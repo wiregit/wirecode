@@ -194,5 +194,9 @@ public class HandshakeResponse {
     public Properties getHeaders() {
         return headers;
     }
+
+    public String toString() {
+        return "<"+statusCode+", "+statusMessage+">";
+    }
 }
 
