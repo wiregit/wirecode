@@ -1080,13 +1080,14 @@ public final class RouterService {
         return manager.isSupernode();
     }
 
-    public static boolean hasClientSupernodeConnection() {
-        return manager.hasClientSupernodeConnection();
-    }
-    
-    public static boolean hasSupernodeClientConnection() {
-        return manager.hasSupernodeClientConnection();
-    }
+	/**
+	 * Accessor for whether or not this node is a leaf.
+	 *
+	 * @return <tt>true</tt> if this node is a leaf, <tt>false</tt> otherwise
+	 */
+    public static boolean isLeaf() {
+        return manager.isLeaf();
+    }    
 
 
     /**
