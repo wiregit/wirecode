@@ -1161,14 +1161,19 @@ public abstract class FileManager {
 
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) 
+        for(int i = 0; i < fds.length; i++) {
             addToQRT(fds[i]);
+        }
     }
     
     /**
      * function add and addIndivisible from passed in FileDesc
      */
     protected void addToQRT(FileDesc fd) {
+        // Don't add incomplete files to the QRP tables.
+        if(fd instanceof IncompleteFileDesc) {
+            return;
+        }
         _queryRouteTable.add(fd.getPath());
         Set urns = fd.getUrns();
         Iterator iter = urns.iterator();
