@@ -39,7 +39,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     private FileManager fileManager;
     /** The repository of incomplete files. */
     private IncompleteFileManager incompleteFileManager;
-    /** The complete list of files passed to the constructor. */
+    /** The complete list of files passed to the constructor.  Must be
+     *  maintained in memory to support resume. */
     private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
@@ -58,12 +59,22 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
-    /** The minimum quality considered likely to work.  Value of two corresponds
-     *  to a THREE-star result. */
-    private static final int DECENT_QUALITY=2;
 
 
     ////////////////////////// Core Variables /////////////////////////////
+    /** The buckets of "same" files, each a list of RemoteFileDesc.  One by one,
+     *  we will try to swarm each bucket.  Buckets are passed to the
+     *  tryAllDownloadsX, removeBest, and tryOneDownload methods, which can
+     *  mutate them.  Also, existing buckets can be modified and new buckets
+     *  added by the addDownload method.  Therefore great care must be taken to
+     *  synchronize on this when modifying buckets, as well as avoiding
+     *  ConcurrentModificationException. 
+     * 
+     *  INVARIANT: buckets contains a subset of allFiles.  (Remember that we
+     *  remove locations from buckets if they don't pan out.  We don't remove
+     *  them from allFiles to support resumes.)
+     */
+    RemoteFileDescGrouper buckets;
     /** If started, the thread trying to coordinate all downloads.  
      *  Otherwise null. */
     private Thread dloaderManagerThread;
@@ -216,10 +227,41 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
-    /* Adds the given location to this.  In typical use, rfd will be similar
-     * or same to some entry in this, but that is not required.
+
+    /** 
+     * Adds the given location to this.  This will terminate after
+     * downloading rfd or any of the other locations in this.  This
+     * may swarm some file from rfd and other locations.
+     * 
+     * @param rfd a new download candidate.  Typically rfd will be similar or
+     *  same to some entry in this, but that is not required.  
      */
-    public void addDownload(RemoteFileDesc rfd) {
+    public synchronized void addDownload(RemoteFileDesc rfd) {
+        //Ignore if this was already added.  This includes existing downloaders
+        //as well as busy lists.
+        for (int i=0; i<allFiles.length; i++) {
+            if (rfd.equals(allFiles[i]))
+                return;          
+        }  
+
+        //System.out.println("Adding "+rfd);
+        //Add to buckets (will be seen because buckets exposes representation)...
+        buckets.add(rfd);
+        //...append to allFiles for resume purposes...
+        RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
+        System.arraycopy(allFiles, 0, newAllFiles, 0, allFiles.length);
+        newAllFiles[newAllFiles.length-1]=rfd;
+        allFiles=newAllFiles;
+        //...and notify manager to look for new workers.  You might be tempted
+        //to just call dloaderManagerThread.interrupt(), but that causes
+        //spurious interrupts to happen when establishing connections (push or
+        //otherwise).  So instead we target the two cases we're interested:
+        //waiting for downloaders to complete (by waiting on this) or waiting
+        //for retry (by sleeping).
+        if (state==Downloader.WAITING_FOR_RETRY)
+            dloaderManagerThread.interrupt();   //see tryAllDownloads    
+        else
+            this.notify();                      //see tryAllDownloads3
     }
 
     /**
@@ -374,27 +416,32 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file to the library.  Called from dloadManagerThread.  
      */
     private void tryAllDownloads() {     
-        List[] /* of File */ buckets=bucket(allFiles, incompleteFileManager);
-        //System.out.println("Buckets: "+Arrays.asList(buckets).toString());
+        synchronized (this) {
+            buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
+        }
 
         //While not success and still busy...
         while (true) {
             try {
-                //Try each group, returning on success.  The children of
+                //Try each b, bucket returning on success.  Note that buckets
+                //may be added while the iterator is in use; these changes will
+                //be reflected in the iteration.  The children of
                 //tryAllDownloads call setState(CONNECTING) and
                 //setState(DOWNLOADING) as appropriate.
                 setState(QUEUED);
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
-                for (int i=0; i<buckets.length; i++) {    
-                    if (buckets[i].size() <= 0)
+                try {
+                for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
+                    List /* of RemoteFileDesc */ bucket=(List)iter.next();
+                    if (bucket.size() <= 0)
                         continue;
                     synchronized (this) {
-                        RemoteFileDesc rfd=(RemoteFileDesc)buckets[i].get(0);
+                        RemoteFileDesc rfd=(RemoteFileDesc)bucket.get(0);
                         currentFileName=rfd.getFileName();
                         currentFileSize=rfd.getSize();
                     }
-                    int status=tryAllDownloads2(buckets[i]);
+                    int status=tryAllDownloads2(bucket);
                     if (status==COMPLETE) {
                         //Success! 
                         setState(COMPLETE);
@@ -411,14 +458,22 @@ public class ManagedDownloader implements Downloader, Serializable {
                                     "Bad status from tad2: "+status);
                     }                    
                 }
+                } catch (InterruptedException e) {
+                    //check that each waitForSlot is paired with yieldSlot,
+                    //unless we're aborting
+                    if (!stopped)
+                        ManagedDownloader.this.manager.internalError(e);
+                }
                 manager.yieldSlot(this);
 
                 //Wait or abort.
                 if (waitForRetry) {
                     synchronized (this) {
                         retriesWaiting=0;
-                        for (int i=0; i<buckets.length; i++)
-                            retriesWaiting+=buckets[i].size();
+                        for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
+                            List /* of RemoteFileDesc */ bucket=(List)iter.next();
+                            retriesWaiting+=bucket.size();
+                        }
                     }
                     long time=calculateWaitTime();
                     setState(WAITING_FOR_RETRY, time);
@@ -469,13 +524,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private int tryAllDownloads2(final List /* of RemoteFileDesc */ files)
             throws InterruptedException {
-        if (files.size()==0)
-            return GAVE_UP;
+        synchronized (this) {
+            if (files.size()==0)
+                return GAVE_UP;
+        }
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
         //   etc.  We check this by looking where the downloaded file will
         //   end up.
-        RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
+        RemoteFileDesc rfd=null;
+        synchronized (this) {
+            rfd=(RemoteFileDesc)files.get(0);
+        }
         int fileSize=rfd.getSize(); 
         String filename=rfd.getFileName(); 
         File incompleteFile=incompleteFileManager.getFile(rfd);
@@ -572,8 +632,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             //2. Wait for them to finish.
             //System.out.println("MANAGER: waiting for complete");
             synchronized (this) {
-                if (stopped) throw new InterruptedException();
-                while (terminated.size()==0 && dloaders.size()!=0) {
+                if (stopped) throw new InterruptedException();        
+                //This if statement used to be a while loop with a more
+                //complicated test.  The change was needed to implement
+                //addDownload.
+                if (dloaders.size()>0) {
                     try {
                         this.wait();
                     } catch (InterruptedException e) {
@@ -812,6 +875,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+
     /**
      * Attempts to run downloader.doDownload, notifying manager of termination
      * via downloaders.notify().  Typically tryOneDownload is invoked in
@@ -851,102 +915,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     init+downloader.getAmountRead());
                 this.notifyAll();
             }
-        }
-    }
-
-    /** 
-     * Groups the elements of allFiles into buckets of similar files. 
-     *
-     * @return an array of List of File.  For all i, for all elements
-     *  f1 and f2 of returned[i], f1 and f2 are the "same" file (with
-     *  high probability).  This means that 
-     *     incompleteFileManager.getFile(f1)==incompleteFileManager.get(f2).
-     *  Furthermore the elements of the returned array are sorted by estimated 
-     *  download time, though the elements within each list are not.
-     */
-    private static List[] /* of File */ bucket(
-            RemoteFileDesc[] rfds,
-            IncompleteFileManager incompleteFileManager) {
-        //Bucket the requested files.  TODO3: a TreeMap would use less memory.
-        Map /* File -> List<RemoteFileDesc> */ buckets=new HashMap();         
-        for (int i=0; i<rfds.length; i++) {
-            RemoteFileDesc rfd=new RemoteFileDesc2(rfds[i], false);
-            File incompleteFile=incompleteFileManager.getFile(rfd);
-            List siblings=(List)buckets.get(incompleteFile);
-            if (siblings==null) {
-                siblings=new ArrayList();
-                buckets.put(incompleteFile, siblings);
-            }
-            siblings.add(rfd);
-        }
-        //Now for each file, estimate remaining download time.  This assumes
-        //that we'll be able to download a file from all (only) three and
-        //four-star locations in parallel at exactly the advertised speed.  Fat
-        //chance that will happen, but it's probably a good enough heuristic.
-        //Still, we may want to preference buckets with more quality loctions
-        //even if the total bandwidth is lower.
-        FilePair[] pairs=new FilePair[buckets.keySet().size()];
-        int i=0;
-        for (Iterator iter=buckets.keySet().iterator(); iter.hasNext(); i++) {
-            File incompleteFile=(File)iter.next();
-            List /* of RemoteFileDesc */ files=
-                (List)buckets.get(incompleteFile);
-            int size=((RemoteFileDesc)files.get(0)).getSize()
-                        - incompleteFileManager.getBlockSize(incompleteFile);
-            int bandwidth=1; //prevent divide by zero
-            for (Iterator iter2=files.iterator(); iter2.hasNext(); ) {
-                RemoteFileDesc2 rfd2=(RemoteFileDesc2)iter2.next();
-                if (rfd2.getQuality()>=DECENT_QUALITY) {
-                    //TODO2: don't normalize measured speeds.
-					bandwidth+=normalize(rfd2.getSpeed());
-				}
-            }
-            float time=(float)size/(float)bandwidth;
-            pairs[i]=new FilePair(incompleteFile, time);
-        }
-        //Sort by download time and copy corresponding lists of files to new
-        //array.
-        Arrays.sort(pairs);
-        List[] /* of File */ ret=new List[pairs.length];
-        for (i=0; i<pairs.length; i++)
-            ret[i]=(List)buckets.get(pairs[i].file);
-        return ret;
-    }
-
-    /** Normalizes the given speed, e.g., reports "50 KB/s" for T3 speeds
-     *  @param speed the reported speed in kilobits/s
-     *  @return the normalized speed, in kilobytes/s */
-    private static int normalize(int speed) {
-        if (speed<SpeedConstants.MODEM_SPEED_INT) {
-            return 3;
-        } else if (speed<SpeedConstants.CABLE_SPEED_INT) {
-            return 30;
-        } else if (speed<SpeedConstants.T1_SPEED_INT) {
-            return 40;
-        } else {
-            return 50;
-        }
-
-    }
-
-    private static class FilePair
-            implements com.sun.java.util.collections.Comparable {
-        float time;     //TODO: does this work with 1.1.8?
-        File file;
-
-        public FilePair(File file, float time) {
-            this.time=time;
-            this.file=file;
-        }
-
-        public int compareTo(Object o) {
-            float diff=this.time-((FilePair)o).time;
-            if (diff<0)
-                return -1;
-            else if (diff>0)
-                return 1;
-            else
-                return 0;
         }
     }
 
@@ -1001,7 +969,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
-    private LimeXMLDocument[] getXMLDocuments() {
+    private synchronized LimeXMLDocument[] getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
         //those locations that we download from?  How about only those in this
         //bucket?
@@ -1156,114 +1124,22 @@ public class ManagedDownloader implements Downloader, Serializable {
     public float getMeasuredBandwidth() {
         return bandwidthTracker.getMeasuredBandwidth();
     }
-  
-	/*
-	  // Adam's unit test on the bucket() method.
-	public static void main(String args[]) {
-        IncompleteFileManager ifm=new IncompleteFileManager();
-        RemoteFileDesc rf1=new RemoteFileDesc(
-            "1.2.3.4", 6346, 0, "some file.txt", 3000000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
-        RemoteFileDesc rf2=new RemoteFileDesc(
-            "1.2.3.5", 6346, 0, "some file.txt", 3000000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
-        RemoteFileDesc rf3=new RemoteFileDesc(
-            "1.2.3.6", 6346, 0, "some file.txt", 3000000, 
-            new byte[16], SpeedConstants.MODEM_SPEED_INT, false, 0);
 
-
-        RemoteFileDesc rf4=new RemoteFileDesc(
-            "1.2.3.7", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf5=new RemoteFileDesc(
-            "1.2.3.8", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf6=new RemoteFileDesc(
-            "1.2.3.9", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf7=new RemoteFileDesc(
-            "1.2.3.10", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf8=new RemoteFileDesc(
-            "1.2.3.11", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf9=new RemoteFileDesc(
-            "1.2.3.12", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf10=new RemoteFileDesc(
-            "1.2.3.13", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf11=new RemoteFileDesc(
-            "1.2.3.14", 6346, 0, "some file.txt", 3100000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
-        RemoteFileDesc rf12=new RemoteFileDesc(
-		    "1.2.3.15", 6346, 0, "some file.txt", 3100000, 
-		    new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
-        RemoteFileDesc rf13=new RemoteFileDesc(
-		    "1.2.3.16", 6346, 0, "some file.txt", 3100000, 
-		    new byte[16], SpeedConstants.MODEM_SPEED_INT, false, 0);
-
-
-        //Simple case
-        //RemoteFileDesc[] allFiles={rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9};
-        RemoteFileDesc[] allFiles={rf13, rf12, rf11, rf10, rf9, rf8, rf7, rf6, rf5, rf4, rf3, rf2, rf1};
-        List[] files=bucket(allFiles, ifm);
-		//List list = files[0];
-		RemoteFileDesc rfd=(RemoteFileDesc)files[0].get(0);
-		System.out.println(rfd.getSize());
-	}	
-    */
-	
+    /** Unit test */
     /*
     public static void main(String args[]) {
-        //Test bucketing.  Note that the 1-star result is ignored.
-        System.out.println("Unit test");
-        IncompleteFileManager ifm=new IncompleteFileManager();
+        //Test removeBest
         RemoteFileDesc rf1=new RemoteFileDesc(
             "1.2.3.4", 6346, 0, "some file.txt", 1000, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
-        RemoteFileDesc rf2=new RemoteFileDesc(
-            "1.2.3.5", 6346, 0, "some file.txt", 1000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
-        RemoteFileDesc rf3=new RemoteFileDesc(
-            "1.2.3.6", 6346, 0, "some file.txt", 1010, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
         RemoteFileDesc rf4=new RemoteFileDesc(
             "1.2.3.6", 6346, 0, "some file.txt", 1010, 
             new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        
-
-        //Simple case
-        RemoteFileDesc[] allFiles={rf3, rf2, rf1, rf4};
-        List[] files=bucket(allFiles, ifm);
-        Assert.that(files.length==2);
-        List list=files[0];
-        Assert.that(list.size()==2);
-        Assert.that(list.contains(rf1));
-        Assert.that(list.contains(rf2));
-        list=files[1];
-        Assert.that(list.size()==2);
-        Assert.that(list.contains(rf3));
-        Assert.that(list.contains(rf4));
-
-        //Large part written on disk
-        ifm.addBlock(ifm.getFile(rf3), 0, 1009);
-        files=bucket(allFiles, ifm);
-        Assert.that(files.length==2);
-        list=files[0];
-        Assert.that(list.size()==2);
-        Assert.that(list.contains(rf3));
-        Assert.that(list.contains(rf4));
-        list=files[1];
-        Assert.that(list.size()==2);
-        Assert.that(list.contains(rf1));
-        Assert.that(list.contains(rf2));
-
-        //Test removeBest
         RemoteFileDesc rf5=new RemoteFileDesc(
             "1.2.3.6", 6346, 0, "some file.txt", 1010, 
             new byte[16], SpeedConstants.T3_SPEED_INT+1, false, 0);
-        list=new LinkedList();
+
+        List list=new LinkedList();
         list.add(rf4);
         list.add(rf1);
         list.add(rf5);
@@ -1279,7 +1155,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         Assert.that(list.size()==0);
     }
     
-    //Stub constructor for testing removeBest
-    private ManagedDownloader() { }
+    //Stub constructor for above test.
+    private ManagedDownloader() {
+    }
     */
 }
