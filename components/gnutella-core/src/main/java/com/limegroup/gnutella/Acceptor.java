@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.util.Random;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -391,10 +392,20 @@ public class Acceptor implements Runnable {
 			_port = tempPort;
         } catch (IOException e) {
             socketError = e;
-            //2. Try 10 different ports
-            int numToTry = 10;
+            //2. Try 20 different ports. The first 10 tries increment
+            //sequentially from 6346. The next 10 tries are random ports between
+            //2000 and 52000
+            int numToTry = 20;
+            Random gen = null;
             for (int i=0; i<numToTry; i++) {
-				tempPort = i+6346;
+                if(i < 10)
+                    tempPort = i+6346;
+                else {
+                    if(gen==null)
+                        gen = new Random();
+                    tempPort = gen.nextInt(50000);
+                    tempPort += 2000;//avoid the first 2000 ports
+                }
 				// do not try to bind to the multicast port.
 				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
 				    numToTry++;
@@ -411,7 +422,7 @@ public class Acceptor implements Runnable {
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                ErrorService.error(socketError);
+                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
             }
         }
         socketError = null;
