@@ -49,6 +49,34 @@ public class Connection {
     private InputStream _in;
     private OutputStream _out;
     private final boolean OUTGOING;
+    
+    /**
+     * The Inflater to use for inflating read streams, initialized
+     * in initialize() if the connection told us it's sending with
+     * a Content-Encoding of deflate.
+     */
+    private Inflater _inflater;
+    
+    /**
+     * The Deflater to use for deflating written streams, initialized
+     * in initialize() if we told the connection we're sending with
+     * a Content-Encoding of deflate.
+     * Note that this is the same as '_out', but is assigned here
+     * as the appropriate type so we don't have to cast when we
+     * want to measure the compression savings.
+     */
+    private ZOutputStream _deflater;
+    
+    /**
+     * The number of bytes sent to the output stream.
+     */
+    private volatile long _bytesSent;
+    
+    /**
+     * The number of bytes recieved from the input stream.
+     */
+    private volatile long _bytesReceived;
+    
 
     /** The possibly non-null VendorMessagePayload which describes what
      *  VendorMessages the guy on the other side of this connection supports.
@@ -345,16 +373,14 @@ public class Connection {
             
             //wrap the streams with inflater/deflater
             if(isWriteDeflated()) {
-                //System.out.println(this + ": deflating output stream");
                 ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
                 zout.setFlushMode(JZlib.Z_SYNC_FLUSH);
                 _out = zout;
-                //_out = getOutputStream();
+                _deflater = zout;
             }            
             if(isReadDeflated()) {
-               // System.out.println(this + ": inflating input stream");
-                _in = new InflaterInputStream(_in, inf);
-                //_in = getInputStream();
+                _inflater = new Inflater();
+                _in = new InflaterInputStream(_in, _inflater);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -768,21 +794,13 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
-//            if( isReadDeflated() ) {
-//                //Assert.that(_in instanceof InflaterInputStream, "should be inflating, but _in not an inflater");
-//                try {
-//                    m = Message.read(_in, HEADER_BUF, _softMax);
-//                   // System.out.println(this + ": Read " + m + " from deflated stream.");
-//                    //System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
-//                } catch(IOException e) {
-//                    //System.out.println(this + ": Read failed.");
-//                    //System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
-//                    //e.printStackTrace();
-//                    throw e;
-//                }
-//            }
-//            else
-                m = Message.read(_in, HEADER_BUF, _softMax);
+            m = Message.read(_in, HEADER_BUF, _softMax);
+            if ( m != null ) {
+                if( isReadDeflated() )
+                    _bytesReceived = _inflater.getTotalIn();
+                else
+                    _bytesReceived += m.getTotalLength();
+            }
         }
         return m;
     }
@@ -812,7 +830,12 @@ public class Connection {
             Message m = Message.read(_in, HEADER_BUF, _softMax);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
-            }
+            } else {
+                if( isReadDeflated() )
+                    _bytesReceived = _inflater.getTotalIn();
+                else
+                    _bytesReceived += m.getTotalLength();
+            }            
             return m;
         } finally {
             _socket.setSoTimeout(oldTimeout);
@@ -830,17 +853,13 @@ public class Connection {
      * @effects send m on the network.  Throws IOException if problems
      *   arise.
      */
-    private long totalLength;
     public void send(Message m) throws IOException {
-        if ( isWriteDeflated() ) {
-            ZOutputStream zos = (ZOutputStream)_out;
-            //System.out.println(this + ": writing " + m + " to a deflated stream");
-            m.write(_out);
-            totalLength += m.getTotalLength();
-            //System.out.println(this + ": Total message length: " + totalLength + ", TotalIn: " + zos.getTotalIn() + ", TotalOut: " + zos.getTotalOut());
-        } else {
-            m.write(_out);
-        }
+        m.write(_out);
+        
+        if( isWriteDeflated() )
+            _bytesSent = _deflater.getTotalOut();
+        else
+            _bytesSent += m.getTotalLength();
     }
 
     /**
@@ -849,6 +868,16 @@ public class Connection {
     public void flush() throws IOException {
         _out.flush();
     }
+    
+    /** Returns the number of bytes sent on this connection. */
+    public long getBytesSent() {
+        return _bytesSent;
+    }
+    
+    /** Returns the number of bytes received on this connection. */
+    public long getBytesReceived() {
+        return _bytesReceived;
+    }    
 
     /** Returns the host set at construction */
     public String getOrigHost() {

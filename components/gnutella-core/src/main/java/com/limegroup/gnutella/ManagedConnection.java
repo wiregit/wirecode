@@ -265,12 +265,12 @@ public class ManagedConnection extends Connection
     private long _nextQRPForwardTime;
 
 
-    /** The total number of bytes sent/received.
-     *  These are not synchronized and not guaranteed to be 100% accurate. */
-    private volatile long _bytesSent;
+    /** 
+     * The bandwidth trackers for the up/downstream.
+     * These are not synchronized and not guaranteed to be 100% accurate.
+     */
     private BandwidthTrackerImpl _upBandwidthTracker=
         new BandwidthTrackerImpl();
-    private volatile long _bytesReceived;
     private BandwidthTrackerImpl _downBandwidthTracker=
         new BandwidthTrackerImpl();
 
@@ -398,7 +398,6 @@ public class ManagedConnection extends Connection
         Message m = null;
         try {
             m = super.receive();
-            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             if (_manager!=null) //may be null for testing
                 _manager.remove(this);
@@ -418,7 +417,6 @@ public class ManagedConnection extends Connection
         Message m = null;
         try {
             m = super.receive(timeout);
-            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             if (_manager!=null) //may be null for testing
                 _manager.remove(this);
@@ -585,7 +583,6 @@ public class ManagedConnection extends Connection
                     }
 
                     ManagedConnection.super.send(m);
-                    _bytesSent+=m.getTotalLength();
                 }
                 
                 //Optimization: the if statement below is not needed for
@@ -1021,16 +1018,6 @@ public class ManagedConnection extends Connection
     // Begin statistics accessors
     //
 
-    /** Returns the number of bytes sent on this connection. */
-    public long getBytesSent() {
-        return _bytesSent;
-    }
-    
-    /** Returns the number of bytes received on this connection. */
-    public long getBytesReceived() {
-        return _bytesReceived;
-    }
-
     /** Returns the number of messages sent on this connection */
     public int getNumMessagesSent() {
         return _numMessagesSent;
@@ -1097,9 +1084,9 @@ public class ManagedConnection extends Connection
      */
     public void measureBandwidth() {
         _upBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(_bytesSent));
+             ByteOrder.long2int(getBytesSent()));
         _downBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(_bytesReceived));
+             ByteOrder.long2int(getBytesReceived()));
     }
 
     /**
