@@ -9,8 +9,6 @@ import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
 
-import com.sun.java.util.collections.*;
-
 /**
  * This class encapsulates the data for an alternate resource location, as 
  * specified in HUGE v0.93.  This also provides utility methods for such 
@@ -96,7 +94,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 
 		URL url = AlternateLocation.createUrl(location);
 		URN sha1 = URN.createSHA1UrnFromURL(url);
-		return new DirectAltLoc(url, sha1);
+		return new DirectAltLoc(url,sha1);
 	}
 	
 	/**
@@ -124,55 +122,26 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
          
         // Case 1.   
         if(location.toLowerCase().startsWith("http")) {
-            AlternateLocation al = create(location);
+            URL url = createUrl(location);
+            URN sha1 = URN.createSHA1UrnFromURL(url);
+            AlternateLocation al = new DirectAltLoc(url,sha1);
             if(!al.SHA1_URN.equals(urn))
                 throw new IOException("mismatched URN");
             return al;
         }
         
         // Case 2. Direct Alt Loc
-        //Note: the AlternateLocation object created this way does not know 
-        //the name of the file it is pointing to.
         if (location.indexOf(";")==-1) {
         	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
 			return new DirectAltLoc(addr, urn);
         }
         
         //Case 3. Push Alt loc
-        //Note: the AlternateLocation object created this way does not know 
-        //the name of the file it is pointing to.  
         PushEndpoint pe = new PushEndpoint(location);
         return new PushAltLoc(pe,urn);
     }
 	
-	/**
-	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
-	 * <tt>URL</tt> instance.  This constructor creates an alternate
-	 * location with the current date and time as its timestamp.
-	 * This can be used, for example, for newly uploaded files.
-	 *
-	 * @param url the <tt>URL</tt> instance for the resource
-	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
-	 *  <tt>null</tt>
-	 * @throws <tt>MalformedURLException</tt> if a copy of the supplied 
-	 *  <tt>URL</tt> instance cannot be successfully created
-	 * @throws <tt>IOException</tt> if the url argument is not a
-	 *  valid location for any reason
-	 * 
-	 *NOTE: this constructor is used only in tests, so it can be removed.
-	 */
-	public static AlternateLocation create(final URL url) 
-		                             throws MalformedURLException, IOException {
-		if(url == null) 
-			throw new NullPointerException("cannot accept null URL");
 
-		// create a new URL instance from the data for the given url
-		// and the urn
-		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
-							  url.getFile());
-		URN sha1 = URN.createSHA1UrnFromURL(tempUrl);
-		return new DirectAltLoc(tempUrl, sha1);
-	}
 
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> for the data stored in

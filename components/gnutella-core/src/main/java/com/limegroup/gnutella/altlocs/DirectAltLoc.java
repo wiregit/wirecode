@@ -2,7 +2,6 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 
