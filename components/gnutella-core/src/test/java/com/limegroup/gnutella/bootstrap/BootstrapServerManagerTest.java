@@ -24,7 +24,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(BootstrapServerManagerTest.class);
+        return buildTestSuite(BootstrapServerManagerTest.class, "testRedirect");
     }
 
     ////////////////////////////////////////////////////////////////////////////

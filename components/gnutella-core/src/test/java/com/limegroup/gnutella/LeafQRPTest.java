@@ -195,7 +195,7 @@ public class LeafQRPTest extends BaseTestCase {
         try {
             Message m = null;
             while (true) {
-                m = ultrapeer1.receive(500);
+                m = ultrapeer1.receive(1000);
                 if (m instanceof ResetTableMessage)
                     qrt.reset((ResetTableMessage) m);
                 else if (m instanceof PatchTableMessage)
@@ -222,10 +222,10 @@ public class LeafQRPTest extends BaseTestCase {
         QueryRequest queryURN = QueryRequest.createQuery(berkeleyURN);
         QueryRequest queryURN2 = QueryRequest.createQuery(susheelURN);
 
-        assertTrue(qrt.contains(query));
-        assertTrue(qrt.contains(query2));
-        assertTrue(qrt.contains(queryURN));
-        assertTrue(qrt.contains(queryURN2));
+        assertTrue("qrt did not contain: " + query, qrt.contains(query));
+        assertTrue("qrt did not contain: " + query2, qrt.contains(query2));
+        assertTrue("qrt did not contain: " + queryURN, qrt.contains(queryURN));
+        assertTrue("qrt did not contain: "+queryURN2, qrt.contains(queryURN2));
 
         /* //TODO: investigate why this isn't working....
         retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
