@@ -12,11 +12,16 @@ SRCS := $(wildcard *.java)
 # our object files
 OBJS	= $(SRCS:.java=.class)
 
+SUBDIRS = gui util install
+
 # targets
 
 # make everything, (just makes .class files, for now)
 all: $(SRCS)
 	$(JAVA) $<
+
+subdirs: $(SUBDIRS)
+	cd $<; $(MAKE) -f ../Makefile
 
 # dont need this part... 
 # make all class files
