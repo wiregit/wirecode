@@ -58,7 +58,7 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setPort(port);
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
-		SettingsManager.instance().setKeepAlive(1);
+		SettingsManager.instance().setKeepAlive(6);
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
 		SettingsManager.instance().setConnectOnStartup(true);
@@ -73,15 +73,15 @@ public class UploadTest extends TestCase {
 												 new ServerAuthenticator());
 		router.initialize();
 
-        System.out.println(
-            "Please make sure your client is listening on port "+port+"\n"
-            +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
-            +"with at least one incoming messaging slot.  Also, nothing\n"
-            +"may be listening to port "+callbackPort+".\n"
-			+"Finally, the file must contain all lower-case characters in\n" 
-			+"the alphabet, exactly like the following:\n\n"
-			+"abcdefghijklmnopqrstuvwxyz");
-		System.out.println(); 
+        //System.out.println(
+        //    "Please make sure your client is listening on port "+port+"\n"
+        //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
+        //    +"with at least one incoming messaging slot.  Also, nothing\n"
+        //    +"may be listening to port "+callbackPort+".\n"
+		//	+"Finally, the file must contain all lower-case characters in\n" 
+		//	+"the alphabet, exactly like the following:\n\n"
+		//	+"abcdefghijklmnopqrstuvwxyz");
+		//System.out.println(); 
 	}
 
     public void testAll() {
