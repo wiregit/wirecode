@@ -168,7 +168,7 @@ public final class RouterService {
 	 */
   	public RouterService(ActivityCallback callback) {
         this(callback, 
-		    new MetaEnabledMessageRouter(callback, fileManager));
+		    new StandardMessageRouter(callback, fileManager));
     }
 
 	/**
