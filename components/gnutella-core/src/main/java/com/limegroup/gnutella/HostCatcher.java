@@ -57,7 +57,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.
      */
-    private BinaryHeapArray queue=new BinaryHeapArray();
+    private BucketQueueArray queue=new BucketQueueArray();
     private Set /* of Endpoint */ set=new HashSet();
 
     private Acceptor acceptor;
@@ -720,9 +720,9 @@ public class HostCatcher {
         Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("18.239.0.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
-        Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
         Assert.that(! iter.hasNext());
 
         iter=hc.getUltrapeerHosts(1);
@@ -737,9 +737,9 @@ public class HostCatcher {
         Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("128.103.60.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
-        Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
         Assert.that(! iter.hasNext());
 
         iter=hc.getNormalHosts(1);
@@ -751,15 +751,15 @@ public class HostCatcher {
         Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("18.239.0.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
-        Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
         Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("128.103.60.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
-        Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
         Assert.that(! iter.hasNext());
 
         Assert.that(hc.getAnEndpointInternal().equals(
@@ -788,6 +788,7 @@ public class HostCatcher {
 
         //TODO: test private hosts.
         //TODO: test modification during iteration (clone)
+        //TODO: test high hops
     }
     
     private static PingReply makeTestPong(int addr1, int addr2, 
@@ -807,24 +808,23 @@ public class HostCatcher {
 
 
 /** 
- * Aggregates a number of BinaryHeap's, providing a BucketQueue-like
- * interface.  In other words, prioritizes Endpoints by type (ultrapeer,
- * normal, or private) and then by hops.  Specialized for HostCatcher's
- * three priority scheme; could be generalized.  Not thread-safe.
+ * Aggregates a number of BucketQueue, providing two levels of Endpoint
+ * prioritization: first by type (ultrapeer, normal, or private) and then by
+ * hops.  Specialized for HostCatcher's three priority scheme; could be
+ * generalized.  Not thread-safe.
  */
-class BinaryHeapArray {
+class BucketQueueArray {
     /** One heap for each type.  Then each heap is sorted by weight, which is
      *  equal to hops. */
-    private BinaryHeap[] heaps;
+    private BucketQueue[] heaps;
+    final int BUCKETS=8;
+    final int[] CAPACITIES={10, 10, 10, 20, 20, 30, 40, 50};
 
-    BinaryHeapArray() {
-        heaps=new BinaryHeap[3];
-        heaps[HostCatcher.BAD_PRIORITY]=
-            new BinaryHeap(HostCatcher.BAD_SIZE); 
-        heaps[HostCatcher.NORMAL_PRIORITY]=
-            new BinaryHeap(HostCatcher.NORMAL_SIZE);
-        heaps[HostCatcher.GOOD_PRIORITY]=
-            new BinaryHeap(HostCatcher.GOOD_SIZE);
+    BucketQueueArray() {
+        heaps=new BucketQueue[3];
+        heaps[HostCatcher.BAD_PRIORITY]=new BucketQueue(CAPACITIES); 
+        heaps[HostCatcher.NORMAL_PRIORITY]=new BucketQueue(CAPACITIES);
+        heaps[HostCatcher.GOOD_PRIORITY]=new BucketQueue(CAPACITIES); 
     }
 
     /**
@@ -835,7 +835,12 @@ class BinaryHeapArray {
      *  HostCatcher.BAD_PRIORITY.
      */
     public Endpoint insert(Endpoint e, int type) {
-        return (Endpoint)heaps[type].insert(e);
+        int weight=e.getWeight();
+        if (weight<0)
+            weight=0;
+        else if (weight>=BUCKETS)
+            weight=BUCKETS-1;
+        return (Endpoint)heaps[type].insert(e, weight);
     }
 
     public Endpoint getMax() throws NoSuchElementException {
@@ -906,7 +911,7 @@ class BinaryHeapArray {
      * @param n an upper bound on the number of element to return
      */
     public Iterator iterator(int type, int n) {
-        BinaryHeap heap=heaps[type];
+        BucketQueue heap=heaps[type];
         n=Math.min(heap.size(), n);
         List buf=new ArrayList(n);
 
