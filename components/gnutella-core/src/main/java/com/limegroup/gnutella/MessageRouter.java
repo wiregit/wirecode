@@ -1449,6 +1449,7 @@ public abstract class MessageRouter {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
+                Assert.that(c != null, "null c.");
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
                     c.handlePingReply(reply, handler);
                 }
