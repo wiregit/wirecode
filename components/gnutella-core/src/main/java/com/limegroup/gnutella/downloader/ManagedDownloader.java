@@ -8,13 +8,11 @@ import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,14 +35,11 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.UDPHostRanker;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
@@ -57,10 +52,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.HeadPing;
-import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -69,15 +61,12 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.ApproximateMatcher;
-import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -109,7 +98,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * unconnected. <b>Furthermore, it is necessary to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-public class ManagedDownloader implements Downloader, Serializable, Cancellable, MessageListener {
+public class ManagedDownloader implements Downloader, Serializable {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
@@ -412,9 +401,7 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
     
 	/** The value of an unknown filename - potentially overridden in 
       * subclasses */
-	protected static final String UNKNOWN_FILENAME = ""; 
-	
-	private Message headPing; 
+	protected static final String UNKNOWN_FILENAME = "";  
 
     /** This is used for matching of filenames.  kind of big so we only want
      *  one. */
@@ -463,11 +450,8 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
 
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
-    private List /*of RemoteFileDesc */ files,verified;
+    private List /*of RemoteFileDesc */ files;
     
-	Set uniqueHosts = new HashSet(512);
-	Set pingedHosts = new LinkedHashSet(512);
-	
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
      */
@@ -717,7 +701,6 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
 		this.fileManager=fileManager;
         this.callback=callback;
         files = new LinkedList();
-		verified = new LinkedList();
         dloaders=new LinkedList();
         threads=new ArrayList();
         queuedThreads = new HashMap();
@@ -755,8 +738,6 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
                 initializeAlternateLocations();
             }
         }
-		
-		headPing = new HeadPing(downloadSHA1,HeadPing.ALT_LOCS);
         setState(QUEUED);
     }
     
@@ -2437,11 +2418,7 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
                 LOG.debug("MANAGER: kicking off workers, size: " + size + 
                           ", connect: " + connectTo + ", dloadsCount: " + 
                           dloadsCount + ", threads: " + threads.size());
-            
-			// rank some hosts... we stop ranking at 500 but often get twice that much
-			if (dloadsCount < getSwarmCapacity() && size < 500) 
-				rankHosts();
-			
+                
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
             //limit, which if successfully starts downloading or gets a better
@@ -2459,7 +2436,7 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
                 // else...
                 startWorker(rfd);
             }//end of for 
-             
+                
             //wait for a notification before we continue.
             try {
                 //if no workers notify in 4 secs, iterate. This is a problem
@@ -2470,72 +2447,7 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
         }//end of while
     }
     
-	private void rankHosts() {
-		List l = new ArrayList(files.size());
-		for (Iterator iter = files.iterator(); iter.hasNext();) {
-			RemoteFileDesc current = (RemoteFileDesc) iter.next();
-			if (current.isPrivate())
-				continue; //not yet
-			
-			try {
-				l.add(new IpPortImpl(current.getHost(),current.getPort()));
-			}catch(UnknownHostException ohWell){
-				iter.remove();
-			}
-		}
-		l.removeAll(pingedHosts);
-		UDPHostRanker.rank(l,this,this,headPing);
-		pingedHosts.addAll(l);
-		if (LOG.isDebugEnabled())
-			LOG.debug("ranking "+ l.size() +" hosts, ranked so far "+pingedHosts.size());
-	}
-	
-    /* (non-Javadoc)
-	 * @see com.limegroup.gnutella.MessageListener#processMessage(com.limegroup.gnutella.messages.Message, com.limegroup.gnutella.ReplyHandler)
-	 */
-	public void processMessage(Message m, ReplyHandler handler) {
-		if (!(m instanceof HeadPong))
-			return;
-
-		if (LOG.isDebugEnabled())
-			LOG.debug("processing headpong from "+handler);
-		
-		HeadPong pong = (HeadPong)m;
-		if (!pong.hasFile() || pong.isBusy())
-			return;
-		
-		Set alts = pong.getAltLocs();
-		alts.removeAll(uniqueHosts);
-		uniqueHosts.addAll(alts);
-		if (LOG.isDebugEnabled())
-			LOG.debug("pong is a good source and carried "+alts.size()+
-					" new alts, we know about "+uniqueHosts.size());
-		synchronized(this) {
-			// add directly to the files list cause addDownload() is insane
-			
-			if (allFiles != null && allFiles.length > 0 && allFiles[0] != null) {
-				for (Iterator iter = alts.iterator(); iter.hasNext();) {
-					IpPort alt = (IpPort) iter.next();
-					files.add(new RemoteFileDesc(allFiles[0],alt));
-				}
-			}
-			
-			verified.add(handler);
-			notify(); //the master thread
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.MessageListener#registered(byte[])
-	 */
-	public void registered(byte[] guid) {}
-
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.MessageListener#unregistered(byte[])
-	 */
-	public void unregistered(byte[] guid) {}
-
-	/**
+    /**
      * Top level method of the thread. Calls three methods 
      * a. Establish a TCP Connection.
      * b. Assign this thread a part of the file, and do HTTP handshaking
@@ -3622,8 +3534,6 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
      * @return the best file/endpoint location 
      */
     private synchronized RemoteFileDesc removeBest() {
-		IpPort alive = (IpPort)(verified.isEmpty() ? null : verified.remove(0));
-		
         //Lock is needed here because file can be modified by
         //worker thread.
         Iterator iter=files.iterator();
@@ -3633,10 +3543,9 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
         //Find max of each (remaining) element, storing in max.
         //Follows the following logic:
         //1) Find a non-busy host (make connections)
-		//2) Find a host that we have headpinged
-        //3) Find a host that uses hashes (avoid corruptions)
-        //4) Find a better quality host (avoid dud locations)
-        //5) Find a speedier host (avoid slow downloads)
+        //2) Find a host that uses hashes (avoid corruptions)
+        //3) Find a better quality host (avoid dud locations)
+        //4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
             RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
             
@@ -3647,18 +3556,9 @@ public class ManagedDownloader implements Downloader, Serializable, Cancellable,
             if (ret.isBusy())
                 ret=rfd;
             // 2.
-            else if (alive != null && 
-					rfd.getHost().equals(alive.getAddress()) &&
-					rfd.getPort() == alive.getPort()) {
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("selected an rfd from a verified host "+rfd);
-				return rfd;
-            }
-            // 3. 	
             else if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
                 ret=rfd;
-            // 4 & 5.
+            // 3 & 4.
             // (note the use of == so that the comparison is only done
             //  if both rfd & ret either had or didn't have a SHA1)
             else if ((rfd.getSHA1Urn()==null) == (ret.getSHA1Urn()==null)) {

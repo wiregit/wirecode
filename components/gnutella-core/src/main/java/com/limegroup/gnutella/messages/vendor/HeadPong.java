@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -34,6 +35,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.CountingGGEP;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.BloomFilter;
 import com.limegroup.gnutella.util.CountingOutputStream;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
@@ -283,10 +285,14 @@ public class HeadPong extends VendorMessage {
 	    //parse any included firewalled altlocs
 	    if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
 	        _pushLocs=readPushLocs(dais);
+        else
+            _pushLocs = Collections.EMPTY_SET;
 	    
 	    //parse any included altlocs
 	    if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
-	        _altLocs=readLocs(dais);
+	        _altLocs = readLocs(dais);
+        else
+            _altLocs = Collections.EMPTY_SET;
 	}
 	
 	/**
@@ -455,7 +461,7 @@ public class HeadPong extends VendorMessage {
 	 */
 	public Set getAltLocs() {
 	    if (_altLocs == null)
-	        readAltLocs();
+	        _altLocs = readAltLocs();
 		return _altLocs;
 	}
 	
@@ -463,18 +469,17 @@ public class HeadPong extends VendorMessage {
 	 * extracts the altlocs from the GGEP block.
 	 * if the HeadPong is in legacy format, the altlocs are already parsed.
 	 */
-	private void readAltLocs() {
+	private Set readAltLocs() {
 	    if (_ggep == null)
-	        return;
+            return Collections.EMPTY_SET;
 
 	    if ((_ggepFeatures & GGEPHeadConstants.ALTLOCS) != GGEPHeadConstants.ALTLOCS)
-	        return;
+            return Collections.EMPTY_SET;
 
 	    try {
 	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(altlocs);
-	        _altLocs = readLocs(new DataInputStream(bais));
-	        
+            
 	        //also extract some stats if they're available
 	        if ((_ggepFeatures & GGEPHeadConstants.ALT_MESH_STAT) != 0) {
 	            byte []stat = 
@@ -482,9 +487,14 @@ public class HeadPong extends VendorMessage {
 	            _totalLocs = ByteOrder.leb2short(stat,0);
 	            _skippedLocs = ByteOrder.leb2short(stat,2);
 	        }
+            
+            return readLocs(new DataInputStream(bais));
+            
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
+        
+        return Collections.EMPTY_SET;
 	}
 	
 	/**
@@ -494,7 +504,7 @@ public class HeadPong extends VendorMessage {
 	 */
 	public Set getPushLocs() {
 	    if (_pushLocs == null)
-	        readPushLocs();
+	        _pushLocs = readPushLocs();
 		return _pushLocs;
 	}
 	
@@ -502,15 +512,16 @@ public class HeadPong extends VendorMessage {
 	 * extracts the pushlocs from the GGEP block.
 	 * if the HeadPong is in legacy format, the pushlocs are already parsed.
 	 */
-	private void readPushLocs() {
+	private Set readPushLocs() {
 	    if (_ggep == null)
-	        return;
+	        return Collections.EMPTY_SET;
+        
 	    if ((_ggepFeatures & GGEPHeadConstants.PUSHLOCS) != GGEPHeadConstants.PUSHLOCS)
-	        return;
+            return Collections.EMPTY_SET;
+        
 	    try {
 	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(pushlocs);
-	        _pushLocs = readPushLocs(new DataInputStream(bais));
 	        
 	        // also extract some stats if they're available
 	        if ((_ggepFeatures & GGEPHeadConstants.PUSH_MESH_STAT) != 0) {
@@ -519,9 +530,14 @@ public class HeadPong extends VendorMessage {
 	            _totalPushLocs = ByteOrder.leb2short(stat,0);
 	            _skippedPushLocs = ByteOrder.leb2short(stat,2);
 	        }
+            
+            return readPushLocs(new DataInputStream(bais));
+            
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
+        
+        return Collections.EMPTY_SET;
 	}
 	
 	/**
@@ -695,37 +711,20 @@ public class HeadPong extends VendorMessage {
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
 	        return;
+        
 	    if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+toPack+"locs to pong");
 	    
-	    // see if the other side sent a filter
-	    AltLocDigest digest = ping.getDigest();
-
-	    // if we have a filter, filter the altlocs
-	    if (digest != null || toPack < altlocs.getAltLocsSize()) {
-	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
-	        int sent =0;
-	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
-	            AlternateLocation loc = (AlternateLocation)iter.next();
-	            if (loc instanceof PushAltLoc)
-	                    continue;
-	            
-	            if (digest != null && digest.contains(loc)) {
-	                filtered++;
-	                continue;
-	            }
-	            temp.add(loc.createClone());
-	            sent++;
-	        }
-	        altlocs = temp;
-	    }
+	    // filter the altlocs
+        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
+        filtered = filterLocs(altlocs,temp,ping.getDigest(),toPack);
 	    
 	    // if after filtering / trimming we decided not to send anything, return.
-	    if (altlocs.getAltLocsSize() == 0)
+	    if (temp.getAltLocsSize() == 0)
 	        return;
 	    
 	    // put the response in the ggep
-	    byte [] alts = altlocs.toBytes(toPack);
+	    byte [] alts = temp.toBytes(toPack);
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
@@ -761,44 +760,36 @@ public class HeadPong extends VendorMessage {
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
 	        return;
+        
 	    if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+toPack+"locs to pong");
 	    
+        AlternateLocationCollection toSend = AlternateLocationCollection.create(altlocs.getSHA1Urn());
 	    // see if the other side sent a filter
-	    AltLocDigest digest = ping.getPushDigest();
 
-	    // if we have a filter, filter the altlocs
-	    if (digest != null || ping.requestsFWTPushLocs() || toPack < altlocs.getAltLocsSize()) {
-	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
-	        int sent =0;
-	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
-	            AlternateLocation loc = (AlternateLocation)iter.next();
-	            if (loc instanceof DirectAltLoc)
-	                    continue;
-	        
-	            // skip non-fwt capable pushlocs if requested
-	            if (ping.requestsFWTPushLocs()) {
-	                PushAltLoc pushalt = (PushAltLoc)loc;
-	                if (pushalt.supportsFWTVersion() < 1)
-	                    continue;
-	            }
-	            
-	            if (digest != null && digest.contains(loc)) {
-	                filtered++;
-	                continue;
-	            }
-	            temp.add(loc.createClone());
-	            sent++;
-	        }
-	        altlocs = temp;
-	    }
+
+        
+        // skip non-fwt capable pushlocs if requested
+        if (ping.requestsFWTPushLocs()) {
+            AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
+            for(Iterator iter = temp.iterator();iter.hasNext();) {
+                PushAltLoc pushalt = (PushAltLoc)iter.next();
+                if (pushalt.supportsFWTVersion() < 1)
+                    continue;
+                temp.add(pushalt.createClone());
+            }
+            altlocs = temp;
+        }
+        
+        // filter, filter the altlocs
+        filtered = filterLocs(altlocs,toSend,ping.getPushDigest(),toPack);
 	    
 	    // if after filtering / trimming we decided not to send anything, return
-	    if (altlocs.getAltLocsSize() == 0 )
+	    if (toSend.getAltLocsSize() == 0 )
 	        return;
 	    
 	    // put the response in the ggep
-	    byte [] alts = altlocs.toBytesPush(toPack);
+	    byte [] alts = toSend.toBytesPush(toPack);
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
@@ -814,6 +805,34 @@ public class HeadPong extends VendorMessage {
 	        dest.put((char)GGEPHeadConstants.PUSH_MESH_STAT+GGEPHeadConstants.DATA,stats);
 	    }
 	}
+
+    /**
+     * @param orig the AlternateLocationCollection to filter
+     * @param dest the AlternateLocationCollection to put the altlocs
+     * @param filter the BloomFilter to filter the altlocs with
+     * @param max do not include more than this many altlocs
+     * @return how many altlocs were filtered
+     */
+    private static short filterLocs(
+            AlternateLocationCollection orig, 
+            AlternateLocationCollection dest,
+            BloomFilter filter, 
+            int max) {
+        int sent =0;
+        short filtered = 0;
+        for (Iterator iter = orig.iterator();iter.hasNext() && sent < max;) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            
+            if (filter.contains(loc)) {
+                filtered++;
+                continue;
+            }
+            dest.add(loc.createClone());
+            sent++;
+        }
+        
+        return filtered;
+    }
 	
 }
 	

@@ -14,6 +14,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.util.BloomFilter;
 
 /**
  * An UDP equivalent of the HEAD request method with a twist.
@@ -96,7 +97,7 @@ public class HeadPing extends VendorMessage {
 	/**
 	 * The bloom filter carried by this ping, if any
 	 */
-	private AltLocDigest _digest,_pushDigest;
+	private BloomFilter _digest,_pushDigest;
 	
 	/**
 	 * Whether the pinger supports bloom filters.
@@ -211,11 +212,11 @@ public class HeadPing extends VendorMessage {
 		_clientGUID = clientGUID;
 		
 		if (digests == null || digests.length < 2) {
-		    _digest = null;
-		    _pushDigest = null;
+		    _digest = BloomFilter.EMTPY_FILTER;
+		    _pushDigest = BloomFilter.EMTPY_FILTER;
 		} else {
-		    _digest = digests[0];
-		    _pushDigest = digests[1];
+		    _digest = digests[0] == null ? BloomFilter.EMTPY_FILTER : digests[0];
+		    _pushDigest = digests[1] == null ? BloomFilter.EMTPY_FILTER : digests[1];
 		}
 		
 		_supportsBloom=true;
@@ -338,43 +339,45 @@ public class HeadPing extends VendorMessage {
 	/**
 	 * @return the altloc digest contained in this ping.  null if none
 	 */
-	public AltLocDigest getDigest() {
+	public BloomFilter getDigest() {
 	    if (_digest == null)
-	        parseDigest();
+	        _digest = parseDigest();
 	    return _digest; 
 	}
 	
 	/**
 	 * @return the pushloc digest contained in this ping.  null if none
 	 */
-	public AltLocDigest getPushDigest() {
+	public BloomFilter getPushDigest() {
 	    if (_pushDigest == null)
-	        parsePushDigest();
+	        _pushDigest = parsePushDigest();
 	    return _pushDigest; 
 	}
 	
-	private void parseDigest() {
+	private BloomFilter parseDigest() {
 	    if (_ggep != null) {
 	        //see if there is an altloc digest
 	        try {
 	            byte [] data = 
 	                _ggep.getBytes((char)GGEPHeadConstants.GGEP_BLOOM+GGEPHeadConstants.DATA);
-	            _digest = AltLocDigest.parseDigest(data,0,data.length);
+	            return AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
-	        catch(IOException badBloom) {} //ignore it?
+	        catch(IOException badBloom) {} 
 	    }
+        return BloomFilter.EMTPY_FILTER;
 	}
 	
-	private void parsePushDigest() {
+	private BloomFilter parsePushDigest() {
 	    if (_ggep != null) {
 	        // see if there is a pushloc digest
 	        try {
 	            byte [] data = 
 	                _ggep.getBytes((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+GGEPHeadConstants.DATA);
-	            _pushDigest = AltLocDigest.parseDigest(data,0,data.length);
+	            return AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
-	        catch(IOException badBloom) {} //ignore it?
+	        catch(IOException badBloom) {} 
 	    }
+        return BloomFilter.EMTPY_FILTER;
 	}
 	
 }
