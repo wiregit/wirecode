@@ -53,33 +53,54 @@ public class DownloadTester {
 //          cleanup();
 //          testOverlapCheckSpeed(125);
 //          cleanup();
-
-        testSimpleDownload();
-        cleanup();
-        testSimpleSwarm();
-        cleanup();
-        testUnbalancedSwarm();
-        cleanup();
-        testSwarmWithInterrupt();
-        cleanup();
-        testStealerInterrupted();
-        cleanup();
-        testAddDownload();
-        cleanup();
-        testStallingUploaderReplaced();
-        cleanup();
+        if(args.length == 0 || args[0].equals("0")) {
+            testSimpleDownload();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("1")) {
+            testSimpleSwarm();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("2")) {
+            testUnbalancedSwarm();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("3")) {
+            testSwarmWithInterrupt();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("4")) {
+            testStealerInterrupted();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("5")) {
+            testAddDownload();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("6")) {
+            testStallingUploaderReplaced();
+            cleanup();
+        }
         //test corruption and ignore it
         //Note: callback.delCorrupt = false by default.
-        testOverlapCheckGrey(false);//wait for complete
-        cleanup();
-        testOverlapCheckWhite(false);//wait for complete
-        cleanup();
+        if(args.length == 0 || args[0].equals("7")) {
+            testOverlapCheckGrey(false);//wait for complete
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("8")) {
+            testOverlapCheckWhite(false);//wait for complete
+            cleanup();
+        }
         //now test corruption without ignoring it
         callback.delCorrupt = true;
-        testOverlapCheckGrey(true);//wait for corrupt
-        cleanup();
-        testOverlapCheckWhite(true);//wait for corrupt
-        cleanup();
+        if(args.length == 0 || args[0].equals("9")) {
+            testOverlapCheckGrey(true);//wait for corrupt
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("10")) {
+            testOverlapCheckWhite(true);//wait for corrupt
+            cleanup();
+        }
     }
 
 
@@ -92,9 +113,11 @@ public class DownloadTester {
         long start1=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(rfd, file);
+            RandomAccessFile raf = new RandomAccessFile(file,"rw");
+            VerifyingFile vf = new VerifyingFile(raf,true, null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0,TestFile.length());
-            downloader.doDownload(true,null);
+            downloader.doDownload(null,vf);
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } 
@@ -111,9 +134,11 @@ public class DownloadTester {
         long start2=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(rfd, file);
+            RandomAccessFile raf = new RandomAccessFile(file,"rw");
+            VerifyingFile vf = new VerifyingFile(raf,false, null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0, TestFile.length());
-            downloader.doDownload(false,null);
+            downloader.doDownload(null,vf);
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } 

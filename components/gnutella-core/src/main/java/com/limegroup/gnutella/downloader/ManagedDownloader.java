@@ -237,6 +237,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
+
+    private VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
     /** MiniRemoteFileDesc -> Object. 
@@ -923,6 +925,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             status=tryAllDownloads3();//Exception may be thrown here. 
         } catch (InterruptedException e) { }
 
+        //Close the file controlled by commonOutFile.
+        commonOutFile.close();
+        
         if(corruptState != NOT_CORRUPT_STATE) {//it is corrupt
             synchronized(corruptStateLock) {
                 try{
@@ -1046,7 +1051,21 @@ public class ManagedDownloader implements Downloader, Serializable {
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
+                RandomAccessFile file = null;
+                try {
+                    file = new RandomAccessFile(incompleteFile,"rw");
+                }catch (IOException fnfx) {
+                    debug("could not create random access file...returning");
+                    return GAVE_UP;//TODO3: Is this appropriate?
+                }
+                debug("creating a verifying file");
+                commonOutFile = new VerifyingFile(file, true, this);
                 synchronized (incompleteFileManager) {
+                    //update VerifyingFile
+                    Iterator i=incompleteFileManager.getBlocks(incompleteFile);
+                    while(i.hasNext()) 
+                        commonOutFile.addInterval((Interval)i.next());
+                    //update needed
                     Iterator iter=incompleteFileManager.
                     getFreeBlocks(incompleteFile, rfd.getSize());
                     while (iter.hasNext())
@@ -1059,6 +1078,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         busy=new LinkedList();
         int size = -1;
         int connectTo = -1;
+        //The number of worker threads in progress.  Used to make sure that we
+        //do not terminate without hope if threads are connecting to hosts
+        //(i.e., removed from files) but not have not yet been added to
+        //dloaders.
+        //  LOCKING: synchronize on this
+        //  INVARIANT: dloaders.size<=threads
+        int threads=0;
         
         //While there is still an unfinished region of the file...
         while (true) {
@@ -1078,8 +1104,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         //Finished.
                         debug("MANAGER: terminating because of completion");
                         return COMPLETE;
-                    } else if (dloaders.size()==0 
-                               && files.size()==0 ) {
+                    } else if (threads==0
+                               && files.size()==0) {
                         //No downloaders worth living for.
                         if (busy.size()>0) {
                             debug("MANAGER: terminating with busy");
@@ -1098,6 +1124,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //OK. We are going to create a thread for each RFD, 
             for(int i=0; i<connectTo && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
+                synchronized (this) { threads++; }
                 Thread connectCreator = new Thread() {
                     public void run() {
                         try {
@@ -1108,6 +1135,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                             //point, but we do attempt to display the error in
                             //the GUI for debugging purposes.
                             ManagedDownloader.this.manager.internalError(e);
+                        } finally {
+                            synchronized (ManagedDownloader.this) { threads--; }
                         }
                     }//end of run
                 };
@@ -1445,11 +1474,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
-            downloader.doDownload(true,this);
+            downloader.doDownload(this,commonOutFile);
         } catch (IOException e) {
             problem = true;
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
+            //e.printStackTrace();
         }
         finally {
             int stop=downloader.getInitialReadingPoint()
@@ -1574,7 +1604,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //is set to waiting. We are not going to move files unless we
                 //are out of this state
                 callback.promptAboutCorruptDownload(this);
-                //Note2: ActivityCallback is going to ask a message to be show to
+                //Note2:ActivityCallback is going to ask a message to be show to
                 //the user asynchronously
             }
         }
@@ -1625,6 +1655,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void cleanup() {
         miniRFDToLock.clear();
         threadLockToSocket.clear();
+        commonOutFile = null;
         needed = null;
         busy = null;
         files = null;
@@ -1844,8 +1875,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
@@ -1853,7 +1884,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(writer== null) {
                     try {
                         writer=new 
-                        PrintWriter(new FileOutputStream(new File("log.log")));
+                        PrintWriter(new FileOutputStream("log.log",true));
                     }catch (IOException ioe) {
                         System.out.println("could not create log file");
                     }
