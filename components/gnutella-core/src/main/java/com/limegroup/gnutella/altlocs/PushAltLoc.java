@@ -7,8 +7,11 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -82,6 +85,11 @@ public class PushAltLoc extends AlternateLocation {
         ret._count = this._count;
         return ret;
     }
+	
+	public boolean isMe() {
+	    return Arrays.equals(_pushAddress.getClientGUID(),
+	            RouterService.getMyGUID());
+	}
 	
 	/**
 	 * Updates the proxies in this PushEndpoint.

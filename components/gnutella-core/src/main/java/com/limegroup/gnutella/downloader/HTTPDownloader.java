@@ -549,7 +549,11 @@ public class HTTPDownloader implements BandwidthTracker {
         			writeClone = new HashSet();
         			Iterator iter = _goodPushLocs.iterator();
         			while(iter.hasNext()) {
-        				Object next = iter.next();
+        				PushAltLoc next = (PushAltLoc)iter.next();
+        				if (next.getPushAddress().getProxies().isEmpty()) {
+        				    iter.remove();
+        				    continue;
+        				}
         				writeClone.add(next);
         				_writtenPushLocs.add(next);
         			}
@@ -567,8 +571,12 @@ public class HTTPDownloader implements BandwidthTracker {
                     writeClone = new HashSet();
                     Iterator iter = _badPushLocs.iterator();
                     while(iter.hasNext()) {
-                        Object next = iter.next();
-                        writeClone.add(next);
+                        PushAltLoc next = (PushAltLoc)iter.next();
+        				if (next.getPushAddress().getProxies().isEmpty()) {
+        				    iter.remove();
+        				    continue;
+        				}
+        				writeClone.add(next);
                         _writtenBadPushLocs.add(next);
                     }
                     _badPushLocs.clear();
@@ -974,6 +982,8 @@ public class HTTPDownloader implements BandwidthTracker {
 				AlternateLocation al =
 					AlternateLocation.create(st.nextToken().trim(), sha1);
                 Assert.that(al.getSHA1Urn().equals(sha1));
+                if (al.isMe())
+                    continue;
                 
                 //if this is a direct altloc, add it to the appropriate collection
                 if (al instanceof DirectAltLoc) {

@@ -572,8 +572,16 @@ public final class HTTPUploader implements Uploader {
         		//local variable, so we are OK.            
         		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
         			PushAltLoc al = (PushAltLoc)iter.next();
+        			
         			if(_writtenPushLocs.contains(al))
+        			    continue;
+        			
+        			// it is possible to end up having a PE with all
+        			// proxies removed.  In that case we remove it explicitly
+        			if(al.getPushAddress().getProxies().isEmpty()) {
+        			    iter.remove();
         				continue;
+        			}
         			
         			//if the downloader indicated that they are firewalled
         			//but the altloc did not say that it supports FWT transfer,
@@ -1127,6 +1135,10 @@ public final class HTTPUploader implements Uploader {
 
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
+		URN sha1 =_fileDesc.getSHA1Urn(); 
+		if (!sha1.equals(alc.getSHA1Urn()))
+		    return;
+		
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
@@ -1139,21 +1151,25 @@ public final class HTTPUploader implements Uploader {
                 AlternateLocation.create(st.nextToken().trim(),
                                          _fileDesc.getSHA1Urn());
                 
-                URN sha1 = al.getSHA1Urn();
-                if(sha1.equals(alc.getSHA1Urn())) {
-                    if(al instanceof PushAltLoc)
-                        ((PushAltLoc)al).updateProxies(isGood);
-                    
-                    if(isGood) 
-                        alc.add(al);
-                    else
-                        alc.remove(al);
+                Assert.that(al.getSHA1Urn().equals(sha1));
+                
+                if (al.isMe())
+                    continue;
+                
+                if(al instanceof PushAltLoc) 
+                    ((PushAltLoc)al).updateProxies(isGood);
+                // Note: if this thread gets preempted at this point,
+                // the AlternateLocationCollectioin may contain a PE
+                // without any proxies.
+                if(isGood) 
+                    alc.add(al);
+                else
+                    alc.remove(al);
                         
-                    if (al instanceof DirectAltLoc)
-                    	_writtenLocs.add(al);
-                    else
-                    	_writtenPushLocs.add(al); // no problem if we add an existing pushloc
-                }
+                if (al instanceof DirectAltLoc)
+                 	_writtenLocs.add(al);
+                else
+                 	_writtenPushLocs.add(al); // no problem if we add an existing pushloc
             } catch(IOException e) {
                 // just return without adding it.
                 continue;

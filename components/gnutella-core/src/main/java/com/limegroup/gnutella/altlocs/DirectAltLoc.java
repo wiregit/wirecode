@@ -110,6 +110,10 @@ public class DirectAltLoc extends AlternateLocation {
         return ret;
     }
 	
+	public boolean isMe(){
+	    return NetworkUtils.isMe(_node.getAddress(),_node.getPort());
+	}
+	
 	/**
 	 * Returns the host/port of this alternate location as an endpoint.
 	 */

@@ -268,6 +268,12 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 
 	public abstract RemoteFileDesc createRemoteFileDesc(int size);
 	
+	/**
+	 * 
+	 * @return whether this is an alternate location pointing to myself.
+	 */
+	public abstract boolean isMe();
+	
 	
 
     /**

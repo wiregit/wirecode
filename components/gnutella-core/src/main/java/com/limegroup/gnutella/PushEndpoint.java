@@ -431,9 +431,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	    synchronized(GUID_PROXY_MAP) {
 	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 
-		// try to get a hard ref so that the mapping won't expire
-		if (existing!=null)
-		    guidRef=existing.getGuid();	        
+	        // try to get a hard ref so that the mapping won't expire
+	        if (existing!=null)
+	            guidRef=existing.getGuid();	        
 
 	        // if we do not have a mapping for this guid, or it just expired,
 	        // add a new one atomically
