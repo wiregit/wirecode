@@ -158,13 +158,6 @@ public abstract class MessageRouter {
         }
         _secretKey = QueryKey.generateSecretKey();
         _secretPad = QueryKey.generateSecretPad();
-
-        // schedule a runner to clear unused out-of-band replies
-        // this used to be called from RouterService.schedule, but i'm afraid
-        // that during hectic times the schedule thread may be waiting for this
-        // guy
-        Expirer expirer = new Expirer();
-        expirer.start();
     }
 
     /**
@@ -176,6 +169,13 @@ public abstract class MessageRouter {
 		_fileManager = RouterService.getFileManager();
 		DYNAMIC_QUERIER.start();
 	    QRP_PROPAGATOR.start();
+
+        // schedule a runner to clear unused out-of-band replies
+        // this used to be called from RouterService.schedule, but i'm afraid
+        // that during hectic times the schedule thread may be waiting for this
+        // guy
+        Thread expirer = new Thread(new Expirer());
+        expirer.start();
     }
 
     public String getPingRouteTableDump() {
@@ -1875,11 +1875,11 @@ public abstract class MessageRouter {
 
     /** Can be run to invalidate out-of-band ACKs that we are waiting for....
      */
-    private class Expirer extends Thread {
+    private class Expirer implements Runnable {
         public void run() {
             while (true) {
                 try {
-                    sleep(CLEAR_TIME);
+                    Thread.sleep(CLEAR_TIME);
                     Set toRemove = new HashSet();
                     synchronized (_outOfBandReplies) {
                         Iterator keys = _outOfBandReplies.keySet().iterator();
