@@ -741,33 +741,26 @@ public class QueryReply extends Message implements Serializable{
 
 
 	/**
-	 * This method calculates the quality of service for
-	 * a given host.  The calculation should be some function
-	 * of whether or not the host is busy, whether or not
-	 * the host has ever recieved an incoming connection,
-	 * and... what else?
-	 *   hops value
-	 *   speed?
-	 *   firewall? <- not as usefull as incoming/not incoming ?
-	 *
-	 * NOTE:
-	 * I dont really think this is the right place for this,
-	 * but for now I'll put it here.  I don't think it should
-	 * be in the QueryReply, but if not there, then I'm really
-	 * not sure where to put it.  Some other data structure?
-	 *
-     * NOTE2:
-     * QueryReply has need of this method now.  It is in TWO places,
-     * and i can't easily give access to it in SearchView
-     * cuz that would be a gui dependency in core.
+     * This method calculates the quality of service for
+     * a given host.  The calculation should be some function
+     * of whether or not the host is busy, whether or not
+     * the host has ever recieved an incoming connection,
+     * and... what else?
+     *   hops value
+     *   speed?
+     *   firewall? <- not as usefull as incoming/not incoming ?
      *
-     * NOTE3:
      * Moved this code from SearchView to here permanently, so we 
      * avoid duplication.  It makes sense from a data point of view
      * to plaster this bad boy here as a public instance method.
      * SearchView used to have it, it went bye-bye....
-	 */
-	public int calculateQualityOfService() {
+     * @return a int from 0 to 3.  0 is bad quality, 1 is OK quality, 2 is
+     * pretty good quality, 4 is 'quite the bomb' (aka GREAT) quality
+     * @param iFirewalled switch to indicate if the client is firewalled or
+     * not.  See RouterService.acceptingIncomingConnection or Acceptor for
+     * details.
+     */
+	public int calculateQualityOfService(final boolean iFirewalled) {
 
 		int quality;
 		int busy;
@@ -796,11 +789,6 @@ public class QueryReply extends Message implements Serializable{
 				push = 0; // UNDECIDED
 			}
 		}
-
-        
-        boolean iFirewalled = false;
-        if (RouterService.instance() != null)
-            iFirewalled = !RouterService.instance().acceptedIncomingConnection();
 
 		/*********************************************************************
          *  There are 9 possible QHD states, though only 7 can appear in the
@@ -879,7 +867,9 @@ public class QueryReply extends Message implements Serializable{
         int index = 0;
         // these will be used over and over....
         final String ip = getIP();
-        final int port = getPort(), qual = calculateQualityOfService();
+        final int port = getPort();
+        final int qual = 
+        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;
