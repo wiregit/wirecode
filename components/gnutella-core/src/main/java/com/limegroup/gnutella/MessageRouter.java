@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.udpconnect.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -176,6 +177,13 @@ public abstract class MessageRouter {
      * GUID -> MessageListener
      */
     private final Map _messageListeners = new Hashtable();
+
+
+    /**
+     * Router for UDPConnection messages.
+     */
+	private final UDPMultiplexor _udpConnectionMultiplexor =
+	    UDPMultiplexor.instance(); 
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -425,6 +433,14 @@ public abstract class MessageRouter {
 		if(!NetworkUtils.isValidAddress(address) ||
 		   !NetworkUtils.isValidPort(port))
 		    return;
+
+		// Send UDPConnection messages on to the connection multiplexor
+		// for routing to the appropriate connection processor
+		if ( msg instanceof UDPConnectionMessage ) {
+		    _udpConnectionMultiplexor.routeMessage(
+			  (UDPConnectionMessage)msg, address, port);
+			return;
+		}
 
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		

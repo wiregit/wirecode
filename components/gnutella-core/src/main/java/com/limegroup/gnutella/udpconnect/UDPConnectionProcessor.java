@@ -170,6 +170,10 @@ public class UDPConnectionProcessor {
         // Register yourself for incoming messages
 		_myConnectionID    = _multiplexor.register(this);
 
+		// Throw an exception if udp connection limit hit
+		if ( _myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) 
+			throw new IOException("no room for connection"); 
+
         // See if you can establish a pseudo connection 
         // which means each side can send/receive a SYN and ACK
 		tryToConnect();
