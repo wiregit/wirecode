@@ -779,6 +779,43 @@ public class ManagedConnection
         return this._isRouter;
     }
 
+    /** Returns true iff this is a connection to a shielded leaf node. 
+     *  Note that isClientConnection() ==> !isSupernodeConnection(). */
+    public boolean isClientConnection() {
+        String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            //X-Supernode: true  ==> false
+            //X-Supernode: false ==> true
+            return !Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns true iff this is a connection to a supernode.
+     *  Note that isSupernodeConnection() ==> !isClientConnection(). */
+    public boolean isSupernodeConnection() {
+        String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            return Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns true iff this is a connection to a supernode.
+     *  Note that isSupernodeConnection() ==> !isClientConnection(). */
+    public boolean isClientSupernodeConnection() {
+        //Is remote host a supernode...
+        if (! isSupernodeConnection())
+            return false;
+
+        //...and am I a leaf node?
+        String value=getPropertyWritten(
+            ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            return !Boolean.valueOf(value).booleanValue();
+    }
 
     public void setKillable(boolean killable) {
         this._isKillable=killable;
@@ -940,9 +977,8 @@ public class ManagedConnection
             boolean outgoing) {
             Properties ret=new Properties();
             
-            //on outgoing connection, we have already sent headers. Send
-            //the heaaders on incoming only
-            if(!outgoing){
+            if(!outgoing) {
+                //Incoming connection....
                 ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
                 ret.setProperty(
                     ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
@@ -959,6 +995,17 @@ public class ManagedConnection
                 
                 //also add some host addresses in the response 
                 addHostAddresses(ret, _manager);
+            } else {
+                //Outgoing connection.  Did the server request we become a leaf?
+                String neededS=response.getHeaders().
+                    getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
+                if (neededS!=null 
+                       && !Boolean.valueOf(neededS).booleanValue()
+                       && _manager.allowClientMode()) {
+                    //Fine, we'll become a leaf.
+                    ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, 
+                                    "False");
+                }
             }
             return new HandshakeResponse(ret);
         }

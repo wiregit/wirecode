@@ -90,20 +90,7 @@ public class ConnectionManager {
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
-    
-    /** 
-     * Is true, if we are a client node, and are currently maintaining
-     * connection to a supernode, and that is the only connection we 
-     * are maintaining. Is false, otherwise.
-     */
-    private volatile boolean _hasShieldedClientSupernodeConnection = false;
-    
-    /** 
-     * This is the transitional supernode mode, set automatically during
-     * the execution of program 
-     */
-    private volatile boolean _supernodeModeTransit 
-        = SettingsManager.instance().getEverSupernodeCapable();
+
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -222,9 +209,8 @@ public class ConnectionManager {
          
          //dont keep the connection, if we are not a supernode
          synchronized(this){
-            if(_hasShieldedClientSupernodeConnection){
+            if(hasShieldedClientSupernodeConnection()) 
                 remove(connection);
-            }
          }
          
          //update the connection count
@@ -306,18 +292,10 @@ public class ConnectionManager {
      * Tells whether the node is gonna be a supernode or not
      * @return true, if supernode, false otherwise
      */
-    public boolean isSupernode()
-    {
-        return _supernodeModeTransit;
+    public boolean isSupernode() {
+        boolean isCapable=SettingsManager.instance().getEverSupernodeCapable();
+        return isCapable && !hasShieldedClientSupernodeConnection();
     }
-    
-    /**
-     * Sets whether the node is a supernode or not
-     */
-    public void setSupernodeMode(boolean supernodeModeTransit)
-    {
-        this._supernodeModeTransit = supernodeModeTransit;
-    }    
     
     /**
      * Tells whether this node has a connection to
@@ -326,8 +304,14 @@ public class ConnectionManager {
      * @return True, if the clientnode has connection to supernode,
      * false otherwise
      */
-    public boolean hasShieldedClientSupernodeConnection() {
-        return _hasShieldedClientSupernodeConnection;
+    public synchronized boolean hasShieldedClientSupernodeConnection() {
+        List connections=getConnections();
+        if (connections.size()!=1)
+            return false;
+        else {
+            ManagedConnection first=(ManagedConnection)connections.get(0);
+            return first.isClientSupernodeConnection();
+        }
     }
     
     /**
@@ -450,7 +434,7 @@ public class ConnectionManager {
         for(Iterator iterator = _initializedConnections.iterator();
             iterator.hasNext();)
         {
-            Connection connection = (Connection)iterator.next();
+            ManagedConnection connection = (ManagedConnection)iterator.next();
             if(connection.isSupernodeConnection())
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
@@ -486,7 +470,7 @@ public class ConnectionManager {
      * removed from the list of open connections during its initialization.
      * Should only be called from a thread that has this' monitor.
      */
-    private void connectionInitialized(Connection c) {
+    private void connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
             //update the appropriate list of connections
             if(!c.isClientConnection()){
@@ -551,9 +535,6 @@ public class ConnectionManager {
             ManagedConnection c=(ManagedConnection)iter.next();
             remove(c);
         }
-        
-        //set supernodeMode
-        setSupernodeMode(_settings.getEverSupernodeCapable());
     }
     
     /**
@@ -608,17 +589,6 @@ public class ConnectionManager {
             } catch (InterruptedException e) { }
             SettingsManager.instance().setUseQuickConnect(false);
         }
-    }
-    
-    /**
-     * Drops the current set of connections, and starts afresh based upon
-     * the supernode/client state
-     */
-    public synchronized void reconnect()
-    {
-        disconnect();
-        SettingsManager.instance().setKeepAlive(4);
-        connect();
     }
     
     /** 
@@ -853,9 +823,8 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(!isSupernode() && 
-                c.isSupernodeConnection()){
-            gotShieldedClientSupernodeConnection(c);
+            if(c.isClientSupernodeConnection()) {
+                gotShieldedClientSupernodeConnection(c);
             }
         }
     }
@@ -885,10 +854,9 @@ public class ConnectionManager {
             if(!connection.equals(supernodeConnection))
                 connection.close();
         }
-        //set the _hasShieldedClientSupernodeConnection flag to true
-        _hasShieldedClientSupernodeConnection = true;
         
-        //reinitialize the lists
+        //reinitialize the lists.  TODO: avoid this by using proper disconnect()
+        //method.
         List newConnections=new ArrayList();
         newConnections.add(supernodeConnection);
         _connections = newConnections;
@@ -911,11 +879,6 @@ public class ConnectionManager {
     {
         if(_connections.size() == 0)
         {
-            //set supernodeMode
-            setSupernodeMode(_settings.getEverSupernodeCapable());
-            //set the _hasShieldedClientSupernodeConnection flag to false
-            _hasShieldedClientSupernodeConnection = false;
-
             //set keep alive to 4, so that we start fetching new connections
             setKeepAlive(4);
         }
@@ -937,18 +900,7 @@ public class ConnectionManager {
         //update the addresses in the host cache (in case we received some
         //in the headers)
         updateHostCache(headers, connection);
-        
-        //set client/supernode flag for the connection
-        String supernodeStr = headers.getProperty(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
-        if(supernodeStr != null){
-            boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
-            if(isSupernode)
-                connection.setSupernodeConnectionFlag(true);
-            else
-                connection.setClientConnectionFlag(true);
-        }
-        
+                
         //get remote address
         String remoteAddress 
             = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
@@ -968,82 +920,21 @@ public class ConnectionManager {
             }
         }
         
-        
-        //check Supernode-Needed header
-        String supernodeNeededStr = headers.getProperty(
-            ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
-        if(supernodeNeededStr != null){
-            boolean supernodeNeeded 
-                = (new Boolean(supernodeNeededStr)).booleanValue();
-            //get the remote address
-            String remoteHost;
-            if(connection.isOutgoing())
-                remoteHost = connection.getOrigHost() + ":" + 
-                    connection.getOrigPort();
-            else
-                remoteHost = headers.getProperty(
-                    ConnectionHandshakeHeaders.X_MY_ADDRESS);
-            //take appropriate action       
-            gotSupernodeNeededGuidance(supernodeNeeded, remoteHost);
-        }
+        //We used to check X_NEED_SUPERNODE here, but that is no longer
+        //necessary.
     }
    
     /** 
-     * Indicates that we received guidance from another supernode about
-     * the supernode/clientnode state we should go to. 
-     * Based upon the guidance as well as our current conditions, we may
-     * change our state based upon the guidance
-     * @param supernodeNeeded True, if other node thinks we should be
-     * a supernode, false otherwise
-     * @param remoteAddress address (host:port) of the remote host who is
-     * providing the guidance
+     * Returns true if this can safely switch from supernode to leaf mode.
+     * Typically that means there are no leaf connections, but it could be
+     * stricter.  
      */
-    private void gotSupernodeNeededGuidance(boolean supernodeNeeded,
-        String remoteAddress){
-        //if we are in the state asked for, return
-        if(isSupernode() == supernodeNeeded)
-            return;
-        
+    public boolean allowClientMode() {
         //if is a supernode, and have client connections, dont change mode
-        if(isSupernode() && _incomingClientConnections > 0)
-            return;
-        
-        //if we are not supernode capable, and guidance received is to
-        //become supernode, discard it
-        if(supernodeNeeded
-            && !SettingsManager.instance().getEverSupernodeCapable())
-        {
-            return;
-        }
-       
-        //if the remote address is not null, connect to the remoteAddress
-        try{
-            if(remoteAddress != null){
-                    
-                //disconnect all the connections, and set the state as guided
-                disconnect();    
-                setSupernodeMode(supernodeNeeded);    
-                    
-                //open connection to the specified host
-                Endpoint endpoint = new Endpoint(remoteAddress);
-                ManagedConnection connection = new ManagedConnection(
-                    endpoint.getHostname(), endpoint.getPort(), _router,
-                    ConnectionManager.this);
-
-                initializeExternallyGeneratedConnection(connection);
-                sendInitialPingRequest(connection);
-                connection.loopForMessages();
-            }
-        }catch(Exception e){
-            //just catch any exception
-        }
-        finally{
-            //in case the guidance was to become client node
-            //if that connection worked, that was our only connection
-            //to the supernode. Else we just didnt have any connection
-            if(!supernodeNeeded)
-                lostShieldedClientSupernodeConnection();
-        }
+        if (isSupernode() && _incomingClientConnections > 0)
+            return false;
+        else
+            return true;
     }
     
     /**
@@ -1145,7 +1036,7 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(!isSupernode() && c.isSupernodeConnection()){
+            if(c.isClientSupernodeConnection()) {
                 gotShieldedClientSupernodeConnection(c);
             }
         }
@@ -1213,10 +1104,8 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                if(_hasShieldedClientSupernodeConnection)
-                {
+                if (_connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
-                }
             }
         }
     }
@@ -1283,9 +1172,8 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                if(_hasShieldedClientSupernodeConnection){
+                if (_connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
-                }
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -1354,9 +1242,8 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                if(_hasShieldedClientSupernodeConnection){
+                if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
-                }
             }
         }
     }
