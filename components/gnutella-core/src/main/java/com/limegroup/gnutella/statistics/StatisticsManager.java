@@ -20,6 +20,11 @@ public final class StatisticsManager implements Runnable {
 	private volatile List ADVANCED_STATS = new LinkedList();
 
 	/**
+	 * <tt>List</tt> of all advanced numberical statistics classes.
+	 */
+	private volatile List NUMERICAL_STATS = new LinkedList();
+
+	/**
 	 * Boolean for whether or not advanced statistics should be 
 	 * recorded.
 	 */
@@ -65,6 +70,18 @@ public final class StatisticsManager implements Runnable {
 	void addAdvancedStatistic(Statistic stat) {
 		synchronized(ADVANCED_STATS) {
 			ADVANCED_STATS.add(stat);		
+		}
+	}
+
+	/**
+	 * Adds an <tt>NumericalStatistic</tt> to the set of Numerical
+	 * statistics to record.
+	 *
+	 * @param stat the <tt>NumericalStatistic</tt> to add
+	 */	 
+	void addNumericalStatistic(Statistic stat) {
+		synchronized(NUMERICAL_STATS) {
+			NUMERICAL_STATS.add(stat);		
 		}
 	}
 
