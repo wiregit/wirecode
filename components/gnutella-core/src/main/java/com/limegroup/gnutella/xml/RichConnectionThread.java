@@ -30,17 +30,26 @@ public class RichConnectionThread extends Thread{
         QueryReply qr = null;
         try{
             c.initialize();//handshake
-            c.send(qr);//send the query along
+            //System.out.println("Sumeet: initialized");
+            c.send(query);//send the query along
+            //System.out.println("Sumeet: sent query");
             c.flush();
+            //System.out.println("Sumeet: flushed query");
         }catch(IOException ee){//could not send? return
             return;
         }
         byte[] queryGUID = query.getGUID();
         while(true){//keep receiving 'em 
             try{
-                //lets give the server 10 seconds to respond
-                qr = (QueryReply)c.receive(10000);
+                //lets give the server 10 seconds to respond 
+                Message m = c.receive(10000);
+                if(m instanceof QueryReply)
+                    qr = (QueryReply)m;
+                else 
+                    continue;//carry on
+                //System.out.println("Sumeet: received reply");
             }catch(Exception e){//exception? close connection and get out
+                //e.printStackTrace();
                 if(c.isOpen())
                     c.close();
                 break;
