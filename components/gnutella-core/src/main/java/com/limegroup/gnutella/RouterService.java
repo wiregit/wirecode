@@ -643,6 +643,8 @@ public class RouterService {
             c.setPersonalFilter(SpamFilter.newPersonalFilter());
             c.setRouteFilter(SpamFilter.newRouteFilter());
         }
+        
+        UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
     }
 
     /**

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.filters.SpamFilter;
 import com.sun.java.util.collections.*;
 import java.io.IOException;
 import java.net.*;
@@ -39,6 +40,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * Constant for whether or not to record stats.
 	 */
 	private final boolean RECORD_STATS = !CommonUtils.isJava118();
+    
+    /**
+     * Used to filter messages that are considered spam.
+     * With the introduction of OOB replies, it is important
+     * to check UDP replies for spam too.
+     *
+     * Uses one static instance instead of creating a new
+     * filter for every single UDP message.
+     */
+    private static volatile SpamFilter _personalFilter =
+        SpamFilter.newPersonalFilter();
 	
 	/**
 	 * Constructor that sets the ip and port to reply to.
@@ -55,6 +67,13 @@ public final class UDPReplyHandler implements ReplyHandler {
 		IP   = ip;
 		PORT = port;
 	}
+    
+    /**
+     * Sets the new personal spam filter to be used for all UDPReplyHandlers.
+     */
+    public static void setPersonalFilter(SpamFilter filter) {
+        _personalFilter = filter;
+    }
 
 	
 	/**
@@ -109,9 +128,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	}
 
 	public boolean isPersonalSpam(Message m) {
-		// TODO: do something else here
-        //return !_personalFilter.allow(m);
-		return false;
+        return !_personalFilter.allow(m);
 	}
 
 	public boolean isOpen() {
