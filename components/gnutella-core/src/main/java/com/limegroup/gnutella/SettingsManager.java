@@ -990,7 +990,7 @@ public final class SettingsManager {
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_CONNECTION_SPEED);
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
-        setClientID( (new GUID(Message.makeGuid())).toHexString() );
+        setClientID( (new GUID()).toHexString() );
         setBannedIps(DEFAULT_BLACK_LISTED_IP_ADDRESSES);
         setAllowedIps(DEFAULT_WHITE_LISTED_IP_ADDRESSES);
         setBannedWords(DEFAULT_BANNED_WORDS);
@@ -1526,7 +1526,7 @@ public final class SettingsManager {
 	 * Returns the forced IP address in dotted-quad format.
 	 */
     public String getForcedIPAddressString() {
-        return Message.ip2string(_forcedIPAddress);
+        return NetworkUtils.ip2string(_forcedIPAddress);
     }
 
     /**
