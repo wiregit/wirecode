@@ -12,13 +12,13 @@ import java.io.*;
  * and send it the special query
  * @author  Sumeet Thadani (11/16/01)
  */
-public class RichConnectionThread extends Thread{
+public final class RichConnectionThread extends Thread{
     private String ipAddress;
     private QueryRequest query;
     private ActivityCallback callback;
     //constructor
     public RichConnectionThread(String ip, QueryRequest qr, 
-                                                    ActivityCallback callback){
+								ActivityCallback callback){
         this.ipAddress = ip;
         this.query = qr;
         this.callback = callback;
@@ -29,6 +29,7 @@ public class RichConnectionThread extends Thread{
      * rich query request
      */
     public void run(){
+		/*
         try {
             Connection c = new Connection(ipAddress,6346);//use default port
             QueryReply qr = null;
@@ -71,5 +72,6 @@ public class RichConnectionThread extends Thread{
         } catch(Throwable t) {
             RouterService.error(t);
         }
+		*/
     }
 }
