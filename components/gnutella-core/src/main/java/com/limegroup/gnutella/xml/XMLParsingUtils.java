@@ -1,16 +1,12 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.Assert;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -63,12 +59,13 @@ public class XMLParsingUtils {
                         result.schemaURI = "http://www.limewire.com/schemas/"+result.type+".xsd";
                         result.canonicalKeyPrefix = plural(localName)+"__"+localName+"__";
                     } 
-                    Map attributeMap = new TreeMap(Comparators.stringComparator());
+                    Map attributeMap = new HashMap();
                     int count = attributes.getLength();
-                    for(int i=0; i<count; i++) 
+                    for(int i=0; i<count; i++) {
                         attributeMap.put(result.canonicalKeyPrefix + 
                                          attributes.getLocalName(i) + "__",
                                          attributes.getValue(i));
+                    }
                     result.canonicalAttributeMaps.add(attributeMap);
                 }
             });

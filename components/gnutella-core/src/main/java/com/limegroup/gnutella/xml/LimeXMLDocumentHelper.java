@@ -1,20 +1,16 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.Response;
 
 
@@ -56,17 +52,21 @@ public final class LimeXMLDocumentHelper{
             
             Iterator mapsIterator = parsingResult.canonicalAttributeMaps.iterator();
             while(mapsIterator.hasNext()) {
-                try {
-                    TreeMap map = (TreeMap)mapsIterator.next();
-                    
-                    int index = Integer.parseInt((String)map.get(indexKey));
-                    if (index >= documents.length)
-                        continue; // bad?
-                    
-                    documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
-                } catch(NumberFormatException bad) {
-                    ErrorService.error(bad);
+                
+                Map map = (Map)mapsIterator.next();
+                
+                int index = -1;
+                try{
+                    index = Integer.parseInt((String)map.get(indexKey));
+                }catch(NumberFormatException bad) { //invalid xml
+                    return Collections.EMPTY_LIST;
                 }
+                
+                if (index >= documents.length)
+                    return Collections.EMPTY_LIST; // malicious document, can't trust it.
+                
+                documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
+                
             }
             results.add(documents);
         }

@@ -5,21 +5,18 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.metadata.MP3MetaData;
-import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.NameValue;
 
 
@@ -44,8 +41,7 @@ public class LimeXMLDocument implements Serializable {
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    private Map fieldToValue = 
-        new TreeMap(Comparators.stringComparator());
+    private Map fieldToValue = new HashMap();
     private String schemaUri;
     private String xmlString;//this is what is sent back on the wire.
     /** 
@@ -102,7 +98,7 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(TreeMap map, String schemaURI){
+    LimeXMLDocument(Map map, String schemaURI){
         this.schemaUri = schemaURI;
         if(map.keySet().isEmpty()) throw new IllegalArgumentException("empty map");
         fieldToValue = map;
@@ -215,7 +211,7 @@ public class LimeXMLDocument implements Serializable {
         if (result.canonicalAttributeMaps.isEmpty())
             throw new IOException("No element present");
         
-        fieldToValue = (TreeMap)result.canonicalAttributeMaps.get(0);
+        fieldToValue = (Map)result.canonicalAttributeMaps.get(0);
         schemaUri = result.schemaURI;
     }
 
