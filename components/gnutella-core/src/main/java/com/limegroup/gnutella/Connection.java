@@ -258,36 +258,41 @@ import java.io.*;
 			    FileManager fm = FileManager.getFileManager();
 			    Response[] responses = fm.query((QueryRequest)m);
 			    
-			    byte[] guid = m.getGUID();
-			    System.out.println("the guid " + guid);
-			    byte ttl = Const.TTL;
-			    System.out.println("the ttl " + ttl);
-			    int port = manager.getListeningPort();
-			    System.out.println("the port " + port);
-			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-			    System.out.println("the ip " + ip);
-			    System.out.println("the ip ");
-			    for(int i = 0; i < ip.length; i++) {
-  				System.out.print(ip[i]);
-  			    }
-			    System.out.println("");
-			    // long speed = ((QueryRequest)m).getMinSpeed();
-			    long speed = 0;
-			    System.out.println("the speed " + speed);
-			    byte[] clientGUID = manager.ClientId.getBytes();
-			    System.out.println("the client GUID ");
-
-			    for(int i = 0; i < clientGUID.length; i++) {
-  				System.out.print(clientGUID[i]);
-  			    }
+			    if (responses.length > 0) {
 			    
-			    System.out.println("");
+				byte[] guid = m.getGUID();
+				// System.out.println("the guid " + guid);
+				byte ttl = Const.TTL;
+				// System.out.println("the ttl " + ttl);
+				int port = manager.getListeningPort();
+				// System.out.println("the port " + port);
+				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+				// System.out.println("the ip " + ip);
+				// System.out.println("the ip ");
+				// for(int i = 0; i < ip.length; i++) {
+				//     System.out.print(ip[i]);
+				// }
+			LimeProperties.ja	System.out.println("");
+				// long speed = ((QueryRequest)m).getMinSpeed();
+				long speed = 0;
+				// System.out.println("the speed " + speed);
+				byte[] clientGUID = manager.ClientId.getBytes();
+				// System.out.println("the client GUID ");
+				
+				// for(int i = 0; i < clientGUID.length; i++) {
+				//    System.out.print(clientGUID[i]);
+				// }
+				
+				// System.out.println("");
+				
+				QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+								   speed, responses, clientGUID);
+				send(qreply);
+				if(manager.stats == true)
+				    manager.QRepCount++;//keep stats if stats is turned on
 
-			    QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
-					   speed, responses, clientGUID);
-			    send(qreply);
-			    if(manager.stats == true)
-				manager.QRepCount++;//keep stats if stats is turned on
+			    }
+
 			}
 			else{//TTL is zero
 			    //do nothing(drop the message)
@@ -298,7 +303,7 @@ import java.io.*;
 		    }
 		}
 		else if (m instanceof QueryReply){
-		    System.out.println("Recieved a Querry Reply");
+		    // System.out.println("Recieved a Querry Reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
 			if (manager.stats==true)
@@ -330,7 +335,7 @@ import java.io.*;
 		    }
 		}
 		else if (m instanceof PushRequest){
-		    //System.out.println("Sumeet:We have a push request");
+		    // System.out.println("Sumeet:We have a push request");
 		    if (manager.stats==true)
 			manager.pushCount++;//keeps stats if stats turned on
 		    PushRequest req = (PushRequest)m;
