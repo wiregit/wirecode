@@ -113,7 +113,26 @@ public class QueryRouteTable {
         //1. First we check that all the normal keywords of qr are in the route
         //   table.  Note that this is done with zero allocations!  Also note
         //   that HashFunction.hash() takes cares of the capitalization.
-        String query=qr.getQuery();
+        String query = qr.getQuery();
+        String richQuery = qr.getRichQuery();
+		if(query.length() == 0 && 
+		   richQuery.length() == 0 && 
+		   !qr.hasQueryUrns()) {
+			return false;
+		}
+		if(qr.hasQueryUrns()) {
+			Set urns = qr.getQueryUrns();
+			Iterator iter = urns.iterator();
+			while(iter.hasNext()) {
+				URN qurn = (URN)iter.next();
+				int hash = HashFunction.hash(qurn.toString(), bits);
+				if(contains(hash)) {
+					// we note a match if any one of the hashes matches
+					return true;
+				}
+			}
+			return false;
+		}
         for (int i=0 ; ; ) {
             //Find next keyword...
             //    _ _ W O R D _ _ _ A B
@@ -134,7 +153,7 @@ public class QueryRouteTable {
         //   declare success now.  Otherwise ensure that the URI is in the 
         //   table.  TODO: avoid allocations.
         //TODO2: avoid parsing if possible
-        String richQuery = qr.getRichQuery();
+        //String richQuery = qr.getRichQuery();
         if (richQuery.equals(""))
             //Normal case for matching query with no metadata.
             return true;
