@@ -8,42 +8,54 @@ import java.io.*;
  * snatches IP addresses of other Gnutella peers.  IP addresses may
  * also be added to it from a file (usually "gnutella.net").  The
  * servent may then connect to these addresses as necessary to
- * maintain full connectivity.  
+ * maintain full connectivity.<p>
+ *
+ * The host catcher maintains two sets of address: the "likelys" and the
+ * "maybe" sets.  Likelys hosts are the results of ping replies and hence
+ * are known to be good.  Maybe hosts haven't been tried yet, so they may
+ * or may not be good.  Hosts we are connected to are NOT stored, but they
+ * may be written to disk.
  */
 public class HostCatcher {
-    /** The untested set of connections to try.  This could ultimately
-      * be prioritized by extra info (e.g., connection speed, number
-      * of files) gathered in spy(..).  Succesful connections from
-      * this are added to the elected set.  This is NOT synchronized
-      * directly; rather you should manually grab its monitor before
-      * modifying it.  */
-    protected Set /* of Endpoint */ candidates=new HashSet();
+    /** INVARIANT: "likelys" and "maybes" and "chosen" are disjoint */
 
-    /** Where to add new connections. */
+    /** The hosts read from disk, or otherwise unlikely to be
+      * unconnected.  This could ultimately be prioritized by extra
+      * info (e.g., connection speed, number of files) gathered in
+      * spy(..).  This is NOT synchronized directly; rather you should
+      * manually grab its monitor before modifying it. */
+    protected Set /* of Endpoint */ maybes=new HashSet();
+
+    /** Used exclusively for callbacks. */
     protected ConnectionManager manager;
 
-    /** The good connections we've made.  We keep this around to write
-      * it to disk.  This is NOT synchronized directly; rather you
-      * should manually grab its monitor before modifying it */
-    protected Set /* of Endpoint */ elected=new HashSet();
+    /** The hosts discovered by pings, or otherwise likely to be connected. */
+    protected Set /* of Endpoint */ likelys=new HashSet();
     
+    /** The hosts given out by choose().  Ignore their pings. */
+    protected Set /* of Endpoint */ chosen=new HashSet();
 
     private void error(String message) {
-	System.err.println(message);   //Sssshhh!
+	if (manager!=null) {
+	    ActivityCallback callback=manager.getCallback();
+	    if (callback!=null)
+		callback.error(message);
+	}
     }
 
     /** 
-     * Creates an empty host catcher.  The manager r is where new connection
-     *  should be registered in the choose method.
+     * Creates an empty host catcher.  manager is used for callbacks,
+     * or null if we don't care.
      */
     public HostCatcher(ConnectionManager manager) { this.manager=manager; }
 
     /** 
-     * Creates a host catcher containing the hosts in the given file.
-     * If filename does not exist, then no error message is printed
-     * and this is initially empty.  The file is expected to contain a
-     * sequence of lines in the format "<host>:port\n".  Lines not in
-     * this format are silently ignored.  manager is as described above.  
+     * Creates a host catcher whose maybe set contains the hosts
+     * in the given file.  (The likelys set is empty.)  If filename
+     * does not exist, then no error message is printed and this is
+     * initially empty.  The file is expected to contain a sequence of
+     * lines in the format "<host>:port\n".  Lines not in this format
+     * are silently ignored.  manager is as described above.  
      */
     public HostCatcher(ConnectionManager manager, String filename) {
 	this.manager=manager;
@@ -60,7 +72,6 @@ public class HostCatcher {
 	    try {
 		line=in.readLine();
 	    } catch (IOException e) {
-		error("IOException");
 		return; //fatal
 	    }
 	    if (line==null)   //nothing left to read?  Done.
@@ -69,7 +80,6 @@ public class HostCatcher {
 	    //Break the line into host and port.  Skip if badly formatted.
 	    int index=line.indexOf(':');
 	    if (index==-1) {
-		error("No ':' in line");
 		continue;
 	    }
 	    String host=line.substring(0,index);
@@ -77,31 +87,37 @@ public class HostCatcher {
 	    try {
 		port=Integer.parseInt(line.substring(index+1));
 	    } catch (NumberFormatException e) {
-		error("Poorly formatted number");
 		continue;
 	    } catch (ArrayIndexOutOfBoundsException e) {
 		continue;
 	    }
 	    
-	    //Everything passed!  Add it.
+	    //Everything passed!  Add it.  No need to synchronize because
+	    //this is a constructor.
 	    Endpoint e = new Endpoint(host, port);	    
-	    candidates.add(e);	    
+	    maybes.add(e);	    
     	    addKnownHost(e);
 	}	
     }
 
     /**
      * @modifies the file named filename
-     * @effects writes this to the given file. Those hosts who
-     *  actually accepted connections are written first.
+     * @effects writes this to the given file.  The file
+     *  is prioritized by rough probability of being good.
      */
-    public void write(String filename) throws IOException {
+    public synchronized void write(String filename) throws IOException {
 	FileWriter out=new FileWriter(filename);
-	synchronized(elected) {
-	    writeInternal(out, elected);
+	//Write connections we've given out first...
+	synchronized(chosen) {
+	    writeInternal(out, chosen);
 	}
-	synchronized(candidates) {
-	    writeInternal(out, candidates);
+	//Followed by pings...
+	synchronized(likelys) {
+	    writeInternal(out, likelys);
+	}
+	//Followed by gnutella.net entries...
+	synchronized(maybes) {
+	    writeInternal(out, maybes);
 	}
 	out.close();	
     }
@@ -113,143 +129,186 @@ public class HostCatcher {
 	    out.write(e.toString()+"\n");
 	}
     }
+
+    //////////////////////////////////////////////////////////////////////
+
     
     /** 
      * @modifies this
-     * @effects ensures any hosts listed in m are in this
+     * @effects ensures any hosts listed in m are in this' likelys set
      */
-    public void spy(Message m) {
-	String ip=null;
-	int port=6346;
-	if (m instanceof PingReply) {
-	    PingReply pr=(PingReply)m;
-	    ip=pr.getIP();
-	    port=pr.getPort();
-	} 
+    public void spy(Message m) {	
+	//ignore m if I'm connected to it, i.e. if hops==0
 	//We could also get ip addresses from query hits and push
 	//requests, but then we have to guess the ports for incoming
-	//connections.  (These only give ports for HTTP.)
-	else {
+	//connections.  (These only give ports for HTTP.) 
+	int hops=m.getHops();
+	if ((! (m instanceof PingReply)) || hops==0)
 	    return;
+	
+	PingReply pr=(PingReply)m;
+	Endpoint e=new Endpoint(pr.getIP(), pr.getPort(), 
+				pr.getFiles(), pr.getKbytes());
+
+	//Don't record addresses I've already seen.
+	if (chosen.contains(e))
+	    return;
+
+	//Add it to the likely set, remove it from the maybes set if
+	//it's there.
+	synchronized(likelys) {
+	    likelys.add(e);
 	}
-	synchronized(candidates) {
-	    Endpoint e=new Endpoint(ip, port);
-	    //Only add e if its not in candidates.  This effectively ignores
-	    //pings from any hosts we are directly connected to, since we added
-	    //them to the elected set via addGood.
-	    if (! elected.contains(e)) {
-		candidates.add(e);
-    	        addKnownHost(e);
-	    }
+	synchronized(maybes) {
+	    maybes.remove(e); //ok even if e not in maybe
 	}
+	addKnownHost(e);
     }
 
-    /** 
-     * @modifies this
-     * @effects notifies this that c is a good connection and should be
-     *  written to disk later.
-     */
-    public void addGood(Connection c) {
-	String host=c.getInetAddress().getHostAddress();
-	int port=c.getPort();
-	synchronized (elected) {
-	    elected.add(new Endpoint(host,port));
-	}	
-    }
 
     /**
      * @modifies this
-     * @effects returns a new outgoing connection to some host in this
-     *  and removes it from this (atomically).  Does not modify manager.
-     *  If no such host can be found, throws NoSuchElementException.  This
-     *  method <i>is</i> thread-safe, but it can be run in parallel with
-     *  itself.
+     * @effects returns a new outgoing, connected connection to some
+     *  host in this and removes it from this (atomically).  Does not
+     *  modify manager.  If no such host can be found, throws
+     *  NoSuchElementException.  This method <i>is</i> thread-safe, but
+     *  it is cleverly synchronized so that multiple invocations can run
+     *  at the same time.
      */
     public Connection choose() throws NoSuchElementException {
 	while (true) {
-	    Endpoint e=null;
-	    //1. While we have this' monitor, get an endpoint and
-	    //   remove it from this.	   
-	    synchronized (candidates) {
-		Iterator iter=candidates.iterator();	
-		if (! iter.hasNext()) 
-		    throw new NoSuchElementException();
-		e=(Endpoint)iter.next();
-		candidates.remove(e);	
-	    }
-	    //2. Now--without the lock--try to establish connection. If
-	    //   successful, add the endpoint to the elected set so we 
-	    //   can write to disk and try later.
+	    Endpoint e=getAnEndpoint();	
 	    try {
-		manager.tryingToConnect(e.hostname,e.port, false);
+		if (manager!=null)
+		    manager.tryingToConnect(e.hostname,e.port, false);
 		Connection ret=new Connection(e.hostname,e.port);
 		ret.connect();
-		synchronized(elected) {
-		    elected.add(e);
+		//Note that we've given out e for future reference
+		synchronized(chosen) {
+		    chosen.add(e);
 		}
 		return ret;
 	    } catch (IOException exc) {
-		manager.failedToConnect(e.hostname,e.port);
+		if (manager!=null)
+		    manager.failedToConnect(e.hostname,e.port);
 		continue;
 	    }
 	}
     }
 
   /**
-  	 *	returns an Endpoint from the candidates list
-	 *	@return An Endpoint out of the candidates list
-	 *	@throws NoSuchElementException if the candidates list is empty
-     */
+   * @modifies this
+   * @effects atomically returns the highest priority host from this
+   *  and removes it from this.  Throws NoSuchElementException if 
+   *  no host could be found.
+   */
     public Endpoint getAnEndpoint() throws NoSuchElementException 
     {
-	Endpoint e=null;
-	//Synchronize on candidates to avoid structural modifications to it
-	//by multiple threads
-	synchronized (candidates) {
-		Iterator iter=candidates.iterator();	
-		if (! iter.hasNext()) 
-		    	throw new NoSuchElementException();
-		e=(Endpoint)iter.next();
-		candidates.remove(e);
-    	}
-
-	return e;
-
+	//Use pings before gnutella.net if possible.
+	if (likelys.size()>0) {
+	    try {
+		return choose(likelys);
+	    } catch (NoSuchElementException e) { 
+		//This can happen if another thread removed the last likelys
+		//host before I got to acquire the monitor.  If it happens,
+		//try maybes set.
+	    }
+	}
+	return choose(maybes);    
     }//end of getAnEndpoint
+
+    /**
+     * @modifies s
+     * @effects atomically returns an element of s and removes it.
+     *  Throws NoSuchElementException if s is empty.
+     */
+    private static Endpoint choose(Set s) throws NoSuchElementException {
+	//  While we have s' monitor, get an endpoint and
+	//  remove it from this.	   
+	synchronized (s) {
+	    Iterator iter=s.iterator();	
+	    if (! iter.hasNext()) 
+		throw new NoSuchElementException();
+	    Endpoint e=(Endpoint)iter.next();
+	    s.remove(e);	
+	    return e;
+	}
+    }	 
 
     /**
      *  Return the number of good hosts
      */
     public int getNumHosts() {
-	return( candidates.size() );
+	return( maybes.size() );
     }
 
     /**
-     *  Return an iterator on the candidates
+     * Return an iterator of the hosts in this. This can be modified 
+     * while iterating through the result, but the modifications will
+     * not be observed.
      */
     public Iterator getHosts() {
-	return( candidates.iterator() );
+	Set everything=new HashSet();
+	synchronized(likelys) {
+	    everything.addAll(likelys);
+	}
+	synchronized(maybes) {
+	    everything.addAll(maybes);
+	}	
+	return( everything.iterator() );
+    }
+
+    /** 
+     * @requires n>0
+     * @effects returns an iterator that yields up the best n endpoints of this
+     */ 
+    public Iterator getBestHosts(int n) {
+	Set best=new HashSet();
+	//ignore maybes
+	synchronized(likelys) {
+	    Iterator iter=likelys.iterator();
+	    for (int i=0; i<n && iter.hasNext(); i++) 
+		best.add(iter.next());
+	    return best.iterator();
+	}
     }
 
     /**
-     *  Add a known host/port
+     *  Notifies callback that e has been discovered.
      */
-    public void addKnownHost(Endpoint e)
+    private void addKnownHost(Endpoint e)
     {
-	if ( manager.getCallback() != null )
+	if ( manager!=null && manager.getCallback() != null )
 	    manager.getCallback().knownHost(e);
     }
 
-
-
     public String toString() {
-	return "("+elected.toString()+", "+candidates.toString()+")";
+	return "("+likelys.toString()+", "+maybes.toString()+")";
     }
 
-    /** Unit test.  First arg is filename */
+//      /** Unit test.  First arg is filename */
 //      public static void main(String args[]) {
-//  	HostCatcher hc=new HostCatcher(new ConnectionManager(), args[0]);
+//  	HostCatcher hc=new HostCatcher(null, args[0]);
 //  	System.out.println(hc.toString());
+
+//  	PingRequest ping=new PingRequest((byte)3);
+//  	PingReply pr1=new PingReply(ping.getGUID(), (byte)5, 0,
+//  				    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+//  				    0, 0);
+//  	hc.spy(pr1); //ignored because the hop is 0
+//  	PingReply pr2=new PingReply(ping.getGUID(), (byte)5, 0,
+//  				   new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
+//  				   10, 20);
+//  	pr2.hop();
+//  	hc.spy(pr2); //not ignored
+//  	Iterator iter=hc.getBestHosts(10);
+//  	Assert.that(iter.hasNext());
+//  	Endpoint e=(Endpoint)iter.next();
+//  	String host=e.getHostname();
+//  	Assert.that(host.equals("127.0.0.2"));
+//  	Assert.that(e.getFiles()==10);
+//  	Assert.that(e.getKbytes()==20);
+//  	Assert.that(! iter.hasNext());
 //      }
 }
 
