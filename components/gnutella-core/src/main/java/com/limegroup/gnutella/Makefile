@@ -5,7 +5,8 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	UnmodifiableIterator.class Assert.class Const.class \
 	Message.class PingRequest.class PingReply.class \
 	QueryRequest.class QueryReply.class Response.class \
-	PushRequest.class ByteOrder.class HostCatcher.class
+	PushRequest.class ByteOrder.class HostCatcher.class \
+	ForgetfulHashMap.class
 
 all : $(classes)
 
