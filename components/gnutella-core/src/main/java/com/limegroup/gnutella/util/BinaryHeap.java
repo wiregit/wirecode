@@ -16,7 +16,7 @@ import com.sun.java.util.collections.Iterator;
  *
  * BinaryHeap now contains a constructor to allow dynamic resizing as well.
  */
-public class BinaryHeap implements FixedSizeCollection
+public class BinaryHeap
 {
     /**
      * number of elements currently present in the heap
@@ -229,15 +229,6 @@ public class BinaryHeap implements FixedSizeCollection
     }//end of insert
 
     /**
-     * Same as insert, but returns the number of elements removed (1 or 0).
-     * @param ClassCastException x is not Comparable
-     */
-    public int addR(Object x) 
-    {
-        return insert((Comparable)x)==null ? 0 : 1;
-    }
-
-    /**
      * Returns the largest element in this, without modifying this.  If this is
      * empty, throws NoSuchElementException instead.  
      */
@@ -272,12 +263,6 @@ public class BinaryHeap implements FixedSizeCollection
 
         //return the max element
         return max;
-    }
-
-    /** Same as extractMax(). */
-    public Object remove() 
-    {
-        return extractMax();
     }
 
     /** 
