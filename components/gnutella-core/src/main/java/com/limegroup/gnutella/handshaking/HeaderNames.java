@@ -20,7 +20,6 @@ public final class HeaderNames {
     public static final String X_TRY                = "X-Try";
     public static final String X_TRY_ULTRAPEERS     = "X-Try-Ultrapeers";
     public static final String X_QUERY_ROUTING      = "X-Query-Routing";
-	public static final String QUERY_ROUTING_VERSION = "0.1";
     public static final String X_PONG_CACHING       = "X-Pong-Caching";
     public static final String X_ULTRAPEER_NEEDED   = "X-Ultrapeer-Needed";
     public static final String USER_AGENT           = "User-Agent";
@@ -37,7 +36,7 @@ public final class HeaderNames {
 	 * Header name for the GUESS version.
 	 */
     public static final String X_GUESS = "X-Guess";
-    public static final String X_VERSION            = "X-Version";
+    public static final String X_VERSION = "X-Version";
 
 	/**
 	 * Header name for the degree of intra-Ultrapeer connections the
@@ -51,8 +50,22 @@ public final class HeaderNames {
 	public static final String X_ULTRAPEER_QUERY_ROUTING = 
 		"X-Ultrapeer-Query-Routing";
 
+    /**
+     * Constant for the header advertising support for vendor messages.
+     */
     public static final String X_VENDOR_MESSAGE = "Vendor-Message";
-    public static final String VM_VERSION = "0.1";
+
+    /**
+     * Send by new hosts using dynamic-query style searching to denote the
+     * maximum TTL that should be sent to them.  This is only for queries
+     * coming directly from this host, and is affected by degree.
+     */
+    public static final String X_MAX_TTL = "X-Max-TTL";
+
+    /**
+     * Header to indicate the version of dynamic querying in use.
+     */
+    public static final String X_DYNAMIC_QUERY = "X-Dynamic-Querying";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
