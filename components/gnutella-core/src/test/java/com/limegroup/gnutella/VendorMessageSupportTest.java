@@ -115,6 +115,9 @@ public class VendorMessageSupportTest extends BaseTestCase {
                         c.handleVendorMessage((VendorMessage) m);
                         receivedDesiredMessage = true;
                     }
+                    else if (m instanceof CapabilitiesVM) {
+                        // this is expected....
+                    }
                     else
                         fail("Unexpected VendorMessage of class" + m.getClass());
                 }
