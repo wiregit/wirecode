@@ -6,7 +6,7 @@ import com.limegroup.gnutella.http.*;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.bitzi.util.Base32;
 
 /**
@@ -27,35 +27,26 @@ public final class PushProxyUploadState implements HTTPMessage {
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
-        String clientGUID  = _uploader.getFileName();
-        String hostAddress = _uploader.getNodeAddress().trim();
+        byte[] clientGUID  = Base32.decode(_uploader.getFileName());
+        InetAddress hostAddress = _uploader.getNodeAddress();
         int    hostPort    = _uploader.getNodePort();
-
-        try {
-            InetAddress addr = InetAddress.getByName(hostAddress);
-            PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
-                                               Base32.decode(clientGUID),
-                                               0, addr.getAddress(), hostPort);
-            RouterService.getMessageRouter().sendPushRequest(push);
-            
-        }
-        catch (UnknownHostException uhe) {
+        
+        if ((clientGUID.length != 16) || (hostAddress == null) ||
+            (!NetworkUtils.isValidPort(hostPort))) {
             // send back a 400
             String str = "HTTP/1.1 400 PushProxy:Bad Request\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
             debug("PPUS.doUpload(): unknown host.");
-            debug(uhe);
             return;
         }
-        catch (IllegalArgumentException iae) {
-            // send back a 400
-            String str = "HTTP/1.1 400 PushProxy:Bad Request\r\n";
-            ostream.write(str.getBytes());
-            ostream.flush();
-            debug("PPUS.doUpload(): bad client guid.");
-            debug(iae);
-            return;
+
+        PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
+                                           clientGUID, 0, 
+                                           hostAddress.getAddress(), hostPort);
+        try {
+            RouterService.getMessageRouter().sendPushRequest(push);
+            
         }
         catch (IOException ioe) {
             // send back a 410

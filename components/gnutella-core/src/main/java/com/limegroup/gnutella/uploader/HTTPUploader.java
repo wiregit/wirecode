@@ -76,11 +76,11 @@ public final class HTTPUploader implements Uploader {
 
     /** The address as described by the "X-Node" header.
      */
-    private String _nodeAddress;
+    private InetAddress _nodeAddress = null;
 
     /** The port as described by the "X-Node" header.
      */
-    private int _nodePort;
+    private int _nodePort = -1;
 
 
     private BandwidthTrackerImpl bandwidthTracker=null;
@@ -544,7 +544,7 @@ public final class HTTPUploader implements Uploader {
         return !_userAgent.startsWith("Morpheus 3.0.2");
     }
     
-    public String getNodeAddress() {return _nodeAddress; }
+    public InetAddress getNodeAddress() {return _nodeAddress; }
     
     public int getNodePort() {return _nodePort; }
     
@@ -881,18 +881,26 @@ public final class HTTPUploader implements Uploader {
      *
      * @return true if the header had an node description value
      */
-    private boolean readNodeHeader(String str) {
+    private boolean readNodeHeader(final String str) {
         if ( indexOfIgnoreCase(str, "X-Node") == -1 )
             return false;
            
-        StringTokenizer st = new StringTokenizer(str, ":");
-        // we are expecting 3 tokens - only evalute if you see 3
-        if (st.countTokens() >= 3) {
+        StringTokenizer st = 
+            new StringTokenizer(HTTPUtils.extractHeaderValue(str), ":");
+        InetAddress tempAddr = null;
+        int tempPort = -1;
+        // we are expecting 2 tokens - only evalute if you see 2
+        if (st.countTokens() == 2) {
             try {
-                // discard X-Node
-                st.nextToken();
-                _nodeAddress = st.nextToken().trim();
-                _nodePort = Integer.parseInt(st.nextToken().trim());
+                tempAddr = InetAddress.getByName(st.nextToken().trim());
+                tempPort = Integer.parseInt(st.nextToken().trim());
+                if (NetworkUtils.isValidPort(tempPort)) {
+                    // everything checks out....
+                    _nodeAddress = tempAddr;
+                    _nodePort = tempPort;
+                }
+            }
+            catch (UnknownHostException badHost) { // crappy host
             }
             catch (NumberFormatException nfe) {} // crappy port
         }
