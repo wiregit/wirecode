@@ -165,8 +165,10 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @param pComp the prior compressed traffic, used for adding to stats
      */
     private void updateWriteStatistics(Message m, long pUn, long pComp) {
-        if( m != null )
+        if( m != null ) {
             CONNECTION.stats().addBytesSent(m.getTotalLength());
+            CONNECTION.stats().addSent();
+        }
         if(CONNECTION.isWriteDeflated()) {
             CONNECTION.stats().addCompressedBytesSent(DEFLATER.getTotalOut());
             if(!CommonUtils.isJava118()) {
@@ -258,7 +260,14 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      *  data
      */
     private final void sendQueued() throws IOException {    
-        QUEUE.write();
+        //QUEUE.write();
+        
+        Message msg = QUEUE.removeNext();
+        while(msg != null) {
+            simpleWrite(msg);
+            msg = QUEUE.removeNext();
+        }
+        flush();
     }
 
     /**
