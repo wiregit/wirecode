@@ -431,7 +431,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		while(st.hasMoreTokens()) {
 			try {
 				AlternateLocation al=AlternateLocation.
-                                createAlternateLocation(st.nextToken().trim());
+                                              create(st.nextToken().trim());
                 URN alSha1 = al.getSHA1Urn();
                 if(alSha1 == null) {
                     continue;

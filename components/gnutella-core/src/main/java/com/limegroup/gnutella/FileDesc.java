@@ -274,7 +274,7 @@ public class FileDesc implements AlternateLocationCollector {
 	public AlternateLocationCollection getAlternateLocationCollection() {
         // always renew entry for self before giving out alternate locations
 		try {
-			ALT_LOCS.add(AlternateLocation.createAlternateLocation(SHA1_URN));
+			ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
 		} catch (IOException e) {
 			// not much we can do -- also should never happen
 		}

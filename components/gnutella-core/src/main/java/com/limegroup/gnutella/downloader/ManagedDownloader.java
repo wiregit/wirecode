@@ -899,6 +899,23 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloaderManagerThread.interrupt();
     }
 
+    private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+        AlternateLocation loc = null;
+        try {
+            loc = AlternateLocation.create(rfd);
+        } catch (IOException iox) {
+            return;
+        }
+        Assert.that(loc!=null,"null alternateLocation but no exception");
+        for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
+            HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
+            if(good)
+                httpDloader.addSuccessfulAltLoc(loc);
+            else
+                httpDloader.addFailedAltLoc(loc);
+        }
+    }
+
     public boolean resume() throws AlreadyDownloadingException {
         //Ignore request if already in the download cycle.
         synchronized (this) {
@@ -1751,6 +1768,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * <p> 
      * method tries to establish connection either by push or by normal
      * ways.
+     * <p>
+     * If the connection fails for some reason, or needs a push the mesh needs 
+     * to be informed that this location failed.
      * @param rfd the RemoteFileDesc to connect to
      * <p> 
      * The following exceptions may be thrown within this method, but they are
@@ -1809,6 +1829,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     ret = connectDirectly(rfd, incompleteFile);
                 } catch(IOException e2) {
+                    informMesh(rfd,false);
                     return null; // impossible to connect.
                 }
             }
@@ -1823,6 +1844,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ret = connectDirectly(rfd, incompleteFile);
                 return ret;
             } catch(IOException e) {
+                informMesh(rfd, false);
                 // oh well, fall through to the push.
             }
         }
@@ -1833,7 +1855,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(IOException e) {
             // even the push failed :(
         }
-        
+        informMesh(rfd, false);
         // if we're here, everything failed.
         return null;
     }
@@ -1974,7 +1996,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 debug("nsrx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
                     RemoteFileDesc rfd = dloader.getRemoteFileDesc();
-                    //forget the ranges we are preteding uploader is busy.
+                    //forget the ranges we are pretending uploader is busy.
                     rfd.setAvailableRanges(null);
                     busy.add(rfd);
                 }
@@ -1986,6 +2008,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0;
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
@@ -1996,11 +2019,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 debug("fnfx thrown in assignAndRequest "+dloader);
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 debug("nsx thrown in assignAndRequest "+dloader);
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
@@ -2025,17 +2050,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 debug("prhe thrown in assignAndRequest "+dloader);
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0; //discard the rfd of dloader
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
                 debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
                       + dloader);
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
                 debug("iox thrown in assignAndRequest "+dloader);
+                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0; //discard the rfd of dloader
             } finally {
                 //add alternate locations, which we could have gotten from 
@@ -2408,6 +2436,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.FAILED_HTTP10.incrementStat();
              }
             problem = true;
+            informMesh(downloader.getRemoteFileDesc(),false);
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
             //e.printStackTrace();
@@ -2433,10 +2462,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(!problem && rfd.isAltLocCapable()) {
                     AlternateLocation loc=null;
                     try {
-                        loc = AlternateLocation.createAlternateLocation(rfd);
+                        loc = AlternateLocation.create(rfd);
                     } catch (Exception e) {}
-                    if(loc!=null)
+                    if(loc!=null) {
+                        informMesh(rfd,true);
                         addAlternateLocation(loc);
+                    }
                 }
             }
         }

@@ -66,9 +66,8 @@ public final class AlternateLocation
 	 *  throw NullPointerException here, but since we're already forcing the
 	 *  caller to catch IOException, we might as well throw in in both cases
 	 */
-	public static AlternateLocation 
-		createAlternateLocation(final String location) 
-		throws IOException {
+	public static AlternateLocation create(final String location) 
+                                                           throws IOException {
 		if(location == null || location.equals("")) {
 			throw new IOException("null or empty in alt loc: "+location);
 		}
@@ -114,8 +113,8 @@ public final class AlternateLocation
 	 * @throws <tt>IOException</tt> if the url argument is not a
 	 *  valid location for any reason
 	 */
-	public static AlternateLocation createAlternateLocation(final URL url) 
-		throws MalformedURLException, IOException {
+	public static AlternateLocation create(final URL url) 
+		                             throws MalformedURLException, IOException {
 		if(url == null) {
 			throw new NullPointerException("cannot accept null URL");
 		}
@@ -153,9 +152,8 @@ public final class AlternateLocation
 	 *  <tt>null</tt>
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
 	 */
-	public static AlternateLocation 
-		createAlternateLocation(final RemoteFileDesc rfd) 
-		throws IOException {
+	public static AlternateLocation create(final RemoteFileDesc rfd) 
+		                                                    throws IOException {
 		if(rfd == null) {
 			throw new NullPointerException("cannot accept null RFD");
 		}
@@ -185,8 +183,7 @@ public final class AlternateLocation
 	 *
 	 * @param urn the <tt>URN</tt> of the locally stored file
 	 */
-	public static AlternateLocation createAlternateLocation(URN urn) 
-		throws IOException {
+	public static AlternateLocation create(URN urn) throws IOException {
 		if(urn == null) throw new NullPointerException("null sha1");
 		URL url = 
 			new URL("http", 

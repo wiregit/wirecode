@@ -96,7 +96,7 @@ public final class AlternateLocationCollection
 			String curTok = st.nextToken();
 			try {
 				AlternateLocation al = 
-                    AlternateLocation.createAlternateLocation(curTok);
+                    AlternateLocation.create(curTok);
 				if(alc == null) {
 					alc = new AlternateLocationCollection(al.getSHA1Urn());
 				}
