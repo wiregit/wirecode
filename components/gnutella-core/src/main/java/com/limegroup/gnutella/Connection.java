@@ -441,9 +441,7 @@ public class Connection implements Runnable {
 				int port = manager.getListeningPort();
 				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
 				long speed = SettingsManager.instance().getConnectionSpeed();
-				//byte[] clientGUID = manager.ClientId.getBytes(); - This should
-				// have been a bug
-				byte[] clientGUID = GUID.fromHexString(manager.ClientId);
+				byte[] clientGUID = manager.ClientId.bytes();
 
 				// changing the port here to test push:
 				
@@ -511,13 +509,8 @@ public class Connection implements Runnable {
 		    PushRequest req = (PushRequest)m;
 
 		    byte[] req_guid = req.getClientGUID();
-
-		    String DestinationId = new String(req.getClientGUID());
-		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
-
-
-		    byte[] client_id = GUID.fromHexString(manager.ClientId);
-		    String client_str = new String(client_id);
+		    String req_guid_hexstring = (new GUID(req_guid)).toString();
+		    Connection nextHost = pushRouteTable.get(req_guid);
 
 		    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
 			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
@@ -527,9 +520,7 @@ public class Connection implements Runnable {
 		    // This comparison doesn't work:
 		    // // if (manager.ClientId.equals(DestinationId) ){
 		      //I am the destination
-		    else if (client_str.equals(DestinationId)) {
-			// else
-			
+		    else if (manager.isClient(req_guid)) {
 			//unpack message
 			//make HTTP connection with originator
 			String host = new String(req.getIP());
@@ -555,12 +546,11 @@ public class Connection implements Runnable {
 			} 
 			String file = desc._name;
 			
-//  			HTTPUploader up = new 
-//  			    HTTPUploader("http", h, port, file, manager, 0, 0);
-//  			Thread t=new 
-			
-//  			up.run();
-
+			HTTPUploader up = new 
+			    HTTPUploader(h, port, index, req_guid_hexstring, manager);
+  			Thread t=new Thread(up);
+			t.setDaemon(true);
+  			t.run();
 		    }
 		    else{// the message has arrived in error or is spam
 			//do nothing.....drop the message
