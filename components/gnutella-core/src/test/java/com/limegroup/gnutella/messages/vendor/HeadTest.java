@@ -53,6 +53,8 @@ public class HeadTest extends BaseTestCase {
 	
 	static PushEndpoint pe;
 	
+	static int PACKET_SIZE;
+	
 	
 	public HeadTest(String name) {
 		super(name);
@@ -87,7 +89,7 @@ public class HeadTest extends BaseTestCase {
 		
 		base=0;
 		_rangesMedium = new IntervalSet();
-		for (int i=2;i<63;i++) {
+		for (int i=2;i<70;i++) {
 			int low = base;
 			_rangesMedium.add(new Interval(low,low+i));
 			base+=2*i;
@@ -131,6 +133,8 @@ public class HeadTest extends BaseTestCase {
 		
 		PrivilegedAccessor.setValue(HeadPong.class, "_fileManager",_fm);
 		PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager",_um);
+		
+		PACKET_SIZE = ((Integer)PrivilegedAccessor.getValue(HeadPong.class,"PACKET_SIZE")).intValue();
 		
 	}
 	
@@ -255,7 +259,7 @@ public class HeadTest extends BaseTestCase {
 		pongi = reparse(new HeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
-		assertLessThan(512,pongi.getPayload().length);
+		assertLessThan(PACKET_SIZE,pongi.getPayload().length);
 		
 		_partial.setRangesByte(_ranges.toBytes());
 	}
@@ -314,7 +318,7 @@ public class HeadTest extends BaseTestCase {
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
 		
 		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());
-		assertLessThan(512,pong2.getPayload().length);
+		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
 	}
 	
 	public void testFirewalledAltlocs() throws Exception {
