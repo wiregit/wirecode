@@ -12,14 +12,13 @@ import com.sun.java.util.collections.*;
  * 
  * @author Sumeet Thadani
  */
-
 public class SchemaReplyCollectionMapper{
     
-    private HashMap mapper;
-    static SchemaReplyCollectionMapper instance;
+    private Map mapper;
+    private static SchemaReplyCollectionMapper instance;
     
     //constructor
-    private SchemaReplyCollectionMapper(){
+    private SchemaReplyCollectionMapper() {
         mapper = new HashMap();
     }
 
@@ -41,10 +40,8 @@ public class SchemaReplyCollectionMapper{
      * Warning/Note:If the schemaURI already corresponds to a ReplyCollection
      * this method will replace thet old reply collection with the new one. 
      * The old collection will be lost!
-     * 
      */
     public void add(String schemaURI, LimeXMLReplyCollection replyCollection){
-        LimeXMLReplyCollection l=(LimeXMLReplyCollection)mapper.get(schemaURI);
         synchronized(mapper){
             mapper.put(schemaURI,replyCollection);        
         }
@@ -60,11 +57,4 @@ public class SchemaReplyCollectionMapper{
         }
         return replyCollection;
     }
-
-    private void removeReplyCollection(String schemaURI){
-        synchronized(mapper){
-            mapper.remove(schemaURI);
-        }
-    }
-
 }
