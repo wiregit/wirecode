@@ -61,9 +61,11 @@ public class UltrapeerHandshakeResponder
 			//Fine, we'll become a leaf.
 			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
-		
+
+		//We do this last, to prevent reject connections from being deflated,
+		//which may actually increase the amount of bandwidth needed.		
 		if(response.isDeflateAccepted()) {
-		    ret.put("Content-Encoding", "deflate");
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 		    
         // accept the response
@@ -99,8 +101,10 @@ public class UltrapeerHandshakeResponder
             return HandshakeResponse.createRejectIncomingResponse(ret);
 		}
 		
+		//We do this last, to prevent reject connections from being deflated,
+		//which may actually increase the amount of bandwidth needed.
 		if(response.isDeflateAccepted()) {
-		    ret.put("Content-Encoding", "deflate");
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}		
 		
         // accept the connection, and let the Ultrapeer know about Ultrapeers

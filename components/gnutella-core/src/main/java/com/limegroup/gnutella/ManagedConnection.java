@@ -39,17 +39,15 @@ import com.limegroup.gnutella.updates.*;
  * the properties in the SettingsManager, but you can change them with
  * setPersonalFilter and setRouteFilter.<p>
  *
- * ManagedConnection maintain a large number of statistics, such as the number
- * of bytes read and written.  ManagedConnection doesn't quite fit the
+ * ManagedConnection maintain a large number of statistics, such as the current
+ * bandwidth for upstream & downstream.  ManagedConnection doesn't quite fit the
  * BandwidthTracker interface, unfortunately.  On the query-routing3-branch and
  * pong-caching CVS branches, these statistics have been bundled into a single
- * object, reducing the complexity of ManagedConnection.  We will likely merge
- * this change into ManagedConnection in the future, so please bear with this
- * for now.<p>
+ * object, reducing the complexity of ManagedConnection.<p>
  * 
  * ManagedConnection also takes care of various VendorMessage handling, in
  * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
- * handleVendorMessage().
+ * handleVendorMessage().<p>
  *
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
@@ -385,7 +383,12 @@ public class ManagedConnection extends Connection
         updater.checkAndUpdate(this);
     }
 
-    /** Throttles the super's OutputStream. */
+    /**
+     * Throttles the super's OutputStream.  This works quite well with
+     * compressed streams, because the chaining mechanism writes the
+     * compressed bytes, ensuring that we do not attempt to request
+     * more data (and thus sleep while throttling) than we will actually write.
+     */
     protected OutputStream getOutputStream()  throws IOException {
         return new ThrottledOutputStream(super.getOutputStream(), _throttle);
     }
@@ -586,6 +589,12 @@ public class ManagedConnection extends Connection
                             break;
                     }
 
+                    //Note that if the ougoing stream is compressed
+                    //(isWriteDeflated()), this call may not actually
+                    //do anything.  This is because the Deflater waits
+                    //until an optimal time to start deflating, buffering
+                    //up incoming data until that time is reached, or the
+                    //data is explicitly flushed.
                     ManagedConnection.super.send(m);
                 }
                 
@@ -601,6 +610,9 @@ public class ManagedConnection extends Connection
             //kernel's TCP send buffer.  It doesn't force TCP to
             //actually send the data to the network.  That is determined
             //by the receiver's window size and Nagle's algorithm.
+            //Note that if the outgoing stream is compressed 
+            //(isWriteDeflated()), then this call may block while the
+            //Deflater deflates the data.
             ManagedConnection.super.flush();
         }
     } //end OutputRunner
@@ -779,9 +791,15 @@ public class ManagedConnection extends Connection
             pr.hop();
 
             //send the message
+            //This is called only during a Reject connection, and thus
+            //it is impossible for the stream to be compressed.
+            //That is a Good Thing (tm) because we're sending such little
+            //data, that the compression may actually hurt.
             super.send(pr);
         }
         
+        //Because we are guaranteed that the stream is not compressed,
+        //this call will not block.
         super.flush();
     }
     
@@ -1273,11 +1291,11 @@ public class ManagedConnection extends Connection
         */
     }
 
-//	// overrides Object.toString
-//	public String toString() {
-//		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
-//			" Leaf: "+isLeafConnection();
-//	}
+	// overrides Object.toString
+	public String toString() {
+		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
+			" Leaf: "+isLeafConnection();
+	}
     
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest

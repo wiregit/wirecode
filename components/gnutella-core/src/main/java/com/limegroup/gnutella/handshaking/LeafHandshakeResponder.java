@@ -46,8 +46,10 @@ public final class LeafHandshakeResponder
         }
         
         Properties ret = new Properties();
+		//We do this last, to prevent reject connections from being deflated,
+		//which may actually increase the amount of bandwidth needed.        
 		if(response.isDeflateAccepted()) {
-		    ret.put("Content-Encoding", "deflate");
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
         
         // let the Ultrapeer know of any high-hops Ultrapeers
@@ -64,20 +66,22 @@ public final class LeafHandshakeResponder
      */
     private HandshakeResponse 
         respondToIncoming(HandshakeResponse hr) {
-        Properties props = new LeafHeaders(getRemoteIP());
+        Properties ret = new LeafHeaders(getRemoteIP());
         
 
         if (RouterService.isLeaf()) {
             //a) If we're already a leaf, reject
-            return HandshakeResponse.createRejectIncomingResponse(props);
+            return HandshakeResponse.createRejectIncomingResponse(ret);
         }
-        
+
+		//We do this last, to prevent reject connections from being deflated,
+		//which may actually increase the amount of bandwidth needed.        
 		if(hr.isDeflateAccepted()) {
-		    props.put("Content-Encoding", "deflate");
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 
         //b) We're not a leaf yet, so accept the incoming connection
-        return HandshakeResponse.createAcceptIncomingResponse(props);
+        return HandshakeResponse.createAcceptIncomingResponse(ret);
     }
 }
 

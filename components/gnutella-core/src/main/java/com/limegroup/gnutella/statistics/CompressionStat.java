@@ -4,7 +4,7 @@ package com.limegroup.gnutella.statistics;
  * This class contains a type-safe enumeration of all classes for
  * compression data.
  */
-public class CompressionStat extends BasicKilobytesStatistic {
+public class CompressionStat extends AdvancedKilobytesStatistic {
 	
 	/**
 	 * Make the constructor private so that only this class can construct

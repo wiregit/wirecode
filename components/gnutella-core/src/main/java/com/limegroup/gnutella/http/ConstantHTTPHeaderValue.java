@@ -34,5 +34,11 @@ public class ConstantHTTPHeaderValue implements HTTPHeaderValue {
 	 */
 	public static final HTTPHeaderValue SERVER_VALUE = 
 		new ConstantHTTPHeaderValue(CommonUtils.getHttpServer());
-	
+		
+    /**
+     * Constant for accepting or encoding in deflate, in the Accept-Encoding
+     * or Content-Encoding fields.
+     */
+    public static final HTTPHeaderValue DEFLATE_VALUE =
+        new ConstantHTTPHeaderValue("deflate");
 }

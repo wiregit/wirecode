@@ -547,8 +547,14 @@ public final class HandshakeResponse {
      * Returns whether or not this connection accepts deflate as an encoding.
      */
     public boolean isDeflateAccepted() {
-        return ConnectionSettings.ACCEPT_DEFLATE.getValue() &&
-            containsStringValue(HEADERS, "Accept-Encoding", "deflate");
+        //Note that we check the ENCODE_DEFLATE setting, and NOT the
+        //ACCEPT_DEFLATE setting.  This is a trick to prevent the
+        //HandshakeResponders from thinking they can encode
+        //the via deflate if we do not want to encode in deflate.
+        return ConnectionSettings.ENCODE_DEFLATE.getValue() &&
+            containsStringValue(HEADERS,    // the headers to look through
+                HeaderNames.ACCEPT_ENCODING,// the header to look for
+                HeaderNames.DEFLATE_VALUE); // the value to look for
     }
     
 	/**
@@ -767,6 +773,13 @@ public final class HandshakeResponse {
       String headerName, String headerValue) {
         String value = headers.getProperty(headerName);
         if(value == null) return false;
+
+        //As a small optimization, we first check to see if the value
+        //by itself is what we want, so we don't have to create the
+        //StringTokenizer.
+        if(value.equalsIgnoreCase(headerValue))
+            return true;
+
         StringTokenizer st = new StringTokenizer(value, ",");
         while(st.hasMoreTokens()) {
             if(st.nextToken().equalsIgnoreCase(headerValue))

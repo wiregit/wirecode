@@ -673,6 +673,14 @@ public class ConnectionManager {
 				// need more connections
 				//return connections < ULTRAPEER_CONNECTIONS;
 			//}
+			
+			// USE THIS FOR TESTING DEFLATE IN THE WILD,
+			// TO EVENTUALLY HAVE ALL CONNECTIONS BE DEFLATE-ENABLED.
+			// If this is our last few connections, only allow it if it
+			// accepts deflate-encoding.
+			//if( connections >= ULTRAPEER_CONNECTIONS-6 ) {
+			//    return hr.isDeflateAccepted();
+			//}
 
 			// if it's not a new high-density connection, only allow it if
 			// our number of connections is below the maximum number of old

@@ -29,11 +29,24 @@ import com.limegroup.gnutella.statistics.*;
  * <tt>Connection</tt> supports only 0.6 handshakes.  Gnutella 0.6 connections
  * have a list of properties read and written during the handshake sequence.
  * Typical property/value pairs might be "Query-Routing: 0.3" or "User-Agent:
- * LimeWire".  
+ * LimeWire".<p>
  *
  * This class augments the basic 0.6 handshaking mechanism to allow
  * authentication via "401" messages.  Authentication interactions can take
- * multiple rounds.  
+ * multiple rounds.<p>
+ *
+ * This class supports reading and writing streams using 'deflate' compression.
+ * The HandshakeResponser is what actually determines whether or not
+ * deflate will be used.  This class merely looks at what the responses are in
+ * order to set up the appropriate streams.  Compression is implemented by
+ * chaining the input and output streams, meaning that even if an extending
+ * class implements getInputStream() and getOutputStream(), the actual input
+ * and output stream used may not be an instance of the expected class.
+ * However, the information is still chained through the appropriate stream.<p>
+ *
+ * The amount of bytes written and received are maintained by this class.  This
+ * is necessary because of compression and decompression are considered
+ * implementation details in this class.
  */
 public class Connection {
     /** 
@@ -416,7 +429,7 @@ public class Connection {
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
-                _in = new InflaterInputStream(_in, _inflater);
+                _in = new UncompressingInputStream(_in, _inflater);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -836,13 +849,7 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
-            int pCompressed = 0, pUncompressed = 0;
-            if(isReadDeflated()) {
-                pCompressed = _inflater.getTotalIn();
-                pUncompressed = _inflater.getTotalOut();
-            }
-            m = Message.read(_in, HEADER_BUF, _softMax);
-            updateReadStatistics(m, pUncompressed, pCompressed);
+            m = readAndUpdateStatistics();
         }
         return m;
     }
@@ -867,14 +874,8 @@ public class Connection {
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
-        try {            
-            int pCompressed = 0, pUncompressed = 0;
-            if(isReadDeflated()) {
-                pCompressed = _inflater.getTotalIn();
-                pUncompressed = _inflater.getTotalOut();
-            }
-            Message m = Message.read(_in, HEADER_BUF, _softMax);
-            updateReadStatistics(m, pUncompressed, pCompressed);
+        try {
+            Message m = readAndUpdateStatistics();
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
@@ -885,14 +886,19 @@ public class Connection {
     }
     
     /**
-     * Updates statistics after a message is read.
-     * If m is null and the read stream is not deflated,
-     * this method has no effect.
-     * @param m the possibly null message to add to the read bytes
-     * @param pUn the prior uncompressed data sent, for adding to statistics
-     * @param pComp the prior compressed data sent, for adding to statistics
+     * Reads a message from the network and updates the appropriate statistics.
      */
-    private void updateReadStatistics(Message m, int pUn, int pComp) {
+    private Message readAndUpdateStatistics()
+      throws IOException, BadPacketException {
+        int pCompressed = 0, pUncompressed = 0;
+        if(isReadDeflated()) {
+            pCompressed = _inflater.getTotalIn();
+            pUncompressed = _inflater.getTotalOut();
+        }
+        
+        // DO THE ACTUAL READ
+        Message m = Message.read(_in, HEADER_BUF, _softMax);
+        
         // _bytesReceived must be set differently
         // when compressed because the inflater will
         // read more input than a single message,
@@ -903,14 +909,15 @@ public class Connection {
             _bytesReceived = _inflater.getTotalOut();
             if(!CommonUtils.isJava118()) {
                 CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalOut() - pUn));
+                    (int)(_inflater.getTotalOut() - pUncompressed));
                 CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalIn() - pComp));
+                    (int)(_inflater.getTotalIn() - pCompressed));
             }            
         } else if(m != null) {
             _bytesReceived += m.getTotalLength();
-        }
-    }           
+        }        
+        return m;
+    }
 
     /**
      * Sends a message.  The message may be buffered, so call flush() to
@@ -1245,10 +1252,20 @@ public class Connection {
         return _headers.isGoodConnection();
     }
     
+    /**
+     * Returns true if the outgoing stream is deflated.
+     *
+     * @return true if the outgoing stream is deflated.
+     */
     public boolean isWriteDeflated() {
         return _headersWritten.isDeflateEnabled();
     }
     
+    /**
+     * Returns true if the incoming stream is deflated.
+     *
+     * @return true if the incoming stream is deflated.
+     */
     public boolean isReadDeflated() {
         return _headers.isDeflateEnabled();
     }

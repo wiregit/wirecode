@@ -72,8 +72,8 @@ public abstract class DefaultHeaders extends Properties {
         props.put(HeaderNames.X_MAX_TTL, "4");
         props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
         
-        if ( ConnectionSettings.ADVERTISE_DEFLATE.getValue() )
-            props.put("Accept-Encoding", "deflate");
+        if ( ConnectionSettings.ACCEPT_DEFLATE.getValue() )
+            props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
         
         
         UpdateManager u = UpdateManager.instance();
