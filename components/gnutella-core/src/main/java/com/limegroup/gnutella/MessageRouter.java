@@ -1758,12 +1758,9 @@ public abstract class MessageRouter {
     protected void handlePingReply(PingReply reply,
                                    ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
-        boolean newAddress = 
-		    RouterService.getHostCatcher().add(reply);
+        boolean newAddress = RouterService.getHostCatcher().add(reply);
 
-        if(newAddress && 
-           (handler.supportsPongCaching() || 
-            PongCacher.instance().needsPongs())) {
+        if(newAddress) {
             PongCacher.instance().addPong(reply);
         }
 
