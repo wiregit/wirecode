@@ -466,8 +466,13 @@ public class RouterService
      * their GUIDs.  (You may want to wrap the bytes with a GUID
      * object for simplicity.)  */
     public byte[] query(String query, int minSpeed, MediaType type) {
+        //anu modified
+        //TODO revert changes, or place somewhere else. I guess sumeet will
+        //figure out
+        //anu creating rich query (by duplicating the normal query into
+        //both plain and rich areas
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
+                                         minSpeed, query, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
