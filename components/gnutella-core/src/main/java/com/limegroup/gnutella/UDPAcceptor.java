@@ -3,12 +3,14 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 
+import com.limegroup.gnutella.connection.UltraPeerListener;
+
 /**
  * This class listens for incoming messages on the open UDP port,
  * dispatching those message the appropriate message routers and 
  * reply handlers.
  */
-public final class UDPAcceptor implements Runnable {
+public final class UDPAcceptor implements Runnable, UltraPeerListener {
 
 	/**
 	 * Constant for the single <tt>UDPAcceptor</tt> instance.
@@ -24,14 +26,14 @@ public final class UDPAcceptor implements Runnable {
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
 	 */
-	private final int BUFFER_SIZE = 8192;
+	private final int BUFFER_SIZE = 1024 * 32;
 
-	private final int SOCKET_TIMEOUT = 2*1000;
+	//private final int SOCKET_TIMEOUT = 2*1000;
 
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private Thread _udpThread;
+	private Thread _udpThread = new Thread(this);
 
 	/**
 	 * Instance accessor.
@@ -46,8 +48,17 @@ public final class UDPAcceptor implements Runnable {
 	private UDPAcceptor() {}
 
 
-	public void initialize() {
-		_udpThread = new Thread(this);
+	/**
+	 * Implements <tt>UltraPeerListener</tt>.<p>
+	 *
+	 * If the UDP listening socket thread is not already running, this
+	 * starts the thread, listening for incoming Gnutella messages
+	 * over UDP.
+	 */
+	public void ultraPeerConnectionEstablished() {
+
+		// if we're already listening, return
+		if(_udpThread.isAlive()) return;
 		_udpThread.setDaemon(true);		
 		_udpThread.start();
 	}
@@ -74,14 +85,14 @@ public final class UDPAcceptor implements Runnable {
 		}		
 		
 		MessageRouter router = RouterService.getMessageRouter();
+		byte[] datagramBytes = new byte[BUFFER_SIZE];
 
-		while(port == RouterService.getPort()) {
+		while(port == RouterService.getPort() && RouterService.isSupernode()) {
 			try {
-                // These NEXT TWO lines may need to be optimized
+                // this line may need to be optimized
                 // -------------			
-                byte[] datagramBytes = new byte[BUFFER_SIZE];
                 DatagramPacket datagram = 
-                new DatagramPacket(datagramBytes, BUFFER_SIZE);
+                    new DatagramPacket(datagramBytes, BUFFER_SIZE);
                 // -------------			
 				_socket.receive(datagram);
 				byte[] data = datagram.getData();
@@ -112,12 +123,9 @@ public final class UDPAcceptor implements Runnable {
 	/**
 	 * Notifies the UDP socket that the port has been changed, requiring
 	 * the UDP socket to be recreated.
-	 *
-	 * TODO: work on the threading
 	 */
 	public void resetPort() {
 		if(_udpThread.isAlive()) _udpThread.interrupt();
-		initialize();
 	}
 
 
