@@ -197,30 +197,3 @@ public class HostCatcher {
 //      }
 }
 
-/** Immutable IP/port pair. */
-class Endpoint {
-    String hostname;
-    int port;
-    
-    Endpoint(String hostname, int port) {
-	this.hostname=hostname;
-	this.port=port;
-    }
-
-    public String toString() {
-	return hostname+":"+port;
-    }
-    
-    public boolean equals(Object o) {
-	if (! (o instanceof Endpoint))
-	    return false;
-	Endpoint e=(Endpoint)o;
-	return hostname.equals(e.hostname) && port==e.port;
-    }
-
-    public int hashCode() {
-	//This is good enough, since one host rarely has multiple ports.
-	return hostname.hashCode();
-    }
-}
-
