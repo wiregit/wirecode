@@ -20,7 +20,6 @@ import java.util.List;
 public class RichQueryHandler{
     
     static RichQueryHandler instance;// the instance
-    public static final int INDEX = 75000;//TODO1:Ask Chris what this should be
     
     /**
      * Call this method to get the singleton
@@ -78,7 +77,7 @@ public class RichQueryHandler{
             String subjectFile = currDoc.getIdentifier();//returns null if none
             metadata = currDoc.getXMLString();
             if(subjectFile==null){//pure data (data about NO file)
-                index = INDEX;
+                index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
                 name = metadata.substring(22,33);//after <?xml version="1.0"?>
                 size = metadata.length();//Here: size = size of metadata String
             }

@@ -21,6 +21,13 @@ public class LimeXMLProperties
 {
 
     /**
+     * The default index for responses when there is no there no file and 
+     * hecne to no download. The value is set to 2^32 -1
+     */
+    public static final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFF;
+    
+
+    /**
      * Properties and the values set by user
      */
     private Properties _properties = new Properties();
@@ -370,6 +377,6 @@ public class LimeXMLProperties
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
         return SettingsManager.instance().getPath();
-    }
+    }    
     
 }//end of class
