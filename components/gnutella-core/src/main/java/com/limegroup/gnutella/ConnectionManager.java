@@ -601,7 +601,8 @@ public class ConnectionManager {
      *  it was not written
      * @return true if a connection of the given type is allowed
      */
-    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {		
+    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
@@ -641,11 +642,13 @@ public class ConnectionManager {
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
 			if(goodConnection(hr)) {
-				return getNumInitializedClientConnections() < MAX_LEAVES;
+				return getNumInitializedClientConnections() < 
+                    UltrapeerSettings.MAX_LEAVES.getValue();
 			} else {
 				return getNumInitializedClientConnections() <
 					(trustedVendor(hr.getUserAgent()) ?
-					 (MAX_LEAVES - RESERVED_GOOD_LEAF_CONNECTIONS) :
+					 (UltrapeerSettings.MAX_LEAVES.getValue() - 
+                      RESERVED_GOOD_LEAF_CONNECTIONS) :
 					 ALLOWED_BAD_LEAF_CONNECTIONS);
 			}
             //return getNumInitializedClientConnections() 
@@ -735,9 +738,7 @@ public class ConnectionManager {
      * @return true, if more ultrapeers needed, false otherwise
      */
     public boolean supernodeNeeded() {
-        System.out.println("ConnectionManager::supernodeNeeded::ultrapeer: "+isSupernode()); 
-        //if more than 90% slots are full, return true 
-        
+        //if more than 90% slots are full, return true         
 		if(getNumInitializedClientConnections() >= 
            (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
             return true;
