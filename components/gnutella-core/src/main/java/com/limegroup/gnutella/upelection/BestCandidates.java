@@ -243,6 +243,7 @@ public class BestCandidates {
 		synchronized(instance) {
 			instance._best=new Candidate[3];  //do we want to lose our already known candidates?
 			instance._best[0]=electBest(0);
+			propagateChange();
 		}
 	}
 	
