@@ -451,7 +451,7 @@ public class UploadManager implements BandwidthTracker {
      * Determines whether or no this Uploader should be shown
      * in the GUI.
      */
-    private boolean shouldShowInGUI(Uploader uploader) {
+    private boolean shouldShowInGUI(HTTPUploader uploader) {
         return uploader.getIndex() != BROWSE_HOST_FILE_INDEX &&
                uploader.getIndex() != PUSH_PROXY_FILE_INDEX &&
                uploader.getIndex() != UPDATE_FILE_INDEX &&
@@ -459,7 +459,8 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getIndex() != RESOURCE_INDEX &&
-               uploader.getMethod() != HTTPRequestMethod.HEAD;
+               uploader.getMethod() != HTTPRequestMethod.HEAD &&
+               !uploader.isNetworkShare();
 	}
     
     /**
@@ -473,10 +474,11 @@ public class UploadManager implements BandwidthTracker {
      * Don't let FILE_VIEW requests bypass the queue, we want to make sure
      * those guys don't hammer.
      */
-    private boolean shouldBypassQueue(Uploader uploader) {
+    private boolean shouldBypassQueue(HTTPUploader uploader) {
         return (uploader.getState() != Uploader.CONNECTING &&
                 uploader.getState() != Uploader.FILE_VIEW) ||
-               uploader.getMethod() == HTTPRequestMethod.HEAD;
+               uploader.getMethod() == HTTPRequestMethod.HEAD ||
+               uploader.isNetworkShare();
     }
     
     /**
@@ -736,7 +738,7 @@ public class UploadManager implements BandwidthTracker {
      * Adds this upload to the GUI and increments the attempted uploads.
      * Does nothing if 'shouldShowInGUI' is false.
      */
-    private void addToGUI(Uploader uploader) {
+    private void addToGUI(HTTPUploader uploader) {
         
         // We want to increment attempted only for uploads that may
         // have a chance of failing.

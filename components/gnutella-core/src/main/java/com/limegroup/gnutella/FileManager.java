@@ -43,6 +43,17 @@ public abstract class FileManager {
     public static final String INDEXING_QUERY="    ";
     /** The string used by LimeWire to browse hosts. */
     public static final String BROWSE_QUERY="*.*";
+    
+    /** Subdirectory that is always shared */
+    public static final File SUBDIR_SHARE;
+    
+    static {
+        File forceShare = new File(".", "NetworkShare").getAbsoluteFile();
+        try {
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        SUBDIR_SHARE = forceShare;
+    }
 
     /**********************************************************************
      * LOCKING: obtain this' monitor before modifying this. The exception
@@ -74,6 +85,12 @@ public abstract class FileManager {
      *  elements of _files that are not null.
      */
     private int _numIncompleteFiles;
+    
+    /**
+     * The number of files that are forcibly shared over the network.
+     * INVARIANT: _numFiles >= _numNetworkShares.
+     */
+    private int _numNetworkShares;
     
     /** 
      * The list of shareable files.  An entry is null if it is no longer
@@ -254,6 +271,7 @@ public abstract class FileManager {
         _numFiles = 0;
         _numIncompleteFiles = 0;
         _numPendingFiles = 0;
+        _numNetworkShares = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
         _urnIndex = new HashMap();
@@ -283,8 +301,9 @@ public abstract class FileManager {
 
     /**
      * Returns the number of files.
+     * This number does NOT include incomplete files or forcibly shared network files.
      */
-    public int getNumFiles() {return _numFiles;}
+    public int getNumFiles() {return _numFiles - _numNetworkShares;}
     
     /**
      * Returns the number of shared incomplete files.
@@ -299,7 +318,13 @@ public abstract class FileManager {
     public int getNumPendingFiles() {
         return _numPendingFiles;
     }
-
+    
+    /**
+     * Returns the number of network-shared files.
+     */
+    public int getNumNetworkShares() {
+        return _numNetworkShares;
+    }
 
     /**
      * Returns the file descriptor with the given index.  Throws
@@ -636,8 +661,13 @@ public abstract class FileManager {
             //work. So we just approximate this by sorting by filename length, 
             //from smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-			final File[] directories = 
-                SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+            
+            // add 'NetworkShare' as an always shared subdirectory.
+            File[] tmpDirs = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+            File[] directories = new File[tmpDirs.length + 1];
+            for(int i = 0; i < tmpDirs.length; i++)
+                directories[i] = tmpDirs[i];
+            directories[tmpDirs.length] = SUBDIR_SHARE;
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
@@ -715,6 +745,8 @@ public abstract class FileManager {
         // don't share the incomplete directory ... 
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return Collections.EMPTY_LIST;
+            
+        boolean isNetworkShare = directory.equals(SUBDIR_SHARE);
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
@@ -738,7 +770,8 @@ public abstract class FileManager {
                 
             _sharedDirectories.put(directory, new IntSet());
             
-            RouterService.getCallback().addSharedDirectory(directory, parent);
+            if(!isNetworkShare)
+                RouterService.getCallback().addSharedDirectory(directory, parent);
                 
             _numPendingFiles += numShareable;
         }
@@ -749,8 +782,10 @@ public abstract class FileManager {
         // is closer to correct number.
         List added = new LinkedList();
         added.add(new KeyValue(directory, file_list));
-        for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
-            added.addAll(updateDirectories(dir_list[i], directory));
+        if(!isNetworkShare) { // don't share subdirectories of the network-share dir.
+            for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
+                added.addAll(updateDirectories(dir_list[i], directory));
+            }
         }
         
         return added;
@@ -805,7 +840,7 @@ public abstract class FileManager {
      */
     protected FileDesc addFileIfShared(File file, boolean notify) {
         
-        	// Make sure capitals are resolved properly, etc.
+        // Make sure capitals are resolved properly, etc.
         File f = null;
         try {
             f = FileUtils.getCanonicalFile(file);
@@ -813,7 +848,8 @@ public abstract class FileManager {
                 return null;
         } catch (IOException e) {
             return null;
-	}
+	    }
+
         File dir = FileUtils.getParentFile(f);
         if (dir==null) 
             return null;
@@ -922,7 +958,12 @@ public abstract class FileManager {
             boolean added=siblings.add(fileIndex);
             Assert.that(added, "File "+fileIndex+" already found in "+siblings);
             
-            RouterService.getCallback().addSharedFile(fileDesc, parent);
+            // files that are forcibly shared over the network
+            // aren't counted or shown.
+            if(!parent.equals(SUBDIR_SHARE))
+                RouterService.getCallback().addSharedFile(fileDesc, parent);
+            else
+                _numNetworkShares++;
 		
             //Index the filename.  For each keyword...
             String[] keywords = extractKeywords(fileDesc);
@@ -1175,7 +1216,7 @@ public abstract class FileManager {
             repOk();
             return null;
         }
-        
+
         _numFiles--;
         _size-=fd.getSize();
 
@@ -1186,6 +1227,13 @@ public abstract class FileManager {
             "Rem directory \""+parent+"\" not in "+_sharedDirectories);
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
+
+        // files that are forcibly shared over the network aren't
+        // counted.        
+        if(parent.equals(SUBDIR_SHARE)) {
+            notify = false;
+            _numNetworkShares--;
+        }
 
         //Remove references to this from index.
         String[] keywords = extractKeywords(fd);

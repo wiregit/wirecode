@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -92,6 +94,11 @@ public final class HTTPUploader implements Uploader {
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
     private final boolean _hadPassword;
+    
+    /**
+     * True if this is a forcibly shared network file.
+     */
+    private boolean _isNetworkShare = false;
     
     /**
      * whether the remote side indicated they want to receive
@@ -261,6 +268,10 @@ public final class HTTPUploader implements Uploader {
             } catch(IOException ignored) {}
         }
         _fis = _fileDesc.createInputStream();
+        
+        File parent = _fileDesc.getFile().getParentFile();
+        if(parent != null)
+            _isNetworkShare = parent.equals(FileManager.SUBDIR_SHARE);
 	}
 
 	/**
@@ -559,6 +570,9 @@ public final class HTTPUploader implements Uploader {
 	
 	//implements the Uploader interface
 	public boolean isHeaderParsed() { return _headersParsed; }
+	
+	// is a network share?
+	public boolean isNetworkShare() { return _isNetworkShare; }
 
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();
