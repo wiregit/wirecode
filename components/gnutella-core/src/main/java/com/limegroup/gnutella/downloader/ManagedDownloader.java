@@ -549,7 +549,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * LOCKING: obtain corruptStateLock
      * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
      */
-    private int corruptState;
+    private volatile int corruptState;
     private Object corruptStateLock;
 
     /**
