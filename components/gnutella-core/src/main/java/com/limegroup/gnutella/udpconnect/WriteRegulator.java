@@ -136,10 +136,13 @@ public class WriteRegulator {
             // Scale up the sleep time to a full timeout as you approach 
             // zero space for writing
             int multiple = LOW_WINDOW_SPACE / Math.max(1, receiverWindowSpace);
-            sleepTime = (((int)srtt) * multiple) / (LOW_WINDOW_SPACE - 1);
+            sleepTime = (((int)srtt) * multiple) / (LOW_WINDOW_SPACE + 1);
 
-        	if(LOG.isDebugEnabled())  
-            	LOG.debug("LOW_WINDOW sT:"+sleepTime);
+			if ( receiverWindowSpace <= (LOW_WINDOW_SPACE/2) ) {
+            	sleepTime = rto;
+				if(LOG.isDebugEnabled())  
+					LOG.debug("LOW_WINDOW sT:"+sleepTime);
+			}
 			minTime = sleepTime;
         }
 
