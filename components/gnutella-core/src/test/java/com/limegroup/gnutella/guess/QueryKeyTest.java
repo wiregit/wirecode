@@ -13,7 +13,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(QueryKeyTest.class);
+        return buildTestSuite(QueryKeyTest.class);
     }
 
     public void testConstruction() {

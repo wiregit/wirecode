@@ -99,7 +99,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Run this suite of tests.
 	 */
 	public static Test suite() {
-		return new TestSuite(GUESSTester.class);
+		return buildTestSuite(GUESSTester.class);
 	}
 
     public void testSmall() {

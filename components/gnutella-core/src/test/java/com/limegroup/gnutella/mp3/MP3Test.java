@@ -56,7 +56,7 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         
     }
     public static Test suite() {
-        return new TestSuite(MP3Test.class);
+        return buildTestSuite(MP3Test.class);
     }
     protected void tearDown() {
         

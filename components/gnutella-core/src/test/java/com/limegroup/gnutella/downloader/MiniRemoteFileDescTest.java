@@ -11,7 +11,7 @@ public class MiniRemoteFileDescTest extends com.limegroup.gnutella.util.BaseTest
     }
     
     public static Test suite() {
-        return new TestSuite(MiniRemoteFileDescTest.class);
+        return buildTestSuite(MiniRemoteFileDescTest.class);
     }
 
 	public void testLegacy() {

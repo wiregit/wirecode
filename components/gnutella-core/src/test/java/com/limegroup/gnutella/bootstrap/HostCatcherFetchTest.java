@@ -17,7 +17,7 @@ public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public static Test suite() {
-        return new TestSuite(HostCatcherFetchTest.class);
+        return buildTestSuite(HostCatcherFetchTest.class);
     }
     
     public static void main(String[] args) {

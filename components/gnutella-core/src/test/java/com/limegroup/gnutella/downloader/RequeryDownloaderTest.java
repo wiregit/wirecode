@@ -16,7 +16,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     public static Test suite() {
-        return new TestSuite(RequeryDownloaderTest.class);
+        return buildTestSuite(RequeryDownloaderTest.class);
     }
 
 	public void testLegacy() throws Exception {

@@ -82,7 +82,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(DownloadTest.class);
+        return buildTestSuite(DownloadTest.class);
     }
 
     public static void main(String[] args) {

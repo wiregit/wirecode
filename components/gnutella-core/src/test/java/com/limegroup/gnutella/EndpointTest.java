@@ -8,7 +8,7 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(EndpointTest.class);
+        return buildTestSuite(EndpointTest.class);
     }
 
     public void testLegacy() throws Exception {

@@ -46,7 +46,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Allows this test to be run as a set of suites.
 	 */
 	public static Test suite() {
-		return new TestSuite(UploadTest.class);
+		return buildTestSuite(UploadTest.class);
 	}
 
 	public static void main(String args[]) {

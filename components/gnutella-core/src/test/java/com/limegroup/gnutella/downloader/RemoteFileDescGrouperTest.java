@@ -12,7 +12,7 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
     }
 
     public static Test suite() {
-        return new TestSuite(RemoteFileDescGrouperTest.class);
+        return buildTestSuite(RemoteFileDescGrouperTest.class);
     }
 
     RemoteFileDesc rf1, rf2, rf3, rf4, rf5, rf6;

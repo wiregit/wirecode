@@ -23,7 +23,7 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
     }
 
     public static Test suite() {
-        return new TestSuite(FixedsizePriorityQueueTest.class);
+        return buildTestSuite(FixedsizePriorityQueueTest.class);
     }    
     
     public void setUp() {

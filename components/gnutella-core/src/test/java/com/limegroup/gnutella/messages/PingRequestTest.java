@@ -12,7 +12,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(PingRequestTest.class);
+        return buildTestSuite(PingRequestTest.class);
     }
 
 

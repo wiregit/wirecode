@@ -27,7 +27,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
     public static Test suite() {
-        return new TestSuite(ConnectionManagerTest.class);
+        return buildTestSuite(ConnectionManagerTest.class);
     }
 
     public static void main(String[] args) {

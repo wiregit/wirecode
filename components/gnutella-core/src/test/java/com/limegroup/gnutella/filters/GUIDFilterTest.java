@@ -16,7 +16,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(GUIDFilterTest.class);
+        return buildTestSuite(GUIDFilterTest.class);
     }
 
     public void setUp() {

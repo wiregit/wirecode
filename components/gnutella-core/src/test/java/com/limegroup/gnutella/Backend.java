@@ -52,12 +52,10 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	private RouterService ROUTER_SERVICE;
     
     /**
-     * Server socket on which we will listen for error reports from backend
-     * servers running in other JVM's.   Not that this is not used by the
-     * backend server process itself, but by test classes that are calling
-     * the launch and shutdown methods
+     * The thread which is catching the error reports from the various
+     * backend servers.
      */
-    private static ServerSocket errorServer = null;
+    private static ErrorMonitor errorMonitor = null;
 
     /**
      * Return the linstening port number
@@ -104,7 +102,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
         args[0] = "java";
         args[1] = "-classpath";
         args[2] = System.getProperty("java.class.path", ".");
-        args[3] = "com.limegroup.gnutella.Backend";
+        args[3] = Backend.class.getName();
         if (reject) args[4] = "reject";
         Process proc = Runtime.getRuntime().exec(args);
         new CopyThread(proc.getErrorStream(), System.err);
@@ -161,39 +159,65 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      * @param callback Callback interface to be called to report errors, or
      * null to release the interface.
 	 */
-	public static void setErrorCallback(ErrorCallback callback) 
-        throws IOException {
+	public static void setErrorCallback(ErrorCallback callback) {
+	    // A null callback means we want to stop listening.
         if (callback == null) {
-            if (errorServer != null) {
-                ServerSocket tmpServer = errorServer;
-                errorServer = null;
-                try { tmpServer.close(); } catch (IOException ex) {}
+            if (errorMonitor != null) {
+                errorMonitor.stopRunning();
             }
-        }
-        
-        else {
-            if (errorServer != null) {
-                throw new IOException("Error callback already active");
+        // If errorMonitor is null, we need to make one.
+        } else if (errorMonitor == null) {
+            ServerSocket errorServer = null;
+            try {
+                errorServer = new ServerSocket(ERROR_PORT);
+            } catch(IOException e) {
+                callback.error(e);
+                return;
             }
-            errorServer = new ServerSocket(ERROR_PORT);
-            new ErrorMonitorThread(callback);
+            errorMonitor = new ErrorMonitor(callback, errorServer);
+            Thread errorThread =
+                new Thread(errorMonitor, "ErrorMonitorThread");
+            errorThread.setDaemon(true);
+            errorThread.start();
+            Thread.yield(); // let it start up.
+        // The errorMonitor is already running,
+        // just redirect the error callback.
+        } else {
+            errorMonitor.setErrorCallback(callback);
         }
 	}
     
-    public static class ErrorMonitorThread extends Thread {
-        private ErrorCallback callback;
+    /**
+     * Inner class that listens for errors reported from the backends
+     * and redirects them to the correct error callback.
+     */
+    public static class ErrorMonitor implements Runnable {
+        private volatile ErrorCallback callback;
+        private volatile boolean isStopped = true;
+        private ServerSocket listenSocket = null;
         
-        public ErrorMonitorThread(ErrorCallback callback) {
-            super("ErrorMonitorThread");
-            this.callback = callback;
-            setDaemon(true);
-            start();
+        ErrorMonitor(ErrorCallback cb, ServerSocket listen) {
+            callback = cb;
+            listenSocket = listen;
+        }   
+        
+        public void setErrorCallback(ErrorCallback cb) {
+            callback = cb;
+        }
+        
+        public void stopRunning() {
+            isStopped = true;
+            try {
+                listenSocket.close();
+            } catch (IOException ignored) {}
+            listenSocket = null;
         }
         
         public void run() {
             try {
-                while (true) {
-                    Socket sock = errorServer.accept();
+                isStopped = false;
+                while (!isStopped) {
+                    Socket sock = listenSocket.accept();
                     try {
                         sock.setSoTimeout(1000);
                         ObjectInputStream ois = 
@@ -206,11 +230,13 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
                     }
                 }
             } catch (IOException ex) {
-                if (errorServer != null) {
+                if (!isStopped) {
                     callback.error(ex);
-                    try { errorServer.close(); } catch (IOException ex2) {}
-                    errorServer = null;
+                    try {
+                        listenSocket.close();
+                    } catch (IOException ignored) {}
                 }
+                isStopped = true;
             }
         }
     }
@@ -293,7 +319,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             doShutdown(reject, "");
         } catch (Exception ex) {
             ErrorService.error(ex);
-            doShutdown(reject, "Exception thrown by monitor thread");
+            doShutdown(reject, "Exception thrown by backend shutdown monitor");
         } finally {
             try {
                 if (shutdownSocket != null) shutdownSocket.close();

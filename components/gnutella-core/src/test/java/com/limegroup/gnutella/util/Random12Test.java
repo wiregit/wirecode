@@ -12,7 +12,7 @@ public class Random12Test extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(Random12Test.class);
+        return buildTestSuite(Random12Test.class);
     }
 
     Random12 rand;

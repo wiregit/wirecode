@@ -21,7 +21,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
 	}
 
 	public static Test suite() {
-		return new TestSuite(ManagedConnectionBufferTest.class);
+		return buildTestSuite(ManagedConnectionBufferTest.class);
 	}
 
 	public void setUp() {

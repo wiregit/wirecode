@@ -10,7 +10,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(GGEPTest.class);
+        return buildTestSuite(GGEPTest.class);
     }
 
 

@@ -36,7 +36,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	}
 
 	public static Test suite() {
-		return new TestSuite(UrnHttpRequestTest.class);
+		return buildTestSuite(UrnHttpRequestTest.class);
 	}
 
 	/**

@@ -30,7 +30,7 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
     OutputStream out;
     
     public static Test suite() {
-        return new TestSuite(BandwidthThrottleTest.class);
+        return buildTestSuite(BandwidthThrottleTest.class);
     }  
 
     protected void setUp() {

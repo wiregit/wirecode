@@ -39,7 +39,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public static Test suite() {
-        return new TestSuite(LeafRoutingTest.class);
+        return buildTestSuite(LeafRoutingTest.class);
     }    
 
     public static void main(String[] args) {

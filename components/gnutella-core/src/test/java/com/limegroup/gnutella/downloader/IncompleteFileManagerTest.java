@@ -20,7 +20,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
     
     public static Test suite() {
-        return new TestSuite(IncompleteFileManagerTest.class);
+        return buildTestSuite(IncompleteFileManagerTest.class);
     }
     
     public void setUp() {

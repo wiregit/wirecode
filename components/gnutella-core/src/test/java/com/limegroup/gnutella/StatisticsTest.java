@@ -16,7 +16,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(StatisticsTest.class);
+        return buildTestSuite(StatisticsTest.class);
     }
 
     public void setUp() {

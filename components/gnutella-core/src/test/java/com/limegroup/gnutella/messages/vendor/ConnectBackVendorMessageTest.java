@@ -20,7 +20,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
     }
 
     public static Test suite() {
-        return new TestSuite(ConnectBackVendorMessageTest.class);
+        return buildTestSuite(ConnectBackVendorMessageTest.class);
     }
 
 

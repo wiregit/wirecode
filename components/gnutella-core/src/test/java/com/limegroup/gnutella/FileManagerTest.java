@@ -13,7 +13,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(FileManagerTest.class);
+        return buildTestSuite(FileManagerTest.class);
     }
 
 	//<<<<<<< FileManagerTest.java

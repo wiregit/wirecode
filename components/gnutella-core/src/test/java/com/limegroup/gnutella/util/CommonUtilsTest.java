@@ -15,7 +15,7 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(CommonUtilsTest.class);
+        return buildTestSuite(CommonUtilsTest.class);
     }  
 
     public void testMajorRevisionMethod() {

@@ -11,7 +11,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
     }
     
     public static Test suite() {
-        return new TestSuite(HTTPDownloaderTest.class);
+        return buildTestSuite(HTTPDownloaderTest.class);
     }
 
 	public void testLegacy() {

@@ -11,7 +11,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(PushRequestTest.class);
+        return buildTestSuite(PushRequestTest.class);
     }
 
     public void testBasic() {

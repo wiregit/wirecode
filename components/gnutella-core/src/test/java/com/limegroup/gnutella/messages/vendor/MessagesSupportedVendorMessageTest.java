@@ -14,7 +14,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
     }
 
     public static Test suite() {
-        return new TestSuite(MessagesSupportedVendorMessageTest.class);
+        return buildTestSuite(MessagesSupportedVendorMessageTest.class);
     }
 
 

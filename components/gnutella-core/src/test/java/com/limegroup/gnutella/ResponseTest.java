@@ -21,7 +21,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 
 	public static Test suite() {
-		return new TestSuite(ResponseTest.class);
+		return buildTestSuite(ResponseTest.class);
 	}
 
 	/**

@@ -68,7 +68,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(UploaderTest.class);
+        return buildTestSuite(UploaderTest.class);
     }
 
     /**

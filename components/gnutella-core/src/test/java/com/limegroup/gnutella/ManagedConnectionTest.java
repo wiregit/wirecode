@@ -25,7 +25,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     public static Test suite() {
-        return new TestSuite(ManagedConnectionTest.class);
+        return buildTestSuite(ManagedConnectionTest.class);
     }    
 
     public static void main(String argv[]) {

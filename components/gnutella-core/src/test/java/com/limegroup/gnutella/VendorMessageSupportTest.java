@@ -33,7 +33,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(VendorMessageSupportTest.class);
+        return buildTestSuite(VendorMessageSupportTest.class);
     }
 
     

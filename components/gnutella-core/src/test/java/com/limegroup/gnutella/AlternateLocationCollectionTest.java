@@ -25,7 +25,7 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 	}
 
 	public static Test suite() {
-		return new TestSuite(AlternateLocationCollectionTest.class);
+		return buildTestSuite(AlternateLocationCollectionTest.class);
 	}
 
 	public static void main(String[] args) {

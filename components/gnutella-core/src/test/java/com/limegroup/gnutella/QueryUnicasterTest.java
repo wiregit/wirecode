@@ -46,7 +46,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     }
 
     public static Test suite() {
-        return new TestSuite(QueryUnicasterTest.class);
+        return buildTestSuite(QueryUnicasterTest.class);
     }
     
     public void setUp() throws Exception {

@@ -11,10 +11,10 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(AcceptorTest.class);
+        return buildTestSuite(AcceptorTest.class);
     }
 
-    public void testPortsOccupied() {
+    public void testPortsOccupied() {        
         // strategy: open sockets on various ports and try to set the listening
         // port via Acceptor.
 

@@ -9,7 +9,7 @@ public class IntervalTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public static Test suite() {
-        return new TestSuite(IntervalTest.class);
+        return buildTestSuite(IntervalTest.class);
     }
 
 	public void testLegacy() {

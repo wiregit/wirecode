@@ -18,7 +18,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
     }
 
     public static Test suite() {
-        return new TestSuite(BootstrapServerManagerTest.class);
+        return buildTestSuite(BootstrapServerManagerTest.class);
     }
 
     ////////////////////////////////////////////////////////////////////////////

@@ -85,7 +85,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     public static Test suite() {
-        return new TestSuite(UltrapeerRoutingTest.class);
+        return buildTestSuite(UltrapeerRoutingTest.class);
     }    
    
 	public static void main(String[] args) {

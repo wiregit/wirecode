@@ -17,7 +17,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public static Test suite() {
-        return new TestSuite(ExtendedEndpointTest.class);
+        return buildTestSuite(ExtendedEndpointTest.class);
     }
 
     public void setUp() {

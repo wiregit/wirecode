@@ -126,7 +126,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
 	public static Test suite() {
-		return new TestSuite(UrnTest.class);
+		return buildTestSuite(UrnTest.class);
 	}
 
 	public static void main(String[] args) {

@@ -14,7 +14,7 @@ public class BootstrapServerTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
     public static Test suite() {
-        return new TestSuite(BootstrapServerTest.class);
+        return buildTestSuite(BootstrapServerTest.class);
     }
 
     public void testConstructorSimple() throws Exception {        

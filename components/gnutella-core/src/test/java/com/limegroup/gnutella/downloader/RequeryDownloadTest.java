@@ -56,7 +56,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
     public static Test suite() {
-        return new TestSuite(RequeryDownloadTest.class);
+        return buildTestSuite(RequeryDownloadTest.class);
         //return new RequeryDownloadTest("testRequeryScheduling");
     }
 

@@ -44,7 +44,7 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
     public static Test suite() {
-        return new TestSuite(GUESSServerSideTest.class);
+        return buildTestSuite(GUESSServerSideTest.class);
     }
     
     public void setUp() throws Exception {

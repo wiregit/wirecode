@@ -20,7 +20,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(OldDownloadsTest.class);
+        return buildTestSuite(OldDownloadsTest.class);
     }
 
 

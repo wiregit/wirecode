@@ -20,7 +20,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	}
 
 	public static Test suite() {
-		return new TestSuite(QueryReplyTest.class);
+		return buildTestSuite(QueryReplyTest.class);
 	}
 
 	/**

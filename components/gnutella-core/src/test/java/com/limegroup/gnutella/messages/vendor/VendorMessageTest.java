@@ -11,7 +11,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
 
     public static Test suite() {
-        return new TestSuite(VendorMessageTest.class);
+        return buildTestSuite(VendorMessageTest.class);
     }
 
 

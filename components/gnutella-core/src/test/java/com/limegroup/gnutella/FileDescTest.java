@@ -49,7 +49,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 
 	public static Test suite() {
-		return new TestSuite(FileDescTest.class);
+		return buildTestSuite(FileDescTest.class);
 	}
 
 	public static void main(String[] args) {

@@ -12,7 +12,7 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(StringUtilsTest.class);
+        return buildTestSuite(StringUtilsTest.class);
     }  
 
     public void testCase() {

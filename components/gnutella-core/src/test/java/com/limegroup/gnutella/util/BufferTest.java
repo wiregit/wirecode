@@ -10,7 +10,7 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(BufferTest.class);
+        return buildTestSuite(BufferTest.class);
     }
 
     public void testLegacy() {

@@ -11,7 +11,7 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
     }
     
     public static Test suite() {
-        return new TestSuite(AutoDownloaderDetailsTest.class);
+        return buildTestSuite(AutoDownloaderDetailsTest.class);
     }
 
 	public void testLegacy() throws Exception {

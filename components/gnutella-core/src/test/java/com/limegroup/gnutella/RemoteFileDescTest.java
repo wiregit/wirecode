@@ -22,7 +22,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 	}
 
 	public static Test suite() {
-		return new TestSuite(RemoteFileDescTest.class);
+		return buildTestSuite(RemoteFileDescTest.class);
 	}
 
 	public static void main(String[] args) {

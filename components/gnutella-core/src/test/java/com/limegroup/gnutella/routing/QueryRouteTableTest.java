@@ -15,7 +15,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
     public static Test suite() {
-        return new TestSuite(QueryRouteTableTest.class);
+        return buildTestSuite(QueryRouteTableTest.class);
     }
 
     public void assertTrue(boolean test, String out) {

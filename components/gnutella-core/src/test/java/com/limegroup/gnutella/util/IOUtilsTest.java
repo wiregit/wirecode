@@ -24,7 +24,7 @@ public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase 
 	 * Runs this suite of tests.
 	 */
 	public static Test suite() {
-		return new TestSuite(IOUtilsTest.class);
+		return buildTestSuite(IOUtilsTest.class);
 	}
 
 	/**

@@ -36,7 +36,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public static Test suite() {
-        return new TestSuite(ResumeDownloaderTest.class);
+        return buildTestSuite(ResumeDownloaderTest.class);
     }
 
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */

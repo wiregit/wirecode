@@ -22,7 +22,7 @@ public final class QueryRequestTest extends BaseTestCase {
 	}
 
 	public static Test suite() {
-		return new TestSuite(QueryRequestTest.class);
+		return buildTestSuite(QueryRequestTest.class);
 	}
 
 	/**

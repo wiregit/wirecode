@@ -60,7 +60,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	}
 
 	public static Test suite() {
-		return new TestSuite(AlternateLocationTest.class);
+		return buildTestSuite(AlternateLocationTest.class);
 	}
 
 	public static void main(String[] args) {

@@ -44,7 +44,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     public static TestSuite buildTestSuite(Class cls) {
-        return new TestSuite(cls);
+        return new LimeTestSuite(cls);
     }
     
     /**
@@ -65,11 +65,11 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     public static TestSuite buildTestSuite(Class cls, String[] tests) {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new LimeTestSuite();
         for (int ii = 0; ii < tests.length; ii++) {
             suite.addTest(suite.createTest(cls, tests[ii]));
         }
-        suite.addTest(suite.createTest(cls, "incompleteTest"));
+        suite.addTest(warning("Warning - Full test suite has not been run."));
         return suite;
     }
     
@@ -108,7 +108,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @throws <tt>IOException</tt> if the launching of either
      *  backend fails
      */
-    public void launchAllBackends() throws IOException {
+    public static void launchAllBackends() throws IOException {
         launchBackend(true);
         launchBackend(false);
     }
@@ -117,7 +117,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Launch backend server if it is not running already
      * @throws IOException if attempt to launch backend server fails
      */
-    public void launchBackend() throws IOException {
+    public static void launchBackend() throws IOException {
         launchBackend(false);
     }
     
@@ -125,54 +125,30 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Launch backend server if it is not running already
      * @throws IOException if attempt to launch backend server fails
      */
-    public void launchBackend(boolean reject) throws IOException {
+    public static void launchBackend(boolean reject) throws IOException {
         
         /* If we've already launched the backend, don't try it again */
         int index = (reject ? 1 : 0);
         if (shutdownBackend[index]) return;
-
-        /* Try to set up a error callback listener on the backend.
-         * This will fail if some other test class has grabbed it first,
-         * so don't get too excited about a failure.  Not that we do this
-         * first so it will catch any errors reported by Backend startup
-         */
-        try {
-            Backend.setErrorCallback(this);
-        } catch (IOException ex) {
-            System.out.println("Could not establish Backend sever listener:" +
-                               ex.getMessage());
-        }
         
-        /* Otherwise luanch one if needed */
+        /* Otherwise launch one if needed */
         shutdownBackend[index] = Backend.launch(reject);
     }
-
-    /* Dummy test method defined so we can clean things up after all of the
-     * supeclass test methods have been called
-     */
-    public void testBaseTestCleanup() {
-        shutdownBackends();
-    }
     
-    /* Not a real test, but if buildTestSuite is called to build a subset of
-     * the complete test suite, it will automatically include this test to 
-     * warn the user that all tests have not been run
+    /**
+     * Shutdown any backend servers that we started
+     * This must be static so LimeTestSuite can call it.
+     * (Which implicitly means that shutdownBackend[] must
+     *  stay static also.)
      */
-    public void incompleteTest() {
-        shutdownBackends();
-        fail("Warning - full test suite has not been run");
-    }
-    
-    /** SHutdown any backend servers that we started */
-    private void shutdownBackends() {
+    static void shutdownBackends() {
         for (int ii = 0; ii < 2; ii++) {
             if (shutdownBackend[ii]) Backend.shutdown(ii == 1);
         }
         // Wait a couople seconds for any shutdown error reports.
         try { Thread.sleep(2000); } catch (InterruptedException ex) {}
-        try { Backend.setErrorCallback(null); } catch (IOException ex) {}
+        Backend.setErrorCallback(null);
     }
-    
     
     /*
      * This is modified to run 'preSetUp' and 'postTearDown' as methods
@@ -184,28 +160,18 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      *
 	 */
 	public void runBare() throws Throwable {
-        /* If the test is one of our bookeeping tests, calling the setup and
-         * teardown methods is a waste of resources.   Worse, some test classes
-         * will actually fail because of sloppily written race conditions.
-         */
         String testName = getName();
-        // System.out.println("runBare:" + testName);
+        //System.out.println("Running test: " + testName);
         assertNotNull(testName);
-        if (testName.equals("testBaseTestCleanup") ||
-            testName.equals("incompleteTest")) {
+        try {
+            preSetUp();
+            setUp();
             runTest();
-        } 
-        else {
+        } finally {
             try {
-                preSetUp();
-                setUp();
-                runTest();
+                tearDown();
             } finally {
-                try {
-                    tearDown();
-                } finally {
-                    postTearDown();
-                }
+                postTearDown();
             }
         }
     }
@@ -215,10 +181,10 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * add errors from the ErrorService callback (giving us errors that were
      * triggered from outside of the test thread).
      */
-     public void run(TestResult result) {
+    public void run(TestResult result) {
         _testResult = result;
         super.run(result);
-     }
+    }
     
     /**
      * Called before each test's setUp.
@@ -233,6 +199,16 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
         ErrorService.setErrorCallback(this);
         setupSettings();
         setupUniqueDirectories();
+        
+        // The backend must also have its error callback reset
+        // for each test, otherwise it could send errors to a stale
+        // TestResult object (one whose test hasn't started or already ended).
+        // But, we don't want to let the actual Backend class set it,
+        // because that could provide an infinite loop of writing
+        // to the socket, then reading it and rewriting it,
+        // then reading it and rewriting it, etc...
+        if (!(this instanceof Backend) )
+            Backend.setErrorCallback(this);
     }
     
     /**
@@ -342,6 +318,21 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
         } else {
             fail("ErrorService callback error", ex);
         }
+    }
+    
+    /**
+     * Returns a test which will fail and log a warning message.
+     * Copied from JUnit's TestSuite.java
+     * Note that it does not have to extend BaseTestCase, just TestCase.
+     * BaseTestCase would add needless complexity to an otherwise
+     * simple failure message.
+     */
+    private static Test warning(final String message) {
+    	return new TestCase("warning") {
+    		protected void runTest() {
+    			fail(message);
+    		}
+    	};
     }
 }
 

@@ -17,7 +17,7 @@ public final class HttpUtilsTest extends com.limegroup.gnutella.util.BaseTestCas
 	}
 
 	public static Test suite() {
-		return new TestSuite(HttpUtilsTest.class);
+		return buildTestSuite(HttpUtilsTest.class);
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(GUIDTest.class);
+        return buildTestSuite(GUIDTest.class);
     }
 
     public void setUp() {

@@ -16,7 +16,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(HostCatcherTest.class);
+        return buildTestSuite(HostCatcherTest.class);
     }
 
     /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
