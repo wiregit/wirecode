@@ -1,10 +1,5 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.*;
-
-import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.io.*;
@@ -32,7 +27,7 @@ public final class NIOHeaderWriter implements HeaderWriter {
      * List of headers that we were not able to send out -- buffer 
      * them for later sending.
      */
-    private final LinkedList BUFFERED_HEADERS = new LinkedList();
+    //private final LinkedList BUFFERED_HEADERS = new LinkedList();
 
     /**
      * Creates a new <tt>NIOHeaderWriter</tt> for the specified connection
@@ -53,6 +48,7 @@ public final class NIOHeaderWriter implements HeaderWriter {
      */
     private NIOHeaderWriter(Connection conn) {
         CONNECTION = conn;
+        System.out.println("NIOHeaderWriter::NIOHeaderWriter::about to get socket");
         CHANNEL = conn.getSocket().getChannel();        
     }
 
@@ -66,12 +62,15 @@ public final class NIOHeaderWriter implements HeaderWriter {
         // write anything left over in the buffer
         if(_headerBuffer.hasRemaining()) {
             CHANNEL.write(_headerBuffer);
+        }
+        
+        return !_headerBuffer.hasRemaining();
 
             // if we successfully wrote everything, try writing more
-            return writeBuffered();
-        } else {
-            return writeBuffered();
-        }
+            //return writeBuffered();
+        //} else {
+           // return writeBuffered();
+        //}
     }
 
     /**
@@ -85,41 +84,50 @@ public final class NIOHeaderWriter implements HeaderWriter {
      *  <tt>false</tt>, indicating that the selector should keep this
      *  channel registered for write events
      */
-    private boolean writeBuffered() throws IOException {
-        Iterator iter = BUFFERED_HEADERS.iterator();
-        while(iter.hasNext() && !_headerBuffer.hasRemaining()) {
-            rawWriteHeader((String)iter.next()); 
-        }
-        if(_headerBuffer.hasRemaining() || !BUFFERED_HEADERS.isEmpty()) {
-            // keep this channel registered for write events
-            return false;
-        } else {
-            // deregister this channel for write events
-            return true;
-        }
-    }
+//    private boolean writeBuffered() throws IOException {
+//        Iterator iter = BUFFERED_HEADERS.iterator();
+//        while(iter.hasNext() && !_headerBuffer.hasRemaining()) {
+//            rawWriteHeader((String)iter.next()); 
+//        }
+//        if(_headerBuffer.hasRemaining() || !BUFFERED_HEADERS.isEmpty()) {
+//            // keep this channel registered for write events
+//            return false;
+//        } else {
+//            // deregister this channel for write events
+//            return true;
+//        }
+//    }
 
     /**
-     * Writes the specified header to the network.  
+     * Writes the specified header to the network using non-blocking IO.  If 
+     * all headers have been written successfully, this returns <tt>true</tt>,
+     * indicating that this connection no longer needs to be registered for
+     * write events.  Otherwise, this writer still has headers that need to
+     * be written to the network, and this will return <tt>false</tt>.
      *
      * @param header the header to write
      * @throws IOException if there is an IO error writing to the channel
      * @throws IllegalArgumentException if the header parameter is null
      *  or the empty string
+     * @return <tt>true</tt> if this writer has written all requested headers
+     *  to the network, and can therefore be deregistered for write events,
+     *  otherwise returns <tt>false</tt> to indicate that this connection 
+     *  should remain registered so that it can complete writing all of its
+     *  headers
      */
-    public void writeHeader(String header) throws IOException {
+    public boolean writeHeader(String header) throws IOException {
         if(header == null || header.equals("")) {
             throw new IllegalArgumentException("null or empty string: "+header);
         }
 
         // If we've already started to buffer, keep buffering.  We'll be
         // notified by the selector whenever we can send
-        if(BUFFERED_HEADERS.size() > 0) {
-            BUFFERED_HEADERS.add(header);
-            return;
-        }
+        //if(BUFFERED_HEADERS.size() > 0) {
+          //  BUFFERED_HEADERS.add(header);
+            //return false;
+        //}
         
-        rawWriteHeader(header);
+        return rawWriteHeader(header);
     }
 
     /**
@@ -146,13 +154,27 @@ public final class NIOHeaderWriter implements HeaderWriter {
         }        
     }
 
-    public void closeHeaderWriting() throws IOException {
+    // inherit doc comment
+    public boolean closeHeaderWriting() throws IOException {
         _headerBuffer.put(CRLF);
         CHANNEL.write(_headerBuffer);
-        _headerBuffer = null;
+        if(_headerBuffer.hasRemaining())  {
+            return false;
+        } else  {
+            _headerBuffer = null;
+            return true;
+        }
     }
 
+    // inherit doc comment
     public synchronized void setWriteRegistered(boolean registered) {
         _registered = registered;
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.HeaderWriter#hasBufferedData()
+     */
+    public boolean hasBufferedData() {
+        return _headerBuffer.hasRemaining();
     }
 }
