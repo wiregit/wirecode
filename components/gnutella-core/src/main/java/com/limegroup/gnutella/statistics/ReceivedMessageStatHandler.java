@@ -48,7 +48,7 @@ public final class ReceivedMessageStatHandler {
 	public void addMessage(Message msg) {
 		NUMBER_STAT.incrementStat();
 		BYTE_STAT.addData(msg.getTotalLength());
-		BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH.addData(msg.getTotalLength());
+		BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH.addData(msg.getTotalLength());
 	}
 	
 
