@@ -55,6 +55,11 @@ class RemoteFileDescGrouper implements Serializable {
      *  to a THREE-star result. */
     private static final int DECENT_QUALITY=2;
 
+    /**
+     * The maximum size of a bucket. They should not be unbounded. Based on
+     * emprical data from the field 500 seems more than sufficient.
+     */
+    private static final int MAX_BUCKET_SIZE = 500;
 
     /** 
      * Creates a new RemoteFileDescGrouper containing copies of files (as
@@ -194,6 +199,8 @@ class RemoteFileDescGrouper implements Serializable {
                 if (checkExisting && bucket.contains(rfd))
                     return -1;
                 
+                if(bucket.size() > MAX_BUCKET_SIZE)
+                    return -1;
                 bucket.add(rfd);
                 repOk();
                 return 1;
@@ -202,7 +209,7 @@ class RemoteFileDescGrouper implements Serializable {
 
         //No match?  Add in new bucket at END of bucket list.  Don't forget to
         List bucket=new ArrayList();
-        bucket.add(rfd);
+        bucket.add(rfd); //it's a new list the size cannot be > MAX_BUCKET_SIZE
         buckets.add(bucket);
         incompletes.add(incompleteFile);
         //note: we need to be careful while adding to sha1s, since some elements

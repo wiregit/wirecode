@@ -64,6 +64,8 @@ public final class AlternateLocation implements
     private volatile boolean _demoted = false;
 
 
+    private boolean _old = false;
+
     ////////////////////////"Constructors"//////////////////////////////
     
 	/**
@@ -262,6 +264,15 @@ public final class AlternateLocation implements
 	public RemoteFileDesc createRemoteFileDesc(int size) {
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());
+        if(_old) {
+            return new RemoteFileDesc(URL.getHost(), URL.getPort(),
+                                      0, URL.getFile(), size,  
+                                      EMPTY_GUID, 1000,
+                                      true, 2, false, null, urnSet, false,
+                                      false, //assume altLoc is not firewalled
+                                      "ALT",//Never displayed, and we don't know
+                                      System.currentTimeMillis(), null);
+        }
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  EMPTY_GUID, 1000,
@@ -272,7 +283,7 @@ public final class AlternateLocation implements
 	}
 
     /**
-     * package access to promote this. 
+     * increment the count.
      * @see demote
      */
     public synchronized void increment() { _count++; }
@@ -283,9 +294,15 @@ public final class AlternateLocation implements
     synchronized void  demote() { _demoted = true; }
 
     /**
-     * package access for demoting this.
+     * package access for promoting this.
      */
     synchronized void promote() { _demoted = false; }
+
+    /**
+     * to set this._old to true, meaning that this is a location from the old
+     * mesh.
+     */
+    public void setOld() { _old = true; }
 
     /**
      * could return null

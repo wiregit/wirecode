@@ -507,7 +507,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        invalidAlts = new FixedsizeForgetfulHashMap(100);        
+        invalidAlts = new FixedsizeForgetfulHashMap(500);        
         this.dloaderManagerThread=new Thread("ManagedDownload") {
             public void run() {
                 try { 
@@ -932,8 +932,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         boolean added = false;
-        //Add to buckets (will be seen because buckets exposes representation).        
-        if (buckets != null) {
+        //Add to buckets (will be seen because buckets exposes representation).
+        if (buckets != null && busy!=null && !busy.contains(rfd)) {
             // We must always check to see if this RFD was already added to
             // the buckets now that we add downloads before adding to alt locs.
             // (Previously altloccollection filtered out already-seen ones)
@@ -1070,12 +1070,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( fd != null && fd instanceof IncompleteFileDesc)
             ifd = (IncompleteFileDesc)fd;
         
-        if( good ) {
-            if( RECORD_STATS && rfd.isFromAlternateLocation() )
-                DownloadStat.ALTERNATE_WORKED.incrementStat();                
-            validAlts.add(loc);
-            if( ifd != null )
-                ifd.addVerified(forFD);
+        if(good) {
+            //check if validAlts contains loc to avoid duplicate stats, and
+            //spurious count increments in the local
+            //AlternateLocationCollections
+            if(!validAlts.contains(loc)) {
+                if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                    DownloadStat.ALTERNATE_WORKED.incrementStat(); 
+                validAlts.add(loc);
+                if( ifd != null )
+                    ifd.addVerified(forFD);
+            }
         } else {
             if( RECORD_STATS && rfd.isFromAlternateLocation() )
                 DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
@@ -2354,11 +2359,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns the amount of other hosts this download can possibly use.
      */
-    public synchronized int getNumberOfPossibleHosts() {
-        return (files == null ? 0 : files.size()) +
-               (busy == null ? 0 : busy.size());
+    public synchronized int getPossibleHostCount() {
+        return (files == null ? 0 : files.size());
     }
     
+    public synchronized int getBusyHostCount() {
+        return (busy == null ? 0 : busy.size());
+    }
+
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.

@@ -159,7 +159,14 @@ public interface Downloader extends BandwidthTracker {
     public int getNumberOfAlternateLocations();
     
     /**
-     * Returns the number of possible hosts for this possible.
+     * @return the number of possible hosts for this download
      */
-    public int getNumberOfPossibleHosts();
+    public int getPossibleHostCount();
+
+    /**
+     * @return the number of hosts we tried which were busy. We will try these
+     * later
+     */
+    public int getBusyHostCount();
 }
+
