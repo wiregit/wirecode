@@ -230,27 +230,6 @@ public class ConnectionManager {
          }
      }
 
-    /** 
-     * Utility class that compares connections based on the number of messages
-     * they have sent and received.
-     */
-    private static final class ManagedConnectionComparator implements Comparator {
-        public int compare(Object connection1, Object connection2) {
-            ManagedConnection mc1=(ManagedConnection)connection1;
-            ManagedConnection mc2=(ManagedConnection)connection2;
-            if (mc1.isOutgoing()!=mc2.isOutgoing()) {
-                //Primary key: outgoing status
-                return mc1.isOutgoing() ? -1 : 1;
-            } else {
-                //Secondary key: number of messages
-                int total1=mc1.getNumMessagesSent()
-                          +mc1.getNumMessagesReceived();
-                int total2=mc2.getNumMessagesSent()
-                          +mc2.getNumMessagesReceived();
-                return total1-total2;
-            }
-        }
-    }
      
     /**
      * Removes the specified connection from currently active connections, also
