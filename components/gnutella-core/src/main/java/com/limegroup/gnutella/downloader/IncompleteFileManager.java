@@ -183,6 +183,19 @@ public class IncompleteFileManager implements Serializable {
         else
             return size1==size2 && name1.equals(name2);
     }
+    
+    /**
+     * Canonicalization is not as important on windows,
+     * and is causing problems.
+     * Therefore, don't do it.
+     */
+    private static File canonicalize(File f) throws IOException {
+        f = f.getAbsoluteFile();
+        if(CommonUtils.isWindows())
+            return f;
+        else
+            return f.getCanonicalFile();
+    }       
 
     /** 
      * Returns the fully-qualified temporary download file for the given
@@ -208,12 +221,18 @@ public class IncompleteFileManager implements Serializable {
      * file's name.
      */
     public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
+        boolean dirsMade = false;
+        File baseFile = null;
+        File canonFile = null;
+        
+        
 	    File incDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
 		//make sure its created.. (the user might have deleted it)
-		incDir.mkdirs();
+		dirsMade = incDir.mkdirs();
 		
-		String convertedName =
-		    CommonUtils.convertFileName(rfd.getFileName());
+		String convertedName = CommonUtils.convertFileName(rfd.getFileName());
+
+        try {
 
         URN sha1=rfd.getSHA1Urn();
         if (sha1!=null) {
@@ -226,10 +245,11 @@ public class IncompleteFileManager implements Serializable {
                 //the value set of HASHES.  Because we allow risky resumes,
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
-                    file = new File(incDir, 
-                            tempName(convertedName, rfd.getSize(), i));
-                    file = FileUtils.getCanonicalFile(file);
-                    if (! hashes.values().contains(file))
+                    file = new File(incDir, tempName(convertedName, rfd.getSize(), i));
+                    baseFile = file;
+                    file = canonicalize(file);
+                    canonFile = file;
+                    if (! hashes.values().contains(file)) 
                         break;
                 }
                 //...and record the hash for later.
@@ -243,14 +263,28 @@ public class IncompleteFileManager implements Serializable {
                 //   This means that in order for the canonical-checking
                 //   within this class to work, the file must exist on disk.
                 FileUtils.touch(file);
+                
                 return file;
             }
         } else {
             //No hash.
             File f = new File(incDir, 
                         tempName(convertedName, rfd.getSize(), 0));
-            f = FileUtils.getCanonicalFile(f);
+            baseFile = f;
+            f = canonicalize(f);
+            canonFile = f;
             return f;
+        }
+        
+        } catch(IOException ioe) {
+            IOException ioe2 = new IOException(
+                                    "dirsMade: " + dirsMade
+                                + "\ndirExist: " + incDir.exists()
+                                + "\nbaseFile: " + baseFile
+                                + "\ncannFile: " + canonFile);
+            if(CommonUtils.isJava14OrLater())
+                ioe2.initCause(ioe);
+            throw ioe2;
         }
     }
     
@@ -340,7 +374,7 @@ public class IncompleteFileManager implements Serializable {
                 URN urn = (URN)entry.getKey();
                 File f = (File)entry.getValue();
                 try {
-                    f = FileUtils.getCanonicalFile(f);
+                    f = canonicalize(f);
                     // We must purge old entries that had mapped
                     // multiple URNs to uncanonicalized files.
                     // This is done by ensuring that we only add
@@ -369,7 +403,7 @@ public class IncompleteFileManager implements Serializable {
                 //non-canonicalized files to be inserted into the table.
                 File f = (File)incompleteFile;
                 try {
-                    f = FileUtils.getCanonicalFile(f);
+                    f = canonicalize(f);
                 }  catch(IOException ioe) {
                     // ignore entry
                     continue;
@@ -450,7 +484,7 @@ public class IncompleteFileManager implements Serializable {
       throws IOException {
         // We must canonicalize the file.
         try {
-            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+            incompleteFile = canonicalize(incompleteFile);
         } catch(IOException ignored) {}
 
         blocks.put(incompleteFile,vf);
