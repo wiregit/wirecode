@@ -30,8 +30,10 @@ import java.io.*;
 public class Connection implements Runnable { 
     private ConnectionManager manager=null; //may be null
     private RouteTable routeTable=null;     //may be null
+    private PushRouteTable pushRouteTable=null; 
     /** The underlying socket.  For thread synchronization reasons, it is important
-     *  that this only be modified by the send(m) and receive() methods. */
+     *  that this only be modified by the send(m) and receive() methods. 
+     */
     private Socket sock;
     private boolean incoming;
 
@@ -82,9 +84,10 @@ public class Connection implements Runnable {
 	this.manager=manager;
 	this.sock=sock;
 	this.incoming=incoming;
-	if (manager!=null)
+	if (manager!=null){
 	    this.routeTable=manager.routeTable;
-
+	    this.pushRouteTable = manager.pushRouteTable;
+	}
 	//Handshake
 	final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
 	final String OK="GNUTELLA OK\n\n";
@@ -100,7 +103,7 @@ public class Connection implements Runnable {
 		routeTable.put(m.getGUID(), this);
 	    }
 	}
-
+	
 	if (manager!=null)
 	    manager.add(this);
   	System.out.println("Established "+(incoming?"incoming":"outgoing")
@@ -178,7 +181,7 @@ public class Connection implements Runnable {
      *   If this happens, removes itself from the manager's connection list.
      */
     public void run() {
-	Assert.that(manager!=null && routeTable!=null);
+	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null);
 	try {
 	    while (true) {
 		Message m=null;
@@ -186,65 +189,111 @@ public class Connection implements Runnable {
 		    m=receive();
 		    if (m==null)
 			continue;
-		} catch (BadPacketException e) {
-//  		    System.out.println("Discarding bad packet ("
-//  				       +e.getMessage()+")");
+		} 
+		catch (BadPacketException e) {
+		    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
 		    continue;
 		}
-		//0. Look up the message in the routing table, 
-		//   Pass it to the hostcatcher for inspection.
-		byte[] guid=m.getGUID();
-		Connection originator=routeTable.get(guid);
-		manager.catcher.spy(m);
-
-		//1. Reply to request I haven't seen yet.
-		//TODO: optimize with SWITCH statement or instance methods.
-		if (m instanceof PingRequest && originator==null) {    
-		    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-		    send(new PingReply(guid,
-				       m.getHops(), //TODO: I think...
-				       (short)sock.getLocalPort(),
-				       ip,
-				       (int)0,
-				       (int)0));		
-		}
-  		else if (m instanceof QueryRequest) {
-		    //Don't bother to respond, since I have no data to share.
-  		}
-
-		//2. Decrement TTL.  If WAS zero, drop message; else forward.
-		if ( m.hop()!=0 ) {
-		    //a) Broadcast all requests I haven't seen.
-		    //   Silently drop those I have seen.
-		    if (m.isRequest()) {
-			if (originator==null) {
-			    routeTable.put(guid,this);
-			    manager.sendToAllExcept(m, this);
+		if(m instanceof PingRequest){
+		    Connection inConnection = routeTable.get(m.getGUID()); 
+		    //connection has never been encountered before...
+		    if (inConnection.equals(null)){
+			//reduce TTL, increment hops. If old val of TTL was 0 drop message
+			if (m.hop()!=0){
+			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
+			    manager.sendToAllExcept(m, this);//broadcast to other hosts
+			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),sock.getLocalPort(),
+							      ip,
+							      0, //I think we will get this value from Rob's code
+							      0); //Kilobytes also from Robs code
+			    send(pingReply);
+			}
+			else{//TTL is zero
+			    //do nothing (drop the message).
 			}
 		    }
-		    //b) Replies: route to the original machine based
-		    //   on the GUID.
-		    else {			
-			if (originator==this) //Hack or necessary?? 
-			    ; //do nothing
-			else if (originator!=null)
-			    originator.send(m);
-			else // originator==null
-			    ConnectionManager.error("Possible routing error on message "
-					 +m.toString()
-					 +",\n   or was intended for me.");
+		    else{// message has already been processed before
+			//do nothing (drop message)
 		    }
 		}
-	    }
-	} catch (IOException e) {
-	    manager.remove(this);
-	    ConnectionManager.error("Connection closed: "+sock.toString());
-	} catch (Exception e) {
-	    ConnectionManager.error("Unexpected exception.  Terminating.");
-	    manager.remove(this);
-	    e.printStackTrace();	
+		else if (m instanceof PingReply){
+		    Connection outConnection = routeTable.get(m.getGUID());
+		    if(!outConnection.equals(null)){ //we have a place to route it
+			if (outConnection.equals(this)){ //I am the destination
+			    manager.catcher.spy(m);//update hostcatcher
+			    //TODO2: So what else do we have to do here??
+			}
+			else{//message needs to routed
+			    outConnection.send(m);
+			}
+		    }
+		    else { //Route Table does not know what to do with message
+			//do nothing...drop the message
+		    }
+		}
+		else if (m instanceof QueryRequest){
+		    Connection inConnection = routeTable.get(m.getGUID());
+		    if (inConnection.equals(null)){
+			//reduce TTL,increment hops, If old val of TTL was 0 drop message
+			if (m.hop()!=0){
+			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
+			    manager.sendToAllExcept(m,this); //broadcast to other hosts
+			    //TODO3: Rob does the search
+			    //TODO3: Make the Query Reply message and send it out.
+			    //Don't forget the client ID!
+			    //send the packet
+			}
+			else{//TTL is zero
+			    //do nothing(drop the message)
+			}
+		    }
+		    else{//message has been entry in Route Table, has already been processed.
+			//do nothing (drop message)
+		    }
+		}
+		else if (m instanceof QueryReply){
+		    Connection outConnection = routeTable.get(m.getGUID());
+		    if(!outConnection.equals(null)){ //we have a place to route it
+			pushRouteTable.put(this, m);//first store this in pushRouteTable
+			if (outConnection.equals(this)){ //I am the destination
+			    //TODO1: This needs to be interfaced with Rob
+			    //Unpack message
+			    // and present it to user
+			    //make HTTP connection with chosen message
+			    //does this go here?
+			    // interface with GUI client 
+			}
+			else {//message needs to be routed.
+			    outConnection.send(m);//send the message along on its route
+			}
+		    }
+		    else{//route table does not know what to do this message
+			//do nothing...drop the message
+		    }
+		}
+		else if (m instanceof PushRequest){
+		    Connection nextHost = pushRouteTable.get(m);
+		    PushRequest req = (PushRequest)m;
+		    String DestinationId = new String(req.getClientGUID());
+		    if (! nextHost.equals(null)){//we have a place to route this message
+			nextHost.send(m); //send the message to appropriate host
+		    }
+		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
+			//unpack message
+			//make HTTP connection with originator
+			//TODO1: Rob makes HHTTP connection
+		    }
+		    else{// the message has arrived in error
+			//do nothing.....drop the message
+		    }
+		}// else if		
+	    }//while
+	}//try
+	catch (Throwable t){
+	    System.out.println("Error in Connection thread");
 	}
-    } 
+    }//run
 
     public String toString() {
 	return "Connection("+(incoming?"incoming":"outgoing")

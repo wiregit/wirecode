@@ -27,7 +27,7 @@ public abstract class Message {
     
     //Temporary code for managing GUIDs
     private static Random rand=new Random();
-    private static byte[] makeGuid() {
+    static byte[] makeGuid() {
 	byte[] ret=new byte[16];
 	rand.nextBytes(ret); //TODO1: not guaranteed unique
 	return ret;

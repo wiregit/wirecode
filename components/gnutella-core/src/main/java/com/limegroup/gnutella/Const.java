@@ -24,6 +24,7 @@ public class Const {
 
     /** The name of the file containing hosts to contact */
     public static String HOSTLIST="gnutella.net";
+
     /** The number of outgoing connections to maintain */
     public static int KEEP_ALIVE=4;
 }

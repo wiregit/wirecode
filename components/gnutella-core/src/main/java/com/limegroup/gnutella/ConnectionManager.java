@@ -23,23 +23,40 @@ import java.util.*;
 public class ConnectionManager implements Runnable {
     private int port;
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
+    public PushRouteTable pushRouteTable = new PushRouteTable(2048);//same as Route Table could be lower
     private List /* of Connection */ connections=Collections.synchronizedList(
 						      new ArrayList());
     public HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
     private int keepAlive=0;
+    private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
+    public String ClientId;
 
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
      * call run. */
     public ConnectionManager(int port) {
 	this.port=port;
+	propertyManager();
     }
 
     /** Creates a manager that listens on the default port (6346) for
      *	incoming connections. */
     public ConnectionManager() {
 	this(6346);
+	propertyManager();
     }  
+    
+    /** 
+     *This method is used to get important properties (ClientId for now) at initialization
+     *If the property is not set, a value is given to the property.
+     */
+    private void propertyManager(){
+	ClientId = lp.getProperty("clientID");
+	if (ClientId.equals(null)){
+	    ClientId = new String(Message.makeGuid() );
+	    lp.setProperty("ClientID",ClientId);
+	}
+    }
 
     /** @modifies network
      *
@@ -166,7 +183,22 @@ public class ConnectionManager implements Runnable {
 	    }
 	}	
     }
-
+    /**Returns true if the given ClientID matches the ClientID of this host
+     *else returns false.
+     *This method will be called when a push request is being made and a 
+     *host which receives the messages is unable to direct the message any further.
+     *The host then needs to check if it is the final destination. 
+     *If this method returns true, then it is the final destination.
+     */
+    public synchronized boolean isClient(byte[] ClientId){
+	//get the client ID from the gnutella.ini file.
+	String packetId = new String (ClientId);
+	if ( this.ClientId.equals(packetId) )
+	    return true;
+	return false;
+    }
+    
+    
     /** Returns an unmodifiable iterator of this' connections.
      *  The iterator yields items in any order.
      */
