@@ -255,11 +255,19 @@ public class Connection implements Runnable {
 			    //TODO3: Make the Query Reply message and send it out.
 
 			    byte[] guid = m.getGUID();
+			    System.out.println("the guid " + guid);
 			    byte ttl = Const.TTL;
-			    int port = sock.getLocalPort();
+			    System.out.println("the ttl " + ttl);
+			    int port = manager.getListeningPort();
+			    System.out.println("the port " + port);
+
 			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-			    long speed = ((QueryRequest)m).getMinSpeed();
+			    System.out.println("the ip " + ip);
+			    // long speed = ((QueryRequest)m).getMinSpeed();
+			    long speed = 0;
+			    System.out.println("the speed " + speed);
 			    byte[] clientGUID = manager.ClientId.getBytes();
+			    System.out.println("the client GUID " + clientGUID);
 			    // byte[] clientGUID = null;
 			    QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
 					   speed, responses, clientGUID);
@@ -280,6 +288,7 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof QueryReply){
+		    System.out.println("Recieved a Querry Reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
 			//System.out.println("Sumeet:found connection");
@@ -293,6 +302,10 @@ public class Connection implements Runnable {
 			    //make HTTP connection with chosen message
 			    //does this go here?
 			    // interface with GUI client 
+
+			    
+
+
 			}
 			else {//message needs to be routed.
 			    //System.out.println("Sumeet:About to route reply");
@@ -305,7 +318,7 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
-		    //System.out.println("Sumeet:We have a push request");
+		    System.out.println("Sumeet:We have a push request");
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());

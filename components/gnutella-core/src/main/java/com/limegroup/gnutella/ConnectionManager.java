@@ -141,6 +141,7 @@ public class ConnectionManager implements Runnable {
 		//Accept an incoming connection, make it into a Connection
 		//object, handshake, and give it a thread to service it.
 		Socket client=sock.accept();
+		System.out.println("In the CManager.. soc was accepted");
 		try {
 		    tryingToConnect(
                       getHostName(client.getInetAddress()), 
