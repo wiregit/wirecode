@@ -24,12 +24,12 @@ public final class QueryKey {
     /**
      * Constant for the <tt>SecretKey</tt> to use.
      */
-    private static final SecretKey SECRET_KEY = new SecretKey();
+    private static SecretKey SECRET_KEY = null;
     
     /**
      * Constant for the <tt>SecretPad</tt> to use.
      */
-    private static final SecretPad SECRET_PAD = new SecretPad();
+    private static SecretPad SECRET_PAD = null;
 
     /** As detailed by the GUESS spec.
      */
@@ -46,6 +46,8 @@ public final class QueryKey {
     static {
         // initialize the logi.crypto package
         org.logi.crypto.Crypto.initRandom();
+        SECRET_KEY = new SecretKey();
+        SECRET_PAD = new SecretPad();
     }
     
     private QueryKey(byte[] key) throws IllegalArgumentException {
