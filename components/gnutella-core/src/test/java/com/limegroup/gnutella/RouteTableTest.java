@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
@@ -28,10 +29,10 @@ public final class RouteTableTest extends BaseTestCase {
         byte[] g2=new byte[16]; g2[0]=(byte)2;
         byte[] g3=new byte[16]; g3[0]=(byte)3;
         byte[] g4=new byte[16]; g4[0]=(byte)4;
-        ReplyHandler c1=new StubReplyHandler();
-        ReplyHandler c2=new StubReplyHandler();
-        ReplyHandler c3=new StubReplyHandler();
-        ReplyHandler c4=new StubReplyHandler();
+        ReplyHandler c1=new ReplyHandlerStub();
+        ReplyHandler c2=new ReplyHandlerStub();
+        ReplyHandler c3=new ReplyHandlerStub();
+        ReplyHandler c4=new ReplyHandlerStub();
 
         //1. Test time replacement policy (glass box).
         int MSECS=1000;
@@ -177,55 +178,4 @@ public final class RouteTableTest extends BaseTestCase {
         if (debugOn)
             System.out.println(out);
     }
-
-
-    private static class StubReplyHandler implements ReplyHandler {
-        public boolean isOpen() {
-            return true;
-        }
-        public void handlePingReply(PingReply pingReply, 
-                                    ReplyHandler receivingConnection) {
-        }
-        public void handlePushRequest(PushRequest pushRequest, 
-                                      ReplyHandler receivingConnection) {
-        }
-        public void handleQueryReply(QueryReply queryReply, 
-                                     ReplyHandler receivingConnection) {
-        }
-        public int getNumMessagesReceived() {
-            return 0;
-        }
-        public void countDroppedMessage() {
-        }
-        public Set getDomains() {
-            return null;
-        }
-        public boolean isPersonalSpam(Message m) {
-            return false;
-        }
-        public boolean isOutgoing() {
-            return false;
-        }
-        public boolean isKillable() {
-            return false;
-        }
-        public boolean isSupernodeClientConnection() {
-            return false;
-        }
-        public boolean isLeafConnection() {
-            return false;
-        }
-        public boolean isHighDegreeConnection() {
-            return false;
-        }
-
-        public boolean isUltrapeerQueryRoutingConnection() {
-            return false;
-        }
-
-        public boolean isGoodConnection() {
-            return false;
-        }
-    }
-
 }
