@@ -13,7 +13,6 @@
 <!-- default classpath for javac.  it is set as the user's CLASSPATH
      environment with the jar files necessary for compilation appended. -->
 <path id="default.classpath" >
-  <pathelement path="${CLASSPATH}" />
   <fileset dir="lib" includes="*.jar"/>
   <pathelement location="../chord" />
 </path>
