@@ -95,7 +95,9 @@ private class SThread implements Runnable
 /**
 * List of queryRequests that this thread have received
 */
-Vector queryRequests = new Vector(20, 10);
+private Vector queryRequests = new Vector(20, 10);
+
+private boolean shouldRunResponder = false;
     
 /**
 * Connecion for this thread
@@ -116,8 +118,21 @@ public void run()
         new Thread(rr).start();
 
         //start a responder thread
-        //Responder responder = new Responder();
-        //new Thread(responder).start();
+        //wait till we have received requests
+//        while(!shouldRunResponder)
+//        {
+//           //Sleep for some time
+//            //Dont waste CPU cycles by doing busy waiting
+//            try
+//            {
+//                Thread.sleep(1000); //1 sec
+//            }
+//            catch(InterruptedException ie)
+//            {
+//            } 
+//        }
+        Responder responder = new Responder();
+        new Thread(responder).start();
 
     }
     catch(IOException ioe)
@@ -160,35 +175,44 @@ public void run()
             
                 synchronized(queryRequests)
                 {
-                    //create the array
-                    requests = new QueryRequest[queryRequests.size()];
-
-                    //fill the array
-                    Enumeration e = queryRequests.elements();
-                    for(int i=0; e.hasMoreElements(); i++) 
+                    size = queryRequests.size();
+                    
+                    if(size > 0)
                     {
-                        try
+                        //create the array
+                        requests = new QueryRequest[queryRequests.size()];
+
+                        //fill the array
+                        Enumeration e = queryRequests.elements();
+                        for(int i=0; e.hasMoreElements(); i++) 
                         {
-                            requests[i] = (QueryRequest)(e.nextElement());
-                        }
-                        catch(ArrayIndexOutOfBoundsException oobe)
-                        {
-                            //do nothing, just break out of the loop
-                            break;
+                            try
+                            {
+                                requests[i] = (QueryRequest)(e.nextElement());
+                            }
+                            catch(ArrayIndexOutOfBoundsException oobe)
+                            {
+                                //do nothing, just break out of the loop
+                                break;
+                            }
                         }
                     }
 
                 }//end of synchronization
                 
+                
                 System.out.println("clients = " + size);
-                //Sleep for some time
-                //Dont waste CPU cycles by doing busy waiting
-                try
+                if(size <= 0)
                 {
-                    Thread.sleep(250); //sleep for 1/4th of a second
-                }
-                catch(InterruptedException ie)
-                {
+                    //Sleep for some time
+                    //Dont waste CPU cycles by doing busy waiting
+                    try
+                    {
+                        Thread.sleep(1000); //sleep for 1 second
+                    }
+                    catch(InterruptedException ie)
+                    {
+                    }
                 }
             }
 
@@ -216,6 +240,7 @@ public void run()
                                                     ip, 56, responses, clientGUID);
                     reply.hop();  //so servent doesn't think it's from me
                     connection.send(reply); 
+                    System.out.println("reply sent");
                 }//end of inner for	
             }//end of outer for
             

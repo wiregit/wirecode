@@ -79,7 +79,7 @@ private CThread[] cThreads;
 
 private static final long NUM_MESSAGES = 10000;
 
-private static final long WARMUPTIME = 100000; //100 seconds
+private static final long WARMUPTIME = 10000; //10 seconds
 
 private long timeTaken = 0;
 
