@@ -323,6 +323,11 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
+        else if (msg instanceof CapabilitiesVM) {
+			if(RECORD_STATS)
+                ;
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        }
         else if (msg instanceof HopsFlowVendorMessage) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);

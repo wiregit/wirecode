@@ -144,6 +144,11 @@ public class Connection {
      */
     protected MessagesSupportedVendorMessage _messagesSupported = null;
     
+    /** The possibly non-null VendorMessagePayload which describes what
+     *  Capabilities the guy on the other side of this connection supports.
+     */
+    protected CapabilitiesVM _capabilities = null;
+    
     /**
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
@@ -345,6 +350,7 @@ public class Connection {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
 			if(_headers.supportsVendorMessages()) {
                 send(MessagesSupportedVendorMessage.instance());
+                send(CapabilitiesVM.instance());
 			}
         } catch (IOException ioe) {
         } catch (BadPacketException bpe) {
@@ -359,6 +365,8 @@ public class Connection {
     protected void handleVendorMessage(VendorMessage vm) {
         if (vm instanceof MessagesSupportedVendorMessage)
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
+        if (vm instanceof CapabilitiesVM)
+            _capabilities = (CapabilitiesVM) vm;
     }
 
 
@@ -1368,6 +1376,14 @@ public class Connection {
         if (_messagesSupported != null)
             return _messagesSupported.supportsLeafGuidance();
         return -1;
+    }
+
+    /** @return true if the capability is supported.
+     */
+    public boolean remoteHostSupportsWhatIsNew() {
+        if (_capabilities != null)
+            return _capabilities.supportsWhatIsNew();
+        return false;
     }
 
     /**
