@@ -4,6 +4,7 @@ import com.limegroup.gnutella.downloader.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
+import java.util.StringTokenizer;
 
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number of
@@ -368,14 +369,52 @@ public class DownloadManager implements BandwidthTracker {
             callback.downloadsComplete();
     }
 
-    /** Currently, this method simply extracts the filename from each rfd in
-     *    rfds.  In the future, we may want to be smarter or more cute....
+    
+    private final String[] invalidWords = {"the", "an", "a"};
+    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
+    /** Canonicalizes a file name - gets rid of articles, etc...
+     */    
+    private final String canonicalize(String fileName) {
+        final StringBuffer retString = new StringBuffer();
+        // separate by whitespace and _ 
+        StringTokenizer st = new StringTokenizer(fileName, " _-");
+        while (st.hasMoreTokens()) {
+            final String currToken = st.nextToken().toLowerCase();
+            if (wordSet.contains(currToken))
+                continue;
+            try {
+                Double.parseDouble(currToken);
+                continue;
+            }
+            catch (Exception e) {}
+            retString.append(currToken + " ");
+        }
+        return retString.toString();
+    }
+
+    /** Extract a canonical name from the RFD.
      */
     private final String[] extractQueryStrings(RemoteFileDesc[] rfds) {
         String[] retStrings = new String[rfds.length];
         for (int i = 0; i < rfds.length; i++)
-            retStrings[i] = rfds[i].getFileName();
+            retStrings[i] = canonicalize(ripExtension(rfds[i].getFileName()));
         return retStrings;
+    }
+
+    /** Removes duplicates from the array.
+     *  @param in The String[] to remove duplicates from.
+     *  @return A String[] with unique elements....
+     */
+    private final String[] removeDuplicates(String[] in) {
+        String[] out = null;
+        ArrayList list = new ArrayList();
+        for (int i = 0; i < in.length; i++)
+            if (! list.contains(in[i]))
+                list.add(in[i]);
+        out = new String[list.size()];
+        for (int j = 0; j < out.length; j++)
+            out[j] = (String) list.get(j);
+        return out;
     }
 
     private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
@@ -392,7 +431,7 @@ public class DownloadManager implements BandwidthTracker {
      * PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc objects.
      */
     public void sendQuery(RemoteFileDesc[] rfds) {
-        String[] qStrings= extractQueryStrings(rfds);
+        String[] qStrings= removeDuplicates(extractQueryStrings(rfds));
         QueryRequest[] qReqs = constructQueryRequests(qStrings);
         for (int i = 0; i < qReqs.length; i++)
             router.broadcastQueryRequest(qReqs[i]);            
@@ -519,6 +558,18 @@ public class DownloadManager implements BandwidthTracker {
         callback.error(ActivityCallback.ASSERT_ERROR, e);
     }
 
+    // take the extension off the filename...
+    private String ripExtension(String fileName) {
+        String retString = null;
+        int extStart = fileName.lastIndexOf('.');
+        if (extStart == -1)
+            retString = fileName;
+        else
+            retString = fileName.substring(0, extStart);
+        return retString;
+    }
+
+
     private final boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)
@@ -528,5 +579,7 @@ public class DownloadManager implements BandwidthTracker {
         if (debugOn)
             e.printStackTrace();
     }
+
+
 
 }
