@@ -1115,11 +1115,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
 		// Prepare a fresh set of alternate locations for these file
-		//totalAlternateLocations = new AlternateLocationCollection(); 
+		totalAlternateLocations = new AlternateLocationCollection(); 
 
 		// null out the alternate locations so we can create a new set
 		// for these files
-		totalAlternateLocations = null;  
+		//totalAlternateLocations = null;  
 		RemoteFileDesc tempRFD;
 		String rfdStr;
 		URL    rfdURL;
@@ -1134,7 +1134,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 				if(sha1 == null)
 				    continue;
 
-				if(totalAlternateLocations == null) {
+				if(totalAlternateLocations.size() == 0) {
 					// Prepare a fresh set of alternate locations for these file
 					totalAlternateLocations = 
 						AlternateLocationCollection.createCollection(sha1);

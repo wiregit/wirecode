@@ -28,6 +28,9 @@ public final class AlternateLocationCollection
 
 	private final URN SHA1;
 
+	public static AlternateLocationCollection createCollection() {
+		return new AlternateLocationCollection();
+	}
 	public static AlternateLocationCollection createCollection(URN sha1) {
 		return new AlternateLocationCollection(sha1);
 	}
@@ -68,6 +71,10 @@ public final class AlternateLocationCollection
 		return alc;
 	}
 
+	private AlternateLocationCollection() {
+		SHA1 = null;
+	}
+
 	/**
 	 * Creates a new <tt>AlternateLocationCollection</tt> for the specified
 	 * <tt>URN</tt>.
@@ -75,10 +82,10 @@ public final class AlternateLocationCollection
 	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
 	 */
 	private AlternateLocationCollection(URN sha1) {
-		if(sha1 == null) {
-			throw new NullPointerException("null URN");
-		}
-		if(!sha1.isSHA1()) {
+//		if(sha1 == null) {
+//			throw new NullPointerException("null URN");
+//		}
+		if( sha1 != null && !sha1.isSHA1()) {
 			throw new IllegalArgumentException("URN must be a SHA1");
 		}
 		SHA1 = sha1;
