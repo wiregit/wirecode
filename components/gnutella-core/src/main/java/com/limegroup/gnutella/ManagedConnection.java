@@ -821,13 +821,13 @@ public class ManagedConnection extends Connection
 
         //send the pongs for the Ultrapeer & 0.4 connections
         List /*<ManagedConnection>*/ nonLeafConnections 
-            = _manager.getInitializedConnections2();
+            = _manager.getInitializedConnections();
         
         supersendNeighborPongs(m, nonLeafConnections);
         
         //send the pongs for leaves
         List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections2();
+            = _manager.getInitializedClientConnections();
         supersendNeighborPongs(m, leafConnections);
         
         //Note that sending its own pong is not necessary, as the crawler has
