@@ -117,24 +117,37 @@ public class Connection implements Runnable {
     private boolean doShutdown;
 
     /** 
-     * The number of packets I sent and received.  This includes bad
-     * packets.  These are synchronized by out and in, respectively.
+     * Various statistics follow.  sent and received are the number of
+     * packets I sent and received.  This includes dropped packets.
+     * These are synchronized by out and in, respectively.
      *
-     * Dropped is the number of packets I read (<read) and dropped because the
-     * host made one of the following errors: sent replies to requests
-     * I didn't make, sent bad packets, or sent (route) spam.  It does
-     * not include: TTL's of zero, duplicate requests (it's not their
-     * fault), or buffer overflows in sendToAll.  
+     * recvDropped is the number of packets I read and dropped because
+     * the host made one of the following errors: sent replies to
+     * requests I didn't make, sent bad packets, or sent (route) spam.
+     * It does not include: TTL's of zero, duplicate requests (it's
+     * not their fault), or buffer overflows in sendToAll.  Note that
+     * this is always less than received.  No synchronization is
+     * necessary.
      *
-     * lastReceived and lastDropped are the values of received and
-     * dropped at the last call to getPercentDropped.
+     * sentDropped is the number of packets I dropped because the
+     * output queue overflowed.  This happens when the remote host
+     * cannot receive packets as quickly as I am trying to send them.
+     * No synchronization is necessary.
+     * 
+     * lastSent/lastSentDropped and lastReceived/lastRecvDropped the
+     * values of sent/sentDropped and received/recvDropped at the last
+     * call to getPercentDropped.  These are synchronized by this;
+     * finer-grained schemes could be used.
      */
-    protected int sent=0;
-    protected int received=0;
-    protected int dropped=0;
-    //protected int unsent=0;
-    protected int lastReceived=0;
-    protected int lastDropped=0;
+    private int sent=0;
+    private int sentDropped=0;
+    private int lastSent=0;
+    private int lastSentDropped=0;
+
+    private int received=0;
+    private int recvDropped=0;
+    private int lastReceived=0;
+    private int lastRecvDropped=0;
 
     /** Statistics about horizon size. */
     public long totalFileSize;
@@ -270,15 +283,17 @@ public class Connection implements Runnable {
     public void send(Message m) throws IOException {
         if (connectionClosed)
             throw new IOException();
-        
+
         synchronized (outputQueueLock) {
+            //TODO2: if the queue is full, we could use a smarter
+            //replacement scheme.
             Object removed=outputQueue.addFirst(m);
-            //if (removed!=null)
-            //    unsent++;
+            if (removed!=null)
+                sentDropped++;
+
             if (outputQueue.getSize() >= BATCH_SIZE)
-                //TODO2: if the queue is full, we could use a smarter
-                //replacement scheme.
                 outputQueueLock.notify();
+            sent++;
         }
     }
 
@@ -317,7 +332,6 @@ public class Connection implements Runnable {
                         connectionClosed=true;
                         break;
                     }
-                    sent++;     
                     if (manager!=null)
                         manager.total++;
                 }                
@@ -407,7 +421,7 @@ public class Connection implements Runnable {
     private final boolean isRouteSpam(Message m) {
         if (! routeFilter.allow(m)) {
             manager.totDropped++;
-            dropped++;
+            recvDropped++;
             return true;
         } else
             return false;
@@ -446,7 +460,7 @@ public class Connection implements Runnable {
                 } 
                 catch (BadPacketException e) {
                     //System.out.println("Discarding bad packet ("+e.getMessage()+")");
-                    //dropped++;
+                    //recvDropped++;
                     continue;
                 }
                 if(m instanceof PingRequest){
@@ -509,7 +523,7 @@ public class Connection implements Runnable {
                     else { //Route Table does not know what to do with message
                         //do nothing...drop the message
                         manager.totDropped++;
-                        dropped++;
+                        recvDropped++;
                     }
                 }
                 else if (m instanceof QueryRequest){
@@ -596,7 +610,7 @@ public class Connection implements Runnable {
                     else{//route table does not know what to do this message
                         //do nothing...drop the message
                         manager.totDropped++;
-                        dropped++;
+                        recvDropped++;
                     }
                 }
                 else if (m instanceof PushRequest){
@@ -666,7 +680,7 @@ public class Connection implements Runnable {
                         //do nothing.....drop the message
                         manager.totRouteError++;
                         manager.totDropped++;
-                        dropped++;
+                        recvDropped++;
                     }
                 }// else if     
             }//while
@@ -760,36 +774,64 @@ public class Connection implements Runnable {
         return totalFileSize;
     }   
 
-    /** Returns the number of messages sent on this connection */
+    /** Returns the number of messages I tried to send on this connection.
+     *  Some may have been dropped. */
     public long getNumSent() {
         return sent;
     }
 
-    /** Returns the number of messages received on this connection */
+    /** Returns the number of messages I dropped while trying to send
+     *  on this connection.  This happens when the remote host cannot
+     *  keep up with me. */
+    public long getNumSentDropped() {
+        return sentDropped;
+    }
+
+    /** 
+     * @modifies this
+     * @effects Returns the percentage of messages sent on this
+     *  since the last call to getPercentSentDropped that were 
+     *  dropped by this end of the connection.
+     */
+    public synchronized float getPercentSentDropped() {
+        int rdiff=sent-lastSent;
+        int ddiff=sentDropped-lastSentDropped;
+        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+    
+        lastSent=sent;
+        lastSentDropped=sentDropped;
+        return percent;
+    }
+
+    /** Returns the number of messages received on this connection.
+     *  Some may have been dropped. */
     public long getNumReceived() {
         return received;
     }
 
-    /** Returns the number of messages dropped on this connection.<p>
+    /** Returns the number of bad messages received on this connection.<p>
      * 
      * Here, dropped messages mean replies to requests I didn't make,
      * bad packets, broadcasted pushes, or spam.  It does not include:
      * TTL's of zero, duplicate requests (it's not their fault), or
      * buffer overflows in sendToAll.  
      */
-    public long getNumDropped() {
-        return dropped;
+    public long getNumRecvDropped() {
+        return recvDropped;
     }
 
-    /** Return the percentage of messages dropped on this connection since
-     *  the last call to getPercentDropped. */
-    public float getPercentDropped() {
+    /** 
+     * @modifies this
+     * @effects Returns the percentage of messages received since the
+     *  last call to getRecvPercentDropped that were bad. 
+     */
+    public synchronized float getPercentRecvDropped() {
         int rdiff=received-lastReceived;
-        int ddiff=dropped-lastDropped;
+        int ddiff=recvDropped-lastRecvDropped;
         float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
     
         lastReceived=received;
-        lastDropped=dropped;
+        lastRecvDropped=recvDropped;
         return percent;
     }
 
