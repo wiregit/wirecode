@@ -115,11 +115,6 @@ public final class SettingsManager {
 	 */
 	private final String  SAVE_DIRECTORY_NAME = "Shared";
 
-	/**
-	 * Name of the host list file.
-	 */
-	private final String HOST_LIST_NAME = "gnutella.net";
-
     /**
 	 * Default name for the properties file
 	 */
@@ -1244,15 +1239,6 @@ public final class SettingsManager {
     public int getPersistentHTTPConnectionTimeout(){
         return _persistentHTTPConnectionTimeout;
     }
-
-    /**
-	 * Returns a string specifying the full pathname of the file listing
-     * the hosts
-	 */
-    public String getHostList() {        
-		return new File(CommonUtils.getUserSettingsDir(), 
-                        HOST_LIST_NAME).getAbsolutePath();
-	}
 
     /** Returns the client's port number */
     public int getPort(){return _port;}
