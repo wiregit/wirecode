@@ -10,14 +10,14 @@ public class QueryRequest extends Message {
     /**
      * Builds a new query from scratch 
      *
-     * @requires 0&<;=minSpeed&<;2^32 (i.e., can fit in 4 unsigned bytes)
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      */
-    public QueryRequest(byte ttl, long minSpeed, String query) {
+    public QueryRequest(byte ttl, int minSpeed, String query) {
 	//Allocate two bytes for min speed plus query string and null terminator
 	super(Message.F_QUERY, ttl, 2+query.length()+1);
 	payload=new byte[2+query.length()+1];
-	//Extract minimum speed.  It's ok if "(int)minSpeed" is negative.
-	ByteOrder.int2leb((int)minSpeed, payload, 0);
+	//Extract minimum speed.  It's ok if "(short)minSpeed" is negative.
+	ByteOrder.short2leb((short)minSpeed, payload, 0);
 	//Copy bytes from query string to payload
 	byte[] qbytes=query.getBytes();
 	System.arraycopy(qbytes,0,payload,2,qbytes.length);
@@ -49,9 +49,9 @@ public class QueryRequest extends Message {
       * number, but Java ints are signed.  Hence we must use a long.  The
       * value returned is always smaller than 2^32.
       */
-    public long getMinSpeed() {
-	int speed=ByteOrder.leb2int(payload,0);
-	long ret=ByteOrder.ubytes2long(speed);
+    public int getMinSpeed() {
+	short speed=ByteOrder.leb2short(payload,0);
+	int ret=ByteOrder.ubytes2int(speed);
 	Assert.that(ret>=0, "getMinSpeed got negative value");
 	return ret;
     }
@@ -67,9 +67,13 @@ public class QueryRequest extends Message {
 
 //      /** Unit test */
 //      public static void main(String args[]) {
-//  	long u4=0x00000000FFFFFFFFl;
-//  	QueryRequest qr=new QueryRequest((byte)3,u4,"query");
-//  	Assert.that(qr.getMinSpeed()==u4);
-//  	Assert.that(qr.getQuery().equals("query"));
+//  	int u2=0x0000FFFF;
+//  	QueryRequest qr=new QueryRequest((byte)3,u2,"");
+//  	Assert.that(qr.getMinSpeed()==u2);
+//  	Assert.that(qr.getQuery().equals(""));
+	
+//  	qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
+//  	Assert.that(qr.getMinSpeed()==(byte)1);
+//  	Assert.that(qr.getQuery().equals("ZZZ"));
 //      }
 }
