@@ -168,19 +168,34 @@ public class FileManager {
 
     /**
      * Returns the file descriptor with the given index.  Throws
-     * IndexOutOfBoundsException if the index is not valid, either because the
-     * file was never shared or was "unshared".<p>
+     * IndexOutOfBoundsException if the index is out of range.  It is also
+     * possible for the index to be within range, but for this method to
+     * return <tt>null</tt>, such as the case where the file has been
+     * unshared.
      *
-     * Design note: this is slightly unusual use of IndexOutOfBoundsException.
-     * For example, get(0) and get(2) may throw an exception but get(1) may not.
-     * NoSuchElementException was considered as an alernative, but this can
-     * create ambiguity problems between java.util and com.sun.java.util.  
+     * @param i the index of the <tt>FileDesc</tt> to access
+     * @throws <tt>IndexOutOfBoundsException</tt> if the index is out of 
+     *  range
+     * @return the <tt>FileDesc</tt> at the specified index, which may
+     *  be <tt>null</tt>
      */
-    public synchronized FileDesc get(int i) throws IndexOutOfBoundsException {
-        FileDesc ret=(FileDesc)_files.get(i);
-        if (ret==null)
-            throw new IndexOutOfBoundsException();
-        return ret;
+    public synchronized FileDesc get(int i) {
+        return (FileDesc)_files.get(i);
+    }
+
+    /**
+     * Determines whether or not the specified index is valid.  The index
+     * is valid if it is within range of the number of files shared, i.e.,
+     * if:<p>
+     *
+     * i >= 0 && i < _files.size() <p>
+     *
+     * @param i the index to check
+     * @return <tt>true</tt> if the index is within range of our shared
+     *  file data structure, otherwise <tt>false</tt>
+     */
+    public synchronized boolean isValidIndex(int i) {
+        return (i >= 0 && i < _files.size());
     }
 
 	/**
