@@ -970,6 +970,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final long currTime = System.currentTimeMillis();
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
+					waitForStableConnections();
                     // yeah, it is about time and i've not sent too many...
                     try {
                         if (manager.sendQuery(this, newRequery(numRequeries)))
@@ -1030,6 +1031,37 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }
         }                 
+    }
+
+private static final int MIN_NUM_CONNECTIONS = 2;
+private static final int MIN_NUM_HOSTS       = 6;
+private static final int MAX_CONNECTION_WAIT = 5;
+private static final int MAX_HOST_WAIT       = 8;
+    /**
+     *  Try to wait for good, stable, connections with some amount of reach
+     */
+    private static void waitForStableConnections() {
+    	RouterService service = RouterService.instance();
+    	int waitCount = 0; 
+
+    	// Attempt to get 2 stable connections
+        // (This really doesn't do much without access to
+        //  getNumInitializedConnections in ConnectionManager.
+    	//  The next loop actually does the waiting.
+    	while (service.getNumConnections() < MIN_NUM_CONNECTIONS && 
+               waitCount                   < MAX_CONNECTION_WAIT) {
+    	    try { Thread.sleep(1000); } catch(InterruptedException e) {};
+    		waitCount++;
+    	}
+
+    	// Wait till you get a few pongs in on the connections
+    	// for stability
+    	while ( service.getNumHosts() < MIN_NUM_HOSTS && 
+                waitCount             < MAX_HOST_WAIT ) {
+    	    service.updateHorizon();
+    	    try { Thread.sleep(1000); } catch(InterruptedException e) { }
+    		waitCount++;
+    	}
     }
 
     /** Returns the next system time that we can requery.  Subclasses may
