@@ -779,35 +779,6 @@ public class SettingsManager implements SettingsInterface
 		props_.put(SettingsInterface.EXTENSIONS, ext);
     }
 
-    /** sets the port to connect on */
-    public synchronized void setPort(int port) 
-		throws IllegalArgumentException {
-		// if the entered port is outside accepted 
-		// port numbers, throw the exception
-		if(port > 65536 || port < 0)
-			throw new IllegalArgumentException();
-		else {
-			port_ = port;
-			String s = Integer.toString(port_);
-			props_.put(SettingsInterface.PORT, s);
-			//writeProperties();		    
-		}
-    }
-
-    /** sets the connection speed.  throws an
-     *  exception if you try to set the speed
-     *  far faster than a T3 line or less than
-     *  0.*/
-    public void setConnectionSpeed(int speed) {
-		if(speed < 0 || speed > 20000)
-			throw new IllegalArgumentException();
-		else {
-			connectionSpeed_ = speed;
-			String s = Integer.toString(connectionSpeed_);
-			props_.put(SettingsInterface.SPEED, s);
-		}
-    }
-
     /** sets the time to live */
     public void setTTL(byte ttl) 
 		throws IllegalArgumentException {
@@ -831,6 +802,35 @@ public class SettingsManager implements SettingsInterface
 			props_.put(SettingsInterface.SOFT_MAX_TTL, s);
 		}
     }
+
+    /** sets the port to connect on */
+    public synchronized void setPort(int port) 
+		throws IllegalArgumentException {
+		// if the entered port is outside accepted 
+		// port numbers, throw the exception
+		if(port > 65536 || port < 0)
+			throw new IllegalArgumentException();
+		else {
+			port_ = port;
+			String s = Integer.toString(port_);
+			props_.put(SettingsInterface.PORT, s);
+		}
+    }
+
+    /** sets the connection speed.  throws an
+     *  exception if you try to set the speed
+     *  far faster than a T3 line or less than
+     *  0.*/
+    public void setConnectionSpeed(int speed) {
+		if(speed < 0 || speed > 20000)
+			throw new IllegalArgumentException();
+		else {
+			connectionSpeed_ = speed;
+			String s = Integer.toString(connectionSpeed_);
+			props_.put(SettingsInterface.SPEED, s);
+		}
+    }
+
 
     public void setConnectString(String connect) 
 		throws IllegalArgumentException {
@@ -870,7 +870,8 @@ public class SettingsManager implements SettingsInterface
 		props_.put(SettingsInterface.CONNECT_STRING, connect);
     }
 	
-    public void setConnectOkString(String ok) throws IllegalArgumentException {
+    public void setConnectOkString(String ok) 
+		throws IllegalArgumentException {
 		if (ok.length()<1)
 			throw new IllegalArgumentException();
 		
