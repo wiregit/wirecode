@@ -197,7 +197,7 @@ public abstract class AbstractMessageReader implements MessageReader {
                     addMessage(msg);
             }
             CONNECTION.stats().countDroppedMessage();
-        } else {
+        } else if(RouterService.isStarted()){
         
             // call MessageRouter to handle and process the message
             RouterService.getMessageRouter().handleMessage(msg, CONNECTION);
