@@ -5,17 +5,13 @@ import java.net.URL;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.TreeMap;
+import com.sun.java.util.collections.*;
+
+import com.limegroup.gnutella.messages.*;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
@@ -156,7 +152,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    false,false,"",0,null, -1);
 
             // just make sure this doesn't throw an exception
-			AlternateLocation.create(rfd);
+			AlternateLocation loc = AlternateLocation.create(rfd);
+			assertNull(loc.getPushAddress());
 		}
 
         try {
@@ -180,7 +177,23 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
             fail("should have thrown a null pointer");
         } catch(NullPointerException e) {
             // this is expected
-        }                
+        }
+        
+        PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        assertNotNull(loc.getPushAddress());
         
 	}
 
@@ -196,6 +209,25 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			URL url = (URL)PrivilegedAccessor.getValue(al,"URL");
 			assertEquals("urls should be equal", url, rfd.getUrl());
 		}
+		
+		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        RemoteFileDesc other = loc.createRemoteFileDesc(3);
+        
+        assertEquals(fwalled.getClientGUID(),other.getClientGUID());
+        assertEquals(fwalled.getPushAddr(),other.getPushAddr());
 	}
 
 	/**

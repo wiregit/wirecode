@@ -449,16 +449,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertEquals(HeadPing.PLAIN, ping.getFeatures());
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
+    	assertFalse(ping.requestsPushLocs());
     	
 
-
-    	try {
-    		ping = new HeadPing(urn, 0xFF);
-    		fail("created a redirect ping w/o address");
-    	}catch(IllegalArgumentException expected){}
-    	
     	ping = new HeadPing(urn, 0xFF);
-
+    	
+    	assertTrue(ping.requestsPushLocs());
     	assertTrue(ping.requestsAltlocs());
     	assertTrue(ping.requestsRanges());
     	
