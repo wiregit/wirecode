@@ -216,27 +216,22 @@ public final class HugeTestUtils {
 		"http://www.test.com",
 		"http: //40.201.12.36:6332/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-
-    };
-
-    /*
-      "http://N.N.N.N:20/uri-res/N2R?"+
-      "urn:sha1:QYCZLVFE64ICMJSK6DKJXA7SOJO7REF4 2003-01-14"+
+        "http://30.35.35.35:20/uri-res/N2R?"+
+            "urn:sha1:QYCZLVFE64ICMJSK6DKJXA7SOJO7REF4 2003-01-14"+
             "03EE80E2  T00:49:16Z",
 
-        "http://M.M.M.M:2000/uri-res/N2R?"+
+        "http://200.60.60.60:2000/uri-res/N2R?"+
             "urn:sha1:___IIHXN25H2GJ 2003-01-14"+
-            "0962239A  T00:41:50Z"+
-        "http://K.K.K.K:K/uri-res/N2R?"+
+            "0962239A  T00:41:50Z",
+        "http://100.20.20.30:3000/uri-res/N2R?"+
             "urn:sha1:___IIHXN25H2GJ 2003-01-14T00:41:51Z", 
-        "http://Q.Q.Q.Q:Q/uri-res/N2R?urn:sha1:MJPNEJY6C09622443  "+
+        "http://60.80.70.98:900/uri-res/N2R?urn:sha1:MJPNEJY6C09622443  "+
             "6O4RR6K3LDWCSVT3KCQRG7Z 2003-01-14T01:07:49Z",
-        "http://X.X.X.X:X/uri-res/N2R?urn:sha1:___GTY42JCUXK5M7QVYWDP2CMOMPD "+
+        "http://60.67.67.67:800/uri-res/N2R?urn:sha1:___GTY42JCUXK5M7QVYWDP2CMOMPD "+
             "2003-01-14T11:59:57Z", 
-        "http://G.G.G.G:G096224EC  "+
+        "http://30.35.35.35:G096224EC  "+
             "355/uri-res/N2R?urn:sha1:___IIHXN25H2GJ 2003-01-14T00:45:44Z",
 	};
-    */
 	
 
 	/**
