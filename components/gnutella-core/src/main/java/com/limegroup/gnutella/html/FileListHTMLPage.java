@@ -56,14 +56,14 @@ public class FileListHTMLPage {
         
         {
             // get all the Shared files from the FM
-            final String beginURL = "\r\n<a href=/get/";
+            final String beginURL = "\r\n<a href=\"/get/";
             for (int i = 0; i < sharedFiles.length; i++) {
                 if (!(sharedFiles[i] instanceof IncompleteFileDesc)) {
                     File currFile = sharedFiles[i].getFile();
                     sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
                               UploadManager.FV_PASS + "/" +
                               StringUtils.replace(URLEncoder.encode(currFile.getName()),
-                                                  "+", "%20") + ">" + 
+                                                  "+", "%20") + "\">" + 
                               currFile.getName() + "</a><br>");
                     
                     if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
