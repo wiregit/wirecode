@@ -135,6 +135,15 @@ System.out.println("RouterService init");
     }
 
     /**
+     *  Reset how many connections you want and start kicking more off
+     *  if required
+     */
+    public void adjustKeepAlive(int newKeep)
+    {
+        manager.adjustKeepAlive(newKeep);
+    }
+
+    /**
      *  Return the total number of messages sent and received
      */
     public int getTotalMessages() {

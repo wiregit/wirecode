@@ -34,6 +34,7 @@ public class ConnectionManager implements Runnable {
     private ActivityCallback callback;
     private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
     public String ClientId;
+    private int   activeAttempts = 0;
     public boolean stats;
 
     /** Variables for stastical purpouses */
@@ -213,7 +214,6 @@ public class ConnectionManager implements Runnable {
      */
     public void setActivityCallback(ActivityCallback connection) {
         callback = connection;
-	//System.out.println("ConnectionManager init -  cc ="+connection);
     }
 
     /** @requires c not in this
@@ -228,7 +228,6 @@ public class ConnectionManager implements Runnable {
 	if (c.isOutgoing())
 	    catcher.addGood(c);
 
-	//System.out.println("add - cc="+callback);
 	// Tell the listener that this connection is okay.
 	if ( callback != null )
 	    callback.updateConnection(
@@ -241,7 +240,6 @@ public class ConnectionManager implements Runnable {
      *  @effects passes connecting information to ActivityCallback
      */
     public void tryingToConnect(String host, int port, boolean incoming) {
-	//System.out.println("trying - cc="+callback);
 	// Tell the listener that this connection is connecting.
 	if ( callback != null )
 	    callback.addConnection(
@@ -250,16 +248,24 @@ public class ConnectionManager implements Runnable {
 	      (incoming ? callback.CONNECTION_INCOMING :
                           callback.CONNECTION_OUTGOING), 
               callback.STATUS_CONNECTING);
+
+	// Maintain a count of attempted outgoing connections
+    	if ( ! incoming ) 
+	{
+	    activeAttempts++;
+	}
     }
 
     /** 
      *  @effects passes failed connect information to ActivityCallback
      */
     public void failedToConnect(String host, int port) {
-	//System.out.println("failed - cc="+callback);
 	// Remove this connection
 	if ( callback != null )
 	    callback.removeConnection( host, port );
+
+	// Maintain a count of attempted outgoing connections
+	activeAttempts--;
     }
 	
     /** 
@@ -282,7 +288,6 @@ public class ConnectionManager implements Runnable {
 		t.start();
 	    }
 
-	    //System.out.println("remove - cc="+callback);
 	    // Tell the listener that this connection is removed.
 	    if ( callback != null )
 		callback.removeConnection(
@@ -295,9 +300,13 @@ public class ConnectionManager implements Runnable {
 	return( callback );
     }
 
+    public int getActiveAttempts()
+    {
+	return(activeAttempts--);
+    }
+
     private static String getHostName( InetAddress ia )
     {
-	//System.out.println("InetAddr = " + ia );
 	String host = ia.getHostAddress();
 	
 	return(host);
@@ -349,6 +358,24 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
+     *  Reset how many connections you want and start kicking more off
+     *  if required
+     */
+    public void adjustKeepAlive(int newKeep)
+    {
+	keepAlive = newKeep;
+	if (keepAlive > 0) {
+	    int need = keepAlive - getNumConnections() - getActiveAttempts();
+	    //Asynchronously fetch connections to maintain keepAlive connections
+	    for ( int i=0; i < need; i++ )
+	    {
+	        Thread t=new ConnectionFetcher(this, 1);
+	        t.start();
+	    }
+	}
+    }
+
+    /**
      * @modifies the file gnutella.net, or its user-defined equivalent
      * @effects writes the gnutella.net file to disk.
      */
@@ -397,7 +424,6 @@ class ConnectionFetcher extends Thread {
 	this.manager=manager;
 	this.n=n;
 	setDaemon(true);
-	//System.out.println("Fetcher Started");
     }
 
     public void run() {
@@ -409,7 +435,6 @@ class ConnectionFetcher extends Thread {
 		t.setDaemon(true);
 		t.start();
 		//Manager.error("Asynchronously established outgoing connection.");
-		System.out.println("Got a connection");
 	    } catch (NoSuchElementException e) {
 		//give up
 		//Manager.error("Host catcher is empty");

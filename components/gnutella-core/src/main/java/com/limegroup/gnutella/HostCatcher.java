@@ -183,16 +183,13 @@ public class HostCatcher {
 	    //   successful, add the endpoint to the elected set so we 
 	    //   can write to disk and try later.
 	    try {
-		//System.out.println("trying IP ="+e.hostname);
 		manager.tryingToConnect(e.hostname,e.port, false);
 		Connection ret=new Connection(manager,e.hostname,e.port);
 		synchronized(elected) {
 		    elected.add(e);
 		}
-		//System.out.println("OK");
 		return ret;
 	    } catch (IOException exc) {
-		//System.out.println("FAILED");
 		manager.failedToConnect(e.hostname,e.port);
 		continue;
 	    }
