@@ -8,7 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;

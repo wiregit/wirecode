@@ -4,6 +4,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -16,7 +17,7 @@ import java.net.UnknownHostException;
 
 /**
  * a class that represents an endpoint behind one or more PushProxies
- * everything is immutable including the contents of the set.
+ * almost everything is immutable including the contents of the set.
  * 
  * the network format this is serialized to is:
  * byte 0 : 
@@ -35,9 +36,9 @@ import java.net.UnknownHostException;
  * 
  * Examples:
  * 
- *  //altloc with 2 proxies that supports firewall transfer 1.0 :
+ *  //altloc with 2 proxies that supports firewall transfer 1 :
  * 
- * <ThisIsTheGUIDASDF>;fwawt/1.0;20.30.40.50:60;1.2.3.4:5567
+ * <ThisIsTheGUIDASDF>;fwt/1.0;20.30.40.50:60;1.2.3.4:5567
  * 
  *   //altloc with 1 proxy that doesn't support firewall transfer :
  * 
@@ -95,7 +96,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	/**
 	 * the string representation as sent in headers.
 	 */
-	private final String _httpString;
+	private String _httpString;
 	
 	/**
 	 * the various features this PE supports.
@@ -129,44 +130,24 @@ public class PushEndpoint implements HTTPHeaderValue{
 		_size = HEADER_SIZE+
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 		
-		//create the http string representation
-
-		String httpString = _guid.toHexString()+";";
-		
-		//if version is not 0, append it to the http string
-		if (version!=0)
-			httpString+=HTTPConstants.FW_TRANSFER+"/"+version+";";
-		
-		//also calculate the hashcode in the constructor, also append
-		//proxies to httpString in the same loop
+		//also calculate the hashcode in the constructor
 		
 		int hashcode = _guid.hashCode();
 		
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
-			hashcode = 37 *hashcode+cur.hashCode();
-			httpString = httpString + 
-				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
-			httpString = httpString +":"+cur.getPushProxyPort()+";";
+			hashcode = 37 *hashcode+cur.hashCode();	
 		}
 		
-		//trim the ; at the end
-		if (_proxies.size() > 0)
-			httpString = httpString.substring(0,httpString.length()-1);
+
 		
-		_httpString = httpString;
 		_hashcode = hashcode;
 		
 		
 	}
 	
 	public PushEndpoint(byte [] guid, Set proxies) {
-		//if we are creating a PushEndpoint for ourselves, check which version
-		//of firewall transfer we support
-		this(guid,proxies,PLAIN,
-				Arrays.equals(guid,RouterService.getMessageRouter().getOurGUID()) ?
-						1 : 0);
-		//TODO: get right number here
+		this(guid,proxies,PLAIN,0);
 	}
 	
 	/**
@@ -184,8 +165,6 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public PushEndpoint(String httpString) throws IOException{
 		
 
-		//copy the constructing string directly.
-		_httpString=httpString;
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
@@ -211,7 +190,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		while(tok.hasMoreTokens() && parsedProxies < 4) {
 			String current = tok.nextToken();
 			
-			//see if this token is the fwawt header
+			//see if this token is the fwt header
 			if (current.startsWith(HTTPConstants.FW_TRANSFER)) {
 				int slash = current.indexOf("/");
 				String version = current.substring(slash+1);
@@ -407,6 +386,28 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public String httpStringValue() {
+		
+		if (_httpString ==null) {
+			String httpString = _guid.toHexString()+";";
+			
+			//if version is not 0, append it to the http string
+			if (_fwtVersion!=0)
+				httpString+=HTTPConstants.FW_TRANSFER+"/"+_fwtVersion+";";
+			
+			for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+				PushProxyInterface cur = (PushProxyInterface)iter.next();
+				
+				httpString = httpString + 
+				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
+				httpString = httpString +":"+cur.getPushProxyPort()+";";
+			}
+			
+			//trim the ; at the end
+			if (_proxies.size() > 0)
+				httpString = httpString.substring(0,httpString.length()-1);
+			
+			_httpString=httpString;
+		}
 		return _httpString;
 	}
 	
