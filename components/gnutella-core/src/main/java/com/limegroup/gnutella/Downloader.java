@@ -154,7 +154,12 @@ public interface Downloader extends BandwidthTracker {
     public String getQueuePosition();
     
     /**
-     * Return the number of alternate locations for this download
+     * Return the number of validated alternate locations for this download
      */
     public int getNumberOfAlternateLocations();
+    
+    /**
+     * Returns the number of possible hosts for this possible.
+     */
+    public int getNumberOfPossibleHosts();
 }
