@@ -199,8 +199,8 @@ public final class QueryUnicaster {
                     udpService.send(new PingRequest(),
                                     toQuery.getAddress(),
                                     toQuery.getPort());
-                    // re-add GUESS Endpoint to back of list
-                    addUnicastEndpoint(toQuery);
+                    // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
+                    // QueryKey Reply!!
                     continue; // try another up above....
                 }
                 QueryKey queryKey = 
@@ -428,6 +428,7 @@ public final class QueryUnicaster {
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         _queryKeys.put(endpoint, new QueryKeyBundle(qk));
+        addUnicastEndpoint(endpoint);
     }
 
 
