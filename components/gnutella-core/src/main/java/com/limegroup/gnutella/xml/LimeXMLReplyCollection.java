@@ -111,19 +111,14 @@ public class LimeXMLReplyCollection{
                     boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
                     try {
                         if(!onlyID3) {  //non-id3 values with mp3 file
-                            try {
-                                String id3XML =
-                                id3Reader.readDocument(file,onlyID3);
-                                String joinedXML = 
-                                joinAudioXMLStrings(id3XML, xmlStr);
-                                doc = new LimeXMLDocument(joinedXML);
-                            }
-                            catch (RuntimeException re) {
-                                // our join method can be fragile, so there
-                                // is no reason to discard xml for this file
-                                // just use id3 info...
+                            String id3XML =
+                            id3Reader.readDocument(file,onlyID3);
+                            String joinedXML = 
+                            joinAudioXMLStrings(id3XML, xmlStr);
+                            if( joinedXML == null )
                                 doc = id3Reader.readDocument(file);
-                            }
+                            else 
+                                doc = new LimeXMLDocument(joinedXML);
                         }
                         else // only id3 data with mp3 files
                             doc = id3Reader.readDocument(file);
@@ -226,19 +221,24 @@ public class LimeXMLReplyCollection{
         LimeXMLProperties props = LimeXMLProperties.instance();
         String path = props.getXMLDocsDir();
         dataFile = new File(path,fname);
+        // invalid if directory.
+        if( dataFile.isDirectory() )
+            return null;
         mainMap = new HashMap();
         MapSerializer ret = null;
-        try{
-            ret = new MapSerializer(dataFile);
-        }catch(Exception e){
+        try {
+            return new MapSerializer(dataFile);
+        } catch(IOException e) {
             debug(e);
+            return null;
         }
-        return ret;
     }
-        
-    private String joinAudioXMLStrings(String mp3Str, String fileStr) 
-    throws RuntimeException {
+
+    private String joinAudioXMLStrings(String mp3Str, String fileStr) {
         int p = fileStr.lastIndexOf("></audio>");
+        if( p == -1 )
+            return null;
+            
         //above line is the one closing the root element
         String a = fileStr.substring(0,p);//all but the closing part
         String b = fileStr.substring(p);//closing part
@@ -268,14 +268,14 @@ public class LimeXMLReplyCollection{
         }
         replyDoc.setIdentifier(identifier);
         addReply(hash, replyDoc);
+        
         // commit to disk...
-        try {
-            if (audio)
+        if (audio) {
+            try {
                 mp3ToDisk(f.getCanonicalPath());
-            else
-                write();
-        }
-        catch (Exception ignored) {}
+            } catch(IOException ignored) {}
+        } else
+            write();
     }
 
     public int getCount(){
@@ -373,13 +373,17 @@ public class LimeXMLReplyCollection{
             LimeXMLProperties props = LimeXMLProperties.instance();
             String path = props.getXMLDocsDir();
             dataFile = new File(path,fname);
-        }        
-        try{
+        }
+        // invalid if directory
+        if( dataFile.isDirectory() )
+            return false;
+    
+        try {
             MapSerializer ms = new MapSerializer(dataFile, mainMap);
             synchronized (writeLock) {
                 ms.commit();
             }
-        }catch (Exception e){
+        } catch (IOException e) {
             return false;
         }
         return true;
@@ -414,28 +418,38 @@ public class LimeXMLReplyCollection{
     private Object[] ripMP3XML(String modifiedFile) {
         Object[] retObjs = new Object[3];
         retObjs[0] = Boolean.FALSE;
+
         if (!LimeXMLUtils.isMP3File(modifiedFile))
             return retObjs;
+
+        String hash = null;
+        
         try {
-            String hash = 
-            new String(LimeXMLUtils.hashFile(new File(modifiedFile)));
-            LimeXMLDocument doc = null;
-            synchronized (mainMap) {
-                doc = (LimeXMLDocument) mainMap.get(hash);
-            }
-            if (LimeXMLUtils.isMP3File(modifiedFile)) {
-                ID3Editor e = new ID3Editor();
-                String xml = doc.getXMLStringWithIdentifier();
-                e.removeID3Tags(xml);
-                retObjs[0] = Boolean.TRUE;
-                retObjs[1] = hash;
-                retObjs[2] = e;
-            }
+            hash = new String(LimeXMLUtils.hashFile(new File(modifiedFile)));
+        } catch(IOException ioe) {
             return retObjs;
         }
-        catch (Exception e) {
+        
+        LimeXMLDocument doc = null;
+        synchronized (mainMap) {
+            doc = (LimeXMLDocument) mainMap.get(hash);
+        }
+
+        ID3Editor e = new ID3Editor();
+        String xml = null;
+
+        try {
+            xml = doc.getXMLStringWithIdentifier();
+        } catch(SchemaNotFoundException snfe) {
             return retObjs;
         }
+        
+        e.removeID3Tags(xml);
+        retObjs[0] = Boolean.TRUE;
+        retObjs[1] = hash;
+        retObjs[2] = e;
+
+        return retObjs;
     }
 
 
@@ -453,7 +467,7 @@ public class LimeXMLReplyCollection{
         try {
             newHash = new String(LimeXMLUtils.hashFile(file));
         }
-        catch (Exception e){
+        catch (IOException e){
             retVal = HASH_FAILED;
             return retVal;
         }
@@ -484,14 +498,13 @@ public class LimeXMLReplyCollection{
         private Map _hashMap;
 
         /** @param whereToStore The name of the file to serialize from / 
-         *  deserialize to.  
-         *  @exception Exception Thrown if input file whereToStore is invalid.
+         *  deserialize to.
+         *  @exception IOException if there was a problem deserializing the
+         *    file.
          */
-        public MapSerializer(File whereToStore) throws Exception {
+        public MapSerializer(File whereToStore) throws IOException {
             _backingStoreFile = whereToStore;
-            if (_backingStoreFile.isDirectory())
-                throw new Exception();
-            else if (_backingStoreFile.exists())
+            if (_backingStoreFile.exists())
                 deserializeFromFile();
             else
                 _hashMap = new HashMap();
@@ -501,40 +514,58 @@ public class LimeXMLReplyCollection{
         /** @param whereToStore The name of the file to serialize from / 
          *  deserialize to.  
          *  @param storage A HashMap that you want to serialize / deserialize.
-         *  @exception Exception Thrown if input file whereToStore is invalid.
          */
-        public MapSerializer(File whereToStore, Map storage) 
-        throws Exception {
+        public MapSerializer(File whereToStore, Map storage) {
             _backingStoreFile = whereToStore;
             _hashMap = storage;
-            if (_backingStoreFile.isDirectory())
-                throw new Exception();
         }
 
 
-        private void deserializeFromFile() throws Exception {            
-            FileInputStream istream = new FileInputStream(_backingStoreFile);
-            ObjectInputStream objStream = new ObjectInputStream(istream);
-            _hashMap = (Map) objStream.readObject();
-            istream.close();
+        private void deserializeFromFile() throws IOException {
+            FileInputStream istream = null;
+            ObjectInputStream objStream = null;
+            try {
+                istream = new FileInputStream(_backingStoreFile);
+                objStream = new ObjectInputStream(istream);
+                _hashMap = (Map) objStream.readObject();
+            } catch(ClassNotFoundException cnfe) {
+                throw new IOException("class not found");
+            } catch(ClassCastException cce) {
+                throw new IOException("class cast");
+            } finally {
+                if( istream != null ) {
+                    try {
+                        istream.close();
+                    } catch(IOException ignored) {}
+                }
+            }
         }
 
         /** Call this method when you want to force the contents to the HashMap
          *  to disk.
-         *  @exception Exception Thrown if force to disk failed.
+         *  @exception IOException Thrown if force to disk failed.
          */
-        public void commit() throws Exception {
+        public void commit() throws IOException {
             serializeToFile();
         }
 
         
-        private void serializeToFile() throws Exception {
-            FileOutputStream ostream = new FileOutputStream(_backingStoreFile);
-            ObjectOutputStream objStream = new ObjectOutputStream(ostream);
-            synchronized (_hashMap) {
-                objStream.writeObject(_hashMap);
+        private void serializeToFile() throws IOException {
+            FileOutputStream ostream = null;
+            ObjectOutputStream objStream = null;
+            try {
+                ostream = new FileOutputStream(_backingStoreFile);
+                objStream = new ObjectOutputStream(ostream);
+                synchronized (_hashMap) {
+                    objStream.writeObject(_hashMap);
+                }
+            } finally {
+                if( ostream != null ) {
+                    try {
+                        ostream.close();
+                    } catch(IOException ignored) {}
+                }
             }
-            ostream.close();
         }
 
         /** @return The Map this class encases.
@@ -545,26 +576,6 @@ public class LimeXMLReplyCollection{
 
     }
 
-
-    
-    public static void testMapSerializer(String argv[]) throws Exception {   
-        LimeXMLReplyCollection.MapSerializer hms =
-        new LimeXMLReplyCollection.MapSerializer(new File(argv[0]));
-        
-        Map hm = hms.getMap();
-        
-        System.out.println(""+hm);
-        
-        for (int i = 1; i < argv.length; i+=2) {
-            try{
-                hm.put(argv[i],argv[i+1]);
-            }
-            catch (Exception e) {};
-        }
-        hms.commit();
-    }
-
-
     private final static boolean debugOn = false;
     private final static void debug(String out) {
         if (debugOn)
@@ -574,12 +585,4 @@ public class LimeXMLReplyCollection{
         if (debugOn)
             out.printStackTrace();
     }
-
-    
-    
-    public static void main(String argv[]) throws Exception {
-        testMapSerializer(argv);
-    }
-    
-
 }

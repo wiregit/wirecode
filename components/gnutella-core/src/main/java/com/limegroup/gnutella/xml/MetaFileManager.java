@@ -15,13 +15,13 @@ public class MetaFileManager extends FileManager {
     boolean initialized = false;
     
     /**
-     * keeps a hash of files -> hash of files (file -> string)
+     * keeps a file -> hash of files (file -> string)
      * <p>
      * <b>You must use the synchronized method in this class to read
      *  or write from this map
      * </b>
      */
-    private Map fileToHash = new HashMap();
+    private Map fileToHash /* File -> String */ = new HashMap();
     
     /**
      * Overrides FileManager.query.
