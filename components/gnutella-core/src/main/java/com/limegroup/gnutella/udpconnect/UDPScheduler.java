@@ -130,6 +130,11 @@ public class UDPScheduler extends ManagedThread {
             synchronized(this) {
                 if ( _scheduledEvent == NO_EVENT )
                     continue;
+                // If an event changed during sleep, then rework schedule
+                if ( _scheduledEvent.getEventTime() == Long.MAX_VALUE ) {
+                    reworkSchedule();
+                    continue;
+                }
                 waitTime = _scheduledEvent.getEventTime() - 
                   System.currentTimeMillis();
                 if ( waitTime > 0 )

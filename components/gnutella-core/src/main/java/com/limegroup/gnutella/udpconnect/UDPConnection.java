@@ -7,7 +7,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 /** 
  *  Create a reliable udp connection interface.
  */
-public class UDPConnection {
+public class UDPConnection extends Socket {
 
 	private UDPConnectionProcessor _processor;
 
@@ -34,4 +34,7 @@ public class UDPConnection {
 	public void close() throws IOException {
 		_processor.close();
 	}
+    
+    // TODO: There appear to be new additions to the useable interface and
+    //       everything else should throw exceptions.
 }

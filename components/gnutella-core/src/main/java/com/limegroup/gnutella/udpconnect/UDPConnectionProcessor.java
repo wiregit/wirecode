@@ -65,6 +65,9 @@ public class UDPConnectionProcessor {
         on the receivers end, they may not be setup initially.  */
 	private static final long WRITE_STARTUP_WAIT_TIME = 400;
 
+    /** Define the default time to check for an ack to a data message */
+    private static final long DEFAULT_RTO_WAIT_TIME   = 400;
+
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -102,8 +105,11 @@ public class UDPConnectionProcessor {
     /** Scheduled event for keeping connection alive  */
     private UDPTimerEvent     _keepaliveEvent;
 
-    /** Scheduled event for keeping connection alive  */
+    /** Scheduled event for writing data appropriately over time  */
     private UDPTimerEvent     _writeDataEvent;
+
+    /** Scheduled event for ensuring that data is acked or resent */
+    private UDPTimerEvent     _ackTimeoutEvent;
 
 
     /** The current sequence number of messages originated here */
@@ -227,6 +233,51 @@ public class UDPConnectionProcessor {
     }
 
     /**
+     *  Setup and schedule the callback event for ensuring data gets acked.
+     */
+    private synchronized void scheduleAckTimeoutEvent(long time) {
+        if ( isConnected() ) {
+            if ( _ackTimeoutEvent == null ) {
+                _ackTimeoutEvent  = 
+                    new AckTimeoutTimerEvent(time);
+
+                // Register ackTimout event for future use
+                _scheduler.register(_ackTimeoutEvent);
+            } else {
+                _ackTimeoutEvent.updateTime(time);
+            }
+
+            // Notify the scheduler that there is a new ack timeout event
+            _scheduler.scheduleEvent(_ackTimeoutEvent);
+        }
+    }
+
+    /**
+     *  Suppress ack timeout events for now
+     */
+    private synchronized void unscheduleAckTimeoutEvent() {
+        // Nothing required if not initialized
+        if ( _ackTimeoutEvent == null )
+            return;
+
+        // Set an existing event to an infinite wait
+        // Note: No need to explicitly inform scheduler.
+        _ackTimeoutEvent.updateTime(Long.MAX_VALUE);
+    }
+
+    /**
+     *  Determine if an ackTimeout should be rescheduled  
+     */
+    private synchronized boolean isAckTimeoutUpdateRequired() {
+        // If ack timeout not yet created then yes.
+        if ( _ackTimeoutEvent == null ) 
+            return true;
+
+        // If ack timeout exists but is infinite then yes an update is required.
+        return (_ackTimeoutEvent.getEventTime() == Long.MAX_VALUE);
+    }
+
+    /**
      *  Move the outgoing message sequence number forward with possible 
      *  rollover.
      */
@@ -304,9 +355,52 @@ public class UDPConnectionProcessor {
 			_sendWindow.addData(_sequenceNumber, dm);  
 
 			_sequenceNumber++;
+
+            // If Acking check needs to be woken up then do it
+            if ( isAckTimeoutUpdateRequired()) 
+                scheduleAckIfNeeded();
+
         } catch (BadPacketException bpe) {
             // This would not be good.  
             ErrorService.error(bpe);
+        } catch(IllegalArgumentException iae) {
+            // Report an error since this shouldn't ever happen
+            ErrorService.error(iae);
+        }
+    }
+
+    /**
+     *  Build and send an ack with default error handling with
+     *  the messages sequenceNumber, receive window start and 
+     *  receive window space.
+     */
+    private void safeSendAck(UDPConnectionMessage msg) {
+        // Ack the message
+        AckMessage ack = null;
+        try {
+          ack = new AckMessage(
+           _theirConnectionID, 
+           msg.getSequenceNumber(),
+           _receiveWindow.getWindowStart(),   
+           _receiveWindow.getWindowSpace());
+
+            send(ack);
+        } catch (BadPacketException bpe) {
+            // This would not be good.   TODO: ????
+            ErrorService.error(bpe);
+        } catch(IllegalArgumentException iae) {
+            // Report an error since this shouldn't ever happen
+            ErrorService.error(iae);
+        }
+    }
+
+
+    /**
+     *  Send a message on to the UDPService
+     */
+    private synchronized void safeSend(UDPConnectionMessage msg) {
+        try {
+            send(msg); 
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
@@ -322,6 +416,75 @@ public class UDPConnectionProcessor {
 		_lastSendTime = System.currentTimeMillis();
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
+
+
+
+    /**
+     *  Schedule an ack timeout for the oldest unacked data.
+     *  If no acks are pending, then do nothing.
+     */
+    private synchronized void scheduleAckIfNeeded() {
+        DataRecord drec = _sendWindow.getOldestUnackedBlock();
+        if ( drec != null ) {
+            int rto         = _sendWindow.getRTO();
+            long waitTime    = drec.sentTime + ((long)rto);
+            scheduleAckTimeoutEvent(waitTime);
+        } else {
+            unscheduleAckTimeoutEvent();
+        }
+    }
+
+    /**
+     *  Ensure that data is getting acked.  If not within an appropriate time, 
+     *  then resend.
+     */
+    private synchronized void validateAckedData() {
+        long currTime = System.currentTimeMillis();
+
+        if (_sendWindow.acksAppearToBeMissing(currTime, 1)) {
+
+            // if the older blocks ack have been missing for a while
+            // resend them.
+
+            // Calculate a good time to wait
+            int rto      = _sendWindow.getRTO();
+            int adjRTO   = (rto * 3) / 2;
+            int waitTime = rto / 2;
+
+            int start = _sendWindow.getWindowStart();
+
+System.out.println("Soft resend data:"+ start+ " rto:"+rto+
+" uS:"+_sendWindow.getUsedSpots());
+
+            DataRecord drec;
+            int        blockNum;
+
+            // Resend up to 2
+            for (int i = 0; i < 2; i++) {
+
+                //blockNum = (start + i) % DataWindow.MAX_SEQUENCE_NUMBER;
+
+                // Get the oldest unacked block out of storage
+                drec = _sendWindow.getOldestUnackedBlock();
+
+                // The assumption is that this record has not been acked
+                if ( drec == null ) break;
+                if ( drec.acks > 0 ) continue;
+
+                int currentWait = (int)(currTime - drec.sentTime);
+
+                // If it looks like we waited too long then speculatively resend
+                if ( currentWait > adjRTO ) {
+System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
+                    safeSend(drec.msg);
+                    currTime      = _lastSendTime;
+                    drec.sentTime = currTime;
+                    drec.sends++;
+                }
+            }
+        } 
+        scheduleAckIfNeeded();
+    }
 
 
     // ------------------  Connection Handling Logic -------------------
@@ -393,21 +556,7 @@ public class UDPConnectionProcessor {
             }
 
             // Ack their SYN message
-            AckMessage ack = null;
-            try {
-              ack = new AckMessage(theirConnID, smsg.getSequenceNumber(),
-               _receiveWindow.getWindowStart(),   
-               _receiveWindow.getWindowSpace());
-            } catch (BadPacketException bpe) {
-                // This would not be good.   TODO: ????
-                ErrorService.error(bpe);
-            }
-            try {  
-                send(ack);
-            } catch(IllegalArgumentException iae) {
-                // Report an error since this shouldn't ever happen
-                ErrorService.error(iae);
-            }
+            safeSendAck(msg);
         } else if (msg instanceof AckMessage) {
             AckMessage    amsg   = (AckMessage) msg;
             int           seqNo  = amsg.getSequenceNumber();
@@ -430,26 +579,18 @@ public class UDPConnectionProcessor {
 			_receiveWindow.addData(_sequenceNumber, dmsg);  
 
             // Ack the Data message
-            AckMessage ack = null;
-            try {
-              ack = new AckMessage(_theirConnectionID, dmsg.getSequenceNumber(),
-               _receiveWindow.getWindowStart(),   
-               _receiveWindow.getWindowSpace());
-            } catch (BadPacketException bpe) {
-                // This would not be good.   TODO: ????
-                ErrorService.error(bpe);
-            }
-            try {  
-                send(ack);
-            } catch(IllegalArgumentException iae) {
-                // Report an error since this shouldn't ever happen
-                ErrorService.error(iae);
-            }
+            safeSendAck(msg);
         } else if (msg instanceof KeepAliveMessage) {
             KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
             int              seqNo  = kmsg.getSequenceNumber();
             int              wStart = kmsg.getWindowStart();
     		_receiverWindowSpace    = kmsg.getWindowSpace();
+        } else if (msg instanceof FinMessage) {
+            // Stop sending data
+            _receiverWindowSpace    = 0;
+
+            // Ack the Fin message
+            safeSendAck(msg);
         }
 
         // TODO: fill in
@@ -521,11 +662,16 @@ public class UDPConnectionProcessor {
      *  Define what happens when an ack timeout occurs
      */
     class  AckTimeoutTimerEvent extends UDPTimerEvent {
+
         public AckTimeoutTimerEvent(long time) {
             super(time);
         }
 
         public void handleEvent() {
+            
+            if ( isConnected() ) {
+                validateAckedData();
+            }
         }
     }
     //

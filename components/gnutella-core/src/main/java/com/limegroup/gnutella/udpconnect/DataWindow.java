@@ -16,16 +16,22 @@ import java.util.HashMap;
  */
 public class DataWindow
 {
-    public static final int HIST_SIZE = 4;
+    public  static final int   MAX_SEQUENCE_NUMBER = 0xFFFF;
+    private static final int   HIST_SIZE           = 4;
+    private static final float RTT_GAIN            = 1.0f / 8.0f;
+    private static final float DEVIATION_GAIN      = 1.0f / 4.0f;
 
-	HashMap window;
-	int     windowStart;
-	int     windowSize;
-	int     endBlock;
-	long    averageRTT;
-	long    smoothRTT;
-	long    lowRTT;
-	int     lowRTTCount;
+	private HashMap window;
+	private int     windowStart;
+	private int     windowSize;
+	private int     endBlock;
+	private long    averageRTT;
+	private long    smoothRTT;
+	private long    lowRTT;
+	private int     lowRTTCount;
+    private float   srtt;
+    private float   rttvar;
+    private int     rto;
 
     /*
      *  Define a data window for sending or receiving multiple udp packets
@@ -199,26 +205,28 @@ public class DataWindow
     }
 
     /** 
-     *  If 50 percent of acks are in for window then 
-     *  assume lower guys went missing.
+     *  If the sent data has not been acked for some multiple of 
+     *  the RTO, it looks like a message was lost.
      */
     public synchronized boolean acksAppearToBeMissing(long time, int multiple) {
 		// Check for first record being old
 		DataRecord drec = getBlock(windowStart);
-		if ( smoothRTT > 0 &&
+		if ( rto > 0 &&
 			 drec != null   &&
 			 drec.acks < 1  &&
 		     drec.sentTime + (multiple * smoothRTT) < time ) {
-System.out.println("smoothRTT:"+smoothRTT);
+System.out.println("RTO:"+rto);
 			return true;
 		}
 
 		return false;
+    }
 
-		// Check for inactive records
-        //int highAcks = countHigherAckBlocks();
-        //int percent  = (highAcks * 100) / windowSize; 
-        //return (percent >= 50);
+    /** 
+     *  Return the RTO based on window data and acks.
+     */
+    public synchronized int getRTO() {
+        return rto;
     }
 
     /** 
@@ -266,9 +274,15 @@ System.out.println("smoothRTT:"+smoothRTT);
 
 			// Add to the averageRTT
 			if ( drec.acks == 1 && drec.sends == 1 ) {
-				long rtt = (drec.ackTime-drec.sentTime);
-				long adjRTT = rtt + HIST_SIZE/2 + 1;
+				long  rtt    = (drec.ackTime-drec.sentTime);
+				long  adjRTT = rtt + HIST_SIZE/2 + 1;
+                float delta  = ((float) rtt) - srtt;
 				if ( rtt > 0 ) {
+                    // Compute RTO
+                    srtt   = srtt + RTT_GAIN * delta;
+                    rttvar = rttvar + DEVIATION_GAIN*(Math.abs(delta) - rttvar);
+                    rto    = (int)(srtt + 4 * rttvar + 0.5);     
+
 					// Compute the average RTT
 					if ( averageRTT == 0 ) 
 						averageRTT = rtt;
@@ -304,23 +318,43 @@ System.out.println("smoothRTT:"+smoothRTT);
 	}
 
     /** 
-     *  Get a writable block which means unwritten ones at the start of Window
+     *  Get the oldest unacked block.
      */
-	public synchronized DataRecord getWritableBlock() {
+    public synchronized DataRecord getOldestUnackedBlock() {
         DataRecord d;
 
-		// Find a writable block
-		for (int i = windowStart; i < windowStart+windowSize+1; i++) {
-			d = getBlock(i);
-			if ( d != null ) {
-				if (d.written) continue;
-				else return d;
-			} else {
-				break;
-			}
-		}
-		return null;
-	}
+        // Find the oldest block.
+        DataRecord oldest = null;
+        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+            d = getBlock(i);
+            if ( d != null ) {
+                if ( d.acks == 0 &&
+                     (oldest == null || d.sentTime < oldest.sentTime) ) {
+                    oldest = d;
+                }
+            } 
+        }
+        return oldest;
+    }
+
+    /** 
+     *  Get a writable block which means unwritten ones at the start of Window
+     */
+    public synchronized DataRecord getWritableBlock() {
+        DataRecord d;
+
+        // Find a writable block
+        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+            d = getBlock(i);
+            if ( d != null ) {
+                if (d.written) continue;
+                else return d;
+            } else {
+                break;
+            }
+        }
+        return null;
+    }
 
     /** 
      *  To advance the window of the reader, higher blocks need to come in.
