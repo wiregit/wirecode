@@ -227,7 +227,7 @@ public final class UploadManager implements BandwidthTracker {
         } finally {
             // If the socket timed out while waiting for the next request,
             // then this is considered interupted.
-            if( uploader != null && uploader.getState() != Uploader.COMPLETE )
+            if( uploader != null && !uploader.isInactive())
                 uploader.setState(Uploader.INTERRUPTED);
                 
             synchronized(this) {

@@ -400,6 +400,27 @@ public final class HTTPUploader implements Uploader {
 		}
 		_amountRead = amount;
 	}
+    
+	/**
+	 * Returns whether or not this upload is in what is considered an "inactive"
+	 * state, such as completeed, aborted, failed, etc.
+	 *
+	 * @return <tt>true</tt> if this upload is in an inactive state,
+	 *  <tt>false</tt> otherwise
+	 */
+	public boolean isInactive() {
+        switch(_stateNum) {
+        case COMPLETE:
+        case PUSH_FAILED:
+        case LIMIT_REACHED:
+        case INTERRUPTED:
+        case FILE_NOT_FOUND:
+        case FREELOADER:
+            return true;
+        default:
+            return false;
+        }
+	}
 
     /** The byte offset where we should start the upload. */
 	int getUploadBegin() {return _uploadBegin;}

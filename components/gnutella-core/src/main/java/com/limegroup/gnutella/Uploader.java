@@ -127,6 +127,11 @@ public interface Uploader extends BandwidthTracker {
      * Returns the current queue position if queued.
      */
     public int getQueuePosition();
+    
+    /**
+     * Returns whether or not the uploader is in an inactive state.
+     */
+    public boolean isInactive();
 
 }
 
