@@ -94,8 +94,8 @@ class JOrbisComment {
     write(out);
     
     //rename fails on some rare filesystem setups
-    if (!tempFile.renameTo(file)){
-    	//TODO: come up with solution
+    if (!FileUtils.forceRename(tempFile,file)){
+    	//something's seriously wrong
     	throw new IOException("couldn't rename file");
     }
     }finally {
