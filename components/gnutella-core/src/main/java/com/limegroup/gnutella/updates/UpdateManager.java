@@ -2,6 +2,7 @@ package com.limegroup.gnutella.updates;
 
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.gui.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
 import java.net.*;
@@ -64,8 +65,8 @@ public class UpdateManager {
         if(isGreaterVersion(myVersion))
             return;
         //OK. myVersion < latestVersion
-        //TODO: get international string for first part
-        String guiMessage = "Please upgrade to "+latestVersion+". "+message;
+        String guiMessage = GUIMediator.getStringResource("UPDATE_MESSAGE")+
+        latestVersion+". "+message;
         gui.notifyUserAboutUpdate(guiMessage, CommonUtils.isPro());
     }
 
@@ -121,7 +122,7 @@ public class UpdateManager {
                     return;
                 if(isGreaterVersion(newVersion)) {
                     synchronized(UpdateManager.this) {
-                        verifier.commitVersionFile();//could throw an exception
+                        commitVersionFile(data);//could throw an exception
                         //update the value of latestVersion
                         latestVersion = newVersion;//we have the file committed
                     }
@@ -160,4 +161,18 @@ public class UpdateManager {
             return true;        
         return false;
     }
+
+    /**
+     *  writes data to signed_updateFile
+     */ 
+    private void commitVersionFile(byte[] data) throws IOException {
+        File f = new File("lib\\signed_update_file.xml");
+        File nf = new File("lib\\signed_update_file.new");
+        RandomAccessFile raf = new RandomAccessFile(nf,"rw");
+        raf.write(data);
+        boolean deleted = nf.renameTo(f);
+        if(!deleted)
+            throw new IOException();
+    }
+
 }
