@@ -51,10 +51,10 @@ public final class QueryHandler {
 
     /**
      * The number of milliseconds to wait per query hop.  So, if we send
-     * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
+     * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
      * milliseconds.
      */
-    static final long TIME_TO_WAIT_PER_HOP = 2200;
+    private long _timeToWaitPerHop = 2200;
 
     /**
      * Constant for the maximum number of milliseconds the entire query
@@ -305,7 +305,7 @@ public final class QueryHandler {
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
                 _nextQueryTime = 
-                    System.currentTimeMillis() + TIME_TO_WAIT_PER_HOP;
+                    System.currentTimeMillis() + _timeToWaitPerHop;
                 return;
             }
         }
@@ -333,6 +333,11 @@ public final class QueryHandler {
                 _nextQueryTime = System.currentTimeMillis() + 6000;
             }   
             _theoreticalHostsQueried += newHosts;
+            if(QUERIED_CONNECTIONS.size() > 4 && 
+               _timeToWaitPerHop > 50 &&
+               RESULT_COUNTER.getNumResults() < 80) {
+                _timeToWaitPerHop -= 100; 
+            }
         }
     }
 
@@ -478,7 +483,7 @@ public final class QueryHandler {
         
         
         handler._nextQueryTime = System.currentTimeMillis() + 
-            (ttl * TIME_TO_WAIT_PER_HOP);
+            (ttl * handler._timeToWaitPerHop);
 
         return calculateNewHosts(mc, ttl);
     }
