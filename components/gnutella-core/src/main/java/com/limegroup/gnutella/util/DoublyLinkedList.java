@@ -128,6 +128,46 @@ public class DoublyLinkedList
         last.prev = start;
     }
 
+
+    /* 
+     * Returns an iterator that yields the ListElement's in this, 
+     * each once, in order, from head to tail.  Call getValue() on
+     * each element to get the values in this.
+     *     @requires this not modified while iterator in use.
+     */
+    public Iterator iterator() {
+        return new DoublyLinkedListIterator();
+    }
+
+    /**
+     * Returns true if this contains the given ListElement.
+     */
+    public boolean contains(ListElement e) {
+        for (Iterator iter=iterator(); iter.hasNext(); ) {
+            ListElement e2=(ListElement)iter.next();
+            if (e.equals(e2))
+                return true;
+        }
+        return false;
+    }
+    
+    private class DoublyLinkedListIterator extends UnmodifiableIterator {
+        /** The next element to yield, or last if done. */
+        private ListElement next=start.next;
+
+        public boolean hasNext() {
+            return next!=last;
+        }
+
+        public Object next() {
+            if (! hasNext())
+                throw new NoSuchElementException();
+            ListElement ret=next;
+            next=next.next;
+            return ret;
+        }
+    }
+
     /**
      * An element of the linked list.  Immutable.
      */
@@ -169,6 +209,7 @@ public class DoublyLinkedList
         {
             return key;
         }
+
     }//end of class ListElement    
 
     /** Unit test. */
@@ -245,6 +286,29 @@ public class DoublyLinkedList
         l.clear();
         Assert.that(l.removeFirst()==null);
         Assert.that(l.removeFirst()==null);
+
+        //Test iterator and contains
+        l.clear();
+        Iterator iter=l.iterator();
+        Assert.that(! iter.hasNext());
+
+        Assert.that(! l.contains(a));
+        a=l.addLast("a");
+        Assert.that(l.contains(a));
+        iter=l.iterator();
+        Assert.that(iter.next()==a);
+        Assert.that(! iter.hasNext());
+
+        b=l.addLast("b");
+        Assert.that(! l.contains(c));
+        c=l.addLast("c");
+        Assert.that(l.contains(b));
+        Assert.that(l.contains(c));
+        iter=l.iterator();
+        Assert.that(iter.next()==a);
+        Assert.that(iter.next()==b);
+        Assert.that(iter.next()==c);
+        Assert.that(! iter.hasNext());
     }
     */
 }
