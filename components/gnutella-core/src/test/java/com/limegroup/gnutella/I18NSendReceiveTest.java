@@ -17,6 +17,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
@@ -221,25 +222,30 @@ public class I18NSendReceiveTest
     public void testSendReceiveXML() throws Exception {
         drain(CONN_1);
         setUpMetaData();
+        I18NConvert normer = I18NConvert.instance();
 
         List expectedReply = new ArrayList();
 
         addExpectedReply(expectedReply, META_FILE_0);
         sendCheckQueryXML(expectedReply, director1,
-                          buildXMLString("director=\"" + director1 + "\""));
+                          buildXMLString("director=\"" +
+                                         normer.getNorm(director1) + 
+                                         "\""));
         
         addExpectedReply(expectedReply, META_FILE_1);
         addExpectedReply(expectedReply, META_FILE_2);
         sendCheckQueryXML(expectedReply, director2,
-                          buildXMLString("director=\"" + director2 + "\""));
+                          buildXMLString("director=\"" +
+                                         normer.getNorm(director2) +
+                                         "\""));
         
         addExpectedReply(expectedReply, META_FILE_2);
         sendCheckQueryXML(expectedReply, director2,
                           buildXMLString("director=\"" 
-                                         + director2 
+                                         + normer.getNorm(director2)
                                          + "\" "
                                          + "studio=\""
-                                         + studio2 
+                                         + normer.getNorm(studio2)
                                          + "\""));
     }
     
