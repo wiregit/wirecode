@@ -32,7 +32,11 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public static final int F2F_TRANSFER=0x8; //whether the PE supports F2F transfers.
 	
 	private static final int SIZE_MASK=0x7;
+	
+	//the features mask does not clear the bits we do not understand
+	//because we may pass on the altloc to someone who does.
 	private static final int FEATURES_MASK=0xF8;
+	
 	/**
 	 * the client guid of the endpoint
 	 */
@@ -76,7 +80,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public PushEndpoint(byte [] guid, Set proxies,int features) {
 		
-		_features = features;
+		_features = features & FEATURES_MASK;
 		
 		_clientGUID=guid;
 		_guid = new GUID(guid);
