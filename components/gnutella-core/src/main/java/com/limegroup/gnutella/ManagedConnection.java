@@ -76,7 +76,7 @@ public class ManagedConnection extends Connection
 
     /** The total amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=10000;
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
 
     /** The maximum number of times ManagedConnection instances should send UDP
      *  ConnectBack requests.
@@ -139,7 +139,7 @@ public class ManagedConnection extends Connection
      *  of producer traffic, though they waste more memory. This queue is
      *  slightly smaller so that we don't waste too much memory on lower
      *  priority messages. */
-    private static final int QUEUE_SIZE = 30;
+    private static final int QUEUE_SIZE = 5;
     /** The max time to keep reply messages and pushes in the queues, in
      *  milliseconds. */
     private static int BIG_QUEUE_TIME=10*1000;
@@ -366,11 +366,11 @@ public class ManagedConnection extends Connection
         _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+            = new PriorityMessageQueue(4, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(1, QUEUE_TIME, BIG_QUEUE_SIZE);
+            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_PING_REPLY] 
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING]       
