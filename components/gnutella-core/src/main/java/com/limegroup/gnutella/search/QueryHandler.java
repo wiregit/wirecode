@@ -151,15 +151,21 @@ public final class QueryHandler {
 	 *  far fewer matches, ignoring this parameter
 	 */
 	private QueryHandler(QueryRequest query, int results) {
+		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		GUID = query.getGUID();
-		QUERY = query.getQuery();
-		XML_QUERY = query.getRichQuery();
+		if(isHashQuery) {
+			QUERY = "\\";
+			XML_QUERY = "";
+		} else {
+			QUERY = query.getQuery();
+			XML_QUERY = query.getRichQuery();
+		}
 		HOPS = query.getHops();
 		PAYLOAD = query.getPayload();
-		if(query.getQueryUrns().isEmpty()) {
-			RESULTS = results;
-		} else {
+		if(isHashQuery) {
 			RESULTS = HASH_QUERY_RESULTS;
+		} else {
+			RESULTS = results;
 		}
 	}
 
