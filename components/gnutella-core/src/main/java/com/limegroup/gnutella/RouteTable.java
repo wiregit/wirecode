@@ -19,6 +19,8 @@ public class RouteTable {
      *     (queue[0], map.get(queue[0])), 
      *     (queue[n], map.get(queue[n])), ...,
      *     (queue[next], map.get(queue[next])) ]
+     * BUT with null keys and/or values removed.  See remove()
+     * for an understanding of the implications.
      *
      * The rep. invariant is
      *            n==queue.length
@@ -30,7 +32,7 @@ public class RouteTable {
      *
      * TODO3: I wish we could avoid creating new GUIDs everytime
      */
-    private Hashtable map=new Hashtable();
+    private Map map=new HashMap();
     private Object[] queue;
     private int next;
     private int n;
@@ -51,7 +53,7 @@ public class RouteTable {
      * @requires guid not in this, guid and c are non-null
      * @effects adds the routing entry to this, i.e., this=[(guid,c)]+this
      */
-    public void put(byte[] guid, Connection c) {
+    public synchronized void put(byte[] guid, Connection c) {
 	Assert.that(guid!=null);
 	Assert.that(c!=null);
 	GUID g=new GUID(guid);
@@ -70,7 +72,7 @@ public class RouteTable {
     }
 
     /** Returns the corresponding Connection for this GUID, or null if none. */
-    public Connection get(byte[] guid) {
+    public synchronized Connection get(byte[] guid) {
 	Object o=map.get(new GUID(guid));
 	if (o!=null)
 	    return (Connection)o;
@@ -78,26 +80,44 @@ public class RouteTable {
 	    return null;
     }
 
-    public boolean hasRoute(byte[] guid) {
+    public synchronized boolean hasRoute(byte[] guid) {
 	return map.get(new GUID(guid))!=null;
     }
 
-    public String toString() {
+    /** 
+     * @modifies this
+     * @effects removes all entries [guid, c2] s.t. c2.equals(c).
+     *  This operation runs in O(n) time, where n is the max number
+     *  of routing table entries. 
+     */
+    public synchronized void remove(Connection c) {
+	for (int i=0; i<queue.length; i++) {
+	    Object guid=queue[i];
+	    if (guid==null)
+		continue;
+	    if (map.get(guid).equals(c)) {
+		map.remove(guid);
+		queue[i]=null;
+	    }
+	}
+    }	
+
+    public synchronized String toString() {
 	StringBuffer buf=new StringBuffer("\n");
-	Enumeration iter=map.keys();
-	while (iter.hasMoreElements()) {
-	    GUID guid=(GUID)(iter.nextElement());
+	Iterator iter=map.keySet().iterator();
+	while (iter.hasNext()) {
+	    GUID guid=(GUID)(iter.next());
+	    Connection conn=get(guid.bytes());
+	    Assert.that(conn!=null);
 	    buf.append(guid.toString());
 	    buf.append(" -> ");
-	    Connection conn=get(guid.bytes());
-	    Assert.that(conn!=null,"Null connection!");
 	    buf.append(conn.sock.toString());
 	    buf.append("\n");
 	}
 	return buf.toString();
     }
 
-    /** Unit test */
+//      /** Unit test */
 //      public static void main(String args[]) {
 //  	RouteTable rt=null;
 //  	byte[] g1=new byte[16]; g1[0]=(byte)1;
@@ -137,6 +157,11 @@ public class RouteTable {
 //  	Assert.that(rt.get(g1)==null); 
 //  	Assert.that(rt.get(g2)==null); 
 //  	Assert.that(rt.get(g3)==c3);
+
+//  	rt=new RouteTable(2);
+//  	rt.put(g1,c1);
+//  	rt.remove(c1);
+//  	Assert.that(rt.get(g1)==null);
 //      }
 }
     
