@@ -315,6 +315,44 @@ public class BestCandidatesTest extends BaseTestCase {
 	}
 	
 	/**
+	 * tests the call to the initialize() method.
+	 */
+	public void testInitialize() throws Exception {
+		assertNotNull(BestCandidates.getCandidates()[0]);
+		assertNull(BestCandidates.getCandidates()[1]);
+		assertNull(BestCandidates.getCandidates()[2]);
+		
+		assertTrue(BestCandidates.getBest().isSame(mediocreCandidate));
+		
+		Candidate [] update = new Candidate[2];
+		update[0]=goodCandidate;
+		update[1]=veryGoodCandidate;
+		BestCandidates.update(update);
+		assertNotNull(BestCandidates.getCandidates()[0]);
+		assertNotNull(BestCandidates.getCandidates()[1]);
+		assertNotNull(BestCandidates.getCandidates()[2]);
+		
+		//add leaf conns to connection manager
+		ConnectionManager manager = RouterService.getConnectionManager();
+		List l = new LinkedList();
+		l.add(betterLeaf);
+		l.add(bestLeaf);
+		l.add(goodLeaf);
+		PrivilegedAccessor.setValue(manager,"_initializedClientConnections",l);
+		
+		// after this call we should have only one candidate and it should be
+		// bestLeaf
+		BestCandidates.initialize();
+		
+		assertNotNull(BestCandidates.getCandidates()[0]);
+		assertNull(BestCandidates.getCandidates()[1]);
+		assertNull(BestCandidates.getCandidates()[2]);
+		
+		assertTrue(BestCandidates.getBest().isSame(bestLeaf));
+		
+	}
+	
+	/**
 	 * tests the election of a new connection once the route fails.
 	 */
 	public void testRouteFailedToLeaf() throws Exception {
