@@ -441,7 +441,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized boolean resume() throws AlreadyDownloadingException {
         //Ignore request if already in the download cycle.
-        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || state==ABORTED))
+        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
+               state==ABORTED || state==WAITING_FOR_RESULTS))
             return false;
         //Sometimes a resume can cause a conflict.  So we check.
         String conflict=this.manager.conflicts(allFiles, this);
@@ -457,6 +458,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //Interrupt any waits.
             if (dloaderManagerThread!=null)
                 dloaderManagerThread.interrupt();
+        } else if (state==WAITING_FOR_RESULTS) {
+            // wake up the requerier...
+            reqLock.release();
         }
         return true;
     }
