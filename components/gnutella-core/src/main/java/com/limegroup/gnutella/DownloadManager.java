@@ -95,7 +95,7 @@ public class DownloadManager implements BandwidthTracker {
      *      downloads.dat
      */
     public void postGuiInit(RouterService backend) {
-        readSnapshot();
+        readSnapshot(SettingsManager.instance().getDownloadSnapshotFile());
         Runnable checkpointer=new Runnable() {
             public void run() {
                 if (downloadsInProgress()>0) //optimization
@@ -149,14 +149,14 @@ public class DownloadManager implements BandwidthTracker {
     /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
      *  to this, queued.  The queued downloads will restart immediately if slots
      *  are available.  Returns false iff the file could not be read for any
-     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. */
-    synchronized boolean readSnapshot() {
+     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
+     *  It is public for testing purposes only!  
+     *  @param file the downloads.dat snapshot file */
+    public synchronized boolean readSnapshot(File file) {
         //Read downloaders from disk.
         List buf=null;
         try {
-            ObjectInputStream in=new ObjectInputStream(
-                new FileInputStream(
-                    SettingsManager.instance().getDownloadSnapshotFile()));
+            ObjectInputStream in=new ObjectInputStream(new FileInputStream(file));
             //This does not try to maintain backwards compatibility with older
             //versions of LimeWire, which only wrote the list of downloaders.
             //Note that there is a minor race condition here; if the user has
