@@ -98,6 +98,9 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return new FileInputStream(getFile());
     }
     
+    /**
+     * Returns the available ranges as an HTTP string value.
+     */
     public String getAvailableRanges() {
         StringBuffer ret = new StringBuffer("bytes");
         VerifyingFile vf = _incompleteFileManager.getEntry(getFile());
@@ -113,10 +116,18 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret.toString();
     }
     
+    /**
+     * Determines whether or not the given range is satisfied by this
+     * incomplete file.
+     */
     public boolean isRangeSatisfiable(int low, int high) {
         return isRangeSatisfiable(new Interval(low, high));
     }
     
+    /**
+     * Determines whether or not the given interval is within the range
+     * of our incomplete file.
+     */
     public boolean isRangeSatisfiable(Interval range) {
         VerifyingFile vf = _incompleteFileManager.getEntry(getFile());
         for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
@@ -127,6 +138,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return false;
     }
     
+    // implements HTTPHeaderValue
     public String httpStringValue() {
         return getAvailableRanges();
     }
