@@ -72,10 +72,11 @@ public class ConnectionManager {
     private int MAX_SUPERNODE_ENDPOINTS=10;
 
     
-    /* Sister backend classes. */
     private MessageRouter _router;
     private HostCatcher _catcher;
-	private SettingsManager _settings;
+
+	/** Constant handle to the <tt>SettingsManager</tt>. */
+	private final SettingsManager _settings = SettingsManager.instance();
 	private ConnectionWatchdog _watchdog;
 
 
@@ -135,7 +136,6 @@ public class ConnectionManager {
      */
     public ConnectionManager(Authenticator authenticator) {
         _authenticator = authenticator; 
-		_settings = SettingsManager.instance(); 
     }
 
     /**
@@ -904,12 +904,6 @@ public class ConnectionManager {
      * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        PingRequest pr;
-        //Bootstrap server: send group ping.
-        //if (connection.isRouterConnection()) {
-		//  String group = "none:"+_settings.getConnectionSpeed();
-		//  pr = _router.createGroupPingRequest(group);                 //a
-        //}
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -917,6 +911,7 @@ public class ConnectionManager {
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
+        PingRequest pr;
         if (getNumInitializedConnections() >= _keepAlive)
             pr = new PingRequest((byte)1);                              //b
         else
