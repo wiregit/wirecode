@@ -959,7 +959,7 @@ public final class CommonUtils {
 	 */
     public static void copyResourceFile(final String fileName, File newFile, 
 										final boolean forceOverwrite) {
-		if(newFile == null) newFile = new File(fileName);
+		if(newFile == null) newFile = new File(".", fileName);
 
 		// return quickly if the file is already there, no copy necessary
 		if( !forceOverwrite && newFile.exists() ) return;
@@ -993,7 +993,8 @@ public final class CommonUtils {
 			
 			do { //read and write in chunks of buffer size until EOF reached
 				c = bis.read(buffer, 0, bufferSize);
-				bos.write(buffer, 0, c);
+                                if (c > 0)
+                                    bos.write(buffer, 0, c);
 			}
 			while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
 			
