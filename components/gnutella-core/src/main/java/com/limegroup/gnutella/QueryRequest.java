@@ -18,9 +18,9 @@ public class QueryRequest extends Message implements Serializable{
 
     // HUGE v0.93 fields
     /** Any URN types requested on responses */
-    private Collection requestedUrnTypes = null;
+    private Set requestedUrnTypes = null;
     /** Any exact URNs requested to match */
-    private Collection queryUrns = null;
+    private Set queryUrns = null;
 
     /**
      * Builds a new query from scratch
@@ -40,15 +40,19 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
-                        Collection requestedUrnTypes, Collection queryUrns) {
+                        Set requestedUrnTypes, Set queryUrns) {
         // don't worry about getting the length right at first
         super((isRequery ? GUID.makeGuidRequery() : GUID.makeGuid()),
               Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
         this.minSpeed=minSpeed;
         this.query=query;
         this.richQuery=richQuery;
-        this.requestedUrnTypes=requestedUrnTypes;
-        this.queryUrns=queryUrns;
+		if(requestedUrnTypes != null) {
+			this.requestedUrnTypes = new HashSet(requestedUrnTypes);
+		}
+		if(queryUrns != null) {
+			this.queryUrns = new HashSet(queryUrns);
+		}
         buildPayload(); // now the length has been set
     }
 
@@ -133,6 +137,11 @@ public class QueryRequest extends Message implements Serializable{
         return query;
     }
     
+	/**
+	 * Returns the rich query string.
+	 *
+	 * @return the rich query string
+	 */
     public synchronized String getRichQuery() {
         if(!payloadHarmonized) {
             scanPayload();
@@ -140,20 +149,44 @@ public class QueryRequest extends Message implements Serializable{
         return richQuery;
     }
  
-    public synchronized Collection getRequestedUrnTypes() {
+	/**
+	 * Returns the <tt>Set</tt> of URN types requested for this query, or
+	 * <tt>null</tt> if there are no specified URN types.
+	 *
+	 * @return the <tt>Set</tt> of URN types requested for this query, or
+	 * <tt>null</tt> if there are no specified URN types
+	 */
+    public synchronized Set getRequestedUrnTypes() {
         if(!payloadHarmonized) {
             scanPayload();
         }
-        return requestedUrnTypes;
+		if(requestedUrnTypes != null) {
+			return new HashSet(requestedUrnTypes);
+		}
+		return null;
     }
     
-    public synchronized Collection getQueryUrns() {
+	/**
+	 * Returns the <tt>Set</tt> of <tt>URN</tt> instances for this query, or 
+	 * <tt>null</tt> if there are no URNs specified for the query.
+	 *
+	 * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, or 
+	 * <tt>null</tt> if there are no URNs specified for the query
+	 */
+    public synchronized Set getQueryUrns() {
         if(!payloadHarmonized) {
             scanPayload();
         }
-        return queryUrns;
+		if( queryUrns != null) {
+			return new HashSet(queryUrns);
+		}
+		return null;
     }
     
+	/**
+	 * Scans the payload for the query request, initializing variables
+	 * for the query request in the process.
+	 */
     private void scanPayload() {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(payload);
@@ -175,6 +208,13 @@ public class QueryRequest extends Message implements Serializable{
         }
     }
     
+	/**
+	 * Handles an individual HUGE "General Extension Mechanism" (GEM)
+	 * string, adding the appropriate URN, URN type, or xml query data 
+	 * to the query reply.
+	 *
+	 * @param urnString the string containing the GEM data
+	 */
     private void handleGemExtensionString(String urnString) {
 		if(URN.isUrn(urnString)) {
 			// it's an URN to match, of form "urn:namespace:etc"
@@ -225,18 +265,18 @@ public class QueryRequest extends Message implements Serializable{
      * area.  Because of different character encodings, the returned value does
      * not necessarily equal getQuery().getBytes()[pseudoIndex].
      */
-    public byte getQueryByteAt(int pseudoIndex)throws 
-                                      ArrayIndexOutOfBoundsException{
+    public byte getQueryByteAt(int pseudoIndex)
+		throws ArrayIndexOutOfBoundsException {
         if (pseudoIndex<0 || pseudoIndex > getQueryLength()-1)
             throw new ArrayIndexOutOfBoundsException();
         return payload[pseudoIndex+2];
     }
 
     /**
-      * Note: the minimum speed can be represented as a 2-byte unsigned
-      * number, but Java shorts are signed.  Hence we must use an int.  The
-      * value returned is always smaller than 2^16.
-      */
+	 * Note: the minimum speed can be represented as a 2-byte unsigned
+	 * number, but Java shorts are signed.  Hence we must use an int.  The
+	 * value returned is always smaller than 2^16.
+	 */
     public int getMinSpeed() {
         if(!payloadHarmonized) {
             scanPayload();
