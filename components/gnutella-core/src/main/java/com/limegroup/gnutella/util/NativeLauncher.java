@@ -8,7 +8,6 @@
 
 package com.limegroup.gnutella.util;
 
-//import com.limegroup.gnutella.gui.Utilities;
 
 public class NativeLauncher {
 	static {
