@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Hira
 LOCALE_SCRIPT_NAME=Far-East Asian
 LOCALE_ENGLISH_LANGUAGE_NAME=Japanese
+LOCALE_NSIS_NAME=Japanese
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

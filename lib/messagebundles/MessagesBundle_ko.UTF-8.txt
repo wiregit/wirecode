@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=국제
 LOCALE_SCRIPT_CODE=Hang
 LOCALE_SCRIPT_NAME=Far-East Asian
 LOCALE_ENGLISH_LANGUAGE_NAME=Korean
+LOCALE_NSIS_NAME=Korean
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

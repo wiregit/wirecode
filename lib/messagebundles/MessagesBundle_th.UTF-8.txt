@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Thai
 LOCALE_SCRIPT_NAME=Thai
 LOCALE_ENGLISH_LANGUAGE_NAME=Thai
+LOCALE_NSIS_NAME=Thai
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

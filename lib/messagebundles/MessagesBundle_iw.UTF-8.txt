@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Hebr
 LOCALE_SCRIPT_NAME=Hebrew
 LOCALE_ENGLISH_LANGUAGE_NAME=Hebrew
+LOCALE_NSIS_NAME=Hebrew
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

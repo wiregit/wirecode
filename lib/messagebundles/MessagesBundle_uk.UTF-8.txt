@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Cyrl
 LOCALE_SCRIPT_NAME=Cyrillic
 LOCALE_ENGLISH_LANGUAGE_NAME=Ukrainian
+LOCALE_NSIS_NAME=Ukrainian
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
