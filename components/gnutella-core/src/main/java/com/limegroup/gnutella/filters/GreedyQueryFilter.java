@@ -20,9 +20,10 @@ public class GreedyQueryFilter extends SpamFilter {
         if (! (m instanceof QueryRequest))
             return true;
 
-        String query=((QueryRequest)m).getQuery();
+		QueryRequest qr = (QueryRequest)m;
+        String query = qr.getQuery();
         int n=query.length();
-        if (n==1)
+        if (n==1 && !qr.hasQueryUrns())
             return false;
         if ((n==5 || n==6) 
                && query.charAt(1)=='.' 
