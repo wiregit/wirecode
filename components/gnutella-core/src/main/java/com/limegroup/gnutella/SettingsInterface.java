@@ -36,7 +36,7 @@ public interface SettingsInterface {
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED          = 56;
-    public static final int     DEFAULT_UPLOAD_SPEED   = 50;
+    public static final int     DEFAULT_UPLOAD_SPEED   = 100;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
