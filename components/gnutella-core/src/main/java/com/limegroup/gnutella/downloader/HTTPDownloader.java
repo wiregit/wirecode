@@ -7,6 +7,7 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.Sockets;
 import java.io.*;
 import java.net.*;
@@ -275,10 +276,12 @@ public class HTTPDownloader implements BandwidthTracker {
         
         // Add ourselves to the mesh if:
         //  This rfd has a SHA1,
+        //  We are allowing partial sharing,
         //  The VerifyingFile is not corrupted,
         //  We have downloaded a large enough portion of the file,
         //  and We have accepted incoming during this session.
         if (_rfd.getSHA1Urn() != null && 
+          UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
           !_outIsCorrupted &&
           RouterService.acceptedIncomingConnection() &&
           _incompleteFile.length() > _minPartialFileSize) {
