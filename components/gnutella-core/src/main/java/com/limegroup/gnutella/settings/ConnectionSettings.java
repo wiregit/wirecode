@@ -29,7 +29,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * do Firewall-to-firewall transfers in the past. 
 	 */
 	public static final BooleanSetting EVER_DISABLED_FWT =
-		FACTORY.createBooleanSetting("EVER_DISABLED_FWT", false);
+		FACTORY.createExpirableBooleanSetting("EVER_DISABLED_FWT", false);
 
 	/**
 	 * Settings for whether or not to automatically connect to the network
