@@ -25,7 +25,7 @@ public class LimeXMLDocument implements Serializable {
 	/**
 	 * Cached hash code for this instance.
 	 */
-	private volatile int hashCode = 0;
+	private volatile transient int hashCode = 0;
 
     /** For backwards compatibility with downloads.dat. */
     static final long serialVersionUID = 7396170507085078485L;
@@ -34,17 +34,17 @@ public class LimeXMLDocument implements Serializable {
     //of some fields. 
     
     private final Map fieldToValue = new TreeMap(new StringComparator());
-    protected String schemaUri;
-    protected String xmlString;//this is what is sent back on the wire.
+    private String schemaUri;
+    private String xmlString;//this is what is sent back on the wire.
     /** 
      * Field corresponds to the name of the file for which this
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
-    protected String identifier;
+    private String identifier;
     public void setIdentifier(String id) {
         identifier = id;
     }
-    protected String action="";
+    private String action="";
 
     //constructor
     public LimeXMLDocument(String XMLStr) throws SAXException, 
@@ -289,16 +289,7 @@ public class LimeXMLDocument implements Serializable {
      */
     public String getSchemaURI(){
         return schemaUri;
-    }
-
-    /**
-     * Sets the schema URI for this document
-     * @param schemaURI schema URI to be set
-     */
-    public void setSchemaURI(String schemaURI){
-		this.schemaUri = schemaURI;
-    }
-    
+    }    
     
     /**
      * Returns the name of the file that the data in this XML document 
