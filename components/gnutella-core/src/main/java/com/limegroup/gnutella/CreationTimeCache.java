@@ -125,7 +125,9 @@ public final class CreationTimeCache {
      * want all, give Integer.MAX_VALUE.
      * @return the iterator returns younger URNs first.
      */
-    public synchronized Iterator getFiles(final int max) {
+    public synchronized Iterator getFiles(final int max) 
+        throws IllegalArgumentException {
+        if (max < 1) throw new IllegalArgumentException("bad max = " + max);
         List urnList = new ArrayList();
         Iterator iter = URN_MAP.entrySet().iterator();
 
