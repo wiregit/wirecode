@@ -204,7 +204,7 @@ public class DataWindow
 		if ( rto > 0 &&
 			 drec != null   &&
 			 drec.acks < 1  &&
-		     drec.sentTime + (multiple * rto) < time ) {
+		     drec.sentTime + (multiple * smoothRTT) < time ) {
 			return true;
 		}
 
