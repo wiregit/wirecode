@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
 
 /**
  * A priority queue for messages.  Used by ManagedConnection to implement the
@@ -81,6 +79,7 @@ public abstract class MessageQueue {
             if (m==null)
                 return null;     //Nothing left, give up.
             if (m.getCreationTime()<expireTime) {
+                
                 _dropped++;
                 m.recordDrop();
                 continue;        //Too old.  Keep searching.
