@@ -19,6 +19,8 @@ import com.limegroup.gnutella.util.*;
  */
 public class VerifyingFile {
     
+    private final static org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VerifyingFile.class);
+    
     private RandomAccessFile fos;
 
     private boolean checkOverlap;
@@ -121,6 +123,22 @@ public class VerifyingFile {
 
     public synchronized int getBlockSize() {
         return writtenBlocks.getSize();
+    }
+    
+    public synchronized Iterator getNecessaryBlocks(Interval in) {
+        List overlap = writtenBlocks.getOverlapIntervals(in);
+        if(overlap.size() == 0) {
+            List req = new LinkedList();            
+            req.add(in);
+            return req.iterator();
+        } else {
+            IntervalSet lap = new IntervalSet();
+            if(in.low != 0)
+                lap.add(new Interval(0, in.low));
+            for(Iterator i = overlap.iterator(); i.hasNext(); )
+                lap.add((Interval)i.next());
+            return lap.getNeededIntervals(in.high+1);
+        }
     }
   
     /**
