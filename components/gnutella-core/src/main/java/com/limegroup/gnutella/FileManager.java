@@ -316,6 +316,17 @@ public abstract class FileManager {
         return (FileDesc)_files.get(i);
     }
 
+
+    /**
+     * Get the index for a given FileDesc.  -1 if the FileDesc is not a shared
+     * file.  This is unfortunately a little slow (linear search).
+     *
+     * @return an int which is the index of the file, or -1.
+     */
+    public synchronized int getIndexForFileDesc(FileDesc fd) {
+        return _files.indexOf(fd);
+    }
+
     /**
      * Determines whether or not the specified index is valid.  The index
      * is valid if it is within range of the number of files shared, i.e.,

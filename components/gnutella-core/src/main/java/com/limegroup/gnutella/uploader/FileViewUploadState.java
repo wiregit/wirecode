@@ -28,7 +28,6 @@ public final class FileViewUploadState implements HTTPMessage {
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-        System.out.println(UploadManager.FV_PASS);
         final String fileName = _uploader.getFileName();
         final String pass = 
             UploadManager.FV_REQ_BEGIN + "/" + UploadManager.FV_PASS;
