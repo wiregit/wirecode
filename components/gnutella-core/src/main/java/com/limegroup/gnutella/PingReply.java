@@ -137,12 +137,16 @@ public class PingReply extends Message implements Serializable {
     /**
      * Wrap a PingReply around stuff snatched from the network.
      * <p>
-     * Initially this method required that payload.lenght == 14. But now we
-     * want to have support for big pings and pongs. 
+     * Initially this method required that payload.lenghth == 14. But now we
+     * support for big pings and pongs. 
+     *
+     * @exception BadPacketException payload is too small
      */
     public PingReply(byte[] guid, byte ttl, byte hops,
-             byte[] payload) {
+             byte[] payload) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+        if (payload.length<STANDARD_PAYLOAD_SIZE)
+            throw new BadPacketException();
         this.payload=payload;
     }
 
@@ -233,8 +237,13 @@ public class PingReply extends Message implements Serializable {
         System.arraycopy(payload, 0,
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
-        return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPayload);
+        try {
+            return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
+                                 newPayload);
+        } catch (BadPacketException e) {
+            Assert.that(false, "Couldn't strip payload! "+e);
+            return null;
+        }
     }
 
 

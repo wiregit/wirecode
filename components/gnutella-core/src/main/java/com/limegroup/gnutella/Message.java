@@ -174,6 +174,10 @@ public abstract class Message
 
         //Dispatch based on opcode.
         switch (func) {
+            //TODO: all the length checks should be encapsulated in the various
+            //constructors; Message shouldn't know anything about the various
+            //messages except for their function codes.  I've started this
+            //refactoring with PushRequest and PingReply.
             case F_PING:
                 if (PARSE_GROUP_PINGS && length>=15) {
 				    // Build a GroupPingRequest

@@ -98,7 +98,12 @@ public class PingReplyTest extends TestCase {
         //OK Now for the big pong part
         payload[14] = (byte) 65;
         payload[15] = (byte) 66;
-        PingReply pr = new PingReply(new byte[16], (byte)2, (byte)4, payload);
+        PingReply pr=null;
+        try {
+            pr = new PingReply(new byte[16], (byte)2, (byte)4, payload);
+        } catch (BadPacketException e) {
+            fail("Packet bad: "+e);
+        }
         assertTrue(! pr.hasGGEPExtension());
         try {
             pr.getDailyUptime();
@@ -208,5 +213,22 @@ public class PingReplyTest extends TestCase {
         pr1.hop();
         assertTrue(pr1.getHops()!=pr2.getHops());
         assertTrue(pr1.getTTL()!=pr2.getTTL());
+    }
+
+    public void testPongTooSmall() {
+        byte[] bytes=new byte[23+25];  //one byte too small
+        bytes[16]=Message.F_PING_REPLY;
+        bytes[17]=(byte)3;     //hops
+        bytes[18]=(byte)3;     //ttl
+        bytes[19]=(byte)13;    //payload length
+        ByteArrayInputStream in=new ByteArrayInputStream(bytes);
+        try {
+            Message.read(in);
+            fail("No exception thrown");
+        } catch (IOException fail) {
+            fail("Unexpected IO problem");
+        } catch (BadPacketException pass) { 
+            //Pass!
+        }
     }
 }
