@@ -524,9 +524,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // fully connected, and we can go ahead with the handshake
         if(!ConnectionSettings.USE_NIO.getValue())  {
             blockingHandshake();              
-        } else if(isOutgoing())  {
-            HANDSHAKER.write();
-        }
+        } //else if(isOutgoing())  {
+            //HANDSHAKER.write();
+        //}
     }
     
     /**
@@ -842,13 +842,16 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         send(pushRequest);
     }  
 
-    //public boolean read() throws IOException {
-      //  if(_headerReader == null) {
-        //    return _messageReader.read();
-        //} 
-        //return _headerReader.read();
-    //}
     
+    /**
+     * Handles a write event for this connection.  This is called when previous
+     * writes have failed, and there is space for this connection to write to 
+     * the TCP buffer.
+     * 
+     * @return <tt>true</tt> if all of the data for this write event was 
+     *  successfully written, otherwise <tt>false</tt>
+     * @throws IOException if an i/o error occurs over the course of this write
+     */
     public boolean write() throws IOException {
         if(HANDSHAKER.handshakeComplete()) {
             return _messageWriter.write();
@@ -856,6 +859,17 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return HANDSHAKER.write();
     }
     
+    /**
+     * Handles a read event for this connection's channel.  This is called 
+     * when the TCP input buffer for this channel has new data to read.  The
+     * new data can either be a part of the connection handshake or a Gnutella
+     * message.
+     * 
+     * @throws IOException if there is any IO error while performing the read,
+     *  such as the remote host disconnecting
+     * @throws BadPacketException if we read data that does not match any
+     *  understood Gnutella message
+     */
     public void read() throws IOException, BadPacketException  {
         if(HANDSHAKER.handshakeComplete()) {
             _messageReader.read();
@@ -863,11 +877,16 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         HANDSHAKER.read();        
     }
 
+    private boolean _writeRegistered;
+    
+    public boolean writeRegistered()  {
+        return _writeRegistered;
+    }
+    
     public void setWriteRegistered(boolean registered) {
-        HANDSHAKER.setWriteRegistered(registered);
-
-
-        _messageWriter.setWriteRegistered(registered);
+        _writeRegistered = registered;
+        //HANDSHAKER.setWriteRegistered(registered);
+        //_messageWriter.setWriteRegistered(registered);
     }
     
     /**
