@@ -72,7 +72,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-	private final int TIMER_DELAY = 5000;
+	private final int TIMER_DELAY = 5 * 60 * 1000; //5 minutes
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
@@ -97,6 +97,11 @@ public final class SupernodeAssigner implements Runnable {
 	 * download bandwidth used for file downloads.
 	 */
 	private BandwidthTracker _downloadTracker;
+    
+    /**
+     * A reference to the router service
+     */
+    private RouterService _routerService;
 
 	/**
 	 * Variable for the current uptime of this node.
@@ -116,6 +121,12 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	private int _maxDownstreamBytesPerSec = 
         SETTINGS.getMaxDownstreamBytesPerSec();
+    
+    /**
+     * True, if the last time we evaluated the node for supernode capability, 
+     * it came out as supernode capable. False, otherwise
+     */
+    private volatile boolean _wasSupernodeCapable = SETTINGS.isSupernode();
 
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
@@ -126,9 +137,11 @@ public final class SupernodeAssigner implements Runnable {
 	 *                        tracking bandwidth used for downloads
 	 */
     public SupernodeAssigner(final BandwidthTracker uploadTracker, 
-							 final BandwidthTracker downloadTracker) {
+							 final BandwidthTracker downloadTracker,
+                             RouterService routerService) {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
+        this._routerService = routerService;
 		ActionListener timerListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				collectBandwidthData();
@@ -176,19 +189,19 @@ public final class SupernodeAssigner implements Runnable {
 	 * and downloads.
 	 */
 	private void collectBandwidthData() {
-		System.out.println("_maxDownstreamBytesPerSec: "+_maxDownstreamBytesPerSec);
-        System.out.println();
-        System.out.println("_maxUpstreamBytesPerSec: "+_maxUpstreamBytesPerSec);
-        System.out.println();
-        System.out.println("_currentUptime: " + _currentUptime);
-        System.out.println();
-        System.out.println("AVERAGE_UPTIME: " + AVERAGE_UPTIME);
-        System.out.println();
-        System.out.println("FIREWALLED: " + FIREWALLED);
-        System.out.println();
-        System.out.println("SUPERNODE_OS: " + SUPERNODE_OS);
-        System.out.println();
-        System.out.println("isSupernodeCapable: "+isSupernodeCapable());
+//		System.out.println("_maxDownstreamBytesPerSec: "+_maxDownstreamBytesPerSec);
+//        System.out.println();
+//        System.out.println("_maxUpstreamBytesPerSec: "+_maxUpstreamBytesPerSec);
+//        System.out.println();
+//        System.out.println("_currentUptime: " + _currentUptime);
+//        System.out.println();
+//        System.out.println("AVERAGE_UPTIME: " + AVERAGE_UPTIME);
+//        System.out.println();
+//        System.out.println("FIREWALLED: " + FIREWALLED);
+//        System.out.println();
+//        System.out.println("SUPERNODE_OS: " + SUPERNODE_OS);
+//        System.out.println();
+//        System.out.println("isSupernodeCapable: "+isSupernodeCapable());
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         int newUpstreamBytes   = _uploadTracker.getNewBytesTransferred();
         int newDownstreamBytes = _downloadTracker.getNewBytesTransferred();
@@ -204,6 +217,16 @@ public final class SupernodeAssigner implements Runnable {
 			_maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
   			SETTINGS.setMaxDownstreamBytesPerSec(_maxDownstreamBytesPerSec);
   		}
+        
+        //check if the state changed
+        boolean isSupernodeCapable = isSupernodeCapable();
+        if(isSupernodeCapable != _wasSupernodeCapable){
+            _routerService.disconnect();
+            SETTINGS.setSupernodeMode(isSupernodeCapable);
+            SETTINGS.setKeepAlive(4);
+            _routerService.connect();
+        }
+            _wasSupernodeCapable = isSupernodeCapable;
 	}
 
 }
