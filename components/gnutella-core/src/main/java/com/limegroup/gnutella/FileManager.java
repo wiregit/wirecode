@@ -15,7 +15,8 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.oroinc.text.regex.*;
-import java.util.*;
+// import java.util.*;
+import java.util.Enumeration;
 
 public class FileManager{
 
@@ -80,6 +81,9 @@ public class FileManager{
         _extensions =  HTTPUtil.stringSplit(str, ';');
         // int length = _extensions.length;
     }
+
+	
+
 
 	public boolean hasExtension(String filename) {
 		int begin = filename.lastIndexOf(".") + 1;
