@@ -118,8 +118,9 @@ public class ConnectionManager implements Runnable {
     }
 	
     /** 
-     * @modifies this
-     * @effects removes c from this' connection list.  If
+     * @modifies this, route table
+     * @effects removes c from this' connection list and
+     *  all corresponding errors from the route table.  If
      *  c is not in the connection list, does nothing.  May
      *  try to establish a new outgoing connection to replace
      *  this one.
@@ -127,6 +128,7 @@ public class ConnectionManager implements Runnable {
     public synchronized void remove(Connection c) {
 	int i=connections.indexOf(c);
 	if (i != -1) {
+	    routeTable.remove(c);
 	    connections.remove(i);
 	    if (keepAlive!=0) {
 		//Asynchronously fetch a connection to replace c
