@@ -245,11 +245,18 @@ public final class UploadManager implements BandwidthTracker {
                 setInitialUploadingState(uploader);
                 try {
                     uploader.readHeader(iStream);
+                    setUploaderStateOffHeaders(uploader);
+                } catch(ProblemReadingHeaderException prhe) {
+                    // if there was a problem reading the header,
+                    // this is a bad request, so let them know.
+                    // we do NOT throw the IOX again because the
+                    // connection is still open.
+                    debug(uploader + " problem reading header");
+                    uploader.setState(Uploader.MALFORMED_REQUEST);
                 } catch(IOException ioe) {
                     uploader.setState(Uploader.INTERRUPTED);
                     throw ioe;
                 }
-                setUploaderStateOffHeaders(uploader);
                 
                 debug(uploader+" HTTPUploader created and read all headers");
 

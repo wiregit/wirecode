@@ -254,62 +254,70 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     ////////////normal download with HTTP 1.1////////////////
-
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
         boolean passed = false;
-        passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz");
+        passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz", false);
         assertTrue("No range header with HTTP1.1",passed);
     }
 
     public void testHTTP11DownloadStandardRangeHeader() throws Exception {
         boolean passed = false;
         passed =download1(file, "Range: bytes=2-", 
-                     "cdefghijklmnopqrstuvwxyz");
+                     "cdefghijklmnopqrstuvwxyz", false);
         assertTrue("Standard range header with HTTP1.1",passed);
-    }
+    }    
 
 
     public void testHTTP11DownloadRangeMissingEquals() throws Exception {
         boolean passed = false;
         passed =download1(file, "Range: bytes 2-", 
-                     "cdefghijklmnopqrstuvwxyz");
+                     "cdefghijklmnopqrstuvwxyz", false);
         assertTrue("Range missing \"=\". (Not legal HTTP, but common.)"+
                "with HTTP1.1", passed);
     }
 
     public void testHTTP11DownloadMiddleRange() throws Exception {
         boolean passed = false;
-        passed =download1(file, "Range: bytes=2-5","cdef");
+        passed =download1(file, "Range: bytes=2-5","cdef", false);
         assertTrue("Middle range, inclusive with HTTP1.1",passed);
     }
         
     public void testHTTP11DownloadRangeNoSpaceAfterColon() throws Exception {
         boolean passed = false;
         passed =download1(file, "Range:bytes 2-",
-                     "cdefghijklmnopqrstuvwxyz");
+                     "cdefghijklmnopqrstuvwxyz", false);
         assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
     }
 
     public void testHTTP11DownloadRangeLastByte() throws Exception {
         boolean passed = false;
-        passed =download1(file, "Range: bytes=-5","vwxyz");
+        passed =download1(file, "Range: bytes=-5","vwxyz", false);
         assertTrue("Last bytes of file with HTTP1.1",passed);
     }
 
 
     public void testHTTP11DownloadRangeLotsOfExtraSpace() throws Exception {
         boolean passed = false;
-        passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef");
+        passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef", false);
         assertTrue("Lots of extra space with HTTP1.1",passed);        
-
-        
-        assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile),
-                     file, java.net.URLDecoder.decode(encodedFile));
     }
 
+    public void testHTTP11IncompleteRange() throws Exception {
+        boolean passed = false;
+        // add the range.
+        Interval iv = new Interval(2, 6);
+        vf.addInterval(iv);
+        passed = download1(incompleteHash, "Range: bytes 2-5", "cdef", true);
+        assertTrue("incomplete range did not work", passed);
+    }
+    
     public void testHTTP11DownloadURLEncoding() throws Exception {
         boolean passed = false;
-        passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+        
+        assertEquals("URLDecoder broken",
+            file, java.net.URLDecoder.decode(encodedFile));
+
+        passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz", false);
         assertTrue("URL encoded with HTTP1.1",passed);
 
     }
@@ -351,7 +359,14 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true,
                 "X-Available-Ranges: bytes 50-102499");
-    }    
+    }
+    
+    public void testIncompleteFileWithRangeRequest() throws Exception {
+        String header = "Range: bytes 30-50";
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + incompleteHash, header, true,
+                 "HTTP/1.1 503 Requested Range Unavailable");
+    }        
 
     public void testHTTP11WrongURI() throws Exception {
         tFailureHeaderRequired(
@@ -384,6 +399,13 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             "/get/some/dr/pepper", null, true,
                 "HTTP/1.1 400 Malformed Request");
     }
+    
+    public void testHTTP11MalformedHeader() throws Exception {
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + hash, 
+            "Range: 2-5", // should be Range: bytes 2-5
+            true, "HTTP/1.1 400 Malformed Request");
+    }
 
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
@@ -391,7 +413,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Do not include new line or carriage return in header.  Throws IOException
      * if there is a problem, without cleaning up. 
      */
-    private static boolean download1(String file,String header,String expResp) 
+    private static boolean download1(String file,String header,String expResp,
+                                     boolean uri) 
             throws IOException {
         //Unfortunately we can't use URLConnection because we need to test
         //malformed and slightly malformed headers
@@ -403,14 +426,25 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
+        String requestName;
+        
+        if( uri ) {
+            requestName = "/uri-res/N2R?" + file;
+        } else {
+            requestName = "/get/" + index + "/" + file;
+        }
+        
         //first request with the socket
-        String value=downloadInternal1(file,header,out,in,expResp.length());
-        //System.out.println("Sumeet: first return value "+value);
+        String value=downloadInternal1("GET", requestName,
+            header,out,in,expResp.length());
+
         ret = value.equals(expResp);//first request seccessful?
         //make second requst on same socket
         value = "";//reset
-        value = downloadInternal1(file, header, out, in, expResp.length());
-        //System.out.println("Sumeet: first return value "+value);
+        
+        value = downloadInternal1("GET", requestName,
+            header, out, in, expResp.length());
+
         ret = ret && value.equals(expResp);//both reqests successful?
         in.close();
         out.close();
@@ -677,22 +711,6 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     /** 
-     * Sends a get request to out, reads the response from in, and returns the
-     * content.  Doesn't close in or out.
-     * @param indexedFile a partially qualified name, e.g. "file.txt".  The 
-     * "/get/<index>" is automatically appended
-     */
-    private static String downloadInternal1(String indexedFile,
-											String header,
-											BufferedWriter out,
-											BufferedReader in,
-											int expectedSize) 
-                                            throws IOException {
-        return downloadInternal1("GET", "/get/"+index+"/"+indexedFile, header, 
-                                 out, in, expectedSize);
-    }
-
-    /** 
      * Sends an arbitrary request, returning the result.
      * @param file the full filename, e.g., "/get/0/file.txt"     
      * @param request an HTTP request such as "GET" or "HEAD"
@@ -713,11 +731,12 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         out.write("\r\n");
         out.flush();
         
+        
         //2. Read (and ignore!) response code and headers.  TODO: verify.
         while(!in.readLine().equals("")){ }
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();
-        for(int i=0; i<expectedSize; i++){
+        for(int i=0; i<expectedSize; i++) {
             int c = in.read();
             buf.append((char)c);
         }
@@ -873,7 +892,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                   null, out, in, 0));
             //3. Send GET request, make sure data ok.
             assertEquals(alphabet,
-                downloadInternal1(encodedFile, null, out, in, alphabet.length()));
+                downloadInternal1("GET", "/get/"+index+"/"+encodedFile,
+                                  null, out, in, alphabet.length()));
         } finally {
             if (s!=null)
                 try { s.close(); } catch (IOException ignore) { }
@@ -923,7 +943,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
                                                           s.getOutputStream()));
             //2. Send GET request in URI form
-            downloadInternal("GET", file, null, out, in, 
+            downloadInternal("GET", file, sendHeader, out, in, 
                              requiredHeader, http11);
             
             //3. If we're testing HTTP1.1 then send another request

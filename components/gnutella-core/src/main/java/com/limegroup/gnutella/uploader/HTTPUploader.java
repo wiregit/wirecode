@@ -459,8 +459,8 @@ public final class HTTPUploader implements Uploader {
 	 * 'GET' portion of the request header has already been read.
 	 *
 	 * @param iStream the input stream to read the headers from.
-	 * @throws <tt>IOException</tt> if there are any io issues while reading
-	 *  the header
+	 * @throws <tt>IOException</tt> if the connection closes while reading
+	 * @throws <tt>ProblemReadingHeaderException</tt> if any header is invalid
 	 */
 	public void readHeader(InputStream iStream) throws IOException {
         _uploadBegin = 0;
@@ -493,6 +493,16 @@ public final class HTTPUploader implements Uploader {
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
         	}
+        } catch(ProblemReadingHeaderException prhe) {
+            // there was a problem reading the header.. gobble up
+            // the rest of the input and rethrow the exception
+            while(true) {
+                String str = br.readLine();
+                if( str == null || str.equals("") )
+                 break;
+            }
+            
+            throw prhe;
         } finally {
             // we want to ensure these are always set, regardless
             // of if an exception was thrown.
@@ -524,7 +534,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			sub = str.substring(5);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
         }
 		sub = sub.trim();
 		int colon = sub.indexOf(":");
@@ -537,7 +547,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			port = java.lang.Integer.parseInt(sport);
 		} catch (NumberFormatException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
         }
 		_chatEnabled = true;
 		_browseEnabled = true;
@@ -567,11 +577,12 @@ public final class HTTPUploader implements Uploader {
 		try {
             int i=str.indexOf("bytes");    //TODO: use constant
             if (i<0)
-                throw new IOException("bytes not present in range");
+                throw new ProblemReadingHeaderException(
+                     "bytes not present in range");
             i+=6;                          //TODO: use constant
 			sub = str.substring(i);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
 		}
 		// remove the white space
         sub = sub.trim();   
@@ -580,7 +591,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			c = sub.charAt(0);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
 		}
 		// - n  
         if (c == '-') {  
@@ -588,7 +599,7 @@ public final class HTTPUploader implements Uploader {
 			try {
 				second = sub.substring(1);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             second = second.trim();
 			try {
@@ -599,7 +610,7 @@ public final class HTTPUploader implements Uploader {
                                     _fileSize-Integer.parseInt(second));
 				_uploadEnd = _fileSize;
 			} catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
         }
         else {                
@@ -609,18 +620,18 @@ public final class HTTPUploader implements Uploader {
 			try {
 				first = sub.substring(0, dash);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             first = first.trim();
 			try {
 				_uploadBegin = java.lang.Integer.parseInt(first);
 			} catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
 			try {
 				second = sub.substring(dash+1);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             second = second.trim();
             if (!second.equals("")) 
@@ -630,7 +641,7 @@ public final class HTTPUploader implements Uploader {
                     //index, so increment by 1.
 					_uploadEnd = java.lang.Integer.parseInt(second)+1;
             } catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
         }
         
