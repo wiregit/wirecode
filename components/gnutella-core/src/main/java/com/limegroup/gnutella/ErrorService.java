@@ -26,6 +26,13 @@ public final class ErrorService {
 	public static void setErrorCallback(ErrorCallback callback) {
 		_errorCallback = callback;
 	}
+	
+	/**
+	 * Gets the <tt>ErrorCallback</tt> currently in use.
+	 */
+	public static ErrorCallback getErrorCallback() {
+	    return _errorCallback;
+	}
 
 
 	/**
