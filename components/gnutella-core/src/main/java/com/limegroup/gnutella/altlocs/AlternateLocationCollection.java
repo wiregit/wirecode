@@ -25,14 +25,14 @@ public final class AlternateLocationCollection
      * <p>
      * LOCKING: obtain this' monitor when iterating. Note that all modifications
      * to LOCATIONS are synchronized on this.  allAll method has the potential
-     * for deadlocks, so the LlternateLocationCollection provided is cloned and
+     * for deadlocks, so the AlternateLocationCollection provided is cloned and
      * the lock on the original is released.
      *
-     * There must be a seperate _locations variable to do equals comparisons
-     * on.  SynchronizedMap.equals(SynchronizedMap) won't work, because
-     * the synchronized map does not extend Fixedsize.., and Fixedsize..
-     * uses private variables for the equals comparison.  
+     * LOCKING: Never grab the lock on AlternateLocationCollection.class if you
+     * have this' monitor. If both locks are needed, always lock on
+     * AlternateLocationCollection.class first, never the other way around.
      */
+ 
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
         
     /**
@@ -296,7 +296,11 @@ public final class AlternateLocationCollection
         // because we not using the SynchronizedMap versions, and equals
         // will inherently call methods that would have been synchronized.
         synchronized(AlternateLocationCollection.class) {
-                ret = LOCATIONS.equals(alc.LOCATIONS);
+            synchronized(this) {
+                synchronized(alc) {
+                    ret = LOCATIONS.equals(alc.LOCATIONS);
+                }
+            }
         }
         return ret;
     }

@@ -463,10 +463,10 @@ public final class HTTPUploader implements Uploader {
     AlternateLocationCollection getAlternateLocationCollection() {
         AlternateLocationCollection coll =
                                     _fileDesc.getAlternateLocationCollection();
-        AlternateLocationCollection ret = null;
+        AlternateLocationCollection ret=
+                    AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
         synchronized(coll) {
             Iterator iter  = coll.iterator();
-            ret = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
             for(int i=0; iter.hasNext() && i < _numAltsWritten ; i++) 
                 iter.next(); //skip the first _numAltsWritten
             int i;
