@@ -29,9 +29,9 @@ public final class CommonUtils {
 	private static boolean _isWindows = false;
 
 	/** 
-	 * Variable for whether or not we're on Windows NT or 2000.
+	 * Variable for whether or not we're on Windows NT, 2000, or XP.
 	 */
-	private static boolean _isWindowsNTor2000 = false;
+	private static boolean _isWindowsNTor2000orXP = false;
 
 	/** 
 	 * Variable for whether or not we're on Windows 95.
@@ -42,6 +42,11 @@ public final class CommonUtils {
 	 * Variable for whether or not we're on Windows 98.
 	 */
 	private static boolean _isWindows98 = false;
+
+	/** 
+	 * Variable for whether or not we're on Windows Me.
+	 */
+	private static boolean _isWindowsMe = false;
 
     /** 
 	 * Variable for whether or not the operating system allows the 
@@ -90,21 +95,25 @@ public final class CommonUtils {
 	 */
 	static {
 		// get the operating system
-		String os = System.getProperty("os.name");
+		String os = System.getProperty("os.name").toLowerCase();
 
 		// set the operating system variables
-		_isWindows = os.indexOf("Windows") != -1;
-		if (os.indexOf("Windows NT") != -1 || os.indexOf("Windows 2000")!=-1)
-			_isWindowsNTor2000 = true;
-		if(os.indexOf("Windows 95") != -1)
+		_isWindows = os.indexOf("windows") != -1;
+		if (os.indexOf("windows nt") != -1 || 
+			os.indexOf("windows 2000")!= -1 ||
+			os.indexOf("windows xp")!= -1)
+			_isWindowsNTor2000orXP = true;
+		if(os.indexOf("windows 95") != -1)
 		   _isWindows95 = true;
-		if(os.indexOf("Windows 98") != -1)
+		if(os.indexOf("windows 98") != -1)
 		   _isWindows98 = true;
+		if(os.indexOf("windows me") != -1)
+		   _isWindowsMe = true;
 		if(_isWindows) _supportsTray=true;
-		_isSolaris = os.indexOf("Solaris") != -1;
-		_isLinux   = os.indexOf("Linux")   != -1;
-		if(os.startsWith("Mac OS")) {
-			if(os.endsWith("X")) {
+		_isSolaris = os.indexOf("solaris") != -1;
+		_isLinux   = os.indexOf("linux")   != -1;
+		if(os.startsWith("mac os")) {
+			if(os.endsWith("x")) {
 				_isMacOSX = true;
 			} else {
 				_isMacClassic = true;
@@ -192,7 +201,7 @@ public final class CommonUtils {
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isSupernodeOS() {
-		if(_isWindows98 || _isWindows95 || _isMacClassic) {
+		if(_isWindows98 || _isWindows95 || _isWindowsMe || _isMacClassic) {
 			return false;
 		}
 		return true;
@@ -214,8 +223,8 @@ public final class CommonUtils {
 	 * @return <tt>true</tt> if the application is running on Windows NT 
 	 *         or 2000, <tt>false</tt> otherwise
 	 */
-	public static boolean isWindowsNTor2000() {
-		return _isWindowsNTor2000;
+	public static boolean isWindowsNTor2000orXP() {
+		return _isWindowsNTor2000orXP;
 	}
 
 	/** 
@@ -532,3 +541,6 @@ public final class CommonUtils {
     }
     */
 }
+
+
+
