@@ -502,7 +502,7 @@ public class ConnectionManager {
     /**
      * @return the number of free leaf slots.
      */
-    int getNumFreeLeafSlots() {
+    public int getNumFreeLeafSlots() {
         if (isSupernode())
 			return UltrapeerSettings.MAX_LEAVES.getValue() - 
 				getNumInitializedClientConnections();
@@ -514,7 +514,7 @@ public class ConnectionManager {
     /**
      * @return the number of free non-leaf slots.
      */
-    int getNumFreeNonLeafSlots() {
+    public int getNumFreeNonLeafSlots() {
         return ULTRAPEER_CONNECTIONS - getNumInitializedConnections();
     }
 
