@@ -122,4 +122,12 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
         super.recordDrop();
     }
 
+    /**
+     * Overridden to provide more information about this class.
+     * 
+     * @return a description of this class
+     */
+    public String toString() {
+        return "UDPConnectBackVendorMessage::VERSION: "+VERSION+" PORT: "+_port;
+    }
 }
