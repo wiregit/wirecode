@@ -13,6 +13,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -985,7 +986,16 @@ public class DownloadManager implements BandwidthTracker {
                                             Socket fwTrans = 
                                             new UDPConnection(file.getHost(),
                                                               file.getPort());
-                                            acceptDownload(fwTrans);
+                                            // TODO: put this out to Acceptor in
+                                            // the future
+                                            InputStream is =
+                                                fwTrans.getInputStream();
+                                            String word = 
+                                                IOUtils.readWord(is, 4);
+                                            if (word.equals("GIV"))
+                                                acceptDownload(fwTrans);
+                                            else
+                                                fwTrans.close();
                                         }
                                         catch (IOException crap) {}
                                     }
@@ -1072,13 +1082,11 @@ public class DownloadManager implements BandwidthTracker {
                 throw new IOException();
             }
         } catch (IOException e) {        
-            throw e;                   
+            throw e;  
         }   
 
         //2. Parse and return the fields.
         try {
-            // just make sure the GIV is gone
-            if (command.startsWith("GIV ")) command = command.substring(4);
             //a) Extract file index.  IndexOutOfBoundsException
             //   or NumberFormatExceptions will be thrown here if there's
             //   a problem.  They're caught below.
