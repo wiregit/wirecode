@@ -62,7 +62,10 @@ import com.limegroup.gnutella.RouterService;
             // there's room in the buffer now, the channel needs some data.
             NIODispatcher.instance().interestRead(channel);
             
-            return read;
+            // must &, otherwise implicit cast can change value.
+            // (for example, reading the byte -1 is very different than
+            //  reading the int -1, which means EOF.)
+            return read & 0xFF;
         }
     }
     
