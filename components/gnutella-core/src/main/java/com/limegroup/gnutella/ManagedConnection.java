@@ -342,31 +342,6 @@ public class ManagedConnection extends Connection
         //Establish the socket (if needed), handshake.
 		super.initialize(CONNECT_TIMEOUT);
 
-        //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
-        //save a fair bit of memory by not using buffering at all.  But this
-        //requires the CompositeMessageQueue class from nio-branch.
-        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                true);
-        _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING_REPLY] 
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING]       
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_OUR_QUERY]
-            = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                false);
-        
-        //Start the thread to empty the output queue
-        new OutputRunner();
-
         UpdateManager updater = UpdateManager.instance();
         updater.checkAndUpdate(this);
     }
@@ -459,14 +434,7 @@ public class ManagedConnection extends Connection
      * down the connection on IOException
      */
     public Message receive() throws IOException, BadPacketException {
-        Message m = null;
-        try {
-            m = super.receive();
-        } catch(IOException e) {
-            if (_manager!=null) //may be null for testing
-                _manager.remove(this);
-            throw e;
-        }
+        Message m = super.receive();
         
         // record received message in stats
         addReceived();
@@ -479,14 +447,7 @@ public class ManagedConnection extends Connection
      */
     public Message receive(int timeout)
             throws IOException, BadPacketException, InterruptedIOException {
-        Message m = null;
-        try {
-            m = super.receive(timeout);
-        } catch(IOException e) {
-            if (_manager!=null) //may be null for testing
-                _manager.remove(this);
-            throw e;
-        }
+        Message m = super.receive(timeout);
         
         // record received message in stats
         addReceived();
@@ -586,7 +547,6 @@ public class ManagedConnection extends Connection
      * MessageRouter and account for number of reply bytes.
      */
     private int calculatePriority(Message m) {
-        //TODO: use switch statement?
         byte opcode=m.getFunc();
         boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
         switch (opcode) {
@@ -612,6 +572,38 @@ public class ManagedConnection extends Connection
      */
     public void flush() throws IOException {        
     }
+    
+    /**
+     * Builds queues and starts the OutputRunner.  This is intentionally not
+     * in initialize(), as we do not want to create the queues and start
+     * the OutputRunner for reject connections.
+     */
+    public void buildAndStartQueues() {
+        //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
+        //save a fair bit of memory by not using buffering at all.  But this
+        //requires the CompositeMessageQueue class from nio-branch.
+        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
+                true);
+        _outputQueue[PRIORITY_PUSH]
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+        _outputQueue[PRIORITY_QUERY_REPLY]
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+        _outputQueue[PRIORITY_QUERY]      
+            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
+        _outputQueue[PRIORITY_PING_REPLY] 
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_PING]       
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_OUR_QUERY]
+            = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
+                false);
+        
+        //Start the thread to empty the output queue
+        new OutputRunner();
+    }        
 
     /** Repeatedly sends all the queued data. */
     private class OutputRunner extends Thread {
@@ -623,10 +615,9 @@ public class ManagedConnection extends Connection
 
         /** While the connection is not closed, sends all data delay. */
         public void run() {
-            // Catching any exception will remove this from the list
-            // of connections.  Catching something other than an IOException
-            // will tell ErrorService about it (because IOExceptions are
-            // expected errors from closed connections).
+            //Exceptions are only caught to set the _runnerDied variable
+            //to make testing easier.  For non-IOExceptions, Throwable
+            //is caught to notify ErrorService.
             try {
                 while (true) {
                     repOk();
@@ -635,12 +626,8 @@ public class ManagedConnection extends Connection
                     repOk();
                 }                
             } catch (IOException e) {
-                if (_manager!=null) //may be null for testing
-                    _manager.remove(ManagedConnection.this);
                 _runnerDied=true;
             } catch(Throwable t) {
-                if (_manager!=null) //may be null for testing
-                    _manager.remove(ManagedConnection.this);
                 _runnerDied=true;      
                 ErrorService.error(t);
             }
@@ -758,9 +745,6 @@ public class ManagedConnection extends Connection
         //IMPORTANT: note that we do not use this' send or receive methods.
         //This is an important optimization to prevent calling
         //RouteTable.removeReplyHandler when the connection is closed.
-        //Unfortunately it still can be triggered by the
-        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
-        //thread in this case?
 
         try {
 			//The first message we get from the remote host should be its 
@@ -899,9 +883,6 @@ public class ManagedConnection extends Connection
      * @requires this is initialized
      * @modifies the network underlying this, manager
      * @effects receives request and sends appropriate replies.
-     *   Returns if either the connection is closed or an error happens.
-     *   If this happens, removes itself from the manager's connection list,
-     *   so no further cleanup is necessary.  No exception is thrown
      *
      * @throws IOException passed on from the receive call; failures to forward
      *         or route messages are silently swallowed, allowing the message

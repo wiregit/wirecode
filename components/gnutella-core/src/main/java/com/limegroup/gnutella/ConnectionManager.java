@@ -572,6 +572,7 @@ public class ConnectionManager {
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+		
 
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
@@ -919,6 +920,14 @@ public class ConnectionManager {
      */
     private boolean connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
+	        // build the queues and start the output runner.
+	        // this MUST be done before _initializedConnections
+	        // or _initializedClientConnections has added this
+	        // connection to its list.  otherwise, messages may
+	        // attempt to be sent to the connection before it has
+	        // set up its output queues.
+            c.buildAndStartQueues();
+            
             //update the appropriate list of connections
             if(!c.isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
@@ -937,7 +946,10 @@ public class ConnectionManager {
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
             }
-            c.postInit();
+	        // do any post-connection initialization that may involve sending.
+	        c.postInit();
+	        // sending the ping request.
+    		sendInitialPingRequest(c);            
             return true;
         }
         return false;
@@ -1435,7 +1447,7 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && !allowConnection(c)) {
-            c.loopToReject();   
+            c.loopToReject();
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
@@ -1548,15 +1560,19 @@ public class ConnectionManager {
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
 	    Thread.currentThread().setName("MessageLoopingThread");
-		// Send ping...possibly group ping.
-		sendInitialPingRequest(conn);
-		if(conn.isGUESSUltrapeer()) {
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getListeningPort());
-		}
-
-		// this can throw IOException
-		conn.loopForMessages();		
+	    try {
+    		if(conn.isGUESSUltrapeer()) {
+    			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
+    				conn.getListeningPort());
+    		}
+    
+    		// this can throw IOException
+    		conn.loopForMessages();
+        } finally {
+            // If we ever exit this method, it is because the connection died,
+            // so we must clean up the references to it.
+            remove(conn);
+        }
 	}
     
     /**
