@@ -391,28 +391,32 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	public String httpStringValue() {
 		
-		if (_httpString ==null) {
-			String httpString = _guid.toHexString()+";";
-			
-			//if version is not 0, append it to the http string
-			if (_fwtVersion!=0)
-				httpString+=HTTPConstants.FW_TRANSFER+"/"+_fwtVersion+";";
-			
-			for (Iterator iter = getProxies().iterator();iter.hasNext();) {
-				PushProxyInterface cur = (PushProxyInterface)iter.next();
-				
-				httpString = httpString + 
-				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
-				httpString = httpString +":"+cur.getPushProxyPort()+";";
-			}
-			
-			//trim the ; at the end
-			if (_proxies.size() > 0)
-				httpString = httpString.substring(0,httpString.length()-1);
-			
-			_httpString=httpString;
-		}
+		if (_httpString ==null) 	
+			_httpString=generateHTTPString();
+		
 		return _httpString;
+	}
+	
+	protected final String generateHTTPString() {
+	    String httpString = _guid.toHexString()+";";
+		
+		//if version is not 0, append it to the http string
+		if (_fwtVersion!=0)
+			httpString+=HTTPConstants.FW_TRANSFER+"/"+_fwtVersion+";";
+		
+		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
+			PushProxyInterface cur = (PushProxyInterface)iter.next();
+			
+			httpString = httpString + 
+			NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
+			httpString = httpString +":"+cur.getPushProxyPort()+";";
+		}
+		
+		//trim the ; at the end
+		if (_proxies.size() > 0)
+			httpString = httpString.substring(0,httpString.length()-1);
+		
+		return httpString;
 	}
 	
 	public int getFeatures() {

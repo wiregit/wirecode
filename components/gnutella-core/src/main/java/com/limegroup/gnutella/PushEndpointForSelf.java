@@ -45,7 +45,14 @@ public class PushEndpointForSelf extends PushEndpoint {
     /**
      * override to not cache the hashcode
      */
-    public int hashcode() {
+    public int hashCode() {
         return getHashcode();
+    }
+    
+    /**
+     * override to not cache the http representation
+     */
+    public String httpStringValue() {
+        return generateHTTPString();
     }
 }
