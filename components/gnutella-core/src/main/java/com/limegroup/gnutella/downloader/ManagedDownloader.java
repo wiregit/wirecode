@@ -707,7 +707,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
-                    manager.sendQuery(allFiles);
+                    manager.sendQuery(this, allFiles);
                     numRequeries++;
                     // set time for next requery...
                     nextRequeryTime = currTime + 
@@ -1585,18 +1585,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return minutes to wait
      */
     private int getMinutesToWaitForRequery(int requeries) {
-        switch (requeries) {
-        case 0:
-            return 2;   //wait 2 minutes after initial download before requery
-        case 1:
-            return 15;  //wait 15 minutes between first and second requery
-        case 2:
-            return 60;
-        case 3:
-            return 120;
-        default:
-            return 180;
-        }
+        return 5;
     }
 
 

@@ -57,6 +57,20 @@ public class DownloadManager implements BandwidthTracker {
      */
     private Map queryDetails = new Hashtable();
 
+    /** The amount of time between requeries....
+     */
+    private final long TIME_BETWEEN_REQUERIES = 30 * 60 * 1000; // 30 minutes
+
+    /** The last time that a requery was sent.
+     */
+    private long lastRequeryTime = 0;
+
+    /** This will hold the MDs that have sent requeries.
+     *  When this size gets too big - meaning bigger than active.size(), then
+     *  that means that all MDs have been serviced at least once, so you can
+     *  clear it and start anew....
+     */
+    private List querySentMDs = new ArrayList();
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -565,23 +579,67 @@ public class DownloadManager implements BandwidthTracker {
         return retQRs;
     }
 
-
+    
     /** Initiates a search for files similar to rfd.
-     * PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc objects.
+     *  PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc 
+     *  objects.
+     *  Now does sophisticated round-robin sending of queries to minimize
+     *  requery traffic seen on the network...
+     *  It is important to note that this methodology works because we KNOW
+     *  that requeries are always trying to requery....
      */
-    public void sendQuery(RemoteFileDesc[] rfds) {
-        // convert....
-        String[] names = new String[rfds.length];
-        for (int i = 0; i < rfds.length; i++)
-            names[i] = rfds[i].getFileName();
+    public synchronized void sendQuery(ManagedDownloader requerier, 
+                          RemoteFileDesc[] rfds) {
 
-        // construct QRs
-        String[] qStrings= extractQueryStrings(names);
-        QueryRequest[] qReqs = constructQueryRequests(qStrings);
+        debug("DM.sendQuery(): entered.");
+        Assert.that(waiting.contains(requerier),
+                    "Unknown or non-waiting MD trying to send requery.");
+        boolean allowed = true;
+        
+        if ((System.currentTimeMillis() - lastRequeryTime) > 
+            TIME_BETWEEN_REQUERIES) {
+            debug("DM.sendQuery(): requery allowed!!");            
+            // ok, i can do a requery, but is it allowed for this MD?           
+            if (querySentMDs.size() < waiting.size()) {
+                // not all MDs have had a turn, see if this guy can go...
+                if (querySentMDs.contains(requerier)) {
+                    debug("DM.sendQuery(): sorry, wait your turn...");
+                    // nope, sorry, must lets others go first...
+                    allowed = false;
+                }
+                else {
+                    querySentMDs.add(requerier);
+                    debug("DM.sendQuery(): ok, you can go...");
+                }
+            }
+            else {
+                debug("DM.sendQuery(): no contention, just go....");
+                querySentMDs.clear();
+                querySentMDs.add(requerier);
+            }
+                
+            // note last requery time...
+            if (allowed)
+                lastRequeryTime = System.currentTimeMillis();
+        }
+        else 
+            allowed = false;
 
-        // send away....
-        for (int i = 0; i < qReqs.length; i++)
-            router.broadcastQueryRequest(qReqs[i]);            
+        if (allowed) {
+            // convert....
+            String[] names = new String[rfds.length];
+            for (int i = 0; i < rfds.length; i++)
+                names[i] = rfds[i].getFileName();
+
+            // construct QRs
+            String[] qStrings= extractQueryStrings(names);
+            QueryRequest[] qReqs = constructQueryRequests(qStrings);
+            
+            // send away....
+            for (int i = 0; i < qReqs.length; i++)
+                router.broadcastQueryRequest(qReqs[i]);            
+        }
+        debug("DM.sendQuery(): returning.");
     }
 
 
