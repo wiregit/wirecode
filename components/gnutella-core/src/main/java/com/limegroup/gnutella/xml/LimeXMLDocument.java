@@ -19,7 +19,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Element;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * @author  Sumeet Thadani
@@ -180,7 +180,7 @@ public class LimeXMLDocument{
     public List getNameValueList() {
         int size = fieldToValue.size();
         Iterator keys = fieldToValue.keySet().iterator();
-        List retList = new Vector();
+        List retList = new ArrayList();
         for(int i=0; i< size; i++){
             String name = (String)keys.next();
             String value  = (String)fieldToValue.get(name);
