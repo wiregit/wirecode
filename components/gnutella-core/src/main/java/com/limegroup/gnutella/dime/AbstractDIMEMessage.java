@@ -8,7 +8,6 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -113,22 +112,6 @@ public abstract class AbstractDIMEMessage {
     public void write(OutputStream os) throws IOException {
         for (Iterator iter = _records.iterator(); iter.hasNext();)
              ((AbstractDIMERecord) iter.next()).write(os);
-    }
-
-    /**
-     * method for writing a AbstractDIMEMessage to an OutputStream
-     * 
-     * @param os
-     *            the <tt>OutputStream</tt> to write to.
-     * @param throttle
-     *            the <tt>BandwidthThrottle</tt> throttling our output
-     * @throws IOException
-     *             if there was a problem writing to os.
-     */
-    public void write(OutputStream os, BandwidthThrottle throttle)
-        throws IOException {
-        for (Iterator iter = _records.iterator(); iter.hasNext();)
-             ((AbstractDIMERecord) iter.next()).write(os, throttle);
     }
 
     /**

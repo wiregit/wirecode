@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.sun.java.util.collections.HashMap;
 import com.sun.java.util.collections.Map;
 
@@ -171,41 +170,6 @@ public abstract class AbstractDIMERecord {
         os.write(AbstractDIMEMessage.padData(_id));
         os.write(AbstractDIMEMessage.padData(_type));
         os.write(AbstractDIMEMessage.padData(_data));
-    }
-
-    void write(OutputStream os, BandwidthThrottle throttle)
-        throws IOException {
-        writeByteArrayThrottled(
-            AbstractDIMEMessage.padData(_header),
-            os,
-            throttle);
-        writeByteArrayThrottled(
-            AbstractDIMEMessage.padData(_options),
-            os,
-            throttle);
-        writeByteArrayThrottled(AbstractDIMEMessage.padData(_id), os, throttle);
-        writeByteArrayThrottled(
-            AbstractDIMEMessage.padData(_type),
-            os,
-            throttle);
-        writeByteArrayThrottled(
-            AbstractDIMEMessage.padData(_data),
-            os,
-            throttle);
-    }
-
-    private void writeByteArrayThrottled(
-        byte[] array,
-        OutputStream os,
-        BandwidthThrottle throttle)
-        throws IOException {
-        int offset = 0;
-        while (offset < array.length) {
-            int allowed = throttle.request(array.length - offset) + offset;
-            for (; offset < allowed; offset++) {
-                os.write(array[offset]);
-            }
-        }
     }
 
     private static int parseTypeID(byte[] header) throws DIMEMessageException {

@@ -11,6 +11,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -117,7 +118,8 @@ public class THEXUploadState implements HTTPMessage {
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
     public void writeMessageBody(OutputStream os) throws IOException {
-        FILE_DESC.getHashTree().getMessage().write(os, THROTTLE);
+        OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
+        FILE_DESC.getHashTree().getMessage().write(slowStream);
     }
 
     /**

@@ -19,7 +19,6 @@ import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.dime.AbstractDIMEMessage;
 import com.limegroup.gnutella.dime.AbstractDIMERecord;
-import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
@@ -100,24 +99,6 @@ public class HashTreeDIMEMessage extends AbstractDIMEMessage {
             readRecord(is),
             root32);
 
-    }
-
-    /**
-     * method for writing a DIMEMessage to an OutputStream
-     * 
-     * @param os
-     *            the <tt>OutputStream</tt> to write to.
-     * @param throttle
-     *            the <tt>BandwidthThrottle</tt> throttling our output
-     * @throws IOException
-     *             if there was a problem writing to os.
-     * @see com.limegroup.gnutella.dime.AbstractDIMEMessage
-     */
-    public void write(OutputStream os, BandwidthThrottle throttle)
-        throws IOException {
-        super.addRecord(createXMLRecord());
-        super.addRecord(createTreeRecord());
-        super.write(os, throttle);
     }
 
     /**
