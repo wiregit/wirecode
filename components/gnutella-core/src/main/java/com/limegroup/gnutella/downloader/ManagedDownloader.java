@@ -2741,11 +2741,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
-    private synchronized LimeXMLDocument[] getXMLDocuments() {
+    private synchronized List getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
         //those locations that we download from?  How about only those in this
         //bucket?
-        LimeXMLDocument[] retArray = null;
         List allDocs = new ArrayList();
 
         // get all docs possible
@@ -2757,14 +2756,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 				}
             }
         }
-
-        if (allDocs.size() > 0) {
-			retArray = (LimeXMLDocument[])allDocs.toArray(new LimeXMLDocument[0]);
-        }
-        else
-            retArray = null;
-
-        return retArray;
+        
+        return allDocs;
     }
 
     private void cleanup() {
