@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.html.*;
@@ -28,28 +29,22 @@ public final class FileViewUploadState implements HTTPMessage {
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-        final String fileName = _uploader.getFileName();
-        final String pass = 
-            UploadManager.FV_REQ_BEGIN + "/" + UploadManager.FV_PASS;
-
         // make sure it has the correct beginning
-        if (fileName.startsWith(pass)) {
+        if (_uploader.hasPassword()) {
             FileListHTMLPage htmlGen = FileListHTMLPage.instance();
-            String indices = fileName.substring(pass.length());
+            String indexes = (String)_uploader.getParameters().get(UploadManager.INDEX_KEY);
 
             // the url may want only certain files
-            if (indices.length() > 1) {
-                StringTokenizer st = new StringTokenizer(indices, "/&");
+            if (indexes != null) {
+                StringTokenizer st = new StringTokenizer(indexes, ",");
                 List descs = new ArrayList(st.countTokens());
                 while (st.hasMoreTokens()) {
                     try {
                         int i = Integer.parseInt(st.nextToken());
                         descs.add(RouterService.getFileManager().get(i));
-                    }
-                    catch (NumberFormatException nfe) {
-                    }
-                    catch (IndexOutOfBoundsException ioooe) {
-                    }
+                    } 
+                    catch (NumberFormatException nfe) {}
+                    catch (IndexOutOfBoundsException ioooe) {}
                 }
 
                 if (descs.size() > 0) {
@@ -85,22 +80,9 @@ public final class FileViewUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
         _uploader.setAmountUploaded(BAOS.size());
-        debug("BHUS.doUpload(): returning.");
 	}
 	
 	public boolean getCloseConnection() {
 	    return false;
-	}  	
-
-    private final static boolean debugOn = false;
-    private final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
-    
+	}
 }

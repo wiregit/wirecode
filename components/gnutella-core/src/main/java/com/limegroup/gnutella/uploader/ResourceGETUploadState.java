@@ -5,15 +5,13 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.html.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.image.ImageHandler;
+import com.limegroup.gnutella.image.ImageManipulator;
+
 import java.io.*;
 import java.util.*;
-import javax.imageio.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import java.awt.*;
-import java.awt.image.*;
-import javax.imageio.stream.*;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 
 
@@ -31,37 +29,41 @@ public final class ResourceGETUploadState implements HTTPMessage {
     public ResourceGETUploadState(HTTPUploader uploader) {
 		this._uploader = uploader;
     }
+    
+    /**
+     * Generates a thumbnail for the given FileDesc image.
+     */
+    private byte[] generateThumbnail(FileDesc fd) throws IOException {
+        ImageHandler handler = ImageManipulator.getDefaultImageHandler();
+        Image wrote;
+        BufferedImage read = handler.getBufferedImage(
+                            handler.readImage(fd.getFile())
+                          );
+        int width = read.getWidth();
+        int height = read.getHeight();
+		int thumbWidth = 100;
+		if(width > thumbWidth) {
+		    int div = width/thumbWidth;
+		    height = height/div;
+		    wrote = handler.resize(read, thumbWidth, height);
+        } else {
+            wrote = read;
+        }
+        
+	    return handler.write(wrote);
+    }
      
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
         boolean noResource = false;
+        String mimeType = null;
         try {
-            if(_uploader.getFileDesc() != null) {
-                File f = _uploader.getFileDesc().getFile();
-                BufferedImage bm = ImageIO.read(f);
-    			int width = bm.getWidth();
-    			int height = bm.getHeight();
-    			if(width == 0 || height == 0)
-    			    throw new IOException("no file");
-    
-    			int thumbWidth = 100;
-    			if(width > thumbWidth) {
-    			    int div = width/thumbWidth;
-    			    height = height/div;
-        			Image img = bm.getScaledInstance(thumbWidth, height ,Image.SCALE_FAST);
-        
-        			BufferedImage bi = new BufferedImage(thumbWidth, height, BufferedImage.TYPE_INT_RGB);
-        			Graphics2D biContext = bi.createGraphics();
-        			biContext.drawImage(img, 0, 0, null);
-        			biContext.dispose();
-        			bm = bi;
-                }
-    
-    			ByteArrayOutputStream bo = new ByteArrayOutputStream();
-    			if(!ImageIO.write(bm, "jpg", bo))
-    			    throw new IOException();
-                _resourceBytes = bo.toByteArray();
+            FileDesc fd = _uploader.getFileDesc();
+            if(fd != null) {
+                mimeType = "image/jpg";
+                _resourceBytes = generateThumbnail(fd);
             } else {
+                mimeType = HTTPUtils.getMimeType(_uploader.getFileName());
                 InputStream fr = _uploader.getInputStream();
                 _resourceBytes = new byte[_uploader.getFileSize()];
                 int read = 0;
@@ -69,7 +71,6 @@ public final class ResourceGETUploadState implements HTTPMessage {
                     read += fr.read(_resourceBytes, read,
                                     (_resourceBytes.length - read));
             }
-
         }
         catch (FileNotFoundException fnfe) {
             String str = NOT_FOUND + "\r\n";
@@ -93,8 +94,10 @@ public final class ResourceGETUploadState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
-		str = "Content-Type: image/jpg\r\n";
-		ostream.write(str.getBytes());
+		if(mimeType != null) {
+		    str = "Content-Type: " + mimeType + "\r\n";
+		    ostream.write(str.getBytes());
+        }
 	    str = "Content-Length: " + _resourceBytes.length + "\r\n";
 		ostream.write(str.getBytes());
 		str = "\r\n";

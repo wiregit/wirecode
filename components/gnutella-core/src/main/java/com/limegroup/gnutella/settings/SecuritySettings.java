@@ -22,4 +22,10 @@ public class SecuritySettings extends LimeProps {
      */
     public static final StringSetting COOKIES_FILE = 
         FACTORY.createStringSetting("COOKIES_FILE", CommonUtils.getUserSettingsDir() + File.separator + "Cookies.dat");
+        
+    /**
+     * Whether or not a password is required for file-view pages.
+     */
+    public static final BooleanSetting FILE_VIEW_USE_PASSWORD =
+        FACTORY.createBooleanSetting("FILE_VIEW_USE_PASSWORD", true);
 }

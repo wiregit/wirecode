@@ -95,7 +95,13 @@ public class FileUtils
      *   could not be extracted
      */
     public static String getFileExtension(File f) {
-        String name = f.getName();
+        return getFileExtension(f.getName());
+    }
+    
+    /**
+     * Utility method that returns the extension of the given file name.
+     */
+    public static String getFileExtension(String name) {
         int index = name.lastIndexOf(".");
         if(index == -1) return null;
         
@@ -107,7 +113,7 @@ public class FileUtils
         if(index == (name.length()-1)) return null;
         
         return name.substring(index+1);
-    }
+    }        
     
     /**
      * Set of all files that we couldn't set writeable

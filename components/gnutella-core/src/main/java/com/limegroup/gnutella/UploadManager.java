@@ -73,6 +73,10 @@ import org.apache.commons.logging.LogFactory;
 public class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
+    
+    
+    public final static String INDEX_KEY = "idxs";
+    public static final String FV_PASS_KEY = "fvpw";
     public static final String FV_PASS =
         new String(""+(new Random()).nextInt(999999999));
 
@@ -281,8 +285,7 @@ public class UploadManager implements BandwidthTracker {
 						    			        socket,
 							    		        line._index,
 							    		        line.getParameters(),
-								    	        watchdog,
-                                                line.hadPassword());
+								    	        watchdog);
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
@@ -1214,14 +1217,28 @@ public class UploadManager implements BandwidthTracker {
             }
 
             str.trim();
+            
+            boolean isHttp11 = isHTTP11Request(str);
+            int httpIdx = str.toLowerCase().lastIndexOf(" http/");
+            if(httpIdx == -1)
+                throw new IOException();
+            else
+                str = str.substring(0, httpIdx).trim();
+            
+            
+            Map params = Collections.EMPTY_MAP;
+    		int questionIdx = str.indexOf("?");
+    		if(questionIdx != -1) {
+    		    params = getParameters(str.substring(questionIdx));
+    		    str = str.substring(0, questionIdx).trim();
+            }            
 
-            if(this.isURNGet(str)) {
+            if(this.isURNGet(str))
                 // handle the URN get request
-                return this.parseURNGet(str);
-            }
-		
-            // handle the standard get request
-            return UploadManager.parseTraditionalGet(str);
+                return parseURNGet(str, params, isHttp11);
+            else
+                // handle the standard get request
+                return parseTraditionalGet(str, params, isHttp11);
         } catch (IOException ioe) {
             LOG.debug("http request failed", ioe);
             // this means the request was malformed somehow.
@@ -1269,22 +1286,12 @@ public class UploadManager implements BandwidthTracker {
 	 * @throws <tt>IOException</tt> if there is an error parsing the
 	 *  request
 	 */
-	private static HttpRequestLine parseTraditionalGet(final String requestLine) 
+	private static HttpRequestLine parseTraditionalGet(final String fileInfoPart,
+	                                                   Map parameters, boolean http11) 
 		throws IOException {
-		try {           
+		try {
 			int index = -1;
-            //tokenize the string to separate out file information part
-            //and the http information part
-            StringTokenizer st = new StringTokenizer(requestLine);
-
-            if(st.countTokens() < 2) {
-                throw new IOException("invalid request: "+requestLine);
-            }
-            //file information part: /get/0/sample.txt
-            String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
-			Map parameters = null;
-            boolean hadPassword = false;
 			
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
@@ -1299,95 +1306,71 @@ public class UploadManager implements BandwidthTracker {
                 //special case for file view gif get
                 index = RESOURCE_INDEX;
                 fileName = fileInfoPart.substring(RESOURCE_GET.length());
-                hadPassword = true;
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
                 UploadStat.UPDATE_FILE.incrementStat();
-            } else if (fileInfoPart.startsWith("/gnutella/push-proxy") ||
-                       fileInfoPart.startsWith("/gnet/push-proxy")) {
-                // start after the '?'
-                int question = fileInfoPart.indexOf('?');
-                if( question == -1 )
-                    throw new IOException("Malformed PushProxy Req");
-                fileInfoPart = fileInfoPart.substring(question + 1);
-                index = PUSH_PROXY_FILE_INDEX;
-                // set the filename as the servent ID
-                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=&");
-                // iff less than two tokens, or no value for a parameter, bad.
-                if (stLocal.countTokens() < 2 || stLocal.countTokens() % 2 != 0)
-                    throw new IOException("Malformed PushProxy HTTP Request");
-                Integer fileIndex = null;
-                while( stLocal.hasMoreTokens()  ) {
-                    final String k = stLocal.nextToken();
-                    final String val = stLocal.nextToken();
-                    if(k.equalsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
-                        if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
-                        // must convert from base32 to base 16.
-                        byte[] base16 = Base32.decode(val);
-                        if( base16.length != 16 )
-                            throw new IOException("Malformed PushProxy Req");
-                        fileName = new GUID(base16).toHexString();
-                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_GUID)){
-                        if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
-                        if( val.length() != 32 )
-                            throw new IOException("Malformed PushProxy Req");
-                        fileName = val; //already in base16.
-                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_FILE)){
-                        if( fileIndex != null ) // already have an index?
-                            throw new IOException("Malformed PushProxy Req");
-                        fileIndex = Integer.valueOf(val);
-                        if( fileIndex.intValue() < 0 )
-                            throw new IOException("Malformed PushProxy Req");
-                        if( parameters == null ) // create the param map
-                            parameters = new HashMap();
-                        parameters.put("file", fileIndex);
-                     }
-                }
+            } else if (fileInfoPart.startsWith("/gnutella/push-proxy?") ||
+                       fileInfoPart.startsWith("/gnet/push-proxy?")) {
+                fileName = "Push Proxy Request";
                 UploadStat.PUSH_PROXY.incrementStat();
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
                 // find where the get is...
-                int g = requestLine.indexOf("/get/");
+                int g = fileInfoPart.indexOf("/get/");
                 // find the next "/" after the "/get/".  the number 
                 // between should be the index;
-                int d = requestLine.indexOf( "/", (g + 5) ); 
+                int d = fileInfoPart.indexOf( "/", (g + 5) ); 
                 // get the index
-                String str_index = requestLine.substring( (g+5), d );
-                index = java.lang.Integer.parseInt(str_index);
+                String str_index = fileInfoPart.substring( (g+5), d );
+                index = Integer.parseInt(str_index);
                 // get the filename, which should be right after
                 // the "/", and before the next " ".
-                int f = requestLine.indexOf( " HTTP/", d );
+                int f = fileInfoPart.indexOf( " HTTP/", d );
 				try {
 					fileName = URLDecoder.decode(
-					             requestLine.substring( (d+1), f));
+					             fileInfoPart.substring( (d+1), f));
 				} catch(IllegalArgumentException e) {
-					fileName = requestLine.substring( (d+1), f);
+					fileName = fileInfoPart.substring( (d+1), f);
 				}
-                // if this is a request from a file-view, trim the fileName
-                // and remember if it had the correct password
-                final String password = FV_PASS+"/";
-                if (fileName.startsWith(password)) {
-                    fileName = fileName.substring(password.length(),
-                                                  fileName.length());
-                    hadPassword = true;
-                }
                 UploadStat.TRADITIONAL_GET.incrementStat();				
             }
-            //check if the protocol is HTTP1.1.
-            //Note that this is not a very strict check.
-            boolean http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11, parameters,
-                                       hadPassword);
+			return new HttpRequestLine(index, fileName, http11, parameters);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException();
 		}
 	}
+	
+	/**
+	 * Returns a HashMap of parameters that were appended to the request line.
+	 */
+	private static Map getParameters(String line) throws IOException {
+	    // only had a single ? 
+	    if(line.equals("?"))
+	        throw new IOException();
+        line = line.substring(1);
+        Map map = new TreeMap(Comparators.caseInsensitiveStringComparator());
+        StringTokenizer st = new StringTokenizer(line, "=&", true);
+        boolean onAnd = true;
+        String key, value;
+        while(st.hasMoreTokens()) {
+            // iff not atleast X=Y, bad
+            if (st.countTokens() < 3)
+                throw new IOException();
+            key = st.nextToken();
+            if(!"=".equals(st.nextToken()))
+                throw new IOException();
+            value = st.nextToken();
+            if(st.hasMoreTokens())
+                if(!"&".equals(st.nextToken()))
+                    throw new IOException();
+            map.put(key, value);
+        }
+        return map;
+    }
 
 	/**
 	 * Parses the get line for a URN request, throwing an exception if 
@@ -1401,10 +1384,10 @@ public class UploadManager implements BandwidthTracker {
 	 * @return a new <tt>RequestLine</tt> instance containing all of the data
 	 *  for the get request
 	 */
-	private HttpRequestLine parseURNGet(final String requestLine)
+	private HttpRequestLine parseURNGet(final String requestLine, Map parameters, boolean isHttp11)
       throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
-		Map params = new HashMap();
+		Map params = new HashMap(parameters);
 		
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy.  URI scheme names are not case-sensitive.
@@ -1417,18 +1400,17 @@ public class UploadManager implements BandwidthTracker {
             if(LOG.isWarnEnabled())
 			    LOG.warn("Invalid URN query: " + requestLine);
 			return new HttpRequestLine(BAD_URN_QUERY_INDEX,
-				"Invalid URN query", isHTTP11Request(requestLine));
+				"Invalid URN query", isHttp11);
         }
 		
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
             UploadStat.UNKNOWN_URN_GET.incrementStat();
             return new HttpRequestLine(BAD_URN_QUERY_INDEX,
-                  "Invalid URN query", isHTTP11Request(requestLine));
+                  "Invalid URN query", isHttp11);
 		}		
         UploadStat.URN_GET.incrementStat();
-		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
-								   isHTTP11Request(requestLine), params, false);
+		return new HttpRequestLine(desc.getIndex(), desc.getName(), isHttp11, params);
 	}
 
 	/**
@@ -1496,11 +1478,6 @@ public class UploadManager implements BandwidthTracker {
             return "Index = " + _index + ", FileName = " + _fileName +
             ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
         }
-        
-        /**
-         * Flag for whether or not the get request had the correct password.
-         */
-        final boolean _hadPass;
 
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
@@ -1510,7 +1487,7 @@ public class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, Collections.EMPTY_MAP, false);
+		    this(index, fileName, http11, Collections.EMPTY_MAP);
   		}
   		
 		/**
@@ -1521,8 +1498,7 @@ public class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 * @param params a map of params in this request line
 		 */
-  		HttpRequestLine(int index, String fName, boolean http11, Map params,
-                        boolean hadPass) {
+  		HttpRequestLine(int index, String fName, boolean http11, Map params) {
   			_index = index;
   			_fileName = fName;
             _http11 = http11;
@@ -1530,7 +1506,6 @@ public class UploadManager implements BandwidthTracker {
                 _params = Collections.EMPTY_MAP;
             else
                 _params = params;
-            _hadPass = hadPass;
         }
         
 		/**
@@ -1548,13 +1523,6 @@ public class UploadManager implements BandwidthTracker {
          */
         Map getParameters() {
             return _params;
-        }
-
-        /**
-         * @return true if the get request had a matching password
-         */
-        boolean hadPassword() {
-            return _hadPass;
         }
   	}
 

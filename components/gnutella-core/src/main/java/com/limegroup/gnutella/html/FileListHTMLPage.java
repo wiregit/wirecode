@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.html;
 
-import javax.imageio.*;
+import com.limegroup.gnutella.image.ImageHandler;
+import com.limegroup.gnutella.image.ImageManipulator;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.io.File;
@@ -57,29 +58,7 @@ public class FileListHTMLPage {
         final String port = ""+RouterService.getPort();
         sb.append(host + ":" + port + htmlMiddle);
         
-        boolean shouldShowMagnets = false;
-        
-        {
-            // get all the Shared files from the FM
-            final String beginURL = "\r\n<a href=\"/get/";
-            for (int i = 0; i < sharedFiles.length; i++) {
-                if (sharedFiles[i] instanceof IncompleteFileDesc)
-                    continue;
-                
-                File currFile = sharedFiles[i].getFile();
-                if(isImageFile(currFile)) {
-                    sb.append(htmlImageLink(sharedFiles[i]));
-                }
-                sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
-                          UploadManager.FV_PASS + "/" +
-                          StringUtils.replace(URLEncoder.encode(currFile.getName()),
-                                              "+", "%20") + "\">" + 
-                          currFile.getName() + "</a><br>");
-                
-                if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
-                    shouldShowMagnets = true;
-            }
-        }
+        boolean shouldShowMagnets = writeStartOfPage(sb, sharedFiles);
         
         if (shouldShowMagnets) {
             // put the magnet links
@@ -105,15 +84,37 @@ public class FileListHTMLPage {
         sb.append(htmlEnd);
         return sb.toString();
     }
+    
+    /**
+     * Writes the beginning of the shared HTML page.
+     */
+    private boolean writeStartOfPage(StringBuffer sb, FileDesc[] sharedFiles) {
+        ImageHandler handler = ImageManipulator.getDefaultImageHandler();        
+        boolean shouldShowMagnets = false;
+        final String beginURL = "\r\n<a href=\"/get/";
+        for (int i = 0; i < sharedFiles.length; i++) {
+            if (sharedFiles[i] instanceof IncompleteFileDesc)
+                continue;
+            
+            File currFile = sharedFiles[i].getFile();
+            if(handler != null && handler.isImageFile(currFile))
+                sb.append(htmlImageLink(sharedFiles[i]));
+
+            sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
+                      UploadManager.FV_PASS + "/" +
+                      StringUtils.replace(URLEncoder.encode(currFile.getName()),
+                                          "+", "%20") + "\">" + 
+                      currFile.getName() + "</a><br>");
+            
+            if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
+                shouldShowMagnets = true;
+        }
+        return shouldShowMagnets;
+    }
 
     // 1 is you, so you need 2 (or more)
     private boolean hasEnoughAltLocs(FileDesc fd) {
         return (fd.getAlternateLocationCollection().getAltLocsSize() > 1);
-    }
-    
-    private boolean isImageFile(File f) {
-        String ext = FileUtils.getFileExtension(f);
-        return ext != null && ImageIO.getImageReadersBySuffix(ext).hasNext();
     }
     
     private String htmlImageLink(FileDesc fd) {

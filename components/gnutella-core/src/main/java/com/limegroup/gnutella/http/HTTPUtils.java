@@ -11,6 +11,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.HashMap;
 
 /**
  * This class supplies general facilities for handling HTTP, such as
@@ -33,6 +36,14 @@ public final class HTTPUtils {
 	 * Cached colon to avoid excessive allocations.
 	 */
 	private static final String COLON = ":";
+	
+	/**
+	 * A collection of mime types per extension.
+	 */
+	private static final Map MIME_TYPES = new HashMap();
+	static {
+	    loadMimeTypes();
+	}
 
 	/**
 	 * Private constructor to ensure that this class cannot be constructed
@@ -268,6 +279,24 @@ public final class HTTPUtils {
     }        
     
     /**
+     * Utility method that retrieves the mime type for an extension.
+     */
+    public static String getMimeType(String name) {
+        String ext = FileUtils.getFileExtension(name);
+        if(ext != null)
+            return (String)MIME_TYPES.get(ext.toLowerCase());
+        else
+            return null;
+    }
+    
+    /**
+     * Utility method that retrieves the mime type for the given file.
+     */
+    public static String getMimeType(File f) {
+        return getMimeType(f.getName());
+    }
+    
+    /**
      * Utlity method for getting the currently supported features.
      */
     private static Set getFeaturesValue() {
@@ -290,5 +319,35 @@ public final class HTTPUtils {
             new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
         return df.format(new Date());
+    }
+    
+    private static void loadMimeTypes() {
+        InputStream is = null;
+        try {
+            is = CommonUtils.getResourceStream("com/limegroup/gnutella/http/mime.types");
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String line = br.readLine();
+            while(line != null) {
+                line = line.trim();
+                if(line.startsWith("#")) {
+                    line = br.readLine();
+                    continue;
+                }
+                StringTokenizer st = new StringTokenizer(line);
+                if(st.hasMoreElements()) {
+                    String type = st.nextToken();
+                    while(st.hasMoreElements())
+                        MIME_TYPES.put(st.nextToken().toLowerCase(), type);
+                }
+                line = br.readLine();
+            }
+        } catch(IOException ignored) {
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(IOException ignored) {}
+            }
+        }
     }
 }
