@@ -955,14 +955,24 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (state==GAVE_UP || state==ABORTED) {
                 if ((state==GAVE_UP) &&
                     (dloaderManagerThread!=null) && 
-                    (dloaderManagerThread.isAlive()))
+                    (dloaderManagerThread.isAlive())) {
+                    // We can be sure all available RFDs have been tried, so
+                    // buckets is empty. We should allow the user to retry
+                    // the original RFDs he tried to download by pushing
+                    // the resume button, so we create a new 'buckets'
+                    // This is a quick and easy way of possibly restarting
+                    // the download that uses zero network resources.
+                    synchronized (this) {
+                        buckets=new RemoteFileDescGrouper(
+                            allFiles, incompleteFileManager);
+                    }
                     // if the dloaderManagerThread is simply waiting on reqLock,
                     // then just release him.  calling initialize will 'do the 
                     // right thing' but will cause a memory leak due to threads
                     // not being cleaned up.  Alternatively, we could have
                     // called stop() and then initialize.
                     reqLock.release();
-                else
+                } else
                     //This stopped because all hosts were tried.  (Note that this
                     //couldn't have been user aborted.)  Therefore no threads are
                     //running in this and it may be safely resumed.
