@@ -188,24 +188,20 @@ public class UploadManager {
 	}
 
 	private boolean testPerHostLimit(String host) {
-		// throws ExceededPerHostLimitException {
 		if ( _uploadsInProgress.containsKey(host) ) {
 			Integer value = (Integer)_uploadsInProgress.get(host);
 			int current = value.intValue();
 			int max = SettingsManager.instance().getUploadsPerPerson();
 			if (current > max)
-				// throw new ExceededPerHostLimitException();
 				return false;
 		}
 		return true;
 	}
 		
 	private boolean testTotalUploadLimit() {
-		// throws ExceededTotalUploadLimitException {
 		int max = SettingsManager.instance().getMaxUploads();
 		int current = _uploadsInProgress.size();
 		if (current > max)
-			// throw new ExceededTotalUploadLimitException();
 			return false;
 		return true;
 	}
@@ -215,11 +211,6 @@ public class UploadManager {
 	}
 	
 	private boolean testFailedPush(String host) {
-		//  // throws FailedPushException {
-//  		if ( _failedPushes.contains(host) )
-//  			return false;
-//  		// throw new FailedPushException(); 
-//  		return true;
 		PushedFile pf = new PushedFile(host);
 		PushedFile pfile;
 		Iterator iter = _failedPushes.iterator();
@@ -237,16 +228,12 @@ public class UploadManager {
 	}
 
 	private boolean testAttemptedPush(String host) {
-		//		throws FailedPushException {
-		//  if ( _attemptingPushes.contains(host) )
-//  			throw new FailedPushException();
 		PushedFile pf = new PushedFile(host);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
 			pfile = (PushedFile)iter.next();
 			if ( pf.equals(pfile) ) 
-				// throw new FailedPushException();
 				return false;
 		}
 		return true;
