@@ -80,10 +80,11 @@ public final class NIODispatcher implements Runnable {
 	 * 
 	 * @param conn the <tt>Connection</tt> instance that will be reading 
      *  data from the network
-     * @throws NullPointerException if the <tt>mc</tt> argument is 
+     * @throws NullPointerException if the <tt>conn</tt> argument is 
      *  <tt>null</tt>
 	 */
     public void addReader(Connection conn) {
+        System.out.println("NIODispatcher::addReader");
         if(conn == null) {
             throw new NullPointerException("adding null connection");
         }
@@ -101,7 +102,7 @@ public final class NIODispatcher implements Runnable {
 	 * 
 	 * @param conn the <tt>Connection</tt> instance containing a message that 
      *  was not fully written
-     * @throws NullPointerException if the <tt>mc</tt> argument is 
+     * @throws NullPointerException if the <tt>conn</tt> argument is 
      *  <tt>null</tt>
 	 */
 	public void addWriter(Connection conn) {
@@ -217,6 +218,7 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
+        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
