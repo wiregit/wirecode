@@ -84,7 +84,6 @@ public final class NIODispatcher implements Runnable {
      *  <tt>null</tt>
 	 */
     public void addReader(Connection conn) {
-        System.out.println("NIODispatcher::addReader");
         if(conn == null) {
             throw new NullPointerException("adding null connection");
         }
@@ -159,8 +158,8 @@ public final class NIODispatcher implements Runnable {
 			if(n == 0) {
 				continue;
 			}
+            
 			handleReaders();
-			
 			registerWriters();
 			handleWriters();
 		}
@@ -218,7 +217,6 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
-        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
@@ -226,42 +224,41 @@ public final class NIODispatcher implements Runnable {
 			
 			// ignore invalid keys
 			if(!key.isValid()) continue;
-			if(key.isReadable()) {
-                Connection conn = null;
-				try {
-                    conn = (Connection)key.attachment();
-                    if(!conn.isOpen()) {
-                        // continue if the connection is no longer open
-                        continue;
-                    }
-					Message msg = conn.reader().createMessageFromTCP(key);
-					
-					if(msg == null) {
-                        // the message was not read completely -- we'll get
-                        // another read event on the channel and keep reading
-						continue;
-					}
-
-                    conn.stats().addReceived();
-                    // make sure this message isn't considered spam                    
-                    if(!conn.isSpam(msg)) {
-                        // TODO:: don't use RouterService
-                        RouterService.getMessageRouter().handleMessage(msg, 
-                            (Connection)key.attachment());
-                    } else {
-                        if(!CommonUtils.isJava118()) {
-                            ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                                addMessage(msg);
-                        }
-                        conn.countDroppedMessage();
-                    }
-				} catch (BadPacketException e) {
-                    MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
-				} catch (IOException e) {
-                    // remove the connection if we got an IOException
-                    RouterService.removeConnection(conn);
-                    MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+            if(!key.isReadable()) continue;
+            Connection conn = null;
+			try {
+                conn = (Connection)key.attachment();
+                if(!conn.isOpen()) {
+                    // continue if the connection is no longer open
+                    continue;
+                }
+				Message msg = conn.reader().createMessageFromTCP(key);
+				
+				if(msg == null) {
+                    // the message was not read completely -- we'll get
+                    // another read event on the channel and keep reading
+					continue;
 				}
+
+                conn.stats().addReceived();
+                // make sure this message isn't considered spam                    
+                if(!conn.isSpam(msg)) {
+                    // TODO:: don't use RouterService
+                    RouterService.getMessageRouter().handleMessage(msg, 
+                        (Connection)key.attachment());
+                } else {
+                    if(!CommonUtils.isJava118()) {
+                        ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
+                            addMessage(msg);
+                    }
+                    conn.countDroppedMessage();
+                }
+			} catch (BadPacketException e) {
+                MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+			} catch (IOException e) {
+                // remove the connection if we got an IOException
+                RouterService.removeConnection(conn);
+                MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 			}
 		}
 	}
