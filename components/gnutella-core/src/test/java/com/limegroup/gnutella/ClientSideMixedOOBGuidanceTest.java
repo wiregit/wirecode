@@ -45,17 +45,7 @@ import com.sun.java.util.collections.Set;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-public class ClientSideMixedOOBGuidanceTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
-    private static final int PORT=6669;
-    private static final int TIMEOUT=3000;
-    private static final byte[] ultrapeerIP=
-        new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-    private static final byte[] oldIP=
-        new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
-
-    private static Connection[] testUPs = new Connection[4];
-    private static RouterService rs;
+public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
     private static MyActivityCallback callback;
 
@@ -76,128 +66,12 @@ public class ClientSideMixedOOBGuidanceTest
         junit.textui.TestRunner.run(suite());
     }
     
-    private static void doSettings() {
-        ConnectionSettings.PORT.setValue(PORT);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-        // make sure results get through
-        SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
-    }        
-    
-    public static void globalSetUp() throws Exception {
-        doSettings();
-
-        callback=new MyActivityCallback();
-        rs=new RouterService(callback);
-        assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
-        Thread.sleep(1000);
-        assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-    }        
-    
-    public void setUp() throws Exception  {
-        doSettings();
-    }
-     
-    private static Connection connect(RouterService rs, int port, 
-                                       boolean ultrapeer) 
-         throws Exception {
-         ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
-         Socket socket = ss.accept();
-         ss.close();
-         
-         socket.setSoTimeout(3000);
-         InputStream in=socket.getInputStream();
-         String word=readWord(in);
-         if (! word.equals("GNUTELLA"))
-             throw new IOException("Bad word: "+word);
-         
-         HandshakeResponder responder;
-         if (ultrapeer) {
-             responder = new UltrapeerResponder();
-         } else {
-             responder = new OldResponder();
-         }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
-         assertTrue("should be open", con.isOpen());
-         replyToPing(con, ultrapeer);
-         return con;
-     }
-     
-     /**
-      * Acceptor.readWord
-      *
-      * @modifies sock
-      * @effects Returns the first word (i.e., no whitespace) of less
-      *  than 8 characters read from sock, or throws IOException if none
-      *  found.
-      */
-     private static String readWord(InputStream sock) throws IOException {
-         final int N=9;  //number of characters to look at
-         char[] buf=new char[N];
-         for (int i=0 ; i<N ; i++) {
-             int got=sock.read();
-             if (got==-1)  //EOF
-                 throw new IOException();
-             if ((char)got==' ') { //got word.  Exclude space.
-                 return new String(buf,0,i);
-             }
-             buf[i]=(char)got;
-         }
-         throw new IOException();
-     }
-
-     private static void replyToPing(Connection c, boolean ultrapeer) 
-             throws Exception {
-        // respond to a ping iff one is given.
-        Message m = null;
-        byte[] guid;
-        try {
-            while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
-            }
-            guid = ((PingRequest)m).getGUID();            
-        } catch(InterruptedIOException iioe) {
-            //nothing's coming, send a fake pong anyway.
-            guid = new GUID().bytes();
-        }
-        
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
-        PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
-                                 socket.getLocalPort(), 
-                                 ultrapeer ? ultrapeerIP : oldIP,
-                                 ultrapeer);
-        reply.hop();
-        c.send(reply);
-        c.flush();
-     }
-
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
     private static QueryStatusResponse getFirstQueryStatus(Connection c) {
         return (QueryStatusResponse)
-            getFirstMessageOfType(c, QueryStatusResponse.class, TIMEOUT);
+            getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
 
     ///////////////////////// Actual Tests ////////////////////////////
@@ -207,14 +81,13 @@ public class ClientSideMixedOOBGuidanceTest
         DatagramPacket pack = null;
         UDP_ACCESS = new DatagramSocket();
 
-        for (int i = 0; i < testUPs.length; i++) {
-            testUPs[i] = connect(rs, 6355+i, true);
-            assertTrue("not open", testUPs[i].isOpen());
-            assertTrue("not up->leaf", testUPs[i].isSupernodeClientConnection());
-            drain(testUPs[i], 500);
+        for (int i = 0; i < testUP.length; i++) {
+            assertTrue("not open", testUP[i].isOpen());
+            assertTrue("not up->leaf", testUP[i].isSupernodeClientConnection());
+            drain(testUP[i], 500);
             if ((i==2)) { // i'll send 0 later....
-                testUPs[i].send(MessagesSupportedVendorMessage.instance());
-                testUPs[i].flush();
+                testUP[i].send(MessagesSupportedVendorMessage.instance());
+                testUP[i].flush();
             }
         }
 
@@ -228,8 +101,8 @@ public class ClientSideMixedOOBGuidanceTest
                                  UDP_ACCESS.getLocalPort(), 
                                  InetAddress.getLocalHost().getAddress(), 
                                  10, 10, true, 900, true);
-            testUPs[0].send(pong);
-            testUPs[0].flush();
+            testUP[0].send(pong);
+            testUP[0].flush();
 
             // wait for the ping request from the test UP
             UDP_ACCESS.setSoTimeout(TIMEOUT*2);
@@ -260,14 +133,14 @@ public class ClientSideMixedOOBGuidanceTest
         // set up unsolicited UDP support
         {
             // resend this to start exchange
-            testUPs[0].send(MessagesSupportedVendorMessage.instance());
-            testUPs[0].flush();
+            testUP[0].send(MessagesSupportedVendorMessage.instance());
+            testUP[0].flush();
 
             byte[] cbGuid = null;
             int cbPort = -1;
             while (cbGuid == null) {
                 try {
-                    Message m = testUPs[0].receive(TIMEOUT);
+                    Message m = testUP[0].receive(TIMEOUT);
                     if (m instanceof UDPConnectBackVendorMessage) {
                         UDPConnectBackVendorMessage udp = 
                             (UDPConnectBackVendorMessage) m;
@@ -287,7 +160,7 @@ public class ClientSideMixedOOBGuidanceTest
             pr.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
-                                      testUPs[0].getInetAddress(), cbPort);
+                                      testUP[0].getInetAddress(), cbPort);
             UDP_ACCESS.send(pack);
         }
 
@@ -296,8 +169,8 @@ public class ClientSideMixedOOBGuidanceTest
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(), 
-                                       PORT, 12);
+                sock=Sockets.connect(InetAddress.getLocalHost().getHostAddress(),
+                                     SERVER_PORT, 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());
             } catch (IOException ignored) {
@@ -330,8 +203,8 @@ public class ClientSideMixedOOBGuidanceTest
         Thread.sleep(250);
 
         // some connected UPs should get a OOB query
-        for (int i = 0; i < testUPs.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUPs[i], TIMEOUT);
+        for (int i = 0; i < testUP.length; i++) {
+            QueryRequest qr = getFirstQueryRequest(testUP[i], TIMEOUT);
             assertNotNull("up " + i + " didn't get query", qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             if ((i==0) || (i==2))
@@ -342,8 +215,8 @@ public class ClientSideMixedOOBGuidanceTest
 
         // now confirm that we leaf guide the 'even' guys but not the others.
         Message m = null;
-        assertGreaterThan(SearchResultHandler.REPORT_INTERVAL, 4*testUPs.length);
-        for (int i = 0; i < testUPs.length; i++) {
+        assertGreaterThan(SearchResultHandler.REPORT_INTERVAL, 4*testUP.length);
+        for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[4];
             res[0] = new Response(10, 10, "susheel"+i);
             res[1] = new Response(10, 10, "susheel smells good"+i);
@@ -353,13 +226,13 @@ public class ClientSideMixedOOBGuidanceTest
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
 
-            testUPs[i].send(m);
-            testUPs[i].flush();
+            testUP[i].send(m);
+            testUP[i].flush();
         }
         
         // all UPs should get a QueryStatusResponse
-        for (int i = 0; i < testUPs.length; i++) {
-            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+        for (int i = 0; i < testUP.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUP[i]);
             if ((i==0) || (i==2)) {
                 assertNotNull(stat);
                 assertEquals(new GUID(stat.getGUID()), queryGuid);
@@ -373,8 +246,8 @@ public class ClientSideMixedOOBGuidanceTest
         rs.stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
-        for (int i = 0; i < testUPs.length; i++) {
-            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+        for (int i = 0; i < testUP.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUP[i]);
             if ((i==0) || (i==2)) {
                 assertNotNull(stat);
                 assertEquals(new GUID(stat.getGUID()), queryGuid);
@@ -389,37 +262,16 @@ public class ClientSideMixedOOBGuidanceTest
 
     //////////////////////////////////////////////////////////////////
 
-    private void drainAll() throws Exception {
-        drainAll(testUPs);
-    }
-    
     private static byte[] myIP() {
         return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
-    private static final boolean DEBUG = false;
-    
-    static void debug(String message) {
-        if(DEBUG) 
-            System.out.println(message);
+    public static Integer numUPs() {
+        return new Integer(4);
     }
 
-    private static class UltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
-            props.put(HeaderNames.X_DEGREE, "42");           
-            return HandshakeResponse.createResponse(props);
-        }
-    }
-
-
-    private static class OldResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
-            Properties props=new Properties();
-            return HandshakeResponse.createResponse(props);
-        }
+    public static ActivityCallback getActivityCallback() {
+        return new MyActivityCallback();
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {

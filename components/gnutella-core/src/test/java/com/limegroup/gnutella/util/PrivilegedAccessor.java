@@ -6,6 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+
 /**
  * a.k.a. The "ObjectMolester"
  * <p>
@@ -136,6 +140,94 @@ public class PrivilegedAccessor {
                IllegalAccessException, 
                InvocationTargetException  {
         return getMethod(instance,methodName,classTypes).invoke(instance,args);
+    }
+    
+    /**
+     * Calls a static method on the given class with the given argument.
+     * The static method is called on all superclasses of the class to.
+     * The call chain starts with the supermost class, eventually leading
+     * back to the class supplied as the argument.
+     *
+     * @param clazz the entry point class
+     * @param methodName the name of the method to invoke
+     * @param arg the argument to pass to the method
+     * @see PrivilegedAccessor#invokeMethod(Object,String,Object[])
+     */
+    public static List invokeAllStaticMethods(Class clazz,
+                                              String methodName, 
+                                              Object arg ) 
+        throws NoSuchMethodException,
+               IllegalAccessException, 
+               InvocationTargetException  {
+        Object[] args = new Object[1];
+        args[0] = arg;
+        return invokeAllStaticMethods(clazz, methodName, args);
+    }    
+    
+    /**
+     * Calls a static method on the given class with the given arguments.
+     * The static method is called on all superclasses of the class to.
+     * The call chain starts with the supermost class, eventually leading
+     * back to the class supplied as the argument.
+     *
+     * Returns an array of PairTuple of (Class, Object) where each entry
+     * represents one return value, Class being the class that returned Object.
+     *
+     * @param clazz the class
+     * @param methodName the name of the method to invoke
+     * @param args an array of objects to pass as arguments
+     * @see PrivilegedAccessor#invokeAllStaticMethods(Class,String,Object)
+     */
+    public static List invokeAllStaticMethods(Class clazz,
+                                              String methodName, 
+                                              Object[] args ) 
+        throws NoSuchMethodException,
+               IllegalAccessException, 
+               InvocationTargetException  {
+        Class[] classTypes = null;
+        if( args != null) {
+            classTypes = new Class[args.length];
+            for( int i = 0; i < args.length; i++ ) {
+                if( args[i] != null )
+                    classTypes[i] = args[i].getClass();
+            }
+        }
+        return invokeAllStaticMethods(clazz, methodName, args, classTypes);
+    }
+
+    /**
+     * Calls a static method on the given class with the given arguments.
+     * The static method is called on all superclasses of the class to.
+     * The call chain starts with the supermost class, eventually leading
+     * back to the class supplied as the argument.
+     *
+     * Returns an array of PairTuple of (Class, Object) where each entry
+     * represents one return value, Class being the class that returned Object.
+     *
+     * Necessary for using native-type parameters and when the arguments
+     * are subclassed objects.
+     *
+     * @param clazz the class
+     * @param methodName the name of the method to invoke
+     * @param args an array of objects to pass as arguments
+     * @param classTypes an array of the types of the arguments.
+     * @see PrivilegedAccessor#invokeAllStaticMethods(Class,String,Object)
+     */
+    public static List invokeAllStaticMethods(Class clazz,
+                                              String methodName, 
+                                              Object[] args,
+                                              Class[] classTypes ) 
+        throws NoSuchMethodException,
+               IllegalAccessException, 
+               InvocationTargetException  {
+        List methods = getAllStaticMethods(clazz ,methodName,classTypes);
+        List ret = new LinkedList();
+        for(Iterator i = methods.iterator(); i.hasNext(); ) {
+            Method m = (Method)i.next();
+            Object val = m.invoke(null, args);
+            ret.add(new PairTuple(m.getDeclaringClass(), val));
+        }
+        return ret;
     }    
 
     /**
@@ -155,6 +247,30 @@ public class PrivilegedAccessor {
         accessMethod.setAccessible(true);
         return accessMethod;
     }
+    
+    /**
+     * @param class the class to find the statics methods in
+     * @param methodName the name of the static method
+     * @param the parameter classes
+     */
+    public static List getAllStaticMethods(Class entryClass,
+                                           String methodName, 
+                                           Class[] classTypes ) 
+                                           throws NoSuchMethodException {
+        List methods = new LinkedList();
+        Class clazz = entryClass;
+        while(clazz != null) {
+            try {
+                Method add = clazz.getDeclaredMethod(methodName, classTypes);
+                add.setAccessible(true);
+                methods.add(0, add);
+            } catch(NoSuchMethodException ignored) {}
+            clazz = clazz.getSuperclass();
+        }
+        if(methods.isEmpty())
+            throw new NoSuchMethodException("Invalid method: " + methodName);
+        return methods;
+    }    
     
     /**
      * Returns the class 'name' that was declared by class 'parent'.
