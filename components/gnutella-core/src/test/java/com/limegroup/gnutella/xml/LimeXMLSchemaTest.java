@@ -53,30 +53,30 @@ public class LimeXMLSchemaTest extends BaseTestCase {
         
         assertTrue( iterator.hasNext() );
         
-        check( iterator, "title");
-        check( iterator, "artist");
-        check( iterator, "album");
-        check( iterator, "track");
-        check( iterator, "genre");
-        check( iterator, "type");
-        check( iterator, "seconds");
-        check( iterator, "year");
-        check( iterator, "language");
-        check( iterator, "SHA1");
-        check( iterator, "bitrate");
-        check( iterator, "price");
-        check( iterator, "link");
-        check( iterator, "comments");
-        check( iterator, "action");
+        check( iterator, "title", true);
+        check( iterator, "artist", true);
+        check( iterator, "album", true);
+        check( iterator, "genre", true);
+        check( iterator, "licensetype", false );
+        check( iterator, "track", true);
+        check( iterator, "type", true);
+        check( iterator, "year", true);
+        check( iterator, "seconds", false);
+        check( iterator, "language", true);
+        check( iterator, "bitrate", false);
+        check( iterator, "comments", true);
+        check( iterator, "license", true);
+        check( iterator, "action", true);
         
         assertTrue( !iterator.hasNext() );
     }
     
-    private static void check( Iterator i, String name) {
+    private static void check( Iterator i, String name, boolean editable) {
         String fullName = "audios__audio__" + name + "__";
         
         assertTrue(i.hasNext());
         SchemaFieldInfo fieldInfo = (SchemaFieldInfo)i.next();
         assertEquals(fullName, fieldInfo.getCanonicalizedFieldName());
+        assertEquals(editable, fieldInfo.isEditable());
     }
 }	
