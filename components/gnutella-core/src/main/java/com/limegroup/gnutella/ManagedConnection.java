@@ -54,8 +54,13 @@ public class ManagedConnection
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
 
-    private MessageRouter _router;
-    private ConnectionManager _manager;
+    private final MessageRouter _router;
+    private final ConnectionManager _manager;
+
+	/**
+	 * Constant for the statistics-handling class.
+	 */
+	private final Statistics STATS = Statistics.instance();
 
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
@@ -383,7 +388,8 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        _router.countMessage();
+        //_router.countMessage();
+		
         return m;
     }
 
@@ -403,7 +409,7 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        _router.countMessage();
+        //_router.countMessage();
         return m;
     }
 
@@ -430,7 +436,7 @@ public class ManagedConnection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-        _router.countMessage();
+        //_router.countMessage();
         int priority=calculatePriority(m);        
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
@@ -758,8 +764,7 @@ public class ManagedConnection
      *         or route messages are silently swallowed, allowing the message
      *         loop to continue.
      */
-    void loopForMessages()
-            throws IOException {
+    void loopForMessages() throws IOException {
         while (true) {
             Message m=null;
             try {
@@ -774,29 +779,14 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-                _router.countFilteredMessage();
+				STATS.addFilteredTCPMessage();
+                //_router.countFilteredMessage();
                 _numReceivedMessagesDropped++;
                 continue;
             }
 
             //call MessageRouter to handle and process the message
-            _router.handleMessage(m, this);
-            
-//            // Increment hops and decrease TTL
-//            m.hop();
-//
-//            if(m instanceof PingRequest)
-//                _router.handlePingRequestPossibleDuplicate(
-//                    (PingRequest)m, this);
-//            else if (m instanceof PingReply)
-//                _router.handlePingReply((PingReply)m, this);
-//            else if (m instanceof QueryRequest)
-//                _router.handleQueryRequestPossibleDuplicate(
-//                    (QueryRequest)m, this);
-//            else if (m instanceof QueryReply)
-//                _router.handleQueryReply((QueryReply)m, this);
-//            else if (m instanceof PushRequest)
-//                _router.handlePushRequest((PushRequest)m, this);
+            _router.handleMessage(m, this);            
         }
     }
 
@@ -810,7 +800,7 @@ public class ManagedConnection
      * connection has no routing path.
      */
     public void countDroppedMessage() {
-        _numReceivedMessagesDropped++;
+		_numReceivedMessagesDropped++;
     }
 
     /**
@@ -1202,6 +1192,40 @@ public class ManagedConnection
         else 
             return !Boolean.valueOf(value).booleanValue();
     }
+
+	/**
+	 * Returns whether or not this connection is to a client supporting
+	 * GUESS.
+	 *
+	 * @return <tt>true</tt> if the node on the other end of this 
+	 *  connection supports GUESS, <tt>false</tt> otherwise
+	 */
+	public boolean isGUESSUltrapeer() {
+		int version = getGUESSVersion();
+		if(version == -1) return false;
+		else if(version < 20 && version > 0) return true;
+		return false;
+	}
+
+	/**
+	 * Returns the version of the GUESS search scheme supported by the node
+	 * at the other end of the connection.  This returns the version in
+	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
+	 * will return 1.  If the other client has not sent an X-Guess header
+	 * this returns -1.
+	 *
+	 * @return the version of GUESS supported, reported as a whole number,
+	 *  or -1 if GUESS is not supported
+	 */
+	public int getGUESSVersion() {
+		String value = super.getProperty(ConnectionHandshakeHeaders.X_GUESS);
+		if(value == null) return -1;
+		else {
+			float version = Float.parseFloat(value);
+			version *= 10;
+			return (int)version;
+		}
+	}
 
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
