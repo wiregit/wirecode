@@ -977,7 +977,12 @@ public class Connection {
             }
             
             // DO THE ACTUAL READ
-            msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+            try {
+                msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+            } catch(IOException ioe) {
+                close(); // if IOError, make sure we close.
+                throw ioe;
+            }
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -1028,7 +1033,13 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
             
-            m.write(_out);
+            try {
+                m.write(_out);
+            } catch(IOException ioe) {
+                close(); // make sure we close.
+                throw ioe;
+            }
+
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
@@ -1053,7 +1064,13 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
 
-            _out.flush();
+            try {
+                _out.flush();
+            } catch(IOException ioe) {
+                close();
+                throw ioe;
+            }
+
             // we must update the write statistics again,
             // because flushing forces the deflater to deflate.
             updateWriteStatistics(null, priorUncompressed, priorCompressed);

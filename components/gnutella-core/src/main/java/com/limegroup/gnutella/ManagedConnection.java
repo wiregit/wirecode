@@ -629,7 +629,7 @@ public class ManagedConnection extends Connection
             } catch (IOException e) {
                 _runnerDied=true;
             } catch(Throwable t) {
-                _runnerDied=true;      
+                _runnerDied=true;
                 ErrorService.error(t);
             }
         }
