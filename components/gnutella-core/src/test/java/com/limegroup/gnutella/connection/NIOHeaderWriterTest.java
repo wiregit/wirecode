@@ -1,19 +1,17 @@
 package com.limegroup.gnutella.connection;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.handshaking.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.ServerSocket;
+import java.net.Socket;
 
+import junit.framework.Test;
 
-import java.net.*;
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.lang.reflect.*;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * This class tests the code for writing Gnutella message headers
@@ -22,8 +20,6 @@ import java.lang.reflect.*;
 public class NIOHeaderWriterTest extends BaseTestCase {
     
     private static final int SERVER_PORT = 9000;
-
-    private static final int LIME_PORT = 6669;
 
     private static Field[] _headers;
 
