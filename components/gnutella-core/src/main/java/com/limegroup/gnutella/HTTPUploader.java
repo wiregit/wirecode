@@ -53,11 +53,11 @@ public class HTTPUploader implements Runnable {
 	 * of uploads by a single user exceeds the SettingsManager's
 	 * uploadsPerPerson_ variable, then the upload is denied, 
 	 * and the used gets a Try Again Later message.
-	 */
-	/* Maps IP Addresses to ints representing the number of uploads */
-	private static Map _uploadsInProgress =
-		Collections.synchronizedMap(new HashMap());
-
+     *
+     * LOCKING: obtain _uploadsInProgress' monitor before modifying
+     */
+	private static Map /* String -> Integer */ _uploadsInProgress =
+		new HashMap();
 
 
     //////////// Initialized in Constructors ///////////
@@ -441,6 +441,7 @@ public class HTTPUploader implements Runnable {
         }
 
         try {
+            testAndIncrementNumUploads();
             _callback.addUpload(this);
             //1. For push requests only, establish the connection.
             if (! _isServer) {
@@ -481,7 +482,6 @@ public class HTTPUploader implements Runnable {
                 _state = COMPLETE;
             }
         } catch (IOException e) {
-			decrementNumUploads();
             _state = ERROR;
         } finally {
 			decrementNumUploads();
@@ -512,7 +512,6 @@ public class HTTPUploader implements Runnable {
     }
 
     public void doUpload() throws IOException {
-		testAndIncrementNumUploads();
         writeHeader();
         int c = -1;
         int available = 0;
@@ -668,31 +667,31 @@ public class HTTPUploader implements Runnable {
 		
 		Integer value;
 		int numUploads = 0;
-		
-		/* check to see if the IP address is already in the map */
-		if (_uploadsInProgress.containsKey(ip) == true) {
-			/* if it is, get the number of uploads */
-			value = (Integer)_uploadsInProgress.get(ip);
-			numUploads = value.intValue();
-		}
+        
+        synchronized (_uploadsInProgress) {
+            /* check to see if the IP address is already in the map */
+            if (_uploadsInProgress.containsKey(ip) == true) {
+                /* if it is, get the number of uploads */
+                value = (Integer)_uploadsInProgress.get(ip);
+                numUploads = value.intValue();
+            }
 
-		/* add the current upload to the total number of uploads */
-		numUploads++;
+            /* add the current upload to the total number of uploads */
+            numUploads++;
 
-		/* get the number of uploads per person allowed */
-		int numAllowed = SettingsManager.instance().getUploadsPerPerson();
+            /* get the number of uploads per person allowed */
+            int numAllowed = SettingsManager.instance().getUploadsPerPerson();
 
-		/* if there are more uploads than allowed */
-		/* then throw an exception */		
-		if (numAllowed < numUploads) {
-			doLimitReachedAfterConnect();
-			throw new IOException("Too Many Uploads in Progress");
-		}
-		else {
-			/* insert the new value back into the map */ 
-			_uploadsInProgress.put(ip, new Integer(numUploads));
-		}
-		
+            /* insert the new value back into the map */ 
+            _uploadsInProgress.put(ip, new Integer(numUploads));
+
+            /* if there are more uploads than allowed */
+            /* then throw an exception */		
+            if (numAllowed < numUploads) {
+                doLimitReachedAfterConnect();
+                throw new IOException("Too Many Uploads in Progress");
+            }
+        }
 	}
 
 	/**
@@ -708,19 +707,21 @@ public class HTTPUploader implements Runnable {
 		/* the ip address that is the key for the map */
 		String ip = getInetAddress().getHostAddress();		
 		
-		Integer value;
-		int numUploads;
-		/* this test shouldn't be necessary, the ip address */
-		/* should be there, but i'll do it just to be safe */
-		if (_uploadsInProgress.containsKey(ip) == true) {
-			value = (Integer)_uploadsInProgress.get(ip);
-			numUploads = value.intValue();
-			numUploads--;
-			if (numUploads == 0)
-				_uploadsInProgress.remove(ip);
-			else 
-				_uploadsInProgress.put(ip, new Integer(numUploads));
-		}
+        synchronized (_uploadsInProgress) {
+            Integer value;
+            int numUploads;
+            /* this test shouldn't be necessary, the ip address */
+            /* should be there, but i'll do it just to be safe */
+            if (_uploadsInProgress.containsKey(ip) == true) {
+                value = (Integer)_uploadsInProgress.get(ip);
+                numUploads = value.intValue();
+                numUploads--;
+                if (numUploads <= 0)
+                    _uploadsInProgress.remove(ip);
+                else 
+                    _uploadsInProgress.put(ip, new Integer(numUploads));
+            }
+        }
 	}
 
 
