@@ -151,6 +151,13 @@ public class DirectAltLoc extends AlternateLocation {
 		
 			DirectAltLoc other = (DirectAltLoc)o;
 		
+			// if I'm demoted, I'm bigger.  Otherwise I'm smaller
+			if (_demoted !=other._demoted) {
+				if (_demoted)
+					return 1;
+				return -1;
+			}
+			
 			ret = _node.getAddress().compareTo(other._node.getAddress());
 			if(ret!=0)
 				return ret;

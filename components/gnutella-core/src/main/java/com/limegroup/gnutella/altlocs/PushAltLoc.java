@@ -155,13 +155,6 @@ public class PushAltLoc extends AlternateLocation {
 		return hashCode() - obj.hashCode();
 	}
 	
-	/**
-	 * avoid comparing the demoted value when the comparant is a pushloc.
-	 */
-	protected boolean shouldCompareDemoted(AlternateLocation other) {
-	    return false;
-	}
-	
 	public int hashCode() {
 		if (hashCode==0) {
 			int result = super.hashCode();
