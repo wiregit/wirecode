@@ -446,12 +446,22 @@ public class Connection implements Runnable {
 				byte[] clientGUID = GUID.fromHexString(manager.ClientId);
 
 				// changing the port here to test push:
+				
+				//Modified by Sumeet Thadani
+				// If the number of responses is more 255, we are going to 
+				// drop the responses after index 255. This can be corrected 
+				//post beta, so that the extra responses can be sent along as
+				//another query reply.
+				if (responses.length > 255){
+				    Response[] res = new Response[255];
+				    for(int i=0; i<255;i++)
+					res[i] = responses[i]; //copy first 255 elements of old array
+				    responses = res;//old array will be garbage collected
+				}
 			  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
   								   speed, responses, clientGUID);
-
-		//  		QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
-//  								   speed, responses, clientGUID);
-
+				//QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
+				//  		     speed, responses, clientGUID);			       
 				send(qreply);
 				if(manager.stats == true)
 				    manager.QRepCount++;//keep stats if stats is turned on
