@@ -627,6 +627,13 @@ public class ConnectionManager {
      */
     private boolean allowConnection(ManagedConnection c) {
         if(!c.receivedHeaders()) return false;
+        
+        if (c.isCandidateConnection()) {
+        	//dropWorstUPAsync(c);  //schedule a trimming of the UPs
+        	//currently disabled
+        	return true;
+        }
+        
 		return allowConnection(c.headers(), false);
     }
 
@@ -2179,7 +2186,7 @@ public class ConnectionManager {
 		recoverHosts();
 		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
 		
-		//TODO: don't forget to set the last disconnect time
+		_disconnectTime=0; 
 		
     }
 

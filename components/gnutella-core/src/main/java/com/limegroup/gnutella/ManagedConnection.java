@@ -1672,5 +1672,13 @@ public class ManagedConnection extends Connection
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		send(m);
 	}
+	
+	/**
+	 * @return whether this specific connection is 
+	 * from a candidate leaf that has promoted itself to an UP.
+	 */
+	public boolean isCandidateConnection() {
+		return _isCandidate;
+	}
 
 }
