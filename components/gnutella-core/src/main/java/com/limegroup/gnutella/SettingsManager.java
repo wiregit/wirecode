@@ -459,6 +459,28 @@ public class SettingsManager implements SettingsInterface {
 				else if(key.equals(WINDOW_Y)) {
 					setWindowY(Integer.parseInt(p));
 				}
+
+				else if(key.equals(SHOW_TRAY_DIALOG)) {
+					boolean showTrayDialog;
+                    if (p.equals("true"))
+                        showTrayDialog = true;
+                    else if (p.equals("false"))
+                        showTrayDialog = false;
+                    else
+                        break;
+					setShowTrayDialog(showTrayDialog);
+				}
+
+				else if(key.equals(MINIMIZE_TO_TRAY)) {
+					boolean minimize;
+                    if (p.equals("true"))
+                        minimize = true;
+                    else if (p.equals("false"))
+                        minimize = false;
+                    else
+                        break;
+					setMinimizeToTray(minimize);
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -541,6 +563,8 @@ public class SettingsManager implements SettingsInterface {
 		setSessions(DEFAULT_SESSIONS);
 		setInstalled(DEFAULT_INSTALLED);
 		setRunOnce(DEFAULT_RUN_ONCE);
+		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
+		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
     }
 
 
@@ -780,6 +804,24 @@ public class SettingsManager implements SettingsInterface {
 	 */
 	public int getWindowY() {
 		return Integer.parseInt(props_.getProperty(WINDOW_Y));
+	}
+
+	/**
+	 * returns a boolean specifying whether or not the tray
+	 * dialog window should be shown.
+	 */
+	public boolean getShowTrayDialog() {
+		Boolean b = Boolean.valueOf(props_.getProperty(SHOW_TRAY_DIALOG));
+		return b.booleanValue();	
+	}
+
+	/**
+	 * returns a boolean specifying whether or not to minimize 
+	 * the application to the system tray.
+	 */
+	public boolean getMinimizeToTray() {
+		Boolean b = Boolean.valueOf(props_.getProperty(MINIMIZE_TO_TRAY));
+		return b.booleanValue();	
 	}
 
     /******************************************************
@@ -1649,6 +1691,24 @@ public class SettingsManager implements SettingsInterface {
 	public void setWindowY(int y) {
 		props_.put(WINDOW_Y, Integer.toString(y));
 	}
+
+	/**
+	 * sets the flag for whether or not the tray dialog
+	 * window should be shown.
+	 */
+	public void setShowTrayDialog(boolean showDialog) {
+		Boolean b = new Boolean(showDialog);
+		props_.put(SHOW_TRAY_DIALOG, b.toString());
+	}
+
+	/**
+	 * sets the flag for whether or not the application
+	 * should be minimized to the system tray on windows
+	 */
+	public void setMinimizeToTray(boolean minimize) {
+		Boolean b = new Boolean(minimize);
+		props_.put(MINIMIZE_TO_TRAY, b.toString());
+	}	
 
     /******************************************************
      ***************  END OF MUTATOR METHODS **************

@@ -102,6 +102,9 @@ public interface SettingsInterface {
 	public static final int     DEFAULT_APP_WIDTH = 640;
 	public static final int     DEFAULT_APP_HEIGHT = 620;
 	public static final boolean DEFAULT_RUN_ONCE = false;
+	public static final boolean DEFAULT_SHOW_TRAY_DIALOG = true;
+	public static final boolean DEFAULT_MINIMIZE_TO_TRAY = true;
+
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
@@ -164,6 +167,8 @@ public interface SettingsInterface {
 	public static final String RUN_ONCE           = "RUN_ONCE";
 	public static final String WINDOW_X           = "WINDOW_X";
 	public static final String WINDOW_Y           = "WINDOW_Y";
+	public static final String SHOW_TRAY_DIALOG   = "SHOW_TRAY_DIALOG";
+	public static final String MINIMIZE_TO_TRAY   = "MINIMIZE_TO_TRAY";
 }
 
 
