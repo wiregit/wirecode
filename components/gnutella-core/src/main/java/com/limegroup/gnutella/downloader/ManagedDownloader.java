@@ -1367,8 +1367,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
                     public void run() {
+                        boolean iterate = false;
                         try {
-                            connectAndDownload(rfd);
+                            iterate = connectAndDownload(rfd);
                         } catch (Exception e) {
                             //This is a "firewall" for reporting unhandled
                             //errors.  We don't really try to recover at this
@@ -1378,7 +1379,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         } finally {
                             synchronized (ManagedDownloader.this) { 
                                 threads.remove(this); 
-                                ManagedDownloader.this.notifyAll();
+                                if(iterate) 
+                                    ManagedDownloader.this.notifyAll();
                             }
                         }
                     }//end of run
@@ -1407,8 +1409,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * c. get the file.
      * Each of these steps can run into errors, which have to be dealt with
      * differently.
+     * @return true if this worker thread should notify, false otherwise.
+     * currently this method returns false iff NSEEx is  thrown. 
      */
-    private void connectAndDownload(RemoteFileDesc rfd) {
+    private boolean connectAndDownload(RemoteFileDesc rfd) {
         //this make throw an exception if we were not able to establish a 
         //direct connection and push was unsuccessful too
         HTTPDownloader dloader = null;
@@ -1417,7 +1421,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloader = establishConnection(rfd);
         
         if(dloader == null)//any exceptions in the method internally?
-            return;
+            return true;//no work was done, we should try to get another thread
 
         boolean http11 = true;//must enter the loop
 
@@ -1448,8 +1452,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     synchronized(this) {
                         queuedCount--;
                     }
-                    dloader.stop();
-                    return;//close connection
+                    dloader.stop();//close connection
+                    // notifying will make no diff, coz the next iteration will 
+                    //throw interrupted exception.
+                    return true;
                 }
             }
             if(wasQueued) {//we have been given a slot, after being queued
@@ -1458,15 +1464,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }
             //Now, connected is either 0 or 2
-            Assert.that(connected==0 || connected==2,
+            Assert.that(connected==0 || connected==2 || connected==3,
                         "invalid return from assignAndRequest "+connected);
             if(connected==0)
-                return;
+                return true;
+            else if(connected==3)
+                return false;
             
             //Step 3. OK, we have successfully connected, start saving the file
             //to disk
             doDownload(dloader, http11);
         }
+        //came out of the while loop, http1.0 spawn a thread
+        return true;
     }
     
     /** 
@@ -1578,10 +1588,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
-     * @return 0 if
-     * NoSuchElement, TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
+     * @return 0 if (the server is not giving us the file)
+     * TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
+     * otherwise if NoSuchElement( we have no areas to steal) return 3
      */
     private int assignAndRequest(HTTPDownloader dloader,int[] referenceArray,
                                                                boolean http11) {
@@ -1600,11 +1611,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
                 Assert.that(updateNeeded == false,
                             "updateNeeded not false in assignAndRequest");
-                debug("nsex thrown in assingAndReplace "+dloader);
+                debug("nsex thrown in assingAndRequest "+dloader);
                 synchronized(this) {
                     files.add(dloader.getRemoteFileDesc());
                 }
-                return 0;
+                return 3;
             } catch(TryAgainLaterException talx) {
                 debug("talx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
@@ -1775,6 +1786,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         int amountRead=biggest.getAmountRead();
         int left=biggest.getAmountToRead()-amountRead;
         //check if we need to steal the last chunk from a slow downloader.
+        //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
         if ((http11 && left<CHUNK_SIZE) || (!http11 && left < MIN_SPLIT_SIZE)){ 
             float bandwidth = -1;//initialize
             try {
@@ -1804,7 +1816,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         else { //There is a big enough chunk to split...split it
             int start;
             if(http11) //steal CHUNK_SIZE bytes from the end
-                start = biggest.getAmountToRead()-CHUNK_SIZE +1;
+                start = biggest.getInitialReadingPoint()+
+                        biggest.getAmountToRead()-CHUNK_SIZE +1;
             else 
                 start=biggest.getInitialReadingPoint()+amountRead+left/2;
             int stop=

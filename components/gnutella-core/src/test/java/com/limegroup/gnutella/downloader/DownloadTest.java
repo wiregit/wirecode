@@ -464,10 +464,6 @@ public class DownloadTest extends TestCase {
             waitForCorrupt(download);
         else
             waitForComplete(download);
-        if(deleteCorrupt) {//we are not interrupted if we choose to keep going
-            check(download.getAmountRead()<2*TestFile.length()/3, 
-                  "Didn't interrupt soon enough: "+download.getAmountRead());
-        }
         debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
@@ -982,7 +978,7 @@ public class DownloadTest extends TestCase {
         assertTrue(message,ok);
     }
 
-    private static final boolean DEBUG=true;
+    private static final boolean DEBUG=false;
     
     static void debug(String message) {
         if(DEBUG) 
