@@ -230,8 +230,8 @@ public class SettingsManager implements SettingsInterface
 		else if(key.equals(SettingsInterface.SEARCH_LIMIT))
 		    {
 			try {
-			    byte s = Byte.parseByte(p);
-			    try {setSearchLimit(s);}
+			    b = Byte.parseByte(p);
+			    try {setSearchLimit(b);}
 			    catch (IllegalArgumentException ie){}
 			}
 			catch(NumberFormatException nfe){} 	
@@ -269,10 +269,7 @@ public class SettingsManager implements SettingsInterface
 		else if(key.equals(SettingsInterface.DIRECTORIES))
 		    {
 			try {setDirectories(p);}
-			catch (IllegalArgumentException ie)
-			    {
-				setDirectories(home_);
-			    }
+			catch (IllegalArgumentException ie){}
 		    }
 
 		else if(key.equals(SettingsInterface.EXTENSIONS))
@@ -362,7 +359,8 @@ public class SettingsManager implements SettingsInterface
 	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 	setStats(SettingsInterface.DEFAULT_STATS);
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
-	setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);
+	try {setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
+	catch(IllegalArgumentException e){setDirectories(home_);}
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
 	setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
@@ -651,7 +649,7 @@ public class SettingsManager implements SettingsInterface
     /** set the directories to search */
     public synchronized void setDirectories(String dir)
     {	
-	if(dir == null)
+	if(dir == "")
 	    throw new IllegalArgumentException();
 	else
 	    {
