@@ -81,6 +81,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         Thread.sleep(6000);
         assertTrue("connection should be considered stable", conn.isStable());
+        conn.close();
     }
 
 	/**
@@ -143,6 +144,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 		mc.initialize();
 		assertTrue("connection should be high degree", 
 				   mc.isHighDegreeConnection());
+        mc.close();
 	}
 
     public void testHorizonStatistics() {
@@ -204,10 +206,22 @@ public class ManagedConnectionTest extends BaseTestCase {
         mc.refreshHorizonStats();
         assertEquals("unexpected number of files", 0,mc.getNumFiles());
         assertEquals("unexpected number of hosts", 0,mc.getNumHosts());
-        assertEquals("unexpected total file size", 0,mc.getTotalFileSize());                
+        assertEquals("unexpected total file size", 0,mc.getTotalFileSize());
+        
+        mc.close();
     }
     	
-	
+	/**
+	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
+	 * in pongs if it thinks the connection on the other end does not 
+	 * support GGEP on an uncompressed connection.
+	 */
+	public void testStripsGGEPNotCompressed() throws Exception {
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+		tStripsGGEP();
+    }
+
 	/**
 	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
 	 * in pongs if it thinks the connection on the other end does not 
@@ -218,58 +232,32 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
 		tStripsGGEP();
     }
-
-	/**
-	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
-	 * in pongs if it thinks the connection on the other end does not 
-	 * support GGEP on an uncompressed connection.
-	 */
-	public void testStripsGGEPNotCompressed() throws Exception {
-		ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
-		tStripsGGEP();
-    }    
-    	    
+   	    
 	private void tStripsGGEP() throws Exception {
         ManagedConnection out = 
 			ManagedConnection.createTestConnection("localhost", 
 												   Backend.PORT,
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
-		out.initialize();
+        out.initialize();
 
+        assertTrue("connection is open", out.isOpen());
 		// receive initial ping
         //drain(out);
 		out.receive();
 		out.receive();
-        //out.receive();
+		//out.receive();`
 
-        //Connection in = acceptor.accept();
-		//assertNotNull("connection should not be null", in);
-        assertTrue("Connection should support GGEP", out.supportsGGEP());
-		out.send(new PingRequest((byte)2));
+		out.send(new PingRequest((byte)3));
 		
 		Message m = out.receive();
 		assertInstanceof("should be a pong", PingReply.class, m);
 		PingReply pr = (PingReply)m;
-        //try {
-        pr.getDailyUptime();
-        
-        assertEquals("Payload wasn't stripped", -1, pr.getDailyUptime());
-        //fail("Payload wasn't stripped");
-        //} catch (BadPacketException e) { }			
 
-        //try {
-        //  pr.getDailyUptime();
-        //  fail("GGEP payload wasn't stripped");
-        //} catch (BadPacketException e) { }			
-        // try {
-        assertFalse("should not have contained GGEP block", 
-                    pr.supportsUnicast());
-
-		assertTrue("pong should not have GGEP", !pr.hasGGEPExtension());
-
-        out.close();
+        assertTrue("pong should not have GGEP", !pr.hasGGEPExtension());
+		assertTrue("should not have ggep block", !pr.supportsUnicast());
+		assertEquals("incorrect daily uptime!", -1, pr.getDailyUptime());
+		out.close();
     }
     
 	/**
