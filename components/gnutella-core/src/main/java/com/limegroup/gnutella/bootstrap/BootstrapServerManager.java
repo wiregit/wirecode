@@ -306,8 +306,11 @@ public class BootstrapServerManager {
                 +"&"+request.parameters());
             URLConnection connection=url.openConnection();
             connection.setUseCaches(false);
+            //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
+            //weird characters on international systems.
             in=new BufferedReader(
-                   new InputStreamReader(connection.getInputStream()));
+                   new InputStreamReader(connection.getInputStream(), 
+                                         "ISO-8859-1"));
 
             //For each line of data (excludes HTTP headers)...
             boolean firstLine=true;
