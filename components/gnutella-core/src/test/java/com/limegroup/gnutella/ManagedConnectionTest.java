@@ -306,6 +306,38 @@ public class ManagedConnectionTest extends TestCase {
         }
     }
 
+//      /** Tests that write() does not enter an infinite loop if closed. */
+//      public void testWriteToClosed() {
+//          int TIMEOUT=1000;
+//          TestConnectionListener listener=new TestConnectionListener();
+//          try {
+//              MiniAcceptor acceptor=new MiniAcceptor(
+//                  listener, new EmptyResponder(), 6346);
+//              ManagedConnection out=new ManagedConnection(
+//                  "localhost", 6346,
+//                  new MessageRouterStub(), new ConnectionManagerStub());
+//              out.initialize(listener);
+//              Connection in=acceptor.accept();
+            
+//              //Try to write huge message.  Nothing should go through initially.
+//              //Except that the line marked below always works on Windows.  Don't
+//              //understand why.
+//              final int SIZE=10000000;
+//              SettingsManager.instance().setMaxLength(SIZE+1);            
+//              PingRequest big=new PingRequest(GUID.makeGuid(), 
+//                                          (byte)3, (byte)0,
+//                                          new byte[SIZE]);
+//              assertTrue(out.write(big));   //see above
+
+//              System.out.println("Before");
+//              out.close();
+//              assertTrue(!out.write());
+//              System.out.println("After");
+//          } catch (IOException e) {
+//              e.printStackTrace();
+//              fail("Mysterious IO problem: "+e);
+//          }
+//      }
 }
 
 /** Can simulate blocked connection. */

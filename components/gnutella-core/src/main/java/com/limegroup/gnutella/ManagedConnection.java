@@ -336,7 +336,8 @@ public class ManagedConnection
         //a) super cannot send any more data because its send
         //   buffer is full OR
         //b) neither super nor this have any queued data
-        while (true) {
+        //c) the socket is closed
+        while (isOpen()) {
             //Add more queued data to super if possible.
             if (! super.hasQueued()) {
                 Message m=_queue.removeNext();
@@ -355,6 +356,7 @@ public class ManagedConnection
                     return true;     //needs another write (b)
             }
         }
+        return false;                //socket closed (c)
     }
 
     protected boolean hasQueued() {
