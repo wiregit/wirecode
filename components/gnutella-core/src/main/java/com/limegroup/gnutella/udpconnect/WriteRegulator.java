@@ -60,8 +60,9 @@ public class WriteRegulator {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
-System.out.println("hitResendTimeout _skipLimit = "+_skipLimit+
-" fR="+_tracker.failureRateAsString());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("hitResendTimeout _skipLimit = "+_skipLimit+
+                " fR="+_tracker.failureRateAsString());
             _tracker.clearOldFailures();
         }
     }
@@ -79,8 +80,9 @@ System.out.println("hitResendTimeout _skipLimit = "+_skipLimit+
             //_skipLimit /= 2;
             //_limitCount = 0;
             _zeroCount = 0;
-System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
-" fR="+_tracker.failureRateAsString());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("hitZeroWindow _skipLimit = "+_skipLimit+
+                  " fR="+_tracker.failureRateAsString());
         }
     }
 
@@ -110,6 +112,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
         // reading window.  Don't want to get too far ahead or too far behind
         //
         int sleepTime  = ((usedSpots+1) * baseWait);
+        int minTime    = 0;
 
         if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
             sleepTime += 1;
@@ -151,13 +154,18 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
         // Reset Timing if you are going to wait less than rtt or
         // RTT has elevated too much
 
-        // Compute a max target RTT given the spikyness of traffic
+        // Compute a max target RTT given the bandwidth capacity
         int maxRTT;
-        if ( smoothRTT > ((5*lowRTT)/2) ) {
-            maxRTT      = ((lowRTT*7) / 5);
+        if ( smoothRTT > ((5*lowRTT)/2) ) {  // If avg much greater than low
+            // Capacity is limited so kick in quickly
+            maxRTT      = ((lowRTT*7) / 5);  
         } else {
+            // Capacity doesn't seem to be limited so only kick in if extreme
             maxRTT      = ((lowRTT*15) / 5);
         }
+
+        // We want at least 2 round trips per full window time
+        // so find out how much you would wait for half a window
         int windowDelay = 
           (((baseWait * windowSize) / _skipLimit) * 2) / 4;
 
@@ -189,6 +197,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                       " rtt:"+rtt+ 
                       " sL:"+_skipLimit);
             }
+            */
 
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
@@ -201,7 +210,6 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                       " rRTT:"+realRTT+
                       " sT:"+sleepTime);
             }
-            */
         }
 
         // Cycle through the accelerator states and enforced backoff
@@ -218,8 +226,8 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                 if(LOG.isDebugEnabled())  
                     LOG.debug("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
-            if(LOG.isDebugEnabled())  
-                LOG.debug(" -- UPP sL:"+_skipLimit);
+                if(LOG.isDebugEnabled())  
+                    LOG.debug(" -- UPP sL:"+_skipLimit);
             }
         } else {
             // Wait before trying to be aggressive again
@@ -240,6 +248,9 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                  LOG.debug("_skipLimit = "+_skipLimit);
             sleepTime = 0;
         }
+
+        // Ensure that any minimum sleep time is enforced
+        sleepTime = Math.max(sleepTime, minTime);
 
         return (long) sleepTime;
         //------------- Sleep ------------------------
