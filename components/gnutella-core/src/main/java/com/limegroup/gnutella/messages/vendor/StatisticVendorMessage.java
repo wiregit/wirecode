@@ -19,7 +19,7 @@ public class StatisticVendorMessage extends VendorMessage {
     public StatisticVendorMessage(byte[] guid, byte ttl, byte hops, 
                                    int version, byte[] payload) 
                                                      throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_STATISTICS, version,
               payload);
     }
 
