@@ -590,6 +590,7 @@ public final class AlternateLocation
 		// and if yes, handle it by parsing the index and filename
 		// otherwise, we can't currently handle
 		String fname = URL.getFile();
+		fname = URLDecoder.decode(fname);
 		if (fname != null && fname.startsWith("/get/")) {
 			fname = fname.substring(5);
 			int dloc = fname.indexOf("/");
