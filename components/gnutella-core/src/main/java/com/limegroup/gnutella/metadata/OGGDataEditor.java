@@ -27,7 +27,7 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 	 * @param fileName the filename to create the editor for
 	 */
 	protected OGGDataEditor(String fileName) {
-		_file = CommonUtils.getResourceFile(fileName);
+		_file = new File(fileName);
 		
 		//first populate our own data fields..
 		//if an exception is thrown the fields remain blank, which is ok.

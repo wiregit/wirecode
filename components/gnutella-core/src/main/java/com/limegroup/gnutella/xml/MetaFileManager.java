@@ -255,7 +255,8 @@ public class MetaFileManager extends FileManager {
             LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
             if (collection != null && !schemasAddedTo.contains(uri)) {
                 schemasAddedTo.add(uri);
-                if( AudioMetaData.isCorrupted(currDoc) )
+                if( LimeXMLUtils.isMP3File(file) && 
+                		AudioMetaData.isCorrupted(currDoc) )
                     currDoc = AudioMetaData.fixCorruption(currDoc);
                 collection.addReplyWithCommit(file, fd, currDoc, true);
                 

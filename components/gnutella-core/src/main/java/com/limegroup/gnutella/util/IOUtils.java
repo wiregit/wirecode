@@ -93,5 +93,17 @@ public class IOUtils {
             }
         }
     }
+    
+    public static long ensureSkip(InputStream in, long length) throws IOException {
+    	long skipped = 0;
+    	while(skipped < length) {
+    		long current = in.skip(length - skipped);
+    	    if(current == -1)
+    	        throw new EOFException("eof");
+    	    else
+    	        skipped += current;
+    	}
+    	return skipped;
+    }
 
 }

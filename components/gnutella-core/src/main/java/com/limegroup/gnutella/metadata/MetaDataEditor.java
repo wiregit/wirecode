@@ -8,11 +8,7 @@ import com.limegroup.gnutella.xml.*;
 
 
 /**
- * Used when a user wants to edit meta-information about a media file, and asks
- * to save it. 
- * 
- * For this class to work efficiently, the removeID3Tags method
- * is called before. rewriteID3Tags method is called. 
+ * Factory for various editors of MetaData for media files. 
  *
  * @author Sumeet Thadani
  */
@@ -89,8 +85,6 @@ public abstract class MetaDataEditor {
      * lime xml repository should be used.
      */
     public static MetaDataEditor getEditorForFile(String name) {
-    	if (!LimeXMLUtils.isSupportedFormat(name))
-    		return null;
     	if (LimeXMLUtils.isSupportedAudioFormat(name))
     		return AudioMetaDataEditor.getEditorForFile(name);
     	//add video types here

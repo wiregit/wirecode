@@ -42,13 +42,13 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.*;
 
 
-class JOrbisComment {
+public class JOrbisComment {
 	
-	Log LOG = LogFactory.getLog(JOrbisComment.class);
+ static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
 	
-  State state=null;
+  private State state=null;
 
-  File _file;
+  
   
   /**
    * updates the given ogg file with the new Comment field

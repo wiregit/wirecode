@@ -595,7 +595,7 @@ public class LimeXMLReplyCollection {
         MetaDataEditor commitWith = getEditorIfNeeded(mp3FileName, doc, checkBetter);
         if (commitWith != null)  {// commit to disk.
             if(commitWith.getCorrectDocument() == null) 
-                mp3WriteState = commitID3Data(mp3FileName, commitWith);
+                mp3WriteState = commitMetaData(mp3FileName, commitWith);
             else { 
                 //The id3 data on disk is better than the data we got in the
                 //query reply. So we should update the Document we added
@@ -693,9 +693,9 @@ public class LimeXMLReplyCollection {
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private int commitID3Data(String mp3FileName, MetaDataEditor editor) {
+    private int commitMetaData(String fileName, MetaDataEditor editor) {
         //write to mp3 file...
-        int retVal = editor.commitMetaData(mp3FileName);
+        int retVal = editor.commitMetaData(fileName);
         if(LOG.isDebugEnabled())
             LOG.debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 
@@ -712,7 +712,7 @@ public class LimeXMLReplyCollection {
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        RouterService.getFileManager().fileChanged(new File(mp3FileName));
+        RouterService.getFileManager().fileChanged(new File(fileName));
         return retVal;
     }
 

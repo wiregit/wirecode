@@ -86,28 +86,23 @@ public class M4AMetaData extends AudioMetaData {
 	/**
 	 * some metadata header atoms
 	 */
-        final static int NAME_ATOM = 0xa96e616d; //0xa9+ "nam"
-        final static int ALBUM_ATOM = 0xa9616c62; //0xa9 + "alb"
-        final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
-        final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
-        final static int GENRE_ATOM = 0x676e7265; //"gnre"
-        final static int GENRE_ATOM_STANDARD = 0xA967656E; //"0xa9+"gen"
-        final static int TRACK_ATOM = 0x74726b6e; //"trkn"
-        final static int TRACK_ATOM_STANDARD = 0xA974726b; //0xa9+"trk"
-        final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
-        final static int DISK_ATOM = 0x6469736b; //"disk"
+       private final static int NAME_ATOM = 0xa96e616d; //0xa9+ "nam"
+       private final static int ALBUM_ATOM = 0xa9616c62; //0xa9 + "alb"
+       private final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
+       private final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
+       private final static int GENRE_ATOM = 0x676e7265; //"gnre"
+       private final static int GENRE_ATOM_STANDARD = 0xA967656E; //"0xa9+"gen"
+       private final static int TRACK_ATOM = 0x74726b6e; //"trkn"
+       private final static int TRACK_ATOM_STANDARD = 0xA974726b; //0xa9+"trk"
+       private final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
+       private final static int DISK_ATOM = 0x6469736b; //"disk"
 	
 	/**
 	 * the data atom within each metadata atom
 	 */
-	final static int DATA_ATOM = 0x64617461; //"data"
+       private final static int DATA_ATOM = 0x64617461; //"data"
 	
-	
-	
-	DataInputStream _in;
-	File _f;
-	
-	HashMap _metaData;
+	private int _maxLength;
 	
 	public M4AMetaData(File f) throws IOException{
 		super(f);
@@ -117,73 +112,82 @@ public class M4AMetaData extends AudioMetaData {
 	 * @see com.limegroup.gnutella.mp3.MetaData#parseFile(java.io.File)
 	 */
 	protected void parseFile(File f) throws IOException {
-		_f = f;
-		_in = new DataInputStream(new FileInputStream(_f));
-		_in = getMetaDataStream();
-		_metaData = new HashMap();
+		FileInputStream fin = null;
+		try{
+			
+			_maxLength=(int)f.length();
+			fin = new FileInputStream(f);
 		
-		populateMetaDataMap();
+			positionMetaDataStream(fin);
 		
-		//the title, artist album and comment tags are in string format.
-		//so we just set them
-		byte []current = (byte []) _metaData.get(new Integer(NAME_ATOM));
-		setTitle(current == null ? "" : new String(current, "UTF-8"));
+			Map metaData = populateMetaDataMap(fin);
 		
-		current = (byte []) _metaData.get(new Integer(ARTIST_ATOM));
-		setArtist(current == null ? "" : new String(current, "UTF-8"));
+			//the title, artist album and comment tags are in string format.
+			//so we just set them
+			byte []current = (byte []) metaData.get(new Integer(NAME_ATOM));
+			setTitle(current == null ? "" : new String(current, "UTF-8"));
 		
-		current = (byte []) _metaData.get(new Integer(ALBUM_ATOM));
-		setAlbum(current == null ? "" : new String(current,"UTF-8"));
+			current = (byte []) metaData.get(new Integer(ARTIST_ATOM));
+			setArtist(current == null ? "" : new String(current, "UTF-8"));
 		
-		current = (byte []) _metaData.get(new Integer(COMMENT_ATOM));
-		setComment(current == null ? "" : new String(current,"UTF-8"));
+			current = (byte []) metaData.get(new Integer(ALBUM_ATOM));
+			setAlbum(current == null ? "" : new String(current,"UTF-8"));
+		
+			current = (byte []) metaData.get(new Integer(COMMENT_ATOM));
+			setComment(current == null ? "" : new String(current,"UTF-8"));
 		
 		
-		//the genre is byte encoded the same way as with id3 tags
-		//except that the table is shifted one position
-		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
-		if (current!=null) {
-			if (current[3] == 1) {
-				//we have a custom genre.
-				String genre = new String(current,8,current.length-8,"UTF-8");
-				setGenre(genre);
-			} else {
-				short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
-				setGenre(MP3MetaData.getGenreString(genreShort));
+			//	the genre is byte encoded the same way as with id3 tags
+			//	except that the table is shifted one position
+			current = (byte []) metaData.get(new Integer(GENRE_ATOM));
+			if (current!=null) {
+				if (current[3] == 1) {
+					//we have a custom genre.
+					String genre = new String(current,8,current.length-8,"UTF-8");
+					setGenre(genre);
+				} else {
+					short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
+					setGenre(MP3MetaData.getGenreString(genreShort));
+				}
 			}
-		}
 		
 		
-		//the date is plaintext.  Store only the year
-		current = (byte []) _metaData.get(new Integer(DATE_ATOM));
-		if (current==null)
-			setYear("");
-		else {
-			String year = new String(current,8,current.length-8);
-			if (year.length()>4)
-				year = year.substring(0,4);
-			setYear(year);
-		}
+			//the date is plaintext.  Store only the year
+			current = (byte []) metaData.get(new Integer(DATE_ATOM));
+			if (current==null)
+				setYear("");
+			else {
+				String year = new String(current,8,current.length-8);
+				if (year.length()>4)
+					year = year.substring(0,4);
+				setYear(year);
+			}
 		
-		//get the track # & total # of tracks on album
-		current = (byte []) _metaData.get(new Integer(TRACK_ATOM));
-		if (current != null) {
-			short trackShort = ByteOrder.beb2short(current,current.length-6);
-			setTrack(trackShort);
-			short trackTotal = ByteOrder.beb2short(current,current.length-4);
-			setTotalTracks(trackTotal);
-		}
+			//get the track # & total # of tracks on album
+			current = (byte []) metaData.get(new Integer(TRACK_ATOM));
+			if (current != null) {
+				short trackShort = ByteOrder.beb2short(current,current.length-6);
+				setTrack(trackShort);
+				short trackTotal = ByteOrder.beb2short(current,current.length-4);
+				setTotalTracks(trackTotal);
+			}
 		
-		//get the disk # & total # of disks on album
-		current = (byte []) _metaData.get(new Integer(DISK_ATOM));
-		if (current != null) {
-			short diskShort = ByteOrder.beb2short(current,current.length-4);
-			setDisk(diskShort);
-			short diskTotal = ByteOrder.beb2short(current,current.length-2);
-			setTotalDisks(diskTotal);
-		}
+			//get the disk # & total # of disks on album
+			current = (byte []) metaData.get(new Integer(DISK_ATOM));
+			if (current != null) {
+				short diskShort = ByteOrder.beb2short(current,current.length-4);
+				setDisk(diskShort);
+				short diskTotal = ByteOrder.beb2short(current,current.length-2);
+				setTotalDisks(diskTotal);
+			}
 		
 		//TODO: add more fields as we discover their meaning.
+			
+		}finally {
+			if (fin!=null)
+			try{fin.close();}catch(IOException ignored){}
+		}
+		
 	}
 	
 	/**
@@ -195,7 +199,7 @@ public class M4AMetaData extends AudioMetaData {
 	 * @throws IOException either reading failed, or the atom type didn't match
 	 */
 	private void skipAtom(int atomType, DataInputStream in) throws IOException {
-                in.skip(enterAtom(atomType,in));
+                IOUtils.ensureSkip(in,enterAtom(atomType,in));
 	}
 	
 	/**
@@ -211,7 +215,7 @@ public class M4AMetaData extends AudioMetaData {
 	private int enterAtom(int atomType, DataInputStream in) throws IOException {
 		boolean extended = false;
 		int size = in.readInt();
-		if (size >= _f.length())
+		if (size >= _maxLength)
 			throw new IOException ("invalid size field read");
 		
 		int type = in.readInt();
@@ -235,63 +239,51 @@ public class M4AMetaData extends AudioMetaData {
 	 * @return a <tt>DataInputStream</tt> whose source is a copy of the
 	 * atom containing the metadata atoms
 	 */
-	private DataInputStream getMetaDataStream() throws IOException{
+	private void positionMetaDataStream(InputStream rawIn) throws IOException{
+		DataInputStream in = new DataInputStream(rawIn);
 		byte []ILST = null;
-		try {     
-			skipAtom(FTYP_ATOM,_in);
-			enterAtom(MOOV_ATOM,_in);
+		     
+		skipAtom(FTYP_ATOM,in);
+		enterAtom(MOOV_ATOM,in);
 	
-			//extract the length.
+		//extract the length.
 				
-			int mvhdSize = enterAtom(MVHD_ATOM,_in)-20;
-			_in.skip(12);
+		int mvhdSize = enterAtom(MVHD_ATOM,in)-20;
+		IOUtils.ensureSkip(in,12);
 
-			int timeScale = _in.readInt();
-			int timeUnits = _in.readInt();
-			setLength((int) ( timeUnits/timeScale));
-			_in.skip(mvhdSize);
+		int timeScale = in.readInt();
+		int timeUnits = in.readInt();
+		setLength((int) ( timeUnits/timeScale));
+		IOUtils.ensureSkip(in,mvhdSize);
                         
-                        //extract the bitrate.
+        //extract the bitrate.
                         
-			enterAtom(TRAK_ATOM, _in);
-                        skipAtom(TKHD_ATOM, _in);
-                        enterAtom(MDIA_ATOM, _in);
-                        skipAtom(MDHD_ATOM, _in);
-                        skipAtom(HDLR_ATOM, _in);
-                        enterAtom(MINF_ATOM, _in);
-                        skipAtom(SMHD_ATOM, _in);
-                        skipAtom(DINF_ATOM, _in);
-                        enterAtom(STBL_ATOM, _in);
-                        enterAtom(STSD_ATOM, _in);
+		enterAtom(TRAK_ATOM, in);
+        skipAtom(TKHD_ATOM, in);
+        enterAtom(MDIA_ATOM, in);
+        skipAtom(MDHD_ATOM, in);
+        skipAtom(HDLR_ATOM, in);
+        enterAtom(MINF_ATOM, in);
+        skipAtom(SMHD_ATOM, in);
+        skipAtom(DINF_ATOM, in);
+        enterAtom(STBL_ATOM, in);
+        enterAtom(STSD_ATOM, in);
                         
-                        processSTSDAtom(_in);
+        processSTSDAtom(in);
           	      
-                        skipAtom(STTS_ATOM, _in);
-                        skipAtom(STSC_ATOM, _in);
-                        skipAtom(STSZ_ATOM, _in);
-                        skipAtom(STCO_ATOM, _in);
+        skipAtom(STTS_ATOM, in);
+        skipAtom(STSC_ATOM, in);
+        skipAtom(STSZ_ATOM, in);
+        skipAtom(STCO_ATOM, in);
             
-			enterAtom(UDTA_ATOM,_in);
+		enterAtom(UDTA_ATOM,in);
                         
-			enterAtom(META_ATOM,_in);
-			_in.skip(4); //no comment...
-			skipAtom(HDLR_ATOM,_in);
+		enterAtom(META_ATOM,in);
+		IOUtils.ensureSkip(in,4); //no comment...
+		skipAtom(HDLR_ATOM,in);
 			
-			//at this point we are about to enter the ILST atom
-			//which is the atom containing the metadata atoms.
-			//for simplicity, lets load this atom in memory -
-			//its pretty small and we don't have to worry about closing the stream
-			ILST = new byte[enterAtom(ILST_ATOM,_in)];
-			_in.readFully(ILST);
-			
-		}finally {
-			//close the file before proceeding futher
-			if (_in!=null)
-				try {_in.close();}catch(IOException ignored){}
-		}
-		
-		//create a ByteArrayInputStream and read from it.
-		return ILST==null ? null : new DataInputStream(new ByteArrayInputStream(ILST));
+
+		_maxLength = enterAtom(ILST_ATOM,in);
 	}
         
         /**
@@ -303,19 +295,19 @@ public class M4AMetaData extends AudioMetaData {
          *     (bitrate is at offset 0x1A or 0x14)
          *
          */
-        private void processSTSDAtom(DataInputStream _in) throws IOException {
+        private void processSTSDAtom(DataInputStream in) throws IOException {
                         
-            _in.skip(8+4); // (1) skip some data of [stsd]
+            IOUtils.ensureSkip(in,8+4); // (1) skip some data of [stsd]
             
-            int atomType = _in.readInt(); // [mp4a], [alac]
+            int atomType = in.readInt(); // [mp4a], [alac]
             
-            _in.skip(0x1c); // (2) skip more data of [mp4a]...
+            IOUtils.ensureSkip(in,0x1c); // (2) skip more data of [mp4a]...
             
             if (atomType == MP4A_ATOM) {
                 // || atomType == DRMS_ATOM
-                enterBitrateAtom(ESDS_ATOM, 0x1A, _in);
+                enterBitrateAtom(ESDS_ATOM, 0x1A, in);
             } else if (atomType == ALAC_ATOM) {
-                enterBitrateAtom(ALAC_ATOM, 0x14, _in);
+                enterBitrateAtom(ALAC_ATOM, 0x14, in);
             } else {
                 throw new IOException ("atom type mismatch, expected " +MP4A_ATOM+ " or " +ALAC_ATOM+ " got " +atomType);
             }
@@ -324,56 +316,60 @@ public class M4AMetaData extends AudioMetaData {
         /**
          * Retrieve the Bitrate
          */
-        private void enterBitrateAtom(int atom, int skip, DataInputStream _in) throws IOException {
-            int length = enterAtom(atom, _in);
+        private void enterBitrateAtom(int atom, int skip, DataInputStream in) throws IOException {
+            int length = enterAtom(atom, in);
             
-            length -= _in.skip(skip);
-            int avgBitrate = _in.readInt();
+            length -= IOUtils.ensureSkip(in,skip);
+            int avgBitrate = in.readInt();
             length -= 4;
             setBitrate((int)(avgBitrate/1000)); // bits to kbits
             
-            _in.skip(length); // ignore the rest of this atom
+            IOUtils.ensureSkip(in,length); // ignore the rest of this atom
         }
         
 	/**
 	 * populates the metaData map with values read from the file
 	 * @throws IOException parsing failed
 	 */
-	private void populateMetaDataMap() throws IOException {
-		try {
-			while (true) {
-				int currentSize = _in.readInt();
-				if (currentSize > _f.length())
-					throw new IOException("invalid file size");
-				int currentType = _in.readInt();
+	private Map populateMetaDataMap(InputStream rawIn) throws IOException {
+		Map metaData = new HashMap();
+		CountingInputStream cin = new CountingInputStream(rawIn);
+		DataInputStream in = new DataInputStream(cin);
+		
+		while (cin.getAmountRead() < _maxLength && !isComplete()) {
+			int currentSize = in.readInt();
+			if (currentSize > _maxLength)
+				throw new IOException("invalid file size");
+			int currentType = in.readInt();
 				
-				switch(currentType) {
-					case NAME_ATOM :
-						_metaData.put(new Integer(NAME_ATOM), readDataAtom());break;
-					case ARTIST_ATOM :
-						_metaData.put(new Integer(ARTIST_ATOM), readDataAtom());break;
-					case ALBUM_ATOM :
-						_metaData.put(new Integer(ALBUM_ATOM), readDataAtom());break;
-					case TRACK_ATOM :
-					case TRACK_ATOM_STANDARD:
-						_metaData.put(new Integer(TRACK_ATOM), readDataAtom());break;
-					case GENRE_ATOM :
-					case GENRE_ATOM_STANDARD:
-						_metaData.put(new Integer(GENRE_ATOM), readDataAtom());break;
-					case DATE_ATOM:
-						_metaData.put(new Integer(DATE_ATOM), readDataAtom());break;
-					case COMMENT_ATOM:
-						_metaData.put(new Integer(COMMENT_ATOM), readDataAtom());break;
-					case DISK_ATOM:
-						_metaData.put(new Integer(DISK_ATOM), readDataAtom());break;
-						//add more atoms as we learn their meaning
-                                        default:
-						//skip unknown atoms.
-						_in.skip(currentSize-8);
-				}
+			switch(currentType) {
+				case NAME_ATOM :
+					metaData.put(new Integer(NAME_ATOM), readDataAtom(in));break;
+				case ARTIST_ATOM :
+					metaData.put(new Integer(ARTIST_ATOM), readDataAtom(in));break;
+				case ALBUM_ATOM :
+					metaData.put(new Integer(ALBUM_ATOM), readDataAtom(in));break;
+				case TRACK_ATOM :
+				case TRACK_ATOM_STANDARD:
+					metaData.put(new Integer(TRACK_ATOM), readDataAtom(in));break;
+				case GENRE_ATOM :
+				case GENRE_ATOM_STANDARD:
+					metaData.put(new Integer(GENRE_ATOM), readDataAtom(in));break;
+				case DATE_ATOM:
+					metaData.put(new Integer(DATE_ATOM), readDataAtom(in));break;
+				case COMMENT_ATOM:
+					metaData.put(new Integer(COMMENT_ATOM), readDataAtom(in));break;
+				case DISK_ATOM:
+					metaData.put(new Integer(DISK_ATOM), readDataAtom(in));break;
+					//add more atoms as we learn their meaning
+                default:
+					//skip unknown atoms.
+					IOUtils.ensureSkip(in,currentSize-8);
 			}
-		}catch(EOFException ignored) {}
-		//let IOExceptions go through.
+		}
+		
+		
+		return metaData;
 	}
 	
 	/**
@@ -381,13 +377,13 @@ public class M4AMetaData extends AudioMetaData {
 	 * @return the content of the data atom
 	 * @throws IOException the data atom was not found or error occured
 	 */
-	private byte[] readDataAtom() throws IOException{
-		int size = _in.readInt();
-		if (_in.readInt() != DATA_ATOM)
+	private byte[] readDataAtom(DataInputStream in) throws IOException{
+		int size = in.readInt();
+		if (in.readInt() != DATA_ATOM)
 			throw new IOException("data tag not found");
 		byte [] res = new byte[size-8];
 		//_in.skip(8);
-		_in.readFully(res);
+		in.readFully(res);
 		return res;
 	}
 	
