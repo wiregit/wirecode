@@ -162,16 +162,9 @@ public class StandardMessageRouter extends MessageRouter {
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID,
                                             ReplyHandler handler) {
-
-        // This is a special What is Query - we can only answer queries which
-        // have version numbers at or below our supported version
-        if (queryRequest.getCapabilitySelector() < 
-                                   CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)
+        //Only respond if we understand the actual feature, if it had a feature.
+        if(!FeatureSearchData.supportsFeature(queryRequest.getFeatureSelector()))
             return false;
-
-        if(queryRequest.getCapabilitySelector() > 
-                                   CapabilitiesVM.FEATURE_SEARCH_MAX_SELECTOR) 
-           return false;
 
         if (queryRequest.isWhatIsNewRequest())
             ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();

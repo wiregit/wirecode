@@ -58,7 +58,7 @@ public class ServerSideWhatIsNewTest
         junit.textui.TestRunner.run(suite());
     }
     
-    private static void doSettings() {
+    private static void doSettings() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -71,10 +71,7 @@ public class ServerSideWhatIsNewTest
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
-        try {
         SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
-        }
-        catch (IOException bad) { assertTrue(false); }
         // get the resource file for com/limegroup/gnutella
         berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -296,7 +293,7 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -328,14 +325,14 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
         // give time to process
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         QueryReply reply = 
             (QueryReply) getFirstInstanceOfMessageType(testUP,
@@ -348,7 +345,7 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
@@ -444,7 +441,7 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -502,7 +499,7 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -565,7 +562,7 @@ public class ServerSideWhatIsNewTest
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 

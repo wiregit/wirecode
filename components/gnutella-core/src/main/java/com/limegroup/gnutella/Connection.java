@@ -1445,11 +1445,20 @@ public class Connection implements IpPort {
             return _messagesSupported.supportsLeafGuidance();
         return -1;
     }
+    
+    /**
+     * Return whether or not the remote host supports feature queries.
+     */
+    public boolean getRemoteHostSupportsFeatureQueries() {
+        if(_capabilities != null)
+            return _capabilities.supportsFeatureQueries() > 0;
+        return false;
+    }
 
     /** @return the maximum selector of capability supported, else -1 if no
      *  support.
      */
-    public int getRemoteHostCapabilitySelector() {
+    public int getRemoteHostFeatureQuerySelector() {
         if (_capabilities != null)
             return _capabilities.supportsFeatureQueries();
         return -1;

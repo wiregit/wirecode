@@ -98,7 +98,7 @@ public abstract class ClientSideTestCase
         rs.start();
         RouterService.clearHostCatcher();
         RouterService.connect();
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         connect();

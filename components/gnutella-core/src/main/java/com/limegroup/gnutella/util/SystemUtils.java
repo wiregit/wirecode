@@ -9,24 +9,24 @@ public class SystemUtils {
     /**
      * Whether or not the native libraries could be loaded.
      */
-    private final static boolean isLoaded;
+    private static boolean isLoaded;
     
     static {
         boolean canLoad;
         try {
             // Only load the library on systems where we've made it.
-            if(CommonUtils.isMacOSX())
+            if(CommonUtils.isMacOSX()) {
                 System.loadLibrary("SystemUtilities");
-            else if(CommonUtils.isWindows()) {
+            } else if(CommonUtils.isWindows()) {
                 System.loadLibrary("GenericWindowsUtils");
-                if(CommonUtils.isWindows2000orXP())
+                if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
+                }
+            } else if (CommonUtils.isLinux()) {
+    		    System.loadLibrary("IdleTime");
             }
-	    else if (CommonUtils.isLinux())
-		System.loadLibrary("IdleTime");
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
-		
             canLoad = false;
         }
         isLoaded = canLoad;
@@ -60,8 +60,8 @@ public class SystemUtils {
                 return true;
             else if(CommonUtils.isMacOSX())
                 return true;
-	    else if (CommonUtils.isLinux())
-		return true;
+	        else if (CommonUtils.isLinux())
+                return true;
         }
             
         return false;

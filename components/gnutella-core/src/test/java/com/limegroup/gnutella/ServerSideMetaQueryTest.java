@@ -20,6 +20,7 @@ import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -419,7 +420,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
                              null, null, false, Message.N_TCP, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0);
         
         testUP[0].send(query);
@@ -442,7 +443,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
                              null, null, false, Message.N_TCP, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.AUDIO_MASK);
         
         testUP[1].send(query);
@@ -470,7 +471,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
                              null, null, false, Message.N_TCP, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.DOC_MASK);
         
         testUP[2].send(query);
@@ -499,7 +500,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
                              null, null, false, Message.N_TCP, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, false,
+                             FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.LIN_PROG_MASK);
         
         testUP[3].send(query);

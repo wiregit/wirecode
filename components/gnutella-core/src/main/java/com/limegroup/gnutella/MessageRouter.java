@@ -1592,11 +1592,10 @@ public abstract class MessageRouter {
         // by a leaf to other Ultrapeers
         if(ultrapeer.isClientSupernodeConnection()) return;
 
-        // special what is queries have version numbers attached to them - make
-        // sure that the remote host can answer the query....
-        if ((query.getCapabilitySelector() > 0) &&
-            (ultrapeer.getRemoteHostCapabilitySelector() <
-             CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)) return;
+        // make sure that the ultrapeer understands feature queries.
+        if(query.isFeatureQuery() && 
+           !ultrapeer.getRemoteHostSupportsFeatureQueries())
+             return;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
@@ -1696,13 +1695,16 @@ public abstract class MessageRouter {
             throw new NullPointerException("null query");
         if( mc == null )
             throw new NullPointerException("null connection");
+    
+        // if this is a feature query & the other side doesn't
+        // support it, then don't send it
+        // This is an optimization of network traffic, and doesn't
+        // necessarily need to exist.  We could be shooting ourselves
+        // in the foot by not sending this, rendering Feature Searches
+        // inoperable for some users connected to bad Ultrapeers.
+        if(query.isFeatureQuery() && !mc.getRemoteHostSupportsFeatureQueries())
+            return false;
         
-        // special what is queries have version numbers attached to them - make
-        // sure that the remote host can answer the query....
-        if ((query.getCapabilitySelector() > 0) &&
-            (mc.getRemoteHostCapabilitySelector() < 
-             CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)
-            ) return false;
         mc.originateQuery(query);
         return true;
     }

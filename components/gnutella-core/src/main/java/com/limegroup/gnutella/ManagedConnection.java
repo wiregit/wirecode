@@ -412,14 +412,14 @@ public class ManagedConnection extends Connection
     public boolean shouldForwardQuery(QueryRequest query) {
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
-        if (query.getCapabilitySelector() > 0) {
+        if (query.isFeatureQuery()) {
             if (isSupernodeClientConnection())
-                return (getRemoteHostCapabilitySelector() >= 
-                        query.getCapabilitySelector());
+                return (getRemoteHostFeatureQuerySelector() >= 
+                        query.getFeatureSelector());
             else if (isSupernodeSupernodeConnection())
-                return (getRemoteHostCapabilitySelector() >=  
-                        CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR);
-            else return false;
+                return getRemoteHostSupportsFeatureQueries();
+            else
+                return false;
         }
         return hitsQueryRouteTable(query);
     }

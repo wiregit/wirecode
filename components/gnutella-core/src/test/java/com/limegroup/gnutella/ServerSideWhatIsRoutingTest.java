@@ -258,7 +258,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -283,7 +283,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false, 
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -302,7 +302,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)1, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -328,7 +328,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -354,7 +354,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -380,7 +380,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
+                             FeatureSearchData.WHAT_IS_NEW);
         LEAF.send(whatIsNewQuery);
         LEAF.flush();
 
@@ -401,19 +401,16 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
     }
 
 
-    // Change the type of 'what is' query and make sure it doesn't get to leaf
     public void testUnsupportedQueryForwardedCorrectly() throws Exception {
         drainAll();
 
         // send the query
-        final int actualValue = QueryRequest.WHAT_IS_NEW_GGEP_VALUE;
-        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = 2;
-        QueryRequest whatIsNewQuery = 
+        QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
-        ULTRAPEER_2.send(whatIsNewQuery);
+                             FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
+        ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
 
         // give time to process
@@ -423,7 +420,6 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNull(rQuery);
-        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = actualValue;
 
         // Ultrapeer 1 should get it though
         rQuery = 
@@ -431,25 +427,21 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
-                     new GUID(whatIsNewQuery.getGUID()));
+                     new GUID(unknownFeatureQuery.getGUID()));
     }
 
 
-    // Change the type of 'what is' query and make sure it doesn't get to leaf.
-    // the query is last hop so make sure it gets to the Ultrapeer
     public void testLastHopUnsupportedQueryForwardedCorrectly() 
         throws Exception {
         drainAll();
 
         // send the query
-        final int actualValue = QueryRequest.WHAT_IS_NEW_GGEP_VALUE;
-        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = 2;
-        QueryRequest whatIsNewQuery = 
+        QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
                              null, null, false, Message.N_UNKNOWN, false,
-                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
-        ULTRAPEER_2.send(whatIsNewQuery);
+                             FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
+        ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
 
         // give time to process
@@ -459,7 +451,6 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNull(rQuery);
-        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = actualValue;
 
         // Ultrapeer 1 should get it though
         rQuery = 
@@ -467,7 +458,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
-                     new GUID(whatIsNewQuery.getGUID()));
+                     new GUID(unknownFeatureQuery.getGUID()));
     }
 
     // ------------------------------------------------------

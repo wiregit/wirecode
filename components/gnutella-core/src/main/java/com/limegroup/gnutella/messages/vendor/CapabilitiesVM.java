@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
@@ -14,8 +15,10 @@ import com.limegroup.gnutella.simpp.*;
  */
 public final class CapabilitiesVM extends VendorMessage {
 
-    /** Bytes for Feature search the first flavor of which is called 'WHAT'
-     *  Package access for tests
+    /**
+     * Bytes for advertising that we support a 'feature' search.
+     * The value is 'WHAT' for legacy reasons, because 'what is new' 
+     * was the first feature search supported.
      */
     static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
@@ -25,24 +28,6 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
                                                           (byte)77, (byte)80};
-
-    /**
-     *  This value can change - it is the version number of the highest 
-     *  Feature Search Capability -- for now 1 for What is new
-     */
-    public static final int FEATURE_SEARCH_MAX_SELECTOR = 1;
-
-    /**
-     *  The selector currently 'What Is New?' query we support. This will NEVER
-     *  change
-     */
-    public static final int WHAT_FEATURE_SEARCH_SELECTOR = 1;
-
-    /**
-     * This value will NEVER change - this is the version number of the first
-     * Feature query.
-     */
-    public  static final int FEATURE_SEARCH_MIN_SELECTOR = 1;
 
     /**
      * The version of the latest simpp version this node knows about. 
@@ -117,7 +102,7 @@ public final class CapabilitiesVM extends VendorMessage {
     private static void addSupportedMessages(Set hashSet) {
         SupportedMessageBlock smp = null;
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
-                                        FEATURE_SEARCH_MAX_SELECTOR);
+                                        FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
         smp=new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES, _simppVersion);
         hashSet.add(smp);
@@ -163,7 +148,8 @@ public final class CapabilitiesVM extends VendorMessage {
     /** @return true if 'what is new' capability query feature is supported.
      */
     public boolean supportsWhatIsNew() {
-        return supportsFeatureQueries() > 0;
+        return FeatureSearchData.supportsWhatIsNew(
+            supportsCapability(FEATURE_SEARCH_BYTES));
     }
 
     // override super

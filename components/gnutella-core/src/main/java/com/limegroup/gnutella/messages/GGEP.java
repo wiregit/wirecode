@@ -35,8 +35,11 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
-    /** The extension header (key) for WhatIs(New/....) support */
-    public static final String GGEP_HEADER_WHAT_IS = "WH";
+    /**
+     * The extension header (key) for a feature query.
+     * This is 'WH' for legacy reasons, because 'What is New' was the first.
+     */
+    public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
     /** The extension header disabling OOB proxying. */
     public static final String GGEP_HEADER_NO_PROXY = "NP";
     /** The extension header (key) for MetaType query support */

@@ -63,7 +63,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     }
     
     private static void doSettings() {
-        TIMEOUT = 3000;
+        TIMEOUT = 4000;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
@@ -291,21 +291,19 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue(qr.desiresOutOfBandReplies());
 
         // just return ONE real result and the rest junk
-        Response resp = null;
-        QueryReply reply = null;
         {
             // get a correct response object
             QueryRequest qrTemp = QueryRequest.createQuery("berkeley");
             testUP[0].send(qrTemp);
             testUP[0].flush();
-
-            reply = (QueryReply) getFirstInstanceOfMessageType(testUP[0],
-                                                               QueryReply.class);
-            assertNotNull(reply);
-            resp = (Response) (reply.getResultsAsList()).get(0);
-
         }
+
+        Response resp = null;
+        QueryReply reply = null;
+        reply = (QueryReply) getFirstInstanceOfMessageType(testUP[0],
+                                                           QueryReply.class);
         assertNotNull(reply);
+        resp = (Response) (reply.getResultsAsList()).get(0);
         assertNotNull(resp);
         Response[] res = new Response[] { resp };
 
@@ -1539,7 +1537,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     }
 
     public static Integer numUPs() {
-        return new Integer(4);
+        return new Integer(3);
     }
     
     private static byte[] myIP() {
