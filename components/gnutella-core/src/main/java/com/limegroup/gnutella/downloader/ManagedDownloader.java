@@ -78,9 +78,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     private HTTPDownloader dloader;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
-//      /** The list of all files we've requested via push messages.  Only files
-//       * matching this description may be accepted from incoming connections. */
-//      private List /* of PushRequestedFile */ requested;
+    /** The list of all files we've requested via push messages.  Only files
+     * matching this description may be accepted from incoming connections. */
+    private List /* of PushRequestedFile */ requested;
 
 
     ///////////////////////// Variables for GUI Display  /////////////////
@@ -149,7 +149,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         this.dloader=null;
         stopped=false;
-//          requested=new LinkedList();
+        requested=new LinkedList();
         setState(QUEUED);
         this.lastAddress=null;
         this.tries=0;
@@ -195,51 +195,47 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean acceptDownload(
             String file, Socket socket, int index, byte[] clientGUID)
             throws IOException {
-//          //Authentication: check if we requested file from this host via push.
-//          //This ignores timestamps.  So first we clear out very old entries.
-//          RemoteFileDesc rfd=null;   //The original rfd.  See below.
-//          PushRequestedFile prf=new PushRequestedFile(clientGUID, file, index);
-//          synchronized (this) {
-//              purgeOldPushRequests();
-//              if (! requested.contains(prf))
-//                  return false;
+        //Authentication: check if we requested file from this host via push.
+        //This ignores timestamps.  So first we clear out very old entries.
+        RemoteFileDesc rfd=null;   //The original rfd.  See below.
+        PushRequestedFile prf=new PushRequestedFile(clientGUID, file, index);
+        synchronized (this) {
+            purgeOldPushRequests();
+            if (! requested.contains(prf))
+                return false;
 
-//              //Get original RemoteFileDesc to get file size to find temporary
-//              //file.  Unfortunately the size is NOT available from the GIV line.
-//              //(That's sort of a flaw of the Gnutella protocol.)  So we search
-//              //through the list of files in this, comparing file index numbers
-//              //and client GUID's.  We also check filenames, though this is not
-//              //strictly needed.
-//              for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
-//                  rfd=((RFDPushPair)iter.next()).rfd;
-//                  if (rfd.getIndex()==index 
-//                          && rfd.getFileName().equals(file)
-//                          && (new GUID(rfd.getClientGUID())).
-//                              equals(new GUID(clientGUID)))
-//                      break;
-//              }
-//              Assert.that(rfd!=null, "No match for supposedly requested file");
-//          }
+            //Get original RemoteFileDesc to get file size to find temporary
+            //file.  Unfortunately the size is NOT available from the GIV line.
+            //(That's sort of a flaw of the Gnutella protocol.)  So we search
+            //through the list of files in this, comparing file index numbers
+            //and client GUID's.  We also check filenames, though this is not
+            //strictly needed.
+            for (Iterator iter=files.iterator(); iter.hasNext(); ) {
+                rfd=(RemoteFileDesc)iter.next();
+                if (rfd.getIndex()==index 
+                        && rfd.getFileName().equals(file)
+                        && (new GUID(rfd.getClientGUID())).
+                            equals(new GUID(clientGUID)))
+                    break;
+            }
+            Assert.that(rfd!=null, "No match for supposedly requested file");
+        }
 
-//          //Authentication ok.  Make and queue downloader.  Notify downloader
-//          //thread to consume this downloader.  If downloader isn't waiting, this
-//          //may not be serviced for some time.
-//          HTTPDownloader downloader=new HTTPDownloader(
-//              socket, rfd, incompleteFileManager.getFile(rfd));
-            
-            
-//          synchronized (this) {
-//              //If stopped or stopping, don't add this or it may not be cleaned
-//              //up.
-//              if (stopped) {
-//                  downloader.stop();
-//                  return false;
-//              }
-//              pushQueue.add(downloader);
-//              this.notify();
-//          }
-//          return true;
-        return false;
+        //Authentication ok.  Make and queue downloader.  Notify downloader
+        //thread to consume this downloader.  If downloader isn't waiting, this
+        //may not be serviced for some time.
+        System.out.println("ACCEPT_DOWNLOAD: accepting download");
+        final HTTPDownloader downloader=new HTTPDownloader(
+            socket, rfd, incompleteFileManager.getFile(rfd));
+        final RemoteFileDesc rfdAlias=rfd;  //make compiler happy
+        Thread runner=new Thread() {
+            public void run() {
+                tryOneDownload(downloader, rfdAlias);
+            }
+         };
+        runner.setDaemon(true);
+        runner.start();
+        return true;
     }
 
     public synchronized void stop() {
@@ -421,14 +417,30 @@ public class ManagedDownloader implements Downloader, Serializable {
             //1. Start up to five locations in parallel, asynchronously.
             for (int i=0; i<PARALLEL_CONNECT && filesLeft.size()>0; i++) {
                 final RemoteFileDesc rfd=removeBest(filesLeft);
-                final HTTPDownloader downloader=new HTTPDownloader(
-                    rfd, incompleteFileManager.getFile(rfd));
-                Thread worker=new Thread() {
+                if (! isPrivate(rfd)) {
+                    //a) Normal download
+                    final HTTPDownloader downloader=new HTTPDownloader(
+                        rfd, incompleteFileManager.getFile(rfd));
+                    Thread worker=new Thread() {
                         public void run() {
                             tryOneDownload(downloader, rfd);
                         }
                     };
-                worker.start();
+                    worker.setDaemon(true);
+                    worker.start();
+                } else {
+                    //b) Push download.  Note that no threads are started.
+                    //   When (if) the server responds, acceptDownload will
+                    //   be called, which will call tryOneDownload.
+                    PushRequestedFile prf=
+                        new PushRequestedFile(rfd.getClientGUID(), 
+                                              rfd.getFileName(),
+                                              rfd.getIndex());
+                    synchronized (ManagedDownloader.this) {
+                        requested.add(prf);
+                    }
+                    manager.sendPush(rfd);
+                }
             }
                 
             //2. Wait for a winner to be declared or all to die.  If
@@ -596,32 +608,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return ret;
     }
 
-
-    //          /** Send pushes to those locations we couldn't connect to above. */
-    //          private void sendPushes() {
-    //              //Just to ensure memory is bounded, remove old push request from
-    //              //list.  This is different than requested.clear()!
-    //              synchronized (ManagedDownloader.this) {
-    //                  purgeOldPushRequests();
-    //              }
-    //              //For each file that needs a push.  Just to be safe we limit
-    //              //the number of pushes sent at any time.
-    //              Iterator iter=pushFiles.iterator();
-    //              for (int i=0; i<PARALLEL_CONNECT && iter.hasNext(); i++) {
-    //                  //Send the push. Mark that we requested the file, for
-    //                  //authentication purposes.
-    //                  RFDPushPair pair=(RFDPushPair)iter.next();
-    //                  RemoteFileDesc rfd=pair.rfd;
-    //                  PushRequestedFile prf=new PushRequestedFile(rfd.getClientGUID(),
-    //                                                              rfd.getFileName(),
-    //                                                              rfd.getIndex());
-    //                  synchronized (ManagedDownloader.this) {
-    //                      requested.add(prf);
-    //                  }
-    //                  manager.sendPush(rfd);
-    //              }
-    //          }
-
     private static boolean isPrivate(RemoteFileDesc rfd) {
         String host=rfd.getHost();
         int port=rfd.getPort();
@@ -633,14 +619,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      *      @requires this monitor held
      *      @modifies requested */
     private void purgeOldPushRequests() {
-        //          Date time=new Date();
-        //          time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
-        //          Iterator iter=requested.iterator();
-        //          while (iter.hasNext()) {
-        //              PushRequestedFile prf=(PushRequestedFile)iter.next();
-        //              if (prf.before(time))
-        //                  iter.remove();
-        //          }
+        Date time=new Date();
+        time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
+        Iterator iter=requested.iterator();
+        while (iter.hasNext()) {
+            PushRequestedFile prf=(PushRequestedFile)iter.next();
+            if (prf.before(time))
+                iter.remove();
+        }
     }
 
 
