@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -101,31 +102,36 @@ public final class ConnectionChecker implements Runnable {
      * Checks for a live internet connection.
      */
     public void run() {
-        List hostList = Arrays.asList(STANDARD_HOSTS);
-        
-        // Add some randomization.
-        Collections.shuffle(hostList);
-        
-        Iterator iter = hostList.iterator();
-        while(iter.hasNext()) {
-            String curHost = (String)iter.next();        
-            connectToHost(curHost);
+        try {
+            List hostList = Arrays.asList(STANDARD_HOSTS);
             
-            // Break out of the loop if we've already discovered that we're 
-            // connected -- we only need to successfully connect to one host
-            // to know for sure that we're up.
-            if(_connected) {
-                return;
-            }
+            // Add some randomization.
+            Collections.shuffle(hostList);
             
-            // Stop if we've failed to connect to more than 2 of the hosts
-            // that should be up all of the time.  We do this to make extra
-            // sure the user's connection is down.  If it is down, trying
-            // multiple times adds no load to the test servers.
-            if(_unsuccessfulAttempts > 2) {
-                RouterService.getConnectionManager().noInternetConnection(); 
-                return;   
+            Iterator iter = hostList.iterator();
+            while(iter.hasNext()) {
+                String curHost = (String)iter.next();        
+                connectToHost(curHost);
+                
+                // Break out of the loop if we've already discovered that we're 
+                // connected -- we only need to successfully connect to one host
+                // to know for sure that we're up.
+                if(_connected) {
+                    return;
+                }
+                
+                // Stop if we've failed to connect to more than 2 of the hosts
+                // that should be up all of the time.  We do this to make extra
+                // sure the user's connection is down.  If it is down, trying
+                // multiple times adds no load to the test servers.
+                if(_unsuccessfulAttempts > 2) {
+                    RouterService.getConnectionManager().noInternetConnection(); 
+                    return;   
+                }
             }
+        } catch(Throwable t) {
+            // Report any unhandled errors.
+            ErrorService.error(t);
         }
     }
     
