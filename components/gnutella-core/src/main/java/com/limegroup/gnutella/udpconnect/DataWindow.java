@@ -64,7 +64,7 @@ public class DataWindow
 		d          = new DataRecord();
 		d.pnum     = msg.getSequenceNumber();
 		d.msg      = msg;
-		d.pkey     = String.valueOf(d.pnum);
+		d.pkey     = new Long(d.pnum);
 		d.sends    = 0;
 		d.written  = false;
 		d.acks     = 0;
@@ -79,9 +79,7 @@ public class DataWindow
      *  Get the block based on the sequenceNumber.
      */
 	public DataRecord getBlock(long pnum) {
-		String     pkey = String.valueOf(pnum);
-		DataRecord d    = (DataRecord) window.get(pkey);
-		return d;
+		return (DataRecord) window.get(new Long(pnum));
 	}
 
     /** 
@@ -104,10 +102,10 @@ public class DataWindow
      */
     public int getUsedSpots() {
         DataRecord d;
-        String     pkey;
+        Long     pkey;
         int        count = 0;
         for (long i = windowStart; i < windowStart+windowSize+3; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             // Count the spots that are full and not written
             if ( (d = (DataRecord) window.get(pkey)) != null &&
                   (!d.written || i != windowStart))
@@ -129,11 +127,11 @@ public class DataWindow
      */
 	public int calculateWaitTime(long time, int n) {
         DataRecord d;
-        String     pkey;
+        Long     pkey;
         int        count = 0;
 		long       totalDelta = 0;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks == 0 ) {
                 count++;
@@ -154,10 +152,10 @@ public class DataWindow
      */
 	public int clearLowAckedBlocks() {
         DataRecord d;
-        String     pkey;
+        Long     pkey;
         int        count = 0;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
                 window.remove(pkey);
@@ -175,9 +173,9 @@ public class DataWindow
      *  i.e. sequenceNumber
      */
     public long getLowestUnsentBlock() {
-        String pkey;
+        Long pkey;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             if (window.get(pkey) == null)
                 return(i);
         }
@@ -192,10 +190,10 @@ public class DataWindow
      */
     public int countHigherAckBlocks() {
         DataRecord d;
-        String     pkey;
+        Long     pkey;
         int        count = 0;
         for (long i = windowStart+1; i < windowStart+windowSize+1; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
                 count++;
@@ -209,13 +207,12 @@ public class DataWindow
      *  the RTO, it looks like a message was lost.
      */
     public boolean acksAppearToBeMissing(long time, int multiple) {
-		int irto = (int)rto;
 		// Check for first record being old
 		DataRecord drec = getBlock(windowStart);
-		if ( irto > 0 &&
+		if ( rto > 0 &&
 			 drec != null   &&
 			 drec.acks < 1  &&
-		     drec.sentTime + (multiple * irto) < time ) {
+		     drec.sentTime + (multiple * rto) < time ) {
 			return true;
 		}
 
@@ -417,7 +414,7 @@ public class DataWindow
      */
 	public int clearEarlyWrittenBlocks() {
         DataRecord d;
-        String     pkey;
+        Long     pkey;
         int        count = 0;
 
 		long maxBlock      = windowStart+windowSize;
@@ -439,7 +436,7 @@ public class DataWindow
         // potential space.   
         //for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
         for (long i = windowStart; i < windowStart + windowSize + 1; i++) {
-            pkey = String.valueOf(i);
+            pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
                 window.remove(pkey);
@@ -524,7 +521,7 @@ public class DataWindow
  */
 class DataRecord {
 	public long			 		pnum;     // sequence number
-	public String 				pkey;     // sequence number as a String
+	public Long 				pkey;     // sequence number as a Long
 	public UDPConnectionMessage msg;      // the actual data message
     public int                  sends;    // count of the sends
 	public boolean 		        written;  // whether the data was written
