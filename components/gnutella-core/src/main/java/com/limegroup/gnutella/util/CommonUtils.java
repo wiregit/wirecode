@@ -1,0 +1,169 @@
+/**
+ * This class handles common utility functions that many classes
+ * may want to access.
+ *
+ * @author Adam Fisk
+ */
+//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
+
+package com.limegroup.gnutella.util;
+
+import java.util.Properties;
+
+
+public class CommonUtils {
+
+	// constant for the current version of LimeWire
+	private static final String LIMEWIRE_VERSION = "1.4b";
+	
+	// variable for the system properties
+	private static Properties _props;
+
+	// variable for whether or not we're on Windows
+	private static boolean _isWindows    = false;
+
+	// variable for whether or not we're on Mac 9.1 or below
+	private static boolean _isMacClassic = false;
+
+	// variable for whether or not we're on MacOSX
+	private static boolean _isMacOSX     = false;
+
+	// variable for whether or not we're on Linux
+	private static boolean _isLinux      = false;
+
+	// variable for whether or not we're on Solaris
+	private static boolean _isSolaris    = false;
+	
+	/**
+	 * make sure the constructor can never be called.
+	 */
+	private CommonUtils() {}
+
+	/**
+	 * initialize the settings statically. this gives a little
+	 * more control over when the class is initialized over
+	 * a simple static initializer.
+	 */
+	public static void initialize() {
+
+		// get the system properties object
+		_props = System.getProperties();
+
+		// get the operating system
+		String os = System.getProperty("os.name");
+
+		// set the operating system variables
+		_isWindows = os.indexOf("Windows") != -1;
+		_isSolaris = os.indexOf("Solaris") != -1;
+		_isLinux   = os.indexOf("Linux")   != -1;
+		if(os.startsWith("Mac OS")) {
+			if(os.endsWith("X")) {
+				_isMacOSX = true;
+			} else {
+				_isMacClassic = true;
+			}			
+		}
+	}
+
+	/**
+	 * returns the current version number of LimeWire as
+     * a string, e.g., "1.4".
+	 */
+	public static String getLimeWireVersion() {
+		return LIMEWIRE_VERSION;
+	}
+
+	/**
+	 * Returns a version number appropriate for upload headers.
+     * Same as '"LimeWire "+getLimeWireVersion'.
+	 */
+	public static String getVendor() {
+		return "LimeWire "+LIMEWIRE_VERSION;
+	}    
+
+	/**
+	 * returns the version of java we're using.
+	 */
+	public static String getJavaVersion() {
+		return _props.getProperty("java.version");
+	}
+
+	/**
+	 * returns the operating system
+	 */
+	public static String getOS() {
+		return _props.getProperty("os.name");;
+	}
+
+	/**
+	 * returns the user's current working directory.
+	 */
+	public static String getCurrentDirectory() {
+		return _props.getProperty("user.dir");
+	}
+
+	/**
+	 * returns whether or not the os is some version of Windows
+	 */
+	public static boolean isWindows() {
+		return _isWindows;
+	}
+
+	/** 
+	 * returns whether or not the os is Mac 9.1 or earlier.
+	 */
+	public static boolean isMacClassic() {
+		return _isMacClassic;
+	}
+
+	/** 
+	 * returns whether or not the os is Mac OSX
+	 */
+	public static boolean isMacOSX() {
+		return _isMacOSX;
+	}
+
+	/** 
+	 * returns whether or not the os is Solaris
+	 */
+	public static boolean isSolaris() {
+		return _isSolaris;
+	}
+
+	/** 
+	 * returns whether or not the os is Linux
+	 */
+	public static boolean isLinux() {
+		return _isLinux;
+	}
+
+	/** 
+	 * returns whether or not the os is some version of
+	 * Unix, defined here as only Solaris or Linux
+	 */
+	public static boolean isUnix() {
+		return _isLinux || _isSolaris; 
+	}
+
+	/**
+	 * This static method converts the passed in
+	 * number of bytes into a kilobyte string 
+	 * separated by commas and with "KB" at the
+	 * end. 
+	 */
+	public static String toKilobytes(int bytes) {
+		double d = (double)bytes/(double)1024;
+		if(d < 1 && d > 0)
+			d = 1;
+		StringBuffer sb = new StringBuffer(Integer.toString((int)d));
+		if(d > 999) {
+			sb.insert(sb.length() - 3, ",");
+  			if(d > 999999) {
+  				sb.insert(sb.length() - 7, ",");
+  			}
+		}
+		sb.append("KB");
+		return sb.toString();
+	}
+	
+}
