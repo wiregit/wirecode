@@ -2583,14 +2583,16 @@ public abstract class MessageRouter {
     	int port = datagram.getPort();
     	FileManager fmanager = RouterService.getFileManager();
     	UploadManager umanager = RouterService.getUploadManager();
+    	UDPService uservice = UDPService.instance();
     	if (_udpHeadRequests.add(host)) {
     		HeadPong pong = new HeadPong(ping);
     		if (ping.getAddress() == null)
-    			UDPService.instance().send(pong, host, port);
+    			uservice.send(pong, host, port);
     		else 
-    			if (fmanager.getFileDescForUrn(ping.getUrn()) != null &&
+    			if (!uservice.canReceiveUnsolicited() &&
+    					fmanager.getFileDescForUrn(ping.getUrn()) != null &&
     					!umanager.isQueueFull())
-    				UDPService.instance().send(pong,ping.getAddress());
+    				uservice.send(pong,ping.getAddress());
     	}
     }
     
@@ -2605,15 +2607,17 @@ public abstract class MessageRouter {
     	
     	FileManager fmanager = RouterService.getFileManager();
     	UploadManager umanager = RouterService.getUploadManager();
+    	UDPService uservice = UDPService.instance();
     	
     	if (_udpHeadRequests.add(conn.getInetAddress())) {
     		HeadPong pong = new HeadPong(ping);
     		if (ping.getAddress() == null)
     			conn.send(pong);
     		else
-    			if(fmanager.getFileDescForUrn(ping.getUrn()) != null &&
+    			if(!uservice.canReceiveUnsolicited() &&
+    					fmanager.getFileDescForUrn(ping.getUrn()) != null &&
     					!umanager.isQueueFull())
-    				UDPService.instance().send(pong,ping.getAddress());
+    				uservice.send(pong,ping.getAddress());
     	}
     	
     }
