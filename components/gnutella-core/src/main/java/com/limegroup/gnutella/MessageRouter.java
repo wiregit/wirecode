@@ -105,7 +105,7 @@ public abstract class MessageRouter {
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
      * if the sink wants them).  Cleared every CLEAR_TIME seconds.
-     * GUIDBundle->QueryReply
+     * TimedGUID->QueryReply
      */
     private Hashtable _outOfBandReplies = new Hashtable();
 
@@ -1491,7 +1491,7 @@ public abstract class MessageRouter {
                     // store reply by guid for later retrieval1
                     synchronized (_outOfBandReplies) {
                         if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
-                            _outOfBandReplies.put(new GUIDBundle(guid), 
+                            _outOfBandReplies.put(new TimedGUID(guid), 
                                                   queryReply);
                             UDPService.instance().send(vm, addr, port);
                         }
@@ -1824,12 +1824,12 @@ public abstract class MessageRouter {
     /** Simply couples a GUID with a timestamp.  Needed for expiration of
      *  QueryReplies waiting for out-of-band delivery.
      */
-    private static class GUIDBundle {
+    private static class TimedGUID {
         public static final long MAX_LIFE = 25 * 1000; // 25 seconds
         private final GUID _guid;
         private final long _creationTime;
 
-        public GUIDBundle(GUID guid) {
+        public TimedGUID(GUID guid) {
             _guid = guid;
             _creationTime = System.currentTimeMillis();
         }
@@ -1840,8 +1840,8 @@ public abstract class MessageRouter {
         public boolean equals(Object other) {
             if (other instanceof GUID)
                 return _guid.equals(other);
-            else if (other instanceof GUIDBundle) 
-                return _guid.equals(((GUIDBundle) other)._guid);
+            else if (other instanceof TimedGUID) 
+                return _guid.equals(((TimedGUID) other)._guid);
             return false;
         }
 
@@ -1874,7 +1874,7 @@ public abstract class MessageRouter {
                     synchronized (_outOfBandReplies) {
                         Iterator keys = _outOfBandReplies.keySet().iterator();
                         while (keys.hasNext()) {
-                            GUIDBundle currQB = (GUIDBundle) keys.next();
+                            TimedGUID currQB = (TimedGUID) keys.next();
                             if ((currQB != null) && (currQB.shouldExpire()))
                                 toRemove.add(currQB);
                         }
