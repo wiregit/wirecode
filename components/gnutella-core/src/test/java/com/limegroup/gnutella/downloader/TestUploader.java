@@ -71,6 +71,21 @@ public class TestUploader {
         settings.setAllowedIps(new String[] {"127.*.*.*"});
         this.name=name;
         reset();
+        
+        try {
+            server = new ServerSocket();
+            //Use Java 1.4's option to reuse a socket address.  This is
+            //important because some client thread may be using the given port
+            //even though no threads are listening on the given socket.
+            server.setReuseAddress(true);
+            server.bind(new InetSocketAddress(port));
+        } catch (IOException e) {
+            DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
+            //System.out.println("Couldn't listen on port "+port);
+            ErrorService.error(e);
+            return;
+        }
+        
         //spawn loop();
         Thread t = new Thread() {
             public void run() {
@@ -177,20 +192,6 @@ public class TestUploader {
      * Repeatedly accepts connections and handles them.
      */
     private void loop(int port) {
-        try {
-            server = new ServerSocket();
-            //Use Java 1.4's option to reuse a socket address.  This is
-            //important because some client thread may be using the given port
-            //even though no threads are listening on the given socket.
-            server.setReuseAddress(true);
-            server.bind(new InetSocketAddress(port));
-        } catch (IOException e) {
-            DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
-            //System.out.println("Couldn't listen on port "+port);
-            ErrorService.error(e);
-            return;
-        }
-
         Socket socket = null;
         while(true) {
             try {
