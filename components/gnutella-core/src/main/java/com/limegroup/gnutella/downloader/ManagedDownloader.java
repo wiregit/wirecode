@@ -797,10 +797,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * locations until all locations fail or some locations succeed.  Moves
      * incomplete file to the library on success.
      * 
-     * @param files a list of files to pick from, all of which MUST be
-     *  "identical" instances of RemoteFileDesc.  Unreachable locations
-     *  are removed from files. The list has been sorted so the highest
-     * quality hosts are first in the list.
      * @return COMPLETE if a file was successfully downloaded
      *         CORRUPT_FILE a bytes mismatched when checking overlapping
      *             regions of resume or swarm, and all downloader were aborted
@@ -937,9 +933,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Like tryDownloads2, but does not deal with the library, cleaning
      * up corrupt files, etc.
      *
-     * @param files a list of files to pick from, all of which MUST be
-     *  "identical" instances of RemoteFileDesc.  Unreachable locations
-     *  are removed from files.
      * @return COMPLETE if a file was successfully downloaded
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
      *             to try again later because some hosts reported busy.
@@ -969,7 +962,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //The locations that were busy, for trying later.
         busy=new LinkedList();
-
+        int size = -1;
+        
         //While there is still an unfinished region of the file...
         while (true) {
             synchronized (this) {
@@ -989,12 +983,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return GAVE_UP;
                     }
                 }
-            }                        
+                size = files.size();//capture the size (in synched block)
+            }
             //OK. We are going to create a thread for each RFD, 
             //TODO2:Note:for now we connect to all the hosts we can. But later 
             // we should try to connect to about twice (I am guessing) 
             //as many as we are allowed to swarm from. 
-            int size = files.size();//capture the size, it wil change
             for(int i=0; i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
@@ -1182,10 +1176,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             updateNeeded(dloader);
             return false;//discard the rfd of dloader
         } catch(NoSuchElementException nsex) {
-            //thrown in assignGrey. No need to updateNeeded. T
-            //he dloader we were trying to steal from is not mutated.
+            //thrown in assignGrey.The downloader we were trying to steal from
+            //is not mutated.  
+            //DO NOT CALL updateNeeded() here! 
             debug("nsex thrown in assingAndReplace");
-            //updateNeeded(dloader);
             files.add(dloader.getRemoteFileDesc());
             return false;
         } catch (IOException iox) {
@@ -1348,6 +1342,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+    /**
+     * adds an interval to needed, if dloader was not able to download a part
+     * assigned to it.  
+     */
     private synchronized void updateNeeded(HTTPDownloader dloader) {
         debug ("downloader failed. adding to white..."+
                "Downloader: initial, read, toRead :"+
@@ -1357,7 +1355,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                dloader.getAmountToRead());
         int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
         int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
-        if( (high-low) > 0) {
+        if( (high-low)>0) {//dloader failed to download a part assigned to it?
             Interval in = new Interval(low,high);
             needed.add(in);
         }
