@@ -892,12 +892,13 @@ public class FileManager {
         IntSet matches = null;
         matches = search( str,
                           matches);
-        if ( request.getQueryUrns()!=null ) {
+        if(request.getQueryUrns().size() > 0) {
             matches = urnSearch(request.getQueryUrns().iterator(),matches);
         }
         
-        if (matches==null)
+        if (matches==null) {
             return null;
+		}
 
         Response[] response = new Response[matches.size()];
         int j=0;
@@ -906,7 +907,7 @@ public class FileManager {
                  j++) {            
             int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
-            response[j] = new Response(desc);//desc.responseFor(request);
+            response[j] = new Response(desc);
         }
         return response;
     }
