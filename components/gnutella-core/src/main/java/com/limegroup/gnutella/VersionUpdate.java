@@ -23,10 +23,14 @@ public class VersionUpdate implements Runnable
 
 	private String VERSION_FILE = "version.txt";
 	private static VersionUpdate _updater;
+	
+	private String _latest;
+
 
 	// private constructor for singleton
 	private VersionUpdate() 
 	{
+		_latest = SettingsManager.instance().getLastVersionChecked();
 	}
 
 	// static method for getting an instance of VersionUpdate
@@ -113,12 +117,19 @@ public class VersionUpdate implements Runnable
 
 		}
 
-		sm.setCheckAgain(true);
+		// sm.setCheckAgain(true);
 
-		sm.setLastVersionChecked(latest);  
+		// sm.setLastVersionChecked(latest);  
+
+		_latest = latest;
 
 		br.close();
 
+	}
+
+	public void setLastVersionChecked() {
+		SettingsManager sm = SettingsManager.instance();
+		sm.setLastVersionChecked(_latest);
 	}
 
 
