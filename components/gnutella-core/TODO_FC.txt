@@ -11,9 +11,9 @@ Steps
         -fractional
 -add timeouts.  Don't forget to increment drop count (see
 -add GUID prioritization (yay heap!)
--refactor.  
-        -Make OutputRunner smaller.
-        -can we use an array of smart object for each priority level?
++refactor.  
+        +Make OutputRunner smaller.
+        +can we use an array of smart object for each priority level?
 -optimize:
         -add size INVARIANT (sum of all buffers), changed queued()
         -avoid inner loop for common case ratio

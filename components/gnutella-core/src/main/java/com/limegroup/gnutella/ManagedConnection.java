@@ -8,6 +8,7 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -53,7 +54,15 @@ public class ManagedConnection
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
 
-    /** The size of the queue per priority. Larger values tolerate larger bursts
+    /** A lock to protect _outputQueue. */
+    private Object _outputQueueLock=new Object();
+    /** The OutputRunner thread.  Needed for testing only. */
+    private Thread _outputRunnerThread;
+    /** The producer's queues, one priority per mesage type. 
+     *  INVARIANT: _outputQueue.length==PRIORITIES
+     *  LOCKING: obtain _outputQueueLock. */
+    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];     
+   /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
     /** The number of different priority levels. */
@@ -67,30 +76,15 @@ public class ManagedConnection
     private static final int PRIORITY_PING_REPLY=4;
     private static final int PRIORITY_PING=5;
     private static final int PRIORITY_OTHER=6;       
-    /** The ratios of messages to let through. 
-     *  INVARIANT: PRIORITY_RATIOS.length==PRIORITIES
-     *             PRIORITY_RATIOS[i]>0 */
-    private static final int[] PRIORITY_RATIOS=new int[PRIORITIES];
     {
-        PRIORITY_RATIOS[PRIORITY_WATCHDOG]=1;
-        PRIORITY_RATIOS[PRIORITY_PUSH]=3;
-        PRIORITY_RATIOS[PRIORITY_QUERY_REPLY]=2;
-        PRIORITY_RATIOS[PRIORITY_QUERY]=1;
-        PRIORITY_RATIOS[PRIORITY_PING_REPLY]=1;
-        PRIORITY_RATIOS[PRIORITY_PING]=1;
-        PRIORITY_RATIOS[PRIORITY_OTHER]=1;
-    }
-
-    /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
-    private Object _outputQueueLock=new Object();
-    /** The producer's queues, one priority per mesage type. */
-    private Buffer[] _outputQueue=new Buffer[PRIORITIES]; 
-    {
-        for (int i=0; i<PRIORITIES; i++)
-            _outputQueue[i]=new Buffer(QUEUE_SIZE);
-    }
-    /** The OutputRunner thread.  Needed for debugging only. */
-    private Thread _outputRunnerThread;
+        _outputQueue[PRIORITY_WATCHDOG]   =new MessageQueue(true,QUEUE_SIZE,1);
+        _outputQueue[PRIORITY_PUSH]       =new MessageQueue(true,QUEUE_SIZE,3);
+        _outputQueue[PRIORITY_QUERY_REPLY]=new MessageQueue(true,QUEUE_SIZE,2);
+        _outputQueue[PRIORITY_QUERY]      =new MessageQueue(true,QUEUE_SIZE,1);
+        _outputQueue[PRIORITY_PING_REPLY] =new MessageQueue(true,QUEUE_SIZE,1);
+        _outputQueue[PRIORITY_PING]       =new MessageQueue(true,QUEUE_SIZE,1);
+        _outputQueue[PRIORITY_OTHER]      =new MessageQueue(false,QUEUE_SIZE,1);
+    }                                                             
 
 
     /**
@@ -335,6 +329,9 @@ public class ManagedConnection
         return m;
     }
 
+
+    ////////////////////// Sending, Outgoing Flow Control //////////////////////
+
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
      * are dropped if the socket gets backed up.  It also does MessageRouter
@@ -352,9 +349,8 @@ public class ManagedConnection
         int priority=calculatePriority(m);
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
-            Object dropped=_outputQueue[priority].addLast(m);
-            if (dropped!=null)
-                _numSentMessagesDropped++;
+            int dropped=_outputQueue[priority].add(m);
+            _numSentMessagesDropped+=dropped;
             _outputQueueLock.notify();
         }
     }
@@ -395,75 +391,74 @@ public class ManagedConnection
     public void flush() throws IOException {        
     }
 
-    /** Repeatedly sends all the queued data every few seconds. */
+    /** Repeatedly sends all the queued data. */
     private class OutputRunner extends Thread {
         public OutputRunner() {
             setDaemon(true);
             start();
         }
 
+        /** While the connection is not closed, sends all data delay. */
         public void run() {
             while (isOpen()) {
-                //1. Wait until the queue is non-empty.  The synchronized
-                //statement is outside the while loop because queued() is not
-                //thread-safe.
-                if (isInterrupted()) {
+                try {
+                    waitForQueued();
+                } catch (InterruptedException e) {
                     //This only happens if I've been killed for debugging
                     //purposes.  (See unit tests below.)
-                    System.err.println("WARNING: OutputRunner for "
-                                       +ManagedConnection.this
-                                       +" terminating");
+                    System.err.println(" WARNING: OutputRunner terminating.");
+                    System.err.println("          Acceptable only if testing.");
                     return;
                 }
-                synchronized (_outputQueueLock) {
-                    while (queued() <= 0) {
-                        try {
-                            _outputQueueLock.wait();
-                        } catch (InterruptedException e) { 
-                            //For debug only, same as return above.
-                            System.err.println("WARNING: OutputRunner for "
-                                               +ManagedConnection.this
-                                               +" terminating");
-                            return;
-                        }
-                    }
-                } 
-
-//                 System.out.println(System.currentTimeMillis()+" before write");
-//                 dumpQueueStats();
-
+                //System.out.println(System.currentTimeMillis()+" before write");
+                //dumpQueueStats();
                 try {
-                    //2. Now send PRIORITY_RATIOS[i] queued message of each type
-                    //i (if possible).  Note that we obtain the lock while
-                    //removing elements from the queue but NOT while actually
-                    //sending.  TODO: can avoid inner loop for most message
-                    //types.
-                    for (int i=0; i<PRIORITIES; i++) { 
-                        for (int j=0; j<PRIORITY_RATIOS[i]; j++) {
-                            Message m=null;
-                            synchronized (_outputQueueLock) {
-                                if (_outputQueue[i].isEmpty())
-                                    break;
-                                if (i!=PRIORITY_OTHER)  //LIFO
-                                    m=(Message)_outputQueue[i].removeLast(); 
-                                else                    //FIFO
-                                    m=(Message)_outputQueue[i].removeFirst();
-                            }
-                            ManagedConnection.super.send(m);
-                            _bytesSent+=m.getTotalLength();
-                        }
-                    }
-
-                    //3. Flush.  This just forces data from Connection's
-                    //BufferedOutputStream into the kernel's TCP send buffer.
-                    //It doesn't force TCP to actually send the data to the
-                    //network.  That is determined by the receiver's window size
-                    //and Nagle's algorithm.
-                    ManagedConnection.super.flush();
+                    sendQueued();
                 } catch (IOException e) {
                     _manager.remove(ManagedConnection.this);
                 }
             }
+        }
+
+        /** Wait until the queue is (probably) non-empty. */
+        private void waitForQueued() throws InterruptedException {
+            //The synchronized statement is outside the while loop because
+            //queued() is not thread-safe.
+            if (isInterrupted()) {
+                throw new InterruptedException();
+            }
+            synchronized (_outputQueueLock) {
+                while (queued() <= 0) {                    
+                    _outputQueueLock.wait();
+                }
+            }
+        }   
+
+        /** Send several queued message of each type. */
+        private void sendQueued() throws IOException {  
+            //1. For each priority send as many messages as desired for that
+            //type.  IMPORTANT: we only obtain _outputQueueLock while touching
+            //the queue, not while actually sending (which can block).
+            for (int priority=0; priority<PRIORITIES; priority++) { 
+                _outputQueue[priority].resetCycle();
+
+                while (true) {
+                    Message m=null;
+                    synchronized (_outputQueueLock) {
+                        m=(Message)_outputQueue[priority].removeNext(); 
+                    }
+                    if (m==null)
+                        break;
+                    ManagedConnection.super.send(m);
+                    _bytesSent+=m.getTotalLength();
+                }
+            }
+
+            //2. Now force data from Connection's BufferedOutputStream into the
+            //kernel's TCP send buffer.  It doesn't force TCP to
+            //actually send the data to the network.  That is determined
+            //by the receiver's window size and Nagle's algorithm.
+            ManagedConnection.super.flush();
         }
     }
 
