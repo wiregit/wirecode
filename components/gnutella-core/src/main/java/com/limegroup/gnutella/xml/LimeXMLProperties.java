@@ -438,7 +438,7 @@ public class LimeXMLProperties
         }
         else
         {
-            if(!limeHome.endsWith(File.separator))
+            if(!limeHome.endsWith("/") && !limeHome.endsWith("\\"))
                 limeHome = limeHome + File.separator;
             return limeHome + "lib" + File.separator;
         }
