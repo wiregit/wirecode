@@ -160,29 +160,3 @@ public class ByteReader {
 		return sBuffer.toString();
     }
 }
-
-//    	public static void main(String args[]) {
-//    		try {
-//    			InputStream in;
-//    			ByteReader bin;
-//    			String s;       
-			
-//    			in=new StringBufferInputStream("abc\r\na\rbc\n");
-//    			bin=new ByteReader(in);
-			
-//    			s=bin.readLine(); Assert.that(s.equals("abc"), s);
-//    			s=bin.readLine(); Assert.that(s.equals("abc"), s);
-//    			s=bin.readLine(); Assert.that(s==null, s);
-//    			s=bin.readLine(); Assert.that(s==null, s);
-			
-//    			in=new StringBufferInputStream("a\ne");
-//    			bin=new ByteReader(in);
-			
-//    			s=bin.readLine(); Assert.that(s.equals("a"), s);
-//    			s=bin.readLine(); Assert.that(s==null, s);  
-//    		} catch (IOException e) {
-//    			e.printStackTrace();
-//    			Assert.that(false);
-//    		}
-//    	}
-//    }
