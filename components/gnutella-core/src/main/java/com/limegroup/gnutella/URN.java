@@ -130,14 +130,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return a new <tt>URN</tt> built from the specified string
 	 * @throws <tt>IOException</tt> if there is an error
 	 */
-	private static URN createSHA1UrnFromString(String urnString) 
+	private static URN createSHA1UrnFromString(final String urnString) 
 		throws IOException {
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("invalid urn string: "+urnString);
 		}
 		String typeString = URN.getTypeString(urnString);
 		if(!UrnType.isSupportedUrnType(typeString)) {
-			throw new IOException("urn type not recognized: "+urnString);
+			throw new IOException("urn type not recognized: "+typeString);
 		}
 		UrnType type = UrnType.createUrnType(typeString);
 		return new URN(urnString, type);
@@ -210,7 +210,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		URN urn = (URN)o;
 		
 		return (_urnString.equals(urn._urnString) &&
-				_urnType == urn._urnType);
+				_urnType.equals(urn._urnType));
 	}
 
 	/**
@@ -361,19 +361,24 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	}	
 
 	/**
-	 * Returns the URN type string for this URN.  For example, if the
-	 * String for this URN is:<p>
+	 * Returns the URN type string for this URN.  This requires that each URN 
+	 * have a specific type - a general "urn:" type is not accepted.  As an example
+	 * of how this method behaves, if the string for this URN is:<p>
 	 * 
 	 * urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB <p>
 	 *
 	 * then this method will return: <p>
 	 *
 	 * urn:sha1:
+	 *
+	 * @param fullUrnString the string containing the full urn
+	 * @return the urn type of the string
 	 */
-	private static String getTypeString(String fullUrnString) {
-		String protocol =
-		  fullUrnString.substring(0,fullUrnString.lastIndexOf(':')+1);		
-		return protocol.trim();
+	private static String getTypeString(final String fullUrnString) {		
+		// trims any leading whitespace from the urn string -- without 
+		// whitespace the urn must start with 'urn:'
+		String type = fullUrnString.trim();
+		return type.substring(0,type.indexOf(':', 4)+1); 
 	}
 
 	/**
@@ -382,8 +387,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param file the file to construct the hash from
 	 * @return the SHA1 hash string
 	 * @throws <tt>IOException</tt> if there is an error creating the hash
-	 * @throws <tt>IOException</tt> if the specified algorithm
-	 *  cannot be found
+	 *  or if the specified algorithm cannot be found
      * @throws <tt>InterruptedException</tt> if the calling thread was 
      *  interrupted while hashing.  (This method can take a while to
      *  execute.)
