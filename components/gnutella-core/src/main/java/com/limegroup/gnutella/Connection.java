@@ -534,6 +534,7 @@ public class Connection {
 
 			//2. Read "GNUTELLA/0.6 200 OK"  
 			String connectLine = readLine();
+			Assert.that(connectLine != null, "null connectLine");
 			if (! connectLine.startsWith(GNUTELLA_06))
 				throw new IOException("Bad connect string");
 			
@@ -545,6 +546,7 @@ public class Connection {
                 HandshakeResponse.createResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
+            Assert.that(theirResponse != null, "null theirResponse");
 
             int code = theirResponse.getStatusCode();
             if (code != HandshakeResponse.OK &&  
@@ -558,9 +560,11 @@ public class Connection {
 
             //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
 			//   and headers.
+			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
             HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(theirResponse, true);
 
+            Assert.that(ourResponse != null, "null ourResponse");
             writeLine(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
@@ -568,8 +572,8 @@ public class Connection {
             code = ourResponse.getStatusCode();
             //Consider termination...
             if(code == HandshakeResponse.OK) {
-                if(ourResponse.getStatusMessage().equals(
-                    HandshakeResponse.OK_MESSAGE)){
+                if(HandshakeResponse.OK_MESSAGE.equals(
+                    ourResponse.getStatusMessage())){
                     //a) Terminate normally if we wrote "200 OK".
                     return;
                 } else {
