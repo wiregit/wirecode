@@ -89,6 +89,22 @@ public class PingReply extends Message implements Serializable {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
              dailyUptime>=0 ? newGGEP(dailyUptime) : null);
     }
+
+    /**
+     * Wrap a PingReply around stuff snatched from the network.
+     * <p>
+     * Initially this method required that payload.lenghth == 14. But now we
+     * support for big pings and pongs. 
+     *
+     * @exception BadPacketException payload is too small
+     */
+    public PingReply(byte[] guid, byte ttl, byte hops,
+             byte[] payload) throws BadPacketException {
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+        if (payload.length<STANDARD_PAYLOAD_SIZE)
+            throw new BadPacketException();
+        this.payload=payload;
+    }
      
     /** Internal constructor used to bind the encoded GGEP payload, avoiding the
      *  need to construct it more than once.  
@@ -134,21 +150,25 @@ public class PingReply extends Message implements Serializable {
         }
     }
 
-    /**
-     * Wrap a PingReply around stuff snatched from the network.
-     * <p>
-     * Initially this method required that payload.lenghth == 14. But now we
-     * support for big pings and pongs. 
-     *
-     * @exception BadPacketException payload is too small
-     */
-    public PingReply(byte[] guid, byte ttl, byte hops,
-             byte[] payload) throws BadPacketException {
-        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
-        if (payload.length<STANDARD_PAYLOAD_SIZE)
-            throw new BadPacketException();
-        this.payload=payload;
-    }
+	/**
+	 * Adds the GGEP extension indicating support for Gnutella messages 
+	 * over UDP on the specified IP and port.
+	 *
+	 * @param udpSupported specifies whether or not UDP is supported -
+	 *  1 if supported, otherwise 0
+	 */
+	private static byte[] createUdpSupportedGGEP(int udpSupported) {
+		try {
+			GGEP ggep = new GGEP(true);
+			ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, udpSupported);
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			ggep.write(baos);
+			return baos.toByteArray();			
+		} catch(IOException e) {
+			Assert.that(false, "could not encode udp: "+e);
+			return null;
+		}
+	}
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
