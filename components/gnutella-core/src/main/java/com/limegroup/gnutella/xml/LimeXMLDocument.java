@@ -20,6 +20,8 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ID_ATTRIBUTE_STRING = "identifier";
     public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
 
+    private static DOMParser parser = new DOMParser();
+
 	/**
 	 * Cached hash code for this instance.
 	 */
@@ -112,13 +114,14 @@ public class LimeXMLDocument implements Serializable {
     
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
-        DOMParser parser = new DOMParser();
         //TODO1: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
         Document document = null;
-        parser.parse(doc);
-        document=parser.getDocument();
+        synchronized(this.parser) {
+            parser.parse(doc);
+            document=parser.getDocument();
+        }
         Element docElement = document.getDocumentElement();
         grabDocInfo(docElement,true);
         Node child=docElement.getFirstChild();
