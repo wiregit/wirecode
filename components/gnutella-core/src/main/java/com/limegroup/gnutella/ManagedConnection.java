@@ -130,8 +130,16 @@ public class ManagedConnection extends Connection
      *  no locking is necessary.  Package-access for testing purposes only. */
     int _lastPriority=0;
     /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. */
-    private static final int QUEUE_SIZE=100;
+     *  of producer traffic, though they waste more memory. This queue is 
+     *  slightly larger than the standard to accomodate higher priority 
+     *  messages, such as queries and query hits. */
+    private static final int BIG_QUEUE_SIZE = 100;
+
+    /** The size of the queue per priority. Larger values tolerate larger bursts
+     *  of producer traffic, though they waste more memory. This queue is
+     *  slightly smaller so that we don't waste too much memory on lower
+     *  priority messages. */
+    private static final int QUEUE_SIZE = 30;
     /** The max time to keep reply messages and pushes in the queues, in
      *  milliseconds. */
     private static int BIG_QUEUE_TIME=10*1000;
@@ -356,19 +364,19 @@ public class ManagedConnection extends Connection
         //save a fair bit of memory by not using buffering at all.  But this
         //requires the CompositeMessageQueue class from nio-branch.
         _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, true);
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, QUEUE_SIZE);
+            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, QUEUE_SIZE);
+            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+            = new PriorityMessageQueue(1, QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_PING_REPLY] 
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING]       
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, false);
         
         //Start the thread to empty the output queue
         new OutputRunner();
