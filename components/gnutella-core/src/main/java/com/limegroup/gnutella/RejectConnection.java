@@ -91,11 +91,8 @@ class RejectConnection extends Connection
      * @param guid GUID for the pong
      */
     private void sendPongs(byte[] guid)
-
     {
-
         try
-
         {
             //retrieve an array of hosts from the network discovery engine
             Endpoint[] endpoints = manager.getNDAccess().getNGoodEndpoints(10);
@@ -113,9 +110,17 @@ class RejectConnection extends Connection
                     endpoints[i].getKbytes());
                     //send the pong (ping reply)
                     send(pr);
+                    try
+                    {
+                        Thread.sleep(100); //1/4th of a sec
+                    }
+                    catch(InterruptedException ie)
+                    {
+                        
+                    }
+                    //System.out.println("send completed fine");
                 }
                 catch(UnknownHostException uhe)
-
                 {
                     //dont need to do anything
                     //it will go to the next endpoint
@@ -123,12 +128,17 @@ class RejectConnection extends Connection
             }
         }
         catch(Exception e)
-
         {
             //e.printStackTrace();
             //doesnt matter if we r not able to send pongs
         }
-    }
-
-
-}
+        finally
+        {
+            //flush the connection so that the pongs reach the client
+            flush(); 
+        }
+    }//end of fn sendPongs
+    
+    
+    
+}//end of class
