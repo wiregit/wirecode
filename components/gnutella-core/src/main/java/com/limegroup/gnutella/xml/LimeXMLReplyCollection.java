@@ -85,7 +85,7 @@ public class LimeXMLReplyCollection{
         //      String (xml mini hash) -> String (XML).
         // After that (before LimeWire 3.4) it was stored as
         //      String (xml mini hash) -> LimeXMLDocument
-        // From LimeWire 3.3 on, it is stored as
+        // From LimeWire 3.4 on, it is stored as
         //      URN (SHA1 Hash) -> LimeXMLDocument        
         // Because of the changes, and the need to support reading older
         // .sxml files (so we don't lose any annotated XML), we need to
@@ -129,7 +129,7 @@ public class LimeXMLReplyCollection{
             //If requiresConversion is true, a lookup of the URN
             //is pointless because the hashToXML's keys are
             //a String (mini-hash).
-            if( requiresConversion ) { //Before LimeWire 3.3
+            if( requiresConversion ) { //Before LimeWire 3.4
                 String miniHash = null;
                 try {
                     miniHash = new String(LimeXMLUtils.hashFile(file));
@@ -137,7 +137,7 @@ public class LimeXMLReplyCollection{
                     continue; // oh well.
                 }
                 xml = hashToXML.get(miniHash);
-                // If this was between LimeWire 2.5 and LimeWire 3.3...
+                // If this was between LimeWire 2.5 and LimeWire 3.4...
                 // and it had some XML..
                 if( xml != null && xml instanceof LimeXMLDocument ) {
                     debug("sync: 1");
@@ -146,7 +146,7 @@ public class LimeXMLReplyCollection{
                     debug("sync: 2");
                     doc = constructDocument((String)xml, file);
                 }
-            } else { // After LimeWire 3.3
+            } else { // After LimeWire 3.4
                 xml = hashToXML.get(hash);
                 if( xml == null ) { // no XML might exist, try and make some
                     debug("sync: 3");
