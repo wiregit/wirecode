@@ -119,8 +119,8 @@ public class MP3MetaData extends AudioMetaData {
     /**
      * Generates ID3Data from id3v2 data in the file.
      */
-    private AudioMetaData parseID3v2Data(File file) {
-        AudioMetaData data = new AudioMetaData();
+    private void parseID3v2Data(File file) {
+        
         
         ID3v2 id3v2Parser = null;
         try {
@@ -128,9 +128,9 @@ public class MP3MetaData extends AudioMetaData {
         } catch (ID3v2Exception idvx) { //can't go on
             if(idvx instanceof ID3v2BadParsingException)
                 ErrorService.error(idvx); //we want to know about OutOfMemorys
-            return data;
+            return ;
         } catch (IOException iox) {
-            return data;
+            return ;
         }
         
 
@@ -138,7 +138,7 @@ public class MP3MetaData extends AudioMetaData {
         try {
             frames = id3v2Parser.getFrames();
         } catch (NoID3v2TagException ntx) {
-            return data;
+            return ;
         }
         
         //rather than getting each frame indvidually, we can get all the frames
@@ -163,13 +163,13 @@ public class MP3MetaData extends AudioMetaData {
                 continue;
             //check which tag we are looking at
             if(MP3DataEditor.TITLE_ID.equals(frameID)) 
-                data.setTitle(frameContent);
+                setTitle(frameContent);
             else if(MP3DataEditor.ARTIST_ID.equals(frameID)) 
-                data.setArtist(frameContent);
+                setArtist(frameContent);
             else if(MP3DataEditor.ALBUM_ID.equals(frameID)) 
-                data.setAlbum(frameContent);
+                setAlbum(frameContent);
             else if(MP3DataEditor.YEAR_ID.equals(frameID)) 
-                data.setYear(frameContent);
+                setYear(frameContent);
             else if(MP3DataEditor.COMMENT_ID.equals(frameID)) {
                 //ID3v2 comments field has null separators embedded to encode
                 //language etc, the real content begins after the last null
@@ -184,11 +184,11 @@ public class MP3MetaData extends AudioMetaData {
                 }
                 frameContent = 
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
-                data.setComment(frameContent);
+                setComment(frameContent);
             }
            else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
-                    data.setTrack(Short.parseShort(frameContent));
+                    setTrack(Short.parseShort(frameContent));
                 } catch (NumberFormatException ignored) {} 
             }
             else if(MP3DataEditor.GENRE_ID.equals(frameID)) {
@@ -219,12 +219,12 @@ public class MP3MetaData extends AudioMetaData {
                 }
                 
                 if(genreCode >= 0 && genreCode <= 127)
-                    data.setGenre(getGenreString((short)genreCode));
+                    setGenre(getGenreString((short)genreCode));
                 else 
-                    data.setGenre(frameContent);
+                    setGenre(frameContent);
             }
         }
-        return data;
+        
     }
 
 
