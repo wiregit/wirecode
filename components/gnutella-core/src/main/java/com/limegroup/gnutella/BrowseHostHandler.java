@@ -212,6 +212,7 @@ public class BrowseHostHandler {
     }
 
     private void browseExchange(Socket socket) throws IOException {
+    	socket.setSoTimeout(10000);
         LOG.trace("BHH.browseExchange(): entered.");
         setState(EXCHANGING);
         
