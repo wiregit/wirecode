@@ -128,14 +128,14 @@ public final class UploadManager implements BandwidthTracker {
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
-	 * if it successfully parses the HTTP 'get' header.  BLOCKING.
+	 * if it successfully parses the HTTP request.  BLOCKING.
 	 *
+	 * @param method the <tt>HTTPRequestMethod</tt> that will delegate to
+	 *  the appropriate response handlers for the type of request
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
     public void acceptUpload(HTTPRequestMethod method, Socket socket) {
 		try {
-            //increment the download count
-            
             //do uploads
             while(true) {
                 //parse the get line
@@ -315,7 +315,9 @@ public final class UploadManager implements BandwidthTracker {
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
                     }
-                }
+                } catch(Exception e) {
+					_callback.error(e);
+				}
                 finally {
                     //close the socket
                     GIVuploader.stop();
