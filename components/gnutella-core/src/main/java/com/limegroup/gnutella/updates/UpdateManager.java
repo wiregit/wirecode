@@ -246,6 +246,7 @@ public class UpdateManager {
                 }
             }//end of run
         };
+        checker.setDaemon(true);
         checker.start();      
     }
 
