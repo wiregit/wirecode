@@ -82,8 +82,11 @@ public final class ID3Reader {
             }            
         }
 
+        MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
         // Bitrate
-        int bitrate = (new MP3Info(file.getCanonicalPath())).getBitRate();
+        int bitrate = mp3Info.getBitRate();
+        // Length
+        int seconds  = (int) mp3Info.getLengthInSeconds();
         
         String str = "";
         if(solo){
@@ -119,6 +122,8 @@ public final class ID3Reader {
             str = str+" comments=\""+comment+"\"";
         if(bitrate > 0)
             str = str+" bitrate=\""+bitrate+"\"";
+        if(seconds > 0)
+            str = str+" seconds=\""+seconds+"\"";
         if(solo){
             //str = str+"</audio>";
             str = str+"/>";

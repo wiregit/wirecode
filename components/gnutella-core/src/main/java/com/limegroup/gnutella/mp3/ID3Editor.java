@@ -29,6 +29,7 @@ public class ID3Editor{
     private static final String COMMENT_STRING = "comments";
     private static final String GENRE_STRING   = "genre";
     private static final String BITRATE_STRING = "bitrate";
+    private static final String SECONDS_STRING = "seconds";
 
     private final boolean debugOn = false;
     private void debug(String out) {
@@ -170,6 +171,17 @@ public class ID3Editor{
             rippedStuff = ripTag(xmlStr, BITRATE_STRING);
 
             // we get bitrate info from the mp3 file....
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //seconds
+        try {
+            rippedStuff = ripTag(xmlStr, SECONDS_STRING);
+
+            // we get seconds info from the mp3 file....
 
             i = ((Integer)rippedStuff[0]).intValue();
             j = ((Integer)rippedStuff[1]).intValue();        
