@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 import java.io.*;
+import java.net.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -99,11 +100,24 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // Push Proxy Acknowledgement
         // -----------------------------
         // test network constructor....
+
+        byte[] bytes = new byte[6];
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = (byte)33;
+
+        // make sure deprecation is working....
+        try {
+            vm = new PushProxyAcknowledgement(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 1, bytes);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {}
+
         vm = new PushProxyAcknowledgement(GUID.makeGuid(), (byte) 1, 
-                                          (byte) 0, 1, new byte[2]);
+                                          (byte) 0, 2, bytes);
         testWrite(vm);
         // test other constructor....
-        vm = new PushProxyAcknowledgement(5);
+        vm = new PushProxyAcknowledgement(InetAddress.getLocalHost(), 5);
         testRead(vm);
     }
 
@@ -183,8 +197,10 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         assertTrue(req.getClientGUID().equals(guid));
         testWrite(req);
         testRead(req);
-        
-        PushProxyAcknowledgement ack = new PushProxyAcknowledgement(6346);
+
+        InetAddress addr = InetAddress.getLocalHost();
+        PushProxyAcknowledgement ack = new PushProxyAcknowledgement(addr, 6346);
+        assertEquals(InetAddress.getLocalHost(), ack.getListeningAddress());
         assertTrue(ack.getListeningPort() == 6346);
         testWrite(ack);
         testRead(req);

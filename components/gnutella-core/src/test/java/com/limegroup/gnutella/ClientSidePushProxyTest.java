@@ -205,7 +205,8 @@ public class ClientSidePushProxyTest
 
         // we should answer the push proxy request
         PushProxyAcknowledgement ack = 
-            new PushProxyAcknowledgement(6355, new GUID(m.getGUID()));
+        new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
+                                     6355, new GUID(m.getGUID()));
         testUP.send(ack);
         testUP.flush();
 
@@ -242,7 +243,7 @@ public class ClientSidePushProxyTest
         Iterator iter = proxies.iterator();
         PushProxyInterface ppi = (PushProxyInterface)iter.next();
         assertEquals(ppi.getPushProxyPort(), 6355);
-        assertTrue(ppi.getPushProxyAddress().getHostAddress().startsWith("127"));
+        assertTrue(ppi.getPushProxyAddress().equals(InetAddress.getLocalHost()));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);

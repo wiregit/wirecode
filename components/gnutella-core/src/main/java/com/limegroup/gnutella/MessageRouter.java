@@ -879,9 +879,12 @@ public abstract class MessageRouter {
                                           ManagedConnection source) {
         if (source.isSupernodeClientConnection()) {
             try {
+                String stringAddr = 
+                    NetworkUtils.ip2string(RouterService.getAddress());
+                InetAddress addr = InetAddress.getByName(stringAddr);
                 // 1)
                 PushProxyAcknowledgement ack = 
-                    new PushProxyAcknowledgement(RouterService.getPort(),
+                    new PushProxyAcknowledgement(addr,RouterService.getPort(),
                                                  ppReq.getClientGUID());
                 source.send(ack);
                 
@@ -890,8 +893,12 @@ public abstract class MessageRouter {
                                            source);
             }
             catch (BadPacketException tooTerribleToIgnore) {
-                tooTerribleToIgnore.printStackTrace();
+                ErrorService.error(tooTerribleToIgnore);
             }
+            catch (UnknownHostException tooTerribleToIgnore2) {
+                ErrorService.error(tooTerribleToIgnore2);
+            }
+                
         }
     }
 

@@ -1358,7 +1358,7 @@ public class QueryReply extends Message implements Serializable{
      *  This may be a bad decision.  I'm sure someone will let me know during
      *  code review.
      */
-    private static class IPPortCombo {
+    public static class IPPortCombo {
         private int _port;
         private InetAddress _addr;
         
