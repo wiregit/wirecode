@@ -143,15 +143,33 @@ public class HTTPDownloader {
 	}
 
 	
-	/* public interface methods */
+	/** 
+     * Start the download.  Throws IOException if the headers
+     * couldn't be read, there remote host has no more download slots,
+     * or the download was interrupted.  (In the future different exceptions
+     * will be thrown for each of these cases.
+     *     @modifies this
+     */
 	public void start() throws IOException {
-		System.out.println("Starting...");
 		readHeader();
 		doDownload();
 	}
 
-	public void stop() throws IOException {
-		shutdown();
+    /** 
+     * Stops this immediately.  This method is always safe to call.
+     *     @modifies this
+     */
+	public void stop() {        
+        if (_byteReader != null)
+            _byteReader.close();
+        try {
+            if (_fos != null)
+                _fos.close();
+        } catch (IOException e) { }
+        try {
+            if (_socket != null)
+                _socket.close();
+        } catch (IOException e) { }
 	}
 
 	/* Public Accessor Methods */
@@ -385,19 +403,4 @@ public class HTTPDownloader {
 		} else 
 			throw new IOException("File Incomplete");
 	}
-
-	private void shutdown() throws IOException {
-		
-		if (_byteReader != null)
-			_byteReader.close();
-
-		if (_fos != null)
-			_fos.close();
-
-		if (_socket != null)
-			_socket.close();
-
-
-	}
-
 }
