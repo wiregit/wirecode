@@ -83,6 +83,16 @@ public final class NetworkUtils {
     public static boolean isVeryCloseIP(byte[] addr) {
         return isVeryCloseIP(RouterService.getAddress(), addr);
     }
+    
+    /**
+     * Returns whether or not this node has a private address.
+     *
+     * @return <tt>true</tt> if this node has a private address,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isPrivate() {
+        return isPrivateAddress(RouterService.getAddress());
+    }
 
     /**
      * Checks to see if the given address is a firewalled address.
