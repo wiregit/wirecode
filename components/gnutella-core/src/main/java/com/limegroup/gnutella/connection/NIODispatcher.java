@@ -51,7 +51,11 @@ public final class NIODispatcher implements Runnable {
 	private final List WRITERS = 
 		Collections.synchronizedList(new LinkedList());
 
-	
+	/**
+     * Flag used only for testing -- set using PrivilegedAccessor.
+	 */
+    private boolean _testing;
+    
 	/**
 	 * Accessor for the <tt>NIODispatcher</tt> instance.
 	 * 
@@ -245,7 +249,7 @@ public final class NIODispatcher implements Runnable {
                 conn.stats().addReceived();
                 
                 // make sure this message isn't considered spam                    
-                if(!conn.isSpam(msg)) {
+                if(!conn.isSpam(msg) && !_testing) {
                     // TODO:: don't use RouterService
                     RouterService.getMessageRouter().handleMessage(msg, conn);
                 } else {
