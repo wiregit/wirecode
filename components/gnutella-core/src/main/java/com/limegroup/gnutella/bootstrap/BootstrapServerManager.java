@@ -274,7 +274,7 @@ public class BootstrapServerManager {
             //My ip address as a parameter.
             String ipPart = null;
             if (myIP != null) 
-                ipPart = "ip="+myIP.getHostname()+":"+myIP.getPort();
+                ipPart = "ip="+myIP.getAddress()+":"+myIP.getPort();
 
             //Some of these case are disallowed by sendUpdatesAsync, but we
             //handle all of them here.
