@@ -3,7 +3,6 @@ package com.limegroup.gnutella.handshaking;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.statistics.HandshakingStat;
@@ -83,7 +82,8 @@ public class UltrapeerHandshakeResponder
 	 */
 	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
  		
-		// if this is a connections from the crawler, return the special crawler response
+		// if this is a connections from the crawler, return the special crawler 
+        // response
 		if(response.isCrawler()) {
 		    if( RECORD_STATS )
 		        HandshakingStat.INCOMING_CRAWLER.incrementStat();
