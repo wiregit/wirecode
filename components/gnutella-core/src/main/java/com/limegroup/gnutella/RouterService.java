@@ -213,91 +213,93 @@ public class RouterService {
 	 * been constructed.
 	 */
 	public void start() {
-	    LOG.trace("START RouterService");
-	    
-	    if ( isStarted() ) return;
-        _started = true;
-
-        LOG.trace("START Acceptor");
-		acceptor.start();
-		LOG.trace("STOP Acceptor");
-		
-		// Now, link all the pieces together, starting the various threads.
-		LOG.trace("START ResultHandler");
-		RESULT_HANDLER.start();
-		LOG.trace("STOP ResultHandler");
-
-        LOG.trace("START MessageRouter");
-		router.initialize();
-		LOG.trace("STOPMessageRouter");
-		
-		LOG.trace("START ConnectionManager");
-		manager.initialize();
-		LOG.trace("STOP ConnectionManager");
-		
-		LOG.trace("START DownloadManager");
-		downloader.initialize(); 
-		LOG.trace("STOP DownloadManager");
-		
-		LOG.trace("START SupernodeAssigner");
-		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
-													 downloader, 
-													 manager);
-		sa.start();
-		LOG.trace("STOP SupernodeAssigner");
-
-        // THIS MUST BE BEFORE THE CONNECT (below)
-        // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
-        LOG.trace("START HostCatcher.initialize");
-		catcher.initialize();
-		LOG.trace("STOP HostCatcher.initialize");
-
-		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
-			// Make sure connections come up ultra-fast (beyond default keepAlive)		
-			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
-			if ( outgoing > 0 ) {
-			    LOG.trace("START connect");
-				connect();
-                LOG.trace("STOP connect");
-            }
-		}
-        // Asynchronously load files now that the GUI is up, notifying
-        // callback.
-        LOG.trace("START FileManager");
-        fileManager.start();
-        LOG.trace("STOP FileManager");
-
-        // Restore any downloads in progress.
-        LOG.trace("START DownloadManager.postGuiInit");
-        downloader.postGuiInit();
-        LOG.trace("STOP DownloadManager.postGuiInit");
-        
-        LOG.trace("START UpdateManager.instance");
-        UpdateManager.instance();//initialize
-        LOG.trace("STOP UpdateManager.instance");
-        
-        LOG.trace("START QueryUnicaster");
-		QueryUnicaster.instance().start();
-		LOG.trace("STOP QueryUnicaster");
-		
-		LOG.trace("START HTTPAcceptor");
-        httpAcceptor = new HTTPAcceptor();  
-        httpAcceptor.start();
-        LOG.trace("STOP HTTPAcceptor");
-        
-        LOG.trace("START Pinger");
-        Pinger.instance().start();
-        LOG.trace("STOP Pinger");
-        
-        LOG.trace("START ConnectionWatchdog");
-        ConnectionWatchdog.instance().start();
-        LOG.trace("STOP ConnectionWatchdog");
-        
-        LOG.trace("START SavedFileManager");
-        SavedFileManager.instance();
-        LOG.trace("STOP SavedFileManager");
-        
-        LOG.trace("STOP RouterService.");
+	    synchronized(RouterService.class) {
+    	    LOG.trace("START RouterService");
+    	    
+    	    if ( isStarted() ) return;
+            _started = true;
+    
+            LOG.trace("START Acceptor");
+    		acceptor.start();
+    		LOG.trace("STOP Acceptor");
+    		
+    		// Now, link all the pieces together, starting the various threads.
+    		LOG.trace("START ResultHandler");
+    		RESULT_HANDLER.start();
+    		LOG.trace("STOP ResultHandler");
+    
+            LOG.trace("START MessageRouter");
+    		router.initialize();
+    		LOG.trace("STOPMessageRouter");
+    		
+    		LOG.trace("START ConnectionManager");
+    		manager.initialize();
+    		LOG.trace("STOP ConnectionManager");
+    		
+    		LOG.trace("START DownloadManager");
+    		downloader.initialize(); 
+    		LOG.trace("STOP DownloadManager");
+    		
+    		LOG.trace("START SupernodeAssigner");
+    		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
+    													 downloader, 
+    													 manager);
+    		sa.start();
+    		LOG.trace("STOP SupernodeAssigner");
+    
+            // THIS MUST BE BEFORE THE CONNECT (below)
+            // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
+            LOG.trace("START HostCatcher.initialize");
+    		catcher.initialize();
+    		LOG.trace("STOP HostCatcher.initialize");
+    
+    		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
+    			// Make sure connections come up ultra-fast (beyond default keepAlive)		
+    			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
+    			if ( outgoing > 0 ) {
+    			    LOG.trace("START connect");
+    				connect();
+                    LOG.trace("STOP connect");
+                }
+    		}
+            // Asynchronously load files now that the GUI is up, notifying
+            // callback.
+            LOG.trace("START FileManager");
+            fileManager.start();
+            LOG.trace("STOP FileManager");
+    
+            // Restore any downloads in progress.
+            LOG.trace("START DownloadManager.postGuiInit");
+            downloader.postGuiInit();
+            LOG.trace("STOP DownloadManager.postGuiInit");
+            
+            LOG.trace("START UpdateManager.instance");
+            UpdateManager.instance();//initialize
+            LOG.trace("STOP UpdateManager.instance");
+            
+            LOG.trace("START QueryUnicaster");
+    		QueryUnicaster.instance().start();
+    		LOG.trace("STOP QueryUnicaster");
+    		
+    		LOG.trace("START HTTPAcceptor");
+            httpAcceptor = new HTTPAcceptor();  
+            httpAcceptor.start();
+            LOG.trace("STOP HTTPAcceptor");
+            
+            LOG.trace("START Pinger");
+            Pinger.instance().start();
+            LOG.trace("STOP Pinger");
+            
+            LOG.trace("START ConnectionWatchdog");
+            ConnectionWatchdog.instance().start();
+            LOG.trace("STOP ConnectionWatchdog");
+            
+            LOG.trace("START SavedFileManager");
+            SavedFileManager.instance();
+            LOG.trace("STOP SavedFileManager");
+            
+            LOG.trace("STOP RouterService.");
+        }
 	}
 
     /**
@@ -600,8 +602,11 @@ public class RouterService {
     /**
      * Shuts down the backend and writes the gnutella.net file.
      */
-    public static void shutdown() {
+    public static synchronized void shutdown() {
         try {
+            if(!isStarted())
+                return;
+            
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
