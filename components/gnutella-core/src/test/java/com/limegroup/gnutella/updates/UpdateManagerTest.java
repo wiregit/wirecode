@@ -8,6 +8,7 @@ import java.net.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
+import com.sun.java.util.collections.Iterator;
 
 /**
  * Unit tests for UpdateMessageVerifier
@@ -361,6 +362,7 @@ public class UpdateManagerTest extends BaseTestCase {
 
 
     public void testBadMessageFailsOnNetwork() {
+    	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -379,6 +381,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void testBadXMLFailsOnNetwork() {
+    	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -397,6 +400,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void testGarbageDataFailsOnNetwork() {
+    	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -415,6 +419,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void testFileReadVerifiedWithJava118() throws Exception {
+    	removeConnections();
         UpdateManager man = UpdateManager.instance();
         assertEquals("setSettings not working", "2.9.3", man.getVersion());
         PrivilegedAccessor.setValue(CommonUtils.class, 
@@ -429,6 +434,9 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void testJava118NetworkVerification() throws Exception {
+    	
+    	removeConnections();
+    	
        UpdateManager man = UpdateManager.instance();
        assertEquals("setSettings not working", "2.9.3", man.getVersion());
        PrivilegedAccessor.setValue(CommonUtils.class, 
@@ -467,6 +475,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
    public void testUpdateNotRequesteFromSpecial() {
+   		removeConnections();
        updateVersion = OLD;
        changeUpdateFile();
        TestConnection conn = null;
@@ -487,6 +496,7 @@ public class UpdateManagerTest extends BaseTestCase {
     
     
     public void testUpdateMessageDelayed() {
+    	removeConnections();
         //Note:If the update file does not contain the timestamp attibute, the
         //UpdateManager assumes it is the current time. We can use this to test
         //that there is a delay in our displaying the message
@@ -556,6 +566,19 @@ public class UpdateManagerTest extends BaseTestCase {
                 lock.notifyAll();
             }
         }
+    }
+    
+    /**
+     * removes all existing connections to the node because previous tests
+     * may influence outcome
+     * @throws Exception
+     */
+    private void removeConnections()  {
+    	ConnectionManager cman = RouterService.getConnectionManager();
+    	for (Iterator iter = cman.getConnections().iterator();iter.hasNext();) {
+    		Connection c = (Connection)iter.next();
+    		c.close();
+    	}
     }
 
 }
