@@ -610,7 +610,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * snapshot.  May be useful for subclasses.
      */
     protected boolean pauseForRequery(int numRequeries, 
-                                      boolean deserializedFromDisk) {
+                                      boolean deserializedFromDisk) 
+        throws InterruptedException {
         // MD's never want to requery without user input.
         boolean retVal = false;
         synchronized (reqLock) {
@@ -618,10 +619,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {
                 retVal = reqLock.lock(0);  // wait indefinitely
             }
-            catch (InterruptedException weird) {
+            catch (InterruptedException stopException) {
                 // must have been killed!!
                 if (!stopped)
-                    weird.printStackTrace();
+                    stopException.printStackTrace();
+                else
+                    throw stopException;
             }
             // state will be set by tryAllDownloads()
         }
@@ -1117,7 +1120,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                             areThereNewResults = 
                                 reqLock.lock(timeToWait);
                         }
-                        catch (InterruptedException timeOut) {}
+                        catch (InterruptedException timeOut) {
+                            if (stopped)
+                                throw timeOut; // get out of here...
+                        }
                     }
 
                     // 2B) should we wait for the user to respawn a query?

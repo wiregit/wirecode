@@ -107,7 +107,8 @@ public class ResumeDownloader extends ManagedDownloader
      * @param numRequeries The number of requeries sent so far.
      */
     protected boolean pauseForRequery(int numRequeries, 
-                                      boolean deserializedFromDisk) {
+                                      boolean deserializedFromDisk) 
+        throws InterruptedException {
         // if i've sent a query already or i was respawned from disk, act like
         // a ManagedDownloader
         if (numRequeries > 0 || deserializedFromDisk)
