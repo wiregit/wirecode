@@ -798,7 +798,7 @@ public class QueryReply extends Message implements Serializable{
             int measuredSpeedFlagT=UNDEFINED;
             int supportsChatT=UNDEFINED;
             int supportsBrowseHostT=UNDEFINED;
-            int replyToMulticastT=UNDEFINED;
+            int replyToMulticastT=FALSE;
             Set proxies=null;
             
             //a) extract vendor code
