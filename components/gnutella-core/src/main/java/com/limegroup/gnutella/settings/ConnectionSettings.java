@@ -23,8 +23,8 @@ public final class ConnectionSettings extends AbstractSettings {
 	/**
 	 * Settings for the number of connections to maintain.
 	 */
-	public static final IntSetting KEEP_ALIVE =
-        FACTORY.createIntSetting("KEEP_ALIVE", 25);
+	public static final IntSetting NUM_CONNECTIONS =
+        FACTORY.createIntSetting("NUM_CONNECTIONS", 15);
 
 	
     /**

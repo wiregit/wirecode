@@ -77,7 +77,7 @@ public class ConnectionManager {
 	 * The number of Ultrapeer connections to ideally maintain.
 	 */
 	public static final int ULTRAPEER_CONNECTIONS =
-        ConnectionSettings.KEEP_ALIVE.getValue();
+        ConnectionSettings.NUM_CONNECTIONS.getValue();
 
     /** Ideal number of connections for a leaf.  */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
@@ -125,7 +125,7 @@ public class ConnectionManager {
 
     /** The number of connections to keep up.  */
     private volatile int _keepAlive=0;
-    /** Threads trying to maintain the KEEP_ALIVE.  This is generally
+    /** Threads trying to maintain the NUM_CONNECTIONS.  This is generally
      *  some multiple of _keepAlive.   LOCKING: obtain this. */
     private final List /* of ConnectionFetcher */ _fetchers =
         new ArrayList();
@@ -965,10 +965,10 @@ public class ConnectionManager {
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
-		int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+		int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
         if (outgoing < 1) {
-			ConnectionSettings.KEEP_ALIVE.revertToDefault();
-			outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+			ConnectionSettings.NUM_CONNECTIONS.revertToDefault();
+			outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
         }
         //Actually notify the backend.		
         setKeepAlive(outgoing);
@@ -1084,7 +1084,7 @@ public class ConnectionManager {
      */
     private void adjustConnectionFetchers() {
         //How many connections do we need?  To prefer ultrapeers, we try to
-        //achieve KEEP_ALIVE ultrapeer connections.  But to prevent
+        //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
         //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
         //allowConnection(boolean, boolean) and killExcessConnections().
@@ -1190,9 +1190,9 @@ public class ConnectionManager {
     private synchronized void gotShieldedClientSupernodeConnection() {
         //How many leaf connections should we have?  There's a tension between
         //doing what LimeWire thinks is best and what the user wants.  Ideally
-        //we would set the KEEP_ALIVE iff the user hasn't recently manually
+        //we would set the NUM_CONNECTIONS iff the user hasn't recently manually
         //adjusted it.  Because this is a pain to implement, we use a hack; only
-        //adjust the KEEP_ALIVE if there is only one shielded leaf-ultrapeer
+        //adjust the NUM_CONNECTIONS if there is only one shielded leaf-ultrapeer
         //connection.  Typically this will happen just once, when we enter leaf
         //mode.  Note that we actually call ultrapeerConnections() instead of a
         //"clientSupernodeConnections()" method; if this method is called and
