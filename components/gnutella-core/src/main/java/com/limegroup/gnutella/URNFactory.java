@@ -60,10 +60,41 @@ public final class URNFactory {
 		String urnStr = URNFactory.getUrnFromGetRequest(getLine);
 		if(urnStr == null) {
 			throw new IOException("COULD NOT CONSTRUCT URN");
-		}
-		
+		}	   
+
 		// this constructor can also throw an IOException
 		return new URN(urnStr);
+	}
+
+	/**
+	 * Creates a new <tt>URN</tt> instance from the given "service
+	 * request" line.  The service request syntax must be of the form 
+	 * specified in RFC 2169.  Note the the service request in this 
+	 * case does not include the leading "GET" or the trailing 
+	 * "HTTP/1.x".  Rather, the string must be of the form:<p>
+	 * 
+	 * "/uri-res/<service>?<uri>"  <p>
+	 *
+	 * In our case, this will mean, for example:<p>
+	 *
+	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
+	 */
+	public static URN createUrnFromServiceRequest(final String line) 
+		throws IOException {
+		if(!URNFactory.isValidUriRes(line)) {
+			throw new IOException("INVALID URI-RES LINE");
+		}
+
+		if(!URNFactory.isValidResolutionProtocol(line)) {
+			throw new IOException("INVALID RESOLUTION PROTOCOL IN "+
+								  "URI-RES LINE");
+		}
+		String urnStr = URNFactory.getUrnFromServiceRequest(line);
+		if(urnStr == null) {
+			throw new IOException("COULD NOT CONSTRUCT A URN FROM "+
+								  "THE GIVEN SERVICE REQUEST LINE");
+		}
+		return new URN(urnStr);		
 	}
 
 	/**
@@ -79,8 +110,8 @@ public final class URNFactory {
 	 *
 	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	 */
-	public static String createHttpUrnFileString(final URN urn) {
-		return HTTPConstants.URI_RES_N2R + urn.stringValue();
+	public static String createHttpUrnServiceRequest(final URN urn) {
+		return HTTPConstants.URI_RES_N2R + urn.httpStringValue();
 	}
 
 	/**
@@ -99,6 +130,22 @@ public final class URNFactory {
 			return null;
 		}
 		return getLine.substring(qIndex, spaceIndex);
+	}
+
+	/**
+	 * Returns the URN string for the specified URN service request.  The
+	 * service request must be of the form:<p>
+	 *
+	 * "/uri-res/<service>?<uri>"  <p>
+	 *
+	 * In our case, this will mean, for example:<p>
+	 *
+	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
+	 */
+	private static String getUrnFromServiceRequest(final String urnLine) {
+		int questionIndex = urnLine.indexOf("?");
+		if(questionIndex != 12) return null;
+		return urnLine.substring(questionIndex+1);
 	}
 
 	/**
@@ -180,9 +227,9 @@ public final class URNFactory {
 	}
 
 	/**
-	 * Returns whether or not the specified "resolution protocol" is valid.
-	 * We currently only support N2R, which specifies "Given a URN, return the
-	 * named resource."
+	 * Returns whether or not the "resolution protocol" for the given URN GET
+	 * line is valid.  We currently only support N2R, which specifies "Given 
+	 * a URN, return the named resource."
 	 *
 	 * @param getLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the resolution protocol is valid, <tt>false</tt>
