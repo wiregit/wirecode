@@ -1,38 +1,31 @@
-# Makefile
-
+# Makefile for LimeWire.
+# Requires Gnu Make.
 
 # the java compiler
-JAVA  = javac 
-
+JAVAC  = javac 
 RM      = /bin/rm -rf
 
 # grab all sources - kind of hacky
 SRCS := $(wildcard *.java)
-
 # our object files
 OBJS  = $(SRCS:.java=.class)
 
-SUBDIRS = gui util filters
-
-# targets
-
 # make everything, (just makes .class files, for now)
-all: $(SRCS) 
-	$(JAVA) $<
+all: $(OBJS) gui util filters
 
-subdirs: $(SUBDIRS)
-	cd $<; $(MAKE) -f ../Makefile
+$(OBJS): %.class: %.java
+	$(JAVAC) $<
 
-# dont need this part... 
-# make all class files
-# class: $(OBJS)
-#   $(JAVA) $<
-
-show_srcs:
-	@echo $(SRCS)
-
-show_objs:
-	@echo $(OBJS) 
+# make subdirectories.  TODO: can you make this more general?
+.PHONY: gui
+gui:
+	$(MAKE) -C $@
+.PHONY: util
+util:
+	$(MAKE) -C $@
+.PHONY: filters
+filters:
+	$(MAKE) -C $@
 
 # clean and then make again
 again:  clean all
