@@ -9,12 +9,12 @@ import java.util.StringTokenizer;
 
 
 /**
- *  This class manages the property settings.  It maintains
- *  default settings for values not set in the saved
- *  settings files and updates those settings based on user
- *  input, checking for errors where appropriate.  It also
- *  saves the settings file to disk when the session
- *  terminates.
+ * This class manages the property settings.  It maintains
+ * default settings for values not set in the saved
+ * settings files and updates those settings based on user
+ * input, checking for errors where appropriate.  It also
+ * saves the settings file to disk when the session
+ * terminates.
  *
  * @author Adam Fisk
  */
@@ -191,7 +191,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setAllowBrowser(bs);
 				}
                 else if(key.equals(SOFT_MAX_TTL)) {
@@ -216,7 +216,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setPromptExeDownload(bs);
                 }
                 else if(key.equals(MAX_UPLOADS)) {
@@ -229,7 +229,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setClearCompletedDownload(bs);
                 }
                 else if(key.equals(CLEAR_UPLOAD)) {
@@ -239,7 +239,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setClearCompletedUpload(bs);
                 }
                 else if(key.equals(TIMEOUT)) {
@@ -292,7 +292,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setCheckAgain(bs);
                 }
                 else if(key.equals(BANNED_IPS)) {
@@ -308,7 +308,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterAdult(bs);
                 }
                 else if(key.equals(FILTER_DUPLICATES)) {
@@ -318,7 +318,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterDuplicates(bs);
                 }
                 else if(key.equals(FILTER_HTML)) {
@@ -328,7 +328,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterHtml(bs);
                 }
                 else if(key.equals(FILTER_VBS)) {
@@ -338,7 +338,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterVbs(bs);
                 }
                 else if(key.equals(FILTER_GREEDY_QUERIES)) {
@@ -348,7 +348,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterGreedyQueries(bs);
                 }
 
@@ -360,7 +360,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setFilterBearShareQueries(bs);
                 }
 
@@ -375,7 +375,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setUseQuickConnect(bs);
                 }
                 else if(key.equals(SEARCH_ANIMATION_TIME)) {
@@ -405,7 +405,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         bs=false;
                     else
-                        return;
+                        break;
                     setForceIPAddress(bs);
                 }
                 else if(key.equals(FORCED_IP_ADDRESS)){
@@ -439,7 +439,7 @@ public class SettingsManager implements SettingsInterface {
                     else if (p.equals("false"))
                         install=false;
                     else
-                        return;
+                        break;
 					setInstalled(install);
 				}
             }
@@ -456,9 +456,11 @@ public class SettingsManager implements SettingsInterface {
         }
     }
 
-    /* Load in the default values.  Any properties
+    /** 
+	 * Load in the default values.  Any properties
      * written to the real properties file will overwrite
-     * these. */
+     * these. 
+	 */
     private void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
         setMaxTTL(DEFAULT_MAX_TTL);
@@ -709,7 +711,9 @@ public class SettingsManager implements SettingsInterface {
 		return sessions_;
 	}
 
-	/* gets whether or not the program has been installed */
+	/** 
+	 * gets whether or not the program has been installed 
+	 */
 	public boolean getInstalled() {
 		return installed_;
 	}
@@ -1351,7 +1355,7 @@ public class SettingsManager implements SettingsInterface {
         }
     }
 	
-	/* set whether or not the program has been installed */
+	/** set whether or not the program has been installed */
 	public void setInstalled(boolean installed) {        
         installed_ = installed;
         String s = String.valueOf(installed);
