@@ -1,0 +1,247 @@
+package com.limegroup.gnutella.tests;
+
+import com.limegroup.gnutella.*;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
+
+/**
+ * This class handles testing all methods of the urn class.
+ */
+public final class UrnTest extends TestCase {
+	
+	private static final String [] VALID_URNS = {
+		"urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB",
+		"Urn:sha1:OLSTHIPQGSSZTS5FJUPAKTZWUGZQYPFB",
+		"uRn:sHa1:JLRTHIPQGSSZTS5RJUPAKRZWUGYQYPFB",
+		"urn:sha1:RLPTHIPQGSSZTS5FRUPAKEZWUGYQYPFB",
+		"urn:Sha1:MLSTHIPQGSSZTS5FJRPAKWZWUGYQYPFB",
+		"UrN:sha1:WLSTHIPQGSSZTS5FJURAKQZWUGYQYPFB",
+		"urn:sHa1:ALSTIIPQGSSZTS5FJUPRKAZWUGYQYPFB",
+		"urn:sha1:ZLSTXIPQGSSZTS5FJUPARCZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKXZWUGYQYPFB"
+	};
+	
+	private static final String [] INVALID_URNS = {
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC",
+		"urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"ur:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"rn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urnsha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		" urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn::sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn: sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1 :PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1 :PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB "
+	};
+
+	private static final String [] VALID_SHA1_URNS = {
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
+	};
+
+	private static URN[] urns;
+	private static URN[] sha1Urns;
+
+	public UrnTest(String name) {
+		super(name);
+	}
+
+	public static Test suite() {
+		return new TestSuite(UrnTest.class);
+	}
+
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}
+
+	protected void setUp() {
+		urns = new URN[VALID_URNS.length];
+		for(int i=0; i<urns.length; i++) {
+			try {
+				urns[i] = URNFactory.createUrn(VALID_URNS[i]);
+				assertNotNull("urn should not be null",urns[i]);
+				assertTrue("should be SHA1", urns[i].isSHA1());
+				assertTrue("urn should not have the empty string", 
+						   !urns[i].toString().equals(""));
+			} catch(IOException e) {
+				assertTrue("unexpected exception: "+e, false);
+			}		
+		}
+		sha1Urns = new URN[VALID_SHA1_URNS.length];
+		for(int i=0; i<sha1Urns.length; i++) {
+			try {
+				sha1Urns[i] = URNFactory.createUrn(VALID_SHA1_URNS[i]);
+				assertNotNull("urn should not be null",sha1Urns[i]);
+				assertTrue("urn should not have the empty string", 
+						   !sha1Urns[i].toString().equals(""));
+			} catch(IOException e) {
+				assertTrue("unexpected exception: "+e, false);
+			}		
+		}
+	}
+
+	/**
+	 * Tests that valid urn strings successfully construct new URN instances.
+	 */
+	public void testValidUrns() {
+		for(int i=0; i<VALID_URNS.length; i++) {
+			try {
+				URN urn = URNFactory.createUrn(VALID_URNS[i]);
+			} catch(IOException e) {
+				assertTrue(false);				
+			}
+		}
+	}
+
+
+	/**
+	 * Tests the urn contructor that takes a string to make sure that invalid
+	 * string inputs fail properly.
+	 */
+	public void testInvalidUrns() {
+		boolean encounteredFailure = false;
+		for(int i=0; i<INVALID_URNS.length; i++) {
+			try {
+				URN urn = URNFactory.createUrn(INVALID_URNS[i]);
+				assertTrue(false);
+			} catch(IOException e) {
+			}
+		}
+	}
+
+	/**
+	 * Tests the URN constructor that takes a File instance.
+	 */
+	public void testUrnConstructionFromFiles() {
+		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
+		File[] testFiles = new File("gui/lib").listFiles();
+		File curFile = null;
+		try {
+			for(int i=0; i<10; i++) {
+				curFile = testFiles[i];
+				if(!curFile.isFile()) {
+					continue;
+				}
+				URN urn = URNFactory.createSHA1Urn(curFile);
+				assertTrue(urn.isSHA1());
+				assertTrue(urn.isUrn(urn.toString()));
+				assertTrue(urn.getUrnType() == UrnType.SHA1);
+				try {
+					URN newURN = URNFactory.createUrn(urn.toString());
+					assertTrue(newURN.equals(urn));
+				} catch(IOException e) {
+					assertTrue(false);
+				}
+			}
+		} catch(IOException e) {
+			assertTrue(false);
+		}
+	}
+
+	/**
+	 * Tests the isUrnType method.
+	 */
+	public void testIsUrnTypeMethod() {
+		// TEST FOR isURNType method
+		String[] validURNTypes = {
+			"urn:",
+			"urn:sha1:",
+			"Urn:",
+			"urn:Sha1:"
+		};
+
+		String[] invalidURNTypes = {
+			"urn: ",
+			"urn: sha1:",
+			"urn::",
+			"urn:sha2:",
+			" urn:sha1",
+			"rn:sha1",
+			" "
+		};
+		
+		for(int i=0; i<validURNTypes.length; i++) {			
+			assertTrue(UrnType.isSupportedUrnType(validURNTypes[i]));
+		}
+
+		for(int i=0; i<invalidURNTypes.length; i++) {
+			assertTrue(!UrnType.isSupportedUrnType(invalidURNTypes[i]));
+		}
+	}
+
+
+	/**
+	 * Tests the hashCode method.
+	 */
+	public void testHashCode() {
+		int[] hashCodes = new int[VALID_URNS.length];
+		for(int i=0; i<VALID_URNS.length; i++) {
+			try {
+				hashCodes[i] = URNFactory.createUrn(VALID_URNS[i]).hashCode();
+			} catch(IOException e) {
+				assertTrue(false);
+			}
+		}
+
+		for(int i=0; i<hashCodes.length; i++) {
+			int curCode = hashCodes[i];
+			for(int j=0; j<hashCodes.length; j++) {
+				if(i == j) continue;
+				assertTrue(curCode != hashCodes[j]);
+			}
+		}
+	}
+
+	/**
+	 * Tests the equals method.
+	 */
+	public void testEquals() {
+		URN curUrn;
+		for(int i=0; i<urns.length; i++) {
+			curUrn = urns[i];
+			assertTrue("current urn is unexpectedly null", curUrn != null);
+			for(int j=0; j<urns.length; j++) {
+				if(i == j) {
+					try {
+						URN tempUrn = URNFactory.createUrn(urns[j].toString());
+						assertEquals("urns should be equal", curUrn, tempUrn);
+					} catch(IOException e) {
+						assertTrue("unexpected exception: "+e, false);
+					}
+					continue;
+				}
+				else {
+					assertTrue("urns are unexpectedly equal: curUrn: "+curUrn+"\r\n"+
+							   "                            urns[j]: "+urns[j]+"\r\n"+
+							   "i: "+i+" j: "+j, 
+							   !curUrn.equals(urns[j]));
+				}
+				assertNotNull("urn is unexpectedly null", urns[j]);
+			}
+		}
+	}
+
+	/**
+	 * Tests the isSHA1 method.
+	 */
+	public void testIsSHA1Method() {
+		for(int i=0; i<sha1Urns.length; i++) {
+			assertTrue(sha1Urns[i].isSHA1());
+		}
+	}
+	
+}

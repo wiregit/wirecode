@@ -14,10 +14,7 @@ import java.util.StringTokenizer;
 
 /**
  * The list of all the uploads in progress.
- * 
- * 
  */
-
 public class UploadManager implements BandwidthTracker {
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
@@ -118,8 +115,6 @@ public class UploadManager implements BandwidthTracker {
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
      */
-
-
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor,
@@ -154,8 +149,9 @@ public class UploadManager implements BandwidthTracker {
                     return;
                 }
                 //create an uploader
-                uploader = new HTTPUploader(line._file, socket, line._index, 
+                uploader = new HTTPUploader(line._fileName, socket, line._index, 
                     this, _fileManager, _router);
+
                 //do the upload
                 doSingleUpload(uploader, 
                     socket.getInetAddress().getHostAddress(), line._index);
@@ -639,59 +635,117 @@ public class UploadManager implements BandwidthTracker {
         }
     }
 
-	//////////////////////// Handle Parsing /////////////////////////
+	/**
+	 * Returns a new <tt>GETLine</tt> instance, where the <tt>GETLine</tt>
+	 * class is an immutable struct that contains all data for the "GET" line
+	 * of the HTTP request.
+	 *
+	 * @param socket the <tt>Socket</tt> instance over which we're reading
+	 * @return the <tt>GETLine</tt> struct for the HTTP request
+	 */
+	private GETLine parseGET(Socket socket) throws IOException {
 
-	
+		// Set the timeout so that we don't do block reading.
+		socket.setSoTimeout(SettingsManager.instance().getTimeout());
+		// open the stream from the socket for reading
+		ByteReader br = new ByteReader(socket.getInputStream());
+		
+		// read the first line. if null, throw an exception
+		String str = br.readLine();
+		if (str == null) {
+			throw new IOException();
+		}
 
-	private static GETLine parseGET(Socket socket) throws IOException {
-		try {
-            int index = -1;
-            String file = null;
-			// Set the timeout so that we don't do block reading.
-			socket.setSoTimeout(SettingsManager.instance().getTimeout());
-			// open the stream from the socket for reading
-			InputStream istream = socket.getInputStream();
-			ByteReader br = new ByteReader(istream);
-            //Expecting "GET /get/0/sample.txt HTTP/1.0"
-			// read the first line ("GET " has already been read). 
-			String str = br.readLine().trim();
-			if (str == null)
-				throw new IOException();
-            
+		str.trim();
+
+		// handle the get request depending on what type of request it is
+		if(this.isTraditionalGet(str)) {
+			// handle the standard get request
+			return this.parseTraditionalGet(str);
+		}
+		// handle the URN get request
+		return this.parseURNGet(str);
+  	}
+
+	/**
+	 * Returns whether or not the HTTP get request is a traditional 
+	 * Gnutella-style HTTP get.
+	 *
+	 * @return <tt>true</tt> if it is a traditional Gnutella HTTP get,
+	 *  <tt>false</tt> otherwise
+	 */
+	private boolean isTraditionalGet(final String GET_LINE) {
+		return (GET_LINE.indexOf("/get/") != -1);
+	}
+
+	/**
+	 * Returns whether or not the get request for the specified line is
+	 * a URN request.
+	 *
+	 * @param GET_LINE the <tt>String</tt> to parse to check whether it's
+	 *  following the URN request syntax as specified in HUGE v. 0.93
+	 * @return <tt>true</tt> if the request is a valid URN request, 
+	 *  <tt>false</tt> otherwise
+	 */
+	private boolean isURNGet(final String GET_LINE) {
+		int slash1Index = GET_LINE.indexOf("/");
+		int slash2Index = GET_LINE.indexOf("/", slash1Index);
+		if((slash1Index==-1) || (slash2Index==-1)) {
+			return false;
+		}
+		String idString = GET_LINE.substring(slash1Index, slash2Index);
+		return idString.equalsIgnoreCase("uri-res");
+	}
+
+	/**
+	 * Performs the parsing for a traditional HTTP Gnutella get request,
+	 * returning a new <tt>GETLine</tt> instance with the data for the
+	 * request.
+	 *
+	 * @param GET_LINE the HTTP get request string
+	 * @return a new <tt>GETLine</tt> instance for the request
+	 * @throws <tt>IOException</tt> if there is an error parsing the
+	 *  request
+	 */
+	private static GETLine parseTraditionalGet(final String GET_LINE) 
+		throws IOException {
+		try {           
+			int index = -1;
             //tokenize the string to separate out file information part
             //and the http information part
-            StringTokenizer st = new StringTokenizer(str);
+            StringTokenizer st = new StringTokenizer(GET_LINE);
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
             //http information part: HTTP/1.0
             String httpInfoPart = st.nextToken().trim();
             
+			String fileName;
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
-                file = "Browse-Host Request";
+                fileName = "Browse-Host Request";
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
                 // find where the get is...
-                int g = str.indexOf("/get/");
+                int g = GET_LINE.indexOf("/get/");
                 // find the next "/" after the "/get/".  the number 
                 // between should be the index;
-                int d = str.indexOf( "/", (g + 5) ); 
+                int d = GET_LINE.indexOf( "/", (g + 5) ); 
                 // get the index
-                String str_index = str.substring( (g+5), d );
+                String str_index = GET_LINE.substring( (g+5), d );
                 index = java.lang.Integer.parseInt(str_index);
                 // get the filename, which should be right after
                 // the "/", and before the next " ".
-                int f = str.indexOf( " HTTP/", d );
-                file = URLDecoder.decode(str.substring( (d+1), f));
+                int f = GET_LINE.indexOf( " HTTP/", d );
+                fileName = URLDecoder.decode(GET_LINE.substring( (d+1), f));
             }
             //check if the protocol is HTTP1.1. Note that this is not a very 
             //strict check.
             boolean http11 = false;
-            if(str.endsWith("1.1"))
+            if(GET_LINE.endsWith("1.1"))
                 http11 = true;
-			return new GETLine(index, file, http11);
+			return new GETLine(index, fileName, http11);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -699,34 +753,89 @@ public class UploadManager implements BandwidthTracker {
 		} catch (java.util.NoSuchElementException nsee) {
             throw new IOException();
         }
-  	}
+	}
+
+	/**
+	 * Parses the get line for a URN request, throwing an exception if 
+	 * there are any errors in parsing.
+	 *
+	 * @param GET_LINE the <tt>String</tt> instance containing the get request
+	 * @return a new <tt>GETLine</tt> instance containing all of the data
+	 *  for the get request
+	 */
+	private GETLine parseURNGet(final String GET_LINE) 
+		throws IOException {		
+
+		URN urn = URNFactory.createSHA1UrnFromGetRequest(GET_LINE);
+		if(urn == null) {
+			throw new IOException("NO ERROR CREATING URN");
+		}
+		FileDesc desc = _fileManager.getFileDescForUrn(urn);
+		if(desc == null) {
+			throw new IOException("NO MATCHING FILEDESC FOR URN");
+		}		
+		int fileIndex = _fileManager.getFileIndexForUrn(urn);
+		if(fileIndex == -1) {
+			throw new IOException("NO MATCHING FILE INDEX FOR URN");
+		}
+		String fileName = desc._name;
+		boolean isHTTP11 = this.isHTTP11Request(GET_LINE);
+		return new GETLine(fileIndex, fileName, isHTTP11);		
+	}
 
 
+	/**
+	 * Returns whether or the the specified get request is using HTTP 1.1.
+	 *
+	 * @return <tt>true</tt> if the get request specifies HTTP 1.1,
+	 *  <tt>false</tt> otherwise
+	 */
+	private boolean isHTTP11Request(final String GET_LINE) {
+		return GET_LINE.endsWith("1.1");
+	}
+
+	/**
+	 * This is an immutable class that contains the data for the GET line of
+	 * the HTTP request.
+	 */
 	private static class GETLine {
-        int _index;
-  		String _file;
+  		final int _index;
+  		final String _fileName;
+
         /** flag indicating if the protocol is HTTP1.1 */
-        boolean _http11;
-        
-  		public GETLine(int index, String file, boolean http11) {
+        final boolean _http11;
+
+		/**
+		 * Constructs a new <tt>GETLine</tt> instance.
+		 *
+		 * @param index the index for the file to get
+		 * @param fileName the name of the file to get
+		 * @param http11 specifies whether or not it's an HTTP 1.1 request
+		 */
+		GETLine(int index, String fileName, boolean http11) {
   			_index = index;
-  			_file = file;
+  			_fileName = fileName;
             _http11 = http11;
   		}
         
+		/**
+		 * Returns whether or not the request is an HTTP 1.1 request.
+		 *
+		 * @return <tt>true</tt> if this is an HTTP 1.1 request, <tt>false</tt>
+		 *  otherwise
+		 */
         boolean isHTTP11() {
             return _http11;
         }
-
   	}
 
 	/**
 	 * Keeps track of a push requested file and the host that requested it.
 	 */
-	private class PushedFile {
-		private String _host;
-        private int _index;
-		private Date _time;        
+	private static class PushedFile {
+		private final String _host;
+        private final int _index;
+		private final Date _time;        
 
 		public PushedFile(String host, int index) {
 			_host = host;
@@ -737,6 +846,7 @@ public class UploadManager implements BandwidthTracker {
         /** Returns true iff o is a PushedFile with same _host and _index.
          *  Time doesn't matter. */
 		public boolean equals(Object o) {
+			if(o == this) return true;
             if (! (o instanceof PushedFile))
                 return false;
             PushedFile pf=(PushedFile)o;
@@ -748,6 +858,7 @@ public class UploadManager implements BandwidthTracker {
 		}
 		
 	}
+
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.Random;
+import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 
@@ -226,6 +226,54 @@ public abstract class Message
      */
     protected abstract void writePayload(OutputStream out) throws IOException;
 
+     /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+										boolean addPrefixDelimiter, 
+										String ext) throws IOException {
+        if (ext == null || (ext.length()==0)) {
+            return addPrefixDelimiter;
+        }
+        if(addPrefixDelimiter) {
+            os.write(0x1c);
+        }
+        os.write(ext.getBytes());
+        return true; // any subsequent extensions should have delimiter 
+    }
+    
+    /**
+     * @effects Writes each extension string in exts to given stream,
+     * adding delimiters as necessary. exts may be null or empty, in
+     *  which case this is noop
+     */
+    protected boolean writeGemExtensions(OutputStream os, 
+										 boolean addPrefixDelimiter, 
+										 Iterator iter) throws IOException {
+        if (iter == null) {
+            return addPrefixDelimiter;
+        }
+        while(iter.hasNext()) {
+            addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
+												   iter.next().toString());
+        }
+        return addPrefixDelimiter; // will be true is anything at all was written 
+    }
+    
+    /**
+     * @effects utility function to read null-terminated string from stream
+     */
+    protected String readNullTerminatedString(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i;
+        while ((is.available()>0)&&(i=is.read())!=0) {
+            baos.write(i);
+        }
+        return new String(baos.toByteArray());
+    }
+
     ////////////////////////////////////////////////////////////////////
 
     public byte[] getGUID() {
@@ -269,6 +317,11 @@ public abstract class Message
     /** Returns the length of this' payload, in bytes. */
     public int getLength() {
         return length;
+    }
+
+    /** Updates length of this' payload, in bytes. */
+    protected void updateLength(int l) {
+        length=l;
     }
 
     /** Returns the total length of this, in bytes */

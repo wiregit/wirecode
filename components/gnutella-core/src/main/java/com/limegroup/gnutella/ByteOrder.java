@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.*;
+
 /**
  * Various static routines for solving endian problems.
  */
@@ -29,6 +31,16 @@ public class ByteOrder {
         int x1=(x[offset+1]<<8);
         return (short)(x1|x0);
     }
+    
+    /** 
+     *  Little-endian bytes to short - stream version 
+     * 
+     */
+    public static short leb2short(InputStream is) throws IOException {
+        int x0=is.read() & 0x000000FF;
+        int x1=is.read() <<8;
+        return (short)(x1|x0);
+    }
 
     /** 
      * Little-endian bytes to int
@@ -48,6 +60,20 @@ public class ByteOrder {
         int x3=(x[offset+3]<<24);
         return x3|x2|x1|x0;
     }
+    
+    /** 
+     * Little-endian bytes to int - stream version
+     * 
+     */
+    public static int leb2int(InputStream is) throws IOException{
+        //Must mask value after left-shifting, since case from byte
+        //to int copies most significant bit to the left!
+        int x0=is.read() & 0x000000FF;
+        int x1=(is.read()<<8) & 0x0000FF00;
+        int x2=(is.read()<<16) & 0x00FF0000;
+        int x3=(is.read()<<24);
+        return x3|x2|x1|x0;
+    }
 
     /**
      * Short to little-endian bytes: writes x to buf[offset...]
@@ -55,6 +81,14 @@ public class ByteOrder {
     public static void short2leb(short x, byte[] buf, int offset) {
         buf[offset]=(byte)(x & (short)0x00FF);
         buf[offset+1]=(byte)((short)(x>>8) & (short)0x00FF);
+    }
+
+    /**
+     * Short to little-endian bytes: writes x to given stream
+     */
+    public static void short2leb(short x, OutputStream os) throws IOException {
+        os.write((byte)(x & (short)0x00FF));
+        os.write((byte)((short)(x>>8) & (short)0x00FF));
     }
 
     /**

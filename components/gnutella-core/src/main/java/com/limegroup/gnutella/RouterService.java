@@ -449,6 +449,9 @@ public class RouterService
 
         //save cookies
         Cookies.instance().save();
+        
+        //persist urn cache
+        UrnCache.instance().persistCache();
     }
 
     /**
@@ -684,34 +687,39 @@ public class RouterService
      * @param minSpeed the minimum desired result speed
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
-     * @param autoDL flag that indicates whether the auto downloader should take
-     * care of downloading files....
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
-        QueryRequest qr=new QueryRequest(guid,
-                                         SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
-        verifier.record(qr, type);
-        router.broadcastQueryRequest(qr);
-    }
+    public void query(byte[] guid, String query, int minSpeed, MediaType type) {         
+		// as specified in HUGE v0.93, ask for any available URNs on responses
+		HashSet reqUrns = new HashSet();
+		reqUrns.add("urn:");
 
-    /**
-     * Searches the network for files with the given metadata.
-     * 
-     * @param richQuery metadata query to insert between the nulls,
-     *  typically in XML format
-     * @see query(byte[], String, int, MediaType)
-     */
-    public void query(byte[] guid, String query, String richQuery, 
+		QueryRequest qr=new QueryRequest(guid,SettingsManager.instance().getTTL(),
+										 minSpeed, query, null, false, reqUrns, null);
+		verifier.record(qr, type);
+		router.broadcastQueryRequest(qr);
+	}
+
+	/**
+	 * Searches the network for files with the given metadata.
+	 * 
+	 * @param richQuery metadata query to insert between the nulls,
+	 *  typically in XML format
+	 * @see query(byte[], String, int, MediaType)
+	 */
+	public void query(byte[] guid, String query, String richQuery, 
                         int minSpeed, MediaType type) {
-        QueryRequest qr=new QueryRequest(guid,
-                                         SettingsManager.instance().getTTL(),
-                                         minSpeed, query, richQuery);
-        verifier.record(qr, type);
-        router.broadcastQueryRequest(qr);
+                            
+		// per HUGE v0.93, ask for URNs on responses
+		Set reqUrns = new HashSet();
+		reqUrns.add(UrnType.ANY_TYPE);
 
-        /* 
-         * We don't really use this. for now
+		QueryRequest qr=new QueryRequest(guid, SettingsManager.instance().getTTL(),
+                                         minSpeed, query, richQuery, false, reqUrns, null);
+		verifier.record(qr, type);
+		router.broadcastQueryRequest(qr);
+
+		/* 
+		 * We don't really use this. for now
          //Rich query?
          //Check if there are special servers to send this query to
          //Then spawn the RichConnectionThread and send the rich query 

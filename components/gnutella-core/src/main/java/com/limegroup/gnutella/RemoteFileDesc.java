@@ -1,10 +1,9 @@
 package com.limegroup.gnutella;
 
-import java.io.Serializable;
-import com.sun.java.util.collections.Comparator;
-import com.sun.java.util.collections.Comparable;
-import com.sun.java.util.collections.Arrays;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import java.io.*;
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.xml.*;
+import org.xml.sax.*;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
@@ -12,19 +11,28 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * specific data as well, such as the server's 16-byte GUID.
  */
 public class RemoteFileDesc implements Serializable {
-    static final long serialVersionUID = 6619479308616716538L;
+    private static final long serialVersionUID = 6619479308616716538L;
 
-	private String _host;
-	private int _port;
-	private String _filename; 
-	private long _index;
-	private byte[] _clientGUID;
-	private int _speed;
-	private int _size;
-	private boolean _chatEnabled;
-    private boolean _browseHostEnabled;
-    private int _quality;
-    private LimeXMLDocument[] _xmlDocs = null;
+	private final String _host;
+	private final int _port;
+	private final String _filename; 
+	private final long _index;
+	private final byte[] _clientGUID;
+	private final int _speed;
+	private final int _size;
+	private final boolean _chatEnabled;
+    private final int _quality;
+    private final LimeXMLDocument[] _xmlDocs;
+	private final Set _urns;
+	private final boolean _browseHostEnabled;
+
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections
+	 * 1.1 implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 
 	/** 
      * Constructs a new RemoteFileDesc without metadata.
@@ -39,20 +47,14 @@ public class RemoteFileDesc implements Serializable {
      * @param quality the quality of the connection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
+	 * @param browseHost specifies whether or not the host associated with
+	 *  this 
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, boolean browseHost, int quality) {	   
-		_speed = speed;
-		_host = host;
-		_port = port;
-		_index = index;
-		_filename = filename;
-		_size = size;
-		_clientGUID = clientGUID;
-		_chatEnabled = chat;
-        _browseHostEnabled = browseHost;
-        _quality = quality;
+						  boolean chat, int quality, boolean browseHost) {	   
+		this(host, port, index, filename, size,
+			 clientGUID, speed, chat, quality, browseHost, null, null);
 	}
 
 	/** 
@@ -72,48 +74,95 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, boolean browseHost, int quality, 
-                          LimeXMLDocument[] xmlDocs) {
-        this(host, port, index, filename, size,
-             clientGUID, speed, chat, browseHost, quality);
-        _xmlDocs=xmlDocs;
+						  boolean chat, int quality, boolean browseHost, 
+						  LimeXMLDocument[] xmlDocs, Set urns) {
+		_speed = speed;
+		_host = host;
+		_port = port;
+		_index = index;
+		_filename = filename;
+		_size = size;
+		_clientGUID = clientGUID;
+		_chatEnabled = chat;
+        _quality = quality;
+		_browseHostEnabled = browseHost;
+
+		if(xmlDocs == null) {
+			_xmlDocs = null;
+		}
+		else {
+			// make a defensive copy of the xml docs array so no one can 
+			// mutate this class
+			_xmlDocs = new LimeXMLDocument[xmlDocs.length];
+			System.arraycopy(xmlDocs, 0, _xmlDocs, 0, xmlDocs.length);
+		}
+		if(urns == null) {
+			_urns = EMPTY_SET;
+		}
+		else {
+			_urns = Collections.unmodifiableSet(urns);
+		}
 	}
 
 	/* Accessor Methods */
-	public String getHost() {return _host;}
-	public int getPort() {return _port;}
-	public long getIndex() {return _index;}
-	public int getSize() {return _size;}
-	public String getFileName() {return _filename;}
-	public byte[] getClientGUID() {return _clientGUID;}
-	public int getSpeed() {return _speed;}	
-	public boolean chatEnabled() {return _chatEnabled;}
-    public boolean browseHostEnabled() {return _browseHostEnabled;}
-    public int getQuality() {return _quality;}
-    public LimeXMLDocument[] getXMLDocs() {return _xmlDocs;}
+	public final String getHost() {return _host;}
+	public final int getPort() {return _port;}
+	public final long getIndex() {return _index;}
+	public final int getSize() {return _size;}
+	public final String getFileName() {return _filename;}
+	public final byte[] getClientGUID() {return _clientGUID;}
+	public final int getSpeed() {return _speed;}	
+	public final boolean chatEnabled() {return _chatEnabled;}
+	public boolean browseHostEnabled() {return _browseHostEnabled;}
+    public final int getQuality() {return _quality;}
 
-	public boolean isPrivate() {
-		// System.out.println("host: " + _host);
+	/**
+	 * Returns a copy of the <tt>LimeXMLDocument</tt> array.
+	 *
+	 * @return a copy of the <tt>LimeXMLDocument</tt> array
+	 */
+    public final LimeXMLDocument[] getXMLDocs() {
+		LimeXMLDocument[] xmlDocsCopy = new LimeXMLDocument[_xmlDocs.length];
+		System.arraycopy(_xmlDocs, 0, xmlDocsCopy, 0, _xmlDocs.length);
+		return xmlDocsCopy;
+	}
+
+	public final boolean isPrivate() {
 		if (_host == null) return true;
 		Endpoint e = new Endpoint(_host, _port);
 		return e.isPrivateAddress();
 	}
 
 
-	/** Returns true iff o is a RemoteFileDesc with the same value as this.
-     *  Priority and number of attempts is ignored in doing the comparison! */
+	/**
+	 * Overrides <tt>Object.equals</tt> to return instance equality
+	 * based on the equality of all <tt>RemoteFileDesc</tt> fields.
+	 *
+	 * @return <tt>true</tt> if all of fields of this 
+	 *  <tt>RemoteFileDesc</tt> instance are equal to all of the 
+	 *  fields of the specified object, and <tt>false</tt> if this
+	 *  is not the case, or if the specified object is not a 
+	 *  <tt>RemoteFileDesc</tt>.
+	 */
     public boolean equals(Object o) {
+		if(o == this) return true;
         if (! (o instanceof RemoteFileDesc))
             return false;
-        RemoteFileDesc other=(RemoteFileDesc)o;
-        
-        return _host.equals(other._host)
-            && _port==other._port
-            && _filename.equals(other._filename)
-            && _index==other._index 
-            && Arrays.equals(_clientGUID, other._clientGUID)
-            && _speed==other._speed
-            && _size==other._size;
+        RemoteFileDesc other=(RemoteFileDesc)o;        
+		return ((_host == null ? other._host == null : 
+				 _host.equals(other._host)) &&
+				(_port == other._port) &&
+				(_filename == null ? other._filename == null :
+				 _filename.equals(other._filename)) &&
+				(_index == other._index) &&
+				(_clientGUID == null ? other._clientGUID == null :
+				 Arrays.equals(_clientGUID, other._clientGUID)) &&
+				(_speed == other._speed) &&
+				(_size == other._size) &&
+				(_xmlDocs == null ? other._xmlDocs == null :
+				 Arrays.equals(_xmlDocs, other._xmlDocs)) &&
+				(_urns == null ? other._urns == null :
+				 _urns.equals(other._urns)));		
     }
 
     public String toString() {

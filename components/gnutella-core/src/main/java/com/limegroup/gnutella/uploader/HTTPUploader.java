@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
-
-
 import java.io.*;
 import java.net.*;
 import java.util.Date;
+import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringUtils;
@@ -26,29 +25,43 @@ import com.limegroup.gnutella.util.URLDecoder;
  * and then wait for the GET to come back.
  */
 public class HTTPUploader implements Uploader {
-    //See accessors for documentation
-	protected OutputStream _ostream;
-	protected InputStream _fis;
-	protected Socket _socket;
-	protected int _amountRead;
-	protected int _uploadBegin;
-	protected int _uploadEnd;
-	protected int _fileSize;
-	protected int _index;
-	protected String _filename;
-	protected String _hostName;
-	protected String _guid;
-	protected int _port;
-	protected int _stateNum = CONNECTING;
+
+	private OutputStream _ostream;
+	private InputStream _fis;
+	private Socket _socket;
+	private int _amountRead;
+	private int _uploadBegin;
+	private int _uploadEnd;
+	private int _fileSize;
+	private int _index;
+	private String _fileName;
+	private String _hostName;
+	private String _guid;
+	private int _port;
+	private int _stateNum = CONNECTING;
 
 	private UploadState _state;
-	private UploadManager _manager;
+	private final UploadManager _manager;
     private MessageRouter _router;
 	
 	private boolean  _chatEnabled;
 	private String  _chatHost;
 	private int _chatPort;
     private FileManager _fileManager;
+	private URN _urn = null;
+
+	/**
+	 * The URN specified in the X-Gnutella-Content-URN header, if any.
+	 */
+	private URN _requestedURN = null;
+
+	/**
+	 * <tt>Map</tt> instance for storing unique alternate locations sent in 
+	 * the upload header.
+	 */
+	private Map _alternateLocations = null;
+
+	private FileDesc _fileDesc;
     
     /**
      * Indicates that the client to which we are uploading is capable of
@@ -56,23 +69,31 @@ public class HTTPUploader implements Uploader {
      */
     private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
-    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
-
-    //constructors
+    private final BandwidthTrackerImpl bandwidthTracker=
+		new BandwidthTrackerImpl();
 
 	/**
-     * The constructor used for normal uploads, takes the incoming socket as 
-     * a parameter
-     * @param file the file to be uploaded
-     * @param s the socket on which to upload the file.
-     * @param index index of file to upload
-     */
-	public HTTPUploader(String file, Socket s, int index, UploadManager m,
-                        FileManager fm, MessageRouter router) {
-		_socket = s;
+	 * Stores any alternate locations specified in the HTTP headers for 
+	 * this upload.
+	 */
+	private AlternateLocationCollection _alternateLocationCollection;
+
+	/**
+	 * Consructor for a "normal" non-push upload.  Note that this can
+	 * still be a URN get request.
+	 *
+	 * @param fileName the name of the file
+	 * @param socket the <tt>Socket</tt> instance to serve the upload over
+	 * @param index the index of the file in the set of shared files
+	 * @param um a reference to the <tt>UploadManager</tt> instance 
+	 * @param fm a reference to the <tt>FileManager</tt> instance
+	 */
+	public HTTPUploader(String fileName, Socket socket, int index, 
+						UploadManager um, FileManager fm, MessageRouter router) {
+		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
-		_filename = file;
-		_manager = m;
+		_fileName = fileName;
+		_manager = um;
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
@@ -85,32 +106,29 @@ public class HTTPUploader implements Uploader {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
+			_fileDesc = _fileManager.get(_index);
+			_fileSize = (int)_fileDesc.getSize();
+			_urn = _fileDesc.getSHA1Urn();
             
             //special case for browse host
             if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
                 setState(BROWSE_HOST);
-                return;
-            }
-            
-			desc = _fileManager.get(_index);
-			_fileSize = desc._size;
+            } 
+			else {
+				setState(CONNECTING);
+			}
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
 			// some reason the index is no longer valid.
-			indexOut = true;
+			setState(FILE_NOT_FOUND);
 		} catch (IOException e) {
 			// FileManager.get() throws an IOException if
 			// the file has been deleted
-			ioexcept = true;
-		}
-		if (indexOut)
-			setState(FILE_NOT_FOUND);
-		else if (ioexcept) 
 			setState(INTERRUPTED);
-		else 
-			setState(CONNECTING);
+		}
 	}
 		
+
 	// Push requested Upload
     /**
      * The other constructor that is used for push uploads. This constructor
@@ -125,7 +143,7 @@ public class HTTPUploader implements Uploader {
 	public HTTPUploader(String file, String host, int port, int index,
 						String guid, UploadManager m, FileManager fm,
                         MessageRouter router) {
-		_filename = file;
+		_fileName = file;
 		_manager = m;
 		_index = index;
 		_uploadBegin = 0;
@@ -135,10 +153,9 @@ public class HTTPUploader implements Uploader {
 		_port = port;
         _fileManager = fm;
         _router = router;
-		FileDesc desc;
 		try {
-			desc = _fileManager.get(_index);
-			_fileSize = desc._size;
+			_fileDesc = _fileManager.get(_index);
+			_fileSize = _fileDesc._size;
 			setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
 			setState(PUSH_FAILED);
@@ -166,13 +183,13 @@ public class HTTPUploader implements Uploader {
 			// open a stream for writing to the socket
 			_ostream = _socket.getOutputStream();
 			// ask chris about Assert
-			Assert.that(_filename != null);  
+			Assert.that(_fileName != null);  
 			// write out the giv
 
-			Assert.that(_filename != "");  
+			Assert.that(_fileName != "");  
 
-			String giv; 
-			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
+			String giv = "GIV " + _index + ":" + _guid + "/" + 
+			             _fileName + "\n\n";
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 
@@ -204,7 +221,7 @@ public class HTTPUploader implements Uploader {
 	}
 
     
-	/*
+	/**
 	 * Is called by the thread.  makes the
 	 * actual call upload the file or appropriate
 	 * error information.
@@ -218,7 +235,7 @@ public class HTTPUploader implements Uploader {
 		}
 		try {
 			readHeader();
-			_state.doUpload(this);
+			_state.doUpload(this);		   
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 			try {
@@ -227,6 +244,11 @@ public class HTTPUploader implements Uploader {
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
+
+		// making this call now is necessary to avoid writing the 
+		// same alternate locations back to the requester as they sent 
+		// in their original headers
+		_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
 	}
 
     /**
@@ -280,13 +302,31 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 	
+	/**
+	 * Stores the alternate location for this upload in the associated 
+	 * <tt>FileDesc</tt> instance.
+	 */
+	public void storeAlternateLocation() {
+		// ignore if this is a push upload
+		if(_socket == null) return;
+		try {
+			URL url = 
+			    new URL("http", _hostName, _port, 
+						URNFactory.createHttpUrnServiceRequest(_fileDesc.getSHA1Urn()));
+			AlternateLocation al = new AlternateLocation(url);
+			_fileDesc.addAlternateLocation(al);
+		} catch(MalformedURLException e) {
+			// if the url is invalid, it simply will not be added to the list
+			// of alternate locations
+		}		
+	}
 
 	/****************** accessor methods *****************/
 
 
 	public OutputStream getOutputStream() {return _ostream;}
 	public int getIndex() {return _index;}
-	public String getFileName() {return _filename;}
+	public String getFileName() {return _fileName;}
 	public int getFileSize() {return _fileSize;}
 	public InputStream getInputStream() {return _fis;}
     /**The number of bytes read. The way we calculate the number of bytes 
@@ -315,10 +355,36 @@ public class HTTPUploader implements Uploader {
 	public boolean chatEnabled() {return _chatEnabled;}
 	public String getChatHost() {return _chatHost;}
 	public int getChatPort() {return _chatPort;}
+
+	/**
+	 * Accessor for the <tt>URN</tt> instance for the file requested, which
+	 * is <tt>null</tt> if there is no URN for the file.
+	 *
+	 * @return the <tt>URN</tt> instance for the file being uploaded, which
+	 *  can be <tt>null</tt> if no URN has been assigned
+	 */
+	public URN getUrn() {return _urn;}
+
+	/**
+	 * Returns the requested <tt>URN</tt> as specified in the 
+	 * "X-Gnutella-Content-URN" extension header, defined in HUGE v0.93.
+	 *
+	 * @return the requested <tt>URN</tt>
+	 */
+	public URN getRequestedUrn() {return _requestedURN;}
+
+	/**
+	 * Returns the <tt>FileDesc</tt> instance for this uploader.
+	 *
+	 * @return the <tt>FileDesc</tt> instance for this uploader, or
+	 *  <tt>null</tt> if the <tt>FileDesc</tt> could not be assigned
+	 *  from the shared files
+	 */
+	public FileDesc getFileDesc() {return _fileDesc;}
+
     public boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
-    }
-    
+    }    
 	/****************** private methods *******************/
 
 
@@ -343,8 +409,7 @@ public class HTTPUploader implements Uploader {
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
                 break;
-            
-			if (str.toUpperCase().indexOf("CHAT:") != -1) {
+			else if (str.toUpperCase().indexOf("CHAT:") != -1) {
 				String sub;
 				try {
 					sub = str.substring(5);
@@ -372,7 +437,7 @@ public class HTTPUploader implements Uploader {
 			// "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
             //  old versions of BearShare do not send it.  The value following the
             //  bytes unit will be in the form '-n', 'm-n', or 'm-'.
-            if (indexOfIgnoreCase(str, "Range:") == 0) {
+            else if (indexOfIgnoreCase(str, "Range:") == 0) {
                 //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
                 //that we don't validate the data between "Range:" and the
                 //bytes.
@@ -450,7 +515,7 @@ public class HTTPUploader implements Uploader {
             }
 
 			// check the User-Agent field of the header information
-			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
+			else if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
                 //Allow them to browse the host though
@@ -480,6 +545,15 @@ public class HTTPUploader implements Uploader {
 				}
 				userAgent = str.substring(11).trim();
 			}
+			else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str)) {
+				_requestedURN = HTTPUploader.readContentUrn(str);
+			}
+			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
+				if(_alternateLocationCollection == null) {
+					_alternateLocationCollection = new AlternateLocationCollection();
+				}
+				HTTPUploader.readAlternateLocations(str, _alternateLocationCollection);
+			}
             //check the "accept:" header
             if (indexOfIgnoreCase(str, "accept:") != -1) {
                 if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE)
@@ -494,11 +568,81 @@ public class HTTPUploader implements Uploader {
 	}
 
 	/**
-	 * a helper method to compare two strings 
-	 * ignoring their case.
+	 * This method parses the "X-Gnutella-Content-URN" header, as specified
+	 * in HUGE v0.93.  This assigns the requested urn value for this 
+	 * upload, which otherwise remains null.
+	 *
+	 * @param contentUrnStr the string containing the header
+	 * @return a new <tt>URN</tt> instance for the request line, or 
+	 *  <tt>null</tt> if there was any problem creating it
+	 */
+	private static URN readContentUrn(final String contentUrnStr) {
+		int offset = contentUrnStr.indexOf(":");
+		int spaceIndex = contentUrnStr.indexOf(" ");
+		if(offset == -1) {
+			return null;
+		}
+		if(spaceIndex == -1) {
+			// this means that there's no space after the colon
+			offset++;
+		}
+		else if((spaceIndex - offset) == 1) {
+			// this means that there is a space after the colon,
+			// so the urn is offset by one more index
+			offset += 2;
+		}
+		else {
+			// otherwise, the request is of an unknown form, so just
+			// return without setting _requestedURN
+			return null;
+		}
+		
+		String urnStr = contentUrnStr.substring(offset);
+		try {
+			return URNFactory.createUrn(urnStr);
+		} catch(IOException e) {
+			// this will be thrown if the URN string was invalid for any
+			// reason -- just return null
+			return null;
+		}		
+	}
+	
+	/**
+	 * Reads alternate location header.  The header can contain only one
+	 * alternate location, or it can contain many in the same header.
+	 * This method adds them all to the <tt>FileDesc</tt> for this
+	 * uploader.  This will not allow more than 20 alternate locations
+	 * for a single file.
+	 *
+	 * @param altHeader the full alternate locations header
+	 */
+	private static void readAlternateLocations(final String altHeader,
+											   final AlternateLocationCollection alc) {
+		int colonIndex = altHeader.indexOf(":");
+		if(colonIndex == -1) {
+			return;
+		}
+		final String alternateLocations = 
+		    altHeader.substring(colonIndex+1).trim();
+		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+
+		while(st.hasMoreTokens()) {
+			try {
+				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
+				alc.addAlternateLocation(al);
+			} catch(IOException e) {
+				e.printStackTrace();
+				// just return without adding it.
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Helper method to compare two stings, ignoring their case.
 	 */ 
 	private int indexOfIgnoreCase(String str, String section) {
-		// convert both strings to lower case
+		// convert both strings to lower case -- this is expensive
 		String aaa = str.toLowerCase();
 		String bbb = section.toLowerCase();
 		// then look for the index...
@@ -522,11 +666,11 @@ public class HTTPUploader implements Uploader {
 		 * For pushed (server-side) uploads, check to see that 
 		 * the index matches the filename. */
 		String name = fdesc._name;
-		if (_filename == null) {
-            _filename = name;
+		if (_fileName == null) {
+            _fileName = name;
         } else {
 			/* matches the name */
-			if ( !name.equals(_filename) ) {
+			if ( !name.equals(_fileName) ) {
 				throw new IOException();
 			}
         }
@@ -535,7 +679,7 @@ public class HTTPUploader implements Uploader {
         _fileSize = fdesc._size;
 
 		// get the fileInputStream
-		_fis = _fileManager.getInputStream(fdesc);
+		_fis = fdesc.createInputStream();
 
 	}
   
@@ -558,13 +702,11 @@ public class HTTPUploader implements Uploader {
         return _state.getCloseConnection();
     }
 
-
     private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
-
 }
 
 

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -28,6 +29,17 @@ public class NormalUploadState implements UploadState {
     /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
 
+	/**
+	 * The <tt>URN</tt> instance for this upload, which could always
+	 * remain null.
+	 */
+	private URN _urn;
+
+	/**
+	 * <tt>FileDesc</tt> instance for the file being uploaded.
+	 */
+	private FileDesc _fileDesc;
+
     /** Flag indicating whether we should close the connection after serving
      * the request or not */
     private boolean _closeConnection = false;
@@ -50,6 +62,8 @@ public class NormalUploadState implements UploadState {
             _amountRead = _uploader.amountUploaded();
             _uploadBegin =  _uploader.getUploadBegin();
             _uploadEnd =  _uploader.getUploadEnd();
+			_urn = _uploader.getUrn();
+			_fileDesc = _uploader.getFileDesc();
             
             //guard clause
             if(_fileSize < _uploadBegin)
@@ -88,6 +102,7 @@ public class NormalUploadState implements UploadState {
         }
 
         _uploader.setState(_uploader.COMPLETE);
+		_uploader.storeAlternateLocation();
 	}
 
     /**
@@ -213,9 +228,7 @@ public class NormalUploadState implements UploadState {
 	 * mime type of a file fill in the details of 
 	 * this later. assume binary for now */
 	private String getMimeType() {
-		String mimetype;                
-        mimetype = "application/binary"; 
-        return mimetype;                  
+        return "application/binary";                  
 	}
 
 	/**
@@ -232,7 +245,7 @@ public class NormalUploadState implements UploadState {
 		_ostream.write(str.getBytes());
 		str = "Content-length:"+ (_uploadEnd - _uploadBegin) + "\r\n";
 		_ostream.write(str.getBytes());
-		
+
 		// Version 0.5 of limewire misinterpreted Content-range
 		// to be 1 - n instead of 0 - (n-1), but because this is
 		// an optional field in the regular case, we don't need
@@ -248,16 +261,53 @@ public class NormalUploadState implements UploadState {
 			"-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
+		if(_fileDesc != null) {
+			HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
+								  _fileDesc.getSHA1Urn(),
+								  _ostream);
+			if(_fileDesc.hasAlternateLocations()) {
+				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+									  _fileDesc.getAlternateLocationCollection(),
+									  _ostream);
+			}
+			//_fileDesc.writeUrnTo(_ostream);
+			//_fileDesc.writeAlternateLocationsTo(_ostream);
+		}
+		
 		 str = "\r\n";
 		_ostream.write(str.getBytes());
 		
 	}
+
     
     //inherit doc comment
-    public boolean getCloseConnection()
-    {
+    public boolean getCloseConnection() {
         return _closeConnection;
     }
+
+	/*
+	public static void main(String[] args) {
+		NormalUploadState nus = new NormalUploadState();
+		FileDesc fd = new FileDesc(new File("NormalUploadState.java"), 0, 
+								   new HashSet());
+		String alt0 = "Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2001.mpg "+
+		"2002-04-09T20:32:33Z";
+		nus._ostream = new ByteArrayOutputStream();	   
+		try {
+			nus._urn = new URN("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+			AlternateLocation al = new AlternateLocation(alt0);
+			fd.addAlternateLocation(al);
+			nus._fileDesc = fd;			
+			nus.writeHeader();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("NORMAL UPLOAD HEADER:");
+		System.out.println(); 
+		System.out.println(nus._ostream); 
+	}
+	*/
     
 }
 

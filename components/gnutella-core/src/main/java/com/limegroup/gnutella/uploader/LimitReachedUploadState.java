@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
+import com.limegroup.gnutella.*;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -12,33 +13,41 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 
 public class LimitReachedUploadState implements UploadState {
-
-	private HTTPUploader _uploader;
-	private OutputStream _ostream;	
   
 	/**
-	 * This class implements a failed upload 
-	 * due to the Upload limit having been reached.
+	 * Implements a failed upload due to the Upload limit 
+	 * having been reached.
 	 */
 	public void doUpload(HTTPUploader uploader) throws IOException {
 		/* Sends a 503 Service Unavailable message */
-		_uploader = uploader;
-		_ostream = uploader.getOutputStream();
+		OutputStream ostream = uploader.getOutputStream();
 
 		String str;
-		String errMsg = "Server busy.  Too many active downloads.";
+		String errMsg = "Server busy.  Too many active uploads.";
 		str = "HTTP/1.1 503 Service Unavailable\r\n";
-		_ostream.write(str.getBytes());
+		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getVendor() + "\r\n";
-		_ostream.write(str.getBytes());
+		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
-		_ostream.write(str.getBytes());
+		ostream.write(str.getBytes());
 		str = "Content-Length: " + errMsg.length() + "\r\n";
-		_ostream.write(str.getBytes());
+		ostream.write(str.getBytes());
+		FileDesc fileDesc = uploader.getFileDesc();
+		if(fileDesc != null) {
+			// write the URN in case the caller wants it
+			HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN,
+								  fileDesc.getSHA1Urn(),
+								  ostream);
+			if(fileDesc.hasAlternateLocations()) {
+				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+									  fileDesc.getAlternateLocationCollection(),
+									  ostream);
+			}
+		}
 		str = "\r\n";
-		_ostream.write(str.getBytes());
-		_ostream.write(errMsg.getBytes());
-		_ostream.flush();
+		ostream.write(str.getBytes());
+		ostream.write(errMsg.getBytes());
+		ostream.flush();
 	}
     
     /**
@@ -48,8 +57,7 @@ public class LimitReachedUploadState implements UploadState {
      * @return true, if the upload state doesnt allow the connection to receive
      * another request on the same connection, false otherwise
      */
-    public boolean getCloseConnection()
-    {
+    public boolean getCloseConnection(){
         return true;
     }    
 

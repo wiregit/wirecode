@@ -18,8 +18,6 @@ import com.limegroup.gnutella.messages.*;
  * 
  * This class also encapsulates xml metadata.  See the description of the QHD 
  * below for more details.
- * 
- * 
  */
 public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
@@ -34,7 +32,7 @@ public class QueryReply extends Message implements Serializable{
     
     /** 2 bytes for public area, 2 bytes for xml length.
      */
-    static final int COMMON_PAYLOAD_LEN = 4;
+    public static final int COMMON_PAYLOAD_LEN = 4;
 
     private byte[] payload;
     /** True if the responses and metadata have been extracted. */
@@ -204,16 +202,7 @@ public class QueryReply extends Message implements Serializable{
         int i=11;
         for (int left=n; left>0; left--) {
             Response r=responses[n-left];
-            ByteOrder.int2leb((int)r.getIndex(),payload,i);
-            ByteOrder.int2leb((int)r.getSize(),payload,i+4);
-            i+=8;            
-            byte[] nameBytes = r.getNameBytes();
-            System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
-            i+=nameBytes.length;
-            //Write first null terminator.
-            payload[i++]=(byte)0;
-            //add the second null terminator
-            payload[i++]=(byte)0;
+            i = r.writeToArray(payload,i);
         }
 
         //Write QHD if desired
@@ -315,11 +304,9 @@ public class QueryReply extends Message implements Serializable{
      */
     private static int rLength(Response[] responses) {
         int ret=0;
-        for (int i=0; i<responses.length; i++)
-            //8 bytes for index and size, plus name and two null terminators
-            //response.getNameBytesSize() returns the size of the 
-            //file name in bytes
-            ret += 8+responses[i].getNameBytesSize()+1/*regular part*/+1;
+        for (int i=0; i<responses.length; i++) {
+            ret += responses[i].getLength();
+        }
         return ret;
     }
 
@@ -589,57 +576,20 @@ public class QueryReply extends Message implements Serializable{
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
         try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(payload,i,payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
-                long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
-                long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
-                i+=8;
-
-                //The file name is supposed to be terminated by a double null
-                //terminator.  But Gnotella inserts meta-information between
-                //these null characters.  So we have to handle this.
-                //See http://gnutelladev.wego.com/go/
-                //         wego.discussion.message?groupId=139406&
-                //         view=message&curMsgId=319258&discId=140845&
-                //         index=-1&action=view
-
-                //Search for first single null terminator.
-                int j=i;
-                for ( ; ; j++) {
-                    if (payload[j]==(byte)0)
-                        break;
-                }
-
-                //payload[i..j-1] is name.  This excludes the null terminator.
-                String name=new String(payload,i,j-i);
-
-                int l = j+1;
-                //Search for remaining null terminator.
-                int k = l;//next byte after the first null
-                for ( ; ; k++) {
-                    if (k>=payload.length-16)//k is already in the GUID
-                        throw new BadPacketException("Missing null terminator "
-                                                     +"filename");
-                    if (payload[k]==(byte)0)
-                        break;
-                }
-                String betweenNulls = new String(payload,l,k-l);
-                if(betweenNulls==null || betweenNulls.equals(""))
-                    responses[responses.length-left]=
-                                    new Response(index,size,name);
-                else
-                    responses[responses.length-left]=new 
-                          Response(betweenNulls.toLowerCase(),index,size,name);
-                i=k+1;//The byte after the second null
+                Response r = Response.createFromStream(bais);
+                responses[responses.length-left] = r;
+                i+=r.getLength();
             }
-
             //All set.  Accept parsed results.
             this.responses=responses;
         } catch (ArrayIndexOutOfBoundsException e) {
             return;
-        } catch (BadPacketException e) {
+        } catch (IOException e) {
             return;
-        }                
+        }           
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
@@ -985,8 +935,8 @@ public class QueryReply extends Message implements Serializable{
                                                    (int) currResp.getSize(),
                                                    clientGUID, (int) speed,
                                                    supportsChat, 
-                                                   supportsBrowseHost,
-                                                   qual);
+                                                   qual,
+												   supportsBrowseHost);
         }
         
         return retArray;

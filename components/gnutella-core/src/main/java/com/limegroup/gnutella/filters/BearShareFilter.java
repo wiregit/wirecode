@@ -21,14 +21,16 @@ public class BearShareFilter extends SpamFilter {
 
         //Edited by Sumeet Thadani (2/27/01)
         QueryRequest qReq = (QueryRequest)m;
-        int rawQueryLength = qReq.getQueryLength();
+		String query = qReq.getQuery();
+		byte[] queryBytes = query.getBytes();
+		int rawQueryLength = qReq.getQuery().length();
         //Not enough bytes in payload to be above threshold
         if (rawQueryLength < MAX_HIGHBITS)
             return true;
         int highbits=0;
         byte currByte;
         for(int i=0; i<rawQueryLength; i++){
-            currByte = qReq.getQueryByteAt(i);
+			currByte = queryBytes[i];
             if((currByte & 0x80)!=0)
                 highbits++;
         }
