@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.html.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
@@ -15,6 +15,8 @@ import com.limegroup.gnutella.util.CommonUtils;
 public final class FileViewUploadState implements HTTPMessage {
 
     public final static byte[] BAD_PASS_REPLY = "Wrong Password!".getBytes();
+    public final static byte[] MALFORMED_REQUEST_REPLY = 
+        "Malformed Request!".getBytes();
     
     private final HTTPUploader _uploader;
 
@@ -26,11 +28,42 @@ public final class FileViewUploadState implements HTTPMessage {
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+        System.out.println(UploadManager.FV_PASS);
         final String fileName = _uploader.getFileName();
-        if (fileName.startsWith(UploadManager.FV_REQ_BEGIN + "/" + 
-                                UploadManager.FV_PASS)) {
+        final String pass = 
+            UploadManager.FV_REQ_BEGIN + "/" + UploadManager.FV_PASS;
+
+        // make sure it has the correct beginning
+        if (fileName.startsWith(pass)) {
             FileListHTMLPage htmlGen = FileListHTMLPage.instance();
-            BAOS.write(htmlGen.getSharedFilePage().getBytes());
+            String indices = fileName.substring(pass.length());
+
+            // the url may want only certain files
+            if (indices.length() > 1) {
+                StringTokenizer st = new StringTokenizer(indices, "/&");
+                List descs = new ArrayList(st.countTokens());
+                while (st.hasMoreTokens()) {
+                    try {
+                        int i = Integer.parseInt(st.nextToken());
+                        descs.add(RouterService.getFileManager().get(i));
+                    }
+                    catch (NumberFormatException nfe) {
+                    }
+                    catch (IndexOutOfBoundsException ioooe) {
+                    }
+                }
+
+                if (descs.size() > 0) {
+                    FileDesc[] descArray = 
+                        (FileDesc[]) descs.toArray(new FileDesc[0]);
+                    BAOS.write(htmlGen.getSharedFilePage(descArray).getBytes());
+                }
+                else
+                    BAOS.write(MALFORMED_REQUEST_REPLY);
+            }
+            // give everything
+            else
+                BAOS.write(htmlGen.getSharedFilePage().getBytes());
         }
         else
             BAOS.write(BAD_PASS_REPLY);
