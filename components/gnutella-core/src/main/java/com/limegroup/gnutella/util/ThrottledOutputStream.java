@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
-import java.net.*;
 import com.limegroup.gnutella.Assert;
 
 /** 
@@ -69,6 +68,7 @@ public class ThrottledOutputStream extends OutputStream {
             offset += length;
         }
     }
+    
 
     /**
      * Write the given bytes to the delegate stream, possibly blocking if
