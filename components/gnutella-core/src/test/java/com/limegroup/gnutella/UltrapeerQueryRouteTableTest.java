@@ -78,8 +78,12 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
             CALLBACK, MESSAGE_ROUTER, FMAN);
         ROUTER_SERVICE.start();
         
-        RouterService.connectToHostAsynchronously("localhost", Backend.BACKEND_PORT);    
-        Thread.sleep(3000);
+        RouterService.connectToHostAsynchronously("localhost", 
+            Backend.BACKEND_PORT);    
+        
+        // Wait for awhile after the connection to make sure the hosts have 
+        // time to exchange QRP tables.
+        Thread.sleep(10 * 1000);
         assertTrue("should be connected", RouterService.isConnected());
     }
 
@@ -113,10 +117,11 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 	}
     
     /**
-     * Test to make sure that queries with one more hop to go are
-     * properly routed when the last hop is an Ultrapeer.
+     * Test to make sure that dynamic querying sends a query with TTL=1 and 
+     * other properties when a neighboring Ultrapeer has a hit in its QRP
+     * table for that query.
      */
-    public void testLastHopQueryRouting() throws Exception {
+    public void testDynamicQueryingWithQRPHit() throws Exception {
         assertTrue("should be connected", RouterService.isConnected());
                 
         QueryRequest qr = QueryRequest.createQuery(
@@ -128,9 +133,10 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
         
         QueryRequest qSent = (QueryRequest)SENT.get(0);
         
-        // Since the Ultrapeer only has one connection, the TTL should be the
-        // maximum "probe" TTL of 2
-        assertEquals("wrong ttl", 2, qSent.getTTL());
+        // The TTL on the sent query should be 1 because the other Ultrapeer
+        // should have a "hit" in its QRP table.  When there's a hit, we 
+        // send with TTL 1 simply because it's likely that it's popular.
+        assertEquals("wrong ttl", 1, qSent.getTTL());
         assertEquals("wrong hops", 0, qSent.getHops());
         assertEquals("wrong query", qr.getQuery(), qSent.getQuery());
         assertEquals("wrong guid", qr.getGUID(), qSent.getGUID());        
@@ -144,7 +150,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
     private static void sendQuery(QueryRequest qr) {
         MessageRouter mr = RouterService.getMessageRouter();
         mr.sendDynamicQuery(qr);
-        //mr.broadcastQueryRequest(qr, REPLY_HANDLER);
+        //mr.broadcastQueryRequest(qr);
     }
     
     private static class TestMessageRouter extends StandardMessageRouter {
