@@ -92,13 +92,6 @@ public class ConnectionManager {
 	private static final int MAX_LEAVES = 
 		UltrapeerSettings.MAX_LEAVES.getValue();
 
-	/**
-	 * Constant for the version of query routing that we support -- the same
-	 * version is used both for query routing between leaves and Ultrapeers
-	 * and between Ultrapeers.
-	 */
-	public static final String QUERY_ROUTING_VERSION = "0.1";
-
     
     private HostCatcher _catcher;
 	private final ConnectionWatchdog _watchdog;
@@ -511,12 +504,35 @@ public class ConnectionManager {
      * false otherwise
      */
     public boolean allowConnection(ManagedConnection c) {
-        return allowConnection(
-            c.isOutgoing(),
-            c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE),
-            c.getProperty(ConnectionHandshakeHeaders.USER_AGENT),
-			c.getNumIntraUltrapeerConnections());
+		return allowConnection(c.headers(), false);
     }
+
+    /**
+     * Checks if the connection received can be accepted,
+     * based upon the type of connection (e.g. client, supernode, 
+     * temporary etc). 
+     * @param c The connection we received, for which to 
+     * test if we have incoming slot.
+     * @return true, if we have incoming slot for the connection received,
+     * false otherwise
+     */
+    public boolean allowConnectionAsLeaf(HandshakeResponse hr) {
+		return allowConnection(hr, true);
+    }
+
+    /**
+     * Checks if the connection received can be accepted,
+     * based upon the type of connection (e.g. client, supernode, 
+     * temporary etc). 
+     * @param c The connection we received, for which to 
+     * test if we have incoming slot.
+     * @return true, if we have incoming slot for the connection received,
+     * false otherwise
+     */
+     public boolean allowConnection(HandshakeResponse hr) {
+         return allowConnection(hr, false);
+     }
+
     
     /**
      * Checks if there is any available slot of any kind.
@@ -558,11 +574,7 @@ public class ConnectionManager {
      *  it was not written
      * @return true if a connection of the given type is allowed
      */
-    public synchronized boolean allowConnection(boolean outgoing,
-                                                String ultrapeerHeader,
-                                                String userAgentHeader,
-												int degree) {
-
+    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
@@ -585,49 +597,46 @@ public class ConnectionManager {
         //one of the following is true: C is a good vendor or there are fewer
         //than N-K connections.  With time, this converges on all good
         //connections.
-        
-        boolean isUltrapeerAware = ultrapeerHeader!=null;
-        boolean isLeaf = ConnectionHandshakeHeaders.isFalse(ultrapeerHeader);
 
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
-        if (_keepAlive<=0) {
+        if (_keepAlive <= 0) {
             return false;
 		} else if (RouterService.isLeaf()) {
 			// we're a leaf -- don't allow any incoming connections
             return false;  
-		} else if (isLeaf && isUltrapeerAware) {
+		} else if (hr.isLeafConnection() || leaf) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
             return getNumInitializedClientConnections() 
-                < (trustedVendor(userAgentHeader)
+                < (trustedVendor(hr.getUserAgent())
 				   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
 
-        } else if (isUltrapeerAware) {
+        } else if (hr.isSupernodeConnection()) {
             //2. Ultrapeer.  Preference trusted vendors using BearShare's
-            //clumping algorithm (see above).
-		   
-			int connections = getNumInitializedConnections();
-			boolean degree30Connection = degree == 30;
+            //clumping algorithm (see above).		   
 
-			if(!degree30Connection) {
-				// if it's not a new high-density connection, only allow it if
-				// our number of connections is below the maximum number of old
-				// connections to allow
-				return connections < 
-					(trustedVendor(userAgentHeader) ? 
-					 MAX_LOW_DEGREE_ULTRAPEERS : 
-					 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
+			int connections = getNumInitializedConnections();
+
+			if(hr.isHighDegreeConnection() && 
+			   hr.isUltrapeerQueryRoutingConnection()) {
+				// otherwise, it is a high degree connection, so allow it if we 
+				// need more connections
+				return (trustedVendor(hr.getUserAgent()) &&
+						connections < MIN_CONNECTIONS_FOR_SUPERNODE);
 			}
 
-			// otherwise, it is a high degree connection, so allow it if we 
-			// need more connections
-			return (trustedVendor(userAgentHeader) &&
-					connections < MIN_CONNECTIONS_FOR_SUPERNODE);
-        } else {
-			return false;
-		}
+			// if it's not a new high-density connection, only allow it if
+			// our number of connections is below the maximum number of old
+			// connections to allow
+			return connections < 
+				(trustedVendor(hr.getUserAgent()) ? 
+				 MAX_LOW_DEGREE_ULTRAPEERS : 
+				 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
+        } 
+		
+		return false;
     }
 
 	/**
@@ -664,15 +673,9 @@ public class ConnectionManager {
 
     /** Returns the number of old-fashioned unrouted connections.  Caller MUST
      *  hold this' monitor. */
-    private int oldConnections() {
-        //TODO3: augment state of this if needed to avoid loop
-        int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)==null)
-                ret++;            
-        }
-        return ret;
+    private int oldConnections() {		
+		// we no longer allow old connections!
+		return 0;
     }
 
     /**
@@ -778,7 +781,8 @@ public class ConnectionManager {
                     connection.getOrigPort()));
         }
         //add the best few endpoints from the hostcatcher.
-        Iterator iterator=_catcher.getUltrapeerHosts(MAX_SUPERNODE_ENDPOINTS);
+        Iterator iterator =
+			RouterService.getHostCatcher().getUltrapeerHosts(MAX_SUPERNODE_ENDPOINTS);
         while (iterator.hasNext()) {
             Endpoint e=(Endpoint)iterator.next();
             retSet.add(e);
@@ -1489,7 +1493,7 @@ public class ConnectionManager {
     public synchronized Iterator getNormalHosts(int n) {
         //TODO: this method doesn't really belong here.  It's used because parts
         //of ManagedConnection have a reference to this but not the HostCatcher.
-        return _catcher.getNormalHosts(n);
+        return RouterService.getHostCatcher().getNormalHosts(n);
     }
 
     /**
