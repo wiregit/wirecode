@@ -118,7 +118,7 @@ public final class SearchResultHandler {
             }
         }
         if( reSend == null )
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         else
             return reSend;
     }        

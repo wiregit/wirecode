@@ -1127,7 +1127,7 @@ public class RouterService {
                                       boolean overwrite, GUID queryGUID)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return download(files, DataUtils.EMPTY_LIST, overwrite, queryGUID);
+		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID);
 	}
         
 

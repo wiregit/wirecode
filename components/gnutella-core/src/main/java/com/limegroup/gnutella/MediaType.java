@@ -1,18 +1,17 @@
 package com.limegroup.gnutella;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.DataUtils;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.Arrays;
-
-import java.io.Serializable;
 
 /**
  * A generic type of media, i.e., "video" or "audio".
@@ -182,7 +181,7 @@ public class MediaType implements Serializable {
     public MediaType(String schema) {
         this.schema = schema;
         this.descriptionKey = null;
-        this.exts = DataUtils.EMPTY_SET;
+        this.exts = Collections.EMPTY_SET;
         this.isDefault = false;
     }
     
@@ -201,7 +200,7 @@ public class MediaType implements Serializable {
         this.descriptionKey = descriptionKey;
         this.isDefault = true;
         if(extensions == null) {
-            this.exts = DataUtils.EMPTY_SET;
+            this.exts = Collections.EMPTY_SET;
         } else {
             Set set =
                 new TreeSet(Comparators.caseInsensitiveStringComparator());

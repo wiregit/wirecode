@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
@@ -1902,7 +1903,7 @@ public class DownloadTest extends BaseTestCase {
     
     private static void tGeneric(RemoteFileDesc[] now, RemoteFileDesc[] later)
       throws Exception {
-        tGeneric(now, later, DataUtils.EMPTY_LIST);
+        tGeneric(now, later, Collections.EMPTY_LIST);
     }
     
     /**

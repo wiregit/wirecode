@@ -501,7 +501,7 @@ public final class HTTPUploader implements Uploader {
                 ret.add(al);
                 i++;
             }
-            return ret == null ? DataUtils.EMPTY_SET : ret;
+            return ret == null ? Collections.EMPTY_SET : ret;
         }
     }
     

@@ -88,14 +88,14 @@ public final class UrnCache {
     public synchronized Set getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L) {
-			return DataUtils.EMPTY_SET;
+			return Collections.EMPTY_SET;
 		} 
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
 		if(cachedUrns == null) {
-			return DataUtils.EMPTY_SET;
+			return Collections.EMPTY_SET;
 		}
 
 		return Collections.unmodifiableSet(cachedUrns);

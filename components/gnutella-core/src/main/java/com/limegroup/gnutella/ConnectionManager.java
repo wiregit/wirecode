@@ -1033,7 +1033,7 @@ public class ConnectionManager {
             return proxies;
         }
 
-        return DataUtils.EMPTY_SET;
+        return Collections.EMPTY_SET;
     }
 
     /**

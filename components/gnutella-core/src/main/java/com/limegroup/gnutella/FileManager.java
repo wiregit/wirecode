@@ -3,24 +3,9 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-
-import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.Function;
-import com.limegroup.gnutella.util.IntSet;
-import com.limegroup.gnutella.util.KeyValue;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,6 +15,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.Function;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.IntSet;
+import com.limegroup.gnutella.util.KeyValue;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -709,12 +709,12 @@ public abstract class FileManager {
         try {
             directory=FileUtils.getCanonicalFile(directory);
         } catch (IOException e) {
-            return DataUtils.EMPTY_LIST;  //doesn't exist?
+            return Collections.EMPTY_LIST;  //doesn't exist?
         }
         
         // don't share the incomplete directory ... 
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
@@ -723,7 +723,7 @@ public abstract class FileManager {
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
 
         int numShareable = file_list.length;
         int numSubDirs = dir_list.length;
@@ -734,7 +734,7 @@ public abstract class FileManager {
         synchronized (this) {
             // if it was already added, ignore.
             if ( _sharedDirectories.get(directory) != null)
-                return DataUtils.EMPTY_LIST;
+                return Collections.EMPTY_LIST;
                 
             _sharedDirectories.put(directory, new IntSet());
             

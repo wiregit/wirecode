@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.messages;
 
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.DataUtils;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
 
 /** 
  * Encapsulation of a HUGE block.  Offers various get methods to retrieve its
@@ -23,25 +26,25 @@ public class HUGEExtension {
     /** @return the set of GGEP Objects in this HUGE extension.
      */
     public Set getGGEPBlocks() {
-        if (_ggeps == null) return DataUtils.EMPTY_SET;
+        if (_ggeps == null) return Collections.EMPTY_SET;
         return _ggeps;
     }
     /** @return the set of URN Objects in this HUGE extension.
      */
     public Set getURNS() {
-        if (_urns == null) return DataUtils.EMPTY_SET;
+        if (_urns == null) return Collections.EMPTY_SET;
         return _urns;
     }
     /** @return the set of URN Type Objects in this HUGE extension.
      */
     public Set getURNTypes() {
-        if (_urnTypes == null) return DataUtils.EMPTY_SET;
+        if (_urnTypes == null) return Collections.EMPTY_SET;
         return _urnTypes;
     }
     /** @return the set of miscellaneous blocks (Strings) in this extension.
      */
     public Set getMiscBlocks() {
-        if (_miscBlocks == null) return DataUtils.EMPTY_SET;
+        if (_miscBlocks == null) return Collections.EMPTY_SET;
         return _miscBlocks;
     }
 

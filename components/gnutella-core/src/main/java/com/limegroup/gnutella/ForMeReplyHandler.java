@@ -240,7 +240,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	}
 	
 	public Set getDomains() {
-		return DataUtils.EMPTY_SET;
+		return Collections.EMPTY_SET;
 	}
 	
 	public boolean isPersonalSpam(Message m) {

@@ -161,7 +161,7 @@ public class RemoteFileDesc implements Serializable {
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
               System.currentTimeMillis(),   // timestamp
-              DataUtils.EMPTY_SET,          // push proxies
+              Collections.EMPTY_SET,        // push proxies
               rfd.getCreationTime(),       // creation time
               false);                       // firewalled transfer
     }
@@ -277,7 +277,7 @@ public class RemoteFileDesc implements Serializable {
         _timestamp = timestamp;
         _creationTime = createTime;
         if(proxies == null) {
-            _proxies = DataUtils.EMPTY_SET;
+            _proxies = Collections.EMPTY_SET;
         } else {
             _proxies = Collections.unmodifiableSet(proxies);
         }
@@ -286,7 +286,7 @@ public class RemoteFileDesc implements Serializable {
         else
             _xmlDocs = null;
 		if(urns == null) {
-			_urns = DataUtils.EMPTY_SET;
+			_urns = Collections.EMPTY_SET;
 		}
 		else {
 			_urns = Collections.unmodifiableSet(urns);
@@ -302,7 +302,7 @@ public class RemoteFileDesc implements Serializable {
         //(the default Java value).  Hence we also initialize
         //_browseHostEnabled.  See class overview for more details.
         if(_urns == null) {
-            _urns = DataUtils.EMPTY_SET;
+            _urns = Collections.EMPTY_SET;
             _browseHostEnabled= false;
         } else {
             // It seems that the Urn Set has some java.io.Files
@@ -327,7 +327,7 @@ public class RemoteFileDesc implements Serializable {
         }
                 
         if(_proxies == null) {
-            _proxies = DataUtils.EMPTY_SET;
+            _proxies = Collections.EMPTY_SET;
         }
 		// preserve the invariant that the LimeXMLDocument array either be
 		// null or have at least one element

@@ -1,15 +1,13 @@
 package com.limegroup.gnutella.dime;
 
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-
-import java.util.Iterator;
-import java.io.InputStream;
 import java.io.IOException;
-
-import com.limegroup.gnutella.util.DataUtils;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Parser for creating DIMERecords from input.
@@ -67,7 +65,7 @@ public class DIMEParser implements Iterator {
      */
     public List getRecords() throws IOException {
         if(_lastRead)
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         
         List records = new LinkedList();
         while(!_lastRead)

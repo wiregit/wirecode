@@ -481,7 +481,7 @@ public class LimeXMLReplyCollection {
         
         // no matches?... exit.
         if( matching == null || matching.size() == 0)
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         
         // Now filter that list using the real XML matching tool...
         List actualMatches = null;
@@ -496,7 +496,7 @@ public class LimeXMLReplyCollection {
         
         // No actual matches?... exit.
         if( actualMatches == null || actualMatches.size() == 0 )
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
 
         return actualMatches;
     }

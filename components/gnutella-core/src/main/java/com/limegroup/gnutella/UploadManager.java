@@ -1498,7 +1498,7 @@ public class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, DataUtils.EMPTY_MAP, false);
+		    this(index, fileName, http11, Collections.EMPTY_MAP, false);
   		}
   		
 		/**
@@ -1515,7 +1515,7 @@ public class UploadManager implements BandwidthTracker {
   			_fileName = fName;
             _http11 = http11;
             if( params == null )
-                _params = DataUtils.EMPTY_MAP;
+                _params = Collections.EMPTY_MAP;
             else
                 _params = params;
             _hadPass = hadPass;

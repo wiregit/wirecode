@@ -26,7 +26,7 @@ public final class LimeXMLDocumentHelper{
     public static List getDocuments(String aggregrateXMLStr, 
                                     int totalResponseCount) {
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
 
         ArrayList retList = new ArrayList();
         DOMParser parser = new DOMParser();

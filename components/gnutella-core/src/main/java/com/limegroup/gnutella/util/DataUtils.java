@@ -49,25 +49,6 @@ public final class DataUtils {
      * Constant empty string array for any class to use -- immutable.
      */
     public static String[] EMPTY_STRING_ARRAY = new String[0];
-
-    /**
-     * Utility immutable emtpy set (not supported in 1.1.8 version of 
-     * Collections class in collections).
-     */
-    public static final Set EMPTY_SET = 
-        Collections.unmodifiableSet(new HashSet(0));
-        
-    /**
-     * An empty list.
-     */
-    public static final List EMPTY_LIST =
-        Collections.unmodifiableList(new ArrayList(0));
-        
-    /**
-     * An empty map.
-     */
-    public static final Map EMPTY_MAP =
-        Collections.unmodifiableMap(new HashMap(0));
         
     /**
      * An 16-length empty byte array, for GUIDs.

@@ -134,7 +134,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
-             false, DataUtils.EMPTY_SET);
+             false, Collections.EMPTY_SET);
     }
 
 
@@ -163,7 +163,7 @@ public class QueryReply extends Message implements Serializable{
              DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply, false, DataUtils.EMPTY_SET);
+             true, isMulticastReply, false, Collections.EMPTY_SET);
     }
 
 
@@ -198,7 +198,7 @@ public class QueryReply extends Message implements Serializable{
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
-             supportsChat, isMulticastReply, DataUtils.EMPTY_SET);
+             supportsChat, isMulticastReply, Collections.EMPTY_SET);
     }
 
     /** 
@@ -409,7 +409,7 @@ public class QueryReply extends Message implements Serializable{
                 // size of standard, no options, ggep block...
                 int ggepLen=
                     _ggepUtil.getQRGGEP(false, false, false,
-                                        DataUtils.EMPTY_SET).length;
+                                        Collections.EMPTY_SET).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -1023,7 +1023,7 @@ public class QueryReply extends Message implements Serializable{
             this._supportsBrowseHost=supportsBrowseHostT;
             this._replyToMulticast=replyToMulticastT;
             if(proxies == null) {
-                this._proxies = DataUtils.EMPTY_SET;
+                this._proxies = Collections.EMPTY_SET;
             } else {
                 this._proxies = proxies;
             }

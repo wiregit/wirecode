@@ -72,7 +72,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * much much easier.
 	 */
 	private volatile List /* of LimeXMLDocument */ _limeXMLDocs = 
-	    DataUtils.EMPTY_LIST;
+	    Collections.EMPTY_LIST;
 
 	/**
 	 * The collection of alternate locations for the file.
