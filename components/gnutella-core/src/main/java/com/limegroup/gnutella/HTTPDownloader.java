@@ -280,7 +280,7 @@ public class HTTPDownloader implements Runnable {
         _stateString = null;
 
         SettingsManager set = SettingsManager.instance();
-        _downloadDir = set.getSaveDirectory();
+        _downloadDir = set.getIncompleteDirectory();
         String pathname = _downloadDir + _filename;
         File myFile = new File(pathname);
 
@@ -495,7 +495,6 @@ public class HTTPDownloader implements Runnable {
                 c = _br.read(buf);
             }
             catch (Exception e) {
-                e.printStackTrace();
                 _state = ERROR;
                 return;
             }
@@ -541,6 +540,7 @@ public class HTTPDownloader implements Runnable {
         else
         {
             _state = ERROR;
+            _stateString = "Interrupted";
         }
     }
 
