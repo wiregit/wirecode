@@ -12,6 +12,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Iterator;
 
 import junit.framework.Test;
 
@@ -60,13 +61,33 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     }      
     
     private static void doSettings() {
-        TIMEOUT = 3000;
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
+        TIMEOUT = 1250;
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
+        mp3 = 
+        CommonUtils.getResourceFile("com/limegroup/gnutella/ByteOrderTest.java");
+        // now move them to the share dir
+        CommonUtils.copy(mp3, new File(_sharedDir, "meta audio.mp3"));
+        mp3 = 
+        CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        // now move them to the share dir
+        CommonUtils.copy(mp3, new File(_sharedDir, "meta video.wmv"));
+        mp3 = 
+        CommonUtils.getResourceFile("com/limegroup/gnutella/Base32Test.java");
+        // now move them to the share dir
+        CommonUtils.copy(mp3, new File(_sharedDir, "meta doc.txt"));
+        mp3 = 
+        CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
+        // now move them to the share dir
+        CommonUtils.copy(mp3, new File(_sharedDir, "meta image.png"));
+        mp3 = 
+        CommonUtils.getResourceFile("com/limegroup/gnutella/MediaTypeTest.java");
+        // now move them to the share dir
+        CommonUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
     }   
     
     //////////////////////////////////////////////////////////////////
@@ -172,7 +193,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     
     public void testMetaFlagQuery() throws Exception {
-
+        drainAll();
         {
         // first test a normal query with no meta flag info
         QueryRequest query = 
@@ -237,6 +258,131 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         Response resp = (Response) results.get(0);
         assertEquals("berkeley.txt", resp.getName());
         }
+    }
+
+    public void testAdvancedMetaQuery() throws Exception {
+        drainAll();
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "meta", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | 
+                             QueryRequest.AUDIO_MASK | 
+                             QueryRequest.DOC_MASK |
+                             QueryRequest.VIDEO_MASK | 
+                             QueryRequest.IMAGE_MASK | 
+                             QueryRequest.LIN_PROG_MASK);
+        
+        testUP[0].send(query);
+        testUP[0].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 5 responses
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(5, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("meta audio.mp3"));
+        assertTrue(names.contains("meta video.wmv"));
+        assertTrue(names.contains("meta image.png"));
+        assertTrue(names.contains("meta doc.txt"));
+        assertTrue(names.contains("meta program txt.bin"));
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "meta", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | 
+                             QueryRequest.AUDIO_MASK | 
+                             QueryRequest.DOC_MASK |
+                             QueryRequest.IMAGE_MASK | 
+                             QueryRequest.LIN_PROG_MASK);
+        
+        testUP[1].send(query);
+        testUP[1].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 4 responses
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(4, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("meta audio.mp3"));
+        assertTrue(names.contains("meta image.png"));
+        assertTrue(names.contains("meta doc.txt"));
+        assertTrue(names.contains("meta program txt.bin"));
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "txt", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | 
+                             QueryRequest.DOC_MASK |
+                             QueryRequest.IMAGE_MASK);
+        
+        testUP[2].send(query);
+        testUP[2].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 3 responses
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(3, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("meta doc.txt"));
+        assertTrue(names.contains("berkeley.txt"));
+        assertTrue(names.contains("susheel.txt"));
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "txt", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | 
+                             QueryRequest.LIN_PROG_MASK |
+                             QueryRequest.IMAGE_MASK);
+        
+        testUP[3].send(query);
+        testUP[3].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 1 responses
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[3],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(1, results.size());
+        Response resp = (Response) results.get(0);
+        assertEquals("meta program txt.bin", resp.getName());
+        }
+
+
     }
 
 }
