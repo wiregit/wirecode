@@ -265,7 +265,14 @@ public class SettingsManager implements SettingsInterface {
                 }
 
                 else if(key.equals(SAVE_DIRECTORY)) {
-                    setSaveDirectory(new File(p));
+					try {
+						setSaveDirectory(new File(p));
+					} catch(IOException ioe) {
+						// if we get an IOException, then the save 
+						// directory could not be set for some reason,
+						// so simply use the default
+						setSaveDirectory(getSaveDefault());
+					}
                 }
 
                 else if(key.equals(DIRECTORIES)) {
