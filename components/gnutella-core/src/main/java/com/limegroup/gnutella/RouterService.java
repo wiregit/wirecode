@@ -104,7 +104,7 @@ public class RouterService
      * Dump the list of connections
      */
     public void dumpConnections() {
-        Iterator iter=manager.connections();
+        Iterator iter=manager.getConnections().iterator();
         while (iter.hasNext())
             System.out.println(iter.next().toString());
     }
@@ -209,7 +209,8 @@ public class RouterService
         //1. Prevent any new threads from starting.
         setKeepAlive(0);
         //2. Remove all connections.
-        for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+        for (Iterator iter=manager.getConnections().iterator();
+             iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             removeConnection(c);
         }
@@ -254,7 +255,8 @@ public class RouterService
     public void adjustSpamFilters() {
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
-        for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+        for (Iterator iter=manager.getConnections().iterator();
+             iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             c.setPersonalFilter(SpamFilter.newPersonalFilter());
             c.setRouteFilter(SpamFilter.newRouteFilter());
@@ -297,7 +299,8 @@ public class RouterService
      */
     public long getNumHosts() {
         long ret=0;
-        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getNumHosts();
         return ret;
     }
@@ -307,7 +310,8 @@ public class RouterService
      */
     public long getNumFiles() {
         long ret=0;
-        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getNumFiles();
         return ret;
     }
@@ -317,7 +321,8 @@ public class RouterService
      */
     public long getTotalFileSize() {
         long ret=0;
-        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getTotalFileSize();
         return ret;
     }
@@ -333,7 +338,8 @@ public class RouterService
      */
     public void updateHorizon() {
         //Reset statistics first
-        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext() ; )
             ((ManagedConnection)iter.next()).clearHorizonStats();
 
         //Send ping to everyone.
@@ -384,7 +390,8 @@ public class RouterService
         ManagedConnection c=null;
 
         //1. See if we're connected....
-        for (Iterator iter=manager.initializedConnections(); iter.hasNext(); ) {
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext() ; ) {
             ManagedConnection c2=(ManagedConnection)iter.next();
             //Get the IP address of c2 in dotted decimal form.  Note
             //that c2.getOrigHost is no good as it may return a
@@ -423,7 +430,7 @@ public class RouterService
         if (manager.getNumConnections()>manager.getKeepAlive()) {
             ManagedConnection worst=null;
             long files=Long.MAX_VALUE;
-            for (Iterator iter=manager.connections();
+            for (Iterator iter=manager.getConnections().iterator();
                  iter.hasNext(); ) {
                 ManagedConnection c2=(ManagedConnection)iter.next();
                 //Don't remove the connection to the host we are browsing.

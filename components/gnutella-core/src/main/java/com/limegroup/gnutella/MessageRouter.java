@@ -204,7 +204,7 @@ public class MessageRouter
                                                     this,
                                                     _callback,
                                                     _acceptor,
-                                                    _manager)
+                                                    _manager);
         }
     }
 
@@ -423,7 +423,7 @@ public class MessageRouter
         Assert.that(m != null);
         // Note the use of initializedConnections only.
         for(Iterator iterConnections =
-                _manager.initializedConnections();
+                _manager.getInitializedConnections().iterator();
             iterConnections.hasNext();  )
         {
             Connection c = (Connection)iterConnections.next();

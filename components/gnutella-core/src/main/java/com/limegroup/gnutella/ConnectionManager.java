@@ -173,26 +173,26 @@ public class ConnectionManager {
     }
 
     /**
-     * @return an iterator of a clone of this' initialized connections.
+     * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
      * the modifications will not be visible during the iteration.
      */
-    public Iterator initializedConnections() {
+    public List getInitializedConnections() {
         List clone=new ArrayList();
         clone.addAll(_initializedConnections);
-        return clone.iterator();
+        return clone;
     }
 
     /**
-     * @return an iterator of a clone of all of this' connections.
+     * @return a clone of all of this' connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
      * the modifications will not be visible during the iteration.
      */
-    public Iterator connections() {
+    public List getConnections() {
         List clone=new ArrayList(_connections);
-        return clone.iterator();
+        return clone;
     }
 
     /**
