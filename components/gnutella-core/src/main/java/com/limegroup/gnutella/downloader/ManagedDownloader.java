@@ -2049,18 +2049,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     commonOutFile.open(incompleteFile,this);
                 } catch(IOException e) {
-                    // If the user's disk is full, let them know.
-                    if(StringUtils.contains(e.getMessage(), "No space left", 
-                           true) || 
-                       StringUtils.contains(e.getMessage(), "not enough space", 
-                           true)) { 
-                        MessageService.showMessage("DOWNLOAD_DISK_FULL");
-                    } else {
-                        // This is a serious problem if it happens.
+                    if(!IOUtils.handleException(e, "DOWNLOAD"))
                         ErrorService.error(e);
-                    }
-                    
-                    //Ideally we should show the user some sort of message here.
                     return COULDNT_MOVE_TO_LIBRARY;
                 }
                 //update needed

@@ -1,12 +1,44 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
 
 /**
  * Provides utility I/O methods, used by multiple classes
  * @author Anurag Singla
  */
 public class IOUtils {
+    
+    /**
+     * Attempts to handle an IOException.  If we know expect the problem,
+     * we can either ignore it or display a friendly error (both returning
+     * true, for handled) or expect the outer-world to handle it (and
+     * return false).
+     *
+     * If friendly is null, a generic error related to the bug is displayed.
+     *
+     * @return true if we could handle the error.
+     */
+    public static boolean handleException(IOException ioe, String friendly) {
+        String msg = ioe.getMessage();
+        if(msg == null)
+            return false;
+            
+        if(friendly == null)
+            friendly = "GENERIC";
+        
+        msg = msg.toLowerCase();
+        // If the user's disk is full, let them know.
+        if(StringUtils.contains(msg, "no space left") || 
+           StringUtils.contains(msg, "not enough space")) {
+            MessageService.showError("ERROR_DISK_FULL_" + friendly);
+            return true;
+        }
+        
+        // dunno what to do, let the outer world handle it.
+        return false;
+    }       
 
     /**
      * Returns the first word of specified maximum size up to the first space
