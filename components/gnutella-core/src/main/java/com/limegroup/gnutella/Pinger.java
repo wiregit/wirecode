@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * This class continually sends broadcast pings on behalf of an Ultrapeer
@@ -16,6 +17,12 @@ public final class Pinger implements Runnable {
      * Single <tt>Pinger</tt> instance, following the singleton pattern.
      */
     private static final Pinger INSTANCE = new Pinger();
+
+    /**
+     * Constant for the number of milliseconds to wait between ping 
+     * broadcasts.  Public to make testing easier.
+     */
+    public static final int PING_INTERVAL = 2000;
 
     /**
      * Returns the single <tt>Pinger</tt> instance.
@@ -48,12 +55,13 @@ public final class Pinger implements Runnable {
     public void run() {
         try {
             while(true) {
-                if(RouterService.isSupernode()) {
+                if(RouterService.isSupernode() &&
+                   PingPongSettings.PINGS_ACTIVE.getValue()) {
                     RouterService.getMessageRouter().
                         broadcastPingRequest(new PingRequest((byte)3));
                 }
                 
-                Thread.sleep(2000);
+                Thread.sleep(PING_INTERVAL);
             }
         } catch(Throwable t) {
             ErrorService.error(t);
