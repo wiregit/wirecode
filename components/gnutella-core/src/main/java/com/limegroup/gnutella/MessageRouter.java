@@ -552,27 +552,22 @@ public abstract class MessageRouter {
 	}
 
     /**
-     * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
-     * does the broadcast, and generates a response.
+     * Handles pings from the network.  With the addition of pong caching, this
+     * method will either respond with cached pongs, or it will ignore the ping
+     * entirely if another ping has been received from this connection very
+     * recently.  If the ping is TTL=1, we will always process it, as it may
+     * be a hearbeat ping to make sure the connection is alive and well.
      *
-     * You can customize behavior in three ways:
-     *   1. Override. You can assume that duplicate messages
-     *      (messages with the same GUID that arrived via different paths) have
-     *      already been filtered.  If you want stats updated, you'll
-     *      have to call super.handlePingRequest.
-     *   2. Override broadcastPingRequest.  This allows you to use the default
-     *      handling framework and just customize request routing.
-     *   3. Implement respondToPingRequest.  This allows you to use the default
-     *      handling framework and just customize responses.
+     * @param ping the ping to handle
+     * @param handler the <tt>ReplyHandler</tt> instance that sent the ping
      */
-    protected void handlePingRequest(PingRequest pingRequest,
-                                     ReplyHandler receivingConnection) {
-        //if(pingRequest.getTTL() > 0)
-        //  broadcastPingRequest(pingRequest, receivingConnection,
-        //                       _manager);
-
-        respondToPingRequest(pingRequest);
+    final private void handlePingRequest(PingRequest ping,
+                                         ReplyHandler handler) {
+        // if it's a TTL=1 ping, such as a heartbeat ping, or if we should
+        // allow new pings on this connection, allow it.
+        if((ping.getHops() == 1) || handler.allowNewPings()) {
+            respondToPingRequest(ping);
+        } 
     }
 
 
@@ -917,9 +912,9 @@ public abstract class MessageRouter {
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    protected void broadcastPingRequest(PingRequest request,
-                                        ReplyHandler receivingConnection,
-                                        ConnectionManager manager) {
+    private void broadcastPingRequest(PingRequest request,
+                                      ReplyHandler receivingConnection,
+                                      ConnectionManager manager) {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
 
