@@ -1084,7 +1084,7 @@ public abstract class MessageRouter {
         RoutedQueryStat.LEAF_DROP.addData(notSent);
         
         for(int i=0; i<hitConnections.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
+            ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
             if(mc == handler) continue;
             
             // sendRoutedQueryToHost is not called because 
