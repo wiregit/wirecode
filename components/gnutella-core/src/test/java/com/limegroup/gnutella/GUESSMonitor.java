@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.guess.*;
 import java.io.*;
 import java.util.*;
 
@@ -115,6 +116,8 @@ public class GUESSMonitor {
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
                     debug("guessPongLoop(): consuming Pong = " + currPong);
+                    GUESSStatistics.getAckStatistics(currPong.getIP(),
+                                                     currPong.getPort());
                 }
             }
             debug("guessPongLoop(): returning.");
