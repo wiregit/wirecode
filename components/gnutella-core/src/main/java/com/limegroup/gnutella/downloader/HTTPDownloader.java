@@ -176,13 +176,14 @@ public class HTTPDownloader implements BandwidthTracker {
                NotSharingException, QueuedException {
         _amountToRead = stop-start;
 		_initialReadingPoint = start;
-        //Write GET request and headers.  TODO: we COULD specify the end of the
-        //range (i.e., start+bytes).  But why bother?
+        //Write GET request and headers.  We request HTTP/1.1 since we need
+        //persistence for queuing, even though we don't currently use it for
+        //anything else.  (So we can't write "Connection: close".)
         OutputStream os = _socket.getOutputStream();
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.1\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
         if(supportQueueing)
@@ -202,6 +203,8 @@ public class HTTPDownloader implements BandwidthTracker {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}
 
+        //TODO: we COULD specify the end of the range (i.e., start+bytes).  
+        //But why bother?  This will change when we add persistence.
         out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
