@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 
@@ -107,6 +108,21 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns) {
+        this(guid, ttl, minSpeed, query, richQuery, isRequery, 
+             requestedUrnTypes, queryUrns, null, null);
+    }
+
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  Also allows addition of GGEP for Unicast protocol support.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery,
+                        Set requestedUrnTypes, Set queryUrns,
+                        InetAddress host, Integer port) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
         this.minSpeed=minSpeed;
@@ -311,6 +327,30 @@ public class QueryRequest extends Message implements Serializable{
     public int getMinSpeed() {
         return minSpeed;
     }
+
+
+    /** @return Whether or not this QueryRequest supports the unicast protocol.
+     */
+    public boolean supportsUnicast() {
+        return false;
+    }
+
+
+    /** @return Given supportsUnicast(), this will return the InetAddress to
+     *  contact for unicast replies.  May return null.
+     */
+    public InetAddress getUDPAddress() {
+        return null;
+    }
+
+
+    /** @return Given supportsUnicast(), this will return the port to
+     *  contact for unicast replies.  May return null.
+     */
+    public Integer getPort() {
+        return null;
+    }
+
 
     /** Returns this, because it's always safe to send big queries. */
     public Message stripExtendedPayload() {
