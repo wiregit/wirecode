@@ -23,7 +23,8 @@ public class StandardMessageRouter extends MessageRouter {
      * handling for both "heartbeat" pings that were sent to ensure that
      * the connection is still live as well as for pings from a crawler.
      *
-     * @param 
+     * @param ping the <tt>PingRequest</tt> to respond to
+     * @param handler the <tt>ReplyHandler</tt> to send any pongs to
      */
     protected void respondToPingRequest(PingRequest ping,
                                         ReplyHandler handler) {
@@ -75,9 +76,13 @@ public class StandardMessageRouter extends MessageRouter {
         Iterator iter = pongs.iterator();
         byte[] guid = ping.getGUID();
 
+        String pingerIP = handler.getInetAddress().getHostAddress();
         while(iter.hasNext()) {
-            sendPingReply(((PingReply)iter.next()).mutateGUID(guid),
-                          handler);
+            PingReply pr = (PingReply)iter.next();
+            if(pr.getIP().equals(pingerIP)) {
+                continue;
+            }
+            sendPingReply(pr.mutateGUID(guid), handler);
         }
     }
 
