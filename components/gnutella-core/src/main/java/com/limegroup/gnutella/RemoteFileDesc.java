@@ -698,7 +698,8 @@ public class RemoteFileDesc implements Serializable {
     }
 
     public final boolean supportsFWTransfer() {
-        return _pushAddr.supportsFWTVersion() > 0;
+        
+        return _pushAddr == null ? false : _pushAddr.supportsFWTVersion() > 0;
     }
 
     /**

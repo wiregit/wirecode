@@ -709,7 +709,7 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-
+        
         // With the new handling of probe queries (TTL 1, Hops 0), we have a few
         // new options:
         // 1) If we have a probe query....

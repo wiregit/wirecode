@@ -73,4 +73,11 @@ public class FilterSettings extends LimeProps {
 	 */
     public static final StringArraySetting BANNED_WORDS =
         FACTORY.createStringArraySetting("BANNED_WORDS", new String[0]);
+    
+    /**
+     * Whether to filter queries containing hashes.
+     * TODO: naming convention for SIMPP keys?
+     */
+    public static final BooleanSetting FILTER_HASH_QUERIES =
+        FACTORY.createSettableBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
 }

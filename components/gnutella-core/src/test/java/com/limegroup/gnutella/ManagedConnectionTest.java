@@ -14,7 +14,9 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -343,6 +345,35 @@ public class ManagedConnectionTest extends BaseTestCase {
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());
 		sleep(2000);
+    }
+    
+    /**
+     * tests that the node filters hash queries correctly based on the
+     * settings.
+     */
+    public void testHashFiltering() throws Exception {
+        
+        URN sha1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        
+        QueryRequest urnFile = QueryRequest.createQuery(sha1,"java");
+        
+        ManagedConnection out=null;
+
+		out = new ManagedConnection("localhost", Backend.BACKEND_PORT);
+        out.initialize();            
+        out.buildAndStartQueues();
+        
+        
+        // default should be no filtering
+        assertFalse(out.isSpam(urnFile));
+        
+        // now turn filtering on and rebuild filters
+        FilterSettings.FILTER_HASH_QUERIES.setValue(true);
+        RouterService.adjustSpamFilters();
+        
+        assertTrue(out.isSpam(urnFile));
+
+        FilterSettings.FILTER_HASH_QUERIES.setValue(false);
     }
 
     class GGEPResponder implements HandshakeResponder {
