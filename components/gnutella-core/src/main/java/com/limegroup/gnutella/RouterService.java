@@ -53,9 +53,10 @@ public final class RouterService {
     private static final FileManager fileManager = new MetaFileManager();
 
     /**
-     * For authenticating users
+     * For authenticating users.
      */
-    private static Authenticator authenticator = new ServerAuthenticator();
+    private static final Authenticator authenticator = 
+		new ServerAuthenticator();
 
 	/**
 	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
