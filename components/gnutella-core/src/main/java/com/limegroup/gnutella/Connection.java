@@ -988,7 +988,17 @@ public class Connection {
         return OUTGOING;
     }
 
-    
+    /**
+     * Utility method for checking whether or not this connection is in
+     * blocking mode.
+     * 
+     * @return <tt>true</tt> if this connection is in blocking mode,
+     *  otherwise <tt>false</tt>
+     */
+    private final boolean isBlocking() {
+        return getChannel().isBlocking();
+    }
+       
     /** 
      * Like Connection.write(m), but may queue and write more than one message. 
      * Never blocks, even if this is a blocking connection.
@@ -1014,10 +1024,6 @@ public class Connection {
             // TODO:: we need to implement this!!!
             //return true;
         }
-    }
-
-    private final boolean isBlocking() {
-        return getChannel().isBlocking();
     }
 
     
