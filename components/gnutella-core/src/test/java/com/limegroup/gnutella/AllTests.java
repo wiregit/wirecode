@@ -12,6 +12,7 @@ public class AllTests {
         suite.addTest(HostCatcherTest.suite());
         suite.addTest(ManagedConnectionTest.suite());
         suite.addTest(GUIDTest.suite());
+        suite.addTest(StatisticsTest.suite());
         return suite;
     }
 

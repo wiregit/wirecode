@@ -230,6 +230,9 @@ public final class SettingsManager {
 	 */
 	private final long    DEFAULT_TOTAL_UPTIME        = 20*60;
 
+    private final long    DEFAULT_LAST_SHUTDOWN_TIME  = 0;
+    private final float   DEFAULT_FRACTIONAL_UPTIME   = 0.0f;
+
 	/**
 	 * Default value for whether or not some installation sequence,
 	 * whether it be InstallShield, InstallAnywhere, or our own
@@ -438,6 +441,8 @@ public final class SettingsManager {
     private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
     private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
     private final String SESSIONS              = "SESSIONS";
+    private final String LAST_SHUTDOWN_TIME    = "LAST_SHUTDOWN_TIME";
+    private final String FRACTIONAL_UPTIME     = "FRACTIONAL_UPTIME";
 	private final String INSTALLED             = "INSTALLED";
 	private final String APP_WIDTH             = "APP_WIDTH";
 	private final String APP_HEIGHT            = "APP_HEIGHT";
@@ -1083,6 +1088,12 @@ public final class SettingsManager {
 				else if(key.equals(TOTAL_UPTIME)) {
 					setTotalUptime(Long.parseLong(p));
 				}
+                else if(key.equals(LAST_SHUTDOWN_TIME)) {
+                    setLastShutdownTime(Long.parseLong(p));
+                }
+                else if(key.equals(FRACTIONAL_UPTIME)) {
+                    setFractionalUptime(Float.parseFloat(p));
+                }
                 else if(key.equals(SERVANT_TYPE)) {
 					setServantType(p);
 				}
@@ -1255,6 +1266,8 @@ public final class SettingsManager {
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
+        setLastShutdownTime(DEFAULT_LAST_SHUTDOWN_TIME);
+        setFractionalUptime(DEFAULT_FRACTIONAL_UPTIME);
         //anu added
         setServantType(DEFAULT_SERVANT_TYPE);
 		setInstalled(DEFAULT_INSTALLED);
@@ -1831,6 +1844,24 @@ public final class SettingsManager {
 		return _sessions;
 	}
 
+    /** 
+     * Returns the fraction of time this is running.
+     * @return a value between 0.0 and 1.0, inclusive
+     * @see setFractionalUptime 
+     */
+    public float getFractionalUptime() {
+        return getFloatValue(FRACTIONAL_UPTIME);
+    }
+
+    /** 
+     * Returns the system time LimeWire was last shut down.
+     * @return the system time in milliseconds
+     * @see setLastShutdownTime 
+     */
+    public long getLastShutdownTime() {
+        return getLongValue(LAST_SHUTDOWN_TIME);
+    }
+
 	/** 
 	 * Returns a boolean indicating whether or not the program 
 	 * has been "installed," with the properties set correctly. 
@@ -2151,6 +2182,30 @@ public final class SettingsManager {
 		String s = Long.toString(_totalUptime);
 		PROPS.put(TOTAL_UPTIME, s);
 	}
+
+    /**
+     * Sets the fraction of time this is running, a unitless quality.  This is
+     * used to identify highly available hosts with big pongs.  This value
+     * should only be updated once per session.
+     * 
+     * @param fraction a number between 0.0 and 1.0f, inclusive
+     * @see com.limegroup.gnutella.Statistics#calculateFractionalUptime
+     */
+    public void setFractionalUptime(float fraction) {
+        //TODO: what if fraction is <0 or >1?
+        setFloatValue(FRACTIONAL_UPTIME, fraction);
+    }
+
+    /**
+     * Sets the time that this was last shutdown.
+     *
+     * @param time the system time in milliseconds of the last shutdown
+     * @see com.limegroup.gnutella.Statistics#calculateFractionalUptime
+     */
+    public void setLastShutdownTime(long time) {
+        //TODO: what if time is negative?
+        setLongValue(LAST_SHUTDOWN_TIME, time);
+    }
 
     /** 
 	 * Sets the maximum length of packets (spam protection)
@@ -3261,6 +3316,17 @@ public final class SettingsManager {
 	}
 
 	/**
+	 * Sets the <tt>float</tt> value for the specified key as a
+	 * <tt>Float</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param FLOAT the <tt>float</tt> value to set
+	 */
+	private void setFloatValue(final String KEY, final float FLOAT) {
+		PROPS.put(KEY, Float.toString(FLOAT));
+	}
+
+	/**
 	 * Sets the <tt>String</tt> value for the specified key.
 	 *
 	 * @param KEY the key for the value to set
@@ -3318,6 +3384,18 @@ public final class SettingsManager {
 	 */
 	private int getIntValue(final String KEY) {
 		return Integer.parseInt(PROPS.getProperty(KEY));
+	}
+
+	/**
+	 * Returns the <tt>float</tt> value associated with the
+	 * specified key.
+	 *
+	 * @param KEY the key for the desired value
+	 * @return the <tt>float</tt> value associated with the
+	 *  specified key
+	 */
+	private float getFloatValue(final String KEY) {
+		return Float.parseFloat(PROPS.getProperty(KEY));
 	}
 
     /**

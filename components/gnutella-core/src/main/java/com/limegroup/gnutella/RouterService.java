@@ -139,6 +139,9 @@ public class RouterService
 
 		this.downloader.initialize(callback, router, acceptor, fileManager);
 		
+        //Ensure statistcs have started (by loading class).
+        Statistics.instance();
+
 		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
                                                    downloader, 
                                                    manager);
@@ -414,6 +417,9 @@ public class RouterService
      * Shuts down the backend and writes the gnutella.net file.
      */
     public void shutdown() {
+        //Update fractional uptime statistics (before writing limewire.props)
+        Statistics.instance().shutdown();
+
         //Write gnutella.net
         try {
             //ask the manager to add connected supernode endpoints to
