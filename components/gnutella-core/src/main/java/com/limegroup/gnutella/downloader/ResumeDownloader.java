@@ -25,10 +25,17 @@ public class ResumeDownloader extends ManagedDownloader
      *  _incompleteFile. */
     private final String _name;
     private final int _size;
-    /** The hash of the completed file.  This field was not included in the LW
-     *  2.7.0/2.7.1 beta, so it may be null when reading downloads.dat files
-     *  from these rare versions.  That's no big deal; its like not having the
-     *  hash in the first place.  */
+    
+    /**
+     * The hash of the completed file.  This field was not included in the LW
+     * 2.7.0/2.7.1 beta, so it may be null when reading downloads.dat files
+     * from these rare versions.  That's no big deal; its like not having the
+     * hash in the first place. 
+     *
+     * This is not used as much anymore, since ManagedDownloader stores the
+     * SHA1 anyway.  It is still used, however, to keep the sha1 between
+     * sessions, since it is serialized.
+     */
     private final URN _hash;
     
 
@@ -64,6 +71,8 @@ public class ResumeDownloader extends ManagedDownloader
     public void initialize(DownloadManager manager, 
                            FileManager fileManager, 
                            ActivityCallback callback) {
+        if(_hash != null)
+            downloadSHA1 = _hash;
         initializeIncompleteFile(_incompleteFile);
         super.initialize(manager, fileManager, callback);
     }
@@ -85,7 +94,7 @@ public class ResumeDownloader extends ManagedDownloader
         //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
         //but more efficient since no allocations in IncompleteFileManager.
         return IncompleteFileManager.same(
-            _name, _size, _hash,     
+            _name, _size, downloadSHA1,     
             other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
@@ -128,14 +137,14 @@ public class ResumeDownloader extends ManagedDownloader
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
 //        Set queryUrns=null;
-//        if (_hash!=null) {
+//        if (downloadSHA1!=null) {
 //            queryUrns=new HashSet(1);
-//            queryUrns.add(_hash);
+//            queryUrns.add(downloadSHA1);
 //        }
         // Extract a query string from our filename.
         String queryName = extractQueryString(getFileName());
 
-        if (_hash != null)
+        if (downloadSHA1 != null)
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change

@@ -392,7 +392,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
      */
-    private URN sha1;
+    protected URN downloadSHA1;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -649,9 +649,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         triedLocatingSources = false;
         // get the SHA1 if we can.
         if(allFiles != null) {
-            for(int i = 0; i < allFiles.length && sha1 == null; i++)
-                sha1 = allFiles[i].getSHA1Urn();
+            for(int i = 0; i < allFiles.length && downloadSHA1 == null; i++)
+                downloadSHA1 = allFiles[i].getSHA1Urn();
         }
+        
+        allFiles = verifyAllFiles(allFiles);
         // stores up to 1000 locations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
@@ -663,6 +665,43 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         setState(QUEUED);
+    }
+    
+    /** 
+     * Verifies the integrity of the RemoteFileDesc[].
+     *
+     * At one point in time, LimeWire somehow allowed files with different
+     * SHA1s to be placed in the same ManagedDownloader.  This breaks
+     * the invariants of the current ManagedDownloader, so we must
+     * remove the extraneous RFDs.
+     */
+    RemoteFileDesc[] verifyAllFiles(RemoteFileDesc[] old) {
+        if(downloadSHA1 == null)
+            return old;
+            
+        List verified = null;
+        // First iterate through each file and see if it contains
+        // atleast one invalid RFD.  If they're all good, then we're fine.
+        for(int i = 0; i < old.length; i++) {
+            URN check = old[i].getSHA1Urn();
+            if(check != null && !downloadSHA1.equals(check)) {
+                verified = new LinkedList();
+                break;
+            }
+        }
+        
+        // If we didn't construct the list, all RFDs were a-okay.
+        if(verified == null)
+            return old;
+            
+        for(int i = 0; i < old.length; i++) {
+            URN check = old[i].getSHA1Urn();
+            if(check == null || downloadSHA1.equals(check))
+                verified.add(old[i]);
+        }
+        
+        RemoteFileDesc[] checked = new RemoteFileDesc[verified.size()];
+        return (RemoteFileDesc[])verified.toArray(checked);
     }
     
     /**
@@ -815,7 +854,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Tries iterative GUESSing of sources.
      */
     private boolean tryGUESSing() {
-        if(originalQueryGUID == null || triedLocatingSources || sha1 == null)
+        if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
             return false;
             
         MessageRouter mr = RouterService.getMessageRouter();
@@ -831,7 +870,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
             // send a guess query
             GUESSEndpoint ep = (GUESSEndpoint) i.next();
-            OnDemandUnicaster.query(ep, sha1);
+            OnDemandUnicaster.query(ep, downloadSHA1);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -894,7 +933,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected void initializeFiles() {
         for(int i = 0; i < allFiles.length; i++)
-            if(shouldAllowRFD(allFiles[i]))
+            if(!isRFDAlreadyStored(allFiles[i]))
                 files.add(allFiles[i]);
     }
 
@@ -1198,8 +1237,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         final long otherLength = other.getSize();
 
         synchronized (this) {
-            if(otherUrn != null && sha1 != null)
-                return otherUrn.equals(sha1);
+            if(otherUrn != null && downloadSHA1 != null)
+                return otherUrn.equals(downloadSHA1);
             
             // compare to allFiles....
             for (int i=0; i<allFiles.length; i++) {
@@ -1286,9 +1325,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected synchronized final boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
         rfd.setDownloading(true);
-        if(sha1 == null)
-            sha1 = rfd.getSHA1Urn();
-                                                            
+        if(downloadSHA1 == null)
+            downloadSHA1 = rfd.getSHA1Urn();
+            
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
             return true;
@@ -1308,7 +1347,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         boolean added = false;
         // Add to the list of RFDs to connect to.
-        if (shouldAllowRFD(rfd))
+        if (!isRFDAlreadyStored(rfd))
             added = files.add(rfd);
         
         //Append to allFiles for resume purposes if caching...
@@ -1344,12 +1383,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
     
-    private synchronized boolean shouldAllowRFD(RemoteFileDesc rfd) {
+    /**
+     * Determines if we already have this RFD in our lists.
+     */
+    private synchronized boolean isRFDAlreadyStored(RemoteFileDesc rfd) {
         if( currentRFDs != null && currentRFDs.contains(rfd))
-            return false;
+            return true;
         if( files != null && files.contains(rfd))
-            return false;
-        return true;
+            return true;
+        return false;
     }
     
     /**
@@ -1448,17 +1490,17 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        Assert.that(sha1 != null, "null hash.");
+        Assert.that(downloadSHA1 != null, "null hash.");
         
-        // Now verify that the SHA1 of the RFD matches.
-        Assert.that(sha1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        
+        Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
         
         // If a validAlts collection wasn't created already
         // (which would only be possible if the initial set of
         // RFDs did not have a hash, but subsequent searches
         // produced RFDs with hashes), create the collection.
         if( validAlts == null )
-            validAlts = AlternateLocationCollection.create(sha1);
+            validAlts = AlternateLocationCollection.create(downloadSHA1);
         
         try {
             loc = AlternateLocation.create(rfd);
@@ -1480,12 +1522,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
-            if(!sha1.equals(ifd.getSHA1Urn())) {
+            if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
                 Assert.silent(false, "wrong IFD.\n" +
                            "ours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
-                           "\nour hash    : " + sha1 +
+                           "\nour hash    : " + downloadSHA1 +
                            "\ntheir hashes: " +
                            DataUtils.listSet(ifd.getUrns())+
                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
@@ -1777,9 +1819,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Create a new validAlts for this sha1.
         // initialize the HashTree
-		if( sha1 != null ) {
-		    validAlts = AlternateLocationCollection.create(sha1);
-            hashTree = TigerTreeCache.instance().getHashTree(sha1);  
+		if( downloadSHA1 != null ) {
+		    validAlts = AlternateLocationCollection.create(downloadSHA1);
+            hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);  
         }
         
         URN fileHash;
@@ -1865,17 +1907,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         catch(InterruptedException ignored) {}
         
         // If we have no hash, we can't check at all.
-        if(sha1 == null)
+        if(downloadSHA1 == null)
             return fileHash;
 
         // If they're equal, everything's fine.
         //if fileHash == null, it will be a mismatch
-        if(sha1.equals(fileHash))
+        if(downloadSHA1.equals(fileHash))
             return fileHash;
         
         if(LOG.isWarnEnabled())
             LOG.warn("hash verification problem, fileHash="+
-                           fileHash+", ourHash="+sha1);
+                           fileHash+", ourHash="+downloadSHA1);
 
         synchronized(corruptStateLock) {
             // immediately set as corrupt,
@@ -1894,7 +1936,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
         if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
-            treeRecoveryFailed(sha1);
+            treeRecoveryFailed(downloadSHA1);
         } else if (hashTree != null) {
             // we can try to use the hashtree to identify corrupt ranges!
             try {
@@ -1907,10 +1949,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
                 corruptState = NOT_CORRUPT_STATE;
                 if(deleted == 0)
-                    treeRecoveryFailed(sha1);
+                    treeRecoveryFailed(downloadSHA1);
             } catch (IOException ioe) {
                 LOG.debug(ioe);
-                treeRecoveryFailed(sha1);
+                treeRecoveryFailed(downloadSHA1);
             }
         }
         
