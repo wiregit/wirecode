@@ -516,6 +516,63 @@ public class ConnectionManager {
         }
     }
 
+    //------------------------------------------------------------------------
+    /**
+     * Create a new connection, blocking until it's initialized, but launching
+     * a new thread to do the message loop.
+     */
+    public ManagedConnection createGroupConnectionBlocking(
+      String hostname, int portnum, GroupPingRequest specialPing) 
+	  throws IOException {
+        ManagedConnection c = 
+		  new ManagedConnection(hostname, portnum, _router, this, true);
+
+        // Initialize synchronously
+        initializeExternallyGeneratedConnection(c);
+        // Kick off a thread for the message loop.
+        new GroupOutgoingConnectionThread(c, specialPing);
+
+        return c;
+    }
+
+    /**
+     * This thread does the message loop for ManagedConnections created
+     * through createGroupConnectionBlocking
+     */
+    private class GroupOutgoingConnectionThread
+            extends Thread {
+        private ManagedConnection _connection;
+        private PingRequest       _specialPing;
+
+        /**
+         * The constructor calls start(), so allow you need to do
+         * is construct the thread.
+         */
+        public GroupOutgoingConnectionThread(
+                ManagedConnection connection, PingRequest specialPing) {
+            _connection  = connection;
+            _specialPing = specialPing;
+            setDaemon(true);
+            start();
+        }
+
+        public void run() {
+            try {
+                _router.sendPingRequest(_specialPing, _connection);
+                _connection.loopForMessages();
+            } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
+            }
+
+            //SettingsManager settings = SettingsManager.instance();
+		    //settings.setUseQuickConnect(true);
+            //setKeepAlive(2);
+        }
+    }
+	//------------------------------------------------------------------------
+
     /**
      * Asynchronously fetches a connection from hostcatcher, then does
      * then initialization and message loop.

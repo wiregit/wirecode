@@ -117,8 +117,78 @@ public class RouterService
 
 	public void connectToGroup(String group) {
 		System.out.println("Connect to: " + group );
+		groupConnect(group);
 	}
 
+//------------------------------------------------------------------------
+    /**
+     * Connect to remote host (establish outgoing connection).
+     * Blocks until connection established but send a GroupPingRequest
+     */
+    public ManagedConnection groupConnectToHostBlocking(
+	  String hostname, int portnum, String group)
+            throws IOException {
+
+        FileManager fm = FileManager.getFileManager();
+        int num_files = fm.getNumFiles();
+        int kilobytes = fm.getSize()/1024;
+
+        SettingsManager settings=SettingsManager.instance();
+        group += ":"+settings.getConnectionSpeed();
+
+        GroupPingRequest pingRequest = 
+		  new GroupPingRequest(SettingsManager.instance().getTTL(),
+            acceptor.getPort(), acceptor.getAddress(),
+            num_files, kilobytes, group);
+
+        return manager.createGroupConnectionBlocking(hostname, portnum, 
+		  pingRequest);
+	}
+
+    /**
+     * Connects to router and sends a GroupPingRequest.
+     * Block until connected.
+     */
+    public void groupConnect(String group) {
+        SettingsManager settings=SettingsManager.instance();
+
+		boolean useQuickConnect = settings.getUseQuickConnect(); 
+		settings.setUseQuickConnect(false);
+
+        // Ensure the keep alive is at least 1.
+        if (settings.getKeepAlive()<1)
+            settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
+        int oldKeepAlive = settings.getKeepAlive();
+
+        // Build an endpoint of the group server
+        String host= "router.limewire.com:6349";
+		Endpoint e;
+		try {
+			e=new Endpoint(host);
+		} catch (IllegalArgumentException exc) {
+			return;
+		}
+
+		// Disconnect from current connections.
+		disconnect();
+
+        // Clear host catcher.  
+        catcher.silentClear();
+
+		// Kickoff the Group Connect fetch of PingReplies
+		try {
+			groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
+		} catch (IOException exc) {
+			return;
+		}
+
+		// Reset the KeepAlive to greater than 1
+        //oldKeepAlive;
+
+        setKeepAlive(oldKeepAlive);
+		settings.setUseQuickConnect(useQuickConnect);
+    }
+//------------------------------------------------------------------------
 
     /**
      * @modifies this
@@ -176,7 +246,14 @@ public class RouterService
      * Clear the hostcatcher if requested
      */
     public void clearHostCatcher() {
-        catcher.clear();
+        catcher.silentClear();
+    }
+
+    /**
+     * Get the real number of hosts from the host catcher
+     */
+    public int getRealNumHosts() {
+        return(catcher.getNumHosts());
     }
 
 
