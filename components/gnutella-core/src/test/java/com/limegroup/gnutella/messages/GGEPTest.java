@@ -217,7 +217,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
         GGEP[] temp = GGEP.read(bytes,0);
-        Assert.assertTrue("read() test - WRONG SIZE: " + temp.length, 
+        assertTrue("read() test - WRONG SIZE: " + temp.length, 
                           temp.length == 1);
                           
         bytes = new byte[32];
@@ -254,14 +254,53 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[30] = (byte)'N';
         bytes[31] = (byte)'I';        
         temp = GGEP.read(bytes,0);
-        Assert.assertTrue("read() test - WRONG SIZE: " + temp.length, 
+        assertTrue("read() test - WRONG SIZE: " + temp.length, 
                           temp.length == 2);
-        Assert.assertTrue("read() test - first ggep wrong size: " +
+        assertTrue("read() test - first ggep wrong size: " +
                           temp[0].getHeaders().size(),
                           temp[0].getHeaders().size() == 1);
-        Assert.assertTrue("read() test - second ggep wrong size: " +
+        assertTrue("read() test - second ggep wrong size: " +
                           temp[1].getHeaders().size(),
                           temp[1].getHeaders().size() == 2);
+
+        bytes = new byte[32];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x85;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[9] = (byte)0x15;
+        bytes[10] = (byte)'B';
+        bytes[11] = (byte)'H';
+        bytes[12] = (byte)'O';
+        bytes[13] = (byte)'S';
+        bytes[14] = (byte)'T';
+        bytes[15] = (byte)0x40;
+        bytes[16] = (byte)0x87;
+        bytes[17] = (byte)'S';
+        bytes[18] = (byte)'U';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'H';
+        bytes[21] = (byte)'E';
+        bytes[22] = (byte)'E';
+        bytes[23] = (byte)'L';
+        bytes[24] = (byte)0x47;
+        bytes[25] = (byte)'D';
+        bytes[26] = (byte)'A';
+        bytes[27] = (byte)'S';
+        bytes[28] = (byte)'W';
+        bytes[29] = (byte)'A';
+        bytes[30] = (byte)'N';
+        bytes[31] = (byte)'I';
+        try {
+            temp = GGEP.read(bytes,0);
+            assertTrue(false);
+        }
+        catch (BadGGEPBlockException expected) {}
 
     }
 
@@ -297,16 +336,16 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         GGEP temp = new GGEP(bytes,0, endOffset);
         Set headers = temp.getHeaders();
-        Assert.assertTrue("Test 5 - NO BHOST!", headers.contains("BHOST"));
+        assertTrue("Test 5 - NO BHOST!", headers.contains("BHOST"));
         try {
             temp.getString("BHOST");
             fail("No BadGGEPPropertyException.");
         } catch (BadGGEPPropertyException e) {
         }
-        Assert.assertTrue("Test 5 - NO SUSH!", headers.contains("SUSHEEL"));
+        assertTrue("Test 5 - NO SUSH!", headers.contains("SUSHEEL"));
         Object shouldNotBeNull = temp.getString("SUSHEEL");
-        Assert.assertTrue("Test 5 - NULL!", shouldNotBeNull != null);
-        Assert.assertTrue("Test 5 - endOffset off: " + endOffset[0], 
+        assertTrue("Test 5 - NULL!", shouldNotBeNull != null);
+        assertTrue("Test 5 - endOffset off: " + endOffset[0], 
                           endOffset[0] == 24);
     }
 
@@ -344,14 +383,14 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[8] = (byte)0xA5; // compressed
         GGEP temp = new GGEP(bytes,0,null);
         Set headers = temp.getHeaders();
-        Assert.assertTrue("Test 6 - COMPRESSED!", 
+        assertTrue("Test 6 - COMPRESSED!", 
                           !headers.contains("SUSHEEL"));
 
 
         bytes[8] = (byte)0x80; // 0 len header
         try {
             temp = new GGEP(bytes,0,null);
-            Assert.assertTrue("Test 6 - 0 LEN HEADER!", false);
+            assertTrue("Test 6 - 0 LEN HEADER!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
         }
@@ -363,7 +402,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[19] = (byte)0xBF;
         try {
             temp = new GGEP(bytes,0,null);
-            Assert.assertTrue("Test 6 - >3 DATA LEN!", false);
+            assertTrue("Test 6 - >3 DATA LEN!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
         }
@@ -407,7 +446,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
                 
         assertTrue("Different headers",
                    one.getHeaders().equals(two.getHeaders()));
-        Assert.assertTrue("One is not Two!!", one.equals(two));
+        assertTrue("One is not Two!!", one.equals(two));
     }
 
 
