@@ -78,6 +78,11 @@ public class FileManager {
      *  if this has no callback.  */
     private static ActivityCallback _callback;
 
+	/**
+	 * Reference to the <tt>FileDescLoader</tt> for creating <tt>FileDesc</tt>s.
+	 */
+	private FileDescLoader _fileDescLoader;
+
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
     private static final boolean isDelimeter(char c) {
@@ -110,6 +115,7 @@ public class FileManager {
         _urnIndex = new Hashtable();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
+		_fileDescLoader = new FileDescLoader(this);
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -613,7 +619,8 @@ public class FileManager {
 			return false;
 		_size += fileLength;
 		int fileIndex = _files.size();
-		FileDesc fileDesc = new FileDesc(file, fileIndex);
+		FileDesc fileDesc = _fileDescLoader.createFileDesc(file, fileIndex);
+		//FileDesc fileDesc = new FileDesc(file, fileIndex);
 		_files.add(fileDesc);
 		_numFiles++;
 		
@@ -642,11 +649,7 @@ public class FileManager {
 			}
 			//Add fileIndex to the set.
 			indices.add(fileIndex);
-		}
-		
-		// Ensure file can be found by URN lookups
-		this.updateUrnIndex(fileDesc);
-		
+		}		
 		return true;
     }
 
@@ -655,7 +658,7 @@ public class FileManager {
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
      */
-    private synchronized void updateUrnIndex(FileDesc fileDesc) {
+    public synchronized void updateUrnIndex(FileDesc fileDesc) {
 		Iterator iter = fileDesc.getUrns().iterator();
 		while (iter.hasNext()) {
 			URN urn = (URN)iter.next();
