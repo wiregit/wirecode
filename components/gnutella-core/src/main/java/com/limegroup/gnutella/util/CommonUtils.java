@@ -15,7 +15,7 @@ import java.io.*;
 public class CommonUtils {
 
 	// constant for the current version of LimeWire
-	private static final String LIMEWIRE_VERSION = "1.4";
+	private static final String LIMEWIRE_VERSION = "UPDATE_TEST";
 	
 	// variable for the system properties
 	private static Properties _props;
