@@ -11,8 +11,8 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**
- * Sends Gnutella messages via UDP to a set of hosts and calls back to a listener
- * whenever responses are returned.
+ * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
+ * listener whenever responses are returned.
  */
 public class UDPHostRanker {
 
