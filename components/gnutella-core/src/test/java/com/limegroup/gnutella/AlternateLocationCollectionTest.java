@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
@@ -45,10 +45,10 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
 			if(!created) {
 				_alCollection = 
-					AlternateLocationCollection.createCollection(al.getSHA1Urn());
+					AlternateLocationCollection.create(al.getSHA1Urn());
                 created = true;
 			}
-			_alCollection.addAlternateLocation(al);
+			_alCollection.add(al);
 		}
 	}
 
@@ -58,72 +58,30 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
     public void testWasRemoved() throws Exception {
         AlternateLocation al = HugeTestUtils.EQUAL_SHA1_LOCATIONS[0];
         URN sha1 = al.getSHA1Urn();
-        AlternateLocationCollection alc = 
-            AlternateLocationCollection.createCollection(sha1);
-        alc.addAlternateLocation(al);
-        alc.removeAlternateLocation(al);
-        assertTrue("should have been removed", alc.wasRemoved(al));
+        AlternateLocationCollection a=AlternateLocationCollection.create(sha1);
+        AlternateLocationCollection b=AlternateLocationCollection.create(sha1);
+        AltLocCollectionsManager man = new AltLocCollectionsManager(a,b);
+        man.addLocation(al);
+        man.removeLocation(al,false);
+        assertFalse("should not have been removed", man.wasRemoved(al));
+        man.removeLocation(al,true);
+        assertTrue("loc should have been removed", man.wasRemoved(al));
     }
 
-    /**
-     * Test the method for getting a diff of the alternate location
-     * collection.
-     */
-    public void testDiffAlternateLocationCollection() throws Exception {
-
-        // make sure the general case works
-        AlternateLocation al = HugeTestUtils.EQUAL_SHA1_LOCATIONS[0];
-        URN sha1 = al.getSHA1Urn();
-        AlternateLocationCollection alc1 = 
-            AlternateLocationCollection.createCollection(sha1);
-
-        alc1.addAlternateLocation(al);
-
-        // create a second one to pass into the diff method
-        AlternateLocationCollection alc2 = 
-            AlternateLocationCollection.createCollection(sha1);
-        alc2.addAlternateLocation(al);
-        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
-        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
-        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
-
-        // create a third one that should be equal to the diffed collection
-        // after the method is invoked
-        AlternateLocationCollection alc3 = 
-            AlternateLocationCollection.createCollection(sha1);
-        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
-        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
-        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
-
-        
-        AlternateLocationCollection alcTest = 
-            alc1.diffAlternateLocationCollection(alc2);
-        assertEquals("diffed collection should be equal", alc3, alcTest);
-
-        
-        // now, make sure the diff works when some of the locations 
-        // have already been removed.
-        alc1.removeAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
-        
-        // if the above remove hadn't worked, or if the diff method 
-        // didn't work, this would return alc2
-        alcTest = alc1.diffAlternateLocationCollection(alc2);
-        assertEquals("diffed collection should be equal", alc3, alcTest);                
-    }
 
 	/**
 	 * Tests that adding an <tt>AlternateLocationCollection</tt> works correctly.
 	 */
 	public void testCreateCollectionFromHttpValue() {
 		AlternateLocationCollection collection = 
-			AlternateLocationCollection.createCollection
+			AlternateLocationCollection.create
 			(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
 		AlternateLocationCollection testCollection = collection;
 		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
-			collection.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[i]);
+			collection.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[i]);
 		}
 
-		testCollection.addAlternateLocationCollection(collection);
+		testCollection.addAll(collection);
 	}
 
 	/**
@@ -132,11 +90,11 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	 */
 	public void testAddWrongLocation() {
 		AlternateLocationCollection collection = 
-			AlternateLocationCollection.createCollection
+			AlternateLocationCollection.create
 			(HugeTestUtils.UNIQUE_SHA1);
 		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				collection.addAlternateLocation(HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
+				collection.add(HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
 				fail("should not have accepted unequal location: "+
 					 HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
 			} catch(IllegalArgumentException e) {
@@ -152,14 +110,14 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	 */
 	public void testAddAlternateLocation() {
 		AlternateLocationCollection alc = 
-			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
+			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
 		Iterator iter = _alternateLocations.iterator();
 		int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
-			alc.addAlternateLocation(al);
+			alc.add(al);
 			assertEquals("was not able to add as new",
-			    ++i, alc.getNumberOfAlternateLocations() );
+			    ++i, alc.getAltLocsSize() );
 		}
 	}	
 
@@ -169,19 +127,19 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	 */
 	public void testAddAlternateLocationCollection() {
 		AlternateLocationCollection alc1 = 
-			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
+			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
 		Iterator iter = _alternateLocations.iterator();
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
-			alc1.addAlternateLocation(al);
+			alc1.add(al);
 		}
 
 		AlternateLocationCollection alc2 = 
-			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
-		alc2.addAlternateLocationCollection(alc1);
+			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
+		alc2.addAll(alc1);
 		assertEquals("was not able to add all from the collection.",
-		    alc1.getNumberOfAlternateLocations(),
-		    alc2.getNumberOfAlternateLocations());
+		    alc1.getAltLocsSize(),
+		    alc2.getAltLocsSize());
 	}	
 
 	/**
@@ -192,7 +150,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	   assertTrue("should have alternate locations", 
 				  _alCollection.hasAlternateLocations());
 	   AlternateLocationCollection testCollection = 
-		   AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
+		   AlternateLocationCollection.create(_alCollection.getSHA1Urn());
 	   assertTrue("should not have alternate locations", 
 				  !testCollection.hasAlternateLocations());
 	}
@@ -205,13 +163,13 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		String val = _alCollection.httpStringValue();
 		StringTokenizer st = new StringTokenizer(val, ",");
 		AlternateLocationCollection alc1 = 
-			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
+			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
 		while(st.hasMoreTokens()) {
 			String str = st.nextToken();
 			str = str.trim();
 			AlternateLocation al = 
-			    AlternateLocation.createAlternateLocation(str);
-			alc1.addAlternateLocation(al);
+			    AlternateLocation.create(str);
+			alc1.add(al);
 		}
 
 		//assertTrue("AlternateLocationCollections should be equal:\r\n"+_alCollection+
@@ -219,7 +177,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         //         _alCollection.equals(alc1));
 
 		//AlternateLocationCollection alc2 = new AlternateLocationCollection();
-		//alc2.addAlternateLocationCollection(alc1);
+		//alc2.addAll(alc1);
 		//assertTrue("AlternateLocationCollections should be equal", 
 		//	   _alCollection.equals(alc2));
 		
@@ -230,15 +188,15 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	 */
 	public void testCanRemoveLocation() {
 	    Iterator iter = _alternateLocations.iterator();
-	    int total = _alCollection.getNumberOfAlternateLocations();
+	    int total = _alCollection.getAltLocsSize();
 	    int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
                 i++;
 			    assertTrue("unable to remove al: " + al + " from collection: " + _alCollection,
-			        _alCollection.removeAlternateLocation(al));
+			        _alCollection.remove(al));
                 assertEquals("size is off", 
-                    total-i, _alCollection.getNumberOfAlternateLocations() );
+                    total-i, _alCollection.getAltLocsSize() );
 		}
     }
     
@@ -247,18 +205,18 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
      */
     public void testCantAddAfterRemove() {
 	    Iterator iter = _alternateLocations.iterator();
-	    int total = _alCollection.getNumberOfAlternateLocations();
+	    int total = _alCollection.getAltLocsSize();
 	    int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
                 i++;
 			    assertTrue("unable to remove al: " + al,
-			        _alCollection.removeAlternateLocation(al));
+			        _alCollection.remove(al));
                 assertEquals("size is off", 
-                    total-i, _alCollection.getNumberOfAlternateLocations() );
-                _alCollection.addAlternateLocation(al);
+                    total-i, _alCollection.getAltLocsSize() );
+                _alCollection.add(al);
                 assertEquals("size is off", 
-                    total-i, _alCollection.getNumberOfAlternateLocations() );                
+                    total-i, _alCollection.getAltLocsSize() );                
 		}
     }        
 }

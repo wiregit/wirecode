@@ -92,7 +92,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
-        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes            
+        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -605,7 +605,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
         HTTPDownloader downloader = 
-			new HTTPDownloader(sb, rfd, tmp, null);
+			new HTTPDownloader(sb, rfd, tmp);
         tmp.delete();
         return downloader;
     }

@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -288,7 +289,7 @@ public class TestUploader {
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
 				if(incomingAltLocs == null) {
 					incomingAltLocs =
-						AlternateLocationCollection.createCollection(_sha1);
+						AlternateLocationCollection.create(_sha1);
 				}
 				readAlternateLocations(line, incomingAltLocs);
             }        
@@ -540,8 +541,8 @@ public class TestUploader {
 				// sequences that may be used if the sender is using
 				// continuations.
 				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
-				alc.addAlternateLocation(al);
+				    AlternateLocation.create(st.nextToken().trim());
+				alc.add(al);
 			} catch(IOException e) {
 				// just return without adding it.
 				continue;
