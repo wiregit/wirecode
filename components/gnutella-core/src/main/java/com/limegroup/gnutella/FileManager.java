@@ -220,13 +220,25 @@ public class FileManager {
         for (int i=0; i<extensions.length; i++)
             _extensions.add(extensions[i].toLowerCase());
                       
+        //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
+        //C:\dir\subdir.  Although this isn't needed for correctness, it may
+        //help the GUI show "subdir" as a subdirectory of "dir".  One way of
+        //doing this is to do a full topological sort, but that's a lot of work.
+        //So we just approximate this by sorting by filename length, from
+        //smallest to largest.  Unless directories are specified as
+        //"C:\dir\..\dir\..\dir", this will do the right thing.
+        final String[] directories = HTTPUtil.stringSplit(
+            SettingsManager.instance().getDirectories().trim(),
+            ';');
+        Arrays.sort(directories, new Comparator() {
+            public int compare(Object a, Object b) {
+                return ((String)a).length()-((String)b).length();
+            }
+        });
 
         // Load the shared directories and their files asynchonously.
         // Duplicates in the directories list will be ignored.  Note that the
         // runner thread only obtain this' monitor when adding individual files.
-        final String[] directories = HTTPUtil.stringSplit(
-            SettingsManager.instance().getDirectories().trim(),
-            ';');
         _loadThread = new Thread("FileManager.loadSettings") {
             public void run() {
                 // Add each directory as long as we're not interrupted.
@@ -277,6 +289,7 @@ public class FileManager {
             return;  //doesn't exist?
         }
 
+        //Register this directory with list of share directories.
         synchronized (this) {
             if (_sharedDirectories.get(directory)!=null)
                 //directory already added.  Don't re-add.
@@ -286,21 +299,25 @@ public class FileManager {
                 _callback.addSharedDirectory(directory, parent);
         }
 
+        //List contents of directory.
         File[] file_list = listFiles(directory);    /* the files in a specified */
         int n = file_list.length;                   /* directory */
        
-        // go through file_list
-        // get file name
-        // see if it contains extention.
-        // if yes, add to new list...
-        //   TODO: add all files before directories so IntSet's become
-        //   less fragmented
+        //First add all files.  We'll add the directories later to smooth out
+        //what the user sees.  It also decreases the size of the IntSet values
+        //in _sharedDirectories.  Again, this is not strictly necessary for
+        //correctness.
+        List /* of File */ directories=new ArrayList();
         for (int i=0; i<n && !_loadThread.isInterrupted(); i++) {
             if (file_list[i].isDirectory())     /* the recursive call */
-                addDirectory((File)file_list[i], directory);
+                directories.add(file_list[i]);
             else                                /* add the file with the */
                 addFile((File)file_list[i]); 
         }
+        //Now add directories discovered in previous pass.
+        Iterator iter=directories.iterator();
+        while (iter.hasNext() && !_loadThread.isInterrupted())
+            addDirectory((File)iter.next(), directory);
     }
 
 
