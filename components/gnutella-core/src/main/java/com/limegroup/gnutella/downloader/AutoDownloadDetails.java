@@ -104,6 +104,7 @@ public class AutoDownloadDetails implements Serializable {
     private void readObject(ObjectInputStream stream) throws IOException,
                                                     ClassNotFoundException {
         stream.defaultReadObject();
+
         if(mediaDesc == null)
             type = MediaType.getAnyTypeMediaType();
         else

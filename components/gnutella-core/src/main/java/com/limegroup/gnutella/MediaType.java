@@ -12,14 +12,21 @@ import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.TreeSet;
 import com.sun.java.util.collections.Arrays;
 
+import java.io.Serializable;
+
 /**
  * A generic type of media, i.e., "video" or "audio".
  * Many different file formats can be of the same media type.
  * MediaType's are immutable.
  *
+ * MediaType is Serializable so that older downloads.dat files
+ * with serialized wishlist downloaders can be deserialized.
+ * Note that we no longer serialize MediaType though.
+ *
  * // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
  */
-public class MediaType {
+public class MediaType implements Serializable {
+    private static final long serialVersionUID = 3999062781289258389L;
     
     // These values should match standard MIME content-type
     // categories and/or XSD schema names.
@@ -99,8 +106,8 @@ public class MediaType {
      */
     private static final MediaType TYPE_PROGRAMS =
         new MediaType(SCHEMA_PROGRAMS, PROGRAMS, EXT_PROGRAMS, 
-                makeArray(TYPE_LINUX_OSX_PROGRAMS.extensions,
-                          TYPE_WINDOWS_PROGRAMS.extensions)
+                makeArray(TYPE_LINUX_OSX_PROGRAMS.exts,
+                          TYPE_WINDOWS_PROGRAMS.exts)
         );
         
     /**
@@ -171,7 +178,7 @@ public class MediaType {
     /**
      * The list of extensions within this MediaType.
      */
-    private final Set extensions;
+    private final Set exts;
     
     /**
      * The main extension for this MediaType.
@@ -189,7 +196,7 @@ public class MediaType {
     public MediaType(String schema) {
         this.schema = schema;
         this.descriptionKey = null;
-        this.extensions = DataUtils.EMPTY_SET;
+        this.exts = DataUtils.EMPTY_SET;
         this.mainExt = null;
         this.isDefault = false;
     }
@@ -210,12 +217,12 @@ public class MediaType {
         this.mainExt = ext;
         this.isDefault = true;
         if(extensions == null) {
-            this.extensions = DataUtils.EMPTY_SET;
+            this.exts = DataUtils.EMPTY_SET;
         } else {
             Set set =
                 new TreeSet(Comparators.caseInsensitiveStringComparator());
             set.addAll(Arrays.asList(extensions));
-            this.extensions = set;
+            this.exts = set;
         }
     }
         
@@ -225,7 +232,7 @@ public class MediaType {
      * one of this' extensions. 
      */
     public boolean matches(String filename) {
-        if (extensions == null)
+        if (exts == null)
             return true;
 
         //Get suffix of filename.
@@ -235,7 +242,7 @@ public class MediaType {
         String suffix = filename.substring(j+1);
 
         // Match with extensions.
-        return extensions.contains(suffix);
+        return exts.contains(suffix);
     }
     
     /** 
@@ -297,7 +304,7 @@ public class MediaType {
      */
     public static MediaType getMediaTypeForExtension(String ext) {
         for(int i = ALL_MEDIA_TYPES.length; --i >= 0;)
-            if(ALL_MEDIA_TYPES[i].extensions.contains(ext))
+            if(ALL_MEDIA_TYPES[i].exts.contains(ext))
                 return ALL_MEDIA_TYPES[i];
         return null;
     }
