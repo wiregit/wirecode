@@ -352,8 +352,8 @@ public class ClientSideBrowseHostTest
 
         // confirm a GET/HEAD pushproxy request
         currLine = reader.readLine();
-        assertTrue(currLine.startsWith("GET /gnutella/pushproxy") ||
-                   currLine.startsWith("HEAD /gnutella/pushproxy"));
+        assertTrue(currLine.startsWith("GET /gnutella/push-proxy") ||
+                   currLine.startsWith("HEAD /gnutella/push-proxy"));
         
         // make sure it sends the correct client GUID
         int beginIndex = currLine.indexOf("ID=") + 3;

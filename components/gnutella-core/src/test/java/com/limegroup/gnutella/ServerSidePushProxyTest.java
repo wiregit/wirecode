@@ -405,7 +405,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
         // first test a GET
-        out.write("GET /gnutella/pushproxy?ServerID=");
+        out.write("GET /gnutella/push-proxy?ServerID=");
         out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:127.0.0.1:6346\r\n");
@@ -436,7 +436,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         in = new BufferedReader(new InputStreamReader(s.getInputStream()));
         out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
-        out.write("HEAD /gnutella/pushproxy?ServerID=");
+        out.write("HEAD /gnutella/push-proxy?ServerID=");
         out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:10.238.1.87:6350\r\n");
@@ -476,7 +476,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
         // first test a GET with a unrecognized guid
-        out.write("GET /gnutella/pushproxy?ServerID=");
+        out.write("GET /gnutella/push-proxy?ServerID=");
         out.write(Base32.encode(GUID.makeGuid()));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:127.0.0.1:6346\r\n");
@@ -503,7 +503,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         in = new BufferedReader(new InputStreamReader(s.getInputStream()));
         out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
-        out.write("HEAD /gnutella/pushproxy?ServerID=");
+        out.write("HEAD /gnutella/push-proxy?ServerID=");
         out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:www.crapalapadapa.com:6346\r\n");

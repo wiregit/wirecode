@@ -1079,7 +1079,7 @@ public final class UploadManager implements BandwidthTracker {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
                 UploadStat.UPDATE_FILE.incrementStat();
-            } else if (fileInfoPart.startsWith("/gnutella/pushproxy")) {
+            } else if (fileInfoPart.startsWith("/gnutella/push-proxy")) {
                 index = PUSH_PROXY_FILE_INDEX;
                 // set the filename as the servent ID
                 StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=");

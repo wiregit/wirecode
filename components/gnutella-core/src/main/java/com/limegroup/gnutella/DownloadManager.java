@@ -730,7 +730,7 @@ public class DownloadManager implements BandwidthTracker {
             boolean requestSuccessful = false;
 
             // set up request
-            final String requestString = "/gnutella/pushproxy?ServerID=" + 
+            final String requestString = "/gnutella/push-proxy?ServerID=" + 
                 Base32.encode(file.getClientGUID());
             final String nodeString = "X-Node:";
             final String nodeValue = 
