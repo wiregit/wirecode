@@ -64,8 +64,7 @@ public class HTTPUploader implements Runnable, Comparable {
 	 * A SortedSet of the full uploads in progress.  
 	 * This is used to shutdown "Gnutella" uploads as needed.
 	 */
-	private static List _fullUploads =
-		Collections.synchronizedList(new LinkedList());
+	private static List _fullUploads = new LinkedList();
 
 
 
@@ -467,7 +466,9 @@ public class HTTPUploader implements Runnable, Comparable {
 
         try {
 			_cleanupDone = false;
-			_fullUploads.add(this);  // Add to the User-Agent priority queue
+			synchronized(_fullUploads) {
+			    _fullUploads.add(this);  // Add to the User-Agent priority queue
+			}
             boolean uplimit = testAndIncrementNumUploads();
             _callback.addUpload(this);
             //1. For push requests only, establish the connection.
@@ -549,7 +550,9 @@ public class HTTPUploader implements Runnable, Comparable {
 	{
 		if ( _cleanupDone )
 			return;
-		_fullUploads.remove(this);
+		synchronized(_fullUploads) {
+		    _fullUploads.remove(this);
+		}
 		decrementNumUploads();
 		if ( uploadCountIncremented )
 			synchronized(uploadCountLock) { uploadCount--; }
@@ -852,12 +855,17 @@ public class HTTPUploader implements Runnable, Comparable {
 		if ( "Gnutella".equals(agent) )
 			return false;
 
-        HTTPUploader first = (HTTPUploader)Collections.min(_fullUploads); 
-		if ( "Gnutella".equals(first.getUserAgent()) )
-		{
-			first.doCleanup();  
-    		first.setStateString("Bumped old client");
-			return true;
+		synchronized(_fullUploads) {
+			if (_fullUploads.isEmpty())
+				return false;
+
+			HTTPUploader first = (HTTPUploader)Collections.min(_fullUploads); 
+			if ( "Gnutella".equals(first.getUserAgent()) )
+			{
+				first.doCleanup();  
+				first.setStateString("Bumped old client");
+				return true;
+			}
 		}
 		return false;
 	}
