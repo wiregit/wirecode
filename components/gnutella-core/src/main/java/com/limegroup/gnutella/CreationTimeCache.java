@@ -233,7 +233,8 @@ public final class CreationTimeCache {
         }
         finally {
             try {
-                oos.close();
+                if (oos != null)
+                    oos.close();
             }
             catch (IOException ignored) {}
         }
