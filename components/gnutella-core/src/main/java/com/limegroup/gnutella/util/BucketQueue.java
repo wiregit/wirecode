@@ -21,6 +21,29 @@ public class BucketQueue implements Cloneable {
      */
     private Buffer[] buckets;
 
+    /** 
+     * @effects a new queue with the given number of priorities, and
+     *  the given number of entries PER PRIORITY.  Hence 0 through 
+     *  priorities-1 are the legal priorities, and there are up to
+     *  capacityPerPriority*priorities elements in the queue.
+     * @exception IllegalArgumentException priorities or capacityPerPriority
+     *  is non-positive.
+     */
+    public BucketQueue(int priorities, int capacityPerPriority) 
+            throws IllegalArgumentException {
+        if (priorities<=0)
+            throw new IllegalArgumentException(
+                "Bad priorities: "+priorities);
+        if (capacityPerPriority<=0)
+            throw new IllegalArgumentException(
+                "Bad capacity: "+capacityPerPriority);
+
+        this.buckets=new Buffer[priorities];
+        for (int i=0; i<buckets.length; i++) {
+            buckets[i]=new Buffer(capacityPerPriority);
+        }
+    }
+
     /**
      * @effects makes a new queue that will hold up to capacities[i]
      *  elements of priority i.  Hence the legal priorities are 0
@@ -222,7 +245,7 @@ public class BucketQueue implements Cloneable {
         Endpoint e2a=new Endpoint("garbage", 0); e2a.setWeight(2);
         Endpoint e2b=new Endpoint("garbage", 0); e2b.setWeight(2);
         Endpoint e0=new Endpoint("garbage", 0); e0.setWeight(0);
-        BucketQueue q=new BucketQueue(new int[] {10, 10, 10, 10, 10});
+        BucketQueue q=new BucketQueue(5, 10);
         Assert.that(q.isEmpty());
 
         Assert.that(q.insert(e0, 0)==null);
@@ -327,13 +350,17 @@ public class BucketQueue implements Cloneable {
         q.insert(e2b, 2);
         Assert.that(q.size()==(q2.size()+1));
 
-        //Test with stuff besides endpoints
-        q=new BucketQueue(new int[] {10, 10, 10});
-        q.insert("medium", 1);
-        q.insert("low", 0);
-        q.insert("high", 2);
+        //More rigorous test of insertion.  Also checks objects besides
+        //Endpoint.        
+        q=new BucketQueue(3, 2);
+        Assert.that(q.insert("oldest medium", 1)==null);
+        Assert.that(q.insert("older medium", 1)==null);
+        Assert.that(q.insert("medium", 1).equals("oldest medium"));
+        Assert.that(q.insert("low", 0)==null);
+        Assert.that(q.insert("high", 2)==null);
         Assert.that(q.extractMax().equals("high"));
         Assert.that(q.extractMax().equals("medium"));
+        Assert.that(q.extractMax().equals("older medium"));
         Assert.that(q.extractMax().equals("low"));
 
         //Test exceptional cases
@@ -349,6 +376,16 @@ public class BucketQueue implements Cloneable {
             q=new BucketQueue(new int[] {1});
         } catch (IllegalArgumentException e) { 
             Assert.that(false);
+        }
+        try {
+            q=new BucketQueue(0, 1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { 
+        }
+        try {
+            q=new BucketQueue(1, 0);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { 
         }
 
         q=new BucketQueue(new int[] {10, 10, 10});
