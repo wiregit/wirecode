@@ -66,9 +66,12 @@ public class UploaderTest extends TestCase {
         HTTPDownloader d3 = null;
         try {
             HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+            connectDloader(d1,true,rfd1);
             HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
+            connectDloader(d2,true,rfd2);
             try {
                 d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
+                connectDloader(d3,true,rfd3);
             } catch(QueuedException qx) {
                 assertEquals(0, qx.getQueuePosition());
             } catch (Exception ioe) {
@@ -78,6 +81,7 @@ public class UploaderTest extends TestCase {
             HTTPDownloader d4 = null;
             try {
                 d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
+                connectDloader(d4,true,rfd4);
             } catch(QueuedException qx) {
                 assertEquals(1,qx.getQueuePosition());
             } catch (Exception ioe) {
@@ -86,6 +90,7 @@ public class UploaderTest extends TestCase {
             HTTPDownloader d5 = null;
             try {
                 d5 = addUploader(upManager,rfd5,"1.1.1.5",true);
+                connectDloader(d5,true,rfd5);
             } catch (QueuedException qx) {
                 fail("queued after capacity ");
             } catch (TryAgainLaterException tax) {//correct
@@ -94,22 +99,16 @@ public class UploaderTest extends TestCase {
             }
             kill(d1);//now the queue should free up, but we need to request
             Thread.sleep(UploadManager.MIN_POLL_TIME);//wait till min Poll  time
-            final HTTPDownloader dloader = d3;
-            Thread runner = new Thread() {
-                public void run() {
-                    try {
-                        dloader.connectHTTP(0,rfd3.getSize());                
-                    } catch (QueuedException e) {
-                        e.printStackTrace();
-                        fail("exception thrown in connectHTTP");
-                    } catch (TryAgainLaterException tlx) {
-                        fail("exception thrown in connectHTTP");
-                    } catch (Exception ign) {
-                        ign.printStackTrace();
-                    } 
-                }
-            };
-            runner.start();
+            try {
+                connectDloader(d3,false,rfd3);
+            } catch (QueuedException e) {
+                e.printStackTrace();
+                fail("exception thrown in connectHTTP");
+            } catch (TryAgainLaterException tlx) {
+                fail("exception thrown in connectHTTP");
+            } catch (Exception ign) {
+                ign.printStackTrace();
+            }         
             System.out.println("Passed");
         } catch(Exception anyother) {
             System.out.println("FAILED");
@@ -136,8 +135,7 @@ public class UploaderTest extends TestCase {
     private static HTTPDownloader addUploader(final UploadManager upman, 
                                               RemoteFileDesc rfd,
                                               String ip,
-                                              boolean block) 
-        throws TryAgainLaterException, IOException {        
+                                              boolean block) throws IOException{
         //Allow some fudging to prevent race conditons.
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
 
@@ -156,13 +154,16 @@ public class UploaderTest extends TestCase {
         File tmp=File.createTempFile("UploadManager_Test", "dat");
         HTTPDownloader downloader=new HTTPDownloader(sb, rfd, tmp, 
                                           new AlternateLocationCollection());
-        try {
-            downloader.connectTCP(0); //may throw TryAgainLater, etc.
-            downloader.connectHTTP(0,rfd.getSize());
-            return downloader;
-        } finally {
-            tmp.delete();
-        }
+        tmp.delete();
+        return downloader;
+    }
+    
+    private static void connectDloader(HTTPDownloader dloader, boolean tcp, 
+                                       RemoteFileDesc rfd) throws 
+                                       TryAgainLaterException, IOException {  
+        if(tcp)
+            dloader.connectTCP(0); //may throw TryAgainLater, etc.
+        dloader.connectHTTP(0,rfd.getSize());
     }
 
     private static void kill(HTTPDownloader downloader) {

@@ -365,7 +365,10 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     /**
-     * Note: This method 
+     * Note: Called when we encounter a 503, and need to check if the uploader
+     * has queued us or not. Consuming all the headers is required, because
+     * if queued, we intend to use the same stream again, and residual headers
+     * will cause problems. Further, these headers are of no use to anyone else.
      */
     private void supportsQueueing() throws IOException, QueuedException {
         //Note: According to the specification there are 5 headers, LimeWire
