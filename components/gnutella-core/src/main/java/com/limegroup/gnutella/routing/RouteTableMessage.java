@@ -124,24 +124,6 @@ public abstract class RouteTableMessage extends Message {
 			DroppedSentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(this);	   
 		}
 	}
-
-    /** Unit test */
-    public static void main(String[] args) {                  
-        //Read bytes with bad variant
-        byte[] message=new byte[23+2];
-        message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
-        message[17]=(byte)3;                                 //TTL
-        message[19]=(byte)2;                                 //payload length
-        message[23+0]=(byte)0xFF;                            //bogus variant
-        InputStream in=new ByteArrayInputStream(message);
-        try {
-            Message m=(ResetTableMessage)Message.read(in);
-            Assert.that(false);
-        } catch (BadPacketException e) {
-        } catch (Exception e) {
-            Assert.that(false);
-        }
-    }
 }
 
 
