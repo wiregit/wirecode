@@ -180,11 +180,15 @@ public class UpdateManager {
                         //its not a problem - the client always does its own
                         //verification.
                     }
-                } catch(Exception e ) {
+                } catch(MalformedURLException mfux) {
                     //MalformedURLException - while creating URL
+                    ErrorService.error(mfux);
+                } catch(IOException iox) {
                     //IOException - reading from socket, writing to disk etc.
+                    return;
+                } catch(SAXException sx) {
                     //SAXException - parsing the xml
-                    return; //any errors? We can't continue...forget it.
+                    return; //We can't continue...forget it.
                 }
             }//end of run
         };
