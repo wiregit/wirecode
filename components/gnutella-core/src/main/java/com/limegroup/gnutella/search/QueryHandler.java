@@ -263,14 +263,11 @@ public final class QueryHandler {
 	 * yet ready to be processed, this returns immediately.
 	 */
 	public void sendQuery() {
-        System.out.println("QueryHandler::sendQuery"); 
 		if(hasEnoughResults()) return;
-        System.out.println("QueryHandler::sendQuery::has enough results"); 
 
 		_curTime = System.currentTimeMillis();
 		if(_curTime < _nextQueryTime) return;
 
-        System.out.println("QueryHandler::sendQuery2"); 
 		if(_queryStartTime == 0) {
 			_queryStartTime = _curTime;
         }
@@ -279,9 +276,11 @@ public final class QueryHandler {
 
         // 1) If we haven't sent the query to our leaves, send it
         if(!_forwardedToLeaves) {
+
             _forwardedToLeaves = true;
             QueryRouteTable qrt = 
                 RouterService.getMessageRouter().getQueryRouteTable();
+
             QueryRequest query = createQuery(QUERY, (byte)1);
 
             _theoreticalHostsQueried += 25;
@@ -292,7 +291,6 @@ public final class QueryHandler {
                 RouterService.getMessageRouter().
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
-                _forwardedToLeaves = true;
                 _nextQueryTime = 
                     System.currentTimeMillis() + TIME_TO_WAIT_PER_HOP;
                 return;
@@ -313,7 +311,6 @@ public final class QueryHandler {
 
         // 3) If we haven't yet satisfied the query, keep trying
         else {
-            System.out.println("QueryHandler::sendQuery::sending query"); 
             // otherwise, just send a normal query
             int newHosts = 
                 sendQuery(_connectionManager.getInitializedConnections());
