@@ -562,8 +562,14 @@ public class QueryRouteTable {
 
         //2. Try compression.
         //TODO: Should this not be done if compression isn't allowed?
-        byte bits=4;
-        data=halve(data);
+        byte bits=8;
+        // Only halve if our values require 4 signed bytes at most.
+        // keywordPresent will always be negative and
+        // keywordAbsent will always be positive.
+        if( keywordPresent >= -8 && keywordAbsent <= 7 ) {
+            bits = 4;
+            data = halve(data);
+        }
 
         byte compression=PatchTableMessage.COMPRESSOR_NONE;
         //Optimization: If we are told it is safe to compress the message,
