@@ -65,7 +65,7 @@ public class MediaType {
 		MediaType audio=new MediaType("Audio", 
 									  new String[] {"mp3", "wav", "au", 
 													"aif", "aiff", "ra", 
-													"ram", "rmj", "lqt"});
+													"ram", "rmj", "lqt", "ogg"});
 		MediaType video=new MediaType("Video", 
 									  new String[] {"mpg", "mpeg", "asf", "qt", 
 													"mov", "avi", "mpe", "swf", "dcr"});
