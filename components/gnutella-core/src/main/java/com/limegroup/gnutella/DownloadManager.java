@@ -260,6 +260,29 @@ public class DownloadManager implements BandwidthTracker {
     }   
     
     /**
+     * Starts a resume download for the given incomplete file.
+     */ 
+    public synchronized Downloader startResumeDownload(File incompleteFile)
+            throws AlreadyDownloadingException {
+        //TODO: check for conflicts
+        //TODO: refactor
+        ResumeDownloader downloader = new ResumeDownloader(this,
+                                                     fileManager,
+                                                     incompleteFileManager,
+                                                     callback,
+                                                     incompleteFile);
+        waiting.add(downloader);
+        callback.addDownload(downloader);
+        //Save this' state to disk for crash recovery.
+        writeSnapshot();
+        //Start a requery immediately, bypassing the rate-limited requerying
+        //of sendQuery, as called from ManagedDownloader.tryAllDownloads.
+        router.broadcastQueryRequest(downloader.newRequery());
+        return downloader;
+    }
+
+
+    /**
      * Starts a "requery download".
      * A "requery download" should be started when the user has not received any
      * results for her query, and wants LimeWire to spawn a specialized
@@ -359,7 +382,7 @@ public class DownloadManager implements BandwidthTracker {
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 
-            rfds = qr.toRemoteFileDescArray();
+            rfds = qr.toRemoteFileDescArray(acceptor.acceptedIncoming());
         }
         catch (BadPacketException bpe) {
             debug(bpe);
@@ -652,8 +675,15 @@ public class DownloadManager implements BandwidthTracker {
                 new QueryRequest(SettingsManager.instance().getTTL(),
                                  0, dlder.getQuery(), true);
                 router.broadcastQueryRequest(qr);
-            }
-            else
+            } 
+            else if ((rfds.length == 0) && 
+                     (requerier instanceof ResumeDownloader)) {
+                // downloader without any files, get the query from the
+                // ResumeDownloader...   TODO: factor
+                ResumeDownloader dlder = (ResumeDownloader) requerier;
+                QueryRequest qr = dlder.newRequery();
+                router.broadcastQueryRequest(qr);
+            } else
                 Assert.that(false, 
                             "Downloader has no files and is not a Requerier.");
         }

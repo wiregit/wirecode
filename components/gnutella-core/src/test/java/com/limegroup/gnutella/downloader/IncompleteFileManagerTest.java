@@ -109,6 +109,73 @@ public class IncompleteFileManagerTest extends TestCase {
         assertEquals(tmp1, tmp2);
     }
 
+    public void testCompletedHash_NotFound() {
+        File tmp2=new File("T-1839-some file name");
+        assertEquals(null, ifm.getCompletedHash(tmp2));
+    }
+
+    public void testCompletedHash_Found() {
+        rfd1=newRFD("some file name", 1839, 
+                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        File tmp1=ifm.getFile(rfd1);
+        try {
+            URN urn=URN.createSHA1Urn( 
+                "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+            assertEquals(urn, ifm.getCompletedHash(tmp1));
+        } catch (IOException e) {
+            fail("Couldn't make URN");
+        }
+    }
+
+    public void testCompletedName() {
+        File tmp1=new File("T-1839-some file.txt");
+        assertEquals("some file.txt", ifm.getCompletedName(tmp1));
+    }
+
+    public void testCompletedName_IllegalArgument() {
+        try {
+            ifm.getCompletedName(new File("no dash.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+
+        try {
+            ifm.getCompletedName(new File("T-one dash.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+
+        try {
+            ifm.getCompletedName(new File("T-123-"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+    }
+
+    public void testCompletedSize() {
+        File tmp1=new File("T-1839-some file.txt");
+        assertEquals(1839, ifm.getCompletedSize(tmp1));
+    }
+
+    public void testCompletedSize_IllegalArgument() {
+        try {
+            ifm.getCompletedSize(new File("no dash.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+
+        try {
+            ifm.getCompletedSize(new File("T-one dash.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+
+        try {
+            ifm.getCompletedSize(new File("T--no number.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+
+        try {
+            ifm.getCompletedSize(new File("T-x-bad number.txt"));
+            fail("Accepted bad file");
+        } catch (IllegalArgumentException pass) { }
+    }
+
     /** Serializes, then deserializes. */
     public void testSerialize() {
         File tmp=null;

@@ -307,7 +307,77 @@ public class IncompleteFileManager implements Serializable {
             return vf.getBlockSize();
         }
     }
+   
 
+    /**
+     * Returns the name of the complete file associated with the given
+     * incomplete file, i.e., what incompleteFile will be renamed to
+     * when the download completes (without path information).
+     * @param incompleteFile a file returned by getFile
+     * @return the complete file name, without path
+     * @exception IllegalArgumentException incompleteFile was not the
+     *  return value from getFile
+     */
+    public String getCompletedName(File incompleteFile) 
+            throws IllegalArgumentException {
+        //Given T-<size>-<name> return <name>.
+        //       i      j
+        //This is not as strict as it could be.  TODO: what about (x) suffix?
+        String name=incompleteFile.getName();
+        int i=name.indexOf(SEPARATOR);
+        if (i<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        int j=name.indexOf(SEPARATOR, i+1);
+        if (j<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        if (j==name.length()-1)
+            throw new IllegalArgumentException("No name after last separator");
+        return name.substring(j+1);
+    }
+
+    /**
+     * Returns the size of the complete file associated with the given
+     * incomplete file, i.e., the number of bytes in the file when the
+     * download completes.
+     * @param incompleteFile a file returned by getFile
+     * @return the complete file size
+     * @exception IllegalArgumentException incompleteFile was not
+     *  returned by getFile 
+     */
+    public long getCompletedSize(File incompleteFile) 
+            throws IllegalArgumentException {
+        //Given T-<size>-<name>, return <size>.
+        //       i      j
+        String name=incompleteFile.getName();
+        int i=name.indexOf(SEPARATOR);
+        if (i<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        int j=name.indexOf(SEPARATOR, i+1);
+        if (j<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        try {
+            return Long.parseLong(name.substring(i+1, j));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Bad number format: "+name);
+        }
+    }
+
+    /**
+     * Returns the hash of the complete file associated with the given
+     * incomplete file, i.e., the hash of incompleteFile when the 
+     * download is complete.
+     * @param incompleteFile a file returned by getFile
+     * @return a SHA1 hash, or null if unknown
+     */
+    public synchronized URN getCompletedHash(File incompleteFile) {
+        //Return a key k s.t., hashes.get(k)==incompleteFile...
+        for (Iterator iter=hashes.keySet().iterator(); iter.hasNext(); ) {
+            URN key=(URN)iter.next();
+            if (hashes.get(key).equals(incompleteFile))
+                return key;
+        }
+        return null; //...or null if no such k.
+    }
 
     public synchronized String toString() {
         StringBuffer buf=new StringBuffer();

@@ -916,6 +916,14 @@ public class RouterService
 		return downloader.getFiles(files, overwrite);
 	}
 
+   /**
+     * Starts a resume download for the given incomplete file.
+     */ 
+    public synchronized Downloader startResumeDownload(File incompleteFile)
+            throws AlreadyDownloadingException {
+        return downloader.startResumeDownload(incompleteFile);
+    }
+
     /**
      * Starts a "requery download".
      * A "requery download" should be started when the user has not received any

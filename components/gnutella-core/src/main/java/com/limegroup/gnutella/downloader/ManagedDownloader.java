@@ -432,6 +432,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //attempt to display the error in the GUI for debugging
                     //purposes.
                     ManagedDownloader.this.manager.internalError(e);
+                    e.printStackTrace();
                 }
             }
         };
@@ -691,8 +692,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
         else if (state!=COMPLETE) {
-            File incomplete=incompleteFileManager.
-                               getFile(currentFileName, currentFileSize); 
+            RemoteFileDesc rfd=buckets.getRemoteFileDescForBucket(bucketNumber);
+            File incomplete=incompleteFileManager.getFile(rfd);
             File file=new File(incomplete.getParent(),
                                IncompleteFileManager.PREVIEW_PREFIX
                                    +incomplete.getName());
@@ -753,8 +754,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         int numRequeries = 0;
         // the time to next requery.  We don't want to send the first requery
         // until a few minutes after the initial download attempt--after all,
-        // the user just started a query.  Hence initialize initialize
-        // nextRequeryTime to System.currentTimeMillis() plus a few minutes.
+        // the user just started a query.  Hence initialize nextRequeryTime to
+        // System.currentTimeMillis() plus a few minutes.
         long nextRequeryTime = System.currentTimeMillis()
             + getMinutesToWaitForRequery(numRequeries)*60*1000;
 
@@ -1964,7 +1965,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param requeriesthe number of requeries sent, which must be non-negative
      * @return minutes to wait
      */
-    private int getMinutesToWaitForRequery(int requeries) {
+    protected int getMinutesToWaitForRequery(int requeries) {
         return 5;
     }
 

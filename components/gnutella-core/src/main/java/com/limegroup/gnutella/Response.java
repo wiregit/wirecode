@@ -193,7 +193,7 @@ public class Response {
 	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
 	 *  the file
      */
-    private Response(long index, long size, String name,
+    public Response(long index, long size, String name,
 					 String metadata, Set urns, LimeXMLDocument doc) {
         Assert.that((index & 0xFFFFFFFF00000000l)==0,
                 "Response constructor: index too big!");
