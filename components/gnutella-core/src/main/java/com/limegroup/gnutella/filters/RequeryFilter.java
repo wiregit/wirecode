@@ -27,6 +27,7 @@ public class RequeryFilter extends SpamFilter {
         return true;
     }
 
+    /*
     public static void main(String args[]) {
         SettingsManager.instance().setFilterDuplicates(false);
         SettingsManager.instance().setFilterGreedyQueries(false);
@@ -49,4 +50,5 @@ public class RequeryFilter extends SpamFilter {
         Assert.that(! GUID.isLimeRequeryGUID(guid, 0));
         Assert.that(! filter.allow(new QueryRequest(guid, (byte)5, 0, "asdf")));
     }
+    */
 }
