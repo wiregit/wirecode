@@ -363,17 +363,20 @@ public class DataWindow
 		int lastBlock     = -1;
 
 		// Find the last block
+        /*
 		for (int i = maxBlock; i < newMaxBlock; i++) {
 			d = getBlock(i);
 			if ( d != null )
 				lastBlock = i;
 		}
+        */
 
 		// Advance the window up to windowSize before lastBlock and clear old
 		// blocks - This ensures that the data is successfully acked before 
         // it is removed.  Note: windowSpace must reflect the true 
-        // potential space.
-        for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
+        // potential space.   
+        //for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
+        for (int i = windowStart; i < windowStart + windowSize + 1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
