@@ -282,12 +282,24 @@ public class RouterService
       byte[] bguid) {
 	//String file = "/get/" + String.valueOf(index) + "/" + fname;
 
+	System.out.println("A");
+
         HTTPDownloader down = new
             HTTPDownloader("http", ip, port, index, fname, manager, bguid);
 
+	System.out.println("B");
+
 	Thread t = new Thread(down);
+
+	System.out.println("C");
 	t.setDaemon(true);
+
+	System.out.println("D");
+
 	t.start();
+	
+	System.out.println("E");
+
     }
 	
 }

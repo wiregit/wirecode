@@ -58,9 +58,12 @@ public class HTTPDownloader implements Runnable {
 	    // _in = new BufferedReader(isr, 1);
   	    // _in = new DataInputStream(_istream);
 	    _br = new ByteReader(_istream);
+	    // System.out.println("Made it through the download try");
+
 	}
 	catch (Exception e) {
-	    _callback.error(ActivityCallback.ERROR_4);
+	    // _callback.error(ActivityCallback.ERROR_4);
+	    // System.out.println("Exception in the download try");
 	    return;
 	}
 
@@ -69,10 +72,11 @@ public class HTTPDownloader implements Runnable {
     }
       
     /* The client side get */
-    public HTTPDownloader(String protocal, String host, 
+    public HTTPDownloader(String protocol, String host, 
 			  int port, int index, String file, 
 			  ConnectionManager m, byte[] guid ) {
 			
+	System.out.println("entered cons.");
 	_okay = false;
 	_filename = file;
 	_amountRead = 0;
@@ -87,27 +91,33 @@ public class HTTPDownloader implements Runnable {
 	String furl = "/get/" + String.valueOf(index) + "/" + file;
 
 	try {
-	    URL url = new URL(protocal, host, port, furl);
+	    // System.out.println("b4 url open");
+	    URL url = new URL(protocol, host, port, furl);
+	    // System.out.println("mid url open");
 	    conn = url.openConnection();
+	    // System.out.println("after url open");
+
 	}
 	catch (java.net.MalformedURLException e) {
 	    sendPushRequest(host, index, port, guid);
-	    _callback.error(ActivityCallback.ERROR_5);
+	    // _callback.error(ActivityCallback.ERROR_5);
 	    return;
 	}
 	catch (IOException e) {
 	    sendPushRequest(host, index, port, guid);
-	    _callback.error(ActivityCallback.ERROR_6);
+	    // _callback.error(ActivityCallback.ERROR_6);
 
 	    return;
 	}
 	catch (Exception e) {
-	    System.out.println("There was an exception:");
+	    // System.out.println("There was an exception:");
   	    e.printStackTrace();
 	    return;
 	}
   	try {
+	    // System.out.println("b4 getinputstream");
 	    _istream = conn.getInputStream();
+	    // System.out.println("after getinputstream");
 	    //  _bis = new BufferedInputStream(_istream);
 	    // InputStreamReader isr = new InputStreamReader(_istream);
   	    // _in = new DataInputStream(_istream);
@@ -115,7 +125,7 @@ public class HTTPDownloader implements Runnable {
   	}
 	catch (NoRouteToHostException e) {
 	//      System.out.println("No route to host");
-	    _callback.error(ActivityCallback.ERROR_13);
+	    // _callback.error(ActivityCallback.ERROR_13);
 	    return;
 	}
   	catch (IOException e) {
@@ -135,6 +145,8 @@ public class HTTPDownloader implements Runnable {
     
     public void sendPushRequest(String hostname, int index, 
 				int port, byte[] cguid) {
+
+	System.out.println("Sending a push request");
 
 	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
 	String a = tokenizer.nextToken();
@@ -164,7 +176,7 @@ public class HTTPDownloader implements Runnable {
 	    _manager.sendToAll(push);
 	}
 	catch (Exception e) {
-	    _callback.error(ActivityCallback.ERROR_7);
+	    // _callback.error(ActivityCallback.ERROR_7);
 	    return;
 	}
 
@@ -193,12 +205,16 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
-	if (_okay) {
+	 if (_okay) {
+	     // System.out.println("Download is Okay");
 	    _callback.addDownload(this);
 	    doDownload();
 	    // readHeader();
 	    _callback.removeDownload(this);
-	}
+	 }
+	//   else {
+//  	     System.out.println("Download Not Okay");
+//  	 }
     }
 
     
@@ -219,10 +235,12 @@ public class HTTPDownloader implements Runnable {
 	}
 	catch (FileNotFoundException e) {
 	    //  	    System.out.println("THere is an error with the fos");
+	    return;
   	}
 	catch (Exception e) {
 	    //	    System.out.println("THere was an exception with the fos");
-	    e.printStackTrace();
+	    // e.printStackTrace();
+	    return;
 	}
 	
 	readHeader();
@@ -234,6 +252,8 @@ public class HTTPDownloader implements Runnable {
 
 	while (true) {
 	    
+	    // System.out.println("downloading...");
+
 	    try {
 		// c = _in.read(buf);
 		c = _br.read(buf);
@@ -241,8 +261,9 @@ public class HTTPDownloader implements Runnable {
 		// System.out.print(c); 
 	    }
 	    catch (Exception e) {
-		// System.out.println("THere is a problem with read");
-		return;
+		System.out.println("THere is a problem with read");
+		 return;
+		 //break;
 	    }
 
 	    if (c == -1)
@@ -257,7 +278,8 @@ public class HTTPDownloader implements Runnable {
 //  		System.out.println("* There is a problem with write");
 //  		System.out.println("***********************************");
 //  		e.printStackTrace();
-		return;
+		break;
+		// return;
 	    }
 
 	    _amountRead+=c;
@@ -282,6 +304,18 @@ public class HTTPDownloader implements Runnable {
 	}
     }
 
+
+    public void exit() {
+	try {
+	    // _in.close();
+	    _br.close();
+	    
+	    _fos.close();
+	}
+	catch (IOException e) {
+	}
+    }
+    
 
      public void readHeader() {
 	String str = null;

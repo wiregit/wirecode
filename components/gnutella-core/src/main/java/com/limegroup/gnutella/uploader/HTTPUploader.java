@@ -79,6 +79,7 @@ public class HTTPUploader implements Runnable {
 	catch (Exception e) {
 	    //	    System.out.println("ERROR C");
 	    uploadError("unable to open outputsetream");
+	    return;
 	}
 
 	try {
@@ -94,6 +95,7 @@ public class HTTPUploader implements Runnable {
 
 	catch (Exception e) {
 	    uploadError("unable to open file");
+	    return;
 	}
 
 	_okay = true;
@@ -140,6 +142,7 @@ public class HTTPUploader implements Runnable {
 	
 	catch (Exception e) {
 	    uploadError("unable to open file");
+	    return;
 	}
 
 	URLConnection conn;
@@ -251,13 +254,22 @@ public class HTTPUploader implements Runnable {
 
 	//	System.out.println("In the upload run");
 	if (_okay) {
+	    // System.out.println("Uploader is okay");
 	    _callback.addUpload(this);
 	    doUpload();
 	    _callback.removeUpload(this);
 	}
+	else {
+	    // System.out.println("Uploader not okay");
+	    shutdown();
+	}
     }
 
     public void doUpload() {
+
+	//  if (!_okay)
+//  	    return;
+
 	writeHeader();
 	int c = -1;
 	int available = 0;
