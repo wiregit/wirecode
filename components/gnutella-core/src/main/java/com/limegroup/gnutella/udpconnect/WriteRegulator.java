@@ -47,7 +47,7 @@ public class WriteRegulator {
     /** 
      *  Compute how long the sleep time should be before the next write.
      */
-    public long getSleepTime(long currTime) {
+    public long getSleepTime(long currTime, int receiverWindowSpace) {
 
         //------------- Sleep ------------------------
 
@@ -69,6 +69,11 @@ public class WriteRegulator {
         // reading window.  Don't want to get too far ahead or too far behind
         //
         int sleepTime  = ((usedSpots+1) * baseWait);
+
+        if ( receiverWindowSpace <= 5 ) {
+            sleepTime += 1;
+            sleepTime = 2 * (6 - receiverWindowSpace) * sleepTime;  
+        }
 
         // Ensure the sleep time is fairly distributed
         if ( sleepTime < windowSize ) {

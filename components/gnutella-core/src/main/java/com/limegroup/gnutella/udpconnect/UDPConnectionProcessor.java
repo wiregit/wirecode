@@ -101,10 +101,10 @@ public class UDPConnectionProcessor {
     private static final long MIN_ACK_WAIT_TIME       = 5;
 
     /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_SEND_WINDOW       = 4;
+    private static final long SMALL_SEND_WINDOW       = 2;
 
     /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_WINDOW_MULTIPLE   = 6;
+    private static final long SMALL_WINDOW_MULTIPLE   = 10;
 
     /** Ensure that writing takes a break every 4 writes so other 
         synchronized activity can take place */
@@ -962,6 +962,7 @@ public class UDPConnectionProcessor {
                      _receiverWindowSpace > 0 ) {
                     if(LOG.isDebugEnabled())  
                         LOG.debug(" -- ACK wakeup");
+                    System.out.println(" -- ACK wakeup");
                     writeSpaceActivation();
                 }
 
@@ -1062,6 +1063,7 @@ public class UDPConnectionProcessor {
                          _receiverWindowSpace > 0 ) {
                         if(LOG.isDebugEnabled())  
                             LOG.debug(" -- KA wakeup");
+                        System.out.println(" -- KA wakeup");
                         writeSpaceActivation();
                     }
                 }
@@ -1139,12 +1141,16 @@ public class UDPConnectionProcessor {
             // TODO: Simplify experimental algorithm and plug it in
             //long waitTime = (long)_sendWindow.getRTO() / 6l;
             long currTime = System.currentTimeMillis();
-            long waitTime = _writeRegulator.getSleepTime(currTime);
+            long waitTime = _writeRegulator.getSleepTime(currTime, 
+              _receiverWindowSpace);
 
             if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
+
+                //waitTime += 1;
+
                 // If send window getting small
                 // then wait longer
-                waitTime *= SMALL_WINDOW_MULTIPLE;
+                //waitTime *= SMALL_WINDOW_MULTIPLE;
 
                 // Scale back on the writing speed if you are hitting limits
                 _writeRegulator.hitZeroWindow();
