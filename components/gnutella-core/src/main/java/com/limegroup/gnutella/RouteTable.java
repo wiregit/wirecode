@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.ForgetfulHashMap;
 import java.util.*;
 
 /**
