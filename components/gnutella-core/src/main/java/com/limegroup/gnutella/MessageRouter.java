@@ -181,7 +181,7 @@ public abstract class MessageRouter
         m.hop();
 
         if(m instanceof PingRequest) 
-            handlePingRequest((PingRequest)m, receivingConnection);
+            handlePingRequestPossibleDuplicate((PingRequest)m, receivingConnection);
         else if (m instanceof PingReply) 
             handlePingReply((PingReply)m, receivingConnection);
         else if (m instanceof QueryRequest)
