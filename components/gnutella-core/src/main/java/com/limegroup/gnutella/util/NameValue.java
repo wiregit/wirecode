@@ -11,36 +11,26 @@ package com.limegroup.gnutella.util;
  * be any object. 
  * @author  asingla
  */
-public class NameValue
-{
-    private String _name;
-    private Object _value;
+public final class NameValue {
+
+    private final String _name;
+    private final Object _value;
     
     /** Creates new NameValue */
-    public NameValue(String name, Object value)
-    {
+    public NameValue(String name, Object value) {
         this._name = name;
         this._value = value;
     }
     
-    public String getName()
-    {
+    public String getName() {
         return _name;
     }
     
-    public Object getValue()
-    {
+    public Object getValue() {
         return _value;
     }
-    
-    public void setValue(Object value)
-    {
-        this._value = value;
-    }
-    
-    public String toString()
-    {
+        
+    public String toString() {
         return "name = " + _name + " value = " + _value;
-    }
-    
+    }    
 }
