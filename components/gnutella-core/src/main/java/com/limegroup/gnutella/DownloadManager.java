@@ -314,7 +314,50 @@ public class DownloadManager implements BandwidthTracker {
                     currD.addDownload(rfds[i]);
                     break;
                 }
-            }        
+            }
+
+        if (htGuidToADD.containsKey(new GUID(qr.getGUID()))) {
+            // get the appropriate details....
+            AutoDownloadDetails add = 
+            (AutoDownloadDetails) htGuidToADD.get(new GUID(qr.getGUID()));
+            List toDL = new ArrayList();
+
+            // are there any files you should get?
+            for (int i = 0; i < rfds.length; i++) 
+                if (add.addDownload(rfds[i]))
+                    toDL.add(rfds[i]);
+
+            // if so, start downloading them....
+            if (toDL.size() > 0) {
+                RemoteFileDesc[] toGet = new RemoteFileDesc[1];
+                for (int i = 0; i < toGet.length; i++) {                
+                    toGet[0] = (RemoteFileDesc) toDL.get(i);
+                    try {
+                        getFiles(toGet, false);
+                        add.commitDownload(toGet[0]);
+                    }
+                    catch (AlreadyDownloadingException ade) {
+                        // not too much of a surprise, defn. possible...
+                        debug(ade);
+                        add.removeDownload(toGet[0]);
+                    }
+                    catch (FileExistsException fee) {
+                        // yeah, don't dl a file if the user has it already...
+                        debug(fee);
+                        add.removeDownload(toGet[0]);
+                    }
+                    catch (java.io.FileNotFoundException fnfe) {
+                        // i guess the RFD expired....
+                        debug(fnfe);
+                        add.removeDownload(toGet[0]);
+                    }
+                }
+            }
+
+            // if you've got enough files, don't consider this guy in the future
+            if (add.expired())
+                htGuidToADD.remove(new GUID(qr.getGUID()));
+        }
     }
 
 
@@ -655,6 +698,25 @@ public class DownloadManager implements BandwidthTracker {
         if (debugOn)
             e.printStackTrace();
     }
+
+
+    ///////////////////// AUTO DOWNLOADER FUNCTIONALITY //////////////////
+    /////////////////////             BEGIN             //////////////////
+
+    private Hashtable htGuidToADD = new Hashtable();
+
+    public void registerAutomaticDownload(byte[] guid, String query,
+                                          String richQuery, MediaType type) {
+        
+        GUID key = new GUID(guid);
+        // in the off case that a key (GUID) inserted is already in the HT, then
+        // just ignore.  this shouldn't happen every since the guid space is so
+        // big and we'd assume no client will be up that long....
+        htGuidToADD.put(key, new AutoDownloadDetails(query, richQuery, type));
+    }
+
+    /////////////////////              END              //////////////////
+
 
     /*
     public static void main(String argv[]) {

@@ -687,13 +687,19 @@ public class RouterService
      * @param minSpeed the minimum desired result speed
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
+     * @param autoDL flag that indicates whether the auto downloader should take
+     * care of downloading files....
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
+    public void query(byte[] guid, String query, int minSpeed, MediaType type,
+                      boolean autoDL) {
         QueryRequest qr=new QueryRequest(guid,
                                          SettingsManager.instance().getTTL(),
                                          minSpeed, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
+
+        if (autoDL)
+            downloader.registerAutomaticDownload(guid, query, null, type);
     }
 
     /**
@@ -704,12 +710,15 @@ public class RouterService
      * @see query(byte[], String, int, MediaType)
      */
     public void query(byte[] guid, String query, String richQuery, 
-                        int minSpeed, MediaType type) {
+                        int minSpeed, MediaType type, boolean autoDL) {
         QueryRequest qr=new QueryRequest(guid,
                                          SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
+
+        if (autoDL)
+            downloader.registerAutomaticDownload(guid, query, richQuery, type);
         /* 
          * We don't really use this. for now
          //Rich query?
@@ -740,7 +749,7 @@ public class RouterService
      * @see query(byte[], String, int, MediaType)
      */
     public void query(byte[] guid, String query, int minSpeed) {
-        query(guid, query, minSpeed, null);
+        query(guid, query, minSpeed, null, false);
     }
 
     /** 
