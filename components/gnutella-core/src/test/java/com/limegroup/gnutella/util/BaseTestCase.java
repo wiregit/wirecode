@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.*;
 
-import java.io.File;
+import java.io.*;
 
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
@@ -18,6 +18,13 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     protected Thread _testThread;
     protected TestResult _testResult;
     
+    /* Flag indicate that we have launched the backend process and should
+     * shut it down when we are finished.
+     * NOTE. this has to be declared static because a separate TestCase is
+     * insantiated for each test.
+     */
+    private static boolean[] shutdownBackend = new boolean[]{false, false};
+    
     /**
      * The base constructor.
      * Nothing should ever be initialized in the constructor.
@@ -29,6 +36,55 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      */    
     public BaseTestCase(String name) {
         super(name);
+    }
+    
+    /**
+     * Build a test suite containing all of the test methods in the given class
+     * @param cls The test class (must be subclassed from TestCase)
+     * @return <tt>TestSuite</tt> object that can be returned by suite method
+     */
+    public static TestSuite buildTestSuite(Class cls) {
+        return new TestSuite(cls);
+    }
+    
+    /**
+     * Build a test suite containing a single test from a specificed test class
+     * @param cls The test class (must be subclassed from TestCase)
+     * @param test The name of the test method in cls to be run
+     * @return <tt>TestSuite</tt> object that can be returned by suite method
+     */
+    public static TestSuite buildTestSuite(Class cls, String test) {
+        return buildTestSuite(cls, new String[]{test});
+    }
+    
+    /**
+     * Build a test suite containing a set of tests from a specificed test class
+     * @param cls The test class (must be subclassed from TestCase)
+     * @param test Array containing the names of the test methods in cls to be 
+     * run
+     * @return <tt>TestSuite</tt> object that can be returned by suite method
+     */
+    public static TestSuite buildTestSuite(Class cls, String[] tests) {
+        TestSuite suite = new TestSuite();
+        for (int ii = 0; ii < tests.length; ii++) {
+            suite.addTest(suite.createTest(cls, tests[ii]));
+        }
+        suite.addTest(suite.createTest(cls, "incompleteTest"));
+        return suite;
+    }
+    
+    /**
+     * Get test save directory
+     */
+    public File getSaveDirectory() {
+        return _savedDir;
+    }
+    
+    /**
+     * Get test shared directory
+     */
+    public File getSharedDirectory() {
+        return _sharedDir;
     }
     
     /**
@@ -46,6 +102,78 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
         dir.delete();
     }
     
+    /**
+     * Launches all backend servers.
+     *
+     * @throws <tt>IOException</tt> if the launching of either
+     *  backend fails
+     */
+    public void launchAllBackends() throws IOException {
+        launchBackend(true);
+        launchBackend(false);
+    }
+
+    /**
+     * Launch backend server if it is not running already
+     * @throws IOException if attempt to launch backend server fails
+     */
+    public void launchBackend() throws IOException {
+        launchBackend(false);
+    }
+    
+    /**
+     * Launch backend server if it is not running already
+     * @throws IOException if attempt to launch backend server fails
+     */
+    public void launchBackend(boolean reject) throws IOException {
+        
+        /* If we've already launched the backend, don't try it again */
+        int index = (reject ? 1 : 0);
+        if (shutdownBackend[index]) return;
+
+        /* Try to set up a error callback listener on the backend.
+         * This will fail if some other test class has grabbed it first,
+         * so don't get too excited about a failure.  Not that we do this
+         * first so it will catch any errors reported by Backend startup
+         */
+        try {
+            Backend.setErrorCallback(this);
+        } catch (IOException ex) {
+            System.out.println("Could not establish Backend sever listener:" +
+                               ex.getMessage());
+        }
+        
+        /* Otherwise luanch one if needed */
+        shutdownBackend[index] = Backend.launch(reject);
+    }
+
+    /* Dummy test method defined so we can clean things up after all of the
+     * supeclass test methods have been called
+     */
+    public void testBaseTestCleanup() {
+        shutdownBackends();
+    }
+    
+    /* Not a real test, but if buildTestSuite is called to build a subset of
+     * the complete test suite, it will automatically include this test to 
+     * warn the user that all tests have not been run
+     */
+    public void incompleteTest() {
+        shutdownBackends();
+        fail("Warning - full test suite has not been run");
+    }
+    
+    /** SHutdown any backend servers that we started */
+    private void shutdownBackends() {
+        for (int ii = 0; ii < 2; ii++) {
+            if (shutdownBackend[ii]) Backend.shutdown(ii == 1);
+        }
+        // Wait a couople seconds for any shutdown error reports.
+        try { Thread.sleep(2000); } catch (InterruptedException ex) {}
+        try { Backend.setErrorCallback(null); } catch (IOException ex) {}
+    }
+    
+    
     /*
      * This is modified to run 'preSetUp' and 'postTearDown' as methods
      * which all tests will run, regardless of their implementation
@@ -56,17 +184,30 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      *
 	 */
 	public void runBare() throws Throwable {
-	    try {
-	        preSetUp();
-	        setUp();
-	        runTest();
-	    } finally {
-	        try {
-	            tearDown();
-	        } finally {
-	            postTearDown();
-	        }
-	    }
+        /* If the test is one of our bookeeping tests, calling the setup and
+         * teardown methods is a waste of resources.   Worse, some test classes
+         * will actually fail because of sloppily written race conditions.
+         */
+        String testName = getName();
+        // System.out.println("runBare:" + testName);
+        assertNotNull(testName);
+        if (testName.equals("testBaseTestCleanup") ||
+            testName.equals("incompleteTest")) {
+            runTest();
+        } 
+        else {
+            try {
+                preSetUp();
+                setUp();
+                runTest();
+            } finally {
+                try {
+                    tearDown();
+                } finally {
+                    postTearDown();
+                }
+            }
+        }
     }
     
     /**
@@ -87,20 +228,18 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * This must also set the ErrorService's callback, so it
      * associates with the correct test object.
      */
-    public void preSetUp() throws Throwable {
+    public void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
         ErrorService.setErrorCallback(this);
         setupSettings();
         setupUniqueDirectories();
-        
-        System.out.println("Running test: " + getName() );
     }
     
     /**
      * Called after each test's tearDown.
      * Used to remove directories and possibly other things.
      */
-    public void postTearDown() throws Throwable {
+    public void postTearDown() {
         if ( _baseDir != null )
             cleanFiles(_baseDir);
     }
@@ -109,7 +248,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Sets up settings to a pristine environment for this test.
      * Ensures that no settings are saved.
      */
-    public void setupSettings() throws Throwable  {
+    public void setupSettings() {
         SettingsManager.instance(); // initialize SettingsManager
         AbstractSettings.setShouldSave(false);
         AbstractSettings.revertToDefault();
@@ -118,7 +257,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     /**
      * Sets this test up to have unique directories.
      */
-    public void setupUniqueDirectories() throws Throwable {
+    public void setupUniqueDirectories() throws Exception {
         _baseDir = new File( this.getClass().getName() + "_" + hashCode() );
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");
@@ -141,6 +280,26 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
         _baseDir.deleteOnExit();
     }
     
+    /**
+     * Sets standard settings for a pristine test environment.
+     */
+    public static void setStandardSettings() {
+        SettingsManager settings = SettingsManager.instance();
+        AbstractSettings.revertToDefault();
+		settings.setExtensions("tmp");
+		ConnectionSettings.KEEP_ALIVE.setValue(4);
+		SearchSettings.GUESS_ENABLED.setValue(true);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.USE_GWEBCACHE.setValue(false);        
+        settings.setBannedIps(new String[] {"*.*.*.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*"});        
+    }
+
     /**
      * Fails the test with an AssertionFailedError and another
      * error as the root cause.
