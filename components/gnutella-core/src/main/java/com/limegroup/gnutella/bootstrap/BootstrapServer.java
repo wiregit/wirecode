@@ -51,7 +51,10 @@ public class BootstrapServer {
         }
     }
 
-    /** Returns the URL to the server, minus any request parameters. */
+    /** 
+	 * Returns the URL to the server, minus any request parameters. This is
+	 * guaranteed to be non-null.
+	 */
     public URL getURL() {
         return _url;
     }
