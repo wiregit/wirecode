@@ -407,6 +407,59 @@ public class CreationTimeCacheTest
     }
 
 
+    public void testCommit() throws Exception {
+        CreationTimeCache ctCache = null;
+        Iterator iter = null;
+        Map TIME_MAP = null;
+        Long old = new Long(1);
+        Long middle = new Long(2);
+        Long young = new Long(3);
+        deleteCacheFile();
+        
+        // should be a empty cache
+        // ---------------------------
+        ctCache = new CreationTimeCache();
+        assertFalse(ctCache.getFiles().hasNext());
+
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        assertEquals(0, TIME_MAP.size());
+        // ---------------------------
+
+        // make sure that only after something is committed is it returned
+        // via getFiles()
+        // ---------------------------
+        ctCache.addTime(hash1, middle.longValue());
+        iter = ctCache.getFiles();
+        assertFalse(iter.hasNext());
+
+        ctCache.commitTime(hash1);
+        iter = ctCache.getFiles();
+        assertEquals(hash1, iter.next());
+        assertFalse(iter.hasNext());
+        // ---------------------------
+
+        // make sure that commiting changes ordering....
+        // ---------------------------
+        ctCache.addTime(hash2, young.longValue());
+        ctCache.addTime(hash3, old.longValue());
+
+        ctCache.commitTime(hash3);
+        iter = ctCache.getFiles();
+        assertEquals(hash1, iter.next());
+        assertEquals(hash3, iter.next());
+        assertFalse(iter.hasNext());
+
+        ctCache.commitTime(hash2);
+        iter = ctCache.getFiles();
+        assertEquals(hash2, iter.next());
+        assertEquals(hash1, iter.next());
+        assertEquals(hash3, iter.next());
+        assertFalse(iter.hasNext());
+        // ---------------------------
+    }
+
+
+
     /**
      * Test read & write of map
      */
