@@ -13,7 +13,8 @@ public final class Connector {
     
     private static final Connector INSTANCE = new Connector();
 
-    private final File HOST_FILE = new File(CommonUtils.getUserSettingsDir(), "hosts.txt");
+    private final File HOST_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
 
     /**
      * Constant for the <tt>Set</tt> of hosts to attempt to connect to.
@@ -38,7 +39,8 @@ public final class Connector {
                     pingHosts(); 
                 }
             };
-        Thread hostFileReaderThread = new Thread(hostFileReader, "host file reader");
+        Thread hostFileReaderThread = 
+            new Thread(hostFileReader, "host file reader");
         hostFileReaderThread.setDaemon(true);
         hostFileReaderThread.start();
     }
