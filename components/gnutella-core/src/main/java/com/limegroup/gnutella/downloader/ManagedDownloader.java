@@ -173,7 +173,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         this.dloaderManagerThread=new Thread() {
             public void run() {
-                tryAllDownloads();
+                try { 
+                    tryAllDownloads();
+                } catch (Exception e) {
+                    //This is a "firewall" for reporting unhandled errors.  We
+                    //don't really try to recover at this point, but we do
+                    //attempt to display the error in the GUI for debugging
+                    //purposes.
+                    ManagedDownloader.this.manager.internalError(e);
+                }
             }
         };
         dloaderManagerThread.setDaemon(true);
@@ -682,7 +690,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         final HTTPDownloader dloaderAlias=dloader;
         Thread worker=new Thread() {
                 public void run() {
-                    tryOneDownload(dloaderAlias, files, terminated);
+                    try {
+                        tryOneDownload(dloaderAlias, files, terminated);
+                    } catch (Exception e) {
+                        //This is a "firewall" for reporting unhandled errors.
+                        //We don't really try to recover at this point, but we
+                        //do attempt to display the error in the GUI for
+                        //debugging purposes.
+                        ManagedDownloader.this.manager.internalError(e);
+                    }
                 }
             };
         worker.setDaemon(true);

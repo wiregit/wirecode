@@ -446,4 +446,10 @@ public class DownloadManager implements BandwidthTracker {
 		}
         return sum;
 	}
+    
+    /** Notifies the GUI of the uncaught exception e.  For use only by download
+     *  runner threads. */
+    public void internalError(Throwable e) { 
+        callback.error(ActivityCallback.ASSERT_ERROR, e);
+    }
 }
