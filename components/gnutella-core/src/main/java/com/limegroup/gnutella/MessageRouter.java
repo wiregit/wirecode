@@ -27,7 +27,11 @@ public abstract class MessageRouter
      */
     protected byte[] _clientGUID;
 
-    private LoopbackReplyHandler _forMeReplyHandler;
+	/**
+	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
+	 * this node.
+	 */
+    private ReplyHandler _forMeReplyHandler;
 
     /**
      * The lock to hold before updating or propogating tables.  TODO3: it's 
@@ -143,19 +147,13 @@ public abstract class MessageRouter
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
-						   HostCatcher catcher, UploadManager uploadManager,
-						   DownloadManager downloadManager, 
-						   ActivityCallback callback,
-						   FileManager fileManager)
+						   HostCatcher catcher, UploadManager uploadManager)
     {
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
         _uploadManager = uploadManager;
-		_forMeReplyHandler = 
-		    new LoopbackReplyHandler(acceptor, manager, fileManager, 
-									 callback, downloadManager, 
-									 uploadManager);
+		_forMeReplyHandler = new ForMeReplyHandler();
     }
 
     public String getPingRouteTableDump()
