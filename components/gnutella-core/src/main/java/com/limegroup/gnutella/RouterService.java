@@ -192,8 +192,12 @@ public class RouterService {
 
     /**
      * Variable for whether or not that backend threads have been started.
+     * 0 - nothing started
+     * 1 - pre/while gui tasks started
+     * 2 - everything started
+     * LOCKING: RouterService.class 
      */
-    private static boolean _started;
+    private static int _started;
 
 
 	/**
@@ -255,7 +259,14 @@ public class RouterService {
   	 * Performs startup tasks that should happen while the GUI loads
   	 */
   	public void asyncGuiInit() {
-  	    
+  		
+  		synchronized(RouterService.class) {
+  			if (_started > 0) // already did this?
+  				return;
+  			else
+  				_started = 1;
+  		}
+  		
   	    Thread t = new ManagedThread(new Initializer());
   	    t.setName("async gui initializer");
   	    t.setDaemon(true);
@@ -267,6 +278,14 @@ public class RouterService {
   	 * to be used for tests and when running only the core
   	 */
   	public void preGuiInit() {
+  		
+  		synchronized(RouterService.class) {
+  			if (_started > 0) // already did this?
+  				return;
+  			else
+  				_started = 1;
+  		}
+  		
   	    (new Initializer()).run();
   	}
   	
@@ -286,7 +305,8 @@ public class RouterService {
     	    LOG.trace("START RouterService");
     	    
     	    if ( isStarted() ) return;
-            _started = true;
+    	    	preGuiInit();
+            _started = 2;
     
     		// Now, link all the pieces together, starting the various threads.
 
@@ -427,8 +447,8 @@ public class RouterService {
      * @return <tt>true</tt> if the backend threads have been started,
      *  otherwise <tt>false</tt>
      */
-    public static boolean isStarted() {
-        return _started;
+    public synchronized static boolean isStarted() {
+        return _started == 2;
     }
 
     /**
@@ -1487,25 +1507,28 @@ public class RouterService {
 
         // reset the last connect back time so the next time the TCP/UDP
         // validators run they try to connect back.
-        acceptor.resetLastConnectBackTime();
-        udpService.resetLastConnectBackTime();
+        if (acceptor != null)
+        	acceptor.resetLastConnectBackTime();
+        if (udpService != null)
+        	udpService.resetLastConnectBackTime();
         
-        Properties props = new Properties();
-        props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
-        HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
-        
-        for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
-            ManagedConnection c = (ManagedConnection)iter.next();
-            if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
-                c.send(huvm);
+        if (manager != null) {
+        	Properties props = new Properties();
+        	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
+        	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
+        	
+        	for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
+        		ManagedConnection c = (ManagedConnection)iter.next();
+        		if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+        			c.send(huvm);
+        	}
+        	
+        	for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
+        		ManagedConnection c = (ManagedConnection)iter.next();
+        		if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+        			c.send(huvm);
+        	}
         }
-        
-        for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
-            ManagedConnection c = (ManagedConnection)iter.next();
-            if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
-                c.send(huvm);
-        }
-
         return true;
     }
     
