@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.settings.*;
@@ -622,10 +623,22 @@ public class UploadManager implements BandwidthTracker {
                 // If we are allowing, see if we have the range.
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
                 int upStart = uploader.getUploadBegin();
-                int upEnd = uploader.getUploadEnd();
-                if ( !ifd.isRangeSatisfiable(upStart, upEnd) ) {
-                    uploader.setState(Uploader.UNAVAILABLE_RANGE);
-                    return;
+                // uploader.getUploadEnd() is exclusive!
+                int upEnd = uploader.getUploadEnd() - 1;                
+                // If the request contained a 'Range:' header, then we can
+                // shrink the request to what we have available.
+                if(uploader.containedRangeRequest()) {
+                    Interval request = ifd.getAvailableSubRange(upStart, upEnd);
+                    if ( request == null ) {
+                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                        return;
+                    }
+                    uploader.setUploadBeginAndEnd(request.low, request.high + 1);
+                } else {
+                    if ( !ifd.isRangeSatisfiable(upStart, upEnd) ) {
+                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                        return;
+                    }
                 }
             }
         }

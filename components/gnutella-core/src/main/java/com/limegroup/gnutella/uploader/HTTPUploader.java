@@ -53,6 +53,7 @@ public final class HTTPUploader implements Uploader {
 	private int _lastTransferStateNum;
 	private HTTPMessage _state;
 	private boolean _firstReply = true;
+	private boolean _containedRangeRequest = false;
 	
 	private boolean _chatEnabled;
 	private boolean _browseEnabled;
@@ -422,6 +423,23 @@ public final class HTTPUploader implements Uploader {
 	public int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
     public int getUploadEnd() {return _uploadEnd;}
+    
+    /**
+     * Set new upload begin & end values, modifying the amount requested.
+     */
+    public void setUploadBeginAndEnd(int begin, int end) {
+        _uploadBegin = begin;
+        _uploadEnd = end;
+        _amountRequested = _uploadEnd - _uploadBegin;
+    }
+    
+    /**
+     * Whether or not the last request to this HTTPUploader contained
+     * a 'Range: ' header, so we can truncate the requested range.
+     */
+    public boolean containedRangeRequest() {
+        return _containedRangeRequest;
+    }
 
 	// implements the Uploader interface
 	public int getFileSize() {
@@ -589,6 +607,7 @@ public final class HTTPUploader implements Uploader {
 	public void readHeader(InputStream iStream) throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
+        _containedRangeRequest = false;
 		_clientAcceptsXGnutellaQueryreplies = false;
         
 		ByteReader br = new ByteReader(iStream);
@@ -692,6 +711,8 @@ public final class HTTPUploader implements Uploader {
         // was: != 0, is == -1 (that okay?)
         if ( StringUtils.indexOfIgnoreCase(str, "Range:") == -1 )
             return false;
+            
+        _containedRangeRequest = true;
             
         //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
         //that we don't validate the data between "Range:" and the

@@ -222,6 +222,26 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     }
     
     /**
+     * Adjusts the requested range to the available range.
+     * @return Interval that has been clipped to match the available range, null
+     * if the interval does not overlap any available ranges
+     */
+     public Interval getAvailableSubRange(int low, int high) {
+        synchronized(_verifyingFile) {
+            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+                Interval interval = (Interval) iter.next();
+                if ((interval.low <= high && low <= interval.high))
+                	// overlap found 
+                    return new Interval(Math.max(interval.low, low), 
+                                        Math.min(interval.high, high));
+                else if (interval.low > high) // passed all viable intervals
+                    break;
+            }
+            return null;
+        }
+     }
+    
+    /**
      * Determines whether or not the given interval is within the range
      * of our incomplete file.
      */

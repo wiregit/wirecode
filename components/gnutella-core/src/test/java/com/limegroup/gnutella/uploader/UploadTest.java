@@ -376,6 +376,17 @@ public class UploadTest extends BaseTestCase {
         vf.addInterval(iv);
         passed = download1(incompleteHash, "Range: bytes 2-5", "cdef", true);
         assertTrue("incomplete range did not work", passed);
+        
+        passed = download1(incompleteHash, "Range: bytes 1-3", "cd", true);
+        assertTrue("didn't shrink wanted ranges, low", passed);
+        
+        passed = download1(incompleteHash, "Range: bytes 3-10", "defg", true);
+        assertTrue("didn't shrink wanted ranges, high", passed);
+        
+        passed = download1(incompleteHash, "Range: bytes 0-20", "cdefg", true);
+        assertTrue("didn't shrink wanted ranges, both", passed);
+        
+        // failures checked in testIncompleteXXX later on down.
     }
     
     public void testHTTP11DownloadURLEncoding() throws Exception {
@@ -1026,7 +1037,7 @@ public class UploadTest extends BaseTestCase {
     }
     
     public void testIncompleteFileWithRangeRequest() throws Exception {
-        String header = "Range: bytes 30-50";
+        String header = "Range: bytes 20-40";
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, header, true, true,
                  "HTTP/1.1 416 Requested Range Unavailable");
