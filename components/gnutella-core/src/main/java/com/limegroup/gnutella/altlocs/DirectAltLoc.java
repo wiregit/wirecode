@@ -72,7 +72,7 @@ public class DirectAltLoc extends AlternateLocation {
 	}
 	
 	protected String generateHTTPString() {
-		String ret = _node.getAddress();
+		String ret = _node.getInetAddress().getHostAddress();
 		if (_node.getPort()!=6346)
 			ret = ret+":"+_node.getPort();
 		return ret;
@@ -188,7 +188,7 @@ public class DirectAltLoc extends AlternateLocation {
 	public int hashCode() {
 		if (hashCode ==0) {
 		int result = super.hashCode();
-			result = (37* result)+_node.getAddress().hashCode();
+			result = (37* result)+_node.getInetAddress().hashCode();
 			result = (37* result)+_node.getPort();
 			hashCode=result;
 		}
