@@ -105,8 +105,9 @@ public class RichQueryHandler{
                 }
             }
             if (valid) {
-                //if this code is NOT run s times 
-                //there will be nulls at the end of the array
+                // Note that if any response was invalid,
+                // the array will be too small, and we'll
+                // have to resize it.
                 res.setDocument(currDoc);
                 retResponses[z] = res;
                 z++;
