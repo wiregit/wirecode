@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.statistics.MessageStatistics;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -78,12 +79,6 @@ public abstract class MessageRouter
 
 
 	/**
-	 * Constant for the <tt>Statistics</tt> class that handles keeping
-	 * all message statistics.
-	 */
-	private final Statistics STATS = Statistics.instance();
-
-	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
 	 */
@@ -96,12 +91,12 @@ public abstract class MessageRouter
      * The total number of messages that pass through ManagedConnection.send()
      * and ManagedConnection.receive().
      */
-    private volatile int _numMessages;
+    //private volatile int _numMessages;
     /**
      * The number of PingRequests we actually respond to after filtering.
      * Note that excludes PingRequests we generate.
      */
-    private volatile int _numPingRequests;
+    //private volatile int _numPingRequests;
     /**
      * The number of PingReplies we actually process after filtering, either by
      * routing to another connection or updating our horizon statistics.
@@ -109,12 +104,12 @@ public abstract class MessageRouter
      * _numPingRequests (the number of PingRequests for which we generate a
      * PingReply)
      */
-    private volatile int _numPingReplies;
+    //private volatile int _numPingReplies;
     /**
      * The number of QueryRequests we actually respond to after filtering.
      * Note that excludes QueryRequests we generate.
      */
-    private volatile int _numQueryRequests;
+    //private volatile int _numQueryRequests;
     /**
      * The number of QueryReplies we actually process after filtering, either by
      * routing to another connection or by querying the local store.
@@ -122,21 +117,21 @@ public abstract class MessageRouter
      * _numQueryRequests (the number of QueryRequests for which we attempt to
      * generate a QueryReply)
      */
-    private volatile int _numQueryReplies;
+    //private volatile int _numQueryReplies;
     /**
      * The number of PushRequests we actually process after filtering, either by
      * routing to another connection or by launching an HTTPUploader.
      * Note that excludes PushRequests we generate through Downloader.
      */
-    private volatile int _numPushRequests;
+    //private volatile int _numPushRequests;
     /**
      * The number of messages dropped by route filters
      */
-    private volatile int _numFilteredMessages;
+    //private volatile int _numFilteredMessages;
     /**
      * The number of replies dropped because they have no routing table entry
      */
-    private volatile int _numRouteErrors;
+    //private volatile int _numRouteErrors;
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -204,24 +199,24 @@ public abstract class MessageRouter
         msg.hop();
 	   
         if(msg instanceof PingRequest) {
-			STATS.addTCPPingRequest();
+			MessageStatistics.addTCPPingRequest();
             handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
 		} else if (msg instanceof PingReply) {
-			STATS.addTCPPingReply();
+			MessageStatistics.addTCPPingReply();
             handlePingReply((PingReply)msg, receivingConnection);
 		} else if (msg instanceof QueryRequest) {
-			STATS.addTCPQueryRequest();
+			MessageStatistics.addTCPQueryRequest();
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
 		} else if (msg instanceof QueryReply) {
-			STATS.addTCPQueryReply();
+			MessageStatistics.addTCPQueryReply();
             handleQueryReply((QueryReply)msg, receivingConnection);
 		} else if (msg instanceof PushRequest) {
-			STATS.addTCPPushRequest();
+			MessageStatistics.addTCPPushRequest();
             handlePushRequest((PushRequest)msg, receivingConnection);
 		} else if (msg instanceof RouteTableMessage) {
-			STATS.addTCPRouteTableMessage();
+			MessageStatistics.addTCPRouteTableMessage();
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
 		}
@@ -249,25 +244,25 @@ public abstract class MessageRouter
 		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
 		
         if (msg instanceof QueryRequest) {
-			STATS.addUDPQueryRequest();
+			MessageStatistics.addUDPQueryRequest();
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
 			if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
-			STATS.addUDPQueryReply();
+			MessageStatistics.addUDPQueryReply();
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			STATS.addUDPPingRequest();
+			MessageStatistics.addUDPPingRequest();
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
-			STATS.addUDPPingReply();
+			MessageStatistics.addUDPPingReply();
 			UNICASTER.addUnicastEndpoint(datagram.getAddress(),
 										 datagram.getPort());		
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
-			STATS.addUDPPushRequest();
+			MessageStatistics.addUDPPushRequest();
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
@@ -353,7 +348,7 @@ public abstract class MessageRouter
     protected void handlePingRequest(PingRequest pingRequest,
                                      ReplyHandler receivingConnection)
     {
-        _numPingRequests++;
+        //_numPingRequests++;
 
         if(pingRequest.getTTL() > 0)
             broadcastPingRequest(pingRequest, receivingConnection,
@@ -381,7 +376,7 @@ public abstract class MessageRouter
     protected void handleUDPPingRequest(PingRequest pingRequest,
 										ReplyHandler handler)
     {
-        _numPingRequests++;
+        //_numPingRequests++;
         respondToUDPPingRequest(pingRequest);
     }
     
@@ -404,7 +399,7 @@ public abstract class MessageRouter
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler)
     {
-        _numQueryRequests++;
+        //_numQueryRequests++;
 
 		// if it's a request from a leaf, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
@@ -679,22 +674,29 @@ public abstract class MessageRouter
 
         if(replyHandler != null)
         {
-            _numPingReplies++;
-            replyHandler.handlePingReply(pingReply,
-                                         handler);
+            //_numPingReplies++;
+            replyHandler.handlePingReply(pingReply, handler);
         }
         else
         {
-            _numRouteErrors++;
+			MessageStatistics.addRouteError();
+            //_numRouteErrors++;
             handler.countDroppedMessage();
         }
 
-        //Then, if a marked pong from a supernode that we've never seen before,
+		boolean supportsUnicast = false;
+		try {
+			supportsUnicast = pingReply.supportsUnicast();
+		} catch(BadPacketException e) {
+		}
+
+        //Then, if a marked pong from an Ultrapeer that we've never seen before,
         //send to all leaf connections except replyHandler (which may be null),
         //irregardless of GUID.  The leafs will add the address then drop the
-        //pong as they have no routing entry.  Note that if supernodes are very
+        //pong as they have no routing entry.  Note that if Ultrapeers are very
         //prevalent, this may consume too much bandwidth.
-        if (newAddress && pingReply.isMarked()) 
+		//Also forward any GUESS pongs to all leaves.
+        if ((newAddress && pingReply.isMarked()) || supportsUnicast) 
         {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) 
@@ -729,7 +731,7 @@ public abstract class MessageRouter
         if(rrp != null)
         {
             queryReply.setPriority(rrp.getBytesRouted());
-            _numQueryReplies++;
+            //_numQueryReplies++;
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
@@ -752,7 +754,8 @@ public abstract class MessageRouter
         }
         else
         {
-            _numRouteErrors++;
+			MessageStatistics.addRouteError();
+            //_numRouteErrors++;
             handler.countDroppedMessage();
         }
     }
@@ -776,12 +779,13 @@ public abstract class MessageRouter
 
         if(replyHandler != null)
         {
-            _numPingReplies++;
+            //_numPingReplies++;
             replyHandler.handlePushRequest(pushRequest, handler);
         }
         else
         {
-            _numRouteErrors++;
+			MessageStatistics.addRouteError();
+            //_numRouteErrors++;
             handler.countDroppedMessage();
         }
     }
@@ -1103,10 +1107,10 @@ public abstract class MessageRouter
      * The overall number of messages should be maintained in the send and
      * receive calls on ManagedConnection.
      */
-    public void countMessage()
-    {
-        _numMessages++;
-    }
+//      public void countMessage()
+//      {
+//          _numMessages++;
+//      }
 
     /**
      * This method should only be called from the ManagedConnection message
@@ -1114,20 +1118,20 @@ public abstract class MessageRouter
      * should count it.
      * See that class for instructions on counting dropped messages.
      */
-    public void countFilteredMessage()
-    {
-        _numFilteredMessages++;
-    }
+//      public void countFilteredMessage()
+//      {
+//          _numFilteredMessages++;
+//      }
 
     /**
      * @return the number of PingRequests we actually respond to after
      * filtering.
      * Note that excludes PingRequests we generate.
      */
-    public int getNumPingRequests()
-    {
-        return _numPingRequests;
-    }
+//      public int getNumPingRequests()
+//      {
+//          return _numPingRequests;
+//      }
 
     /**
      * @return the number of PingReplies we actually process after filtering,
@@ -1137,20 +1141,20 @@ public abstract class MessageRouter
      * _numPingRequests (the number of PingRequests for which we generate a
      * PingReply)
      */
-    public int getNumPingReplies()
-    {
-        return _numPingReplies;
-    }
+//      public int getNumPingReplies()
+//      {
+//          return _numPingReplies;
+//      }
 
     /**
      * @return The number of QueryRequests we actually respond to after
      * filtering.
      * Note that excludes QueryRequests we generate.
      */
-    public int getNumQueryRequests()
-    {
-        return _numQueryRequests;
-    }
+//      public int getNumQueryRequests()
+//      {
+//          return _numQueryRequests;
+//      }
 
     /**
      * @return the number of QueryReplies we actually process after filtering,
@@ -1159,37 +1163,37 @@ public abstract class MessageRouter
      * _numQueryRequests (the number of QueryRequests for which we attempt to
      * generate a QueryReply)
      */
-    public int getNumQueryReplies()
-    {
-        return _numQueryReplies;
-    }
+//      public int getNumQueryReplies()
+//      {
+//          return _numQueryReplies;
+//      }
 
     /**
      * @return the number of PushRequests we actually process after filtering,
      * either by routing to another connection or by launching an HTTPUploader.
      * Note that excludes PushRequests we generate through Downloader.
      */
-    public int getNumPushRequests()
-    {
-        return _numPushRequests;
-    }
+//      public int getNumPushRequests()
+//      {
+//          return _numPushRequests;
+//      }
 
     /**
      * @return the number of messages dropped by routing filters
      */
-    public int getNumFilteredMessages()
-    {
-        return _numFilteredMessages;
-    }
+//      public int getNumFilteredMessages()
+//      {
+//          return _numFilteredMessages;
+//      }
 
     /**
      * @return the number of replies dropped because they have no routing table
      * entry
      */
-    public int getNumRouteErrors()
-    {
-        return _numRouteErrors;
-    }
+//      public int getNumRouteErrors()
+//      {
+//          return _numRouteErrors;
+//      }
 
     /**
      * A convenience method for getNumFilteredMessages() + getNumRouteErrors()
@@ -1197,19 +1201,19 @@ public abstract class MessageRouter
      * @return The total number of messages dropped for filtering or routing
      *         reasons
      */
-    public int getNumDroppedMessages()
-    {
-        return _numFilteredMessages + _numRouteErrors;
-    }
+//      public int getNumDroppedMessages()
+//      {
+//          return _numFilteredMessages + _numRouteErrors;
+//      }
 
     /**
      * @return the total number of messages sent or received.  This includes
      * dropped messages, whatever.  If we attempt to send a message or
      * if we receive a well-formed message on a socket, we count it.
      */
-    public int getNumMessages()
-    {
-        return _numMessages;
-    }
+//      public int getNumMessages()
+//      {
+//          return _numMessages;
+//      }
 
 }

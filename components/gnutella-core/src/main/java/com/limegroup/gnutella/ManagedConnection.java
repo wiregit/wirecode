@@ -9,6 +9,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -56,11 +57,6 @@ public class ManagedConnection
 
     private final MessageRouter _router;
     private final ConnectionManager _manager;
-
-	/**
-	 * Constant for the statistics-handling class.
-	 */
-	private final Statistics STATS = Statistics.instance();
 
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
@@ -779,7 +775,7 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-				STATS.addFilteredTCPMessage();
+				MessageStatistics.addFilteredTCPMessage();
                 //_router.countFilteredMessage();
                 _numReceivedMessagesDropped++;
                 continue;
