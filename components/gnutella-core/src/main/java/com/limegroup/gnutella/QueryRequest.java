@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 
-public class QueryRequest extends Message {
+public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
     byte[] payload;

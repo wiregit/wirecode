@@ -6,7 +6,7 @@ import java.io.*;
  * A ping reply message, aka, "pong".
  */
 
-public class PingReply extends Message {
+public class PingReply extends Message implements Serializable{
     //WARNING: see note in Message about IP addresses
 
     /** All the data.  We extract the port, ip address, number of files,

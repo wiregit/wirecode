@@ -6,7 +6,7 @@ import java.io.*;
  * A Gnutella ping message.
  */
 
-public class PingRequest extends Message {
+public class PingRequest extends Message implements Serializable{
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
     }

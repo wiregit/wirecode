@@ -7,7 +7,7 @@ import com.sun.java.util.collections.Arrays;
  * A Gnutella push request, used to download files behind a firewall.
  */
 
-public class PushRequest extends Message {
+public class PushRequest extends Message implements Serializable {
     /** The unparsed payload--because I don't care what's inside.
     NOTE: IP address is BIG-endian.
      */

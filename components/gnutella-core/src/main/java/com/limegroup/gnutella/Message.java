@@ -12,7 +12,7 @@ import java.io.*;
  * and replies (pong, search results).  Only the TTL and hops field of
  * a message can be changed.
  */
-public abstract class Message {
+public abstract class Message implements Serializable{
     //Functional IDs defined by Gnutella protocol.
     protected static final byte F_PING=(byte)0x0;
     protected static final byte F_PING_REPLY=(byte)0x1;

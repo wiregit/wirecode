@@ -9,7 +9,7 @@ import com.sun.java.util.collections.*;
  * reply packets may not be discovered until the getResponses
  * methods are called.
  */
-public class QueryReply extends Message {
+public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
     //forward them) we extract the responses lazily as needed.
     //When they are extracted, however, it makes sense to store the parsed
