@@ -20,7 +20,6 @@ public class ChatManager {
 	private List _chatsInProgress = new LinkedList();
 	private List _blockedHosts = new LinkedList();
 	private ActivityCallback _activityCallback;
-	private boolean _allowChats = true;
 
 	// Operations
 	public static ChatManager instance() {
@@ -39,8 +38,10 @@ public class ChatManager {
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
 
+		boolean allowChats = SettingsManager.instance().getChatEnabled();
+
 		// see if chatting is turned off
-		if (! _allowChats)
+		if (! allowChats)
 			return;
 
 		// do a check to see it the host has been blocked
@@ -93,10 +94,6 @@ public class ChatManager {
 	
 	public void unblockHost(String host) {
 		_blockedHosts.remove(host);
-	}
-
-	public void allowChats(boolean b) {
-		_allowChats = b;
 	}
 
 	// Private Classes
