@@ -554,8 +554,6 @@ public final class SettingsManager {
     private volatile boolean  _filterHtml;
     private volatile boolean  _filterGreedyQueries;
     private volatile boolean  _filterBearShare;
-    private volatile boolean  _useQuickConnect;
-    private volatile String[] _quickConnectHosts;
     private volatile int      _parallelSearchMax;
     private volatile boolean  _clearCompletedUpload;
     private volatile boolean  _clearCompletedDownload;
@@ -1496,24 +1494,6 @@ public final class SettingsManager {
      *         <tt>false</tt> otherwise
      */
     public boolean getFilterBearShareQueries() { return _filterBearShare; }
-
-    /**
-     * Returns a <tt>boolean</tt> value indicating whether or not automatic
-     * connection to the network via "quick connect" servers should be
-     * enables at startup.
-     *
-     * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
-     *         otherwise
-     */
-    public boolean getUseQuickConnect(){return true;}
-
-    /**
-     * Returns an array of servers to automatically connect to via "quick
-     * connect" on startup.
-     *
-     * @return an array of servers to use for quickly connecting
-     */
-    public String[] getQuickConnectHosts(){return _quickConnectHosts;}
 
     /**
      * Returns the number of simultaneous searches to allow before the oldest
