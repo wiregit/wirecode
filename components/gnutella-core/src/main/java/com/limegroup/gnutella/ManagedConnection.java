@@ -1009,7 +1009,8 @@ public class ManagedConnection extends Connection
         if (remoteHostSupportsLeafGuidance() < 1) return query;
         if (query.desiresOutOfBandReplies()) return query;
         if (!RouterService.isOOBCapable() || 
-            !OutOfBandThroughputStat.isSuccessRateGreat()) return query;
+            !OutOfBandThroughputStat.isSuccessRateGreat() ||
+            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
 
         // everything is a go - we need to do the following:
         // 1) mutate the GUID of the query - you should maintain every param of
@@ -1042,6 +1043,7 @@ public class ManagedConnection extends Connection
             _nextClearTime = System.currentTimeMillis() + TIMED_GUID_LIFETIME;
         }
 
+        OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
         return query;
     }
 

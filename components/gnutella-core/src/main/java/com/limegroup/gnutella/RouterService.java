@@ -765,7 +765,7 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isOOBCapable())
+        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
@@ -819,7 +819,7 @@ public class RouterService {
 		try {
 			_lastQueryTime = System.currentTimeMillis();
             QueryRequest qr = null;
-            if ((new GUID(guid)).addressesMatch(getAddress(), getPort()))
+            if ((new GUID(guid)).addressesMatch(getAddress(), getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
                 // of band support.  note that there is a VERY small chance that
                 // the guid will be address encoded but not meant for out of band
@@ -829,6 +829,8 @@ public class RouterService {
                 qr = QueryRequest.createOutOfBandQuery(guid, 
                                                        query, 
                                                        richQuery);
+                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+            }
             else
                 qr = QueryRequest.createQuery(guid, 
                                               query, 
