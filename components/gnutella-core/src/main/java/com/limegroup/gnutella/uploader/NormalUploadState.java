@@ -54,7 +54,9 @@ public class NormalUploadState implements UploadState {
                 return;
             
             //if invalid end-index, then upload upto the end of file
-            if(_uploadEnd <= 0 || _uploadEnd <= _uploadBegin)
+            if(_uploadEnd <= 0 
+                || _uploadEnd <= _uploadBegin 
+                || _uploadEnd > _fileSize)
                 _uploadEnd = _fileSize;
 
             /* write the header information to the socket */
