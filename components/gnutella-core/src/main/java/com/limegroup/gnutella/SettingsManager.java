@@ -985,7 +985,6 @@ public class SettingsManager implements SettingsInterface
 			tempPath = saveFile.getCanonicalPath();
 			tempPath = saveFile.getParent();
 			tempPath += File.separator;
-			//tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
 			tempPath += "Incomplete";
 			incFile = new File(tempPath);
 		} catch(IOException ioe) {
