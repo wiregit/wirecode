@@ -22,6 +22,14 @@ import java.util.StringTokenizer;
  */
 public class QueryRequest extends Message implements Serializable{
 
+    // these specs may seem backwards, but they are not - ByteOrder.short2leb
+    // puts the low-order byte first, so over the network 0x0080 would look
+    // like 0x8000
+    public static final int SPECIAL_MINSPEED_MASK  = 0x0080;
+    public static final int SPECIAL_FIREWALL_MASK  = 0x0040;
+    public static final int SPECIAL_XML_MASK       = 0x0020;
+    public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
+
     /**
      * The payload for the query -- includes the query string, the
      * XML query, any URNs, GGEP, etc.
@@ -632,19 +640,19 @@ public class QueryRequest extends Message implements Serializable{
             
 		// the new Min Speed format - looks reversed but
 		// it isn't because of ByteOrder.short2leb
-		int minSpeed = 0x00000080; 
+		int minSpeed = SPECIAL_MINSPEED_MASK; 
 		// set the firewall bit if i'm firewalled
 		if (isFirewalled && !isMulticast())
-			minSpeed |= 0x40;
+			minSpeed |= SPECIAL_FIREWALL_MASK;
         // THE DEAL:
         // if we can NOT receive out of band replies, we want in-band XML - so
 		// set the correct bit.
         // if we can receive out of band replies, we do not want in-band XML -
 		// we'll hope the out-of-band reply guys will provide us all necessary XML.
         if (!canReceiveOutOfBandReplies) 
-            minSpeed |= 0x20;
+            minSpeed |= SPECIAL_XML_MASK;
         else // bit 10 flags out-of-band support
-            minSpeed |= 0x04;
+            minSpeed |= SPECIAL_OUTOFBAND_MASK;
 
         MIN_SPEED = minSpeed;
 		if(query == null) {
@@ -979,8 +987,8 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean isFirewalledSource() {
         if ( !isMulticast() ) {
-            if ((MIN_SPEED & 0x0080) > 0) {
-                if ((MIN_SPEED & 0x0040) > 0)
+            if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
+                if ((MIN_SPEED & SPECIAL_FIREWALL_MASK) > 0)
                     return true;
             }
         }
@@ -992,8 +1000,8 @@ public class QueryRequest extends Message implements Serializable{
      * Returns true if the query source desires Lime meta-data in responses.
      */
     public boolean desiresXMLResponses() {
-        if ((MIN_SPEED & 0x0080) > 0) {
-            if ((MIN_SPEED & 0x0020) > 0)
+        if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
+            if ((MIN_SPEED & SPECIAL_XML_MASK) > 0)
                 return true;
         }
         return false;        
@@ -1006,8 +1014,8 @@ public class QueryRequest extends Message implements Serializable{
      * it.  Always send XML if you are sending an out-of-band reply.
      */
     public boolean desiresOutOfBandReplies() {
-        if ((MIN_SPEED & 0x0080) > 0) {
-            if ((MIN_SPEED & 0x0004) > 0)
+        if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
+            if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
         return false;
