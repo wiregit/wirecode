@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
@@ -34,6 +35,8 @@ import com.limegroup.gnutella.util.IntervalSet;
 public class VerifyingFile {
     
     private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
+    
+    private static final ProcessingQueue CHUNK_VERIFIER = new ProcessingQueue("chunk verifier");
     
     /**
      * The file we're writing to / reading from.
@@ -76,9 +79,13 @@ public class VerifyingFile {
     private IntervalSet leasedBlocks;
     
     /**
-     * Ranges which are written and pending verification.  
-     * INVARIANT: pendingBlocks is a subset of leasedBlocks, no blocks can be in 
-     * written blocks and pendingBlocks at the same time.
+     * Ranges that are currently written to disk, but do not form complete chunks
+     * so cannot be verified by the HashTree.
+     */
+    private IntervalSet partialBlocks;
+    
+    /**
+     * Ranges which are written and pending verification.
      */
     private IntervalSet pendingBlocks;
     
@@ -101,6 +108,7 @@ public class VerifyingFile {
         writtenBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
+        partialBlocks = new IntervalSet();
     }
     
     /**
@@ -148,13 +156,19 @@ public class VerifyingFile {
      */
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
                                                     throws IOException {
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug(" trying to write block at offset "+currPos+" with size "+numBytes);
+        
         if(numBytes==0) //nothing to write? return
             return;
         if(fos == null)
             throw new IOException();
+        
         boolean checkBeforeWrite = false;
         List overlapBlocks = null;
         Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+        
         if(checkOverlap) {
             overlapBlocks = writtenBlocks.getOverlapIntervals(intvl);
             if(overlapBlocks.size()>0)
@@ -164,6 +178,8 @@ public class VerifyingFile {
         //1. If there are overlaps, check those parts of the buffer we are about
         // to write.
         if(checkBeforeWrite) { //we found overlaps
+            LOG.debug("will check overlaps");
+            
             for(Iterator iter = overlapBlocks.iterator(); iter.hasNext();) {
                 Interval overlapInterval = (Interval)iter.next();
                 int amountToCheck=(overlapInterval.high-overlapInterval.low)+1;
@@ -186,11 +202,24 @@ public class VerifyingFile {
         fos.seek(currPos);
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
-        //4. add this interval
-        pendingBlocks.add(intvl);
         
-        //5. see if writing this block allows us to verify any full chunks
-        verifyAnyPendingBlocks(intvl.high+1);
+        //4. add this interval to the partial blocks
+        if (LOG.isDebugEnabled())
+            LOG.debug("adding chunk "+intvl+" to partialBlocks");
+        partialBlocks.add(intvl);
+        
+        //5. if we have a tree, see if there is a complete chunk in the partial list
+        HashTree tree = managedDownloader.getHashTree(); 
+        if (tree != null) {
+            for (Iterator iter = findVerifyableBlocks(intvl.high+1).iterator();iter.hasNext();)  {
+                Interval i = (Interval) iter.next();
+                pendingBlocks.add(i);
+                if (LOG.isDebugEnabled())
+                    LOG.debug("will schedule for verification "+i);
+                CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
+            }
+            
+        }
     }
 
     /**
@@ -200,18 +229,16 @@ public class VerifyingFile {
      * 
      * @param maxOffset do not check past this offset
      */
-    private void verifyAnyPendingBlocks(int maxOffset) {
+    private List findVerifyableBlocks(int maxOffset) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("trying to find verifyable blocks up to offset "+maxOffset+" out of "+partialBlocks);
         
-        // cache an instance of the TigerTree we have now, since it may change by the time
-        // we finish iterating
-        
-        HashTree tree = managedDownloader.getHashTree(); //TODO: check vf->md locking
-        
-        List verifiable = new ArrayList();
-        List pending = pendingBlocks.getAllIntervalsAsList();
+        List verifyable = new ArrayList(2);
+        List pending = partialBlocks.getAllIntervalsAsList();
         int chunkSize = managedDownloader.getChunkSize();
-        for (int i =0;i < pending.size();i++) {
-            Interval current = (Interval)pending.get(0);
+        
+        for (int i = 0; i < pending.size() ; i++) {
+            Interval current = (Interval)pending.get(i);
             
             // we passed the chunk we just added, no need to iterate further
             if (current.low > maxOffset)
@@ -222,41 +249,26 @@ public class VerifyingFile {
             if (current.low % chunkSize != 0)
                 lowChunkOffset += chunkSize;
             while (current.high >= lowChunkOffset+chunkSize-1) {
-                verifiable.add(new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1));
+                Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
+                verifyable.add(complete);
+                partialBlocks.delete(complete);
                 lowChunkOffset += chunkSize;
             }
         }
         
-        for (Iterator iter = verifiable.iterator();iter.hasNext();) {
-            Interval i = (Interval)iter.next();
-            if (verifyChunk(i,tree)) 
-                writtenBlocks.add(i);
-            releaseBlock(i);
-            pendingBlocks.delete(i);
+        // special case for the last chunk
+        if (pending.size() > verifyable.size()) {
+            Interval last = (Interval)pending.get(pending.size() - 1);
+            if (last.low % chunkSize == 0 && last.high == completedSize-1) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("adding the last chunk for verification");
+                verifyable.add(last);
+                partialBlocks.delete(last);
+            }
         }
-    }
-    
-    /**
-     * @return whether this chunk is corrupt according to the downloader's hash tree
-     */
-    private boolean verifyChunk(Interval i, HashTree tree) {
-        byte []b = new byte[i.high - i.low+1];
-        // read the interval from the file
-        long pos = -1;
-        try {
-            pos = fos.getFilePointer();
-            fos.seek(i.low);
-            fos.read(b);
-        }catch (IOException bad) {
-            // we failed reading back from the file - assume block is corrupt
-            // and it will have to be re-downloaded
-            return false;
-        }finally {
-            if (pos != -1)
-                try {fos.seek(pos);}catch(IOException iox){}
-        }
+                
         
-        return tree.isCorrupt(i,b);
+        return verifyable;
     }
     
     /**
@@ -265,6 +277,8 @@ public class VerifyingFile {
     public synchronized Interval leaseWhite() throws NoSuchElementException {
         IntervalSet freeBlocks = writtenBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
+        freeBlocks.delete(partialBlocks);
+        freeBlocks.delete(pendingBlocks);
         Interval ret = freeBlocks.removeFirst();
         leaseBlock(ret);
         return ret;
@@ -288,6 +302,7 @@ public class VerifyingFile {
       throws NoSuchElementException {
         ranges.delete(writtenBlocks);
         ranges.delete(leasedBlocks);
+        ranges.delete(partialBlocks);
         ranges.delete(pendingBlocks);
         Interval temp = ranges.removeFirst();
         
@@ -321,7 +336,7 @@ public class VerifyingFile {
     /**
      * Removes the specified internal from the set of leased intervals.
      */
-    public synchronized void releaseBlock(Interval in) {
+    public synchronized void releaseBlock(Interval in) {LOG.debug(in+" partial: "+partialBlocks+" pending: "+pendingBlocks,new Exception());
         //if(LOG.isDebugEnabled())
             //LOG.debug("Releasing interval: " + in);
         leasedBlocks.delete(in);
@@ -346,14 +361,6 @@ public class VerifyingFile {
     }
 
     /**
-     * Returns all blocks that are free assuming the specified
-     * maximum size, as an Iterator.
-     */
-    public synchronized Iterator getFreeBlocks(int maxSize) {
-        return writtenBlocks.getNeededIntervals(maxSize);
-    }
-
-    /**
      * Returns the total number of bytes written to disk.
      */
     public synchronized int getBlockSize() {
@@ -373,7 +380,8 @@ public class VerifyingFile {
      */
     public synchronized boolean hasFreeBlocksToAssign() {
         return ( writtenBlocks.getSize() + 
-                leasedBlocks.getSize() + 
+                leasedBlocks.getSize() +
+                partialBlocks.getSize() +
                 pendingBlocks.getSize() < completedSize); 
     }
     
@@ -461,16 +469,21 @@ public class VerifyingFile {
      * than chunksize and finishes at exact chunk offset.
      */
     private synchronized Interval allignInterval(Interval temp, int chunkSize) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("alligning "+temp +" with chunk size "+chunkSize);
+        
         Interval interval;
         
-        int intervalSize = temp.high - temp.low;
+        int intervalSize = temp.high - temp.low+1;
         
         // find where the next chunk starts
-        int chunkStart = ( 1 + temp.low / chunkSize ) * chunkSize;
+        int chunkStart = ( 1 + temp.low / chunkSize ) * chunkSize ;
         
         // if we're already covering an exact chunk, return 
-        if (chunkStart == temp.high && intervalSize == chunkSize)
+        if (chunkStart == temp.high+1 && intervalSize == chunkSize) {
+            LOG.debug("already at exact chunk");
             return temp;
+        }
         
         // try to map the area until the chunk border
         if (chunkStart < temp.high) {
@@ -480,6 +493,9 @@ public class VerifyingFile {
         } else
             interval = temp;
 
+        if (LOG.isDebugEnabled())
+            LOG.debug("aligned to interval: "+interval);
+        
         return interval;
     }
 
@@ -490,5 +506,60 @@ public class VerifyingFile {
         //if(LOG.isDebugEnabled())
             //LOG.debug("Obtaining interval: " + in);
         leasedBlocks.add(in);
+    }
+    
+    /**
+     * a Runnable that verifies chunks without locking the VerifyingFile during
+     * intensive cpu or i/o operations. After verification, the completed regions 
+     * are added either as black or white.
+     */
+    private class ChunkVerifier implements Runnable {
+        private final Interval _interval;
+        private final HashTree _tree;
+        public ChunkVerifier(Interval i, HashTree tree) {
+            _interval = i;
+            _tree = tree;
+        }
+        public void run() {
+            // heavy i/o here
+            boolean good = verifyChunk(_interval,_tree);
+            
+            synchronized(VerifyingFile.this) {
+                pendingBlocks.delete(_interval);
+                if (good) 
+                    addInterval(_interval);
+            }
+        }
+        
+        /**
+         * @return whether this chunk is corrupt according to the downloader's hash tree
+         */
+        private boolean verifyChunk(Interval i, HashTree tree) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("verifying interval "+i);
+            
+            byte []b = new byte[i.high - i.low+1];
+            // read the interval from the file
+            long pos = -1;
+            try {
+                pos = fos.getFilePointer();
+                fos.seek(i.low);
+                fos.read(b);
+            }catch (IOException bad) {
+                // we failed reading back from the file - assume block is corrupt
+                // and it will have to be re-downloaded
+                return false;
+            }finally {
+                if (pos != -1)
+                    try {fos.seek(pos);}catch(IOException iox){}
+            }
+            
+            boolean corrupt = tree.isCorrupt(i,b);
+            
+            if (LOG.isDebugEnabled() && corrupt)
+                LOG.debug("block corrupt!");
+            
+            return !corrupt;
+        }
     }
 }

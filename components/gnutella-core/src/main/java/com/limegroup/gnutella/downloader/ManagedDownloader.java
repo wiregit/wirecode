@@ -315,8 +315,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB
     /** The default chunk size - if we don't have a tree we request chunks this big */
     private static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
-    /** The interval size for downloaders with persistenace support  */
-    private transient volatile int _chunkSize = DEFAULT_CHUNK_SIZE;
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
@@ -563,8 +561,14 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * stores a HashTree that will be requested if we find it.
+     * LOCKING: hashTreeLock
      */
     private HashTree hashTree = null;
+    
+    /**
+     * LOCKS: hashTree
+     */
+    private transient final Object hashTreeLock = new Object();
     
     /**
      * one BandwidthTrackerImpl so we don't have to allocate one for
@@ -1924,9 +1928,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  (Calls to resume() do not result in InterruptedException.)
      */
     private int tryAllDownloads2() throws InterruptedException {
+        RemoteFileDesc firstDesc = null;
         synchronized (this) {
             if (files.size()==0)
                 return GAVE_UP;
+            firstDesc = (RemoteFileDesc)files.get(0);
         }
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
@@ -1941,8 +1947,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         File saveDir;
         String fileName = getFileName();
         try {
-            incompleteFile = incompleteFileManager.getFile(
-                                         (RemoteFileDesc)files.get(0));
+            incompleteFile = incompleteFileManager.getFile(firstDesc);
             saveDir = SharingSettings.getSaveDirectory();
             completeFile = new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();
@@ -1959,13 +1964,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         // initialize the HashTree
 		if( downloadSHA1 != null ) {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
-            hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
-            
-            // if we have a valid tree, update our chunk size and disable overlap checking
-            if (hashTree != null && hashTree.isDepthGoodEnough()) {
-                _chunkSize = hashTree.getNodeSize();
-                commonOutFile.setCheckOverlap(false);
-            }
+		    synchronized(hashTreeLock) {
+		        hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
+		        
+		        // if we have a valid tree, update our chunk size and disable overlap checking
+		        if (hashTree != null && hashTree.isDepthGoodEnough()) {
+		            commonOutFile.setCheckOverlap(false);
+		        }
+		    }
         }
         
         URN fileHash;
@@ -2078,15 +2084,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (corruptState==CORRUPT_STOP_STATE)
             return fileHash;
             
+        HashTree ourTree=null;
+        synchronized(hashTreeLock) {
+            ourTree = hashTree;
+        }
         // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
         if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
             treeRecoveryFailed(downloadSHA1);
-        } else if (hashTree != null) {
+        } else if (ourTree != null) {
             // we can try to use the hashtree to identify corrupt ranges!
             try {
                 setState(IDENTIFY_CORRUPTION);
                 LOG.debug("identifying corruption...");
-                int deleted = commonOutFile.deleteCorruptedBlocks(hashTree,
+                int deleted = commonOutFile.deleteCorruptedBlocks(ourTree,
                                                              incompleteFile);
                 if(LOG.isDebugEnabled())
                     LOG.debug("deleted " + deleted + " blocks");
@@ -2109,7 +2119,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void treeRecoveryFailed(URN hash) {
         TigerTreeCache.instance().purgeTree(hash);
-        hashTree = null;
+        synchronized(hashTreeLock) {
+            hashTree = null;
+        }
         promptAboutCorruptDownload();
         waitForCorruptResponse();
         setState(RECOVERY_FAILED);
@@ -2517,25 +2529,30 @@ public class ManagedDownloader implements Downloader, Serializable {
             while(true) { //while queued, connect and sleep if we queued
                 status = null;
                 
+                HashTree ourTree;
+                synchronized(hashTreeLock) {
+                    ourTree = hashTree;
+                }
                 // request THEX from te dloader if the tree we have
                 // isn't good enough (or we don't have a tree)
                 if (dloader.hasHashTree() &&
-                  (hashTree == null || !hashTree.isDepthGoodEnough())) {
+                  (ourTree == null || !ourTree.isDepthGoodEnough())) {
                     status = dloader.requestHashTree();
                     if(status.isThexResponse()) {
                         HashTree temp = status.getHashTree();
-                        if (temp.isBetterTree(hashTree)) {
-                            hashTree = temp;
-                            
-                            // update our chunk size with this new, better tree
-                            _chunkSize = hashTree.getNodeSize();
-                            commonOutFile.setCheckOverlap(false);
-                            
-                            // persist the hashTree in the TigerTreeCache
-                            // because we won't save it in ManagedDownloader
-                            TigerTreeCache.instance().addHashTree(
-                                    rfd.getSHA1Urn(),
-                                    hashTree);
+                        if (temp.isBetterTree(ourTree)) {
+                            synchronized(hashTreeLock){
+                                hashTree = temp;
+                                
+                                // update our chunk size with this new, better tree
+                                commonOutFile.setCheckOverlap(false);
+                                
+                                // persist the hashTree in the TigerTreeCache
+                                // because we won't save it in ManagedDownloader
+                                TigerTreeCache.instance().addHashTree(
+                                        rfd.getSHA1Urn(),
+                                        hashTree);
+                            }
                         }
                     }
                 }
@@ -3162,7 +3179,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !dloader.getRemoteFileDesc().isPartialSource() ) {
             if(http11)
-                interval = commonOutFile.leaseWhite(_chunkSize);
+                interval = commonOutFile.leaseWhite(getChunkSize());
             else
                 interval = commonOutFile.leaseWhite();
         }
@@ -3174,7 +3191,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     dloader.getRemoteFileDesc().getAvailableRanges();
                 if(http11)
                     interval =
-                        commonOutFile.leaseWhite(availableRanges, _chunkSize);
+                        commonOutFile.leaseWhite(availableRanges, getChunkSize());
                 else
                     interval = commonOutFile.leaseWhite(availableRanges);
             } catch(NoSuchElementException nsee) {
@@ -3283,7 +3300,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         int left = biggest.getAmountToRead()-amountRead;
         //check if we need to steal the last chunk from a slow downloader.
         //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
-        if ((http11 && left<_chunkSize) || (!http11 && left < MIN_SPLIT_SIZE)){ 
+        if ((http11 && left<getChunkSize()) || (!http11 && left < MIN_SPLIT_SIZE)){ 
             float bandwidthVictim = -1;
             float bandwidthStealer = -1;
             
@@ -3356,7 +3373,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             int start;
             if(http11) { //steal CHUNK_SIZE bytes from the end
                 start = biggest.getInitialReadingPoint() +
-                        biggest.getAmountToRead() - _chunkSize + 1;
+                        biggest.getAmountToRead() - getChunkSize() + 1;
             } else {
                 start= biggest.getInitialReadingPoint() + amountRead + left/2;
             }
@@ -3399,7 +3416,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * If we have a valid hashTree we do not request overlaps.
      */
     private int getOverlapOffset(int i) {
-        return hashTree == null ? Math.max(0, i-OVERLAP_BYTES) : i;
+        synchronized(hashTreeLock) {
+        return getHashTree() == null ? Math.max(0, i-OVERLAP_BYTES) : i;
+        }
     }
     
     /**
@@ -3572,7 +3591,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //If we are corrupt, we want to stop sharing the incomplete file,
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
-            if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
+            if(corruptState == NOT_CORRUPT_STATE && getHashTree() == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
                 //when the user has made a decision. Until then the corruptState
@@ -3593,7 +3612,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Otherwise, we may continue the download or stop it immediately.
      */
     public void discardCorruptDownload(boolean delete) {
-        if(hashTree != null) {
+        if(getHashTree() != null) {
             corruptState = CORRUPT_CONTINUE_STATE;
         } else if(delete) {
             corruptState = CORRUPT_STOP_STATE;
@@ -3801,8 +3820,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         return dloaders.size() + queuedThreads.size();
     }
     
-    public synchronized HashTree getHashTree() {
-        return hashTree;
+    public HashTree getHashTree() {
+        synchronized(hashTreeLock) {
+            return hashTree;
+        }
     }
 
     private final Iterator getHosts(boolean chattableOnly) {
@@ -3867,7 +3888,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}	    
 
 	public int getChunkSize() {
-	    return _chunkSize;
+	    synchronized(hashTreeLock) {
+	        return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
+	    }
 	}
 	
     /**

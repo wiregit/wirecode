@@ -33,7 +33,7 @@ import com.limegroup.gnutella.security.TigerTree;
  * 
  * @author Gregorio Roper
  */
-public final class HashTree implements HTTPHeaderValue, Serializable {
+public class HashTree implements HTTPHeaderValue, Serializable {
     
     private static final long serialVersionUID = -5752974896215224469L;    
 
@@ -252,14 +252,18 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     public boolean isCorrupt(Interval in, byte [] data) {
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
-        if (in.low % _nodeSize == 0 && in.high == in.low+_nodeSize-1) {
+        if (in.low % _nodeSize == 0 && 
+                (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
             digest.update(data);
             byte [] hash = digest.digest();
             byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
-            return Arrays.equals(treeHash, hash);
+            boolean ok = Arrays.equals(treeHash, hash);
+            if (LOG.isDebugEnabled())
+                LOG.debug("interval "+in+" verified "+ok);
+            return !ok;
         }
-        return false;
+        return true;
     }
 
     /**
