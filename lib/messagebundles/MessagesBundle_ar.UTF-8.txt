@@ -509,6 +509,7 @@ DOWNLOAD_SEARCHING=يتم الآن تحديد مواقع المصادر...
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=معذرة، ولكن LimeWire لا يستطيع إعادة تشغيل ملفات التنزيل القديمة الخاصة بك.
 DOWNLOAD_MAGNET_DIALOG=هل ترغب في التنزيل
 DOWNLOAD_FROM=من
+DOWNLOAD_MAGNET_DIALOG_END=?
 
 ###################################################################
 # Key/value pairs for UploadView
