@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.*;
+import com.sun.java.util.collections.*;
 
 import java.net.*;
 import java.io.*;
@@ -66,15 +67,10 @@ public final class UDPService implements Runnable {
 	 */
 	private final Thread UDP_THREAD = new Thread(this, "UDPService");
 
-	/**
-	 * Cached <tt>QueryUnicaster</tt> instnace.
-	 */
-	private QueryUnicaster UNICASTER = QueryUnicaster.instance();
-
     /**
      * The GUID that we advertise out for UDPConnectBack requests.
      */
-    private GUID _connectBackGUID = null;
+    private final GUID CONNECT_BACK_GUID = new GUID(GUID.makeGuid());
 
 	/**
 	 * Instance accessor.
@@ -86,14 +82,12 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() {
-        _connectBackGUID = new GUID(GUID.makeGuid());
-    }
+	private UDPService() { }
 
     /** @return The GUID to send for UDPConnectBack attempts....
      */
     public GUID getConnectBackGUID() {
-        return _connectBackGUID;
+        return CONNECT_BACK_GUID;
     }
 
     /** 
@@ -157,9 +151,8 @@ public final class UDPService implements Runnable {
 	 */
 	public void run() {
         try {
-            MessageRouter router = RouterService.getMessageRouter();
             byte[] datagramBytes = new byte[BUFFER_SIZE];
-            
+            MessageRouter router = RouterService.getMessageRouter();                                
             while (true) {
                 // prepare to receive
                 DatagramPacket datagram = new DatagramPacket(datagramBytes, 
@@ -198,16 +191,14 @@ public final class UDPService implements Runnable {
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
                             GUID guidReceived = new GUID(message.getGUID());
-                            if (_connectBackGUID.equals(guidReceived))
+                            if (CONNECT_BACK_GUID.equals(guidReceived))
                                 _acceptedUnsolicitedIncoming = true;
                         }
                         else
                             _acceptedSolicitedIncoming = true;
                     }
                     if(message == null) continue;
-                    //if (message instanceof QueryRequest)
-					//sendAcknowledgement(datagram, message.getGUID());
-                    router.handleUDPMessage(message, datagram);				
+                    router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
                     continue;
