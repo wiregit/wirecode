@@ -26,6 +26,12 @@ DISABLE_BOLD_CHARACTERS=false
 LAYOUT_RIGHT_TO_LEFT=false
 
 ################################################################################
+# Key/value pair for whether or not the tips of the day should be displayed.
+# The default is false (set to true in english resource).
+################################################################################
+HAS_TIPS_OF_THE_DAY=false
+
+################################################################################
 # Keys/value pairs for general strings that can be used in any components
 ################################################################################
 GENERAL_OK_BUTTON_LABEL=Tamam

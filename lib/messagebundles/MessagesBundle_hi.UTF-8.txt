@@ -67,4 +67,6 @@ OPTIONS_RESTART_REQUIRED=एक या अनेक विकल्प पुन
 YES=हाँ
 NO=नहीं
 
-#  Incomplete translation. Missing messages will be found in the default English resources.
+################################################################################
+# All other translated resources are missing. Look at the default English file.
+################################################################################

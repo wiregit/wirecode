@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 2.8.5
+# Messages Bundle for LimeWire 4.1.6
 # Specialization for: Greek - Greece & Cyprus (Modern)
 # Dummy resources bundle for missing translation.
 ################################################################################
@@ -18,6 +18,18 @@ LOCALE_ENGLISH_LANGUAGE_NAME=Greek
 # locale. Must be "true" or "false" (true only for complex scripts).
 ################################################################################
 DISABLE_BOLD_CHARACTERS=false
+
+################################################################################
+# Key/value pair for whether or not the layout should be adapted for right-to-
+# left scripts. Must be "true" or "false" (true only for semitic scripts).
+################################################################################
+LAYOUT_RIGHT_TO_LEFT=false
+
+################################################################################
+# Key/value pair for whether or not the tips of the day should be displayed.
+# The default is false (set to true in english resource).
+################################################################################
+HAS_TIPS_OF_THE_DAY=false
 
 ################################################################################
 # All other translated resources are missing. Look at the default English file.
