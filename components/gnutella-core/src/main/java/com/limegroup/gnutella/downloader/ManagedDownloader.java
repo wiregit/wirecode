@@ -2548,6 +2548,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
                 && getState()!=HASHING && getState()!=SAVING && 
                 queuedThreads.size()==0)
+                if(Thread.currentThread().isInterrupted())
+                    return null; // we were signalled to stop.
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
@@ -2616,7 +2618,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Note that connectTCP can throw IOException
         // (and the subclassed CantConnectException)
         try {
-        ret.connectTCP(NORMAL_CONNECT_TIME);
+            ret.connectTCP(NORMAL_CONNECT_TIME);
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
         } catch(IOException iox) {
             DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
@@ -2775,6 +2777,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
             synchronized(this) {
                 if(dloaders.size()==0) {
+                    if(Thread.currentThread().isInterrupted())
+                        return ConnectionStatus.getNoData(); // we were signalled to stop.
                     setState(REMOTE_QUEUED);
                 }
                 int oldPos = queuePosition.equals("")?
@@ -2857,6 +2861,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         synchronized(this) {
+            if(Thread.currentThread().isInterrupted())
+                return ConnectionStatus.getNoData(); // we were signalled to stop.
             setState(DOWNLOADING);
         }
         
