@@ -65,6 +65,7 @@ public class M4AMetaData extends AudioMetaData {
 	final static int NAME_ATOM = 0xa96e616d; //0xa9+ "nam"
     final static int ALBUM_ATOM = 0xa9616c62; //0xa9 + "alb"
     final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
+    final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
 	final static int  GENRE_ATOM = 0x676e7265; //"gnre"
 	final static int  TRACK_ATOM = 0x74726b6e; //"trkn"
 	
@@ -114,6 +115,18 @@ public class M4AMetaData extends AudioMetaData {
 		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
 		short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
 		setGenre(MP3MetaData.getGenreString(genreShort));
+		
+		
+		//the date is plaintext.  Store only the year
+		current = (byte []) _metaData.get(new Integer(DATE_ATOM));
+		if (current==null)
+			setYear("");
+		else {
+			String year = new String(current);
+			if (year.length()>4)
+				year = year.substring(0,4);
+			setYear(year);
+		}
 		
 		//TODO: add more fields as we discover their meaning.
 	}
@@ -220,7 +233,8 @@ public class M4AMetaData extends AudioMetaData {
 						_metaData.put(new Integer(TRACK_ATOM), readDataAtom());break;
 					case GENRE_ATOM :
 						_metaData.put(new Integer(GENRE_ATOM), readDataAtom());break;
-						
+					case DATE_ATOM:
+						_metaData.put(new Integer(DATE_ATOM), readDataAtom());break;
 						//add more atoms as we learn their meaning
 					default:
 						//skip unknown atoms.
@@ -232,7 +246,8 @@ public class M4AMetaData extends AudioMetaData {
 	}
 	
 	/**
-	 * reads the data atom contained in a metadata atom
+	 * reads the data atom contained in a metadata atom.  Supposedly,
+	 * the first 8 bytes are junk.
 	 * @return the content of the data atom
 	 * @throws IOException the data atom was not found or error occured
 	 */
@@ -240,7 +255,8 @@ public class M4AMetaData extends AudioMetaData {
 		int size = _in.readInt();
 		if (_in.readInt() != DATA_ATOM)
 			throw new IOException("data tag not found");
-		byte [] res = new byte[size-8];
+		byte [] res = new byte[size-16];
+		_in.skip(8);
 		_in.readFully(res);
 		return res;
 	}
