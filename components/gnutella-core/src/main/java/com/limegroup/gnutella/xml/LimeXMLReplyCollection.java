@@ -351,4 +351,86 @@ public class LimeXMLReplyCollection{
         replyDocs.addAll(newReplyCollection);
     }
 
+
+    public class MapSerializer {
+
+        /** Where to serialize/deserialize from.
+         */
+        private String _backingStoreName;
+        
+        /** underlying map for hashmap access.
+         */
+        private HashMap _hashMap;
+
+        /** @param whereToStore The name of the file to serialize from / 
+         *  deserialize to.  
+         *  @exception Exception Thrown if input file whereToStore is invalid.
+         */
+        public MapSerializer(String whereToStore) throws Exception {
+            _backingStoreName = whereToStore;
+            File file = new File(_backingStoreName);
+            if (file.isDirectory())
+                throw new Exception();
+            else if (file.exists())
+                deserializeFromFile();
+            else
+                _hashMap = new HashMap();
+        }
+
+        private void deserializeFromFile() throws Exception {            
+            FileInputStream istream = new FileInputStream(_backingStoreName);
+            ObjectInputStream objStream = new ObjectInputStream(istream);
+            _hashMap = (HashMap) objStream.readObject();
+            istream.close();
+        }
+
+        /** Call this method when you want to force the contents to the HashMap
+         *  to disk.
+         *  @exception Exception Thrown if force to disk failed.
+         */
+        public void commit() throws Exception {
+            serializeToFile();
+        }
+
+        
+        private void serializeToFile() throws Exception {
+            FileOutputStream ostream = new FileOutputStream(_backingStoreName);
+            ObjectOutputStream objStream = new ObjectOutputStream(ostream);
+            objStream.writeObject(_hashMap);
+            ostream.close();
+        }
+
+        /** @return The Map this class encases.
+         */
+        public Map getMap() {
+            return _hashMap;
+        }
+
+    }
+
+
+    /*
+    public static void testMapSerializer(String argv[]) throws Exception {   
+    LimeXMLReplyCollection.MapSerializer hms =
+    new LimeXMLReplyCollection.MapSerializer("test.txt");
+    
+    Map hm = hms.getMap();
+    
+    System.out.println(""+hm);
+    
+    for (int i = 0; i < argv.length; i+=2) {
+    try{
+    hm.put(argv[i],argv[i+1]);
+    }
+    catch (Exception e) {};
+    }
+    hms.commit();
+    }
+    
+    
+    public static void main(String argv[]) throws Exception {
+    testMapSerializer(argv);
+    }
+    */
+
 }
