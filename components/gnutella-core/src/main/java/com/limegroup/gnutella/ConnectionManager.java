@@ -949,18 +949,36 @@ public class ConnectionManager {
             _incomingClientConnections > 0)
             return;
         
-        //Add the remote address to Host Cacher, so that we can connect to
-        //that
+        //if the remote address is not null, and we are swithcing state
+        //from supernodemode to clientmode, connect to the remoteAddress
         try{
-            if(remoteAddress != null)
-                _catcher.add(new Endpoint(remoteAddress),null);
-        }catch(IllegalArgumentException iae){}
-        
-        //else, set the state as guided, and reconnect
-        SettingsManager.instance().setSupernodeMode(supernodeNeeded);
-        reconnect();
+            if(remoteAddress != null 
+                && SettingsManager.instance().isSupernode()){
+                    
+                //disconnect all the connections, and set the state as guided
+                disconnect();    
+                SettingsManager.instance().setSupernodeMode(supernodeNeeded);    
+                    
+                //open connection to the specified host
+                Endpoint endpoint = new Endpoint(remoteAddress);
+                System.out.println("opening connection to :" + endpoint);
+                ManagedConnection connection = new ManagedConnection(
+                endpoint.getHostname(), endpoint.getPort(), _router,
+                ConnectionManager.this);
+
+                initializeExternallyGeneratedConnection(connection);
+                sendInitialPingRequest(connection);
+                connection.loopForMessages();
+            }
+        }catch(Exception e){
+            //just catch any exception
+        }
+        finally{
+            //if that connection worked, that was our only connection
+            //to the supernode. Else we just didnt have any connection
+            lostShieldedClientSupernodeConnection();
+        }
     }
-    
     
     /**
      * Updates the addresses in the hostCache by parsing the passed string
