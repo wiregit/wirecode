@@ -19,10 +19,16 @@ import com.oroinc.text.regex.*;
 import java.util.Enumeration;
 
 public class FileManager{
-
-    protected int _size;                   /* the total size of all files */
-    protected int _numFiles;               /* the total number of files */
-    public ArrayList _files;             /* the list of shareable files */
+    /** the total size of all files, in bytes. 
+     *  INVARIANT: _size=sum of all size of the elements of _files */
+    private int _size;                  
+    /** the total number of files.  INVARIANT: _numFiles==number of 
+     *  elements of _files that are not null. */
+    private int _numFiles;      
+    /** the list of shareable files.  An entry is null if it is no longer
+     *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
+     *  f[i]._path is in the shared folder with the shareable extension. */
+    private ArrayList /* of FileDesc */ _files;             
     private String[] _extensions;
 
     // Regular Expressions Stuff.
@@ -61,6 +67,23 @@ public class FileManager{
         _numFiles = 0;
         _files = new ArrayList();
         // _extensions = new String[0];
+    }
+
+    /** 
+     * Returns the file descriptor with the given index.  Throws
+     * IndexOutOfBoundsException if the index is not valid, either because the
+     * file was never shared or was "unshared".<p>
+     *
+     * Design note: this is slightly unusual use of NoSuchElementException.  For
+     * example, get(0) and get(2) may throw an exception but get(1) may not.
+     * NoSuchElementException was considered as an alernative, but this can
+     * create ambiguity problems between java.util and com.sun.java.util.  
+     */
+    public FileDesc get(int i) throws IndexOutOfBoundsException { 
+        FileDesc ret=(FileDesc)_files.get(i);
+        if (ret==null) 
+            throw new IndexOutOfBoundsException();
+        return ret;
     }
 
     public synchronized Response[] query(QueryRequest request) {
@@ -105,40 +128,24 @@ public class FileManager{
 
     /**
      * @modifies this
-     * @effects adds the given file to this, if it exists.
-     *  <b>WARNING: this is a potential security hazard.</b>
+     * @effects adds the given file to this, if it exists
+     *  and is of the proper extension.  <b>WARNING: this is a 
+     *  potential security hazard; caller must ensure the file
+     *  is in the shared directory.</b>
      */
     private synchronized void addFile(String path) {
         File myFile = new File(path);
 
         if (!myFile.exists())
             return;
-        /* the addFile method adds */
-        /* just one single file to */
+
         String name = myFile.getName();     /* the name of the file */
-        int n = (int)myFile.length();       /* the list, and increments */
-        _size += n;                         /* the appropriate info */
         if (hasExtension(name)) {
-            _files.add(new FileDesc(_numFiles, name, path,  n));
+            int n = (int)myFile.length();       /* the list, and increments */
+            _size += n;                         /* the appropriate info */
+            _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
         }
-    }
-
-    public void printFirstFive() {
-
-        int size = 5;
-
-        if (_files.size() < size)
-            size = _files.size();
-
-        System.out.println("printing " + size);
-
-        for(int i =0; i < size; i++) {
-
-            ((FileDesc)_files.get(i)).print();
-
-        }
-
     }
 
     /**
@@ -176,6 +183,31 @@ public class FileManager{
 
     }
 
+    /** 
+     * @modifies this
+     * @effects ensures the given file is not shared.  Returns
+     *  true iff the file was previously shared.  In this case,
+     *  the file's index will not be assigned to any other files.
+     *  Note that the file is not actually removed from disk.
+     */
+    public synchronized boolean removeFileIfShared(File file) {
+        //Look for a file matching <file>...
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc fd=(FileDesc)_files.get(i);
+            if (fd==null)
+                continue;
+            File candidate=new File(fd._path);
+
+            //Aha, it's shared. Unshare it by nulling it out.
+            if (file.equals(candidate)) {
+                _files.set(i,null);
+                _numFiles--;
+                _size-=fd._size;
+                return true;  //No more files in list will match this.
+            }                
+        }
+        return false;
+    }
 
     /**
      * @modifies this
@@ -306,8 +338,10 @@ public class FileManager{
             pattern = compiler.compile(query);}
         catch(MalformedPatternException e){
             // use search w/o regEx in this case
-            for(int i=0; i < _numFiles; i++) {
-                FileDesc desc = (FileDesc)_files.get(i);
+            for(int i=0; i < _files.size(); i++) {
+                FileDesc desc = (FileDesc)_files.get(i);                
+                if (desc==null)
+                    continue;
                 //System.out.println("Rob:"+query);
                 String fileName = desc._name;
                 String file_name = fileName.toLowerCase();
@@ -316,9 +350,11 @@ public class FileManager{
             }
             return response_list;
         }
-        for(int i=0; i < _numFiles; i++){
+        for(int i=0; i < _files.size(); i++){
             //Adam will populate the list before calling query.
             FileDesc desc = (FileDesc)_files.get(i);
+            if (desc==null)
+                continue;
             //System.out.println("Sumeet: "+query);
             String fileName = desc._name;
             String file_name = fileName.toLowerCase();
@@ -328,6 +364,90 @@ public class FileManager{
         }
         return response_list;
     }
+
+    /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
+    /*
+    public static void main(String args[]) {
+        //Test some of add/remove capability
+        File f1=null;
+        File f2=null;
+        File f3=null;
+        try {
+            f1=createNewTestFile(1);
+            System.out.println("Creating temporary files in "+f1.getParent());
+            FileManager fman=FileManager.getFileManager();
+            fman.setExtensions("XYZ");
+            fman.addDirectory(f1.getParent());
+            f2=createNewTestFile(3);
+            f3=createNewTestFile(11);
+
+            //One file
+            Assert.that(fman.getNumFiles()==1, fman.getNumFiles()+"");
+            Assert.that(fman.getSize()==1, fman.getSize()+"");
+            Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Assert.that(responses.length==1);
+            Assert.that(fman.removeFileIfShared(f3)==false);
+            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Assert.that(responses.length==1);
+            Assert.that(fman.getSize()==1);
+            Assert.that(fman.getNumFiles()==1);
+            fman.get(0);
+
+            //Two files
+            fman.addFile(f2.getAbsolutePath());
+            Assert.that(fman.getNumFiles()==2, fman.getNumFiles()+"");
+            Assert.that(fman.getSize()==4, fman.getSize()+"");
+            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Assert.that(responses[0].getIndex()!=responses[1].getIndex());
+            for (int i=0; i<responses.length; i++) {
+                Assert.that(responses[i].getIndex()==0
+                               || responses[i].getIndex()==1);
+            }
+            
+            //Remove file that's shared.  Back to 1 file.
+            Assert.that(fman.removeFileIfShared(f2)==true);
+            Assert.that(fman.getSize()==1);
+            Assert.that(fman.getNumFiles()==1);
+            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Assert.that(responses.length==1);                       
+
+            fman.addFile(f3.getAbsolutePath());
+            Assert.that(fman.getSize()==12, "size of files: "+fman.getSize());
+            Assert.that(fman.getNumFiles()==2, "# files: "+fman.getNumFiles());
+            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Assert.that(responses.length==2, "response: "+responses.length);     
+            Assert.that(responses[0].getIndex()!=1);
+            Assert.that(responses[1].getIndex()!=1);
+            fman.get(0);
+            fman.get(2);
+            try {
+                fman.get(1);
+                Assert.that(false);
+            } catch (IndexOutOfBoundsException e) { }
+
+        } finally {        
+            if (f1!=null) f1.delete();
+            if (f2!=null) f2.delete();
+            if (f3!=null) f3.delete();
+        }
+    }
+    
+    static File createNewTestFile(int size) {
+        try {
+            File ret=File.createTempFile("FileManager_unit_test",".XYZ");
+            OutputStream out=new FileOutputStream(ret);
+            out.write(new byte[size]);
+            out.flush();
+            out.close();
+            return ret;
+        } catch (Exception e) {
+            System.err.println("Couldn't run test");
+            e.printStackTrace();
+            System.exit(1);
+            return null; //never executed
+        }
+    }        
+    */
 }
 
 
