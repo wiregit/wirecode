@@ -134,7 +134,6 @@ public class ConnectionManager {
      * @param authenticator Authenticator instance for authenticating users
      */
     public ConnectionManager(Authenticator authenticator) {
-        //_callback = callback;		
         _authenticator = authenticator; 
 		_settings = SettingsManager.instance(); 
     }
