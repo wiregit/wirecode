@@ -394,7 +394,12 @@ public final class AlternateLocationCollection
     			Object o = iter.next();
     			if (!(o instanceof PushAltLoc))
     				continue;
+    			
     			PushAltLoc current = (PushAltLoc)o;
+    			
+    			if (current.getPushAddress().getProxies().isEmpty())
+    				continue;
+    			
     			baos.write(current.getPushAddress().toBytes());
     			total++;
     		}
