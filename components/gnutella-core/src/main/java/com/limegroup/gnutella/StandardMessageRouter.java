@@ -90,10 +90,12 @@ public class StandardMessageRouter
         int num_files = _fileManager.getNumFiles();
         int kilobytes = _fileManager.getSize()/1024;
         
+        //also append everSupernodeCapable flag to the group
         GroupPingRequest pingRequest =
           new GroupPingRequest(SettingsManager.instance().getTTL(),
             _acceptor.getPort(), _acceptor.getAddress(),
-            num_files, kilobytes, group);
+            num_files, kilobytes, group + ":"
+            + SettingsManager.instance().getEverSupernodeCapable());
         return( pingRequest );
     }
 
