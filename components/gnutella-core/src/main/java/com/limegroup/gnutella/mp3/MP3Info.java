@@ -297,9 +297,10 @@ public final class MP3Info {
                    - 36;        // max bytes to skip
   		if (need < 0) { //special case, we need more data
 	  		//shift current data left to make room for need data
-			for (i = 0, need = -need; 
-		  		 need < buf.length; i++, need++ ) {
-		  		buf[i] = buf[need];
+	  		i -= need;
+			for (int j = 0, need = -need; 
+		  		 need < buf.length; j++, need++ ) {
+		  		buf[j] = buf[need];
 	  		}
 	  		
 	  		//read more, starting at where we last have valid data.
