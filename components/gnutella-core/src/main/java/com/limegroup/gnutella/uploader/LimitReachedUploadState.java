@@ -6,20 +6,18 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * an implementaiton of the UploadState 
- * that sends an error message for the limit of
- * uploads allowed has been reached. This is
- * an HTTP 503 error.
+ * An implementaiton of the UploadState that sends an error message 
+ * for the limit of uploads allowed has been reached. This is an
+ * HTTP 503 error.
  */
-
 public class LimitReachedUploadState implements UploadState {
   
 	/**
-	 * Implements a failed upload due to the Upload limit 
-	 * having been reached.
+	 * Implements a failed upload due to the upload limit having 
+	 * been reached.
 	 */
 	public void doUpload(HTTPUploader uploader) throws IOException {
-		/* Sends a 503 Service Unavailable message */
+		// sends a 503 Service Unavailable message 
 		OutputStream ostream = uploader.getOutputStream();
 
 		String str;
