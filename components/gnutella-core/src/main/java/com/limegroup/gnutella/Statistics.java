@@ -104,6 +104,8 @@ public class Statistics {
         //LAST_SHUTDOWN_TIME property.
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());
         ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(now());
+        int sessions = ApplicationSettings.SESSIONS.getValue();
+        ApplicationSettings.SESSIONS.setValue( sessions + 1 );
     }
 
     /** The current system time, in milliseconds.  Exists as a hook for testing

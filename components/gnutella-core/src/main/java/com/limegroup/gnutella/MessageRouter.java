@@ -151,6 +151,9 @@ public abstract class MessageRouter {
         catch (IllegalArgumentException e) {
             //This should never happen! But if it does, we can recover.
             _clientGUID = Message.makeGuid();
+            // And store the next ID in our settings
+            ApplicationSettings.CLIENT_ID.setValue(
+                new GUID(_clientGUID).toHexString() );
         }
     }
 
