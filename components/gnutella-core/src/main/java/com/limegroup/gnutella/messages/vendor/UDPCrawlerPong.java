@@ -185,7 +185,9 @@ public class UDPCrawlerPong extends VendorMessage {
 			iter = endpointsUP.iterator();
 			while(iter.hasNext()) {
 				Connection c = (Connection)iter.next();
-				agents.append(c.getUserAgent()).append(AGENT_SEP);
+				String agent = c.getUserAgent();
+				agent = StringUtils.replace(agent,AGENT_SEP,"\\"+AGENT_SEP);
+				agents.append(agent).append(AGENT_SEP);
 			}
 			
 			//lose the trailing ~
