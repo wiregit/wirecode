@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.sun.java.util.collections.*;
-
+import com.limegroup.gnutella.ByteOrder;
 
 /**
  * Utility class that supplies commonly used data sets that each
@@ -100,4 +100,24 @@ public final class DataUtils {
             sb.append(i.next().toString());
         return sb.toString();
     }
+
+    /**
+     * Prints out the contents of the input array as a hex string.
+     */
+    public static String toHexString(byte[] bytes) {
+        StringBuffer buf=new StringBuffer();
+        String str;
+        int val;
+        for (int i=0; i<bytes.length; i++) {
+            //Treating each byte as an unsigned value ensures
+            //that we don't str doesn't equal things like 0xFFFF...
+            val = ByteOrder.ubyte2int(bytes[i]);
+            str = Integer.toHexString(val);
+            while ( str.length() < 2 )
+            str = "0" + str;
+            buf.append( str );
+        }
+        return buf.toString().toUpperCase();
+    }
+
 }
