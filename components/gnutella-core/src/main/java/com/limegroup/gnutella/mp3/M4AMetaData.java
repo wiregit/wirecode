@@ -47,17 +47,7 @@ import com.sun.java.util.collections.*;
  * Although sometimes the atom names can be represented as strings, sometimes they 
  * contain non-asccii characters, so it is safer to represent all atom names as integers.
  * (that's what says in the spec too)
- * 
- * NOTE: This parser does not parse the bitrate info.  The reason is that
- * the bitrate info is contained in the [esds] atom, or the [alac] atom if the codec
- * is lossless, and the bitrate info is stored in different format in those atoms, neither
- * of which are documented.
  *   
- * Furthermore, the [esds] atom is in different location in files purchased from 
- * the store than in those ripped from cds.  Creating a hierarchical parser (i.e. 
- * parser which parses the entire file and creates the atom structure in memory) 
- * is not trivial because of various artifacts (like unexpected offsets) which apple 
- * introduced to prevent people from parsing their files.  
  */
 public class M4AMetaData extends AudioMetaData {
 	
