@@ -956,15 +956,14 @@ public class ConnectionManager {
      */
     private void updateHostCache(Properties headers, ManagedConnection
         connection){
-        //add the addresses received
-        updateHostCache(headers.getProperty(
-                ConnectionHandshakeHeaders.X_TRY),
-                connection, false);
-        
         //get the supernodes, and add those to the host cache
         updateHostCache(headers.getProperty(
                 ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
                 connection, true);
+        //add the addresses received
+        updateHostCache(headers.getProperty(
+                ConnectionHandshakeHeaders.X_TRY),
+                connection, false);        
     }
     
     /**
