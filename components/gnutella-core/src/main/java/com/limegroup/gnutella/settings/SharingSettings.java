@@ -107,13 +107,13 @@ public class SharingSettings extends LimeProps {
 	 * The shared directories (an array of Files!).
 	 */
     public static final FileArraySetting DIRECTORIES_TO_SHARE =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE", new File[0]);
+        FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
     
     /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SHARE", 
+        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", 
                                             DEFAULT_EXTENSIONS_TO_SHARE);
                                             
     /**
