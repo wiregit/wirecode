@@ -2,8 +2,11 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
+import com.limegroup.gnutella.connection.BIOMessageWriter;
+import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
@@ -36,6 +39,11 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    public static void globalSetup() throws Exception {
+        // make sure we don't use NIO
+        ConnectionSettings.USE_NIO.setValue(false);    
+    }
+    
 	public void setUp() throws Exception {
 		setStandardSettings();
 		
@@ -55,7 +63,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		acceptor = new MiniAcceptor(new DummyResponder("localhost"), 
             BUFFER_PORT);
 
-		ManagedConnection.QUEUE_TIME=1000;
+        CompositeQueue.QUEUE_TIME=1000;
 		out = new ManagedConnection("localhost", BUFFER_PORT);
         out.buildAndStartQueues();
     }
@@ -132,7 +140,16 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         else
             assertInstanceof(BufferedOutputStream.class, inOut);
     }        
+
+    /**
+     * Tests that the buffer drops when compressed.
+     */
+    public void testDropBufferCompressed() throws Exception {
+        setupCompressed();
+        tDropBuffer();
+    }
     
+      
     /**
      * Tests that flushing works correctly while compressed.
      */
@@ -199,10 +216,11 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * priority, and each priority is a different bucket.
      */
     private void tReorderBuffer() 
-		throws IOException, BadPacketException {
+		throws Exception {
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
-        out.stopOutputRunner();
+        stopOutputRunner(out);
+        //out.stopOutputRunner();
         Message m=null;
 
         // send QueryRequest		
@@ -332,13 +350,17 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING: x
         //  OTHER: reset patch1 patch2
         //out._lastPriority=0;  //cheating to make old tests work
-        out.resetPriority();
-        out.startOutputRunner();
+        //out.resetPriority();
+        
+        resetPriority(out);
+        startOutputRunner(out);
+        
 
         //System.out.println("ManagedConnectionBufferTest::testReorderBuffer::"+
           //  "buffer size: "+((BIOMessageWriter)out.getWriter()).size());
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
+        
         assertInstanceof("Unexpected message: "+m, PingRequest.class, m);
         assertEquals("Unexpected # of hops"+m, 0, m.getHops());
 
@@ -492,29 +514,32 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * queues and are dropped.
      */
     private void tBufferTimeout() 
-            throws IOException, BadPacketException {
+            throws Exception {
         assertEquals("unexected queue time",
-            1000, ManagedConnection.QUEUE_TIME);
+            1000, CompositeQueue.QUEUE_TIME);
         
         //Drop one message
-        out.stopOutputRunner();        
+        stopOutputRunner(out);
+        //out.stopOutputRunner();        
         out.send(QueryRequest.createQuery("0", (byte)3));   
         sleep(1200);
         out.send(QueryRequest.createQuery("1200", (byte)3)); 
-        out.startOutputRunner();
+        startOutputRunner(out);
+        //out.startOutputRunner();
         Message m=(QueryRequest)in.receive(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "1200", ((QueryRequest)m).getQuery());
         try {
             m=in.receive(200);
-            fail("buffer didn't timeout in time.  message: " + m.toString());
+            fail("buffer didn't timeout in time.  message: " + m);
         } catch (InterruptedIOException e) {
         }
         assertEquals("unexpected # of dropped sent messages", 
             1, out.getNumSentMessagesDropped());
 
         //Drop many messages
-        out.stopOutputRunner();        
+        stopOutputRunner(out);
+        //out.stopOutputRunner();        
         out.send(QueryRequest.createQuery("0", (byte)3));   
         sleep(300);
         out.send(QueryRequest.createQuery("300", (byte)3));        
@@ -524,7 +549,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(QueryRequest.createQuery("1100", (byte)3));
         sleep(900);
         out.send(QueryRequest.createQuery("2000", (byte)3));
-        out.startOutputRunner();
+        startOutputRunner(out);
+        //out.startOutputRunner();
         m=in.receive(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "2000", ((QueryRequest)m).getQuery());
@@ -557,25 +583,29 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
     
     private void tPriorityHint() 
-            throws IOException, BadPacketException {
+            throws Exception {
         //Tests wrap-around loop of sendQueuedMessages
         Message m=null;
 
         // head...tail
-        out.stopOutputRunner(); 
+        stopOutputRunner(out);
+        //out.stopOutputRunner(); 
         out.send(hopped(new PingRequest((byte)4)));
         out.send(QueryRequest.createQuery("a", (byte)3));
-        out.startOutputRunner();
+        startOutputRunner(out);
+        //out.startOutputRunner();
         assertInstanceof("didn't recieve queryrequest", 
             QueryRequest.class, in.receive());
         assertInstanceof("didn't recieve pingrequest", 
             PingRequest.class, in.receive());
 
         //tail...<wrap>...head
-        out.stopOutputRunner(); 
+        stopOutputRunner(out);
+        //out.stopOutputRunner(); 
         out.send(QueryRequest.createQuery("a", (byte)3));
         out.send(hopped(new PingRequest((byte)5)));
-        out.startOutputRunner();
+        startOutputRunner(out);
+        //out.startOutputRunner();
         assertInstanceof("didn't recieve pingrequest",
             PingRequest.class, in.receive());
         assertInstanceof("didn't recieve queryrequest",
@@ -589,13 +619,15 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING_REPLY: 
         //  PING: 
         //  OTHER: reset
-        out.stopOutputRunner(); 
+        stopOutputRunner(out);
+        //out.stopOutputRunner(); 
         out.send(new PingRequest((byte)1));
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16], false));
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(QueryRequest.createQuery("a", (byte)3));
-        out.startOutputRunner();
+        startOutputRunner(out);
+        //out.startOutputRunner();
         m=in.receive();
         assertInstanceof("Got: "+m, QueryRequest.class, m);
         m=in.receive();
@@ -615,13 +647,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
     
-    /**
-     * Tests that the buffer drops when compressed.
-     */
-    public void testDropBufferCompressed() throws Exception {
-        setupCompressed();
-        tDropBuffer();
-    }
+
     
     /**
      * Tests that the buffer drops when not compressed.
@@ -683,4 +709,52 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		}
 	}
 
+    /**
+     * Utility method that uses reflection to stop the sending thread of the
+     * given connection.
+     * 
+     * @param mc the connection to stop
+     * @throws Exception for a whole bunch of possible reasons
+     */
+    private static void stopOutputRunner(ManagedConnection mc) 
+        throws Exception {
+        Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+        BIOMessageWriter writer = 
+            (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
+        Object writeLock = 
+            PrivilegedAccessor.getValue(writer, "OUTPUT_QUEUE_LOCK");
+        Method close = 
+            PrivilegedAccessor.getMethod(writer, "close", new Class[0]);
+        synchronized(writeLock) {
+            
+            PrivilegedAccessor.setValue(mc, "_closed", Boolean.TRUE);
+            close.invoke(writer, new Object[0]);
+        }
+        while(!mc.runnerDied()) {
+            Thread.yield();
+        }
+        PrivilegedAccessor.setValue(mc, "_runnerDied", Boolean.FALSE);
+        PrivilegedAccessor.setValue(mc, "_closed", Boolean.FALSE);
+        //mc.stopOutputRunner();
+    }
+    
+    private static void startOutputRunner(ManagedConnection mc)
+        throws Exception {
+        Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+        BIOMessageWriter writer = 
+            (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
+        Method start = 
+            PrivilegedAccessor.getMethod(writer, "start", new Class[0]);        
+        start.invoke(writer, new Object[0]);   
+    }
+    
+    private static void resetPriority(ManagedConnection mc)
+        throws Exception {
+            Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            BIOMessageWriter writer = 
+                (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
+            Method resetPriority = 
+                PrivilegedAccessor.getMethod(writer, "resetPriority", new Class[0]);        
+            resetPriority.invoke(writer, new Object[0]);                
+    }
 }
