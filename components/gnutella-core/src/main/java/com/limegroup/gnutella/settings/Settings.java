@@ -18,22 +18,69 @@ import java.io.*;
  */
 public final class Settings extends AbstractSettings {
 
+    static final File THEME_DIR_FILE =
+		new File(CommonUtils.getUserSettingsDir(), "themes");
+
+	/**
+	 * The default name of the theme file for all operating systems other than
+	 * OS X.
+	 */
+	private static final String DEFAULT_THEME_NAME = 
+		"default_theme.zip";
+
+	/**
+	 * The default name of the theme file name for OS X.
+	 */
+	private static final String DEFAULT_OSX_THEME_NAME = 
+		"default_osx_theme.zip";
+
+	
+	/**
+	 * The full path to the default theme file.
+	 */
+	static final File DEFAULT_THEME_FILE = 
+		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
+
+	/**
+	 * The full path to the default theme file on OS X.
+	 */
+	static final File DEFAULT_OSX_THEME_FILE = 
+		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
+
+
+	/**
+	 * The array of all theme files that should be copied by default
+	 * from the themes jar file.
+	 */
+	private static final String[] THEMES = {
+		DEFAULT_THEME_NAME,
+		DEFAULT_OSX_THEME_NAME,
+		"black_theme.zip",
+	}; 
+	
+	static {
+	    for(int i=0; i<THEMES.length; i++) { 
+			CommonUtils.copyResourceFile(THEMES[i], 
+										 new File(THEME_DIR_FILE, THEMES[i]));
+		}
+	}
+	
 	/**
 	 * Setting for the default theme file to use for LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT = 
 		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ? 
-								  ThemeSettings.DEFAULT_OSX_THEME_FILE : 
-								  ThemeSettings.DEFAULT_THEME_FILE); 
+								  DEFAULT_OSX_THEME_FILE : 
+								  DEFAULT_THEME_FILE); 
 
 	/**
 	 * Setting for the default theme directory to use in LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT_DIR = 
 		FACTORY.createFileSetting("THEME_DEFAULT_DIR", CommonUtils.isMacOSX() ?
-								  new File(ThemeSettings.THEME_DIR_FILE, 
+								  new File(THEME_DIR_FILE, 
 										   "default_osx_theme") :
-								  new File(ThemeSettings.THEME_DIR_FILE, 
+								  new File(THEME_DIR_FILE, 
 										   "default_theme"));
 
 	/**

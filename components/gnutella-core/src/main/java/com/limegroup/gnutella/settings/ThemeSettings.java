@@ -16,45 +16,7 @@ public final class ThemeSettings {
 	private static final Properties DEFAULT_PROPS = new Properties();
 
 
-	static final File THEME_DIR_FILE =
-		new File(CommonUtils.getUserSettingsDir(), "themes");
-
-	/**
-	 * The default name of the theme file for all operating systems other than
-	 * OS X.
-	 */
-	private static final String DEFAULT_THEME_NAME = 
-		"default_theme.zip";
-
-	/**
-	 * The default name of the theme file name for OS X.
-	 */
-	private static final String DEFAULT_OSX_THEME_NAME = 
-		"default_osx_theme.zip";
-
 	
-	/**
-	 * The full path to the default theme file.
-	 */
-	static final File DEFAULT_THEME_FILE = 
-		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
-
-	/**
-	 * The full path to the default theme file on OS X.
-	 */
-	static final File DEFAULT_OSX_THEME_FILE = 
-		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
-
-
-	/**
-	 * The array of all theme files that should be copied by default
-	 * from the themes jar file.
-	 */
-	private static final String[] THEMES = {
-		DEFAULT_THEME_NAME,
-		DEFAULT_OSX_THEME_NAME,
-		"black_theme.zip",
-	}; 
 
 	/**
 	 * Handle to the <tt>SettingsFactory</tt> for theme settings.
@@ -62,10 +24,6 @@ public final class ThemeSettings {
 	private static SettingsFactory FACTORY;
 
 	static {
-		for(int i=0; i<THEMES.length; i++) { 
-			CommonUtils.copyResourceFile(THEMES[i], 
-										 new File(THEME_DIR_FILE, THEMES[i]));
-		}
 		reload();
 	}
 
@@ -254,20 +212,20 @@ public final class ThemeSettings {
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW1_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_R", 209);	
+		FACTORY.createIntSetting("WINDOW1_COLOR_R", 0);	
 		
 
 	/**
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW1_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_G", 209);
+		FACTORY.createIntSetting("WINDOW1_COLOR_G", 0);
 		
 	/**
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW1_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_B", 209);	
+		FACTORY.createIntSetting("WINDOW1_COLOR_B", 0);	
 		
 
 	/**
@@ -370,20 +328,20 @@ public final class ThemeSettings {
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW7_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_R", 0);	
+		FACTORY.createIntSetting("WINDOW7_COLOR_R", 100);	
 		
 
 	/**
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW7_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_G", 0);
+		FACTORY.createIntSetting("WINDOW7_COLOR_G", 100);
 		
 	/**
 	 * Setting for the secondary 3 color blue value.
 	 */
 	public static final IntSetting WINDOW7_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_B", 0);		
+		FACTORY.createIntSetting("WINDOW7_COLOR_B", 100);		
 		
 	/**
 	 * Setting for the secondary 3 color blue value.
