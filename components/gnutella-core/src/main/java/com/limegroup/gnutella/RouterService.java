@@ -196,15 +196,15 @@ public class RouterService
      * If the group server is not reachable, restores connection settings
      * and silently fails.
      */
-    public void connectToGroup(String group) {
-        groupConnect(group);
-    }
+    //public void connectToGroup(String group) {
+	// groupConnect(group);
+    //}
 
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established but send a GroupPingRequest
      */
-    private ManagedConnection groupConnectToHostBlocking(
+    /**private ManagedConnection groupConnectToHostBlocking(
       String hostname, int portnum, String group)
             throws IOException {
 
@@ -217,12 +217,13 @@ public class RouterService
         return manager.createGroupConnectionBlocking(hostname, portnum,
           pingRequest);
     }
+	*/
 
     /**
      * Connects to router and sends a GroupPingRequest.
      * Block until connected.
      */
-    private void groupConnect(String group) {
+    /**private void groupConnect(String group) {
         SettingsManager settings=SettingsManager.instance();
 
         // Store the quick connect value.
@@ -275,11 +276,12 @@ public class RouterService
 		//  Adjust up keepAlive for initial ultrafast connect
 		if ( outgoing < 10 ) {
 			outgoing = 10;
-			manager.activateUltraFastConnectShutdown();
+			//manager.activateUltraFastConnectShutdown();
 		}
         setKeepAlive(outgoing);
         settings.setUseQuickConnect(useQuickConnect);
     }
+	*/
 
     /**
      * Connects to the network.  Ensures the number of messaging connections
@@ -302,9 +304,9 @@ public class RouterService
 	/**
 	 * Lowers the number of connections for "low-power" mode.
 	 */
-	public void reduceConnections() {
-		manager.reduceConnections();
-	}
+	//public void reduceConnections() {
+	//manager.reduceConnections();
+	//}
 
     /**
      * Closes and removes the given connection.
