@@ -567,11 +567,12 @@ public class QueryRequest extends Message implements Serializable{
 		if(qr == null) {
 			throw new NullPointerException("null query");
 		}
+        // always unmark multicast queries for OOB stuff....
         QueryRequest mQr =
             new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
                              qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
                              qr.getQueryUrns(), qr.getQueryKey(), false, 
-                             Message.N_MULTICAST, qr.desiresOutOfBandReplies());
+                             Message.N_MULTICAST, false);
         mQr.setHops(qr.getHops());
         return mQr;
 	}
