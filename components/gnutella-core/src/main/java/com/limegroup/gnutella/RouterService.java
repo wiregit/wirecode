@@ -761,35 +761,37 @@ public final class RouterService {
 							 final int minSpeed, 
 							 final MediaType type) {
 
-		Thread searcherThread = new Thread("SearcherThread") {
-			public void run() {
-                try {
-					//if(!isSupernode()) {
-					if(false) {
-						// per HUGE v0.94, ask for URNs on responses
-						Set urnTypes = new HashSet();
-						urnTypes.add(UrnType.ANY_TYPE);
-						QueryRequest qr = 
-							new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
-											 query, richQuery, false, urnTypes, null,
-											 !acceptedIncomingConnection());
-						verifier.record(qr, type);
-						router.broadcastQueryRequest(qr);
-					} else {
-						QueryHandler qf = 
-							QueryHandler.createHandler(guid, query, richQuery);
-
-						// TODO: what should we do about verifier here???
-						router.sendDynamicQuery(qf);
-					}
-                } catch(Throwable t) {
-                    RouterService.error(t);
-                }
+		// TODO: should we start a thread here?  otherwise, this is on the
+		// swing thread
+		//Thread searcherThread = new Thread("SearcherThread") {
+		//public void run() {
+		try {
+			//if(!isSupernode()) {
+			if(false) {
+				// per HUGE v0.94, ask for URNs on responses
+				Set urnTypes = new HashSet();
+				urnTypes.add(UrnType.ANY_TYPE);
+				QueryRequest qr = 
+					new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
+									 query, richQuery, false, urnTypes, null,
+									 !acceptedIncomingConnection());
+				verifier.record(qr, type);
+				router.broadcastQueryRequest(qr);
+			} else {
+				QueryHandler qf = 
+					QueryHandler.createHandler(guid, query, richQuery);
+				
+				// TODO: what should we do about verifier here???
+				router.sendDynamicQuery(qf);
 			}
-		};
-		searcherThread.setDaemon(true);
-		searcherThread.start();
-    }
+		} catch(Throwable t) {
+			RouterService.error(t);
+		}
+	}
+	//	};
+	//searcherThread.setDaemon(true);
+	//searcherThread.start();
+    //}
 
 
     /** 
