@@ -42,7 +42,8 @@ public final class FileDesc implements AlternateLocationCollector {
     public long _modTime;
 
 	/**
-	 * Constant <tt>Collection</tt> of <tt>URN</tt> instances for the file.
+	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
+	 * is immutable.
 	 */
     private final Set /* of URNS */ URNS; 
 
@@ -62,12 +63,12 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *
 	 * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
-	 * @param urns the <tt>HashSet</tt> of URNs for this <tt>FileDesc</tt>
+	 * @param urns the <tt>Set</tt> of URNs for this <tt>FileDesc</tt>
      */
-    public FileDesc(File file, int index, Collection urns) {	
-		if((file == null) || (urns == null)) {
+    public FileDesc(File file, int index) {	
+		if((file == null)) {
 			throw new NullPointerException("cannot create a FileDesc with "+
-										   "null values");
+										   "a null File");
 		}
 		if(index <0) {
 			throw new IndexOutOfBoundsException("negative values not permitted "+
@@ -80,13 +81,16 @@ public final class FileDesc implements AlternateLocationCollector {
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
-
-		// defensively copy the urn HashSet		
-		URNS = new HashSet(urns);
-
-        //if(this.shouldCalculateUrns()) {
-		//this.calculateUrns();
-		//}
+		
+		Set urns = UrnCache.instance().getUrns(FILE);
+		if(urns.size() == 0) {			
+			// expensive the first time a new file is added
+			URNS = Collections.unmodifiableSet(calculateUrns());
+			UrnCache.instance().addUrns(FILE, URNS);
+		}
+		else {
+			URNS = Collections.unmodifiableSet(urns);
+		}
     }
 
 	/**
@@ -160,9 +164,9 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @return <tt>true</tt> if this <tt>FileDesc</tt> has an 
 	 *  associated SHA1 value, <tt>false</tt> otherwise
 	 */
-    public synchronized boolean hasSHA1Urn() {
-		return (getSHA1Urn() != null);
-	}
+    //public synchronized boolean hasSHA1Urn() {
+	//return (getSHA1Urn() != null);
+	//}
 	
     
     /**
@@ -172,15 +176,17 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * This is a place where members of <tt>FileDesc</tt> are mutable,
 	 * namely the collection of <tt>URN</tt>s.
      */
-    public void calculateUrns() {
+    private Set calculateUrns() {
 		// update modTime
-		_modTime = FILE.lastModified();
+		//_modTime = FILE.lastModified();
 		try {
-			URN urn = URNFactory.createSHA1Urn(FILE);
-			URNS.add(urn);
+			Set set = new HashSet();
+			set.add(URNFactory.createSHA1Urn(FILE));
+			return set;
 		} catch(IOException e) {
 			// the urn just does not get added
-		}		
+			return Collections.EMPTY_SET;
+		}				
 	}
     
     /**
@@ -191,17 +197,20 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
 	 *  for this file, <tt>false</tt> otherwise
      */
-    public synchronized boolean containsUrn(URN urn) {
+    public boolean containsUrn(URN urn) {
         // first check if modified since last hashing
-        if (FILE.lastModified()!=_modTime) {
-            // recently modified; throw out SHA1 values
-            Iterator iter = URNS.iterator();
-            while(iter.hasNext()){
-                if (((URN)iter.next()).isSHA1()) {
-                    iter.remove();
-                }
-            }
-        }
+		
+		/// this is where we'll need to shift some work over to 
+		// FileManager
+//          if (FILE.lastModified()!=_modTime) {
+//              // recently modified; throw out SHA1 values
+//              Iterator iter = URNS.iterator();
+//              while(iter.hasNext()){
+//                  if (((URN)iter.next()).isSHA1()) {
+//                      iter.remove();
+//                  }
+//              }
+//          }
         // now check if given urn matches
         Iterator iter = URNS.iterator();
         while(iter.hasNext()){
@@ -219,7 +228,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
 	 *  otherwise
      */
-    public synchronized URN getSHA1Urn() {
+    public URN getSHA1Urn() {
         Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
@@ -227,6 +236,8 @@ public final class FileDesc implements AlternateLocationCollector {
                 return urn;
             }
         }
+
+		// this should never happen!!
         return null;
     }
 
@@ -241,13 +252,14 @@ public final class FileDesc implements AlternateLocationCollector {
 
 	/**
 	 * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
-	 * for the this <tt>FileDesc</tt>.
+	 * for the this <tt>FileDesc</tt>.  The <tt>Set</tt> instance
+	 * returned is immutable.
 	 *
 	 * @return a new <tt>Set</tt> of <tt>URN</tt>s for this 
 	 *  <tt>FileDesc</tt>
 	 */
 	public Set getUrns() {
-		return new HashSet(URNS);
+		return URNS;
 	}
 
     /**
