@@ -379,7 +379,6 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         String urlStr = AlternateLocation.removeTimestamp(locationHeader);
         URL url = new URL(urlStr);
         String host = url.getHost();
-        int    port = url.getPort();
         
         // Invalid host? Bad.
         if(host == null || host.equals(""))
