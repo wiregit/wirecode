@@ -22,6 +22,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -52,6 +53,13 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     // 2. that the client makes a correct push proxy connection if necessary
     // 3. if all else fails the client sends a PushRequest
 
+    public static void globalSetUp() {
+        try {
+            PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        }catch(Exception bad) {
+            ErrorService.error(bad);
+        }
+    }
     public void testHTTPRequest() throws Exception {
         callback = (MyActivityCallback) getCallback();
 
