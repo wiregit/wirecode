@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.Properties;
 import java.io.*;
+import java.net.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -10,28 +11,67 @@ import java.io.*;
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public class CommonUtils {
 
-	// constant for the current version of LimeWire
+	/** 
+	 * Constant for the current version of LimeWire.
+	 */
 	private static final String LIMEWIRE_VERSION = "1.7";
 	
-	// variable for the system properties
+	/** 
+	 * Variable for the java system properties.
+	 */
 	private static Properties _props;
 
-	// variable for whether or not we're on Windows
-	private static boolean _isWindows    = false;
-    // true if NT or 2000.
+	/** 
+	 * Variable for whether or not we're on Windows.
+	 */
+	private static boolean _isWindows = false;
+
+	/** 
+	 * Variable for whether or not we're on Windows NT or 2000.
+	 */
+	private static boolean _isWindowsNTor2000 = false;
+
+	/** 
+	 * Variable for whether or not we're on Windows 95.
+	 */
+	private static boolean _isWindows95 = false;
+
+	/** 
+	 * Variable for whether or not we're on Windows 98.
+	 */
+	private static boolean _isWindows98 = false;
+
+    /** 
+	 * Variable for whether or not the operating system allows the 
+	 * application to be reduced to the system tray.
+	 */
     private static boolean _supportsTray = false;
 
-	// variable for whether or not we're on Mac 9.1 or below
+	/**
+	 * Variable for whether or not we're on Mac 9.1 or below.
+	 */
 	private static boolean _isMacClassic = false;
 
-	// variable for whether or not we're on MacOSX
+	/** 
+	 * Variable for whether or not we're on MacOSX.
+	 */
 	private static boolean _isMacOSX     = false;
 
-	// variable for whether or not we're on Linux
+	/** 
+	 * Variable for whether or not we're on Linux.
+	 */
 	private static boolean _isLinux      = false;
 
-	// variable for whether or not we're on Solaris
+	/** 
+	 * Variable for whether or not we're on Solaris.
+	 */
 	private static boolean _isSolaris    = false;
+
+	/**
+	 * Variable for whether or not the localhost is running on a private
+	 * ip address.
+	 */
+	private static boolean _isPrivateAddress = true;
 	
 	/**
 	 * Make sure the constructor can never be called.
@@ -50,7 +90,12 @@ public class CommonUtils {
 
 		// set the operating system variables
 		_isWindows = os.indexOf("Windows") != -1;
-		//if (os.indexOf("Windows NT")!=-1 || os.indexOf("Windows 2000")!=-1)
+		if (os.indexOf("Windows NT") != -1 || os.indexOf("Windows 2000")!=-1)
+			_isWindowsNTor2000 = true;
+		if(os.indexOf("Windows 95") != -1)
+		   _isWindows95 = true;
+		if(os.indexOf("Windows 98") != -1)
+		   _isWindows98 = true;
 		if(_isWindows) _supportsTray=true;
 		_isSolaris = os.indexOf("Solaris") != -1;
 		_isLinux   = os.indexOf("Linux")   != -1;
@@ -61,6 +106,40 @@ public class CommonUtils {
 				_isMacClassic = true;
 			}			
 		}
+		
+		// determine whether or not the local host is a private ip address
+		byte[] bytes = null;
+		try {
+			bytes = InetAddress.getLocalHost().getAddress();
+		} catch(UnknownHostException uhe) {
+			_isPrivateAddress = true;
+		}
+
+		// 10.0.0.0 - 10.255.255.255
+        if (bytes[0]==(byte)10)
+            _isPrivateAddress = true;
+
+		// 172.16.0.0 - 172.31.255.255
+        else if (bytes[0]==(byte)172 &&
+                 bytes[1]>=(byte)16 &&
+                 bytes[1]<=(byte)31)
+            _isPrivateAddress = true;
+
+		// 192.168.0.0 - 192.168.255.255   
+        else if (bytes[0]==(byte)192 &&
+                 bytes[1]==(byte)168)
+            _isPrivateAddress = true; 
+
+		// 0.0.0.0 - Gnutella (well BearShare really) convention
+        else if (bytes[0]==(byte)0 &&
+                 bytes[1]==(byte)0 &&
+                 bytes[2]==(byte)0 &&
+                 bytes[3]==(byte)0)
+            _isPrivateAddress = true;
+		
+		// otherwise, we're not firewalled
+        else
+			_isPrivateAddress = false;
 	}
 
 	/**
@@ -100,23 +179,53 @@ public class CommonUtils {
 		return _props.getProperty("user.dir");
 	}
 
+    /**
+     * Returns true if this is Windows NT or Windows 2000 and
+	 * hence can support a system tray feature.
+     */
+	public static boolean supportsTray() {
+		return _supportsTray;
+	}
+		
 	/**
-	 * Returns whether or not the os is some version of Windows
+	 * Returns whether or not this operating system is considered
+	 * capable of meeting the requirements of a supernode.
+	 *
+	 * @return <tt>true</tt> if this os meets supernode requirements,
+	 *         <tt>false</tt> otherwise
+	 */
+	public static boolean isSupernodeOS() {
+		if(!_isWindows98 && !_isWindows95 && !_isMacClassic) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Returns whether or not the os is some version of Windows.
+	 *
+	 * @return <tt>true</tt> if the application is running on some Windows 
+	 *         version, <tt>false</tt> otherwise
 	 */
 	public static boolean isWindows() {
 		return _isWindows;
 	}
 
-    /**
-     * Returns true iff this is Windows NT or Windows 2000 and
-	 * hence can support a system tray feature.
-     */
-    public static boolean supportsTray() {
-        return _supportsTray;
-    }
+	/**
+	 * Returns whether or not the os is some version of Windows.
+	 *
+	 * @return <tt>true</tt> if the application is running on Windows NT 
+	 *         or 2000, <tt>false</tt> otherwise
+	 */
+	public static boolean isWindowsNTor2000() {
+		return _isWindowsNTor2000;
+	}
 
 	/** 
 	 * Returns whether or not the os is Mac 9.1 or earlier.
+	 *
+	 * @return <tt>true</tt> if the application is running on a Mac version
+	 *         prior to OSX, <tt>false</tt> otherwise
 	 */
 	public static boolean isMacClassic() {
 		return _isMacClassic;
@@ -124,13 +233,19 @@ public class CommonUtils {
 
 	/** 
 	 * Returns whether or not the os is Mac OSX.
+	 *
+	 * @return <tt>true</tt> if the application is running on a Mac OSX, 
+	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isMacOSX() {
 		return _isMacOSX;
 	}
 
 	/** 
-	 * returns whether or not the os is Solaris.
+	 * Returns whether or not the os is Solaris.
+	 *
+	 * @return <tt>true</tt> if the application is running on Solaris, 
+	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isSolaris() {
 		return _isSolaris;
@@ -138,6 +253,9 @@ public class CommonUtils {
 
 	/** 
 	 * Returns whether or not the os is Linux.
+	 *
+	 * @return <tt>true</tt> if the application is running on Linux, 
+	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isLinux() {
 		return _isLinux;
@@ -182,4 +300,17 @@ public class CommonUtils {
         }
         return ok;
     }
+
+    /**
+     * Returns true if this is a private IP address as defined by
+     * RFC 1918.  In the case that this has a symbolic name that
+     * cannot be resolved, returns true.
+	 *
+	 * @return <tt>true</tt> if the localhost has a private ip address,
+	 *         <tt>false</tt> otherwise
+     */
+    public static boolean isPrivateAddress() {
+		return _isPrivateAddress;
+    }
+
 }
