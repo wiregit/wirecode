@@ -24,7 +24,7 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         final int thirtyMins = 30 * 60 * 1000;
         Runnable adjuster = new Runnable() {
                 public void run() {
-                    if (!isSuccessRateGreat() && !isSuccessRateGood() &&
+                    if (!isSuccessRateGreat() &&
                         !isSuccessRateTerrible())
                         MIN_SAMPLE_SIZE += 500;
                 }
@@ -97,7 +97,7 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     public static boolean isSuccessRateTerrible() {
         // we want a large enough sample space.....
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
-            return true;
+            return false;
         return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
     }
 
