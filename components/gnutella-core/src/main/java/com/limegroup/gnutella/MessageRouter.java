@@ -406,11 +406,12 @@ public abstract class MessageRouter
     {
         _numQueryRequests++;
 
-		if(!handler.isSupernodeClientConnection() && 
-		   request.getTTL() > 0) {
-			broadcastQueryRequest(request, handler);
-		} else {
+		// if it's a request from a leaf, send it out via GUESS --
+		// otherwise, broadcast it if it still has TTL
+		if(handler.isSupernodeClientConnection()) {
 			unicastQueryRequest(request);
+		} else if(request.getTTL() > 0) {
+			broadcastQueryRequest(request, handler);
 		}
 			
 		// always forward any queries to leaves -- this only does
@@ -458,7 +459,6 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest queryRequest)
     {
         _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        //boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
         if (UNICAST_MODE && RouterService.isGUESSCapable()) 
             unicastQueryRequest(queryRequest);
         else
