@@ -105,11 +105,31 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * the send(m) and receive() methods.
      */
     private final String _host;
+
+    /**
+     * The port the remote host is listening on.
+     */
     private int _port;
+    
+    /**
+     * The <tt>Socket</tt> to the remote host.
+     */
     private Socket _socket;
+    
+    /**
+     * Flag for whether or not this is an outgoing connection, initiated by 
+     * us.
+     */
     private final boolean OUTGOING;
     
+    /**
+     * The <tt>InputStream</tt> for incoming data from the remote host.
+     */
     private InputStream _in;
+    
+    /**
+     * The <tt>OutputStream</tt> to send data to the remote host.
+     */
     private OutputStream _out;
     
     /**
@@ -330,6 +350,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private static final int CONNECT_TIMEOUT = 6000;  //6 seconds
     
+    /**
+     * Constant for the <tt>Handshaker</tt> instance that performs the actual
+     * handshaking.
+     */
     private final Handshaker HANDSHAKER;
 
     /**
@@ -412,9 +436,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
         _host = host;
         _port = port;
-        OUTGOING = true;
-        //REQUEST_HEADERS = requestHeaders;
-        //RESPONSE_HEADERS = responseHeaders;            
+        OUTGOING = true;          
         if(!CommonUtils.isJava118()) {
             ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
         }
@@ -456,8 +478,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
-        //RESPONSE_HEADERS = responseHeaders; 
-        //REQUEST_HEADERS = null;
         if(!CommonUtils.isJava118()) {
             ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
         }
@@ -801,7 +821,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
      * are dropped if the socket gets backed up.  Will remove any extended
-     * payloads if the receiving connection does not support GGGEP.   Also
+     * payloads if the receiving connection does not support GGEP.   Also
      * updates MessageRouter stats.<p>
      *
      * This method IS thread safe.  Multiple threads can be in a send call
@@ -970,13 +990,14 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
 
     /**
-     * Accessor for the port number this connection is listening on.  Note that this 
-     * is NOT the port of the socket itself.  For incoming connections, the getPort
-     * method of the java.net.Socket class returns the ephemeral port that the
-     * host connected with.  This port, however, is the port the remote host is
-     * listening on for new connections, which we set using Gnutella connection
-     * headers in the case of incoming connections.  For outgoing connections,
-     * this is the port we used to connect to them -- their listening port.
+     * Accessor for the port number this connection is listening on.  Note that  
+     * this is NOT the port of the socket itself.  For incoming connections, the 
+     * getPort method of the java.net.Socket class returns the ephemeral port 
+     * that the host connected with.  This port, however, is the port the remote 
+     * host is listening on for new connections, which we set using Gnutella 
+     * connection headers in the case of incoming connections.  For outgoing 
+     * connections, this is the port we used to connect to them -- their 
+     * listening port.
      * 
      * @return the listening port for the remote host
      */
@@ -985,8 +1006,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
     
     /** 
-     * Sets the port where the conected node listens at, not the one
-     * got from socket
+     * Sets the port where the connected node listens on.
+     * 
+     * @param port the port the remote host is listening on
      */
     public void setListeningPort(int port){
         if (!NetworkUtils.isValidPort(port))
@@ -1718,13 +1740,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /** FOR TESTING PURPOSES ONLY! */
     public boolean runnerDied() {
         return _runnerDied;
-    }
-
-    /**
-     * @return
-     */
-    public int getPort() {
-        return _port;
     }
 
     /**
