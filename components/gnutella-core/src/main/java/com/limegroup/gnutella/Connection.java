@@ -164,6 +164,10 @@ public class Connection {
     public void initialize() throws IOException {
         try {
             initializeWithoutRetry();
+        } catch (NoGnutellaOkException e) {
+            //Other guy speaks the same language but doesn't want us.
+            //Don't bother to retry
+            throw e;
         } catch (BadHandshakeException e) {
             //reset the flags
             _propertiesRead = null;
@@ -183,9 +187,16 @@ public class Connection {
     }
     
     private static class BadHandshakeException extends IOException { }
+    private static class NoGnutellaOkException extends IOException { }
 
     /*
      * Exactly like initialize, but without the re-connection.
+     *
+     * @exception IOException couldn't establish the TCP connection
+     * @exception NoGnutellaOkException the other end understood the 0.6
+     *  protocol but returned a response code other than "200 OK"
+     * @exception BadHandshakeException some sort of protocol error after
+     *  establishing the connection
      */
     private void initializeWithoutRetry() throws IOException {
         SettingsManager settingsManager = SettingsManager.instance();
@@ -227,14 +238,23 @@ public class Connection {
                 initializeOutgoing();
             else
                 initializeIncoming();
-        } catch(IOException e) {
+        } catch (NoGnutellaOkException e) {
+            _socket.close();
+            throw e;
+        } catch (IOException e) {
             _socket.close();
             throw new BadHandshakeException();
         }
     }
 
-    /** Sends and receives handshake strings for outgoing connections,
-     *  throwing IOException if any problems. */
+    /** 
+     * Sends and receives handshake strings for outgoing connections,
+     * throwing exception if any problems. 
+     * 
+     * @exception NoGnutellaOkException the other end understood the 0.6
+     *  protocol but returned a response code other than "200 OK"
+     * @exception IOException any other error.  May wish to retry at 0.4
+     */
     private void initializeOutgoing() throws IOException {
         //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
         //user.  If the other end doesn't understand it--too bad!  There is an
@@ -267,25 +287,31 @@ public class Connection {
             
             //if the connection was accepted (with 200 OK), we should go to the
             //third step and send back our headers
-            if (! connectLine.equals(GNUTELLA_OK_06)){
-                throw new IOException("Bad connect string");
-            }
-            else{
+            if (! connectLine.equals(GNUTELLA_OK_06))
+                throw new NoGnutellaOkException();
+            else {
                 //3. Send our response and headers
                 HandshakeResponse ourResponse = _propertiesWrittenR.respond(
                     new HandshakeResponse(_propertiesRead), true);
+                //TODO: should we throw NoGnutellaOkException if we send something
+                //other than "200 OK".  (See line 350 below.)
                 
                 sendString(GNUTELLA_06 + " " 
                     + ourResponse.getStatusLine() + CRLF);
                 sendHeaders(ourResponse.getHeaders());
             }
         }
-    }
-
-  
+    }  
     
-    /** Sends and receives handshake strings for incoming connections,
-     *  throwing IOException if any problems. */
+
+    /** 
+     * Sends and receives handshake strings for incoming connections,
+     * throwing exception if any problems. 
+     * 
+     * @exception NoGnutellaOkException the other end understood the 0.6
+     *  protocol but returned a response code other than "200 OK"
+     * @exception IOException any other error.  May wish to retry at 0.4
+     */
     private void initializeIncoming() throws IOException {
         //Dispatch based on first line read.  Remember that "GNUTELLA " has
         //already been read by Acceptor.  Hence we are looking for "CONNECT/0.4"
@@ -318,17 +344,19 @@ public class Connection {
                 sendHeaders(ourResponse.getHeaders());   
                 
                 //if our response was not OK, throw an exception so as to
-                //signal the caller to close the connection.
+                //signal the caller to close the connection--without retry.
                 //(Needed to accomodate bad clients, who may not close the
                 //connection, even if they dont receive 200 OK
-                if(ourResponse.notOKStatusCode()){
-                    throw new IOException(
-                        "We didnt return OK code during Connection Handshake");
-                }
+                if(ourResponse.notOKStatusCode())
+                    throw new NoGnutellaOkException();
             }
             //3. Read GNUTELLA/200 OK, and any private vendor headers.
-            if (! readLine().equals(GNUTELLA_OK_06))
-                throw new IOException("Bad connect string");
+            line=readLine();
+            if (! line.startsWith(GNUTELLA_06))
+                throw new IOException("Unexpected response");
+            if (! line.equals(GNUTELLA_OK_06))
+                //e.g., "GNUTELLA/0.6 503 Unavailable"
+                throw new NoGnutellaOkException(); 
             readHeaders();
         } else {
             throw new IOException("Unexpected connect string");
@@ -640,15 +668,17 @@ public class Connection {
 //          final Properties props=new Properties();
 //          props.setProperty("Query-Routing", "0.3");        
 //          HandshakeResponder standardResponder=new HandshakeResponder() {
-//              public Properties respond(Properties props) {
-//                  return props;
+//              public HandshakeResponse respond(HandshakeResponse response,
+//                                               boolean outgoing) {
+//                  return new HandshakeResponse(props);;
 //              }
 //          };        
 //          HandshakeResponder secretResponder=new HandshakeResponder() {
-//              public Properties respond(Properties props) {
-//                  Properties ret=new Properties();
-//                  ret.setProperty("Secret", "abcdefg");
-//                  return ret;
+//              public HandshakeResponse respond(HandshakeResponse response,
+//                                               boolean outgoing) {
+//                  Properties props2=new Properties();
+//                  props2.setProperty("Secret", "abcdefg");
+//                  return new HandshakeResponse(props2);
 //              }
 //          };
 //          ConnectionPair p=null;
