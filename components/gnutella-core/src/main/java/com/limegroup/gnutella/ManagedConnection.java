@@ -39,17 +39,15 @@ import com.limegroup.gnutella.updates.*;
  * the properties in the SettingsManager, but you can change them with
  * setPersonalFilter and setRouteFilter.<p>
  *
- * ManagedConnection maintain a large number of statistics, such as the number
- * of bytes read and written.  ManagedConnection doesn't quite fit the
+ * ManagedConnection maintain a large number of statistics, such as the current
+ * bandwidth for upstream & downstream.  ManagedConnection doesn't quite fit the
  * BandwidthTracker interface, unfortunately.  On the query-routing3-branch and
  * pong-caching CVS branches, these statistics have been bundled into a single
- * object, reducing the complexity of ManagedConnection.  We will likely merge
- * this change into ManagedConnection in the future, so please bear with this
- * for now.<p>
+ * object, reducing the complexity of ManagedConnection.<p>
  * 
  * ManagedConnection also takes care of various VendorMessage handling, in
  * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
- * handleVendorMessage().
+ * handleVendorMessage().<p>
  *
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
@@ -265,12 +263,12 @@ public class ManagedConnection extends Connection
     private long _nextQRPForwardTime;
 
 
-    /** The total number of bytes sent/received.
-     *  These are not synchronized and not guaranteed to be 100% accurate. */
-    private volatile long _bytesSent;
+    /** 
+     * The bandwidth trackers for the up/downstream.
+     * These are not synchronized and not guaranteed to be 100% accurate.
+     */
     private BandwidthTrackerImpl _upBandwidthTracker=
         new BandwidthTrackerImpl();
-    private volatile long _bytesReceived;
     private BandwidthTrackerImpl _downBandwidthTracker=
         new BandwidthTrackerImpl();
 
@@ -385,7 +383,12 @@ public class ManagedConnection extends Connection
         updater.checkAndUpdate(this);
     }
 
-    /** Throttles the super's OutputStream. */
+    /**
+     * Throttles the super's OutputStream.  This works quite well with
+     * compressed streams, because the chaining mechanism writes the
+     * compressed bytes, ensuring that we do not attempt to request
+     * more data (and thus sleep while throttling) than we will actually write.
+     */
     protected OutputStream getOutputStream()  throws IOException {
         return new ThrottledOutputStream(super.getOutputStream(), _throttle);
     }
@@ -398,7 +401,6 @@ public class ManagedConnection extends Connection
         Message m = null;
         try {
             m = super.receive();
-            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             if (_manager!=null) //may be null for testing
                 _manager.remove(this);
@@ -418,7 +420,6 @@ public class ManagedConnection extends Connection
         Message m = null;
         try {
             m = super.receive(timeout);
-            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             if (_manager!=null) //may be null for testing
                 _manager.remove(this);
@@ -517,21 +518,25 @@ public class ManagedConnection extends Connection
 
         /** While the connection is not closed, sends all data delay. */
         public void run() {
+            // Catching any exception will remove this from the list
+            // of connections.  Catching something other than an IOException
+            // will tell ErrorService about it (because IOExceptions are
+            // expected errors from closed connections).
             try {
                 while (true) {
                     repOk();
-                    try {
-                        waitForQueued();
-                        sendQueued();
-                    } catch (IOException e) {
-                        if (_manager!=null) //may be null for testing
-                            _manager.remove(ManagedConnection.this);
-                        _runnerDied=true;
-                        return;
-                    }
+                    waitForQueued();
+                    sendQueued();
                     repOk();
-                }
+                }                
+            } catch (IOException e) {
+                if (_manager!=null) //may be null for testing
+                    _manager.remove(ManagedConnection.this);
+                _runnerDied=true;
             } catch(Throwable t) {
+                if (_manager!=null) //may be null for testing
+                    _manager.remove(ManagedConnection.this);
+                _runnerDied=true;      
                 ErrorService.error(t);
             }
         }
@@ -554,7 +559,7 @@ public class ManagedConnection extends Connection
             }
             
             if (! isOpen())
-                throw new IOException("connection closed");
+                throw CONNECTION_CLOSED;
         }
         
         /** Send several queued message of each type. */
@@ -584,8 +589,13 @@ public class ManagedConnection extends Connection
                             break;
                     }
 
+                    //Note that if the ougoing stream is compressed
+                    //(isWriteDeflated()), this call may not actually
+                    //do anything.  This is because the Deflater waits
+                    //until an optimal time to start deflating, buffering
+                    //up incoming data until that time is reached, or the
+                    //data is explicitly flushed.
                     ManagedConnection.super.send(m);
-                    _bytesSent+=m.getTotalLength();
                 }
                 
                 //Optimization: the if statement below is not needed for
@@ -600,6 +610,9 @@ public class ManagedConnection extends Connection
             //kernel's TCP send buffer.  It doesn't force TCP to
             //actually send the data to the network.  That is determined
             //by the receiver's window size and Nagle's algorithm.
+            //Note that if the outgoing stream is compressed 
+            //(isWriteDeflated()), then this call may block while the
+            //Deflater deflates the data.
             ManagedConnection.super.flush();
         }
     } //end OutputRunner
@@ -778,9 +791,15 @@ public class ManagedConnection extends Connection
             pr.hop();
 
             //send the message
+            //This is called only during a Reject connection, and thus
+            //it is impossible for the stream to be compressed.
+            //That is a Good Thing (tm) because we're sending such little
+            //data, that the compression may actually hurt.
             super.send(pr);
         }
         
+        //Because we are guaranteed that the stream is not compressed,
+        //this call will not block.
         super.flush();
     }
     
@@ -1021,16 +1040,6 @@ public class ManagedConnection extends Connection
     // Begin statistics accessors
     //
 
-    /** Returns the number of bytes sent on this connection. */
-    public long getBytesSent() {
-        return _bytesSent;
-    }
-    
-    /** Returns the number of bytes received on this connection. */
-    public long getBytesReceived() {
-        return _bytesReceived;
-    }
-
     /** Returns the number of messages sent on this connection */
     public int getNumMessagesSent() {
         return _numMessagesSent;
@@ -1097,9 +1106,9 @@ public class ManagedConnection extends Connection
      */
     public void measureBandwidth() {
         _upBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(_bytesSent));
+             ByteOrder.long2int(getBytesSent()));
         _downBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(_bytesReceived));
+             ByteOrder.long2int(getBytesReceived()));
     }
 
     /**

@@ -368,7 +368,7 @@ public class ConnectionManager {
     public boolean isSupernode() {
         boolean isCapable =
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue();
-        return isCapable && !isLeaf();
+        return isCapable && !isShieldedLeaf();
     }
     
     /**
@@ -376,10 +376,8 @@ public class ConnectionManager {
      * is not required that the ultrapeer support query routing, though that is
      * generally the case.  
      */
-    public boolean isLeaf() {
+    public boolean isShieldedLeaf() {
         return _shieldedConnections != 0;
-        //TODO2: should we make this faster by augmenting state?  We could
-        //also return false if isSupernode().
 //        List connections=getInitializedConnections();
 //        for (int i=0; i<connections.size(); i++) {
 //            ManagedConnection first=(ManagedConnection)connections.get(i);
@@ -576,7 +574,7 @@ public class ConnectionManager {
     public boolean allowAnyConnection() {
         //Stricter than necessary.  
         //See allowAnyConnection(boolean,String,String).
-        if (isLeaf())
+        if (isShieldedLeaf())
             return false;
 
         //Do we have normal or leaf slots?
@@ -641,7 +639,7 @@ public class ConnectionManager {
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive <= 0) {
             return false;
-		} else if (RouterService.isLeaf()) {
+		} else if (RouterService.isShieldedLeaf()) {
 			// we're a leaf -- don't allow any incoming connections
             return false;  
 		} else if (hr.isLeaf() || leaf) {
@@ -672,6 +670,14 @@ public class ConnectionManager {
 				// otherwise, it is a high degree connection, so allow it if we 
 				// need more connections
 				//return connections < ULTRAPEER_CONNECTIONS;
+			//}
+			
+			// USE THIS FOR TESTING DEFLATE IN THE WILD,
+			// TO EVENTUALLY HAVE ALL CONNECTIONS BE DEFLATE-ENABLED.
+			// If this is our last few connections, only allow it if it
+			// accepts deflate-encoding.
+			//if( connections >= ULTRAPEER_CONNECTIONS-6 ) {
+			//    return hr.isDeflateAccepted();
 			//}
 
 			// if it's not a new high-density connection, only allow it if

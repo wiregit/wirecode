@@ -81,8 +81,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         pr=(PingRequest)in.receive();
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", 1, out.getNumMessagesSent());
-        assertEquals("bytes sent differs from total length",
-					 out.getBytesSent(), pr.getTotalLength());
+        assertEquals( pr.getTotalLength(), in.getUncompressedBytesReceived() );
+        assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
         assertEquals("unexpected ttl", 4, pr.getTTL());
@@ -530,7 +530,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 			respondUnauthenticated(HandshakeResponse response,
 			                       boolean outgoing) 
 			throws IOException {
-			return HandshakeResponse.createResponse(new Properties());
+			    Properties props = new Properties();
+			    props.put("Accept-Encoding", "deflate");
+			return HandshakeResponse.createResponse(props);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import java.util.Properties;
@@ -26,7 +27,14 @@ public final class HandshakeResponseTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
+    
+    /**
+     * Individual tests will change these as needed.
+     */    
+    public void setUp() {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }
     
     /**
      * Tests the method for extracting the status message from a connection
@@ -272,20 +280,89 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should be accepted", hr.isAccepted());
         assertEquals("should not have any properties", 0, hr.props().size());
     }
+    
+    /**
+     * Tests the isDeflateEnabled method.
+     */
+    public void testIsDeflateEnabled() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr;
+
+        props.put("Content-Encoding", "deflate");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should be deflate enabled", hr.isDeflateEnabled());
+
+        props.put("Content-Encoding", "gobblygook");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateEnabled());
+
+        props.clear();
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateEnabled());
+    }
+    
+    /**
+     * Tests the isDeflateAccepted method.  Note the wierd condition
+     * with ConnectionSettings.ENCODE_DEFLATE
+     */
+    public void testIsDeflateAccepted() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr;
+        
+        // These are all the normal cases, where the servent
+        // is allowed to write back a Content-Encoding: deflate
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+
+        props.put("Accept-Encoding", "deflate");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should be deflate enabled", hr.isDeflateAccepted());
+
+        props.put("Accept-Encoding", "gobblygook");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.clear();
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+        
+        // This is the other case, where the servent is now allowed
+        // to write back a Content-Encoding: deflate.
+        // In order to short-circuit the HandshakeResponders, we pretend
+        // that all incoming responses simply do not have an Accept-Encoding
+        // line if the servent cannot deflate output.
+        ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+        props.put("Accept-Encoding", "deflate");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.put("Accept-Encoding", "gobblygook");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.clear();
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());                
+    }    
 
     /**
      * Test to make sure that Ultrapeer headers are created correctly.
      */
     public void testUltrapeerHeaders() {
+        
+        // Test once with deflate support & once without.
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         HandshakeResponse hr = 
             HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
+        
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+        hr = HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
-        hr = HandshakeResponse.createRejectOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
     }
 
@@ -294,6 +371,11 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * Test to make sure that leaf headers are created correctly.
      */
     public void testLeafHeaders() {
+        // don't let the short-circuit take place, we want a real test.
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);        
+        
+        // Test once with deflate support & once without.
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);        
         HandshakeResponse hr = 
             HandshakeResponse.createRejectIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
@@ -301,6 +383,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         hr = HandshakeResponse.createAcceptIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
         hr = HandshakeResponse.createRejectOutgoingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
@@ -329,6 +412,9 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * @param hr the headers to test
      */
     private static void runUltrapeerHeadersTest(HandshakeResponse hr) {
+        // don't let the short-circuit take place, we want a real test.        
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);        
+        
         runCommonHeadersTest(hr);
         assertTrue("should be an Ultrapeer connection", hr.isUltrapeer());
         assertTrue("should not be a leaf connection", !hr.isLeaf());
@@ -358,6 +444,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should support GGEP", hr.supportsGGEP());
         assertTrue("should support vendor messages", hr.supportsVendorMessages());
         assertTrue("should use dynamic querying", hr.isDynamicQueryConnection());
+
+        //if we added the value, make sure its there.
+        if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
+            assertTrue("should accept deflate encoding", hr.isDeflateAccepted());
+        else 
+            assertTrue("should not accept deflate encoding", !hr.isDeflateAccepted());
+            
+        // no responders have added the Content-Encoding: deflate yet...
+        assertTrue("should not be encoding in deflate", !hr.isDeflateEnabled());
     }
 
     /**
@@ -378,6 +473,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         hr = HandshakeResponse.createAcceptIncomingResponse(new Properties());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
     }
+        
 
     /**
      * Tests the header utility method that checks if a the version for a 
@@ -712,5 +808,85 @@ public final class HandshakeResponseTest extends BaseTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "");
         isTrue = (Boolean)m.invoke(null, params);
         assertTrue("header should not be true", !isTrue.booleanValue()); 
+    }
+    
+    /**
+     * Tests the isStringValue method to see if it's working correctly.
+     */
+    public void testIsStringValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "isStringValue",
+                                         new Class[]{Properties.class,
+                                                     String.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        // construct the parameters to pass to the method
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = "Content-Encoding";
+        params[2] = "deflate";
+
+        //the header with the correct value exists; true
+        headers.put("Content-Encoding", "Deflate");
+        Boolean isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should contain correct value", isTrue.booleanValue());
+
+        //the header with an incorrect value exists; false
+        headers.put("Content-Encoding", "zip");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should not contain correct value", !isTrue.booleanValue());
+
+        //the header does not exist; false
+        headers.clear();
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should not contain correct value", !isTrue.booleanValue());
+    }
+    
+    /**
+     * Tests the containsStringValue method to see if it's working properly.
+     */
+    public void testContainsStringValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "containsStringValue",
+                                         new Class[]{Properties.class,
+                                                     String.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        // construct the parameters to pass to the method
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = "Accept-Encoding";
+        params[2] = "deflate";
+
+        //the header with a single correct value exists; true
+        headers.put("Accept-Encoding", "deflate");
+        Boolean isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should contain correct value", isTrue.booleanValue());
+        
+        //the header with a multiple values (one correct) exists; true
+        headers.put("Accept-Encoding", "deflate, zip, really good zip");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should contain correct value", isTrue.booleanValue());        
+
+        //the header with an incorrect value exists; false
+        headers.put("Accept-Encoding", "zip");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should not contain correct value", !isTrue.booleanValue());
+        
+        //the header with an multiple incorrect value exists; false
+        headers.put("Accept-Encoding", "zip, gzip, pack");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("should not contain correct value", !isTrue.booleanValue());        
+
+        //the header does not exist; false
+        headers.clear();
+        isTrue = (Boolean)m.invoke(null, params);        
+        assertTrue("should not contain correct value", !isTrue.booleanValue());        
     }
 }

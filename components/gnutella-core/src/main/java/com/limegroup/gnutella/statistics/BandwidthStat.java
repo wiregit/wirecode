@@ -30,7 +30,29 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 			super.addData(data);
 			DOWNSTREAM_BANDWIDTH.addData(data);
 		}
+	}	
+
+	/**
+	 * Specialized class for accumulating all downstream bandwidth sent
+	 * over Gnutella.
+	 */
+	private static class DownstreamGnutellaBandwidthStat extends BandwidthStat {
+		public void addData(int data) {
+			super.addData(data);
+			GNUTELLA_DOWNSTREAM_BANDWIDTH.addData(data);
+		}
 	}
+
+	/**
+	 * Specialized class for accumulating all upstream bandwidth sent
+	 * over Gnutella.
+	 */
+	private static class UpstreamGnutellaBandwidthStat extends BandwidthStat {
+		public void addData(int data) {
+			super.addData(data);
+			GNUTELLA_UPSTREAM_BANDWIDTH.addData(data);
+		}
+	}	
 
 	/**
 	 * Specialized class for accumulating all downstream bandwidth sent
@@ -43,7 +65,6 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 		}
 	}
 
-
 	/**
 	 * Specialized class for accumulating all upstream bandwidth sent
 	 * over HTTP.
@@ -54,7 +75,6 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 			HTTP_UPSTREAM_BANDWIDTH.addData(data);
 		}
 	}
-	
 
 	/**
 	 * <tt>Statistic</tt> for all upstream bandwidth.
@@ -107,20 +127,47 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 	 */
 	public static final Statistic HTTP_BODY_UPSTREAM_BANDWIDTH =
 		new UpstreamHTTPBandwidthStat();
+		
+	/**
+	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella.
+	 */
+	public static final Statistic GNUTELLA_DOWNSTREAM_BANDWIDTH =
+		new DownstreamBandwidthStat();
+
+	/**
+	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella.
+	 */
+	public static final Statistic GNUTELLA_UPSTREAM_BANDWIDTH =
+		new UpstreamBandwidthStat();
 
 	/**
 	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella
 	 * message traffic.
 	 */
-	public static final Statistic GNUTELLA_DOWNSTREAM_BANDWIDTH =
-		new DownstreamBandwidthStat();
+	public static final Statistic GNUTELLA_MESSAGE_DOWNSTREAM_BANDWIDTH =
+		new DownstreamGnutellaBandwidthStat();
 
 
 	/**
 	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella
 	 * message traffic.
 	 */
-	public static final Statistic GNUTELLA_UPSTREAM_BANDWIDTH =
-		new UpstreamBandwidthStat();
+	public static final Statistic GNUTELLA_MESSAGE_UPSTREAM_BANDWIDTH =
+		new UpstreamGnutellaBandwidthStat();
+
+	/**
+	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella
+	 * connection headers.
+	 */
+	public static final Statistic GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH =
+		new DownstreamGnutellaBandwidthStat();
+
+
+	/**
+	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella
+	 * connection headers.
+	 */
+	public static final Statistic GNUTELLA_HEADER_UPSTREAM_BANDWIDTH =
+		new UpstreamGnutellaBandwidthStat();
 
 }

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.util.zip.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
@@ -28,11 +29,24 @@ import com.limegroup.gnutella.statistics.*;
  * <tt>Connection</tt> supports only 0.6 handshakes.  Gnutella 0.6 connections
  * have a list of properties read and written during the handshake sequence.
  * Typical property/value pairs might be "Query-Routing: 0.3" or "User-Agent:
- * LimeWire".  
+ * LimeWire".<p>
  *
  * This class augments the basic 0.6 handshaking mechanism to allow
  * authentication via "401" messages.  Authentication interactions can take
- * multiple rounds.  
+ * multiple rounds.<p>
+ *
+ * This class supports reading and writing streams using 'deflate' compression.
+ * The HandshakeResponser is what actually determines whether or not
+ * deflate will be used.  This class merely looks at what the responses are in
+ * order to set up the appropriate streams.  Compression is implemented by
+ * chaining the input and output streams, meaning that even if an extending
+ * class implements getInputStream() and getOutputStream(), the actual input
+ * and output stream used may not be an instance of the expected class.
+ * However, the information is still chained through the appropriate stream.<p>
+ *
+ * The amount of bytes written and received are maintained by this class.  This
+ * is necessary because of compression and decompression are considered
+ * implementation details in this class.
  */
 public class Connection {
     /** 
@@ -47,6 +61,57 @@ public class Connection {
     private InputStream _in;
     private OutputStream _out;
     private final boolean OUTGOING;
+    
+    /**
+     * The Inflater to use for inflating read streams, initialized
+     * in initialize() if the connection told us it's sending with
+     * a Content-Encoding of deflate.
+     * Definitions:
+     *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
+     *   Inflater.getTotalIn  -- The number of COMPRESSED bytes
+     */
+    private Inflater _inflater;
+    
+    /**
+     * The Deflater to use for deflating written streams, initialized
+     * in initialize() if we told the connection we're sending with
+     * a Content-Encoding of deflate.
+     * Note that this is the same as '_out', but is assigned here
+     * as the appropriate type so we don't have to cast when we
+     * want to measure the compression savings.
+     * Definitions:
+     *   Deflater.getTotalOut -- The number of COMPRESSED bytes
+     *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
+     */
+    private Deflater _deflater;
+    
+    /**
+     * The number of bytes sent to the output stream.
+     */
+    private volatile long _bytesSent;
+    
+    /**
+     * The number of bytes recieved from the input stream.
+     */
+    private volatile long _bytesReceived;
+    
+    /**
+     * The number of compressed bytes sent to the stream.
+     * This is effectively the same as _deflater.getTotalOut(),
+     * but must be cached because Deflater's behaviour is undefined
+     * after end() has been called on it, which is done when this
+     * connection is closed.
+     */
+    private volatile long _compressedBytesSent;
+    
+    /**
+     * The number of compressed bytes read from the stream.
+     * This is effectively the same as _inflater.getTotalIn(),
+     * but must be cached because Inflater's behaviour is undefined
+     * after end() has been called on it, which is done when this
+     * connection is closed.
+     */
+    private volatile long _compressedBytesReceived;
 
     /** The possibly non-null VendorMessagePayload which describes what
      *  VendorMessages the guy on the other side of this connection supports.
@@ -60,6 +125,8 @@ public class Connection {
      * asynchronously before initialize() completes.  Note that the 
      * connection may have been remotely closed even if _closed==true.  
      * Protected (instead of private) for testing purposes only.
+     * This also protects us from calling methods on the Inflater/Deflater
+     * objects after end() has been called on them.
      */
     protected volatile boolean _closed=false;
 
@@ -73,6 +140,12 @@ public class Connection {
      */
 	private HandshakeResponse _headers = 
         HandshakeResponse.createEmptyResponse();
+        
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for written connection headers.
+     */
+	private HandshakeResponse _headersWritten = 
+        HandshakeResponse.createEmptyResponse();        
 
     /** For outgoing Gnutella 0.6 connections, the properties written
      *  after "GNUTELLA CONNECT".  Null otherwise. */
@@ -137,6 +210,13 @@ public class Connection {
      * The "soft max" ttl to use for this connection.
      */
     private byte _softMax;
+    
+    /**
+     * Cache the 'connection closed' exception, so we have to allocate
+     * one for every closed connection.
+     */
+    protected static final IOException CONNECTION_CLOSED =
+        new IOException("connection closed");
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -279,7 +359,7 @@ public class Connection {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
-            throw new IOException("socket is closed");
+            throw CONNECTION_CLOSED;
         } 
         
         // Check to see if this is an attempt to connect to ourselves
@@ -320,7 +400,8 @@ public class Connection {
             else
                 initializeIncoming();
 
-            _headers = HandshakeResponse.createResponse(HEADERS_READ);            
+            _headers = HandshakeResponse.createResponse(HEADERS_READ);
+            _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -332,6 +413,23 @@ public class Connection {
                 _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
             } else {
                 _softMax = ConnectionSettings.SOFT_MAX.getValue();
+            }
+            
+            //wrap the streams with inflater/deflater
+            // These calls must be delayed until absolutely necessary (here)
+            // because the native construction for Deflater & Inflater 
+            // allocate buffers outside of Java's memory heap, preventing 
+            // Java from fully knowing when/how to GC.  The call to end()
+            // (done explicitly in the close() method of this class, and
+            //  implicitly in the finalization of the Deflater & Inflater)
+            // releases these buffers.
+            if(isWriteDeflated()) {
+                _deflater = new Deflater();
+                _out = new CompressingOutputStream(_out, _deflater);
+            }            
+            if(isReadDeflated()) {
+                _inflater = new Inflater();
+                _in = new UncompressingInputStream(_in, _inflater);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -645,6 +743,10 @@ public class Connection {
 
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
+		if(!CommonUtils.isJava118()) {
+			BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
+			    bytes.length);
+        }        
         _out.write(bytes);
         _out.flush();
     }
@@ -684,6 +786,10 @@ public class Connection {
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
+			if(!CommonUtils.isJava118()) {
+				BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
+				    line.length());
+            }
             return line;
         } finally {
             //Restore socket timeout.
@@ -691,18 +797,25 @@ public class Connection {
         }
     }
 
-    /** Returns the stream to use for writing to s.  By default this is a
-     *  BufferedOutputStream.  Subclasses may override to decorate the
-     *  stream. */
+    /**
+     * Returns the stream to use for writing to s.
+     * By default this is a BufferedOutputStream.
+     * Subclasses may override to decorate the stream.
+     */
     protected OutputStream getOutputStream()  throws IOException {
         return new BufferedOutputStream(_socket.getOutputStream());
     }
 
-    /** Returns the stream to use for reading from s.  By default this is a
-     *  BufferedInputStream.  Subclasses may override to decorate the stream. */
+    /**
+     * Returns the stream to use for reading from s.
+     * By default this is a BufferedInputStream.
+     * Subclasses may override to decorate the stream.
+     */
     protected InputStream getInputStream() throws IOException {
         return new BufferedInputStream(_socket.getInputStream());
-    }
+    }    
+    
+    
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -730,12 +843,13 @@ public class Connection {
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
         //that Message.read may still throw IOException below.
+        //See note on _closed for more information.
         if (_closed)
-            throw new IOException("connection closed");
+            throw CONNECTION_CLOSED;
 
         Message m = null;
         while (m == null) {
-            m = Message.read(_in, HEADER_BUF, _softMax);
+            m = readAndUpdateStatistics();
         }
         return m;
     }
@@ -755,13 +869,13 @@ public class Connection {
 		throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
-            throw new IOException("connection closed");
+            throw CONNECTION_CLOSED;
 
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {
-            Message m = Message.read(_in, HEADER_BUF, _softMax);
+            Message m = readAndUpdateStatistics();
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
@@ -769,6 +883,40 @@ public class Connection {
         } finally {
             _socket.setSoTimeout(oldTimeout);
         }
+    }
+    
+    /**
+     * Reads a message from the network and updates the appropriate statistics.
+     */
+    private Message readAndUpdateStatistics()
+      throws IOException, BadPacketException {
+        int pCompressed = 0, pUncompressed = 0;
+        if(isReadDeflated()) {
+            pCompressed = _inflater.getTotalIn();
+            pUncompressed = _inflater.getTotalOut();
+        }
+        
+        // DO THE ACTUAL READ
+        Message m = Message.read(_in, HEADER_BUF, _softMax);
+        
+        // _bytesReceived must be set differently
+        // when compressed because the inflater will
+        // read more input than a single message,
+        // making it appear as if the deflated input
+        // was actually larger.
+        if( isReadDeflated() ) {
+            _compressedBytesReceived = _inflater.getTotalIn();
+            _bytesReceived = _inflater.getTotalOut();
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalOut() - pUncompressed));
+                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalIn() - pCompressed));
+            }            
+        } else if(m != null) {
+            _bytesReceived += m.getTotalLength();
+        }        
+        return m;
     }
 
     /**
@@ -783,14 +931,114 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        if ( isWriteDeflated() ) {
+            priorUncompressed = _deflater.getTotalIn();
+            priorCompressed = _deflater.getTotalOut();
+        }
+        
         m.write(_out);
+        updateWriteStatistics(m, priorUncompressed, priorCompressed);
     }
 
     /**
      * Flushes any buffered messages sent through the send method.
      */
     public void flush() throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        if ( isWriteDeflated() ) {
+            priorUncompressed = _deflater.getTotalIn();
+            priorCompressed = _deflater.getTotalOut();
+        }        
         _out.flush();
+        // we must update the write statistics again,
+        // because flushing forces the deflater to deflate.
+        updateWriteStatistics(null, priorUncompressed, priorCompressed);
+    }
+    
+    /**
+     * Updates the write statistics.
+     * @param m the possibly null message to add to the bytes sent
+     * @param pUn the prior uncompressed traffic, used for adding to stats
+     * @param pComp the prior compressed traffic, used for adding to stats
+     */
+    private void updateWriteStatistics(Message m, long pUn, long pComp) {
+        if( m != null )
+            _bytesSent += m.getTotalLength();
+        if(!_closed && isWriteDeflated()) {
+            _compressedBytesSent = _deflater.getTotalOut();
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalIn() - pUn));
+                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalOut() - pComp));
+            }
+        }
+    }               
+    
+    /**
+     * Returns the number of bytes sent on this connection.
+     * If the outgoing stream is compressed, the return value indicates
+     * the compressed number of bytes sent.
+     */
+    public long getBytesSent() {
+        if(isWriteDeflated())
+            return _compressedBytesSent;
+        else            
+            return _bytesSent;
+    }
+    
+    /**
+     * Returns the number of uncompressed bytes sent on this connection.
+     * If the outgoing stream is not compressed, this is effectively the same
+     * as calling getBytesSent()
+     */
+    public long getUncompressedBytesSent() {
+        return _bytesSent;
+    }
+    
+    /** 
+     * Returns the number of bytes received on this connection.
+     * If the incoming stream is compressed, the return value indicates
+     * the number of compressed bytes received.
+     */
+    public long getBytesReceived() {
+        if(isReadDeflated())
+            return _compressedBytesReceived;
+        else
+            return _bytesReceived;
+    }
+    
+    /**
+     * Returns the number of uncompressed bytes read on this connection.
+     * If the incoming stream is not compressed, this is effectively the same
+     * as calling getBytesReceived()
+     */
+    public long getUncompressedBytesReceived() {
+        return _bytesReceived;
+    }
+    
+    /**
+     * Returns the percentage saved through compressing the outgoing data.
+     * The value may be slightly off until the output stream is flushed,
+     * because the value of the compressed bytes is not calculated until
+     * then.
+     */
+    public float getSentSavedFromCompression() {
+        if( !isWriteDeflated() || _bytesSent == 0 ) return 0;
+        return 1-((float)_compressedBytesSent/(float)_bytesSent);
+    }
+    
+    /**
+     * Returns the percentage saved from having the incoming data compressed.
+     */
+    public float getReadSavedFromCompression() {
+        if( !isReadDeflated() || _bytesReceived == 0 ) return 0;
+        return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
     }
 
     /** Returns the host set at construction */
@@ -966,6 +1214,19 @@ public class Connection {
             } catch(IOException e) {}
         }
         
+        // tell the inflater & deflater that we're done with them.
+        // These calls are dangerous, because we don't know that the
+        // stream isn't currently deflating or inflating, and the access
+        // to the deflater/inflater is not synchronized (it shouldn't be).
+        // This can lead to NPE's popping up in unexpected places.
+        // Fortunately, the calls aren't explicitly necessary because
+        // when the deflater/inflaters are garbage-collected they will call
+        // end for us.
+        //if( _deflater != null )
+        //    _deflater.end();
+        //if( _inflater != null )
+        //    _inflater.end();
+        
        // closing _in (and possibly _out too) can cause NPE's
        // in Message.read (and possibly other places),
        // because BufferedInputStream can't handle
@@ -996,6 +1257,24 @@ public class Connection {
     // inherit doc comment
     public boolean isGoodConnection() {
         return _headers.isGoodConnection();
+    }
+    
+    /**
+     * Returns true if the outgoing stream is deflated.
+     *
+     * @return true if the outgoing stream is deflated.
+     */
+    public boolean isWriteDeflated() {
+        return _headersWritten.isDeflateEnabled();
+    }
+    
+    /**
+     * Returns true if the incoming stream is deflated.
+     *
+     * @return true if the incoming stream is deflated.
+     */
+    public boolean isReadDeflated() {
+        return _headers.isDeflateEnabled();
     }
 
 	/**

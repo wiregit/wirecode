@@ -76,6 +76,7 @@ public abstract class AbstractStatistic implements Statistic {
 
 	// inherit doc comment
 	public double getAverage() {
+	    if(_totalStatsRecorded == 0) return 0;
 		return _total/_totalStatsRecorded;
 	}
 

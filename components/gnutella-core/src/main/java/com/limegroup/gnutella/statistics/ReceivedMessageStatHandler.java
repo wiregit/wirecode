@@ -26,7 +26,7 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   Statistic limeByteStat,
 									   String fileName) {
 		super(numberStat, byteStat, limeNumberStat, limeByteStat,
-			  BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH, fileName);
+			  BandwidthStat.GNUTELLA_MESSAGE_DOWNSTREAM_BANDWIDTH, fileName);
 	}
 	
 

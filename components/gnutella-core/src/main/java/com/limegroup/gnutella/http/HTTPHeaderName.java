@@ -66,6 +66,18 @@ public class HTTPHeaderName {
 	 */
 	public static final HTTPHeaderName CONTENT_LENGTH =
 		new HTTPHeaderName("Content-Length");
+		
+    /**
+     * Header for specifying the type of encoding we'll accept.
+     */
+    public static final HTTPHeaderName ACCEPT_ENCODING =
+        new HTTPHeaderName("Accept-Encoding");
+
+    /**
+     * Header for specifying the type of encoding we'll send.
+     */
+    public static final HTTPHeaderName CONTENT_ENCODING =
+        new HTTPHeaderName("Content-Encoding");
 
 	/**
 	 * Response header for specifying the server name and version.

@@ -32,6 +32,16 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    /**
+     * Always assume we're encoding & accept it.  This simplifies the testing.
+     * For further tests on whether how handshaking works in response to these
+     * settings, see HandshakeResponseTest.
+     */
+    public void setUp() {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }
 
     /**
      * Tests the method for responding to outgoing connection attempts.
@@ -60,10 +70,11 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         // we shouldn't send any response header in this case
         // we should not accept any incoming connections
         assertTrue("should have been accepted", hr.isAccepted());
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have deflate header", 1, hr.props().size());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
 
 
-        // 2) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: true
+        // 2) Ultrapeer-Leaf::X-Ultrapeer-Needed: true
         props = new UltrapeerHeaders("40.0.9.8");
 
         // this should be redundant, but make sure it's handled the way
@@ -76,16 +87,18 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
         assertTrue("should have been accepted", hr.isAccepted());
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have deflate header", 1, hr.props().size());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
 
-        // 3) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: false
+        // 3) Ultrapeer-Leaf::X-Ultrapeer-Needed: false
         props = new UltrapeerHeaders("78.9.3.0");
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         
         headers = HandshakeResponse.createResponse(props);        
         hr = responder.respondUnauthenticated(headers, true);
         assertTrue("should have been accepted", hr.isAccepted());
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have deflate header", 1, hr.props().size());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
         ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
     }
 
@@ -101,7 +114,8 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         LeafHandshakeResponder responder = 
             new LeafHandshakeResponder("23.3.4.5");
 
-        // Leaf-Ultrapeer  --> leaf slots available
+        // Leaf-Leaf  --> never allowed, regardless of slots
+        UltrapeerSettings.MAX_LEAVES.setValue(1);
         Properties props = new LeafHeaders("78.9.3.0");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);  
         HandshakeResponse hr = responder.respondUnauthenticated(headers, true);
@@ -111,7 +125,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
                    !hr.isAccepted());
         assertEquals("should not have any headers", 0, hr.props().size());
 
-        
+        // Leaf-Leaf --> never allowed, but check anyway with no slots
         UltrapeerSettings.MAX_LEAVES.setValue(0);
         hr = responder.respondUnauthenticated(headers, true);
         assertTrue("should not have accepted the connection", 
@@ -145,6 +159,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         assertTrue("should accept incoming connections as a leaf -- "+
                    "this could change in the future!",
                    hr.isAccepted());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
     }
 
     /**
@@ -168,6 +183,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
                    "we don't know our status yet"+
                    hr.getStatusLine(), 
                    hr.isAccepted());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
     }
 
 }

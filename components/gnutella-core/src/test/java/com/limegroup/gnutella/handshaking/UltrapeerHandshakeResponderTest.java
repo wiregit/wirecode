@@ -32,6 +32,16 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    /**
+     * Always assume we're encoding & accept it.  This simplifies the testing.
+     * For further tests on whether how handshaking works in response to these
+     * settings, see HandshakeResponseTest.
+     */    
+    public void setUp() {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }    
 
     /**
      * Tests the method for responding to outgoing connection attempts.
@@ -58,7 +68,8 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
         assertTrue("should be accepted", hr.isAccepted());
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have deflate header", 1, hr.props().size());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
 
 
         // 2) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: true
@@ -74,8 +85,8 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
         assertTrue("should be accepted", hr.isAccepted());
-
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have deflate header", 1, hr.props().size());
+        assertTrue("should be deflated", hr.isDeflateEnabled());
 
         // 3) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: false
         props = new UltrapeerHeaders("78.9.3.0");
@@ -86,7 +97,9 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertTrue("should not be an Ultrapeer", !hr.isUltrapeer());
         assertTrue("should be becoming an leaf", hr.isLeaf());
         assertTrue("should be accepted", hr.isAccepted());
-        assertEquals("should only have one header", 1, hr.props().size());
+        assertEquals("should have two headers", 2, hr.props().size());
+        assertTrue("should be deflating",
+                hr.isDeflateEnabled());
         ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
     }
 
@@ -107,7 +120,9 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         assertTrue("should have returned that we accepted the connection", 
                    hr.isAccepted());
-        assertEquals("should not have any headers", 0, hr.props().size());
+        assertEquals("should only have one header", 1, hr.props().size());
+        assertTrue("should deflate to leaf (may change)",
+                    hr.isDeflateEnabled());
 
         
         UltrapeerSettings.MAX_LEAVES.setValue(0);
@@ -144,6 +159,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());
         assertTrue("should tell the connecting Ultrapeer to become a leaf", 
                    hr.hasLeafGuidance());
+        assertTrue("should be deflated (may change)", hr.isDeflateEnabled());
 
         //  2) check to make sure that Ultrapeers are accepted as 
         //     Ultrapeer connections when we have enough leaves -- create this
@@ -155,6 +171,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
                    !hr.hasLeafGuidance());
         assertTrue("should still be accepted as an Ultrapeer",
                    hr.isAccepted());
+        assertTrue("should be deflating to leaf", hr.isDeflateEnabled());
         UltrapeerSettings.MAX_LEAVES.revertToDefault();
         ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
     }
@@ -181,6 +198,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertTrue("should be high degree connection", hr.isHighDegreeConnection());
         assertTrue("should be an Ultrapeer query routing connection", 
                    hr.isUltrapeerQueryRoutingConnection());
+        assertTrue("should be deflating to leaf", hr.isDeflateEnabled());                   
 
         //  2) check to make sure that leaves are rejected with X-Try-Ultrapeer
         //     headers when we alread have enough leaves -- create this 

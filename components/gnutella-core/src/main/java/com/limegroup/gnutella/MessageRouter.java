@@ -674,7 +674,7 @@ public abstract class MessageRouter {
 																	  handler), 
 								 handler, counter);
 			}
-		} else if(request.getTTL() > 0 && !RouterService.isLeaf()) {
+		} else if(request.getTTL() > 0 && !RouterService.isShieldedLeaf()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
             if(handler.isGoodConnection()) {
@@ -1662,7 +1662,17 @@ public abstract class MessageRouter {
 
 			//..and send each piece.
 			//TODO2: use incremental and interleaved update
-			for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
+			
+			//If writing is deflated, then do not allow the message to be
+			//compressed.  This is because the message is going
+			//to be compressed as a part of the outgoing stream, anyway.
+			//Iterator iter=table.encode(qi.lastSent, !c.isWriteDeflated());
+			
+			// (We always want to allow deflation of the QRP tables. This
+			//  is because we don't want to potentially clutter the stream's
+			//  dictionary with rare data, and because we want better stats.)
+			Iterator iter=table.encode(qi.lastSent, true);
+			for (; iter.hasNext(); ) {  
 				RouteTableMessage m=(RouteTableMessage)iter.next();
 				c.send(m);
 			}

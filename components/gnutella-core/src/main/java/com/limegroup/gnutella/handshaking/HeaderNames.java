@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+
 /**
  * Provides names for the headers used in the gnutella connection handshake
  * @author Anurag Singla
@@ -71,6 +74,31 @@ public final class HeaderNames {
      * Header to indicate the version of dynamic querying in use.
      */
     public static final String X_DYNAMIC_QUERY = "X-Dynamic-Querying";
+    
+    /**
+     * Header for Content-Encoding. Useful because typing
+     * HTTPHeaderName.CONTENT_ENCODING.httpStringValue()
+     * in all handshaking classes is cumbersome.
+     */
+    public static final String CONTENT_ENCODING =
+        HTTPHeaderName.CONTENT_ENCODING.httpStringValue();
+        
+    /**
+     * Header for Accept-Encoding. Useful because typing
+     * HTTPHeaderName.ACCEPT_ENCODING.httpStringValue()
+     * in all handshaking classes is cumbersome.
+     */
+    public static final String ACCEPT_ENCODING =
+        HTTPHeaderName.ACCEPT_ENCODING.httpStringValue();
+        
+    /**
+     * The value for deflate -- the type of encoding we can read & write.
+     * Useful because typing
+     * ConstantHTTPHeaderValue.DEFLATE_VALUE.httpStringValue()
+     * in all handshaking classes is cumbersome.
+     */
+    public static final String DEFLATE_VALUE =
+        ConstantHTTPHeaderValue.DEFLATE_VALUE.httpStringValue();
 
     /** 
      * The true/false values for some headers.  Note that these are not the only

@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.util.StringTokenizer;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -146,6 +148,12 @@ public final class HandshakeResponse {
      * X-Ultrapeer: false in it's handshake headers.
      */
     private final boolean LEAF;
+    
+    /**
+     * Cached value for whether or not the connection reported
+     * Content-Encoding: deflate
+     */
+    private final boolean DEFLATE_ENCODED;
 
 
     /**
@@ -182,6 +190,8 @@ public final class HandshakeResponse {
 
          ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
          LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
+         DEFLATE_ENCODED = isStringValue(HEADERS,
+            HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
      }
    
     /**
@@ -527,7 +537,29 @@ public final class HandshakeResponse {
         return GOOD;
     }    
 
-
+    /**
+     * Returns whether or not this connnection is encoded in deflate.
+     */
+    public boolean isDeflateEnabled() {
+        //this does NOT check the setting because we have already told the
+        //outgoing side we support encoding, and they're expecting us to use it
+        return DEFLATE_ENCODED;
+    }
+    
+    /**
+     * Returns whether or not this connection accepts deflate as an encoding.
+     */
+    public boolean isDeflateAccepted() {
+        //Note that we check the ENCODE_DEFLATE setting, and NOT the
+        //ACCEPT_DEFLATE setting.  This is a trick to prevent the
+        //HandshakeResponders from thinking they can encode
+        //the via deflate if we do not want to encode in deflate.
+        return ConnectionSettings.ENCODE_DEFLATE.getValue() &&
+            containsStringValue(HEADERS,    // the headers to look through
+                HeaderNames.ACCEPT_ENCODING,// the header to look for
+                HeaderNames.DEFLATE_VALUE); // the value to look for
+    }
+    
 	/**
 	 * Returns whether or not this connection supports query routing 
      * between Ultrapeers at 1 hop.
@@ -715,6 +747,49 @@ public final class HandshakeResponse {
         if(value == null) return false;        
         return value.equalsIgnoreCase("false");
     }
+    
+    /**
+     * Utility method for determing whether or not a given header
+     * is a given string value.  Case-insensitive.
+     *
+     * @param headers the headers to check
+     * @param headerName the headerName to look for
+     * @param headerValue the headerValue to check against
+     */
+    private static boolean isStringValue(Properties headers,
+      String headerName, String headerValue) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        return value.equalsIgnoreCase(headerValue);
+    }
+    
+    /**
+     * Utility method for determing whether or not a given header
+     * contains a given string value within a comma-delimited list.
+     * Case-insensitive.
+     *
+     * @param headers the headers to check
+     * @param headerName the headerName to look for
+     * @param headerValue the headerValue to check against
+     */
+    private static boolean containsStringValue(Properties headers,
+      String headerName, String headerValue) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+
+        //As a small optimization, we first check to see if the value
+        //by itself is what we want, so we don't have to create the
+        //StringTokenizer.
+        if(value.equalsIgnoreCase(headerValue))
+            return true;
+
+        StringTokenizer st = new StringTokenizer(value, ",");
+        while(st.hasMoreTokens()) {
+            if(st.nextToken().equalsIgnoreCase(headerValue))
+                return true;
+        }
+        return false;
+    }    
 
 
 
