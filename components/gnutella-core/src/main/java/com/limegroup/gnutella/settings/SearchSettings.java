@@ -22,12 +22,6 @@ public final class SearchSettings extends AbstractSettings {
 		CFG_FACTORY.createBooleanSetting("GUESS_ENABLED", true);
 
     /**
-     * The TTL for probe queries.
-     */
-    public static final ByteSetting PROBE_TTL =
-        CFG_FACTORY.createByteSetting("PROBE_TTL", (byte)2);
-
-    /**
      * Setting for the characters that are not allowed in search strings
      */
     public static final CharArraySetting ILLEGAL_CHARS =
