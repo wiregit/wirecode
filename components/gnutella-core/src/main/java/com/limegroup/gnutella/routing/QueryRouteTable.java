@@ -116,10 +116,33 @@ public class QueryRouteTable {
      *    @modifies this
      */
     public void addAll(QueryRouteTable qrt) {
-        Assert.that(this.table.length==qrt.table.length,
-                    "TODO2: table scaling not implemented.");
-        for (int i=0; i<table.length; i++) 
-            table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
+        //This algorithm scales between tables of different lengths and TTLs.
+        //Refer to the query routing paper for a full explanation.  If
+        //performance is a problem, it's possible to special-case the algorithm
+        //for when both tables have the same length and infinity:
+        //
+        //          for (int i=0; i<table.length; i++)
+        //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
+
+        int m=qrt.table.length;
+        int m2=this.table.length;
+        double scale=((double)m2)/((double)m);   //using float can cause round-off!
+        for (int i=0; i<m; i++) {
+            int low=(int)Math.floor(i*scale);
+            int high=(int)Math.ceil((i+1)*scale);
+            Assert.that(low>=0 && low<m2,
+                        "Low value "+low+" for "+i+" incompatible with "+m2);
+            Assert.that(high>=0 && high<=m2,
+                        "High value "+high+" for "+i+" incompatible with "+m2);
+            for (int i2=low; i2<high; i2++) {
+                byte other;
+                if (qrt.table[i]>=qrt.infinity)
+                    other=this.infinity;
+                else
+                    other=(byte)(qrt.table[i]+1);
+                table[i2]=(byte)Math.min(table[i2], other);
+            }
+        }
     }
 
     /** Returns true if this has been fully patched following a reset. */
@@ -322,8 +345,8 @@ public class QueryRouteTable {
             gos.close();                      //flushes bytes
             return baos.toByteArray();
         } catch (IOException e) {
-            //TODO: this should REALLY never happen because no devices are
-            //involved.  But could we propogate it up.
+            //This should REALLY never happen because no devices are involved.
+            //But could we propogate it up.
             Assert.that(false, "Couldn't write to byte stream");
             return null;
         }
@@ -401,11 +424,6 @@ public class QueryRouteTable {
         byte[] big={(byte)1, (byte)7, (byte)-1, (byte)-8};
         byte[] small={(byte)0x17, (byte)0xF8};
         Assert.that(Arrays.equals(halve(big), small));
-        {
-            byte[] out=unhalve(small);
-            for (int i=0; i<out.length; i++)
-                System.out.println(i+": "+out[i]);
-        }
         Assert.that(Arrays.equals(unhalve(small), big));
 
         QueryRouteTable qrt=new QueryRouteTable(1000, (byte)7);
@@ -498,5 +516,64 @@ public class QueryRouteTable {
                     ==PatchTableMessage.COMPRESSOR_NONE);
         }
         Assert.that(qrt2.equals(qrt));
+
+        //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
+        //added to everything!
+        qrt=new QueryRouteTable(4, (byte)7);  // 1 4 5 X ==> 2 6
+        qrt2=new QueryRouteTable(2, (byte)7);
+        qrt.table[0]=(byte)1;
+        qrt.table[1]=(byte)4;
+        qrt.table[2]=(byte)5;
+        qrt.table[3]=qrt.infinity;
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.table[0]==(byte)2, "Got: "+qrt2.table[0]);
+        Assert.that(qrt2.table[1]==(byte)6, "Got: "+qrt2.table[1]);
+
+        //This also tests tables with different TTL problem.  (The 6 is qrt
+        //is interepreted as infinity in qrt2, not a 7.)
+        qrt=new QueryRouteTable(2, (byte)6);  // 1 X ==> 2 2 X X
+        qrt2=new QueryRouteTable(4, (byte)8);
+        qrt.table[0]=(byte)1;
+        qrt.table[1]=qrt.infinity;
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.table[0]==(byte)2);
+        Assert.that(qrt2.table[1]==(byte)2);
+        Assert.that(qrt2.table[2]>=qrt.infinity);
+        Assert.that(qrt2.table[3]>=qrt.infinity);
+
+        qrt=new QueryRouteTable(4, (byte)8);  // 1 2 4 X ==> 2 3 5
+        qrt2=new QueryRouteTable(3, (byte)7);
+        qrt.table[0]=(byte)1;
+        qrt.table[1]=(byte)2;
+        qrt.table[2]=(byte)4;
+        qrt.table[3]=qrt.infinity;
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.table[0]==(byte)2);
+        Assert.that(qrt2.table[1]==(byte)3);
+        Assert.that(qrt2.table[2]==(byte)5);
+
+        qrt=new QueryRouteTable(3, (byte)7);  // 1 4 X ==> 2 2 5 X
+        qrt2=new QueryRouteTable(4, (byte)7);
+        qrt.table[0]=(byte)1;
+        qrt.table[1]=(byte)4;
+        qrt.table[2]=qrt.infinity;
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.table[0]==(byte)2);
+        Assert.that(qrt2.table[1]==(byte)2, "Got: "+qrt2.table[1]);
+        Assert.that(qrt2.table[2]==(byte)5);
+        Assert.that(qrt2.table[3]==qrt.infinity);
+
+        //5b. Black-box test for addAll.
+        qrt=new QueryRouteTable(100, (byte)7);
+        qrt.add("good book");
+        qrt.add("bad", 3);   //{good/1, book/1, bad/3}
+        qrt2=new QueryRouteTable(213, (byte)7);
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
+        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
+        qrt2=new QueryRouteTable(59, (byte)7);
+        qrt2.addAll(qrt);
+        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
+        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
     }
 }
