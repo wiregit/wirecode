@@ -25,15 +25,15 @@ public class LimitReachedUploadState implements HTTPMessage {
 
     /**
      * Number of seconds the remote host should wait before retrying in
-     * case we don't have any alt-locs left to send. (5 minutes)
+     * case we don't have any alt-locs left to send. (20 minutes)
      */
-    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 5);
+    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 20);
 
     /**
      * Number of seconds the remote host should wait before retrying in
-     * case we still have alt-locs left to send. (1 minute)
+     * case we still have alt-locs left to send. (15 minute)
      */
-    private static final String NORMAL_RETRY_AFTER = "" + (60 * 1);
+    private static final String NORMAL_RETRY_AFTER = "" + (60 * 15);
 
 	/**
 	 * The error message to send in the message body.
