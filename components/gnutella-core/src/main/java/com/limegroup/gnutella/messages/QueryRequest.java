@@ -442,12 +442,24 @@ public class QueryRequest extends Message implements Serializable{
      * @param guid the desired guid of the query.
      */
     public static QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl) {
+        return createWhatIsNewQuery(guid, ttl, null);
+    }
+   
+
+    /**
+     * Creates a new 'What is new'? query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
+     */
+    public static QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
+                                                    MediaType type) {
         if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Message.N_UNKNOWN, false, 
-                                WHAT_IS_NEW_GGEP_VALUE, false, 0);
+                                WHAT_IS_NEW_GGEP_VALUE, false, 
+                                getMetaFlag(type));
     }
    
 
@@ -457,12 +469,23 @@ public class QueryRequest extends Message implements Serializable{
      * @param guid the desired guid of the query.
      */
     public static QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl) {
+        return createWhatIsNewOOBQuery(guid, ttl, null);
+    }
+   
+
+    /**
+     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
+     */
+    public static QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
+                                                       MediaType type) {
         if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Message.N_UNKNOWN, true, WHAT_IS_NEW_GGEP_VALUE,
-                                false, 0);
+                                false, getMetaFlag(type));
     }
    
 
