@@ -13,6 +13,11 @@ public interface Crawler {
 	public static final int TTL=4;
 	
 	/**
+	 * the number of desired UP results
+	 */
+	public static final int MAX_RESULTS=32;
+	
+	/**
 	 * starts a blocking crawl at the default depth.  
 	 * @return Collection of Endpoints that represent the results of the crawl.
 	 * @throws Exception something goes wrong with the crawl.
@@ -28,15 +33,9 @@ public interface Crawler {
 	public Collection crawl(int ttl) throws Exception;
 	
 	/**
-	 * starts an async crawl at default depth, notifying the provided callback for events
-	 * @param callback the class that listens to the events.
+	 * sets the number of desired crawl results.  If called asynchronously 
+	 * and the crawl has already generated enough results the crawl will end.
+	 * @param number the number of desired results.
 	 */
-	public void crawlAsync(CrawlerClient callback);
-	
-	/**
-	 * starts an async crawl at the specified depth,  notifying the provided callback for events
-	 * @param callback the class that listens to the events.
-	 * @param depth the depth to do the crawl in ttl
-	 */
-	public void crawlAsync(CrawlerClient callback, int depth);
+	public void setDesiredResults(int number);
 }
