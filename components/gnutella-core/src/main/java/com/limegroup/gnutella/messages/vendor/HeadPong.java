@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -91,10 +92,28 @@ public class HeadPong extends VendorMessage {
 	private static FileManager _fileManager
 		= RouterService.getFileManager();
 	
+	///// some constants related to keeping the size of the 
+	///// pong within non-defragmentable limits
+	
 	/**
 	 * try to make packets less than this size
 	 */
 	private static final int PACKET_SIZE = 580;
+	
+	/**
+	 * how well do we think ranges will compress
+	 */
+	private static final float RANGE_COMPRESSION = 0.6f;
+	
+	/**
+	 * how well do we think altlocs will compress
+	 */
+	private static final float ALTLOC_COMPRESSION = 0.7f;
+	
+	/**
+	 * how well do we think pushlocs will compress
+	 */
+	private static final float PUSHLOC_COMPRESSION = 0.8f;
 	
 	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 
@@ -295,9 +314,6 @@ public class HeadPong extends VendorMessage {
 		byte queueStatus;
 		URN urn = ping.getUrn();
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
-		boolean didNotSendAltLocs=false;
-		boolean didNotSendPushAltLocs = false;
-		boolean didNotSendRanges = false;
 		
 		try {
     		byte features = ping.getFeatures();
@@ -357,10 +373,14 @@ public class HeadPong extends VendorMessage {
     			LOG.debug("our queue status is "+queueStatus);
     		
     		//create the GGEP block
-    		GGEP ggep = new GGEP(true);
+    		CountingGGEP ggep = new CountingGGEP(true);
     		
     		//put in our supported features with metadata
     		GGEPHeadConstants.addDefaultGGEPProperties(ggep);
+    		
+    		//if the ping requests ranges, add them
+    		if (ping.requestsRanges())
+    		    writeRanges(ggep,desc);
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -596,29 +616,21 @@ public class HeadPong extends VendorMessage {
 		return ret;
 	}
 	
-	
-	/**
-	 * @param daos the output stream to write the ranges to
-	 * @return if they were written or not.
-	 */
-	private static final boolean writeRanges(CountingOutputStream caos,
-			FileDesc desc) throws IOException{
-		DataOutputStream daos = new DataOutputStream(caos);
-		LOG.debug("adding ranges to pong");
+	private static final void writeRanges(CountingGGEP dest, FileDesc desc){
+	    LOG.debug("adding ranges to pong");
 		IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
 		byte [] ranges =ifd.getRangesAsByte();
 		
-		//write the ranges only if they will fit in the packet
-		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
-			LOG.debug("added ranges");
-			daos.writeShort((short)ranges.length);
-			caos.write(ranges);
-			return true;
-		} 
-		else { //the ranges will not fit - say we didn't send them.
-			LOG.debug("ranges will not fit :(");
-			return false;
-		}
+		// if we estimate we won't be able to fit the ranges, don't put them in.
+		if (dest.getEstimatedSize()+3+ ranges.length/RANGE_COMPRESSION > PACKET_SIZE)
+		    return;
+		
+		// write out the format in the first byte
+		byte []toZip = new byte[ranges.length+3];
+		toZip[0] = GGEPHeadConstants.RANGE_LIST;
+		ByteOrder.short2leb((short)ranges.length,toZip,1);
+		System.arraycopy(ranges,0,toZip,3,ranges.length);
+		dest.putAndCompress((char)GGEPHeadConstants.RANGES + GGEPHeadConstants.DATA,toZip);
 	}
 	
 	private static final boolean writePushLocs(CountingOutputStream caos,
