@@ -103,6 +103,7 @@ public class HTTPDownloader implements Runnable {
   	}
 	catch (NoRouteToHostException e) {
 	    System.out.println("No route to host");
+	    _callback.error(ActivityCallback.ERROR_13);
 	    return;
 	}
   	catch (IOException e) {
