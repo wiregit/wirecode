@@ -47,7 +47,7 @@ public class KeywordFilter extends SpamFilter {
 	    while (lexer.hasMoreTokens()) {
 		String word=lexer.nextToken();
 		if (ban.contains(word.toLowerCase(locale))) {
-		    System.out.println("Banned \""+query+"\" because of \""+word+"\"");
+		    //System.out.println("Banned \""+query+"\" because of \""+word+"\"");
 		    ok=false;
 		    break;
 		}
