@@ -443,8 +443,10 @@ public abstract class MessageRouter {
         //    2) If it isn't, put it in the route table but no need to setTTL
 
         // we msg.hop() before we get here....
+        // hops may be 1 or 2 because we may be probing with a leaf query....
         final boolean isProbeQuery = 
-            ((request.getTTL() == 0) && (request.getHops() == 1));
+            ((request.getTTL() == 0) && 
+             ((request.getHops() == 1) || (request.getHops() == 2)));
 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
