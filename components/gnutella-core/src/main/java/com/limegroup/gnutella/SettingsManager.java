@@ -68,7 +68,6 @@ public final class SettingsManager {
     private final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     private final int     DEFAULT_CONNECTION_SPEED          = 56;
-    private final int     DEFAULT_UPLOAD_SPEED   = 100;
     /** Default limit for the number of searches */
     private final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
@@ -268,7 +267,6 @@ public final class SettingsManager {
         = "PERSISTENT_HTTP_CONNECTION_TIMEOUT";
     private final String PORT                  = "PORT";
     private final String CONNECTION_SPEED      = "CONNECTION_SPEED";
-    private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
     private final String SEARCH_LIMIT          = "SEARCH_LIMIT";
     private final String CLIENT_ID             = "CLIENT_ID";
     private final String MAX_INCOMING_CONNECTIONS
@@ -439,7 +437,6 @@ public final class SettingsManager {
     private volatile String   _hostList;
     private volatile int      _port;
     private volatile int      _connectionSpeed;
-    private volatile int      _uploadSpeed;
     private volatile byte     _searchLimit;
     private volatile String   _clientID;
     private volatile File     _saveDirectory;
@@ -671,9 +668,6 @@ public final class SettingsManager {
                 }
                 else if(key.equals(CONNECTION_SPEED)) {
                     setConnectionSpeed(Integer.parseInt(p));
-                }
-                else if(key.equals(UPLOAD_SPEED)) {
-                    setUploadSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(SEARCH_LIMIT)) {
                     setSearchLimit(Byte.parseByte(p));
@@ -995,7 +989,6 @@ public final class SettingsManager {
             DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT);
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_CONNECTION_SPEED);
-        setUploadSpeed(DEFAULT_UPLOAD_SPEED);
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
         setBannedIps(DEFAULT_BLACK_LISTED_IP_ADDRESSES);
@@ -1173,8 +1166,6 @@ public final class SettingsManager {
     /** Returns the client's connection speed in kilobits/sec
      *  (not kilobytes/sec) */
     public int getConnectionSpeed(){return _connectionSpeed;}
-
-    public int getUploadSpeed() { return _uploadSpeed; }
 
     /** Returns the client's search speed */
     public byte getSearchLimit(){return _searchLimit;}
@@ -2172,21 +2163,6 @@ public final class SettingsManager {
         }
     }
 
-    /**
-	 * Sets the percentage of total bandwidth (as given by
-     * CONNECTION_SPEED) to use for uploads.  This is shared
-     * equally among all uploads.  Throws IllegalArgumentException
-     * if speed<0 or speed>100.
-	 */
-    public void setUploadSpeed(int speed) {
-        if (speed<0 || speed>100)
-            throw new IllegalArgumentException();
-        else {
-            _uploadSpeed = speed;
-            String s = Integer.toString(_uploadSpeed);
-            PROPS.put(UPLOAD_SPEED, s);
-        }
-    }
 
 	/**
 	 * Sets the string for making gnutella connections.
