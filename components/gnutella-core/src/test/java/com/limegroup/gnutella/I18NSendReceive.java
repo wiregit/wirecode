@@ -6,6 +6,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.xml.*;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -21,14 +22,18 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
 
     //test file names that should be in the shared dir and returned as
     //replies
-
     private static final String FILE_0 = "hello_0.txt";
     private static final String FILE_1 = "\uff8a\uff9b\uff70\u5143\u6c17\u3067\u3059\u304b\uff1f_\u30d5\u30a3\u30b7\u30e5_1.txt";
     private static final String FILE_2 = "\uff34\uff25\uff33\uff34\uff34\uff28\uff29\uff33\uff3f\uff26\uff29\uff2c\uff25\uff3f\uff2e\uff21\uff2d\uff25_2.txt";
     private static final String FILE_3 = "\u7206\u98a8\uff3ftestth\u00ccs_\uff27\uff2f_3.txt";
     private static final String FILE_4 = "t\u00e9stthis_\u334d_\uff2d\uff21\uff2c\uff23\uff2f\uff2d\u3000\uff38\uff3f\uff8f\uff99\uff7a\uff91_4.txt";
 
-    private static final String[] FILES = {FILE_0, FILE_1, FILE_2, FILE_3, FILE_4};
+    //these test file names are used for testing xml search
+    private static final String META_FILE_0 = "meta1.mpg";
+    private static final String META_FILE_1 = "\u30e1\u30bf\u60c5\u5831\u30c6\u30b9\u30c8.mpg";
+    private static final String META_FILE_2 = "\uff2d\uff25\uff34\uff21\u60c5\u5831\u30c6\u30b9\u30c8.mpg";
+
+    private static final String[] FILES = {FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, META_FILE_2};
 
     private static final String meter_j = "\u30e1\u30fc\u30c8\u30eb";
 
@@ -58,9 +63,10 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private static void setUpFiles() throws Exception {
-        for(int i = 0; i < 5; i++) {
+        
+        for(int i = 0; i < 8; i++) {
             File f = 
-                new File("com/limegroup/gnutella/testfiles/" + FILES[i]);
+                new File("com/limegroup/gnutella/" + FILES[i]);
             if(!f.exists()) {
                 f.createNewFile();
                 //make sure its not 0kb
@@ -72,6 +78,7 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
             }
             CommonUtils.copy(f, new File(_sharedDir, FILES[i]));
         }
+
     }
 
     public static void globalSetUp() throws Exception {
@@ -101,7 +108,7 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
 		try {Thread.sleep(5000);}catch(InterruptedException e) {}
 	}
 
-    /*
+    /**
      * tests that we get a query reply from a file with the normalized
      * name and also that we receive the actual file name in the queryreply
      */
@@ -109,9 +116,6 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
 
         QueryRequest qr;
         QueryReply rp;
-        List expectedReply = new ArrayList();
-        int size;
-
         //test random query 
         qr = QueryRequest.createQuery("asdfadf", (byte)2);
         CONN_1.send(qr);
@@ -121,6 +125,7 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("should not have received a QueryReply", !drain(CONN_1));
         drain(CONN_1);
 
+        List expectedReply = new ArrayList();
         //should find FILE_0
         expectedReply.add(FILE_0);
         sendCheckQuery(expectedReply, "hello");
@@ -146,30 +151,117 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
 
     }
 
-    //call if you expect a reply 
+    /**
+     * checks that files specified in List are all in the QueryReply created
+     * by the keyword 'q'
+     */
     private void sendCheckQuery(List expectedReply, String q) throws Exception {
+        sendCheckQueryXML(expectedReply, q, "");
+    }
+
+    /**
+     * checks that files specified in List are all in the QueryReply created
+     * by the keyword 'q' and the xml string 'xml'
+     */
+    private void sendCheckQueryXML(List expectedReply, String q, String xml) 
+        throws Exception {
         int size = expectedReply.size();
 
-        QueryRequest qr = QueryRequest.createQuery(q, (byte)2);
+        QueryRequest qr 
+            = QueryRequest.createQuery(q, xml);
         CONN_1.send(qr);
         CONN_1.flush();
-        
+
         QueryReply rp = getFirstQueryReply(CONN_1);
         
         assertTrue("we should of received a QueryReply", rp != null);
         assertEquals("should have " + size + " result(s)", 
                      size,
                      rp.getResultCount());
-
         for(Iterator iter = rp.getResults(); iter.hasNext(); ) {
             Response res = (Response)iter.next();
             assertTrue("QueryReply : " + res.getName() + " not expected",
                        expectedReply.remove(res.getName()));
+            //System.out.println(new String(rp.getXMLBytes(), "UTF-8"));
         }
 
         expectedReply.clear();
     }
+    
+    //params used for xml query test
+    private final String director1 = "thetestdirector";
+    private final String director2 = "\u30e9\u30a4\u30e0\u30ef\u30a4\u30e4\u30fc";
+    private final String studio = "\u30d6\u30ed\u30fc\u30c9\u30a6\u30a7\u30a4";
+    private final String studio2 = "\u30ab\u30ca\u30eb\u8857";
 
+    /**
+     * test that XML queries are sent and replies using the correct format
+     */
+    public void testSendReceiveXML() throws Exception {
+        drain(CONN_1);
+        setUpMetaData();
+
+        List expectedReply = new ArrayList();
+
+        expectedReply.add(META_FILE_0);
+        sendCheckQueryXML(expectedReply, director1,
+                          buildXMLString("director=\"" + director1 + "\""));
+        
+        expectedReply.add(META_FILE_1);
+        expectedReply.add(META_FILE_2);
+        sendCheckQueryXML(expectedReply, director2,
+                          buildXMLString("director=\"" + director2 + "\""));
+        
+        expectedReply.add(META_FILE_2);
+        sendCheckQueryXML(expectedReply, director2,
+                          buildXMLString("director=\"" 
+                                         + director2 
+                                         + "\" "
+                                         + "studio=\""
+                                         + studio2 
+                                         + "\""));
+    }
+    
+    /**
+     * adds metadata information to the test files
+     */
+    private void setUpMetaData() throws Exception {
+        addMetaData(META_FILE_0, "director=\"" + director1 + "\"");
+        addMetaData(META_FILE_1, 
+                    "director=\"" + director2 
+                    + "\" studio=\"" + studio + "\"");
+        addMetaData(META_FILE_2, 
+                    "director=\"" + director2 
+                    + "\" studio=\"" + studio2 + "\"");
+    }
+
+    /**
+     * add the metadata
+     */
+    private void addMetaData(String fname, String xmlstr) throws Exception {
+        FileManager fm = RouterService.getFileManager();
+        FileDesc fd = 
+            fm.getFileDescForFile(new File(_sharedDir, fname));
+        
+        LimeXMLDocument newDoc = 
+            new LimeXMLDocument(buildXMLString(xmlstr));
+        
+        SchemaReplyCollectionMapper map =
+            SchemaReplyCollectionMapper.instance();
+        String uri = newDoc.getSchemaURI();
+        LimeXMLReplyCollection collection = map.getReplyCollection(uri);
+        
+        Assert.that(collection != null, 
+                    "Cant add doc to nonexistent collection");
+
+        collection.addReply(fd, newDoc);
+        assertTrue("error commiting xml", collection.write());
+    }
+    
+    // build xml string for video
+    private String buildXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video " + keyname + "></video></videos>";
+    }
 
 }
 
