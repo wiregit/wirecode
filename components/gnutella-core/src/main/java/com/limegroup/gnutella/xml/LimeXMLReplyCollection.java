@@ -418,11 +418,9 @@ public class LimeXMLReplyCollection{
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        Object[] output = ripMP3XML(mp3FileName, hash, doc);
-        if (((Boolean) output[0]).booleanValue()) 
-            // now we need to commit ID3 data to disk
-            mp3WriteState = commitID3Data(mp3FileName, hash,
-                                          (ID3Editor) output[1]);
+        ID3Editor commitWith = ripMP3XML(mp3FileName, hash, doc);
+        if (commitWith != null)  // commit to disk.
+            mp3WriteState = commitID3Data(mp3FileName, hash, commitWith);
         
         // write out the mainmap in serial form...
         wrote = write();
@@ -434,17 +432,12 @@ public class LimeXMLReplyCollection{
     }
 
     /**
-     * @return A Object[] of size 2.
-     *   First object is a boolean indicating whether you should commit this
-     *    ID3 to disk
-     *   Second is the ID3Editor to use when commiting.
+     * @return An ID3Editor to use when committing or
+     *  null if nothing should be editted.
      */
-    private Object[] ripMP3XML(String mp3File, URN hash, LimeXMLDocument doc) {
-        Object[] retObjs = new Object[2];
-        retObjs[0] = Boolean.FALSE;
-
+    private ID3Editor ripMP3XML(String mp3File, URN hash, LimeXMLDocument doc){
         if (!LimeXMLUtils.isMP3File(mp3File))
-            return retObjs;
+            return null;
 
         ID3Editor newValues = new ID3Editor();
         String newXML = null;
@@ -452,7 +445,7 @@ public class LimeXMLReplyCollection{
         try {
             newXML = doc.getXMLStringWithIdentifier();
         } catch(SchemaNotFoundException snfe) {
-            return retObjs;
+            return null;
         }       
         newValues.removeID3Tags(newXML);
         
@@ -462,27 +455,24 @@ public class LimeXMLReplyCollection{
         try {
             existingDoc = ID3Reader.readDocument(new File(mp3File));
         } catch(IOException e) {
-            return retObjs;
+            return null;
         }
         String existingXML = null;
         try {
             existingXML = existingDoc.getXMLStringWithIdentifier();
         } catch(SchemaNotFoundException snfe) {
-            return retObjs;
+            return null;
         }
         existing.removeID3Tags(existingXML);
         
         // The ID3 tag is the same as the document, don't do anything.
         if( newValues.equals(existing) ) {
             debug("tag read from disk is same as XML doc.");
-            return retObjs;
+            return null;
         }
-        
-        // Something will change ... let them know.
-        retObjs[0] = Boolean.TRUE;
-        retObjs[1] = newValues;
 
-        return retObjs;
+        // Commit using this ID3Editor ... 
+        return newValues;
     }
 
 
