@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
 import java.io.*;
 import com.sun.java.util.collections.Set;
 import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Comparable;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
@@ -483,10 +482,20 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation other = (AlternateLocation)obj;
-		return (URL.getHost().equals(other.URL.getHost()) &&
+		
+		if (other.URL ==null && other._pushAddress==null)
+			throw new IllegalArgumentException("invalid altloc passed as argument");
+		
+		if (URL!=null)
+			return (URL.getHost().equals(other.URL.getHost()) &&
                 URL.getPort() == other.URL.getPort() &&
                 SHA1_URN.equals(other.SHA1_URN) &&
                 URL.getProtocol().equals(other.URL.getProtocol()) );
+		else if (_pushAddress!=null)
+			return SHA1_URN.equals(other.SHA1_URN) &&
+				_pushAddress.equals(other._pushAddress);
+		else
+			throw new Error("an altloc had neither URL nor PE - bad.");
 	}
 
     /**
@@ -544,10 +553,16 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	public int hashCode() {
 		if(hashCode == 0) {
             int result = 17;
-            result = (37* result)+this.URL.getHost().hashCode();
-            result = (37* result)+this.URL.getPort();
-            result = (37* result)+this.SHA1_URN.hashCode();
-            result = (37* result)+this.URL.getProtocol().hashCode();
+            if (URL!=null) {
+            	result = (37* result)+this.URL.getHost().hashCode();
+            	result = (37* result)+this.URL.getPort();
+            	result = (37* result)+this.SHA1_URN.hashCode();
+            	result = (37* result)+this.URL.getProtocol().hashCode();
+            } 
+            else if (_pushAddress!=null)
+            	result = (37* result)+this._pushAddress.hashCode();
+            else 
+            	throw new Error("an altloc had neither an URL nor a PE - bad.");
             hashCode = result;
         }
 		return hashCode;

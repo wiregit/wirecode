@@ -678,7 +678,7 @@ public class RemoteFileDesc implements Serializable {
 
         if( (NetworkUtils.isPrivateAddress(_host) ||
              NetworkUtils.isPrivateAddress(other._host)) && 
-            !byteArrayEquals(_clientGUID, other._clientGUID) )
+            !_pushAddr.equals(other._pushAddr) )
             return false;
 
         if (_size != other._size)
@@ -723,6 +723,8 @@ public class RemoteFileDesc implements Serializable {
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
+            if (_pushAddr!=null)
+            	result = (37 * result)+_pushAddr.hashCode();
             _hashCode = result;
         }
 		return _hashCode;

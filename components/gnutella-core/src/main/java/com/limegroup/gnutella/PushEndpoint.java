@@ -39,6 +39,11 @@ public class PushEndpoint {
 	 */
 	private final int _size;
 	
+	/**
+	 * the hashcode of this object
+	 */
+	private final int _hashcode;
+	
 
 	/**
 	 * 
@@ -46,9 +51,26 @@ public class PushEndpoint {
 	 * @param proxies the push proxies for that host
 	 */
 	public PushEndpoint(byte [] guid, Set proxies) {
+		
 		_clientGUID=guid;
-		_proxies = Collections.unmodifiableSet(proxies);
+		
+		if (proxies!=null)
+			_proxies = Collections.unmodifiableSet(proxies);
+		else 
+			_proxies = DataUtils.EMPTY_SET;
+		
 		_size = HEADER_SIZE+_proxies.size()*PROXY_SIZE;
+		
+		//also calculate the hashcode in the constructor
+		
+		int hashcode = _clientGUID.hashCode() *15;
+		
+		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+			QueryReply.PushProxyContainer cur = 
+				(QueryReply.PushProxyContainer) iter.next();
+			hashcode = 37 *hashcode+cur.hashCode();
+		}
+		_hashcode = hashcode;
 	}
 	
 	/**
@@ -143,7 +165,24 @@ public class PushEndpoint {
 		return _proxies;
 	}
 	
-	public int getSize() {
+	/**
+	 * 
+	 * @return how many bytes this PE will use when serialized.
+	 */
+	public int getSizeBytes() {
 		return _size;
+	}
+	
+	public int hashCode() {
+		return _hashcode;
+	}
+	
+	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		if (!(other instanceof PushEndpoint))
+			return false;
+		
+		return hashCode() == other.hashCode();
 	}
 }
