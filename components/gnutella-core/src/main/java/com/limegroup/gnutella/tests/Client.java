@@ -150,7 +150,9 @@ private synchronized void reportTime(long time)
     timeTaken += time;
     numClientsFinished++;
     
-    float bandwidth = (float)NUM_MESSAGES * numClientsFinished / (timeTaken/1000.f);
+    long avgTime = timeTaken/numClientsFinished;
+    
+    float bandwidth = (float)NUM_MESSAGES * numClientsFinished / (avgTime/1000.f);
     System.out.println("Reply bandwidth: " + bandwidth +" replies/sec");
 }
 
