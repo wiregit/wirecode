@@ -8,7 +8,10 @@ import com.limegroup.gnutella.ByteOrder;
 import com.sun.java.util.collections.*;
 
 /**
- * Limited metadata parsing of m4a files.
+ * Limited metadata parsing of m4a files.  This is based on code published
+ * by Chris Adamson and released under GPL.  Information about the format was
+ * originally found on <url>http://www.oreillynet.com/pub/wlg/3130</url>.
+ * 
  * 
  * The m4a files have a tree structure composed of atoms.  
  * Atoms are similar to xml tags. 
