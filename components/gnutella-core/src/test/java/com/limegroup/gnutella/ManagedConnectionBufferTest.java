@@ -8,6 +8,8 @@ import java.util.Properties;
 import com.limegroup.gnutella.connection.BIOMessageWriter;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.NIOMessageWriter;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
@@ -144,6 +146,14 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             assertInstanceof(ThrottledOutputStream.class, inOut);
     }        
 
+    /**
+     * Tests that the priority hint works without compression
+     */
+    public void testPriorityHintNotCompressed() throws Exception {
+        setupNotCompressed();
+        tPriorityHint();
+    }
+    
     /**
      * Tests that the buffer drops when compressed.
      */
@@ -578,13 +588,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         tPriorityHint();
     }
     
-    /**
-     * Tests that the priority hint works without compression
-     */
-    public void testPriorityHintNotCompressed() throws Exception {
-        setupNotCompressed();
-        tPriorityHint();
-    }
     
     private void tPriorityHint() 
             throws Exception {
@@ -592,12 +595,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         Message m=null;
 
         // head...tail
-        stopOutputRunner(out);
-        //out.stopOutputRunner(); 
+        stopOutputRunner(out); 
         out.send(hopped(new PingRequest((byte)4)));
         out.send(QueryRequest.createQuery("a", (byte)3));
         startOutputRunner(out);
-        //out.startOutputRunner();
         assertInstanceof("didn't recieve queryrequest", 
             QueryRequest.class, in.reader().read());
         assertInstanceof("didn't recieve pingrequest", 
@@ -721,43 +722,66 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      */
     private static void stopOutputRunner(Connection mc) 
         throws Exception {
-        Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
-        BIOMessageWriter writer = 
-            (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
-        Object writeLock = 
-            PrivilegedAccessor.getValue(writer, "QUEUE_LOCK");
-        Method close = 
-            PrivilegedAccessor.getMethod(writer, "close", new Class[0]);
-        synchronized(writeLock) {
-            
-            PrivilegedAccessor.setValue(mc, "_closed", Boolean.TRUE);
-            close.invoke(writer, new Object[0]);
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+               Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+               MessageWriter writer = 
+                   (MessageWriter)PrivilegedAccessor.getValue(obj, 
+                        "DELEGATE");  
+               writer.setClosed(true);          
+        } else {
+
+            Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            BIOMessageWriter writer = 
+                (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
+            Object writeLock = 
+                PrivilegedAccessor.getValue(writer, "QUEUE_LOCK");
+            Method close = 
+                PrivilegedAccessor.getMethod(writer, "close", new Class[0]);
+            synchronized(writeLock) {
+                
+                PrivilegedAccessor.setValue(mc, "_closed", Boolean.TRUE);
+                close.invoke(writer, new Object[0]);
+            }
+            while(!mc.runnerDied()) {
+                Thread.yield();
+            }
+            PrivilegedAccessor.setValue(mc, "_runnerDied", Boolean.FALSE);
+            PrivilegedAccessor.setValue(mc, "_closed", Boolean.FALSE);
         }
-        while(!mc.runnerDied()) {
-            Thread.yield();
-        }
-        PrivilegedAccessor.setValue(mc, "_runnerDied", Boolean.FALSE);
-        PrivilegedAccessor.setValue(mc, "_closed", Boolean.FALSE);
-        //mc.stopOutputRunner();
     }
     
     private static void startOutputRunner(Connection mc)
         throws Exception {
-        Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
-        BIOMessageWriter writer = 
-            (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
-        Method start = 
-            PrivilegedAccessor.getMethod(writer, "start", new Class[0]);        
-        start.invoke(writer, new Object[0]);   
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+               Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+               MessageWriter writer = 
+                   (MessageWriter)PrivilegedAccessor.getValue(obj, 
+                        "DELEGATE");  
+               writer.setClosed(false);             
+        } else {
+            Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            BIOMessageWriter writer = 
+                (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
+            Method start = 
+                PrivilegedAccessor.getMethod(writer, "start", new Class[0]);        
+            start.invoke(writer, new Object[0]);  
+        } 
     }
     
     private static void resetPriority(Connection mc)
         throws Exception {
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+        } else {
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
             BIOMessageWriter writer = 
                 (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
             Method resetPriority = 
-                PrivilegedAccessor.getMethod(writer, "resetPriority", new Class[0]);        
-            resetPriority.invoke(writer, new Object[0]);                
+                PrivilegedAccessor.getMethod(writer, "resetPriority", 
+                    new Class[0]);        
+            resetPriority.invoke(writer, new Object[0]); 
+        }               
     }
 }
