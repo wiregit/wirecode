@@ -161,7 +161,12 @@ public class XMLStringUtils
         return choppedElements;
     }
 
-    
+    /*
+      NOTE: This method has been commented out. but it may be
+      used by the LimePeerServer code. 
+      If we need to bring this method back, it should look like the code in 
+      MetaEditorFrame.saveMeta
+      
     public static void saveMetaInfo(LimeXMLDocument doc, 
                                     String fileName) {
         File dir = null;
@@ -202,7 +207,7 @@ public class XMLStringUtils
             // this is bad            
         }
     }
-    
+    */
     /**
      * The separator used in URIs to separate different parts
      */

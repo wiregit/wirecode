@@ -31,6 +31,21 @@ public class LimeXMLReplyCollection{
     private String changedHash = null;
     private MetaFileManager metaFileManager=null;
     private Object mainMapLock = new Object();
+
+    public static final int NORMAL = 0;
+    public static final int FILE_DEFECTIVE = 1;
+    public static final int RW_ERROR = 2;
+    public static final int BAD_ID3  = 3;
+    public static final int FAILED_TITLE  = 4;
+    public static final int FAILED_ARTIST  = 5;
+    public static final int FAILED_ALBUM  = 6;
+    public static final int FAILED_YEAR  = 7;
+    public static final int FAILED_COMMENT  = 8;
+    public static final int FAILED_TRACK  = 9;
+    public static final int FAILED_GENRE  = 10;
+    public static final int HASH_FAILED  = 11;
+
+
     /**
      * Special audio constructor. The signature is the same as the other
      * constructor, except the boolean. This is a hack. The order is different
@@ -302,11 +317,17 @@ public class LimeXMLReplyCollection{
     }
 
     
-    public void replaceDoc(Object hash, LimeXMLDocument newDoc){
+    /**
+     * @return the older document, which is being replaced. Can be null.
+     */
+    public LimeXMLDocument replaceDoc(Object hash, LimeXMLDocument newDoc){
+        LimeXMLDocument oldDoc = null;
         synchronized(mainMapLock){
+            oldDoc = (LimeXMLDocument)mainMap.get(hash);
             mainMap.put(hash,newDoc);
         }
         replyDocs=null;//things have changed
+        return oldDoc;
     }
 
     public boolean removeDoc(String hash){
@@ -393,23 +414,26 @@ public class LimeXMLReplyCollection{
         return true;
     }
     
-    public boolean mp3ToDisk(String mp3FileName){
+    public int mp3ToDisk(String mp3FileName){
         boolean mp3= LimeXMLUtils.isMP3File(mp3FileName);
         boolean wrote=false;
-        boolean wrote2 = false;
+        int mp3WriteState = -1;
         //remove nonID3 stuff and store in outMap...and write out to disk 
         //in the regular way
-        toDisk(mp3FileName);//Thadani
+        toDisk(mp3FileName);
 
         if (this.editor != null){//now outMap is populated            
-            wrote2 = this.editor.writeID3DataToDisk(mp3FileName);//to mp3 file
+            //write to mp3 file...
+            mp3WriteState = this.editor.writeID3DataToDisk(mp3FileName);
+            if(mp3WriteState!=NORMAL)
+                return mp3WriteState;
             //Note: above operation has changed the hash of the file.
             File file = new File(mp3FileName);
             String newHash= null;
             try{
                 newHash = new String(LimeXMLUtils.hashFile(file));
             }catch (Exception e){
-                return false;
+                return HASH_FAILED;
             }
             synchronized(mainMapLock){
                 Object mainValue = mainMap.remove(changedHash);
@@ -424,22 +448,17 @@ public class LimeXMLReplyCollection{
             metaFileManager.handleChangedHash(changedHash,newHash,this);
             Object outValue = outMap.remove(changedHash);
             outMap.put(newHash,outValue);
-        }
-        else// there was no need to write out to mp3 assume it returned true
-            wrote2 = true;
+        }        
         wrote = write();
         this.outMap=null;
         this.changedHash = null;
         this.editor= null; //reset the value
-        return (wrote && wrote2);
+        if(!wrote){//writing serialized map failed
+            System.out.println("Sumeet not good");
+            return RW_ERROR;
+        }
+        return mp3WriteState;//wrote successful, return mp3WriteState
     }
-
-
-    /*
-      public void appendCollectionList(List newReplyCollection){
-      replyDocs.addAll(newReplyCollection);
-      }
-    */
 
 
     public static class MapSerializer {
