@@ -43,6 +43,16 @@ import com.sun.java.util.collections.*;
 public class UDPHeadPong extends VendorMessage {
 	
 	/**
+	 * cache references to the upload manager and file manager for
+	 * easier stubbing and testing.
+	 */
+	private static UploadManager _uploadManager 
+		= RouterService.getUploadManager();
+	
+	private static FileManager _fileManager
+		= RouterService.getFileManager();
+	
+	/**
 	 * try to make packets less than this size
 	 */
 	private static final int PACKET_SIZE = 512;
@@ -191,7 +201,7 @@ public class UDPHeadPong extends VendorMessage {
 		
 		
 		URN urn = ping.getUrn();
-		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
+		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		
 		try{
 			
@@ -216,7 +226,7 @@ public class UDPHeadPong extends VendorMessage {
 		caos.write(F_LIME_VENDOR_ID);
 		
 		//get our queue status.
-		int queueSize = RouterService.getUploadManager().getNumQueuedUploads();
+		int queueSize = _uploadManager.getNumQueuedUploads();
 		
 		if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
 			queueStatus = BUSY;
@@ -225,7 +235,7 @@ public class UDPHeadPong extends VendorMessage {
 		 else 	
 			//optimistic value
 			queueStatus =  (byte)
-				(RouterService.getUploadManager().uploadsInProgress() - 
+				(_uploadManager.uploadsInProgress() - 
 						UploadSettings.HARD_MAX_UPLOADS.getValue() );
 		
 		
