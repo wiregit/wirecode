@@ -1274,16 +1274,9 @@ public abstract class FileManager {
         //Special case: return up to 3 of your 'youngest' files.
         if (request.isWhatIsNewRequest()) {
             // see if there are any files to send....
-            // NOTE: we only request up to 25 urns.  since these may all be
-            // partial files, we may not return any responses.  this is a
-            // calculated risk - the chance that the 25 youngest of my files are
-            // all incomplete downloads is not zero, but it is a risk we are
-            // willing to take, and definitely better than the alternative of
-            // getting ALL the files we could possibly be sharing.  we could
-            // probably do something smarter to always get the appropriate
-            // files, but the cost in code complexity isn't worth it, especially
-            // in the face of dynamic querying....
-            Iterator iter = CreationTimeCache.instance().getFiles(25);
+            // NOTE: we only request up to 10 urns.  we don't need to worry
+            // about partial files because we don't add them to the cache.
+            Iterator iter = CreationTimeCache.instance().getFiles(3);
             if (!iter.hasNext())
                 return EMPTY_RESPONSES;
             
@@ -1293,10 +1286,11 @@ public abstract class FileManager {
                 URN currURN = (URN) iter.next();
                 FileDesc desc = getFileDescForUrn(currURN);
 
-        		// If the file was unshared or is an incomplete file,
-        		// DO NOT SEND IT.
-                if (desc==null || desc instanceof IncompleteFileDesc) 
-                    continue;    
+                // should never happen since we don't add times for IFDs and
+                // we clear removed files...
+                if ((desc==null) || (desc instanceof IncompleteFileDesc))
+                    ErrorService.error(new Exception("Unexpected file = " +
+                                                     desc));
 
                 // Formulate the response
                 Response r = new Response(desc);

@@ -90,7 +90,16 @@ public final class CreationTimeCache {
      */
     public synchronized void removeTime(URN urn) {
         TIME_MAP.remove(urn);
-        // don't worry about URN_MAP, it'll be pruned next time on startup
+        
+        Iterator iter = URN_MAP.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry currEntry = (Map.Entry) iter.next();
+            Set urnSet = (Set) currEntry.getValue();
+            if (urnSet.contains(urn)) {
+                urnSet.remove(urn);
+                break;
+            }
+        }
     }
 
     /**
