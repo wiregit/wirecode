@@ -15,6 +15,10 @@ public class QueryUnicaster {
      */
     public static final int ITERATION_TIME = 100; // 1/10th of a second...
 
+    /** The number of Endpoints where you should start sending pings to them.
+     */
+    public static final int MIN_ENDPOINTS = 50;
+
     // the instance of me....
     private static QueryUnicaster _instance = null;
 
@@ -176,9 +180,32 @@ public class QueryUnicaster {
     private ExtendedEndpoint getUnicastHost() throws InterruptedException {
         debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
-            if (_queryHosts.isEmpty())
+
+            if (_queryHosts.isEmpty()) {
+                // first send a Ping, hopefully we'll get some pongs....
+                PingRequest pr = 
+                new PingRequest(SettingsManager.instance().getTTL());
+                RouterService.getMessageRouter().broadcastPingRequest(pr);
+                // now wait, what else can we do?
                 _queryHosts.wait();
+            }
             debug("QueryUnicaster.getUnicastHost(): got a host!");
+
+            if (_queryHosts.size() < MIN_ENDPOINTS) {
+                // send a ping to the guy you are popping if cache too small
+                ExtendedEndpoint toReturn = 
+                (ExtendedEndpoint) _queryHosts.pop();
+                PingRequest pr = new PingRequest((byte)1);
+                UDPAcceptor udpService = UDPAcceptor.instance();
+                try {
+                    InetAddress ip = 
+                    InetAddress.getByName(toReturn.getHostname());
+                    // send the query
+                    udpService.send(pr, ip, toReturn.getPort());
+                }
+                catch (UnknownHostException ignored) {}
+                return toReturn;
+            }
             return (ExtendedEndpoint) _queryHosts.pop();
         }
     }
