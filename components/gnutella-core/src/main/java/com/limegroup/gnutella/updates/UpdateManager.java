@@ -31,6 +31,8 @@ public class UpdateManager {
     
     private static UpdateManager INSTANCE=null;
 
+    public static final String SPECIAL_VERSION = "@version@";
+
     /**
      * Constructor, reads the latest update.xml file from the last run on the
      * network, and srores the values in latestVersion, message and usesLocale.
@@ -80,7 +82,8 @@ public class UpdateManager {
      */
     public void postGuiInit(ActivityCallback gui) {
         String myVersion = CommonUtils.getLimeWireVersion();
-
+        if(latestVersion.equals(SPECIAL_VERSION))
+            return;
         if(myVersion.equalsIgnoreCase(latestVersion)) //are we equal?
             return;
         if(!isGreaterVersion(latestVersion,myVersion))
@@ -91,10 +94,10 @@ public class UpdateManager {
     }
 
     public void checkAndUpdate(Connection connection) {
-        //String nv=connection.getProperty(ConnectionHandshakeHeaders.X_VERSION);
-
 		String nv = connection.getVersion();
         debug("myVersion:"+latestVersion+" theirs: "+nv);
+        if(nv.equals(SPECIAL_VERSION))// should never see this on the network!!
+            return;//so this should never happen
         if(!isGreaterVersion(nv,latestVersion))
             return;        
         final Connection c = connection;
@@ -201,9 +204,9 @@ public class UpdateManager {
             return true;
         if(newVer.equals(oldVer))//same
             return false;
-        if(newVer.equals("@version@")) //new is newer
+        if(newVer.equals(SPECIAL_VERSION)) //new is newer
             return true;
-        if(oldVer.equals("@version@")) //old is newer
+        if(oldVer.equals(SPECIAL_VERSION)) //old is newer
             return false;
         //OK. Now lets look at numbers
         int o1, o2 = -1;
