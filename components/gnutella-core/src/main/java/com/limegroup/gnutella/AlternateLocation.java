@@ -307,9 +307,9 @@ public final class AlternateLocation
 		// we currently only support the http protocol specifier or the
 		// X-Gnutella-Alternate-Location specifier for the beginning
 		// of the alternate location line
-		if(!(test.startsWith("http") || 
-			 HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test))) {
-			throw new IOException("invalid start for alternate location");
+		if((!test.startsWith("http") && 
+			!HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test))) {
+			throw new IOException("invalid start for alternate location: "+test);
 		}
 		if(!test.startsWith("http")) {
 			int colonIndex  = locationHeader.indexOf(":");
