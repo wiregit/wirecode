@@ -70,9 +70,6 @@ public class IOUtils {
                 }
             }
             
-            if(CommonUtils.isJava14OrLater())
-                e = e.getCause();
-            else
                 e = null;
         }
 
