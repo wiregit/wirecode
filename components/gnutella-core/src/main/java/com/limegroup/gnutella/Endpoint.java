@@ -77,7 +77,8 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     }
     
     public String toString() {
-	return hostname+":"+port + " connectivity=" + connectivity;
+	return hostname+":"+port + " connectivity=" + connectivity + " files="
+					+ files + " kbytes=" + kbytes;
     }
     
     public String getHostname(){
