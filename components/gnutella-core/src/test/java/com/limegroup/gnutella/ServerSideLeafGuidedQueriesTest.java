@@ -101,17 +101,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     }
 
     public static void setSettings() throws Exception {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client to listen on port 6667, with
-        //incoming slots and no connections.
-        //To keep LimeWire from connecting to the outside network, we filter out
-        //all addresses but localhost and 18.239.0.*.  The latter is used in
-        //pongs for testing.  TODO: it would be nice to have a way to prevent
-        //BootstrapServerManager from adding defaults and connecting.
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*", "18.239.0.*"});
+            new String[] {"127.*.*.*"});
         ConnectionSettings.PORT.setValue(PORT);
         SharingSettings.setDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -142,6 +135,21 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     
     public void setUp() throws Exception {
         setSettings();
+        
+        for (int i = 0; i < ULTRAPEERS.length; i++) {
+            assertTrue("ULTRAPEER " + i + 
+                       " should be connected", ULTRAPEERS[i].isOpen());
+            assertTrue("should be up -> up",
+                       ULTRAPEERS[i].isSupernodeSupernodeConnection());
+        }
+		assertTrue("LEAF should be connected", LEAF.isOpen());
+		assertTrue("should be up -> leaf", LEAF.isClientSupernodeConnection());
+		
+		ConnectionManager cm = RouterService.getConnectionManager();
+		assertEquals("wrong # ultrapeers",
+		    ULTRAPEERS.length, cm.getNumUltrapeerConnections());
+        assertEquals("wrong # leaf connections",
+            1, cm.getNumInitializedClientConnections());
     }
 
 
@@ -162,12 +170,8 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 	 * Drains all messages 
 	 */
  	private static void drainAll() throws Exception {
-        for (int i = 0; i < ULTRAPEERS.length; i++) {
-            if (ULTRAPEERS[i].isOpen())
-                drain(ULTRAPEERS[i]);
-        }
- 		if(LEAF.isOpen())
- 			drain(LEAF);
+ 	    drainAll(ULTRAPEERS);
+ 	    drain(LEAF);
  	}
 
 	/**
@@ -201,159 +205,21 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
                 ULTRAPEERS[i].flush();
             }
         }
-        
-        for (int i = 0; i < ULTRAPEERS.length; i++)
-            assertTrue("ULTRAPEER " + i + 
-                       " should be connected", ULTRAPEERS[i].isOpen());
-		assertTrue("LEAF should be connected", LEAF.isOpen());
 
     }
-
-    /** 
-	 * Tries to receive any outstanding messages on c 
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                ret=true;
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
-    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
-     *  QRP stuff) were recieved.
-     */
-    private static boolean noUnexpectedMessages(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-            }
-            catch (InterruptedIOException ie) {
-                return true;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryRequest getFirstQueryRequest(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryRequest) 
-                    return (QueryRequest)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrReply received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryReply getFirstQueryReply(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryReply) 
-                    return (QueryReply)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-	/**
-	 * Asserts that the given message is a query, printing out the 
-	 * message and failing if it's not.
-	 *
-	 * @param m the <tt>Message</tt> to check
-	 */
-	private static void assertQuery(Message m) {
-		if(m instanceof QueryRequest) return;
-
-		assertInstanceof("message not a QueryRequest: " + m,
-		    QueryRequest.class, m);
-	}
-
 
     // BEGIN TESTS
     // ------------------------------------------------------
 
     public void testConfirmSupport() throws Exception {
-        while (true) {
-            try {
-                Message m=LEAF.receive(TIMEOUT);
-                if (m instanceof MessagesSupportedVendorMessage) {
-                    MessagesSupportedVendorMessage msvm =
-                        (MessagesSupportedVendorMessage) m;
-                    assertTrue(msvm.supportsLeafGuidance() > 0);
-                    return;
-                }
-            }
-            catch (InterruptedIOException ie) {
-                assertTrue(false);
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
+        Message m = getFirstMessageOfType(LEAF,
+                        MessagesSupportedVendorMessage.class);
+        assertNotNull(m);
+        
+        MessagesSupportedVendorMessage msvm =
+            (MessagesSupportedVendorMessage)m;
+
+        assertGreaterThan(0, msvm.supportsLeafGuidance());
     }
 
 
