@@ -17,8 +17,8 @@ import com.limegroup.gnutella.Assert;
 class IP {
     private static final String MSG = "Could not parse: ";
 
-    private long addr;
-    private long mask;
+    private final long addr;
+    private final long mask;
 
     /**
      * Creates an IP object
