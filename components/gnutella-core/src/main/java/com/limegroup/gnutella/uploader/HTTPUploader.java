@@ -807,7 +807,8 @@ public final class HTTPUploader implements Uploader {
 	}
   
     public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
+        if(getState()==UPLOADING)
+            bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
     }
 
     public float getMeasuredBandwidth() {
