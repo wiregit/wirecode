@@ -350,6 +350,7 @@ public class QueryReply extends Message implements Serializable{
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
+                boolean hasProxies = (_proxies != null) && (_proxies.size() > 0);
                 byte flags=
                     (byte)((needsPush && !isMulticastReply ? PUSH_MASK : 0) 
                            | BUSY_MASK 
@@ -361,7 +362,7 @@ public class QueryReply extends Message implements Serializable{
                            | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
                            | (finishedUpload ? UPLOADED_MASK : 0)
                            | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
-                           | (supportsBH || isMulticastReply ? 
+                           | (supportsBH || isMulticastReply || hasProxies ? 
                               GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
 
                 baos.write(flags);
