@@ -192,7 +192,7 @@ public class BIOMessageReader extends AbstractMessageReader {
                 msg = BIOMessageReader.read(INPUT_STREAM, HEADER_BUF, 
                     Message.N_TCP, SOFT_MAX);
             } catch(IOException e) {
-                CONNECTION.close(); // if IOError, make sure we close.
+                RouterService.removeConnection(CONNECTION); // if IOError, make sure we close.
                 throw e;
             }
             
