@@ -9,10 +9,10 @@ extern "C" {
 #endif
 /*
  * Class:     com_limegroup_gnutella_util_NativeLauncher
- * Method:    nativeLaunchWindowsFile
+ * Method:    nativeLaunchFileWindows
  * Signature: (Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_NativeLauncher_nativeLaunchWindowsFile
+JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_NativeLauncher_nativeLaunchFileWindows
   (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
