@@ -164,16 +164,20 @@ public class LimeXMLDocument implements Serializable {
         // make sure any spaces are removed.
         if(xmlString != null)
             xmlString = xmlString.trim();
-        if (LimeXMLUtils.isMP3File(identifier)) {
+        
+        if (identifier!=null && fieldToValue!=null &&
+        		LimeXMLUtils.isMP3File(identifier)) {
+        	
         	String genre = (String) fieldToValue.get("audios__audio__genre__");
-        	try {
-        		short index = Short.parseShort(genre);
-        		genre = MP3MetaData.getGenreString(index);
-        		fieldToValue.put("audios__audio__genre__", genre);
-        	}
-        	catch (NumberFormatException ignored) {
-        		// the string is fine, it is a valid genre...
-        	}
+        	if (genre!=null)
+        		try {
+        			short index = Short.parseShort(genre);
+        			genre = MP3MetaData.getGenreString(index);
+        			fieldToValue.put("audios__audio__genre__", genre);
+        		}
+        		catch (NumberFormatException ignored) {
+        			// the string is fine, it is a valid genre...
+        		}
         }
     }
  
@@ -506,21 +510,6 @@ public class LimeXMLDocument implements Serializable {
         String retValue = null;
         fieldName = fieldName.trim();
         retValue = (String)fieldToValue.get(fieldName);
-        /** The following HACK is necessitated by my omission of
-         *  getGenreString() in the new ID3Editor.readDocument() method.
-         *  That method has been fixed, but certain clients still have issues.
-         *  So we need to turn any numbers into the appropriate genre...
-         */
-        if (fieldName.equals("audios__audio__genre__") && (retValue != null)) {
-            try {
-                short index = Short.parseShort(retValue);
-                retValue = MP3MetaData.getGenreString(index);
-                fieldToValue.put(fieldName, retValue);
-            }
-            catch (NumberFormatException ignored) {
-                // the string is fine, it is a valid genre...
-            }
-        }
         return retValue;
     }
     
