@@ -21,9 +21,13 @@ import java.util.*;
  * You should call the shutdown() method when you're done to ensure
  * that the gnutella.net file is written to disk.  */
 public class ConnectionManager implements Runnable {
+    /** The port to listen for incoming connections. */
     private int port;
+
+    /** Routing information.  ME_CONNECTION is a hack described in Connection. */
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
     public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
+    static final Connection ME_CONNECTION=new Connection("",0);
 
     /** List of all connections.  This is <i>not</i> synchronized, so you must
      * always hold this' monitor before modifying it. */
@@ -44,10 +48,6 @@ public class ConnectionManager implements Runnable {
     public int QReqCount; //Query Request count
     public int QRepCount; //Query Reply count
     public int pushCount; //Push request count
-    
-    
-    public long totalSize;
-    public long totalFiles;
 
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
@@ -90,6 +90,20 @@ public class ConnectionManager implements Runnable {
 	    else 
 		stats= false;
 	}	  
+    }
+
+    /** 
+     * Associate a GUID with this host
+     * 
+     * @modifies route table
+     * @effects notifies the route table that m is a request originating from 
+     *  this host and I expect replies, i.e.,
+     *  <pre>
+     *      routeTable.put(m.getGUID(), ME_CONNECTION);
+     *  </pre>
+     */
+    public void fromMe(Message m) {
+	routeTable.put(m.getGUID(), ME_CONNECTION);
     }
 
     /** @modifies network
@@ -321,7 +335,7 @@ public class ConnectionManager implements Runnable {
 	    routeTable.remove(c);
 	    pushRouteTable.remove(c);
 	    connections.remove(i);
-	    c.shutdown();//ensure that the connecetion is closed
+	    c.shutdown();//ensure that the connection is closed
 	    if (keepAlive!=0) {
 		//Asynchronously fetch a connection to replace c
 		Thread t=new ConnectionFetcher(this,1);
@@ -471,7 +485,12 @@ class ConnectionFetcher extends Thread {
 	    try {
 		Connection c=manager.catcher.choose();
 		try {
-		    c.send(new PingRequest(Const.TTL)); 
+		    //Send initial ping request.  HACK: use routeTable to
+		    //designate that replies are for me.  Do this *before*
+		    //sending message.
+		    PingRequest pr=new PingRequest(Const.TTL);
+		    manager.fromMe(pr);
+		    c.send(pr); 
 		} catch (IOException e) {
 		    //Try again!
 		    c.shutdown();
