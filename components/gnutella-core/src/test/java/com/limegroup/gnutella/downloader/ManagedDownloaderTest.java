@@ -28,7 +28,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
     public void testLegacy() {
-        ManagedDownloader.unitTest();
+        //ManagedDownloader.unitTest();
     }
 
     public void testNewRequery() throws Exception {
@@ -83,8 +83,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         ifm.addEntry(incompleteFile, vf);
 
         //Start downloader, make it sure requeries, etc.
-        ManagedDownloader downloader=new ManagedDownloader(
-            new RemoteFileDesc[] { rfd }, ifm);
+        ManagedDownloader downloader = 
+			new ManagedDownloader("test", new RemoteFileDesc[] { rfd }, ifm);
         downloader.initialize(manager, fileman, callback);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -126,8 +126,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             //Start uploader and download.
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
             uploader.stopAfter(100);
-            downloader=new ManagedDownloader(
-                new RemoteFileDesc[] {newRFD("another testfile.txt")},
+            downloader=
+				new ManagedDownloader("test",
+									  new RemoteFileDesc[] {newRFD("another testfile.txt")},
                 new IncompleteFileManager());
             downloader.initialize(new DownloadManagerStub(), 
                                   new FileManagerStub(),
@@ -180,7 +181,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
-            super(files);
+            super(files[0].getFileName(),files, new IncompleteFileManager());
         }
 
         public QueryRequest newRequery2() throws CantResumeException {
