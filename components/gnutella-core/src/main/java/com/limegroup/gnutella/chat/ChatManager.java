@@ -2,6 +2,7 @@ package com.limegroup.gnutella.chat;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.StringComparator;
 import java.net.*;
 import java.io.*;
 
@@ -115,7 +116,8 @@ public class ChatManager {
 		String[] bannedIPs = sm.getBannedIps();
 		Arrays.sort(bannedIPs);		
 		synchronized (this) {
-			if ( Arrays.binarySearch(bannedIPs, host) < 0 ) {
+			if ( Arrays.binarySearch(bannedIPs, host, 
+									 new StringComparator()) < 0 ) {
 				String[] more_banned = new String[bannedIPs.length+1];
 				System.arraycopy(bannedIPs, 0, more_banned, 0, 
 								 bannedIPs.length);
