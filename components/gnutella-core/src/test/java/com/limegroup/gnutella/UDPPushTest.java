@@ -70,7 +70,7 @@ public class UDPPushTest extends BaseTestCase {
 		try{
 			Map map = (Map)
 				PrivilegedAccessor.getValue(RouterService.getDownloadManager(),
-					"_udpFailover");
+					"UDP_FAILOVER");
 			map.clear();
 		}catch(Exception tough){tough.printStackTrace();}
 		

@@ -46,13 +46,6 @@ public class DownloadStat extends AdvancedStatistic {
 
     /**
      * Statistic for pushed connection attempts that failed because
-     * we didn't have the push route stored.
-     */ 
-    public static final Statistic PUSH_FAILURE_NO_ROUTE =
-        new DownloadStat();
-
-    /**
-     * Statistic for pushed connection attempts that failed because
      * we didn't receive a GIV from the pushee after a certain time.
      */ 
     public static final Statistic PUSH_FAILURE_NO_RESPONSE =

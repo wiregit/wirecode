@@ -148,13 +148,8 @@ public class BrowseHostHandler {
 
                 // send the Push after registering in case you get a response 
                 // really quickly.  reuse code in DM cuz that works well
-                if (!RouterService.getDownloadManager().sendPush(fakeRFD)) {
-                    // didn't work, unregister yourself...
-                    synchronized (_pushedHosts) {
-                        _pushedHosts.remove(_serventID);
-                    }
-                    failed();
-                }
+                RouterService.getDownloadManager().sendPush(fakeRFD);
+                 
             }
             break;
         }

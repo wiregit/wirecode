@@ -18,6 +18,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+import quicktime.std.music.ToneDescription;
+
 
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number 
@@ -1066,6 +1068,9 @@ public class DownloadManager implements BandwidthTracker {
     	
     }
 
+    public void sendPush(final RemoteFileDesc file) {
+    	sendPush(file, new Object());
+    }
     /**
      * Sends a push request for the given file.  Returns false iff no push could
      * be sent, i.e., because no routing entry exists. That generally means you
@@ -1076,7 +1081,7 @@ public class DownloadManager implements BandwidthTracker {
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public boolean sendPush(final RemoteFileDesc file) {
+    public void sendPush(final RemoteFileDesc file, final Object toNotify) {
     	
     	//Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
@@ -1084,12 +1089,12 @@ public class DownloadManager implements BandwidthTracker {
         int port = RouterService.getPort();
         if( !NetworkUtils.isValidAddress(addr) || 
             !NetworkUtils.isValidPort(port) )
-            return false;
+            return;
         
         final byte []guid = GUID.makeGuid();
         
     	if (sendPushMulticast(file,guid))
-    		return true;
+    		return;
     	
     	//remember that we are waiting a push from this host 
         //for the specific file.
@@ -1109,10 +1114,10 @@ public class DownloadManager implements BandwidthTracker {
         // schedule the failover tcp pusher
         RouterService.schedule(new Runnable(){
         	public void run() {
-        		FAILOVERS.add(new PushFailoverRequestor(file,guid));
+        		FAILOVERS.add(new PushFailoverRequestor(file,guid,toNotify));
         	}},UDP_PUSH_FAILTIME,0);
         
-    	return sendPushUDP(file,guid);
+    	sendPushUDP(file,guid);
     }
 
 
@@ -1238,10 +1243,12 @@ public class DownloadManager implements BandwidthTracker {
 		
 		final RemoteFileDesc _file;
 		final byte [] _guid;
+		final Object _toNotify;
 		
-		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid) {
+		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid,Object toNotify) {
 			_file = file;
 			_guid = guid;
+			_toNotify=toNotify;
 		}
 		
 		public void run() {
@@ -1261,7 +1268,10 @@ public class DownloadManager implements BandwidthTracker {
 			}
 			
 			if (proceed)
-				sendPushTCP(_file,_guid);
+				if (sendPushTCP(_file,_guid))
+					synchronized(_toNotify) {
+						_toNotify.notify();
+					}
 		}
 	}
 

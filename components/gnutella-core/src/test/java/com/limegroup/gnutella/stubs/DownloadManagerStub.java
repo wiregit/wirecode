@@ -49,7 +49,7 @@ public class DownloadManagerStub extends DownloadManager {
 
 		return !GUID.isLimeRequeryGUID(query.getGUID());
     }
-    public boolean sendPush(RemoteFileDesc file) { return false; }
+    public void sendPush(RemoteFileDesc file) {}
     public synchronized void measureBandwidth() { }
 	public synchronized float getMeasuredBandwidth() { return 0.f; }
     public void internalError(Throwable e) { }

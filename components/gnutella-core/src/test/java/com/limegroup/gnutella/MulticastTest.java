@@ -220,8 +220,8 @@ public class MulticastTest extends BaseTestCase {
         MESSAGE_ROUTER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        boolean ret = RouterService.getDownloadManager().sendPush(rfd);
-        assertTrue("sendPush should have worked", ret);
+        RouterService.getDownloadManager().sendPush(rfd);
+        
         
         // sleep to make sure the push goes through.
         sleep(300);

@@ -2598,8 +2598,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean pushSent;
         synchronized(threadLock) {
             // only wait if we actually were able to send the push
-            pushSent = manager.sendPush(rfd);
-            if ( pushSent ) {
+            manager.sendPush(rfd,threadLock);
+            
                 //No loop is actually needed here, assuming spurious
                 //notify()'s don't occur.  (They are not allowed by the Java
                 //Language Specifications.)  Look at acceptDownload for
@@ -2611,18 +2611,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                         DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                     throw new IOException("push interupted.");
                 }
-            }
+            
         }
         
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
         if (pushSocket==null) {
-            if(RECORD_STATS) {
-                if( !pushSent )
-                    DownloadStat.PUSH_FAILURE_NO_ROUTE.incrementStat();
-                else
-                    DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
-            }
+            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+            
             throw new IOException("push socket is null");
         }
         
