@@ -1,6 +1,6 @@
 Localization notes:
 Copyright (c)2002 the LimeWire project team. www.limewire.com
-asfd
+test cvs@lib.limewire.org
 This is the current list of supported locales.
 
 This file contains the current codes used by LimeWire to load
