@@ -820,6 +820,10 @@ public class SettingsManager implements SettingsInterface
     /** set the extensions to search for */
     public void setExtensions(String ext) {
         FileManager.getFileManager().setExtensions(ext);
+		if(getDirectories() != null) {
+			FileManager.getFileManager().reset();
+			FileManager.getFileManager().addDirectories(getDirectories());
+		}
         extensions_ = ext;
         props_.put(SettingsInterface.EXTENSIONS, ext);
     }
