@@ -59,7 +59,7 @@ public class CountPercent {
 	    for(int i = 0; i < files.length; i++) {
 	        if(!files[i].startsWith("MessagesBundle_") ||
 	           !files[i].endsWith(".properties") ||
-	           files[i].startsWith("MessageBundle_en"))
+	           files[i].startsWith("MessagesBundle_en"))
 	            continue;
 	        
 	        try {
