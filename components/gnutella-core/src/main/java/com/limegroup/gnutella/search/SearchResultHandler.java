@@ -136,8 +136,8 @@ public final class SearchResultHandler {
 		if(data.getSpeed() < settings.getMinimumSearchSpeed()) return false;
         if(data.isFirewalled() && 
            (!RouterService.acceptedIncomingConnection() ||
-            (NetworkUtils.isPrivateAddress(RouterService.getAddress()))
-            && !NetworkUtils.isVeryCloseIP(qr.getIPBytes()))) {
+            (NetworkUtils.isPrivateAddress(RouterService.getAddress())
+            && !NetworkUtils.isVeryCloseIP(qr.getIPBytes())))) {
             return false;
         }
 
