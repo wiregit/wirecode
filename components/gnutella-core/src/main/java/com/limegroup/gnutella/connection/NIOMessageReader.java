@@ -8,9 +8,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 
@@ -19,9 +19,11 @@ import com.limegroup.gnutella.statistics.MessageReadErrorStat;
  * Message as appropriate by opcode.  Used by Connnection to read messages in a
  * non-blocking manner (which requires state).  Contains code formerly in
  * Message.read(InputStream).  Thread-safe; in a true single-thread core, this
- * would not be necessary.
+ * would not be necessary.<p>
+ * 
+ * NON-FINAL FOR TESTING
  */
-public final class NIOMessageReader extends AbstractMessageReader {
+public class NIOMessageReader extends AbstractMessageReader {
 	 
 	
 	/**
@@ -36,12 +38,8 @@ public final class NIOMessageReader extends AbstractMessageReader {
         ByteBuffer.allocate(MessageSettings.MAX_LENGTH.getValue());
     
     
-    /**
-     * Variable for the last message created -- used only for testing.
-     */
-    private Message _lastMessage;
+
     
-	
     /**
      * Factory method for creating new <tt>MessageReader</tt>
      * instances for each connection.
@@ -53,9 +51,9 @@ public final class NIOMessageReader extends AbstractMessageReader {
     }
     
 	/**
-	 * Ensure that this class cannot be constructed.
+	 * Ensure that this class cannot be constructed by another class.
 	 */
-	private NIOMessageReader() {
+	protected NIOMessageReader() {
         HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
     }
 		
@@ -72,8 +70,7 @@ public final class NIOMessageReader extends AbstractMessageReader {
 	 */
 	public Message createMessageFromTCP(SelectionKey key) 
 		throws IOException, BadPacketException {
-        _lastMessage = createMessage(key, Message.N_TCP);
-		return _lastMessage;
+        return createMessage(key, Message.N_TCP);
 	}
 
 	/**
@@ -260,7 +257,11 @@ public final class NIOMessageReader extends AbstractMessageReader {
      * Used only for testing.  
      */
     public Message read() throws IOException, BadPacketException {
-        return read(2000);
+        // silly code to make everything compile
+        if(true) {
+            throw new IllegalStateException("this method should not be called");
+        }    
+        return null;
     }
 
     /**
@@ -268,13 +269,10 @@ public final class NIOMessageReader extends AbstractMessageReader {
      */
     public Message read(int i) throws IOException, BadPacketException, 
         InterruptedIOException {
-        try {
-            Thread.sleep(i);
-        } catch (InterruptedException e) {
-            // this should never happen
-            ErrorService.error(e);
-        }
-        // return the last message read
-        return _lastMessage;
+        // silly code to make everything compile
+        if(true) {
+            throw new IllegalStateException("this method should not be called");
+        }    
+        return null;
     }
 }
