@@ -36,19 +36,19 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         FileDesc fd = fm.get(0);
         rfd1 = new RemoteFileDesc("1.1.1.1",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
-                                  false, null, HugeTestUtils.URN_SETS[0]);
+                                  false, null, null);
         rfd2 = new RemoteFileDesc("1.1.1.2",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
-                                  false, null, HugeTestUtils.URN_SETS[0]);
+                                  false, null, null);
         rfd3 = new RemoteFileDesc("1.1.1.3",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
-                                  false, null, HugeTestUtils.URN_SETS[0]);
+                                  false, null, null);
         rfd4 = new RemoteFileDesc("1.1.1.4",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
-                                  false, null, HugeTestUtils.URN_SETS[0]);
+                                  false, null, null);
         rfd5 = new RemoteFileDesc("1.1.1.5",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
-                                  false, null, HugeTestUtils.URN_SETS[0]);
+                                  false, null, null);
     }
 
     public UploaderTest(String name) {
@@ -492,10 +492,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
-		AlternateLocationCollection collection =
-			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
         HTTPDownloader downloader = 
-			new HTTPDownloader(sb, rfd, tmp, collection);
+			new HTTPDownloader(sb, rfd, tmp, null);
         tmp.delete();
         return downloader;
     }
