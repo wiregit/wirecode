@@ -43,29 +43,18 @@ public final class Pinger implements Runnable {
      * this node if it's an Ultrapeer.
      */
     public void start() {
-        Thread pingThread = new ManagedThread(this, "pinger thread");
-        pingThread.setDaemon(true);
-        pingThread.start();
+        RouterService.schedule(this, PING_INTERVAL, PING_INTERVAL);
     }
 
 
     /**
-     * Implements the <tt>Runnable</tt> interface.  Periodically sends broadcast
-     * pings along all connections.
+     * Broadcasts a ping to all connections.
      */
     public void run() {
-        try {
-            while(true) {
-                if(RouterService.isSupernode() &&
-                   PingPongSettings.PINGS_ACTIVE.getValue()) {
-                    RouterService.getMessageRouter().
-                        broadcastPingRequest(new PingRequest((byte)3));
-                }
-                
-                Thread.sleep(PING_INTERVAL);
-            }
-        } catch(Throwable t) {
-            ErrorService.error(t);
+        if(RouterService.isSupernode() &&
+           PingPongSettings.PINGS_ACTIVE.getValue()) {
+            RouterService.getMessageRouter().
+                broadcastPingRequest(new PingRequest((byte)3));
         }
     }
 }
