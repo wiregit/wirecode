@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.net.DatagramPacket;
 import java.util.HashMap;
 
 /**
@@ -46,11 +45,11 @@ public class DataWindow
     /*
      *  Add a new message to the window.  TODO: Not based on packet.
      */
-	public synchronized DataRecord addData(int pnum, DatagramPacket p) {
+	public synchronized DataRecord addData(int pnum, UDPConnectionMessage msg) {
 		DataRecord d;
 		d          = new DataRecord();
 		d.pnum     = pnum;
-		d.p        = p;
+		d.msg      = msg;
 		d.pkey     = String.valueOf(pnum);
 		d.sends    = 0;
 		d.written  = false;
@@ -427,13 +426,13 @@ System.out.println("smoothRTT:"+smoothRTT);
 
 	
 class DataRecord {
-	public int 			  pnum;
-	public String 		  pkey;
-	public DatagramPacket p;
-    public int            sends;
-	public boolean 		  written;
-	public int   		  acks;
-    public long           sentTime;
-    public long           ackTime;
+	public int 			 		pnum;
+	public String 				pkey;
+	public UDPConnectionMessage msg;
+    public int                  sends;
+	public boolean 		        written;
+	public int   		        acks;
+    public long                 sentTime;
+    public long                 ackTime;
 }
 

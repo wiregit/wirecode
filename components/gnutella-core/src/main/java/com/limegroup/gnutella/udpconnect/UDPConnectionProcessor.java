@@ -20,6 +20,10 @@ public class UDPConnectionProcessor {
     /** The limit on space for data to be written out */
     private int               _chunkLimit;
 
+    /** The receivers windowSpace defining amount of data that receiver can
+        accept */
+    private int               _receiverWindowSpace;
+
     /** Record the desired connection timeout on the connection */
     private long              connectTimeOut          = MAX_CONNECT_WAIT_TIME;
 
@@ -122,11 +126,12 @@ public class UDPConnectionProcessor {
         _port      		   = port;
 
         // Init default state
-        _theirConnectionID = UDPMultiplexor.UNASSIGNED_SLOT; 
-		_connectionState   = PRECONNECT_STATE;
-		_lastSendTime      = 0l;
-    	_chunkLimit        = DATA_WINDOW_SIZE; // TODO: This varies based on
-											   // Window fullness
+        _theirConnectionID   = UDPMultiplexor.UNASSIGNED_SLOT; 
+		_connectionState     = PRECONNECT_STATE;
+		_lastSendTime        = 0l;
+    	_chunkLimit          = DATA_WINDOW_SIZE; // TODO: This varies based on
+											     // Window fullness
+    	_receiverWindowSpace = DATA_WINDOW_SIZE; 
 
 		_udpService        = UDPService.instance();
 
@@ -260,10 +265,11 @@ public class UDPConnectionProcessor {
 
     /**
      *  Return the room for new local incoming data in chunks. This should 
-	 *  remain equal to the space available in the sender data window.
+	 *  remain equal to the space available in the sender and receiver 
+	 *  data window.
      */
 	public int getChunkLimit() {
-		return _chunkLimit;
+		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
     /**
@@ -295,7 +301,7 @@ public class UDPConnectionProcessor {
             DataMessage dm = new DataMessage(_theirConnectionID, 
 			  _sequenceNumber, chunk.data, chunk.length);
             send(dm);
-			//_sendWindow.addData(_sequenceNumber, dm);  /TODO: do
+			_sendWindow.addData(_sequenceNumber, dm);  
 
 			_sequenceNumber++;
         } catch (BadPacketException bpe) {
@@ -403,8 +409,10 @@ public class UDPConnectionProcessor {
                 ErrorService.error(iae);
             }
         } else if (msg instanceof AckMessage) {
-            AckMessage amsg  = (AckMessage) msg;
-            int        seqNo = amsg.getSequenceNumber();
+            AckMessage    amsg   = (AckMessage) msg;
+            int           seqNo  = amsg.getSequenceNumber();
+            int           wStart = amsg.getWindowStart();
+    		_receiverWindowSpace = amsg.getWindowSpace();
 
             // If they are Acking our SYN message, advance the state
             if ( seqNo == 0 && isConnecting() ) { 
@@ -412,7 +420,36 @@ public class UDPConnectionProcessor {
                 // receive their SYN so move state to CONNECT_STATE
                 // and get ready for activity
                 prepareOpenConnection();
+            } else {
+            	// Record the ack
+				_sendWindow.ackBlock(seqNo);
+			}
+        } else if (msg instanceof DataMessage) {
+            // Pass the data message to the output window
+            DataMessage dmsg = (DataMessage) msg;
+			_receiveWindow.addData(_sequenceNumber, dmsg);  
+
+            // Ack the Data message
+            AckMessage ack = null;
+            try {
+              ack = new AckMessage(_theirConnectionID, dmsg.getSequenceNumber(),
+               _receiveWindow.getWindowStart(),   
+               _receiveWindow.getWindowSpace());
+            } catch (BadPacketException bpe) {
+                // This would not be good.   TODO: ????
+                ErrorService.error(bpe);
             }
+            try {  
+                send(ack);
+            } catch(IllegalArgumentException iae) {
+                // Report an error since this shouldn't ever happen
+                ErrorService.error(iae);
+            }
+        } else if (msg instanceof KeepAliveMessage) {
+            KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
+            int              seqNo  = kmsg.getSequenceNumber();
+            int              wStart = kmsg.getWindowStart();
+    		_receiverWindowSpace    = kmsg.getWindowSpace();
         }
 
         // TODO: fill in
