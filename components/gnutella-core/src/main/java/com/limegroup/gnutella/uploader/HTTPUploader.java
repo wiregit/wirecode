@@ -266,7 +266,7 @@ public class HTTPUploader implements Uploader {
 			setState(INTERRUPTED);
 		}
 
-		if(_alternateLocationCollection != null) {
+		if(_alternateLocationCollection != null && _fileDesc != null) {
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as were 
 			// sent in the request headers
