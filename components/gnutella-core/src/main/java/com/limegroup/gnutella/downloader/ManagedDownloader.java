@@ -1138,8 +1138,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                            "\nour hash    : " + bucketHash +
                            "\ntheir hashes: " +
                            DataUtils.listSet(ifd.getUrns())+
-                          "\nifm.hashes : "+incompleteFileManager.dumpHashes()+
-                          "\ndownloaders : "+manager.dumpDownloaders());
+                          "\nifm.hashes : "+incompleteFileManager.dumpHashes());
                 fileManager.removeFileIfShared(incompleteFile);
                 ifd = null; // do not use, it's bad.
             }
@@ -3383,13 +3382,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             return getAndClearNewResult();
         }
 
-    }
- 
-    public synchronized String toString() {
-        return "numBuckets: "+buckets.numBuckets()+
-        ", currentBucket: "+bucketNumber+
-        ", currentHash: "+buckets.getURNForBucket(bucketNumber)+
-        ", incompleteFile: "+incompleteFile;
     }
    
     private final boolean debugOn = false;
