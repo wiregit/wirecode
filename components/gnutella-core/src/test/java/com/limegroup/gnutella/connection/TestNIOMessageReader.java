@@ -39,8 +39,10 @@ public class TestNIOMessageReader extends NIOMessageReader {
         throws IOException, BadPacketException {
         synchronized(READ_LOCK) {
             Message curMsg = super.createMessageFromTCP(key);
-            MESSAGES.add(curMsg);
-            READ_LOCK.notify();
+            if(curMsg != null) {
+                MESSAGES.add(curMsg);
+                READ_LOCK.notify();
+            }
             return curMsg;
         }
     } 
@@ -73,13 +75,12 @@ public class TestNIOMessageReader extends NIOMessageReader {
             if(MESSAGES.isEmpty()) {
                 try {
                     READ_LOCK.wait(i);
+                    if(MESSAGES.isEmpty()) {
+                        throw new InterruptedIOException("null message read");
+                    }
+                    return (Message)MESSAGES.remove(0);
                 } catch (InterruptedException e) {
                     throw new InterruptedIOException("null message read");
-                }
-                if(MESSAGES.isEmpty()) {
-                    return null;
-                } else {
-                    return (Message)MESSAGES.remove(0);
                 }
             } else {
                 return (Message)MESSAGES.remove(0);
