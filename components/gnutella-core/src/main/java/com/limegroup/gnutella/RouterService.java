@@ -202,7 +202,7 @@ public class RouterService
      * @exception IllegalArgumentException delay or period negative
      * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public void schedule(Runnable task, long delay, long period) {
+    void schedule(Runnable task, long delay, long period) {
         timer.schedule(task, delay, period);
     }
 
