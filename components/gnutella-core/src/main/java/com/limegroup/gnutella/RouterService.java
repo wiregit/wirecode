@@ -10,6 +10,7 @@ import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -168,7 +169,6 @@ public final class RouterService {
 		// start up the UDP server thread
 		catcher.initialize();
 		acceptor.initialize();
-		udpAcceptor.initialize();
 		
 
         // Asynchronously load files now that the GUI is up, notifying
@@ -966,5 +966,48 @@ public final class RouterService {
      */    
 	public static int getPort() {
 		return acceptor.getPort();
+	}
+
+	/**
+	 * Notify the callback that an error of the specified error code has
+	 * occurred.
+	 *
+	 * @param errorCode the code for the error
+	 */
+	public static void error(int errorCode) {
+		callback.error(errorCode);
+	}
+
+	/**
+	 * Notify the callback that an error has occurred with the given 
+	 * <tt>Throwable</tt>.
+	 *
+	 * @param trace the <tt>Throwable</tt> instance containing the stack
+	 *  trace of the error
+	 */
+	public static void error(Throwable trace) {
+		callback.error(trace);
+	}
+
+	/**
+	 * Notify the callback that an error of the specified error code has
+	 * occurred with the given <tt>Throwable</tt>.
+	 *
+	 * @param errorCode the code for the error
+	 * @param trace the <tt>Throwable</tt> instance containing the stack
+	 *  trace of the error
+	 */
+	public static void error(int errorCode, Throwable trace) {
+		callback.error(errorCode, trace);
+	}
+
+	/**
+	 * Adds the specified <tt>UltraPeerListener</tt> to the <tt>List</tt>
+	 * of listeners.
+	 *
+	 * @param listener the <tt>UltraPeerListener</tt> to add
+	 */
+	public static void addUltraPeerListener(UltraPeerListener listener) {
+		manager.addUltraPeerListener(listener);
 	}
 }
