@@ -582,10 +582,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Intersect words(allFiles[i]), for all i.
         Assert.that(allFiles.length>0, "Precondition violated");
         Set intersection=keywords(allFiles[0].getFileName());
-        for (int i=1; i<allFiles.length; i++) {
-            intersection.retainAll(
-                keywords(allFiles[i].getFileName()));
-        }
+//          for (int i=1; i<allFiles.length; i++) {
+//              intersection.retainAll(
+//                  keywords(allFiles[i].getFileName()));
+//          }
 
         //Put the keywords into a string.
         StringBuffer sb = new StringBuffer();
