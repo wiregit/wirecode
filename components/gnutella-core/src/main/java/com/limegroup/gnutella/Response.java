@@ -392,10 +392,6 @@ public class Response {
 				
 				// If it wasn't any of the above, make XML out of it.
                 metaString = createXmlString(name, ext);
-                if(metaString == null || metaString.equals(""))
-                    System.out.println("unknown: " + ext);
-                else
-                    System.out.println("found raw metadata: " + metaString);
                 
 			}			
 			return new Response(index, size, name, metaString, 
