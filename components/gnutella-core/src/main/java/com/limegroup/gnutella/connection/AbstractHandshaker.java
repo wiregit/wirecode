@@ -181,5 +181,22 @@ public abstract class AbstractHandshaker implements Handshaker {
             }
         }        
     }
+    
+    /** 
+     * Returns true iff line ends with "CONNECT/N", where N
+     * is a number greater than or equal "0.6". 
+     */
+    protected static final boolean notLessThan06(String line) {
+        int i=line.indexOf(CONNECT);
+        if (i<0)
+            return false;
+        try {
+            Float F = new Float(line.substring(i+CONNECT.length()));
+            float f = F.floatValue();
+            return f>=0.6f;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
 }
