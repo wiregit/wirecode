@@ -231,14 +231,6 @@ public class Connection implements IpPort {
      */
     private long _connectionTime = Long.MAX_VALUE;
 
-
-    /** if I am a Ultrapeer shielding the given connection */
-    private Boolean _isLeaf=null;
-    /** if I am a leaf connected to a supernode  */
-    private Boolean _isUltrapeer=null;
-    /** if I am an Ultrapeer peering to another Ultrapeer */
-    private Boolean _isUltrapeerToUltrapeer=null;
-
     /**
      * The "soft max" ttl to use for this connection.
      */
@@ -1747,15 +1739,6 @@ public class Connection implements IpPort {
 	 * could be using reflector indexing, for example. 
 	 */
     public boolean isClientSupernodeConnection() {
-        if(_isUltrapeer == null) {
-            _isUltrapeer = 
-                isClientSupernodeConnection2() ?
-                    Boolean.TRUE : Boolean.FALSE;
-        }
-        return _isUltrapeer.booleanValue();
-    }
-
-    private boolean isClientSupernodeConnection2() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
             return false;
@@ -1778,15 +1761,6 @@ public class Connection implements IpPort {
 	 * could be using reflector indexing, for example. 
 	 */
     public boolean isSupernodeSupernodeConnection() {
-        if(_isUltrapeerToUltrapeer == null) {
-            _isUltrapeerToUltrapeer = 
-                isSupernodeSupernodeConnection2() ?
-                    Boolean.TRUE : Boolean.FALSE;
-        }
-        return _isUltrapeerToUltrapeer.booleanValue();
-    }
-
-    private boolean isSupernodeSupernodeConnection2() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
             return false;
@@ -1835,18 +1809,6 @@ public class Connection implements IpPort {
      *  if I wrote "X-Ultrapeer: true" and this connection wrote 
 	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
-        if(_isLeaf == null) {
-            _isLeaf =
-                isSupernodeClientConnection2() ?
-                    Boolean.TRUE : Boolean.FALSE;
-        }
-        return _isLeaf.booleanValue();
-    }
-    
-    /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
-	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
-    private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isLeafConnection())
             return false;
