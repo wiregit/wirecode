@@ -1153,6 +1153,23 @@ public class RouterService {
     public static boolean getIsShuttingDown() {
 		return isShuttingDown;
     }
+    
+    /**
+     * Notifies components that this' IP address has changed.
+     */
+    public static boolean addressChanged() {
+        // Only continue if the current address/port is valid.
+        if(!NetworkUtils.isValidAddress(getAddress()))
+            return false;
+        if(!NetworkUtils.isValidPort(getPort()))
+            return false;
+
+        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++)
+            fds[i].addUrnsForSelf();
+
+        return true;
+    }
 
 	/**
 	 * Returns the raw IP address for this host.
