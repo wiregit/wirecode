@@ -799,19 +799,19 @@ s	 * @param manager the <tt>ConnectionManager</tt> that provides
      */
     private static boolean shouldDropReply(int bytesRouted, int ttl) {
         // send replies with ttl above 3 if we've routed under 50K 
-        if(ttl > 3 && bytesRouted < 50    * 1024) return true;
+        if(ttl > 3 && bytesRouted < 50    * 1024) return false;
         // send replies with ttl 0 if we've routed under 50K, as this 
 		// shouldn't happen 
-        if(ttl == 0 && bytesRouted < 50   * 1024) return true;
+        if(ttl == 0 && bytesRouted < 50   * 1024) return false;
         // send replies with ttl 1 if we've routed under 1000K 
-        if(ttl == 1 && bytesRouted < 1000 * 1024) return true;
+        if(ttl == 1 && bytesRouted < 1000 * 1024) return false;
         // send replies with ttl 2 if we've routed under 333K 
-        if(ttl == 2 && bytesRouted < 333  * 1024) return true;
+        if(ttl == 2 && bytesRouted < 333  * 1024) return false;
         // send replies with ttl 3 if we've routed under 111K 
-        if(ttl == 3 && bytesRouted < 111  * 1024) return true;
+        if(ttl == 3 && bytesRouted < 111  * 1024) return false;
 
         // if none of the above conditions holds true, drop the reply
-        return false;
+        return true;
     }
 
     /**
