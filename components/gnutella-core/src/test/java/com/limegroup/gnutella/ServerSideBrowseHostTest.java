@@ -405,6 +405,31 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());
+        s.close();
+        in.close();
     }
+
+
+    public void testBadHTTPRequest1() throws Exception {
+        Message m = null;
+        String result = null;
+
+        Socket s = new Socket("localhost", PORT);
+        ByteReader in = new ByteReader(s.getInputStream());
+        BufferedWriter out = 
+            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        // first test a GET
+        out.write("GET /  HTTP/1.1\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode
+        result = in.readLine();
+        assertGreaterThan(result, -1, result.indexOf("406"));
+        s.close();
+        in.close();
+    }
+
     
 }
