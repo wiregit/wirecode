@@ -130,6 +130,7 @@ public class Trie {
 
     /**
      * Returns an iterator of all values associated with key, in any order.
+     * Calling the remove() method on the iterator is undefined.
      */
     public Iterator getAll(String key) {
         TrieNode node=fetch(key);
@@ -184,7 +185,7 @@ public class Trie {
      * Returns an iterator (of Object) of the values mapped by the given prefix,
      * in any order.  That is, the returned iterator contains exactly the values
      * v for which there exists a key k s.t. k.startsWith(prefix) and getAll(k) 
-     * contains v.
+     * contains v.  The remove() operation on the iterator in unimplemented.
      *
      * @requires this not modified while iterator in use.  
      */
@@ -201,31 +202,79 @@ public class Trie {
     public Iterator getPrefixedBy(String prefix,
                                   int startOffset, int stopOffset) {
         TrieNode node=root;
-        //1. Find first node start with prefix in tree.
+        //Find first node start with prefix in tree.
         for (int i=startOffset; i<stopOffset; i++) {
             node=node.get(canonicalCase(prefix.charAt(i)));
             if (node==null) 
                 return new EmptyIterator();
         }
-        //2. Find all non-null values in children of node via DFS, putting them
-        //into a temporary list.  Note: if we expect the caller to only iterate
-        //through some of the values, we can do this work incrementally.
-        //Otherwise, it's not worth the trouble.
+        //Yield non-null values from it.
+        return new ValueIterator(node);
+    }
+
+    /** Returns all the non-null values associated with a given
+     *  node and its children. */
+    private class ValueIterator extends UnmodifiableIterator {
+        /** Queue for DFS. Push and pop from back. */
         LinkedList /* of TrieNode */ queue=new LinkedList();
-        LinkedList /* of Object */ values=new LinkedList();
-        queue.addLast(node);
-        while (queue.size() > 0) {
-            node=(TrieNode)queue.removeLast();
-            //TODO3: avoid allocating the iterator here.
-            for (Iterator iter=node.children(); iter.hasNext(); ) {
-                queue.addLast(iter.next());
-            }
-            List value=(List)node.getValue();
-            if (value!=null)
-                values.addAll(value);
+        /** The next element to yield of queue.getLast().
+         *  INVARIANT: this is a valid index of queue.getLast() */
+        int i;
+        
+        /** Creates a new iterator that yields all the node of start
+         *  and its children. */
+        ValueIterator(TrieNode start) {
+            queue.add(start);
+            i=-1;
+            advance(); 
         }
-        //3. Return iterator of temporary list.
-        return values.iterator();
+        
+        /** 
+         * Modifies i and queue s.t. queue.getLast()[i] is the next
+         * element to yield.  If there are no more elements to yield,
+         * queue is emptied.
+         * @requires queue not empty
+         */
+        private void advance() {   
+            Assert.that(queue.size()>0, "Queue empty");
+            //Increment i without modifying queue if possible.
+            i++;
+
+            //Verify it's still good.  If not, use DFS to search for next node
+            //with a non-null value.
+            while (queue.size() > 0) {
+                TrieNode node=(TrieNode)queue.getLast();
+                List list=(List)node.getValue();
+                if (list!=null && i<list.size())
+                    return;     //still good!
+
+                //Discard node, expanding it's children.
+                queue.removeLast();
+                for (Iterator iter=node.children(); iter.hasNext(); ) 
+                    queue.addLast(iter.next());
+                i=0;
+            }
+        }
+
+        public boolean hasNext() {
+            return queue.size()>0;
+        }
+
+        public Object next() {
+            if (! hasNext()) {
+                throw new NoSuchElementException();
+            }
+            TrieNode node=(TrieNode)queue.getLast();
+            List list=(List)node.getValue();
+            Assert.that(list!=null, "Next node has null value");
+            Object ret=list.get(i);
+            advance();
+            return ret;
+        }
+
+        public String toString() {
+            return queue.toString()+"/"+i;
+        }
     }   
 
     /** Yields nothing. */
@@ -317,6 +366,7 @@ public class Trie {
 
         //Yield many elements...
         iter=t.getPrefixedBy("a");
+        Assert.that(iter.hasNext());
         tmp1=iter.next();
         Assert.that(tmp1==aVal || tmp1==anVal || tmp1==addVal || tmp1==antVal);
         tmp2=iter.next();
@@ -394,7 +444,6 @@ public class Trie {
         Assert.that(! iter.hasNext());
 
         Assert.that(t.add("ant", antVal)==false);
-        System.out.println(t.toString());
         Assert.that(t.add("ant", antVal0)==true);
         iter=t.getPrefixedBy("an");
         tmp1=iter.next();
@@ -557,6 +606,14 @@ class TrieNode {
             i++;
             return new Character(pair.c);
         }
+    }
+
+    public String toString() {
+        Object val=getValue();
+        if (val==null)
+            return "NULL";
+        else
+            return val.toString();
     }
 
     static void unitTest() {
