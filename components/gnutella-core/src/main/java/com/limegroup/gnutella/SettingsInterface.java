@@ -109,6 +109,7 @@ public interface SettingsInterface {
 	public static final boolean DEFAULT_RUN_ONCE = false;
 	public static final boolean DEFAULT_SHOW_TRAY_DIALOG = true;
 	public static final boolean DEFAULT_MINIMIZE_TO_TRAY = true;
+	public static final boolean DEFAULT_SHOW_CLOSE_DIALOG = true;
 
 
     // The property key name constants
@@ -174,6 +175,7 @@ public interface SettingsInterface {
 	public static final String WINDOW_Y           = "WINDOW_Y";
 	public static final String SHOW_TRAY_DIALOG   = "SHOW_TRAY_DIALOG";
 	public static final String MINIMIZE_TO_TRAY   = "MINIMIZE_TO_TRAY";
+	public static final String SHOW_CLOSE_DIALOG  = "SHOW_CLOSE_DIALOG";
 }
 
 

@@ -479,6 +479,17 @@ public class SettingsManager implements SettingsInterface {
                         break;
 					setMinimizeToTray(minimize);
 				}
+
+				else if(key.equals(SHOW_CLOSE_DIALOG)) {
+					boolean showCloseDialog;
+                    if (p.equals("true"))
+                        showCloseDialog = true;
+                    else if (p.equals("false"))
+                        showCloseDialog = false;
+                    else
+                        break;
+					setShowCloseDialog(showCloseDialog);
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -563,6 +574,7 @@ public class SettingsManager implements SettingsInterface {
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
+		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
     }
 
 
@@ -836,6 +848,15 @@ public class SettingsManager implements SettingsInterface {
 	 * during a single session
 	 */
 	public boolean getAcceptedIncoming() {return acceptedIncoming_;}
+
+	/**
+	 * returns a boolean specifying whether or not the close
+	 * dialog window should be shown.
+	 */
+	public boolean getShowCloseDialog() {
+		Boolean b = Boolean.valueOf(props_.getProperty(SHOW_CLOSE_DIALOG));
+		return b.booleanValue();	
+	}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1726,6 +1747,15 @@ public class SettingsManager implements SettingsInterface {
 
 	public void setAcceptedIncoming(boolean incoming) {
 		acceptedIncoming_ = incoming;
+	}
+
+	/**
+	 * sets the flag for whether or not the close dialog
+	 * window should be shown.
+	 */
+	public void setShowCloseDialog(boolean showDialog) {
+		Boolean b = new Boolean(showDialog);
+		props_.put(SHOW_CLOSE_DIALOG, b.toString());
 	}
 	
     /******************************************************
