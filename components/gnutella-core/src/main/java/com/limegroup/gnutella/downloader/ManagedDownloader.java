@@ -151,7 +151,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Also, always hold stealLock's monitor before REMOVING elements from 
      * needed. As always, we must obtain this' monitor before modifying needed.
      ***********************************************************************/
-    private Object stealLock = new Object();
+    private Object stealLock;
 
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
@@ -381,6 +381,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
+        stealLock = new Object();
         stopped=false;
         corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
