@@ -136,6 +136,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 	}
 
 	/**
+	 * Implements <tt>ReplyHandler</tt> interface.  Always returns 
+	 * <tt>false</tt> because leaves are connected via TCP, not UDP.
+	 *
+	 * @return <tt>false</tt>, since leaves never maintain their connections
+	 *  via UDP, only TCP
+	 */
+	public boolean isLeafConnection() {
+		return false;
+	}
+
+	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
 	 */
