@@ -16,7 +16,7 @@ public final class MessageWriterProxy implements MessageWriter {
     /**
      * Constant for the delegate class that implements all writing methods.
      */
-    private MessageWriter DELEGATE;
+    private final MessageWriter DELEGATE;
     
     /**
      * Creates a new <tt>MessageWriterProxy</tt> instance that delegates to
