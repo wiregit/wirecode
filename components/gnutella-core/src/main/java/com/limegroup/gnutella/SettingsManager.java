@@ -1210,7 +1210,7 @@ public final class SettingsManager {
      * reasonable values are always loaded even in the case of any
      * failure in loading the properties file from disk.
 	 */
-    private void loadDefaults() {
+    public void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
         setMaxTTL(DEFAULT_MAX_TTL);
         setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
