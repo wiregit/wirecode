@@ -80,7 +80,7 @@ public final class URNFactory {
 	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	 */
 	public static String createHttpUrnFileString(final URN urn) {
-		return HTTPConstants.URI_RES_N2R + urn.getUrnString();
+		return HTTPConstants.URI_RES_N2R + urn.stringValue();
 	}
 
 	/**
