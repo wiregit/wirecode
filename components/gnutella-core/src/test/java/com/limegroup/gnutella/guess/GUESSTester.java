@@ -103,7 +103,7 @@ public class GUESSTester extends TestCase {
 
     public void testSmall() {
         try {
-            assertTrue(testAck("10.254.0.19", 6346));
+            assertTrue(testAck("10.254.0.19", 6346) > 0);
             assertTrue(testQuery("10.254.0.19", 6346,
                                  new QueryRequest((byte) 1, 0, 
                                                   "morrissey")) != null);
@@ -114,9 +114,9 @@ public class GUESSTester extends TestCase {
     }
 
     /** This method blocks for possibly several seconds.
-     *  @return true if the ack was recieved (in a timely fashion).  
+     *  @return a non-negative value if the ack was recieved.  else 0...
      */
-    public synchronized boolean testAck(String host, int port) 
+    public synchronized long testAck(String host, int port) 
         throws UnknownHostException, IOException {
         synchronized (_pongLock) {
             _pong = null;
@@ -128,15 +128,20 @@ public class GUESSTester extends TestCase {
         DatagramPacket toSend = new DatagramPacket(baos.toByteArray(),
                                                    baos.toByteArray().length,
                                                    addr, port);
+        long startTime = 0, endTime = 0;
         synchronized (_pongLock) {
+            startTime = System.currentTimeMillis();
             _socket.send(toSend);
             try {
                 // wait up to 2.5 seconds for an ack....
                 _pongLock.wait(WAIT_TIME);
             }
             catch (InterruptedException ignored) {}
+            endTime = System.currentTimeMillis();
         }
-        return (_pong != null);
+        if (_pong == null)
+            return 0;
+        else return (endTime - startTime);
     }
 
     /** This method blocks for possibly several seconds.

@@ -22,12 +22,12 @@ public class GUESSStatistics {
         float numAttempted = 0, numReceived = 0, timeSum = 0;
         GUESSTester tester = new GUESSTester("whatever");
         while (numAttempted < 100) {
-            long startTime = System.currentTimeMillis();
             try {
-                if (tester.testAck(host, port)) {
+                long timeTook = tester.testAck(host, port);
+                if (timeTook > 0) {
                     numReceived++;
                     long endTime = System.currentTimeMillis();
-                    timeSum += (endTime - startTime);
+                    timeSum += timeTook;
                 }
             }
             catch (Exception ignored) {}
