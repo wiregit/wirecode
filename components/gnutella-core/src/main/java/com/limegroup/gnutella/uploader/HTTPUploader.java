@@ -231,18 +231,8 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void stop() {
-		try {
-			if (_ostream != null)
-				_ostream.close();
-		} catch (IOException e) {}
-		try {
-			if (_fis != null)
-				_fis.close();
-		} catch (IOException e) {}
-		try {
-			if (_socket != null) 
-				_socket.close();
-		} catch (IOException e) {}
+        closeFileStreams();
+        NetworkUtils.closeSocket(_socket);
 	}
 	
 	/**
