@@ -157,10 +157,10 @@ public class QueryRequest extends Message implements Serializable{
             minSpeed = 0x00000080; 
             // set the firewall bit if i'm firewalled
             if (isFirewalled)
-                minSpeed |= 0x01;
+                minSpeed |= 0x40;
             // LimeWire's ALWAYS want rich results....
             if (true)
-                minSpeed |= 0x02;
+                minSpeed |= 0x20;
         }
         this.minSpeed=minSpeed;
 		if(query == null) {
@@ -436,7 +436,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean isFirewalledSource() {
         if ((minSpeed & 0x0080) > 0) {
-            if ((minSpeed & 0x0001) > 0)
+            if ((minSpeed & 0x0040) > 0)
                 return true;
         }
         return false;
@@ -448,7 +448,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresXMLResponses() {
         if ((minSpeed & 0x0080) > 0) {
-            if ((minSpeed & 0x0002) > 0)
+            if ((minSpeed & 0x0020) > 0)
                 return true;
         }
         return false;        

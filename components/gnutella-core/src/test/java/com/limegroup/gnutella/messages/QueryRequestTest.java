@@ -202,7 +202,7 @@ public final class QueryRequestTest extends TestCase {
 					 qr.getRequestedUrnTypes(), Collections.EMPTY_SET);
 		assertEquals("URN Set should be the empty set", 
 					 qr.getQueryUrns(), Collections.EMPTY_SET);
-		assertEquals("min speeds don't match", 130, qr.getMinSpeed());
+		assertEquals("min speeds don't match", 160, qr.getMinSpeed());
 
 		try {
 			Set queryUrns = qr.getQueryUrns();
@@ -396,20 +396,20 @@ public final class QueryRequestTest extends TestCase {
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
 
-        // firewalled and not wanting rich, just 10000001
-        payload[0] = (byte) 0x81;
+        // firewalled and not wanting rich, just 11000000
+        payload[0] = (byte) 0xC0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
 
-        // not firewalled and wanting rich, just 10000010
-        payload[0] = (byte) 0x82;
+        // not firewalled and wanting rich, just 10100000
+        payload[0] = (byte) 0xA0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
 
-        // firewalled and wanting rich, just 10000011
-        payload[0] = (byte) 0x83;
+        // firewalled and wanting rich, just 11100000
+        payload[0] = (byte) 0xE0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
