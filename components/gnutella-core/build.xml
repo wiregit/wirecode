@@ -2,22 +2,7 @@
 
 <!-- set global properties for this basedir -->
 <property name="basedir" value="."/>
-<property name="releasedir" value="../release"/>
-<property name="downloader" value="com/limegroup/gnutella/downloader"/>
-<property name="filters" value="com/limegroup/gnutella/filters"/>
 <property name="tests" value="com/limegroup/gnutella/tests"/>
-<property name="uploader" value="com/limegroup/gnutella/uploader"/>
-<property name="util" value="com/limegroup/gnutella/util"/>
-<property name="xml" value="com/limegroup/gnutella/xml"/>
-<property name="routing" value="com/limegroup/gnutella/routing"/>
-<property name="chat" value="com/limegroup/gnutella/chat"/>
-<property name="gnutella" value="com/limegroup/gnutella"/>
-<property name="handshaking" value="com/limegroup/gnutella/handshaking"/>
-<property name="connection" value="com/limegroup/gnutella/connection"/>
-<property name="mp3" value="com/limegroup/gnutella/mp3"/>
-<property name="security" value="com/limegroup/gnutella/security"/>
-<property name="bootstrap" value="com/limegroup/gnutella/bootstrap"/>
-<property name="bzutil" value="com/bitzi/util"/>
 
 
 <!-- constants -->
@@ -69,23 +54,6 @@
 	<delete>
 		<fileset dir="${basedir}/com" includes="**/*.class"/>
 	</delete>
-</target>
-
-<!-- CLEAN RELEASE -->
-<target name="cleanrelease">
-	<delete>
-		<fileset dir="${releasedir}/com" includes="**/*.class"/>
-	</delete>
-</target>
-
-<!-- RELEASE -->
-<target name="release" depends="init">
-	<javac debug="no" optimize="yes"
-		srcdir="${basedir}" destdir="${releasedir}"
-		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${routing}/**,${chat}/**,${mp3}/**,${security}/**,${handshaking}/**"
-	>
-      <classpath refid="default.classpath" />
-    </javac>
 </target>
 
 </project>
