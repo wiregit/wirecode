@@ -46,7 +46,7 @@ public abstract class AbstractStatHandler {
 	/**
 	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
 	 */
-	private static final StatisticsManager STATS_MANAGER = 
+	protected static final StatisticsManager STATS_MANAGER = 
 		StatisticsManager.instance();
 
 	/**
