@@ -204,8 +204,9 @@ public class WriteRegulator {
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
 				minTime = lowRTT / 4;
+				if ( gettingSlow == 0 )
+            		_skipLimit--;
 				gettingSlow = 50;
-            	_skipLimit--;
                 //sleepTime = (16*rtt) / 7;
                 if(LOG.isDebugEnabled())  
                     LOG.debug(
