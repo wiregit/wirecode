@@ -404,7 +404,7 @@ public class VersionUpdate
 		String message = "Your LimeWire update has encountered an "+
 		"internal error ";
 		message += error;
-		message += "Please e-mail LimeWire support at "+
+		message += "  Please e-mail LimeWire support at "+
 		"\"support@limewire.com\" with this error.  You can download "+
 		"the new version of LimeWire from www.limewire.com.";
 		Utilities.showMessage(message);							  
