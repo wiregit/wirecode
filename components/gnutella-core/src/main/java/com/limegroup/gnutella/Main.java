@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * The command-line UI for the Gnutella servent.

@@ -1,10 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.util.*;
+import java.util.Properties;
+import com.sun.java.util.collections.*;
 //import java.io.IOException;
 import java.lang.IllegalArgumentException;
 import com.limegroup.gnutella.gui.Backend;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
 
 /** 
  *  This class manages the property settings.  It maintains
@@ -70,6 +73,7 @@ public class SettingsManager implements SettingsInterface
     private String home_;
     private String fileName_;
     private String ndFileName_;
+    private String saveShareDir_;
 
     /**
      * This method provides the only access
@@ -88,6 +92,7 @@ public class SettingsManager implements SettingsInterface
      */
     private SettingsManager()
     {
+	
 	props_      = new Properties();
 	ndProps_    = new Properties();
 	fileSep_    = System.getProperty("file.separator");
@@ -490,7 +495,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		ttl_ = ttl;
 		String s = Byte.toString(ttl_);
-		props_.setProperty(SettingsInterface.TTL, s);
+		props_.put(SettingsInterface.TTL, s);
 		writeProperties();
 	    }
     }
@@ -505,7 +510,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		softmaxttl_ = softmaxttl;
 		String s = Byte.toString(softmaxttl);
-		props_.setProperty(SettingsInterface.SOFT_MAX_TTL, s);
+		props_.put(SettingsInterface.SOFT_MAX_TTL, s);
 		writeProperties();
 	    }
     }
@@ -520,7 +525,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		maxttl_ = maxttl;
 		String s = Byte.toString(maxttl_);
-		props_.setProperty(SettingsInterface.MAX_TTL, s);
+		props_.put(SettingsInterface.MAX_TTL, s);
 		writeProperties();
 	    }
     }
@@ -535,7 +540,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		maxLength_ = maxLength;
 		String s = Integer.toString(maxLength_);
-		props_.setProperty(SettingsInterface.MAX_LENGTH, s);
+		props_.put(SettingsInterface.MAX_LENGTH, s);
 		writeProperties();
 	    }
     }
@@ -550,7 +555,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		timeout_ = timeout;
 		String s = Integer.toString(timeout_);
-		props_.setProperty(SettingsInterface.TIMEOUT, s);
+		props_.put(SettingsInterface.TIMEOUT, s);
 		writeProperties();
 	    }
 		
@@ -566,7 +571,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		keepAlive_ = keepAlive;
 		String s = Integer.toString(keepAlive_);
-		props_.setProperty(SettingsInterface.KEEP_ALIVE, s);
+		props_.put(SettingsInterface.KEEP_ALIVE, s);
 		writeProperties();
 	    }
     }
@@ -583,7 +588,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		port_ = port;
 		String s = Integer.toString(port_);
-		props_.setProperty(SettingsInterface.PORT, s);
+		props_.put(SettingsInterface.PORT, s);
 		writeProperties();		    
 	    }
     }
@@ -600,7 +605,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		connectionSpeed_ = speed;
 		String s = Integer.toString(connectionSpeed_);
-		props_.setProperty(SettingsInterface.SPEED, s);
+		props_.put(SettingsInterface.SPEED, s);
 		writeProperties();
 	    }
     }
@@ -616,7 +621,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		searchLimit_ = limit;
 		String s = Byte.toString(searchLimit_);
-		props_.setProperty(SettingsInterface.SEARCH_LIMIT, s);
+		props_.put(SettingsInterface.SEARCH_LIMIT, s);
 		writeProperties();
 	    }
     }
@@ -629,7 +634,7 @@ public class SettingsManager implements SettingsInterface
 	else
 	    {
 		clientID_ = clientID;
-		props_.setProperty(SettingsInterface.CLIENT_ID, clientID_);
+		props_.put(SettingsInterface.CLIENT_ID, clientID_);
 		writeProperties();
 	    }
     }
@@ -645,7 +650,7 @@ public class SettingsManager implements SettingsInterface
 		stats_ = stats;
 		Boolean b = new Boolean(stats_);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.STATS, s);
+		props_.put(SettingsInterface.STATS, s);
 		writeProperties();
 	    }
     }
@@ -659,7 +664,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		maxConn_ = maxConn;		
 		String s = Integer.toString(maxConn_);
-		props_.setProperty(SettingsInterface.MAX_CONN, s);
+		props_.put(SettingsInterface.MAX_CONN, s);
 		writeProperties();
 	    }
     }
@@ -677,7 +682,7 @@ public class SettingsManager implements SettingsInterface
 	else
 	    {
 		saveDirectory_ = dir;
-		props_.setProperty(SettingsInterface.SAVE_DIRECTORY, dir);
+		props_.put(SettingsInterface.SAVE_DIRECTORY, dir);
 		writeProperties();
 	    }
     }
@@ -692,7 +697,7 @@ public class SettingsManager implements SettingsInterface
 		FileManager.getFileManager().reset();
 		FileManager.getFileManager().addDirectories(dir);
 		directories_ = dir;
-		props_.setProperty(SettingsInterface.DIRECTORIES, dir);
+		props_.put(SettingsInterface.DIRECTORIES, dir);
 		writeProperties();
 	    }
     }
@@ -706,7 +711,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		FileManager.getFileManager().setExtensions(ext);
 		extensions_ = ext;			    
-		props_.setProperty(SettingsInterface.EXTENSIONS, ext);
+		props_.put(SettingsInterface.EXTENSIONS, ext);
 		writeProperties();
 	    }
     }
@@ -718,7 +723,7 @@ public class SettingsManager implements SettingsInterface
 	else
 	    {
 		bannedIps_ = bannedIps;
-		props_.setProperty(SettingsInterface.BANNED_IPS, 
+		props_.put(SettingsInterface.BANNED_IPS, 
 				   encode(bannedIps));
 		writeProperties();
 	    }
@@ -731,7 +736,7 @@ public class SettingsManager implements SettingsInterface
 	else
 	    {
 		bannedWords_ = bannedWords;
-		props_.setProperty(SettingsInterface.BANNED_WORDS, 
+		props_.put(SettingsInterface.BANNED_WORDS, 
 				   encode(bannedWords));
 		writeProperties();
 	    }
@@ -746,7 +751,7 @@ public class SettingsManager implements SettingsInterface
 		filterAdult_ = filterAdult;
 		Boolean b = new Boolean(filterAdult);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.FILTER_ADULT, s);
+		props_.put(SettingsInterface.FILTER_ADULT, s);
 		writeProperties();
 	    }
     }
@@ -760,7 +765,7 @@ public class SettingsManager implements SettingsInterface
 		filterDuplicates_ = filterDuplicates;
 		Boolean b = new Boolean(filterDuplicates);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.FILTER_DUPLICATES, s);
+		props_.put(SettingsInterface.FILTER_DUPLICATES, s);
 		writeProperties();
 	    }
     }
@@ -773,7 +778,7 @@ public class SettingsManager implements SettingsInterface
 		filterHtml_ = filterHtml;
 		Boolean b = new Boolean(filterHtml);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.FILTER_HTML, s);
+		props_.put(SettingsInterface.FILTER_HTML, s);
 		writeProperties();
 	
 	    }
@@ -787,7 +792,7 @@ public class SettingsManager implements SettingsInterface
 		filterVbs_ = filterVbs;
 		Boolean b = new Boolean(filterVbs);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.FILTER_VBS, s);
+		props_.put(SettingsInterface.FILTER_VBS, s);
 		writeProperties();	
 	    }
     }
@@ -800,7 +805,7 @@ public class SettingsManager implements SettingsInterface
 		useQuickConnect_ = useQuickConnect;
 		Boolean b = new Boolean(useQuickConnect);
 		String s = b.toString();
-		props_.setProperty(SettingsInterface.USE_QUICK_CONNECT, s);
+		props_.put(SettingsInterface.USE_QUICK_CONNECT, s);
 		writeProperties();	
 	    }
     }
@@ -810,7 +815,7 @@ public class SettingsManager implements SettingsInterface
 	else
 	    {
 		quickConnectHosts_ = hosts;
-		props_.setProperty(SettingsInterface.QUICK_CONNECT_HOSTS, 
+		props_.put(SettingsInterface.QUICK_CONNECT_HOSTS, 
 				   encode(hosts));
 		writeProperties();
 	    }
@@ -824,7 +829,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		parallelSearchMax_ = max;
 		String s = String.valueOf(max);
-		props_.setProperty(SettingsInterface.PARALLEL_SEARCH, s);
+		props_.put(SettingsInterface.PARALLEL_SEARCH, s);
 		writeProperties();	
 	    }
     }
@@ -837,7 +842,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		searchAnimationTime_=seconds;
 		String s = Integer.toString(seconds);
-		props_.setProperty(SettingsInterface.SEARCH_ANIMATION_TIME, s);
+		props_.put(SettingsInterface.SEARCH_ANIMATION_TIME, s);
 		writeProperties();
 	    }
     }
@@ -850,7 +855,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		maxSimDownload_ = max;
 		String s = String.valueOf(max);
-		props_.setProperty(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+		props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
 		writeProperties();	
 	    }
     }
@@ -863,7 +868,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		clearCompletedUpload_ = b;
 		String s = String.valueOf(b);
-		props_.setProperty(SettingsInterface.CLEAR_UPLOAD, s);
+		props_.put(SettingsInterface.CLEAR_UPLOAD, s);
 		writeProperties();	
 	    }
     }
@@ -876,7 +881,7 @@ public class SettingsManager implements SettingsInterface
 	    {
 		clearCompletedDownload_ = b;
 		String s = String.valueOf(b);
-		props_.setProperty(SettingsInterface.CLEAR_DOWNLOAD, s);
+		props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
 		writeProperties();	
 	    }
     }
@@ -914,7 +919,7 @@ public class SettingsManager implements SettingsInterface
     {
 	try {
 	    FileOutputStream ostream = new FileOutputStream(ndFileName_);
-	    props_.store(ostream, "Properties file for Network Discovery");
+	    props_.save(ostream, "Properties file for Network Discovery");
 	    ostream.close();
 	} 
 	catch (Exception e){}
@@ -927,7 +932,7 @@ public class SettingsManager implements SettingsInterface
     {
         try {
 	    FileOutputStream ostream = new FileOutputStream(fileName_);
-	    props_.store(ostream, SettingsInterface.HEADER);
+	    props_.save(ostream, SettingsInterface.HEADER);
 	    ostream.close();
 	} 
 	catch (Exception e){}

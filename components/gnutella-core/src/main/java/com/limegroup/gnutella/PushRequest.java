@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.util.Arrays;
+import com.sun.java.util.collections.Arrays;
 
 /**
  * A Gnutella push request, used to download files behind a firewall.

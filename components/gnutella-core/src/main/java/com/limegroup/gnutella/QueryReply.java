@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /** 
  * A query reply.  Contains information about the responding host in

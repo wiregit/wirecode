@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
+import java.util.Properties;
+import com.sun.java.util.collections.*;
 import java.io.IOException;
 
 /**

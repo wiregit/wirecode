@@ -2,7 +2,8 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
-import java.util.*;
+import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
 
 
 public class ResponseVerifier{

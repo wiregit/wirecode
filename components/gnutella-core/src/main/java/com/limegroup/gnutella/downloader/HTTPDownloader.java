@@ -10,7 +10,9 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Date;
+import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
 
 public class HTTPDownloader implements Runnable {
 

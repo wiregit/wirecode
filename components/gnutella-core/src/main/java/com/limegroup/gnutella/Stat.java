@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
+import java.util.GregorianCalendar;
+import java.util.Date;
 
 
 /**

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.util.Random;
+import com.sun.java.util.collections.Random;
 import java.io.*;
 
 /**

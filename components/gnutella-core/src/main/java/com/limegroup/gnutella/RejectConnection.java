@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  *This class extends Connection and is invkoed when the Connection Manager has reached it's

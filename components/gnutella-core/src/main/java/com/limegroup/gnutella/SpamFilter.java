@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.filters.*;
-import java.util.Vector;
+import com.sun.java.util.collections.Vector;
 
 /** 
  * A filter to eliminate Gnutella spam.  Subclass to implement custom
