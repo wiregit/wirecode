@@ -59,17 +59,17 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private Connection LEAF;
+    private static Connection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private Connection ULTRAPEER_1;
+    private static Connection ULTRAPEER_1;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private Connection ULTRAPEER_2;
+    private static Connection ULTRAPEER_2;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -89,7 +89,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	private void buildConnections() {
+	private static void buildConnections() {
 	    LEAF =
 			new Connection("localhost", PORT, 
 						   new ClientProperties("localhost"),
@@ -109,7 +109,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 						   );
     }
 
-	public void setUp() throws Exception {
+    public static void setSettings() {
 		AbstractSettings.revertToDefault();
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
@@ -132,7 +132,10 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+    }
 
+	public static void globalSetUp() throws Exception {
+        setSettings();
 
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
@@ -145,7 +148,13 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 					 SettingsManager.instance().getPort());
 	}
 
-	public void tearDown() throws Exception {
+    
+    public void setUp() {
+        setSettings();
+    }
+
+
+	public static void globalTearDown() throws Exception {
 		ROUTER_SERVICE.disconnect();
 		sleep();
 		LEAF.close();
@@ -154,18 +163,18 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		sleep();
 	}
 
-	private void sleep() {
+	private static void sleep() {
 		try {Thread.sleep(300);}catch(InterruptedException e) {}
 	}
 
 	/**
 	 * Drains all messages 
 	 */
- 	private void drainAll() throws Exception {
+ 	private static void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
  			drain(ULTRAPEER_1);
  		}
- 		if(ULTRAPEER_1.isOpen()) {
+ 		if(ULTRAPEER_2.isOpen()) {
  			drain(ULTRAPEER_2);
  		}
  		if(LEAF.isOpen()) {
@@ -176,7 +185,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 	/**
 	 * Connects all of the nodes to the central test Ultrapeer.
 	 */
-    private void connect() throws Exception {
+    private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
@@ -187,7 +196,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
         QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("test");
+        qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
@@ -198,7 +207,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // for Ultrapeer 1
         qrt = new QueryRouteTable();
         qrt.add("leehsus");
-        qrt.add("awesome");
+        qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             ULTRAPEER_1.send((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
@@ -245,7 +254,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 	 *
 	 * @param m the <tt>Message</tt> to check
 	 */
-	private void assertQuery(Message m) {
+	private static void assertQuery(Message m) {
 		if(m instanceof QueryRequest) return;
 
 		System.out.println(m); 
@@ -258,7 +267,41 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     // ------------------------------------------------------
 
     public void testBasicProbeMechanics() throws Exception {
+        drainAll();
 
+        QueryRequest request = QueryRequest.createQuery("berkeley");
+        request.setTTL((byte)1);
+
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+
+        // should NOT be forwarded to other Ultrapeer
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        Thread.sleep(2*1000);
+
+        // extend the probe....
+        request.setTTL((byte)2);
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        try {
+            LEAF.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
     }
 
 }
