@@ -2,7 +2,6 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.*;
 import java.net.*;
-import java.util.Date;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;

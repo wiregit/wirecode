@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.io.*;
