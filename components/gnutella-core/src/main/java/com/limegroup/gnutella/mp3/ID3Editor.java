@@ -307,31 +307,27 @@ public class ID3Editor{
                         byte[] buffer){
         debug("writing value to file "+val);
         byte[] fromString;
-        if(val==null || val.equals("")){
+        
+        if (val==null || val.equals("")) {
             fromString = new byte[maxLen];
             Arrays.fill(fromString,0,maxLen-1,(byte)0);//fill it all with 0
-        }
-        else
+        } else
             fromString = val.getBytes();
+            
         int len = fromString.length;
-        if(len < maxLen){
+        if (len < maxLen) {
             System.arraycopy(fromString,0,buffer,0,len);
             Arrays.fill(buffer,len,maxLen-1,(byte)0);//fill the rest with 0s
-        }
-        else//cut off the rest
+        } else//cut off the rest
             System.arraycopy(fromString,0,buffer,0,maxLen);
-        try{
+            
+        try {
             file.write(buffer,0,maxLen);
-        }catch (IOException e){
+        } catch (IOException e){
             return false;
         }
-    return true;
-    }
 
-    private String getInfo(String tag){
-        int i = tag.indexOf(">");//end of opening  tag
-        int j = tag.indexOf("<",i);//begining of closing tag
-        return tag.substring(i+1,j);
+        return true;
     }
 
     private byte getGenreByte(){
