@@ -277,6 +277,8 @@ public class RemoteFileDesc implements Serializable {
 				 _urns.equals(other._urns)));		
     }
 
+	//TODO:: ADD HASHCODE OVERRIDE
+
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName()+"/"+getSize()+", "
