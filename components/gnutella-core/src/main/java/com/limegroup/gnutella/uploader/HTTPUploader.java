@@ -706,14 +706,13 @@ public class HTTPUploader implements Uploader {
     }	
 
     private boolean readQueueVersion(String str) {
-        if (indexOfIgnoreCase(str,"x-queue")==-1)
+        if (! HTTPHeaderName.QUEUE_HEADER.matchesStartOfString(str))
             return false;
         
-        String s = HTTPUtils.extractHeaderValue(str);
-        float version = (new Float(s)).floatValue();
-        if (version > 0) 
-            _supportsQueueing = true;
-
+        //String s = HTTPUtils.extractHeaderValue(str);
+        //we are not interested in the value at this point, the fact that the
+        //header was sent implies that the uploader supports queueing. 
+        _supportsQueueing = true;
         return true;
     }
 

@@ -65,6 +65,9 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName SERVER =
 		new HTTPHeaderName("Server");
 
+    public static final HTTPHeaderName QUEUE_HEADER = 
+        new HTTPHeaderName("X-Queue");
+
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.
