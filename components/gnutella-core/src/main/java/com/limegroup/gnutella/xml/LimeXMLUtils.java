@@ -16,7 +16,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.ErrorService;
 
 import org.xml.sax.InputSource;
