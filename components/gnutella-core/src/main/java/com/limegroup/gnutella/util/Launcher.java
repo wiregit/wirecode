@@ -104,11 +104,10 @@ public class Launcher {
 
 			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
 			try {
-				FileOutputStream fos = new FileOutputStream(libraryPath);
+				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
 				int c;
 
-				while ((c = is.read()) != -1)
-					fos.write(c);
+				while ((c = is.read()) != -1) fos.write(c);
 				
 				is.close();
 				fos.close();
