@@ -254,10 +254,5 @@ public class SmartDownloader extends HTTPDownloader {
 		// return false;
 	}
 	
-	/* this will establish a connection
-	   for a particular endpoint */
-	private ByteReader getConnection() {
-		return null;
-	} 
 
 }
