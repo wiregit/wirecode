@@ -1075,9 +1075,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // so we must catch NPE and throw the CONNECTION_CLOSED.
         try {
             _socket.setSoTimeout(timeout);
-            if(!_socket.getChannel().isOpen()) {
+            //if(!_socket.getChannel().isOpen()) {
                 
-            }
+            //}
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
@@ -1086,7 +1086,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                     line.length());
             }
             return line;
-        } catch(NullPointerException npe) {
+        } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
         } finally {
             //Restore socket timeout.
@@ -1125,8 +1125,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             //connections from dying.  The following works around the problem.  Note
             //that Message.read may still throw IOException below.
             //See note on _closed for more information.
-            if (_closed)
+            if (_closed) {
                 throw CONNECTION_CLOSED;
+            }
     
             Message msg = null;
             while (msg == null) {
@@ -1154,29 +1155,25 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public Message receive(int timeout)
         throws IOException, BadPacketException, InterruptedIOException {
+        //See note in receive().
+        if (_closed) {
+            throw CONNECTION_CLOSED;
+        }
+
+        //temporarily change socket timeout.
+        int oldTimeout = _socket.getSoTimeout();
+        _socket.setSoTimeout(timeout);
         try {
-            //See note in receive().
-            if (_closed)
-                throw CONNECTION_CLOSED;
-    
-            //temporarily change socket timeout.
-            int oldTimeout = _socket.getSoTimeout();
-            _socket.setSoTimeout(timeout);
-            try {
-                Message m = readAndUpdateStatistics();
-                if (m==null) {
-                    throw new InterruptedIOException("null message read");
-                }
-                
-                // record received message in stats
-                stats().addReceived();
-                return m;
-            } finally {
-                _socket.setSoTimeout(oldTimeout);
+            Message m = readAndUpdateStatistics();
+            if (m==null) {
+                throw new InterruptedIOException("null message read");
             }
-        } catch(IOException e) {
-            RouterService.getConnectionManager().remove(this);
-            throw e;            
+            
+            // record received message in stats
+            stats().addReceived();
+            return m;
+        } finally {
+            _socket.setSoTimeout(oldTimeout);
         }
     }
     
