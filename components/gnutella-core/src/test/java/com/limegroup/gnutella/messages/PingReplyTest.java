@@ -54,11 +54,14 @@ public class PingReplyTest extends TestCase {
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, true);
         assertTrue(pr.isMarked());
-        assertTrue(! pr.hasGGEPExtension());
+        // after added unicast support, all Ultrapeer Pongs have GGEP extensions
+        assertTrue(pr.hasGGEPExtension());
         try {
             pr.getDailyUptime();
-            assertTrue(false);
-        } catch (BadPacketException e) { }
+        } 
+        catch (BadPacketException e) { 
+                    assertTrue(false);
+        }
     }
       
     public void testPowerOf2() {
@@ -139,7 +142,7 @@ public class PingReplyTest extends TestCase {
     public void testGGEPEncodeDecode() {
         //Create pong
         PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   0l, 0l, false, 523);        
+                                   0l, 0l, true, 523);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
