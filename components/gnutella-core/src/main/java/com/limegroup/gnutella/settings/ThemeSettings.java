@@ -3,7 +3,6 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
-import java.util.zip.*;
 import java.io.*;
 
 /**
