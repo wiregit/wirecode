@@ -100,6 +100,7 @@ public class FWTDetectionTest extends BaseTestCase {
             PrivilegedAccessor.setValue(service,"_lastReportedIP",null);
             PrivilegedAccessor.setValue(service,"_lastReportedPort",
                     new Integer(RouterService.getPort()));
+            PrivilegedAccessor.setValue(service,"_acceptedSolicitedIncoming",new Boolean(true));
             PrivilegedAccessor.setValue(service,"_portStable",new Boolean(true));
             PrivilegedAccessor.setValue(Acceptor.class,"_externalAddress",new byte[4]);
         }catch(Exception bad) {

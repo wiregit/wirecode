@@ -26,7 +26,8 @@ public final class ConnectionSettings extends LimeProps {
 	
 	/**
 	 * Setting for whether we have ever determined that we are not able to
-	 * do Firewall-to-firewall transfers in the past. 
+	 * do Firewall-to-firewall transfers in the past based on information
+	 * received in pongs.
 	 */
 	public static final BooleanSetting EVER_DISABLED_FWT =
 		FACTORY.createExpirableBooleanSetting("EVER_DISABLED_FWT", false);
