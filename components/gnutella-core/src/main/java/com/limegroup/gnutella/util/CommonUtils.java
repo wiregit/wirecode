@@ -797,7 +797,7 @@ public final class CommonUtils {
         } else if ( o2 == null ) {
             retval = 1;
         } else if ( o1.getClass() == String.class ) {
-            retval = compareIgnoreCase( (String)o1, (String)o2 );
+            retval = StringUtils.compareIgnoreCase( (String)o1, (String)o2 );
         } else if( o1 instanceof com.sun.java.util.collections.Comparable ) {
             retval =
                 ((com.sun.java.util.collections.Comparable)o1).compareTo(o2);
@@ -817,24 +817,7 @@ public final class CommonUtils {
             retval = 0;
         }
         return retval;
-    } 
-
-    /** 
-     * Utility method to avoid loading of StringUtils class.
-     */
-    private static int compareIgnoreCase(String a, String b) {
-        //Check out String.compareTo(String) for a description of the basic
-        //algorithm.  The ignore case extension is trivial.
-        for (int i=0; i<Math.min(a.length(), b.length()); i++) {
-            char ac=Character.toLowerCase(a.charAt(i));
-            char bc=Character.toLowerCase(b.charAt(i));
-            int diff=ac-bc;
-            if (diff!=0)
-                return diff;
-        }
-        return a.length()-b.length();
-    }
-    
+    }     
     
     /**
      * Gets a resource file using the CommonUtils class loader,
@@ -1013,25 +996,28 @@ public final class CommonUtils {
      * @param address the address to check
      */
     public static boolean isPrivateAddress(byte[] address) {
-        if (address[0]==(byte)10)
+        if (address[0]==(byte)10) {
             return true;  //10.0.0.0 - 10.255.255.255
-        else if (address[0]==(byte)127 && 
-                 ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+        } else if (address[0]==(byte)127 && 
+                   ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return true;  //127.x.x.x
-        else if (address[0]==(byte)172 &&
-                 address[1]>=(byte)16 &&
-                 address[1]<=(byte)31)
+        } else if (address[0]==(byte)172 &&
+                   address[1]>=(byte)16 &&
+                   address[1]<=(byte)31) {
             return true;  //172.16.0.0 - 172.31.255.255
-        else if (address[0]==(byte)192 &&
-                 address[1]==(byte)168)
+        } else if (address[0]==(byte)192 &&
+                   address[1]==(byte)168) {
             return true; //192.168.0.0 - 192.168.255.255
-        else if (address[0]==(byte)0 &&
-                 address[1]==(byte)0 &&
-                 address[2]==(byte)0 &&
-                 address[3]==(byte)0)
-            return true; //0.0.0.0 - Gnutella (well BearShare really) convention
-        else
-            return false;        
+        } else if (address[0]==(byte)169 &&
+                   address[1]==(byte)254) {
+            return true; //169.254.0.0 - 169.254.255.255 (local link)
+        } else if (address[0]==(byte)0) {
+            return true; //0.0.0.0 -- reserved 
+            //} else if (address[0]>=(byte)240) {
+            //return true; //240 and above -- broadcast, multicast
+        } else {
+            return false; // otherwise, it's not private
+        }
     }
 
     /** 
