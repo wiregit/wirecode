@@ -1007,6 +1007,8 @@ public class ConnectionManager {
      * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
+        if(connection.supportsPongCaching()) return;
+
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -1019,7 +1021,7 @@ public class ConnectionManager {
             pr = new PingRequest((byte)1);   
         else
             pr = new PingRequest((byte)4);   
-
+        
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
@@ -1522,7 +1524,7 @@ public class ConnectionManager {
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {	
 		// Send ping...possibly group ping.
-		//sendInitialPingRequest(conn);
+		sendInitialPingRequest(conn);
 
 		if(conn.isGUESSUltrapeer()) {
 			int port = conn.getOrigPort();
