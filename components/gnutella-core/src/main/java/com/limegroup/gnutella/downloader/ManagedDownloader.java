@@ -5,9 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -1684,7 +1682,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized(this) {
                 set = new HashSet(files);
             }
-            if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES) {
+            //If file is too small or partial sharing is off, send head request
+            if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES ||
+               !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
                 debug("MANAGER: starting HEAD request");
                 //for small files which never add themselves to the mesh
                 //while downloading, we need to send head requests, so we
