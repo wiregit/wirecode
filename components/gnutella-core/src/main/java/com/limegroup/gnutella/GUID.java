@@ -91,6 +91,10 @@ public class GUID /* implements Comparable */ {
     }
 
 
+    public static byte[] makeGuid() {
+        return Message.makeGuid();
+    }
+    
     /**
      *  Create a GUID bytes from a hex string version.
      *  Throws IllegalArgumentException if sguid is
