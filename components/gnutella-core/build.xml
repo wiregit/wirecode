@@ -17,6 +17,7 @@
   <pathelement location="lib/collections.jar" />
   <pathelement location="lib/xerces.jar" />
   <pathelement location="lib/ui.jar" />
+  <pathelement location="lib/logicrypto.jar" />
   <pathelement location="../chord" />
 </path>
 
