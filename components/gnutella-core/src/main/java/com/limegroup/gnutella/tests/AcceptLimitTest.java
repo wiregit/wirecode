@@ -45,11 +45,14 @@ public class AcceptLimitTest {
     public static void main(String args[]) {
         String host="localhost";
         int port=6346;
-        System.out.println("If this test doesn't pass, try disabling ConnectionWatchdog");
+        System.out.println(
+            "If this test doesn't pass, try disabling ConnectionWatchdog.\n"
+           +"Also, beware of race conditions in the fetch code.\n");
 
         //Bring up application.
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(6346);
+        settings.setDirectories(new File[0]);
         settings.setUseQuickConnect(false);
         settings.setQuickConnectHosts(new String[0]);
         settings.setConnectOnStartup(false);
@@ -67,63 +70,43 @@ public class AcceptLimitTest {
         rs.clearHostCatcher();
         try {
             rs.setKeepAlive(6);
-        } catch (BadConnectionSettingException e) { Assert.that(false); }
+        } catch (BadConnectionSettingException e) { 
+            e.printStackTrace();
+            Assert.that(false); 
+        }
         
-        testFetch(rs, router);
+        testFetchI(rs, router);
         cleanup(rs);
-        testAcceptI(host, port);
+        testFetchII(rs, router);
         cleanup(rs);
-        testAcceptII(host, port);
+        testAcceptI(rs, router, host, port);
+        cleanup(rs);
+        testAcceptII(rs, router, host, port);
+        cleanup(rs);
+        testAcceptIII(rs, router, host, port);
     }
 
-    private static void testFetch(RouterService rs, TestMessageRouter router) {
-        System.out.println("\nTesting fetching (may fail from race conditions):");
+    private static void testFetchI(RouterService rs, TestMessageRouter router) {
+        System.out.println("\nTesting fetching with no ultrapeer pongs:");
         try {
             MiniAcceptor acceptor=null;
             Connection in=null;
-            final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
-            rs.setKeepAlive(0);
+            final String LOCALHOST="127.0.0.1";
+            rs.setKeepAlive(6);
             
             //Fetch an 0.6 connection.  Note there is a race condition here: 
             //we must start listening on the socket before the fetcher starts fetcheing
             System.out.println("-Testing that first fetched 0.6 is accepted");
-            acceptor=new MiniAcceptor(new EmptyResponder(), 6347);
-            router.addHost(LOCALHOST, 6347);
-            rs.setKeepAlive(1);
-            in=acceptor.accept();
-            Assert.that(in!=null);
-            Assert.that(acceptor.getError()==null);
+            testOneFetch(rs, router, LOCALHOST, 6347, new EmptyResponder(), 200);
 
-            //Fetch another 0.6
             System.out.println("-Testing that second fetched 0.6 is accepted");
-            acceptor=new MiniAcceptor(new EmptyResponder(), 6348);
-            router.addHost(LOCALHOST, 6348);
-            rs.setKeepAlive(2);
-            in=acceptor.accept();
-            Assert.that(in!=null);
-            Assert.that(acceptor.getError()==null);
+            testOneFetch(rs, router, LOCALHOST, 6348, new EmptyResponder(), 200);
 
-            //Fetch a third...should be rejected!
-            System.out.println("-Testing that third 0.6 is rejected");
-            acceptor=new MiniAcceptor(new EmptyResponder(), 6349);
-            router.addHost(LOCALHOST, 6349);
-            Thread.yield();
-            rs.setKeepAlive(3);
-            in=acceptor.accept();
-            Assert.that(in==null);
-            IOException e=acceptor.getError();
-            Assert.that(e instanceof NoGnutellaOkException);
-            Assert.that(((NoGnutellaOkException)e).getCode()==503);
+            System.out.println("-Testing that third fetched 0.6 is accepted");
+            testOneFetch(rs, router, LOCALHOST, 6349, new EmptyResponder(), 200);
 
-            //Fetch a fourth ultrapeer.  Should be allowed
-            System.out.println("-Testing that fourth ultrapeer allowed");
-            acceptor=new MiniAcceptor(new UltrapeerResponder(), 6350);
-            router.addHost(LOCALHOST, 6350);
-            Thread.yield();
-            rs.setKeepAlive(3);
-            in=acceptor.accept();
-            Assert.that(in!=null);
-            Assert.that(acceptor.getError()==null);
+            System.out.println("-Testing that fourth fetched 0.6 is accepted");
+            testOneFetch(rs, router, LOCALHOST, 6350, new EmptyResponder(), 200);
 
             rs.disconnect();
             rs.clearHostCatcher();
@@ -133,8 +116,82 @@ public class AcceptLimitTest {
         }
     }
 
-    private static void testAcceptI(String host, int port) {
+
+    private static void testFetchII(RouterService rs, TestMessageRouter router) {
+        System.out.println("\nTesting fetching with ultrapeer pongs:");
+        try {
+            MiniAcceptor acceptor=null;
+            Connection in=null;
+            final String LOCALHOST="127.0.0.1";
+            rs.setKeepAlive(6);
+            
+            //Fill HostCatcher with bogus pongs.
+            for (int i=0; i<100; i++) 
+                router.addHost("1.1.1."+i, 6340, true);
+
+            //Fetch an 0.6 connection.  Note there is a race condition here: 
+            //we must start listening on the socket before the fetcher starts fetcheing
+            System.out.println("-Testing that first fetched 0.6 is accepted");
+            testOneFetch(rs, router, LOCALHOST, 6351, new EmptyResponder(), 200);
+
+            System.out.println("-Testing that second fetched 0.6 is accepted");
+            testOneFetch(rs, router, LOCALHOST, 6352, new EmptyResponder(), 200);
+
+            System.out.println("-Testing that third fetched 0.6 is rejected");
+            testOneFetch(rs, router, LOCALHOST, 6353, new EmptyResponder(), 503);
+
+            System.out.println("-Testing that fetched ultrapeer is accepted");
+            testOneFetch(rs, router, LOCALHOST, 6354, new UltrapeerResponder(), 200);
+
+            rs.disconnect();
+            rs.clearHostCatcher();
+            rs.setKeepAlive(SettingsManager.instance().getKeepAlive());
+        } catch (BadConnectionSettingException e) {
+            Assert.that(false);
+        }
+    }
+    
+    /**
+     * Tests that router (un)successfully fetches a connection to host:port.
+     *
+     * @param rs the facade of the backend to give the pong to
+     * @param router the actual message router of the backend
+     * @param host the 4-byte address of the host to connect to
+     * @param port the port of the host to connect to
+     * @param responder how the server should respond: 503 for reject 
+     *  or 200 for OK.
+     */
+    private static void testOneFetch(RouterService rs,
+                                     TestMessageRouter router,
+                                     String host, int port, 
+                                     HandshakeResponder responder,
+                                     int code) {
+        MiniAcceptor acceptor=new MiniAcceptor(responder, port);
+        Thread.yield();
+        rs.connectToHostAsynchronously(host, port);
+        Connection in=acceptor.accept();
+        if (code==200) {
+            Assert.that(in!=null);
+            Assert.that(acceptor.getError()==null);
+        } else if (code==503) {
+            Assert.that(in==null);
+            IOException e=acceptor.getError();
+            Assert.that(e instanceof NoGnutellaOkException);
+            Assert.that(((NoGnutellaOkException)e).getCode()==code);
+        }
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static void testAcceptI(RouterService rs,
+                                    TestMessageRouter router, 
+                                    String host, int port) {
         System.out.println("\nTesting accept I:");
+        //Fill HostCatcher with bogus pongs.
+        for (int i=0; i<100; i++) 
+            router.addHost("1.1.1."+i, 6340, true);
+
         Connection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
         testPong(c, true);        
         testLimit(host, port, OLD_06, 
@@ -147,8 +204,14 @@ public class AcceptLimitTest {
         testPong(c, false);
     }        
 
-    private static void testAcceptII(String host, int port) {
+    private static void testAcceptII(RouterService rs, 
+                                     TestMessageRouter router, 
+                                     String host, int port) {
         System.out.println("\nTesting accept II:");
+        //Fill HostCatcher with bogus pongs.
+        for (int i=0; i<100; i++) 
+            router.addHost("1.1.1."+i, 6340, true);
+
         //ignores guidance
         Connection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
         testPong(c, true);
@@ -158,6 +221,16 @@ public class AcceptLimitTest {
         testPong(c, true); //Still have leaf slots
         c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
         testPong(c, false);
+    }
+
+    private static void testAcceptIII(RouterService rs, 
+                                      TestMessageRouter router, 
+                                      String host, int port) {
+        System.out.println("\nTesting accept III, no ultrapeer pongs:");
+        rs.clearHostCatcher();
+        //ignores guidance
+        Connection c=testLimit(host, port, OLD_06, KEEP_ALIVE, REJECT_503);  
+        testPong(c, true);
     }
 
     /** 
@@ -378,12 +451,12 @@ class TestMessageRouter extends MetaEnabledMessageRouter {
         super(callback, files);
     }
 
-    public void addHost(byte[] host, int port) {
+    public void addHost(String host, int port, boolean isUltrapeer) {
         //fake up a pong
         //PingReply pong=new PingReply(new byte[16], (byte)5,
         //                             port, host,
         //                             0l, 0l);                                     
         Endpoint e=new Endpoint(host, port);
-        this._catcher.add(e, false);
+        this._catcher.add(e, isUltrapeer);
     }
 }

@@ -567,13 +567,11 @@ public class ConnectionManager {
         //firewalled hosts become leaf nodes.  Hence we make no distinction
         //between incoming and outgoing.
         //
-        //However, now we prefer ultrapeers to old (0.4) connections, gradually
-        //replacing old-style connections with ultrapeers.  Hence there are
-        //never more than _keepAlive connections.  See killExcess() for details.
-        //One caveat: in order to prevent fragmentation of ultrapeers and old
-        //clients, we give the best DESIRED_OLD_CONNECTIONS old connections
-        //immunity from this kill logic.  Effectively these connections are
-        //treated like ultrapeers.  TODO: update
+        //However, now we prefer ultrapeers to old-fashioned ultrapeer-agnostic
+        //connections.  If the HostCatcher has marked ultrapeer pongs, we never
+        //allow more than DESIRED_OLD_CONNECTIONS old connections--incoming or
+        //outgoing.  In the old days, we would actively kill old connections; we
+        //don't do that anymore.
 
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
@@ -597,11 +595,12 @@ public class ConnectionManager {
             return getNumInitializedConnections() < _keepAlive;
         } else {
             //3. Old-style, e.g., "0.4" connections.  Only allow if there are
-            //free slots and there aren't too many old-fashioned connections.
-            //Note there is no longer preferencing to incoming connections.
-            //TODO: conjunct "HostCatcher.hasUltrapeerPongs" with second clause.
+            //free slots.  If there are plenty of ultrapeer pongs, only allow if
+            //there aren't too many old-fashioned connections.
             return (getNumInitializedConnections() < _keepAlive)
-                && (oldConnections() < DESIRED_OLD_CONNECTIONS);  
+                && (_catcher.getNumUltrapeerHosts()>0 
+                        ? oldConnections() < DESIRED_OLD_CONNECTIONS
+                        : true);  
         }
     }
         

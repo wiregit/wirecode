@@ -550,6 +550,13 @@ public class HostCatcher {
     }
 
     /**
+     * Returns the number of marked ultrapeer hosts.
+     */
+    public int getNumUltrapeerHosts() {
+        return queue.size(GOOD_PRIORITY);
+    }
+
+    /**
      * Returns an iterator of the hosts in this, in order of priority.
      * This can be modified while iterating through the result, but
      * the modifications will not be observed.
@@ -712,10 +719,13 @@ public class HostCatcher {
         iter=hc.getUltrapeerHosts(10);
         Assert.that(! iter.hasNext());
 
+        Assert.that(hc.getNumUltrapeerHosts()==0);
         hc.add(new Endpoint("18.239.0.1", 6346), true);
+        Assert.that(hc.getNumUltrapeerHosts()==1);
         hc.add(new Endpoint("18.239.0.2", 6346), true);
         hc.add(new Endpoint("128.103.60.1", 6346), false);
         hc.add(new Endpoint("128.103.60.2", 6346), false);
+        Assert.that(hc.getNumUltrapeerHosts()==2);
 
         iter=hc.getUltrapeerHosts(100);
         Assert.that(iter.hasNext());
