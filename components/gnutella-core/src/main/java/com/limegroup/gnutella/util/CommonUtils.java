@@ -1,3 +1,7 @@
+package com.limegroup.gnutella.util;
+
+import java.util.Properties;
+
 /**
  * This class handles common utility functions that many classes
  * may want to access.
@@ -5,10 +9,6 @@
  * @author Adam Fisk
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-
-package com.limegroup.gnutella.util;
-
-import java.util.Properties;
 
 
 public class CommonUtils {
@@ -143,27 +143,15 @@ public class CommonUtils {
 	 */
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
-	}
-
-	/**
-	 * This static method converts the passed in
-	 * number of bytes into a kilobyte string 
-	 * separated by commas and with "KB" at the
-	 * end. 
-	 */
-	public static String toKilobytes(int bytes) {
-		double d = (double)bytes/(double)1024;
-		if(d < 1 && d > 0)
-			d = 1;
-		StringBuffer sb = new StringBuffer(Integer.toString((int)d));
-		if(d > 999) {
-			sb.insert(sb.length() - 3, ",");
-  			if(d > 999999) {
-  				sb.insert(sb.length() - 7, ",");
-  			}
-		}
-		sb.append("KB");
-		return sb.toString();
-	}
-	
+	}   
 }
+
+
+
+
+
+
+
+
+
+
