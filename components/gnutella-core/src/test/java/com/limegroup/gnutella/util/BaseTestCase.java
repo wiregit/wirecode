@@ -430,6 +430,26 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     ///////////////////////// Useful Testing Methods //////////////////////////
     private static final int TIMEOUT = 2000;
+    
+    /**
+     * Sends a pong through the connection to keep it alive.
+     */
+    public static void keepAlive(Connection c) throws IOException {
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+        c.send(pr);
+        c.flush();
+    }
+    
+    /**
+     * Sends a pong through all connections to keep them alive.
+     */
+    public static void keepAllAlive(Connection[] cs) throws IOException {
+        for(int i = 0; i < cs.length; i++) {
+            PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+            cs[i].send(pr);
+            cs[i].flush();
+        }
+    }    
 
     /** 
 	 * Tries to receive any outstanding messages on c 
@@ -505,7 +525,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 // ignore....
             }
         }
-        return true;
+        throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
     /**
@@ -520,11 +540,14 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                                                 Class type,
                                                 int timeout) {
         for(int i = 0; i < 100; i++) {
-            if(!c.isOpen())
+            if(!c.isOpen()){
+                //System.out.println(c + " is not open");
                 return null;
+            }
 
             try {
                 Message m = c.receive(timeout);
+                //System.out.println("m: " + m + ", class: " + m.getClass());
                 if (m instanceof RouteTableMessage)
                     ;
                 else if (m instanceof PingRequest)
@@ -535,14 +558,17 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                     return null;  // this is usually an error....
                 i = 0;
             } catch (InterruptedIOException ie) {
+                //ie.printStackTrace();
                 return null;
             } catch (BadPacketException e) {
+               // e.printStackTrace();
                 // ignore...
             } catch (IOException ioe) {
+                //ioe.printStackTrace();
                 // ignore....
             }
         }
-        return null;
+        throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
     public static QueryRequest getFirstQueryRequest(Connection c) {
