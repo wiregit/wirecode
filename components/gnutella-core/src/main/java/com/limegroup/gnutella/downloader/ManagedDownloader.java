@@ -511,8 +511,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(REQUERYING_NETWORK);
                         manager.sendQuery(allFiles);
 
-                        setState(WAITING_FOR_RESULTS, REQUERY_TIMEOUT);
-                        reqLock.lock();
+                        int waitTime = getMinutesToWaitForRequery(numRequeries);
+                        waitTime *= (60 * 1000);                        
+
+                        setState(WAITING_FOR_RESULTS, (long) waitTime);
+                        reqLock.lock((long) waitTime);
                     }
                     else {
                         setState(GAVE_UP);
@@ -1166,6 +1169,24 @@ public class ManagedDownloader implements Downloader, Serializable {
         return bandwidthTracker.getMeasuredBandwidth();
     }
 
+    /** @return the number of minutes to wait for your next requery....
+     */
+    private int getMinutesToWaitForRequery(int numCalls) {
+        switch (numCalls) {
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+            return 4;
+        case 4:
+            return 8;
+        default:
+            return 15;
+        }
+    }
+
+
 
     /** Synchronization Primitive for auto-requerying....
      *  Can be underst00d as follows:
@@ -1186,11 +1207,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             this.notifyAll();
         }
 
-        public synchronized void lock() throws InterruptedException {
-            // max REQUERY_TIMEOUT i'll wait, best case i'll get
-            // interrupted 
-            if (shouldWait) 
-                this.wait(REQUERY_TIMEOUT);
+        public synchronized void lock(long waitTime) 
+            throws InterruptedException {
+            try {
+                // max waitTime i'll wait, best case i'll get
+                // interrupted 
+                if (shouldWait) 
+                    this.wait(waitTime);
+            }
+            catch (InterruptedException ie) {
+                // if interrupted, make sure to reset shouldWait...
+                shouldWait = true;
+                throw ie;
+            }
             shouldWait = true;
         }
 
