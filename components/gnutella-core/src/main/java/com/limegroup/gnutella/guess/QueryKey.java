@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.guess;
 
 import com.sun.java.util.collections.*;
+import java.io.*;
 import org.logi.crypto.keys.DESKey;
 import com.limegroup.gnutella.ByteOrder;
 import java.net.InetAddress;
@@ -67,6 +68,9 @@ public class QueryKey {
         return retInt;
     }
 
+    public void write(OutputStream out) throws IOException {
+        out.write(_queryKey);
+    }
 
     //--------------------------------------
     //--- PUBLIC STATIC CONSTRUCTION METHODS
