@@ -483,7 +483,10 @@ public class ServerSideWhatIsNewTest
         CreationTimeCache ctCache = CreationTimeCache.instance();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         URN tempFile2URN = fm.getURNForFile(tempFile2);
-        Long cTime = ctCache.getCreationTime(tempFile2URN);
+        // we are changing tempFile1 to become tempFile2 - but since we
+        // call fileChanged(), then the common URN should get tempFile1's
+        // cTime
+        Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter writer = null;
         {
