@@ -8,13 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import java.util.Map;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Response;
@@ -32,121 +26,34 @@ public final class LimeXMLDocumentHelper{
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
      */
-    public static List getDocuments(String aggregrateXMLStr, 
+    public static List getDocuments(String aggregatedXML, 
                                     int totalResponseCount) {
-        if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
+        if(aggregatedXML==null || aggregatedXML.equals(""))
             return Collections.EMPTY_LIST;
-
-        ArrayList retList = new ArrayList();
-        DOMParser parser = new DOMParser();
-        int startIndex=aggregrateXMLStr.indexOf
-                                (XMLStringUtils.XML_DOC_START_IDENTIFIER);
-        int endIndex = startIndex;
-        String chunk = "";
-        boolean finished= false;
-        while(!finished){
-            startIndex = endIndex;//nextRound
-            if (startIndex == -1){
-                finished = true;
-                continue;
-            }
-            endIndex=aggregrateXMLStr.indexOf
-            (XMLStringUtils.XML_DOC_START_IDENTIFIER,startIndex+1);
-            if (endIndex > 0)
-                chunk = aggregrateXMLStr.substring(startIndex, endIndex);
-            else
-                chunk = aggregrateXMLStr.substring(startIndex);        
-            
-            LimeXMLDocument[] docs = new LimeXMLDocument[totalResponseCount];
-            Element rootElement = getDOMTree(parser, chunk);
-            if(rootElement==null){
-                retList.add(null);
-                continue;
-            }
-            //String schemaURI=getAttributeValue(rootElement,"schemaLocation");
-            List children=LimeXMLUtils.getElements(rootElement.getChildNodes());
-            //Note: each child corresponds to a LimeXMLDocument
-            int z = children.size();
-            for(int i=0;i<z;i++){
-                Node currNode = (Node)children.get(i);
-                String cIndex = getAttributeValue(currNode,"index");
-                int currIndex;
-                try {
-                    currIndex = Integer.parseInt(cIndex);
-                } catch(NumberFormatException nfe) {
-                    continue; // bad data, ignore.
-                }
-                LimeXMLDocument currDoc=null;
-                try {
-                    currDoc = new LimeXMLDocument(currNode,rootElement);
-                } catch (IOException e) {
-                    continue;//ignoring these exceptions has the same effect
-                }
-                catch (SchemaNotFoundException snfx) {
-                    continue;//ignoring these exceptions has the same effect
-                }
-                if (currIndex < docs.length)
-                    docs[currIndex]=currDoc;
-            }
-            retList.add( docs);
-        }
-        return retList;
-    }
-    
-    /**
-     * Breaks the passed xml document in aggregate form (where the root
-     * element has multiple child nodes) to a list of xml documents
-     * where the root node has got only one child. In other words it breaks
-     * the multiple documents embedded in a single big document to respective
-     * non-embedded documents
-     * @param aggregateXMLStr string representing xml document in 
-     * aggregate form
-     * @return List (of LimeXMLDocument) of LimeXMlDocuments that we get 
-     * after breaking the 
-     * aggregate string. Returns null, if the aggregateXMLString is not a
-     * valid xml
-     */ 
-    public static List /* LimeXMLDocument */ breakSingleSchemaAggregateString(
-        String aggregrateXMLStr)
-    {
-        //get the root element of the aggregate string
-        Element rootElement = getDOMTree(new DOMParser(), aggregrateXMLStr);
-
-        //return null, if the passed xml couldnt be parsed
-        if(rootElement==null)
-            return null;
-        
-        //create a list to store the documents
-        ArrayList docs = new ArrayList();
-        
-        //get the child nodes, each of which will be transformed to 
-        //a separate document
-        List children = LimeXMLUtils.getElements(rootElement.getChildNodes());
-        
-        //Iterate over the children
-        for(Iterator iterator = children.iterator(); iterator.hasNext();)
-        {
-            //get the next child node
-            Node currNode = (Node)iterator.next();
-            //convert the subtree represented by the child node to an 
-            //instance of LimeXMLDocument, and add to the list of documents
-            LimeXMLDocument doc = null;
+        List results = new ArrayList();
+        Iterator xmlDocumentsIterator = XMLParsingUtils.split(aggregatedXML).iterator();
+        while(xmlDocumentsIterator.hasNext()) {
+            String xmlDocument = (String)xmlDocumentsIterator.next();
+            XMLParsingUtils.Result parsingResult;
             try {
-                doc = new LimeXMLDocument(currNode,rootElement);
-            } catch(IOException iox) {
-                continue;
-            } catch(SchemaNotFoundException snfx) {
-                continue;
-            } 
-            docs.add(doc);
+                parsingResult = XMLParsingUtils.parse(xmlDocument);
+            } catch (Exception x) {continue;} //bad xml, ignore
+            String indexKey = parsingResult.canonicalKeyPrefix + "index__";
+            Iterator mapsIterator = parsingResult.canonicalAttributeMaps.iterator();
+            LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
+            while(mapsIterator.hasNext()) {
+                try {
+                    Map map = (Map)mapsIterator.next();
+                    int index = Integer.parseInt((String)map.get(indexKey));
+                    documents[index] = new LimeXMLDocument(map.entrySet(),parsingResult.schemaURI);
+                } catch(Exception x) {continue;}//bad data, ignore
+            }
+            results.add(documents);
         }
-        //return the list of documents
-        return docs;
+        return results;
     }
-    
-    
     /**
-     * @param responses array is a set of responses. Sore have meta-data
+     * @param responses array is a set of responses. Some have meta-data
      * some do not. 
      * The aggregrate string should reflect the indexes of the 
      * responses
@@ -262,43 +169,6 @@ public final class LimeXMLDocumentHelper{
             //4.put it back into the map
             uriToString.put(uri,currStringB);
         }
-    }
-
-        
-    private static Element getDOMTree(DOMParser parser, 
-                                      String aggrigateXMLStr){
-        InputSource source=new InputSource(new StringReader(aggrigateXMLStr));
-        Document root = null;
-        try {            
-            parser.parse(source);
-        } catch(SAXException e){
-            //could not parse XML well
-            return null;
-        } catch(IOException e) {
-            return null; // problem reading.
-        }
-        root = parser.getDocument();
-        //get the schemaURI
-        Element rootElement = root.getDocumentElement();
-        return rootElement;
-    }
-
-    /**
-     * Takes a DOMElement, and a string that is part of the attribute
-     * we are looking for, and returns the value of that attribute
-     */
-    private static String getAttributeValue(Node element,String targetName){
-        String lowerTargetName = targetName.toLowerCase(Locale.US);
-        List atts=LimeXMLUtils.getAttributes(element.getAttributes());
-        String retString="";
-        int z = atts.size();        
-        for(int i=0;i<z;i++){
-            Node att = (Node)atts.get(i);
-            String lowerAttName = att.getNodeName().toLowerCase(Locale.US);
-            if(lowerAttName.indexOf(lowerTargetName)>=0)
-                retString=att.getNodeValue();
-        }
-        return retString;
     }
 
     private static boolean debugOn = false;

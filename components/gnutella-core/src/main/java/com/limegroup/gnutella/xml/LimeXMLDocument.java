@@ -14,14 +14,10 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.metadata.MP3MetaData;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.NameValue;
@@ -37,11 +33,6 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ID_ATTRIBUTE_STRING = "identifier";
     public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
 
-    /** The parser to be used for all XML Docs.  No use carrying one per
-     *  instance.  Instances should synchronize on use.
-     */
-    private static DOMParser parser = new DOMParser();
-
 	/**
 	 * Cached hash code for this instance.
 	 */
@@ -53,7 +44,7 @@ public class LimeXMLDocument implements Serializable {
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    private final Map fieldToValue = 
+    private Map fieldToValue = 
         new TreeMap(Comparators.stringComparator());
     private String schemaUri;
     private String xmlString;//this is what is sent back on the wire.
@@ -91,7 +82,6 @@ public class LimeXMLDocument implements Serializable {
         schemaUri = uri;
     }
 
-
     //constructor
     public LimeXMLDocument(String XMLStr) throws SAXException, 
                                         SchemaNotFoundException, IOException{
@@ -104,17 +94,6 @@ public class LimeXMLDocument implements Serializable {
             throw new SAXException("empty after identifier ripped");
     }
     
-    
-    public LimeXMLDocument(Node node, Node rootElement) throws 
-    SchemaNotFoundException, IOException {
-        grabDocInfo(rootElement,true);
-        grabDocInfo(node,false);
-        createMap(node,rootElement.getNodeName());
-        if(fieldToValue.isEmpty())
-            throw new IOException("no elements.");
-        if(getXMLString().equals(""))
-            throw new IOException("invalid elements.");
-    }
 
     /**
      * Constructs a new LimeXMLDocument
@@ -217,97 +196,12 @@ public class LimeXMLDocument implements Serializable {
 
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
-        //TODO1: make sure that the schema actually validates documents
-        //documentBuilderFactory.setValidating(true);
-        //documentBuilderFactory.setNamespaceAware(true);
-        Document document = null;
-        synchronized(LimeXMLDocument.parser) {
-            parser.parse(doc);
-            document=parser.getDocument();
-        }
-        Element docElement = document.getDocumentElement();
-        grabDocInfo(docElement,true);
-        Node child=docElement.getFirstChild();
-        grabDocInfo(child,false);//not root
-        createMap(docElement);
+        
+        XMLParsingUtils.Result result = XMLParsingUtils.parse(doc);
+        fieldToValue = (TreeMap)result.canonicalAttributeMaps.iterator().next();
+        schemaUri = result.schemaURI;
     }
 
-    /**
-     * There are two possible places for important document information 
-     * may be stored. 
-     * 1. it may be in the root element. In which case the root variable
-     * should be set as true. In this case all the important doc info will
-     * be remembered, and any non-doc info present as attributes will
-     * be put into the hashmap
-     * <p>
-     * The other possible place is at the (only) child of the root element.
-     * If this is the node that is being passed. then root variable should
-     * be set to false. In this case. Just the doc info is grabbed. The
-     * non-doc info of a non-doc Node is not even looked at in this method.
-     * <p> 
-     * For this method to be effective, keep the following points in mind.
-     * The doc info mey be either in the root alone or in both the root and
-     * the only child of root. If it is only in root - call this method on 
-     * root, and create map on root.
-     * <p>
-     * If the doc-info is spread out b/w the root and the child. First
-     * call this method with root, then call it with child, and then 
-     * call createMap wht root. This will ensure no loss of data
-     */
-    private void grabDocInfo(Node docElement,boolean root)
-        throws SchemaNotFoundException, IOException {
-                        
-        //Element docElement = doc.getDocumentElement();
-        if(docElement==null)
-            throw new IOException("null doc element");
-        NamedNodeMap nnm = docElement.getAttributes();
-        if( nnm == null )
-            throw new IOException("invalid doc element -- null namednodemap");
-
-        List attributes=LimeXMLUtils.getAttributes(nnm);
-        int size = attributes.size();
-        for(int i=0; i< size; i++){
-            Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName();
-            String lowerAttName = attName.toLowerCase(Locale.US);
-            if (lowerAttName.indexOf("schemalocation") >= 0)
-                schemaUri = att.getNodeValue();
-            else if (lowerAttName.indexOf(XML_ID_ATTRIBUTE_STRING) >= 0) {
-                identifier = att.getNodeValue();
-                //This indentifier corresponds to the ED of the response in
-                //the system. Remove this attribute from the node. We are not 
-                //interested in it anymore
-                Element e = (Element)docElement;
-                e.removeAttribute(attName);
-            }
-            else if (lowerAttName.indexOf("action") >= 0)
-                action = att.getNodeValue();
-            else if(lowerAttName.indexOf("index") >= 0){
-                //This index corresponds to the index of the response in
-                //the QR. Remove this attribute from the node. We are not 
-                //interested in it anymore
-                Element e = (Element)docElement;
-                e.removeAttribute(attName);
-            }
-            else{//these are attributes that have a value
-                if(root){
-                    String canonicalizedAttName= docElement.getNodeName()+
-                    XMLStringUtils.DELIMITER+att.getNodeName()+
-                    XMLStringUtils.DELIMITER;                
-                    fieldToValue.put(canonicalizedAttName.trim(),
-                                     att.getNodeValue().trim());
-                }
-            }
-        }
-        if(schemaUri == null)//we cannot have a doc with out a schema
-            throw new SchemaNotFoundException();
-        //Note: However if the identifier is null it just implies that
-        // the meta data is not associated with any file!
-        //Similarly, if the action is null, it just means there is no
-        //action associated with this Document. 
-    }
-
-    
     public int getNumFields() {
         return fieldToValue.size();
     }
@@ -338,60 +232,6 @@ public class LimeXMLDocument implements Serializable {
         }
         CACHED_KEYWORDS = retList;
         return retList;
-    }
-
-    private void createMap(Node docElement) {
-        //Element docElement = doc.getDocumentElement();
-        doAllChildren(docElement,"");
-    }
-
-    private void createMap(Node docElement, String parent){
-        doAllChildren(docElement,parent);
-    }
-
-    private void doAllChildren (Node currNode, String parentName){
-        if (!currNode.hasChildNodes()){ //base case
-            doEntry(currNode, parentName);
-            return;
-        }
-        String currString = doEntry(currNode,parentName);
-        List children = LimeXMLUtils.getElements(currNode.getChildNodes());
-        int size = children.size();
-        for(int i=0; i< size; i++){            
-            Node child = (Node)children.get(i);
-            doAllChildren(child,currString);
-        }
-    }
-
-    private String doEntry(Node currNode, String parentName){
-        String currTag;
-        if(!parentName.equals(""))
-            currTag=parentName+XMLStringUtils.DELIMITER+currNode.getNodeName();
-        else
-            currTag = currNode.getNodeName();
-
-        //if (currNode.getNodeType() == Node.CDATA_SECTION_NODE)
-        //  System.out.println("this node has type  "+ currNode.getNodeType());
-
-        Element currElement = (Element)currNode;
-        String nodeValue = LimeXMLUtils.getText(currElement.getChildNodes());
-        if (nodeValue != null && !nodeValue.equals(""))
-            fieldToValue.put(currTag.trim(), nodeValue.trim());
-        //add the attributes only if its not the first level
-        if(!parentName.equals("")){
-            List attribs=LimeXMLUtils.getAttributes(currNode.getAttributes());
-            int size = attribs.size();
-            for(int i=0; i< size; i++){
-                Node att = (Node)attribs.get(i);
-                String attName = att.getNodeName();
-                String attString=currTag+XMLStringUtils.DELIMITER
-                         +attName+XMLStringUtils.DELIMITER;
-                String attValue = att.getNodeValue();
-                fieldToValue.put(attString.trim(),
-                                 attValue.trim());
-            }
-        }
-        return currTag;
     }
 
     /**
@@ -569,66 +409,36 @@ public class LimeXMLDocument implements Serializable {
     }
 
 
-    /*
+    
     //Unit Tester    
-    public static void main(String args[]){
-        //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
-        
-        Runtime rt = Runtime.getRuntime();
-        long mem = rt.totalMemory()- rt.freeMemory();
-        System.out.println("Sumeet : Used memory is "+mem);
-        File f = new File("C:/home/etc/xml","junk.xml");
-        LimeXMLDocument l = null;
-        try{            
-            String buffer = "";
-            String xmlStruct = "";
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            while(buffer!=null){
-                buffer=br.readLine();
-                if (buffer!=null)
-                    xmlStruct = xmlStruct+buffer;
-                xmlStruct = xmlStruct.trim();
-            }
-            l = new LimeXMLDocument(xmlStruct);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        List list = l.getNameValueList();
-        int size = list.size();
-        for (int i =0; i< size; i++){
-            NameValue a = (NameValue)list.get(i);
-            String name = a.getName();
-            String value = (String)a.getValue();
-            System.out.println("Sumeet : name "+name);
-            System.out.println("Sumeet : value "+value);
-       }
-        ripIDTest();
-        debugTest1();
-    }
+//     public static void main(String args[]){
+//         ripIDTest();
+//         debugTest1();
+//     }
     
-    public static void debugTest1() {
-        String s="<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio type=\"song\" album=\" \" genre=\" \"/></audios>";
-        try {
-            LimeXMLDocument d = new LimeXMLDocument(s);
-            System.out.println("Document d = "+d);
-            String v = d.getValue("audios__audio__type__");
-            System.out.println("Type val = |"+v+"|");
-            v = d.getValue("audios__audio__album__");
-            System.out.println("Album val = |"+v+"|");
-            v = d.getValue("audios__audio__genre__");
-            System.out.println("Genre val = |"+v+"|");
-        } catch (Exception e ) {
-            e.printStackTrace();
-        }
-    }
+//     public static void debugTest1() {
+//         String s="<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio type=\"song\" album=\"hey\" genre=\"you\"/></audios>";
+//         try {
+//             LimeXMLDocument d = new LimeXMLDocument(s);
+//             System.out.println("Document d = "+d);
+//             String v = d.getValue("audios__audio__type__");
+//             Assert.that(v.equals("song"));
+//             v = d.getValue("audios__audio__album__");
+//             Assert.that(v.equals("hey"));
+//             v = d.getValue("audios__audio__genre__");
+//             Assert.that(v.equals("you"));
+
+//         } catch (Exception e ) {
+//             e.printStackTrace();
+//         }
+//     }
     
-    static void ripIDTest() {
-    final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
+//     static void ripIDTest() {
+//     final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
     
-    Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
-    }
+//     Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
+//     }
     
-    */
 
     /**
      * finds the structure of the document by looking at the names of 
