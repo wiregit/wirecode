@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.sun.java.util.collections.*;
+import java.net.*;
 
 /**
  * An interface for those things that handle replies and thus are placed
@@ -83,7 +84,7 @@ public interface ReplyHandler {
 	 * @return <tt>true</tt> if this is a 'high-degree' connection, 
 	 * otherwise <tt>false</tt>
 	 */
-	public boolean isHighDegreeConnection();
+	boolean isHighDegreeConnection();
 
     /**
      * Returns whether or not this handler uses Ultrapeer query routing.
@@ -91,7 +92,7 @@ public interface ReplyHandler {
      * @return <tt>true</tt> if this connection uses query routing
      *  between Ultrapeers, otherwise <tt>false</tt>
      */
-    public boolean isUltrapeerQueryRoutingConnection();
+    boolean isUltrapeerQueryRoutingConnection();
 
 
     /**
@@ -102,7 +103,7 @@ public interface ReplyHandler {
      * @return <tt>true</tt> if this is considered a good Ultrapeer connection,
      *  otherwise <tt>false</tt>
      */
-    public boolean isGoodUltrapeer();
+    boolean isGoodUltrapeer();
 
     /**
      * Returns whether or not this handler is considered a "good" leaf
@@ -112,7 +113,7 @@ public interface ReplyHandler {
      * @return <tt>true</tt> if this is considered a good leaf connection,
      *  otherwise <tt>false</tt>
      */
-    public boolean isGoodLeaf();
+    boolean isGoodLeaf();
 
     /**
      * Returns whether or not this node supports pong caching.  
@@ -120,7 +121,7 @@ public interface ReplyHandler {
      * @return <tt>true</tt> if this node supports pong caching, otherwise
      *  <tt>false</tt>
      */
-    public boolean supportsPongCaching();
+    boolean supportsPongCaching();
 
     /**
      * Determines whether new pings should be allowed from this reply handler.
@@ -131,11 +132,18 @@ public interface ReplyHandler {
      * @return <tt>true</tt> if new pings are allowed, otherwise 
      *  <tt>false</tt>
      */
-    public boolean allowNewPings();
+    boolean allowNewPings();
 
     /**
      * Updates the time after which we will allow new pings from this handler
      * Before this time is reached, new pings will be ignored.
      */
-    public void updatePingTime();
+    void updatePingTime();
+
+    /**
+     * Accessor for the <tt>InetAddress</tt> instance for this host.
+     *
+     * @return the <tt>InetAddress</tt> instance for this host
+     */
+    InetAddress getInetAddress();
 }

@@ -221,6 +221,12 @@ public final class UDPReplyHandler implements ReplyHandler {
      */
     public void updatePingTime() {}
 
+
+    // inherit doc comment
+    public InetAddress getInetAddress() {
+        return IP;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

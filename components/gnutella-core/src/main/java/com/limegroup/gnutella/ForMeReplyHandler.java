@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.search.*;
+import java.net.*;
 
 /**
  * This is the class that goes in the route table when a request is
@@ -228,6 +229,16 @@ public final class ForMeReplyHandler implements ReplyHandler {
      * from ourselves.
      */
     public void updatePingTime() {}
+
+    // inherit doc comment
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByAddress(RouterService.getAddress());
+        } catch(UnknownHostException e) {
+            // may want to do something else here if we ever use this!
+            return null;
+        }
+    }
 }
 
 
