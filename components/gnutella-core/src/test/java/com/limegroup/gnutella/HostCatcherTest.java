@@ -86,6 +86,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
             hc.getAnEndpoint();
         }
         
+        assertEquals("hosts should be 0", 0, hc.getNumHosts());
         hc.recoverHosts();
         assertEquals("hosts should have been recovered", 
             numHosts, hc.getNumHosts());
