@@ -57,20 +57,15 @@ public class Connection {
     /** For outgoing Gnutella 0.6 connections, a function calculating the
      *  properties written after the server's "GNUTELLA OK".  For incoming
      *  Gnutella 0.6 connections, the properties written after the client's
-     *  "GNUTELLA CONNECT".  Null otherwise. */
+     *  "GNUTELLA CONNECT". */
     private HandshakeResponder _propertiesWrittenR;
+    /** The list of all properties written during the handshake sequence,
+     *  analogous to _propertiesRead.  This is needed because
+     *  _propertiesWrittenR lazily calculates properties according to what it
+     *  read. */
+    private Properties _propertiesWrittenTotal=new Properties();
     /** True iff this should try to reconnect at a lower protocol level on
-     *  outgoing connections. */
-    
-    /**
-     * Indicates whether the connection is to a shielded client
-     */
-    private volatile boolean _isClientConnection = false;
-    
-    /**
-     * Indicates whether the connection is to a supernode 
-     */
-    private volatile boolean _isSupernodeConnection = false;
+     *  outgoing connections. */    
     
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
@@ -167,8 +162,6 @@ public class Connection {
             initializeWithoutRetry();
         } catch (BadHandshakeException e) {
             //reset the flags
-            _isClientConnection = false;
-            _isSupernodeConnection = false;
             _propertiesRead = null;
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
@@ -183,40 +176,6 @@ public class Connection {
                 throw e;
             }
         }
-    }
-    
-    /**
-     * Sets the flag indicating whether the connection is to a shielded client
-     * @param flag The flag value to be set
-     */
-    public void setClientConnectionFlag(boolean flag){
-        _isClientConnection = flag;
-    }
-    
-    /**
-     * Indicates whether the connection is to a shielded client
-     * @return true, if the connection is to a shielded client, false
-     * otherwise
-     */
-    public boolean isClientConnection(){
-        return _isClientConnection;
-    }
-
-    /**
-     * Sets the flag indicating whether the connection is to a supernode
-     * @param flag The flag value to be set
-     */
-    public void setSupernodeConnectionFlag(boolean flag){
-        _isSupernodeConnection = flag;
-    }
-    
-    /**
-     * Indicates whether the connection is to a supernode
-     * @return true, if the connection is to a supernode, false
-     * otherwise
-     */
-    public boolean isSupernodeConnection(){
-        return _isSupernodeConnection;
     }
     
     private static class BadHandshakeException extends IOException { }
@@ -400,6 +359,7 @@ public class Connection {
             if (value==null)
                 value="";
             sendString(key+": "+value+CRLF);            
+            _propertiesWrittenTotal.put(key, value);
         }
         sendString(CRLF);
     }
@@ -623,6 +583,16 @@ public class Connection {
             return null;
         else
             return (Properties)_propertiesRead.clone();
+    }
+
+    /**
+     * Returns the value of the given outgoing (written) connection property, or
+     * null if no such property.  For example, getProperty("X-Supernode") tells
+     * whether I am a supernode or a leaf node.  If I wrote a property multiple
+     * time during connection, returns the latest.
+     */
+    public String getPropertyWritten(String name) {
+        return _propertiesWrittenTotal.getProperty(name);
     }
 
     /**
