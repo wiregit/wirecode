@@ -20,6 +20,9 @@ public class Endpoint implements Cloneable, IpPort
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
+    
+    // so subclasses can serialize.
+    protected Endpoint() { }
 
     /**
      * Returns a new Endpoint from a Gnutella-style host/port pair:
