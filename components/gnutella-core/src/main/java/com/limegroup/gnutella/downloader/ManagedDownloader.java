@@ -1277,9 +1277,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Step 2. OK. Wr have established TCP Connection. This downloader
         //should choose a part of the file to download and send the appropriate
         //HTTP hearders
-        boolean connected = assignAndRequest(dloader);      
-        
-        if(!connected)
+        //Note: 0=disconnected,1=tcp-connected, 2=http-connected
+        int connected = 1;
+        while(connected==1) { //while queued, connect and sleep if we queued
+            connected = assignAndRequest(dloader);
+        }
+        //Now, connected is either 0 or 2
+        Assert.that(connected==0 || connected==2,
+                    "invalid return from assignAndRequest "+connected);
+        if(connected==0)
             return;
         
         //Step 3. OK, we have successfully connected, start saving the file
@@ -1396,8 +1402,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
+     * @return 0 if
+     * NoSuchElement, TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
+     * otherwise if queued return 1
+     * otherwise if connected successfully return 2
      */
-    private boolean assignAndRequest(HTTPDownloader dloader) {
+    private int assignAndRequest(HTTPDownloader dloader) {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
@@ -1417,22 +1427,30 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     files.add(dloader.getRemoteFileDesc());
                 }
-                return false;
+                return 0;
             } catch(TryAgainLaterException talx) {
                 debug("talx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
-                return false;
+                return 0;
             } catch (FileNotFoundException fnfx) {
-                debug("fnfx thrown in assignAndReplace "+dloader);
-                return false;//discard the rfd of dloader
+                debug("fnfx thrown in assignAndRequest "+dloader);
+                return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
-                debug("nsx thrown in assignAndReplace "+dloader);
-                return false;//discard the rfd of dloader
+                debug("nsx thrown in assignAndRequest "+dloader);
+                return 0;//discard the rfd of dloader
+            } catch (QueuedException qx) { 
+                debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
+                try { 
+                    Thread.sleep(qx.getMinPollTime()+100);//tune this value
+                } catch (InterruptedException ix) {
+                    return 0;//close connection
+                }
+                return 1;
             } catch (IOException iox) {
                 debug("iox thrown in assignAndReplace "+dloader);
-                return false; //discard the rfd of dloader
+                return 0; //discard the rfd of dloader
             } finally {
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
@@ -1455,16 +1473,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     files.add(dloader.getRemoteFileDesc());
                 }
-                return false;//throw new InterruptedException();
+                return 0;//throw new InterruptedException();
             }
             synchronized(this) {
                 dloaders.add(dloader);
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
 				addAlternateLocations(dloader.getAlternateLocations(),
-				  dloader.getRemoteFileDesc() );
+                                      dloader.getRemoteFileDesc() );
             }
-            return true;
+            return 2;
         }
     }
 
@@ -1505,7 +1523,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * This method has side effects.
      */
     private void assignWhite(HTTPDownloader dloader) throws IOException, 
-    TryAgainLaterException, FileNotFoundException, NotSharingException {
+    TryAgainLaterException, FileNotFoundException, NotSharingException ,
+    QueuedException {
         //Assign "white" (unclaimed) interval to new downloader.
         //TODO2: choose biggest, earliest, etc.
         //TODO2: assign to existing downloader if possible, without
@@ -1535,7 +1554,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void assignGrey(HTTPDownloader dloader) 
         throws NoSuchElementException,  IOException, TryAgainLaterException, 
-               FileNotFoundException, NotSharingException {
+               FileNotFoundException, NotSharingException, QueuedException {
         //Split largest "gray" interval, i.e., steal part of another
         //downloader's region for a new downloader.  
         //TODO3: split interval into P-|dloaders|, etc., not just half
@@ -2013,8 +2032,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = true;
-    private final boolean log = true;    
+    private final boolean debugOn = false;
+    private final boolean log = false;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
