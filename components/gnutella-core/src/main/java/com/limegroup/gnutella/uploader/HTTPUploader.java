@@ -18,19 +18,19 @@ import com.limegroup.gnutella.util.URLDecoder;
 
 public class HTTPUploader implements Uploader {
 
-	protected OutputStream _ostream;
-	protected InputStream _fis;
-	protected Socket _socket;
-	protected int _amountRead;
-	protected int _uploadBegin;
-	protected int _uploadEnd;
-	protected int _fileSize;
-	protected int _index;
-	protected String _filename;
-	protected String _hostName;
-	protected String _guid;
-	protected int _port;
-	protected int _stateNum = CONNECTING;
+	private OutputStream _ostream;
+	private InputStream _fis;
+	private Socket _socket;
+	private int _amountRead;
+	private int _uploadBegin;
+	private int _uploadEnd;
+	private int _fileSize;
+	private int _index;
+	private String _fileName;
+	private String _hostName;
+	private String _guid;
+	private int _port;
+	private int _stateNum = CONNECTING;
 
 	private UploadState _state;
 	private final UploadManager _manager;
@@ -91,7 +91,7 @@ public class HTTPUploader implements Uploader {
 						UploadManager um, FileManager fm) {
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
-		_filename = fileName;
+		_fileName = fileName;
 		_manager = um;
 		_index = index;
 		_amountRead = 0;
@@ -120,7 +120,7 @@ public class HTTPUploader implements Uploader {
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
 						String guid, UploadManager m, FileManager fm) {
-		_filename = file;
+		_fileName = file;
 		_manager = m;
 		_index = index;
 		_uploadBegin = 0;
@@ -153,13 +153,13 @@ public class HTTPUploader implements Uploader {
 			// open a stream for writing to the socket
 			_ostream = _socket.getOutputStream();
 			// ask chris about Assert
-			Assert.that(_filename != null);  
+			Assert.that(_fileName != null);  
 			// write out the giv
 
-			Assert.that(_filename != "");  
+			Assert.that(_fileName != "");  
 
 			String giv; 
-			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
+			giv = "GIV " + _index + ":" + _guid + "/" + _fileName + "\n\n";
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 			
@@ -197,7 +197,7 @@ public class HTTPUploader implements Uploader {
 			int end = parse[2].lastIndexOf("HTTP") - 1;
 			String filename = URLDecoder.decode(parse[2].substring(0, end));
 			// some safety checks - make sure name and index match.
-			if (! filename.equals(_filename))
+			if (! filename.equals(_fileName))
 				throw new IOException();
 			int pindex = java.lang.Integer.parseInt(parse[1]);
 			if (pindex!= _index)
@@ -306,8 +306,10 @@ public class HTTPUploader implements Uploader {
 		// ignore if this is a push upload
 		if(_socket == null) return;
 		try {
-			AlternateLocation al = 
-			    new AlternateLocation(_hostName, _fileDesc.getSHA1Urn());
+			URL url = 
+			    new URL("http", _hostName, _port, 
+						URNFactory.createHttpUrnFileString(_fileDesc.getSHA1Urn()));
+			AlternateLocation al = new AlternateLocation(url);
 			_fileDesc.addAlternateLocation(al);
 		} catch(MalformedURLException e) {
 			// if the url is invalid, it simply will not be added to the list
@@ -320,7 +322,7 @@ public class HTTPUploader implements Uploader {
 
 	public OutputStream getOutputStream() {return _ostream;}
 	public int getIndex() {return _index;}
-	public String getFileName() {return _filename;}
+	public String getFileName() {return _fileName;}
 	public int getFileSize() {return _fileSize;}
 	public InputStream getInputStream() {return _fis;}
     /** The number of bytes read, including any skipped by the Range header. */
@@ -524,7 +526,7 @@ public class HTTPUploader implements Uploader {
 			}
 
 			else if(indexOfIgnoreCase(str, HTTPConstants.CONTENT_URN_HEADER)!=-1) {
-				_requestedURN = HTTPUploader.readContentURN(str);
+				_requestedURN = HTTPUploader.readContentUrn(str);
 			}
 			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER)!=-1) {
 				HTTPUploader.readAlternateLocations(this._fileDesc, str);
@@ -540,13 +542,13 @@ public class HTTPUploader implements Uploader {
 	 * in HUGE v0.93.  This assigns the requested urn value for this 
 	 * upload, which otherwise remains null.
 	 *
-	 * @param CONTENT_URN_STR the string containing the header
+	 * @param contentUrnStr the string containing the header
 	 * @return a new <tt>URN</tt> instance for the request line, or 
 	 *  <tt>null</tt> if there was any problem creating it
 	 */
-	private static URN readContentURN(final String CONTENT_URN_STR) {
-		int offset = CONTENT_URN_STR.indexOf(":");
-		int spaceIndex = CONTENT_URN_STR.indexOf(" ");
+	private static URN readContentUrn(final String contentUrnStr) {
+		int offset = contentUrnStr.indexOf(":");
+		int spaceIndex = contentUrnStr.indexOf(" ");
 		if(offset == -1) {
 			return null;
 		}
@@ -565,9 +567,9 @@ public class HTTPUploader implements Uploader {
 			return null;
 		}
 		
-		String urnStr = CONTENT_URN_STR.substring(offset);
+		String urnStr = contentUrnStr.substring(offset);
 		try {
-			return URNFactory.createURN(urnStr);
+			return URNFactory.createUrn(urnStr);
 		} catch(IOException e) {
 			// this will be thrown if the URN string was invalid for any
 			// reason -- just return null
@@ -582,25 +584,25 @@ public class HTTPUploader implements Uploader {
 	 * uploader.  This will not allow more than 20 alternate locations
 	 * for a single file.
 	 *
-	 * @param FILE_DESC the <tt>FileDesc</tt> to insert alternate 
+	 * @param fileDesc the <tt>FileDesc</tt> to insert alternate 
 	 *  locations into
-	 * @param ALT_HEADER the full alternate locations header
+	 * @param altHeader the full alternate locations header
 	 */
-	private static void readAlternateLocations(final FileDesc FILE_DESC,
-											   final String ALT_HEADER) {
-		int colonIndex = ALT_HEADER.indexOf(":");
+	private static void readAlternateLocations(final FileDesc fileDesc,
+											   final String altHeader) {
+		int colonIndex = altHeader.indexOf(":");
 		if(colonIndex == -1) {
 			return;
 		}
-		final String ALTERNATE_LOCATIONS = 
-		    ALT_HEADER.substring(colonIndex+1).trim();
-		StringTokenizer st = new StringTokenizer(ALTERNATE_LOCATIONS, ",");
+		final String alternateLocations = 
+		    altHeader.substring(colonIndex+1).trim();
+		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
 
 		// this limits the number of alternate location headers to read
 		// to 20
 		int i=0;
 		while(st.hasMoreTokens() && (i<20)) {
-			HTTPUploader.storeAlternateLocation(FILE_DESC, 
+			HTTPUploader.storeAlternateLocation(fileDesc, 
 												st.nextToken().trim());
 			i++;
 		}
@@ -611,16 +613,16 @@ public class HTTPUploader implements Uploader {
 	 * <tt>AlternateLocation</tt> instance to the specified 
 	 * <tt>FileDesc</tt>.
 	 *
-	 * @param FILE_DESC the <tt>FileDesc</tt> to insert alternate locations 
+	 * @param fileDesc the <tt>FileDesc</tt> to insert alternate locations 
 	 *  into
-	 * @param LOCATION the string representation of the individual alternate 
+	 * @param location the string representation of the individual alternate 
 	 *  location to add
 	 */
-	private static void storeAlternateLocation(final FileDesc FILE_DESC,
-											   final String LOCATION) {
+	private static void storeAlternateLocation(final FileDesc fileDesc,
+											   final String location) {
 		// note that this removes other "whitespace" characters besides
 		// space and tab, which is not strictly correct
-		final String LINE = LOCATION.trim();		
+		final String LINE = location.trim();		
 		AlternateLocation al = null;
 		try {
 			al = new AlternateLocation(LINE);
@@ -629,7 +631,7 @@ public class HTTPUploader implements Uploader {
 			// just return without adding it.
 			return;
 		}
-		FILE_DESC.addTemporaryAlternateLocation(al);
+		fileDesc.addTemporaryAlternateLocation(al);
 	}
 
 	/**
@@ -661,11 +663,11 @@ public class HTTPUploader implements Uploader {
 		 * For pushed (server-side) uploads, check to see that 
 		 * the index matches the filename. */
 		String name = fdesc._name;
-		if (_filename == null) {
-            _filename = name;
+		if (_fileName == null) {
+            _fileName = name;
         } else {
 			/* matches the name */
-			if ( !name.equals(_filename) ) {
+			if ( !name.equals(_fileName) ) {
 				throw new IOException();
 			}
         }
