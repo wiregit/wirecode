@@ -877,7 +877,23 @@ public class Connection {
     /** Returns the number of bytes received on this connection. */
     public long getBytesReceived() {
         return _bytesReceived;
-    }    
+    }
+    
+    /**
+     * Returns the percentage saved through compressing the outgoing data.
+     */
+    public double getSentSavedFromCompression() {
+        if( !isWriteDeflated() ) return 0;
+        return (1-((double)_deflater.getTotalOut()/(double)_deflater.getTotalIn()))*100;
+    }
+    
+    /**
+     * Returns the percentage saved from having the incoming data compressed.
+     */
+    public double getReadSavedFromCompression() {
+        if( !isReadDeflated() ) return 0;
+        return (1-((double)_inflater.getTotalIn()/(double)_inflater.getTotalOut()))*100;
+    }
 
     /** Returns the host set at construction */
     public String getOrigHost() {
