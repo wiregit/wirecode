@@ -18,6 +18,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -30,6 +31,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -68,7 +70,8 @@ public class PingRankerTest extends BaseTestCase {
     public void setUp() throws Exception {
         pinger.messages.clear();
         pinger.hosts.clear();
-        ranker = new PingRanker(pinger);
+        ranker = new PingRanker();
+        PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
     }
     
@@ -79,7 +82,7 @@ public class PingRankerTest extends BaseTestCase {
         for (int i =1;i <= 10;i++) 
             ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
         
-        Thread.sleep(100);
+        Thread.sleep(1000);
         
         assertEquals(10,pinger.hosts.size());
         assertEquals(10,pinger.messages.size());
@@ -235,7 +238,8 @@ public class PingRankerTest extends BaseTestCase {
     }
     
     /**
-     * Tests that the ranker prefers hosts that have sent a pong back.
+     * Tests that the ranker prefers hosts that have sent a pong back but in 
+     * case it runs out of verified hosts it returns a non-verified one.
      */
     public void testPrefersPongedHost() throws Exception {
         assertFalse(ranker.hasMore());
@@ -254,6 +258,12 @@ public class PingRankerTest extends BaseTestCase {
         // now this host should be prefered over other hosts.
         RemoteFileDesc rfd = ranker.getBest();
         assertEquals("1.2.3.5",rfd.getHost());
+     
+        // but if we ask for more hosts we'll get some of the unverified ones
+        assertTrue(ranker.hasMore());
+        rfd = ranker.getBest();
+        assertNotEquals("1.2.3.5",rfd.getHost());
+        assertTrue(rfd.getHost().startsWith("1.2.3."));
     }
     
     /**
@@ -481,10 +491,15 @@ public class PingRankerTest extends BaseTestCase {
          */
         public List hosts = new ArrayList();
         
-        protected synchronized void sendSingleMessage(IpPort host, Message message) {
-            messages.add(message);
-            hosts.add(host);
+        public void rank(Collection hosts, MessageListener listener, 
+                Cancellable canceller, Message message) {
+            for (Iterator iter = hosts.iterator(); iter.hasNext();) {
+                this.hosts.add(iter.next());
+                messages.add(message);
+            }
         }
+        
+        
     }
     
     /**
