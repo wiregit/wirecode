@@ -30,6 +30,7 @@ public final class HTTPUploader implements Uploader {
 	private OutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
+	private int _totalAmountRead;
 	private int _amountRead;
 	// useful so we don't have to do _uploadEnd - _uploadBegin everywhere
     private int _amountRequested;
@@ -104,10 +105,14 @@ public final class HTTPUploader implements Uploader {
 		_amountRead = 0;
 		_guid = null;
 		_port = 0;
-        if(old!=null)
+        if(old!=null) {
+            _totalAmountRead += old.getTotalAmountUploaded();
             bandwidthTracker=old.bandwidthTracker;
-        else
+        }
+        else {
+            _totalAmountRead = 0;
             bandwidthTracker = new BandwidthTrackerImpl();
+        }            
 		try {			
 			_ostream = _socket.getOutputStream();
 
@@ -407,19 +412,22 @@ public final class HTTPUploader implements Uploader {
 
     public boolean supportsQueueing() {return _supportsQueueing; }
     
-    /**The number of bytes read. The way we calculate the number of bytes 
-     * read is a little wierd if the range header begins from the middle of 
-     * the file (say from byte x). Then we consider that bytes 0-x have 
-     * already been read. 
-     * <p>
-     * This may lead to some wierd behaviour with chunking. For example if 
-     * a host requests the last 10% of a file, the GUI will display 90%
-     * downloaded. Later if the same host requests from 20% to 30% the 
-     * progress will reduce to 20% onwards. 
-	 * 
+    /**
+     * The amount of bytes that this upload has transferred.
+     *
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {return _amountRead;}
+	
+	/**
+	 * The total amount of bytes that this upload and all previous
+	 * uploaders have transferred on this socket in this file-exchange.
+	 *
+	 * Implements the Uploader interface.
+	 */
+	public int getTotalAmountUploaded() { 
+	    return _totalAmountRead + _amountRead;
+    }
 
 	/**
 	 * Returns the <tt>FileDesc</tt> instance for this uploader.
@@ -799,7 +807,7 @@ public final class HTTPUploader implements Uploader {
 	}
   
     public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(amountUploaded());
+        bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
     }
 
     public float getMeasuredBandwidth() {
