@@ -237,6 +237,16 @@ public final class RouterService {
     }
 
     /**
+     * Adds the specified <tt>UltrapeerListener</tt> instance to the list
+     * of classes that should be notified of changes un Ultrapeer status.
+     *
+     * @param ul the <tt>UltrapeerListener</tt> instance to add
+     */
+    public static void addUltrapeerListener(UltrapeerListener ul) {
+        manager.addUltrapeerListener(ul);
+    }
+
+    /**
      * Returns the <tt>ActivityCallback</tt> passed to this' constructor.
 	 *
 	 * @return the <tt>ActivityCallback</tt> passed to this' constructor --
