@@ -177,6 +177,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
 
             // If we are starting to affect the RTT, 
             // then ratchet down the accelorator
+            /*
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
                 _skipLimit /= 2;
@@ -188,6 +189,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                       " rtt:"+rtt+ 
                       " sL:"+_skipLimit);
             }
+            */
 
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
