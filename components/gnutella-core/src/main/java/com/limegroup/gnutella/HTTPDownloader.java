@@ -559,13 +559,26 @@ public class HTTPDownloader implements Runnable {
             if (str==null || str.equals(""))
                 break;
 
-            // Handle a 503 error from Gnotella
-            if ( lineNumber == 0 && 
-			 (str.equals("3") || str.startsWith("3 Upload limit reached")) )
+            // Handle errors not conforming to HTTP spec
+            if ( lineNumber == 0 )
             {
-                _stateString = "Try Again Later";
-                _state = ERROR;
-                return;
+                // Handle a 503 error from Gnotella/Gnutella
+                if ( str.equals("3") || 
+                     str.startsWith("3 Upload limit reached") )
+                {
+                    _stateString = "Try Again Later";
+                    _state = ERROR;
+                    return;
+                }
+
+                // Handle a 404 error from Gnotella/Gnutella
+                if ( str.equals("4") || 
+                     str.startsWith("4 File Not Found") )
+                {
+                    _stateString = "File Not Found";
+                    _state = ERROR;
+                    return;
+                }
             }
 
             if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
