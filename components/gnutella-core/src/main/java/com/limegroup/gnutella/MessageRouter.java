@@ -932,22 +932,6 @@ public abstract class MessageRouter {
     }
 
     /**
-     * Sends the query request to the designated connection,
-     * setting up the proper reply routing.
-     */
-    public void sendQueryRequest(QueryRequest request,
-                                 ManagedConnection connection) {        
-        if(request == null) {
-            throw new NullPointerException("null query");
-        }
-        if(connection == null) {
-            throw new NullPointerException("null connection");
-        }
-        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
-        connection.send(request);
-    }
-
-    /**
      * Broadcasts the ping request to all initialized connections,
      * setting up the proper reply routing.
      */
@@ -1070,7 +1054,7 @@ public abstract class MessageRouter {
 	 *  access to any leaf connections that we should forward to
      */
 	public final void forwardQueryRequestToLeaves(QueryRequest query,
-                                                  ReplyHandler handler) {
+                                                  ReplyHandler handler) {                                           
 		if(!RouterService.isSupernode()) return;
         
         //use query routing to route queries to client connections
@@ -1080,8 +1064,8 @@ public abstract class MessageRouter {
         List hitConnections = new ArrayList();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(mc == handler) continue;
-            if(mc.hitsQueryRouteTable(query)) {
+            if(mc == handler) continue; 
+            if(mc.qrp().hitsQueryRouteTable(query)) {
                 hitConnections.add(mc);
             }
         }
@@ -1097,7 +1081,6 @@ public abstract class MessageRouter {
         
         for(int i=0; i<hitConnections.size(); i++) {
             ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
-            
             // sendRoutedQueryToHost is not called because 
             // we have already ensured it hits the routing table
             // by filling up the 'hitsConnection' list.
@@ -1119,7 +1102,7 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		if (mc.hitsQueryRouteTable(query)) {
+		if (mc.qrp().hitsQueryRouteTable(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -1301,6 +1284,7 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
+        System.out.println("MessageRouter::sendQueryRequest");
 		if(request == null) {
 			throw new NullPointerException("null query");
 		}
@@ -1323,6 +1307,7 @@ public abstract class MessageRouter {
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
+            System.out.println("MessageRouter::sendQueryRequest::sending");
             sendConnection.send(request);
 		}		
     }
@@ -1330,6 +1315,10 @@ public abstract class MessageRouter {
     /**
      * Originates a new query request to the ManagedConnection.
      *
+     * TODO:: this is only really here to remain compatible with tests such
+     *  as UltrapeerQueryRouteTableTest -- we should really change the test
+     *  to be compatible with current code
+     * 
      * @param request The query to send.
      * @param mc The ManagedConnection to send the query along
      */
@@ -1339,7 +1328,7 @@ public abstract class MessageRouter {
         if( mc == null )
             throw new NullPointerException("null connection");
         
-        mc.originateQuery(query);
+        mc.send(query);
     }
     
 
@@ -1846,9 +1835,7 @@ public abstract class MessageRouter {
         if(!isQRPConnection(mc)) return;
 
         // reset the query route table for this connection
-        synchronized (mc.getQRPLock()) {
-            mc.resetQueryRouteTable(rtm);
-        }
+        mc.qrp().resetQueryRouteTable(rtm);
 
         // if this is coming from a leaf, make sure we update
         // our tables so that the dynamic querier has correct
@@ -1874,9 +1861,7 @@ public abstract class MessageRouter {
         if(!isQRPConnection(mc)) return;
 
         // patch the query route table for this connection
-        synchronized(mc.getQRPLock()) {
-            mc.patchQueryRouteTable(ptm);
-        }
+        mc.qrp().patchQueryRouteTable(ptm);
 
         // if this is coming from a leaf, make sure we update
         // our tables so that the dynamic querier has correct
@@ -2060,8 +2045,8 @@ public abstract class MessageRouter {
 		
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
-        	synchronized (mc.getQRPLock()) {
-                QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
+        	synchronized (mc.qrp()) {
+                QueryRouteTable qrtr = mc.qrp().getQueryRouteTableReceived();
 				if(qrtr != null) {
 					qrt.addAll(qrtr);
 				}
