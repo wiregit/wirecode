@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
@@ -89,18 +90,11 @@ public final class UDPService implements Runnable {
 	 * The thread for listening of incoming messages.
 	 */
 	private final Thread UDP_RECEIVE_THREAD;
-    
-    /**
-     * The thread for sending of outgoing messages.  Useful because
-     * we don't want the receive thread to block while processing
-     * messages....
-     */
-    private final Thread UDP_SEND_THREAD;
-
-    /**
-     * Used for communication between send() calls and the send thread.
-     */ 
-    private final List PACKETS_TO_SEND;
+	
+	/**
+	 * The queue that processes packets to send.
+	 */
+	private final ProcessingQueue SEND_QUEUE;
 
     /**
      * The GUID that we advertise out for UDPConnectBack requests.
@@ -130,11 +124,9 @@ public final class UDPService implements Runnable {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private UDPService() {	    
-        PACKETS_TO_SEND = new LinkedList();
         UDP_RECEIVE_THREAD = new ManagedThread(this, "UDPService-Receiver");
         UDP_RECEIVE_THREAD.setDaemon(true);
-        UDP_SEND_THREAD = new ManagedThread(new Sender(), "UDPService-Sender");
-        UDP_SEND_THREAD.setDaemon(true);
+        SEND_QUEUE = new ProcessingQueue("UDPService-Sender");
         RouterService.schedule(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
@@ -147,7 +139,6 @@ public final class UDPService implements Runnable {
 	 */
 	public void start() {
         UDP_RECEIVE_THREAD.start();
-        UDP_SEND_THREAD.start();
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -379,76 +370,50 @@ public final class UDPService implements Runnable {
 
         byte[] data = baos.toByteArray();
         DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        synchronized (PACKETS_TO_SEND) {
-            if (PACKETS_TO_SEND.isEmpty())
-                PACKETS_TO_SEND.notify();
-            PACKETS_TO_SEND.add(new SendBundle(dg, err));
-        }
+        SEND_QUEUE.add(new Sender(dg, err));
 	}
-
-    // Just a simple container class
-    private class SendBundle {
-        DatagramPacket _dp;
-        ErrorCallback _err;
-        public SendBundle(DatagramPacket dp, ErrorCallback custom) {
-            _dp = dp;
-            _err = custom;
-        }
-    }
     
     // the runnable that actually sends the UDP packets.  didn't wany any
     // potential blocking in send to slow down the receive thread.  also allows
     // received packets to be handled much more quickly
     private class Sender implements Runnable {
+        private final DatagramPacket _dp;
+        private final ErrorCallback _err;
+        
+        Sender(DatagramPacket dp, ErrorCallback err) {
+            _dp = dp;
+            _err = err;
+        }
         
         public void run() {
-            SendBundle currBundle = null;
-            while (true) {
-
-                // get something to send
-                // ------
-                synchronized (PACKETS_TO_SEND) {
-                    while (PACKETS_TO_SEND.isEmpty()) {
-                        try {
-                            PACKETS_TO_SEND.wait();
-                        }
-                        catch (InterruptedException ignored) {}
+            // send away
+            // ------
+            synchronized (_sendLock) {
+                // we could be changing ports, just drop the message, 
+                // tough luck
+                if (_socket == null) {
+                    if (_socketSetOnce) {
+                        Exception npe = 
+                            new NullPointerException("Null UDP Socket!!");
+                        ErrorService.error(npe);
                     }
-                    currBundle = (SendBundle) PACKETS_TO_SEND.remove(0);
+                    return;
                 }
-                // ------
-
-                // send away
-                // ------
-                synchronized (_sendLock) {
-                    // we could be changing ports, just drop the message, 
-                    // tough luck
-                    if (_socket == null) {
-                        if (_socketSetOnce) {
-                            Exception npe = 
-                                new NullPointerException("Null UDP Socket!!");
-                            ErrorService.error(npe);
-                        }
-                        continue;
-                    }
-                    try {
-                        _socket.send(currBundle._dp);
-                    } catch(BindException be) {
-                        // oh well, if we can't bind our socket, ignore it.. 
-                    } catch(NoRouteToHostException nrthe) {
-                        // oh well, if we can't find that host, ignore it ...
-                    } catch(IOException ioe) {
-                        if(isIgnoreable(ioe.getMessage()))
-                            return;
-                            
-                        String errString = "ip/port: " + 
-                                           currBundle._dp.getAddress() + ":" + 
-                                           currBundle._dp.getPort();
-                        currBundle._err.error(ioe, errString);
-                    }
+                try {
+                    _socket.send(_dp);
+                } catch(BindException be) {
+                    // oh well, if we can't bind our socket, ignore it.. 
+                } catch(NoRouteToHostException nrthe) {
+                    // oh well, if we can't find that host, ignore it ...
+                } catch(IOException ioe) {
+                    if(isIgnoreable(ioe.getMessage()))
+                        return;
+                        
+                    String errString = "ip/port: " + 
+                                       _dp.getAddress() + ":" + 
+                                       _dp.getPort();
+                    _err.error(ioe, errString);
                 }
-                // ------
-
             }
         }
         
