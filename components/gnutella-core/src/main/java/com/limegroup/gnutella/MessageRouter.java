@@ -22,7 +22,7 @@ import java.net.*;
  * maintains a list of connections.
  */
 public abstract class MessageRouter {
-
+	
     protected ConnectionManager _manager;
 
     /**
@@ -56,7 +56,8 @@ public abstract class MessageRouter {
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
 	 * this node.
 	 */
-    private final ReplyHandler FOR_ME_REPLY_HANDLER = new ForMeReplyHandler();
+    private final ReplyHandler FOR_ME_REPLY_HANDLER = 
+		ForMeReplyHandler.instance();
 
     /**
      * The lock to hold before updating or propogating tables.  TODO3: it's 
@@ -387,11 +388,11 @@ public abstract class MessageRouter {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
 			//connection as unkillable so the ConnectionWatchdog will not police it
 			//any more.
-			if ((receivingConnection.getNumMessagesReceived()<=2)
-                && (request.getHops()<=1)  //actually ==1 will do
-                && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
-				receivingConnection.setKillable(false);
-			}
+ 			if ((receivingConnection.getNumMessagesReceived()<=2)
+                 && (request.getHops()<=1)  //actually ==1 will do
+                 && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
+ 				receivingConnection.setKillable(false);
+ 			}
             handleQueryRequest(request, receivingConnection, counter);
 		} else {
 			if(RECORD_STATS)
@@ -569,10 +570,12 @@ public abstract class MessageRouter {
 
 		if(handler.isSupernodeClientConnection()) {
 			if(handler.isHighDegreeConnection()) {
-				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request), 
+				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
+																	  handler), 
 								 handler, counter);
 			} else {
-				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request), 
+				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
+																	  handler), 
 								 handler, counter);
 			}
 		} else if(request.getTTL() > 0) {
@@ -671,7 +674,7 @@ public abstract class MessageRouter {
 			throw new NullPointerException("null ping");
 		}
         _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
-        broadcastPingRequest(ping, null, _manager);
+        broadcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
     }
 
 	/**
@@ -696,7 +699,8 @@ public abstract class MessageRouter {
 			// create a query to send to leaves
 			forwardQueryRequestToLeaves(query, 
 										FOR_ME_REPLY_HANDLER);
-			sendDynamicQuery(QueryHandler.createHandler(query), 
+			sendDynamicQuery(QueryHandler.createHandler(query, 
+														FOR_ME_REPLY_HANDLER), 
 							 FOR_ME_REPLY_HANDLER, counter);
 		} else {
 			broadcastQueryRequest(query, FOR_ME_REPLY_HANDLER);
@@ -747,12 +751,12 @@ public abstract class MessageRouter {
         // Note that we have zero allocations here.
 
         //Broadcast the ping to other connected nodes (supernodes or older
-        //nodes), but DON'T forward any ping not originating from me (i.e.,
-        //receivingConnection!=null) along leaf to ultrapeer connections.
+        //nodes), but DON'T forward any ping not originating from me 
+        //along leaf to ultrapeer connections.
         List list=manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if (   receivingConnection==null   //came from me
+            if (   receivingConnection==FOR_ME_REPLY_HANDLER
 				   || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
                 c.send(request);
@@ -802,6 +806,7 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
+		//System.out.println("MessageRouter::sendRoutedQueryToHost"); 
 		//TODO:
 		//because of some very obscure optimization rules, it's actually
 		//possible that qi could be non-null but not initialized.  Need
@@ -810,6 +815,7 @@ public abstract class MessageRouter {
 		if (qi==null || qi.lastReceived==null) 
 			return false;
 		else if (qi.lastReceived.contains(query)) {
+			//System.out.println("MessageRouter::sendRoutedQueryToHost::sending query"); 
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -859,7 +865,7 @@ public abstract class MessageRouter {
 		}
 
 		// are we sending it to the last hop??
-		boolean lastHop = query.getTTL()==0;
+		boolean lastHop = query.getTTL()==1;
 		for(int i=0; i<limit; i++){
 			ManagedConnection mc = (ManagedConnection)list.get(i);
 			if (handler == FOR_ME_REPLY_HANDLER || 
@@ -895,6 +901,19 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
+
+		if(request == null) {
+			throw new NullPointerException("null query");
+		}
+		if(sendConnection == null) {
+			throw new NullPointerException("null send connection");
+		}
+		if(handler == null) {
+			throw new NullPointerException("null reply handler");
+		}
+
+		//TODO:: make sure to look at query routing tables!!!
+
         //send the query over this connection only if any of the following
         //is true:
         //1. The query originated from our node 
@@ -1440,7 +1459,7 @@ public abstract class MessageRouter {
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
 			ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-			if(qi.lastReceived != null) {
+			if(qi != null && qi.lastReceived != null) {
 				qrt.addAll(qi.lastReceived);
 			}
 			
