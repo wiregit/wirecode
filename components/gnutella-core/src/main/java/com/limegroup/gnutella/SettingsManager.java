@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.util.Locale;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
@@ -287,6 +288,7 @@ public final class SettingsManager {
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
 	private final String DEFAULT_COUNTRY              = "";
+	private final String DEFAULT_LOCALE_VARIANT       = "";
 	
     private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
     private final boolean DEFAULT_CONNECTION_VIEW_ENABLED = false;
@@ -518,6 +520,11 @@ public final class SettingsManager {
 	 */
 	private final String COUNTRY = "COUNTRY";
     
+	/**
+	 * Constant key for the locale variant.
+	 */
+	private final String LOCALE_VARIANT = "LOCALE_VARIANT";
+    
     //settings for Supernode implementation
     private final String MAX_SHIELDED_CLIENT_CONNECTIONS 
        = "MAX_SHIELDED_CLIENT_CONNECTIONS";
@@ -744,6 +751,14 @@ public final class SettingsManager {
         catch(FileNotFoundException fnfe){loadDefaults();}
         catch(SecurityException se){loadDefaults();}
         
+        try {
+            String language = getLanguage();
+            String country = getCountry();
+            String localeVariant = getLocaleVariant();
+            Locale.setDefault(new Locale(language, country, localeVariant));
+        } catch(Exception e) {
+            System.out.println("Could not set new default locale.");
+        }
         
         //reset the values that have expired
         resetExpiredValues();
@@ -1151,6 +1166,9 @@ public final class SettingsManager {
 				else if(key.equals(COUNTRY)) {
 					setCountry(p);
 				}
+				else if(key.equals(LOCALE_VARIANT)) {
+					setLocaleVariant(p);
+				}
 				else if(key.equals(MINIMUM_SEARCH_QUALITY)) {
 					setMinimumSearchQuality(Integer.parseInt(p));
 				}
@@ -1303,6 +1321,8 @@ public final class SettingsManager {
 
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
+		setLocaleVariant(DEFAULT_LOCALE_VARIANT);
+
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
 		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
@@ -2000,6 +2020,17 @@ public final class SettingsManager {
 	 */
 	public String getCountry() {
 		return PROPS.getProperty(COUNTRY);
+	}
+
+	/**
+	 * Returns a <tt>String</tt> instance specifying the locale variant
+	 * to use for the application.
+	 *
+	 * @return a <tt>String</tt> specifying the locale variant to use for
+	 *         the application
+	 */
+	public String getLocaleVariant() {
+		return PROPS.getProperty(LOCALE_VARIANT);
 	}
 
 	/**
@@ -3148,6 +3179,15 @@ public final class SettingsManager {
 	}
 
 	/**
+	 * Sets the locale variant to use for the application.
+	 *
+	 * @param localeVariant the locale variant to use
+	 */
+	public void setLocaleVariant(final String localeVariant) {
+		PROPS.put(LOCALE_VARIANT, localeVariant);
+	}
+
+	/**
 	 * Sets the minimum quality (number of stars) for search results to
 	 * display.
 	 *
@@ -3596,3 +3636,4 @@ public final class SettingsManager {
 //      }
 
 }
+
