@@ -76,6 +76,11 @@ public final class CommonUtils {
 	private static boolean _isJava118 = false;
 
 	/**
+	 * Cached constant for the HTTP Server: header value.
+	 */
+	private static final String HTTP_SERVER;
+
+	/**
 	 * Make sure the constructor can never be called.
 	 */
 	private CommonUtils() {}
@@ -109,6 +114,15 @@ public final class CommonUtils {
 		if(CommonUtils.getJavaVersion().startsWith("1.1.8")) {
 			_isJava118 = true;
 		} 
+		
+		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
+			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
+		}
+		else {
+			HTTP_SERVER = ("LimeWire/" + 
+						   LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4) +
+						   " (Pro)");
+		}
 	}
 
 	/**
@@ -126,6 +140,16 @@ public final class CommonUtils {
 	public static String getVendor() {
 		return "LimeWire " + LIMEWIRE_VERSION;
 	}    
+
+	/**
+	 * Returns the string for the server that should be reported in the HTTP
+	 * "Server: " tag.
+	 * 
+	 * @return the HTTP "Server: " header value
+	 */
+	public static String getHttpServer() {
+		return HTTP_SERVER;
+	}
 
 	/**
 	 * Returns the version of java we're using.
@@ -455,6 +479,7 @@ public final class CommonUtils {
 		if(!isQuickTimeAvailable()) return false;
 		return isQuickTimeSupportedFormat(file);
 	}
+
 
     /*
     public static void main(String args[]) {
