@@ -61,27 +61,33 @@ import com.sun.java.util.collections.*;
  */
 public class M4AMetaData extends AudioMetaData {
 	
-	/**
-	 * some atoms we don't care about
-	 */
-	private static final int FTYP_ATOM = 0x66747970;
-	private static final int MOOV_ATOM = 0x6d6f6f76;
-	private static final int MVHD_ATOM = 0x6d766864;
-	private static final int TRAK_ATOM = 0x7472616b;
-	private static final int TKHD_ATOM = 0x746b6864;
-	private static final int MDIA_ATOM = 0x6d646961;
-	private static final int ESDS_ATOM = 0x65736473;
-	private static final int MDHD_ATOM = 0x6d646864;
-	private static final int MINF_ATOM = 0x6d696e66;
-	private static final int DINF_ATOM = 0x64696e66;
-	private static final int SMHD_ATOM = 0x736d6864;
-	private static final int STBL_ATOM = 0x7374626c;
-	private static final int STSD_ATOM = 0x73747364;
-	private static final int MP4A_ATOM = 0x6d703461;
-	private static final int UDTA_ATOM = 0x75647461;
-	private static final int META_ATOM = 0x6d657461;
-	private static final int HDLR_ATOM = 0x68646c72;
-	
+        /**
+         * some atoms we don't care about
+         */
+        private static final int FTYP_ATOM = 0x66747970;
+        private static final int MOOV_ATOM = 0x6d6f6f76;
+        private static final int MVHD_ATOM = 0x6d766864;
+        private static final int TRAK_ATOM = 0x7472616b;
+        private static final int TKHD_ATOM = 0x746b6864;
+        private static final int MDIA_ATOM = 0x6d646961;
+        private static final int ESDS_ATOM = 0x65736473;
+        private static final int ALAC_ATOM = 0x616c6163;
+        private static final int MDHD_ATOM = 0x6d646864;
+        private static final int MINF_ATOM = 0x6d696e66;
+        private static final int DINF_ATOM = 0x64696e66;
+        private static final int SMHD_ATOM = 0x736d6864;
+        private static final int STBL_ATOM = 0x7374626c;
+        private static final int STSD_ATOM = 0x73747364;
+        private static final int MP4A_ATOM = 0x6d703461;
+        private static final int DRMS_ATOM = 0x64726d73;
+        private static final int UDTA_ATOM = 0x75647461;
+        private static final int META_ATOM = 0x6d657461;
+        private static final int HDLR_ATOM = 0x68646c72;
+        private static final int STTS_ATOM = 0x73747473;
+        private static final int STSC_ATOM = 0x73747363;
+        private static final int STSZ_ATOM = 0x7374737a;
+        private static final int STCO_ATOM = 0x7374636f;  
+        
 	/**
 	 * this atom contains the metadata.
 	 */
@@ -90,16 +96,16 @@ public class M4AMetaData extends AudioMetaData {
 	/**
 	 * some metadata header atoms
 	 */
-	final static int NAME_ATOM = 0xa96e616d; //0xa9+ "nam"
-    final static int ALBUM_ATOM = 0xa9616c62; //0xa9 + "alb"
-    final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
-    final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
-	final static int  GENRE_ATOM = 0x676e7265; //"gnre"
-	final static int  GENRE_ATOM_STANDARD = 0xA967656E; //"0xa9+"gen"
-	final static int  TRACK_ATOM = 0x74726b6e; //"trkn"
-	final static int  TRACK_ATOM_STANDARD = 0xA974726b; //0xa9+"trk"
-	final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
-	final static int DISK_ATOM = 0x6469736b; //"disk"
+        final static int NAME_ATOM = 0xa96e616d; //0xa9+ "nam"
+        final static int ALBUM_ATOM = 0xa9616c62; //0xa9 + "alb"
+        final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
+        final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
+        final static int GENRE_ATOM = 0x676e7265; //"gnre"
+        final static int GENRE_ATOM_STANDARD = 0xA967656E; //"0xa9+"gen"
+        final static int TRACK_ATOM = 0x74726b6e; //"trkn"
+        final static int TRACK_ATOM_STANDARD = 0xA974726b; //0xa9+"trk"
+        final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
+        final static int DISK_ATOM = 0x6469736b; //"disk"
 	
 	/**
 	 * the data atom within each metadata atom
@@ -199,7 +205,7 @@ public class M4AMetaData extends AudioMetaData {
 	 * @throws IOException either reading failed, or the atom type didn't match
 	 */
 	private void skipAtom(int atomType, DataInputStream in) throws IOException {
-		in.skip(enterAtom(atomType,in));
+                in.skip(enterAtom(atomType,in));
 	}
 	
 	/**
@@ -241,22 +247,42 @@ public class M4AMetaData extends AudioMetaData {
 	 */
 	private DataInputStream getMetaDataStream() throws IOException{
 		byte []ILST = null;
-		try {
+		try {     
 			skipAtom(FTYP_ATOM,_in);
 			enterAtom(MOOV_ATOM,_in);
-			
-			//extract the bitrate.
-			
+	
+			//extract the length.
+				
 			int mvhdSize = enterAtom(MVHD_ATOM,_in)-20;
 			_in.skip(12);
+
 			int timeScale = _in.readInt();
 			int timeUnits = _in.readInt();
 			setLength((int) ( timeUnits/timeScale));
 			_in.skip(mvhdSize);
-			
-			//continue with the rest of the atoms we don't care about
-			skipAtom(TRAK_ATOM,_in);
+                        
+                        //extract the bitrate.
+                        
+			enterAtom(TRAK_ATOM, _in);
+                        skipAtom(TKHD_ATOM, _in);
+                        enterAtom(MDIA_ATOM, _in);
+                        skipAtom(MDHD_ATOM, _in);
+                        skipAtom(HDLR_ATOM, _in);
+                        enterAtom(MINF_ATOM, _in);
+                        skipAtom(SMHD_ATOM, _in);
+                        skipAtom(DINF_ATOM, _in);
+                        enterAtom(STBL_ATOM, _in);
+                        enterAtom(STSD_ATOM, _in);
+                        
+                        processSTSDAtom(_in);
+          	      
+                        skipAtom(STTS_ATOM, _in);
+                        skipAtom(STSC_ATOM, _in);
+                        skipAtom(STSZ_ATOM, _in);
+                        skipAtom(STCO_ATOM, _in);
+            
 			enterAtom(UDTA_ATOM,_in);
+                        
 			enterAtom(META_ATOM,_in);
 			_in.skip(4); //no comment...
 			skipAtom(HDLR_ATOM,_in);
@@ -277,8 +303,48 @@ public class M4AMetaData extends AudioMetaData {
 		//create a ByteArrayInputStream and read from it.
 		return ILST==null ? null : new DataInputStream(new ByteArrayInputStream(ILST));
 	}
-	
-	
+        
+        /**
+         * [stsd]
+         *   (1. some data whereof we are not interested in)
+         *   [mp4a] or [alac] (or [drms], is not supported here)
+         *     (2. data whereof we are not interested in)
+         *   [esds] or [alac]
+         *     (bitrate is at offset 0x1A or 0x14)
+         *
+         */
+        private void processSTSDAtom(DataInputStream _in) throws IOException {
+                        
+            _in.skip(8+4); // (1) skip some data of [stsd]
+            
+            int atomType = _in.readInt(); // [mp4a], [alac]
+            
+            _in.skip(0x1c); // (2) skip more data of [mp4a]...
+            
+            if (atomType == MP4A_ATOM) {
+                // || atomType == DRMS_ATOM
+                enterBitrateAtom(ESDS_ATOM, 0x1A, _in);
+            } else if (atomType == ALAC_ATOM) {
+                enterBitrateAtom(ALAC_ATOM, 0x14, _in);
+            } else {
+                throw new IOException ("atom type mismatch, expected " +MP4A_ATOM+ " or " +ALAC_ATOM+ " got " +atomType);
+            }
+        }
+        
+        /**
+         * Retrieve the Bitrate
+         */
+        private void enterBitrateAtom(int atom, int skip, DataInputStream _in) throws IOException {
+            int length = enterAtom(atom, _in);
+            
+            length -= _in.skip(skip);
+            int avgBitrate = _in.readInt();
+            length -= 4;
+            setBitrate((int)(avgBitrate/1000)); // bits to kbits
+            
+            _in.skip(length); // ignore the rest of this atom
+        }
+        
 	/**
 	 * populates the metaData map with values read from the file
 	 * @throws IOException parsing failed
@@ -311,7 +377,7 @@ public class M4AMetaData extends AudioMetaData {
 					case DISK_ATOM:
 						_metaData.put(new Integer(DISK_ATOM), readDataAtom());break;
 						//add more atoms as we learn their meaning
-					default:
+                                        default:
 						//skip unknown atoms.
 						_in.skip(currentSize-8);
 				}
@@ -334,4 +400,6 @@ public class M4AMetaData extends AudioMetaData {
 		_in.readFully(res);
 		return res;
 	}
+	
+
 }
