@@ -34,23 +34,10 @@ public class ID3ReaderTest extends BaseTestCase {
                 public void run() {
                     try {
                         Socket s = ss.accept();
-                        System.out.println("SERVER: got an incoming");
-                        InputStream is = s.getInputStream();
-                        System.out.println("SERVER: about to read");
-                        ByteReader br = new ByteReader(is);
-                        String read = null;
-                        do {
-                            read = br.readLine();
-                            System.out.println(read);
-                        } while (read != null);
                         String output = "HTTP/1.1 OK\r\n\r\n";
                         s.getOutputStream().write(output.getBytes());
                         s.getOutputStream().flush();
-                        System.out.println("SERVER: read");
-                        s.shutdownInput();
-                        s.shutdownOutput();
                         s.close();
-                        System.out.println("SERVER: closed socket");
                     }
                     catch (Exception bad) {
                         bad.printStackTrace();
