@@ -18,12 +18,6 @@ public final class PongCacher {
     private static final PongCacher INSTANCE = new PongCacher();    
 
     /**
-     * Constant for the number of cached pongs returned in response to
-     * pings.  Public to make testing easier.
-     */
-    public static final int NUM_CACHED_PONGS = 6;
-
-    /**
      * Constant for the number of pongs to store per hop.  Public to make
      * testing easier.
      */
@@ -32,7 +26,7 @@ public final class PongCacher {
     /**
      * Constant for the number of hops to keep track of in our pong cache.
      */
-    public static final int NUM_HOPS = 8;
+    public static final int NUM_HOPS = 6;
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
@@ -72,7 +66,7 @@ public final class PongCacher {
             Iterator iter = PONGS.iterator();
             int i = 0;
             List pongs = new LinkedList();
-            for(;iter.hasNext() && i<NUM_CACHED_PONGS; i++) {
+            for(;iter.hasNext() && i<NUM_HOPS; i++) {
                 pongs.add((PingReply)iter.next());
             }
             return pongs;
