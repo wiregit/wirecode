@@ -88,6 +88,11 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
      * the client guid of the LEAF - please set in the first test.
      */
     private static byte[] clientGUID = null;
+    
+    /**
+     * the client GUID of the leaf as a GUID.
+     */
+    private static GUID leafGUID = null;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -359,6 +364,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         drainAll();
         Message m = null;
         clientGUID = GUID.makeGuid();
+        leafGUID = new GUID(clientGUID);
 
         LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
                               new EmptyResponder());
@@ -389,145 +395,132 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
             m = LEAF.receive(TIMEOUT);
         } while (!(m instanceof PushProxyAcknowledgement)) ;
         assertTrue(Arrays.equals(m.getGUID(), clientGUID));
-        assertTrue(((PushProxyAcknowledgement)m).getListeningPort() == PORT);
+        assertEquals(PORT, ((PushProxyAcknowledgement)m).getListeningPort());
 
         // ultrapeer supports push proxy setup A-OK
     }
-
-
-    public void testGoodPushProxyRequest() throws Exception {
-        Message m = null;
-        String result = null;
-
+    
+    public void testGETWithServerId() throws Exception {
+        tRequest("GET", // request method.
+                 "ServerID", // initial param
+                 Base32.encode(clientGUID), // initial value
+                 "127.0.0.1", // ip
+                 6346, // port
+                 null, // params
+                 202); // opcode expected in return
+    }
+    
+    public void testHEADWithServerId() throws Exception {
+        tRequest("HEAD", "Serverid", Base32.encode(clientGUID),
+                        "10.238.1.87", 6350, null, 202);
+    }
+    
+    public void testInvalidGUIDWithServerId() throws Exception {
+        tRequest("GET", "serverid", Base32.encode(GUID.makeGuid()),
+                 "127.0.0.1", 6346, null, 410);
+    }
+    
+    public void testInvalidGUIDWithGuid()  throws Exception {
+        tRequest("GET", "guid", new GUID().toHexString(),
+                "127.0.0.1", 6346, null, 410);
+    }
+    
+    public void testInvalidIP() throws Exception {
+        tRequest("GET", "serverid", Base32.encode(clientGUID),
+                "www.crapalapadapa.com", 6346, null, 400);
+    }
+    
+    public void testServerIdWithBase16Fails() throws Exception {
+        tRequest("GET", "serverid", leafGUID.toHexString(),
+                "127.0.0.1", 6346, null, 400);
+    }
+    
+    public void testGuidIsBase16() throws Exception {
+        tRequest("GET", "guid", leafGUID.toHexString(),
+                "127.0.0.1", 6346, null, 202);
+    }
+    
+    public void testGuidWithBase32Fails() throws Exception {
+        tRequest("GET", "guid", Base32.encode(clientGUID),
+                "127.0.0.1", 6346, null, 400);
+    }
+    
+    public void testFileChangesIndex() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer(34));
+        tRequest("GET", "guid", leafGUID.toHexString(),
+                "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testCannotHaveServeridAndGuid() throws Exception {
+        Map m = new HashMap();
+        m.put("serverid", Base32.encode(clientGUID));
+        tRequest("GET", "guid", leafGUID.toHexString(),
+                "127.0.0.1", 6346, m, 400);
+    }
+    
+    public void testMultipleFileFails() throws Exception {
+        Map m = new HashMap();
+        m.put("FILE", new Integer(1));
+        m.put("file", new Integer(2));
+        tRequest("GET", "guid", leafGUID.toHexString(),
+                "127.0.0.1", 6346, m, 400);
+    }
+    
+    private void tRequest(String reqMethod, String initKey, String guid,
+                                 String ip, int port, Map params, int opcode)
+     throws Exception {
         Socket s = new Socket("localhost", PORT);
         BufferedReader in = 
             new BufferedReader(new InputStreamReader(s.getInputStream()));
         BufferedWriter out = 
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-
-        // first test a GET
-        out.write("GET /gnutella/push-proxy?ServerID=");
-        out.write(Base32.encode(clientGUID));
-        out.write(" HTTP/1.1\r\n");
-        out.write("X-Node:127.0.0.1:6346\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        // check opcode - less important, but might as well
-        result = in.readLine();
-        assertTrue(result, (result.indexOf("202") > -1));
-        // clear out other responses
-        while (in.readLine() != null) ;
-
-        // leaf should get PushRequest
-        do {
-            m = LEAF.receive(TIMEOUT);
-        } while (!(m instanceof PushRequest)) ;
-        PushRequest pr = (PushRequest) m;
-        assertEquals(0, pr.getIndex());
-        assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
-        assertEquals(6346, pr.getPort());
-        assertTrue(pr.getIP()[0] == 127);
-        assertTrue(pr.getIP()[1] == 0);
-        assertTrue(pr.getIP()[2] == 0);
-        assertTrue(pr.getIP()[3] == 1);
-
-        // test a HEAD
-        s = new Socket("localhost", PORT);
-        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-
-        out.write("HEAD /gnutella/push-proxy?ServerID=");
-        out.write(Base32.encode(clientGUID));
-        out.write(" HTTP/1.1\r\n");
-        out.write("X-Node:10.238.1.87:6350\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        // check opcode - less important, but might as well
-        result = in.readLine();
-        assertTrue(result, (result.indexOf("202") > -1));
-        // clear out other responses
-        while (in.readLine() != null) ;
-        
-        // leaf should get PushRequest
-        do {
-            m = LEAF.receive(TIMEOUT);
-        } while (!(m instanceof PushRequest)) ;
-        pr = (PushRequest) m;
-        assertEquals(0, pr.getIndex());
-        assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
-        assertEquals(6350, pr.getPort());
-        assertEquals(pr.getIP()[0], 10);
-        assertEquals(ByteOrder.ubyte2int(pr.getIP()[1]), 238);
-        assertEquals(pr.getIP()[2], 1);
-        assertEquals(pr.getIP()[3], 87);
-        
-    }
-    
-
-    public void testBadPushProxyRequest() throws Exception {
-        Message m = null;
+            
         String result = null;
+        Message m = null;
 
-        Socket s = new Socket("localhost", PORT);
-        BufferedReader in = 
-            new BufferedReader(new InputStreamReader(s.getInputStream()));
-        BufferedWriter out = 
-            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-
-        // first test a GET with a unrecognized guid
-        out.write("GET /gnutella/push-proxy?ServerID=");
-        out.write(Base32.encode(GUID.makeGuid()));
-        out.write(" HTTP/1.1\r\n");
-        out.write("X-Node:127.0.0.1:6346\r\n");
+        out.write(reqMethod + " /gnutella/push-proxy?");
+        out.write(initKey + "=" + guid);
+        if( params != null ) {
+            for(Iterator i = params.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                out.write("&" + entry.getKey() + "=" + entry.getValue());
+            }
+        }
+        out.write(" HTTP/1.1.\r\n");
+        out.write("X-Node: ");
+        out.write(ip + ":" + port + "\r\n");
         out.write("\r\n");
         out.flush();
-
+        
         // check opcode - less important, but might as well
         result = in.readLine();
-        assertTrue(result, (result.indexOf("410") > -1));
+        assertGreaterThan(result, -1, result.indexOf("" + opcode));
         // clear out other responses
         while (in.readLine() != null) ;
-
-        // leaf should NOT get PushRequest
-        try {
+        
+        if( opcode != 202 ) {
+            // leaf NOT expecting PushRequest.
+            try {
+                do {
+                    m = LEAF.receive(TIMEOUT);
+                    assertTrue(!(m instanceof PushRequest));
+                } while (true) ;
+            }
+            catch (InterruptedIOException expected) {}
+        } else {
+            // leaf should get PushRequest
             do {
                 m = LEAF.receive(TIMEOUT);
-                assertTrue(!(m instanceof PushRequest));
-            } while (true) ;
+            } while (!(m instanceof PushRequest)) ;
+            PushRequest pr = (PushRequest) m;
+            int idx = 0;
+            if(params != null && params.get("file") != null )
+                idx = ((Integer)params.get("file")).intValue();
+            assertEquals(idx, pr.getIndex());
+            assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
+            assertEquals(port, pr.getPort());
+            assertEquals(ip, NetworkUtils.ip2string(pr.getIP()));
         }
-        catch (InterruptedIOException expected) {}
-
-        // now test a HEAD with a bad IP
-        s = new Socket("localhost", PORT);
-        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-
-        out.write("HEAD /gnutella/push-proxy?ServerID=");
-        out.write(Base32.encode(clientGUID));
-        out.write(" HTTP/1.1\r\n");
-        out.write("X-Node:www.crapalapadapa.com:6346\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        // check opcode - less important, but might as well
-        result = in.readLine();
-        assertTrue(result, (result.indexOf("400") > -1));
-        // clear out other responses
-        while (in.readLine() != null) ;
-
-        // leaf should NOT get PushRequest
-        try {
-            do {
-                m = LEAF.receive(TIMEOUT);
-                assertTrue(!(m instanceof PushRequest));
-            } while (true) ;
-        }
-        catch (InterruptedIOException expected) {}
-
-
     }
-    
-
 }
