@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
@@ -143,5 +144,17 @@ public final class BIOHeaderReader implements HeaderReader {
      */
     public boolean hasRemainingData() {
         return false;
+    }
+
+    /**
+     * In the blocking case, this returns <tt>null</tt> because there is never
+     * any leftover, unprocessed data for blocking handshakes since we process
+     * only one byte at a time.
+     * 
+     * @return <tt>null</tt> since there is never any data leftover from 
+     *  blocking handshakes
+     */
+    public InputStream getRemainingData() {
+        return null;
     }
 }
