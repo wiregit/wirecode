@@ -245,10 +245,12 @@ public class HTTPUploader implements Uploader {
 			setState(INTERRUPTED);
 		}
 
-		// making this call now is necessary to avoid writing the 
-		// same alternate locations back to the requester as they sent 
-		// in their original headers
-		_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
+		if(_alternateLocationCollection != null) {
+			// making this call now is necessary to avoid writing the 
+			// same alternate locations back to the requester as they sent 
+			// in their original headers
+			_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
+		}
 	}
 
     /**
