@@ -585,7 +585,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             _messageWriter = new MessageWriterProxy(this); 
             _messageReader = new MessageReaderProxy();
              
-            NIODispatcher.instance().addReader(this);
+            //NIODispatcher.instance().addReader(this);
             // check for updates from this host  
             UpdateManager.instance().checkAndUpdate(this);          
         } catch (NoGnutellaOkException e) {
@@ -1123,22 +1123,26 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  results in InterruptedIOException.
      */
     public Message receive() throws IOException, BadPacketException {
-        //On the Macintosh, sockets *appear* to return the same ping reply
-        //repeatedly if the connection has been closed remotely.  This prevents
-        //connections from dying.  The following works around the problem.  Note
-        //that Message.read may still throw IOException below.
-        //See note on _closed for more information.
-        if (_closed)
-            throw CONNECTION_CLOSED;
-
-        Message m = null;
-        while (m == null) {
-            m = readAndUpdateStatistics();
+        try {
+            //On the Macintosh, sockets *appear* to return the same ping reply
+            //repeatedly if the connection has been closed remotely.  This prevents
+            //connections from dying.  The following works around the problem.  Note
+            //that Message.read may still throw IOException below.
+            //See note on _closed for more information.
+            if (_closed)
+                throw CONNECTION_CLOSED;
+    
+            Message msg = null;
+            while (msg == null) {
+                msg = readAndUpdateStatistics();
+            }
+            // record received message in stats
+            stats().addReceived();
+            return msg;
+        } catch(IOException e) {
+            RouterService.getConnectionManager().remove(this);
+            throw e;
         }
-        
-        // record received message in stats
-        stats().addReceived();
-        return m;
     }
 
     /**
@@ -2077,6 +2081,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
+        System.out.println("Connection::loopForMessages");
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
            NIODispatcher.instance().addReader(this); 

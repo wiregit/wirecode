@@ -1545,20 +1545,16 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(Connection conn) throws IOException {
+        System.out.println("ConnectionManager::startConnection");
 	    Thread.currentThread().setName("MessageLoopingThread");
-	    try {
-    		if(conn.isGUESSUltrapeer()) {
-    			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-    				conn.getListeningPort());
-    		}
-    
-    		// this can throw IOException
-    		conn.loopForMessages();
-        } finally {
-            // If we ever exit this method, it is because the connection died,
-            // so we must clean up the references to it.
-            remove(conn);
-        }
+
+		if(conn.isGUESSUltrapeer()) {
+			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
+				conn.getListeningPort());
+		}
+
+		// this can throw IOException
+		conn.loopForMessages();
 	}
     
     /**
