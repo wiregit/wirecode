@@ -107,6 +107,8 @@ public interface ActivityCallback
     public static final int ERROR_11 = 11;
     /** error writing data to log */
     public static final int ERROR_12 = 12;
+    /** error finding the router host */
+    public static final int ERROR_13 = 13;
 }
 
 
