@@ -776,10 +776,9 @@ public final class RouterService {
 						verifier.record(qr, type);
 						router.broadcastQueryRequest(qr);
 					} else {
-						QueryFactory qf = 
-							QueryFactory.createFactory(guid, query, richQuery);
+						QueryHandler qf = 
+							QueryHandler.createHandler(guid, query, richQuery);
 
-						RESULT_HANDLER.addGuid(new GUID(guid));
 						// TODO: what should we do about verifier here???
 						router.sendDynamicQuery(qf);
 					}
