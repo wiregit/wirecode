@@ -11,6 +11,8 @@ import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.rmi.runtime.GetThreadPoolAction;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.FileUtils;
@@ -361,7 +363,12 @@ public class VerifyingFile {
      * Determines if all blocks have been written to disk and verified
      */
     public synchronized boolean isComplete() {
-        return verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
+        if (hashTree != null)
+            return verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
+        else {
+            return verifiedBlocks.getSize() + discardedBlocks.getSize() + 
+            partialBlocks.getSize()== completedSize;
+        }
     }
     
     /**
