@@ -139,10 +139,10 @@ public final class LimeXMLDocumentHelper{
             String str = ((StringBuffer)iter.next()).toString();
             int begin = str.indexOf("<",2);//index of opening outer(plural)
             int end = str.indexOf(" ",begin);
-            String tail  = "</"+str.substring(begin+1,end)+">";
-            //            retString = retString+str+tail;
             retStringB.append(str);
-            retStringB.append(tail);
+            retStringB.append("</");
+            retStringB.append(str.substring(begin+1,end));
+            retStringB.append(">");
         }
         return retStringB.toString();
     }
@@ -192,8 +192,11 @@ public final class LimeXMLDocumentHelper{
             str = str.substring(0,str.lastIndexOf("<"));
             //2.append the index in the right place.
             int p = str.indexOf("<");//index of opening header
+            Assert.that(p>=0, "LimeXMLDocument is broken");
             p = str.indexOf("<",p+1);//index of opening outer(plural) 
+            Assert.that(p>=0, "LimeXMLDocument is broken");
             p = str.indexOf("<",p+1);//index of opening inner
+            Assert.that(p>=0, "LimeXMLDocument is broken");
             int q = str.indexOf(">",p+1);//index of first closing tag
             int k = str.lastIndexOf("/",q-1);//is it tag closing inclusive?
             if(k!=-1 && p < k && k < q )//   "/" b/w open and close
@@ -304,10 +307,10 @@ public final class LimeXMLDocumentHelper{
         Response[] resps = new Response[5];
         
         resps[0] = new Response(0, 100, "File 1");
-        doc = new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio identifier=\"abc.txt\" bitrate=\"192\" genre=\"Blues\"/></audios>");
+        doc = new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio identifier=\"/abc.txt/\" bitrate=\"192\" genre=\"/Blues/\"/></audios>");
         resps[1] = new Response(1, 200, "File 2",doc);
         resps[2] = new Response(0, 300, "File 3");
-        resps[3] = new Response(3, 400, "File 4", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"128\" genre=\"Country\"></audio></audios>"));
+        resps[3] = new Response(3, 400, "File 4", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"128\" genre=\"/Country/\"></audio></audios>"));
         resps[4] = new Response(0, 500, "File 5");
         
         for (int i = 0; i < resps.length; i++)
@@ -316,7 +319,7 @@ public final class LimeXMLDocumentHelper{
         
         String xmlCollectionString = help.getAggregateString(resps);
 
-        Assert.that(xmlCollectionString.equals("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio  bitrate=\"192\" genre=\"Blues\" index=\"1\" /><audio bitrate=\"128\" genre=\"Country\" index=\"3\" ></audio></audios>"));
+        Assert.that(xmlCollectionString.equals("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio  bitrate=\"192\" genre=\"/Blues/\" index=\"1\" /><audio bitrate=\"128\" genre=\"/Country/\" index=\"3\" ></audio></audios>"));
 
         debug("Aggregate String (no disparates) = " + xmlCollectionString); 
                                                
