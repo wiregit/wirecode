@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.Properties;
+import java.io.IOException;
 
 /**
  * Provides a servent ways to set connection handshake responses in response to 
@@ -65,5 +66,5 @@ public interface HandshakeResponder {
      *                 connection.
      */
     public HandshakeResponse respond(HandshakeResponse response, 
-                                     boolean outgoing);
+         boolean outgoing) throws IOException;
 }
