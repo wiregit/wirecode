@@ -118,7 +118,7 @@ public interface SettingsInterface
     /** Default maximum packet length */
     public static final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
-    public static final int     DEFAULT_TIMEOUT        = 4000;
+    public static final int     DEFAULT_TIMEOUT        = 8000;
     /** Default file path for the host list */
     public static final String  DEFAULT_HOST_LIST      = "gnutella.net";
     /** Default name for the properties file */
