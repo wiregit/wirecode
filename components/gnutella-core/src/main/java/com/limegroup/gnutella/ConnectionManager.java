@@ -537,6 +537,11 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
+        
+        //if server mode, dont open any connection
+        if(_settings.isServer())
+            return;
+        
         int need = _keepAlive - getNumConnections() - _fetchers.size();
 
         // Start connection fetchers as necessary
