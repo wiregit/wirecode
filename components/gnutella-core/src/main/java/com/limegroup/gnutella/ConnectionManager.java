@@ -1418,6 +1418,7 @@ public class ConnectionManager {
             if(newest != null)
                 remove(newest);
         }
+        adjustConnectionFetchers();
     }    
 
     /**
