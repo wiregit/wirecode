@@ -370,7 +370,7 @@ public class ManagedDownloader implements Downloader {
         case CONNECTING:
             return timeDiff(now, CONNECT_TIME);
         case WAITING_FOR_RETRY:
-            return timeDiff(now, WAITING_FOR_RETRY);
+            return timeDiff(now, WAIT_TIME);
         default:
             return Integer.MAX_VALUE;                
         }
