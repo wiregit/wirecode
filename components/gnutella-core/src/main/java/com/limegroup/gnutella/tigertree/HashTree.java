@@ -253,6 +253,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
         if (in.low % _nodeSize == 0 && 
+                in.high - in.low +1 <= _nodeSize &&
                 (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
             digest.update(data);

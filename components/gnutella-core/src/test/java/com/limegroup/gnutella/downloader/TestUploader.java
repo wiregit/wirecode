@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.RoundRobinQueue;
  */
 interface HTTP11Listener {
 	public void thexRequestStarted();
-	public void requestStarted();
+	public void requestStarted(TestUploader uploader);
 	public void requestHandled();
 }
 
@@ -100,6 +100,7 @@ public class TestUploader extends AssertComparisons {
 
     boolean killedByDownloader = false;
     
+    int start,stop;
     /**
      * The offset for the low chunk.
      */
@@ -580,8 +581,8 @@ public class TestUploader extends AssertComparisons {
             throttle = new BandwidthThrottle(rate*1024);
         else
             throttle = new BandwidthThrottle(Float.MAX_VALUE);
-        int start = 0;
-        int stop = TestFile.length();
+        start = 0;
+        stop = TestFile.length();
         boolean firstLine=true;
         AlternateLocationCollection badLocs = null;
         AlternateLocationCollection goodLocs = null;
@@ -676,7 +677,7 @@ public class TestUploader extends AssertComparisons {
         } else {    
             //Send the data.
         	if (_httpListener != null)
-        		_httpListener.requestStarted();
+        		_httpListener.requestStarted(this);
             send(output, start, stop);
         }
         

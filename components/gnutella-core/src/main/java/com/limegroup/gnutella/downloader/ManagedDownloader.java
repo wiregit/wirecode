@@ -1964,60 +1964,54 @@ public class ManagedDownloader implements Downloader, Serializable {
         // initialize the HashTree
 		if( downloadSHA1 != null ) {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
+		    boolean goodTree = false;
 		    synchronized(hashTreeLock) {
 		        hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
 		        
 		        // if we have a valid tree, update our chunk size and disable overlap checking
-		        if (hashTree != null && hashTree.isDepthGoodEnough()) {
-		            commonOutFile.setCheckOverlap(false);
-		        }
+		        if (hashTree != null && hashTree.isDepthGoodEnough()) 
+		            goodTree=true;
 		    }
+		    if (goodTree)
+		        commonOutFile.setCheckOverlap(false);
         }
         
         URN fileHash;
         int status;
 
-        // Continue doing the download until we've recovered all
-        // corrupt bytes.
-        for(int i = 0; ; i++) {
-            status = -1;  //TODO: is this equal to COMPLETE etc?            
-            try {
-                //2. Do the download
-                status = tryAllDownloads3();//Exception may be thrown here.
-            } catch (InterruptedException e) { }
-    
-            //Close the file controlled by commonOutFile.
-            commonOutFile.close();
-            
-            // if the user hasn't answered our corrupt question yet, wait.
-            waitForCorruptResponse();
-            // if they really wanted to stop, do that instead of anything else
-            if (corruptState == CORRUPT_STOP_STATE) {
-                cleanupCorrupt(incompleteFile, completeFile.getName());
-                return CORRUPT_FILE;
-            }            
         
-            if (status == -1) //InterruptedException from tryAllDownloads3
-                throw new InterruptedException();
-            if (status != COMPLETE) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("stopping early with status: " + status);
-                return status;
-            }
-
-            //3. Find out the hash of the file and verify that its the same
-            // as our hash.
-            //If the hash is different, we try to automatically recover if
-            //we have a HashTree.
-            fileHash = scanForCorruption(i);
-            if (corruptState == CORRUPT_STOP_STATE) {
-                cleanupCorrupt(incompleteFile, completeFile.getName());
-                return CORRUPT_FILE;
-            }
-
-            //if we didn't identify any corrupted ranges, break out of the loop
-            if(state != IDENTIFY_CORRUPTION)
-                break;                
+        
+        status = -1;  //TODO: is this equal to COMPLETE etc?            
+        try {
+            //2. Do the download
+            status = tryAllDownloads3();//Exception may be thrown here.
+        } catch (InterruptedException e) { }
+        
+        //Close the file controlled by commonOutFile.
+        commonOutFile.close();
+        
+        // if the user hasn't answered our corrupt question yet, wait.
+        waitForCorruptResponse();
+        // if they really wanted to stop, do that instead of anything else
+        if (corruptState == CORRUPT_STOP_STATE) {
+            cleanupCorrupt(incompleteFile, completeFile.getName());
+            return CORRUPT_FILE;
+        }            
+        
+        if (status == -1) //InterruptedException from tryAllDownloads3
+            throw new InterruptedException();
+        if (status != COMPLETE) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("stopping early with status: " + status);
+            return status;
+        }
+        
+        //3. Find out the hash of the file and verify that its the same
+        // as our hash.
+        fileHash = scanForCorruption();
+        if (corruptState == CORRUPT_STOP_STATE) {
+            cleanupCorrupt(incompleteFile, completeFile.getName());
+            return CORRUPT_FILE;
         }
         
         // 4. Save the file to disk.
@@ -2041,7 +2035,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Scans the file for corruption, returning the hash of the file on disk.
      */
-    private URN scanForCorruption(int iteration) {
+    private URN scanForCorruption() {
         // if we already were told to stop, then stop.
         if (corruptState==CORRUPT_STOP_STATE)
             return null;
@@ -2069,6 +2063,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             LOG.warn("hash verification problem, fileHash="+
                            fileHash+", ourHash="+downloadSHA1);
 
+        treeRecoveryFailed(downloadSHA1);
         synchronized(corruptStateLock) {
             // immediately set as corrupt,
             // will change to non-corrupt later if user ignores
@@ -2078,36 +2073,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             // because it removes the file from being shared.
             promptAboutCorruptDownload();
             waitForCorruptResponse();
-        }
-        
-        // If we wanted to stop, stop.
-        if (corruptState==CORRUPT_STOP_STATE)
-            return fileHash;
-            
-        HashTree ourTree=null;
-        synchronized(hashTreeLock) {
-            ourTree = hashTree;
-        }
-        // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
-        if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
-            treeRecoveryFailed(downloadSHA1);
-        } else if (ourTree != null) {
-            // we can try to use the hashtree to identify corrupt ranges!
-            try {
-                setState(IDENTIFY_CORRUPTION);
-                LOG.debug("identifying corruption...");
-                int deleted = commonOutFile.deleteCorruptedBlocks(ourTree,
-                                                             incompleteFile);
-                if(LOG.isDebugEnabled())
-                    LOG.debug("deleted " + deleted + " blocks");
-                
-                corruptState = NOT_CORRUPT_STATE;
-                if(deleted == 0)
-                    treeRecoveryFailed(downloadSHA1);
-            } catch (IOException ioe) {
-                LOG.debug(ioe);
-                treeRecoveryFailed(downloadSHA1);
-            }
         }
         
         return fileHash;        
@@ -2544,15 +2509,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                             synchronized(hashTreeLock){
                                 hashTree = temp;
                                 
-                                // update our chunk size with this new, better tree
-                                commonOutFile.setCheckOverlap(false);
-                                
                                 // persist the hashTree in the TigerTreeCache
                                 // because we won't save it in ManagedDownloader
                                 TigerTreeCache.instance().addHashTree(
                                         rfd.getSHA1Urn(),
                                         hashTree);
                             }
+                            
+                            // update our chunk size with this new, better tree
+                            commonOutFile.setCheckOverlap(false);
                         }
                     }
                 }

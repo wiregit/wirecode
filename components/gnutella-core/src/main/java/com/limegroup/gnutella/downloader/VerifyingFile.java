@@ -336,7 +336,7 @@ public class VerifyingFile {
     /**
      * Removes the specified internal from the set of leased intervals.
      */
-    public synchronized void releaseBlock(Interval in) {LOG.debug(in+" partial: "+partialBlocks+" pending: "+pendingBlocks,new Exception());
+    public synchronized void releaseBlock(Interval in) {
         //if(LOG.isDebugEnabled())
             //LOG.debug("Releasing interval: " + in);
         leasedBlocks.delete(in);
@@ -385,33 +385,6 @@ public class VerifyingFile {
                 pendingBlocks.getSize() < completedSize); 
     }
     
-    /**
-     * Deletes any blocks that were corrupt.
-     *
-     * Returns the number of blocks deleted.
-     */
-    synchronized int deleteCorruptedBlocks (HashTree tree, File file)
-      throws IOException {
-        InputStream is = null;
-        int deleted = 0;
-        try {
-            is = new BufferedInputStream(new FileInputStream(file));
-            List corruptRanges = tree.getCorruptRanges(is);
-            for (Iterator iter = corruptRanges.iterator(); iter.hasNext(); ) {
-                deleted++;
-                writtenBlocks.delete((Interval)iter.next());
-            }
-            isCorrupted = false;
-        } finally {
-            if(is != null) {
-                try {
-                    is.close();
-                } catch(IOException ignored) {}
-            }
-        }
-        return deleted;
-    }
-        
     /**
      * Closes the file output stream.
      */
