@@ -450,10 +450,13 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    /** sets the connection speed */
+    /** sets the connection speed.  throws an
+     *  exception if you try to set the speed
+     *  far faster than a T3 line or less than
+     *  0.*/
     public void setConnectionSpeed(int speed)
     {
-	if(false)
+	if(speed < 0 || speed > 20000)
 	    throw new IllegalArgumentException();
 	else	
 	    {
@@ -464,10 +467,12 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    /** sets the limit for the number of searches */
+    /** sets the limit for the number of searches 
+     *  throws an exception on negative limits 
+     *  and limits of 10,000 or more */
     public void setSearchLimit(byte limit)
     {
-	if(false)
+	if(limit < 0 || limit > 10000)
 	    throw new IllegalArgumentException();
 	else
 	    {
@@ -491,7 +496,8 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    /** sets a boolean that specifies whether a stats file exists */
+    /** sets a boolean that specifies 
+     *  whether a stats file exists */
     public void setStats(boolean stats)
     {
 	if(false)
