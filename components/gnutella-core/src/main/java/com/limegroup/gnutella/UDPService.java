@@ -274,7 +274,7 @@ public final class UDPService implements Runnable {
         if (ip == null)
             throw new IllegalArgumentException("Null InetAddress");
         if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("Invalid Port");
+            throw new IllegalArgumentException("Invalid Port: " + port);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
