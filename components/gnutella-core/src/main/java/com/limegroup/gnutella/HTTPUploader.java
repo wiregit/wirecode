@@ -228,12 +228,15 @@ public class HTTPUploader implements Runnable {
         out.flush();
 
         //3. Wait for   "GET /get/0/sample.txt HTTP/1.0"
+        //   But use timeouts and don't wait too long.
         //   This code is stolen from HTTPManager.
         //   It should really be factored into some method.
-        //   TODO2: timeout, range headers.
+        //   TODO2:  range headers.
         try {
             ByteReader in=new ByteReader(_socket.getInputStream());
+            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             String line=in.readLine();
+            _socket.setSoTimeout(0);
             if (line==null)
                 throw new IOException();
 

@@ -37,6 +37,11 @@ public class HTTPManager {
         FileManager fm = FileManager.getFileManager();
 
         try {
+            //We set the timeout now so we don't block reading
+            //connection strings.  If this is a GIV connection, we
+            //reset the timeout immediately before downloading;
+            //otherwise, it isn't touched again.
+            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             _istream = _socket.getInputStream();
             _br = new ByteReader(_istream);
             command = _br.readLine();   /* read in the first line */

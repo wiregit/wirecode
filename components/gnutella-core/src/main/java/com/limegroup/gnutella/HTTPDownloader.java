@@ -492,6 +492,12 @@ public class HTTPDownloader implements Runnable {
 
         try {
             _fos = new FileOutputStream(pathname, _resume);
+            //If this is a server-side push download (i.e.,
+            //_socket!=null), we must reset the timeouts so downloads
+            //don't fail unexpectedly.  (The timeout was set in
+            //HTTPManager.)
+            if (_socket!=null)
+                _socket.setSoTimeout(0);                
         }
         catch (FileNotFoundException e) {
             _state = ERROR;
