@@ -686,6 +686,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Returns the interval of the responding content range.
      * If the full content range (start & stop interval) is not given,
      * we assume it to be the interval that we requested.
+     * The returned interval's low & high ranges are both INCLUSIVE.
      *
      * Does not strictly enforce HTTP; allows minor errors like replacing the
      * space after "bytes" with an equals.  Also tries to interpret malformed 
@@ -721,8 +722,7 @@ public class HTTPDownloader implements BandwidthTracker {
             if (str.substring(start, slash).equals("*")) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Content-Range like */?, " + str);
-                return new Interval(0,
-                                    _amountToRead + 1 - _initialReadingPoint);
+                return new Interval(0, _amountToRead - 1);
             }
 
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
