@@ -113,7 +113,7 @@ public class Connection {
      * @param port the port of the remote host 
      */
     public Connection(String host, int port) {
-		this(host, port, null, null);
+		this(host, port, null, null, true);
     }
 
 
@@ -137,12 +137,12 @@ public class Connection {
      */
     public Connection(String host, int port,
                       Properties properties1,
-                      HandshakeResponder properties2) {
-		//boolean negotiate) {
+                      HandshakeResponder properties2,
+                      boolean negotiate) {
         _host = host;
         _port = port;
         _outgoing = true;
-        _negotiate = true;
+        _negotiate = negotiate;
         _propertiesWrittenP=properties1;
         _propertiesWrittenR=properties2;            
     }

@@ -294,7 +294,8 @@ public class ManagedConnection
 			   (Properties)(new ClientProperties(host))),
 			  (manager.isSupernode() ?
 			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
-			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)));
+			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)),
+              true);
 		//!isRouter);
         
         _router = router;
