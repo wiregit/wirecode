@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.*;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since
@@ -10,9 +11,16 @@ import com.limegroup.gnutella.stubs.*;
  */
 public class ManagedConnectionStub extends ManagedConnection {
     public ManagedConnectionStub() {
-        super("1.2.3.4", 6346, 
-              new MessageRouterStub(), 
-              new ConnectionManagerStub());
+        super("1.2.3.4", 6346);
+		
+		try {
+            PrivilegedAccessor.setValue(this, "_router", new MessageRouterStub());
+            PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }		
+		//_router = new MessageRouterStub(); 
+        //_manager = new ConnectionManagerStub();
     }
 
     public void initialize() {
