@@ -817,9 +817,9 @@ public class ConnectionManager {
             // accept only Limewire ultrapeers for that one connection.
             
             if (peers==0 && 
-                    Sockets.getAttempts() < limeAttempts ?
-                    hr.isLimeWire() && hr.isGoodUltrapeer() :
-                    hr.isGoodUltrapeer()) {
+                    (Sockets.getAttempts() < limeAttempts ?
+                    (hr.isLimeWire() && hr.isGoodUltrapeer()) :
+                    hr.isGoodUltrapeer())) {
                 
                 if (isIdle()) 
                     return hr.isLimeWire();
@@ -840,8 +840,7 @@ public class ConnectionManager {
                 //locale reservation then we force return a true
                 if(checkLocale(hr.getLocalePref()) &&
                    _localeMatchingPeers
-                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                   ) {
+                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()) {
                     return true;
                 }
 
