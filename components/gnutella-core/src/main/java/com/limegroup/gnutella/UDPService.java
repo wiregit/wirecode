@@ -101,11 +101,6 @@ public final class UDPService implements Runnable {
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
 
-    /**
-     * <tt>Map</tt> of GUIDs to <tt>HostListeners</tt>.
-     */
-    private final Map HOST_LISTENERS = new HashMap();
-    
 	/**
 	 * Instance accessor.
 	 */
@@ -256,11 +251,6 @@ public final class UDPService implements Runnable {
                             if(isValidForIncoming(SOLICITED_PING_GUID, guid,
                                                   datagram))
                                 _acceptedSolicitedIncoming = true;
-                            HostListener hl = 
-                                (HostListener)HOST_LISTENERS.get(guid);
-                            if(hl != null) {
-                                hl.addHost((PingReply)message);
-                            }
                         }
                     }
                     router.handleUDPMessage(message, datagram);
@@ -579,28 +569,4 @@ public final class UDPService implements Runnable {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 
-    /**
-     * Expires the mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s for the
-     * specified <tt>GUID</tt>.  This is done to avoid holding this mapping in
-     * memory forever when, for example, UDP pings are sent to a bunch of hosts
-     * while connecting.
-     * 
-     * @param guid the <tt>GUID</tt> whose mapping should be removed
-     */
-    public void removeListener(GUID guid) {
-        HOST_LISTENERS.remove(guid);
-    }
-
-    /**
-     * Adds the specified <tt>GUID</tt>-><tt>HostListener</tt> pair to the 
-     * mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s.  This is used, for
-     * example, for associated pongs received with their appropriate listeners.
-     *  
-     * @param guid the <tt>GUID</tt> to add 
-     * @param listener the <tt>HostListener</tt> that should listen for pongs
-     *  with the specified <tt>GUID</tt>
-     */
-    public void addListener(GUID guid, HostListener listener) {
-        HOST_LISTENERS.put(guid, listener);       
-    }
 }

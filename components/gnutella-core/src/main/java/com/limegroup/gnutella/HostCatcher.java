@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
  * use those anymore.
  */
-public class HostCatcher implements HostListener {    
+public class HostCatcher {
     
     /**
      * Log for logging this class.
@@ -294,7 +294,7 @@ public class HostCatcher implements HostListener {
     private void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            UDPHostRanker.rank(new HashSet(ENDPOINT_SET), this);
+            UDPHostRanker.rank(new HashSet(ENDPOINT_SET));
         }
     }
     

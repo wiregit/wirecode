@@ -12,11 +12,6 @@ import com.sun.java.util.collections.Iterator;
 public class UDPHostRanker {
 
     /**
-     * Constant <tt>HostListener</tt> that should be notified about new hosts.
-     */
-    private final HostListener LISTENER;
-
-    /**
      * Ranks the specified <tt>Collection</tt> of hosts.  It does this simply
      * by sending UDP Gnutella "pings" to each host in the specified 
      * <tt>Collection</tt>.  The hosts are then "ranked" by the order in which
@@ -26,20 +21,15 @@ public class UDPHostRanker {
      * Returns the new <tt>UDPHostRanker</tt> instance.
      * 
      * @param hosts the <tt>Collection</tt> of hosts to rank
-     * @param hl the listener that should be notified whenever hosts are 
-     *  received
      * @return a new <tt>UDPHostRanker</tt> instance
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt> or if the listener argument is <tt>null</tt>
      */
-    public static UDPHostRanker rank(Collection hosts, HostListener hl){
+    public static UDPHostRanker rank(Collection hosts){
         if(hosts == null) {
             throw new NullPointerException("null hosts not allowed");
         }
-        if(hl == null) {
-            throw new NullPointerException("null listener not allowed");
-        }
-        return new UDPHostRanker(hosts, hl);
+        return new UDPHostRanker(hosts);
     }
     
     /**
@@ -49,8 +39,7 @@ public class UDPHostRanker {
      * 
      * @param hosts the hosts to rank
      */
-    private UDPHostRanker(Collection hosts, HostListener hl) {
-        LISTENER = hl;
+    private UDPHostRanker(Collection hosts) {
         int waits = 0;
         while(!UDPService.instance().isListening() && waits < 10) {
             synchronized(this) {
@@ -66,24 +55,13 @@ public class UDPHostRanker {
         final PingRequest ping = new PingRequest((byte)1);
         final GUID pingGUID = new GUID(ping.getGUID());
         
-        // Add the mapping for the new GUID.
-        UDPService.instance().addListener(pingGUID, LISTENER);
         Iterator iter = hosts.iterator();
         while(iter.hasNext()) {
             IpPort host = (IpPort)iter.next();
             UDPService.instance().send(ping, host);
         }
-        
-        // Now schedule a runnable that will remove the mapping for the GUID
-        // of the above ping after 20 seconds so that we don't store it 
-        // indefinitely in memory for no reason.
-        Runnable udpPingPurger = new Runnable() {
-            public void run() {
-                UDPService.instance().removeListener(pingGUID);
-            }
-        };
-        
-        // Purge after 20 seconds.
-        RouterService.schedule(udpPingPurger, (long)(20*1000), 0);
+
+        // now that we've pinged all these bad boys, any replies will get
+        // funneled back to the HostCatcher via MessageRouter.handleUDPMessage
     }
 }
