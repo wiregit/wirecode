@@ -28,6 +28,7 @@ import java.util.StringTokenizer;
  * </pre>
  */
 public class HTTPDownloader {
+    private RemoteFileDesc _rfd;
     private boolean _isPush;
 	private int _index;
 	private String _filename; 
@@ -95,6 +96,7 @@ public class HTTPDownloader {
                           int start,
                           int stop) {
         _isPush=true;
+        _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
@@ -210,6 +212,8 @@ public class HTTPDownloader {
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 	public int getPort() {return _port;}
+    /** Returns the RemoteFileDesc passed to this' constructor. */
+    public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
     /** Returns true iff this is a push download. */
     public boolean isPush() {return _isPush;}
 	
