@@ -298,17 +298,6 @@ public final class RouterService {
         return manager.createConnectionBlocking(hostname, portnum);
     }
 
-	/**
-	 * Accessor for the TCP port that the application is listening on for
-	 * Gnutella connections and messages.
-	 *
-	 * @return the TCP port that the application is listening on -- if the
-	 *  port has not yet been set, this will return -1
-	 */
-	public static int getTCPListeningPort() {
-		return acceptor.getPort();
-	}
-
     /**
      * Creates a new outgoing messaging connection to the given host and port. 
      * Returns immediately without blocking.  If hostname would connect
@@ -318,6 +307,8 @@ public final class RouterService {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
+		
+		// TODO: should we not block all 127.x.x.x addresses?
         byte[] cIP = null;
         try {
             cIP=InetAddress.getByName(hostname).getAddress();
