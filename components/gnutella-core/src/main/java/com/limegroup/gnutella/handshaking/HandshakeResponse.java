@@ -186,6 +186,11 @@ public final class HandshakeResponse {
 	 * Constant for whether or not this node is a LimeWire (or derivative)
 	 */
 	private final boolean IS_LIMEWIRE;
+    
+    /**
+     * Constant for whether or nor this node is an older limewire. 
+     */
+    private final boolean IS_OLD_LIMEWIRE;
 
     /**
      * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
@@ -251,8 +256,35 @@ public final class HandshakeResponse {
         IS_LIMEWIRE =
             extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
                 toLowerCase().startsWith("limewire");
+        IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
+        oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
     }
     
+    /**
+     * @return true if the version of limewire we are connected to is old
+     */
+    private boolean oldVersion(String userAgent) {
+        StringTokenizer tok = new StringTokenizer(userAgent,"/.");
+            int major = -1;
+            int minor = -1;
+            boolean ret = false;
+            boolean error = false;
+            try {
+                String str = tok.nextToken();//"limewire"
+                str = tok.nextToken();
+                major = Integer.parseInt(str);
+                str = tok.nextToken();
+                minor = Integer.parseInt(str);
+            } catch (NoSuchElementException nssx) {
+                error = true;
+            } catch (NumberFormatException nfx) {
+                error = true;
+            } 
+            if(!error && (major<3 || (major==3 && minor < 4)) )
+                ret  = true;
+            return ret;
+    }
+
     /**
      * Creates an empty response with no headers.  This is useful, for 
      * example, during connection handshaking when we haven't yet read
@@ -681,6 +713,14 @@ public final class HandshakeResponse {
 	 */
 	public boolean isLimeWire() {
 	    return IS_LIMEWIRE;
+    }
+    
+    /**
+     * @return true if we consider this an older version of limewire, false
+     * otherwise
+     */
+    public boolean isOldLimeWire() {
+        return IS_OLD_LIMEWIRE;
     }
 
     /**

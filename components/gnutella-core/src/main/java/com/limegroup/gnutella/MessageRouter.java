@@ -12,6 +12,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
+import java.util.StringTokenizer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
@@ -768,13 +769,14 @@ public abstract class MessageRouter {
         if (!handler.isPersonalSpam(request)) {
             _callback.handleQueryString(request.getQuery());
         }
-
+        
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
 		//if(handler.isSupernodeClientConnection() && 
 		// RouterService.isGUESSCapable()) 
 		//unicastQueryRequest(request, handler);
         //else if(request.getTTL() > 0) {
+        updateMessage(request, handler);
 
 		if(handler.isSupernodeClientConnection() && counter != null) {
             if (request.desiresOutOfBandReplies()) {
@@ -1634,6 +1636,7 @@ public abstract class MessageRouter {
      */
     protected abstract boolean respondToQueryRequest(QueryRequest queryRequest,
                                                   byte[] clientGUID);
+
     /**
      * The default handler for PingRequests received in
      * ManagedConnection.loopForMessages().  This implementation
@@ -2124,6 +2127,19 @@ public abstract class MessageRouter {
         // data
         if(mc.isLeafConnection()) {
             _lastQueryRouteTable = createRouteTable();
+        }
+    }
+
+    private void updateMessage(QueryRequest request, ReplyHandler handler) {
+        Connection c  = (Connection) handler;
+        if(request.getHops()==1 && c.isOldLimeWire()) {
+            if(Constants.updateReply ==null) 
+                return;
+            QueryReply qr
+                      =new QueryReply(request.getGUID(),Constants.updateReply);
+            try {
+                sendQueryReply(qr);
+            } catch (IOException ignored) {}
         }
     }
 

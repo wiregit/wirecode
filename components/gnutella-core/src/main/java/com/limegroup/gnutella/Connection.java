@@ -1421,6 +1421,10 @@ public class Connection {
         return _headers.isLimeWire();
     }
     
+    public boolean isOldLimeWire() {
+        return _headers.isOldLimeWire();
+    }
+
     /**
      * Returns true if the outgoing stream is deflated.
      *
