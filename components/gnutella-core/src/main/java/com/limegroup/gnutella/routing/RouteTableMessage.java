@@ -94,7 +94,9 @@ public abstract class RouteTableMessage extends Message {
         case SET_DENSE_BLOCK_VARIANT:
             return new SetDenseTableMessage(guid, ttl, hops, tableTTL, payload);
         case ADD_SPARSE_BLOCK_VARIANT:
+            return new SparseTableMessage(guid, ttl, hops, true, tableTTL, payload);
         case REMOVE_SPARSE_BLOCK_VARIANT:
+            return new SparseTableMessage(guid, ttl, hops, false, tableTTL, payload);
         default:
             //TODO: this should really return a dummy message that can 
             //be forwarded without parsing.
