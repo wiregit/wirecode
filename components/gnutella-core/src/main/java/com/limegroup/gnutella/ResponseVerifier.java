@@ -94,12 +94,20 @@ public class ResponseVerifier {
      * 100 is given.<p>
      */
     public synchronized int score(byte[] guid, Response resp) {
-        int numMatchingWords=0;
-
         RequestData request=(RequestData)mapper.get(new GUID(guid));
         if (request == null)
             return 100; // assume 100% match if no corresponding query found.
         String[] queryWords = request.queryWords;
+        return calculateScore(queryWords, resp, request.xmlQuery());
+    }
+
+
+    /** The actual procedure for determining the score.  Needed for use by
+     *  AutoDownloadDetails.
+     */
+    public static int calculateScore(String[] queryWords, Response resp,
+                                     boolean isXMLQuery) {
+        int numMatchingWords=0;
         int numQueryWords=queryWords.length;
         if (numQueryWords==0)
             return 100; // avoid divide-by-zero errors below
@@ -107,7 +115,7 @@ public class ResponseVerifier {
         //Count the number of regular expressions from the query that
         //match the result's name.
         String name = null;
-        if (request.xmlQuery())
+        if (isXMLQuery)
             name=getSearchTerms(resp);
         else
             name=resp.getName().toLowerCase();
@@ -158,7 +166,7 @@ public class ResponseVerifier {
     /** Returns all search terms as one long string.  This includes xml and
      *  the standard search terms.  the terms are all in lowercase....
      */
-    private String getSearchTerms(Response resp) {
+    private static String getSearchTerms(Response resp) {
         StringBuffer retSB = new StringBuffer();
         String[] terms = getSearchTerms(resp.getName(), resp.getMetadata());
         for (int i = 0; i < terms.length; i++)
@@ -167,7 +175,7 @@ public class ResponseVerifier {
     }
 
     
-    private static String[] getSearchTerms(String query,
+    public static String[] getSearchTerms(String query,
                                            String richQuery) {
         String[] retTerms = null;
         // combine xml and standard keywords
