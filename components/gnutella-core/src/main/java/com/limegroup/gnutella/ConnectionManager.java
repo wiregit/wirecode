@@ -667,13 +667,9 @@ public class ConnectionManager {
             }            
             
             // Otherwise, if:
-            //  It was a LimeWire that was not a 'good leaf' OR
-            //  It was not a LimeWire, not a good leaf, and we didn't have
-            //   the reserve space left it.
+            //  It was a LimeWire that was not a 'good leaf' 
             // Then allow it only if we have enough space for the 'good'
-            // leaves.  (This implicitly will reserve space, if needed,
-            // for non-limewire leaves because the GOOD number is always
-            // larger).
+            // leaves. 
             return leaves <
                  (UltrapeerSettings.MAX_LEAVES.getValue() - 
                   RESERVED_GOOD_LEAF_CONNECTIONS);
