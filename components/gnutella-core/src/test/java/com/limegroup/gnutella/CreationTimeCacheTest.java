@@ -226,7 +226,87 @@ public class CreationTimeCacheTest
         assertEquals(toSerialize, TIME_MAP);
     }
 
+
+    /** Tests the getFiles() method.
+     */
+    public void testGetFiles() throws Exception {
+        // mock up our own createtimes.txt
+        Map toSerialize = new HashMap();
+        toSerialize.put(hash1, new Long(1));
+        toSerialize.put(hash2, new Long(2));
+        toSerialize.put(hash3, new Long(0));
+        toSerialize.put(hash4, new Long(1));
+
+        ObjectOutputStream oos = 
+        new ObjectOutputStream(new FileOutputStream(new File(_settingsDir,
+                                                             CREATION_CACHE_FILE)));
+        oos.writeObject(toSerialize);
+        oos.close();
+        
+        // now have the CreationTimeCache read it in
+        CreationTimeCache ctCache = new CreationTimeCache();
+        // is everything mapped correctly from URN to Long?
+        assertEquals(ctCache.getCreationTime(hash1), new Long(1));
+        assertEquals(ctCache.getCreationTime(hash2), new Long(2));
+        assertEquals(ctCache.getCreationTime(hash3), new Long(0));
+        assertEquals(ctCache.getCreationTime(hash4), new Long(1));
+
+        {
+            Iterator iter = ctCache.getFiles();
+            assertEquals(hash2, iter.next());
+            URN urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertEquals(hash3, iter.next());
+            assertFalse(iter.hasNext());
+        }
+
+        {
+            Iterator iter = ctCache.getFiles(4);
+            assertEquals(hash2, iter.next());
+            URN urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertEquals(hash3, iter.next());
+            assertFalse(iter.hasNext());
+        }
+
+        {
+            Iterator iter = ctCache.getFiles(3);
+            assertEquals(hash2, iter.next());
+            URN urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertFalse(iter.hasNext());
+        }
+
+        {
+            Iterator iter = ctCache.getFiles(2);
+            assertEquals(hash2, iter.next());
+            URN urn = (URN) iter.next();
+            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertFalse(iter.hasNext());
+        }
+
+        {
+            Iterator iter = ctCache.getFiles(1);
+            assertEquals(hash2, iter.next());
+            assertFalse(iter.hasNext());
+        }
+
+        {
+            try {
+                Iterator iter = ctCache.getFiles(0);
+            }
+            catch (IllegalArgumentException expected) {}
+        }
+
+    }
     
+
     /**
      * Test read & write of map
      */
