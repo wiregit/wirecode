@@ -10,7 +10,7 @@ import java.io.*;
  * Private abstract class for an individual setting.  Subclasses of this
  * class provide typing for settings.
  */
-abstract class Setting {
+public abstract class Setting {
 
 
 	/**
@@ -113,7 +113,14 @@ abstract class Setting {
      */
     public String getKey() {
         return KEY;
-    }	
+    }
+    
+    /**
+     * Returns the value as stored in the properties file.
+     */
+    public String getValueAsString() {
+        return PROPS.getProperty(KEY);
+    }
     
     /**
      * Set new property value

@@ -82,6 +82,16 @@ public final class SettingsFactory {
         HEADING = heading;
 		reload();
 	}
+	
+	/**
+	 * Returns the iterator over the settings stored in this factory.
+	 *
+	 * LOCKING: The caller must ensure that this factory's monitor
+	 *   is held while iterating over the iterator.
+	 */
+	public synchronized Iterator iterator() {
+	    return settings.iterator();
+	}
 
 	/**
 	 * Reloads the settings with the predefined settings file from
