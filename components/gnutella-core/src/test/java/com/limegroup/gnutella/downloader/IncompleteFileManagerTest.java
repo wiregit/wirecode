@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.*;
@@ -19,6 +20,10 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     
     public static Test suite() {
         return buildTestSuite(IncompleteFileManagerTest.class);
+    }
+    
+    public static void globalSetUp() {
+        new RouterService(new ActivityCallbackStub());
     }
     
     public void setUp() {
