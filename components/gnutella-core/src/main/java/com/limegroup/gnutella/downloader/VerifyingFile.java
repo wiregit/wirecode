@@ -75,7 +75,7 @@ public class VerifyingFile {
                 byte[] fileBuf = new byte[amountToCheck];
                 fos.seek(overlapInterval.low);//seek to begining of overlap part
                 fos.readFully(fileBuf,0,amountToCheck);
-                int j = findInitialPoint(overlapInterval,currPos, numBytes);
+                int j = findInitialPoint(overlapInterval,currPos);
                 for(int i=0;i<amountToCheck;i++,j++) {
                     if (buf[j]!=fileBuf[i]) { //corrupt bytes
                         isCorrupted = true; // flag as corrupted.
@@ -157,7 +157,7 @@ public class VerifyingFile {
      * @return the number of bytes from low where the two intervals,
      * begin to overlap.
      */
-    private int findInitialPoint(Interval interval, long low, long numBytes) {
+    private int findInitialPoint(Interval interval, long low) {
         //Remember this is the overlap interval
         if(interval.low <= low)//equivalent to interval.low == low
             return 0;
