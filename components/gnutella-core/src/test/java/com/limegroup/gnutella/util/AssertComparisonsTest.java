@@ -499,6 +499,27 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals("string", "b", "a");
     }
     
+    public void testInstanceof() {
+        try {
+            assertInstanceof(Number.class, new Object());
+            assertInstanceof("string", Number.class, new Object());
+            fail("object is not an instance of number");
+        } catch(AssertionFailedError ignored) {}
+        
+        try {
+            assertInstanceof(java.lang.Comparable.class, new Object());
+            assertInstanceof("stg", java.lang.Comparable.class, new Object());
+            fail("object is not an instance of comparable");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertInstanceof(Object.class, new Object());
+        assertInstanceof("string", Object.class, new Object());
+        assertInstanceof(Number.class, new Integer(1));
+        assertInstanceof("string", Number.class, new Integer(1));
+        assertInstanceof(java.lang.Comparable.class, new Integer(1));
+        assertInstanceof("string", java.lang.Comparable.class, new Integer(1));
+    }
+    
     public void testBadComparisons() {
         try {
             assertGreaterThan(null, null);

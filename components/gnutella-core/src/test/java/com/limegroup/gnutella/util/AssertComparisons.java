@@ -4,7 +4,7 @@ import junit.framework.*;
     
 /**
  * A set of assert comparisons to check greater than / less than
- * situations.
+ * situations and instanceof.
  */
 public class AssertComparisons extends TestCase {
         
@@ -12,12 +12,31 @@ public class AssertComparisons extends TestCase {
     private static final int GREATER_THAN = 1;
     private static final int LESS_THAN_OR_EQUALS = 2;
     private static final int GREATER_THAN_OR_EQUALS = 3;
+    private static final int INSTANCE_OF = 4;
     
     /**
      * Named constructor.
      */
     public AssertComparisons(String name) {
         super(name);
+    }
+    
+    /**
+     * Asserts that actual is an instance of class expected. If it isn't,
+     * an AssertionFailedError is thrown.
+     */
+    static public void assertInstanceof(Class expected, Object actual) {
+        assertInstanceof(null, expected, actual);
+    }
+    
+    /**
+     * Asserts that actual is an instance of the class expected.  If it isn't,
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertInstanceof(String msg, Class expected, Object actual) {
+        if (!instanceofCheck(expected, actual.getClass()))
+            fail(formatComparison(INSTANCE_OF, msg, 
+                    expected.getName(), actual.getClass().getName()));
     }
     
     /**
@@ -516,6 +535,23 @@ public class AssertComparisons extends TestCase {
         fail(formatComparison(type, msg, expected, actual));        
         
     }
+            
+    static private boolean instanceofCheck(Class expected, Class actual) {
+        if ( actual == null || expected == null)
+            return false;
+            
+        if ( expected.isInterface() ) {
+            Class interfaces[] = actual.getInterfaces();
+            for(int i = 0; i < interfaces.length; i++) {
+                if ( expected == interfaces[i] )
+                    return true;
+            }
+        }
+        if ( expected == actual )
+            return true;
+            
+        return instanceofCheck(expected, actual.getSuperclass() );
+    }    
     
     static private String formatComparison(int type,
                                          String message,
@@ -531,6 +567,8 @@ public class AssertComparisons extends TestCase {
             compare = "less than or equal to"; break;
         case GREATER_THAN_OR_EQUALS:
             compare = "greater than or equal to"; break;
+        case INSTANCE_OF:
+            compare = "instanceof"; break;
         }
         String formatted = "";
         if ( message != null )
