@@ -10,30 +10,61 @@ import java.util.Enumeration;
  */
 public class MacOSXUtils {
     private MacOSXUtils() {}
-        
+    
+    /**
+     * Creates a mutable clone of the specified object.
+     */
+    private static Object createMutableClone(Object a)
+      throws CloneNotSupportedException {
+        if(a == null)
+            throw new CloneNotSupportedException();
+        else if (!(a instanceof NSObject))
+            throw new CloneNotSupportedException();
+        else
+            return ((NSObject)a).mutableClone();
+    }
+
     /**
      * Modifies the loginwindow.plist file to either include or exclude
      * starting up LimeWire.
      */
-    public static void modifyLoginWindowPList(boolean allow) {
-        NSUserDefaults defaults = NSUserDefaults.standardUserDefaults();
-        NSDictionary logins = defaults.persistentDomainForName("loginwindow");
-        if(logins == null) {
-            logins = new NSMutableDictionary();
-            ((NSMutableDictionary)logins).setObjectForKey(new NSMutableArray(),
-                                        "AutoLaunchedApplicationDictionary");
-        }
+    public static void setLoginStatus(boolean allow) {
         Object temp; // Used for the assignment when retrieiving as an object.
+        NSUserDefaults defaults = NSUserDefaults.standardUserDefaults();
+
+        temp = defaults.persistentDomainForName("loginwindow");
+        // If no domain existed, create one and make its initial dictionary.
+        if(temp == null) {
+            temp = new NSMutableDictionary();
+            ((NSMutableDictionary)temp).setObjectForKey(new NSMutableArray(),
+                                        "AutoLaunchedApplicationDictionary");
+        } else if(!(temp instanceof NSMutableDictionary))
+            return; // nothing we can do.
+
+        NSMutableDictionary logins = null;
+        try {
+            logins = (NSMutableDictionary)createMutableClone(temp);
+        } catch(CloneNotSupportedException cnso) {
+            //nothing we can do, exit.
+            return;
+        }
         
         // Retrieve the array that contains the various dictionaries
         temp = logins.objectForKey("AutoLaunchedApplicationDictionary");
+        // If no object existed, create one.
         if(temp == null)
             temp = new NSMutableArray();
         // if it is not an NSMutableArray, exit (we dunno how to recover)
-        if(!(temp instanceof NSMutableArray))
+        else if(!(temp instanceof NSMutableArray))
             return;
-            
-        NSMutableArray allApps = (NSMutableArray)temp;
+
+        NSMutableArray allApps = null;
+        try {
+            allApps = (NSMutableArray)createMutableClone(temp);
+        } catch(CloneNotSupportedException cnso) {
+            // nothing we can do, exit.
+            return;
+        }
         
         Enumeration items = allApps.objectEnumerator();
         boolean found = false;
@@ -46,7 +77,14 @@ public class MacOSXUtils {
             // because we won't know how to handle it.
             if(!(temp instanceof NSMutableDictionary))
                 continue;
-            NSMutableDictionary itemInfo = (NSMutableDictionary)temp;
+
+            NSMutableDictionary itemInfo = null;
+            try {
+                itemInfo = (NSMutableDictionary)createMutableClone(temp);
+            } catch(CloneNotSupportedException cnse) {
+                cnse.printStackTrace();
+                continue; // can't do anything, continue.
+            }
             
             Object path = itemInfo.objectForKey("Path");
             // If it isn't a String, ignore it because we
@@ -54,10 +92,13 @@ public class MacOSXUtils {
             if(!(path instanceof String))
                 continue;
             String itemPath = (String)path;
-            if(itemPath.indexOf("LimeWire.app") != -1) {
+            if(itemPath.indexOf("/LimeWire/LoginStartup.app") != -1) {
                 found = true;
+                // If not allowed, remove.
+                // We must remove with temp, not itemInfo, because itemInfo
+                // is a clone.
                 if(!allow)
-                    allApps.removeIdenticalObject(itemInfo);
+                    allApps.removeIdenticalObject(temp);
                 else
                     itemInfo.setObjectForKey(getAppDir(), "Path");
                 break;
@@ -74,6 +115,9 @@ public class MacOSXUtils {
                 allApps.addObject(newItem);
             }
         }
+        
+        //Make sure we set add our new allApps to the dictionary.
+        logins.setObjectForKey(allApps, "AutoLaunchedApplicationDictionary");
         
         // Set the new domain.
         defaults.setPersistentDomainForName(logins, "loginwindow");
@@ -98,11 +142,11 @@ public class MacOSXUtils {
      */
     public static String getAppDir() {
         if(CommonUtils.isTestingVersion()) {
-            return "/Applications/LimeWire/LimeWire.app/";
+            return "/Applications/LimeWire/LoginStartup.app/";
         } else {
             String appDir = CommonUtils.getCurrentDirectory().getPath();
             int app = appDir.indexOf("LimeWire.app");
-            appDir = appDir.substring(0, app + "LimeWire.app".length() + 1);
+            appDir = appDir.substring(0, app) + "LoginStartup.app/";
             return appDir;
         }
     }
