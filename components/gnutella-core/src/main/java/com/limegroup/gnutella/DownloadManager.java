@@ -184,6 +184,14 @@ public class DownloadManager {
             }
         }
 
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge();
+
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader=new ManagedDownloader(
