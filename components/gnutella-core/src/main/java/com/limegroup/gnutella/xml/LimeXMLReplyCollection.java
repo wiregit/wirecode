@@ -213,7 +213,7 @@ public class LimeXMLReplyCollection{
         addReply(hash, replyDoc);
         // commit to disk...
         try {
-            if (LimeXMLUtils.isMP3File(f))
+            if (audio)
                 mp3ToDisk(f.getCanonicalPath());
             else
                 toDisk("");
