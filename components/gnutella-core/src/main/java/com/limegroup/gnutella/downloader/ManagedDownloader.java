@@ -133,6 +133,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
+    /** The lowest (cumulative) bandwith we will accept without stealing the
+     * entire grey area from a downloader for a new one */
+    private static final float MIN_ACCEPTABLE_SPEED = 0.1f;
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
     private static final int OVERLAP_BYTES=500;
@@ -1095,13 +1098,33 @@ public class ManagedDownloader implements Downloader, Serializable {
             //variable.
             int amountRead=biggest.getAmountRead();
             int left=biggest.getAmountToRead()-amountRead;;
-            if (left < MIN_SPLIT_SIZE)
-                throw new NoSuchElementException();
-            int start=biggest.getInitialReadingPoint()+amountRead+left/2;
-            int stop=biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-            dloader=findConnectable(files, getOverlapOffset(start), stop, busy);
-            dloader.stopAt(stop);
-            biggest.stopAt(start);
+            if (left < MIN_SPLIT_SIZE) { 
+                //If the overbandwidth is less than acceptable, then the last
+                //downloader is going too slow
+                if(getMeasuredBandwidth() < MIN_ACCEPTABLE_SPEED) {
+                    //replace (bad boy) biggest if possible
+                    int start=
+                    biggest.getInitialReadingPoint()+amountRead;
+                    int stop=
+                    biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                    dloader=
+                    findConnectable(files, getOverlapOffset(start), stop, busy);
+                    dloader.stopAt(stop);
+                    biggest.stopAt(start);
+                }
+                else//less than MIN_SPLIT_SIZE...but we are doing fine...
+                    throw new NoSuchElementException();
+            }
+            else { //There is a big enough chunk to split...split it
+                int start=
+                biggest.getInitialReadingPoint()+amountRead+left/2;
+                int stop=
+                biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                dloader=
+                findConnectable(files, getOverlapOffset(start), stop, busy);
+                dloader.stopAt(stop);
+                biggest.stopAt(start);
+            }
             //System.out.println("MANAGER: assigning grey "+start
             //                    +"-"+stop+" to "+dloader);
         }

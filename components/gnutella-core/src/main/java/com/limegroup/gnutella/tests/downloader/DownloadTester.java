@@ -43,6 +43,9 @@ public class DownloadTester {
 //         testOverlapCheckSpeed(125);
 //         cleanup();
 
+//          testStallingUploaderReplaced();
+//          cleanup();
+
         testSimpleDownload();
         cleanup();
         testSimpleSwarm();
@@ -54,6 +57,8 @@ public class DownloadTester {
         testStealerInterrupted();
         cleanup();
         testAddDownload();
+        cleanup();
+        testStallingUploaderReplaced();
         cleanup();
 
         testOverlapCheckWhite();
@@ -277,6 +282,21 @@ public class DownloadTester {
         check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
     }
 
+    private static void testStallingUploaderReplaced() {
+        System.out.print
+        ("-Testing download completion with stalling downloader...");
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        uploader1.setRate(0);//stalling uploader
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+        System.out.println("passed");//file downloaded? passed
+    }
+
     private static void testOverlapCheckGrey() {
         System.out.print("-Testing overlap checking from Grey area...");
         final int RATE=500;
@@ -448,7 +468,10 @@ public class DownloadTester {
 
     /** Cleans up the complete file */
     private static void cleanup() {
-        file.delete();
+        boolean deleted = false;
+        while(!deleted) {//have to do this because windows locks up the file
+            deleted = file.getAbsoluteFile().delete();
+        }
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
