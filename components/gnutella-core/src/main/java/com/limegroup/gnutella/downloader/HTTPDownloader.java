@@ -27,13 +27,13 @@ public class HTTPDownloader implements Runnable {
     private static final String TryAgainLater = "Try Again Later";
 
 
-    private InputStream _istream;
+    protected InputStream _istream;
     private String _filename;
-    private int _sizeOfFile;
-    private int _amountRead;
+    protected int _sizeOfFile;
+    protected int _amountRead;
     private MessageRouter _router;
     private Acceptor _acceptor;
-    private ActivityCallback _callback;
+    protected ActivityCallback _callback;
     private Socket _socket;
     private String _downloadDir;
     private FileOutputStream _fos;
@@ -43,11 +43,11 @@ public class HTTPDownloader implements Runnable {
     int _port;
     int _index;
     byte[] _guid;
-    private ByteReader _br;
+    protected ByteReader _br;
     private int _mode;
 
-    private int    _state;
-    private String _stateString = null;
+    protected int    _state;
+    protected String _stateString = null;
 
     private boolean _resume;
     private boolean        _wasShutdown = false;
