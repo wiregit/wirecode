@@ -146,7 +146,8 @@ public interface ReplyHandler {
      * has been alive for some minimal period of time, while UDP handlers
      * will never be considered stable.
      *
-     * @return <tt>true</tt> if this <tt>ReplyHandler</tt>
+     * @return <tt>true</tt> if this <tt>ReplyHandler</tt> has been up long
+     *  enough to be considered "stable"
      */
     boolean isStable();
 }
