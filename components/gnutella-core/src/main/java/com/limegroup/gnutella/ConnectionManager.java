@@ -437,7 +437,7 @@ public class ConnectionManager {
      * @return true if this is probably connected to <tt>host</tt> 
      */
     boolean isConnectedTo(Endpoint host) {        
-        String hostName=host.getHostname();
+        String hostName=host.getAddress();
         //A clone of the list of all connections, both initialized and
         //uninitialized, leaves and unrouted.  If Java could be prevented from
         //making certain code transformations, it would be safe to replace the
@@ -447,7 +447,7 @@ public class ConnectionManager {
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc = (ManagedConnection)iter.next();
  
-            if (mc.getIPString().equals(hostName))
+            if (mc.getAddress().equals(hostName))
                 return true;
         }
         return false;
@@ -957,7 +957,7 @@ public class ConnectionManager {
             if(connection.isSupernodeConnection())
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
-                    connection.getListeningPort()));
+                    connection.getPort()));
         }
         //add the best few endpoints from the hostcatcher.
         Iterator iterator =
@@ -982,7 +982,7 @@ public class ConnectionManager {
 			if(connection.isSupernodeConnection() && 
 			   connection.isGUESSUltrapeer()) {				
 				return new Endpoint(connection.getInetAddress().getAddress(),
-									connection.getListeningPort());
+									connection.getPort());
 			}
 		}
 		return null;
@@ -1100,7 +1100,7 @@ public class ConnectionManager {
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getListeningPort()), true);
+                    c.getPort()), true);
             }   
         }
     }
@@ -1718,7 +1718,7 @@ public class ConnectionManager {
 	    Thread.currentThread().setName("MessageLoopingThread");
 		if(conn.isGUESSUltrapeer()) {
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getListeningPort());
+				conn.getPort());
 		}
 
 		// this can throw IOException
@@ -1770,13 +1770,13 @@ public class ConnectionManager {
                         // death of the fetcher, so just return.
                         return;
                     }
-                } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
+                } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
                           isConnectedTo(endpoint) );                      
     
                 Assert.that(endpoint != null);
     
                 ManagedConnection connection = new ManagedConnection(
-                    endpoint.getHostname(), endpoint.getPort());
+                    endpoint.getAddress(), endpoint.getPort());
 
                 // If we've been trying to connect for awhile and have not 
                 // already checked our connection, check to make sure the

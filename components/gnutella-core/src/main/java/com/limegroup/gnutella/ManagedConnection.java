@@ -866,7 +866,7 @@ public class ManagedConnection extends Connection
             if(connection.isSupernodeConnection()) {
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
-                                   connection.getListeningPort(),
+                                   connection.getPort(),
                                    connection.getInetAddress().getAddress(), 
                                    true);
             } else if(connection.isLeafConnection() 
@@ -874,7 +874,7 @@ public class ManagedConnection extends Connection
                 //we know the listening port of the host in this case
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
-                                   connection.getListeningPort(),
+                                   connection.getPort(),
                                    connection.getInetAddress().getAddress(), 
                                    false);
             }
