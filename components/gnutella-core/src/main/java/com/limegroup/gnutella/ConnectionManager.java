@@ -1115,7 +1115,13 @@ public class ConnectionManager {
         while(st.hasMoreTokens()){
             //get an address
             String address = ((String)st.nextToken()).trim();
-            Endpoint e = new Endpoint(address);
+            Endpoint e;
+            try{
+                e = new Endpoint(address);
+            }
+            catch(IllegalArgumentException iae){
+                continue;
+            }
             //set the good priority, if specified
             if(goodPriority)
                 e.setWeight(HostCatcher.GOOD_PRIORITY);
