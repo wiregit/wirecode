@@ -750,7 +750,8 @@ public class RouterService {
      */
     public static byte[] newQueryGUID() {
         if (isGUESSCapable() && !uploadManager.isBusy() && 
-            OutOfBandThroughputStat.isSuccessRateGood())
+            OutOfBandThroughputStat.isSuccessRateGood() &&
+            acceptedIncomingConnection())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
