@@ -4,6 +4,7 @@ import com.limegroup.gnutella.Assert;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
+//import com.apple.mrj.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -105,9 +106,9 @@ public final class CommonUtils {
 			}			
 		}
 		
-		if(getJavaVersion().startsWith("1.1.8")) {
+		if(CommonUtils.getJavaVersion().startsWith("1.1.8")) {
 			_isJava118 = true;
-		}
+		} 
 	}
 
 	/**
@@ -252,7 +253,7 @@ public final class CommonUtils {
 	}   
 
 	/**
-	 * Returns whether or not the current JVM is 1.1.8 implementation.
+	 * Returns whether or not the current JVM is a 1.1.8 implementation.
 	 *
 	 * @return <tt>true</tt> if we are running on 1.1.8, <tt>false</tt>
 	 *  otherwise
@@ -260,6 +261,16 @@ public final class CommonUtils {
 	public static boolean isJava118() {
 		return _isJava118;
 	}
+
+	/**
+	 * Returns whether or not the current JVM is a 1.4.x implementation.
+	 *
+	 * @return <tt>true</tt> if we are running on 1.4.x, <tt>false</tt>
+	 *  otherwise
+	 */
+	public static boolean isJava14() {
+		return CommonUtils.getJavaVersion().startsWith("1.4");
+	}	
 
     /** 
 	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
@@ -336,15 +347,27 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public static File getUserSettingsDir() {
-		if(isWindows()) {
-			return getCurrentDirectory();
+		if(CommonUtils.isWindows()) {
+			return CommonUtils.getCurrentDirectory();
 		}
-        final File HOME_DIR = new File(getUserHomeDir(), ".limewire");
+
+		// return the special user preferences directory on OS X.
+		// this may have problems on 10.0.
+		//else if(CommonUtils.isMacOSX()) {
+		//short userDomainCode = -32763;
+		//File userPrefsDir = MRJFileUtils.findFolder(userDomainCode, 
+		//											new MRJOSType("pref"));
+		//return new File(userPrefsDir, ".limewire");
+		//}
+		
+        final File HOME_DIR = new File(CommonUtils.getUserHomeDir(), 
+									   ".limewire");
         if(!HOME_DIR.isDirectory()) {
             HOME_DIR.mkdirs();
         }
         return HOME_DIR;
     }
+	
 
     /*
     public static void main(String args[]) {
