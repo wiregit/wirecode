@@ -368,11 +368,21 @@ public class DownloadManager implements BandwidthTracker {
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
         
-        if(filename!=null && !filename.equals("")) {
-            if(conflicts(urn)) 
-                throw new AlreadyDownloadingException(filename);
+        if(urn!=null) {
+            if(conflicts(urn)) {
+                String ex = 
+                (filename!=null&&!filename.equals(""))?filename:urn.toString();
+                throw new AlreadyDownloadingException(ex);
+            }
         }
-        
+
+        //Note: If the filename exists, it would be nice to check that we are
+        //not already downloading the file by calling conflicts with the
+        //filename...the problem is we cannot do this effectively without the
+        //size of the file (atleast, not without being risky in assuming that
+        //two files with the same name are the same file). So for now we will
+        //just leave it and download the same file twice.
+
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = new MagnetDownloader(this,
                                               fileManager,
