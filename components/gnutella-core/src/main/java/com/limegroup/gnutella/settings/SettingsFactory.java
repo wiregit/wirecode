@@ -17,7 +17,6 @@ import java.util.Properties;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To
@@ -133,8 +132,11 @@ public final class SettingsFactory {
             } catch(StringIndexOutOfBoundsException sioobe) {
             } catch(IOException iox) {
                 String msg = iox.getMessage();
-                if(StringUtils.indexOfIgnoreCase(msg,"corrupted") < 0)
-                    throw iox; 
+                if(msg != null) {
+                    msg = msg.toLowerCase();
+                    if(msg.indexOf("corrupted") == -1)
+                        throw iox; 
+                }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
                 MessageService.showError("ERROR_PROPS_CORRUPTED");
