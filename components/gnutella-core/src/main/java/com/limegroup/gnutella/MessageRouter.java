@@ -428,7 +428,6 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-		//System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
@@ -458,7 +457,6 @@ public abstract class MessageRouter {
 	 */
 	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-		//System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
@@ -597,7 +595,8 @@ public abstract class MessageRouter {
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter) {
-		//System.out.println("MessageRouter::handleQueryRequest"); 
+
+        System.out.println("MessageRouter::handleQueryRequest:: "+_callback); 
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -612,7 +611,7 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			if(handler.isHighDegreeConnection()) {
+			if(handler.isGoodConnection()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
 																	  handler), 
 								 handler, counter);
@@ -632,7 +631,6 @@ public abstract class MessageRouter {
 		forwardQueryRequestToLeaves(request, handler);
 		
         // if I'm not firewalled and the source isn't firewalled THEN reply....
-		//System.out.println("MessageRouter::about to respond to request"); 
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
             return;
@@ -710,7 +708,7 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void sendQueryRequest(QueryRequest request,
-                                 ManagedConnection connection) {
+                                 ManagedConnection connection) {        
         if(request == null) {
             throw new NullPointerException("null query");
         }
@@ -930,8 +928,7 @@ public abstract class MessageRouter {
 	 
 		List list=_manager.getInitializedConnections2();
 		int limit;
-		if(handler.isHighDegreeConnection() && 
-           handler.isUltrapeerQueryRoutingConnection()) {
+		if(handler.isGoodConnection()) {
 			limit = list.size();
 		} else {
 			limit = Math.min(5, list.size());
