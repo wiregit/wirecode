@@ -47,26 +47,13 @@ public final class FileDesc implements AlternateLocationCollector {
     private final Set /* of URNS */ URNS; 
 
 	/**
-	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances, keyed by
-	 * <tt>AlternateLocation</tt>s.
-	 */
-	//private Map /*AlternateLocation->AlternateLocation*/
-	//_alternateLocations;
-
-	/**
-	 * <tt>Map</tt> of temporary <tt>AlternateLocation</tt> instances, 
-	 * keyed by <tt>AlternateLocation</tt>s.  This is used to store
-	 * any temporary locations that should not be reported in HTTP
-	 * headers, at least for now.
-	 */
-	//private Map /*AlternateLocation->AlternateLocation*/
-	//_temporaryAlternateLocations;
-
-	/**
 	 * Constant for the <tt>File</tt> instance.
 	 */
 	private final File FILE;
 
+	/**
+	 * The collection of alternate locations for the file.
+	 */
 	private final AlternateLocationCollection ALT_LOCS = 
 		new AlternateLocationCollection();
 		
@@ -120,43 +107,13 @@ public final class FileDesc implements AlternateLocationCollector {
 		ALT_LOCS.addAlternateLocationCollection(alc);
 	}
 
-	public AlternateLocationCollector getAlternateLocationCollector() {
+	public AlternateLocationCollection getAlternateLocationCollection() {
 		return ALT_LOCS;
 	}
 
 	public boolean hasAlternateLocations() {
 		return ALT_LOCS.hasAlternateLocations();
 	}
-
-	public String httpStringValue() {
-		return ALT_LOCS.httpStringValue();
-	}
-
-	/**
-	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
-	 * of "temporary" alternate locations.  These will not be stored to
-	 * the official alternate locations list until a call to 
-	 * commitTemporaryAlternateLocations is made.  This is to avoid,
-	 * for example, sending back the same alternate location headers
-	 * back to an uploader as they sent in with their upload request,
-	 * as they clearly already know about those locations.
-	 *
-	 * @param al the <tt>AlternateLocation</tt> instance to add to the 
-	 *  temporary list.
-	 */
-	//public void addTemporaryAlternateLocation(AlternateLocation al) {
-	//ALT_LOCS.addTemporaryAlternateLocation(al);
-	//}
-
-	/**
-	 * Moves all temporary alternate locations to the "official" list of
-	 * alternate locations for this file that will be reported in
-	 * HTTP headers.
-	 */
-	//public void commitTemporaryAlternateLocations() {
-	//ALT_LOCS.commitTemporaryAlternateLocations();
-	//}
-
 
 	/**
 	 * Writes the SHA1 URN for this file out to the specified stream in
@@ -173,54 +130,14 @@ public final class FileDesc implements AlternateLocationCollector {
 		String str = HTTPConstants.CONTENT_URN_HEADER+" "+urn+HTTPConstants.CRLF;
 		os.write(str.getBytes());
 	}
-
-	/**
-	 * Returns a new <tt>Response</tt> instance for the data in this
-	 * <tt>FileDesc</tt> for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param qr the <tt>QueryRequest</tt> instance to create a 
-	 *  <tt>Response</tt> for
-	 * @return a new <tt>Response</tt> instance for this <tt>FileDesc</tt>
-	 *  and the given <tt>QueryRequest</tt>
-	 */
-	
-//      public Response responseFor(QueryRequest qr) {
-//          Response response = new Response(_index,_size,_name);        
-//          /** Popular approach: return all URNs **/
-//          Iterator allUrns = URNS.iterator();
-//          while(allUrns.hasNext()) {
-//              response.addUrn(((URN)allUrns.next()));
-//          }
-        
-        /** 
-         * Technically proper approach (by HUGE v.0.93): 
-         * give only URNs that are requested
-         *
-        if(qr.getRequestedUrnTypes()==null) return r;
-        Iterator outer = qr.getRequestedUrnTypes().iterator();
-        while (outer.hasNext()) {
-            Iterator inner = URNS.iterator();
-            String req = (String)outer.next();
-            while(inner.hasNext()) {
-                String urn = (String)inner.next();
-                if(urn.startsWith(req)) {
-                    r.addUrn(urn);
-                }
-            }
-        }
-        /**/
-//          return response;
-        
-//      }
-    
-    //
-    //
-    // URN-calculation and handling
-    //
     
     /**
-     * would calling the calculation method add useful URNs?
-     */	
+	 * Returns whether or not this <tt>FileDesc</tt> has an associated
+	 * SHA1 URN value.
+	 * 
+	 * @return <tt>true</tt> if this <tt>FileDesc</tt> has an 
+	 *  associated SHA1 value, <tt>false</tt> otherwise
+	 */
     public synchronized boolean hasSHA1Urn() {
 		return (getSHA1Urn() != null);
 	}
@@ -322,15 +239,6 @@ public final class FileDesc implements AlternateLocationCollector {
      */
     public InputStream getInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
-    }
-
-    public void print() {
-        System.out.println("Name: " + _name);
-        System.out.println("Index: " + _index);
-        System.out.println("Size: " + _size);
-        System.out.println("Path: " + _path);
-        System.out.println("URNs: " + URNS);
-        System.out.println(" ");
     }
 
 	/*
