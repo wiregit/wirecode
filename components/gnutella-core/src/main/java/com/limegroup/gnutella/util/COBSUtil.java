@@ -12,22 +12,27 @@ public class COBSUtil {
      *  POST: the return array will be a cobs encoded version of src.  namely,
      *  cobsDecode(cobsEncode(src)) ==  src.
      */
-    public static byte[] cobsEncode(byte[] src) {
+    public static byte[] cobsEncode(byte[] src) throws IOException {
         final int srcLen = src.length;
         byte code = (byte) 0x01;
         int currIndex = 0;
         ByteArrayOutputStream sink = new ByteArrayOutputStream();
-        
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+
         while (currIndex < srcLen) {
             if (src[currIndex] == 0) {
                 sink.write((int)code);
+                sink.write(temp.toByteArray());
+                temp.reset();
                 code = (byte) 0x01;
             }
             else {
-                sink.write((int)src[currIndex]);
+                temp.write((int)src[currIndex]);
                 code++;
                 if (code == 0xFF) {
                     sink.write((int)code);
+                    sink.write(temp.toByteArray());
+                    temp.reset();
                     code = (byte) 0x01;
                 }
             }
@@ -35,6 +40,7 @@ public class COBSUtil {
         }
 
         sink.write((int)code);
+        sink.write(temp.toByteArray());
         return sink.toByteArray();
     }
 
@@ -48,13 +54,13 @@ public class COBSUtil {
     public static byte[] cobsDecode(byte[] src) {
         final int srcLen = src.length;
         int currIndex = 0;
-        byte code = src[currIndex];
+        byte code = 0;
         ByteArrayOutputStream sink = new ByteArrayOutputStream();        
 
-        while (currIndex < srcLen) {            
+        while (currIndex < srcLen) {
+            code = src[currIndex++];
             for (int i = 1; i < code; i++) {
-                sink.write((int)src[currIndex]);
-                currIndex++;
+                sink.write((int)src[currIndex++]);
             }
             if (code < 0xFF) sink.write(0);
         }
