@@ -30,37 +30,51 @@ public class IOUtils {
      * @return true if we could handle the error.
      */
     public static boolean handleException(IOException ioe, String friendly) {
-        String msg = ioe.getMessage();
-        if(msg == null)
-            return false;
-            
         if(friendly == null)
             friendly = "GENERIC";
         
-        msg = msg.toLowerCase();
-        // If the user's disk is full, let them know.
-        if(StringUtils.contains(msg, "no space left") || 
-           StringUtils.contains(msg, "not enough space")) {
-            MessageService.showError("ERROR_DISK_FULL_" + friendly);
-            return true;
-        }
-        // If the file is locked, let them know.
-        if(StringUtils.contains(msg, "being used by another process")) {
-            MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
-            return true;
-        }
-        // If we don't have permissions to write, let them know.
-        if(StringUtils.contains(msg, "access is denied") || 
-           StringUtils.contains(msg, "permission denied") ) {
-            MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
-            return true;
-        }
-        
-        if(StringUtils.contains(msg, "invalid argument")) {
-            MessageService.showError("ERROR_INVALID_NAME_" + friendly);
-            return true;
-        }
+        return handle(ioe, friendly);
+    }
+    
+    /**
+     * Looks through every cause of an Exception to see if we know how 
+     * to handle it.
+     */
+    private static boolean handle(Throwable e, String friendly) {
+        while(e != null) {
+            String msg = e.getMessage();
             
+            if(msg != null) {
+                msg = msg.toLowerCase();
+                // If the user's disk is full, let them know.
+                if(StringUtils.contains(msg, "no space left") || 
+                   StringUtils.contains(msg, "not enough space")) {
+                    MessageService.showError("ERROR_DISK_FULL_" + friendly);
+                    return true;
+                }
+                // If the file is locked, let them know.
+                if(StringUtils.contains(msg, "being used by another process")) {
+                    MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
+                    return true;
+                }
+                // If we don't have permissions to write, let them know.
+                if(StringUtils.contains(msg, "access is denied") || 
+                   StringUtils.contains(msg, "permission denied") ) {
+                    MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
+                    return true;
+                }
+                
+                if(StringUtils.contains(msg, "invalid argument")) {
+                    MessageService.showError("ERROR_INVALID_NAME_" + friendly);
+                    return true;
+                }
+            }
+            
+            if(CommonUtils.isJava14OrLater())
+                e = e.getCause();
+            else
+                e = null;
+        }
 
         // dunno what to do, let the outer world handle it.
         return false;
