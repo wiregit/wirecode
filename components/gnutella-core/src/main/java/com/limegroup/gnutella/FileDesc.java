@@ -14,6 +14,13 @@ public class FileDesc {
     public String _name;
     public int _size;
 
+    /**
+     * @param i index of the file
+     * @param n the name of the file (e.g., "funny.txt")
+     * @param p the fully-qualified path of the file
+     *  (e.g., "/home/local/funny.txt")
+     * @param s the size of the file, in bytes
+     */
     public FileDesc(int i, String n, String p, int s) {
         _index = i;
         _name = n;
