@@ -33,6 +33,7 @@ public interface SettingsInterface
     public String     getClientID();
     public int        getMaxConn();
     public String     getSaveDirectory();
+    public String     getSaveDefault();
     public String     getDirectories();
     public String     getExtensions();
     public String[]   getBannedIps();
@@ -110,6 +111,9 @@ public interface SettingsInterface
 
     /** sets the directory for saving files*/
     public void setSaveDirectory(String dir)
+	throws IllegalArgumentException;
+    /** sets the default directory for saving files*/
+    public void setSaveDefault(String dir)
 	throws IllegalArgumentException;
 
     /** sets the string list of directories*/
@@ -241,8 +245,14 @@ public interface SettingsInterface
     public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
-
-    public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
+    public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
+    
+    public static final String HEADER = "Properties file for the LimeWire"+
+	" gnutella client.\nYou can modify any of the default"+
+	" properties here if\nyou wish, but if your modifications"+
+	" do not fit the\nrange of expected values for specific"+
+	" properties, those\nproperties will revert to their default"+
+	" values.\n\n";
 }
 
 
