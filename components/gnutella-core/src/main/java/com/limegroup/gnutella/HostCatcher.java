@@ -105,7 +105,9 @@ public class HostCatcher {
      * cleared in doneWithEndpoint(). */
     private Endpoint bootstrapHostInProgress=null;
 
-    private Acceptor acceptor;
+	/**
+	 * Constant for the <tt>SettingsManager</tt>.
+	 */
     private SettingsManager settings=SettingsManager.instance();
 
     /**
@@ -116,9 +118,6 @@ public class HostCatcher {
      */
     private boolean alwaysNotifyKnownHost=false;
 
-	private final Set udpUltraPeers = new HashSet();
-
-
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
      * connect is not specified in the SettingsManager, loads the hosts in the
@@ -128,8 +127,7 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
-		String filename = SettingsManager.instance().getHostList();
-        this.acceptor = RouterService.getAcceptor();
+		String filename = settings.getHostList();
 
         //Read gnutella.net
         try {
@@ -289,7 +287,7 @@ public class HostCatcher {
             return false;
 
         //Skip if this host is banned.
-        if (acceptor.isBannedIP(e.getHostname()))
+        if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
             return false;
 
         //Skip if this is the router.
@@ -522,10 +520,6 @@ public class HostCatcher {
         return buf.iterator();
     }
 
-	public Set getUltraPeersSupportingUdp() {
-		return Collections.unmodifiableSet(udpUltraPeers);
-	}
-
     /**
      * Notifies this that the fetcher has finished attempting a connection to
      * the given host.  This exists primarily to update the permanent host list
@@ -658,11 +652,11 @@ public class HostCatcher {
         }
 
         if (cIP[0]==(byte)127) {
-            return port == acceptor.getPort();
+            return port == RouterService.getPort();
         } else {
-            byte[] managerIP = acceptor.getAddress();
+            byte[] managerIP = RouterService.getAddress();
             return (Arrays.equals(cIP, managerIP) &&
-                    (port==acceptor.getPort()));
+                    (port==RouterService.getPort()));
         }
     }
 
