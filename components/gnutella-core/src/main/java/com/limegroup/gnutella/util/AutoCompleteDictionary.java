@@ -61,4 +61,9 @@ public interface AutoCompleteDictionary {
      *
      */
     public Iterator getIterator(String s);
+    
+    /**
+     * Clears the dictionary.
+     */
+    public void clear();
 }

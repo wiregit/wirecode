@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 
 /**
  * A TrieSet.  A set-like interface designed specifically for Strings.
@@ -90,6 +92,17 @@ public class TrieSet implements AutoCompleteDictionary {
      */
     public Iterator getIterator(String s) {
         return map.getPrefixedBy(s);
+    }
+    
+    /**
+     * Clears all items in the dictionary.
+     */
+    public void clear() {
+        List l = new LinkedList();
+        for(Iterator i = getIterator(); i.hasNext(); )
+            l.add(i.next());
+        for(Iterator i = l.iterator(); i.hasNext(); )
+            removeEntry((String)i.next());
     }
 }
 
