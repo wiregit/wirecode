@@ -45,6 +45,12 @@ public final class NIOMessageWriter implements MessageWriter {
      * A lock to protect changes to the message queue for this connection. 
      */
     private final Object QUEUE_LOCK = new Object();
+    
+    /**
+     * Flag for whether or not the <tt>NIODispatcher</tt> has already registered
+     * this writer for write events.
+     */
+    private volatile boolean _registered = false;
 	
     
     /**
@@ -88,12 +94,15 @@ public final class NIOMessageWriter implements MessageWriter {
      */
     public synchronized boolean write(Message msg) throws IOException {
         
-        // this method should not be called if there's a previouos message
-        // that has not been fully sent -- throw IllegalStateExcepion in this
-        // case
+        // pending messages indicate that the TCP upstream buffer has filled,
+        // so we should start our application-level buffering of messages to
+        // make sure we prioritize certain traffic over others
         if(hasPendingMessage()) {
             QUEUE.add(msg);
-            //throw new IllegalStateException("previous message pending");
+                
+            // should already be registered, but just in case...    
+            register();
+            return false;
         }
         //System.out.println("MessageWriter::write");
         //Copy m to a ByteBuffer.  TODO: avoid allocating ByteBuffer each time.
@@ -117,30 +126,42 @@ public final class NIOMessageWriter implements MessageWriter {
      * sent.  If it is called in this case, <tt>IllegalStateException</tt> will
      * be thrown.
      * 
-     * @return <tt>true</tt> if all of the message was successfully written to
-     *  our TCP buffers, otherwise <tt>false</tt>
+     * @return <tt>true</tt> if all messages for this connection have been 
+     *  successfully written to our TCP buffers, otherwise <tt>false</tt>
      * @throws IOException if any IO error occurs during the write
      * @throws IllegalStateException if there are no pending messages to be 
      *  sent
      */
     public synchronized boolean write() throws IOException {
     	if(!hasPendingMessage()) {
-    		throw new IllegalStateException("no pending message");
-    	}
-        
-        if(!CHANNEL.isConnected()) {
+            if(QUEUE.size() == 0) {
+                return true;
+            }
+    		Message msg = QUEUE.removeNext();
+            Assert.that(msg != null, "should have obtained queued message");
+            return write(msg);
+    	} else if(!CHANNEL.isConnected()) {
             throw new IOException("connection closed");
+        } else {
+    	    CHANNEL.write(_message);
+        	if(!_message.hasRemaining()) {
+        		_message = null;
+                return QUEUE.size() == 0;
+        		//return true;
+        	} else {
+                register();
+        		return false;
+        	}
         }
-    	CHANNEL.write(_message);
-    	if(!_message.hasRemaining()) {
-    		_message = null;
-    		return true;
-    	} else {
-            NIODispatcher.instance().addWriter(CONNECTION);
-    		return false;
-    	}
     }
 
+    private void register() {
+        if(!_registered) {
+            NIODispatcher.instance().addWriter(CONNECTION);
+            _registered = true;
+        }      
+    }
+    
     /**
      * Closes the NIO writer.
      * 
@@ -164,6 +185,16 @@ public final class NIOMessageWriter implements MessageWriter {
     public void flush() throws IOException {
         // TODO Auto-generated method stub
         
+    }
+
+    /**
+     * Sets the flag for whether or not this writer is registered for write 
+     * events with the <tt>NIODispatcher</tt>,
+     * 
+     * @param b boolean specifying registration status
+     */
+    public void setRegistered(boolean b) {
+        _registered = b;
     }
     
 }
