@@ -9,19 +9,12 @@ import com.limegroup.gnutella.*;
  * all messages sent over a specific number of time intervals, 
  * etc.
  */
-public class LimeSentMessageStat extends AbstractStatistic {
+public class LimeSentMessageStat extends AdvancedStatistic {
 
 	/**
-	 * Constructs a new <tt>MessageStat</tt> instance with 
-	 * 0 for all historical data fields.
+	 * Constructs a new <tt>MessageStat</tt> instance.
 	 */
 	private LimeSentMessageStat() {}
-
-	/**
-	 * Private class for handling byte statistics.
-	 */
-	private static class LimeSentMessageStatBytes 
-		extends AbstractKilobytesStatistic {}
 
 	/**
 	 * Private class for keeping track of filtered messages.
@@ -53,43 +46,6 @@ public class LimeSentMessageStat extends AbstractStatistic {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
 			TCP_ALL_MESSAGES.incrementStat();
-		}
-	}
-
-	/**
-	 * Private class for keeping track of filtered messages, in bytes.
-	 */
-	private static class FilteredLimeSentMessageStatBytes
-		extends AbstractKilobytesStatistic {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_FILTERED_MESSAGES_BYTES.incrementStat();
-		}
-	}
-
-	/**
-	 * Private class for the total number of bytes in sent 
-	 * UDP messages.
-	 */
-	private static class UDPLimeSentMessageStatBytes 
-		extends AbstractKilobytesStatistic {
-		public void addData(int data) {
-			super.addData(data);
-			ALL_MESSAGES_BYTES.addData(data);
-			UDP_ALL_MESSAGES_BYTES.addData(data);
-		}
-	}
-
-	/**
-	 * Private class for the total number of bytes in sent 
-	 * TCP messages.
-	 */
-	private static class TCPLimeSentMessageStatBytes 
-		extends AbstractKilobytesStatistic {
-		public void addData(int data) {
-			super.addData(data);
-			ALL_MESSAGES_BYTES.addData(data);
-			TCP_ALL_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -210,125 +166,4 @@ public class LimeSentMessageStat extends AbstractStatistic {
 	 */
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredLimeSentMessageStat();
-
-
-	////////////// START OF BYTE STATISTICS //////////////////
-
-	/**
-	 * <tt>Statistic</tt> for all messages sent.
-	 */
-	public static final Statistic ALL_MESSAGES_BYTES =
-		new LimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for all UPD messages sent.
-	 */
-	public static final Statistic UDP_ALL_MESSAGES_BYTES =
-		new LimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for all TCP messages sent.
-	 */
-	public static final Statistic TCP_ALL_MESSAGES_BYTES =
-		new LimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for all filtered messages.
-	 */
-	public static final Statistic ALL_FILTERED_MESSAGES_BYTES =
-		new LimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella pings sent over UDP.
-	 */
-	public static final Statistic UDP_PING_REQUESTS_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella pings sent over TCP.
-	 */
-	public static final Statistic TCP_PING_REQUESTS_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
-	 */
-	public static final Statistic UDP_PING_REPLIES_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella pongs sent over TCP.
-	 */
-	public static final Statistic TCP_PING_REPLIES_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella query requests sent over 
-	 * UDP.
-	 */
-	public static final Statistic UDP_QUERY_REQUESTS_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella query requests sent over 
-	 * TCP.
-	 */
-	public static final Statistic TCP_QUERY_REQUESTS_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella query replies sent over 
-	 * UDP.
-	 */
-	public static final Statistic UDP_QUERY_REPLIES_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella query replies sent over 
-	 * TCP.
-	 */
-	public static final Statistic TCP_QUERY_REPLIES_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella push requests sent over 
-	 * UDP.
-	 */
-	public static final Statistic UDP_PUSH_REQUESTS_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella push requests sent over 
-	 * TCP.
-	 */
-	public static final Statistic TCP_PUSH_REQUESTS_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages sent 
-	 * over UDP.
-	 */
-	public static final Statistic UDP_ROUTE_TABLE_MESSAGES_BYTES = 
-	    new UDPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages sent 
-	 * over TCP.
-	 */
-	public static final Statistic TCP_ROUTE_TABLE_MESSAGES_BYTES = 
-	    new TCPLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
-	 * over UDP.
-	 */
-	public static final Statistic UDP_FILTERED_MESSAGES_BYTES = 
-	    new FilteredLimeSentMessageStatBytes();
-
-	/**
-	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
-	 * over TCP.
-	 */
-	public static final Statistic TCP_FILTERED_MESSAGES_BYTES = 
-	    new FilteredLimeSentMessageStatBytes();
 }

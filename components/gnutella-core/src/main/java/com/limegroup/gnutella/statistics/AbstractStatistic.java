@@ -14,12 +14,6 @@ import java.util.StringTokenizer;
 public abstract class AbstractStatistic implements Statistic {
 
 	/**
-	 * <tt>List</tt> of all message statistics classes, allowing
-	 * them to be easily iterated over.
-	 */
-	protected static List ALL_STATS = new LinkedList();
-
-	/**
 	 * List of all statistics stored over intervals for this
 	 * specific <tt>Statistic</tt> instance.
 	 */
@@ -28,30 +22,30 @@ public abstract class AbstractStatistic implements Statistic {
 	/**
 	 * Long for the statistic currently being added to.
 	 */
-	protected int _current = 0;
+	protected volatile int _current = 0;
 
 	/**
 	 * Variable for the array of <tt>Integer</tt> instances for the
 	 * history of statistics for this message.  Each 
 	 * <tt>Integer</tt> stores the statistic for one time interval.
 	 */
-	private Integer[] _statHistory;
+	private volatile Integer[] _statHistory;
 
 	/**
 	 * Variable for the total number of messages received for this 
 	 * statistic.
 	 */
-	protected double _total = 0;
+	protected volatile double _total = 0;
 
 	/**
 	 * The total number of stats recorded.
 	 */
-	protected int _totalStatsRecorded = 0;
+	protected volatile int _totalStatsRecorded = 0;
 
 	/**
 	 * The maximum value ever recorded for any time period.
 	 */
-	protected double _max = 0;
+	protected volatile double _max = 0;
 
 	private Writer _writer;
 
@@ -66,8 +60,7 @@ public abstract class AbstractStatistic implements Statistic {
 	protected AbstractStatistic() {
 		for(int i=0; i<HISTORY_LENGTH; i++) {
 			STAT_HISTORY.add(new Integer(0));
-		}
-		ALL_STATS.add(this);
+		}			
 	}
 
 	// inherit doc comment
@@ -171,18 +164,6 @@ public abstract class AbstractStatistic implements Statistic {
 		if(_numWriters == 0) {
 			_writeStat = false;
 			_writer = null;
-		}
-	}
-
-	/**
-	 * Stores the accumulated statistics for all messages into
-	 * their collections of historical data.
-	 */
-	public static void storeCurrentStats() {
-		Iterator iter = ALL_STATS.iterator();
-		while(iter.hasNext()) {
-			Statistic stat = (Statistic)iter.next();
-			stat.storeCurrentStat();
 		}
 	}
 }

@@ -4,7 +4,7 @@ package com.limegroup.gnutella.statistics;
  * This class contains a type-safe enumeration of all classes that
  * store statistics on routing errors.
  */
-public class RouteErrorStat extends AbstractStatistic {
+public class RouteErrorStat extends AdvancedStatistic {
 	
 	/**
 	 * Constructs a new <tt>RouteErrorStat</tt> instance with 

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.statistics;
 /**
  * This class handles all statistics for connections.
  */
-public class ConnectionStat extends AbstractStatistic {
+public class ConnectionStat extends AdvancedStatistic {
 	
 	/**
 	 * Make the constructor private so that only this class can construct
@@ -18,7 +18,7 @@ public class ConnectionStat extends AbstractStatistic {
 	 * attempt count will be automatically incremented.
 	 */
 	private static final class AllConnectionAttemptsStat 
-		extends AbstractStatistic {
+		extends ConnectionStat {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_CONNECTION_ATTEMPTS.incrementStat();

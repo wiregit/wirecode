@@ -15,6 +15,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 
 	// inherit doc comment
 	public double getAverage() {
+		if(_totalStatsRecorded == 0) return 0;
 		return (double)((_total/_totalStatsRecorded)/BYTES_PER_KILOBYTE);
 	}
 

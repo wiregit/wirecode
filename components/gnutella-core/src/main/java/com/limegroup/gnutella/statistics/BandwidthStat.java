@@ -4,7 +4,7 @@ package com.limegroup.gnutella.statistics;
  * This class contains a type-safe enumeration of all classes for
  * bandwidth data.
  */
-public class BandwidthStat extends AbstractKilobytesStatistic {
+public class BandwidthStat extends BasicKilobytesStatistic {
 	
 	/**
 	 * Make the constructor private so that only this class can construct

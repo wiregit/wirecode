@@ -3,61 +3,61 @@ package com.limegroup.gnutella.statistics;
 import com.limegroup.gnutella.*;
 
 /**
- * This class contains a type-safe enumeration of statistics for
- * individual Gnutella messages that have been received from other 
- * nodes on the network.  Each statistic maintains its own history, 
- * all messages received over a specific number of time intervals, 
- * etc.
+ * Class for recording all received message statistics by the number
+ * of bytes transferred.
  */
-public class ReceivedMessageStat extends AdvancedStatistic {
+public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 
 	/**
-	 * Constructs a new <tt>MessageStat</tt> instance with 
-	 * 0 for all historical data fields.
+	 * Constructs a new <tt>ReceivedMessageStatBytes</tt> instance.
 	 */
-	private ReceivedMessageStat() {}
+	private ReceivedMessageStatBytes() {}
 
 	/**
-	 * Private class for keeping track of filtered messages.
+	 * Private class for keeping track of filtered messages, in bytes.
 	 */
-	private static class FilteredReceivedMessageStat 
-		extends ReceivedMessageStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_FILTERED_MESSAGES.incrementStat();
+	private static class FilteredReceivedMessageStat
+		extends ReceivedMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_FILTERED_MESSAGES.addData(data);
 		}
 	}
 
 	/**
-	 * Private class for keeping track of duplicate queries.
+	 * Private class for keeping track of duplicate queries, in bytes.
 	 */
 	private static class DuplicateQueriesReceivedMessageStat
-		extends ReceivedMessageStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_DUPLICATE_QUERIES.incrementStat();
+		extends ReceivedMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_DUPLICATE_QUERIES.addData(data);
 		}
 	}
 
 	/**
-	 * Private class for keeping track of the number of UDP messages.
+	 * Private class for the total number of bytes in received 
+	 * UDP messages.
 	 */
-	private static class UDPReceivedMessageStat extends ReceivedMessageStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_MESSAGES.incrementStat();
-			UDP_ALL_MESSAGES.incrementStat();
+	private static class UDPReceivedMessageStat
+		extends ReceivedMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			UDP_ALL_MESSAGES.addData(data);
 		}
 	}
 
 	/**
-	 * Private class for keeping track of the number of TCP messages.
+	 * Private class for the total number of bytes in received 
+	 * TCP messages.
 	 */
-	private static class TCPReceivedMessageStat extends ReceivedMessageStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_MESSAGES.incrementStat();
-			TCP_ALL_MESSAGES.incrementStat();
+	private static class TCPReceivedMessageStat
+		extends ReceivedMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			TCP_ALL_MESSAGES.addData(data);
 		}
 	}
 
@@ -66,35 +66,31 @@ public class ReceivedMessageStat extends AdvancedStatistic {
 	 * <tt>Statistic</tt> for all messages received.
 	 */
 	public static final Statistic ALL_MESSAGES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all UPD messages received.
 	 */
 	public static final Statistic UDP_ALL_MESSAGES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages received.
 	 */
 	public static final Statistic TCP_ALL_MESSAGES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all duplicate quereies.
+	 * <tt>Statistic</tt> for all duplicate queries, in bytes.
 	 */
 	public static final Statistic ALL_DUPLICATE_QUERIES =
-		new ReceivedMessageStat();
-
-
-
-	/////// individual message stats ///////
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pings received over UDP.
@@ -203,4 +199,5 @@ public class ReceivedMessageStat extends AdvancedStatistic {
 	 */	
 	public static final Statistic TCP_DUPLICATE_QUERIES =
 		new DuplicateQueriesReceivedMessageStat();
+
 }

@@ -5,7 +5,7 @@ package com.limegroup.gnutella.statistics;
  * requests.  Each statistic maintains its own history, all messages 
  * received over a specific number of time intervals.
  */
-public class HTTPStat extends AbstractStatistic {
+public class HTTPStat extends AdvancedStatistic {
 
 	/**
 	 * Make the constructor private so that only this class can construct
