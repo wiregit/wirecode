@@ -184,9 +184,9 @@ public final class CreationTimeCache {
      * Returns an iterator of URNs, from 'youngest' to 'oldest'.
      * @param max the maximum number of URNs you want returned.  if you
      * want all, give Integer.MAX_VALUE.
-     * @return the iterator returns younger URNs first.
+     * @return a List ordered by younger URNs.
      */
-    public synchronized Iterator getFiles(final int max) 
+    public synchronized List getFiles(final int max) 
         throws IllegalArgumentException {
         if (max < 1) throw new IllegalArgumentException("bad max = " + max);
         List urnList = new ArrayList();
@@ -204,13 +204,13 @@ public final class CreationTimeCache {
                 urnList.add(innerIter.next());
         }
 
-        return urnList.iterator();
+        return urnList;
     }
 
 
     /** Returns all of the files URNs, from youngest to oldest.
      */
-    public synchronized Iterator getFiles() {
+    public synchronized List getFiles() {
         return getFiles(Integer.MAX_VALUE);
     }
     

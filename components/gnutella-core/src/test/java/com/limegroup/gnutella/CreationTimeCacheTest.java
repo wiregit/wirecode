@@ -245,7 +245,7 @@ public class CreationTimeCacheTest
     }
 
 
-    /** Tests the getFiles() method.
+    /** Tests the getFiles().iterator() method.
      */
     public void testGetFiles() throws Exception {
         // mock up our own createtimes.txt
@@ -273,7 +273,7 @@ public class CreationTimeCacheTest
         assertEquals(ctCache.getCreationTime(hash4), middle);
 
         {
-            Iterator iter = ctCache.getFiles();
+            Iterator iter = ctCache.getFiles().iterator();
             assertEquals(hash2, iter.next());
             URN urn = (URN) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
@@ -284,7 +284,7 @@ public class CreationTimeCacheTest
         }
 
         {
-            Iterator iter = ctCache.getFiles(4);
+            Iterator iter = ctCache.getFiles(4).iterator();
             assertEquals(hash2, iter.next());
             URN urn = (URN) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
@@ -295,7 +295,7 @@ public class CreationTimeCacheTest
         }
 
         {
-            Iterator iter = ctCache.getFiles(3);
+            Iterator iter = ctCache.getFiles(3).iterator();
             assertEquals(hash2, iter.next());
             URN urn = (URN) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
@@ -305,7 +305,7 @@ public class CreationTimeCacheTest
         }
 
         {
-            Iterator iter = ctCache.getFiles(2);
+            Iterator iter = ctCache.getFiles(2).iterator();
             assertEquals(hash2, iter.next());
             URN urn = (URN) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
@@ -313,14 +313,14 @@ public class CreationTimeCacheTest
         }
 
         {
-            Iterator iter = ctCache.getFiles(1);
+            Iterator iter = ctCache.getFiles(1).iterator();
             assertEquals(hash2, iter.next());
             assertFalse(iter.hasNext());
         }
 
         {
             try {
-                Iterator iter = ctCache.getFiles(0);
+                Iterator iter = ctCache.getFiles(0).iterator();
             }
             catch (IllegalArgumentException expected) {}
         }
@@ -328,7 +328,7 @@ public class CreationTimeCacheTest
     }
 
 
-    /** Tests the getFiles() method.
+    /** Tests the getFiles().iterator() method.
      */
     public void testSettersAndGetters() throws Exception {
         CreationTimeCache ctCache = null;
@@ -342,7 +342,7 @@ public class CreationTimeCacheTest
         // should be a empty cache
         // ---------------------------
         ctCache = getCTC();
-        assertFalse(ctCache.getFiles().hasNext());
+        assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(0, TIME_MAP.size());
@@ -350,7 +350,7 @@ public class CreationTimeCacheTest
         ctCache.addTime(hash1, middle.longValue());
         ctCache.commitTime(hash1);
         ctCache.persistCache();
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
         ctCache = null;
@@ -359,7 +359,7 @@ public class CreationTimeCacheTest
         // should have one value
         // ---------------------------
         ctCache = getCTC();
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
 
@@ -374,7 +374,7 @@ public class CreationTimeCacheTest
         ctCache.commitTime(hash4);
         ctCache.removeTime(hash1);
         ctCache.persistCache();
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash3, iter.next());
         // just clear middle
         iter.next();
@@ -386,7 +386,7 @@ public class CreationTimeCacheTest
         // should have three values
         // ---------------------------
         ctCache = getCTC();
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash3, iter.next());
         assertEquals(hash4, iter.next());
         assertEquals(hash2, iter.next());
@@ -402,7 +402,7 @@ public class CreationTimeCacheTest
         // ---------------------------
         fm.setExcludeURN(hash4);
         ctCache = getCTC();
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
 
@@ -426,21 +426,21 @@ public class CreationTimeCacheTest
         // should be a empty cache
         // ---------------------------
         ctCache = getCTC();
-        assertFalse(ctCache.getFiles().hasNext());
+        assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(0, TIME_MAP.size());
         // ---------------------------
 
         // make sure that only after something is committed is it returned
-        // via getFiles()
+        // via getFiles().iterator()
         // ---------------------------
         ctCache.addTime(hash1, middle.longValue());
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertFalse(iter.hasNext());
 
         ctCache.commitTime(hash1);
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
         // ---------------------------
@@ -451,13 +451,13 @@ public class CreationTimeCacheTest
         ctCache.addTime(hash3, old.longValue());
 
         ctCache.commitTime(hash3);
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertEquals(hash3, iter.next());
         assertFalse(iter.hasNext());
 
         ctCache.commitTime(hash2);
-        iter = ctCache.getFiles();
+        iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());
         assertEquals(hash1, iter.next());
         assertEquals(hash3, iter.next());

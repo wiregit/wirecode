@@ -1012,6 +1012,9 @@ public abstract class FileManager {
         URN oldURN = getURNForFile(f);
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(oldURN);
+        // Is this assertion too stringent?  Possibly.  There is only one
+        // VERY unlikely case where it could happen.  It is probably better to
+        // have the assert there than not.
         Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
@@ -1279,74 +1282,16 @@ public abstract class FileManager {
         boolean includeXML = shouldIncludeXMLInResponse(request);
 
         //Special case: return up to 3 of your 'youngest' files.
-        if (request.isWhatIsNewRequest()) {
-            // see if there are any files to send....
-            // NOTE: we only request up to 10 urns.  we don't need to worry
-            // about partial files because we don't add them to the cache.
-            Iterator iter = CreationTimeCache.instance().getFiles(3);
-            if (!iter.hasNext())
-                return EMPTY_RESPONSES;
-            
-            // get the appropriate responses
-            Set responses = new HashSet();
-            while (iter.hasNext() && (responses.size() < 3)) {
-                URN currURN = (URN) iter.next();
-                FileDesc desc = getFileDescForUrn(currURN);
-
-                // should never happen since we don't add times for IFDs and
-                // we clear removed files...
-                if ((desc==null) || (desc instanceof IncompleteFileDesc))
-                    throw new RuntimeException("Bad Rep - No IFDs allowed!");
-
-                // Formulate the response
-                Response r = new Response(desc);
-                if(includeXML)
-                    addXMLToResponse(r, desc);
-                
-                // Cache it
-                responses.add(r);
-            }
-
-            // send them off
-            if (responses.size()==0)
-                return EMPTY_RESPONSES;
-            else 
-                return (Response[]) responses.toArray(new Response[responses.size()]);
-        }
+        if (request.isWhatIsNewRequest()) 
+            return respondToWhatIsNewRequest(includeXML);
 
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,
         //StandardMessageRouter will clip the number of results sent on the
         //network.  Note that some initial TTLs are filterd by GreedyQuery
         //before they ever reach this point.
-        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
-            //Special case: if no shared files, return null
-            // This works even if incomplete files are shared, because
-            // they are added to _numIncompleteFiles and not _numFiles.
-            if (_numFiles==0)
-                return EMPTY_RESPONSES;
-            //Extract responses for all non-null (i.e., not deleted) files.
-            //Because we ignore all incomplete files, _numFiles continues
-            //to work as the expected size of ret.
-            Response[] ret=new Response[_numFiles];
-            int j=0;
-            for (int i=0; i<_files.size(); i++) {
-                FileDesc desc = (FileDesc)_files.get(i);
-        		// If the file was unshared or is an incomplete file,
-        		// DO NOT SEND IT.
-                if (desc==null || desc instanceof IncompleteFileDesc) 
-                    continue;    
-                Assert.that(j<ret.length,
-                            "_numFiles is too small");
-                ret[j] = new Response(desc);
-                if(includeXML)
-                    addXMLToResponse(ret[j], desc);
-                j++;
-            }
-            Assert.that(j==ret.length,
-                        "_numFiles is too large");
-            return ret;
-        }
+        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY))
+            return respondToIndexingQuery(includeXML);
 
         //Normal case: query the index to find all matches.  TODO: this
         //sometimes returns more results (>255) than we actually send out.
@@ -1387,6 +1332,72 @@ public abstract class FileManager {
         }
         return (Response[])responses.toArray(new Response[responses.size()]);
     }
+
+    /**
+     * Responds to a what is new request.
+     */
+    private Response[] respondToWhatIsNewRequest(boolean includeXML) {
+        // see if there are any files to send....
+        // NOTE: we only request up to 3 urns.  we don't need to worry
+        // about partial files because we don't add them to the cache.
+        List urnList = CreationTimeCache.instance().getFiles(3);
+        if (urnList.size() == 0)
+            return EMPTY_RESPONSES;
+        
+        // get the appropriate responses
+        Response[] resps = new Response[urnList.size()];
+        for (int i = 0; i < urnList.size(); i++) {
+            URN currURN = (URN) urnList.get(i);
+            FileDesc desc = getFileDescForUrn(currURN);
+            
+            // should never happen since we don't add times for IFDs and
+            // we clear removed files...
+            if ((desc==null) || (desc instanceof IncompleteFileDesc))
+                throw new RuntimeException("Bad Rep - No IFDs allowed!");
+            
+            // Formulate the response
+            Response r = new Response(desc);
+            if(includeXML)
+                addXMLToResponse(r, desc);
+            
+            // Cache it
+            resps[i] = r;
+        }
+        return resps;
+    }
+
+    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
+     *  files of this client.
+     */
+    private Response[] respondToIndexingQuery(boolean includeXML) {
+        //Special case: if no shared files, return null
+        // This works even if incomplete files are shared, because
+        // they are added to _numIncompleteFiles and not _numFiles.
+        if (_numFiles==0)
+            return EMPTY_RESPONSES;
+        //Extract responses for all non-null (i.e., not deleted) files.
+        //Because we ignore all incomplete files, _numFiles continues
+        //to work as the expected size of ret.
+        Response[] ret=new Response[_numFiles];
+        int j=0;
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc desc = (FileDesc)_files.get(i);
+            // If the file was unshared or is an incomplete file,
+            // DO NOT SEND IT.
+            if (desc==null || desc instanceof IncompleteFileDesc) 
+                continue;    
+            Assert.that(j<ret.length,
+                        "_numFiles is too small");
+            ret[j] = new Response(desc);
+            if(includeXML)
+                addXMLToResponse(ret[j], desc);
+            j++;
+        }
+        Assert.that(j==ret.length,
+                    "_numFiles is too large");
+        return ret;
+    }
+
     
     /**
      * A normal FileManager will never include XML.
