@@ -1,0 +1,72 @@
+package com.limegroup.gnutella.statistics;
+
+import com.limegroup.gnutella.*;
+
+/**
+ * Abstract class that is a general implementation of a message statistics
+ * handling class.  These classes track multiple statistics at once.  For a 
+ * given message, this includes keeping track of the raw number of messages
+ * past, the number of bytes past, and whether or not that message was 
+ * from another LimeWire.
+ */
+public abstract class AbstractStatHandler {
+
+	/**
+	 * The <tt>Statistic</tt> that should be incremented for each new 
+	 * message.
+	 */
+	private final Statistic NUMBER_STAT;
+
+	/**
+	 * The <tt>Statistic</tt> for the number of bytes for this message
+	 * type.  For each new message added, the number of bytes are added
+	 * to this <tt>Statistic</tt>.
+	 */
+	private final Statistic BYTE_STAT;
+
+
+	/**
+	 * <tt>Statistic</tt> for the number of the given message that came 
+	 * from other LimeWires.
+	 */
+	private final Statistic LIME_NUMBER_STAT;
+
+	/**
+	 * <tt>Statistic</tt> for the bytes of the given message that came 
+	 * from other LimeWires.
+	 */
+	private final Statistic LIME_BYTE_STAT;
+
+	/**
+	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
+	 * Private constructor to ensure that no other classes can
+	 * construct this class, following the type-safe enum pattern.
+	 *
+	 * @param numberStat the statistic that is simply incremented with
+	 *  each new message
+	 * @param byteStat the statistic for keeping track of the total bytes
+	 */
+	protected AbstractStatHandler(Statistic numberStat, 
+								  Statistic byteStat,
+								  Statistic limeNumberStat,
+								  Statistic limeByteStat) {
+		NUMBER_STAT = numberStat;
+		BYTE_STAT = byteStat;
+		LIME_NUMBER_STAT = limeNumberStat;
+		LIME_BYTE_STAT = limeByteStat;
+	} 
+
+	/**
+	 * Adds the specified <tt>Message</tt> to the stored data
+	 *
+	 * @param msg the received <tt>Message</tt> to add to the data
+	 */
+	public void addMessage(Message msg) {
+		NUMBER_STAT.incrementStat();
+		BYTE_STAT.addData(msg.getTotalLength());
+		if(new GUID(msg.getGUID()).isLimeGUID()) {
+			LIME_NUMBER_STAT.incrementStat();
+			LIME_BYTE_STAT.incrementStat();
+		}
+	}	
+}
