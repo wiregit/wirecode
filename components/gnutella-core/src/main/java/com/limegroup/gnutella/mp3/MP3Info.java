@@ -23,6 +23,9 @@ public final class MP3Info {
     // the mp3 file info
     private String _fileName;
     private long _fileSize;
+    public long getFileSize() {
+        return _fileSize;
+    }
 
     // the representation of the header, where all info is ultimately
     // derived....
