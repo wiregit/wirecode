@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.xml;
 
-import java.io.*;
-import com.sun.java.util.collections.*;
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Properties;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /** 
  * This class manages the properties needed by the 
