@@ -188,4 +188,20 @@ public class FileUtils
         } else
             return true;
     }
+    
+    /**
+     * Touches a file, to ensure it exists.
+     */
+    public static void touch(File f) throws IOException {
+        OutputStream fos = null;
+        try {
+            fos = new FileOutputStream(f);
+        } finally {
+            if(fos != null) {
+                try {
+                    fos.close();
+                } catch(IOException ignored) {}
+            }
+        }
+    }
 }

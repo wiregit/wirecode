@@ -56,7 +56,7 @@ public class IncompleteFileManager implements Serializable {
      * A mapping from incomplete files (File) to the blocks of the file stored
      * on disk (VerifyingFile).  Needed for resumptive smart downloads.
      * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
-     * one interval.  Note that blocks are no sorted; there are typically few
+     * one interval.  Note that blocks are not sorted; there are typically few
      * blocks so performance isn't an issue.  
      */
     private Map /* File -> VerifyingFile */ blocks=
@@ -220,6 +220,15 @@ public class IncompleteFileManager implements Serializable {
                 }
                 //...and record the hash for later.
                 hashes.put(sha1, file);
+                //...and make sure the file exists on disk, so that
+                //   future File.getCanonicalFile calls will match this
+                //   file.  This was a problem on OSX, where
+                //   File("myfile") and File("MYFILE") aren't equal,
+                //   but File("myfile").getCanonicalFile() will only return
+                //   a File("MYFILE") if that already existed on disk.
+                //   This means that in order for the canonical-checking
+                //   within this class to work, the file must exist on disk.
+                FileUtils.touch(file);
                 return file;
             }
         } else {
