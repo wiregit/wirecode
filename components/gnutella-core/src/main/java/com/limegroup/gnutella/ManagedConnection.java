@@ -1421,13 +1421,6 @@ public class ManagedConnection extends Connection
         return _nextQRPForwardTime;
     }
 
-    /** Sets the system time that we should next forward a query route table
-     *  along this connection.  Only valid if isClientSupernodeConnection() is
-     *  true. */
-//     public void setNextQRPForwardTime(long time) {
-//         _nextQRPForwardTime=time;
-//     }
-
 	/**
 	 * Increments the next time we should forward query route tables for
 	 * this connection.  This depends on whether or not this is a connection
