@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.mp3;
 
-import java.io.*;
+import org.apache.commons.logging.*;
+
+
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.FileUtils;
-import de.vdheide.mp3.*;
+
 
 /**
  * Used when a user wants to edit meta-information about a media file, and asks
@@ -19,16 +19,11 @@ import de.vdheide.mp3.*;
 
 public abstract class MetaDataEditor {
 
+	private Log LOG = LogFactory.getLog(MetaDataEditor.class);
 
     protected LimeXMLDocument correctDocument= null;
 
     protected MetaDataEditor() {}
-
-    private final boolean debugOn = false;
-    protected void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
     
     
     protected boolean matches(final String a, final String b) {

@@ -5,10 +5,14 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
+import org.apache.commons.logging.*;
+
 /**
  * a metadata editor for audio files.
  */
 public abstract class AudioMetaDataEditor extends MetaDataEditor {
+	
+	private Log LOG = LogFactory.getLog(AudioMetaDataEditor.class);
 	
 	protected String title_;
     protected String artist_;
@@ -104,7 +108,8 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
 	        rippedStuff = ripTag(xmlStr, TITLE_STRING);
 	
 	        title_ = (String)rippedStuff[2];
-	        debug("title = "+title_);
+	        if (LOG.isDebugEnabled())
+	        	LOG.debug("title = "+title_);
 	
 	        i = ((Integer)rippedStuff[0]).intValue();
 	        j = ((Integer)rippedStuff[1]).intValue();        
@@ -116,7 +121,8 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
 	        rippedStuff = ripTag(xmlStr, ARTIST_STRING);
 	
 	        artist_ = (String)rippedStuff[2];
-	        debug("artist = "+artist_);
+	        if (LOG.isDebugEnabled())
+	        	LOG.debug("artist = "+artist_);
 	
 	        i = ((Integer)rippedStuff[0]).intValue();
 	        j = ((Integer)rippedStuff[1]).intValue();        
@@ -240,7 +246,8 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
 	    j = end; // set end of value
 	
 	    retObjs[1] = new Integer(end+1);
-	    debug("ID3Editor.ripTag(): i = " + i +
+	    if (LOG.isDebugEnabled())
+	    	LOG.debug("ID3Editor.ripTag(): i = " + i +
 	          ", j = " + j);
 	    retObjs[2] = source.substring(i,j);
 	                   

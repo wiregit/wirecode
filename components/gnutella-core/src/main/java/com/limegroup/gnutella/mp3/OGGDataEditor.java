@@ -43,37 +43,37 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 			
 			String tmp;
 			
-			System.out.println(title_);
+
 			tmp = OGGMetaData.TITLE_TAG+"="+title_;
 			commentBytes[0]=tmp.getBytes();
 			comment.comment_lengths[0] = tmp.length();
 			
-			System.out.println(artist_);
+
 			tmp=OGGMetaData.ARTIST_TAG+"="+artist_;
 			commentBytes[1]=tmp.getBytes();
 			comment.comment_lengths[1] = tmp.length();
 			
-			System.out.println(album_);
+
 			tmp=OGGMetaData.ALBUM_TAG+"="+album_;
 			commentBytes[2]=tmp.getBytes();
 			comment.comment_lengths[2] = tmp.length();
 			
-			System.out.println(comment_);
+
 			tmp=OGGMetaData.COMMENT_TAG+"="+comment_;
 			commentBytes[3]=tmp.getBytes();
 			comment.comment_lengths[3] = tmp.length();
 			
-			System.out.println(genre_);
+			
 			tmp=OGGMetaData.GENRE_TAG+"="+genre_;
 			commentBytes[4]=tmp.getBytes();
 			comment.comment_lengths[4] = tmp.length();
 			
-			System.out.println(track_);
+			
 			tmp=OGGMetaData.TRACK_TAG+"="+track_;
 			commentBytes[5]=tmp.getBytes();
 			comment.comment_lengths[5] = tmp.length();
 			
-			System.out.println(year_);
+			
 			tmp=OGGMetaData.DATE_TAG+"="+year_;
 			commentBytes[6]=tmp.getBytes();
 			comment.comment_lengths[6] = tmp.length();

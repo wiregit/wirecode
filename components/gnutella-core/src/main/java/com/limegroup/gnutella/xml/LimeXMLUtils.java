@@ -424,7 +424,11 @@ public class LimeXMLUtils
 		else if (isSupportedVideoFormat(file))
 			return "http://www.limewire.com/schemas/video.xsd";
 		else 
-			return null;
+			return "";
+    }
+    
+    public static boolean isSupportedFormatForSchema(File file, String schemaURI) {
+    	return getSchemaURI(file).equals(schemaURI);
     }
     
     /**

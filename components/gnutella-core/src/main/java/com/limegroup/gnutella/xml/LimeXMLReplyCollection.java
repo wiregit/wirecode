@@ -178,12 +178,12 @@ public class LimeXMLReplyCollection {
                 if( xml != null && xml instanceof LimeXMLDocument ) {
                     doc = (LimeXMLDocument)xml;
                 } else { // Pre LimeWire 2.5 or no XML stored.
-                    doc = constructDocument((String)xml, file);
+                    doc = constructDocument(file);
                 }
             } else { // After LimeWire 3.4
                 xml = hashToXML.get(hash);
                 if( xml == null ) { // no XML might exist, try and make some
-                    doc = constructDocument(null, file);
+                    doc = constructDocument(file);
                 } else { //it had a doc already.
                     doc = (LimeXMLDocument)xml;
                 }
@@ -195,14 +195,14 @@ public class LimeXMLReplyCollection {
             if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("reconstructing document for id3v2: " + file);
-                LimeXMLDocument tempDoc = constructDocument(null, file);
+                LimeXMLDocument tempDoc = constructDocument(file);
                 if (tempDoc != null) doc = tempDoc;
             }
                 
             // Verify the doc has information in it.
             if(!doc.isValid()) {
                 //If it is invalid, try and rebuild it.
-                doc = constructDocument(null, file);
+                doc = constructDocument(file);
                 if(doc == null || !doc.isValid())
                     continue;
             }   
@@ -222,46 +222,23 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Creates a LimeXMLDocument from the XML String.
-     * If the string is null, the collection is for audio files,
-     * and the file is an MP3 file, it reads the file to create some XML.
+     * Creates a LimeXMLDocument from the file.  
+     * @return null if the format is not supported or parsing fails,
+     *  <tt>LimeXMLDocument</tt> otherwise.
      */
-    private LimeXMLDocument constructDocument(String xmlStr, File file) {
-        // old style may exist or there may be no xml associated
-        // with this file yet.....
+    private LimeXMLDocument constructDocument(File file) {
+
     	
-        if (audio && LimeXMLUtils.isSupportedFormat(file)) { //the audio flag needs to stay for now
+        if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
         	
-            // first try to get the metadata out of it.  if this file has
-            // no metadata, just construct the doc out of the xml 
-            // string....
-            boolean onlyFileInfo=((xmlStr == null) || xmlStr.equals(""));
+            try{    
+            	return MetaDataReader.readDocument(file);
+            }
             
-            try {
-                if(!onlyFileInfo) {  //non-id3 values with mp3 file
-                	
-                    String fileXML = MetaDataReader.readDocument(file,onlyFileInfo);
-                    
-                    String joinedXML = joinXMLStrings(fileXML, xmlStr);
-                    if( joinedXML != null )
-                        return new LimeXMLDocument(joinedXML);
-                }
-                
-                // no XML data we can use - parse from the file
-                return MetaDataReader.readDocument(file);
+            catch (IOException ignored) { 
+            	return null; 
             }
-            catch (SAXException ignored) { }
-            catch (IOException ignored) { }
-            catch (SchemaNotFoundException ignored) { }
-        }
-        else { // not a supported format
-            try {
-                if ((xmlStr != null) && (!xmlStr.equals(""))) 
-                    return new LimeXMLDocument(xmlStr);
-            }
-            catch (SAXException ignored) { }
-            catch (IOException ignored) { }
-            catch (SchemaNotFoundException ignored) { }
+            
         }
         
         return null;
@@ -307,23 +284,6 @@ public class LimeXMLReplyCollection {
         }
     }
 
-    /**
-     * Joins two XML strings together.
-     * Returns null if the second string is malformed.
-     */
-    private String joinXMLStrings(String str1, String str2) {
-        int p = str2.lastIndexOf("></audio>");
-        if( p == -1 )
-        	p = str2.lastIndexOf("></video>");
-		if(p == -1)
-            return null;
-            
-        //above line is the one closing the root element
-        String a = str2.substring(0,p);//all but the closing part
-        String b = str2.substring(p);//closing part
-        //phew, thank god this schema has depth 1.
-        return(a+str1+b);
-    }
 
     
     /**

@@ -32,14 +32,20 @@
 package com.limegroup.gnutella.mp3;
 
 import java.io.*;
+
 import com.jcraft.jogg.*;
 import com.jcraft.jorbis.*;
+
+import org.apache.commons.logging.*;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.*;
 
 
 class JOrbisComment {
+	
+	Log LOG = LogFactory.getLog(JOrbisComment.class);
+	
   State state=null;
 
   File _file;
@@ -61,14 +67,34 @@ class JOrbisComment {
     state.vc=comment;
     
     //copy the newly created file in a temp folder
-    File tempFile = File.createTempFile(file.getName(),"tmp");
+    File tempFile=null;
+    try {
+     tempFile = File.createTempFile(file.getName(),"tmp");
+    }catch(IOException e) {
+    	//sometimes either the temp path is messed up or
+    	//there isn't enough space on that partition.
+    	//try to create a temp file on the same folder as the
+    	//original.  It will not be around long enough to get shared
+    	
+    	//if an exception is thrown, let it propagate
+    	LOG.debug("couldn't create temp file in $TEMP, trying elsewhere");
+    	
+    	tempFile = new File(file.getAbsolutePath()+
+    			File.separator+
+				file.getName()+".tmp");
+    }
     OutputStream out=new FileOutputStream(tempFile);
-    System.out.println("about to write ogg file");
+    
+    
+    LOG.debug("about to write ogg file");
+    
     write(out);
     out.close();
     in.close();
     
-    //move over the original file
+    //rename fails on some rare filesystem setups
+    LOG.debug("about to rename ogg file");
+    
     tempFile.renameTo(file);
     
     
@@ -171,7 +197,7 @@ class JOrbisComment {
       state.oy.wrote(bytes);
     }
 
-    System.out.println(state.vi);
+    //System.out.println(state.vi);
   }
 
   int write(OutputStream out) throws IOException{
@@ -314,7 +340,8 @@ class JOrbisComment {
 //System.out.println(" result4="+result);
 	if(result==0) break;
 	if(result<0){
-	  System.out.println("Corrupt or missing data, continuing...");
+	  if (LOG.isDebugEnabled()) 
+	  	LOG.debug("Corrupt or missing data, continuing...");
 	}
 	else{
           /* Don't bother going through the rest, we can just 

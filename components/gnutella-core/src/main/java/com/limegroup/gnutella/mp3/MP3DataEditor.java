@@ -199,7 +199,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	            return LimeXMLReplyCollection.BAD_ID3;
 	        }
 	    }
-	    debug("about to start writing to file");
+	    LOG.debug("about to start writing to file");
 	    boolean b;
 	    b = toFile(title_,30,file,buffer);
 	    if(!b)
@@ -247,7 +247,8 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	    
 	}
 	private boolean toFile(String val, int maxLen, RandomAccessFile file, byte[] buffer) {
-	    debug("writing value to file "+val);
+	    if (LOG.isDebugEnabled())
+	    	LOG.debug("writing value to file "+val);
 	    byte[] fromString;
 	    
 	    if (val==null || val.equals("")) {
