@@ -143,9 +143,9 @@ public final class SettingsManager {
 
 	private final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
-    private final byte    DEFAULT_TTL            = (byte)7;
+    private final byte    DEFAULT_TTL            = (byte)6;
     /** Default setting for the soft maximum time to live */
-    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)7;
+    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)6;
     /** Default setting for the hard maximum time to live */
     private final byte    DEFAULT_MAX_TTL        = (byte)16;
     /** Default maximum packet length */
