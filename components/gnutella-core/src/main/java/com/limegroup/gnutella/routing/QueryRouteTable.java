@@ -15,6 +15,15 @@ import java.io.*;
  * infinite!) list of keyword TTL pairs, [ &#60;keyword_1, ttl_1&#62;, ...,
  * &#60;keywordN, ttl_N&#62; ]  <p>
  *
+ * 10/08/2002 - A day after Susheel's birthday, he decided to change this class
+ * for the heck of it.  Kidding.  Functionality has been changed so that keyword
+ * depth is 'constant' - meaning that if a keyword is added, then any contains
+ * query regarding that keyword will return true.  This is because this general
+ * idea of QRTs is only used in a specialized way in LW - namely, UPs use it for
+ * their leaves ONLY, so the depth is always 1.  If you looking for a keyword
+ * and it is in the table, a leaft MAY have it, so return true.  This only
+ * needed a one line change.
+ *
  * <b>This class is NOT synchronized.</b>
  */
 public class QueryRouteTable {
@@ -545,9 +554,6 @@ public class QueryRouteTable {
     /*
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
-        System.out.println("TODO: warning these tests were written "
-                          +"before the restriction that are tables are "
-                          +"powers of 2 in length.");
 
         //0. compress/uncompress.  First we make a huge array with lots of
         //random bytes but also long strings of zeroes.  This means that
@@ -563,18 +569,15 @@ public class QueryRouteTable {
             data[i]=(byte)0;
         }
         byte[] dataCompressed=dummy.compress(data);
-        //System.out.println("Compressed 10000 to "+dataCompressed.length);
         Assert.that(dataCompressed.length<data.length);
         
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             for (int i=0; i<dataCompressed.length; ) {
                 int length=Math.min(rand.nextInt(100), dataCompressed.length-i);
-                //System.out.print(length+"/");
                 byte[] chunk=new byte[length];
                 System.arraycopy(dataCompressed, i, chunk, 0, length);
                 byte[] chunkRead=dummy.uncompress(chunk);
-                //System.out.print(chunkRead.length+" ");
                 baos.write(chunkRead);
                 i+=length;
             }
@@ -582,7 +585,6 @@ public class QueryRouteTable {
             Assert.that(Arrays.equals(data, baos.toByteArray()),
                         "Compress/uncompress loop failed");
         } catch (IOException e) {
-            System.out.println("Decompress failed: "+e);
             e.printStackTrace();
         }
 
@@ -636,11 +638,9 @@ public class QueryRouteTable {
         qrt2=new QueryRouteTable(1000, (byte)7);
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            System.out.println("Got "+m);
             try { 
                 qrt2.update(m); 
             } catch (BadPacketException e) {
-                System.out.println("Got bad packet "+m);
             }
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
@@ -648,17 +648,14 @@ public class QueryRouteTable {
         }
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
 
-        System.out.println();
         qrt.add("bad", 2);
         qrt.add("other", 4); //qrt={good/1, book/1, bad/2, other/4}
         Assert.that(! qrt2.equals(qrt));
         for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            System.out.println("Got "+m);
             try { 
                 qrt2.update(m); 
             } catch (BadPacketException e) {
-                System.out.println("Got bad packet "+m);
             }
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
@@ -684,14 +681,11 @@ public class QueryRouteTable {
         qrt2=new QueryRouteTable(10, (byte)10);
         Assert.that(! qrt2.equals(qrt));
 
-        System.out.println();
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            System.out.println("Got "+m);
             try { 
                 qrt2.update(m); 
             } catch (BadPacketException e) {
-                System.out.println("Got bad packet "+m);
             }
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
@@ -707,14 +701,11 @@ public class QueryRouteTable {
         qrt2=new QueryRouteTable(5000, (byte)10);
         Assert.that(! qrt2.equals(qrt));
 
-        System.out.println();
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            System.out.println("Got "+m);
             try { 
                 qrt2.update(m); 
             } catch (BadPacketException e) {
-                System.out.println("Got bad packet "+e);
             }
         }
         Assert.that(qrt2.equals(qrt));
