@@ -53,7 +53,7 @@ public class UploadManager {
      * INVARIANT: _activeUploads is always less than or equal to the
      * summation of the values of _uploadsInProgress
      */
-    private int _activeUploads= 0;
+    private volatile int _activeUploads= 0;
 
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
@@ -222,6 +222,7 @@ public class UploadManager {
 		return true;
 	}
 
+    /** @requires caller has this' monitor */
 	private void insertFailedPush(String host) {
 		_failedPushes.add(new PushedFile(host));
 	}
@@ -269,7 +270,7 @@ public class UploadManager {
 		}
 	}
 
-
+    /** @requires caller has this' monitor */
 	private void clearFailedPushes() {
 		// First remove all files that were pushed more than a few minutes ago
 		Date time = new Date();
@@ -409,9 +410,7 @@ public class UploadManager {
                 }
 			} catch (IOException e) {
 				// if it fails, insert it into the push failed list
-				// _up.setState(Uploader.PUSH_FAILED);
-				insertFailedPush(_host);
-				// remove it from the uploads in progress
+				synchronized(UploadManager.this) { insertFailedPush(_host); }
 				return;
 			} finally {			    
 				synchronized(UploadManager.this) {
