@@ -550,8 +550,8 @@ public class CountPercent {
 "     Be careful with the relative order of keys and values, and with the\n" +
 "     appearance of ASCII punctuations around right-to-left words: <i>make sure that\n" +
 "     your editor uses the RTL layout with the edited text aligned on the right</i>;\n" +
-"     please don't insert BiDi control overrides; but you may need to place LRM/PDF\n" +
-"     marks (U+200F/U+202C) locally around non-Semitic words inserted within Semitic\n" +
+"     please don't insert BiDi control overrides; but you may need to place LRE/PDF\n" +
+"     marks (U+202B/U+202C) locally around non-Semitic words inserted within Semitic\n" +
 "     sentences. <i>Also the \"</i><code>\\n</code><i>\" sequences that encode a newline\n" +
 "     will be displayed within semitic text as \"</i><code>n\\</code><i>\": don't use\n" +
 "     BiDi overrides for such special sequence whose appearance in your editor is not\n" +
@@ -884,7 +884,7 @@ class LanguageInfo implements Comparable {
     public String getLink() {
         final String tip;
         if (isRightToLeft)
-            tip = "\u200f" /* RLM control: Right-To-Left Mark */
+            tip = "\u202b" /* RLE control: Right-To-Left Embedding */
                 + toString()
                 + "\u202c"; /* PDF control: Pop Directional Format */
         else
