@@ -1,7 +1,5 @@
 /*
- * auth: rsoule
- * file: ByteReader.java
- * desc: handles reading off of the input stream
+ * handles reading off of the input stream
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|

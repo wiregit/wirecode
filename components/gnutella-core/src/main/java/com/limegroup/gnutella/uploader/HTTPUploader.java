@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 /**
- * auth: rsoule
- * file: HTTPUploader.java
- * desc: Read data from disk and write to the net.
+ * Read data from disk and write to the net.
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|

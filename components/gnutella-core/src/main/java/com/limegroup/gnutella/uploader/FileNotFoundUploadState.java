@@ -6,10 +6,8 @@ import java.util.Date;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * auth: rsoule
- * file: NormalUploadState.java
- * desc: an implementaiton of the UploadState interface
- *       to report when a file is not found. 
+ * an implementaiton of the UploadState interface
+ * to report when a file is not found. 
  */
 
 public class FileNotFoundUploadState implements UploadState {
