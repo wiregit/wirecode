@@ -33,7 +33,7 @@ public class QueryReply extends Message implements Serializable{
     
     /** 2 bytes for public area, 2 bytes for xml length.
      */
-    static final int COMMON_PAYLOAD_LEN = 4;
+    public static final int COMMON_PAYLOAD_LEN = 4;
 
     private byte[] payload;
     /** True if the responses and metadata have been extracted. */
@@ -522,7 +522,6 @@ public class QueryReply extends Message implements Serializable{
         } catch (ArrayIndexOutOfBoundsException e) {
             return;
         } catch (IOException e) {
-            System.out.println("QueryReply.parseResults2() IOException");
             return;
         }           
         
