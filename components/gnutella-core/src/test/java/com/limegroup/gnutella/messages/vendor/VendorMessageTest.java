@@ -55,6 +55,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
     }
 
+
     // tests HopsFlowVM and LimeACKVM (very simple messages)
     public void testWriteAndRead() throws Exception {
         // HOPS FLOW
@@ -118,6 +119,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         testWrite(vm);
         // test other constructor....
         vm = new PushProxyAcknowledgement(InetAddress.getLocalHost(), 5);
+        testRead(vm);
+
+        // Query Status Request
+        // -----------------------------
+        // test network constructor....
+        vm = new QueryStatusRequest(GUID.makeGuid(), (byte) 1, 
+                                    (byte) 0, 1, new byte[0]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new QueryStatusRequest(new GUID(GUID.makeGuid()));
+        testRead(vm);
+
+        // Query Status Response
+        // -----------------------------
+        // test network constructor....
+        vm = new QueryStatusResponse(GUID.makeGuid(), (byte) 1, 
+                                     (byte) 0, 1, new byte[2]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new QueryStatusResponse(new GUID(GUID.makeGuid()), 65535);
         testRead(vm);
     }
 

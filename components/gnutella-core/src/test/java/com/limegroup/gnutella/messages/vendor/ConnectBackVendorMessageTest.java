@@ -44,21 +44,21 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             // in the next few tests, try bad sizes of the payload....
             UDPConnectBackVendorMessage udp = 
                 new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, new byte[0]);
+                                                1, new byte[0]);
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
         try {
             UDPConnectBackVendorMessage udp = 
                 new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, new byte[17]);
+                                                1, new byte[17]);
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
         try {
             UDPConnectBackVendorMessage udp = 
                 new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, new byte[19]);
+                                                1, new byte[19]);
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
@@ -67,23 +67,27 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
         UDPConnectBackVendorMessage udp = 
             new UDPConnectBackVendorMessage(guid, ttl, hops,
                                             UDP_VERSION, new byte[18]);
-
-
+        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, 1, new byte[18]);
 
         // make sure we encode things just fine....
         GUID guidObj = new GUID(GUID.makeGuid());
 
-
         UDPConnectBackVendorMessage VendorMessage1 = 
             new UDPConnectBackVendorMessage(6346, guidObj);
         UDPConnectBackVendorMessage VendorMessage2 = 
-            new UDPConnectBackVendorMessage(guidObj.bytes(), ttl, hops, 
-                                            UDP_VERSION, 
-                                            VendorMessage1.getPayload());
+            new UDPConnectBackVendorMessage(VendorMessage1.getGUID(), ttl, hops,
+                                            1, VendorMessage1.getPayload());
+        assertTrue(VendorMessage1.getVersion() == 1);
         assertTrue(VendorMessage1.equals(VendorMessage2));
         assertTrue(VendorMessage1.getConnectBackPort() == 
                    VendorMessage2.getConnectBackPort());
         assertTrue(VendorMessage1.getConnectBackGUID().equals(VendorMessage2.getConnectBackGUID()));
+
+        // tests that we can parse the new version
+        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, UDP_VERSION, 
+                                              new byte[2]);
+        assertTrue(udp.getConnectBackGUID().equals(new GUID(guid)));
+        assertTrue(udp.getConnectBackPort() == 0);
     }
     
 

@@ -8,10 +8,18 @@ import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
  *  Used to ask a host you connect to do a UDP ConnectBack.
+ *
+ *  VERSIONING INFO:
+ *  -------------------------
+ *  Version 2 of this message will fold the connect back guid into the guid
+ *  of the message.  In order to transition, we should follow a 3 step process:
+ *  1) allow this class to accept version 2 format
+ *  2) after 1) has been released for a while, start using version 2
+ *  3) some time after 2), stop accepting 1) (optional)
  */
 public final class UDPConnectBackVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     /** The payload has a 16-bit unsigned value - the port - at which one should
      *  connect back.
@@ -41,15 +49,22 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
 
             // get the port....
             _port = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
-            // get the guid....
-            byte[] guidBytes = new byte[16];
-            int bytesRead = bais.read(guidBytes, 0, guidBytes.length);
-            if ((bytesRead != 16) || (bais.available() > 0))
-                throw new BadPacketException("MALFORMED GUID!!!");
-            _guid = new GUID(guidBytes);
+            if (getVersion() == 1) {
+                // get the guid....
+                byte[] guidBytes = new byte[16];
+                int bytesRead = bais.read(guidBytes, 0, guidBytes.length);
+                if ((bytesRead != 16) || (bais.available() > 0))
+                    throw new BadPacketException("MALFORMED GUID!!!");
+                _guid = new GUID(guidBytes);
+            }
+            else if (getVersion() == 2)
+                _guid = new GUID(super.getGUID());
+            else 
+                throw new BadPacketException("UNSUPPORTED OLD VERSION");
+                
         }
         catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+            throw new BadPacketException("Couldn't read from a ByteStream!!!");
         }
     }
 
@@ -61,7 +76,7 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
      */
     public UDPConnectBackVendorMessage(int port, GUID guid) 
         throws BadPacketException {
-        super(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, VERSION, 
+        super(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 1, 
               derivePayload(port, guid));
         _port = port;
         _guid = guid;

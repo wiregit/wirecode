@@ -230,6 +230,14 @@ public abstract class VendorMessage extends Message {
             // Push Proxy Acknowledgement
             return new PushProxyAcknowledgement(guid, ttl, hops, version, 
                                                 restOf);
+        if ((selector == F_LIME_ACK) && 
+            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
+            // Query Status Request
+            return new QueryStatusRequest(guid, ttl, hops, version, restOf);
+        if ((selector == F_REPLY_NUMBER) && 
+            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
+            // Query Status Response
+            return new QueryStatusResponse(guid, ttl, hops, version, restOf);
 
         throw UNRECOGNIZED_EXCEPTION;
     }
