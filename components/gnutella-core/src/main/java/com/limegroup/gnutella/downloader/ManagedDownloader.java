@@ -713,7 +713,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
         manager.remove(this, complete);
-
+        
+        ranker.stop();
+        
         if(LOG.isTraceEnabled())
             LOG.trace("MD completing <" + getFileName() + 
                       "> completed download, state: " +
@@ -1422,7 +1424,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {
             killAllWorkers();
             
-            ranker.stop();
             // must capture in local variable so the value doesn't become null
             // between if & contents of if.
             Thread dlMan = dloaderManagerThread;

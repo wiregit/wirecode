@@ -72,6 +72,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private URN sha1;
     
     /**
+     * The guid to use for my headPings
+     */
+    private GUID myGUID;
+    
+    /**
      * whether the ranker has been stopped.
      */
     private volatile boolean stopped;
@@ -81,7 +86,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
     public PingRanker() {
-        pinger = new UDPPinger();
+        pinger = new HeadPinger();
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
@@ -103,6 +108,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public synchronized void addToPool(RemoteFileDesc host){
         if (sha1 == null && host.getSHA1Urn() != null)
             sha1 = host.getSHA1Urn();
+        
+        if (myGUID == null) {
+            myGUID = new GUID(GUID.makeGuid());
+            RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
+        }
         
         if (host.needsPush()) 
             everybodyPush.add(host.getPushAddr());
@@ -173,7 +183,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         LOG.debug("will ping some hosts");
         
         // create a ping for the non-firewalled hosts
-        HeadPing ping = new HeadPing(sha1,getPingFlags());
+        HeadPing ping = new HeadPing(myGUID,sha1,getPingFlags());
         
         // iterate through the list and select some hosts to ping
         List toSend = new ArrayList();
@@ -219,7 +229,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (RouterService.acceptedIncomingConnection() || 
                 (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
-                new HeadPing(rfd.getSHA1Urn(),new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
+                new HeadPing(myGUID,rfd.getSHA1Urn(),
+                        new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
             
             for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
                 pingedHosts.put(iter.next(),rfd);
@@ -245,13 +256,13 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
         HeadPong pong = (HeadPong)m;
         
+        if (LOG.isDebugEnabled())
+            LOG.debug("received a pong "+ pong+ " from "+handler);// +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
+        
         if (!pingedHosts.containsKey(handler))
             return;
         
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
-        
-        if (LOG.isDebugEnabled())
-            LOG.debug("received a pong "+ pong+ " from "+handler +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
         
         // if the pong is firewalled, remove the other proxies from the 
         // pinged set
@@ -279,9 +290,15 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
 
 
-    public void registered(byte[] guid) {}
+    public void registered(byte[] guid) {
+        if (LOG.isInfoEnabled())
+            LOG.info("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
+    }
 
-    public void unregistered(byte[] guid) {}
+    public void unregistered(byte[] guid) {
+        if (LOG.isInfoEnabled())
+            LOG.info("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
+    }
     
     public synchronized boolean isCancelled(){
         return stopped || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
@@ -289,6 +306,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     public void stop() {
         stopped = true;
+        RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
     }
     
     protected synchronized Collection getShareableHosts(){

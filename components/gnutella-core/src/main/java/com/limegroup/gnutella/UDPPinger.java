@@ -139,11 +139,10 @@ public class UDPPinger {
     /**
      * Sends the given send bundle.
      */
-    private void send(SenderBundle info) {
-        final Collection hosts = info.hosts;
-        final MessageListener listener = info.listener;
-        final Cancellable canceller = info.canceller;
-        Message message = info.message;
+    protected void send(Collection hosts, 
+            final MessageListener listener,
+            Cancellable canceller,
+            Message message) {
         
         // something went wrong with UDPService - don't try to send
         if (!waitForListening(canceller))
@@ -216,7 +215,7 @@ public class UDPPinger {
         }
         
         public void run() {
-            send(this);
+            send(hosts,listener,canceller,message);
         }
     }
 }

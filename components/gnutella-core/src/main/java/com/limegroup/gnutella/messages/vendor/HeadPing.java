@@ -134,17 +134,18 @@ public class HeadPing extends VendorMessage {
 	 * @param features which features to include in the response
 	 */
 
-	public HeadPing(URN sha1, int features) {
-		this (sha1, null, features);
+	public HeadPing(GUID g, URN sha1, int features) {
+		this (g,sha1, null, features);
 	}
 	
 	
-	public HeadPing(URN sha1, GUID clientGUID, int features) {
+	public HeadPing(GUID g, URN sha1, GUID clientGUID, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
 		 		derivePayload(sha1, clientGUID, features));
 		_features = (byte)(features & FEATURE_MASK);
 		_urn = sha1;
 		_clientGUID = clientGUID;
+        setGUID(g);
 	}
 
 	
@@ -152,7 +153,7 @@ public class HeadPing extends VendorMessage {
 	 * creates a plain udp head request
 	 */
 	public HeadPing (URN urn) {
-		this(urn, PLAIN);
+		this(new GUID(GUID.makeGuid()),urn, PLAIN);
 	}
 	
 
