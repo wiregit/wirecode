@@ -245,7 +245,7 @@ public class HeadPong extends VendorMessage {
 		
 		try {
     		byte features = ping.getFeatures();
-    		features &= HeadPing.FEATURE_MASK;
+    		features &= ~HeadPing.GGEP_PING; 
     		daos.write(features);
     		if (LOG.isDebugEnabled())
     			LOG.debug("writing features "+features);
