@@ -508,6 +508,9 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                          (Arrays.equals(message.getGUID(), query.getGUID()))));
         }
 
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
@@ -595,6 +598,9 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             // as long as we don't get a ClassCastException we are good to go
             message = Message.read(in);
         }
+
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
 
         // WAIT for the expirer to expire the query reply
         Thread.sleep(120 * 1000); // 2 minutes - expirer must run twice
