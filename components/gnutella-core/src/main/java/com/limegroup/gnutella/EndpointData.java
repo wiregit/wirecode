@@ -22,11 +22,16 @@ public class EndpointData extends Endpoint implements Cloneable,
 * serial version
 */
 static final long serialVersionUID = 5045818571228406227L;    
+
+/**
+* set the default speed to be 56k
+*/
+public static final int DEFAULT_SPEED = 56; 
     
 /**
 * Speed in kilobytes of the host this endpoint refers to
 */
-private long speed = 56;
+private long speed = DEFAULT_SPEED;
     
 
 /**
