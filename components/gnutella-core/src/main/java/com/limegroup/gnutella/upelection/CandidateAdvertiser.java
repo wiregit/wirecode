@@ -59,7 +59,7 @@ public class CandidateAdvertiser implements Runnable {
 			if (current.isGoodLeaf() &&
 					current.isStable() && 
 					current.isLimeWire() &&
-					current.isGUESSCapable()) //unsolicited udp
+					current.isUDPCapable()) //unsolicited udp
 				//add more criteria here
 				try {
 					Candidate currentCandidate = new Candidate(current);

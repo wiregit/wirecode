@@ -294,6 +294,13 @@ public class ManagedConnection extends Connection
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
+    
+    /**
+     * Whether this connection can receive unsolicited UDP.
+     * Ultrapeers always can, leafs can if they send queries that desire
+     * out of band results.
+     */
+    private boolean _UDPCapable = false;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -557,6 +564,9 @@ public class ManagedConnection extends Connection
      * @param query the <tt>QueryRequest</tt> to send
      */
     public void originateQuery(QueryRequest query) {
+    	//since these are queries that come from our leafs, it is ok
+    	//to check the condition every time
+    	_UDPCapable= query.desiresOutOfBandReplies();
         send(query, PRIORITY_OUR_QUERY);
     }
 
@@ -1533,7 +1543,13 @@ public class ManagedConnection extends Connection
         return pushProxyAddr;
     }
     
-
+    /**
+     * @return whether the peer on the other side of this connection
+     * can receive unsolicited UDP.  Ultrapeers always can.
+     */
+    public boolean isUDPCapable() {
+    	return isSupernodeConnection() ? true : _UDPCapable;
+    }
     
     /** 
      * Tests representation invariants.  For performance reasons, this is
@@ -1630,11 +1646,10 @@ public class ManagedConnection extends Connection
 
 
 
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	/** 
+	 * this should not arrive through TCP.
 	 */
 	public void handleUPListVM(UPListVendorMessage m) {
-		// TODO Auto-generated method stub
 		
 	}
 
