@@ -64,24 +64,19 @@ public class LimeXMLUtils
      */
     public static InputSource getInputSource(File file) throws IOException
     {
+        return getInputSource(new BufferedReader(new FileReader(file)));
+    }
+
+    static InputSource getInputSource(BufferedReader br) throws IOException {
         //open the file, read it, and derive the structure, store internally
         StringBuffer sb = new StringBuffer();
         InputSource inputSource;
         String line = "";
      
-        //open the file
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        while(line != null)
-        {
-            //read a line from file
-            line = br.readLine();
-            if(line != null)
-            {
-                //append the line (along with the newline that got removed)
-                sb.append(line + "\n");
-            }
-        }
-      
+        //append the line (along with the newline that got removed)
+        while((line = br.readLine()) != null)
+            sb.append(line + "\n");
+
         //get & return the input source
         return new InputSource(new StringReader(sb.toString()));
     }

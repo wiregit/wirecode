@@ -2,9 +2,13 @@ package com.limegroup.gnutella.xml;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
-import java.util.*;
+import java.util.Properties;
+import java.util.Enumeration;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import java.util.zip.*;
+
+import org.xml.sax.InputSource;
 
 /** 
  * This class manages the properties needed by the 
@@ -223,7 +227,11 @@ public class LimeXMLProperties
      * The name of the file that stores the user information map
      */
     private static final String USER_MAP_FILE_DEF = "UserMap.dat";
-    
+
+    /**
+     * The name of the jar file that containts xsd and properties files
+     */
+    private static final String XML_JAR_NAME = "xml.jar";
     
     /**
      * Constructor: Initializes various default values, and loads the settings
@@ -279,7 +287,7 @@ public class LimeXMLProperties
         String xmlSchemaDirRel = _properties.getProperty(XML_SCHEMA_DIR, 
                                                      XML_SCHEMA_DIR_DEF);
 
-        return getPath() + xmlSchemaDirRel ;                   
+        return xmlSchemaDirRel ; //deleted getPath()                   
     }
 
 
@@ -309,39 +317,107 @@ public class LimeXMLProperties
     {
         String xmlDisplayPropsDirRel = _properties.getProperty
                            (XML_DISPLAY_PROPS_DIR,XML_DISPLAY_PROPS_DIR_DEF);
-        return getPath() + xmlDisplayPropsDirRel;
+        return xmlDisplayPropsDirRel; //deleted getPath()
     }
     
     /**
-     * Returns the files pertaining to the XML Schemas used for 
+     * Returns the InputSources pertaining to the XML Schemas used for 
      * querying/responding
      */
-    public File[] getAllXMLSchemaFiles()
+    public InputSource[] getAllXMLSchemaFiles()
     {
-        File dir = new File(getXMLSchemaDir());
-        String[] fileNames = (dir).list(
-            new FilenameFilter()
-            {
-                //the files to be accepted to be returned
-                public boolean accept(File dir, String name)
-                {
-                    if(name.endsWith(".xsd"))
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-            });
-        if(fileNames==null || fileNames.length==0)
-            return new File[0];
+        //need to make resource path to something like /xml/schemas/
+        String resourcePath = "/" + getXMLSchemaDir().replace(File.separatorChar,'/');
+        File dir = new File(getClass().getResource(resourcePath).getFile());
+        
+        if(dir.isDirectory()) //dir is there. handle it like a normal directory
+            return getFilesFromDir(dir);
+        else //its a jar file so need to open up the jar as zip file
+            return getFilesFromJar();
+
+    }
+    
+    /**
+     * Returns an array of InputSources reading the xsd files from
+     * a normail directory
+     */
+    private InputSource[] getFilesFromDir(File dir) {
+        String[] fileNames = 
+            dir.list(
+                     new FilenameFilter() {
+                         public boolean accept(File dir, String name) {
+                             if(name.endsWith(".xsd"))
+                             return true;
+                             else
+                             return false;
+                         }
+                     });
+        
+        if(fileNames == null || fileNames.length==0)
+            return new InputSource[0];
+
         int z = fileNames.length;
-        File[] files = new File[z];
-        for(int i=0;i<z;i++){
-            files[i]  = new File(dir,fileNames[i]);
+        InputSource[] files = new InputSource[z];
+
+        try {
+            for(int i=0;i<z;i++)
+                files[i]  = 
+                    LimeXMLUtils.getInputSource(new File(dir,fileNames[i]));
+        }
+        catch(IOException e) {
+            //e.printStackTrace();
+            files = new InputSource[0];
+        }
+
+        return files;
+    }
+
+
+    /**
+     * Returns an array of InputSources reading in the xsd files 
+     * from a jar file.
+     **/
+    private InputSource[] getFilesFromJar() {
+        //System.out.println("get files from jar");
+        InputSource[] files;
+        try {
+            List l = new ArrayList();
+
+            //open the jar file and get all the entries
+            ZipFile zip = 
+                new ZipFile(getClass().getResource("/" + XML_JAR_NAME).getFile());
+            Enumeration enum = zip.entries();
+
+            //get all the entries that are xsd files
+            while(enum.hasMoreElements()) {
+                String name = ((ZipEntry)enum.nextElement()).getName();
+                if(name.endsWith(".xsd"))
+                    l.add(name);
+            }
+            
+            //create the InputSource array
+            int size = l.size();
+            files = new InputSource[size];
+            String path = "";
+
+            for(int i = 0; i < size; i++) {
+                path = (String)l.get(i);
+                InputStream in = 
+                    getClass().getClassLoader().getResource(path).openStream();
+                BufferedReader buf = 
+                    new BufferedReader(new InputStreamReader(in));
+                files[i] = LimeXMLUtils.getInputSource(buf);
+            }
+        }
+        catch(IOException e) {
+            //e.printStackTrace();
+            //something went wrong
+            files = new InputSource[0];
         }
         return files;
     }
-    
+
+
     /**
      * Returns the name of the file that stores user information map
      */
