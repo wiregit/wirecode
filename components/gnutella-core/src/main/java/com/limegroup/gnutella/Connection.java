@@ -482,7 +482,7 @@ public class Connection {
      */
     private void initializeOutgoing() throws IOException {
         //1. Send "GNUTELLA CONNECT/0.6" and headers
-        sendString(GNUTELLA_CONNECT_06+CRLF);
+        writeLine(GNUTELLA_CONNECT_06+CRLF);
         sendHeaders(REQUEST_HEADERS);   
         
         //conclude the handshake (This may involve exchange of 
@@ -534,7 +534,7 @@ public class Connection {
             HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(theirResponse, true);
 
-            sendString(GNUTELLA_06 + " " 
+            writeLine(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
 
@@ -615,7 +615,7 @@ public class Connection {
 			HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(_headers, false);
 
-            sendString(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
+            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
@@ -709,12 +709,12 @@ public class Connection {
                     value=getInetAddress().getHostAddress();
                 if (value==null)
                     value="";
-                sendString(key+": "+value+CRLF);   
+                writeLine(key+": "+value+CRLF);   
                 HEADERS_WRITTEN.put(key, value);
             }
         }
         //send the trailer
-        sendString(CRLF);
+        writeLine(CRLF);
     }
 
 
@@ -766,7 +766,7 @@ public class Connection {
      * Writes s to out, with no trailing linefeeds.  Called only from
      * initialize().  
      *    @requires _socket, _out are properly set up */
-    private void sendString(String s) throws IOException {
+    private void writeLine(String s) throws IOException {
         if(s == null || s.equals("")) {
             throw new NullPointerException("null or empty string: "+s);
         }
