@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.mp3;
 
+
 import junit.framework.*;
 import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 /**
  * Test MP3Info class
@@ -14,7 +16,7 @@ public class MP3Test extends TestCase {
 	
 	private static final int runs = 900;
 	
-	private static final String d = ""; // current directory
+	private static final String d = "com/limegroup/gnutella/mp3/";
 	
 	private static final String file[] = new String[] {
 	d+"mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav",
@@ -59,6 +61,10 @@ public class MP3Test extends TestCase {
     protected void tearDown() {
         
     }
+    
+    private MP3Info newMP3Info(String loc) throws Exception {
+        return new MP3Info(CommonUtils.getResourceFile(loc).getPath());
+    }
 
     
     /**
@@ -78,7 +84,7 @@ public class MP3Test extends TestCase {
         /*
           mpg1layI_0h_448k_frame14_48000hz_dual_fl5Orig.mp3
         */
-        info  = new MP3Info(file[1]);
+        info  = newMP3Info(file[1]);
         assertEquals(info.getFileSize(), 21952L);
         assertEquals(info.getBitRate() , 448);		
         assertTrue(!info.isCoprighted());		
@@ -100,7 +106,7 @@ public class MP3Test extends TestCase {
         /*
           mpg1layI_32k_f256_441hz_dual_5015emph_CRCcopyOrig_sectest.mp3
         */
-        info  = new MP3Info(file[2]);
+        info  = newMP3Info(file[2]);
         assertEquals(info.getFileSize(), 26645L);
         assertEquals(info.getBitRate() , 32);		
         assertTrue(info.isCoprighted());		
@@ -122,7 +128,7 @@ public class MP3Test extends TestCase {
         /*
           mpg1layII_384k_f24_48hz_stereo_CRCOrig_Gogo1sectest.mp3
         */
-        info  = new MP3Info(file[3]);
+        info  = newMP3Info(file[3]);
         assertEquals(info.getFileSize(), 31104L);
         assertEquals(info.getBitRate() , 384);		
         assertTrue(!info.isCoprighted());		
@@ -144,7 +150,7 @@ public class MP3Test extends TestCase {
         /*
           mpg1layIII_58k-VBRq30_f1211_441hz_joint_XingTAG_sample.mp3
         */
-        info  = new MP3Info(file[5]);
+        info  = newMP3Info(file[5]);
         assertEquals(info.getFileSize(), 232295L); 
         assertEquals(info.getBitRate() , 58); //59-winamp(wrong) 58-encspot	
         assertTrue(info.isCoprighted());		
@@ -168,7 +174,7 @@ public class MP3Test extends TestCase {
         /*
           mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2
         */	
-        info  = new MP3Info(file[8]);
+        info  = newMP3Info(file[8]);
         assertEquals(info.getFileSize(), 30720L);
         assertEquals(info.getBitRate() , 192);		
         assertTrue(!info.isCoprighted());	
@@ -191,7 +197,7 @@ public class MP3Test extends TestCase {
           mpg2.5layIII_8k-VBRq95_f149_8khz_mono_ID3v2Orig_XingTAGLame.mp3
           !!Can't find Xing tag!! which is why stuff is messed up
         */	
-        info  = new MP3Info(file[9]);
+        info  = newMP3Info(file[9]);
         assertEquals(info.getFileSize(), 14336L);
         assertEquals(info.getBitRate() , 32); //18-winamp 8-encspot/////////////////////////////////////////////
         assertTrue(!info.isCoprighted());	
@@ -214,7 +220,7 @@ public class MP3Test extends TestCase {
         /*
           mpg2layI_128k_f54_22050hz_joint_CRCOrig_test33.mp3
         */	
-        info  = new MP3Info(file[10]);
+        info  = newMP3Info(file[10]);
         assertEquals(info.getFileSize(), 22572L);
         assertEquals(info.getBitRate() , 128);		
         assertTrue(!info.isCoprighted());	
@@ -236,7 +242,7 @@ public class MP3Test extends TestCase {
         /*
           mpg2layII_16k_f56_24000hz_joint_CRCOrigID3v1&2_test27.mp3
         */	
-        info  = new MP3Info(file[11]);
+        info  = newMP3Info(file[11]);
         assertEquals(info.getFileSize(), 4224L);
         assertEquals(info.getBitRate() , 16);		
         assertTrue(!info.isCoprighted());	
@@ -259,7 +265,7 @@ public class MP3Test extends TestCase {
         /*
           mpgPlus_210k-VBR_f1149_441hz_joint_protectedUnt_NOTm1lay-448k-f540-5015.mpc
         */	
-        info  = new MP3Info(file[14]);
+        info  = newMP3Info(file[14]);
         assertEquals(info.getFileSize(), 789752L);
         assertEquals(info.getBitRate() , 448); //448-winamp	210-encspot
         assertTrue(info.isCoprighted());	
@@ -282,7 +288,7 @@ public class MP3Test extends TestCase {
           mpg4_golem160x90first120.avi
           MPEG 4 files contain a 'possible' MP3 header
 
-          info  = new MP3Info(file[18] );
+          info  = newMP3Info(file[18] );
           assertEquals(info.getFileSize(), 743933L);
           assertEquals(info.getBitRate() , 40);		
           assertTrue(!info.isCoprighted());	
@@ -305,7 +311,7 @@ public class MP3Test extends TestCase {
           corruptFileWithBadHeaders.mp3
         */
         try {
-            info  = new MP3Info(file[19]);
+            info  = newMP3Info(file[19]);
             fail("Corrupt file with headers passed!"); //shouldn't make it
         }
         catch (Exception e) {}
@@ -320,30 +326,15 @@ public class MP3Test extends TestCase {
         int i = runs;
         long start = 0;
 	
-        new com.limegroup.gnutella.mp3.MP3Info(file[5]);
+        newMP3Info(file[5]);
 	
         start = System.currentTimeMillis();
         while (--i >= 0) {
 		
-            new com.limegroup.gnutella.mp3.MP3Info(file[i%9]);
+            newMP3Info(file[i%9]);
 	
         }
 
         System.out.println("NEW time:" + (System.currentTimeMillis()-start));
-
-        /*
-///////////////////////////
-
-i = runs;	
-new com.limegroup.gnutella.mp3.MP3Info2(file[5] );
-start = System.currentTimeMillis();
-while (--i >= 0) {
-		
-new com.limegroup.gnutella.mp3.MP3Info2(file[i%18]);
-	
-}
-
-System.out.println("OLD time:" + (System.currentTimeMillis()-start));
-        */
     }
 }
