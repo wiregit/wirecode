@@ -284,7 +284,8 @@ public class DownloadManager implements BandwidthTracker {
         // in the off case that a key (GUID) inserted is already in the HT, then
         // just ignore.  this shouldn't happen every since the guid space is so
         // big and we'd assume no client will be up that long....
-        queryDetails.put(key, new AutoDownloadDetails(query, richQuery, type));
+        queryDetails.put(key, 
+                         new AutoDownloadDetails(query, richQuery, guid, type));
     }
 
 

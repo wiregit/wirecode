@@ -13,6 +13,8 @@ public class AutoDownloadDetails {
     private String richQuery = null;
     // the 'filter' associated with this search
     private MediaType type = null;
+    // the GUID associated with this search
+    private byte[] guid = null;
     // the list of downloads made so far - should not exceed size
     // MAX_DOWNLOADS
     private List dlList = null;
@@ -36,6 +38,12 @@ public class AutoDownloadDetails {
      *  words, then don't download it.
      */
     private float WORD_INCIDENCE_RATE = .509999f;
+
+    /** what is considered to be a low score, compared to the return value of
+     *  the score method...
+     */
+    private int LOW_SCORE = 95;
+
 
     /** the set of words that are already being downloaded.  this can be used
      *  as a heuristic when determining what to download.....
@@ -61,10 +69,11 @@ public class AutoDownloadDetails {
      * @param inType the mediatype associated with this string.....
      */
     public AutoDownloadDetails(String inQuery, String inRichQuery, 
-                               MediaType inType) {
+                               byte[] inGuid, MediaType inType) {
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
+        guid = inGuid;
         dlList = new Vector();
         wordSet = new HashSet();
     }
@@ -81,6 +90,15 @@ public class AutoDownloadDetails {
         return type;
     }
     
+
+    private Response deriveResponse(RemoteFileDesc rfd) {
+        Response retResponse = null;
+        retResponse = new Response(rfd.getIndex(),
+                                   rfd.getSize(),
+                                   rfd.getFileName());
+        return retResponse;
+    }
+
     /**
      * @param toAdd The RFD you are TRYING to add.
      * @return Whether or not the add was successful. 
@@ -101,6 +119,18 @@ public class AutoDownloadDetails {
                 retVal = false;
                 debug("ADD.addDownload(): file " +
                       inputFileName + " isn't the right type.");
+            }
+
+            // make sure the score for this file isn't too low....
+            if (RouterService.instance() != null) {
+                int score = 
+                RouterService.instance().score(guid,
+                                               deriveResponse(toAdd));
+                if (score < LOW_SCORE) {
+                    retVal = false;
+                    debug("ADD.addDownload(): file " +
+                          inputFileName + " has low score of " + score);
+                }
             }
 
             // check to see there is a high incidence of words here in stuff we
@@ -245,7 +275,7 @@ public class AutoDownloadDetails {
     public static void main(String argv[]) {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("morrissey", null,
-                                MediaType.getAudioMediaType());
+                                GUID.makeGuid(), MediaType.getAudioMediaType());
         String[] files = {"morrissey - suedehead.mp3",
                           "morriseey - sueadhea d.mp3",
                           "Morrissey - billy budd.mp3",
