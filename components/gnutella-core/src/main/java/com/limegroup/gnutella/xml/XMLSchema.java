@@ -14,7 +14,7 @@ import java.io.*;
  * @author  asingla
  * @version
  */
-public class XMLSchema extends XMLDocument
+public class XMLSchema extends CanonicalizedXMLDocument
 {
     
     /** 
@@ -55,6 +55,10 @@ public class XMLSchema extends XMLDocument
      * those should be represented as using the array index using the __ 
      * notation (withouth the square brackets)
      * for e.g. myarray[0].name ==> myarray__0__name
+     *     
+     * attribute names for an element in the XML schema should be postfixed 
+     * with __ (double underscore).
+     * So element.attribute ==> element__attribute__
      *
      * @return all the field names (placeholders) in this schema.
      */
