@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
-public class BaseTestCase extends TestCase implements ErrorCallback {
+public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     protected static File _baseDir;
     protected static File _sharedDir;
@@ -388,5 +388,5 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     		}
     	};
     }
-}
+}       
 
