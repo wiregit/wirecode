@@ -150,6 +150,9 @@ public class BestCandidatesTest extends BaseTestCase {
 		assertNull(BestCandidates.getCandidates()[2]);
 		
 		assertTrue(mediocreCandidate.isSame(BestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(BestCandidates.getCandidates()[0]));
+		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
+		
 		
 		assertTrue(mediocreCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[0]));
 		assertTrue(badCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[1]));

@@ -692,11 +692,20 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	
     	test2[1]=null;
+    	req2 = new BestCandidatesVendorMessage(test2);
     	assertFalse(req.isSame(req2));
     	test[1]=null;
+    	req = new BestCandidatesVendorMessage(test2);
     	assertTrue(req.isSame(req2));
     	test2[1]= new RemoteCandidate("1.2.3.4",16,(short)20);
+    	req2 = new BestCandidatesVendorMessage(test2);
     	assertFalse(req.isSame(req2));
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	req.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	req2 = (BestCandidatesVendorMessage)Message.read(bais);
+    	assertTrue(req.isSame(req2));
     	
     	testWrite(req);
     	testRead(req);
