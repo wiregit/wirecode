@@ -240,7 +240,6 @@ public class UploadManager implements BandwidthTracker {
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
             removeFromMapAndList(uploader, host);
-            removeAttemptingPush(host, index);
             if (accepted && !isBHUploader)
                 _activeUploads--;
             if (!isBHUploader) // it was never added
@@ -320,6 +319,11 @@ public class UploadManager implements BandwidthTracker {
                 finally {
                     //close the socket
                     GIVuploader.stop();
+                    // do this here so if the index changes, there is no
+                    // confusion
+                    synchronized(UploadManager.this) {
+                        removeAttemptingPush(host, index);
+                    }                    
                 }
             }
         };
