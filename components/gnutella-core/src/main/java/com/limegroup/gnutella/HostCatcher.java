@@ -256,6 +256,11 @@ public class HostCatcher {
      */
     private static final int MAX_CONNECTIONS = 5;
     
+    /**
+     * The pinger that will send the messages
+     */
+    private UniqueHostPinger pinger = new UniqueHostPinger();
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -341,7 +346,7 @@ public class HostCatcher {
      */
     private void rank(Collection hosts) {
         if(needsPongRanking()) {
-            UDPHostRanker.rank(
+            pinger.rank(
                 hosts,
                 // cancel when connected -- don't send out any more pings
                 new Cancellable() {
@@ -1080,7 +1085,7 @@ public class HostCatcher {
         RouterService.schedule(
                 new Runnable() {
                     public void run() {
-                        UDPHostRanker.resetData();
+                        pinger.resetData();
                     }
                 },
                 PONG_RANKING_EXPIRE_TIME,0);
@@ -1095,6 +1100,10 @@ public class HostCatcher {
         FREE_ULTRAPEER_SLOTS_SET.clear();
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
+    }
+    
+    public UDPPinger getPinger() {
+        return pinger;
     }
 
     public String toString() {
@@ -1174,7 +1183,7 @@ public class HostCatcher {
         gWebCache.resetData();
         udpHostCache.resetData();
         
-        UDPHostRanker.resetData();
+        pinger.resetData();
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.

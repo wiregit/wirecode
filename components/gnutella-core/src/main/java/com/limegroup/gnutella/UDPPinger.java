@@ -18,14 +18,14 @@ import org.apache.commons.logging.Log;
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
  * listener whenever responses are returned.
  */
-public class UDPHostRanker {
+public class UDPPinger {
     
-    private static final Log LOG = LogFactory.getLog(UDPHostRanker.class);
+    private static final Log LOG = LogFactory.getLog(UDPPinger.class);
 
-    private static final MessageRouter ROUTER = 
+    protected static final MessageRouter ROUTER = 
         RouterService.getMessageRouter();
         
-    private static final ProcessingQueue QUEUE = 
+    protected static final ProcessingQueue QUEUE = 
          new ProcessingQueue("UDPHostRanker");
         
     /**
@@ -44,29 +44,24 @@ public class UDPHostRanker {
     /**
      * The current number of datagrams we've sent in the past 500 milliseconds.
      */
-    private static int _sentAmount;
+    private int _sentAmount;
     
     /**
      * The last time we sent a datagram.
      */
-    private static long _lastSentTime;
-    
-    /**
-     * set of endpoints we pinged since last expiration
-     */
-    private static final Set _recent = new TreeSet(IpPort.COMPARATOR);
+    private long _lastSentTime;
     
     /**
      * Ranks the specified Collection of hosts.
      */
-    public static void rank(Collection hosts) {
+    public void rank(Collection hosts) {
         rank(hosts, null, null, null);
     }
     
     /**
      * Ranks the specified Collection of hosts with the given message.
      */
-    public static void rank(Collection hosts, Message message) {
+    public void rank(Collection hosts, Message message) {
         rank(hosts, null, null, message);
     }
     
@@ -74,7 +69,7 @@ public class UDPHostRanker {
      * Ranks the specified Collection of hosts with the given
      * Canceller.
      */
-    public static void rank(Collection hosts, Cancellable canceller) {
+    public void rank(Collection hosts, Cancellable canceller) {
         rank(hosts, null, canceller, null);
     }
     
@@ -82,7 +77,7 @@ public class UDPHostRanker {
      * Ranks the specified collection of hosts with the given 
      * MessageListener.
      */
-    public static void rank(Collection hosts, MessageListener listener) {
+    public void rank(Collection hosts, MessageListener listener) {
         rank(hosts, listener, null, null);
     }
     
@@ -90,7 +85,7 @@ public class UDPHostRanker {
      * Ranks the specified collection of hosts with the given
      * MessageListener & Cancellable.
      */
-    public static void rank(Collection hosts, MessageListener listener,
+    public void rank(Collection hosts, MessageListener listener,
                             Cancellable canceller) {
         rank(hosts, listener, canceller, null);
     }
@@ -107,7 +102,7 @@ public class UDPHostRanker {
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt>
      */
-    public static void rank(final Collection hosts,
+    public void rank(final Collection hosts,
                             final MessageListener listener,
                             Cancellable canceller,
                             final Message message) {
@@ -125,7 +120,7 @@ public class UDPHostRanker {
     /**
      * Waits for UDP listening to be activated.
      */
-    private static boolean waitForListening(Cancellable canceller) {
+    private boolean waitForListening(Cancellable canceller) {
         int waits = 0;
         while(!UDPService.instance().isListening() && waits < 10 &&
               !canceller.isCancelled()) {
@@ -144,7 +139,7 @@ public class UDPHostRanker {
     /**
      * Sends the given send bundle.
      */
-    private static void send(SenderBundle info) {
+    private void send(SenderBundle info) {
         final Collection hosts = info.hosts;
         final MessageListener listener = info.listener;
         final Cancellable canceller = info.canceller;
@@ -164,31 +159,8 @@ public class UDPHostRanker {
 
         
         Iterator iter = hosts.iterator();
-        while(iter.hasNext() && !canceller.isCancelled()) {
-            IpPort host = (IpPort)iter.next();
-            
-            if (_recent.contains(host))
-                continue;
-            
-            _recent.add(host);
-            
-            long now = System.currentTimeMillis();
-            if(now > _lastSentTime + SEND_INTERVAL) {
-                _sentAmount = 0;
-            } else if(_sentAmount == MAX_SENDS) {
-                try {
-                    Thread.sleep(SEND_INTERVAL);
-                    now = System.currentTimeMillis();
-                } catch(InterruptedException ignored) {}
-                _sentAmount = 0;
-            }
-            
-            if(LOG.isTraceEnabled())
-                LOG.trace("Sending to " + host + ": " + message);
-            UDPService.instance().send(message, host);
-            _sentAmount++;
-            _lastSentTime = now;
-        }
+        while(iter.hasNext() && !canceller.isCancelled()) 
+            sendSingleMessage((IpPort)iter.next(),message);
 
         // also take care of any MessageListeners
         if (listener != null) {
@@ -206,22 +178,30 @@ public class UDPHostRanker {
         }
     }
     
-    /**
-     * clears the list of Endpoints we pinged since the last reset,
-     * after sending all currently queued messages.
-     */
-    static void resetData() {
-        QUEUE.add(new Runnable(){
-            public void run() {
-                _recent.clear();
-            }
-        });
+    protected void sendSingleMessage(IpPort host, Message message) {
+        
+        long now = System.currentTimeMillis();
+        if(now > _lastSentTime + SEND_INTERVAL) {
+            _sentAmount = 0;
+        } else if(_sentAmount == MAX_SENDS) {
+            try {
+                Thread.sleep(SEND_INTERVAL);
+                now = System.currentTimeMillis();
+            } catch(InterruptedException ignored) {}
+            _sentAmount = 0;
+        }
+        
+        if(LOG.isTraceEnabled())
+            LOG.trace("Sending to " + host + ": " + message);
+        UDPService.instance().send(message, host);
+        _sentAmount++;
+        _lastSentTime = now;
     }
     
     /**
      * Simple bundle that can send itself.
      */
-    private static class SenderBundle implements Runnable {
+    private class SenderBundle implements Runnable {
         private final Collection hosts;
         private final MessageListener listener;
         private final Cancellable canceller;

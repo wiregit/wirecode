@@ -2,7 +2,7 @@ package com.limegroup.gnutella.bootstrap;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.UDPHostRanker;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
@@ -187,7 +187,7 @@ public class UDPHostCache {
         if(LOG.isDebugEnabled())
             LOG.debug("Fetching endpoints from " + hosts + " host caches");
 
-        UDPHostRanker.rank(
+        RouterService.getHostCatcher().getPinger().rank(
             hosts,
             new HostExpirer(hosts),
             // cancel when connected -- don't send out any more pings
