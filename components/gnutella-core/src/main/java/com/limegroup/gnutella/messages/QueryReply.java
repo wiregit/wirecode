@@ -228,9 +228,13 @@ public class QueryReply extends Message implements Serializable{
         this.payload=payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
+		    if( RECORD_STATS )
+                ReceivedErrorStat.REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
+		    if( RECORD_STATS )
+                ReceivedErrorStat.REPLY_INVALID_SPEED.incrementStat();
 			throw new BadPacketException("invalid speed: " + getSpeed());
 		} 		
 		

@@ -24,10 +24,15 @@ public class PushRequest extends Message implements Serializable {
     public PushRequest(byte[] guid, byte ttl, byte hops,
              byte[] payload, int network) throws BadPacketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
-        if (payload.length < STANDARD_PAYLOAD_SIZE)
+        if (payload.length < STANDARD_PAYLOAD_SIZE) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Payload too small: "+payload.length);
+        }
         this.payload=payload;
 		if(!NetworkUtils.isValidPort(getPort())) {
+		    if( RECORD_STATS )
+                ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
     }

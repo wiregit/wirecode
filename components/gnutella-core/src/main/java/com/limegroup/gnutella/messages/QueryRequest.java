@@ -857,20 +857,30 @@ public class QueryRequest extends Message implements Serializable{
 		if(QUERY.length() == 0 &&
 		   XML_QUERY.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
+		    if( RECORD_STATS )
+		        ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
 		}       
         if(QUERY_URNS.size() != 0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.QUERY_URN.incrementStat();
             throw BadPacketException.CANNOT_ACCEPT_URN_QUERIES;
         }
         if(QUERY.length() > MAX_QUERY_LENGTH) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
             throw BadPacketException.QUERY_TOO_BIG;
         }        
 
         if(XML_QUERY.length() > MAX_XML_QUERY_LENGTH) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             throw BadPacketException.XML_QUERY_TOO_BIG;
         }
 
         if(hasIllegalChars(QUERY)) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
         }
     }

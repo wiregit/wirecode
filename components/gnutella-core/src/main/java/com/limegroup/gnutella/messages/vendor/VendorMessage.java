@@ -6,6 +6,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 /** Vendor Messages are Gnutella Messages that are NEVER forwarded after
  *  recieved.
@@ -85,12 +86,21 @@ public abstract class VendorMessage extends Message {
                             byte[] payload) 
         throws BadPacketException {
         super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length);
-        if ((vendorIDBytes.length != 4))
+        if ((vendorIDBytes.length != 4)) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();
             throw new BadPacketException("Vendor ID Invalid!");
-        if ((selector & 0xFFFF0000) != 0)
+        }
+        if ((selector & 0xFFFF0000) != 0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.VENDOR_INVALID_SELECTOR.incrementStat();
             throw new BadPacketException("Selector Invalid!");
-        if ((version & 0xFFFF0000) != 0)
+        }
+        if ((version & 0xFFFF0000) != 0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
             throw new BadPacketException("Version Invalid!");
+        }
         // set the instance params....
         _vendorID = vendorIDBytes;
         _selector = selector;
@@ -166,8 +176,11 @@ public abstract class VendorMessage extends Message {
         throws BadPacketException {
 
         // sanity check
-        if (fromNetwork.length < LENGTH_MINUS_PAYLOAD)
+        if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Not enough bytes for a VM!!");
+        }
 
         // get very necessary parameters....
         ByteArrayInputStream bais = new ByteArrayInputStream(fromNetwork);
@@ -239,6 +252,8 @@ public abstract class VendorMessage extends Message {
             // Query Status Response
             return new QueryStatusResponse(guid, ttl, hops, version, restOf);
 
+        if( RECORD_STATS )
+                ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;
     }
     

@@ -4,6 +4,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.vendor.*;
@@ -72,7 +73,7 @@ public abstract class Message
 	/**
 	 * Constant for whether or not to record stats.
 	 */
-	protected final boolean RECORD_STATS = !CommonUtils.isJava118();
+	protected static final boolean RECORD_STATS = !CommonUtils.isJava118();
    
     /** Rep. invariant */
     protected void repOk() {
@@ -214,7 +215,11 @@ public abstract class Message
                 if (i==0) return null;
                 else throw e;
             }
-            if (got==-1) throw new IOException("Connection closed.");
+            if (got==-1) {
+                if( RECORD_STATS )
+                ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                throw new IOException("Connection closed.");
+            }
             i+=got;
         }
 
@@ -226,8 +231,11 @@ public abstract class Message
         //2.5 If the length is hopelessly off (this includes lengths >
         //    than 2^31 bytes, throw an irrecoverable exception to
         //    cause this connection to be closed.
-        if (length<0 || length > MessageSettings.MAX_LENGTH.getValue())
+        if (length<0 || length > MessageSettings.MAX_LENGTH.getValue()) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_LENGTH.incrementStat();
             throw new IOException("Unreasonable message length: "+length);
+        }
 
         //3. Read rest of payload.  This must be done even for bad
         //   packets, so we can resume reading packets.
@@ -236,7 +244,11 @@ public abstract class Message
             payload=new byte[length];
             for (int i=0; i<length; ) {
                 int got=in.read(payload, i, length-i);
-                if (got==-1) throw new IOException("Connection closed.");
+                if (got==-1) {
+                    if( RECORD_STATS )
+                        ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                    throw new IOException("Connection closed.");
+                }
                 i+=got;
             }
         }
@@ -247,18 +259,26 @@ public abstract class Message
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
         byte hardMax = (byte)14;
-        if (hops<0)
+        if (hops<0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_HOPS.incrementStat();
             throw new BadPacketException("Negative (or very large) hops");
-        else if (ttl<0)
+        } else if (ttl<0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_TTL.incrementStat();
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops >= softMax) && 
+        } else if ((hops >= softMax) && 
                  (func != F_QUERY_REPLY) &&
                  (func != F_PING_REPLY)) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
             throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
         }
-        else if (ttl+hops > hardMax)
+        else if (ttl+hops > hardMax) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
-        else if ((ttl+hops > softMax) && 
+        } else if ((ttl+hops > softMax) && 
                  (func != F_QUERY_REPLY) &&
                  (func != F_PING_REPLY)) {
             ttl=(byte)(softMax - hops);  //overzealous client;
@@ -313,6 +333,9 @@ public abstract class Message
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                          payload);
         }
+        
+        if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_CODE.incrementStat();
         throw new BadPacketException("Unrecognized function code: "+func);
     }
 
