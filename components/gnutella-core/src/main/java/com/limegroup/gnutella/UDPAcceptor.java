@@ -26,6 +26,13 @@ public final class UDPAcceptor implements Runnable {
 	 */
 	private final int BUFFER_SIZE = 8192;
 
+	private final int SOCKET_TIMEOUT = 2*1000;
+
+	/**
+	 * The thread for listening of incoming messages.
+	 */
+	private Thread _udpThread;
+
 	/**
 	 * Instance accessor.
 	 */
@@ -39,31 +46,47 @@ public final class UDPAcceptor implements Runnable {
 	private UDPAcceptor() {}
 
 
+	public void initialize() {
+		_udpThread = new Thread(this);
+		_udpThread.setDaemon(true);		
+		_udpThread.start();
+	}
+
 	/**
 	 * Busy loop that accepts incoming messages sent over UDP and 
 	 * dispatches them to their appropriate handlers.
 	 */
 	public void run() {
-		int port = RouterService.instance().getTCPListeningPort();
-
+		RouterService rs = RouterService.instance();
+		while(rs.getTCPListeningPort() == -1) {
+			try {
+				Thread.sleep(100);
+			} catch(InterruptedException e) {
+				return;
+			}
+		}
+		int port = rs.getTCPListeningPort();
 		try {
 			_socket = new DatagramSocket(port);
+			//_socket.setSoTimeout(SOCKET_TIMEOUT);
 		} catch(SocketException e) {
+			e.printStackTrace();
 			return;
-		}
-
-		MessageRouter router = RouterService.instance().getMessageRouter();
+		}		
+		
+		MessageRouter router = rs.getMessageRouter();
 
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = 
 		    new DatagramPacket(datagramBytes, BUFFER_SIZE);
 
-		while(true) {
-			try {
+		
+		while(port == rs.getTCPListeningPort()) {
+			try {				
 				_socket.receive(datagram);
 				byte[] data = datagram.getData();
-				//System.out.println("DATA RECEIVED: "+new String(data)); 
 				int length = datagram.getLength();
+				// TODO: send an ack??
 				try {
 					//Message message = Message.readUdpData(data);	
 					// we do things the old way temporarily
@@ -74,12 +97,27 @@ public final class UDPAcceptor implements Runnable {
 				} catch(BadPacketException e) {
 					continue;
 				}
+			} catch(InterruptedIOException e) {
+				continue;
 			} catch(IOException e) {
 				continue;
-			} catch(Exception e) {
-				continue;
-			}
+			} 
+			//catch(Exception e) {
+			//continue;
+			//}
 		}
+		_socket.close();
+	}
+
+	/**
+	 * Notifies the UDP socket that the port has been changed, requiring
+	 * the UDP socket to be recreated.
+	 *
+	 * TODO: work on the threading
+	 */
+	public void resetPort() {
+		if(_udpThread.isAlive()) _udpThread.interrupt();
+		initialize();
 	}
 
 
@@ -91,10 +129,14 @@ public final class UDPAcceptor implements Runnable {
 	 * @param port the <tt>port</tt> to send to
 	 */
     public synchronized void send(Message msg, InetAddress ip, int port) {
+		if(_socket == null) {
+			throw new NullPointerException("socket null");
+		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			msg.write(baos);
 		} catch(IOException e) {
+			e.printStackTrace();
 			// can't send the hit, so return
 			return;
 		}
@@ -104,6 +146,7 @@ public final class UDPAcceptor implements Runnable {
 		try {
             _socket.send(dg);
 		} catch(IOException e) {
+			e.printStackTrace();
 			// not sure what to do here -- try again??
 		}
 	}
