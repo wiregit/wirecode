@@ -134,7 +134,6 @@ public final class SettingsManager {
      * Constant <tt>File</tt> instance for the properties file
      */
     private final File PROPS_FILE = Settings.getPropertiesFile();
-    //new File(CommonUtils.getUserSettingsDir(), PROPS_NAME);
 
     /**
      * Time interval, after which the accumulated information expires
@@ -154,8 +153,6 @@ public final class SettingsManager {
     private final int     DEFAULT_TIMEOUT        = 8000;
     /** Default timeout for persistent HTTP connections */
     private final int     DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT = 15000;
-    /** Default value for the keep alive */
-    public static final int DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     private final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
@@ -287,7 +284,6 @@ public final class SettingsManager {
 	public static final String DEFAULT_CLASSPATH = DEFAULT_JAR_NAME;
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
-	private final boolean DEFAULT_GUESS_ENABLED       = false;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
@@ -299,16 +295,6 @@ public final class SettingsManager {
     private final boolean DEFAULT_LIBRARY_VIEW_ENABLED = true;
     private final boolean DEFAULT_SHOPPING_VIEW_ENABLED = true;
 
-	/**
-	 * Constant default value for whether or not an incoming connection
-	 * has ever been established.
-	 */
-	private final boolean DEFAULT_EVER_ACCEPTED_INCOMING = false;
-
-    //settings for Supernode implementation
-    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
-
-    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
 
     //authentication settings
     private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY
@@ -336,19 +322,6 @@ public final class SettingsManager {
 	 */
 	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
 
-    /**
-     * Constant default value for whether or not this node has ever been
-     * considered "supernode capable," meaning that it has met all of the
-     * requirements of a supernode, but not necessarily been a supernode.
-     */
-    private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
-
-    /** By default we don't disable supernodes. */
-    private final boolean DEFAULT_DISABLE_SUPERNODE_MODE = false;
-
-	/** By default we don't force supernode mode. */
-    private final boolean DEFAULT_FORCE_SUPERNODE_MODE = false;
-
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
 	 * per second downstream.
@@ -360,12 +333,6 @@ public final class SettingsManager {
 	 * run on this machine.
 	 */
 	private final int DEFAULT_SESSIONS = 1;
-
-	/**
-	 * Default value for whether or not to connect to the Gnutella
-	 * network on startup.
-	 */
-	private final boolean DEFAULT_CONNECT_ON_STARTUP = true;
 
     /**
      * The time when we last expired accumulated information
@@ -414,7 +381,6 @@ public final class SettingsManager {
     private final String TIMEOUT               = "TIMEOUT";
     private final String PERSISTENT_HTTP_CONNECTION_TIMEOUT
         = "PERSISTENT_HTTP_CONNECTION_TIMEOUT";
-    private final String KEEP_ALIVE            = "KEEP_ALIVE";
     private final String PORT                  = "PORT";
     private final String SPEED                 = "CONNECTION_SPEED";
     private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
@@ -492,11 +458,6 @@ public final class SettingsManager {
 	private final String CHAT_ENABLED = "CHAT_ENABLED";
 
 	/**
-	 * Constant key for whether or not GUESS is enabled.
-	 */
-	private final String GUESS_ENABLED = "GUESS_ENABLED";
-
-	/**
 	 * Constant key for whether or not the internal player is enabled.
 	 */
 	private final String PLAYER_ENABLED = "PLAYER_ENABLED";
@@ -541,12 +502,6 @@ public final class SettingsManager {
 	 * Constant key for the locale variant.
 	 */
 	private final String LOCALE_VARIANT = "LOCALE_VARIANT";
-    
-    //settings for Supernode implementation
-    private final String MAX_SHIELDED_CLIENT_CONNECTIONS
-       = "MAX_SHIELDED_CLIENT_CONNECTIONS";
-    private final String MIN_SHIELDED_CLIENT_CONNECTIONS
-       = "MIN_SHIELDED_CLIENT_CONNECTIONS";
 
 
     //authentication settings
@@ -575,13 +530,6 @@ public final class SettingsManager {
 		"MINIMUM_SEARCH_SPEED";
 
 	/**
-	 * Constant key for the whether or not an incoming connection has
-	 * ever been accepted accross all sessions.
-	 */
-	private final String EVER_ACCEPTED_INCOMING =
-		"EVER_ACCEPTED_INCOMING";
-
-	/**
 	 * Constant key for the maximum number of bytes per second ever passed
 	 * upstream.
 	 */
@@ -594,23 +542,6 @@ public final class SettingsManager {
 	 */
 	private final String MAX_DOWNSTREAM_BYTES_PER_SEC =
 		"MAX_DOWNLOAD_BYTES_PER_SEC";
-
-    /**
-     * Constant key for whether or not this node has ever been considered
-     * "supernode capable" across all sessions.
-     */
-    private final String EVER_SUPERNODE_CAPABLE = "EVER_SUPERNODE_CAPABLE";
-
-    /** Key to disable supernode capability. */
-    private final String DISABLE_SUPERNODE_MODE = "DISABLE_SUPERNODE_MODE";
-
-	 /** Key to force supernode capability. */
-    private final String FORCE_SUPERNODE_MODE = "FORCE_SUPERNODE_MODE";
-
-	/**
-	 * Constant key for whether or not to connect on startup.
-	 */
-	private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";
 
     /**
      * Property that denotes the time when we last expired accumulated
@@ -641,7 +572,6 @@ public final class SettingsManager {
     private volatile int      _timeout;
     private volatile int      _persistentHTTPConnectionTimeout;
     private volatile String   _hostList;
-    private volatile int      _keepAlive;
     private volatile int      _port;
     private volatile int      _connectionSpeed;
     private volatile int      _uploadSpeed;
@@ -708,10 +638,6 @@ public final class SettingsManager {
      * Type of the servant: client, xml-client, server etc
      */
     private String _servantType;
-
-    //settings for Supernode implementation
-    private volatile int _maxShieldedClientConnections;
-    private volatile int _minShieldedClientConnections;
 
 
     /** Specifies if the node is acting as server */
@@ -798,10 +724,11 @@ public final class SettingsManager {
         setLastExpireTime(System.currentTimeMillis());
         //reset the expired values;
         setAverageUptime(DEFAULT_AVERAGE_UPTIME);
-        setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
         setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
-        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
+
+		ConnectionSettings.EVER_ACCEPTED_INCOMING.revertToDefault();
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.revertToDefault();
     }
 
     /**
@@ -899,10 +826,6 @@ public final class SettingsManager {
                 else if(key.equals(LOCAL_IS_PRIVATE)) {
                     setLocalIsPrivate(Boolean.valueOf(p).booleanValue());
                 }
-                else if(key.equals(KEEP_ALIVE)) {
-                    //Verified for real later.  See note below.
-                    setKeepAlive(Integer.parseInt(p));
-                }
                 else if(key.equals(PORT)) {
                     setPort(Integer.parseInt(p));
                 }
@@ -924,16 +847,6 @@ public final class SettingsManager {
                     else
                         break;
                     setChatEnabled(bs);
-				}
-				else if(key.equals(GUESS_ENABLED)) {
-					boolean bs;
-                    if (p.equals("true"))
-                        bs=true;
-                    else if (p.equals("false"))
-                        bs=false;
-                    else
-                        break;
-                    setGuessEnabled(bs);
 				}
 				else if(key.equals(PLAYER_ENABLED)) {
 					boolean bs;
@@ -1199,36 +1112,11 @@ public final class SettingsManager {
 				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
 					setMinimumSearchSpeed(Integer.parseInt(p));
 				}
-				else if(key.equals(EVER_ACCEPTED_INCOMING)) {
-					Boolean b = new Boolean(p);
-					setEverAcceptedIncoming(b.booleanValue());
-				}
 				else if(key.equals(MAX_UPSTREAM_BYTES_PER_SEC)) {
 					setMaxUpstreamBytesPerSec(Integer.parseInt(p));
 				}
 				else if(key.equals(MAX_DOWNSTREAM_BYTES_PER_SEC)) {
 					setMaxDownstreamBytesPerSec(Integer.parseInt(p));
-				}
-                else if(key.equals(EVER_SUPERNODE_CAPABLE)) {
-                    Boolean b = new Boolean(p);
-                    setEverSupernodeCapable(b.booleanValue());
-                }
-				else if(key.equals(DISABLE_SUPERNODE_MODE)) {
-                    Boolean b = new Boolean(p);
-                    setDisableSupernodeMode(b.booleanValue());
-                }
-				else if(key.equals(FORCE_SUPERNODE_MODE)) {
-                    Boolean b = new Boolean(p);
-                    setForceSupernodeMode(b.booleanValue());
-                }
-                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)) {
-                    setMaxShieldedClientConnections((new Integer(p)).intValue());
-                }
-                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
-                    setMinShieldedClientConnections((new Integer(p)).intValue());
-                }
-				else if(key.equals(CONNECT_ON_STARTUP)) {
-					setConnectOnStartup((new Boolean(p)).booleanValue());
 				}
                 else if(key.equals(LAST_EXPIRE_TIME)){
                     setLastExpireTime((new Long(p)).longValue());
@@ -1277,7 +1165,6 @@ public final class SettingsManager {
         setTimeout(DEFAULT_TIMEOUT);
         setPersistentHTTPConnectionTimeout(
             DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT);
-        setKeepAlive(DEFAULT_KEEP_ALIVE);
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_SPEED);
         setUploadSpeed(DEFAULT_UPLOAD_SPEED);
@@ -1337,7 +1224,6 @@ public final class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
-        setGuessEnabled(DEFAULT_GUESS_ENABLED);
 		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 		setBrowser(getDefaultBrowser());
 
@@ -1353,18 +1239,8 @@ public final class SettingsManager {
 
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
-		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
 		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
-        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
-        setDisableSupernodeMode(DEFAULT_DISABLE_SUPERNODE_MODE);
-		setForceSupernodeMode(DEFAULT_FORCE_SUPERNODE_MODE);
-
-        //settings for Supernode implementation
-        setMaxShieldedClientConnections(
-            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
-        setMinShieldedClientConnections(
-            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
 
         //authentication settings
         setAcceptAuthenticatedConnectionsOnly(
@@ -1376,7 +1252,6 @@ public final class SettingsManager {
 		setSessions(DEFAULT_SESSIONS);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
-		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 		setAdVersion(DEFAULT_AD_VERSION);
@@ -1421,9 +1296,6 @@ public final class SettingsManager {
 		return new File(CommonUtils.getUserSettingsDir(), 
                         HOST_LIST_NAME).getAbsolutePath();
 	}
-
-    /** Returns the keep alive value */
-    public int getKeepAlive(){return _keepAlive;}
 
     /** Returns the client's port number */
     public int getPort(){return _port;}
@@ -1485,8 +1357,6 @@ public final class SettingsManager {
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
 
-	/** Returns true if GUESS is enabled */
-	public boolean getGuessEnabled() {return getBooleanValue(GUESS_ENABLED);}
 
 	/** Returns true if the player is enabled */
 	public boolean getPlayerEnabled() {
@@ -1807,13 +1677,6 @@ public final class SettingsManager {
     /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ND_PROPS;}
 
-    /**
-	 * Returns the path of the properties and host list files.
-	 */
-    //public String getPath() {
-    //return CURRENT_DIRECTORY + File.separator;
-	//}
-
     public int getBasicInfoSizeForQuery() {
 		return _basicQueryInfo;
 	}
@@ -2027,26 +1890,6 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Returns true is an incoming connection has ever been established
-	 * during this session.
-	 *
-	 * @return <tt>true</tt> if an incoming connection has been
-	 *         established during this session, <tt>false</tt> otherwise
-	 */
-	public boolean getAcceptedIncoming() {return _acceptedIncoming;}
-
-	/**
-	 * Returns whether or not an incoming connection has ever been accepted
-	 * over all sessions.
-	 *
-	 * @return <tt>true</tt> if an incoming connection has ever been
-	 *         established, <tt>false</tt> otherwise
-	 */
-	public boolean getEverAcceptedIncoming() {
-		return getBooleanValue(EVER_ACCEPTED_INCOMING);
-	}
-
-	/**
 	 * Returns a <tt>String</tt> instance specifying the language to use
 	 * for the application.
 	 *
@@ -2119,55 +1962,6 @@ public final class SettingsManager {
 	 */
 	public int getMaxDownstreamBytesPerSec() {
 		return getIntValue(MAX_DOWNSTREAM_BYTES_PER_SEC);
-	}
-
-    //settings for Supernode implementation
-    /**
-     * Returns the maximum number of shielded connections to be supported by
-     * the supernode
-     */
-    public int getMaxShieldedClientConnections() {
-        return _maxShieldedClientConnections;
-    }
-
-    /**
-     * Returns the minimum number of shielded connections to be supported by
-     * the supernode
-     */
-    public int getMinShieldedClientConnections() {
-        return _minShieldedClientConnections;
-    }
-
-    /**
-     * Returns whether or not this node has ever met the requirements of
-     * a supernode, regardless of whether or not it actually acted as one.
-     *
-     * @return <tt>true</tt> if this node has ever met supernode requirements,
-     *         <tt>false</tt> otherwise
-     */
-    public boolean getEverSupernodeCapable() {
-		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
-    }
-
-    /** Returns true iff the user has disabled supernode mode. */
-    public boolean getDisableSupernodeMode() {
-        return getBooleanValue(DISABLE_SUPERNODE_MODE);
-    }
-
-	/** Returns true iff the user has forced supernode mode. */
-    public boolean getForceSupernodeMode() {
-        return getBooleanValue(FORCE_SUPERNODE_MODE);
-    }
-
-	/**
-	 * Returns whether or not we should connect to the Gnutella network
-	 * on startup.
-	 *
-	 * @return <tt>true</tt> if we should connect to the network on
-	 *  startup, <tt>false</tt> otherwise
-	 */
-	public boolean getConnectOnStartup() {
-		return getBooleanValue(CONNECT_ON_STARTUP);
 	}
 
 	/**
@@ -2316,20 +2110,6 @@ public final class SettingsManager {
 		PROPS.put(PERSISTENT_HTTP_CONNECTION_TIMEOUT, s);
     }
 
-    /**
-     * Sets the keepAlive without checking the maximum value.
-     * @exception IllegalArgumentException if keepAlive is negative.
-     */
-    public void setKeepAlive(int keepAlive)
-        throws IllegalArgumentException {
-        if (keepAlive<0) {
-            throw new IllegalArgumentException();
-        } else {
-            _keepAlive = keepAlive;
-            String s = Integer.toString(_keepAlive);
-            PROPS.put(KEEP_ALIVE, s);
-        }
-    }
 
     /**
 	 * Returns the maximum number of connections for the given connection
@@ -2737,16 +2517,6 @@ public final class SettingsManager {
 		_chatEnabled = chatEnabled;
 		String s = String.valueOf(chatEnabled);
 		PROPS.put(CHAT_ENABLED, s);
-	}
-
-
-	/**
-	 * Sets whether or not guess should be enabled.
-	 *
-	 * @param guessEnabled specified whether or not GUESS is enabled
-	 */
-	public void setGuessEnabled(boolean guessEnabled) {
-		setBooleanValue(GUESS_ENABLED, guessEnabled);
 	}
 
 
@@ -3172,29 +2942,6 @@ public final class SettingsManager {
 		setBooleanValue(SHUTDOWN_AFTER_TRANSFERS, whenReady);
 	}
 
-	/**
-	 * Sets whether or not the application has accepted an incoming
-	 * connection during this session.
-	 *
-	 * @param incoming <tt>boolean</tt> for whether or not an incoming
-	 *                 connection has been accepted within this session
-	 */
-	public void setAcceptedIncoming(final boolean incoming) {
-		_acceptedIncoming = incoming;
-		setEverAcceptedIncoming(incoming);
-    }
-
-	/**
-	 * Sets whether or not this client has ever accepted an incoming
-	 * connection during any session.
-	 *
-	 * @param acceptedIncoming <tt>boolean</tt> specifying whether or not this
-	 *                         client has ever accepted an incoming connection
-	 */
-	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
-		setBooleanValue(EVER_ACCEPTED_INCOMING, acceptedIncoming);
-	}
-
     /**
      * Sets the type of the servant: client, xml-client, server etc
      */
@@ -3278,72 +3025,6 @@ public final class SettingsManager {
 		PROPS.put(MAX_DOWNSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
 	}
 
-
-    //settings for Supernode implementation
-
-    /**
-     * Sets whether or not this node has ever met all of the requirements
-     * necessary to become a supernode, reqardless of whether or not it
-     * actually acted as one.
-     *
-     * @param supernodeCapable <tt>boolean</tt> indicating whether or not
-     *  this node has ever met all of the necessary requirements to be
-     *  considered a supernode
-     */
-    public void setEverSupernodeCapable(final boolean supernodeCapable) {
-        Boolean b = new Boolean(supernodeCapable);
-        PROPS.put(EVER_SUPERNODE_CAPABLE, b.toString());
-    }
-
-    /**
-     * Sets whether supernode mode is disabled.
-     * @param disable true iff supernode mode should be disabled
-     */
-    public void setDisableSupernodeMode(boolean disable) {
-        setBooleanValue(DISABLE_SUPERNODE_MODE, disable);
-    }
-
-	/**
-     * Sets whether supernode mode is forced.
-     * @param force true iff supernode mode should be forced
-     */
-    public void setForceSupernodeMode(boolean force) {
-        setBooleanValue(FORCE_SUPERNODE_MODE, force);
-    }
-
-    /**
-     * Sets the maximum number of shielded connections to be supported by
-     * the supernode
-     */
-    public void setMaxShieldedClientConnections(
-        int maxShieldedClientConnections) {
-        this._maxShieldedClientConnections = maxShieldedClientConnections;
-        PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS,
-            Integer.toString(maxShieldedClientConnections));
-    }
-
-    /**
-     * Sets the minimum number of shielded connections to be supported by
-     * the supernode. If the minimum number of connections are not received
-     * over a period of time, then the node may change its status from
-     * supernode to client-node.
-     */
-    public void setMinShieldedClientConnections(
-        int minShieldedClientConnections) {
-        this._minShieldedClientConnections = minShieldedClientConnections;
-        PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS,
-            Integer.toString(minShieldedClientConnections));
-    }
-
-	/**
-	 * Sets whether or not to connect to the Gnutella network when the
-	 * application starts up.
-	 *
-	 * @param connect specifies whether or not to connect on startup
-	 */
-	public void setConnectOnStartup(boolean connect) {
-		setBooleanValue(CONNECT_ON_STARTUP, connect);
-	}
 
     /**
      * Returns The time when we last expired accumulated information
