@@ -139,8 +139,8 @@ public class ConnectionManager {
      * fast iteration for message broadcast purposes.  Actually we keep a couple
      * of lists: the list of all initialized and uninitialized connections
      * (_connections), the list of all initialized non-leaf connections
-     * (_incomingConnections), and the list of all initialized leaf connections
-     * (_incomingClientConnections).
+     * (_initializedConnections), and the list of all initialized leaf connections
+     * (_initializedClientConnections).
      * 
      * INVARIANT: neither _connections, _initializedConnections, nor 
      *   _initializedClientConnections contains any duplicates.
@@ -647,7 +647,7 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-			if(hr.isGoodConnection()) {
+			if(hr.isGoodLeaf()) {
 				return getNumInitializedClientConnections() < 
                     UltrapeerSettings.MAX_LEAVES.getValue();
 			} else {
@@ -1171,29 +1171,13 @@ public class ConnectionManager {
             }
             throw e;
         }
-        finally{
+        finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
             processConnectionHeaders(mc);
         }
         
-        boolean connectionOpen = false;
-        synchronized(this) {
-            _initializingFetchedConnections.remove(mc);
-            // If the connection was killed while initializing, we shouldn't
-            // announce its initialization
-            connectionOpen = connectionInitialized(mc);
-        }
-        if(connectionOpen) {
-            RouterService.getCallback().connectionInitialized(mc);
-            //check if we are a client node, and now opened a connection 
-            //to ultrapeer. In this case, we will drop all other connections
-            //and just keep this one
-            //check for shieldedclient-ultrapeer connection
-            if(mc.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection();
-            }
-        }
+        completeConnectionInitialization(mc);
     }
 
     /** 
@@ -1413,23 +1397,33 @@ public class ConnectionManager {
             RouterService.getCallback().connectionInitializing(c);
         }
 
+        completeConnectionInitialization(c);
+    }
+
+    /**
+     * Performs the steps necessary to complete connection initialization.
+     *
+     * @param mc the <tt>ManagedConnection</tt> to finish initializing
+     */
+    private void completeConnectionInitialization(ManagedConnection mc) {
         boolean connectionOpen = false;
         synchronized(this) {
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            connectionOpen = connectionInitialized(c);
+            connectionOpen = connectionInitialized(mc);
         }
         if(connectionOpen) {
-            RouterService.getCallback().connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(mc);
             //check if we are a client node, and now opened a connection 
             //to ultrapeer. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-ultrapeer connection
-            if(c.isClientSupernodeConnection()) {
+            if(mc.isClientSupernodeConnection()) {
                 gotShieldedClientSupernodeConnection();
             }
         }
     }
+
 
     //
     // End connection list management functions
