@@ -2194,8 +2194,6 @@ public final class SettingsManager {
 	 */
     public int maxConnections() {
         int speed=getConnectionSpeed();
-        //I'm copying these numbers out of GUIStyles.  I don't want this to
-        //depend on GUI code, though.
         if (speed<=56)    //modems
             return 3;
         else if (speed<=350)  //cable
@@ -2203,7 +2201,7 @@ public final class SettingsManager {
         else if (speed<=1000) //T1
             return 10;
         else                  //T3: no limit
-            return Integer.MAX_VALUE;
+            return 12;
     }
 
 
