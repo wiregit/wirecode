@@ -34,6 +34,11 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * can be <tt>null</tt>.
 	 */
 	private final URN SHA1_URN;
+	
+	/**
+	 * Constant for the string to display as the httpStringValue.
+	 */
+	private final String DISPLAY_STRING;
 
 	/**
 	 * Cached hash code that is lazily initialized.
@@ -171,6 +176,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 			throw new NullPointerException("cannot accept null RFD");
 
 		URN urn = rfd.getSHA1Urn();
+		if(urn == null)
+		    throw new NullPointerException("cannot accept null URN");
 		int port = rfd.getPort();
 
 		URL url = new URL("http", rfd.getHost(), port,						  
@@ -223,6 +230,12 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	    
 		this.URL       = url;
 		this.SHA1_URN  = sha1;
+		InetAddress ia = InetAddress.getByName(URL.getHost());
+		String ip = NetworkUtils.ip2string(ia.getAddress());
+		if( URL.getPort() == 6346 )
+		    DISPLAY_STRING = ip;
+		else
+		    DISPLAY_STRING = ip + ":" + URL.getPort();
         _count = 1;
         _demoted = false;
 	}
@@ -272,7 +285,9 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     
     ////////////////////////////Mesh utility methods////////////////////////////
 
-	public String httpStringValue() {return this.URL.toExternalForm(); }
+	public String httpStringValue() {
+	    return DISPLAY_STRING;
+    }
 
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation

@@ -469,7 +469,8 @@ public class RemoteFileDesc implements Serializable {
      *         and i do have a valid port & address.
      */
     public final boolean isAltLocCapable() {
-        return !_replyToMulticast &&
+        return getSHA1Urn() != null &&
+               !_replyToMulticast &&
                !_firewalled &&
                NetworkUtils.isValidPort(_port) &&
                !NetworkUtils.isPrivateAddress(_host) &&
