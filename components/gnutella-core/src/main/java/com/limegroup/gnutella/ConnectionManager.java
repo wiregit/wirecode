@@ -64,7 +64,7 @@ public class ConnectionManager {
 	/** The maximum number of connections to maintain to older Ultrapeers
 	 * that have low-degrees of intra-Ultrapeer connections --
 	 * connections to the "low-density" network.*/
-	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 10;
+	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 20;
 
     /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
@@ -73,6 +73,9 @@ public class ConnectionManager {
 
     /** Ideal number of connections for a leaf.  */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
+
+	public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
+
     /** The desired number of slots to reserve for good connections (e.g.,
      *  LimeWire) unrouted connections. */
     public static final int RESERVED_GOOD_CONNECTIONS = 2;   
@@ -313,13 +316,7 @@ public class ConnectionManager {
      * to add more threads.  Ignores request if a shielded leaf node
      * and newKeep>1 (sic).
      */
-    public synchronized void setKeepAlive(int newKeep) {
-        //TODO: we may want to re-enable this...with a higher limit.
-        ////The request for increasing keep alive if we are leaf node is invalid
-        ////This logic is duplicated in RouterService.setKeepAlive.
-        //if ((newKeep > 1) && hasClientSupernodeConnection())
-        //    return;
-        
+    public synchronized void setKeepAlive(int newKeep) {        
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
@@ -344,7 +341,7 @@ public class ConnectionManager {
     public boolean isSupernode() {
         boolean isCapable =
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue();
-        return isCapable && !hasClientSupernodeConnection();
+        return isCapable && !isLeaf();
     }
     
     /**
@@ -352,7 +349,7 @@ public class ConnectionManager {
      * is not required that the supernode support query routing, though that is
      * generally the case.  
      */
-    public boolean hasClientSupernodeConnection() {
+    public boolean isLeaf() {
         //TODO2: should we make this faster by augmenting state?  We could
         //also return false if isSupernode().
         List connections=getInitializedConnections();
@@ -527,7 +524,7 @@ public class ConnectionManager {
     public boolean allowAnyConnection() {
         //Stricter than necessary.  
         //See allowAnyConnection(boolean,String,String).
-        if (hasClientSupernodeConnection())
+        if (isLeaf())
             return false;
 
         //Do we have normal or leaf slots?
@@ -594,12 +591,10 @@ public class ConnectionManager {
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0) {
             return false;
-		}
-        else if (hasClientSupernodeConnection())
-            //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
+		} else if (RouterService.isLeaf()) {
+			// we're a leaf -- don't allow any incoming connections
             return false;  
-
-        else if (isLeaf && isUltrapeerAware) {
+		} else if (isLeaf && isUltrapeerAware) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
@@ -1247,7 +1242,8 @@ public class ConnectionManager {
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() 
             || (isSupernode() && connections > 0)) {
             return false;
-		} else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < 10) {
+		} else if(SupernodeAssigner.isTooGoodToPassUp() && 
+				  _leafTries < _demotionLimit) {
 			return false;
 		}
 		return true;
