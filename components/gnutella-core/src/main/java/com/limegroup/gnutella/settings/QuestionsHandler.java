@@ -72,4 +72,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting CANT_RESUME =
         FACTORY.createBooleanSetting("CANT_RESUME", false);
+        
+	/**
+     * Setting for whether or not program should ignore prompting
+     * for incomplete files.
+     */
+    public static final IntSetting PROMPT_FOR_EXE =
+        FACTORY.createIntSetting("PROMPT_FOR_EXE", 0);
 }
