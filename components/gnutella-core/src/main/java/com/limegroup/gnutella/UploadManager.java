@@ -103,7 +103,7 @@ public class UploadManager {
 
 		insertAndTest(uploader, host);
 
-		UploadRunner runner = new UploadRunner(uploader, host);
+		UploadRunner runner = new UploadRunner(uploader, host, line._index);
 		Thread upThread = new Thread(runner);
 		upThread.setDaemon(true);
 		upThread.start();
@@ -120,14 +120,14 @@ public class UploadManager {
 		// testing if we are either currently attempting a push, 
 		// or we have unsuccessfully attempted a push with this host in the
 		// past.
-		if ( (! testAttemptedPush(host) )  ||
-			 (! testFailedPush(host) ) )
+		if ( (! testAttemptedPush(host, index) )  ||
+			 (! testFailedPush(host, index) ) )
 			return;
 
 		insertAndTest(uploader, host);
-		insertAttemptedPush(host);
+		insertAttemptedPush(host, index);
 
-		UploadRunner runner = new UploadRunner(uploader, host);
+		UploadRunner runner = new UploadRunner(uploader, host, index);
 		Thread upThread = new Thread(runner);
 		upThread.setDaemon(true);
 		upThread.start();
@@ -223,12 +223,12 @@ public class UploadManager {
 	}
 
     /** @requires caller has this' monitor */
-	private void insertFailedPush(String host) {
-		_failedPushes.add(new PushedFile(host));
+	private void insertFailedPush(String host, int index) {
+		_failedPushes.add(new PushedFile(host, index));
 	}
 	
-	private boolean testFailedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private boolean testFailedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _failedPushes.iterator();
 		while ( iter.hasNext() ) {
@@ -240,12 +240,12 @@ public class UploadManager {
 
 	}
 
-	private void insertAttemptedPush(String host) {
-		_attemptingPushes.add(new PushedFile(host));
+	private void insertAttemptedPush(String host, int index) {
+		_attemptingPushes.add(new PushedFile(host, index));
 	}
 
-	private boolean testAttemptedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private boolean testAttemptedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
@@ -256,8 +256,8 @@ public class UploadManager {
 		return true;
 	}
 	
-	private void removeAttemptedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private void removeAttemptedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
@@ -388,9 +388,12 @@ public class UploadManager {
     private class UploadRunner implements Runnable {
 		private Uploader _up;
 		private String _host;
-		public UploadRunner(Uploader up, String host) {
+        private int _index;
+
+		public UploadRunner(Uploader up, String host, int index) {
 			_up = up;
 			_host = host;
+            _index = index;
 		}
 		public void run() {
 			try {
@@ -410,12 +413,12 @@ public class UploadManager {
                 }
 			} catch (IOException e) {
 				// if it fails, insert it into the push failed list
-				synchronized(UploadManager.this) { insertFailedPush(_host); }
+				synchronized(UploadManager.this) { insertFailedPush(_host, _index); }
 				return;
 			} finally {			    
 				synchronized(UploadManager.this) {
 					removeFromMap(_host);
-					removeAttemptedPush(_host);
+					removeAttemptedPush(_host, _index);
 				}
 			}
 			
@@ -424,21 +427,26 @@ public class UploadManager {
 	
 
 	/**
-	 * keeps track of the host and time of pushed files
+	 * Keeps track of a push requested file and the host that requested it.
 	 */
 	private class PushedFile {
 		private String _host;
-		private Date _time;
+        private int _index;
+		private Date _time;        
 
-		public PushedFile(String host) {
+		public PushedFile(String host, int index) {
 			_host = host;
+            _index = index;
 			_time = new Date();
 		}
 		
-		public boolean equals(PushedFile pf) {
-			if (_host != pf._host)
-				return false;
-			return true;
+        /** Returns true iff o is a PushedFile with same _host and _index.
+         *  Time doesn't matter. */
+		public boolean equals(Object o) {
+            if (! (o instanceof PushedFile))
+                return false;
+            PushedFile pf=(PushedFile)o;
+			return _index==pf._index && _host.equals(pf._host);
 		}
 		
 		public boolean before(Date time) {
