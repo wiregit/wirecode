@@ -22,14 +22,20 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 
 import java.io.IOException;
-
 import com.sun.java.util.collections.*;
 
 
 public class NetworkBackend extends Backend {
 	
+	/**
+	 * used only in construction.  It is ok to be static because
+	 * there is no way to instantiate more than one network backend 
+	 * in the same jvm anyways. 
+	 */
+	protected static boolean _ultrapeer;
 	
 	private NetworkBackend(int gnutellaPort, int shutDownport, ActivityCallback callback)
 		throws IOException{
@@ -60,9 +66,25 @@ public class NetworkBackend extends Backend {
 			(NetworkClientCallbackStub) PrivilegedAccessor.invokeConstructor(
 					callbackClass,callbackArgs,callbackArgsClasses);
 		
+		//set the node status
+		_ultrapeer=ultrapeer;
 		
+		//and get it running
 		new NetworkBackend(gnutellaPort, shutdownPort, callback);
 			
+	}
+	
+	/**
+	 * checks whether we are supposed to be a leaf and adjusts
+	 * settings accordingly.
+	 */
+	protected void setStandardSettings(int port) {
+		super.setStandardSettings(port);
+		if (!_ultrapeer) {
+			UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+			UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+		}
 	}
 	
 	/**
