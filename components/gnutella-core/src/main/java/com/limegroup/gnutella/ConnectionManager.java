@@ -387,7 +387,7 @@ public class ConnectionManager {
      * @return the number of initialized connections, which is less than or equals
      *  to the number of connections.
      */
-    private int getNumInitializedConnections() {
+    public int getNumInitializedConnections() {
 		return _initializedConnections.size();
     }
     

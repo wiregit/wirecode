@@ -1033,35 +1033,62 @@ public class ManagedDownloader implements Downloader, Serializable {
         }                 
     }
 
-private static final int MIN_NUM_CONNECTIONS = 2;
-private static final int MIN_NUM_HOSTS       = 6;
-private static final int MAX_CONNECTION_WAIT = 5;
-private static final int MAX_HOST_WAIT       = 8;
+	private static final int MIN_NUM_CONNECTIONS      = 1;
+	private static final int DESIRED_NUM_CONNECTIONS  = 2;
+	private static final int MIN_NUM_HOSTS            = 10;
+	private static final int MIN_NEW_MESSAGES         = 20;
+	private static final int MAX_CONNECTION_WAIT      = 30;
+	private static final int MAX_HOST_WAIT            = 50;
+	private static final int CONNECTION_DELAY         = 500;
     /**
      *  Try to wait for good, stable, connections with some amount of reach
+	 *  or message flow.
      */
     private static void waitForStableConnections() {
     	RouterService service = RouterService.instance();
-    	int waitCount = 0; 
+    	int waitCount         = 0; 
+		int stableConnections = 0;
+		int validationCount   = 0;
+		int requiredMessages  = service.getTotalMessages() + MIN_NEW_MESSAGES;
+		// TODO: Note that on a private network, these conditions might
+		//       be too strict.
 
-    	// Attempt to get 2 stable connections
-        // (This really doesn't do much without access to
-        //  getNumInitializedConnections in ConnectionManager.
-    	//  The next loop actually does the waiting.
-    	while (service.getNumConnections() < MIN_NUM_CONNECTIONS && 
-               waitCount                   < MAX_CONNECTION_WAIT) {
-    	    try { Thread.sleep(1000); } catch(InterruptedException e) {};
-    		waitCount++;
-    	}
+		while ( validationCount < 2 ) {
 
-    	// Wait till you get a few pongs in on the connections
-    	// for stability
-    	while ( service.getNumHosts() < MIN_NUM_HOSTS && 
-                waitCount             < MAX_HOST_WAIT ) {
-    	    service.updateHorizon();
-    	    try { Thread.sleep(1000); } catch(InterruptedException e) { }
-    		waitCount++;
-    	}
+			// Attempt to get 2 stable connections.  If that takes too long
+			// then settle for 1 stable connection.
+			// To test stability, wait for at least 2 samples 
+			// of initialized connections above the threshold.
+			while ( 
+              service.getNumInitializedConnections() < MIN_NUM_CONNECTIONS ||
+    		  stableConnections                      < MIN_NUM_CONNECTIONS ||
+              ( (service.getNumInitializedConnections() < 
+                   DESIRED_NUM_CONNECTIONS ||
+    		     stableConnections                     < 
+			       DESIRED_NUM_CONNECTIONS)  &&
+			    waitCount < MAX_CONNECTION_WAIT ) ) {
+
+				stableConnections = service.getNumInitializedConnections();
+				try { Thread.sleep(CONNECTION_DELAY); 
+				} catch(InterruptedException e) {};
+				waitCount++;
+			}
+
+
+			// Wait till one of three conditions are true:
+			//   You have 10 hosts reported on connections.
+			//   You have 20 messages reported on connections.
+			//   You have waited too long.
+			while ( service.getNumHosts()      < MIN_NUM_HOSTS && 
+			        service.getTotalMessages() < requiredMessages && 
+					waitCount                  < MAX_HOST_WAIT ) {
+				service.updateHorizon();
+				try { Thread.sleep(CONNECTION_DELAY); 
+				} catch(InterruptedException e) { }
+				waitCount++;
+			}
+			validationCount++;
+		}
     }
 
     /** Returns the next system time that we can requery.  Subclasses may

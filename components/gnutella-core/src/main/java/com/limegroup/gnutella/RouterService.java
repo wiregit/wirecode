@@ -825,6 +825,13 @@ public class RouterService
 		return manager.getNumConnections();
     }
 
+    /**
+     *  Returns the number of initialized messaging connections.
+     */
+    public int getNumInitializedConnections() {
+		return manager.getNumInitializedConnections();
+    }
+
 	/**
 	 * Returns whether or not this client currently has any initialized 
 	 * connections.
