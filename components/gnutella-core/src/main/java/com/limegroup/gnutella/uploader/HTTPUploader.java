@@ -72,14 +72,20 @@ public final class HTTPUploader implements Uploader {
      */
     private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
-    /** The address as described by the "X-Node" header.
+    /**
+     * The address as described by the "X-Node" header.
      */
     private InetAddress _nodeAddress = null;
 
-    /** The port as described by the "X-Node" header.
+    /**
+     * The port as described by the "X-Node" header.
      */
     private int _nodePort = -1;
-
+    
+    /**
+     * The parameters passed to the HTTP Request.
+     */
+    private Map _parameters = null;
 
     private BandwidthTrackerImpl bandwidthTracker=null;
 
@@ -107,26 +113,31 @@ public final class HTTPUploader implements Uploader {
 	 * @param fileName the name of the file
 	 * @param socket the <tt>Socket</tt> instance to serve the upload over
 	 * @param index the index of the file in the set of shared files
-     * @param old the old HTTPDownloader which we use for bandwidth 
+	 * @param params the map of parameters in the http request.
+     * @param dog the StalledUploadWatchdog to use for monitor stalls.
      * to initialize this' bandwidth tracker so we have history
 	 */
 	public HTTPUploader(HTTPRequestMethod method,
 	                    String fileName, 
                         Socket socket,
                         int index,
+                        Map params,
                         StalledUploadWatchdog dog) {
         STALLED_WATCHDOG = dog;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
 		_index = index;
-		reinitialize(method);
+		reinitialize(method, params);
     }
     
     /**
      * Reinitializes this uploader for a new request method.
+     *
+     * @param method the HTTPRequestMethod to change to.
+     * @param params the parameter list to change to.
      */
-    public void reinitialize(HTTPRequestMethod method) {
+    public void reinitialize(HTTPRequestMethod method, Map params) {
         _method = method;
         _amountRequested = 0;
         _uploadBegin = 0;
@@ -139,6 +150,7 @@ public final class HTTPUploader implements Uploader {
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
         _alternateLocationCollection = null;
+        _parameters = params;
         
         // If this is the first time we are initializing it,
         // create a new bandwidth tracker and set a few more variables.
@@ -375,7 +387,14 @@ public final class HTTPUploader implements Uploader {
         default:
             return false;
         }
-	}	 
+	}
+	
+	/**
+	 * Returns the parameter list of this HTTPUploader.
+	 */
+	Map getParameters() {
+	    return _parameters;
+	}
 	 
     /** The byte offset where we should start the upload. */
 	public int getUploadBegin() {return _uploadBegin;}

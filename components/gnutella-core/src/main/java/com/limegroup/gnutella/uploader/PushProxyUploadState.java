@@ -7,7 +7,6 @@ import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.statistics.*;
 
 /**
@@ -15,6 +14,10 @@ import com.limegroup.gnutella.statistics.*;
  * when the request is to PushProxy
  */
 public final class PushProxyUploadState implements HTTPMessage {
+    
+    public static final String P_SERVER_ID = "ServerId";
+    public static final String P_GUID = "guid";
+    public static final String P_FILE = "file";
     
     private final HTTPUploader _uploader;
 
@@ -27,7 +30,7 @@ public final class PushProxyUploadState implements HTTPMessage {
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
-        byte[] clientGUID  = Base32.decode(_uploader.getFileName());
+        byte[] clientGUID  = GUID.fromHexString(_uploader.getFileName());
         InetAddress hostAddress = _uploader.getNodeAddress();
         int    hostPort    = _uploader.getNodePort();
         
@@ -41,9 +44,16 @@ public final class PushProxyUploadState implements HTTPMessage {
             UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
             return;
         }
+        
+        Map params = _uploader.getParameters();
+        int fileIndex = 0; // default to 0.
+        Object index = params.get(P_FILE);
+        // set the file index if we know it...
+        if( index != null )
+            fileIndex = ((Integer)index).intValue();
 
         PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
-                                           clientGUID, 0, 
+                                           clientGUID, fileIndex, 
                                            hostAddress.getAddress(), hostPort);
         try {
             RouterService.getMessageRouter().sendPushRequest(push);

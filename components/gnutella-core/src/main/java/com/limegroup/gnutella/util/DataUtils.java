@@ -33,4 +33,10 @@ public final class DataUtils {
      */
     public static final List EMPTY_LIST =
         Collections.unmodifiableList(new ArrayList(0));
+        
+    /**
+     * An empty map.
+     */
+    public static final Map EMPTY_MAP =
+        Collections.unmodifiableMap(new HashMap(0));
 }

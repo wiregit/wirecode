@@ -5,6 +5,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.UploadStat;
+import com.bitzi.util.Base32;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -235,13 +236,14 @@ public final class UploadManager implements BandwidthTracker {
                                                 fileName, 
 						    			        socket,
 							    		        line._index,
+							    		        line.getParameters(),
 								    	        watchdog);
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
                 else {
                     debug(uploader + " continuing old file");
-                    uploader.reinitialize(currentMethod);
+                    uploader.reinitialize(currentMethod, line.getParameters());
                 }
                 
                 assertAsConnecting( uploader.getState() );
@@ -1158,8 +1160,9 @@ public final class UploadManager implements BandwidthTracker {
             }
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
-            
-			String fileName;
+			String fileName = null;
+			Map parameters = null;
+			
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
@@ -1172,15 +1175,43 @@ public final class UploadManager implements BandwidthTracker {
                 if( RECORD_STATS )
                     UploadStat.UPDATE_FILE.incrementStat();
             } else if (fileInfoPart.startsWith("/gnutella/push-proxy")) {
+                // cut off the /gnutella/push-proxy (21 = above + ?)..
+                fileInfoPart = fileInfoPart.substring(21);
                 index = PUSH_PROXY_FILE_INDEX;
                 // set the filename as the servent ID
-                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=");
-                if (stLocal.countTokens() < 2)
+                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=&");
+                // iff less than two tokens, or no value for a parameter, bad.
+                if (stLocal.countTokens() < 2 || stLocal.countTokens() % 2 != 0)
                     throw new IOException("Malformed PushProxy HTTP Request");
-                // skip first part
-                stLocal.nextToken();
-                // had better be the client GUID
-                fileName = stLocal.nextToken();
+                Integer fileIndex = null;
+                while( stLocal.hasMoreTokens()  ) {
+                    final String k = stLocal.nextToken();
+                    final String val = stLocal.nextToken();
+                    if(k.equalsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
+                        if( fileName != null ) // already have a name?
+                            throw new IOException("Malformed PushProxy Req");
+                        // must convert from base32 to base 16.
+                        byte[] base16 = Base32.decode(val);
+                        if( base16.length != 16 )
+                            throw new IOException("Malformed PushProxy Req");
+                        fileName = new GUID(base16).toHexString();
+                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_GUID)){
+                        if( fileName != null ) // already have a name?
+                            throw new IOException("Malformed PushProxy Req");
+                        if( val.length() != 32 )
+                            throw new IOException("Malformed PushProxy Req");
+                        fileName = val; //already in base16.
+                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_FILE)){
+                        if( fileIndex != null ) // already have an index?
+                            throw new IOException("Malformed PushProxy Req");
+                        fileIndex = Integer.valueOf(val);
+                        if( fileIndex.intValue() < 0 )
+                            throw new IOException("Malformed PushProxy Req");
+                        if( parameters == null ) // create the param map
+                            parameters = new HashMap();
+                        parameters.put("file", fileIndex);
+                     }
+                }
                 if( RECORD_STATS )
                     UploadStat.PUSH_PROXY.incrementStat();
             } else {
@@ -1209,7 +1240,7 @@ public final class UploadManager implements BandwidthTracker {
             //check if the protocol is HTTP1.1.
             //Note that this is not a very strict check.
             boolean http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11);
+			return new HttpRequestLine(index, fileName, http11, parameters);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -1317,18 +1348,40 @@ public final class UploadManager implements BandwidthTracker {
 		 */
         final boolean _http11;
         
+        /**
+         * Flag of the params in this request line.
+         * Guaranteed to be non null.
+         */
+        final Map _params;
+        
 		/**
-		 * Constructs a new <tt>RequestLine</tt> instance.
+		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
 		 *
 		 * @param index the index for the file to get
 		 * @param fileName the name of the file to get
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-  			_index = index;
-  			_fileName = fileName;
-            _http11 = http11;
+		    this(index, fileName, http11, DataUtils.EMPTY_MAP);
   		}
+  		
+		/**
+		 * Constructs a new <tt>RequestLine</tt> instance with parameters.
+		 *
+		 * @param index the index for the file to get
+		 * @param fName the name of the file to get
+		 * @param http11 specifies whether or not it's an HTTP 1.1 request
+		 * @param params a map of params in this request line
+		 */
+  		HttpRequestLine(int index, String fName, boolean http11, Map params) {
+  			_index = index;
+  			_fileName = fName;
+            _http11 = http11;
+            if( params == null )
+                _params = DataUtils.EMPTY_MAP;
+            else
+                _params = params;
+        }
         
 		/**
 		 * Returns whether or not the request is an HTTP 1.1 request.
@@ -1338,6 +1391,13 @@ public final class UploadManager implements BandwidthTracker {
 		 */
         boolean isHTTP11() {
             return _http11;
+        }
+        
+        /**
+         * Returns the parameter map for this request line.
+         */
+        Map getParameters() {
+            return _params;
         }
   	}
 
@@ -1379,10 +1439,10 @@ public final class UploadManager implements BandwidthTracker {
         return averageBandwidth;
 	}	
     
-    private final boolean debugOn = false;
-    private final boolean log = false;
-    PrintWriter writer = null;
-    private final void debug(String out) {
+    private static final boolean debugOn = false;
+    private static final boolean log = false;
+    private static PrintWriter writer = null;
+    private static final void debug(String out) {
         if (debugOn) {
             if(log) {
                 if(writer== null) {
@@ -1400,7 +1460,7 @@ public final class UploadManager implements BandwidthTracker {
                 System.out.println(out);
         }
     }
-    private final void debug(Exception e) {
+    private static final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
     }
