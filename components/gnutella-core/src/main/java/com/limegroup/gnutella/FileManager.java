@@ -320,6 +320,13 @@ public class FileManager {
             addDirectory((File)iter.next(), directory);
     }
 
+	/**
+	 *  same as addFileIfShared(File file). This method is
+	 *  obsolescent.
+	 */
+    public synchronized void addFileIfShared(String path) {
+		addFileIfShared(new File(path));
+    }
 
     /**
      * @modifies this
@@ -330,25 +337,24 @@ public class FileManager {
      * Design note: this method takes a String as an argument for compatibility
      * with HTTPDownloader.  For consistency, it should take a File.  
      */
-    public synchronized void addFileIfShared(String path) {
+	public synchronized void addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
-            f=getCanonicalFile(new File(path));
+            f=getCanonicalFile(file);
             if (!f.exists())
                 return;
         } catch (IOException e) {
             return;
         }
-
-        File dir = getParentFile(f);
+        File dir = getParentFile(file);
         if (dir==null)
             return;
 
         //TODO: if overwriting an existing, take special care.
         if (_sharedDirectories.containsKey(dir))
-            addFile(f);
-    }
+            addFile(file);
+	}
 
 
     /**
