@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
@@ -80,10 +79,10 @@ public class LeafRoutingTest extends BaseTestCase {
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
+        RouterService.clearHostCatcher();
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
+        connect();
     }        
     
     public void setUp() throws Exception  {
@@ -96,20 +95,19 @@ public class LeafRoutingTest extends BaseTestCase {
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
-         throws Exception {
+     private static void connect() throws Exception {
          debug("-Establish connections");
 
-         ultrapeer1 = connect(rs, 6350, true);
-         ultrapeer2 = connect(rs, 6351, true);
-         old1 = connect(rs, 6352, true);
-         old2 = connect(rs, 6353, true);
+         ultrapeer1 = connect(6350, true);
+         ultrapeer2 = connect(6351, true);
+         old1 = connect(6352, true);
+         old2 = connect(6353, true);
      }
      
-    private static Connection connect(RouterService rs, int port, boolean ultrapeer) 
+    private static Connection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -128,6 +126,7 @@ public class LeafRoutingTest extends BaseTestCase {
          
          Connection con = new Connection(socket, responder);
          con.initialize();
+         con.buildAndStartQueues();
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -186,8 +185,8 @@ public class LeafRoutingTest extends BaseTestCase {
     public void testLeafBroadcast() 
             throws IOException, BadPacketException {
         debug("-Leaf Broadcast test");        
-        byte[] guid=rs.newQueryGUID();
-        rs.query(guid, "crap");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "crap");
 
         while (true) {
             assertNotNull("ultrapeer1 is null", ultrapeer1);
