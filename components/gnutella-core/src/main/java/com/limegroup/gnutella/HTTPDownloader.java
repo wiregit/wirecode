@@ -731,7 +731,6 @@ public class HTTPDownloader implements Runnable {
 				if (numBeforeSlash == tempSize) {
 					resumeInit--;
 					numBeforeSlash--;
-					System.out.println("This is limewire 0.5");
 				}
 				
 
