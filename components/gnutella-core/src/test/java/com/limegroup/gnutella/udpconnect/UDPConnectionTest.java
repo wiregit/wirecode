@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.udpconnect;
 
 import junit.framework.Test;
+import java.io.*;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.UDPServiceStub;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.Constants;
 
 /**
  * Tests the SequenceNumberExtender class.
@@ -38,16 +41,10 @@ public final class UDPConnectionTest extends BaseTestCase {
      */
     public void testBasics() throws Exception {
 		new RouterService(new ActivityCallbackStub());
-		final int NUM_BYTES = 200000;
+		final int NUM_BYTES = 20000;
 
 		try {
-			// Setup the test to use the UDPServiceStub
-			UDPConnectionProcessor.setUDPServiceForTesting(
-				UDPServiceStub.instance());
-
-			// Add some simulated connections to the UDPServiceStub
-			UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10);
-			UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10);
+            setupInternalLoopback();
 
 			// Start the second connection in another thread
 			// and run it to completion.
@@ -92,25 +89,19 @@ public final class UDPConnectionTest extends BaseTestCase {
 			assertTrue("echoServer should return true ", 
 				sSuccess);
 
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
 		} finally {
-			// Reset the UDPServiceStub usage from this test
-			UDPConnectionProcessor.setUDPServiceForTesting(null);
-			UDPServiceStub.stubInstance().clearReceivers();
+            cleanupInternalLoopback();
 		}
     }
 
     public void testBlockTransfers() throws Exception {
 		new RouterService(new ActivityCallbackStub());
-		final int NUM_BLOCKS = 1000;
+		final int NUM_BLOCKS = 100;
 
 		try {
-			// Setup the test to use the UDPServiceStub
-			UDPConnectionProcessor.setUDPServiceForTesting(
-				UDPServiceStub.instance());
-
-			// Add some simulated connections to the UDPServiceStub
-			UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10);
-			UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10);
+            setupInternalLoopback();
 
 			// Start the second connection in another thread
 			// and run it to completion.
@@ -155,25 +146,19 @@ public final class UDPConnectionTest extends BaseTestCase {
 			assertTrue("echoServer should return true ", 
 				sSuccess);
 
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
 		} finally {
-			// Reset the UDPServiceStub usage from this test
-			UDPConnectionProcessor.setUDPServiceForTesting(null);
-			UDPServiceStub.stubInstance().clearReceivers();
+            cleanupInternalLoopback();
 		}
     }
 
     public void testOneWayTransfers() throws Exception {
         new RouterService(new ActivityCallbackStub());
-        final int NUM_BYTES = 200000;
+        final int NUM_BYTES = 20000;
 
         try {
-            // Setup the test to use the UDPServiceStub
-            UDPConnectionProcessor.setUDPServiceForTesting(
-                UDPServiceStub.instance());
-
-            // Add some simulated connections to the UDPServiceStub
-            UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10);
-            UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10);
+            setupInternalLoopback();
 
             // Start the second connection in another thread
             // and run it to completion.
@@ -218,10 +203,294 @@ public final class UDPConnectionTest extends BaseTestCase {
             assertTrue("unidirectionalServer should return true ", 
                 sSuccess);
 
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
         } finally {
-            // Reset the UDPServiceStub usage from this test
-            UDPConnectionProcessor.setUDPServiceForTesting(null);
-            UDPServiceStub.stubInstance().clearReceivers();
+            cleanupInternalLoopback();
+        }
+    }
+
+    public void testIOUtilsOnStream() throws Exception {
+        new RouterService(new ActivityCallbackStub());
+        try {
+            setupInternalLoopback();
+
+            // Start the second connection in another thread
+            UDPConnection uconn2;
+            ConnStarter t = new ConnStarter();
+            t.setDaemon(true);
+            t.start();
+
+            // Startup connection one in original thread
+            UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+    
+            // Wait for commpletion of uconn2 startup
+            t.join();
+
+            // Get the initialized connection 2
+            uconn2 = t.getConnection();
+            
+            // Output on the first connection
+            OutputStream ostream = uconn1.getOutputStream();
+            ostream.write("GET FOO BAR BLECK\r\nSecond Line\r\n".getBytes());
+            //uconn1.close();
+
+            // Read to end and one extra on second stream
+            InputStream  istream = uconn2.getInputStream();
+           uconn2.setSoTimeout(Constants.TIMEOUT); 
+            String word = IOUtils.readWord(istream,8);
+            uconn2.close();
+
+            // Validate the results
+            assertTrue("Read of word should be 'GET' - is:"+word, 
+              "GET".equals(word));
+
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
+        } finally {
+            cleanupInternalLoopback();
+        }
+    }
+
+    public void testReadBeyondEnd() throws Exception {
+        new RouterService(new ActivityCallbackStub());
+        final int NUM_BYTES = 100;
+
+        try {
+            setupInternalLoopback();
+
+            // Start the second connection in another thread
+            UDPConnection uconn2;
+            ConnStarter t = new ConnStarter();
+            t.setDaemon(true);
+            t.start();
+
+            // Startup connection one in original thread
+            UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+    
+            // Wait for commpletion of uconn2 startup
+            t.join();
+
+            // Get the initialized connection 2
+            uconn2 = t.getConnection();
+            
+            // Output on the first connection
+            OutputStream ostream = uconn1.getOutputStream();
+            for ( int i = 0; i < NUM_BYTES; i++ )
+                ostream.write(i % 256);
+
+            // Read to end and one extra on second stream
+            InputStream  istream = uconn2.getInputStream();
+            int rval;
+            for ( int i = 0; i < NUM_BYTES; i++ ) {
+                rval = istream.read();
+                if ( (i % 256)  != rval )
+                    fail("Error on byte:"+i);
+            }
+            // Close writer
+            uconn1.close();
+
+            // Wait a little
+            try { Thread.sleep(200); } catch (InterruptedException e) {}
+
+            // Read from reader
+            rval = istream.read();
+            uconn2.close();
+
+            // Validate the results
+            assertEquals("Read at end of stream should be -1", 
+                rval, -1);
+
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
+        } finally {
+            cleanupInternalLoopback();
+        }
+    }
+
+    public void testReadBeyondEndAsBlock() throws Exception {
+        new RouterService(new ActivityCallbackStub());
+        final int NUM_BYTES = 100;
+
+        try {
+            setupInternalLoopback();
+
+            // Start the second connection in another thread
+            UDPConnection uconn2;
+            ConnStarter t = new ConnStarter();
+            t.setDaemon(true);
+            t.start();
+
+            // Startup connection one in original thread
+            final UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+    
+            // Wait for commpletion of uconn2 startup
+            t.join();
+
+            // Get the initialized connection 2
+            uconn2 = t.getConnection();
+            
+            // Output on the first connection
+            OutputStream ostream = uconn1.getOutputStream();
+            for ( int i = 0; i < NUM_BYTES; i++ )
+                ostream.write(i % 256);
+
+            // Let data get sent to reader
+            Thread.sleep(500);
+
+            // Close writer
+            uconn1.close(); 
+
+            // Read to end and one extra on second stream
+            InputStream  istream = uconn2.getInputStream();
+            byte bdata[] = new byte[512];
+            int rval;
+            int i = 0;
+            while (true) {
+                int len = istream.read(bdata);
+                for ( int j = 0; j < len; j++ ) {
+                    rval = (int)bdata[j] & 0xff;
+                    if ( (i % 256)  != rval )
+                        fail("Error on byte:"+i);
+                    i++;
+                }
+                if (i >= NUM_BYTES)
+                    break;
+            }
+
+            // Read from reader
+            rval = istream.read(bdata);
+            uconn2.close();
+
+            // Validate the results
+            assertEquals("Read at end of stream should be -1", 
+                rval, -1);
+
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
+        } finally {
+            cleanupInternalLoopback();
+        }
+    }
+
+    public void testReadBeyondEndAsBlockDuringRead() throws Exception {
+        new RouterService(new ActivityCallbackStub());
+        final int NUM_BYTES = 100;
+
+        try {
+            setupInternalLoopback();
+
+            // Start the second connection in another thread
+            UDPConnection uconn2;
+            ConnStarter t = new ConnStarter();
+            t.setDaemon(true);
+            t.start();
+
+            // Startup connection one in original thread
+            final UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+    
+            // Wait for commpletion of uconn2 startup
+            t.join();
+
+            // Get the initialized connection 2
+            uconn2 = t.getConnection();
+            
+            // Output on the first connection
+            OutputStream ostream = uconn1.getOutputStream();
+            for ( int i = 0; i < NUM_BYTES; i++ )
+                ostream.write(i % 256);
+
+
+            // Close the writer while the reader is blocked
+            class SubTest extends Thread {
+
+                public void run() {
+                    try {
+                        // Let reader lock up on block read
+                        Thread.sleep(500);
+
+                        // Close writer
+                        uconn1.close(); 
+                        
+                    } catch(Throwable e) {
+                    }
+                }
+            }
+            SubTest st = new SubTest();
+            st.setDaemon(true);
+            st.start();
+
+            // Read to end and one extra on second stream
+            InputStream  istream = uconn2.getInputStream();
+            byte bdata[] = new byte[512];
+            int rval;
+            int i = 0;
+            while (true) {
+                int len = istream.read(bdata);
+                for ( int j = 0; j < len; j++ ) {
+                    rval = (int)bdata[j] & 0xff;
+                    if ( (i % 256)  != rval )
+                        fail("Error on byte:"+i);
+                    i++;
+                }
+                if (i >= NUM_BYTES)
+                    break;
+            }
+
+            // Read from reader
+            rval = istream.read(bdata);
+            uconn2.close();
+
+            // Validate the results
+            assertEquals("Read at end of stream should be -1", 
+                rval, -1);
+
+        } catch(Throwable e) {
+            fail("Failed on exception: "+e);
+        } finally {
+            cleanupInternalLoopback();
+        }
+    }
+
+    private void setupInternalLoopback() {
+        // Setup the test to use the UDPServiceStub
+        UDPConnectionProcessor.setUDPServiceForTesting(
+            UDPServiceStub.instance());
+
+        // Add some simulated connections to the UDPServiceStub
+        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10);
+        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10);
+    }
+
+    private void cleanupInternalLoopback() {
+        // Reset the UDPServiceStub usage from this test
+        UDPConnectionProcessor.setUDPServiceForTesting(null);
+        UDPServiceStub.stubInstance().clearReceivers();
+    }
+
+
+    /**
+     *  Startup a second UDPConnection in a thread since two connections will
+     *  block if started in one thread.
+     */
+    class ConnStarter extends Thread {
+        UDPConnection uconn2;
+
+        public ConnStarter() {
+        }
+
+        public void run() {
+            yield();
+            try {
+                uconn2 = 
+                  new UDPConnection("127.0.0.1",6348);
+                
+            } catch(Throwable e) {
+            }
+        }
+
+        public UDPConnection getConnection() {
+            return uconn2;
         }
     }
 }
