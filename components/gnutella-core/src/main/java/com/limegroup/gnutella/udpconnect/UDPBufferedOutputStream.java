@@ -59,7 +59,7 @@ public class UDPBufferedOutputStream extends OutputStream {
             if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
 				// Add to the current chunk
                 activeChunk[activeCount] = (byte) b;
-log("adding: "+b);
+//log("adding: "+b);
                 activeCount++;
                 return;
             } else {
