@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Properties;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.IllegalArgumentException2;
 import java.io.IOException;
 
 /**
@@ -89,6 +90,10 @@ public interface SettingsInterface
     public void setKeepAlive(int keepAlive)
 		throws IllegalArgumentException;
 
+    /** set the keep alive, ensuring it is not too large. */
+    public void setKeepAlive(int keepAlive, boolean checkUpperLimit)
+		throws IllegalArgumentException2;
+
     /** set the port */
     public void setPort(int port)
 		throws IllegalArgumentException;
@@ -114,6 +119,11 @@ public interface SettingsInterface
     /** set the maximum number of connections */
     public void setMaxConn(int maxConn)
 		throws IllegalArgumentException;
+
+    /** set the maximum number of connections, 
+     *  ensuring the value is not too large. */
+    public void setMaxConn(int maxConn, boolean checkUpperLimit)
+		throws IllegalArgumentException2;
 
     /** sets the directory for saving files*/
     public void setSaveDirectory(String dir)

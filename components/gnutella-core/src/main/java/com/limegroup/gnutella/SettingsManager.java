@@ -3,8 +3,8 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
-//import java.io.IOException;
 import java.lang.IllegalArgumentException;
+import com.limegroup.gnutella.util.IllegalArgumentException2;
 import com.limegroup.gnutella.gui.Backend;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -597,12 +597,51 @@ public class SettingsManager implements SettingsInterface
 		
     }
 	
-    /** sets the keep alive */
-    public synchronized void setKeepAlive(int keepAlive)
-		throws IllegalArgumentException {
-		if(keepAlive<0)
-			throw new IllegalArgumentException();
-		else {
+    /**
+     * Sets the keepAlive without checking the maximum value.
+     * Exactly the same as setKeepAlive(keepAlive, false).
+     */
+    public synchronized void setKeepAlive(int keepAlive) {
+        setKeepAlive(keepAlive, false);
+    }
+
+    /** 
+     * Sets the keep alive. If keepAlive is negative, throws 
+     * IllegalArgumentException2 with a suggested value of 0.
+     *
+     * If checkUpperLimit is true, then if keepAlive is too large for
+     * the current connection speed, IllegalArgumentException2 is
+     * thrown with a suggested value appropriate for the connection.
+     * It is guaranteed that calling setKeepAlive with this value will
+     * not throw an exception if the connection speed is not changed.
+     */
+    public synchronized void setKeepAlive(int keepAlive, 
+                                          boolean checkUpperLimit)
+		throws IllegalArgumentException2 {
+        
+        //I'm copying these numbers out of GUIStyles.  I don't want
+        //this to depend on GUI code, though. 
+        if (checkUpperLimit) {
+            int speed=getConnectionSpeed();
+            if (speed<=56) {
+                if (keepAlive>4)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(4)});
+            } else if (speed<=350) {
+                if (keepAlive>8)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(8)});
+            } else {
+                if (keepAlive>14)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(14)});
+            }
+        }
+
+		if (keepAlive<0) {
+            Object[] suggestions={new Integer(0)};
+			throw new IllegalArgumentException2(suggestions);
+        } else {
 			keepAlive_ = keepAlive;
 			String s = Integer.toString(keepAlive_);
 			props_.put(SettingsInterface.KEEP_ALIVE, s);
@@ -679,8 +718,49 @@ public class SettingsManager implements SettingsInterface
 		}
     }
 
-    /** set the maximum number of connections to hold */
-    public synchronized void setMaxConn(int maxConn) {
+    /**
+     * Sets the max number of connections without checking 
+     * the maximum value.  Exactly the same as 
+     *  setMaxConn(keepAlive, false).
+     */
+    public synchronized void setMaxConn(int maxConn)
+        throws IllegalArgumentException2 {
+        setMaxConn(maxConn, false);
+    }
+
+    /** 
+     * Sets the maximum number of connections (incoming and
+     * outgoing). If maxConn is negative, throws
+     * IllegalArgumentException2 with a suggested value of 0.
+     *
+     * If checkUpperLimit is true, then if maxConn is too large for
+     * the current connection speed, IllegalArgumentException2 is
+     * thrown with a suggested value appropriate for the connection.
+     * It is guaranteed that calling setMaxConn with this value will
+     * not throw an exception if the connection speed is not changed.  */
+    public synchronized void setMaxConn(int maxConn,
+                                        boolean checkUpperLimit) 
+        throws IllegalArgumentException2 {
+
+        //I'm copying these numbers out of GUIStyles.  I don't want
+        //this to depend on GUI code, though. 
+        if (checkUpperLimit) {
+            int speed=getConnectionSpeed();
+            if (speed<=56) {
+                if (maxConn>6)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(6)});
+            } else if (speed<=350) {
+                if (maxConn>12)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(12)});
+            } else {
+                if (maxConn>20)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(20)});
+            }
+        }
+
 		if(maxConn < 0)
 			throw new IllegalArgumentException();
 		else {
@@ -690,6 +770,9 @@ public class SettingsManager implements SettingsInterface
 			writeProperties();
 		}
     }
+
+
+
 
     /** set the directory for saving files */
     public synchronized void setSaveDirectory(String dir) {
