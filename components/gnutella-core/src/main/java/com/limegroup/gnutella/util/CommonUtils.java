@@ -216,10 +216,10 @@ public final class CommonUtils {
 		   _isWindows98 = true;
 		if(os.indexOf("windows me") != -1)
 		   _isWindowsMe = true;
-		if(_isWindows) _supportsTray=true;
 		_isSolaris = os.indexOf("solaris") != -1;
 		_isLinux   = os.indexOf("linux")   != -1;
-        _isOS2     = os.indexOf("os/2")    != -1; 
+        _isOS2     = os.indexOf("os/2")    != -1;
+        if(_isWindows || _isLinux) _supportsTray=true;
 		if(os.startsWith("mac os")) {
 			if(os.endsWith("x")) {
 				_isMacOSX = true;
