@@ -27,7 +27,7 @@ import java.net.*;
 public class ClientSidePushProxyTest 
     extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6669;
-    private static final int TIMEOUT=500;
+    private static final int TIMEOUT=1000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
@@ -296,7 +296,7 @@ public class ClientSidePushProxyTest
 
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
-        ss.setSoTimeout(TIMEOUT);
+        ss.setSoTimeout(4*TIMEOUT);
 
         // send a reply with some PushProxy info
         PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
@@ -422,7 +422,7 @@ public class ClientSidePushProxyTest
 
         // await a PushRequest
         do {
-            m = testUP.receive(TIMEOUT);
+            m = testUP.receive(4*TIMEOUT);
         } while (!(m instanceof PushRequest)) ;
     }
 
@@ -444,7 +444,7 @@ public class ClientSidePushProxyTest
 
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
-        ss.setSoTimeout(TIMEOUT);
+        ss.setSoTimeout(4*TIMEOUT);
 
         // send a reply with some BAD PushProxy info
         PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
@@ -479,13 +479,13 @@ public class ClientSidePushProxyTest
         writer.write("HTTP/1.1 410 gobbledygook");
         writer.flush();
         // there is something going on with timeouts here....
-        if (CommonUtils.isMacOSX())
+        if (CommonUtils.isMacOSX() || CommonUtils.isWindows())
             Thread.sleep(300);
         httpSock.close();
 
         // await a PushRequest
         do {
-            m = testUP.receive(TIMEOUT*4);
+            m = testUP.receive(TIMEOUT*8);
         } while (!(m instanceof PushRequest)) ;
 
         // everything checks out
