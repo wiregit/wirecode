@@ -192,7 +192,7 @@ public abstract class MessageRouter
     {
         // Increment hops and decrease TTL.
         m.hop();
-
+	   
         if(m instanceof PingRequest) 
             handlePingRequestPossibleDuplicate((PingRequest)m, receivingConnection);
         else if (m instanceof PingReply) 
@@ -225,6 +225,10 @@ public abstract class MessageRouter
 
         if (msg instanceof QueryRequest) {
 			QueryRequest request = (QueryRequest)msg;
+			// a TTL above zero may indicate a malicious client, as UDP
+			// messages queries should not be sent with TTL above 1.
+			if(request.getTTL() > 0) return;
+
 			if(!request.supportsUnicast()) return;
 			InetAddress udpAddress = request.getUDPAddress();
 			int udpPort = request.getUDPPort().intValue();
