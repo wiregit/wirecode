@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.statistics.UploadStat;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -92,8 +93,10 @@ public final class StalledUploadWatchdog implements Runnable {
             try {
                 // If it was null, it was already closed
                 // by an outside source.
-                if( ostream != null )
+                if( ostream != null ) {
+                    UploadStat.STALLED.incrementStat();
                     ostream.close();
+                }
             } catch(IOException ignored) {
                 //this can be ignored because we're going to close
                 //the connection anyway.
