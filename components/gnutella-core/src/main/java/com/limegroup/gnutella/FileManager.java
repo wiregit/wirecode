@@ -33,7 +33,7 @@ public class FileManager {
 	
     }
     
-    public static FileManager getFileManager() {
+    public static synchronized FileManager getFileManager() {
 	if(_myFileManager == null)
 	    _myFileManager = new FileManager();;
 	return _myFileManager;
