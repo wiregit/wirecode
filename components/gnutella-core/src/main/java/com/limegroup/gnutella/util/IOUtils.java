@@ -50,43 +50,48 @@ public class IOUtils {
         return false;
     }       
 
-    /**
+   /**
      * Returns the first word of specified maximum size up to the first space
-	 * and returns it.  This does not read up to the first whitespace 
-	 * character -- it only looks for a single space.  This is particularly 
-	 * useful for reading HTTP requests, as the request method, the URI, and
-	 * the HTTP version must all be separated by a single space.
-     * Note that only one extra character is read from the stream in the case of 
+     * and returns it.  This does not read up to the first whitespace
+     * character -- it only looks for a single space.  This is particularly
+     * useful for reading HTTP requests, as the request method, the URI, and
+     * the HTTP version must all be separated by a single space.
+     * Note that only one extra character is read from the stream in the case of
      * success (the white space character after the word).
-	 *
+     *
      * @param in The input stream from where to read the word
      * @param maxSize The maximum size of the word.
      * @return the first word (i.e., no whitespace) of specified maximum size
      * @exception IOException if the word of specified maxSize couldnt be read,
      * either due to stream errors, or timeouts
      */
-    public static String readWord(InputStream in, int maxSize) 
-		throws IOException {
-        char[] buf=new char[maxSize];
-        //iterate till maxSize +1 (for white space)
-        for (int i=0 ; i < maxSize+1 ; i++) {
+    public static String readWord(InputStream in, int maxSize)
+      throws IOException {
+        final char[] buf = new char[maxSize];
+        int i = 0;
+        //iterate till maxSize + 1 (for white space)
+        while (true) {
             int got;
             try {
-                got=in.read();
-            } catch(ArrayIndexOutOfBoundsException aioobe) {
-                // thrown in strange circumstances, consider IOX.
+                got = in.read();
+                if (got >= 0) { // not EOF
+                    if ((char)got != ' ') { //didn't get word. Exclude space.
+                        if (i < maxSize) { //We dont store the last letter
+                            buf[i++] = (char)got;
+                            continue;
+                        }
+                        //if word of size upto maxsize not found, throw an
+                        //IOException. (Fixes bug 26 in 'core' project)
+                        throw new IOException("could not read word");
+                    }
+                    return new String(buf, 0, i);
+                }
+                throw new IOException("unexpected end of file");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                // thrown in strange circumstances of in.read(), consider IOX.
                 throw new IOException("unexpected aioobe");
             }
-            if (got==-1) {//EOF
-                throw new IOException("unexpected end of file");
-			} else if ((char)got==' ') { //got word.  Exclude space.
-				return new String(buf,0,i);
-            } else if(i != maxSize) { //We dont store the last letter
-                buf[i]=(char)got;
-			}
         }
-        //if word of size upto maxsize not found, throw an IOException to
-        //indicate that (Fixes bug 26 in 'core' project)
-        throw new IOException("could not read word");
     }
+
 }
