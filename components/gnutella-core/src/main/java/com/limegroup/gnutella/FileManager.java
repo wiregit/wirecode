@@ -413,7 +413,6 @@ public class FileManager{
                     break;
             }
             //Now keywords[i...j-1] is the keyword to search for.
-            System.out.println("Keyword: \""+query.substring(i, j)+"\"");
 
             Iterator /* of List<Integer> */ iter=
                 _index.getPrefixedBy(query, i, j);
@@ -426,7 +425,7 @@ public class FileManager{
                     matches2.add(k);
                 }
             }         
-            if (i==0)
+            if (matches==null)   //first time through for loop?
                 matches=matches2;
             else
                 matches.retainAll(matches2);
