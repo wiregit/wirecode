@@ -244,11 +244,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
-		// receive initial ping
-        //drain(out);
-		out.receive();
-		out.receive();
-		//out.receive();`
+		// receive all initial messages.
+		drain(out);
 
 		out.send(new PingRequest((byte)3));
 		
