@@ -637,7 +637,8 @@ public class DownloadManager implements BandwidthTracker {
         active.remove(downloader);
         waiting.remove(downloader);
         querySentMDs.remove(downloader);
-        notify();  
+        downloader.finish();
+        notify();
         callback.removeDownload(downloader);
         //Save this' state to disk for crash recovery.  Note that a downloader
         //in the GAVE_UP state is not serialized here even if still displayed in

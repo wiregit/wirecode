@@ -894,6 +894,72 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
         SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+    
+    public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
+        debug("-Testing swarming of rfds ignoring alt ...");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+            
+        final int RATE=200;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = TestFile.length()/10;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        uploader3.setRate(RATE);
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        
+        //Start with only RFD1.
+        RemoteFileDesc[] rfds = {rfd1};
+        
+        // Add RFD2 and 3 to the IncompleteFileDesc, make sure we use them.
+        Thread locAdder = new Thread( new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    FileDesc fd = RouterService.getFileManager().
+                        getFileDescForUrn(TestFile.hash());
+                    assertInstanceof( IncompleteFileDesc.class, fd );
+                    fd.addAlternateLocation(
+                        AlternateLocation.createAlternateLocation(rfd2));
+                    AlternateLocationCollection alcs =
+                        AlternateLocationCollection.createCollection(
+                            TestFile.hash());
+                    alcs.addAlternateLocation(
+                        AlternateLocation.createAlternateLocation(rfd3));
+                    fd.addAlternateLocationCollection(alcs);
+                } catch(Throwable e) {
+                    ErrorService.error(e);
+                }
+            }
+       });
+       locAdder.start();
+        
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tu3: "+u3+"\n");
+        debug("\tTotal: "+(u1+u2+u3)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertEquals("u2 did too much work", STOP_AFTER, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
+        SettingsManager.instance().setConnectionSpeed(capacity);
     }    
 
 	// no longer in use, as alternate locations should always have SHA1s

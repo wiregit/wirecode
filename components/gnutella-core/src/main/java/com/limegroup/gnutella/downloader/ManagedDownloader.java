@@ -1020,6 +1020,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         // no special states
         return new long[2];
     }
+    
+    /**
+     * Cleans up information before this downloader is removed from memory.
+     */
+    public void finish() {
+        commonOutFile.clearManagedDownloader();
+    }
 
 
     /** 

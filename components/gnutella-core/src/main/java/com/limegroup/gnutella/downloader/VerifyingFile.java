@@ -114,17 +114,27 @@ public class VerifyingFile {
         return writtenBlocks.getSize();
     }
   
+    /**
+     * Closes the file output stream.
+     */
     public void close() {
-        // this MUST release the reference to the ManagedDownloader,
-        // otherwise, all downloaders will always stay in memory
-        // (which includes everything the download references)
-        managedDownloader = null;
+        // This does not clear the ManagedDownloader because
+        // it could still be in a waiting state, and we need
+        // it to allow IncompleteFileDescs to funnel alt-locs
+        // as sources to the downloader.
         if(fos==null)
             return;
         try { 
             fos.close();
         } catch (IOException ioe) {}
     }
+    
+    /**
+     * Clears the ManagedDownloader variable, allowing it to be GC'ed.
+     */
+    public void clearManagedDownloader() {
+        managedDownloader = null;
+    }   
     
     /**
      * Returns whether or not we have determined if the written is corrupted.
