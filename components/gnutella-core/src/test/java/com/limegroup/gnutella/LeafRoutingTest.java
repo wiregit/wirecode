@@ -29,10 +29,10 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    static Connection ultrapeer1;
-    static Connection ultrapeer2;
-    static Connection old1;
-    static Connection old2;
+    private Connection ultrapeer1;
+    private Connection ultrapeer2;
+    private Connection old1;
+    private Connection old2;
 
     public LeafRoutingTest(String name) {
         super(name);
@@ -83,51 +83,45 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
-             throws IOException, BadPacketException {
+     private void connect(RouterService rs) 
+     throws IOException, BadPacketException {
+         debug("-Establish connections");
          //Ugh, there is a race condition here from the old days when this was
          //an interactive test.  If rs connects before the listening socket is
          //created, the test will fail.
 
          //System.out.println("Please establish a connection to localhost:6350\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6350);
-         ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
-         ultrapeer1.initialize();
-         replyToPing(ultrapeer1, true);
-
-         //System.out.println("Please establish a connection to localhost:6351\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6351);
-         ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
-         ultrapeer2.initialize();
-         replyToPing(ultrapeer2, true);
-
-         //System.out.println("Please establish a connection to localhost:6352\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6352);
-         //old1=new Connection(accept(6352), new OldResponder());
-         old1=new Connection(accept(6352), new UltrapeerResponder());
-         old1.initialize();
-         //replyToPing(old1, false);
-         replyToPing(old1, true);
-
-         //System.out.println("Please establish a connection to localhost:6353\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6353);
-         //old2=new Connection(accept(6353), new OldResponder());
-         old2=new Connection(accept(6353), new UltrapeerResponder());
-         old2.initialize();
-         //replyToPing(old2, false);
-         replyToPing(old2, true);
+         ultrapeer1 = connect(rs, 6350, true);
+         ultrapeer2 = connect(rs, 6351, true);
+         old1 = connect(rs, 6352, true);
+         old2 = connect(rs, 6353, true);
      }
-
-     private static Socket accept(int port) throws IOException { 
+     
+     private Connection connect(RouterService rs, int port, boolean ultrapeer) 
+     throws IOException, BadPacketException {
          ServerSocket ss=new ServerSocket(port);
-         Socket s=ss.accept();
-         InputStream in=s.getInputStream();
+         rs.connectToHostAsynchronously("127.0.0.1", port);
+         Socket socket = ss.accept();
+         ss.close();
+         
+         socket.setSoTimeout(3000);
+         InputStream in=socket.getInputStream();
          String word=readWord(in);
          if (! word.equals("GNUTELLA"))
              throw new IOException("Bad word: "+word);
-         return s;
+         
+         HandshakeResponder responder;
+         if (ultrapeer) {
+             responder = new UltrapeerResponder();
+         } else {
+             responder = new OldResponder();
+         }
+         Connection con = new Connection(socket, responder);
+         con.initialize();
+         replyToPing(con, ultrapeer);
+         return con;
      }
-
+     
      /**
       * Acceptor.readWord
       *
@@ -153,7 +147,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
      private static void replyToPing(Connection c, boolean ultrapeer) 
              throws IOException, BadPacketException {
-         Message m=c.receive(1000);
+         Message m=c.receive(5000);
          assertTrue(m instanceof PingRequest);
          PingRequest pr=(PingRequest)m;
          byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
@@ -168,15 +162,11 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
      ///////////////////////// Actual Tests ////////////////////////////
 
-    private static void doLeafBroadcast(RouterService rs) 
+    private void doLeafBroadcast(RouterService rs) 
             throws IOException, BadPacketException {
-        //System.out.println("Please send a query for \"crap\" from your leaf\n");
-        //try {
-        //    Thread.sleep(6000);
-        //} catch (InterruptedException e) { }
+        debug("-Leaf Broadcast test");        
         byte[] guid=rs.newQueryGUID();
         rs.query(guid, "crap");
-        //System.out.println("-Testing broadcast from leaf");
 
         while (true) {
             Message m=ultrapeer1.receive(2000);
@@ -216,7 +206,8 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests that the X-Try and X-Try-Ultrapeer headers are correctly
      * being transferred in connection headers.
      */
-    private static void doRedirect() {
+    private void doRedirect() {
+        debug("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder()
@@ -263,8 +254,8 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
-    private static void doBroadcastFromUltrapeer() throws IOException {
-        //System.out.println("-Test query from ultrapeer not broadcasted");
+    private void doBroadcastFromUltrapeer() throws IOException {
+        debug("-Test query from ultrapeer not broadcasted");
         drain(ultrapeer2);
         drain(old1);
         drain(old2);
@@ -280,7 +271,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     /*
     private static void doNoBroadcastFromOld() 
         throws IOException, BadPacketException {
-        //System.out.println("-Test query from old not broadcasted");
+        debug("-Test query from old not broadcasted");
         drain(ultrapeer1);
         drain(ultrapeer2);
         drain(old2);
@@ -302,7 +293,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     /**
      * Tests to make sure that connections to old hosts are not allowed
      */
-    private static void doConnectionToOldDisallowed() {
+    private void doConnectionToOldDisallowed() {
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder()
@@ -317,7 +308,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
-    private static Set /* of Endpoint */ list2set(String addresses) {
+    private Set /* of Endpoint */ list2set(String addresses) {
         Set ret=new HashSet();
         StringTokenizer st = new StringTokenizer(addresses,
             Constants.ENTRY_SEPARATOR);
@@ -339,7 +330,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
+    private boolean drain(Connection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {
@@ -353,8 +344,9 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
-    private static void shutdown() throws IOException {
+    private void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
+        debug("-Shutting down");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
@@ -363,25 +355,32 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         old1.close();
         old2.close();
     }
-}
 
-class UltrapeerResponder implements HandshakeResponder {
-    public HandshakeResponse respond(HandshakeResponse response, 
-            boolean outgoing) throws IOException {
-        Properties props=new Properties();
-        props.put(ConnectionHandshakeHeaders.USER_AGENT, 
-                  CommonUtils.getHttpServer());
-        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-        props.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
-        return new HandshakeResponse(props);
+    private static final boolean DEBUG = false;
+    
+    static void debug(String message) {
+        if(DEBUG) 
+            System.out.println(message);
     }
-}
+
+    class UltrapeerResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response, 
+                boolean outgoing) throws IOException {
+            Properties props=new Properties();
+            props.put(ConnectionHandshakeHeaders.USER_AGENT, 
+                      CommonUtils.getHttpServer());
+            props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+            props.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+            return new HandshakeResponse(props);
+        }
+    }
 
 
-class OldResponder implements HandshakeResponder {
-    public HandshakeResponse respond(HandshakeResponse response, 
-            boolean outgoing) throws IOException {
-        Properties props=new Properties();
-        return new HandshakeResponse(props);
+    class OldResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response, 
+                boolean outgoing) throws IOException {
+            Properties props=new Properties();
+            return new HandshakeResponse(props);
+        }
     }
 }

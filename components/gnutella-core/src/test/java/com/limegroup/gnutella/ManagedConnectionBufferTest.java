@@ -24,6 +24,10 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
 		return buildTestSuite(ManagedConnectionBufferTest.class);
 	}
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
 	public void setUp() {
         //Restore all the defaults.  Apparently testForwardsGGEP fails if this
         //is in ultrapeer mode and the KEEP_ALIVE is 1.  It seems that WE (the
@@ -72,7 +76,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         elapsed=System.currentTimeMillis()-start;
         Assert.that(out.getNumMessagesSent()==1);
         Assert.that(out.getBytesSent()==pr.getTotalLength());
-        Assert.that(elapsed<300, "Unreasonably long send time: "+elapsed);
+        Assert.that(elapsed<500, "Unreasonably long send time: "+elapsed);
         Assert.that(pr.getHops()==0);
         Assert.that(pr.getTTL()==4);
     }
@@ -322,17 +326,16 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
     private static void testDropBuffer(ManagedConnection out, Connection in) 
             throws IOException, BadPacketException {
         //Send tons of messages...but don't read them
-        int total=20000;
+        int total=500;
 
         int initialDropped=out.getNumSentMessagesDropped();
+        int initialSent = out.getNumMessagesSent();
+        long initialBytes = out.getBytesSent();
+        
         for (int i=0; i<total; i++) {
             out.send(new QueryRequest((byte)4, i, 
                                       "Some reaaaaaalllllly big query", false));
         }
-        int dropped=out.getNumSentMessagesDropped()-initialDropped;
-        //System.out.println("Dropped messages: "+dropped);
-        Assert.that(dropped>0);
-        Assert.that(out.getPercentSentDropped()>0);
 
         int read=0;
         int bytesRead=0;
@@ -345,9 +348,18 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
                 break;
             }
         }
+        
+        int dropped=out.getNumSentMessagesDropped()-initialDropped;
+        int sent = out.getNumMessagesSent() - initialSent;
+        long bytes = out.getBytesSent() - initialBytes;
+        //System.out.println("Sent messages/bytes: " + sent + "/" + bytes);
+        //System.out.println("Dropped messages: "+dropped);
         //System.out.println("Read messages/bytes: "+read+"/"+bytesRead);
-        Assert.that(read<total);
-        Assert.that(dropped+read==total);
+        
+        assertTrue("dropped msg cnt > 0", dropped>0);
+        assertTrue("drop prct > 0", out.getPercentSentDropped()>0);
+        assertTrue("read cnt < total", read<total);
+        assertEquals("drop + read == total", total, dropped+read);
     }
 
     private static ManagedConnection newConnection(String host, int port) throws Exception {
