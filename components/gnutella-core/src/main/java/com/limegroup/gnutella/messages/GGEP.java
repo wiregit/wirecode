@@ -46,7 +46,7 @@ public class GGEP extends Object {
      * False iff this should COBS encode values to prevent null bytes.
      * Default is false, to be conservative.
      */
-    public boolean allowNulls=false;
+    public boolean notNeedCOBS=false;
 
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
@@ -61,11 +61,11 @@ public class GGEP extends Object {
      * Creates a new empty GGEP block.  Typically this is used for outgoing
      * messages and mutated before encoding.  
      *
-     * @param allowNulls true if nulls are allowed in extension values; true if
+     * @param notNeedCOBS true if nulls are allowed in extension values;false if
      *  this should activate COBS encoding if necessary to remove null bytes. 
      */
-    public GGEP(boolean allowNulls) {
-        this.allowNulls=allowNulls;
+    public GGEP(boolean notNeedCOBS) {
+        this.notNeedCOBS=notNeedCOBS;
     }    
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
@@ -254,7 +254,7 @@ public class GGEP extends Object {
     private final boolean shouldCOBSEncode(byte[] data) {
         // if nulls are allowed from construction time and if nulls are present
         // in the data...
-        return (allowNulls && containsNull(data));
+        return (!notNeedCOBS && containsNull(data));
     }
 
     
@@ -463,14 +463,14 @@ public class GGEP extends Object {
             return;
         if (value.length>MAX_VALUE_SIZE_IN_BYTES)
             throw new IllegalArgumentException();
-        if (!allowNulls && containsNull(value))
-            throw new IllegalArgumentException();
     }
 
     private boolean containsNull(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++)
-            if (bytes[i] == 0x0)
-                return true;
+        if (bytes != null) {
+            for (int i = 0; i < bytes.length; i++)
+                if (bytes[i] == 0x0)
+                    return true;
+        }
         return false;
     }
 
