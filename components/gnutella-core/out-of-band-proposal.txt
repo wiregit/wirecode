@@ -47,17 +47,21 @@ the 'out-of-band' scheme in future releases.
 Servents that support 'out-of-band' delivery should advertise their
 support via GGEP.  A Query Request message can contain a GGEP block
 between the two terminating null values.  The GGEP header value for
-'out-of-band' delivery support is "OB".  The GGEP block should peacefully
+'out-of-band' delivery support is "OBR".  The GGEP block should peacefully
 co-exist with other vendor extensions in the Query Request.  For more
 information, please see :
 
 http://groups.yahoo.com/group/the_gdf/files/Proposals/GGEP/GnutellaGenericExtensionProtocol.0.51.html
 
 The GGEP extension block for 'out-of-band' should have a non-null value.
-It should be the either 1) the address (host:port) of the non-firewalled 
-query originator or 2) the address (host:port) of an Ultrapeer of the 
+It should be the either 1) the address (host & port) of the non-firewalled 
+query originator or 2) the address (host & port) of an Ultrapeer of the 
 firewalled query originator.  2) is needed to allow 'out-of-band' to work
-for firewalled hosts (more about this in section 2).
+for firewalled hosts (more about this in section 2).  The format of this
+value is a array of 6 bytes - the first 4 bytes should be the 4 bytes of
+the IPv4 dotted address.  The last 2 bytes should be the port number in
+network order.  These 6 bytes capture the essential information in a
+compact manner.  The value should be COBs encoded as necessary. 
 
 2. The 'out-of-band' Protocol
 
@@ -99,7 +103,7 @@ Servent A
 Servent B
 ---------
  - TCP stream of Query Replies to 141.155.55.4:6346
- - TCP send "\n\n" at the end of the stream
+ - close the TCP connection.
 
 Servent A
 ---------
@@ -151,7 +155,7 @@ Servent C1
 Servent B
 ---------
  - TCP stream of Query Replies to 141.155.67.8:6700
- - TCP send "\n\n" at the end of the stream
+ - close the TCP connection.
 
 Servent C1
 ----------
