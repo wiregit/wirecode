@@ -27,27 +27,39 @@ class RouteTable {
     }
 
     /**
+     * Adds a new routing entry.
+     *
      * @requires guid and c are non-null, guid.length==16
-     * @effects adds the routing entry to this
+     * @modifies this
+     * @effects if replyHandler is open, adds the routing entry to this,
+     *  replacing any routing entries for guid.  Otherwise returns
+     *  without modifying this.
      */
     public synchronized void routeReply(byte[] guid,
                                         ReplyHandler replyHandler) {
         Assert.that(replyHandler != null);
+        if (! replyHandler.isOpen())
+            return;
+
         GUID g=new GUID(guid);
         _map.put(g, replyHandler);
     }
 
     /**
-     * Same as routeReply, except that the routing is only done if a routing
-     * for the given GUID doesn't already exist.
+     * Adds a new routing entry if one doesn't exist.
+     *
      * @requires guid and c are non-null, guid.length==16
-     * @effects adds the routing entry to this or returns false
-     * @return true if the routing was successfully created, false if a routing
-     *   for the given GUID already existed
+     * @modifies this
+     * @effects if no routing table entry for guid exists in this
+     *  and replyHandler is still open, adds the routing entry to this
+     *  and returns true.  Otherwise returns false, without modifying this.
      */
     public synchronized boolean tryToRouteReply(byte[] guid,
                                                 ReplyHandler replyHandler) {
         Assert.that(replyHandler != null);
+        if (! replyHandler.isOpen())
+            return false;
+
         GUID g=new GUID(guid);
         if(!_map.containsKey(g)) {
             _map.put(g, replyHandler);
@@ -68,13 +80,16 @@ class RouteTable {
 
     /**
      * @modifies this
-     * @effects removes all entries [guid, rh2] s.t. rh2.equals(replyHandler).
-     *  This operation is fairly expensive.
+     * @effects removes all entries [guid, rh2] s.t. 
+     *  rh2.equals(replyHandler).  This operation runs in linear
+     *  time with respect to this' size.
      */
-    public synchronized void removeReplyHandler(ReplyHandler replyHandler) {
-        Collection values = _map.values();
-        // Loop, removing values until there are no more
-        while(values.remove(replyHandler));
+    public synchronized void removeReplyHandler(ReplyHandler replyHandler) {        
+         Iterator iter = _map.values().iterator();
+         while (iter.hasNext()) {
+             if (iter.next().equals(replyHandler))
+                 iter.remove();
+         }
     }
 
     public synchronized String toString() {
