@@ -144,6 +144,9 @@ public class ConnectionManager implements Runnable {
      */
     public void setListeningPort(int port) throws IOException {
 	synchronized (socketLock) {
+	    //Special case: if unchanged, do nothing.
+	    if (this.port==port)
+		return;
 	    //Special case if port==0.  This ALWAYS works.
 	    if (port==0) {
 		//Close old socket (if non-null)
