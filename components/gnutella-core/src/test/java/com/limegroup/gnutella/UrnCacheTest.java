@@ -16,6 +16,8 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
      * File where urns (currently SHA1 urns) get persisted to
      */
     private static final String URN_CACHE_FILE = "fileurns.cache";
+    private static final String FILE_PATH = "com/limegroup/gnutella/util";
+    private static FileDesc[] descs;
 
 
 	/**
@@ -35,35 +37,33 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-
-	protected void tearDown() {
-		UrnCache.instance().persistCache();
-	}
-
-	/**
-	 * Make sure that the cache contains the expected values.
-	 */
-//  	public void testPersistence() {
-//  		assertTrue("cache should be present", cacheExists());
-//  		UrnCache cache = UrnCache.instance();
-//  		File[] files = createFiles();
-//  		for(int i=0; i<files.length; i++) {
-//  			assertTrue("file should be present in cache", cache.getUrns(files[i]) != 
-//  					   Collections.EMPTY_SET); 
-//  			Set set = cache.getUrns(files[i]);
-//  			assertTrue("URN set should not be empty", !set.isEmpty());
-//  		}
-//  	}
-
-
-	private static File[] createFiles() {
-		File dir = new File("S:\\Gnutella\\installers\\LimeWire210\\winNoVM");
-		return dir.listFiles();
-	}
-
+    
+    /**
+     * Test read & write of map
+     */
+    public void testPersistence() {
+        assertTrue("cache should not be present", !cacheExists() );
+        
+        UrnCache cache = UrnCache.instance();
+        FileDesc[] descs = createFileDescs();
+        assertNotNull("should have some file descs", descs);
+        assertTrue("should have some file descs", descs.length > 0);
+        assertTrue("cache should still not be present", !cacheExists() );
+        cache.persistCache();
+        assertTrue("cache should now exist", cacheExists());
+        for( int i = 0; i < descs.length; i++) {
+            Set set = cache.getUrns(descs[i].getFile());
+            assertTrue("file should be present in cache",
+               !set.equals(CommonUtils.EMPTY_SET)
+            );
+            assertTrue("URN set should not be empty", !set.isEmpty());
+            assertEquals("URN set should be same as that in desc",
+                descs[i].getUrns(), set);
+        }
+    }
 
 	private static FileDesc[] createFileDescs() {
-		File[] files = createFiles();
+		File[] files = CommonUtils.getResourceFile(FILE_PATH).listFiles();
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set urns = FileDesc.calculateAndCacheURN(files[i]);
@@ -73,7 +73,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 
 	private static void deleteCacheFile() {
-		File cacheFile = new File(URN_CACHE_FILE);
+		File cacheFile = new File(_settingsDir, URN_CACHE_FILE);
 		cacheFile.delete();
 	}
 
@@ -81,7 +81,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * Convenience method for making sure that the serialized file exists.
 	 */
 	private static boolean cacheExists() {
-		File cacheFile = new File(URN_CACHE_FILE);
+		File cacheFile = new File(_settingsDir, URN_CACHE_FILE);
 		return cacheFile.exists();
 	}
 
