@@ -62,6 +62,10 @@ public class FileDescStub extends FileDesc {
             }
         };
     }
+
+    public long getSize() {
+        return DEFAULT_SIZE;
+    }
     
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
