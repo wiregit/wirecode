@@ -140,7 +140,7 @@ public class NonBlockingServer implements Runnable {
                 SelectionKey key = (SelectionKey)iter.next();
                 
                 // remove the current entry 
-                iter.remove();
+                //iter.remove();
                 
                 try {
                     if(key.isAcceptable()) {
@@ -221,7 +221,7 @@ public class NonBlockingServer implements Runnable {
     private void registerReaders() {
         synchronized(READERS) {
             // do nothing if there are no new readers
-            if(READERS.isEmpty()) return;
+            //if(READERS.isEmpty()) return;
             for(Iterator iter = READERS.iterator(); iter.hasNext();) {
                 SocketHandler sh = (SocketHandler)iter.next();
                 
@@ -243,7 +243,7 @@ public class NonBlockingServer implements Runnable {
     private void registerWriters() {
         synchronized(WRITERS) {
             // do nothing if there are no new writers
-            if(WRITERS.isEmpty()) return;
+            //if(WRITERS.isEmpty()) return;
             for(Iterator iter = WRITERS.iterator(); iter.hasNext();) {
                 SocketHandler sh = (SocketHandler)iter.next();
                 SocketChannel channel = sh.getChannel();
