@@ -21,6 +21,18 @@ public class Main implements ActivityCallback {
 
 	BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 	for ( ; ;) {
+            
+            //sleep for some time
+            try
+            {
+                Thread.sleep(100);
+            }
+            catch(InterruptedException ie)
+            {
+                
+            }
+            
+          /*
 	    System.out.print("LimeRouter> ");
 	    try {
 		String command=in.readLine();
@@ -81,10 +93,13 @@ public class Main implements ActivityCallback {
 		}
 	    } catch (IOException e) {
 		System.exit(1);
-	    }	    
+	 }
+        */
 	}
+        /*
 	System.out.println("Good bye.");
 	service.shutdown(); //write gnutella.net
+        */
     }
 
     /////////////////////////// ActivityCallback methods //////////////////////
