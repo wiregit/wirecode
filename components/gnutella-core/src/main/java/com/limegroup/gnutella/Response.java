@@ -87,6 +87,14 @@ public class Response {
 	 */
 	private static final String KHZ = "kHz";
 
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections
+	 * 1.1 implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -134,7 +142,9 @@ public class Response {
 		this.metadata = metadata;
         this.metaBytes = metadata.getBytes();
 		if(urns == null) {
-			this.urns = Collections.EMPTY_SET;
+			// this is necessary because Collections.EMPTY_SET is not
+			// serializable in collections 1.1
+			this.urns = EMPTY_SET;
 		}
 		else {
 			this.urns = Collections.unmodifiableSet(urns);
@@ -406,7 +416,7 @@ public class Response {
 	 * this <tt>Response</tt>
 	 */
     public Set getUrns() {
-		return Collections.unmodifiableSet(urns);
+		return urns;
     }
 
 	// TODO: do we care that this does not compare all of the elements?
