@@ -96,7 +96,7 @@ public class SettingsManager implements SettingsInterface
      *  Set up the manager instance to follow the
      *  singleton pattern.
      */
-    private static SettingsManager instance_;
+    private static SettingsManager instance_=new SettingsManager();
 
     /** a string for the file separator */
     private String fileSep_;
@@ -111,9 +111,7 @@ public class SettingsManager implements SettingsInterface
      * to an instance of this class in
      * accordance with the singleton pattern
      */
-    public static synchronized SettingsManager instance() {
-        if(instance_ == null)
-            instance_ = new SettingsManager();
+    public static SettingsManager instance() {
         return instance_;
     }
 
