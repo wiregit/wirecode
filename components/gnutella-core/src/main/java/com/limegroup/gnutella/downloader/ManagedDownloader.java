@@ -2758,7 +2758,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 				return -1;
         } else 
             //Could also use currentFileSize, but this works.
-            return ((HTTPDownloader)_activeWorkers.get(0))
+            return ((DownloadWorker)_activeWorkers.get(0)).getDownloader()
                       .getRemoteFileDesc().getSize();
     }
 
@@ -2939,6 +2939,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 	    synchronized(hashTreeLock) {
 	        return hashTree == null ? DownloadWorker.DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
 	    }
+	}
+	
+	public int getAmountVerified() {
+		return commonOutFile.getVerifiedBlockSize();
 	}
 	
     /**

@@ -214,6 +214,16 @@ public interface Downloader extends BandwidthTracker {
      * Determines if the download is completed.
      */
     public boolean isCompleted();
+	
+	/**
+	 * @return the amount of data that has been verified
+	 */
+	public int getAmountVerified();
+	
+	/**
+	 * @return the chunk size for the given download
+	 */
+	public int getChunkSize();
 
 
 }
