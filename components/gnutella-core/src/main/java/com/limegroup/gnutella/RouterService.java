@@ -224,7 +224,6 @@ public final class RouterService {
 		QueryUnicaster.instance().start();
 	    new HTTPAcceptor().start();	
         Pinger.instance().start();
-        PongCacher.instance().start();
 	}
 
     /**
