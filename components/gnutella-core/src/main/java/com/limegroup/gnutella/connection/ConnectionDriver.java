@@ -132,6 +132,11 @@ public class ConnectionDriver implements ConnectionListener {
                 //There appears to be a bug in Java 1.4.1-beta on Windows where
                 //this can be thrown if a connection is closed by the client.
                 //Ignore.
+            } catch (CancelledKeyException e) {
+                //There appears to be a bug in Java 1.4.1-beta on Windows where
+                //this can be thrown if a connection is closed by the client
+                //while the read is in progress.
+                throw new IOException();
             }
 
             //Handle all reads.  This generates event to listener (this), which
