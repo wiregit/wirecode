@@ -1159,22 +1159,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertLessThan("u2 did all the work", TestFile.length()+FUDGE_FACTOR, u2);
     }
     
-    public void testPartialDownloads() throws IOException {
-        debug("-Testing partial downloads...");
-        uploader1.setPartial(true);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc[] rfds = {rfd1};
-        Downloader downloader = null;
-        try {
-            downloader = RouterService.download(rfds,false);
-        } catch (AlreadyDownloadingException adx) {
-            assertTrue("downloader already downloading??",false);
-        }
-        waitForBusy(downloader);
-        assertEquals("Downloader did not go to busy after getting ranges",
-                     Downloader.WAITING_FOR_RETRY, downloader.getState());
-    }
-    
     public void testSimpleDownloadWithInitialAlts() throws Exception {
         debug("-Testing download with initial alts");
         
@@ -1206,6 +1190,27 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //be equal, because the uploaders are stated at different times.
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }    
+    
+    /**
+     * This test MUST BE LAST because it leaves a file around.
+     * I suppose it could be cleaned up ... but oh well.
+     * Easier to make it last.
+     */
+    public void testPartialDownloads() throws IOException {
+        debug("-Testing partial downloads...");
+        uploader1.setPartial(true);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        Downloader downloader = null;
+        try {
+            downloader = RouterService.download(rfds,false);
+        } catch (AlreadyDownloadingException adx) {
+            assertTrue("downloader already downloading??",false);
+        }
+        waitForBusy(downloader);
+        assertEquals("Downloader did not go to busy after getting ranges",
+                     Downloader.WAITING_FOR_RETRY, downloader.getState());
     }
         
 
