@@ -31,7 +31,7 @@ public class FakeProxyServer {
 
     public FakeProxyServer(int proxyPort, int destinationPort) {
         _proxyOn = false;
-        _proxyVersion = ProxyTester.NONE;
+        _proxyVersion = ProxyTest.NONE;
         _authentication = false;
         startServers(proxyPort, destinationPort);        
     }
@@ -72,11 +72,11 @@ public class FakeProxyServer {
                     Assert.that(false,
                       "LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
-                if(_proxyVersion == ProxyTester.SOCKS4)
+                if(_proxyVersion == ProxyTest.SOCKS4)
                     checkSOCKS4(is);
-                else if(_proxyVersion == ProxyTester.SOCKS5)
+                else if(_proxyVersion == ProxyTest.SOCKS5)
                     checkSOCKS5(is, incomingProxy.getOutputStream());
-                else if(_proxyVersion == ProxyTester.HTTP)
+                else if(_proxyVersion == ProxyTest.HTTP)
                     checkHTTP(is);
                 else
                     Assert.that(false, 
