@@ -2976,7 +2976,7 @@ public final class SettingsManager {
 	 * @param BOOL the <tt>boolean</tt> value to set
 	 */
 	private void setBooleanValue(final String KEY, final boolean BOOL) {
-		PROPS.put(KEY, new Boolean(BOOL).toString());
+		PROPS.put(KEY, String.valueOf(BOOL));
 	}
     
     /**
@@ -2987,7 +2987,7 @@ public final class SettingsManager {
 	 * @param LONG the <tt>long</tt> value to set
 	 */
 	private void setLongValue(final String KEY, final long LONG) {
-		PROPS.put(KEY, new Long(LONG).toString());
+		PROPS.put(KEY, String.valueOf(LONG));
 	}
 
 	/**
