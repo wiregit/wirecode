@@ -27,8 +27,7 @@ import com.limegroup.gnutella.messages.PingReply;
 public final class HorizonCounter {
     
     private static final HorizonCounter INSTANCE = new HorizonCounter();
-    
-    private boolean _horizonEnabled=true;
+
     /** The approximate time to expire pongs, in milliseconds. */
     static long HORIZON_UPDATE_TIME=10*60*1000; //10 minutes
     /** The last time refreshHorizonStats was called. */

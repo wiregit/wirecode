@@ -83,15 +83,7 @@ public class FileDesc implements AlternateLocationCollector {
 	/** 
 	 * The number of times this file has had completed uploads
 	 */
-	private int _completedUploads;	
-
-	/**
-	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
-	 * because Collections.EMPTY_SET is not serializable in the collections 1.1
-	 * implementation.
-	 */
-	private static final Set EMPTY_SET = 
-		Collections.unmodifiableSet(new HashSet());
+	private int _completedUploads;
 
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
