@@ -33,6 +33,8 @@
   <property name="cloverjar"   value="lib/clover.jar"/>
   <property name="cocoaStubs"  value="${corelib}cocoaFoundation.jar"/>
   <property name="corebin"     value="${coredir}/bin"/>
+  <property name="httpclient"  value="${corelib}/commons-httpclient.jar"/>
+  <property name="logging"     value="${corelib}/commons-logging.jar"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -62,6 +64,8 @@
 	<pathelement location="${saxpath}"/>
 	<pathelement location="${cloverjar}"/>
     <pathelement location="${cocoaStubs}"/>
+    <pathelement location="${httpclient}"/>
+    <pathelement location="${logging}"/>
   </path>
   
   <!-- CLOVER SETUP TASKS -->
