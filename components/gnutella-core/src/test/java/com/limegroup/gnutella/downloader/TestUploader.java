@@ -61,6 +61,7 @@ public class TestUploader extends AssertComparisons {
 	private URN                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
+    private Socket socket;
     private boolean busy = false;
     private int retryAfter = -1;
     private int timesBusy = Integer.MAX_VALUE;
@@ -198,37 +199,36 @@ public class TestUploader extends AssertComparisons {
         t.start();        
     }
     
-    public TestUploader(final Socket mySocket, String name) throws IOException{
+    public TestUploader(String name) throws IOException{
         super(name);
         this.name=name;
         reset();
         LOG.debug("starting to handle request with direct socket given");
         
-        try {
-            while(http11 && !stopped) {
-                handleRequest(mySocket);
-                if (queue) { 
-                    mySocket.setSoTimeout(MAX_POLL);
-                    if(unqueue) // second time give slot
-                        queue = false;
-                    handleRequest(mySocket);
+        Thread t = new Thread() {
+            public void run() {
+                synchronized(TestUploader.this) {
+                    try{
+                    while(socket==null) {LOG.debug("socket is null");
+                        TestUploader.this.wait();
+                    }
+                    }catch(InterruptedException hmm) {
+                        ErrorService.error(hmm);
+                    }
                 }
-                mySocket.setSoTimeout(8000);
+                
+                Runnable r = new SocketHandler(socket);
+                r.run();
             }
-        } catch (IOException e) {
-            if(totalUploaded < totalAmountToUpload)
-                killedByDownloader = true;
-            LOG.debug("Exception in uploader (" + name + ")", e);
-        } catch(Throwable t) {
-            ErrorService.error(t);
-        } finally {
-            try {
-                mySocket.close();
-            } catch (IOException e) {
-                return;
-            }
-        }//end of finally
+        };
+        t.start();
 
+    }
+    
+    public synchronized void setSocket(Socket s) {
+        LOG.debug("setting socket");
+        socket=s;
+        notify();
     }
 
     public void stopThread() {
@@ -485,34 +485,7 @@ public class TestUploader extends AssertComparisons {
                 LOG.debug("Uploader accepted connection");
                 //spawn thread to handle request
                 final Socket mySocket = socket;
-                Thread runner=new Thread() {
-                    public void run() {          
-                        try {
-                            while(http11 && !stopped) {
-                                handleRequest(mySocket);
-                                if (queue) { 
-                                    mySocket.setSoTimeout(MAX_POLL);
-                                    if(unqueue) // second time give slot
-                                        queue = false;
-                                    handleRequest(mySocket);
-                                }
-                                mySocket.setSoTimeout(8000);
-                            }
-                        } catch (IOException e) {
-                            if(totalUploaded < totalAmountToUpload)
-                                killedByDownloader = true;
-                            LOG.debug("Exception in uploader (" + name + ")", e);
-                        } catch(Throwable t) {
-                            ErrorService.error(t);
-                        } finally {
-                            try {
-                                mySocket.close();
-                            } catch (IOException e) {
-                                return;
-                            }
-                        }//end of finally
-                    }//end of run
-                };
+                Thread runner=new Thread(new SocketHandler(mySocket));
                 runner.start();
             } catch (IOException e) {
                 LOG.debug("exception in accept", e);
@@ -938,5 +911,38 @@ public class TestUploader extends AssertComparisons {
 			// reason -- just return null
 			return null;
 		}		
+	}
+	
+	private class SocketHandler implements Runnable {
+	    private final Socket mySocket;
+	    public SocketHandler(Socket s) {
+	        mySocket=s;
+	    }
+	    public void run() {          
+            try {
+                while(http11 && !stopped) {
+                    handleRequest(mySocket);
+                    if (queue) { 
+                        mySocket.setSoTimeout(MAX_POLL);
+                        if(unqueue) // second time give slot
+                            queue = false;
+                        handleRequest(mySocket);
+                    }
+                    mySocket.setSoTimeout(8000);
+                }
+            } catch (IOException e) {
+                if(totalUploaded < totalAmountToUpload)
+                    killedByDownloader = true;
+                LOG.debug("Exception in uploader (" + name + ")", e);
+            } catch(Throwable t) {
+                ErrorService.error(t);
+            } finally {
+                try {
+                    mySocket.close();
+                } catch (IOException e) {
+                    return;
+                }
+            }//end of finally
+        }
 	}
 }

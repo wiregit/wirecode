@@ -136,7 +136,7 @@ public class DownloadTest extends BaseTestCase {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
-        //dm.scheduleWaitingPump();
+
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
@@ -322,8 +322,9 @@ public class DownloadTest extends BaseTestCase {
         assertTrue(rfd.needsPush());
         
         RemoteFileDesc [] rfds = {rfd};
+        TestUploader uploader = new TestUploader("push uploader");
         PushAcceptor p = new PushAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName());
+                savedFile.getName(),uploader);
         
         tGeneric(rfds);
     }
@@ -359,6 +360,30 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
 
+    public void testSimpleSwarmPush() throws Exception {
+        LOG.debug("-Testing swarming from two sources, one push...");  
+        
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),savedFile.getName());
+        RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
+        
+        uploader1.setRate(500);
+        TestUploader uploader = new TestUploader("push uploader");
+        final int FUDGE_FACTOR=500*1024;
+        
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        PushAcceptor pa = 
+            new PushAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader);
+        
+        tGeneric(rfds);
+        
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
+                uploader1.amountUploaded());
+        
+        assertGreaterThan("pusher did all the work ",0,uploader1.amountUploaded());
+    }
 
     public void testUnbalancedSwarm() throws Exception  {
         LOG.debug("-Testing swarming from two unbalanced sources...");
@@ -1041,6 +1066,41 @@ public class DownloadTest extends BaseTestCase {
         //be equal, because the uploaders are stated at different times.
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }
+    /**
+     * tests that an uploader will pass a push loc which will be included in the swarm
+     */
+    public void testUploaderPassesPushLoc() throws Exception {
+        LOG.debug("-Testing swarming from two sources one based on a push alt...");
+        final int RATE=500;
+        final int FUDGE_FACTOR=RATE*1024;
+        uploader1.setRate(RATE);
+        
+        TestUploader pusher = new TestUploader("push uploader");
+        pusher.setRate(RATE);
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+        
+        AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
+        alCol.add(pushLoc);
+        
+        uploader1.setAlternateLocations(alCol);
+        
+        RemoteFileDesc rfd = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        
+        RemoteFileDesc []rfds = {rfd};
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),pusher);
+        
+        tGeneric(rfds);
+        
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
+                uploader1.amountUploaded());
+        assertLessThan("pusher did all the work", TestFile.length()/2+FUDGE_FACTOR, 
+                pusher.amountUploaded());
+        assertGreaterThan("pusher didn't do anything",0,pusher.amountUploaded());
     }
     
     public void testAlternateLocationsAreRemoved() throws Exception {  
@@ -2181,12 +2241,14 @@ public class DownloadTest extends BaseTestCase {
         private final int _portC;
         private DatagramSocket sock;
         private final String _fileName;
+        private final TestUploader _uploader;
         
-        public PushAcceptor(int portL,int portC,String filename) {
+        public PushAcceptor(int portL,int portC,String filename,TestUploader uploader) {
             super("push acceptor "+portL+"->"+portC);
             
             _portC=portC;
             _fileName=filename;
+            _uploader=uploader;
             try {
                 sock = new DatagramSocket(portL);
                 //sock.connect(InetAddress.getLocalHost(),portC);
@@ -2220,7 +2282,7 @@ public class DownloadTest extends BaseTestCase {
                 os.flush();
                 
                 LOG.debug("wrote GIV");
-                new TestUploader(s,_fileName);
+                _uploader.setSocket(s);
                 
             }catch(BadPacketException bad) {
                 ErrorService.error(bad);
