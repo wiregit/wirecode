@@ -35,6 +35,17 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	}
 
 	/**
+	 * Private class for keeping track of duplicate queries.
+	 */
+	private static class DuplicateQueriesReceivedMessageStat
+		extends ReceivedMessageStat {
+		public void incrementStat() {
+			super.incrementStat();
+			ALL_DUPLICATE_QUERIES.incrementStat();
+		}
+	}
+
+	/**
 	 * Private class for keeping track of the number of UDP messages.
 	 */
 	private static class UDPReceivedMessageStat extends ReceivedMessageStat {
@@ -56,14 +67,28 @@ public class ReceivedMessageStat extends AbstractStatistic {
 		}
 	}
 
+
+	///// BYTES STATISTICS -- override addData method /////
+
 	/**
 	 * Private class for keeping track of filtered messages, in bytes.
 	 */
 	private static class FilteredReceivedMessageStatBytes
 		extends AbstractKilobytesStatistic {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_FILTERED_MESSAGES_BYTES.incrementStat();
+		public void addData(int data) {
+			super.addData(data);
+			ALL_FILTERED_MESSAGES_BYTES.addData(data);
+		}
+	}
+
+	/**
+	 * Private class for keeping track of duplicate queries, in bytes.
+	 */
+	private static class DuplicateQueriesReceivedMessageStatBytes
+		extends AbstractKilobytesStatistic {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_DUPLICATE_QUERIES_BYTES.addData(data);
 		}
 	}
 
@@ -116,6 +141,16 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES =
 		new ReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for all duplicate quereies.
+	 */
+	public static final Statistic ALL_DUPLICATE_QUERIES =
+		new ReceivedMessageStat();
+
+
+
+	/////// individual message stats ///////
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pings received over UDP.
@@ -211,6 +246,20 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredReceivedMessageStat();
 
+	/**
+	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * over UDP.
+	 */	
+	public static final Statistic UDP_DUPLICATE_QUERIES =
+		new DuplicateQueriesReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * over TCP.
+	 */	
+	public static final Statistic TCP_DUPLICATE_QUERIES =
+		new DuplicateQueriesReceivedMessageStat();
+
 
 	////////////// START OF BYTE STATISTICS //////////////////
 
@@ -236,6 +285,12 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES_BYTES =
+		new ReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for all duplicate queries, in bytes.
+	 */
+	public static final Statistic ALL_DUPLICATE_QUERIES_BYTES =
 		new ReceivedMessageStatBytes();
 
 	/**
@@ -331,4 +386,18 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 */
 	public static final Statistic TCP_FILTERED_MESSAGES_BYTES = 
 	    new FilteredReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * over UDP.
+	 */	
+	public static final Statistic UDP_DUPLICATE_QUERIES_BYTES =
+		new DuplicateQueriesReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * over TCP.
+	 */	
+	public static final Statistic TCP_DUPLICATE_QUERIES_BYTES =
+		new DuplicateQueriesReceivedMessageStatBytes();
 }
