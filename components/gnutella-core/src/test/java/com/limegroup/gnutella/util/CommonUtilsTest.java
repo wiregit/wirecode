@@ -30,6 +30,8 @@ public class CommonUtilsTest extends TestCase {
         assertTrue(majorVersion==13);        
         majorVersion = CommonUtils.getMajorVersionNumberInternal(".34.7");
         assertTrue(majorVersion==2);        
+        majorVersion = CommonUtils.getMajorVersionNumberInternal("2.7.13");
+        assertEquals("unexpected major version number",2, majorVersion); 
     }
 
     public void testMinorRevisionMethod() {
@@ -44,7 +46,10 @@ public class CommonUtilsTest extends TestCase {
         minorVersion = CommonUtils.getMinorVersionNumberInternal("..7");
         assertTrue(minorVersion==7);        
         minorVersion = CommonUtils.getMinorVersionNumberInternal("2..7");
-        assertTrue(minorVersion==7);        
+        assertTrue(minorVersion==7);    
+
+        minorVersion = CommonUtils.getMinorVersionNumberInternal("2.7.13");
+        assertEquals("unexpected minor version number",7, minorVersion); 
     }
     
 
