@@ -406,9 +406,7 @@ public class ConnectionManager {
      *  slots, otherwise <tt>false</tt>
      */
     private boolean hasFreeUltrapeerSlots() {
-        return isSupernode() &&            
-            (getNumInitializedConnections() <
-             ULTRAPEER_CONNECTIONS);
+        return getNumFreeNonLeafSlots() > 0;
     }
 
     /**
@@ -420,9 +418,7 @@ public class ConnectionManager {
      *  slots, otherwise <tt>false</tt>
      */
     private boolean hasFreeLeafSlots() {
-        return isSupernode() &&
-            (getNumInitializedClientConnections() <
-             UltrapeerSettings.MAX_LEAVES.getValue());  
+        return getNumFreeLeafSlots() > 0;
     }
     
     /**
