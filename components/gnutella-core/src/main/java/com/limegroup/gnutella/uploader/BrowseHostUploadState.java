@@ -33,7 +33,7 @@ public final class BrowseHostUploadState extends UploadState {
         // don't accept them...
         if(!UPLOADER.getClientAcceptsXGnutellaQueryreplies()) {
             // send back a 406...
-            String str = "HTTP/1.1 406 Not Acceptable\r\n";
+            String str = "HTTP/1.1 406 Not Acceptable\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
             debug("BHUS.doUpload(): client does not accept QRs.");
