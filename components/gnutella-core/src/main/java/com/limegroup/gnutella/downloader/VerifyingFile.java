@@ -288,15 +288,20 @@ public class VerifyingFile {
       throws NoSuchElementException {
         ranges.delete(writtenBlocks);
         ranges.delete(leasedBlocks);
+        ranges.delete(pendingBlocks);
         Interval temp = ranges.removeFirst();
         
-        // damn you, overlap checking!
-        while (temp != null 
-               && temp.high - temp.low <= ManagedDownloader.OVERLAP_BYTES)
-            temp = ranges.removeFirst();
-        
-        Interval ret =
-            new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, temp.high);
+        Interval ret;
+        if (checkOverlap) {
+            // damn you, overlap checking!
+            while (temp != null 
+                    && temp.high - temp.low <= ManagedDownloader.OVERLAP_BYTES)
+                temp = ranges.removeFirst();
+            
+            ret =
+                new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, temp.high);
+        } else 
+            ret = ranges.removeFirst();
 
         leaseBlock(ret);
         return ret;
@@ -454,20 +459,27 @@ public class VerifyingFile {
     /**
      * Fits an interval inside a chunk.  This ensures that the interval is never larger
      * than chunksize and finishes at exact chunk offset.
-     *
-     * @return a new (smaller) interval up to chunkSize.
      */
     private synchronized Interval allignInterval(Interval temp, int chunkSize) {
         Interval interval;
-        int overlap = temp.high % chunkSize;
-        if(overlap != chunkSize - 1) {
-            int max = temp.high - overlap;
-            interval = new Interval(temp.low, max);
-            temp = new Interval(max+1,temp.high);
+        
+        int intervalSize = temp.high - temp.low;
+        
+        // find where the next chunk starts
+        int chunkStart = ( 1 + temp.low / chunkSize ) * chunkSize;
+        
+        // if we're already covering an exact chunk, return 
+        if (chunkStart == temp.high && intervalSize == chunkSize)
+            return temp;
+        
+        // try to map the area until the chunk border
+        if (chunkStart < temp.high) {
+            interval = new Interval(temp.low, chunkStart-1);
+            temp = new Interval(chunkStart,temp.high);
             releaseBlock(temp);
-        } else { //temp's size <= chunkSize
+        } else
             interval = temp;
-        }
+
         return interval;
     }
 
