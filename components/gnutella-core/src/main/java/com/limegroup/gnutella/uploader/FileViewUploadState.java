@@ -27,7 +27,8 @@ public final class FileViewUploadState implements HTTPMessage {
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
         final String fileName = _uploader.getFileName();
-        if (fileName.endsWith(UploadManager.FV_PASS)) {
+        if (fileName.startsWith(UploadManager.FV_REQ_BEGIN + "/" + 
+                                UploadManager.FV_PASS)) {
             FileListHTMLPage htmlGen = FileListHTMLPage.instance();
             BAOS.write(htmlGen.getSharedFilePage().getBytes());
         }
