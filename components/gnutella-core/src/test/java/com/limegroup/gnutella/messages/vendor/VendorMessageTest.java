@@ -457,11 +457,11 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     		fail("created a redirect ping w/o address");
     	}catch(IllegalArgumentException expected){}
     	
-    	ping = new HeadPing(urn, 0xFF & ~HeadPing.FIREWALL_REDIRECT);
+    	ping = new HeadPing(urn, 0xFF);
 
     	assertTrue(ping.requestsAltlocs());
     	assertTrue(ping.requestsRanges());
-    	assertNull(ping.getAddress());
+    	
     	
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	ping.write(baos);
@@ -470,21 +470,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
-    	
-    	
-    	Endpoint someHost = new Endpoint("1.2.3.4",15);
-    	ping = new HeadPing(urn,someHost);
-    	assertEquals(HeadPing.FIREWALL_REDIRECT,ping.getFeatures());
-    	assertFalse(ping.requestsAltlocs());
-    	assertFalse(ping.requestsRanges());
-    	assertNotNull(ping.getAddress());
-    	
-    	Endpoint someHost2 = (Endpoint) ping.getAddress();
-    	
-    	assertEquals(someHost.getAddress(),someHost2.getAddress());
-    	assertEquals(someHost.getPort(),someHost2.getPort());
-    	assertEquals(someHost.getInetAddress(),someHost2.getInetAddress());
-    	
+    		
     	testWrite(ping);
     }
     

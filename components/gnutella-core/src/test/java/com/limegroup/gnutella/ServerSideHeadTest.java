@@ -47,10 +47,6 @@ public class ServerSideHeadTest extends BaseTestCase {
 
     	ping1 = new HeadPing(FileManagerStub._notHave);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
-    	ping3 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN),
-    			new Endpoint("127.0.0.1",port2));
-    	ping4 = new HeadPing(FileManagerStub._notHave,
-    			new Endpoint("127.0.0.1",port1));
 
     	
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
@@ -138,50 +134,5 @@ public class ServerSideHeadTest extends BaseTestCase {
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     }
     
-    /**
-     * tests the scenario where a ping requests to be sent elsewhere.
-     */
-    public void testRedirectPing() throws Exception {
-    	
-    	PrivilegedAccessor.setValue(UDPService.instance(),
-    			"_acceptedUnsolicitedIncoming",new Boolean(false));
-    	
-    	MessageRouter router = RouterService.getMessageRouter();
-    	
-    	router.handleUDPMessage(ping3,datagram3);
-    	Thread.sleep(100);
-    	
-    	DatagramPacket received = new DatagramPacket(new byte[1024],1024);
-    	
-    	socket2.receive(received);
-    	
-    	try{
-    		socket1.receive(received);
-    		fail("pong sent to wrong place");
-    	}catch(IOException expected) {}
-    	
-    	
-    	
-    	HeadPong pong = (HeadPong) 
-		Message.read(new ByteArrayInputStream(received.getData()));
-	
-    	assertTrue(Arrays.equals(ping3.getGUID(),pong.getGUID()));
-    	
-    	//now test a redirect message for a file we do not have.
-    	router.handleUDPMessage(ping4,datagram4);
-    	Thread.sleep(100);
-    	
-    	
-    	try{
-    		socket1.receive(received);
-    		fail("pong redirected when file was not found");
-    	}catch(IOException expected) {}
-    	
-    	try{
-    		socket2.receive(received);
-    		fail("pong sent to wrong place");
-    	}catch(IOException expected) {}
-    	
-    }
-
+  
 }

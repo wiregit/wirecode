@@ -12,6 +12,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.TreeMap;
@@ -187,12 +188,13 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 * Tests the factory method that creates a RemoteFileDesc from an alternate
 	 * location.
 	 */
-	public void testCreateRemoteFileDesc() {
+	public void testCreateRemoteFileDesc() throws Exception{
 		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			AlternateLocation al = HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
 			RemoteFileDesc rfd = al.createRemoteFileDesc(10);
 			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
-			assertEquals("urls should be equal", al.getUrl(), rfd.getUrl());
+			URL url = (URL)PrivilegedAccessor.getValue(al,"URL");
+			assertEquals("urls should be equal", url, rfd.getUrl());
 		}
 	}
 
