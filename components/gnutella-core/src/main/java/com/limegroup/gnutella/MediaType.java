@@ -8,12 +8,17 @@ package com.limegroup.gnutella;
 public class MediaType {
     private String description;
     private String[] extensions;
-    private final static String ANY_TYPE = "MEDIA_ANY_TYPE";
-    private final static String DOCUMENTS = "MEDIA_DOCUMENTS";
-    private final static String PROGRAMS = "MEDIA_PROGRAMS";
-    private final static String AUDIO = "MEDIA_AUDIO";
-    private final static String VIDEO = "MEDIA_VIDEO";
-    private final static String IMAGES = "MEDIA_IMAGES";
+
+    //////////////////IMPORTANT NOTE//////////////////
+    //If more types are added, then the method isDefualtType in
+    // NamedMediaType must also be chnaged.
+    ////////////////////////////////////////////
+    public final static String ANY_TYPE = "MEDIA_ANY_TYPE";
+    public final static String DOCUMENTS = "MEDIA_DOCUMENTS";
+    public final static String PROGRAMS = "MEDIA_PROGRAMS";
+    public final static String AUDIO = "MEDIA_AUDIO";
+    public final static String VIDEO = "MEDIA_VIDEO";
+    public final static String IMAGES = "MEDIA_IMAGES";
 
 
 

@@ -2,6 +2,14 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 
+/**
+ * A Gnutella query request method.  In addition to a query string, queries can
+ * include a minimum size string and metadata.  There are four constructors in
+ * this to make new outgoing messages from scratch.  Two of them take GUIDs as
+ * arguments; this allows the GUI to prepare a result panel <i>before</i>
+ * sending the query to the network.  One takes a isRequery argument; this is
+ * used for automatic re-query capabilities (DownloadManager).
+ */
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
@@ -11,26 +19,19 @@ public class QueryRequest extends Message implements Serializable{
     private String query=null;
     private String richQuery = null;
 
-    /**
-     * Builds a new query from scratch
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     */
-    public QueryRequest(byte ttl, int minSpeed, String query, String richQuery) {
-        this(ttl, minSpeed, query, richQuery, false);
-    }
-
 
     /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up
+     * results.
      *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    public QueryRequest(byte ttl, int minSpeed, 
-                        String query, String richQuery, boolean isRequery) {
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery) {
         //Allocate two bytes for min speed plus query string and null terminator
-        super((isRequery ? GUID.makeGuidRequery() : GUID.makeGuid()),
+        super(guid,
               Message.F_QUERY, ttl, (byte)0, 
               2+query.length()+1+richQuery.length()+1);
         payload=new byte[2+query.length()+1+richQuery.length()+1];
@@ -51,24 +52,30 @@ public class QueryRequest extends Message implements Serializable{
         i++; //just so the records are straight. 
     }
 
-
+    /**
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up results
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query) {
+        this(guid, ttl, minSpeed, query, "");
+    }
 
     /**
-     * Older form of the constructor calls the newer form of the constructor
-     * with a empty rich query
+     * Builds a new query from scratch, with no metadata, with a default GUID.
      */
     public QueryRequest(byte ttl, int minSpeed, String query) {
-        this(ttl, minSpeed, query, "");
+        this(newQueryGUID(false), ttl, minSpeed, query, "");
     }
 
 
     /**
-     * Older form of the constructor calls the newer form of the constructor
-     * with a empty rich query, but allows you to flag as a requery
+     * Builds a new query from scratch, with no metadata, marking the GUID
+     * as a requery iff isRequery.
      */
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, boolean isRequery) {
-        this(ttl, minSpeed, query, "", isRequery);
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, "");
     }
 
 
@@ -81,6 +88,14 @@ public class QueryRequest extends Message implements Serializable{
             byte[] payload) {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
         this.payload=payload;
+    }
+
+    /**
+     * Returns a new GUID appropriate for query requests.  If isRequery,
+     * the GUID query is marked.
+     */
+    public static byte[] newQueryGUID(boolean isRequery) {
+        return isRequery ? GUID.makeGuidRequery() : GUID.makeGuid();
     }
 
     protected void writePayload(OutputStream out) throws IOException {
@@ -201,42 +216,65 @@ public class QueryRequest extends Message implements Serializable{
         Assert.that(qr.getMinSpeed()==u2);
         Assert.that(qr.getQuery().equals(""));
         Assert.that(qr.getQueryLength()==0);
-        
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
 
-        qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
+        qr=new QueryRequest((byte)3,(byte)1,"ABC");
         Assert.that(qr.getMinSpeed()==(byte)1);
-        Assert.that(qr.getQuery().equals("ZZZ"));
+        Assert.that(qr.getQuery().equals("ABC"));
         Assert.that(qr.getQueryLength()==3);
-        System.out.println("(ZZZ) First byte = "+qr.getQueryByteAt(0));
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
+        Assert.that(qr.getQueryByteAt(0)==(byte)65);
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
 
         //String is single null-terminated.
         byte[] payload=new byte[2+2];
         payload[2]=(byte)65;
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        byte[] guid=GUID.makeGuid();
+        qr=new QueryRequest(guid, (byte)0, (byte)0, payload);
         Assert.that(qr.getLength()==4);
         String s=qr.getQuery();
         Assert.that(s.equals("A"), s);
         Assert.that(qr.getQueryLength()==1);
         Assert.that(qr.getQueryByteAt(0)==65);//first byte of query.
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
 
 
         //String is double null-terminated.
         payload=new byte[2+3];
         payload[2]=(byte)65;
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        qr=new QueryRequest(guid, (byte)0, (byte)0, payload);
         s=qr.getQuery();
         Assert.that(s.equals("A"), s);
         Assert.that(qr.getQueryLength()==1);
         Assert.that(qr.getQueryByteAt(0)==65);
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
 
         //String is empty.
         payload=new byte[2+1];
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        qr=new QueryRequest(guid, (byte)0, (byte)0, payload);
         s=qr.getQuery();
         Assert.that(s.equals(""), s);
         Assert.that(qr.getQueryLength()==0);
-        System.out.println("here comes an exception");
-        qr.getQueryByteAt(0);
+        try {
+            qr.getQueryByteAt(0);
+            Assert.that(false);
+        } catch (ArrayIndexOutOfBoundsException e) { }
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
+
+        //Test that only one constructor marks requery status.
+        qr=new QueryRequest(RouterService.newQueryGUID(), (byte)2,
+                            0, "test");
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
+        qr=new QueryRequest(RouterService.newQueryGUID(), (byte)2,
+                            0, "test", "");
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
+        qr=new QueryRequest((byte)2, 0, "test", false);
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID()));
+
+        qr=new QueryRequest((byte)2, 0, "test", true);
+        Assert.that(GUID.isLimeRequeryGUID(qr.getGUID()));
+        qr=new QueryRequest(newQueryGUID(true), (byte)2, 0, "test");
+        Assert.that(GUID.isLimeRequeryGUID(qr.getGUID()));
     }
     */
 }
