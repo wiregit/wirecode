@@ -578,7 +578,7 @@ class PushRequestedFile {
 	    && filename.equals(prf.filename)
 	    //Because of the following line, hosts that used faked 
 	    //IP addresses will not be able to connect to you.
-//    	    && Arrays.equals(ip, prf.ip)
+  	    && Arrays.equals(ip, prf.ip)
 	    && index==prf.index;
     }
     
