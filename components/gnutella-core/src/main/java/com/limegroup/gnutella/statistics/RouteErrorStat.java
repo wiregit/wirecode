@@ -25,6 +25,7 @@ public class RouteErrorStat extends AdvancedStatistic {
     private static class QueryReplyRouteErrorStat 
         extends GeneralRouteErrorStat {
         public void incrementStat() {
+            super.incrementStat();
             QUERY_REPLY_ROUTE_ERRORS.incrementStat();
         }
     }
