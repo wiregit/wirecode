@@ -339,7 +339,7 @@ public class ConnectionManager {
      * decision.
      * @return true, if more supernodes needed, false otherwise
      */
-    public boolean superNodesNeeded(){
+    public boolean supernodeNeeded(){
         //if more than 70% slots are full, return true 
         if(SettingsManager.instance().isSupernode() &&
             _incomingClientConnections > 
@@ -788,8 +788,8 @@ public class ConnectionManager {
             throw e;
         }
         finally{
-            //if the connection received headers, process those to update
-            //local information (e.g. addresses of other hosts)
+            //if the connection received headers, process the headers to
+            //take steps based on the headers
             processConnectionHeaders(c);
         }
         
@@ -878,7 +878,8 @@ public class ConnectionManager {
     
     /**
      * Processes the headers received during connection handshake and updates
-     * itself with any useful information contained in those headers
+     * itself with any useful information contained in those headers.
+     * Also may change its state based upon the headers.
      * @param headers The headers to be processed
      * @param connection The connection on which we received the headers
      */
@@ -896,7 +897,6 @@ public class ConnectionManager {
         //set client/supernode flag for the connection
         String supernodeStr = headers.getProperty(
             ConnectionHandshakeHeaders.SUPERNODE);
-        
         if(supernodeStr != null)
         {
             boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
@@ -905,8 +905,46 @@ public class ConnectionManager {
             else
                 connection.setClientConnectionFlag(true);
         }
+        
+        //check Supernode-Needed header
+        String supernodeNeededStr = headers.getProperty(
+            ConnectionHandshakeHeaders.SUPERNODE_NEEDED);
+        if(supernodeNeededStr != null)
+        {
+            boolean supernodeNeeded 
+                = (new Boolean(supernodeNeededStr)).booleanValue();
+            //take appropriate action
+            gotSupernodeNeededGuidance(supernodeNeeded);
+        }
     }
    
+    /** 
+     * Indicates that we received guidance from another supernode about
+     * the supernode/clientnode state we should go to. 
+     * Based upon the guidance as well as our current conditions, we may
+     * change our state based upon the guidance
+     * @param supernodeNeeded True, if other node thinks we should be
+     * a supernode, false otherwise
+     */
+    private void gotSupernodeNeededGuidance(boolean supernodeNeeded)
+    {
+        //if we are in the state asked for, return
+        if(SettingsManager.instance().isSupernode() == supernodeNeeded)
+            return;
+        //Also return, if we have a forced state
+        if(SettingsManager.instance().hasSupernodeOrClientnodeStatusForced())
+            return;
+        
+        //if is a supernode, and have client connections, dont change mode
+        if(SettingsManager.instance().isSupernode() && 
+            _incomingClientConnections > 0)
+            return;
+        
+        //else, set the state as guided, and reconnect
+        SettingsManager.instance().setSupernodeMode(supernodeNeeded);
+        reconnect();
+    }
+    
     
     /**
      * Updates the addresses in the hostCache by parsing the passed string
@@ -955,8 +993,8 @@ public class ConnectionManager {
             throw e;
         }
         finally{
-            //if the connection received headers, process those to update
-            //local information (e.g. addresses of other hosts)
+            //if the connection received headers, process the headers to
+            //take steps based on the headers
             processConnectionHeaders(c);
         }
 
