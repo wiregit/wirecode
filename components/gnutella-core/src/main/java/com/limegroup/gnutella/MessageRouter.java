@@ -1634,7 +1634,6 @@ public abstract class MessageRouter {
             int j = 
                 (int)(Math.random() * numResponses) % 
                 (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
-            int limit = index + HIGH_HOPS_RESPONSE_LIMIT;
 
             Response[] newResponses = 
                 new Response[HIGH_HOPS_RESPONSE_LIMIT];
