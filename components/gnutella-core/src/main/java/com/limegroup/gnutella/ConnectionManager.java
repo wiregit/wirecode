@@ -81,7 +81,7 @@ public class ConnectionManager {
         ConnectionSettings.NUM_CONNECTIONS.getValue();
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 4;
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
@@ -1126,7 +1126,7 @@ public class ConnectionManager {
         //(Too much parallelism increases chance of simultaneous connects,
         //resulting in too many connections.)  Note that we assume that all
         //connections being fetched right now will become ultrapeers.
-        int need = Math.min(10,4*neededConnections) 
+        int need = Math.min(20, 4*neededConnections) 
                  - _fetchers.size()
                  - _initializingFetchedConnections.size();
 
