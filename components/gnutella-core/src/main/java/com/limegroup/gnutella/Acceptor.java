@@ -431,7 +431,7 @@ public class Acceptor implements Runnable {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new ServerSocket(port);
+                newSocket=new com.limegroup.gnutella.io.NIOServerSocket(port);
             } catch (IOException e) {
                 udpServiceSocket.close();
                 throw e;
