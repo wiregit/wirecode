@@ -175,7 +175,8 @@ public class WriteRegulator {
           (((baseWait * windowSize) / _skipLimit) * 2) / 4;
 
         // If our RTT time is going up, figure out what to do
-        if ( rtt != 0 && baseWait != 0 && usedSpots >= 10 &&
+        if ( rtt != 0 && baseWait != 0 && 
+             receiverWindowSpace <= LOW_WINDOW_SPACE &&
              (windowDelay < rtt || rtt > maxRTT) ) {
             if(LOG.isDebugEnabled())  
                 LOG.debug(
