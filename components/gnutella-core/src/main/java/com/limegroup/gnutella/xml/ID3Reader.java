@@ -18,7 +18,7 @@ final class ID3Reader {
      * Attempts to read an ID3 tag from the specified file.
      * @return an null if the document has no ID3 tag
      */
-    public final LimeXMLDocument readDocument (File file) throws IOException {
+    public String readDocument(File file,boolean solo) throws IOException{
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         long length = randomAccessFile.length();
 
@@ -74,26 +74,31 @@ final class ID3Reader {
         randomAccessFile.readFully(buffer, 0, 1);
         short gen = (short)ByteOrder.ubyte2int(buffer[0]);
 
-        String str = "<audio noNamespaceSchemaLocation=\""+this.schemaURI;
-        String filename = file.getCanonicalPath();
-        str = str+"\""+" identifier=\""+filename+"\">";
-        //end of head
-        str=str+"<title>"+title+"</title>";
-        str = str+"<artist>"+artist+"</artist>";
-        str = str+"<album>"+album+"</album>";
-        str = str+"<track>"+track+"</track>";
-        String genre = getGenreString(gen);
-        str = str+"<genre>"+genre+"</genre>";
-        str = str+"<year>"+year+"</year>";
-        str = str+"<comments>"+comment+"</comments>";
-        str = str+"</audio>";
-        LimeXMLDocument doc;
-        try{
-            doc = new LimeXMLDocument(str);
-        }catch(Exception e){
-            return null;
+        String str = "";
+        if(solo){
+            str = str+ "<audio noNamespaceSchemaLocation=\""+this.schemaURI;
+            String filename = file.getCanonicalPath();
+            str = str+"\""+" identifier=\""+filename+"\">";
         }
-        return doc;
+        //end of head
+        if(!title.equals(""))
+            str=str+"<title>"+title+"</title>";
+        if(!artist.equals(""))
+            str = str+"<artist>"+artist+"</artist>";
+        if(!album.equals(""))
+            str = str+"<album>"+album+"</album>";
+        if(track>0)
+            str = str+"<track>"+track+"</track>";
+        String genre = getGenreString(gen);
+        if(!genre.equals(""))
+            str = str+"<genre>"+genre+"</genre>";
+        if(!year.equals(""))
+            str = str+"<year>"+year+"</year>";
+        if(!comment.equals(""))
+            str = str+"<comments>"+comment+"</comments>";
+        if(solo)
+            str = str+"</audio>";
+        return str;
     }
 
     /**

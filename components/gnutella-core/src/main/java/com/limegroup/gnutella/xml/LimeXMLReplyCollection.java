@@ -1,13 +1,8 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
-import java.io.RandomAccessFile;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 
 /**
@@ -28,32 +23,89 @@ public class LimeXMLReplyCollection{
     private ArrayList replyDocs;
     private boolean done= false;
     
-    //Constructor
+    //Constructor for audio Schema
+    public LimeXMLReplyCollection(Map nameToFile, String URI){
+        schemaURI = URI;
+        replyDocs = new ArrayList();
+        ID3Reader id3Reader = new ID3Reader();
+        String content = getContent();
+        if(content!= null && !content.equals("")){
+            int startIndex = content.indexOf(
+                            XMLStringUtils.XML_DOC_START_IDENTIFIER);
+            int endIndex = startIndex;
+            String xmlDoc = "";
+            boolean finished= false;
+            while(!finished){
+                startIndex = endIndex;//nextRound
+                if (startIndex == -1){
+                    finished = true;
+                    continue;
+                }
+                endIndex=content.indexOf
+                     (XMLStringUtils.XML_DOC_START_IDENTIFIER,startIndex+1);
+                if (endIndex > 0)
+                    xmlDoc = content.substring(startIndex, endIndex);
+                else
+                    xmlDoc = content.substring(startIndex);
+                String xmlString = "";
+                StringTokenizer tok = new StringTokenizer(xmlDoc,"\n\t");
+                while (tok.hasMoreTokens()){
+                    xmlString = xmlString+tok.nextToken();
+                }
+                String identifier = getIdentifierFromXMLStr(xmlString);
+                if(identifier==null || identifier.equals(""))
+                    continue;
+                File f = (File)nameToFile.remove(identifier);
+                String str;
+                try{
+                    str = id3Reader.readDocument(f,false);//its mixed
+                }catch (Exception e){
+                    str = "";
+                }
+                String xmlStr = joinAudioXMLStrings(str,xmlString);
+                LimeXMLDocument doc = null;
+                try{
+                    doc = new LimeXMLDocument(xmlStr);
+                }catch(Exception e){//the xml is malformed
+                    //e.printStackTrace();
+                    continue;//just ignore this document. dont add or set done
+                }
+                if(doc != null){
+                    addReply(doc);
+                    if(done == false)
+                        done = true;//set it to true coz now we have some data
+                }
+            }
+        }//end of if that checks if we have to deal with file data as well
+        Iterator names = nameToFile.keySet().iterator();
+        while(names.hasNext()){
+            File file = (File)nameToFile.get(names.next());
+            LimeXMLDocument d = null;
+            try{
+                String s = id3Reader.readDocument(file,true);//its not mixed
+                d = new LimeXMLDocument(s);
+            }catch(Exception e){
+                continue;
+            }
+            if(d!=null){
+                addReply(d);
+                if(done == false)
+                    done = true;
+            }
+        }
+    }
+
+    //Original Constructor
     public LimeXMLReplyCollection(String URI) {
         schemaURI = URI;//store it away
-        String schemaStr = LimeXMLSchema.getDisplayString(URI);
-        String schemaName= schemaStr+".xml";
         replyDocs = new ArrayList();
-        //Load up the docs from the file.
-        LimeXMLProperties props = LimeXMLProperties.instance();
-        String path = props.getXMLDocsDir();
-        String content="";
-        try{
-            File file = new File(path,schemaName);
-            RandomAccessFile f = new RandomAccessFile(file,"r");
-            int len = (int)f.length();
-            byte[] con = new byte[len];
-            f.readFully(con,0,len);
-            f.close();
-            content = new String(con);
-            con=null;//free the memory
-        }catch (IOException e){//file had a problem. 
-            //Do not put this collection in mapper
-            done= false;
+        String content = getContent();
+        if(content==null || content.equals("")){
+            done = false;
             return;
         }
         int startIndex = content.indexOf(
-                                    XMLStringUtils.XML_DOC_START_IDENTIFIER);
+                              XMLStringUtils.XML_DOC_START_IDENTIFIER);
         int endIndex = startIndex;
         String xmlDoc = "";
         boolean finished= false;
@@ -81,11 +133,56 @@ public class LimeXMLReplyCollection{
                 //e.printStackTrace();
                 continue;//just ignore this document. do not add or set done
             }
-            addReply(doc);
-            if(done == false)
-                done = true;//set it to true coz now we have some data
+            if(doc!=null){
+                addReply(doc);
+                if(done == false)
+                    done = true;//set it to true coz now we have some data
+            }
         }
     }
+
+    private String getIdentifierFromXMLStr(String xmlStr){
+        int i = xmlStr.indexOf("identifier");
+        i = xmlStr.indexOf("\"",i);
+        int j = xmlStr.indexOf("\"",i+1);
+        if(i<0 || j<0)
+            return "";
+        return xmlStr.substring(i+1,j);
+    }
+        
+    private String joinAudioXMLStrings(String mp3Str, String fileStr){
+        int p = fileStr.lastIndexOf("<");//the one closing the root element
+        String a = fileStr.substring(0,p);//all but the closing part
+        String b = fileStr.substring(p);//closing part
+        //phew, thank god this schema has depth 1.
+        return(a+mp3Str+b);
+    }
+
+    private String getContent(){
+        String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
+        String schemaName= schemaStr+".xml";
+        //Load up the docs from the file.
+        LimeXMLProperties props = LimeXMLProperties.instance();
+        String path = props.getXMLDocsDir();
+        String content="";
+        try{
+            File file = new File(path,schemaName);
+            RandomAccessFile f = new RandomAccessFile(file,"r");
+            int len = (int)f.length();
+            byte[] con = new byte[len];
+            f.readFully(con,0,len);
+            f.close();
+            content = new String(con);
+            con=null;//free the memory
+        }catch (IOException e){//file had a problem. 
+            //Do not put this collection in mapper
+            done= false;
+            return "";
+        }
+        return content;
+    }
+
+
 
     /** 
      * Secondary constructor: used when the user adds meta-data, fot

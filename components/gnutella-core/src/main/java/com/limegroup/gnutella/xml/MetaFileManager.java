@@ -76,48 +76,21 @@ public class MetaFileManager extends FileManager {
                 String[] schemas = schemaRepository.getAvailableSchemaURIs();
                 //we have a list of schemas
                 int len = schemas.length;
+                LimeXMLReplyCollection collection;  
                 for(int i=0;i<len;i++){
-                    LimeXMLReplyCollection collection =  
-                       new LimeXMLReplyCollection(schemas[i]);
                     //One ReplyCollection per schema
+                    String s = LimeXMLSchema.getDisplayString(schemas[i]);
+                    if (s.equalsIgnoreCase("audio")){
+                        Map nameToFile = getAllMP3FilesRecursive();
+                        collection=new LimeXMLReplyCollection
+                        (nameToFile,schemas[i]);
+                    }
+                    else
+                        collection = new LimeXMLReplyCollection(schemas[i]);
                     //Note: we only want to add a XMLReplyCollection to the 
                     //mapper if there is some valid data in the ReplyCollection
                     if(collection.getDone())//if we have some valid data
                         mapper.add(schemas[i],collection);
-                }
-                //Now we should read embedded meta-date from files.
-                //for now we just do .mp3 files. We need to add code here 
-                //for every embedded reader we make.
-                ID3Reader id3Reader = new ID3Reader();
-                List mp3Files = getAllMP3FilesRecursive();
-                int size = mp3Files.size();
-                LimeXMLReplyCollection collection = null;
-                List docs = new ArrayList();
-                for(int i=0;i<size;i++){
-                    File f = (File)mp3Files.get(i);
-                    LimeXMLDocument doc = null;
-                    try{
-                        doc = id3Reader.readDocument(f);
-                    }catch(Exception e){
-                        continue;
-                    }
-                    //System.out.println("Sumeet :doc = "+doc);
-                    if(doc!=null)
-                        docs.add(doc);
-                }
-                if(docs.size()>0){
-                    //create Reply Collection with the first Reply
-                    LimeXMLDocument d = (LimeXMLDocument)docs.get(0);
-                    String schemaURI = d.getSchemaURI();
-                    collection = new LimeXMLReplyCollection(schemaURI,d);
-                    //add the remaining Reply's to the ReplyCollection
-                    for(int i=1;i<docs.size();i++){
-                        d = (LimeXMLDocument)docs.get(i);
-                        collection.addReply(d);
-                    }
-                    SchemaReplyCollectionMapper map=
-                                SchemaReplyCollectionMapper.instance();
-                    map.add(schemaURI,collection);
                 }
             }//end of if, now we are initialized
             initialized = true;
@@ -158,10 +131,10 @@ public class MetaFileManager extends FileManager {
      * Scans all the shared directories recursively and finds files that
      * have .mp3 extension. and returns a List of files.
      */
-    public List getAllMP3FilesRecursive(){
+    public Map getAllMP3FilesRecursive(){
         SettingsManager man = SettingsManager.instance();
         List dirs = Arrays.asList(man.getDirectoriesAsArray());
-        List retFiles = new Vector();
+        Map map  = new HashMap();
         int k=0;
         while(k < dirs.size()){
             String dir = (String)dirs.get(k);
@@ -180,14 +153,22 @@ public class MetaFileManager extends FileManager {
                         dirs.add(t);
                 }
                 else{
-                    String name = files[i].getName();
-                    String ext = name.substring(name.lastIndexOf("."));
+                    String name="";
+                    try{
+                        name = files[i].getCanonicalPath();
+                    }catch(Exception e){
+                        continue;
+                    }
+                    int j = name.lastIndexOf(".");
+                    String ext="";
+                    if(j>0)
+                        ext = name.substring(j);
                     if(ext.equalsIgnoreCase(".mp3"))
-                        retFiles.add(files[i]);
+                        map.put(name,files[i]);
                 }
             }
         }
-        return retFiles;
+        return map;
     }
 
 
