@@ -187,6 +187,11 @@ class AutoDownloadDetails {
         // used by the approx. matcher...
         dlList.remove(toRemove);
         // used by the hashset comparator....
+        // technically, this is bad.  i'm doing it because in practice this will
+        // decrease the amount of downloads, which isn't horrible.  also, i
+        // don't see a download being removed very frequently.  if i want i can
+        // move to a new set which keeps a count for each element of the set and
+        // only discards after the appropriate amt. of removes....
         StringTokenizer st = 
         new StringTokenizer(ripExtension(toRemove.getFileName()),
                             FileManager.DELIMETERS);
@@ -233,7 +238,6 @@ class AutoDownloadDetails {
             e.printStackTrace();
     }
 
-    /*
     public static void main(String argv[]) {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("morrissey", null,
@@ -272,7 +276,7 @@ class AutoDownloadDetails {
         // seems like we've committed MAX_DOWNLOADS, should be expired...
         Assert.that(add.expired());
     }
-    */
+
     
 }
 
