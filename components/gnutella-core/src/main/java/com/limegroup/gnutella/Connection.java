@@ -27,7 +27,7 @@ import java.io.*;
  * Gnutella spiders.  In this case, you don't pass a ConnectionManager
  * as a constructor argument and don't call the run() method.
  */
-public class Connection implements Runnable { 
+  public class Connection implements Runnable { 
     private ConnectionManager manager=null; //may be null
     private RouteTable routeTable=null;     //may be null
     private RouteTable pushRouteTable=null; 
@@ -43,8 +43,6 @@ public class Connection implements Runnable {
     /** The number of packets I sent and received.  This includes bad packets. */
     private int sent;
     private int received;
-    private static int total;
-
 
     /** 
      * Creates an outgoing connection with a fresh socket.
@@ -149,7 +147,7 @@ public class Connection implements Runnable {
 	    m.write(out);
 	    out.flush();
 	    sent++;
-	    total++;
+	    manager.total++;
 	}
 	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
@@ -165,7 +163,7 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    total++;
+	    manager.total++;
 	    //if (m!=null)
 	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
@@ -198,6 +196,8 @@ public class Connection implements Runnable {
 		    //connection has never been encountered before...
 		    if (inConnection==null){
 			//reduce TTL, increment hops. If old val of TTL was 0 drop message
+			if (manager.stats==true)
+			    manager.PReqCount++;//keep track of statistics if stats is turned on.
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
 			    manager.sendToAllExcept(m, this);//broadcast to other hosts
@@ -213,6 +213,8 @@ public class Connection implements Runnable {
 							      ip, num_files, kilobytes);
 
 			    send(pingReply);
+			    if (manager.stats==true)
+				manager.PRepCount++;//keep stats if stats is turned on
 			}
 			else{//TTL is zero
 			    //do nothing (drop the message).
@@ -225,6 +227,8 @@ public class Connection implements Runnable {
 		else if (m instanceof PingReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
+			if (manager.stats==true)
+			    manager.PRepCount++; //keep stats if stats is turned on
 			if (outConnection.equals(this)){ //I am the destination
 			    manager.catcher.spy(m);//update hostcatcher
 			    //TODO2: So what else do we have to do here??
@@ -245,35 +249,32 @@ public class Connection implements Runnable {
 		    Connection inConnection = routeTable.get(m.getGUID());
 		    if (inConnection==null){
 			//reduce TTL,increment hops, If old val of TTL was 0 drop message
+			if (manager.stats==true)
+			    manager.QReqCount++;//keep stats if stats turned on
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
 			    manager.sendToAllExcept(m,this); //broadcast to other hosts
 			 
-			    //TODO3: Rob does the search
 			    FileManager fm = FileManager.getFileManager();
 			    Response[] responses = fm.query((QueryRequest)m);
-			    //TODO3: Make the Query Reply message and send it out.
-
+			    
 			    byte[] guid = m.getGUID();
 			    System.out.println("the guid " + guid);
 			    byte ttl = Const.TTL;
 			    System.out.println("the ttl " + ttl);
 			    int port = manager.getListeningPort();
 			    System.out.println("the port " + port);
-
 			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+			    System.out.println("the ip " + ip);
 			    System.out.println("the ip ");
 			    for(int i = 0; i < ip.length; i++) {
   				System.out.print(ip[i]);
   			    }
-
 			    System.out.println("");
-
 			    // long speed = ((QueryRequest)m).getMinSpeed();
 			    long speed = 0;
 			    System.out.println("the speed " + speed);
 			    byte[] clientGUID = manager.ClientId.getBytes();
-
 			    System.out.println("the client GUID ");
 
 			    for(int i = 0; i < clientGUID.length; i++) {
@@ -282,18 +283,11 @@ public class Connection implements Runnable {
 			    
 			    System.out.println("");
 
-			    // byte[] clientGUID = m.ClientId.getBytes();
-
-			    // byte[] clientGUID = null;
 			    QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
 					   speed, responses, clientGUID);
-			    
-			    //Don't forget the client ID!
-			    //send the packet
 			    send(qreply);
-
-
-
+			    if(manager.stats == true)
+				manager.QRepCount++;//keep stats if stats is turned on
 			}
 			else{//TTL is zero
 			    //do nothing(drop the message)
@@ -307,6 +301,8 @@ public class Connection implements Runnable {
 		    System.out.println("Recieved a Querry Reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
+			if (manager.stats==true)
+			    manager.QRepCount++;
 			//System.out.println("Sumeet:found connection");
 			QueryReply qrep = (QueryReply)m;
 			pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
@@ -334,7 +330,9 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
-		    System.out.println("Sumeet:We have a push request");
+		    //System.out.println("Sumeet:We have a push request");
+		    if (manager.stats==true)
+			manager.pushCount++;//keeps stats if stats turned on
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
@@ -379,13 +377,6 @@ public class Connection implements Runnable {
 	try {
 	    sock.close();
 	} catch(Exception e) {}
-    }
-
-    /**
-     *  Return the total number of messages sent and received
-     */
-    public static int getTotalMessages() {
-	return( total );
     }
 
     /** Returns the port of the foreign host this is connected to. */
