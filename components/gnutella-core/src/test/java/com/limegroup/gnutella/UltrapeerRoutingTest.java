@@ -664,9 +664,10 @@ public class UltrapeerRoutingTest extends TestCase {
 		
         // did recv1 get everything a-ok?
         QueryRequest reqRead=(QueryRequest)m;
-        assertTrue(Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        assertTrue(reqRead.getQueryUrns() != null);
-        assertTrue(currUrnSet.equals(reqRead.getQueryUrns()));
+        assertTrue("guids should be equal",
+				   Arrays.equals(guid.bytes(), reqRead.getGUID()));
+        assertNotNull("query urns should not be null",reqRead.getQueryUrns());
+        assertEquals("urn sets should be equal",currUrnSet, reqRead.getQueryUrns());
 
         // did recv2 get everything a-ok?
         m = rcv2.receive(TIMEOUT);
@@ -694,7 +695,7 @@ public class UltrapeerRoutingTest extends TestCase {
         LEAF.flush();
         
         Message m=ULTRAPEER_1.receive(TIMEOUT);
-        assertTrue(m instanceof QueryRequest);
+        assertTrue("expected a QueryRequest", m instanceof QueryRequest);
         assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
 
