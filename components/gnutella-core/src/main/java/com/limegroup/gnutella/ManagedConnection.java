@@ -482,6 +482,7 @@ public class ManagedConnection
     /** Repeatedly sends all the queued data. */
     private class OutputRunner extends Thread {
         public OutputRunner() {
+            setName("OutputRunner");
             setDaemon(true);
             start();
         }
