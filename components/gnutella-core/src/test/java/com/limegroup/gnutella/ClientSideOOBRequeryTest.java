@@ -42,6 +42,8 @@ import com.sun.java.util.collections.Set;
  * Ultrapeers.
  */
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
+    
+    private static final int UPLOADER_PORT = 10000;    
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -750,18 +752,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
-        URN urn =
-        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
-        Set urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever", 10, GUID.makeGuid(),
-                                                1, false, 3, false, null, 
-                                                urns, false, false, 
-                                                "LIME", 0, new HashSet());
+        RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
 
         // wait for processing
         Thread.sleep(1500);
@@ -888,17 +881,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
         URN urn = TestFile.hash();
-        Set urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever", 10, GUID.makeGuid(),
-                                                1, false, 3, false, null, 
-                                                urns, false, false, 
-                                                "LIME", 0, new HashSet());
+        RemoteFileDesc rfd = makeRFD(urn);
 
         // wait for processing
         Thread.sleep(1500);
@@ -1029,11 +1015,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         uploader2.setRate(100);
 
         { // send back a query request, the TestUploader should service upload
-            rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT+1, 1, 
-                                     "whatever", 10, GUID.makeGuid(),
-                                     1, false, 3, false, null, 
-                                     urns, false, false, 
-                                     "LIME", 0, new HashSet());
+            rfd = makeRFD(urn, UPLOADER_PORT + 1);
             Response[] res = new Response[] { new Response(10, 10, "whatever") };
             m = new QueryReply(qr.getGUID(), (byte) 1, UPLOADER_PORT+1, myIP(), 
                                0, res, GUID.makeGuid(), new byte[0], false, 
@@ -1100,18 +1082,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
-        URN urn =
-        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
-        Set urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever", 10, GUID.makeGuid(),
-                                                1, false, 3, false, null, 
-                                                urns, false, false, 
-                                                "LIME", 0, new HashSet());
+        URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        RemoteFileDesc rfd = makeRFD(urn);
 
         // wait for processing
         Thread.sleep(1500);
@@ -1255,27 +1229,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
-        URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
-        Set urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever", 10, GUID.makeGuid(),
-                                                1, false, 3, false, null, 
-                                                urns, false, false, 
-                                                "LIME", 0, new HashSet());
+        RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        
         TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT);
         uploader2.setBusy(true);
-        urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd2 = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                 "whatever", 10, GUID.makeGuid(),
-                                                 1, false, 3, false, null, 
-                                                 urns, false, false, 
-                                                 "LIME", 0, new HashSet());
+        RemoteFileDesc rfd2 = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
 
         // wait for processing
         Thread.sleep(1500);
@@ -1407,18 +1367,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
-        URN urn =
-        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
-        Set urns = new HashSet();
-        urns.add(urn);
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever", 10, GUID.makeGuid(),
-                                                1, false, 3, false, null, 
-                                                urns, false, false, 
-                                                "LIME", 0, new HashSet());
+        RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
 
         // wait for processing
         Thread.sleep(1500);
@@ -1570,6 +1521,27 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
 
     //////////////////////////////////////////////////////////////////
+    
+    
+    
+    private RemoteFileDesc makeRFD(URN urn, int port) throws Exception {
+        Set urns = new HashSet();
+        urns.add(urn);
+        return new RemoteFileDesc("127.0.0.1", port, 1, 
+                                  "whatever", 10, GUID.makeGuid(),
+                                  1, false, 3, false, null, 
+                                  urns, false, false, 
+                                  "LIME", 0, new HashSet(), -1);
+    }
+    
+    private RemoteFileDesc makeRFD(String sha1) throws Exception {
+        URN urn = URN.createSHA1Urn("urn:sha1:" + sha1);
+        return makeRFD(urn);
+    }
+    
+    private RemoteFileDesc makeRFD(URN urn) throws Exception {
+        return makeRFD(urn, UPLOADER_PORT);
+    }
 
     public static Integer numUPs() {
         return new Integer(4);

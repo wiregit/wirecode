@@ -26,7 +26,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
                                             length, new byte[16], 1,
                                             false, 2, false, null,
                                             null, false, false, "LIME",
-                                            0, null);
+                                            0, null, -1);
         HTTPDownloader dl = new HTTPDownloader(rfd, new File("sam"));
         
         

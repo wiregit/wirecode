@@ -687,7 +687,7 @@ public class ServerSideWhatIsNewTest
                                                 TestFile.length(), 
                                                 guid, 1, false, 3,
                                                 false, null, urns, false,
-                                                false, "LIME", 0, new HashSet());
+                                                false, "LIME", 0, new HashSet(), -1);
         Downloader downloader = 
             rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
@@ -749,7 +749,7 @@ public class ServerSideWhatIsNewTest
                                          "anita.txt", TestFile.length(), 
                                          guid, 1, false, 3,
                                          false, null, urns, false,
-                                         false, "LIME", 0, new HashSet());
+                                         false, "LIME", 0, new HashSet(), -1);
         }
 
         Downloader downloader = rs.download(rfds, false, new GUID(guid));

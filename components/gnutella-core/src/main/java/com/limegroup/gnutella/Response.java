@@ -106,14 +106,14 @@ public class Response {
     private final byte[] extBytes;
     
     /**
-     * The set of other locations that have this file.
-     */
-    private final Set /* of Endpoint */ otherLocations;
-    
-    /**
      * The cached RemoteFileDesc created from this Response.
      */
     private volatile RemoteFileDesc cachedRFD;
+    
+    /**
+     * The container for extra GGEP data.
+     */
+    private final GGEPContainer ggepData;
 
 	
 	/**
@@ -208,7 +208,9 @@ public class Response {
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
 			 "", fd.getUrns(), null, 
-			 getAsEndpoints(fd.getAlternateLocationCollection()),
+			 new GGEPContainer(
+			    getAsEndpoints(fd.getAlternateLocationCollection()),
+			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
 
@@ -235,7 +237,7 @@ public class Response {
      */
     private Response(long index, long size, String name,
 					 String metadata, Set urns, LimeXMLDocument doc, 
-					 Set endpoints, byte[] extensions) {
+					 GGEPContainer ggepData, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
         // see note in createFromStream about Integer.MAX_VALUE
@@ -268,15 +270,15 @@ public class Response {
 		else
 			this.urns = Collections.unmodifiableSet(urns);
 		
-		if (endpoints == null)
-		    this.otherLocations = DataUtils.EMPTY_SET;
-		else
-		    this.otherLocations = Collections.unmodifiableSet(endpoints);
+        if(ggepData == null)
+            this.ggepData = GGEPContainer.EMPTY;
+        else
+		    this.ggepData = ggepData;
 		
 		if (extensions != null)
 		    this.extBytes = extensions;
 		else 
-		    this.extBytes = createExtBytes(this.urns, this.otherLocations);
+		    this.extBytes = createExtBytes(this.urns, this.ggepData);
 
 		if(((metadata == null) || (metadata.equals(""))) && (doc != null)) {
 			// this is guaranteed to be non-null, although it could be the
@@ -366,7 +368,8 @@ public class Response {
 			// \u001c is the HUGE v0.93 GEM delimiter
 			StringTokenizer stok = new StringTokenizer(betweenNulls, EXT_STRING); 
 			Set urns = null;
-			Set endpoints = null;
+			GGEPContainer ggep = null;
+			long createTime;
 			String metaString = null;
 			while(stok.hasMoreTokens()) {
 				final String ext = stok.nextToken();
@@ -419,7 +422,11 @@ public class Response {
                                 if(end[0] != extBytes.length)
                                     stok = recreateTokenizer(extBytes, end[0]);
                             }
-				            endpoints = GGEPUtil.getLocations(ggepBlocks);
+                            GGEPContainer innerGGEP = GGEPUtil.getGGEP(ggepBlocks);
+                            if(ggep == null)
+                                ggep = innerGGEP;
+                            else
+                                ggep = GGEPContainer.merge(ggep, innerGGEP);
 				            continue;
 				        } catch(BadGGEPBlockException be) {
 				            //invalid GGEP. try something else.
@@ -431,7 +438,7 @@ public class Response {
                 
 			}			
 			return new Response(index, size, name, metaString, 
-			                    urns, null, endpoints, rawMeta);
+			                    urns, null, ggep, rawMeta);
         }
     }
     
@@ -523,9 +530,9 @@ public class Response {
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
 	 *  constructing the byte array
 	 */
-	private static byte[] createExtBytes(Set urns, Set endpoints) {
+	private static byte[] createExtBytes(Set urns, GGEPContainer ggep) {
         try {
-            if( isEmpty(urns) && isEmpty(endpoints) )
+            if( isEmpty(urns) && ggep.isEmpty() )
                 return DataUtils.EMPTY_BYTE_ARRAY;
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();            
@@ -542,18 +549,17 @@ public class Response {
     				}
     			}
     			
-    			// If there's endpoints, add the seperator.
-    		    if( !isEmpty(endpoints) )
+    			// If there's ggep data, write the separator.
+    		    if( !ggep.isEmpty() )
     		        baos.write(EXT_SEPERATOR);
             }
             
-            // If there's endpoints, add them.
             // It is imperitive that GGEP is added LAST.
             // That is because GGEP can contain 0x1c (EXT_SEPERATOR)
             // within it, which would cause parsing problems
             // otherwise.
-            if( !isEmpty(endpoints) )
-                GGEPUtil.addGGEP(baos, endpoints);
+            if(!ggep.isEmpty())
+                GGEPUtil.addGGEP(baos, ggep);
 			
             return baos.toByteArray();
         } catch (IOException impossible) {
@@ -822,9 +828,15 @@ public class Response {
      * guaranteed to be non-null, although the set could be empty
      */
     public Set getLocations() {
-        return otherLocations;
+        return ggepData.locations;
     }
     
+    /**
+     * Returns the create time.
+     */
+    public long getCreateTime() {
+        return ggepData.createTime;
+    }    
     
     byte[] getExtBytes() {
         return extBytes;
@@ -856,7 +868,8 @@ public class Response {
                  data.isFirewalled(), 
                  data.getVendorCode(),
                  System.currentTimeMillis(),
-                 data.getPushProxies()
+                 data.getPushProxies(),
+                 getCreateTime()
                 );
             cachedRFD = rfd;
             return rfd;
@@ -919,56 +932,46 @@ public class Response {
          * Adds a GGEP block with the specified alternate locations to the 
          * output stream.
          */
-        static void addGGEP(OutputStream out, Set /* of Endpoint */ locs)
+        static void addGGEP(OutputStream out, GGEPContainer ggep)
           throws IOException {
-            if( locs == null || locs.size() == 0)
+            if( ggep == null || (ggep.locations.size() == 0 && ggep.createTime <= 0))
                 throw new NullPointerException("null or empty locations");
             
             GGEP info = new GGEP();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                for(Iterator i = locs.iterator(); i.hasNext();) {
-                    try {
-                        Endpoint ep = (Endpoint)i.next();
-                        baos.write(ep.getHostBytes());
-                        //baos.write(ep.getPort());
-                        ByteOrder.short2leb((short)ep.getPort(), baos);
-                    } catch(UnknownHostException uhe) {
-                        continue;
+            if(ggep.locations.size() > 0) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try {
+                    for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
+                        try {
+                            Endpoint ep = (Endpoint)i.next();
+                            baos.write(ep.getHostBytes());
+                            ByteOrder.short2leb((short)ep.getPort(), baos);
+                        } catch(UnknownHostException uhe) {
+                            continue;
+                        }
                     }
-                }
-            } catch(IOException impossible) {
-                ErrorService.error(impossible);
+                } catch(IOException impossible) {
+                    ErrorService.error(impossible);
+                }   
+                info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
             }
-                
-            info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
+            
+            if(ggep.createTime > 0)
+                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
+            
             
             info.write(out);
-        }
-        
-        /**
-         * Returns a byte array of a GGEP block containing the
-         * set of endpoints
-         */
-        static byte[] getGGEPBytes(Set locs) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                addGGEP(baos, locs);
-            } catch(IOException impossible) {
-                ErrorService.error(impossible);
-            }
-            
-            return baos.toByteArray();
         }
         
         /**
          * Returns a <tt>Set</tt> of other endpoints described
          * in one of the GGEP arrays.
          */
-        static Set getLocations(GGEP[] ggeps) {
+        static GGEPContainer getGGEP(GGEP[] ggeps) {
             if (ggeps == null)
-                return DataUtils.EMPTY_SET;
+                return GGEPContainer.EMPTY;
             Set locations = null;
+            long createTime = -1;
             final byte[] ip = new byte[4];
             IPFilter ipFilter = IPFilter.instance();
             for (int i = 0; i < ggeps.length; i++) {
@@ -983,7 +986,6 @@ public class Response {
                             continue;
                     } catch (BadGGEPPropertyException bad) {
                         //locBytes not set, key was added without value
-                        ErrorService.error(bad);
                         continue;
                     }
 
@@ -1006,9 +1008,60 @@ public class Response {
                         locations.add(new Endpoint(ip, port));
                     }
                 }
+                
+                if(ggeps[i].hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+                    try {
+                        createTime =
+                            ggeps[i].getLong(GGEP.GGEP_HEADER_CREATE_TIME) *
+                            1000;
+                    } catch(BadGGEPPropertyException bad) {
+                        continue;
+                    }
+                }
             }
-            return locations == null ? DataUtils.EMPTY_SET : locations;
+            
+            return (locations == null && createTime == -1) ?
+                GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
         }
-    }	
+    }
+    
+    /**
+     * A container for information we're putting in/out of GGEP blocks.
+     */
+    static final class GGEPContainer {
+        final Set locations;
+        final long createTime;
+        private static final GGEPContainer EMPTY = new GGEPContainer();
+        
+        private GGEPContainer() {
+            this(null, -1);
+        }
+        
+        GGEPContainer(Set locs, long create) {
+            locations = locs == null ? DataUtils.EMPTY_SET : locs;
+            createTime = create;
+        }
+        
+        static GGEPContainer merge(GGEPContainer a, GGEPContainer b) {
+            Set loc;
+            long create;
+            
+            if(a.locations == DataUtils.EMPTY_SET)
+                loc = b.locations;
+            else
+                loc = a.locations;
+                
+            if(a.createTime == -1)
+                create = b.createTime;
+            else
+                create = a.createTime;
+                
+            return new GGEPContainer(loc, create);
+        }
+        
+        boolean isEmpty() {
+            return locations.isEmpty() && createTime <= 0;
+        }
+    }
 }
 

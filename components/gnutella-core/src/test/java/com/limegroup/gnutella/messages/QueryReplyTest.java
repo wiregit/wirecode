@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -901,7 +902,49 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                 hits[0].getLocations(), hit.getLocations());
 		}        
     }
-
+    
+    public void testQueryReplyHasCreationTimes() throws Exception {
+        addFilesToLibrary();
+        addCreationTimeToFiles();
+        boolean checked = false;
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			long expectTime = (fd.getIndex() + 1) * 10013;
+			Response testResponse = new Response(fd);
+			assertEquals(expectTime, testResponse.getCreateTime());
+			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			Response[] hits = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, hits);
+			// we can only do this test on 'unique' names, so if we get more than
+			// one response, don't test.
+			if ( hits.length != 1 ) continue;
+			checked = true;
+			
+			// first check basic stuff on the response.
+			assertEquals("responses should be equal", testResponse, hits[0]);
+            assertEquals("wrong creation time", expectTime,
+                                                hits[i].getCreateTime());
+			    
+			// then actually create a QueryReply and read it, to make
+			// sure we can write & read stuff correctly.
+            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
+                                           6346, IP, 0, hits,
+                                           GUID.makeGuid(), new byte[0],
+                                           false, false, true, true, true, false,
+                                           null);			    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            qReply.write(baos);
+            ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+            QueryReply readQR = (QueryReply) Message.read(bais);
+            
+            List readHits = readQR.getResultsAsList();
+            assertEquals("wrong # of results", hits.length, readHits.size());
+            Response hit = (Response)readHits.get(0);
+            assertEquals("wrong creation time", expectTime,
+                                                hit.getCreateTime());
+		}
+    }
 
     /**
      * Test to make sure that results that have no name are rejected 
@@ -978,6 +1021,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         }
     }
+    
+    private void addCreationTimeToFiles() throws Exception {
+        FileDesc[] fds = fman.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++) {
+            long time = (fds[i].getIndex() + 1) * 10013;
+            CreationTimeCache.instance().addTime(fds[i].getSHA1Urn(), time);
+            CreationTimeCache.instance().commitTime(fds[i].getSHA1Urn());
+        }
+    }        
     
     private class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {

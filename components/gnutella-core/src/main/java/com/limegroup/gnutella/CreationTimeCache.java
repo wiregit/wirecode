@@ -83,6 +83,20 @@ public final class CreationTimeCache {
     }
     
     /**
+     * Get the Creation Time of the file.
+	 * @param urn <tt>URN<tt> to look up Creation Time for
+	 * @return A long that represents the creation time of the urn. -1
+	 *         if no time exists.
+     */
+    public long getCreationTimeAsLong(URN urn) {
+        Long l = getCreationTime(urn);
+        if(l == null)
+            return -1;
+        else
+            return l.longValue();
+    }    
+    
+    /**
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {

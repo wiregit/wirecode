@@ -306,7 +306,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   ALT_VENDOR,//Never displayed, and we don't know
-                                  System.currentTimeMillis(), null);
+                                  System.currentTimeMillis(), null, -1);
 	}
 
     /**

@@ -413,8 +413,84 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	    endpoints.add( new Endpoint("1.2.3.4", 1) );
 	    endpoints.add( new Endpoint("4.3.2.1", 2) );
 	    assertEquals("wrong alts", endpoints, r.getLocations());
+	    assertEquals("should have no time", -1, r.getCreateTime());
     }
     
+    /**
+     * Tests that the GGEP'd CT extension is read correctly.
+     */
+    public void testGGEPCreateTimeExtension() throws Exception {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    
+	    ByteOrder.int2leb(257, baos);
+	    ByteOrder.int2leb(1029, baos);
+	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
+	    baos.write(name);
+	    
+	    GGEP info = new GGEP();
+	    long time = System.currentTimeMillis();
+	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
+	    info.write(baos);
+	    
+	    // write out closing null.
+	    baos.write((byte)0);
+	    
+	    byte[] output = baos.toByteArray();
+	    ByteArrayInputStream in = new ByteArrayInputStream(output);
+	    Response r = Response.createFromStream(in);
+	    assertEquals("wrong index", 257, r.getIndex());
+	    assertEquals("wrong size", 1029, r.getSize());
+	    assertEquals("wrong name", "sam", r.getName());
+	    // too annoying to check extension was correct.
+	    assertEquals("leftover input", -1, in.read());
+	    
+	    time = time / 1000 * 1000; // we lose precision when sending.	    
+	    assertEquals("wrong time", time, r.getCreateTime());
+	    assertEquals("should have no locs", new HashSet(), r.getLocations());
+    }
+    
+    /**
+     * Test GGEP with multiple extensions.
+     */
+    public void testGGEPMultipleExtensions() throws Exception {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    
+	    ByteOrder.int2leb(257, baos);
+	    ByteOrder.int2leb(1029, baos);
+	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
+	    baos.write(name);
+	    
+	    GGEP info = new GGEP();
+	    long time = System.currentTimeMillis();
+	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
+	    // locations: 1.2.3.4:1, 4.3.2.1:2
+	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
+	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
+	    info.write(baos);
+	    
+	    
+	    // write out closing null.
+	    baos.write((byte)0);
+	    
+	    byte[] output = baos.toByteArray();
+	    ByteArrayInputStream in = new ByteArrayInputStream(output);
+	    Response r = Response.createFromStream(in);
+	    assertEquals("wrong index", 257, r.getIndex());
+	    assertEquals("wrong size", 1029, r.getSize());
+	    assertEquals("wrong name", "sam", r.getName());
+	    // too annoying to check extension was correct.
+	    assertEquals("leftover input", -1, in.read());
+	    
+	    time = time / 1000 * 1000; // we lose precision when sending.	    
+	    assertEquals("wrong time", time, r.getCreateTime());
+	    
+	    assertEquals("wrong number of locations", 2, r.getLocations().size());
+	    Set endpoints = new HashSet();
+	    endpoints.add( new Endpoint("1.2.3.4", 1) );
+	    endpoints.add( new Endpoint("4.3.2.1", 2) );
+	    assertEquals("wrong alts", endpoints, r.getLocations());
+    }        
+        
     /**
      * Tests that GGEP can be both before & after other extensions.
      */
@@ -478,7 +554,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
      * Tests the GGEPUtil.addGGEP method to correctly write
      * the correct number of alts out, in the correct format.
      */
-    public void testGGEPUtilAddGGEPFromGetAsEndpoints() throws Exception {
+    public void testOnly10AltsAreWritten() throws Exception {
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
@@ -497,7 +573,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        addGGEP(baos, endpoints);
+        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1);
+        addGGEP(baos, gc);
         
         // See if we can correctly read the GGEP block.
         baos.flush();
@@ -524,29 +601,31 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
     }
     
     /**
-     * Tests the GGEPUtil.getLocations method.
+     * Tests the GGEPUtil.getGGEP method.
      */
-    public void testGGEPUtilGetLocations() throws Exception {
-        GGEP alts = new GGEP();
+    public void testGGEPUtilGetGGEP() throws Exception {
+        GGEP ggep = new GGEP();
+        Response.GGEPContainer container;
+        long ctime;
         Set locs;
         byte[] data;
         
         data = new byte[20]; // not % 6.
-        alts.put("ALT", data);
-        locs = getLocations(alts);
+        ggep.put("ALT", data);
+        locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
         
         data = new byte[18]; // multiple of 6, but all blank (invalid)
-        alts.put("ALT", data);
-        locs = getLocations(alts);
+        ggep.put("ALT", data);
+        locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
 
         // multiple of 6, but same        
         byte[] d1 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 1, 0};
-        alts.put("ALT", d1);
-        locs = getLocations(alts);
+        ggep.put("ALT", d1);
+        locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 1, locs.size());
         assertEquals("wrong endpoint",
@@ -554,14 +633,46 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 
         // multiple of 6, diff            
         byte[] d2 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 2, 0};
-        alts.put("ALT", d2);
-        locs = getLocations(alts);
+        ggep.put("ALT", d2);
+        locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 2, locs.size());
         Set eps = new HashSet();
         eps.add( new Endpoint("1.2.3.4:1") );
         eps.add( new Endpoint("1.2.3.4:2") );
         assertEquals("wrong endpoints", eps, locs);
+        
+        // ctime.
+        ggep = new GGEP();
+        ggep.put("CT", 5341L);
+        ctime = getGGEP(ggep).createTime;
+        assertEquals(5341000, ctime);
+        
+        // alt & ctime.
+        ggep.put("CT", 1243L);
+        ggep.put("ALT", d2);
+        container = getGGEP(ggep);
+        assertNotNull(container);
+        assertNotNull(container.locations);
+        assertEquals(2, container.locations.size());
+        assertEquals(eps, container.locations);
+        assertEquals(1243000, container.createTime);
+        
+        // invalid alt, valid ctime
+        ggep.put("ALT", new byte[0]);
+        ggep.put("CT", 3214);
+        container = getGGEP(ggep);
+        assertEquals(0, container.locations.size());
+        assertEquals(3214000, container.createTime);
+        
+        // invalid ctime, valid alt
+        ggep.put("ALT", d2);
+        // use 9 bytes (1 byte over the max for a long)
+        ggep.put("CT", new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 } );
+        container = getGGEP(ggep);
+        assertEquals(2, container.locations.size());
+        assertEquals(eps, container.locations);
+        assertEquals(-1, container.createTime);
     }
     
     private Set getAsEndpoints(AlternateLocationCollection col)
@@ -570,18 +681,18 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
             "getAsEndpoints", new Object[] { col } );
     }
     
-    private void addGGEP(OutputStream os, Set eps) throws Exception {
+    private void addGGEP(OutputStream os, Response.GGEPContainer gc) throws Exception {
         Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
         PrivilegedAccessor.invokeMethod(c, "addGGEP",
-            new Object[] { os, eps },
-            new Class[] { OutputStream.class, Set.class } );
+            new Object[] { os, gc },
+            new Class[] { OutputStream.class, Response.GGEPContainer.class } );
     }
     
-    private Set getLocations(GGEP info) throws Exception {
+    private Response.GGEPContainer getGGEP(GGEP info) throws Exception {
         Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
 
         GGEP[] blocks = new GGEP[] {info};        
-        return (Set)PrivilegedAccessor.invokeMethod(c, "getLocations",
-            new Object[] { blocks } );
+        return (Response.GGEPContainer)PrivilegedAccessor.invokeMethod(
+            c, "getGGEP", new Object[] { blocks } );
     }    
 }

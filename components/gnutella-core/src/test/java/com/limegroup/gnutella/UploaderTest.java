@@ -51,19 +51,19 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         fm.get(0);
         rfd1 = new RemoteFileDesc("1.1.1.1",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
-                                  false, null, FileDescStub.set, false, false,"",0, null);
+                                  false, null, FileDescStub.set, false, false,"",0, null, -1);
         rfd2 = new RemoteFileDesc("1.1.1.2",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
-                                  false, null, FileDescStub.set, false, false,"",0, null);
+                                  false, null, FileDescStub.set, false, false,"",0, null, -1);
         rfd3 = new RemoteFileDesc("1.1.1.3",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
-                                  false, null, FileDescStub.set, false, false,"",0, null);
+                                  false, null, FileDescStub.set, false, false,"",0, null, -1);
         rfd4 = new RemoteFileDesc("1.1.1.4",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
-                                  false, null, FileDescStub.set, false, false,"",0, null);
+                                  false, null, FileDescStub.set, false, false,"",0, null, -1);
         rfd5 = new RemoteFileDesc("1.1.1.5",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
-                                  false, null, FileDescStub.set, false, false,"",0, null);
+                                  false, null, FileDescStub.set, false, false,"",0, null, -1);
                                   
         // we don't want the tests confused by the stalled
         // watchdog killing stuff.

@@ -55,7 +55,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
                "18.239.0.144", 6346, 13l,
                name, size,
                new byte[16], 56, false, 4, true, null,
-               urns, false, false,"",0,null);
+               urns, false, false,"",0,null, -1);
        } catch (IOException e) {
            fail("Invalid URN", e);
            return null;

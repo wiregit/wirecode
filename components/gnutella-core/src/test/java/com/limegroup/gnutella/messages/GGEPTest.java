@@ -81,6 +81,21 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("Couldn't get property", failed);
         }
     }
+    
+    public void testLongKeys() throws Exception {
+        GGEP temp = new GGEP(true);
+        temp.put("A", 0xABCDL);
+        assertTrue(temp.hasKey("A"));
+        assertEquals(0xABCDL, temp.getLong("A"));
+        assertEquals(temp.getBytes("A"), new byte[] {(byte)0xCD,(byte)0xAB} );
+        
+        temp.put("A", 0x00ABCDEF12L);
+        assertTrue(temp.hasKey("A"));
+        assertEquals(0xABCDEF12L, temp.getLong("A"));
+        assertEquals(temp.getBytes("A"), new byte[] {
+            (byte)0x12, (byte)0xEF, (byte)0xCD, (byte)0xAB });
+    }
+        
 
     /** Tests that map constructor doesn't accept keys that are too long, should
      *  throw an exception */
