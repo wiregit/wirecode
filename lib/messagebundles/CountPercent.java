@@ -198,7 +198,7 @@ public class CountPercent {
         buildAfterStatus(page);
         buildProgress(page, charsets);
         buildEndOfPage(page);
-        byte[] out = page.toString().getBytes("UTF-8");
+        byte[] out = page.toString().getBytes("8859_1");//prefered encoding for the LimeWire.org website, not UTF-8!
         System.out.write(out, 0, out.length);
     }
     
