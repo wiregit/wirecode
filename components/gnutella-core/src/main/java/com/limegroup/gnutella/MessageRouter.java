@@ -24,7 +24,7 @@ public abstract class MessageRouter
      * @return the GUID we attach to QueryReplies to allow PushRequests in
      *         response.
      */
-    private byte[] _clientGUID;
+    protected byte[] _clientGUID;
 
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
@@ -808,8 +808,7 @@ public abstract class MessageRouter
      * @return Iterator (on QueryReply) over the Query Replies
      */
     public Iterator responsesToQueryReplies(Response[] responses,
-        QueryRequest queryRequest)
-    {
+                                            QueryRequest queryRequest) {
         //List to store Query Replies
         List /*<QueryReply>*/ queryReplies = new LinkedList();
         
@@ -831,10 +830,6 @@ public abstract class MessageRouter
         int index = 0;
 
         int numHops = queryRequest.getHops();
-
-        QueryReply queryReply;
-
-        // modified by rsoule, 11/16/00
 
         while (numResponses > 0) {
             int arraySize;
@@ -877,13 +872,14 @@ public abstract class MessageRouter
 			boolean chat = SettingsManager.instance().getChatEnabled();
 
             // create the new queryReply
-            queryReply = new QueryReply(guid, ttl, port, ip,
-                speed, res, _clientGUID, 
-                !incoming, busy, uploaded, measuredSpeed,
-                chat);  //supports chat
+            List qrList = createQueryReply(guid, ttl, port, ip, speed, 
+                                           res, _clientGUID, !incoming, 
+                                           busy, uploaded, measuredSpeed, 
+                                           chat);
 
-            //add to the list
-            queryReplies.add(queryReply);
+            if (qrList != null) 
+                //add to the list
+                queryReplies.addAll(qrList);
 
             // we only want to send multiple queryReplies
             // if the number of hops is small.
@@ -895,6 +891,24 @@ public abstract class MessageRouter
         return queryReplies.iterator();
     }
     
+    /** If there is special processing needed to building a query reply,
+     * subclasses can override this method as necessary.
+     * @return A (possibly empty) List of query replies
+     */
+    protected List createQueryReply(byte[] guid, byte ttl, int port, 
+                                    byte[] ip , long speed, Response[] res,
+                                    byte[] clientGUID, boolean notIncoming,
+                                    boolean busy, boolean uploaded, 
+                                    boolean measuredSpeed, boolean chat) {
+        List list = new ArrayList();
+        list.add(new QueryReply(guid, ttl, port, ip,
+                                speed, res, _clientGUID, 
+                                notIncoming, busy, uploaded, 
+                                measuredSpeed, chat));
+        return list;
+    }
+                                    
+
     /**
      * Adds all query routing tables for this' files to qrt.
      *     @modifies qrt

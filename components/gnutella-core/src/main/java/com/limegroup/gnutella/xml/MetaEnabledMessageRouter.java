@@ -24,180 +24,88 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
     }
 
 
-    public void sendResponses(Response[] responses, QueryRequest queryRequest,
-                              Acceptor acceptor, byte[] clientGUID) {
+    /** If there is special processing needed to building a query reply,
+     * subclasses can override this method as necessary.
+     * @return the query reply - may return null.
+     */
+    protected List createQueryReply(byte[] guid, byte ttl, int port, 
+                                    byte[] ip , long speed, Response[] res,
+                                    byte[] clientGUID, boolean notIncoming,
+                                    boolean busy, boolean uploaded, 
+                                    boolean measuredSpeed, 
+                                    boolean supportsChat) {
         
-        debug("MetaEnabledMessageRouter.sendResponses(): entered.");
-        
-        boolean supportsChat = SettingsManager.instance().getChatEnabled();
-        
-        // if either there are no responses or, the
-        // response array came back null for some reason,
-        // exit this method
-        if ( (responses == null) || ((responses.length < 1)) )
-            return;
-
-        // get the appropriate queryReply information
-        byte[] guid = queryRequest.getGUID();
-        byte ttl = (byte)(queryRequest.getHops() + 1);
-        int port = acceptor.getPort();
-        byte[] ip = acceptor.getAddress();
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = _uploadManager.measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
-            measuredSpeed=false;
-        }
-
-        int numResponses = responses.length;
-        int index = 0;
-
-        int numHops = queryRequest.getHops();
-
+        List queryReplies = new ArrayList();
         QueryReply queryReply = null;
 
-        // modified by rsoule, 11/16/00
+        // get the xml collection string...
+        String xmlCollectionString = 
+        LimeXMLDocumentHelper.getAggregateString(res);
+        if (xmlCollectionString == null)
+            xmlCollectionString = "";
 
-        while (numResponses > 0) {
-            int arraySize;
-            // if there are more than 255 responses,
-            // create an array of 255 to send in the queryReply
-            // otherwise, create an array of whatever size is left.
-            if (numResponses < 255) {
-                // break;
-                arraySize = numResponses;
-            }
-            else
-                arraySize = 255;
+        // it may be too big....
+        if (xmlCollectionString.length() > QueryReply.XML_MAX_SIZE) {
+            // ok, need to partition responses up once again and send out
+            // multiple query replies.....
+            List splitResps = new LinkedList();
+            splitAndAddResponses(splitResps, res);
 
-            Response[] res;
-            // a special case.  in the common case where there
-            // are less than 256 responses being sent, there
-            // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < 255) ) {
-                res = responses;
-            }
-            else {
-                res = new Response[arraySize];
-                // copy the reponses into bite-size chunks
-                for(int i =0; i < arraySize; i++) {
-                    res[i] = responses[index];
-                    index++;
-                }
-            }
-
-            // decrement the number of responses we have left
-            numResponses-= arraySize;
-
-			// see id there are any open slots
-			boolean busy = _uploadManager.isBusy();
-            boolean uploaded = _uploadManager.hadSuccesfulUpload();
-
-			// see if we have ever accepted an incoming connection
-			boolean incoming = _acceptor.acceptedIncoming();
-
-            // get the xml collection string...
-            String xmlCollectionString = 
-            LimeXMLDocumentHelper.getAggregateString(res);
-            if (xmlCollectionString == null)
-                xmlCollectionString = "";
-
-            // it may be too big....
-            if (xmlCollectionString.length() > QueryReply.XML_MAX_SIZE) {
-                // ok, need to partition responses up once again and send out
-                // multiple query replies.....
-                List splitResps = new LinkedList();
-                splitAndAddResponses(splitResps, res);
-                while (!splitResps.isEmpty()) {
-                    Response[] currResps = (Response[]) splitResps.remove(0);
-                    String currXML = 
-                    LimeXMLDocumentHelper.getAggregateString(currResps);
-                    if ((currXML.length() > QueryReply.XML_MAX_SIZE) &&
-                        (currResps.length > 1)) 
-                        splitAndAddResponses(splitResps, currResps);
-                    else {
-                        try {
-
-                            // create xml bytes if possible...
-                            byte[] xmlCompressed = null;
-                            if ((currXML != null) &&
-                                (!currXML.equals("")))
-                                xmlCompressed = 
-                                LimeXMLUtils.compress(currXML.getBytes());
-                            else
-                                xmlCompressed = new byte[0];
-
-                            // create the new queryReply
-                            queryReply = new QueryReply(guid, ttl, 
-                                                        port, ip,
-                                                        speed, currResps, 
-                                                        clientGUID, 
-                                                        xmlCompressed,
-                                                        !incoming, 
-                                                        busy, 
-                                                        uploaded, 
-                                                        measuredSpeed,
-                                                        supportsChat);
-                        }
-                        catch (Exception e) {
-                            continue;  // this can only happen VERY rarely...
-                        }
-                        
-                        // try to send the new queryReply
-                        try {
-                            sendQueryReply(queryReply);
-                        } 
-                        catch (IOException e) {
-                            // if there is an error, do nothing..
-                        }        
-                    }
-                }
-            }
-            else {  // xml is small enough, no problem.....
-                try {
-                    
-                    // get xml bytes if possible....
+            while (!splitResps.isEmpty()) {
+                Response[] currResps = (Response[]) splitResps.remove(0);
+                String currXML = 
+                LimeXMLDocumentHelper.getAggregateString(currResps);
+                if ((currXML.length() > QueryReply.XML_MAX_SIZE) &&
+                    (currResps.length > 1)) 
+                    splitAndAddResponses(splitResps, currResps);
+                else {
+                    // create xml bytes if possible...
                     byte[] xmlCompressed = null;
-                    if ((xmlCollectionString != null) &&
-                        (!xmlCollectionString.equals("")))
+                    if ((currXML != null) &&
+                        (!currXML.equals("")))
                         xmlCompressed = 
-                        LimeXMLUtils.compress(xmlCollectionString.getBytes());
+                        LimeXMLUtils.compress(currXML.getBytes());
                     else
                         xmlCompressed = new byte[0];
                     
-                    // create the new queryReply
-                    queryReply = new QueryReply(guid, ttl, port, ip,
-                                                speed, res, 
-                                                clientGUID, 
-                                                xmlCompressed,
-                                                !incoming, busy, 
-                                                uploaded, 
-                                                measuredSpeed,supportsChat);
+                    try {
+                        // create the new queryReply
+                        queryReply = new QueryReply(guid, ttl, port, ip, speed, 
+                                                    currResps, _clientGUID, 
+                                                    xmlCompressed, notIncoming, 
+                                                    busy, uploaded, 
+                                                    measuredSpeed, supportsChat);
+                        queryReplies.add(queryReply);
+                    }
+                    catch (IllegalArgumentException ignored) {
+                    }
                 }
-                catch (Exception e) {
-                    return; // never expect this....
-                }
-                
-                // try to send the new queryReply
-                try {
-                    sendQueryReply(queryReply);
-                } 
-                catch (IOException e) {
-                    // if there is an error, do nothing..
-                }        
             }
 
-            // we only want to send multiple queryReplies
-            // if the number of hops is small.
-            if (numHops > 2) {
-                break;
+        }
+        else {  // xml is small enough, no problem.....
+            // get xml bytes if possible....
+            byte[] xmlCompressed = null;
+            if ((xmlCollectionString != null) &&
+                (!xmlCollectionString.equals("")))
+                xmlCompressed = 
+                LimeXMLUtils.compress(xmlCollectionString.getBytes());
+            else
+                xmlCompressed = new byte[0];
+            
+            try {
+                // create the new queryReply
+                queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
+                                            _clientGUID, xmlCompressed,
+                                            notIncoming, busy, uploaded, 
+                                            measuredSpeed,supportsChat);
+                queryReplies.add(queryReply);
             }
+            catch (IllegalArgumentException ignored) {
+            }
+        }
 
-        }//end of while
-
-        debug("MetaEnabledMessageRouter.sendResponses(): returning.");
+        return queryReplies;
     }
 
     

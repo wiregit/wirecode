@@ -142,19 +142,20 @@ public class QueryReply extends Message implements Serializable{
      * in an Exception being throw.  This String is assumed to consist of
      * compressed data.
      * @param supportsChat true iff the host currently allows chatting.
-     * @exception java.lang.Exception Thrown if xmlBytes.length > XML_MAX_SIZE
+     * @exception IllegalArgumentException Thrown if 
+     * xmlBytes.length > XML_MAX_SIZE
      */
     public QueryReply(byte[] guid, byte ttl, 
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat) 
-        throws Exception {
+        throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat,true);
         if (xmlBytes.length > XML_MAX_SIZE)
-            throw new Exception();
+            throw new IllegalArgumentException();
         _xmlBytes = xmlBytes;        
     }
 
