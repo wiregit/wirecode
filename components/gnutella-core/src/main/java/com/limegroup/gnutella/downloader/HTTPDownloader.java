@@ -6,6 +6,8 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -65,8 +67,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private static final int MAX_RETRY_AFTER = 60 * 60; // 1 hour
     
     /**
-     * The throttle to use for all downloads.  Currently used to make sure
-     * we only download every other second, not for true throttling.
+     * The throttle to use for all downloads.
      */
     private static final BandwidthThrottle THROTTLE =
         new BandwidthThrottle(Float.MAX_VALUE, false);
@@ -229,6 +230,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _writtenBadLocs = new HashSet();
 		_amountRead = 0;
 		_totalAmountRead = 0;
+		applyRate();
     }
 
     ////////////////////////Alt Locs methods////////////////////////
@@ -1391,6 +1393,29 @@ public class HTTPDownloader implements BandwidthTracker {
         return bandwidthTracker.getAverageBandwidth();
     }
             
+    /**
+     * Set bandwidth limitation for downloads.
+     */
+    public static void setRate(float bytesPerSecond) {
+        THROTTLE.setRate(bytesPerSecond);
+    }
+    
+    /**
+     * Apply bandwidth limitation from settings.
+     */
+    public static void applyRate() {
+        float downloadRate = Float.MAX_VALUE;
+        int downloadThrottle = DownloadSettings.DOWNLOAD_SPEED.getValue();
+        
+        if ( downloadThrottle < 100 )
+        {
+            downloadRate = (((float)downloadThrottle/100.f)*
+             ((float)ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
+        }
+        setRate( downloadRate );
+    }
+    
+    
 	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {

@@ -6,6 +6,12 @@ package com.limegroup.gnutella.settings;
 public class DownloadSettings extends LimeProps {
     private DownloadSettings() {}
                                                         
+	/**
+	 * Setting for the number of bytes/second to allow for all uploads.
+	 */
+	public static final IntSetting DOWNLOAD_SPEED =
+		FACTORY.createIntSetting("DOWNLOAD_SPEED", 100);
+    
     /**
 	 * The maximum number of downstream bytes per second ever passed by
 	 * this node.
