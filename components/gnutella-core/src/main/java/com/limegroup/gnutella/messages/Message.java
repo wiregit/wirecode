@@ -38,7 +38,7 @@ public abstract class Message
     ////////////////////////// Instance Data //////////////////////
 
     private byte[] guid;
-    private byte func;
+    private final byte func;
 
     /* We do not support TTLs > 2^7, nor do we support packets
      * of length > 2^31 */
@@ -50,7 +50,7 @@ public abstract class Message
      *  written to network. */
     private int priority=0;
     /** Time this was created.  Not written to network. */
-    private long creationTime=System.currentTimeMillis();
+    private final long creationTime=System.currentTimeMillis();
 
 	/**
 	 * Constant byte buffer for storing the GUID for incoming messages --
