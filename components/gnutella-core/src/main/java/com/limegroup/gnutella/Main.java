@@ -27,6 +27,9 @@ public class Main implements ActivityCallback {
         
 		//}
 
+
+
+    System.out.println("For a command list type help.");
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
     for ( ; ;) {
         System.out.print("LimeRouter> ");
@@ -34,6 +37,28 @@ public class Main implements ActivityCallback {
         String command=in.readLine();
         if (command==null)
             break;
+        else if (command.equals("help")) {
+			System.out.println("catcher                  "+
+			  "Print host catcher.");
+			System.out.println("connect <host> [<port>]  "+
+			  "Connect to a host[:port].");
+			System.out.println("help                     "+
+			  "Print this message.");
+			System.out.println("listen <port>            "+
+			  "Set the port you are listening on.");
+			System.out.println("push                     "+
+			  "Print push routes.");
+			System.out.println("query <string>           "+
+			  "Send a query to the network.");
+			System.out.println("quit                     "+
+			  "Quit the application.");
+			System.out.println("route                    "+
+			  "Print routing tables.");
+			System.out.println("stat                     "+
+			  "Print statistics.");
+			System.out.println("update                   "+
+			  "Send pings to update the statistics.");
+		}
         else if (command.equals("quit"))
             break;
         //Print routing tables
