@@ -11,7 +11,8 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	SettingsInterface.class SettingsManager.class \
 	HTTPManager.class HTTPUploader.class HTTPDownloader.class HTTPUtil.class \
 	SpamFilter.class \
-	RouterService.class ResponseVerifier.class
+	RouterService.class ResponseVerifier.class \
+	Library.class
 
 subpackages = util gui filters networkdiscoverer
 
