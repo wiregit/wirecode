@@ -525,77 +525,69 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             //here.  An alternative is to obtain a lock before doing these
             //calls, but we are afraid that getInput/OutputStream may be a
             //blocking operation.
-            close();
+            //close();
             throw new IOException("could not establish connection");
         }
         
-        try {
-            //In all the line reading code below, we are somewhat lax in
-            //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing())
-                initializeOutgoing();
-            else
-                initializeIncoming();
+        //In all the line reading code below, we are somewhat lax in
+        //distinguishing between '\r' and '\n'.  Who cares?
+        if(isOutgoing())
+            initializeOutgoing();
+        else
+            initializeIncoming();
 
-            _headers = HandshakeResponse.createResponse(HEADERS_READ);
-            _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
+        _headers = HandshakeResponse.createResponse(HEADERS_READ);
+        _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
 
-            _connectionTime = System.currentTimeMillis();
+        _connectionTime = System.currentTimeMillis();
 
-            // Now set the soft max TTL that should be used on this connection.
-            // The +1 on the soft max for "good" connections is because the 
-            // message may come from a leaf, and therefore can have an extra
-            // hop.  "Good" connections are connections with features such as 
-            // intra-Ultrapeer QRP passing.
-            _softMax = ConnectionSettings.SOFT_MAX.getValue();
-            if(isGoodUltrapeer() || isGoodLeaf()) {
-                // we give these an extra hop because they might be sending
-                // us traffic from their leaves
-                _softMax++;
-            } 
-            
-            //wrap the streams with inflater/deflater
-            // These calls must be delayed until absolutely necessary (here)
-            // because the native construction for Deflater & Inflater 
-            // allocate buffers outside of Java's memory heap, preventing 
-            // Java from fully knowing when/how to GC.  The call to end()
-            // (done explicitly in the close() method of this class, and
-            //  implicitly in the finalization of the Deflater & Inflater)
-            // releases these buffers.
-            if(isWriteDeflated()) {
-                _deflater = new Deflater();
-                _out = new CompressingOutputStream(_out, _deflater);
-            }            
-            if(isReadDeflated()) {
-                _inflater = new Inflater();
-                _in = new UncompressingInputStream(_in, _inflater);
-            }
-                       
-            // remove the reference to the RESPONSE_HEADERS, since we'll no
-            // longer be responding.
-            // This does not need to be in a finally clause, because if an
-            // exception was thrown, the connection will be removed anyway.
-            RESPONSE_HEADERS = null;
-            
-            if(CommonUtils.isJava14OrLater() && 
-               ConnectionSettings.USE_NIO.getValue()) {
-                _socket.getChannel().configureBlocking(false);
-                NIODispatcher.instance().addReader(this);     
-            }
-            // create the output queues for messages
-            _messageWriter = new MessageWriterProxy(this); 
-            _messageReader = new MessageReaderProxy();
-             
-            //NIODispatcher.instance().addReader(this);
-            // check for updates from this host  
-            UpdateManager.instance().checkAndUpdate(this);          
-        } catch (NoGnutellaOkException e) {
-            close();
-            throw e;
-        } catch (IOException e) {
-            close();
-            throw new BadHandshakeException(e);
+        // Now set the soft max TTL that should be used on this connection.
+        // The +1 on the soft max for "good" connections is because the 
+        // message may come from a leaf, and therefore can have an extra
+        // hop.  "Good" connections are connections with features such as 
+        // intra-Ultrapeer QRP passing.
+        _softMax = ConnectionSettings.SOFT_MAX.getValue();
+        if(isGoodUltrapeer() || isGoodLeaf()) {
+            // we give these an extra hop because they might be sending
+            // us traffic from their leaves
+            _softMax++;
+        } 
+        
+        //wrap the streams with inflater/deflater
+        // These calls must be delayed until absolutely necessary (here)
+        // because the native construction for Deflater & Inflater 
+        // allocate buffers outside of Java's memory heap, preventing 
+        // Java from fully knowing when/how to GC.  The call to end()
+        // (done explicitly in the close() method of this class, and
+        //  implicitly in the finalization of the Deflater & Inflater)
+        // releases these buffers.
+        if(isWriteDeflated()) {
+            _deflater = new Deflater();
+            _out = new CompressingOutputStream(_out, _deflater);
+        }            
+        if(isReadDeflated()) {
+            _inflater = new Inflater();
+            _in = new UncompressingInputStream(_in, _inflater);
         }
+                   
+        // remove the reference to the RESPONSE_HEADERS, since we'll no
+        // longer be responding.
+        // This does not need to be in a finally clause, because if an
+        // exception was thrown, the connection will be removed anyway.
+        RESPONSE_HEADERS = null;
+        
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+            _socket.getChannel().configureBlocking(false);
+            NIODispatcher.instance().addReader(this);     
+        }
+        // create the output queues for messages
+        _messageWriter = new MessageWriterProxy(this); 
+        _messageReader = new MessageReaderProxy();
+         
+        //NIODispatcher.instance().addReader(this);
+        // check for updates from this host  
+        UpdateManager.instance().checkAndUpdate(this);          
     }
 
     /**
@@ -1083,6 +1075,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // so we must catch NPE and throw the CONNECTION_CLOSED.
         try {
             _socket.setSoTimeout(timeout);
+            if(!_socket.getChannel().isOpen()) {
+                
+            }
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
