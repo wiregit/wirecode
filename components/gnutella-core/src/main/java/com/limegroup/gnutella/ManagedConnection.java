@@ -902,10 +902,10 @@ public class ManagedConnection extends Connection
         if(this.isOutgoing())
 			domainsAuthenticated = getDomainsAuthenticated();
 				//domainsAuthenticated = getProperty(
-                //ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+                //HeaderNames.X_DOMAINS_AUTHENTICATED);
         else
             domainsAuthenticated = getPropertyWritten(
-                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+                HeaderNames.X_DOMAINS_AUTHENTICATED);
 
         //for unauthenticated connections
         if(domainsAuthenticated == null){

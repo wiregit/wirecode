@@ -636,7 +636,7 @@ public class ConnectionManager {
 		} else if (RouterService.isLeaf()) {
 			// we're a leaf -- don't allow any incoming connections
             return false;  
-		} else if (hr.isLeafConnection() || leaf) {
+		} else if (hr.isLeaf() || leaf) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
@@ -652,7 +652,7 @@ public class ConnectionManager {
 			//  < (trustedVendor(hr.getUserAgent())
 			//   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
 
-        } else if (hr.isSupernodeConnection()) {
+        } else if (hr.isUltrapeer()) {
             //2. Ultrapeer.  Preference trusted vendors using BearShare's
             //clumping algorithm (see above).		   
 
@@ -1238,7 +1238,7 @@ public class ConnectionManager {
      */
     private void processConnectionHeaders(ManagedConnection connection){
         //get the connection headers
-        Properties headers = connection.getHeaders();
+        Properties headers = connection.getHeaders().props();
         //return if no headers to process
         if(headers == null) return;
         
@@ -1249,10 +1249,10 @@ public class ConnectionManager {
         //get remote address.  If the more modern "Listen-IP" header is
         //not included, try the old-fashioned "X-My-Address".
         String remoteAddress 
-            = headers.getProperty(ConnectionHandshakeHeaders.LISTEN_IP);
+            = headers.getProperty(HeaderNames.LISTEN_IP);
         if (remoteAddress==null)
             remoteAddress 
-                = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
+                = headers.getProperty(HeaderNames.X_MY_ADDRESS);
 
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
@@ -1284,7 +1284,7 @@ public class ConnectionManager {
      */
     public boolean allowLeafDemotion() {
 		_leafTries++;
-
+        
         //if is a ultrapeer, and have other connections (client or ultrapeer),
         //or the ultrapeer status is forced, dont change mode
         int connections = getNumInitializedConnections()
@@ -1326,11 +1326,11 @@ public class ConnectionManager {
 								 ManagedConnection connection) {
         //get the ultrapeers, and add those to the host cache
         updateHostCache(headers.getProperty(
-                ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS),
+                HeaderNames.X_TRY_ULTRAPEERS),
                 connection, true);
         //add the addresses received
         updateHostCache(headers.getProperty(
-                ConnectionHandshakeHeaders.X_TRY),
+                HeaderNames.X_TRY),
                 connection, false);        
     }
     

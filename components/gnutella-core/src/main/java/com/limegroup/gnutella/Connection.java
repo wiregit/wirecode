@@ -65,10 +65,13 @@ public class Connection {
     protected volatile boolean _closed=false;
 
     /** 
-	 * The properties read from the connection.
+	 * The headers read from the connection.
 	 */
     private final Properties HEADERS_READ = new Properties();
 
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
+     */
 	private final HandshakeResponse HEADERS = 
 		new HandshakeResponse(HEADERS_READ);
 
@@ -358,9 +361,11 @@ public class Connection {
 			readHeaders();
 
             //Terminate abnormally if we read something other than 200 or 401.
-            HandshakeResponse theirResponse = new HandshakeResponse(
-                connectLine.substring(GNUTELLA_06.length()).trim(), 
-                HEADERS_READ);
+            HandshakeResponse theirResponse = 
+                HandshakeResponse.createServerResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(), 
+                    HEADERS_READ);
+
             int theirCode = theirResponse.getStatusCode();
             if (theirCode != HandshakeResponse.OK 
 				&&  theirCode != HandshakeResponse.UNAUTHORIZED_CODE)
@@ -376,7 +381,7 @@ public class Connection {
 
             sendString(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.getHeaders());
+            sendHeaders(ourResponse.props());
             //Consider termination...
             if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
                 if(ourResponse.getStatusMessage().equals(
@@ -452,11 +457,10 @@ public class Connection {
 			//See initializeIncoming and the code at the bottom of this
 			//loop.
 			HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(new HandshakeResponse(HEADERS_READ), 
-										 false);
+				RESPONSE_HEADERS.respond(HEADERS, false);
 
             sendString(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.getHeaders());                   
+            sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
             if((ourResponse.getStatusCode() != HandshakeResponse.OK)
@@ -482,9 +486,12 @@ public class Connection {
 			
             if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
-            HandshakeResponse theirResponse=new HandshakeResponse(
-                connectLine.substring(GNUTELLA_06.length()).trim(), 
-                HEADERS_READ);
+
+            HandshakeResponse theirResponse = 
+                HandshakeResponse.createServerResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(),
+                    HEADERS_READ);
+
 
             //Decide whether to proceed.
             int ourCode=ourResponse.getStatusCode();
@@ -544,7 +551,7 @@ public class Connection {
                 String key=(String)enum.nextElement();
                 String value=props.getProperty(key);
                 // Overwrite any domainname with true IP address
-                if ( ConnectionHandshakeHeaders.REMOTE_IP.equals(key) )
+                if ( HeaderNames.REMOTE_IP.equals(key) )
                     value=getInetAddress().getHostAddress();
                 if (value==null)
                     value="";
@@ -854,13 +861,14 @@ public class Connection {
     }
     
     /**
-     * Returns the headers received during connection Handshake
-     * @return the headers received during connection Handshake. All the
-     * headers received are combined together. 
-     * (headers are received twice for the incoming connections)
+     * Accessor for the headers received during the connection handshake.
+     * The headers contain vital properties about the connection.
+     *
+     * @return the <tt>HandshakeResponse</tt> wrapper for the headers
+     *  sent by this connection
      */
-    public Properties getHeaders(){
-		return (Properties)HEADERS_READ.clone();
+    public HandshakeResponse getHeaders() {
+        return HEADERS;
     }
 
     /**
@@ -988,12 +996,12 @@ public class Connection {
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-		return HEADERS.isLeafConnection();
+		return HEADERS.isLeaf();
     }
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-		return HEADERS.isSupernodeConnection();
+		return HEADERS.isUltrapeer();
     }
 
     /** 
@@ -1018,7 +1026,7 @@ public class Connection {
 
         //...and am I a leaf node?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_ULTRAPEER);
+            HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1091,7 +1099,7 @@ public class Connection {
 
         //...and am I a supernode?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_ULTRAPEER);
+            HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else if (!Boolean.valueOf(value).booleanValue())
