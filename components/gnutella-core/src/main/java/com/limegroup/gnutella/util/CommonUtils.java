@@ -898,6 +898,26 @@ public final class CommonUtils {
     }
     
     /**
+     * Gets an InputStream from a resource file.
+     */
+    public static InputStream getResourceStream(String location) 
+      throws IOException {
+       ClassLoader cl = CommonUtils.class.getClassLoader();            
+       URL resource = null;
+
+        if(cl == null) {
+            resource = ClassLoader.getSystemResource(location);
+        } else {
+            resource = cl.getResource(location);
+        }
+        
+        if( resource == null)
+            return null;
+        else
+            return resource.openStream();
+    }
+    
+    /**
      * Copied from URLDecoder.java
      */
     public static String decode(String s) {
