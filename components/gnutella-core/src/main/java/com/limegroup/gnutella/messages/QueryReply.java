@@ -936,7 +936,7 @@ public class QueryReply extends Message implements Serializable{
      * not.  See RouterService.acceptingIncomingConnection or Acceptor for
      * details.  
      */
-	public int calculateQualityOfService(final boolean iFirewalled) {
+	public int calculateQualityOfService(boolean iFirewalled) {
         final int YES=1;
         final int MAYBE=0;
         final int NO=-1;
@@ -948,19 +948,30 @@ public class QueryReply extends Message implements Serializable{
 		} catch (BadPacketException e) {
 			busy = MAYBE;
 		}
+		
+		boolean isMCastReply;
+		try {
+		    isMCastReply = this.isReplyToMulticastQuery();
+		} catch(BadPacketException e) {
+		    isMCastReply = false;
+		}		       
 
         /* Is the remote host firewalled? */
 		int heFirewalled;
 		
-		//if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
-		//	heFirewalled = YES;
-		//else {
+		if( isMCastReply ) {
+		    iFirewalled = false;
+		    heFirewalled = NO;
+		}
+		else if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
+			heFirewalled = YES;
+		else {
 			try {
 				heFirewalled=this.getNeedsPush()? YES : NO;
 			} catch (BadPacketException e) {
 				heFirewalled = MAYBE;
 			}
-		//}
+		}
 
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing

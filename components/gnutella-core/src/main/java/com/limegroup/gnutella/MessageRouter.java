@@ -1489,16 +1489,17 @@ public abstract class MessageRouter {
             boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
-			boolean incoming = RouterService.acceptedIncomingConnection()
-			                || queryRequest.isMulticast();
+			boolean incoming = RouterService.acceptedIncomingConnection();
 
 			boolean chat = SettingsManager.instance().getChatEnabled();
+			
+			boolean mcast = queryRequest.isMulticast();
 
             // create the new queryReply
             List qrList = createQueryReply(guid, ttl, port, ip, speed, 
                                            res, _clientGUID, !incoming, 
                                            busy, uploaded, measuredSpeed, 
-                                           chat);
+                                           chat, mcast);
 
             if (qrList != null) 
                 //add to the list
@@ -1522,12 +1523,13 @@ public abstract class MessageRouter {
                                     byte[] ip , long speed, Response[] res,
                                     byte[] clientGUID, boolean notIncoming,
                                     boolean busy, boolean uploaded, 
-                                    boolean measuredSpeed, boolean chat) {
+                                    boolean measuredSpeed, boolean chat,
+                                    boolean isFromMcast) {
         List list = new ArrayList();
         list.add(new QueryReply(guid, ttl, port, ip,
                                 speed, res, _clientGUID, 
                                 notIncoming, busy, uploaded, 
-                                measuredSpeed, chat, false));
+                                measuredSpeed, chat, isFromMcast));
         return list;
     }
                                     
