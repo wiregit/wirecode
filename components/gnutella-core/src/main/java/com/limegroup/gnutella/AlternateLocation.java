@@ -41,19 +41,26 @@ public final class AlternateLocation {
 	 *  including a full URL for a file and an optional date
 	 * @throws <tt>IOException</tt> if there is any problem constructing
 	 *  the new instance from the specified string
-	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
-	 *  formatted correctly
 	 */
 	public AlternateLocation(final String LOCATION) throws IOException {
-		URL = AlternateLocation.createUrl(LOCATION);
+		try {
+			URL = AlternateLocation.createUrl(LOCATION);
+		} catch(MalformedURLException e) {
+			throw new IOException("MALFORMED URL");
+		}
+		
+		// this can be null
 		OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(LOCATION);
+
+		// this can be null
 		DATE = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
 	}
 
 	/**
 	 * Returns the <tt>URL</tt> instance for this alternate location.
 	 *
-	 * @return the <tt>URL</tt> instance for this alternate location
+	 * @return the <tt>URL</tt> instance for this alternate location, which
+	 *  is guaranteed to be non-null
 	 */
 	public URL getUrl() {
 		// this is fine because the URL class is immutable
@@ -63,9 +70,10 @@ public final class AlternateLocation {
 	/**
 	 * Returns the <tt>Date</tt> instance for this alternate location.
 	 *
-	 * @return the <tt>Date</tt> instance for this alternate location
+	 * @return the <tt>Date</tt> instance for this alternate location, or
+	 *  <tt>null</tt> if this alternate location does not have a timestamp
 	 */
-	public Date getDate() {
+	public Date getTimestamp() {
 		// this is fine because the Date class is immutable
 		return DATE;
 	}
@@ -77,18 +85,16 @@ public final class AlternateLocation {
 	 * @param LOCATION the full alternate-location HTTP header string,
 	 *  as specified in HUGE v0.93
 	 * @return the date/time string from the the alternate location
-	 *  header
-	 * @throws <tt>IOException</tt> if there's any error extracting the
-	 *  the date/time from the alternate location
+	 *  header, or <tt>null</tt> if the date/time string could not
+	 *  be extracted or does not exist
 	 */
-	private static String extractDateTimeString(final String LOCATION) 
-		throws IOException {
+	private static String extractDateTimeString(final String LOCATION) {
 		int dateIndex = LOCATION.lastIndexOf(" ");
 		if((dateIndex == -1) ||
 		   ((dateIndex+1) >= LOCATION.length())) {
-			throw new IOException("ERROR EXTRACTING DATE TIME STRING");
+			return null;
 		}
-		return LOCATION.substring(dateIndex+1); 
+		return LOCATION.substring(dateIndex+1).trim(); 
 	}
 
 	/**
@@ -98,19 +104,17 @@ public final class AlternateLocation {
 	 * @param DATE_TIME_STRING the extracted date-time string from the
 	 *  alternate location header
 	 * @return a new <tt>Date</tt> instance for the date specified in
-	 *  the header
-	 * @throws <tt>IOException</tt> if there is any problem creating
-	 *  the date
+	 *  the header, or <tt>null</tt> if the date could not be extracted
 	 */
-	private static Date createDateInstance(final String DATE_TIME_STRING) 
-		throws IOException {
+	private static Date createDateInstance(final String DATE_TIME_STRING) {
 		int dateTimeSepIndex = DATE_TIME_STRING.indexOf("T");
 
 		// if there's no "T", or it f
 		if((dateTimeSepIndex == -1) || 
 		   ((dateTimeSepIndex+1) >= DATE_TIME_STRING.length()) ||
 		   (DATE_TIME_STRING.length() != 20)) {
-			throw new IOException("INVALID DATE/TIME STRING");
+			return null;
+			//throw new IOException("INVALID DATE/TIME STRING");
 		}
 		String YYYYMMDD = DATE_TIME_STRING.substring(0, dateTimeSepIndex);
 		String hhmmss = 
@@ -118,7 +122,8 @@ public final class AlternateLocation {
 									   DATE_TIME_STRING.length()-1);
 		StringTokenizer stdate = new StringTokenizer(YYYYMMDD, "-");
 		if(stdate.countTokens() != 3) {
-			throw new IOException("INVALID DATE FORMAT");
+			return null;
+			//throw new IOException("INVALID DATE FORMAT");
 		}
 		String YYYYStr = stdate.nextToken();
 		String MMStr   = stdate.nextToken();
@@ -132,7 +137,8 @@ public final class AlternateLocation {
  
 		StringTokenizer sttime = new StringTokenizer(hhmmss, ":");
 		if(sttime.countTokens() != 3) {
-			throw new IOException("INVALID TIME FORMAT");
+			return null;
+			//throw new IOException("INVALID TIME FORMAT");
 		}
 		String hhStr = sttime.nextToken();
 		String mmStr = sttime.nextToken();
@@ -162,15 +168,23 @@ public final class AlternateLocation {
 	 */
 	private static URL createUrl(final String LOCATION_HEADER) 
 		throws IOException {
-		int urlIndex  = LOCATION_HEADER.indexOf(" ");
-		int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
-		if((urlIndex == -1) ||
-		   (urlIndex == dateIndex) ||
-		   ((dateIndex+1) >= LOCATION_HEADER.length())) {
-			throw new IOException("ERROR EXTRACTING URL STRING");
+		String test = LOCATION_HEADER.toLowerCase();
+		String urlString;
+		if(!test.startsWith("http")) {
+			int urlIndex  = LOCATION_HEADER.indexOf(":");
+			int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
+			if((urlIndex == -1) ||
+			   (urlIndex == dateIndex) ||
+			   ((dateIndex+1) >= LOCATION_HEADER.length())) {
+				   throw new IOException("ERROR EXTRACTING URL STRING");
+			   }
+			urlString = LOCATION_HEADER.substring(urlIndex+1, dateIndex);
+		} else {
+			urlString = LOCATION_HEADER;
 		}
-		String urlString = LOCATION_HEADER.substring(urlIndex+1, dateIndex);
-		return new URL(urlString);
+
+		// get rid of any surrounding whitespace
+		return new URL(urlString.trim());
 	}
 
 	/**
@@ -182,7 +196,7 @@ public final class AlternateLocation {
 	 *  argument, and otherwise returns <tt>false</tt> 
 	 */
 	public boolean isOlderThan(AlternateLocation loc) {
-		return DATE.before(loc.getDate());
+		return this.getTimestamp().before(loc.getTimestamp());
 	}
 
 	/**
@@ -194,7 +208,7 @@ public final class AlternateLocation {
 	 *  argument, and otherwise returns <tt>false</tt> 
 	 */
 	public boolean isNewerThan(AlternateLocation loc) {
-		return DATE.after(loc.getDate());
+		return this.getTimestamp().after(loc.getTimestamp());
 	}
 
 	/**
@@ -212,8 +226,16 @@ public final class AlternateLocation {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
-		Date date = al.getDate();
+		Date date = al.getTimestamp();
 		URL url = al.getUrl();
+		if(((date == null) && (DATE != null)) ||
+		   ((date != null) && (DATE == null))) {
+			return false;
+		}
+		else if(((date == null) && (DATE == null)) &&
+				(this.URL.equals(url))) {
+			return true;
+		}
 		return (this.DATE.equals(date) ||
 				this.URL.equals(url));
 	}
@@ -228,6 +250,7 @@ public final class AlternateLocation {
 		return this.URL.toString()+" "+OUTPUT_DATE_TIME;
 	}
 
+	
 	/*
 	public static void main(String[] args) {
 		String alt = "Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
@@ -235,13 +258,14 @@ public final class AlternateLocation {
 		"2002-04-09T20:32:33Z";
 		try {
 			AlternateLocation al = new AlternateLocation(alt);
-			//System.out.println(al.getDate()); 
+			//System.out.println(al.getTimestamp()); 
 			System.out.println(al); 
 		} catch(IOException e) {
 			e.printStackTrace();
 		}		
 	}
 	*/
+	
 }
 
 
