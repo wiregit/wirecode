@@ -15,15 +15,17 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     public static int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
+    public static final int TERRIBLE_SUCCESS_RATE = 40;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
 	private OutOfBandThroughputStat() {
         final int thirtyMins = 30 * 60 * 1000;
-        Runnable adjuster = new Thread() {
+        Runnable adjuster = new Runnable() {
                 public void run() {
-                    if (!isSuccessRateGreat())
+                    if (!isSuccessRateGreat() && !isSuccessRateGood() &&
+                        !isSuccessRateTerrible())
                         MIN_SAMPLE_SIZE += 500;
                 }
             };
@@ -87,6 +89,16 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
         return (getSuccessRate() > PROXY_SUCCESS_RATE);
+    }
+
+    /**
+     * @return whether or not the success rate is terrible (less than 40%).
+     */
+    public static boolean isSuccessRateTerrible() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return true;
+        return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
     }
 
     /**
