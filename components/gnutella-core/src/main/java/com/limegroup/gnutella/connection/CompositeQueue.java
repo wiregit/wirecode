@@ -106,7 +106,7 @@ public final class CompositeQueue {
     /**
      * Lock for the output queue.
      */
-    private Object _queueLock;
+    private final Object QUEUE_LOCK;
     
     /**
      * Creates a new <tt>CompositeQueue</tt> instance.
@@ -122,11 +122,11 @@ public final class CompositeQueue {
     /** 
      * Constructs a new queue with the default message buffers. 
      * 
-     * @param mc the <tt>ManagedConnection</tt> associated with this queue
+     * @param mc the <tt>Connection</tt> associated with this queue
      */
     private CompositeQueue(Connection conn, Object queueLock) {
         CONNECTION = conn;
-        _queueLock = queueLock;
+        QUEUE_LOCK = queueLock;
     }
     
     /**
@@ -172,7 +172,7 @@ public final class CompositeQueue {
             _queues = createQueues();
         }
         
-        synchronized (_queueLock) {
+        synchronized (QUEUE_LOCK) {
             int priority = calculatePriority(msg);
             
             // add msg to appropriate buffer
@@ -189,7 +189,8 @@ public final class CompositeQueue {
         }
         repOk();
     }
-    
+
+     
     /** 
      * Removes and returns the next message to send from this.  Returns null if
      * there are no more messages to send.  The returned message is guaranteed
@@ -201,7 +202,7 @@ public final class CompositeQueue {
      * @see com.limegroup.gnutella.connection.MessageQueue#resetDropped()
      * TODO:: make syncrhonization more fine-grained
      */
-    public void write() throws IOException {        
+    public void write() throws IOException {    
         //try { 
             //repOk();
             
@@ -214,7 +215,7 @@ public final class CompositeQueue {
             boolean emptied = false;
             while(true) {
                 Message msg = null;
-                synchronized (_queueLock) {
+                synchronized (QUEUE_LOCK) {
                     msg = queue.removeNext();
                     int dropped = queue.resetDropped();
                     CONNECTION.stats().addSentDropped(dropped);
