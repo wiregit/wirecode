@@ -8,37 +8,10 @@ import com.limegroup.gnutella.routing.*;
  * sent whose reply is for me.
  */
 public final class ForMeReplyHandler implements ReplyHandler {
-
-	private final ManagedConnectionQueryInfo QUERY_ROUTE_STATE =
-		new ManagedConnectionQueryInfo();
 	
 	private final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 		
-	private final ConnectionManager CONNECTION_MANAGER;
-	private final ActivityCallback CALLBACK;
-
-	private final FileManager FILE_MANAGER;
-
-	private final DownloadManager DOWNLOAD_MANAGER;
-
-	private final UploadManager UPLOAD_MANAGER;
-
-	private final Acceptor ACCEPTOR;
-
-	public ForMeReplyHandler(Acceptor acceptor,
-							 ConnectionManager cm, 
-							 FileManager fm,
-							 ActivityCallback callback,
-							 DownloadManager dm,
-							 UploadManager um) {
-		ACCEPTOR = acceptor;
-		CONNECTION_MANAGER = cm;
-		FILE_MANAGER = fm;
-		CALLBACK = callback;
-		DOWNLOAD_MANAGER = dm;
-		UPLOAD_MANAGER = um;
-	}
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
         SettingsManager settings = SettingsManager.instance();
@@ -54,15 +27,20 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			&& ((int)(Math.random()*100.f) >
 				settings.getFreeloaderAllowed())
 			&& (handler instanceof ManagedConnection)) {
-            CONNECTION_MANAGER.remove((ManagedConnection)handler);
+			ConnectionManager cm = RouterService.instance().getConnectionManager();
+            cm.remove((ManagedConnection)handler);
         }
 	}
 	
-	public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
-        if (!handler.isPersonalSpam(queryReply)) {
-            CALLBACK.handleQueryReply(queryReply);
-            DOWNLOAD_MANAGER.handleQueryReply(queryReply);
-        }
+	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
+		if(handler.isPersonalSpam(reply)) return;
+			
+		RouterService rs = RouterService.instance();
+		ActivityCallback callback = rs.getCallback();
+		callback.handleQueryReply(reply);
+
+		DownloadManager dm = rs.getDownloadManager();
+		dm.handleQueryReply(reply);
 	}
 
 	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler) {
@@ -83,9 +61,11 @@ public final class ForMeReplyHandler implements ReplyHandler {
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
+		RouterService rs = RouterService.instance();
         FileDesc desc;
         try {
-            desc = FILE_MANAGER.get(index);
+			FileManager fm = rs.getFileManager();
+            desc = fm.get(index);
         }
         catch (IndexOutOfBoundsException e) {
             //You could connect and send 404 file
@@ -95,9 +75,11 @@ public final class ForMeReplyHandler implements ReplyHandler {
 
         String file = desc.getName();
 
-        if (!ACCEPTOR.isBannedIP(h)) {
-            UPLOAD_MANAGER.acceptPushUpload(file, h, port, 
-                                            index, req_guid_hexstring);
+		
+        if (!rs.getAcceptor().isBannedIP(h)) {
+			
+            rs.getUploadManager().acceptPushUpload(file, h, port, 
+												   index, req_guid_hexstring);
 		}
 	}
 	
