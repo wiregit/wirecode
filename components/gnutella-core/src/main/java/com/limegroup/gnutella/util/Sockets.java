@@ -69,7 +69,7 @@ public class Sockets {
             //   of Java.  Worse, it may cause runtime errors if class loading
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
-            try {  //TODO1: does this use the right class loader?
+            try {
                 Class inetSocketAddress=
                     Class.forName("java.net.InetSocketAddress");
                 Constructor inetSocketAddressCtor=
