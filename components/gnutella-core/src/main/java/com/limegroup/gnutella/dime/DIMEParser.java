@@ -55,10 +55,8 @@ public class DIMEParser implements Iterator {
     
     /**
      * Returns the next record we can parse.
-     *
-     * @throws NoSuchElementException if _lastRead is already set.
      */
-    public DIMERecord nextRecord() throws IOException, NoSuchElementException {
+    public DIMERecord nextRecord() throws IOException {
         return getNext();
     }
     
@@ -96,12 +94,11 @@ public class DIMEParser implements Iterator {
      * Reads the next record from the stream, updating the internal variables.
      * If the read record is the first and doesn't have the ME flag set,
      * throws IOException.
-     * If this is called when _lastRead is already set, throws
-     * NoSuchElementException.
+     * If this is called when _lastRead is already set, throws IOException.
      */
-    private DIMERecord getNext() throws IOException, NoSuchElementException {
+    private DIMERecord getNext() throws IOException {
         if(_lastRead)
-            throw new NoSuchElementException();
+            throw new IOException("already read last message.");
                 
         DIMERecord next = DIMERecord.createFromStream(IN);
         if(next.isLastRecord())
@@ -109,6 +106,8 @@ public class DIMEParser implements Iterator {
             
         if(!_firstRead && !next.isFirstRecord())
             throw new IOException("middle of stream.");
+        else if(_firstRead && next.isFirstRecord())
+            throw new IOException("two first records.");
             
         _firstRead = true;
         

@@ -12,6 +12,16 @@ import java.io.IOException;
  * See: http://www-106.ibm.com/developerworks/library/ws-dime/
  * (or http://www.perfectxml.com/DIME.asp )
  * for information about DIME.
+ *
+ * To use this class, use:
+ *     DIMEGenerator gen = new DIMEGenerator();
+ *     gen.add(recordOne);
+ *     gen.add(recordTwo);
+ *     etc...
+ *     gen.write(myOutputStream);
+ * To the same records to another output stream, simply call
+ *     gen.write(anotherOutputStream);
+ * again.
  */
 public class DIMEGenerator {
     
