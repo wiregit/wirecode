@@ -19,7 +19,7 @@ public class HTTPDownloader implements Runnable {
     private int MAX_BUFF = 64 * 1024;
 
     // private BufferedReader _in;
-    private DataInputStream _in;;
+    // private DataInputStream _in;;
 
     private InputStream _istream;
     private String _filename;
