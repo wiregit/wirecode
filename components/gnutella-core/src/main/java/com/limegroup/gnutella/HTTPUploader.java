@@ -13,7 +13,8 @@ import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.*;
 
-public class HTTPUploader implements Runnable, Comparable {
+public class HTTPUploader implements Runnable, 
+                    com.sun.java.util.collections.Comparable {
     /**
      * The list of all files that we've tried unsuccessfully to upload
      * via pushes.  (Here successful means we were able to connect.
