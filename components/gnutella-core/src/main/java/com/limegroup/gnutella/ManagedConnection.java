@@ -834,6 +834,12 @@ public class ManagedConnection
         private final Cookies COOKIES = Cookies.instance();    
         
         /**
+         * Constant handle to the <tt>SettingsManager</tt> for accessing
+         * various properties.
+         */
+        private final SettingsManager SETTINGS = SettingsManager.instance();
+        
+        /**
          * An instance of connection manager (to reference other stuff
          * held by connection manager)
          */
@@ -865,7 +871,7 @@ public class ManagedConnection
         //inherit doc comment
         public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException{
-            Properties ret = null;
+            Properties ret = new Properties();
             int code = HandshakeResponse.OK;
             String message = HandshakeResponse.OK_MESSAGE;
             
@@ -886,21 +892,57 @@ public class ManagedConnection
                     //if we dont have cookie, of we have already used the
                     //cookie, then get the information interactively from user
                     if(user == null){
-                        
+                        user = _manager.getCallback()
+                            .getUserAuthenticationInfo(_host);
                     }
                     
+                    //if user cancelled authentication, or didnt fill anything
+                    if(user.getUsername().trim().equals("")){
+                        code = HandshakeResponse.DEFAULT_BAD_STATUS_CODE;
+                        message = HandshakeResponse.UNABLE_TO_AUTHENTICATE;
+                    }
+                    else{
+                        code = HandshakeResponse.OK;
+                        message = HandshakeResponse.AUTHENTICATING;
+                        //add user authentication headers
+                        ret.setProperty(ConnectionHandshakeHeaders.USERNAME,
+                            user.getUsername());
+                        ret.setProperty(ConnectionHandshakeHeaders.PASSWORD,
+                            user.getPassword());
+                        
+                        //also store the authentication information in a 
+                        //cookie, for next-time use
+                        COOKIES.putCookie(user.getUsername(), user);
+                    }
                 }
+                
+            }
+            else{
+                //incoming connection
+                if(SETTINGS.acceptAuthenticatedConnectionsOnly()){
+                    //see if we received username and password
+                    Properties headersReceived = response.getHeaders();
+                    //authenticate
+                    boolean authenticated 
+                        = _manager.getAuthenticator().authenticate(
+                        headersReceived.getProperty(
+                        ConnectionHandshakeHeaders.USERNAME),
+                        headersReceived.getProperty(
+                        ConnectionHandshakeHeaders.PASSWORD), null);
+                    
+                    if(!authenticated){
+                        code = HandshakeResponse.UNAUTHORIZED_CODE;
+                        message = HandshakeResponse.UNAUTHORIZED_MESSAGE;
+                    }
+                }
+                //else no need to do anything
             }
             
-            //if first response, add the headers
-            if(_firstResponse){
-                //turn the flag off
-                _firstResponse = false;
-                //set common properties
-                ret=new Properties();
-                ret.setProperty(
-                    ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
-            }
+            //if first response, unset the flag
+                if(_firstResponse){
+                    //turn the flag off
+                    _firstResponse = false;
+                }
             
             return new HandshakeResponse(code, message, ret);
         }
