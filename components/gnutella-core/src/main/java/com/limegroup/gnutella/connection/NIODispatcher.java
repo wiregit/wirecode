@@ -228,7 +228,6 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
-        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
@@ -239,7 +238,8 @@ public final class NIODispatcher implements Runnable {
             if(!key.isReadable()) continue;
             Connection conn = (Connection)key.attachment();
 			try {
-				Message msg = conn.reader().createMessageFromTCP(key);
+                MessageReader reader = conn.reader();
+				Message msg = reader.createMessageFromTCP(key);
 				
 				if(msg == null) {
                     // the message was not read completely -- we'll get
@@ -247,19 +247,7 @@ public final class NIODispatcher implements Runnable {
 					continue;
 				}
 
-                conn.stats().addReceived();
-                
-                // make sure this message isn't considered spam                    
-                if(!conn.isSpam(msg) && !_testing) {
-                    // TODO:: don't use RouterService
-                    RouterService.getMessageRouter().handleMessage(msg, conn);
-                } else {
-                    if(!CommonUtils.isJava118()) {
-                        ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                            addMessage(msg);
-                    }
-                    conn.stats().countDroppedMessage();
-                }
+                reader.routeMessage(msg);
 			} catch (BadPacketException e) {
                 MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
 			} catch (IOException e) {
