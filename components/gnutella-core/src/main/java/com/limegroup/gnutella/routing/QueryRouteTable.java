@@ -285,15 +285,16 @@ public class QueryRouteTable {
         double scale=((double)m2)/((double)m);   //using float can cause round-off!
     
         for (int i=0; i<m; i++) {
+            // no need to process anything if this bit wasn't set
+            if ( !this.bitTable.get(i) )
+                continue;
+                
             int low=(int)Math.floor(i*scale);
             int high=(int)Math.ceil((i+1)*scale);
 //              Assert.that(low<m2,
 //                          "Low value "+low+" for "+i+" incompatible with "+m2);
 //              Assert.that(high<=m2,
 //                          "High value "+high+" for "+i+" incompatible with "+m2);
-
-            boolean hit = this.bitTable.get(i);
-            if(!hit) continue;
             for (int i2=low; i2<high; i2++) {
                 // if the other is set
                 // we technically can check if this is set
