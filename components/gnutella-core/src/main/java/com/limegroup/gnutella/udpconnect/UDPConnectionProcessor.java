@@ -123,6 +123,12 @@ public class UDPConnectionProcessor {
     /** Scheduled event for writing data appropriately over time  */
     private UDPTimerEvent     _writeDataEvent;
 
+    /** Flag that the writeEvent is shutdown waiting for space to write */
+	private boolean           _waitingForDataSpace;
+
+    /** Flag that the writeEvent is shutdown waiting for data to write */
+	private boolean 		  _waitingForDataAvailable;
+
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
 
@@ -283,6 +289,30 @@ public class UDPConnectionProcessor {
             _scheduler.scheduleEvent(_writeDataEvent);
         }
     }
+
+    /**
+     *  Activate writing if we were waiting for space
+     */
+    private synchronized void writeSpaceActivation() {
+		if ( _waitingForDataSpace ) {
+			_waitingForDataSpace = false;
+
+			// Schedule immediately
+			scheduleWriteDataEvent(0);
+		}
+	}
+
+    /**
+     *  Activate writing if we were waiting for data to write
+     */
+    public synchronized void writeDataActivation() {
+		if ( _waitingForDataAvailable ) {
+			_waitingForDataAvailable = false;
+
+			// Schedule immediately
+			scheduleWriteDataEvent(0);
+		}
+	}
 
     /**
      *  Setup and schedule the callback event for ensuring data gets acked.
@@ -688,7 +718,12 @@ System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
             AckMessage    amsg   = (AckMessage) msg;
             int           seqNo  = amsg.getSequenceNumber();
             int           wStart = amsg.getWindowStart();
+    		int           priorR = _receiverWindowSpace;
     		_receiverWindowSpace = amsg.getWindowSpace();
+
+			// Reactivate writing if required
+			if ( priorR == 0 && _receiverWindowSpace > 0 )
+    			writeSpaceActivation();
 
             // If they are Acking our SYN message, advance the state
             if ( seqNo == 0 && isConnecting() ) { 
@@ -723,7 +758,13 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
             int              seqNo  = kmsg.getSequenceNumber();
 			// TODO: make use of this as a pseudo ack
             int              wStart = kmsg.getWindowStart(); 
+    		int              priorR = _receiverWindowSpace;
     		_receiverWindowSpace    = kmsg.getWindowSpace();
+
+			// Reactivate writing if required
+			if ( priorR == 0 && _receiverWindowSpace > 0 )
+    			writeSpaceActivation();
+
         } else if (msg instanceof FinMessage) {
             // Stop sending data
             _receiverWindowSpace    = 0;
@@ -749,14 +790,32 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
 			return;
 		}
 
+		// Reset special flags for long wait times
+		_waitingForDataAvailable = false;
+		_waitingForDataSpace = false;
+
 		// If there is room to send something then send data if available
 		if ( getChunkLimit() > 0 ) {
 			// Get data and send it
 		    Chunk chunk = _input.getChunk();
 			if ( chunk != null )
 		    	sendData(chunk);
+		} else {
+			// if no room to send data then wait for the window to Open
+			scheduleWriteDataEvent(Long.MAX_VALUE);
+			_waitingForDataSpace = true;
 		}
 
+		// Don't wait for next write if there is no chunk available.
+		// Writes will get rescheduled if a chunk becomes available.
+		synchronized(_input) {
+			if ( _input.getPendingChunks() == 0 ) {
+				scheduleWriteDataEvent(Long.MAX_VALUE);
+				_waitingForDataAvailable = true;
+				return;
+			}
+		}
+		
 		// Compute how long to wait
 		// For now just leave it very simple  
 		// TODO: Simplify experimental algorithm and plug it in

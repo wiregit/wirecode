@@ -50,6 +50,10 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Block if necessary.
      */
     public synchronized void write(int b) {
+		// If there was no data before this, then ensure a writer is awake
+    	if ( getPendingChunks() == 0 )
+			_processor.writeDataActivation();
+
         while (true) {
 			// If there is room within current chunk
             if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
@@ -78,6 +82,10 @@ public class UDPBufferedOutputStream extends OutputStream {
 		
 		int space;   // The space available within the active chunk
 		int wlength; // The length of data to be written to the active chunk
+
+		// If there was no data before this, then ensure a writer is awake
+    	if ( getPendingChunks() == 0 )
+			_processor.writeDataActivation();
 
         while (true) {
 			// If there is room within current chunk
@@ -158,5 +166,19 @@ public class UDPBufferedOutputStream extends OutputStream {
 		// Wakeup any write operation waiting for space
 		notify();
 		return rChunk;
+    }
+
+    /**
+     *  Return how many pending chunks are waiting.
+     */
+    synchronized int getPendingChunks() {
+		// Add the number of list blocks
+		int count = chunks.size();
+		
+		// Add one for the current block if data available.
+		if (activeCount > 0)
+			count++;
+
+		return count;
     }
 }
