@@ -329,10 +329,10 @@ public class GGEP extends Object {
 
     /** Constructs an array of all GGEP blocks starting at
      *  messageBytes[beginOffset].
-     *  @param messageBytes The InputStream to attempt to read one or more GGEP
+     *  @param messageBytes The input bytes to attempt to read one or more GGEP
      *  blocks from.
      *  @param beginOffset The begin index of the (first) GGEP prefix.
-     *  @exception BadGGEPBlockException Thrown if the block could not be parsed
+     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
      *  correctly.
      */
     public static GGEP[] read(byte[] messageBytes,
@@ -346,6 +346,9 @@ public class GGEP extends Object {
         while ((messageBytes.length > currIndex[0]) && 
                (messageBytes[currIndex[0]] == GGEP_PREFIX_MAGIC_NUMBER))
             ggeps.add(new GGEP(messageBytes, currIndex[0], currIndex));
+        
+        if (ggeps.size() == 0)
+            throw new BadGGEPBlockException();
         
         Object[] array = ggeps.toArray();
         retGGEPs = new GGEP[array.length];
