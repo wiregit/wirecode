@@ -53,18 +53,10 @@ public class ServerSideHeadTest extends BaseTestCase {
     	ping1.write(baos1);
     	ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
     	ping2.write(baos2);
-    	ByteArrayOutputStream baos3 = new ByteArrayOutputStream();
-    	ping3.write(baos3);
-    	ByteArrayOutputStream baos4 = new ByteArrayOutputStream();
-    	ping4.write(baos4);
     	
     	datagram1 = new DatagramPacket(baos1.toByteArray(),baos1.toByteArray().length,
     			InetAddress.getLocalHost(),port1);
     	datagram2 = new DatagramPacket(baos2.toByteArray(),baos2.toByteArray().length,
-    			InetAddress.getLocalHost(),port2);
-    	datagram3 = new DatagramPacket(baos3.toByteArray(),baos3.toByteArray().length,
-    			InetAddress.getLocalHost(),port1);
-    	datagram4 = new DatagramPacket(baos4.toByteArray(),baos4.toByteArray().length,
     			InetAddress.getLocalHost(),port2);
     	
     	FileManagerStub fmanager = new FileManagerStub();

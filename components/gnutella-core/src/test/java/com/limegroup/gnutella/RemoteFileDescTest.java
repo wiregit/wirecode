@@ -136,9 +136,9 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 //both rfds should report as being altloc capable, but only
 		 //the firewalled rfd should be pushCapable
 		 assertTrue(fwalled.isAltLocCapable());
-		 assertTrue(fwalled.isPushCapable());
+		 assertTrue(fwalled.needsPush());
 		 assertTrue(nonfwalled.isAltLocCapable());
-		 assertFalse(nonfwalled.isPushCapable());
+		 assertFalse(nonfwalled.needsPush());
 		 
 		 //now create an rfd which claims to be firewalled but has no push proxies
 		 RemoteFileDesc fwalledNotGood = 
@@ -146,6 +146,6 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 
 		 //it should not be a capable altloc.
 		 assertFalse(fwalledNotGood.isAltLocCapable());
-		 assertFalse(fwalledNotGood.isPushCapable());
+		 assertFalse(fwalledNotGood.needsPush());
 	}
 }
