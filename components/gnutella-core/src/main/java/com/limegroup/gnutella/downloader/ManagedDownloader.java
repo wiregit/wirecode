@@ -45,7 +45,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
     /** The max number of downloads to try in parallel. */
-    private static final int PARALLEL_DOWNLOAD=4;
+    private static final int PARALLEL_DOWNLOAD=2;
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
@@ -64,8 +64,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     ////////////////////////// Core Variables /////////////////////////////
     /** The files to get, each represented by a RemoteFileDesc2 */
     private List /* of RemoteFileDesc2 */ files;
-    /** The files/hosts that were busy. */
-    private List /* of RemoteFileDesc2 */ busy;
     /** The list of all files we've requested via push messages.  Only files
      * matching this description may be accepted from incoming connections. */
     private List /* of RemoteFileDesc2 */ requested;
@@ -135,7 +133,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             RemoteFileDesc rfd=allFiles[i];           
             this.files.add(new RemoteFileDesc2(rfd, false));
         }
-        busy=new LinkedList();
         requested=new LinkedList();
         dloaders=new LinkedList();
         stopped=false;
@@ -326,16 +323,24 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     ///////////////////////////// Core Downloading Logic ///////////////////////
 
-    /** Actually does the download, trying all locations, resuming, waiting, and
-     *  retrying as necessary.  Called from dloadManagerThread. */
+    private static final int SUCCESS=0;
+    private static final int WAIT_FOR_RETRY=-1;
+    private static final int NO_MORE_LOCATIONS=-2;      
+
+    /** 
+     * Actually does the download, trying all locations, resuming, waiting, and
+     * retrying as necessary.  Also takes care of moving file from incomplete
+     * directory to save directory and adding file to the library.  Called from
+     * dloadManagerThread. 
+     */
     private void tryAllDownloadsWithRetry() {
-        //0. Verify it's safe to download.  Filename must not have "..", "/",
+        //1. Verify it's safe to download.  Filename must not have "..", "/",
         //   etc.  We check this by looking where the downloaded file will
         //   end up.
-        RemoteFileDesc rfd0=allFiles[0];       //TODO: assumes all the same!
-        int fileSize=rfd0.getSize(); 
-        String filename=rfd0.getFileName(); 
-        File incompleteFile=incompleteFileManager.getFile(rfd0);
+        RemoteFileDesc rfd=allFiles[0];       //TODO: assumes all the same!
+        int fileSize=rfd.getSize(); 
+        String filename=rfd.getFileName(); 
+        File incompleteFile=incompleteFileManager.getFile(rfd);
         File sharedDir;
         File completeFile;
         try {
@@ -348,75 +353,32 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw new InvalidPathException();  
         } catch (IOException e) {
             setState(COULDNT_MOVE_TO_LIBRARY);
+            manager.remove(this, false);
             return;
-        }        
+        }           
 
-        //1. Start up to P downloads at once
-        setState(CONNECTING);
-        HTTPDownloader previousDownloader=null;
-    outerLoop:
-        for (int i=0; i<PARALLEL_DOWNLOAD; i++) {
-            //Search for a connectable downloader
-            HTTPDownloader downloader;
-            RemoteFileDesc rfd;
-            int start=(i*fileSize)/PARALLEL_DOWNLOAD;
-            int stop=fileSize-start;
-            while (true) {
-                if (files.size()==0)
-                    break outerLoop;
-                rfd=removeBest(files);      
-                downloader=new HTTPDownloader(rfd, incompleteFile, start, stop);
-                try {
-                    System.out.println("MANAGER: trying connect to "+rfd);
-                    downloader.connect(CONNECT_TIME);
+        //2. Try to download
+        while (true) {
+            try {
+                int status=tryAllDownloads(incompleteFile, fileSize);
+                if (status==SUCCESS) {
                     break;
-                } catch (IOException e) {
-                    continue;
-                }
-            }
-            
-            //Tell previous downloader not to clobber the first            
-            if (previousDownloader!=null)
-                previousDownloader.stopAt(start);
-            
-            //And spawn a thread to start the first
-            System.out.println(
-                "MANAGER: downloading from "+start+" to "+stop+" with "+rfd);
-            setState(DOWNLOADING);
-            synchronized (this) {
-                if (stopped)
+                } else if (status==WAIT_FOR_RETRY) {
+                    setState(WAITING_FOR_RETRY);
+                    Thread.sleep(calculateWaitTime());
+                    continue;                
+                } else if (status==NO_MORE_LOCATIONS) {
+                    setState(GAVE_UP);
+                    manager.remove(this, false);
                     return;
-                dloaders.add(downloader);
-            }
-            final RemoteFileDesc rfd2=rfd;
-            final HTTPDownloader downloader2=downloader;
-            Thread worker=new Thread() {
-                public void run() {
-                    tryOneDownload(downloader2, rfd2);
                 }
-            };
-            worker.setDaemon(true);
-            worker.start();            
-            previousDownloader=downloader;
-        }
-  
-        
-        //2. Wait for them to finish.  TODO: handle interrupts, couldn't
-        //download, etc.
-        System.out.println("MANAGER: waiting for complete");
-        synchronized (this) {
-            if (stopped)
-                return;
-            while (dloaders.size()>0) {
-                try {
-                    this.wait();
-                } catch (InterruptedException e) {
-                    if (stopped)
-                        return;
+            } catch (InterruptedException e) {
+                if (stopped) {
+                    setState(ABORTED);
+                    manager.remove(this, false);
+                    return;
                 }
             }
-            if (stopped)
-                return;
         }
 
         //3. Move to library.  
@@ -431,9 +393,127 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(COULDNT_MOVE_TO_LIBRARY);        
         //Add file to library.
         FileManager.instance().addFileIfShared(completeFile);  
-        setState(COMPLETE);            
+        setState(COMPLETE);  
+        manager.remove(this, true);                    
     }
 
+
+
+    /**
+     * Tries one round of downloading.  Downloads from all locations until all
+     * locations fail, some locations succeeds, or one location is interrupted.
+     * 
+     * @return SUCCESS if a file was successfully downloaded
+     *         WAIT_FOR_RETRY if no file was downloaded, but it makes sense 
+     *             to try again later because some hosts reported busy.
+     *             The caller should usually wait before retrying.
+     *         NO_MORE_LOCATIONS the download attempt failed, and there are 
+     *             no more locations to try.
+     * @param InterruptedException if the user stop()'ed this download. 
+     *  (Calls to resume() do not result in InterruptedException.)
+     */
+    private int tryAllDownloads(File incompleteFile, int fileSize) 
+            throws InterruptedException {
+        HTTPDownloader previousDownloader=null;
+        List /* of RemoteFileDesc2 */ busy=new LinkedList();
+
+        //1. Start up to P downloads at once, as many as possible
+        setState(CONNECTING);
+    outerLoop:
+        for (int i=0; i<PARALLEL_DOWNLOAD; i++) {
+            //a) Search for a connectable downloader
+            HTTPDownloader downloader;
+            RemoteFileDesc rfd;
+            int start=(i*fileSize)/PARALLEL_DOWNLOAD;
+            int stop=fileSize-start;
+            while (true) {
+                if (files.size()==0)
+                    break outerLoop;
+                rfd=removeBest(files);      
+                downloader=new HTTPDownloader(rfd, incompleteFile, start, stop);
+                try {
+                    System.out.println("MANAGER: trying connect to "+rfd);
+                    downloader.connect(CONNECT_TIME);
+                    break;
+                } catch (TryAgainLaterException e) {
+                    busy.add(rfd);
+                    continue;
+                } catch (IOException e) {
+                    //TODO: schedule for pushing
+                    continue;
+                }
+            }
+            
+            //b) Tell previous downloader not to clobber the first            
+            if (previousDownloader!=null)
+                previousDownloader.stopAt(start);
+            
+            //c) And spawn a thread to start the first
+            System.out.println(
+                "MANAGER: downloading from "+start+" to "+stop+" with "+rfd);
+            setState(DOWNLOADING);
+            synchronized (this) {
+                if (stopped)
+                    throw new InterruptedException();
+                dloaders.add(downloader);
+            }
+            final RemoteFileDesc rfd2=rfd;
+            final HTTPDownloader downloader2=downloader;
+            Thread worker=new Thread() {
+                public void run() {
+                    tryOneDownload(downloader2, rfd2);
+                }
+            };
+            worker.setDaemon(true);
+            worker.start();            
+            previousDownloader=downloader;
+        }
+
+        //Couldn't start anything?
+        if (previousDownloader==null) {
+            synchronized (this) {
+                if (busy.size()>0) {
+                    //Busy: move busy locations to normal 
+                    files.addAll(busy);
+                    busy.clear();
+                    return WAIT_FOR_RETRY;
+                } else {
+                    //Error.
+                    Assert.that(files.size()==0, "Files not empty: "+files.size());
+                    return NO_MORE_LOCATIONS;
+                }
+            }
+        }
+        
+        //2. Wait for them to finish.  TODO1: handle interrupts, couldn't
+        //download, etc.
+        System.out.println("MANAGER: waiting for complete");
+        synchronized (this) {
+            if (stopped) throw new InterruptedException();
+            while (dloaders.size()>0) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    if (stopped) throw e;
+                }
+            }
+            if (stopped) throw new InterruptedException();
+        }          
+        return SUCCESS;
+    }
+
+
+
+    /**
+     * Attempts to run downloader.doDownload, notifying manager of termination
+     * via downloaders.notify().  Typically tryOneDownload is invoked in
+     * parallel for a number of locations.
+     * 
+     * @param downloader the normal or push downloader to use for the transfer,
+     *  which MUST be initialized (i.e., downloader.connect() has been called)
+     * @param rfd the file to download.  This MUST match the name, index,
+     *  address, etc. of downloader.  
+     */
     private void tryOneDownload(HTTPDownloader downloader, 
                                 RemoteFileDesc rfd) {
         try {
