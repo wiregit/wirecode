@@ -7,6 +7,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.uploader.StalledUploadChecker;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import java.net.*;
@@ -74,9 +75,55 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     /**
      * - Bandwidth tracker works properly.
      */
-    public void testLegcay() {
+    public void testLegacy() {
         UploadManager.tBandwidthTracker(new UploadManager());
     }
+    
+    /**
+     * Makes sure a stalled uploader is disconnected.
+     *  (We need to have a queue size of 1 because 0 isn't allowed, so
+     *   the test is slightly more complicated than it needs to be.)
+     */
+    public void testStalledUploader() throws Exception {
+        SettingsManager.instance().setMaxUploads(2);
+        SettingsManager.instance().setSoftMaxUploads(9999);
+        SettingsManager.instance().setUploadsPerPerson(99999);
+        SettingsManager.instance().setUploadQueueSize(1);
+       
+        HTTPDownloader d1, d2, d3, d4;
+        d1 = addUploader(upManager, rfd1, "1.1.1.1", true);
+        connectDloader(d1,true,rfd1,true);
+        d2 = addUploader(upManager, rfd2, "1.1.1.2", true);
+        connectDloader(d2,true,rfd2,true);
+       
+        // assert that we can reach the limit
+        d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
+        try {
+            connectDloader(d3,true,rfd3,true);
+            fail("expected queued later.");
+        } catch(QueuedException e) {
+            assertEquals(1, e.getQueuePosition());
+        }
+        
+        // okay, we know its full, now drop the guy from the queue.
+        try {
+            connectDloader(d3, false, rfd3, true);
+            fail("should have thrown ioexception");
+        } catch(IOException e) {
+            // expected behaviour.
+        }
+        
+        //sleep a little more than needed for the stall to die.
+        Thread.sleep(StalledUploadChecker.DELAY_TIME+5);
+        // should be able to connect now.
+        d3 = addUploader(upManager, rfd3, "1.1.1.3", false);
+        connectDloader(d3, true, rfd3, true);        
+        d4 = addUploader(upManager, rfd4, "1.1.1.4", false);
+        connectDloader(d4,true,rfd4,true);
+        
+        kill(d3);
+        kill(d4);
+    }       
 
     /**
      * Tests that:
@@ -160,6 +207,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         //System.out.println("Passed");
     }
+        
+        
     
     /**
      * Makes sure that if downloaders reconnect too soon they are dropped

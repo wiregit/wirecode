@@ -357,8 +357,9 @@ public final class HTTPUploader implements Uploader {
 	public HTTPRequestMethod getMethod() { return _method; }
 
 	/**
-	 * Sets the number of bytes that have been uploaded along for this
-	 * upload.
+	 * Sets the number of bytes that have been uploaded for this upload.
+	 * This is expected to restart from 0 for each chunk of an HTTP/1.1
+	 * transfer.
 	 *
 	 * @param amount the number of bytes that have been uploaded
 	 */
@@ -413,6 +414,9 @@ public final class HTTPUploader implements Uploader {
     
     /**
      * The amount of bytes that this upload has transferred.
+     * For HTTP/1.1 transfers, this number is the amount uploaded
+     * for this specific chunk only.  Uses getTotalAmountUploaded
+     * for the entire amount uploaded.
      *
 	 * Implements the Uploader interface.
      */

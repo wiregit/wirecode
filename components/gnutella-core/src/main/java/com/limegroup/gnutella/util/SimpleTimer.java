@@ -57,6 +57,7 @@ public class SimpleTimer {
      * @param task the task to run repeatedly
      * @param delay the initial delay, in milliseconds
      * @param period the delay between executions, in milliseconds
+     *  or zero if it should not be rescheduled
      * @exception IllegalStateException this is cancelled
      * @exception IllegalArgumentException delay or period negative
      * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
@@ -94,6 +95,7 @@ public class SimpleTimer {
      */
     private class TimerRunnerThread extends Thread {
         TimerRunnerThread(boolean isDaemon) {
+            super("TimerRunner");            
             setDaemon(isDaemon);
         }
 
@@ -112,10 +114,12 @@ public class SimpleTimer {
                         return;
                     }
                     
-                    //2. Run task WITHOUT HOLDING LOCK, then reschedule.
-                    ttask.runAndReschedule();
-                    synchronized(_queue) {
-                        _queue.insert(ttask);
+                    //2. Run task WITHOUT HOLDING LOCK, 
+                    //   then reschedule if the task told us to.                    
+                    if (ttask.runAndReschedule() ) {
+                        synchronized(_queue) {
+                            _queue.insert(ttask);
+                        }
                     }
                 }
             } catch(Throwable t) {
@@ -184,14 +188,18 @@ class SimpleTimerTask implements Comparable {
     /**
      * Calls _task.run(), then updates _nextTime.  Catches any exceptions while
      * running task.  
+     *
+     * @return true if the task needs to be rescheduled
      */
-    public void runAndReschedule() {
+    public boolean runAndReschedule() {
         try {
             _task.run();
         } catch (Exception e) {
 			ErrorService.error(e);
         }
+        if(_period == 0) return false;
         _nextTime=System.currentTimeMillis()+_period;
+        return true;
     }
 
     /** 
