@@ -243,30 +243,30 @@ public final class SettingsManager {
 	private final int     DEFAULT_APP_HEIGHT          = 620;
 	private final boolean DEFAULT_RUN_ONCE            = false;
 
-        /**
-         * Default value for whether or not the application is minimized
-         * to the SystemTray when the user exits.  This flag is initialized
-         * to true only if the user platform supports the SystemTray, making
-         * minimize to tray the default shutdown behavior on tray enabled 
-         * systems.  DEFAULT_MINIMIZE_TO_TRAY is the logical complement of 
-         * DEFAULT_SHUTDOWN_AFTER_TRANSFERS insuring that only one default 
-         * shutdown operation is set.
-         */ 
+	/**
+	 * Default value for whether or not the application is minimized
+	 * to the SystemTray when the user exits.  This flag is initialized
+	 * to true only if the user platform supports the SystemTray, making
+	 * minimize to tray the default shutdown behavior on tray enabled 
+	 * systems.  DEFAULT_MINIMIZE_TO_TRAY is the logical complement of 
+	 * DEFAULT_SHUTDOWN_AFTER_TRANSFERS insuring that only one default 
+	 * shutdown operation is set.
+	 */ 
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY = 
-            CommonUtils.supportsTray();
-        
-        /**
-         * Default value for whether or not the application waits until
-         * transfers in progress are complete before shutting down.  This 
-         * flag is initialized to true only if the user platform does not 
-         * support the system tray, making shutdown after transfers the 
-         * default shutdown behavior on systems which DO NOT support the 
-         * SystemTray.  DEFAULT_SHUTDOWN_AFTER_TRANSFERS is the logical 
-         * complement of DEFAULT_MINIMIZE_TO_TRAY insuring that only one 
-         * default shutdown operation is set.
-         */ 
-        private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
-            !DEFAULT_MINIMIZE_TO_TRAY;
+		CommonUtils.supportsTray();
+	
+	/**
+	 * Default value for whether or not the application waits until
+	 * transfers in progress are complete before shutting down.  This 
+	 * flag is initialized to true only if the user platform does not 
+	 * support the system tray, making shutdown after transfers the 
+	 * default shutdown behavior on systems which DO NOT support the 
+	 * SystemTray.  DEFAULT_SHUTDOWN_AFTER_TRANSFERS is the logical 
+	 * complement of DEFAULT_MINIMIZE_TO_TRAY insuring that only one 
+	 * default shutdown operation is set.
+	 */ 
+	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
+		!DEFAULT_MINIMIZE_TO_TRAY;
         
 	public static final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + 
@@ -275,12 +275,12 @@ public final class SettingsManager {
 		"jl011.jar";
 	private final String  DEFAULT_MAIN_CLASS           
 		= "com.limegroup.gnutella.gui.Main";
-
+	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
-
+	
 	/**
 	 * Constant default value for whether or not an incoming connection
 	 * has ever been established.
@@ -291,13 +291,13 @@ public final class SettingsManager {
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
     
-
+	
 	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
 	 */
 	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 2;
-
+	
 	/**
 	 * Value for the default minimum speed to allow in search results.
 	 */
