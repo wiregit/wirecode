@@ -8,6 +8,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.tests.*;
 import com.limegroup.gnutella.tests.stubs.*;
+import com.sun.java.util.collections.*;
 
 public class ManagedConnectionTest extends TestCase {  
     public ManagedConnectionTest(String name) {
@@ -19,6 +20,7 @@ public class ManagedConnectionTest extends TestCase {
         TestSuite ret=new TestSuite("Simplified ManagedConnection tests");
         ret.addTest(new ManagedConnectionTest("testForwardsGGEP"));
         ret.addTest(new ManagedConnectionTest("testStripsGGEP"));
+        ret.addTest(new ManagedConnectionTest("testForwardsGroupPing"));
         return ret;
     }
 
@@ -552,6 +554,38 @@ public class ManagedConnectionTest extends TestCase {
             fail("Bad packet: "+e);
         }
     }
+
+    public void testForwardsGroupPing() {
+        int TIMEOUT=1000;
+        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), 6346);
+        //Router connection
+        ManagedConnection out=new ManagedConnection("localhost", 6346,
+                                                   new MessageRouterStub(),
+                                                   new ConnectionManagerStub());
+        try {
+            out.initialize();
+            Connection in=acceptor.accept();
+            assertTrue(! out.supportsGGEP());
+
+            PingRequest ping1=new GroupPingRequest((byte)3, 6349, new byte[4],
+                                                   0l, 0l, "test");
+            assertEquals(14+4+1, ping1.getLength());
+            out.send(ping1);            
+            
+            //Note that Message won't create a GroupPingRequest unless
+            //PARSE_GROUP_PINGS is true.
+            PingRequest ping2=(PingRequest)in.receive(TIMEOUT);
+            assertEquals(14+4+1, ping2.getLength());
+            assertTrue(Arrays.equals(ping1.getGUID(), ping2.getGUID()));
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            fail("Mysterious IO problem: "+e);
+        } catch (BadPacketException e) {
+            fail("Bad packet: "+e);
+        }
+    }
+    
 
     class GGEPResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response,

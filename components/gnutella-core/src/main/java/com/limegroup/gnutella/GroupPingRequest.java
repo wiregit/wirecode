@@ -108,6 +108,21 @@ public class GroupPingRequest extends PingRequest implements Serializable{
         return new String(payload,14,payload.length-15);
     }
 
+    /** 
+     * Returns this.  Because GroupPingRequest's are only used with
+     * router.limewire.com--which doesn't send headers--we shouldn't
+     * strip the extended payload.<p>
+     *
+     * A close examination of the implementation of
+     * PingRequest.stripExtendedPayload shows that overriding isn't strictly
+     * needed, since PingRequest.payload==null.  But this protects us from
+     * spurious superclass changes.  
+     */
+    public Message stripExtendedPayload() { 
+        return this;
+    }
+
+
 	public boolean equals(Object obj) {
 		if ( ! (obj instanceof GroupPingRequest) )
 			return false;
