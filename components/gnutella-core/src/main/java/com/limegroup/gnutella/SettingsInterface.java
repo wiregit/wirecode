@@ -34,6 +34,7 @@ public interface SettingsInterface
     public String     getSaveDirectory();
     public String     getDirectories();
     public String     getExtensions();
+    public String     getBannedIps();
 
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
@@ -103,7 +104,9 @@ public interface SettingsInterface
     /** sets the string of extensions*/
     public void setExtensions(String extensions)
 	throws IllegalArgumentException;
-
+   
+    public void setBannedIps(String ips) 
+	throws IllegalArgumentException;
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
@@ -146,6 +149,8 @@ public interface SettingsInterface
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
     public static final String  DEFAULT_EXTENSIONS     = "";
+    /** default banned ip addresses */
+    public static final String  DEFAULT_BANNED_IPS     = "";
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -163,6 +168,7 @@ public interface SettingsInterface
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
+    public static final String BANNED_IPS     = "BLACK LISTED IP ADDRESSES";
 
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
