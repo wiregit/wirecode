@@ -15,8 +15,7 @@
 <!-- default classpath for javac.  it is set as the user's CLASSPATH
      environment with the jar files necessary for compilation appended. -->
 <path id="default.classpath" >
-  <fileset dir="${jars}" includes="*.jar"/>
-  <pathelement location="../chord" />
+  <fileset dir="${jars}" includes="**/*.jar"/>
 </path>
 
 

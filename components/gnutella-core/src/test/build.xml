@@ -24,7 +24,7 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
-    <fileset dir="${jars}" includes="*.jar, *.zip"/>
+    <fileset dir="${jars}" includes="**/*.jar"/>
     <fileset dir="${testslib}" includes="*.jar"/>
     <pathelement location="${builddir}" />
     <pathelement location="${messagebundles}" />
