@@ -46,61 +46,6 @@ public final class QueryHandlerTest extends BaseTestCase {
 
 
     /**
-     * Test to make sure that the utility method for creating
-     * our probe query lists is working as we expect it to.
-     */
-    public void testCreateProbeListsForSomewhatPopular() throws Exception {
-        List connections = new LinkedList();
-        connections.clear();
-        for(int i=0; i<20; i++) {
-            connections.add(NewConnection.createHitConnection());
-        }           
-
-        for(int i=0; i<5; i++) {
-            connections.add(NewConnection.createConnection());
-        }           
-        
-        for(int i=0; i<5; i++) {
-            connections.add(new OldConnection(5));
-        }                   
-
-        QueryRequest query = QueryRequest.createQuery("test");
-        List[] queryLists = 
-            (List[])CREATE_PROBE_LISTS.invoke(null, 
-                                              new Object[]{connections, query}); 
-
-        System.out.println("TTL=1: "+queryLists[0].size()); 
-        System.out.println("TTL=2: "+queryLists[1].size()); 
-        assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
-        assertTrue("should not be too many ttl=1", queryLists[0].size() < 15);
-    }
-
-    /**
-     * Test to make sure that the utility method for creating
-     * our probe query lists is working as we expect it to when
-     * the content we're searching for is very popular.
-     */
-    public void testCreateProbeListsForPopularContent() throws Exception {
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
-            connections.add(NewConnection.createHitConnection());
-        }           
-        
-        for(int i=0; i<15; i++) {
-            connections.add(new OldConnection(5));
-        }                   
-
-        QueryRequest query = QueryRequest.createQuery("test");
-        List[] queryLists = 
-            (List[])CREATE_PROBE_LISTS.invoke(null, 
-                                              new Object[]{connections, query}); 
-
-        assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
-        assertEquals("should not be only 1 ttl=1 query", queryLists[0].size(), 1);
-    }
-
-
-    /**
      * Tests the method for sending an individual query to a 
      * single connections.
      */
@@ -127,8 +72,8 @@ public final class QueryHandlerTest extends BaseTestCase {
         };
 
         m.invoke(null, params);
-        Set hostsQueried = 
-            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+        List hostsQueried = 
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should not have added host", 0, hostsQueried.size());
 
         // make sure we add the connection to the queries handlers
@@ -136,7 +81,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         params[1] = new LeafConnection();
         m.invoke(null, params);
         hostsQueried = 
-            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 1, hostsQueried.size());
 
         // make sure it adds the connection when the ttl is higher
@@ -146,10 +91,12 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         m.invoke(null, params);
         hostsQueried = 
-            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 2, hostsQueried.size());
+
         
-    }
+        
+    }    
 
     /**
      * Tests the method for calculating the next TTL.
@@ -161,10 +108,10 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          "calculateNewTTL",
                                          params);        
         byte ttl = getTTL(m, 2000, 15, (byte)5);
-        assertEquals("unexpected ttl", 4, ttl);
+        assertEquals("unexpected ttl", 3, ttl);
 
         ttl = getTTL(m, 200, 15, (byte)5);
-        assertEquals("unexpected ttl", 3, ttl);
+        assertEquals("unexpected ttl", 2, ttl);
 
 
         ttl = getTTL(m, 200000, 15, (byte)4);
@@ -175,7 +122,7 @@ public final class QueryHandlerTest extends BaseTestCase {
     }
 
     /**
-     * Convenience method for getting the TTL from QueryHandler/
+     * Convenience method for getting the TTL from QueryHandler.
      */
     private byte getTTL(Method m, int hosts, int degree, byte maxTTL) 
         throws Exception {
@@ -210,6 +157,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         TestConnectionManager tcm = new TestConnectionManager();
 
+        assertTrue(tcm.getInitializedConnections().size() > 0);
         PrivilegedAccessor.setValue(QueryHandler.class, "_connectionManager", tcm);
                                            
         handler.sendQuery();
@@ -242,7 +190,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         assertEquals("unexpected number of queries sent", 4, tcm.getNumQueries());        
         
-        Thread.sleep(2000);
+        Thread.sleep(8000);
         handler.sendQuery();
 
         // after the sleep, it should go through!
@@ -299,45 +247,6 @@ public final class QueryHandlerTest extends BaseTestCase {
         assertEquals("incorrect horizon", 26130, horizon);
     }
 
-
-    /**
-     * Tests the method for sending a probe query to make sure it is sent to
-     * the number of nodes we think it's sent to and to make sure it's sent
-     * with the proper TTL.
-     */
-    public void testProbeQuery() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "sendProbeQuery",
-                                         new Class[]{QueryHandler.class, 
-                                                     List.class});
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
-            connections.add(NewConnection.createConnection(10));
-        }
-
-        QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       NewConnection.createConnection(8),
-                                       new TestResultCounter(0));
-        
-        m.invoke(null, new Object[]{handler, connections});
-
-        int queriesSent = 0;
-        int totalTTL = 0;
-        Iterator iter = connections.iterator();
-        while(iter.hasNext()) {
-            TestConnection tc = (TestConnection)iter.next();
-            queriesSent += tc.getNumQueries();
-            totalTTL += tc.getTotalTTL();
-        }
-
-        assertEquals("should have only sent two queries", 3, queriesSent);
-        assertEquals("should have sent 2 queries with TTL=2", 6, totalTTL);
-    }
-
     
     /**
      * Tests the private method for sending queries to make sure the
@@ -349,8 +258,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "sendQuery",
-                                         new Class[]{QueryHandler.class, 
-                                                     List.class});
+                                         new Class[]{List.class});
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
@@ -367,7 +275,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         //int results = 0;
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
-            m.invoke(null, new Object[]{handler, connections}); 
+            m.invoke(handler, new Object[]{connections}); 
         }
 
 
@@ -459,29 +367,4 @@ public final class QueryHandlerTest extends BaseTestCase {
         m.invoke(null, params);
         assertEquals("lists should be equal", testList, listToAddTo);
     }
-
-
-    /**
-     * Helper result counter that we can use to artificially produce 
-     * results.
-     */
-    private static final class TestResultCounter implements ResultCounter {
-        private final int RESULTS;
-
-        /**
-         * Creates the default counter that always returns that it has
-         * received 10 results.
-         */
-        TestResultCounter() {
-            this(10);
-        }
-
-        TestResultCounter(int results) {
-            RESULTS = results;
-        }
-        public int getNumResults() {
-            return RESULTS;
-        }
-    }
-   
 }
