@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 
 import com.sun.java.util.collections.List;
@@ -107,7 +105,7 @@ public final class PushManager {
                 Socket s = null;
                 try {
         			// try to create the socket.
-        			s = new Socket(host, port);
+        			s = Sockets.connect(host, port, 5000);
         			// open a stream for writing to the socket
         			OutputStream ostream = s.getOutputStream();        
         			String giv = "GIV " + index + ":" + guid + "/" + 
