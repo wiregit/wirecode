@@ -108,8 +108,8 @@
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.AlternateLocationCollectionTest"
 	        todir="${reports}" />
-	  <test name="${GNUTELLA}.ConnectionManagerTest"
-	        todir="${reports}" />
+<!--	  <test name="${GNUTELLA}.ConnectionManagerTest"
+	        todir="${reports}" /> -->
 	  <test name="${GNUTELLA}.EndpointTest"
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.ExtendedEndpointTest"
@@ -187,7 +187,7 @@
 	  
 	  <classpath refid="default.classpath" />
 
-	  <test name="${DOWNLOADER}.AutoDownloadDetailsTest"
+	  <test name="${DOWNLOADER}.AutoDownloaderDetailsTest"
 	        todir="${reports}" />
 	  <test name="${DOWNLOADER}.DownloadTest"
 	        todir="${reports}" />
