@@ -439,7 +439,6 @@ DOWNLOAD_BUSY_HOSTS=混雑中ホスト
 DOWNLOAD_QUEUED_HOSTS=予約中
 DOWNLOAD_SEARCHING=ソースを確認中
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=以前のダウンロードを再開することが出来ませんでした
-DOWNLOAD_DISK_FULL=ハードディスクの空き容量が少ないため, 選択されたファイルをダウロードすることが出来ません. 不必要なファイルを削除してハードディスク の空き容量を増やしてください.
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -815,7 +814,6 @@ ERROR_NETWORK_FLOODING=この検索にはかなりの結果が返ッてくるの
 ERROR_BROWSE_FAILED=要求されたホスト上のファイルを閲覧出来ません. このマシンはおそらくこれ以上の外部からの受信を受け入れていません.
 ERROR_INVALID_SAVE_DIRECTORY=ファイル保存先のフォルダは無効です. 別フォルダを使うか標準に戻すかして下さい.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=保存先フォルダは無効です. 削除済か上書きするアクセス権がないか他の問題があるかもしれません. 別のフォルダを選択して下さい.
-ERROR_INVALID_SAVE_DIRECTORY_SELECTION=選択された保存先フォルダは無効です. 削除済か上書きするアクセス権がないか他の問題があるかもしれません. 以前に選択されたフォルダを使用します. 
 ERROR_INVALID_SHARED_DIRECTORY=ファイル共有先のフォルダは無効です. 別フォルダを使うか標準に戻すかして下さい.
 ERROR_FORCE_IP_PORT_RANGE=強制IPアドレスを設定するにはポート番号を1から 65535 の間で入力する必要があります.
 ERROR_CONNECT_STRING=接続文字列は最低 1 文字以上で, スペースを含み, 'GIV', 'GET' もしくはいかなるHTTPキーワードも含まないようにする必要があります.
