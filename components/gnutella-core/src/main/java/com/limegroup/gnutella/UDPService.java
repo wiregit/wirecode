@@ -104,12 +104,6 @@ public final class UDPService implements Runnable {
      */
     private final Map HOST_LISTENERS = new HashMap();
     
-    /**
-     * <tt>List</tt> of <tt>HostListeners</tt> to maintain the order that 
-     * listeners were added.
-     */
-    private final List HOST_LISTENERS_LIST = new LinkedList();
-    
 	/**
 	 * Instance accessor.
 	 */
@@ -281,21 +275,12 @@ public final class UDPService implements Runnable {
 	}
     
     /**
-     * Sends the specified <tt>Message</tt> to the specified host and associates
-     * the message <tt>GUID</tt> with the specified <tt>HostListener</tt> for
-     * any replies that are returned.
+     * Sends the specified <tt>Message</tt> to the specified host.
      * 
      * @param msg the <tt>Message</tt> to send
      * @param host the host to send the message to
-     * @param listener the <tt>HostListener</tt> to notify about any pongs
-     *  received
      */
-    public void send(Message msg, IpPort host, HostListener listener) {
-        HOST_LISTENERS.put(new GUID(msg.getGUID()), listener);
-        HOST_LISTENERS_LIST.add(listener);
-        if(HOST_LISTENERS.size() > 2000) {
-            HOST_LISTENERS.remove(HOST_LISTENERS_LIST.remove(0));
-        }
+    public void send(Message msg, IpPort host) {
         send(msg, host.getInetAddress(), host.getPort());
     }
 
@@ -574,4 +559,29 @@ public final class UDPService implements Runnable {
 	public String toString() {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
+
+    /**
+     * Expires the mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s for the
+     * specified <tt>GUID</tt>.  This is done to avoid holding this mapping in
+     * memory forever when, for example, UDP pings are sent to a bunch of hosts
+     * while connecting.
+     * 
+     * @param guid the <tt>GUID</tt> whose mapping should be removed
+     */
+    public void removeListener(GUID guid) {
+        HOST_LISTENERS.remove(guid);
+    }
+
+    /**
+     * Adds the specified <tt>GUID</tt>-><tt>HostListener</tt> pair to the 
+     * mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s.  This is used, for
+     * example, for associated pongs received with their appropriate listeners.
+     *  
+     * @param guid the <tt>GUID</tt> to add 
+     * @param listener the <tt>HostListener</tt> that should listen for pongs
+     *  with the specified <tt>GUID</tt>
+     */
+    public void addListener(GUID guid, HostListener listener) {
+        HOST_LISTENERS.put(guid, listener);       
+    }
 }
