@@ -1087,6 +1087,6 @@ public final class RouterService {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */
 	public static boolean isGUESSCapable() {
-		return udpService.isGUESSCapable() && SETTINGS.getGuessEnabled();
+		return udpService.isGUESSCapable();
 	}
 }
