@@ -469,8 +469,6 @@ public abstract class FileManager {
      */
     public static File[] getFilesRecursive(File directory,
                                            String[] filter) {
-
-        debug("FileManager.getFilesRecursive(): entered.");
         ArrayList dirs = new ArrayList();
         // the return array of files...
         ArrayList retFileArray = new ArrayList();
@@ -483,8 +481,6 @@ public abstract class FileManager {
         // while i have dirs to process
         while (dirs.size() > 0) {
             File currDir = (File) dirs.remove(0);
-            debug("FileManager.getFilesRecursive(): currDir = " +
-                  currDir);
             String[] listedFiles = currDir.list();
             for (int i = 0; (listedFiles != null) && (i < listedFiles.length);
                  i++) {
@@ -523,15 +519,7 @@ public abstract class FileManager {
                 retArray[i] = (File) retFileArray.get(i);
         }
 
-        debug("FileManager.getFilesRecursive(): returning.");
         return retArray;
-    }
-
-
-    private static boolean debugOn = false;
-    public static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
     }
 
 
