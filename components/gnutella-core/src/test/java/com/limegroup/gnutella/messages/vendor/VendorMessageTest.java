@@ -75,7 +75,45 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // test other constructor....
         vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()));
         testRead(vm);
+
+        // Reply Number
+        // -----------------------------
+        // test network constructor....
+        vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
+                                      1, new byte[1]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new ReplyNumberVendorMessage(5);
+        testRead(vm);
     }
+
+
+    public void testReplyNumber() throws Exception {
+        try {
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(0);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+        try {
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(256);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        for (int i = 1; i < 256; i++) {
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(i);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            ByteArrayInputStream bais = 
+                new ByteArrayInputStream(baos.toByteArray());
+            ReplyNumberVendorMessage vmRead = 
+                (ReplyNumberVendorMessage) Message.read(bais);
+            assertEquals(vm, vmRead);
+            assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
+        }
+    }
+
 
     private void testWrite(VendorMessage vm) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
