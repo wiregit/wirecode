@@ -1382,11 +1382,10 @@ public final class UploadManager implements BandwidthTracker {
 		
 		// parse the service identifier, whether N2R, N2X or something
 		// we cannot satisfy.
-		if (requestLine.toUpperCase().indexOf(
-				HTTPConstants.NAME_TO_THEX) > 0)
+		if (requestLine.toUpperCase().indexOf(HTTPConstants.NAME_TO_THEX) > 0)
 			params.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
 		else if (requestLine.toUpperCase().indexOf(
-				HTTPConstants.NAME_TO_RESOURCE) > 0)
+                                           HTTPConstants.NAME_TO_RESOURCE) > 0)
 			params.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
 		else {
             if(LOG.isWarnEnabled())

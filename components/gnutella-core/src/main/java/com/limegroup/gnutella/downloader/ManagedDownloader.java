@@ -2762,10 +2762,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (shouldAssignWhite) {
                     assignWhite(dloader,http11);
                 } else {
-                    updateNeeded = false;
+                    updateNeeded = false; //1. See comment in finally
                     assignGrey(dloader,http11); 
                 }
-                updateNeeded = false;
+                updateNeeded = false; //2. See comment in finally
             } catch(NoSuchElementException nsex) {
                 if(RECORD_STATS)
                     DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -3403,6 +3403,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                   " error? "+problem);
             synchronized (this) {
                 if (problem) {
+                    updateNeeded(downloader);
                     downloader.stop();
                     rfd.incrementFailedCount();
                     // if we failed less than twice in succession,

@@ -254,8 +254,7 @@ public final class HTTPUtils {
         // Write X-Features header.
         if (features.size() > 0) {
             writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features),
-                                  writer);
+                    new HTTPHeaderValueCollection(features), writer);
         }
     }
     
@@ -268,8 +267,7 @@ public final class HTTPUtils {
         // Write X-Features header.
         if (features.size() > 0) {
             writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features),
-                                  stream);
+                    new HTTPHeaderValueCollection(features), stream);
         }
     }        
     
