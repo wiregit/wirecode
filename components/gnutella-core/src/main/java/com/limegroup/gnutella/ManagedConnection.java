@@ -757,15 +757,50 @@ public class ManagedConnection
      *  @param router the source of my address for router connections, or null
      *   otherwise. */
     private static Properties createNewProperties(MessageRouter router) {
-        Properties ret=new Properties();
-        ret.setProperty("Query-Routing", "0.1");
-        ret.setProperty("Pong-Caching",  "0.1");
-        if (router!=null) {
-            ret.setProperty("Want-Old-Pongs", "true");
-            Endpoint e=new Endpoint(router.getAddress(), router.getPort());
-            ret.setProperty("My-Address", e.getHostname()+":"+e.getPort());
+        //Ideally we'd just return a new Properties object with the appropriate
+        //properties set.  Unfortunately we can't accurately ascertain the value
+        //of My-Address until AFTER we've established the socket.
+        //(InetAddress.getLocalHost() sometimes returns bad results, like
+        //0.0.0.0 on my Linux laptop.  That's why we set the Acceptor._address
+        //field every time we establish an outgoing connection.)  So we use an
+        //old LISP trick here: lazy evaluation.  The value of getProperty is
+        //only calculated when requested.
+        return new LazyProperties(router);
+    }
+
+    private static class LazyProperties extends Properties {
+        private MessageRouter router;
+
+        LazyProperties(MessageRouter router) {
+            this.router=router;
+            setProperty("Query-Routing", "0.1");
+            setProperty("Pong-Caching",  "0.1");
+            if (router!=null) {
+                setProperty("Want-Old-Pongs", "true");
+                setProperty("My-Address", "");  //just temporary!
+            }
         }
-        return ret;
+        
+        //We don't define one method in terms of the other since that could
+        //cause infinite loops depending on the implementation of the
+        //superclass.
+        public String getProperty(String key, String defaultValue) {
+            if (router!=null && key.equals("My-Address")) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key, defaultValue);
+            }
+        }
+        
+        public String getProperty(String key) {
+            if (router!=null && key.equals("My-Address")) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key);
+            }
+        }
     }
 
     /** Creates a responder that returns the properties of a "new"
