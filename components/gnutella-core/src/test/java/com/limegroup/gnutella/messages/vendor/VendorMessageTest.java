@@ -370,7 +370,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
     
 
-    public void testGiveUPVendorMessage() throws Exception {
+    public void testUDPCrawlerPingMessage() throws Exception {
     	GUID guid = new GUID(GUID.makeGuid());
     	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);
     	assertEquals(1, req.getNumberUP());
@@ -385,6 +385,17 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	req = new UDPCrawlerPing(guid, 1,2,(byte)0xFF);
     	assertTrue(req.hasFeature(UDPCrawlerPing.FEATURE_MASK));
     	assertEquals(0,req.getFormat() & ~UDPCrawlerPing.FEATURE_MASK);
+    }
+    
+    public void testUDPCrawlerPongMessage() throws Exception {
+    	GUID guid = new GUID(GUID.makeGuid());
+    	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);
+    	UDPCrawlerPong rep = new UDPCrawlerPong(req);
+    	
+    	assertFalse(rep.hasConnectionTime());
+    	assertFalse(rep.hasLocaleInfo());
+    	testWrite(rep);
+    	testRead(rep);
     }
     
     public void testPushProxyVMs() throws Exception {
