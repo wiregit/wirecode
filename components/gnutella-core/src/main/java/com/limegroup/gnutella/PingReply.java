@@ -87,7 +87,7 @@ public class PingReply extends Message implements Serializable {
              int port, byte[] ip, long files, long kbytes,
              boolean isUltrapeer, int dailyUptime) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             dailyUptime>=0 ? newGGEP(dailyUptime) : null);
+             dailyUptime>=0 ? newGGEP(dailyUptime, true) : null);
     }
 
     /**
@@ -136,39 +136,21 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
-    private static byte[] newGGEP(int dailyUptime) {
+    private static byte[] newGGEP(int dailyUptime, boolean udpSupported) {
         try {
             GGEP ggep=new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            if (udpSupported)
+                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
         } catch (IOException e) {
             //See above.
-            Assert.that(false, "Couldn't encode uptime");
+            Assert.that(false, "Couldn't encode uptime or udp");
             return null;
         }
     }
-
-	/**
-	 * Adds the GGEP extension indicating support for Gnutella messages 
-	 * over UDP on the specified IP and port.
-	 *
-	 * @param udpSupported specifies whether or not UDP is supported -
-	 *  1 if supported, otherwise 0
-	 */
-	private static byte[] createUdpSupportedGGEP(int udpSupported) {
-		try {
-			GGEP ggep = new GGEP(true);
-			ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, udpSupported);
-			ByteArrayOutputStream baos=new ByteArrayOutputStream();
-			ggep.write(baos);
-			return baos.toByteArray();			
-		} catch(IOException e) {
-			Assert.that(false, "could not encode udp: "+e);
-			return null;
-		}
-	}
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
@@ -221,12 +203,22 @@ public class PingReply extends Message implements Serializable {
     public synchronized int getDailyUptime() throws BadPacketException {
         parseGGEP();
         if (ggep==null)
-            throw new BadPacketException("Missing GGEP blocking");
+            throw new BadPacketException("Missing GGEP block");
         try {
             return ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME);
         } catch (BadGGEPPropertyException e) {
             throw new BadPacketException("Couldn't find uptime extension.");
         }
+    }
+
+
+    /** Returns the average daily uptime in seconds from the GGEP payload.
+     *  @exception BadPacketException if the uptime is not known or corrupt. */
+    public synchronized boolean supportsUnicast() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        return ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
     }
 
     public synchronized boolean hasGGEPExtension() {
