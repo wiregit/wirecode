@@ -38,6 +38,7 @@ public class RouterService
 	Thread t=new Thread(manager);
 	t.setDaemon(true);
 	t.start();	
+	FileManager.getFileManager().addDirectory("c:/rjs/src");
     }
 
     /**

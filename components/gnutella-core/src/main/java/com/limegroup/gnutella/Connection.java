@@ -229,8 +229,8 @@ public class Connection implements Runnable {
 			    manager.catcher.spy(m);//update hostcatcher
 			    //TODO2: So what else do we have to do here??
 
-			    manager.totalSize += m.getKbytes();
-			    manager.totalFiles += m.getFiles();
+			    manager.totalSize += ((PingReply)m).getKbytes();
+			    manager.totalFiles += ((PingReply)m).getFiles();
 			    
 			}
 			else{//message needs to routed

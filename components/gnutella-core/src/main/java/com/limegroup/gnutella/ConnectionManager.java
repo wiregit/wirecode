@@ -34,8 +34,8 @@ public class ConnectionManager implements Runnable {
 
 
 
-    public int totalSize;
-    public int totalFiles;
+    public long totalSize;
+    public long totalFiles;
 
 
     /** Creates a manager that listens for incoming connections on the given
