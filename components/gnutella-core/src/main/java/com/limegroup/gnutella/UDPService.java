@@ -46,6 +46,15 @@ public final class UDPService implements Runnable {
      */
     private final Object _sendLock = new Object();
     
+    /**
+     * Used for case where _socket is null on startup and the send thread
+     * is trying to send but encounters null socket.  It should only report
+     * if the socket has been set before (cuz then the socket will never be
+     * null)
+     */
+    private boolean _socketSetOnce = false;
+
+
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -168,6 +177,8 @@ public final class UDPService implements Runnable {
         //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
             synchronized (_sendLock) {
+                if (_socket == null)
+                    _socketSetOnce = true;
                 // if the input is null, then the service will shut off ;) .
                 _socket = (DatagramSocket) datagramSocket;
                 _receiveLock.notify();
@@ -330,7 +341,6 @@ public final class UDPService implements Runnable {
     private class Sender implements Runnable {
         
         public void run() {
-            boolean hasReportedNullSocket = false;
             SendBundle currBundle = null;
             while (true) {
 
@@ -353,8 +363,7 @@ public final class UDPService implements Runnable {
                     // we could be changing ports, just drop the message, 
                     // tough luck
                     if (_socket == null) {
-                        if (!hasReportedNullSocket) {
-                            hasReportedNullSocket = true;
+                        if (_socketSetOnce) {
                             Exception npe = 
                                 new NullPointerException("Null UDP Socket!!");
                             ErrorService.error(npe);
