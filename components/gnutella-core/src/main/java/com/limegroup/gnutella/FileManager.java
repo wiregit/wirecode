@@ -915,7 +915,9 @@ public class FileManager {
         UrnCache urnCache = UrnCache.instance();
         for (int i = 0; i < files.length; i++) {
             Set urnsForCurrFile = urnCache.getUrns(files[i]);
-            retList.add(urnsForCurrFile);
+            Iterator iter = urnsForCurrFile.iterator();
+            while (iter.hasNext())
+                retList.add(((URN)iter.next()).toString());
         }
         return retList;
     }
