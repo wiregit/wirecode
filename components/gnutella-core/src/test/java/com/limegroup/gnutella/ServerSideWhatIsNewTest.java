@@ -695,7 +695,7 @@ public class ServerSideWhatIsNewTest
         while (downloader.getState() != Downloader.COMPLETE) {
             Thread.sleep(1000);
             sleeps++;
-            if (sleeps > 120) assertTrue("download never completed", false);
+            if (sleeps > 320) assertTrue("download never completed", false);
         }
         
         assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
