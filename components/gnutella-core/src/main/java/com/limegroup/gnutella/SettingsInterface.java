@@ -194,7 +194,7 @@ public interface SettingsInterface
     /** Default boolean for stats file */
     public static final boolean DEFAULT_STATS          = false;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_CONN       = 900;
+    public static final int     DEFAULT_MAX_CONN       = 5;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
