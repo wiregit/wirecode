@@ -2,7 +2,8 @@ package com.limegroup.gnutella.routing;
 
 /** 
  * The official platform-independent hashing function for query-routing.
- * This experimental version does n
+ * This experimental version does not necessarily work cross-platform,
+ * not is it secure in any sense.
  */
 public class HashFunction {
     static final double A=(Math.sqrt(5.0)-1.0)/2.0;
