@@ -75,6 +75,11 @@ public final class CommonUtils {
 	private static boolean _isWindows = false;
 
 	/** 
+	 * Variable for whether or not we're on Windows NT.
+	 */
+	private static boolean _isWindowsNT = false;
+
+	/** 
 	 * Variable for whether or not we're on Windows NT, 2000, or XP.
 	 */
 	private static boolean _isWindowsNTor2000orXP = false;
@@ -176,6 +181,8 @@ public final class CommonUtils {
 		if (os.indexOf("windows 2000")!= -1 ||
 			os.indexOf("windows xp")!= -1)
 			_isWindows2000orXP = true;
+		if (os.indexOf("windows nt") != -1) 
+			_isWindowsNT = true;
 		if(os.indexOf("windows 95") != -1)
 		   _isWindows95 = true;
 		if(os.indexOf("windows 98") != -1)
@@ -352,7 +359,8 @@ public final class CommonUtils {
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isSupernodeOS() {
-		if(_isWindows98 || _isWindows95 || _isWindowsMe || _isMacClassic) {
+		if(_isWindows98 || _isWindows95 || _isWindowsMe || _isMacClassic ||
+		   _isWindowsNT) {
 			return false;
 		}
 		return true;
