@@ -118,7 +118,7 @@ public class UpdateManager {
                 int port = c.getOrigPort();
                 byte[] data = null;
                 try {
-                    URL url = new URL("HTTP",ip,port,UPDATE);
+                    URL url = new URL("http",ip,port,UPDATE);
                     HttpURLConnection connection=(HttpURLConnection)
                                                       url.openConnection();
                     connection.setUseCaches(false);
