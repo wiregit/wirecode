@@ -439,7 +439,13 @@ public class StringUtils {
      * Returns a string to be used for querying from the given name.
      */
     public static String createQueryString(String name) {
+        if(name == null)
+            throw new NullPointerException("null name");
+        
         String retString = null;
+        
+        // normalize the name.
+        name = I18NConvert.instance().getNorm(name);
 
         final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
 
@@ -485,13 +491,6 @@ public class StringUtils {
                     "Original filename: " + name);
         Assert.that(retString != null, 
                     "Original filename: " + name);
-                    
-        // Normalize for internationalization, and more assertions...
-        retString = I18NConvert.instance().getNorm(retString);
-        Assert.that(!retString.equals(""), 
-                    "I18N: Original filename: " + name);
-        Assert.that(retString != null, 
-                    "I18N: Original filename: " + name);
 
         return retString;
     }
