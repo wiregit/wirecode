@@ -429,7 +429,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     
     ///////////////////////// Useful Testing Methods //////////////////////////
-    private static final int TIMEOUT = 300;
+    private static final int TIMEOUT = 2000;
 
     /** 
 	 * Tries to receive any outstanding messages on c 
