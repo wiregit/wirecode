@@ -8,6 +8,10 @@ import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.Backend;
 
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.Iterator;
+
 /**
  * A modified TestSuite that allows the backends
  * to always be shutdown after tests finished,
@@ -104,36 +108,81 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
     }
     
     public void runStaticMethod(String name) throws TestFailedException {
-        Method m = null;
+        List methods = null;
         try {
-            m = _testClass.getDeclaredMethod(name, null);
-            if ( m == null ) return;
+            methods = getAllStaticMethods(_testClass, name);
+            if(methods.isEmpty()) return;
         } catch(NoSuchMethodException e) {
             return;
         }
-                    
-        if ( !Modifier.isStatic(m.getModifiers()) ) {
-            runTest(warning("Method "+name+" must be declared static."),
-                    _testResult);
-            throw new TestFailedException();
-        } else if ( !Modifier.isPublic(m.getModifiers()) ) {
-            runTest(warning("Method "+name+" must be declared public."),
-                    _testResult);
-            throw new TestFailedException();
-        } else {
-            try {
-                m.invoke(_testClass, new Object[] {});
-    		} catch (InvocationTargetException e) {
-    		    runTest(reportError(e.getCause(), _testResult), _testResult);
+
+        for(Iterator i = methods.iterator(); i.hasNext(); ) {
+            Method m = (Method)i.next();
+            if ( !Modifier.isStatic(m.getModifiers()) ) {
+                runTest(warning("Method "+name+" must be declared static."),
+                        _testResult);
                 throw new TestFailedException();
-    		} catch (IllegalAccessException e) {
-    			runTest(warning("Cannot access method: "+name, e),
-    			        _testResult);
+            } else if ( !Modifier.isPublic(m.getModifiers()) ) {
+                runTest(warning("Method "+name+" must be declared public."),
+                        _testResult);
                 throw new TestFailedException();
-    		}                
+            } else {
+                try {
+                    // If this method takes the class parameter, send it
+                    if(m.getParameterTypes().length == 1)
+                        m.invoke(null, new Object[] { _testClass });
+                    // Otherwise use the no-arg invocation
+                    else
+                        m.invoke(null, new Object[] {});
+                } catch (InvocationTargetException e) {
+                    runTest(reportError(e.getCause(), _testResult), _testResult);
+                    throw new TestFailedException();
+                } catch (IllegalAccessException e) {
+                    runTest(warning("Cannot access method: "+name, e),
+                            _testResult);
+                    throw new TestFailedException();
+                }                
+            }
         }
     }
+    
+    /**
+     * Retrieves all static methods of the specified class (and all subclasses)
+     * that are the specified name and either take no parameters or a Class
+     * parameter.  The method that takes a Class parameter takes priority
+     * if both are found.
+     * 
+     * Throws NoSuchMethodException if none are found.
+     */
+	public List getAllStaticMethods(Class entryClass, String methodName)
+      throws NoSuchMethodException {
+        List methods = new LinkedList();
+        Class clazz = entryClass;
+        Class[] classes = new Class[] { Class.class };
+        while(clazz != null) {
+            Method add = null;
+            try {
+                add = clazz.getDeclaredMethod(methodName, classes);
+            } catch(NoSuchMethodException tryAgain) {
+                // If nothing with the class parameter, try with none
+                try {
+                    add = clazz.getDeclaredMethod(methodName, null);
+                } catch(NoSuchMethodException ignored) {}
+            }
+            
+            // If we found a method, add it to the beginning of the list
+            if(add != null)
+                methods.add(0, add);
+
+            // Try again with a superclass.
+            clazz = clazz.getSuperclass();
+        }
         
+        if(methods.isEmpty())
+            throw new NoSuchMethodException("Invalid method: " + methodName);
+
+        return methods;
+    }    
     
     /**
      * Stub for error(Throwable, String)
