@@ -40,6 +40,8 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Random;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Map;
 
 /**
  *  Tests that an Ultrapeer correctly proxies for a Leaf.
@@ -53,6 +55,7 @@ import com.sun.java.util.collections.Random;
  */
 public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;
+    private static final long EXPIRE_TIME = 20 * 1000;
 
     protected static int TIMEOUT = 2000;
 
@@ -83,6 +86,13 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 	
     public static ActivityCallback getActivityCallback() {
         return new ActivityCallbackStub();
+    }
+
+    public static void setSettings() throws Exception {
+        // we want to test the expirer so make the expire period small
+        PrivilegedAccessor.setValue(ManagedConnection.class,
+                                    "TIMED_GUID_LIFETIME",
+                                    new Long(EXPIRE_TIME));
     }
 
     public static void setUpQRPTables() throws Exception {
@@ -513,7 +523,52 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
     }
 
-    
+    // tests that the expirer works
+    public void testExpirer() throws Exception {
+        // see if anything is going to be expired
+        Class guidMapExpirer = 
+            PrivilegedAccessor.getClass(ManagedConnection.class,
+                                        "GuidMapExpirer");
+        List expireList = (List) PrivilegedAccessor.getValue(guidMapExpirer, 
+                                                             "toExpire");
+        assertNotNull(expireList);
+        if (expireList.size() > 0) 
+            Thread.sleep(EXPIRE_TIME*2);
+        assertTrue(expireList.isEmpty());
+
+        // now add a few queries and make sure some are expired but others not
+        {
+        QueryRequest query = QueryRequest.createQuery("sumeet");
+        sendF(LEAF[0], query);
+        QueryStatusResponse resp = 
+            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
+        sendF(LEAF[0], resp);
+        Thread.sleep(1000);
+        }
+        if (expireList.isEmpty()) Thread.sleep(EXPIRE_TIME);
+        {
+        QueryRequest query = QueryRequest.createQuery("berlin");
+        sendF(LEAF[0], query);
+        QueryStatusResponse resp = 
+            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
+        sendF(LEAF[0], resp);
+        Thread.sleep(1000);
+        }
+        if (expireList.isEmpty()) Thread.sleep(EXPIRE_TIME);
+        {
+        QueryRequest query = QueryRequest.createQuery("greg");
+        sendF(LEAF[0], query);
+        QueryStatusResponse resp = 
+            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
+        sendF(LEAF[0], resp);
+        Thread.sleep(1000);
+        }
+ 
+        assertFalse(expireList.isEmpty());
+
+    }
+ 
+   
     private final void sendF(Connection c, Message m) throws Exception {
         c.send(m);
         c.flush();
