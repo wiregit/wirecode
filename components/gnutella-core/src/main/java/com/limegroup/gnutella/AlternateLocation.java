@@ -130,8 +130,8 @@ public final class AlternateLocation
 		}
 		String urlStr = ("http://"+rfd.getHost()+":"+rfd.getPort()+
 						 "/get/"+String.valueOf(rfd.getIndex())+
-						 "/"+rfd.getFileName());
-		URL url = new URL(URLEncoder.encode(urlStr));
+						 "/"+URLEncoder.encode(rfd.getFileName()));
+		URL url = new URL(urlStr);
 		return new AlternateLocation(url, new Date());
 	}
 
