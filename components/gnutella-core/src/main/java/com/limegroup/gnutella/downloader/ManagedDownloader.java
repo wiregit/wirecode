@@ -2022,11 +2022,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                               "FD.getFile    : " + fd.getFile() + "\n" +
                               "Canonical     : " + canon + "\n" +
                               "Error: " + 
-                                (ioe == null ? "(none)" : ioe.getMessage()) +
+                            (ioe == null ? "(none)" : ioe.getMessage()) + "\n"
                               "IFM hashes: " + 
                                 incompleteFileManager.dumpHashes());
-                          //dont fail later
-                          fileManager.removeFileIfShared(incompleteFile);
+                            //dont fail later
+                            fileManager.removeFileIfShared(incompleteFile);
                       }
                     }
                 }
