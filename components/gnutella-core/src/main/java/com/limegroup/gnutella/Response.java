@@ -371,30 +371,18 @@ public class Response {
 
 			Set urns = huge.getURNS();
 
-			String metaString = null;
-            Set metaSet = huge.getXMLBlocks();
-            if (metaSet != null)
-                metaString = (String) metaSet.iterator().next();
+			String metaString = "";
+            Iterator iter = huge.getXMLBlocks().iterator();
+            while (iter.hasNext() && metaString.equals(""))
+                metaString = createXmlString(name, (String)iter.next());
 
-			GGEPContainer ggep = null;
-            Set ggepSet = huge.getGGEPBlocks();
-            if (ggepSet != null)
-                ggep = GGEPUtil.getGGEP(ggepSet);
+			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEPBlocks());
 
 			return new Response(index, size, name, metaString, 
 			                    urns, null, ggep, rawMeta);
         }
     }
     
-    /**
-     * Recreates the string tokenizer using the specified bytes,
-     * starting at the specified offset.
-     */
-    private static StringTokenizer recreateTokenizer(byte[] data, int offset) {
-        String s = new String(data, offset, data.length - offset);
-        return new StringTokenizer(s, EXT_STRING);
-    }
-
 	/**
 	 * Constructs an xml string from the given extension sting.
 	 *
@@ -986,23 +974,6 @@ public class Response {
         GGEPContainer(Set locs, long create) {
             locations = locs == null ? DataUtils.EMPTY_SET : locs;
             createTime = create;
-        }
-        
-        static GGEPContainer merge(GGEPContainer a, GGEPContainer b) {
-            Set loc;
-            long create;
-            
-            if(a.locations == DataUtils.EMPTY_SET)
-                loc = b.locations;
-            else
-                loc = a.locations;
-                
-            if(a.createTime == -1)
-                create = b.createTime;
-            else
-                create = a.createTime;
-                
-            return new GGEPContainer(loc, create);
         }
         
         boolean isEmpty() {

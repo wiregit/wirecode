@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.DataUtils;
 import java.io.IOException;
 
 /** 
@@ -20,29 +21,29 @@ public class HUGEExtension {
     // -----------------------------------------
 
     /** @return the set GGEP Objects in this HUGE extension, may return null.
-     *  if non-null, set.size() > 1;
      */
     public Set getGGEPBlocks() {
+        if (_ggeps == null) return DataUtils.EMPTY_SET;
         return _ggeps;
     }
     /** @return the set URN Objects in this HUGE extension, may return null.
-     *  if non-null, set.size() > 1;
      */
     public Set getURNS() {
+        if (_urns == null) return DataUtils.EMPTY_SET;
         return _urns;
     }
     /** @return the set URN Type Objects in this HUGE extension, may return
      *  null.
-     *  if non-null, set.size() > 1;
      */
     public Set getURNTypes() {
+        if (_urnTypes == null) return DataUtils.EMPTY_SET;
         return _urnTypes;
     }
     /** @return the set XML blocks (Strings) in this HUGE extension, may return
      *  null.
-     *  if non-null, set.size() > 1;
      */
     public Set getXMLBlocks() {
+        if (_xmlBlocks == null) return DataUtils.EMPTY_SET;
         return _xmlBlocks;
     }
 
@@ -95,8 +96,8 @@ public class HUGEExtension {
                                 _urnTypes.add(UrnType.createUrnType(curExtStr));
                             }
                         } 
-                        else if (curExtStr.startsWith("<?xml")) {
-                            // rich query
+                        else {
+                            // miscellaneous, but in the case of queries, xml
                             if (_xmlBlocks == null)
                                 _xmlBlocks = new HashSet();
                             _xmlBlocks.add(curExtStr);
