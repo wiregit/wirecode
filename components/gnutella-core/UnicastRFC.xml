@@ -752,9 +752,10 @@
 
 	<section title="Acknowledgements">
 	  <t>
-	    The authors would like to thank the rest of the LimeWire team, all participants
-		in the Gnutella Developer Forum (GDF), and all members of the LimeWire open
-		source initiative.
+	    The authors would like to thank Christopher Rohrs and the rest of the 
+		LimeWire team.  In addition, we would like to thank Gordon Mohr of Bitzi,
+		Inc., all participants in the Gnutella Developer Forum (GDF), and all 
+		members of the LimeWire open source initiative.
 	  </t>
 	</section>
   </back>
