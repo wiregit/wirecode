@@ -7,7 +7,7 @@ public class FixedSizeSortedSet implements Set {
     /**
      * The underlying set that this wraps
      */
-    private SortedSet _delegate;
+    private TreeSet _delegate;
     
     /**
      *  The maximum size of this, defaults to 50
@@ -46,6 +46,12 @@ public class FixedSizeSortedSet implements Set {
 
     public SortedSet tailSet(Object o) {
         return _delegate.tailSet(o);
+    }
+
+    public Object  clone() {
+        FixedSizeSortedSet ret = new FixedSizeSortedSet(_maxSize);
+        ret._delegate = (TreeSet)_delegate.clone();
+        return ret;
     }
 
     /////////////////////Set Interface methods ///////////////////

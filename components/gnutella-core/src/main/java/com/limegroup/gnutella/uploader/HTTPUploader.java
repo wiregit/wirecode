@@ -225,9 +225,11 @@ public final class HTTPUploader implements Uploader {
                 throw e;
 		} finally {    
     		if(_altLocs != null && _fileDesc != null) {
-    			// making this call now is necessary to avoid writing the 
-    			// same alternate locations back to the requester as were 
-    			// sent in the request headers
+                //Synchronization note: the following two synchronization blocks
+                //hold the locks of two AlternateLocationCollections
+                //simultaneously. This may seem like a festering ground for
+                //deadlocks, but this is not dangerous because the locks for
+                //goodLoc and badLocs cannot be held by more than one thread.
                 AlternateLocationCollection badLocs=_altLocs.getFailedAltLocs();
                 synchronized(badLocs) {
                     Iterator iter = badLocs.iterator();
@@ -455,22 +457,27 @@ public final class HTTPUploader implements Uploader {
 	}
     
     /**
-     * generates an AlternateLocationCollection based on the number of 
-     * AltLocs that this Uploader has already sent out.
+     * package access, generates an AlternateLocationCollection based on the
+     * number of AltLocs that this Uploader has already sent out.
      */
-    public AlternateLocationCollection getAlternateLocationCollection() {
-        Iterator iter  = _fileDesc.getAlternateLocationCollection().iterator();
-        AlternateLocationCollection ret = 
-                    AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
-        //Sumeet:TODO1: Check synchronization. But I think getting an iterator
-        //on the AlternateLocation collection should return a shallow copy
-        for(int i=0; iter.hasNext() && i < _numAltsWritten ; i++) 
-            iter.next(); //skip the first _numAltsWritten
-        int i;
-        for(i = 0; i< 10 && iter.hasNext();i++)
-            ret.add((AlternateLocation)iter.next());//Deadlocks?
-        _numAltsWritten += i;//add as many as we added now.
-        return ret;
+    AlternateLocationCollection getAlternateLocationCollection() {
+        AlternateLocationCollection coll =
+                                    _fileDesc.getAlternateLocationCollection();
+        AlternateLocationCollection ret = null;
+        synchronized(coll) {
+            Iterator iter  = coll.iterator();
+            ret = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+            for(int i=0; iter.hasNext() && i < _numAltsWritten ; i++) 
+                iter.next(); //skip the first _numAltsWritten
+            int i;
+            //Synchronization note: We hold the locks of two
+            //AlternateLocationCollections concurrently, but one of them is a
+            //local variable, so we are OK.
+            for(i = 0; i< 10 && iter.hasNext();i++)
+                ret.add((AlternateLocation)iter.next());
+            _numAltsWritten += i;//add as many as we added now.
+            return ret;
+        }
     }
     
     /**

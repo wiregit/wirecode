@@ -20,20 +20,19 @@ public final class AlternateLocationCollection
     private static final int MAX_SIZE = 100;
 
 	/**
-	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
-	 * <tt>AlternateLocation</tt> instances.  
-	 * This uses a <tt>FixedSizeForgetfulHashMap</tt> so that the oldest
-	 * entry inserted is removed when the limit is reached.
-     * LOCKING: obtain this' monitor when iterating -- otherwise 
-	 *          it's synchronized on its own
+	 * This uses a <tt>FixedSizeSortedSet</tt> so that the highest * entry
+     * inserted is removed when the limit is reached.  
+     * <p>
+     * LOCKING: obtain this' monitor when iterating. Note that all modifications
+     * to LOCATIONS are synchronized on this.  allAll method has the potential
+     * for deadlocks, so the LlternateLocationCollection provided is cloned and
+     * the lock on the original is released.
      *
      * There must be a seperate _locations variable to do equals comparisons
      * on.  SynchronizedMap.equals(SynchronizedMap) won't work, because
      * the synchronized map does not extend Fixedsize.., and Fixedsize..
-     * uses private variables for the equals comparison.
-	 */
-    //Sumeet:TODO2: 
-    //TODO1: Make sure the synchronization of this class works.
+     * uses private variables for the equals comparison.  
+     */
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
         
     /**
@@ -174,16 +173,16 @@ public final class AlternateLocationCollection
     }
 
 	/**
-     * Implements the <tt>AlternateLocationCollector</tt> interface.
-     * Adds the specified <tt>AlternateLocationCollection</tt> to this 
-     * collection.
-     *
+     * Implements the <tt>AlternateLocationCollector</tt> interface.  Adds the
+     * specified <tt>AlternateLocationCollection</tt> to this collection. Note
+     * that to avoid deadlocks, the given AlternateLocationCollection is cloned
+     * first
+     * <p>
      * @param alc the <tt>AlternateLocationCollection</tt> to add
      * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
      *  <tt>null</tt>
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
-     *  collection to add does not match the collection of <tt>this</tt>
-     */
+     *  collection to add does not match the collection of <tt>this</tt> */
 	public int addAll(AlternateLocationCollection alc) {
         if(alc == null) 
             throw new NullPointerException("ALC is null");
@@ -191,18 +190,16 @@ public final class AlternateLocationCollection
 		if(!alc.getSHA1Urn().equals(SHA1)) 
 			throw new IllegalArgumentException("SHA1 does not match");
 
-		//Sumeet:TODO1: potential deadlock. Let a and b are 2
-		//AlternateLocationCollection, a.addAll(b) and b.addAll(a) are called on
-		//two threads at the same time, we could have a deadlock
 		int added = 0;
-		synchronized(alc) {
-			Iterator iter = alc.LOCATIONS.iterator();
-			while(iter.hasNext()) {
-				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				if( add(curLoc) )
-				    added++;
-			}
-		}
+        Iterator iter=null;
+        synchronized(alc) {
+            iter = ((FixedSizeSortedSet)alc.LOCATIONS.clone()).iterator();
+        }
+        while(iter.hasNext()) {
+            AlternateLocation curLoc = (AlternateLocation)iter.next();
+            if( add(curLoc) )
+                added++;
+        }
 		return added;
 	}
 
@@ -257,12 +254,11 @@ public final class AlternateLocationCollection
 
     // Implements AlternateLocationCollector interface -- 
     // inherit doc comment
-	public int getNumberOfAlternateLocations() { 
+	public synchronized int getNumberOfAlternateLocations() { 
 		return LOCATIONS.size();
     }
     
     public Iterator iterator() {
-        //Sumeet:TODO1: synchronization needs checking
         return LOCATIONS.iterator();
     }
 

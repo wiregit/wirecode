@@ -546,9 +546,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // Retrieve the alternate locations (without adding ourself)
                 validAlts = fd.getAlternateLocationCollectionWithoutSelf();
                 Iterator iter = validAlts.iterator();
-                while(iter.hasNext()) {
-                    AlternateLocation loc = (AlternateLocation)iter.next();
-                    addDownload(loc.createRemoteFileDesc((int)size),false);
+                synchronized(validAlts) {
+                    while(iter.hasNext()) {
+                        AlternateLocation loc = (AlternateLocation)iter.next();
+                        addDownload(loc.createRemoteFileDesc((int)size),false);
+                    }
                 }
             }
         }
@@ -1465,12 +1467,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     set = new HashSet(files);
                 }
-				HeadRequester requester = 
-			        new HeadRequester(set, fileHash, fileDesc, 
-                                      fileDesc.getAlternateLocationCollection());
-				Thread headThread = new Thread(requester, "HEAD Request Thread");
-				headThread.setDaemon(true);
-				headThread.start();
+//  				HeadRequester requester = 
+//  			        new HeadRequester(set, fileHash, fileDesc, 
+//                                        fileDesc.getAlternateLocationCollection());
+//  				Thread headThread = new Thread(requester, "HEAD Request Thread");
+//  				headThread.setDaemon(true);
+//  				headThread.start();
 			}
 		}
 		
@@ -2071,8 +2073,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
                 AlternateLocationCollection c = dloader.getAltLocsReceived();
-                //Sumeet:TODO1: make sure no deadlock here. 
-                synchronized(c) {
+                synchronized(c) { 
                     Iterator iter = c.iterator();
                     while(iter.hasNext()) {
                         AlternateLocation loc = (AlternateLocation)iter.next();
