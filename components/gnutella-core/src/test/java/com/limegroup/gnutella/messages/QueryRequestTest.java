@@ -52,6 +52,10 @@ public final class QueryRequestTest extends BaseTestCase {
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
+			qr = QueryRequest.createQuery((URN)null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}		
+		try {
 			qr = QueryRequest.createRequery((String)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
@@ -345,6 +349,10 @@ public final class QueryRequestTest extends BaseTestCase {
 		runStandardChecks(qr, qr.getQueryUrns());
 		runRequeryChecks(qr);
 		assertEquals("TTLs should be equal", (byte)4, qr.getTTL());
+
+		qr = QueryRequest.createQuery(HugeTestUtils.SHA1);
+		runStandardChecks(qr, qr.getQueryUrns());
+		runNonRequeryChecks(qr);
 	}
 
 	/**
