@@ -1,10 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
@@ -13,12 +19,15 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.awt.image.ByteArrayImageSource;
+
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.ManagedConnectionStub;
@@ -29,6 +38,9 @@ import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -38,6 +50,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.sun.java.util.collections.HashSet;
@@ -79,6 +92,17 @@ public class DownloadTest extends BaseTestCase {
      * Port for the fifth uploader.
      */
     private static final int PORT_5 = 6324;
+    
+    
+    /**
+     * ports for the various push proxies
+     */
+    private static final int PPORT_1 = 10001;
+    private static final int PPORT_2 = 10002;
+    private static final int PPORT_3 = 10003;
+    
+    private static final GUID guid = new GUID(GUID.makeGuid());
+        
 
     private static final String filePath =
         "com/limegroup/gnutella/downloader/DownloadTestData/";
@@ -112,7 +136,7 @@ public class DownloadTest extends BaseTestCase {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
-        dm.scheduleWaitingPump();
+        //dm.scheduleWaitingPump();
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
@@ -138,6 +162,7 @@ public class DownloadTest extends BaseTestCase {
             }
         };
         RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
+        rs.start();
     } 
     
     public DownloadTest(String name) {
@@ -283,6 +308,23 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimplePushDownload() throws Exception {
+        LOG.debug("-Testing non-swarmed push download");
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+        
+        RemoteFileDesc rfd = pushLoc.createRemoteFileDesc(TestFile.length());
+        
+        assertTrue(rfd.needsPush());
+        
+        RemoteFileDesc [] rfds = {rfd};
+        PushAcceptor p = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName());
+        
         tGeneric(rfds);
     }
     
@@ -2088,8 +2130,11 @@ public class DownloadTest extends BaseTestCase {
         synchronized(COMPLETE_LOCK) {
             try {
                 REMOVED = false;
+                LOG.debug("starting wait");
                 COMPLETE_LOCK.wait(DOWNLOAD_WAIT_TIME);
+                LOG.debug("finished waiting");
             } catch (InterruptedException e) {
+                LOG.debug("interrupted",e);
                 //good.
             }
         }
@@ -2129,6 +2174,61 @@ public class DownloadTest extends BaseTestCase {
                 REMOVED = true;
                 COMPLETE_LOCK.notify();
             }
+        }
+    }
+    
+    private static class PushAcceptor extends Thread{
+        private final int _portC;
+        private DatagramSocket sock;
+        private final String _fileName;
+        
+        public PushAcceptor(int portL,int portC,String filename) {
+            super("push acceptor "+portL+"->"+portC);
+            
+            _portC=portC;
+            _fileName=filename;
+            try {
+                sock = new DatagramSocket(portL);
+                //sock.connect(InetAddress.getLocalHost(),portC);
+                sock.setSoTimeout(15000);
+            }catch(IOException bad) {
+                ErrorService.error(bad);
+            }
+            start();
+        }
+        
+        public void run() {
+            DatagramPacket p = new DatagramPacket(new byte[1024],1024);
+            Message m = null;
+            try {
+                LOG.debug("listening for push request on "+sock.getLocalPort());
+                sock.receive(p);
+                ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
+                m = Message.read(bais);
+                
+                assertTrue(m instanceof PushRequest);
+                
+                LOG.debug("received a push request");
+                
+                Socket s = Sockets.connect("127.0.0.1",_portC,500);
+                
+                OutputStream os = s.getOutputStream();
+                
+                String GIV = "GIV 0:"+guid.toHexString()+"/"+_fileName+"\n\n";
+                os.write(GIV.getBytes());
+                
+                os.flush();
+                
+                LOG.debug("wrote GIV");
+                new TestUploader(s,_fileName);
+                
+            }catch(BadPacketException bad) {
+                ErrorService.error(bad);
+            }catch(IOException bad) {
+                ErrorService.error(bad);
+            }
+            
+
         }
     }
 }

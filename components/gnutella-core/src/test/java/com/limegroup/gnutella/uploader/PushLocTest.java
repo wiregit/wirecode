@@ -739,25 +739,6 @@ public class PushLocTest extends BaseTestCase {
 	}
 
 
-/*	private static String download(String file, String header, String expResp,
-			String expHeader) throws IOException {
-		//Unfortunately we can't use URLConnection because we need to test
-		//malformed and slightly malformed headers
-
-		//1. Write request
-		Socket s = new Socket("localhost", PORT);
-		BufferedReader in = new BufferedReader(new InputStreamReader(s
-				.getInputStream()));
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s
-				.getOutputStream()));
-
-		String ret = downloadInternal("GET", makeRequest(file), header, out,
-				in, expHeader);
-		in.close();
-		out.close();
-		s.close();
-		return ret;
-	}*/
 
 	
 

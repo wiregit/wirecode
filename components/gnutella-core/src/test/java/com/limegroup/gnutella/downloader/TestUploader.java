@@ -197,6 +197,39 @@ public class TestUploader extends AssertComparisons {
         t.setDaemon(true);
         t.start();        
     }
+    
+    public TestUploader(final Socket mySocket, String name) throws IOException{
+        super(name);
+        this.name=name;
+        reset();
+        LOG.debug("starting to handle request with direct socket given");
+        
+        try {
+            while(http11 && !stopped) {
+                handleRequest(mySocket);
+                if (queue) { 
+                    mySocket.setSoTimeout(MAX_POLL);
+                    if(unqueue) // second time give slot
+                        queue = false;
+                    handleRequest(mySocket);
+                }
+                mySocket.setSoTimeout(8000);
+            }
+        } catch (IOException e) {
+            if(totalUploaded < totalAmountToUpload)
+                killedByDownloader = true;
+            LOG.debug("Exception in uploader (" + name + ")", e);
+        } catch(Throwable t) {
+            ErrorService.error(t);
+        } finally {
+            try {
+                mySocket.close();
+            } catch (IOException e) {
+                return;
+            }
+        }//end of finally
+
+    }
 
     public void stopThread() {
         try {
