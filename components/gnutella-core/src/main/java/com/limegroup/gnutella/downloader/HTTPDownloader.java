@@ -296,6 +296,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private static void readAlternateLocations(final String altHeader,
 											   final AlternateLocationCollector alc) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
 
 		while(st.hasMoreTokens()) {
