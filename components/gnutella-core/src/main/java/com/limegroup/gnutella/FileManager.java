@@ -332,11 +332,10 @@ public class FileManager {
 
         for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);
-        }
-     
+        }        
 
-        System.out.println("Index loaded.");
-        System.out.println(_index.toString());   
+//          System.out.println("Index loaded.");
+//          System.out.println(_index.toString());   
     }
 
     /**
@@ -382,6 +381,15 @@ public class FileManager {
             else                                /* add the file with the */
                 addFile(file_list[i].getAbsolutePath());  /* addFile method */
         }
+
+        //Compact the index.  Ideally this should be called just once on startup, not
+        //once for each directory.
+        _index.trim(new Function() {
+            public Object apply(Object intSet) {
+                ((IntSet)intSet).trim();
+                return intSet;
+            }
+        });
     }
 
     ////////////////////////////////// Queries ///////////////////////////////

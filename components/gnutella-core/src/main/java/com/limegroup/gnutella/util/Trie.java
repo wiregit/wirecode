@@ -372,6 +372,44 @@ public class Trie {
         public Object next() { throw new NoSuchElementException(); }
     }
 
+
+    /** 
+     * Ensures that this consumes the minimum amount of memory.  If
+     * valueCompactor is not null, also sets each node's value to
+     * valueCompactor.apply(node).  Any exceptions thrown by a call to
+     * valueCompactor are thrown by this.
+     *
+     * This method should typically be called after add(..)'ing a number of
+     * nodes.  Insertions can be done after the call to compact, but they might
+     * be slower.  Because this method only affects the performance of this,
+     * there is no modifies clause listed.  
+     */
+    public void trim(Function valueCompactor) 
+            throws IllegalArgumentException, ClassCastException {
+        //For each node in this...
+        LinkedList queue=new LinkedList();
+        queue.add(root);
+        while (! queue.isEmpty()) {
+            TrieNode node=(TrieNode)queue.removeLast();
+
+            //1. Apply compactor to value (if any).
+            if (valueCompactor!=null) {
+                Object value=node.getValue();
+                if (value!=null)
+                    node.setValue(valueCompactor.apply(value));
+            }
+
+            //2. Compact node's children.
+            node.trim();
+
+            //3. Continue with DFS on children.
+            for (Iterator iter=node.children(); iter.hasNext(); ) {
+                queue.addLast(iter.next());
+            }
+        }
+     }
+
+
     /** Returns a string representation of the tree state of this, i.e., the
      *  concrete state.  (The version of toString commented out below returns
      *  a representation of the abstract state of this. */
@@ -439,7 +477,6 @@ public class Trie {
 //      }
 
     /** Unit test. */
-    /*
     public static void main(String args[]) {
         TrieNode.unitTest();
         Trie t=new Trie(false);
@@ -570,7 +607,6 @@ public class Trie {
         Assert.that(t.get("an")==null);
         Assert.that(t.get("ant")==antVal);
     }
-    */
 }
 
 
@@ -589,12 +625,15 @@ public class Trie {
 final class TrieNode {
     /** The value of this node. */
     private Object value=null;
-    /** The list of children.
+    /** The list of children.  Children are stored as a sorted Vector because
+     *  it is a more compact than a tree or linked lists.  Insertions and 
+     *  deletions are more expensive, but they are rare compared to searching.
+     *
      *  INVARIANT: children are sorted by distinct first characters of edges,
      *  i.e., for all i<j,
      *          children[i].edge.charAt(0)<children[j].edge.charAt(0)
      */
-    private TrieEdge[] children=new TrieEdge[0];
+    private Vector /* of TrieEdge */ children=new Vector(0);
 
     /** Creates a trie with no children and no value. */
     public TrieNode() { }
@@ -615,16 +654,51 @@ final class TrieNode {
         this.value=value;
     }
 
+    private final TrieEdge get(int i) {
+        return (TrieEdge)children.get(i);
+    }
+
+    /**
+     * If exact,  returns the unique  i s.t. children[i].getLabelStart()==c
+     * If !exact, returns the largest i s.t. children[i].getLabelStart()<=c
+     * In either case, returns -1 if no such i exists.
+     *
+     * This method uses binary search and runs in O(log N) time, where
+     * N=children.size().  The standard Java binary search methods could not
+     * be used because they only return exact matches.  Also, they require
+     * allocating a dummy Trie.
+     */
+    private final int search(char c, boolean exact) {
+        //This code is stolen from IntSet.search.
+        int low=0;
+        int high=children.size()-1;
+
+        while (low<=high) {
+            int i=(low+high)/2;
+            char ci=get(i).getLabelStart();
+
+            if (ci<c)
+                low=i+1;
+            else if (c<ci)
+                high=i-1;
+            else
+                return i;
+        }
+
+        if (exact)
+            return -1;        //Return no match.
+        else
+            return high;      //Return closes match.  (This works!)
+    } 
+
     /** Returns the edge (at most one) whose label starts with the given
      *  character, or null if no such edge.  */
     public TrieEdge get(char labelStart) {
-        //TODO3: avoid allocation of dummy by implementing binary search here.
-        TrieEdge dummy=new TrieEdge(String.valueOf(labelStart), null);
-        int i=Arrays.binarySearch(children, dummy);
+        int i=search(labelStart, true);
         if (i<0)
             return null;
-        TrieEdge ret=(TrieEdge)children[i];
-        Assert.that(ret.getLabel().charAt(0)==labelStart);
+        TrieEdge ret=get(i);
+        Assert.that(ret.getLabelStart()==labelStart);
         return ret;
     }
 
@@ -633,34 +707,30 @@ final class TrieNode {
      *      mapped to a node.
      *     @modifies this */
     public void put(String label, TrieNode child) {
-        //TODO2: It's possible to simply insert the node into children instead
-        //of sorting.  That reduces the time from O(n log n) to O(n), where
-        //n==children.size().  But that requires a more flexible data structure
-        //to store the children.
-        TrieEdge[] children2=new TrieEdge[children.length+1];
-        System.arraycopy(children, 0, children2, 0, children.length);
-        children2[children2.length-1]=new TrieEdge(label, child);
-        Arrays.sort(children2);
-        children=children2;
+        char labelStart=label.charAt(0);
+        int i=search(labelStart, false);   //find closest match
+        if (i>=0) 
+            Assert.that(get(i).getLabelStart()!=labelStart,
+                        "Precondition of TrieNode.put violated.");
+        children.add(i+1, new TrieEdge(label, child));
     }
 
     /** Removes the edge (at most one) whose label starts with the given
      *  character.  Returns true if any edges where actually removed. */
     public boolean remove(char labelStart) {
-        //1. Find index of edge whose label starts with labelStart.
-        //TODO3: avoid allocation of dummy by implementing binary search here.
-        TrieEdge dummy=new TrieEdge(String.valueOf(labelStart), null);
-        int i=Arrays.binarySearch(children, dummy);
-        if (i<0)
+        int i=search(labelStart, true);
+        if (i==-1)
             return false;
-
-        //2. Copy everything but children[i] to a new array, maintaining order.
-        //TODO2: this is expensive.  Use same ideas as in put.
-        TrieEdge[] children2=new TrieEdge[children.length-1];
-        System.arraycopy(children, 0, children2, 0, i);
-        System.arraycopy(children, i+1, children2, i, children.length-i-1);
-        this.children=children2;
+        Assert.that(get(i).getLabelStart()==labelStart);
+        children.remove(i);
         return true;
+    }
+
+    /** Ensures that this's children take a minimal amount of storage.  This
+     *  should be called after numberous calls to add().
+     *      @modifies this */
+    public void trim() {
+        children.trimToSize();
     }
 
     /** Returns the children of this in any order, as an iterator
@@ -679,13 +749,13 @@ final class TrieNode {
     private class ChildrenIterator extends UnmodifiableIterator {
         int i=0;
         public boolean hasNext() {
-            return i<children.length;
+            return i<children.size();
         }
         public Object next() {
             if (! hasNext())
                 throw new NoSuchElementException();
 
-            TrieEdge edge=(TrieEdge)children[i];
+            TrieEdge edge=get(i);
             i++;
             return edge.getChild();
         }
@@ -695,13 +765,13 @@ final class TrieNode {
     private class LabelIterator extends UnmodifiableIterator {
         int i=0;
         public boolean hasNext() {
-            return i<children.length;
+            return i<children.size();
         }
         public Object next() {
             if (! hasNext())
                 throw new NoSuchElementException();
 
-            TrieEdge edge=(TrieEdge)children[i];
+            TrieEdge edge=get(i);
             i++;
             return edge.getLabel();
         }
@@ -715,11 +785,11 @@ final class TrieNode {
             return val.toString();
     }
 
-    /*
     static void unitTest() {
         TrieNode node=new TrieNode();
         TrieNode childA=new TrieNode();
         TrieNode childB=new TrieNode();
+        TrieNode childC=new TrieNode();
 
         Assert.that(node.getValue()==null);
         String value="abc";
@@ -730,19 +800,34 @@ final class TrieNode {
         Iterator iter=node.children();
         Assert.that(! iter.hasNext());
 
+        //Test put/get.  Note we insert at beginning and end of list.
         node.put("b", childB);
+        Assert.that(node.get('a')==null);
         Assert.that(node.get('b').getChild()==childB);
+        Assert.that(node.get('c')==null);
+        Assert.that(node.get('d')==null);
         node.put("a very long key", childA);
         Assert.that(node.get('a').getChild()==childA);
         Assert.that(node.get('b').getChild()==childB);
         Assert.that(node.get('c')==null);
+        Assert.that(node.get('d')==null);
+        node.put("c is also a key", childC);
+        Assert.that(node.get('a').getChild()==childA);
+        Assert.that(node.get('b').getChild()==childB);
+        Assert.that(node.get('c').getChild()==childC);
+        Assert.that(node.get('d')==null);
 
+        //Test child iterator
         iter=node.children();
         Object tmp=(TrieNode)iter.next();
-        Assert.that(tmp==childA || tmp==childB);
+        Assert.that(tmp==childA || tmp==childB || tmp==childC);
         Object tmp2=(TrieNode)iter.next();
-        Assert.that(tmp2==childA || tmp2==childB);
+        Assert.that(tmp2==childA || tmp2==childB  || tmp2==childC);
         Assert.that(tmp2!=tmp);
+        Object tmp3=(TrieNode)iter.next();
+        Assert.that(tmp3==childA || tmp3==childB  || tmp3==childC);
+        Assert.that(tmp2!=tmp);
+        Assert.that(tmp3!=tmp);
         Assert.that(! iter.hasNext());
         try {
             iter.next();
@@ -750,12 +835,23 @@ final class TrieNode {
         } catch (NoSuchElementException e) {
         }
 
+        //Test label iterator
         iter=node.labels();
         tmp=(String)iter.next();
-        Assert.that(tmp.equals("b") || tmp.equals("a very long key"));
+        Assert.that(tmp.equals("b") 
+            || tmp.equals("a very long key") 
+            || tmp.equals("c is also a key"));
         tmp2=(String)iter.next();
-        Assert.that(tmp.equals("b") || tmp.equals("a very long key"));
+        Assert.that(tmp2.equals("b") 
+            || tmp2.equals("a very long key") 
+            || tmp2.equals("c is also a key"));
         Assert.that(! tmp2.equals(tmp));
+        tmp3=(String)iter.next();
+        Assert.that(tmp3.equals("b") 
+            || tmp3.equals("a very long key") 
+            || tmp3.equals("c is also a key"));
+        Assert.that(! tmp2.equals(tmp));
+        Assert.that(! tmp3.equals(tmp));
         Assert.that(! iter.hasNext());
         try {
             iter.next();
@@ -763,24 +859,31 @@ final class TrieNode {
         } catch (NoSuchElementException e) {
         }
 
-
-        node.remove('b');
-        Assert.that(node.get('a').getChild()==childA);
-        Assert.that(node.get('b')==null);
-        Assert.that(node.get('c')==null);
+        //Test remove operations.
         node.remove('a');
         Assert.that(node.get('a')==null);
+        Assert.that(node.get('b').getChild()==childB);
+        Assert.that(node.get('c').getChild()==childC);
+        node.remove('c');
+        Assert.that(node.get('a')==null);
+        Assert.that(node.get('b').getChild()==childB);
+        Assert.that(node.get('c')==null);
+        node.remove('b');
+        Assert.that(node.get('a')==null);
+        Assert.that(node.get('b')==null);
+        Assert.that(node.get('c')==null);
     }
-    */
 }
 
 /**
  * A labelled edge, i.e., a String label and a TrieNode endpoint.
  */
-final class TrieEdge implements Comparable {
+final class TrieEdge {
     private String label;
-    TrieNode child;
+    private TrieNode child;
 
+    /** @requires label.size()>0
+     *  @requires child!=null */
     TrieEdge(String label, TrieNode child) {
         this.label=label;
         this.child=child;
@@ -790,20 +893,14 @@ final class TrieEdge implements Comparable {
         return label;
     }
 
+    /** Returns the first character of the label, i.e., getLabel().charAt(0). */
+    public char getLabelStart() {
+        //You could store this char as an optimization if needed.
+        return label.charAt(0);
+    }
+
     public TrieNode getChild() {
         return child;
-    }
-
-    public int compareTo(Object o) {
-        TrieEdge other=(TrieEdge)o;
-        return this.label.charAt(0)-other.label.charAt(0);
-    }
-
-    public boolean equals(Object o) {
-        if (! (o instanceof TrieNode))
-            return false;
-        TrieEdge other=(TrieEdge)o;
-        return this.label.charAt(0)==other.label.charAt(0);
     }
 }
 
