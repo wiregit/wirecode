@@ -496,8 +496,6 @@ public final class QueryHandler {
             mc = curConnection;
             break;
         }
-        
-        ManagedConnection _initial = mc;
 
         int remainingConnections = 
             Math.max(length+QUERIED_PROBE_CONNECTIONS.size(), 0);
