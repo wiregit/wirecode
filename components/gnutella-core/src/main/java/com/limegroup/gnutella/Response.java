@@ -174,7 +174,7 @@ public class Response {
 	 *  this <tt>Response</tt> -- must not be <tt>null</tt>
 	 */
 	public Response(FileDesc fd) {
-		this(fd.getIndex(), fd.getFile().length(), fd.getFile().getName(), 
+		this(fd.getIndex(), fd.getSize(), fd.getName(), 
 			 "", fd.getUrns(), null);
 	}
 
