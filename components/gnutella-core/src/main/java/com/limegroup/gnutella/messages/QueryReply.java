@@ -990,7 +990,9 @@ public class QueryReply extends Message implements Serializable{
                 return 1;   //**   busy, direct connect
         } else if (busy==NO) {
             Assert.that(heFirewalled==NO || !iFirewalled);
-            if (heFirewalled==YES)
+            if ( isMCastReply )
+                return 4;
+            else if (heFirewalled==YES)
                 return 2;   //***  not busy, push
             else
                 return 3;   //**** not busy, direct connect

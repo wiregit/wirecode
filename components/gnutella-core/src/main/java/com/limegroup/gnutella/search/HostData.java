@@ -81,7 +81,6 @@ public final class HostData {
 	public HostData(QueryReply reply) {
 		CLIENT_GUID = reply.getClientGUID();
 		MESSAGE_GUID = reply.getGUID();
-		SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
 		IP = reply.getIP();
 		PORT = reply.getPort();
 
@@ -131,6 +130,11 @@ public final class HostData {
 		MULTICAST = multicast;
 		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
         QUALITY = reply.calculateQualityOfService(ifirewalled);
+        
+        if ( multicast )
+            SPEED = Integer.MAX_VALUE;
+        else
+            SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
 	}
 
 	/**
