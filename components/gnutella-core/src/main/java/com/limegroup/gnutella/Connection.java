@@ -1506,7 +1506,8 @@ public class Connection {
     public boolean isClientSupernodeConnection() {
         if(_isUltrapeer == null) {
             _isUltrapeer = 
-                new Boolean(isClientSupernodeConnection2());
+                isClientSupernodeConnection2() ?
+                    Boolean.TRUE : Boolean.FALSE;
         }
         return _isUltrapeer.booleanValue();
     }
@@ -1536,7 +1537,8 @@ public class Connection {
     public boolean isSupernodeSupernodeConnection() {
         if(_isUltrapeerToUltrapeer == null) {
             _isUltrapeerToUltrapeer = 
-                new Boolean(isSupernodeSupernodeConnection2());
+                isSupernodeSupernodeConnection2() ?
+                    Boolean.TRUE : Boolean.FALSE;
         }
         return _isUltrapeerToUltrapeer.booleanValue();
     }
@@ -1591,8 +1593,9 @@ public class Connection {
 	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
         if(_isLeaf == null) {
-            _isLeaf = 
-                new Boolean(isSupernodeClientConnection2());
+            _isLeaf =
+                isSupernodeClientConnection2() ?
+                    Boolean.TRUE : Boolean.FALSE;
         }
         return _isLeaf.booleanValue();
     }
