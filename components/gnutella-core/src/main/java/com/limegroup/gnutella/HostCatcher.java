@@ -151,9 +151,6 @@ public class HostCatcher {
      */
     private static final int LOCALE_SET_SIZE = 100;
     
-    /** How many pongs to return each time */
-    private static final int NUM_ENDPOINTS = 10;
-
     /** The list of pongs with the highest average daily uptimes.  Each host's
      * weight is set to the uptime.  These are most likely to be reachable
      * during the next session, though not necessarily likely to have slots
@@ -994,15 +991,15 @@ public class HostCatcher {
      * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
      *  have advertised they have free ultrapeer slots
      */
-    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
+    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots(int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue());
+                                        ApplicationSettings.LANGUAGE.getValue(),num);
     }
 
     public synchronized Collection 
-        getUltrapeersWithFreeUltrapeerSlots(String locale) {
+        getUltrapeersWithFreeUltrapeerSlots(String locale,int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        locale);
+                                        locale,num);
     }
     
 
@@ -1014,38 +1011,38 @@ public class HostCatcher {
      * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
      *  have advertised they have free leaf slots
      */
-    public synchronized Collection getUltrapeersWithFreeLeafSlots() {
+    public synchronized Collection getUltrapeersWithFreeLeafSlots(int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue());
+                                        ApplicationSettings.LANGUAGE.getValue(),num);
     }
     
     public synchronized Collection
-        getUltrapeersWithFreeLeafSlots(String locale) {
+        getUltrapeersWithFreeLeafSlots(String locale,int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        locale);
+                                        locale,num);
     }
 
     /**
      * preference the set so we try to return those endpoints that match
      * passed in locale "loc"
      */
-    private Collection getPreferencedCollection(Set base, String loc) {
+    private Collection getPreferencedCollection(Set base, String loc, int num) {
         if(loc == null || loc.equals(""))
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
-        Set hosts = new HashSet(NUM_ENDPOINTS);
+        Set hosts = new HashSet(num);
         Iterator i;
 
         Set locales = (Set)LOCALE_SET_MAP.get(loc);
         if(locales != null) {
-            for(i = locales.iterator(); i.hasNext() && hosts.size() < NUM_ENDPOINTS; ) {
+            for(i = locales.iterator(); i.hasNext() && hosts.size() < num; ) {
                 Object next = i.next();
                 if(base.contains(next))
                     hosts.add(next);
             }
         }
         
-        for(i = base.iterator(); i.hasNext() && hosts.size() < NUM_ENDPOINTS;) {
+        for(i = base.iterator(); i.hasNext() && hosts.size() < num;) {
             hosts.add(i.next());
         }
         

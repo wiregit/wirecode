@@ -1021,21 +1021,24 @@ public class RouterService {
      * otherwise it preferences hosts with open leaf slots.
      *
      * Preferences via locale, also.
+     * 
+     * @param num How many endpoints to try to get
      */
-    public static Collection getPreferencedHosts(boolean isUltrapeer, String locale) {
+    public static Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
+        
         // note that we need to use a TreeSet because the objects returned
         // from the various adding calls below will be different types,
         // and hashCode & equals won't be respected.
         Set hosts = new TreeSet(IpPort.COMPARATOR);
         
         if(isUltrapeer)
-            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale));
+            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
         else
-            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale));
+            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale,num));
         
         // If we don't have enough hosts, add more.
         
-        if(hosts.size() < 10) {
+        if(hosts.size() < num) {
             //we first try to get the connections that match the locale.
             List conns = manager.getInitializedConnectionsMatchLocale(locale);
             for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < 10;)
@@ -1043,7 +1046,7 @@ public class RouterService {
             
             //if we still don't have enough hosts, get them from the list
             //of all initialized connection
-            if(hosts.size() < 10) {
+            if(hosts.size() < num) {
                 //list returned is unmmodifiable
                 conns = manager.getInitializedConnections();
                 for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < 10;)

@@ -581,7 +581,7 @@ public final class HandshakeResponse {
     private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
         Collection hosts =
             RouterService.getPreferencedHosts(
-                hr.isUltrapeer(), hr.getLocalePref());
+                hr.isUltrapeer(), hr.getLocalePref(),10);
         
         headers.put(HeaderNames.X_TRY_ULTRAPEERS,
                     createEndpointString(hosts));
