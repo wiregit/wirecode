@@ -171,7 +171,7 @@ public class UnicastSimulator {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);		
-                    if(message == null) continue;
+                    if (message == null) continue;
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();
                         byte[] inGUID = ((QueryRequest)message).getGUID();
@@ -189,7 +189,13 @@ public class UnicastSimulator {
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());
                     }
-                } catch(BadPacketException e) {
+                    else if (message instanceof PingRequest) {
+                        PingReply toSend = _pongs[port - PORT_RANGE_BEGIN];
+                        send(socket, toSend, datagram.getAddress(),
+                             datagram.getPort());
+                    }
+                } 
+                catch(BadPacketException e) {
                     continue;
                 }
             } 
