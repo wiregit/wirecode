@@ -959,14 +959,10 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
-        FileDesc fd = getFileDescForFile(f);
-        if( fd == null )
+        FileDesc removed = removeFileIfShared(f);
+        if( removed == null ) // nothing removed, exit.
             return null;
-        List xmlDocs = new LinkedList();
-        xmlDocs.addAll(fd.getLimeXMLDocuments());
-        FileDesc removed = removeFileIfShared(f);        
-        Assert.that( fd == removed, "did not remove valid fd.");
-        return addFileIfShared(f, xmlDocs);
+        return addFileIfShared(f);
     }
 
     /**

@@ -179,11 +179,7 @@ public class LimeXMLReplyCollection {
             // check to see if it's corrupted and if so, fix it.
             if( ID3Reader.isCorrupted(doc) ) {
                 doc = ID3Reader.fixCorruption(doc);
-                try {
-                    mp3ToDisk(file.getCanonicalPath(), doc);
-                } catch(IOException ioe) {
-                    addReply(fd, doc);
-                }
+                addReplyWithCommit(file, fd, doc);
             } else {
                 addReply(fd, doc);
             }
@@ -637,8 +633,7 @@ public class LimeXMLReplyCollection {
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private int commitID3Data(String mp3FileName,
-                              ID3Editor editor) {
+    private int commitID3Data(String mp3FileName, ID3Editor editor) {
         //write to mp3 file...
         int retVal = editor.writeID3DataToDisk(mp3FileName);
         debug("wrote data: " + retVal);
