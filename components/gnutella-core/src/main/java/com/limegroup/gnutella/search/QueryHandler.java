@@ -288,7 +288,7 @@ public final class QueryHandler {
             
         if(!_forwardedToLeaves) {
             RouterService.getMessageRouter().forwardQueryRequestToLeaves(TTL_1_QUERY, 
-                                                                         handler.REPLY_HANDLER); 
+                                                                         REPLY_HANDLER); 
             _theoreticalHostsQueried += 25;
             _forwardedToLeaves = true;
             _nextQueryTime = System.currentTimeMillis() + 600;
@@ -450,9 +450,6 @@ public final class QueryHandler {
             return returnLists;
         }
 
-        if(popularity < 0.2 &&  numHitConnections < 10) {
-            
-        }
         
         // the number of TTL=1 nodes we would hit if we had that many
         // connections with hits
@@ -477,13 +474,6 @@ public final class QueryHandler {
                 addToList(ttl2List, oldConnections, missConnections, 2);
             }
         }
-        //Math.max(0, (idealTTL1ConnectionsToHit - hitConnections.size()));
-            
-        // scale the number of hosts to send the query to based on the
-        // file's apparent abundance
-        //int ttl1ConnectionsToUse = 
-        //  Math.max(2, (int)((double)hitConnections.size() * 
-        //                    (double)(1.0-popularity)));
 
         //System.out.println("popularity: "+popularity); 
         //System.out.println("idealTTL1ConnectionsToHit: "+idealTTL1ConnectionsToHit); 
@@ -546,7 +536,7 @@ public final class QueryHandler {
         
         // add as many connections as possible from first the old connections
         // list, then the connections that did not have hits
-        addToList(returnLists[1], oldConnections, missConnections);
+        addToList(returnLists[1], oldConnections, missConnections, 3);
 
         // add any hits there are to the TTL=1 list
         int maxIndex = Math.min(4, hitConnections.size());
@@ -567,12 +557,12 @@ public final class QueryHandler {
         // send a TTL=1 query to hosts that have matches in their
         // QRP tables, running one at a time with pauses.
         
-        //QueryRequest query = createQuery(handler.QUERY, (byte)1);
+        QueryRequest query = createQuery(handler.QUERY, (byte)1);
         //RouterService.getMessageRouter().forwardQueryRequestToLeaves(query, handler.REPLY_HANDLER);
 
 
         //List[] probeLists = createProbeLists(list, query);
-        List probeList = probeLists[0];
+        //List probeList = probeLists[0];
         Iterator iter = list.iterator();
         int connectionsUsed = 0;
         
@@ -617,7 +607,7 @@ public final class QueryHandler {
                 continue;
             }
 
-            newHosts += sendQueryToHost(query, mc, handler);
+            newHosts += sendQueryToHost(query, mc, handler, (byte)2);
             hostsQueried++;
             i++;
 		}
