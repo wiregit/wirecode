@@ -874,6 +874,7 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
+        SettingsManager.instance().setSupernodeOrClientnodeStatusForced(false);
         if(_connections.size() == 0)
         {
             //set the _hasShieldedClientSupernodeConnection flag to false
@@ -949,11 +950,16 @@ public class ConnectionManager {
             _incomingClientConnections > 0)
             return;
         
-        //if the remote address is not null, and we are swithcing state
-        //from supernodemode to clientmode, connect to the remoteAddress
+        //if we are not supernode capable, and guidance received is to
+        //become supernode, discard it
+        if(supernodeNeeded
+            && !SettingsManager.instance().getEverSupernodeCapable())
+            return;
+            
+       
+        //if the remote address is not null, connect to the remoteAddress
         try{
-            if(remoteAddress != null 
-                && SettingsManager.instance().isSupernode()){
+            if(remoteAddress != null){
                     
                 //disconnect all the connections, and set the state as guided
                 disconnect();    
@@ -963,8 +969,8 @@ public class ConnectionManager {
                 Endpoint endpoint = new Endpoint(remoteAddress);
                 System.out.println("opening connection to :" + endpoint);
                 ManagedConnection connection = new ManagedConnection(
-                endpoint.getHostname(), endpoint.getPort(), _router,
-                ConnectionManager.this);
+                    endpoint.getHostname(), endpoint.getPort(), _router,
+                    ConnectionManager.this);
 
                 initializeExternallyGeneratedConnection(connection);
                 sendInitialPingRequest(connection);
@@ -974,9 +980,11 @@ public class ConnectionManager {
             //just catch any exception
         }
         finally{
+            //in case the guidance was to become client node
             //if that connection worked, that was our only connection
             //to the supernode. Else we just didnt have any connection
-            lostShieldedClientSupernodeConnection();
+            if(!supernodeNeeded)
+                lostShieldedClientSupernodeConnection();
         }
     }
     
