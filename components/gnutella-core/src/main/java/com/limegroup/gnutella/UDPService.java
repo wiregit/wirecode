@@ -288,8 +288,8 @@ public final class UDPService implements Runnable {
             
 	    String host = d.getAddress().getHostAddress();
 
-        return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() ||
-               !RouterService.getConnectionManager().isConnectedTo(host);
+        return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() /* ||
+               !RouterService.getConnectionManager().isConnectedTo(host) */;
     }
     
     /**
