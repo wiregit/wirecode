@@ -121,6 +121,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 		return false;
 	}
 
+	// inherit doc comment
 	public boolean isKillable() {
 		return false;
 	}
