@@ -54,7 +54,7 @@ public class UpdateManagerTest extends BaseTestCase {
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);// ,"testNewerVersionAcceptedOnNetwork");
+		return buildTestSuite(UpdateManagerTest.class);//, "testJava118NetworkVerification");
 	}
 
 	public static void main(String[] args) {
@@ -114,7 +114,7 @@ public class UpdateManagerTest extends BaseTestCase {
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.MAX_LEAVES.setValue(5);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(2);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(5);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
@@ -408,13 +408,56 @@ public class UpdateManagerTest extends BaseTestCase {
                                                     "2.9.3", man.getVersion());
     }
 
+    public void testFileReadVerifiedWithJava118() throws Exception {
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("setSettings not working", "2.9.3", man.getVersion());
+        PrivilegedAccessor.setValue(CommonUtils.class, 
+                                              "_isJava118", Boolean.TRUE);
+        updateVersion = DEF_MESSAGE;
+        changeUpdateFile();        
+        UpdateManager man2 = UpdateManager.instance();
+        assertEquals("Mac classic verifying on disk broken", 
+                                                 "3.6.3", man2.getVersion());
+        PrivilegedAccessor.setValue(CommonUtils.class, 
+                                              "_isJava118", Boolean.FALSE);
+    }
 
-//      public void testFileReadVerifiedWithJava118() {
-
-//      }
-
-//      public void testJava118NetworkVerification() {
-
+//      public void testJava118NetworkVerification() throws Exception {
+//         UpdateManager man = UpdateManager.instance();
+//         assertEquals("setSettings not working", "2.9.3", man.getVersion());
+//         PrivilegedAccessor.setValue(CommonUtils.class, 
+//                                                "_isJava118", Boolean.TRUE);
+//         PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+//                                     "_shieldedConnections", new Integer(1));
+//         //Make first connection
+//         TestConnection conn1 = null; 
+//         TestConnection conn2 = null;
+//         TestConnection conn3 = null;
+//         TestConnection conn4 = null;
+//         try {
+//             conn1 = new TestConnection(6677, "3.6.3", NEW);
+//             conn2 = new TestConnection(6678, "3.6.3", NEW);
+//             conn3 = new TestConnection(6679, "3.2.2", MIDDLE);
+//             conn4 = new TestConnection(6680, "3.6.3", NEW);
+//         } catch(IOException iox) {
+//             fail("could not set test up");
+//         }
+//         conn1.start();
+//         conn2.start();
+//         conn3.start();
+//         try {
+//             Thread.sleep(300);
+//         } catch(InterruptedException e) { }
+//         UpdateManager man2 = UpdateManager.instance();
+//         assertEquals("java118 verification problem", "2.9.3", man2.getVersion());
+//         conn4.start();
+//         try {
+//             Thread.sleep(300);
+//         } catch(InterruptedException e) { }
+//         UpdateManager man3 = UpdateManager.instance();
+//         assertEquals("java118 verification problem", "3.6.3", man3.getVersion());
+//         PrivilegedAccessor.setValue(CommonUtils.class, 
+//                                                "_isJava118", Boolean.FALSE);
 //      }
 
 
@@ -425,23 +468,12 @@ public class UpdateManagerTest extends BaseTestCase {
 //          os = s.getOutputStream();
 //          is = s.getInputStream();
 //      }
-
-
-    ///////////////////////////////helper methods/////////////////////////
     
-    private Connection makeConnection() {
-        //TODO1: implement
-        return null;
-    }
 
-    private void killConnection() {
+//      public void testUpdateMessageDelayed() {
 
-    }
+//      }
 
-    private void sendHeaders() {
-
-    }
-    
     /**
      * puts an update file in the user pref dir based on updateVersion and set
      * the UpdateManager.INSTANCE to null so the new file is parsed everytime we

@@ -178,6 +178,8 @@ public class TestConnection {
         String updateDir = "com/limegroup/gnutella/updates/";
         if(fileVersion == UpdateManagerTest.OLD)
             file = CommonUtils.getResourceFile(updateDir+"old_verFile.xml");
+        else if(fileVersion == UpdateManagerTest.MIDDLE)
+            file = CommonUtils.getResourceFile(updateDir+"middle_verFile.xml");
         else if(fileVersion == UpdateManagerTest.NEW) 
             file = CommonUtils.getResourceFile(updateDir+"new_verFile.xml");
         else if(fileVersion == UpdateManagerTest.DEF_MESSAGE)
