@@ -10,6 +10,7 @@ import com.sun.java.util.collections.*;
  */
 public abstract class VendorMessagePayload {
     //Functional IDs defined by Gnutella VendorMessage protocol....
+    public static final int F_MESSAGES_SUPPORTED = 0;
     public static final int F_HOPS_FLOW = 4;
     public static final int F_TCP_CONNECT_BACK = 7;
     public static final int F_UDP_CONNECT_BACK = 7;
@@ -20,6 +21,8 @@ public abstract class VendorMessagePayload {
                                                    (byte) 65, (byte) 82};
     public static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
                                                    (byte) 75, (byte) 72};
+    public static final byte[] F_NULL_VENDOR_ID = {(byte) 110, (byte) 117,
+                                                   (byte) 108, (byte) 108};
 
     //----------------------
     // INSTANCE DATA
@@ -77,6 +80,10 @@ public abstract class VendorMessagePayload {
             (Arrays.equals(vendorID, F_GTKG_VENDOR_ID)))
             // UDP CONNECT BACK
             return new UDPConnectBackVMP(version, payload);
+        if ((selector == F_MESSAGES_SUPPORTED) && 
+            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
+            // Messages Supported Message
+            return new MessagesSupportedVMP(version, payload);
         throw new BadPacketException("Unrecognized Vendor Message");
     }
     
@@ -84,15 +91,9 @@ public abstract class VendorMessagePayload {
     /**
      * Use this to get a NEW Gnutella-able VendorMessage from the class.
      */
-    public VendorMessage getVendorMessage() {
-        try {
-            return new VendorMessage(_vendorID, _selector, _version, 
-                                     getPayload());
-        }
-        catch (IllegalArgumentException impossible) {
-            impossible.printStackTrace();
-        }
-        return null;
+    public VendorMessage getVendorMessage() throws IllegalArgumentException {
+        return new VendorMessage(_vendorID, _selector, _version, 
+                                 getPayload());
     }
 
     
