@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
@@ -187,6 +188,11 @@ public final class MulticastService implements Runnable {
                 // ----------------------------*                
                 // process packet....
                 // *----------------------------
+                if(!NetworkUtils.isValidAddress(datagram.getAddress()))
+                    continue;
+                if(!NetworkUtils.isValidPort(datagram.getPort()))
+                    continue;
+                
                 byte[] data = datagram.getData();
                 try {
                     // we do things the old way temporarily
