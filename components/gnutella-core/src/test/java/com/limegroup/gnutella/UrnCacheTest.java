@@ -19,7 +19,9 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
     private static final String FILE_PATH = "com/limegroup/gnutella/util";
     private static FileDesc[] descs;
 
-
+    private static final Set EMPTY_SET = 
+        Collections.unmodifiableSet(new HashSet());
+    
 	/**
 	 * Constructs a new UrnCacheTest with the specified name.
 	 */
@@ -54,7 +56,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
         for( int i = 0; i < descs.length; i++) {
             Set set = cache.getUrns(descs[i].getFile());
             assertTrue("file should be present in cache",
-               !set.equals(CommonUtils.EMPTY_SET)
+               !set.equals(EMPTY_SET)
             );
             assertTrue("URN set should not be empty", !set.isEmpty());
             assertEquals("URN set should be same as that in desc",
