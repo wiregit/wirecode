@@ -841,7 +841,7 @@ public class UDPConnectionProcessor {
 
                 // Get the oldest unacked block out of storage
                 drec     = _sendWindow.getOldestUnackedBlock();
-                int expRTO = (rto * (int)Math.pow(2,drec.sends));
+                int expRTO = (rto * (int)Math.pow(2,drec.sends-1));
                 if (LOG.isDebugEnabled())
                 	LOG.debug(" exponential backoff is now "+expRTO);
 
