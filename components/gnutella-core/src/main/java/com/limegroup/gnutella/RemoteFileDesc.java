@@ -89,14 +89,7 @@ public class RemoteFileDesc implements Serializable {
     private transient Set _proxies;
 		
     /**
-     * The List of available ranges.  Should not be serialized.
-     * This is not an IntervalSet for a reason:
-     * We do not want to compact overlapping ranges into a single range,
-     * because the remote host may not understand them as such.
-     * We must act off the ranges as they're listed to us.
-     * For LimeWires, the ranges will always be as compact as possible,
-     * but for other vendors this is unknown.
-     *
+     * The list of available ranges.
      * This is NOT SERIALIZED.
      */
     private transient List _availableRanges = null;
@@ -113,6 +106,8 @@ public class RemoteFileDesc implements Serializable {
     private transient long _earliestRetryTime = 0;
 
     private transient int _hashCode = 0;
+
+    private transient boolean _THEXFailed = false;
 
     private transient RemoteHostData _hostData = null;
     
@@ -343,6 +338,21 @@ public class RemoteFileDesc implements Serializable {
             LOG.debug("setting retry after to be [" + seconds + 
                       "] seconds for " + this);        
         _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
+    }
+
+	/**
+     * @return Returns the _THEXFailed.
+     */
+    public boolean hasTHEXFailed() {
+        return _THEXFailed;
+    }
+
+    /**
+     * Having THEX with this host is no good. We can get our THEX from anybody,
+     * so we won't bother again. 
+     */
+    public void setTHEXFailed() {
+        _THEXFailed = true;
     }
 
 	/**

@@ -19,6 +19,10 @@ public class UrnType implements Serializable {
 	 */
 	public static final String SHA1_STRING = "sha1:";
 
+    /**
+     * Identifier string for the BITPRINT type.
+     */
+    public static final String BITPRINT_STRING = "bitprint:";
 
     /**
      * The <tt>UrnType</tt> for an invalid UrnType.
@@ -29,6 +33,11 @@ public class UrnType implements Serializable {
 	 * The <tt>UrnType</tt> for SHA1 hashes.
 	 */
 	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
+	
+	/**
+	 * The <tt>UrnType</tt> for bitprint hashes.
+	 */
+	public static final UrnType BITPRINT = new UrnType(BITPRINT_STRING);
 
 	/**
 	 * The <tt>UrnType</tt> for specifying any URN type.
@@ -152,7 +161,9 @@ public class UrnType implements Serializable {
 		throws IOException, ClassNotFoundException {
 		s.defaultReadObject();
 		_urnType = (String)s.readObject();
-		if(!_urnType.equals("") && !_urnType.equals(SHA1_STRING)) {
+		if(!_urnType.equals("") &&
+		   !_urnType.equals(SHA1_STRING) &&
+		   !_urnType.equals(BITPRINT_STRING)) {
 			throw new InvalidObjectException("invalid urn type: "+_urnType);
 		}
 	}
@@ -172,7 +183,9 @@ public class UrnType implements Serializable {
 			return SHA1;
 		} else if(lowerCaseType.equals(ANY_TYPE.toString())) {
 			return ANY_TYPE;
-		} else {
+		} else if(lowerCaseType.equals(BITPRINT.toString())) {
+		    return BITPRINT;
+        } else {
 			return null;
 		}
 	}

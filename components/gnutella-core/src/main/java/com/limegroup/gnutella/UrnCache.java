@@ -197,13 +197,18 @@ public final class UrnCache {
         //It's not ideal to hold a lock while writing to disk, but I doubt think
         //it's a problem in practice.
         URN_CACHE_FILE.renameTo(URN_CACHE_BACKUP_FILE);
+        ObjectOutputStream oos = null;
         try {
-            ObjectOutputStream oos = 
-			    new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
+            oos = new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
             oos.writeObject(URN_MAP);
-            oos.close();
         } catch (Exception e) {
             ErrorService.error(e);
+        } finally {
+            if(oos != null) {
+                try {
+                    oos.close();
+                } catch(IOException ignored) {}
+            }
         }
     }
 

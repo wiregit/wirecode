@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.http;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.text.DateFormat;
@@ -8,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 
 /**
  * This class supplies general facilities for handling HTTP, such as
@@ -241,6 +244,43 @@ public final class HTTPUtils {
     public static void writeDate(OutputStream stream) throws IOException {
         writeHeader(HTTPHeaderName.DATE, getDateValue(), stream);       
     }
+    
+    /**
+     * Utility method for writing the currently supported features
+     * to the <tt>Writer</tt>.
+     */
+    public static void writeFeatures(Writer writer) throws IOException {
+        Set features = getFeaturesValue();
+        // Write X-Features header.
+        if (features.size() > 0) {
+            writeHeader(HTTPHeaderName.FEATURES,
+                    new HTTPHeaderValueCollection(features), writer);
+        }
+    }
+    
+    /**
+     * Utility method for writing the currently supported features
+     * to the <tt>OutputStream</tt>.
+     */
+    public static void writeFeatures(OutputStream stream) throws IOException {
+        Set features = getFeaturesValue();
+        // Write X-Features header.
+        if (features.size() > 0) {
+            writeHeader(HTTPHeaderName.FEATURES,
+                    new HTTPHeaderValueCollection(features), stream);
+        }
+    }        
+    
+    /**
+     * Utlity method for getting the currently supported features.
+     */
+    private static Set getFeaturesValue() {
+        Set features = new HashSet(2);
+        features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
+        if (ChatSettings.CHAT_ENABLED.getValue())
+            features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+        return features;
+    }        
     
     /**
      * Utility method for getting the date value for the "Date" header in

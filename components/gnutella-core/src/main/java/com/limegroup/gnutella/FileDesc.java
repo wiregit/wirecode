@@ -4,6 +4,8 @@ import java.io.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.DataUtils;
 
 
@@ -452,6 +454,14 @@ public class FileDesc implements AlternateLocationCollector {
         return false;
     }
     
+    /**
+     * Returns TIGER_TREE
+     * @return the <tt>TigerTree</tt> this class holds
+     */
+    public HashTree getHashTree() {
+        return TigerTreeCache.instance().getHashTree(this);
+    }
+      
     /**
      * Increase & return the new hit count.
      * @return the new hit count

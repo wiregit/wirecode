@@ -22,6 +22,30 @@ public final class DataUtils {
     public static byte[] EMPTY_BYTE_ARRAY = new byte[0];
     
     /**
+     * An empty byte array length 1.
+     */
+    public static byte[] BYTE_ARRAY_ONE = new byte[1];
+    
+    /**
+     * An empty byte array length 2.
+     */
+    public static byte[] BYTE_ARRAY_TWO = new byte[2];
+    
+    /**
+     * An empty byte array length 3.
+     */
+    public static byte[] BYTE_ARRAY_THREE = new byte[3];
+    
+    static {
+        BYTE_ARRAY_ONE[0] = 0;
+        BYTE_ARRAY_TWO[0] = 0;
+        BYTE_ARRAY_TWO[1] = 0;
+        BYTE_ARRAY_THREE[0] = 0;
+        BYTE_ARRAY_THREE[1] = 0;
+        BYTE_ARRAY_THREE[2] = 0;
+    }
+    
+    /**
      * Constant empty string array for any class to use -- immutable.
      */
     public static String[] EMPTY_STRING_ARRAY = new String[0];

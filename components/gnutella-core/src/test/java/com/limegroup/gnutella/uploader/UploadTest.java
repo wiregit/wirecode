@@ -1,14 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -17,6 +9,7 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -27,6 +20,8 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.dime.DIMEParser;
+import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -44,8 +39,10 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
@@ -66,7 +63,8 @@ public class UploadTest extends BaseTestCase {
     /** The file contents. */
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
     /** The hash of the file contents. */
-    private static final String hash=   "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
+    private static final String baseHash = "GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
+    private static final String hash=   "urn:sha1:" + baseHash;
     private static final String badHash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2SAM";
     private static final String incompleteHash =
         "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
@@ -78,6 +76,8 @@ public class UploadTest extends BaseTestCase {
     private static final VerifyingFile vf = new VerifyingFile(false);
     /** The filedesc of the shared file. */
     private FileDesc FD;    
+    /** The root32 of the shared file. */
+    private String ROOT32;
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new FManCallback());
@@ -166,6 +166,9 @@ public class UploadTest extends BaseTestCase {
         assertEquals( 1, fm.getNumIncompleteFiles() );
         assertEquals( 1, fm.getNumFiles() );
         FD = fm.getFileDescForFile(new File(_sharedDir, fileName));
+        while(FD.getHashTree() == null)
+            Thread.sleep(300);
+        ROOT32 = FD.getHashTree().getRootHash();
         // remove all alts for clarity.
         List alts = new LinkedList();
         AlternateLocationCollection alc = FD.getAlternateLocationCollection();
@@ -1097,6 +1100,68 @@ public class UploadTest extends BaseTestCase {
                    "X-Features: browse/1.0"));
     }
     
+    //////////  test thex works /////////////
+    public void testThexHeader() throws Exception {
+        assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
+                "X-Thex-URI: " + "/uri-res/N2X?" + hash + ";" + ROOT32)
+        );
+    }
+    
+    public void testUploadFromBitprint() throws Exception {
+        assertTrue(download("/uri-res/N2R?urn:bitprint:" +
+            baseHash + "." + ROOT32, null,
+             "abcdefghijklmnopqrstuvwxyz"));
+
+        // we check for a valid bitprint length.
+        tFailureHeaderRequired("/uri-res/N2R?urn:bitprint:" +
+            baseHash + "." + "asdoihffd", null, true, false,
+                "HTTP/1.1 400 Malformed Request");
+             
+        // but not for the valid base32 root -- in the future we may
+        // and this test will break
+        assertTrue(download("/uri-res/N2R?urn:bitprint:" +
+            baseHash + "." + "SAMUWJUUSPLMMDUQZOWX32R6AEOT7NCCBX6AGBI", null,
+             "abcdefghijklmnopqrstuvwxyz"));
+             
+        // make sure "bitprint:" is required for bitprint uploading.
+        tFailureHeaderRequired("/uri-res/N2R?urn:sha1:" +
+            baseHash + "." + ROOT32, null, true, false,
+                "HTTP/1.1 400 Malformed Request");
+    }
+    
+    public void testBadGetTreeRequest() throws Exception {
+        tFailureHeaderRequired("/uri-res/N2X?" + badHash, null, true, true,
+                "HTTP/1.1 404 Not Found");
+                
+        tFailureHeaderRequired("/uri-res/N2X?" + "no hash", null, true, false,
+                "HTTP/1.1 400 Malformed Request");
+    }
+    
+    public void testGetTree() throws Exception {
+        byte[] dl = getDownloadBytes("/uri-res/N2X?" + hash, null, null);
+        assertEquals(FD.getHashTree().getOutputLength(), dl.length);
+        DIMEParser parser = new DIMEParser(new ByteArrayInputStream(dl));
+        DIMERecord xml = parser.nextRecord();
+        DIMERecord tree = parser.nextRecord();
+        assertFalse(parser.hasNext());
+        List allNodes = FD.getHashTree().getAllNodes();
+        byte[] data = tree.getData();
+        int offset = 0;
+        for(Iterator genIter = allNodes.iterator(); genIter.hasNext(); ) {
+            for(Iterator i = ((List)genIter.next()).iterator(); i.hasNext();) {
+                byte[] current = (byte[])i.next();
+                for(int j = 0; j < current.length; j++) {
+                    assertEquals("offset: " + offset + ", idx: " + j,
+                                 current[j], data[offset++]);
+                }
+            }
+        }
+        assertEquals(data.length, offset);
+        // more extensive validity checks are in HashTreeTest
+        // this is just checking to make sure we sent the right tree.
+    }
+                       
+    
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
      * content as a string. If header!=null, includes it as a request header.
@@ -1146,6 +1211,23 @@ public class UploadTest extends BaseTestCase {
             throws IOException {
         return download(file, header, expResp, null);
     }
+    
+    private static byte[] getDownloadBytes(String file, String header,
+                                          String expheader)
+      throws IOException {
+        //1. Write request
+        Socket s = new Socket("localhost", PORT);
+        InputStream in = s.getInputStream();
+        OutputStream out = s.getOutputStream();
+
+        String req = makeRequest(file);
+        byte[] ret = getBytes("GET", req, header,
+                             out, in, expheader, false);
+        in.close();
+        out.close();
+        s.close();
+        return ret;
+    }
 
     private static boolean download(String file,String header,
                                     String expResp, String expHeader)
@@ -1172,7 +1254,7 @@ public class UploadTest extends BaseTestCase {
     private static boolean downloadPush1(String indexedFile, String header, 
 										 String expResp)
            		                         throws IOException, BadPacketException{
-        return downloadPush1("GET", "/get/"+index+"/"+indexedFile, header, expResp);        
+        return downloadPush1("GET", makeRequest(indexedFile), header, expResp);        
     }
 
     /** 
@@ -1316,7 +1398,7 @@ public class UploadTest extends BaseTestCase {
      * @param http11 whether or not to write http 1.1 or 1.0
      * @return the contents of what we read
      */
-     private static String downloadInternal(String requestMethod,
+    private static String downloadInternal(String requestMethod,
                                             String file,
                                             String header,
                                             BufferedWriter out,
@@ -1324,6 +1406,70 @@ public class UploadTest extends BaseTestCase {
                                             String requiredHeader,
                                             boolean http11)
       throws IOException {
+        return new String(
+          request(requestMethod, file, header, out, in, requiredHeader, http11)
+        );
+    }
+    
+  private static byte[] getBytes(String requestMethod,
+                                 String file,
+                                 String header,
+                                 OutputStream out,
+                                 InputStream in,
+                                 String requiredHeader,
+                                 boolean http11)
+     throws IOException {
+        int length = readToContent(requestMethod, file, header,
+                        new OutputStreamWriter(out),
+                        new InputStreamReader(in),
+                        requiredHeader, http11);
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        
+        //3. Read content.  Obviously this is designed for small files.
+        for(int i = 0; i < length; i++) {
+            int c = in.read();
+            if (c < 0)
+                break;
+            bytes.write(c);
+        }
+        
+        return bytes.toByteArray();
+    }
+
+    
+    private static byte[] request(String requestMethod,
+                                            String file,
+                                            String header,
+                                            BufferedWriter out,
+                                            BufferedReader in,
+                                            String requiredHeader,
+                                            boolean http11)
+     throws IOException {
+        
+        int length = readToContent(requestMethod, file, header, 
+                                    out, in, requiredHeader, http11);
+		
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        
+        //3. Read content.  Obviously this is designed for small files.
+        for(int i = 0; i < length; i++) {
+            int c = in.read();
+            if (c < 0)
+                break;
+            bytes.write(c);
+        }
+        
+        return bytes.toByteArray();
+    }
+        
+    private static int readToContent(String requestMethod,
+                                            String file,
+                                            String header,
+                                            Writer out,
+                                            Reader in,
+                                            String requiredHeader,
+                                            boolean http11)
+     throws IOException {        
         // send request
         out.write( requestMethod + " " + file + " " + 
             (http11 ? "HTTP/1.1" : "HTTP/1.0") + "\r\n");
@@ -1343,8 +1489,8 @@ public class UploadTest extends BaseTestCase {
             expectedHeader = new Header(requiredHeader);
             
         while (true) { 
-            String line = in.readLine();
-            if( line == null )
+            String line = readLine(in);
+            if( line == null)
                 throw new InterruptedIOException("connection closed");
             //System.out.println("<< " + line);
                 
@@ -1364,18 +1510,8 @@ public class UploadTest extends BaseTestCase {
         if (requiredHeader != null) {
 			assertTrue("Didn't find header: " + requiredHeader, foundHeader);
 		}
-        
-        //3. Read content.  Obviously this is designed for small files.
-        StringBuffer buf = new StringBuffer();
-        for(int i = 0; i < length; i++) {
-            int c = in.read();
-            if (c < 0)
-                break;
-            buf.append((char)c);
-        }
-        
-        return buf.toString();
-    }
+		return length;
+    }        
     
     private static class Header {
         final String title;
@@ -1454,7 +1590,7 @@ public class UploadTest extends BaseTestCase {
                                            BufferedReader in,
                                            String requiredHeader) 
             throws IOException {
-        return downloadInternal("GET", "/get/" + index + "/" + file, header,
+        return downloadInternal("GET", makeRequest(file), header,
                                     out, in, requiredHeader, true);
 	}
     
@@ -1469,7 +1605,7 @@ public class UploadTest extends BaseTestCase {
                                            BufferedReader in,
                                            String requiredHeader) 
             throws IOException {
-        return downloadInternal("GET", "/get/" + index + "/" + file, header,
+        return downloadInternal("GET", makeRequest(file), header,
                                     out, in, requiredHeader, false);
 	}
 
@@ -1517,7 +1653,7 @@ public class UploadTest extends BaseTestCase {
                                                 (s.getOutputStream()));
         
         //write first request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file)+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1525,7 +1661,7 @@ public class UploadTest extends BaseTestCase {
         out.flush();
         
         //write second request 
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1596,7 +1732,7 @@ public class UploadTest extends BaseTestCase {
         in.readLine();  //skip blank line
         
         //write first request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1604,7 +1740,7 @@ public class UploadTest extends BaseTestCase {
         out.flush();
 
         //write second request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1778,4 +1914,54 @@ public class UploadTest extends BaseTestCase {
             }
         }
     }      
+    
+    private static String makeRequest(String req) {
+        if(req.startsWith("/uri-res"))
+            return req;
+        else
+            return "/get/" + index + "/" + req;
+    }
+    
+    /** 
+     * Reads a new line WITHOUT end of line characters.  A line is 
+     * defined as a minimal sequence of character ending with "\n", with
+     * all "\r"'s thrown away.  Hence calling readLine on a stream
+     * containing "abc\r\n" or "a\rbc\n" will return "abc".
+     *
+     * Throws IOException if there is an IO error.  Returns null if
+     * there are no more lines to read, i.e., EOF has been reached.
+     * Note that calling readLine on "ab<EOF>" returns null.
+     */
+    public static String readLine(Reader _istream) throws IOException {
+        if (_istream == null)
+            return "";
+
+		StringBuffer sBuffer = new StringBuffer();
+        int c = -1; //the character just read
+        boolean keepReading = true;
+        
+		do {
+		    try {
+			    c = _istream.read();
+            } catch(ArrayIndexOutOfBoundsException aiooe) {
+                // this is apparently thrown under strange circumstances.
+                // interpret as an IOException.
+                throw new IOException("aiooe.");
+            }			    
+			switch(c) {
+			    // if this was a \n character, break out of the reading loop
+			    case  '\n': keepReading = false;
+			             break;
+			    // if this was a \r character, ignore it.
+			    case  '\r': continue;
+			    // if we reached an EOF ...
+			    case -1: return null;			             
+                // if it was any other character, append it to the buffer.
+			    default: sBuffer.append((char)c);
+			}
+        } while(keepReading);
+
+		// return the string we have read.
+		return sBuffer.toString();
+    }    
 }

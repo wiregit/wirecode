@@ -2,6 +2,7 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.File;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
@@ -21,6 +22,13 @@ public class FileManagerStub extends FileManager {
     
     public boolean isValidIndex(int i) {
         return true;
+    }
+    
+    public FileDesc getFileDescForUrn(URN urn) {
+        if(urn.toString().equals(FileDescStub.urn))
+            return fdStub;
+        else
+            return new FileDescStub("other.txt");
     }
     
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {

@@ -246,6 +246,47 @@ public class ByteOrder {
         buf[offset + 2] = (byte)(x >>  8);
         buf[offset + 3] = (byte) x       ;
     }
+    
+
+    
+    /**
+     * Int to big-endian bytes: writing only the up to n bytes.
+     *
+     * @requires x fits in n bytes, else the stored value will be incorrect.
+     *           n may be larger than the value required
+     *           to store x, in which case this will pad with 0.
+     *
+     * @param x the little-endian int to convert
+     * @param out the outputstream to write to.
+     * @param n the number of bytes to write, which must be between 1 and 4,
+     *   inclusive
+     * @exception IllegalArgumentException if n is less than 1 or greater than 4
+     */
+    public static void int2beb(final int x, OutputStream out, final int n) 
+      throws IOException {
+        switch(n) {
+        case 1:
+            out.write((byte) x      );
+            break;
+        case 2:
+            out.write((byte)(x >> 8));
+            out.write((byte) x      );
+            break;            
+        case 3:
+            out.write((byte)(x >> 16));
+            out.write((byte)(x >>  8));
+            out.write((byte) x       );
+            break;
+        case 4:
+            out.write((byte)(x >> 24));
+            out.write((byte)(x >> 16));
+            out.write((byte)(x >>  8));
+            out.write((byte) x       );
+            break;
+        default:
+            throw new IllegalArgumentException("invalid n: " + n);
+        }
+    }    
 
     /**
      * Int to little-endian bytes: writes x to given stream.

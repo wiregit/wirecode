@@ -27,7 +27,13 @@ import com.limegroup.gnutella.altlocs.*;
  */
 public final class HTTPUploader implements Uploader {
     
-	private OutputStream _ostream;
+    /**
+     * The outputstream -- a CountingOutputStream so that we can
+     * keep track of the amount of bytes written.
+     * Currently track is only kept for writing a THEX tree, so that
+     * progress of the tree and bandwidth measurement may be done.
+     */
+	private CountingOutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
 	private int _totalAmountRead;
@@ -199,7 +205,7 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the connection was closed.
 	 */
 	public void initializeStreams() throws IOException {
-	    _ostream = _socket.getOutputStream();
+	    _ostream = new CountingOutputStream(_socket.getOutputStream());
 	}
 	    
     
@@ -217,12 +223,13 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void writeResponse() throws IOException {
+        _ostream.setIsCounting(_stateNum == THEX_REQUEST);
 		try {
 			_method.writeHttpResponse(_state, _ostream);
 		} catch (IOException e) {
             // Only propogate the exception if they did not read
             // as much as they wanted to.
-            if ( _amountRead < _amountRequested )
+            if ( amountUploaded() < getAmountRequested() )
                 throw e;
 		}
 		_firstReply = false;
@@ -304,6 +311,9 @@ public final class HTTPUploader implements Uploader {
         case BANNED_GREEDY:
         	_state = new BannedUploadState();
         	break;
+        case THEX_REQUEST:
+        	_state = new THEXUploadState(this, STALLED_WATCHDOG);
+        	break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -313,15 +323,8 @@ public final class HTTPUploader implements Uploader {
             Assert.that(false, "Invalid state: " + state);
 		}
 		
-		// look again to set the last transfer state.
-		switch(state) {
-	    case COMPLETE:
-	    case INTERRUPTED:
-	    case CONNECTING:
-	        break;
-        default:
-            _lastTransferStateNum = state;
-        }
+		if(_state != null)
+		    _lastTransferStateNum = state;
 	}
 	
 	/**
@@ -409,10 +412,20 @@ public final class HTTPUploader implements Uploader {
     public int getUploadEnd() {return _uploadEnd;}
 
 	// implements the Uploader interface
-	public int getFileSize() {return _fileSize;}
+	public int getFileSize() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _fileDesc.getHashTree().getOutputLength();
+	    else
+	        return _fileSize;
+    }
 	
 	// implements the Uploader interface
-	public int getAmountRequested() { return _amountRequested; }
+	public int getAmountRequested() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _fileDesc.getHashTree().getOutputLength();
+	    else
+	        return _amountRequested;
+    }
 
 	// implements the Uploader interface
 	public int getIndex() {return _index;}
@@ -447,6 +460,12 @@ public final class HTTPUploader implements Uploader {
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();
 	}
+	
+	public boolean isTHEXRequest() {
+		return HTTPConstants.NAME_TO_THEX.equals(
+				_parameters.get(UploadManager.SERVICE_ID));
+	}
+    	
     
     /**
      * Returns an AlternateLocationCollection of alternates that
@@ -501,7 +520,12 @@ public final class HTTPUploader implements Uploader {
      *
 	 * Implements the Uploader interface.
      */
-	public int amountUploaded() {return _amountRead;}
+	public int amountUploaded() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _ostream.getAmountWritten();
+	    else
+	        return _amountRead;
+    }
 	
 	/**
 	 * The total amount of bytes that this upload and all previous
@@ -509,8 +533,11 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * Implements the Uploader interface.
 	 */
-	public int getTotalAmountUploaded() { 
-	    return _totalAmountRead + _amountRead;
+	public int getTotalAmountUploaded() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _ostream.getAmountWritten();
+	    else
+	        return _totalAmountRead + _amountRead;
     }
 
 	/**
@@ -843,7 +870,7 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had an node description value
      */
     private boolean readNodeHeader(final String str) {
-        if ( !HTTPHeaderName.X_NODE.matchesStartOfString(str) )
+        if ( !HTTPHeaderName.NODE.matchesStartOfString(str) )
             return false;
            
         StringTokenizer st = 
@@ -875,7 +902,7 @@ public final class HTTPUploader implements Uploader {
 	 * @return true if the header had an node description value
 	 */
 	private boolean readFeatureHeader(String str) {
-		if ( !HTTPHeaderName.X_FEATURES.matchesStartOfString(str) )
+		if ( !HTTPHeaderName.FEATURES.matchesStartOfString(str) )
 			return false;
         str = HTTPUtils.extractHeaderValue(str);
         StringTokenizer tok = new StringTokenizer(str, ",");
@@ -967,7 +994,8 @@ public final class HTTPUploader implements Uploader {
 	}
 
 	public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
+        bandwidthTracker.measureBandwidth(
+             _totalAmountRead + _amountRead + _ostream.getAmountWritten());
     }
 
     public float getMeasuredBandwidth() {

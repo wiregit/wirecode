@@ -354,7 +354,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         urns = new HashSet();
         urns.add( HugeTestUtils.URNS[1] );
         fman.addIncompleteFile(
-            new File("b"), urns, "b", 0, new VerifyingFile(false));        
+            new File("b"), urns, "b", 0, new VerifyingFile(false));
         assertEquals("unexpected shared incomplete",
             2, fman.getNumIncompleteFiles());
             
@@ -425,7 +425,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected shared incomplete",
             0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());        
+            0, fman.getNumPendingFiles());
         
         // ensure it got shared.
         files=fman.getSharedFileDescriptors(_sharedDir);

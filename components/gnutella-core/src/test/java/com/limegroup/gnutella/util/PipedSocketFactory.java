@@ -32,37 +32,64 @@ public class PipedSocketFactory {
     InetAddress  _hostA;
     InetAddress  _hostB;
     
-    public PipedSocketFactory(String hostA, String hostB) throws IOException {
-        this(hostA, hostB, -1, -1);
-    }
+    boolean aOutClosed;
+    boolean bOutClosed;
+    boolean aInClosed;
+    boolean bInClosed;
         
     /**
      * @param hostA the address to use for socket A
      * @param hostB the address to use for socket B
-     * @param limitAB the number of bytes to allow A to send to B,
-     *  or unlimited if less than zero
-     * @param limitBA the number of bytes to allow B to send to A,
-     *  or unlimited if less than zero
      */
-    public PipedSocketFactory(String hostA, String hostB,
-                              int limitAB, int limitBA) 
+    public PipedSocketFactory(String hostA, String hostB) 
             throws IOException, UnknownHostException {
-        PipedOutputStream aOut=new PipedOutputStream();
-        PipedInputStream bIn=new PipedInputStream(aOut);
-        PipedOutputStream bOut=new PipedOutputStream();
-        PipedInputStream aIn=new PipedInputStream(bOut);
+        PipedOutputStream aOut=new PipedOutputStream() {
+            public void close() throws IOException {
+                super.close();
+                aOutClosed = true;
+                PipedSocketFactory.this.close();
+            }
+        };
+        PipedInputStream bIn=new PipedInputStream(aOut) {
+            public void close() throws IOException {
+                super.close();
+                bInClosed = true;
+                PipedSocketFactory.this.close();
+            }
+        };
+        PipedOutputStream bOut=new PipedOutputStream() {
+            public void close() throws IOException {
+                super.close();
+                bOutClosed = true;
+                PipedSocketFactory.this.close();
+            }
+        };
+        PipedInputStream aIn=new PipedInputStream(bOut) {
+            public void close() throws IOException {
+                super.close();
+                aInClosed = true;
+                PipedSocketFactory.this.close();
+            }
+        };
         
         _aIn=aIn;
         _bIn=bIn;
-        _aOut=limitAB<0 ? 
-            (OutputStream)aOut : 
-            new BlockingOutputStream(aOut, limitAB);
-        _bOut=limitBA<0 ? 
-            (OutputStream)bOut : 
-            new BlockingOutputStream(bOut, limitBA);
+        _aOut = aOut;
+        _bOut = bOut;
             
         _hostA=InetAddress.getByName(hostA);
         _hostB=InetAddress.getByName(hostB);            
+    }
+    
+    private void close() throws IOException {
+        if(!aInClosed)
+            _aIn.close();
+        if(!bInClosed)
+            _bIn.close();
+        if(!aOutClosed)
+            _aOut.close();
+        if(!bOutClosed)
+            _bOut.close();
     }
 
     public Socket getSocketA() {
@@ -72,10 +99,7 @@ public class PipedSocketFactory {
             public InputStream getInputStream() { return _aIn; }
             public OutputStream getOutputStream() { return _aOut; }
             public void close() throws IOException { 
-                _aOut.close();
-                _bOut.close();
-                _aIn.close();
-                _bIn.close();
+                PipedSocketFactory.this.close();
             }
         };
     }
@@ -86,11 +110,8 @@ public class PipedSocketFactory {
             public InetAddress getLocalAddress() { return _hostB; }
             public InputStream getInputStream() { return _bIn; }
             public OutputStream getOutputStream() { return _bOut; }
-            public void close() throws IOException { 
-                _aOut.close();
-                _bOut.close();
-                _aIn.close();
-                _bIn.close();
+            public void close() throws IOException {
+                PipedSocketFactory.this.close();
             }
         };
     }

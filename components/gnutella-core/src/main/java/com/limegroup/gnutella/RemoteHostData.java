@@ -1,17 +1,35 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
+import com.sun.java.util.collections.Arrays;
 
+/**
+ * Simple representation of a remote host.
+ */
 public class RemoteHostData {
 
-    private String _host;
+    /**
+     * The host's address.
+     */
+    private final String _host;
+    
+    /**
+     * The host's port.
+     */
+    private final int _port;
 
-    private int _port;
+    /**
+     * The host's clientGUID.
+     */
+    private final byte[] _clientGUID;
 
-    private byte[] _clientGUID;
+    /**
+     * The cached hashCode.
+     */
+    private volatile int _hashcode = 0;
 
-    private int _hashcode = 0;
-
+    /**
+     * Constructs a new RemoteHostData with the specified host, port & guid.
+     */
     public RemoteHostData(String host, int port, byte[] guid) {
         _host = host;
         _port = port;
@@ -36,6 +54,9 @@ public class RemoteHostData {
     //////////////////hashtable  methods///////////////
 
     public boolean equals(Object o) {
+        if(this == o)
+            return true;
+        
         RemoteHostData other = (RemoteHostData)o;//dont catch ClassCastException
         return (_host.equals(other._host) &&
                 _port==other._port &&

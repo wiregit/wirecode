@@ -98,6 +98,12 @@ public class UploadStat extends AdvancedStatistic {
         new UploadStat();
         
     /**
+     * Statistic for uploads who send THEX trees
+     */ 
+    public static final Statistic THEX =
+        new UploadStat();
+        
+    /**
      * Statistic for uploads whose status is queued.  This is incremented
      * after every request in which we queue the uploader.
      */ 

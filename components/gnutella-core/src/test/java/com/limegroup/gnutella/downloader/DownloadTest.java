@@ -34,6 +34,8 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
@@ -159,6 +161,7 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(1000);
         
         callback.delCorrupt = false;
+        callback.corruptChecked = false;
     }    
 
     public void tearDown() {
@@ -535,7 +538,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2.setRate(RATE);
         uploader3.setRate(RATE);
         uploader4.setRate(RATE);
-        uploader5.setRate(RATE); // control, to finish the test.
+        uploader5.setRate(RATE*2); // control, to finish the test.
         
         // Muck around with the chunk sizes the uploaders will return
         uploader1.setLowChunkOffset(50); // add 10 to'm
@@ -552,7 +555,7 @@ public class DownloadTest extends BaseTestCase {
         // u2 cannot be used first 'cause it may just work (if it responds
         // to a request of range 0, it'll return starting at range 0,
         // which is allowed)
-        RemoteFileDesc[] later = { rfd2, rfd5 }; // u2 cannot be used fi
+        RemoteFileDesc[] later = { rfd5, rfd2 }; // u2 cannot be used fi
 
         tGeneric(rfds, later);
         
@@ -594,6 +597,103 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("u5 invalid request attempts", 1, r5);
     }
     
+    public void testReuseHostWithBadTree() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(false);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // the tree will fail, but it'll pick up the content-length
+        // and discard the rest of the bad data.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());        
+    }
+    
+    public void testReuseHostWithBadTreeAndNoContentLength() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(false);
+        uploader1.setSendContentLength(false);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // the tree will fail, but it'll pick up the content-length
+        // and discard the rest of the bad data.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(2, uploader1.getConnections());
+    }
+    
+    public void testGetsThex() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNotNull(tree);
+        assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());        
+    }
+    
+    public void testQueuedOnThexContinues() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setQueueOnThex(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
+    }
+    
+    public void testBadHeaderOnThexContinues() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setUseBadThexResponseHeader(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
+    }    
+    
     public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
         tOverlapCheckGrey(false);
     }
@@ -618,9 +718,10 @@ public class DownloadTest extends BaseTestCase {
         //Start one location, wait a bit, then add another.
         download=RouterService.download(new RemoteFileDesc[] {rfd1}, false,
                                         null);
-        ((ManagedDownloader)download).addDownload(rfd2,true);                                        
+        ((ManagedDownloader)download).addDownload(rfd2,true);
                                         
         waitForComplete(deleteCorrupt);
+        assertTrue(callback.corruptChecked);
         LOG.debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
@@ -653,33 +754,113 @@ public class DownloadTest extends BaseTestCase {
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete(deleteCorrupt);
+        assertTrue(callback.corruptChecked);
         LOG.debug("passed"+"\n");//got here? Test passed
     }
     
+    public void testThexFixesDownload() throws Exception {
+        LOG.debug("-Testing that thex can identify a corrupt download range" +
+                  " and the downloader will automatically get it back.");
+        final int RATE = 100;
+        uploader1.setCorruption(true);
+        uploader1.setCorruptBoundary(50);
+        uploader1.setMaxConnects(1);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        tGeneric( new RemoteFileDesc[] { rfd1, rfd2 } );
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNotNull(tree);
+        assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
+        assertFalse(callback.corruptChecked);
+        
+        // tried once or if twice then failed the second time.
+        assertLessThanOrEquals(2, uploader1.getConnections());
+        // tried once or twice.
+        assertLessThanOrEquals(2, uploader2.getConnections());
+    }
+    
+    public void testThexOnlyWorksFiveTimes() throws Exception {
+        LOG.debug("-Testing that thex can identify a corrupt download range" +
+                  " but will only try and fix it up to 5 times.");
+        final int RATE = 500;
+        uploader1.setCorruption(true);
+        uploader1.setCorruptBoundary(50);
+        uploader1.setMaxConnects(6);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader1.setRate(RATE);
+
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        tGenericCorrupt( new RemoteFileDesc[] { rfd1 } );
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        assertTrue(callback.corruptChecked);
+        
+        // tried exactly six times. (initial + 5 retries)
+        assertEquals(6, uploader1.getConnections());
+    }        
+
+    
     public void testMismatchedVerifyHashNoStopOnCorrupt() throws Exception {
-        tMismatchedVerifyHash(false);
+        tMismatchedVerifyHash(false, false);
     }
     
     public void testMismatchedVerifyHashStopOnCorrupt() throws Exception {
         callback.delCorrupt = true;        
-        tMismatchedVerifyHash(true);
+        tMismatchedVerifyHash(true, false);
+    }
+    
+    public void testMismatchedVerifyHashWithThexNoStopOnCorrupt()
+      throws Exception {
+        tMismatchedVerifyHash(false, true);
+    }
+    
+    public void testMismatchedVerifyHashWithThexStopOnCorrupt() throws Exception{
+        callback.delCorrupt = true;
+        tMismatchedVerifyHash(true, true);
     }
 
-    private void tMismatchedVerifyHash(boolean deleteCorrupt) throws Exception {
+    // note that this test ONLY works because the TestUploader does NOT SEND
+    // a Content-Urn header.  if it did, the download would immediately fail
+    // when reading the header. 
+    private void tMismatchedVerifyHash(boolean deleteCorrupt, boolean getThex )
+      throws Exception {
         LOG.debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
-                         
+        String badSha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+
         final int RATE=100;
         uploader1.setRate(RATE);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100,
-        "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        uploader1.setSendThexTreeHeader(getThex);
+        uploader1.setSendThexTree(getThex);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100, badSha1);
         Downloader download = null;
+        
+        URN badURN = URN.createSHA1Urn(badSha1);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        TigerTreeCache.instance().purgeTree(badURN);
         
         download = RouterService.download(new RemoteFileDesc[] {rfd1}, false, 
                                           null);
+        // even though the download completed, we ignore the tree 'cause the
+        // URNs didn't match.
+        assertNull(TigerTreeCache.instance().getHashTree(TestFile.hash()));
+        assertNull(TigerTreeCache.instance().getHashTree(badURN));
+
         waitForComplete(deleteCorrupt);
-        LOG.debug("passed"+"\n");//got here? Test passed
+        assertTrue(callback.corruptChecked);
+        assertEquals(getThex, uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
     }
 
     public void testDownloaderAddsSmallFilesWithHead() throws Exception {  
@@ -1214,43 +1395,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("u2 did wrong work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
-    }    
-
-	// no longer in use, as alternate locations should always have SHA1s
-	/*
-    private static void tTwoAlternatesButOneWithNoSHA1() {  
-        LOG.debug("-Testing Two Alternates but one with no sha1...");
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100); // No SHA1
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
-
-        tGeneric(rfds);
-
-        //Prepare to check the alternate location - second won't be there
-        //Note: adiff should be blank
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
-        AlternateLocationCollection ashould = 
-			AlternateLocationCollection.create(rfd1.getSHA1Urn());
-        try {
-            URL url1 = rfd1.getUrl();//  rfdURL(rfd1);
-            AlternateLocation al1 =
-				AlternateLocation.create(url1);
-            ashould.add(al1);
-        } catch (Exception e) {
-            check(false, "Couldn't setup test");
-        }
-        AlternateLocationCollection adiff = 
-			ashould.diffAlternateLocationCollection(alt1); 
-        AlternateLocationCollection adiff2 = 
-			alt1.diffAlternateLocationCollection(ashould); 
-        
-        check(alt1.hasAlternateLocations(), "uploader1 didn't receive alt");
-        check(alt2.hasAlternateLocations(), "uploader2 didn't receive alt");
-        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
-        check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
-		}
-	*/
+    } 
 
     public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
         LOG.debug("-Testing corruption of needed. \n");
@@ -1840,22 +1985,6 @@ public class DownloadTest extends BaseTestCase {
         VerifyingFile vf = ifm.getEntry(incFile);
         assertNull("verifying file should be null", vf);
     }
-
-	/*
-    private static URL rfdURL(RemoteFileDesc rfd) {
-        String rfdStr;
-        URL    rfdURL = null;
-        rfdStr = "http://"+rfd.getHost()+":"+
-        rfd.getPort()+"/get/"+String.valueOf(rfd.getIndex())+
-        "/"+rfd.getFileName();
-        try {
-            rfdURL = new URL(rfdStr);
-        } catch( Exception e ) {
-            check(false, "URL creation failed");
-        }  
-        return rfdURL;
-    }
-	*/
 
     private static URL genericURL(String url) {
         URL    theURL = null;

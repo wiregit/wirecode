@@ -58,6 +58,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private static final String TWO = "2";
 
 	/**
+     * Cached constant to avoid making unnecessary string allocations
+     * in validating input.
+     */
+    private static final String DOT = ".";
+
+    /**
 	 * The string representation of the URN.
 	 */
 	private transient String _urnString;
@@ -124,7 +130,13 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
-		return createSHA1UrnFromString(urnString);
+        String typeString = URN.getTypeString(urnString).toLowerCase();
+        if (typeString.indexOf(UrnType.SHA1_STRING) == 4)
+    		return createSHA1UrnFromString(urnString);
+        else if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
+            return createSHA1UrnFromBitprint(urnString);
+        else
+            throw new IOException("unsupported or malformed URN");
 	}
 
 	/**
@@ -169,6 +181,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  RFC 2169, for example:<p>
 	 * 
 	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
+	 *  /uri-res/N2X?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
+	 *  /uri-res/N2R?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1
+     *  /uri-res/N2X?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1	 
 	 *
 	 * @return a new <tt>URN</tt> instance from the specified request, or 
 	 *  <tt>null</tt> if no <tt>URN</tt> could be created
@@ -184,7 +199,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		if(urnString == null) {
 			throw new IOException("COULD NOT CONSTRUCT URN");
 		}	   
-		return createSHA1UrnFromString(urnString);
+		return createSHA1Urn(urnString);
 	}
 
 	/**
@@ -211,6 +226,29 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		return new URN(urnString, type);
 	}
 
+	/**
+     * Constructs a new SHA1 URN from a bitprint URN
+     * 
+     * @param bitprintString
+     *            the string for the bitprint
+     * @return a new <tt>URN</tt> built from the specified string
+     * @throws <tt>IOException</tt> if there is an error
+     */
+    private static URN createSHA1UrnFromBitprint(final String bitprintString)
+        throws IOException {
+        // extract the BASE32 encoded SHA1 from the bitprint
+        int dotIdx = bitprintString.indexOf(DOT);
+        if(dotIdx == -1)
+            throw new IOException("invalid bitprint: " + bitprintString);
+
+        String sha1 =
+            bitprintString.substring(
+                bitprintString.indexOf(':', 4) + 1, dotIdx);
+
+        return createSHA1UrnFromString(
+            UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + sha1);
+    }
+    
 	/**
 	 * Constructs a new URN based on the specified <tt>File</tt> instance.
 	 * The constructor calculates the SHA1 value for the file, and is a
@@ -357,7 +395,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
 	 */
 	private static boolean isValidUrnHttpRequest(final String requestLine) {
-		return (URN.isValidLength(requestLine) &&
+	    return (URN.isValidLength(requestLine) &&
 				URN.isValidUriRes(requestLine) &&
 				URN.isValidResolutionProtocol(requestLine) && 
 				URN.isValidHTTPSpecifier(requestLine));				
@@ -406,7 +444,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * Returns whether or not the "resolution protocol" for the given URN http
 	 * line is valid.  We currently only support N2R, which specifies "Given 
-	 * a URN, return the named resource."
+	 * a URN, return the named resource," and N2X.
 	 *
 	 * @param requestLine the <tt>String</tt> instance containing the request
 	 * @return <tt>true</tt> if the resolution protocol is valid, <tt>false</tt>
@@ -417,10 +455,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		if(nIndex == -1) {
 			return false;
 		}
-		String n2r = requestLine.substring(nIndex-1, nIndex+3);
+		String n2s = requestLine.substring(nIndex-1, nIndex+3);
 
 		// we could add more protocols to this check
-		if(!n2r.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)) {
+		if(!n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)
+           && !n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_THEX)) {
 			return false;
 		}
 		return true;
@@ -461,10 +500,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param fullUrnString the string containing the full urn
 	 * @return the urn type of the string
 	 */
-	private static String getTypeString(final String fullUrnString) {		
+	private static String getTypeString(final String fullUrnString)
+	  throws IOException {		
 		// trims any leading whitespace from the urn string -- without 
 		// whitespace the urn must start with 'urn:'
 		String type = fullUrnString.trim();
+		if(type.length() <= 4)
+		    throw new IOException("no type string");
+
 		return type.substring(0,type.indexOf(':', 4)+1); 
 	}
 

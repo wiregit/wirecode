@@ -14,11 +14,14 @@ import com.limegroup.gnutella.downloader.Interval;
  */
 public class IntervalSet {
     
-    private List /*of Interval*/ intervals;
+    /**
+     * The sorted set of intervals this contains.
+     */
+    private final SortedSet /*of Interval*/ intervals;
     
     //constructor.
     public IntervalSet() {
-        intervals = new ArrayList();
+        intervals = new TreeSet(new IntervalComparator());
     }
 
     public void add(Interval addInterval) {
@@ -44,6 +47,11 @@ public class IntervalSet {
 
             if (high == interval.low-1)              //  <low, high>
                 higher = interval;                   //             ...interval
+            
+            // if high < interval.low we must have found all overlaps since
+            // intervals is sorted.
+            if (higher != null || interval.low > high)
+                break;
         }
 
         //Add block.  Note that remove(..) is linear time.  That's not an issue
@@ -60,15 +68,77 @@ public class IntervalSet {
             //c) Join with higher
             intervals.remove(higher);
             intervals.add(new Interval(low, higher.high));
-        } else if (lower!=null) {
+        } else /*if (lower!=null)*/ {
             //d) Join with lower
             intervals.remove(lower);
             intervals.add(new Interval(lower.low, high));
         }   
     }
     
-    public Interval removeFirst() {
-         return (Interval)intervals.remove(0);
+    /**
+     * Deletes any overlap of existing intervals with the Interval to delete.
+     * @param deleteMe the Interval that should be deleted.
+     */
+    public void delete(Interval deleteMe) {
+        int low = deleteMe.low;
+        int high = deleteMe.high;
+        Interval lower = null;
+        Interval higher = null;
+        for (Iterator iter = intervals.iterator(); iter.hasNext();) {
+            Interval interval = (Interval) iter.next();
+            if (interval.high >= low && interval.low <= high) { //found
+                iter.remove();                                  // overlap
+                if (interval.high <= high) {
+                    if (interval.low < low)
+                        // interval.low < low <= interval.high <= high
+                        lower = new Interval(interval.low, low - 1);
+                    // else 
+                    // low <= interval.low <= interval.high <= high
+                    // do nothing, the interval has already been removed
+                        
+                } else if (interval.low >= low) {
+                    // low <= interval.low <= high < interval.high
+                    higher = new Interval(high + 1, interval.high);
+                    // safe to break here because intervals is sorted.
+                    break;
+                } else {
+                    // interval.low < low <= high < interval.high
+                    lower = new Interval(interval.low, low - 1);
+                    higher = new Interval(high + 1, interval.high);
+                    // we can break here because no other intervals will
+                    // overlap with deleteMe
+                    break;
+                }
+            }
+            // stop here because intervals is sorted and all following 
+            // intervals will be out of range:
+            // low <= high < interval.low <= interval.high
+            else if (interval.low >= high)
+                break;
+        }
+        if (lower != null)
+            add(lower);
+        if (higher != null)
+            add(higher);
+    }
+    
+    /**
+     * Deletes the specified all intervals in the specified set
+     * from this set.
+     */
+    public void delete(IntervalSet set) {
+        for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
+            delete((Interval)iter.next());
+    }
+    
+    /**
+     * Removes the first element.  Throws NoSuchElementException
+     * if no intervals exist.
+     */
+    public Interval removeFirst() throws NoSuchElementException {
+        Interval ret = (Interval)intervals.first();
+        intervals.remove(ret);
+        return ret;
     }
 
     /**
@@ -123,7 +193,7 @@ public class IntervalSet {
     }
 
     public List getAllIntervalsAsList() {
-        return intervals;
+        return new ArrayList(intervals);
     }
 
     public int getSize() {
@@ -144,46 +214,65 @@ public class IntervalSet {
     }
 
     /**
-     * @return an iterator or intervals needed to fill in the holes in this
-     * IntervalSet. Note that the IntervalSet does not know the maximum value of
-     * all the intervals.
+     * This method creates an IntervalSet that is the negative to this 
+     * IntervalSet
+     * @return IntervalSet containing all ranges not contained in this
      */
-    public Iterator getNeededIntervals(int maxSize) {
+    public IntervalSet invert(int maxSize) {
+        IntervalSet ret = new IntervalSet();
         if(maxSize < 1) 
-            return (new ArrayList()).iterator();//return an empty iterator
-        if (intervals==null || intervals.size()==0) {//Nothing recorded?
+            return ret; //return an empty IntervalSet
+        if (intervals.size()==0) {//Nothing recorded?
             Interval block=new Interval(0, maxSize-1);
-            List buf=new ArrayList(); 
-            buf.add(block);
-            return buf.iterator();
+            ret.add(block);
+            return ret;
         }
             
-        //Sort list by low point in ascending order.  This has a side effect but
-        //it doesn't matter.
-        Collections.sort(intervals, new IntervalComparator());
-
         //Now step through list one element at a time, putting gaps into buf.
         //We take advantage of the fact that intervals are disjoint.  Treat
         //beginning specially.  
         //LOOP INVARIANT: interval!=null ==> low==interval.high
-        List buf=new ArrayList();
         int low=-1;
         Interval interval=null;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
             interval=(Interval)iter.next();
             if (interval.low!=0 && low<interval.low)//needed for first interval
-                buf.add(new Interval(low+1, interval.low-1));
+                ret.add(new Interval(low+1, interval.low-1));
             low=interval.high;
         }
         //Special case space between last block and end of file.
         Assert.that(interval!=null, "Null interval in getFreeBlocks");
         if (interval.high < maxSize-1)
-            buf.add(new Interval(interval.high+1, maxSize-1));
+            ret.add(new Interval(interval.high+1, maxSize-1));
+        return ret;
+    }
         
-        return buf.iterator();
-
+    /**
+     * @return an iterator or intervals needed to fill in the holes in this
+     * IntervalSet. Note that the IntervalSet does not know the maximum value of
+     * all the intervals.
+     */
+    public Iterator getNeededIntervals(int maxSize) {
+        return this.invert(maxSize).getAllIntervals();
     }
 
+    /**
+     * Clones the IntervalSet.  The underlying intervals are the same
+     * (so they should never be modified), but the TreeSet this is
+     * backed off of is new.
+     */
+    public Object clone() {
+        IntervalSet ret = new IntervalSet();
+        for (Iterator iter = getAllIntervals(); iter.hasNext(); )
+            // access the internal TreeSet directly, - it's faster that way.
+            ret.intervals.add(iter.next());
+        return ret;
+    }
+
+
+    /**
+     * Comparator for intervals.
+     */
     private class IntervalComparator implements Comparator {
         public int compare(Object a, Object b) {
             Interval ia=(Interval)a;
@@ -192,6 +281,9 @@ public class IntervalSet {
         }
     }
     
+    /**
+     * Lists the contained intervals.
+     */
     public String toString() {
         return intervals.toString();
     }

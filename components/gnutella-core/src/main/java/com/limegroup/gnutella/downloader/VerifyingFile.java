@@ -3,6 +3,10 @@ package com.limegroup.gnutella.downloader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.tigertree.HashTree;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
@@ -19,24 +23,47 @@ import com.limegroup.gnutella.util.*;
  */
 public class VerifyingFile {
     
+    private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
+    
+    /**
+     * The file we're writing to / reading from.
+     */
     private RandomAccessFile fos;
 
-    private boolean checkOverlap;
+    /**
+     * Whether or not we're doing overlap checking.
+     */
+    private final boolean checkOverlap;
     
+    /**
+     * Whether or not we've detected corruption in the file.
+     */
     private volatile boolean isCorrupted;
 
+    /**
+     * The ManagedDownloader this is working for.
+     */
     private ManagedDownloader managedDownloader; 
+    
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
      * to disk and find out which blocks to check before writing to disk
      */
-    private IntervalSet writtenBlocks;
+    private final IntervalSet writtenBlocks;
     
+    /**
+     * Constructs a new VerifyingFile for the specified size.
+     * If checkOverlap is true, will scan for overlap corruption.
+     */
     public VerifyingFile(boolean checkOverlap) {
         this.checkOverlap = checkOverlap;
         writtenBlocks = new IntervalSet();
     }
     
+    /**
+     * Opens this VerifyingFile for writing.
+     * MUST be called before anything else.
+     */
     public void open(File file, ManagedDownloader md) throws IOException {
         this.managedDownloader = md;
         // Ensure that the directory this file is in exists & is writeable.
@@ -59,6 +86,9 @@ public class VerifyingFile {
         writtenBlocks.add(interval);
     }
 
+    /**
+     * Writes bytes to the underlying file.
+     */
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
                                                     throws IOException {
         if(numBytes==0) //nothing to write? return
@@ -67,9 +97,8 @@ public class VerifyingFile {
             throw new IOException();
         boolean checkBeforeWrite = false;
         List overlapBlocks = null;
-        Interval intvl= null;
+        Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
         if(checkOverlap) {
-            intvl =new Interval((int)currPos,(int)currPos+numBytes-1);
             overlapBlocks = writtenBlocks.getOverlapIntervals(intvl);
             if(overlapBlocks.size()>0)
                 checkBeforeWrite = true;
@@ -100,29 +129,65 @@ public class VerifyingFile {
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
         //4. add this interval
-        if(intvl==null)
-            writtenBlocks.
-            add(new Interval((int)currPos, (int)currPos+numBytes-1));
-        else 
-            writtenBlocks.add(intvl);
+        writtenBlocks.add(intvl);
     }
-
+    
+    /**
+     * Returns all written blocks with an Iterator.
+     */
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
     }
 
+    /**
+     * Returns all written blocks as a List.
+     */ 
     public synchronized List getBlocksAsList() {
         return writtenBlocks.getAllIntervalsAsList();
     }
 
+    /**
+     * Returns all blocks that are free assuming the specified
+     * maximum size, as an Iterator.
+     */
     public synchronized Iterator getFreeBlocks(int maxSize) {
         return writtenBlocks.getNeededIntervals(maxSize);
     }
 
+    /**
+     * Returns the total number of bytes written to disk.
+     */
     public synchronized int getBlockSize() {
         return writtenBlocks.getSize();
     }
-  
+    
+    /**
+     * Deletes any blocks that were corrupt.
+     *
+     * Returns the number of blocks deleted.
+     */
+    synchronized int deleteCorruptedBlocks (HashTree tree, File file)
+      throws IOException {
+        InputStream is = null;
+        int deleted = 0;
+        try {
+            is = new BufferedInputStream(new FileInputStream(file));
+            List corruptRanges = tree.getCorruptRanges(is);
+            for (Iterator iter = corruptRanges.iterator(); iter.hasNext(); ) {
+                deleted++;
+                writtenBlocks.delete((Interval)iter.next());
+            }
+            isCorrupted = false;
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(IOException ignored) {}
+            }
+        }
+        return deleted;
+    }
+        
     /**
      * Closes the file output stream.
      */

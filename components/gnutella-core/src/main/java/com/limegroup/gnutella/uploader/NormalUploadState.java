@@ -144,32 +144,27 @@ public final class NormalUploadState implements HTTPMessage {
                 }
             }
             
-            if (_uploader.isFirstReply()) {
-                // write x-features header once because the downloader is
-                // supposed to cache that information anyway
-                Set features = new HashSet();
-                features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
-                if (ChatSettings.CHAT_ENABLED.getValue())
-                    features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
-                // Write X-Features header.
-                if (features.size() > 0) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
-                             new HTTPHeaderValueCollection(features),
-                                          ostream);
-                }
-            }
+            // write x-features header once because the downloader is
+            // supposed to cache that information anyway
+            if (_uploader.isFirstReply())
+                HTTPUtils.writeFeatures(ostream);
+
+            // write X-Thex-URI header with root hash if we have already 
+            // calculated the tigertree
+            if (FILE_DESC.getHashTree()!=null)
+                HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
+                                      FILE_DESC.getHashTree(),
+                                      ostream);
             
 			ostream.write("\r\n");
 			
 			_stalledChecker.activate(network);			
 			network.write(ostream.toString().getBytes());
+        } finally {
 			// we do not need to check the return value because
 			// if it was stalled, an IOException would have been thrown
 			// causing us to fall out to the catch clause
 			_stalledChecker.deactivate();
-		} catch(IOException e) {
-		    _stalledChecker.deactivate(); // no need to kill now.
-            throw e;
 		} 
 	}
 

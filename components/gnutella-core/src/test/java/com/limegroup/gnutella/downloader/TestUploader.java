@@ -26,9 +26,10 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
+import com.limegroup.gnutella.util.AssertComparisons;
 import com.sun.java.util.collections.Iterator;
 
-public class TestUploader {    
+public class TestUploader extends AssertComparisons {    
     
     private static final Log LOG = LogFactory.getLog(TestUploader.class);
     
@@ -39,6 +40,8 @@ public class TestUploader {
     private volatile int totalUploaded;
     /** The number of connections received */
     private int connects=0;
+    /** The maximum number of connect attempts */
+    private int maxConnects = Integer.MAX_VALUE;
     /** The last request sent, e.g., "GET /get/0/file.txt HTTP/1.0" */
     private String request=null;
 
@@ -50,6 +53,8 @@ public class TestUploader {
     private boolean stopped;
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
+    /** the boundary between stop/start to send corrupt bytes */
+    private int corruptBoundary;
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
@@ -101,6 +106,36 @@ public class TestUploader {
     private boolean respondWithHTTP11 = true;
     
     /**
+     * Whether or not we'll include the THEX-Tree header in our response.
+     */
+    private boolean sendThexTreeHeader = false;
+    
+    /**
+     * Whether or not we'll include the THEX-Tree in our response.
+     */
+    private boolean sendThexTree = false;    
+    
+    /**
+     * Whether or not thex was requested.
+     */
+    private boolean thexWasRequested = false;
+    
+    /**
+     * Whether or not to send the content length in the response.
+     */
+    private boolean sendContentLength = true;
+    
+    /**
+     * If we should queue when thex is requested.
+     */
+    private boolean queueOnThex = false;
+    
+    /**
+     * Whether or not we should use a bad THEX response header.
+     */
+    private boolean useBadThexResponseHeader = false;
+    
+    /**
      * The sum of the number of bytes we need to upload across all requests.  If
      * this value is less than totalUploaded and the uploader encountered an
      * IOException in handle request it means the downloader killed the
@@ -120,6 +155,7 @@ public class TestUploader {
      * another thread to do the listening. 
      */
     public TestUploader(String name, final int port) {
+        super(name);
 
         // ensure that only local machines can connect!!
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -175,6 +211,7 @@ public class TestUploader {
         rate = 10000;
         stopped = false;
         sendCorrupt = false;
+        corruptBoundary = 0;
         busy = false;
         retryAfter = -1;
         timesBusy = Integer.MAX_VALUE;
@@ -188,9 +225,16 @@ public class TestUploader {
         totalAmountToUpload = 0;
         requestsReceived = 0;
         connects = 0;
+        maxConnects = Integer.MAX_VALUE;
         lowChunkOffset = 0;
         highChunkOffset = 0;
         respondWithHTTP11 = true;
+        sendThexTreeHeader = false;
+        sendThexTree = false;
+        thexWasRequested = false;
+        sendContentLength = true;
+        queueOnThex = false;
+        useBadThexResponseHeader = false;
     }
 
     public int amountUploaded() {
@@ -250,6 +294,13 @@ public class TestUploader {
     public void setCorruption(boolean corrupt) {
         this.sendCorrupt = corrupt;
     }
+    
+    /**
+     * Sets the boundary around stop/start to send corrupted bytes.
+     */
+    public void setCorruptBoundary(int num) {
+        this.corruptBoundary = num;
+    }
 
     /** 
      * Sets the number of  bytes that this should send.  This lets the user
@@ -289,6 +340,48 @@ public class TestUploader {
         respondWithHTTP11 = yes;
     }
     
+    /**
+     * Sets whether or not we'll send the thex tree header in our response.
+     */
+    public void setSendThexTreeHeader(boolean yes) {
+        sendThexTreeHeader = yes;
+    }    
+    
+    /**
+     * Sets whether or not we'll send the thex tree in our response.
+     */
+    public void setSendThexTree(boolean yes) {
+        sendThexTree = yes;
+    }
+    
+    /**
+     * Determiens whether or not thex was requested this time.
+     */
+    public boolean thexWasRequested() {
+        return thexWasRequested;
+    }
+    
+    /**
+     * Sets whether or not to send the content length in the response.
+     */
+    public void setSendContentLength(boolean yes) {
+        sendContentLength = yes;
+    }
+    
+    /**
+     * Sets whether or not to queue on the thex request.
+     */
+    public void setQueueOnThex(boolean yes) {
+        queueOnThex = yes;
+    }
+    
+    /**
+     * Sets whether or not we'll use a bad thex response header.
+     */
+    public void setUseBadThexResponseHeader(boolean yes ) {
+        useBadThexResponseHeader = yes;
+    }   
+    
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
@@ -306,6 +399,13 @@ public class TestUploader {
     /** Returns the number of connections this accepted. */
     public int getConnections() {
         return connects;
+    }
+    
+    /**
+     * Sets the maximum amount of connects allowed.
+     */
+    public void setMaxConnects(int max) {
+        maxConnects = max;
     }
     
     /**
@@ -330,6 +430,12 @@ public class TestUploader {
             try {
                 socket = server.accept();
                 connects++;
+                if(connects > maxConnects) {
+                    LOG.debug("over-connected");
+                    socket.close();
+                    continue;
+                }
+                    
 
                 // make sure it's from us
 				InetAddress address = socket.getInetAddress();
@@ -403,6 +509,7 @@ public class TestUploader {
         boolean firstLine=true;
         AlternateLocationCollection badLocs = null;
         AlternateLocationCollection goodLocs = null;
+        boolean thexReq = false;
         while (true) {
             String line=input.readLine();
             if (firstLine) {
@@ -435,15 +542,18 @@ public class TestUploader {
                 } catch (Exception e) { 
                     Assert.that(false, "Bad Range request: \""+line+"\"");
                 }
-                start=p.a + lowChunkOffset;
-                if(start < 0) start = 0;
-                stop=p.b + highChunkOffset;
-                if(stop > TestFile.length()) stop = TestFile.length();
+                start = Math.max(0, p.a + lowChunkOffset);
+                stop = Math.min(TestFile.length(),
+                               Math.max(1, p.b + highChunkOffset));
+
             }
             
             i = line.indexOf("GET");
-            if(i==0)
+            if(i==0) {
                 http11 = line.indexOf("1.1") > 0;
+                thexReq = line.indexOf(TestFile.tree().getThexURI()) > 0;
+                thexWasRequested |= thexReq;
+            }
 		}
         if(_sha1!=null) {
             if(incomingAltLocs == null)
@@ -463,10 +573,45 @@ public class TestUploader {
                 }        
             }
         }
-        //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
-    //Send the data.
-        send(output, start, stop);
+        if(thexReq && queueOnThex) {
+            queueOnThex = false;
+            queue = true;
+            sendThexTree = true;
+        }
+        
+        if(thexReq && useBadThexResponseHeader) {
+            sendThexTree = true;
+        }
+        
+        if(thexReq && sendThexTree && !queue) {
+            LOG.debug("sending thex tree.");
+            sendThexTree = false;
+            sendThexTree(output);
+            output.flush();
+            LOG.debug("done sending thex tree.");
+        } else {    
+            //Send the data.
+            send(output, start, stop);
+        }
+    }
+    
+    private void sendThexTree(OutputStream out) throws IOException {
+        if(!useBadThexResponseHeader) {
+            String str = "HTTP/1.1 200 OK\r\n" +
+                         "ugly-header: ugly-value\r\n" + 
+                         "hot diggity doo\r\n" +
+                         "\r\n";
+            out.write(str.getBytes());
+            TestFile.tree().write(out);
+        } else {
+            String body = "You have failed miserably in your attempts.";
+            String str = "HTTP/1.1 9000 Failed Miserably\r\n" +
+                         "Content-Length: " + body.length() + "\r\n" +
+                         "\r\n";
+            out.write(str.getBytes());
+            out.write(body.getBytes());
+        }
     }
 
     private void send(OutputStream out, int start, int stop) 
@@ -532,8 +677,11 @@ public class TestUploader {
                 return;
             }
         }
-		str = "Content-Length:"+ (stop - start) + "\r\n";
-		out.write(str.getBytes());	   
+        if(sendContentLength) {
+		    str = "Content-Length:"+ (stop - start) + "\r\n";
+		    out.write(str.getBytes());	   
+        }
+        
 		if (start != 0 || (stop - start != TestFile.length())) {
             //Note that HTTP stop values are INCLUSIVE.  Our internal values
             //are EXCLUSIVE.  Hence the -1.
@@ -552,6 +700,11 @@ public class TestUploader {
         if(creationTime != null) {
             LOG.debug("Writing out Creation Time.");
             HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
+                                  out);
+        }
+        if(sendThexTreeHeader) {
+            HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
+                                  TestFile.tree(),
                                   out);
         }
         str = "\r\n";
@@ -573,7 +726,9 @@ public class TestUploader {
                 out.flush();
                 throw new IOException();
             }
-            if(sendCorrupt)
+            if(sendCorrupt &&
+               i-start >= corruptBoundary &&
+               stop-i >= corruptBoundary )
                 out.write(TestFile.getByte(i)+(byte)1);
             else
                 out.write(TestFile.getByte(i));
@@ -669,14 +824,14 @@ public class TestUploader {
         //check that the downloader made a correct range request if we are
         //partial and this is the second iteration. 
         if(partial==3) {//check this before checking partial2 -- we set it there
-            Assert.that(start==150000,
-                        "downloader picked incorrect start range in iteration");
-            Assert.that(stop==250010,
-                        "downloader pick incorrect stop range in iteration");
+            assertEquals("downloader picked incorrect start range in iteration",
+                         150010, start);
+            assertEquals("downloader pick incorrect stop range in iteration",
+                         250020, stop);
         }
         if(partial==2) {
-            Assert.that(start==50000,"invalid start range");
-            Assert.that(stop==150010,"invalid stop range was:"+stop);
+            assertEquals("invalid start range", 50000, start);
+            assertEquals("invalid stop range", 150010, stop);
         }                
         return new IntPair(start, stop);
     }

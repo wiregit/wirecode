@@ -57,6 +57,14 @@ public class HTTPHeaderName {
 		new HTTPHeaderName("X-Gnutella-Content-URN");
 
 	/**
+	 * Header for specifying the URN of the file, as per the
+	 * CAW spec at
+	 * http://www.open-content.net/specs/draft-jchapweske-caw-03.html .
+	 */
+	public static final HTTPHeaderName CONTENT_URN =
+		new HTTPHeaderName("X-Content-URN");
+
+	/**
 	 * Header for specifying the byte range of the content.
 	 */
 	public static final HTTPHeaderName CONTENT_RANGE =
@@ -159,14 +167,14 @@ public class HTTPHeaderName {
 	 * 
 	 * Example: X-Features: chat/0.1, browse/1.0, queue/0.1
 	 */
-	public static final HTTPHeaderName X_FEATURES =
+	public static final HTTPHeaderName FEATURES =
         new HTTPHeaderName("X-Features");
 
     /**
      * Header for sending your own "<ip>:
      * <listening port>"
      */
-    public static final HTTPHeaderName X_NODE = new HTTPHeaderName("X-Node");
+    public static final HTTPHeaderName NODE = new HTTPHeaderName("X-Node");
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 

@@ -340,11 +340,15 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     }
 
     /** 
-     * Compares this GUID to o, lexically.  Throws ClassCastException if o not
-     *  a GUID. 
+     * Compares this GUID to o, lexically.
      */
     public int compareTo(Object o) {
-        return compare(this.bytes, ((GUID)o).bytes);
+        if (this == o)
+			return 0;
+		else if (o instanceof GUID)
+			return compare(this.bytes(), ((GUID)o).bytes());
+        else
+            return 1;
     }
 
     /** Compares GUID's lexically. */

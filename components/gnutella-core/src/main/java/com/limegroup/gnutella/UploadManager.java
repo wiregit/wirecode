@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
  * The state of HTTPUploader is maintained by this class.
  * HTTPUploader's state follows the following pattern:
  *                                                           \ /
+ *                             |->---- THEX_REQUEST ------->--|
  *                             |->---- UNAVAILABLE_RANGE -->--|
  *                             |->---- PUSH_PROXY --------->--|
  *                            /-->---- FILE NOT FOUND ----->--|
@@ -172,6 +173,10 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final boolean RECORD_STATS = !CommonUtils.isJava118();
     
+    /**
+     * Constant for HttpRequestLine parameter
+     */
+    public static final String SERVICE_ID = "service_id";
                 
 	/**
      * Remembers uploaders to disadvantage uploaders that
@@ -452,7 +457,8 @@ public final class UploadManager implements BandwidthTracker {
             switch(state) {
                 case Uploader.COMPLETE:
                     UploadStat.COMPLETED.incrementStat();
-                    if( lastState == Uploader.UPLOADING )
+                    if( lastState == Uploader.UPLOADING ||
+                        lastState == Uploader.THEX_REQUEST)
                         UploadStat.COMPLETED_FILE.incrementStat();
                     break;
                 case Uploader.INTERRUPTED:
@@ -465,7 +471,8 @@ public final class UploadManager implements BandwidthTracker {
             FileDesc fd = uploader.getFileDesc();
             if( fd != null && 
               state == Uploader.COMPLETE &&
-              lastState == Uploader.UPLOADING ) {
+              (lastState == Uploader.UPLOADING ||
+               lastState == Uploader.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
                 RouterService.getCallback().handleSharedFileUpdate(
                     fd.getFile());
@@ -551,12 +558,27 @@ public final class UploadManager implements BandwidthTracker {
                 return;
             }
             
+            //handling THEX Requests
+            if (uploader.isTHEXRequest()) {
+                if (uploader.getFileDesc().getHashTree() != null)
+                    uploader.setState(Uploader.THEX_REQUEST);
+                else
+                    uploader.setState(Uploader.FILE_NOT_FOUND);
+                return;
+           }            
+            
             // Special handling for incomplete files...
             if (fd instanceof IncompleteFileDesc) {                
                 // Check to see if we're allowing PFSP.
                 if( !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
                     uploader.setState(Uploader.FILE_NOT_FOUND);
                     return;
+                }
+                
+                // cannot service THEXRequests for partial files
+                if (uploader.isTHEXRequest()) {
+                	uploader.setState(Uploader.FILE_NOT_FOUND);
+                	return;
                 }
                                 
                 // If we are allowing, see if we have the range.
@@ -697,6 +719,10 @@ public final class UploadManager implements BandwidthTracker {
                 uploader.setState(Uploader.UPLOADING);
                 if( RECORD_STATS )
                     UploadStat.UPLOADING.incrementStat();
+                break;
+            case Uploader.THEX_REQUEST:
+                if ( RECORD_STATS )
+                    UploadStat.THEX.incrementStat();
                 break;
             case Uploader.COMPLETE:
             case Uploader.INTERRUPTED:
@@ -1155,14 +1181,12 @@ public final class UploadManager implements BandwidthTracker {
             if(this.isURNGet(str)) {
                 // handle the URN get request
                 return this.parseURNGet(str);
-            } else if (this.isMalformedURNGet(str)) {
-                // handle the malforned URN get request
-                return this.parseMalformedURNGet(str);
             }
 		
             // handle the standard get request
             return UploadManager.parseTraditionalGet(str);
         } catch (IOException ioe) {
+            LOG.debug("http request failed", ioe);
             // this means the request was malformed somehow.
             // instead of closing the connection, we tell them
             // by constructing a HttpRequestLine with a fake
@@ -1198,29 +1222,6 @@ public final class UploadManager implements BandwidthTracker {
 		String idString = requestLine.substring(slash1Index+1, slash2Index);
 		return idString.equalsIgnoreCase("uri-res");
 	}
-	
-	/**
-	 * Returns whether or not the get request for the specified line is
-	 * a malformed URN request coming from LimeWire 2.8.6.<p>
-	 *
-	 * An example malformed request is:
-	 * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63___Z3WPHN7VSVTKZA3YYT HTTP/1.1
-	 * (where the /get/0// are the malformations)
-	 *
-	 * @param requestLine the <tt>String</tt> to parse to check whether it's
-	 *  following the URN request syntax as specified in HUGE v. 0.93
-	 * @return <tt>true</tt> if the request is a valid URN request, 
-	 *  <tt>false</tt> otherwise
-	 */
-	private boolean isMalformedURNGet(final String requestLine) {
-	    // the malformed request will always start with /get/0//
-	    if ( requestLine.startsWith("/get/0//") ) {
-	        // the valid request starts with the last slash of the malformation
-	        return isURNGet(requestLine.substring(7));
-        }
-	    
-	    return false;
-	}	
 
 	/**
 	 * Performs the parsing for a traditional HTTP Gnutella get request,
@@ -1352,6 +1353,22 @@ public final class UploadManager implements BandwidthTracker {
 	private HttpRequestLine parseURNGet(final String requestLine)
       throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
+		Map params = new HashMap();
+		
+		// parse the service identifier, whether N2R, N2X or something
+		// we cannot satisfy.
+		if (requestLine.toUpperCase().indexOf(HTTPConstants.NAME_TO_THEX) > 0)
+			params.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
+		else if (requestLine.toUpperCase().indexOf(
+                                           HTTPConstants.NAME_TO_RESOURCE) > 0)
+			params.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
+		else {
+            if(LOG.isWarnEnabled())
+			    LOG.warn("Invalid URN query: " + requestLine);
+			return new HttpRequestLine(BAD_URN_QUERY_INDEX,
+				"Invalid URN query", isHTTP11Request(requestLine));
+		}
+		
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
             if( RECORD_STATS )
@@ -1362,25 +1379,8 @@ public final class UploadManager implements BandwidthTracker {
         if( RECORD_STATS )
 		    UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
-								   isHTTP11Request(requestLine));
+								   isHTTP11Request(requestLine), params);
 	}
-	
-	/**
-	 * Parses the get line for a malformed URN request, throwing an exception 
-	 * if there are any errors in parsing.
-	 *
-	 * @param requestLine the <tt>String</tt> instance containing the get
-	 *        request
-	 * @return a new <tt>RequestLine</tt> instance containing all of the data
-	 *  for the get request
-	 */
-	private HttpRequestLine parseMalformedURNGet(final String requestLine)
-      throws IOException {
-		// this assumes the malformation is a /get/0/ before the /uri-res..
-		return parseURNGet(requestLine.substring(7));
-	}
-	
-
 
 	/**
 	 * Returns whether or the the specified get request is using HTTP 1.1.

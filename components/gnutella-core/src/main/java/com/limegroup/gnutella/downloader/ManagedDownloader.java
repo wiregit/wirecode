@@ -10,6 +10,8 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 import java.io.*;
 import java.net.*;
@@ -114,11 +116,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                                     |
                               connectAndDownload
                           /           |             \
-        establishConnection     assignAndRequest       doDownload
-             |                        |                        \
-       HTTPDownloader.connectTCP  assignWhite/assignGrey        \
-                                      |           HTTPDownlaoder.doDownload
-                               HTTPDownloader.connectHTTP
+        establishConnection     assignAndRequest    doDownload
+             |                        |             |       \
+       HTTPDownloader.connectTCP      |             |        requestHashTree
+                                      |             |- HTTPDownloader.download
+                            assignWhite/assignGrey
+                                      |
+                           HTTPDownloader.connectHTTP
 
       tryAllDownloads does the bucketing of files, as well as waiting for
       retries.  The core downloading loop is done by tryAllDownloads3.
@@ -173,7 +177,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Never obtain manager's lock if you hold this.
      *
      * Also, always hold stealLock's monitor before REMOVING elements from 
-     * needed. As always, we must obtain this' monitor before modifying needed.
+     * needed. As always, we must obtain this' monitor before modifying needed.     
      ***********************************************************************/
     private Object stealLock;
 
@@ -211,7 +215,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 		0.5f;
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
-    private static final int OVERLAP_BYTES=10;
+    static final int OVERLAP_BYTES=10;
+    
+    /**
+     * The maximum amount of times we'll try to recover.
+     */
+    private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
 
     /** The time to wait between requeries, in milliseconds.  This time can
      *  safely be quite small because it is overridden by the global limit in
@@ -344,6 +353,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * LOCKING: synchronize on this
      */
     private IntervalSet needed;
+
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
@@ -451,6 +461,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private int corruptState;
     private Object corruptStateLock;
+    
+    /**
+     * stores a HashTree that will be requested if we find it.
+     */
+    private HashTree hashTree = null;
     
     /**
      * one BandwidthTrackerImpl so we don't have to allocate one for
@@ -911,8 +926,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // See if we have already tried and failed with this location
         // This is only done if the location we're trying is an alternate..
         if (other.isFromAlternateLocation() && 
-            invalidAlts.contains(other.getRemoteHostData()))
+            invalidAlts.contains(other.getRemoteHostData())) {
             return false;
+        }
         
 
         // get other info...
@@ -1004,11 +1020,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (! allowAddition(rfd)) {
             return false;
         }
-        if (addDownloadForced(rfd, cache)) {
-            LOG.trace("added rfd: " + rfd);
-            return true;
-        } else
-            return false;
+        
+        return addDownloadForced(rfd, cache);
     }
 
     /**
@@ -1074,6 +1087,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //interested: waiting for downloaders to complete (by waiting on
         //this) or waiting for retry (by sleeping).
         if ( added ) {
+            if(LOG.isTraceEnabled())
+                LOG.trace("added rfd: " + rfd);
             if ((state==Downloader.WAITING_FOR_RETRY) ||
                 (state==Downloader.WAITING_FOR_RESULTS) || 
                 (state==Downloader.GAVE_UP) || 
@@ -1773,47 +1788,85 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         // Create a new validAlts for this sha1.
+        // initialize the HashTree
 		URN sha1 = buckets.getURNForBucket(bucketNumber);
-		if( sha1 != null )
+		if( sha1 != null ) {
 		    validAlts = AlternateLocationCollection.create(sha1);
-        
-        //2. Do the download
-        int status = -1;  //TODO: is this equal to COMPLETE etc?
-        try {
-            status=tryAllDownloads3();//Exception may be thrown here. 
-        } catch (InterruptedException e) { }
-
-        //Close the file controlled by commonOutFile.
-        commonOutFile.close();
-        
-        if(corruptState != NOT_CORRUPT_STATE) {//it is corrupt
-            synchronized(corruptStateLock) {
-                try{
-                    while(corruptState==CORRUPT_WAITING_STATE) {
-                        corruptStateLock.wait();
-                    }
-                } catch(InterruptedException ignored) {
-                    //interruped while waiting for user. do nothing
-                }
-            }
-            if (corruptState==CORRUPT_STOP_STATE) {
-                cleanupCorrupt(incompleteFile, completeFile.getName());
-                return CORRUPT_FILE;
-            } 
-            else if (corruptState==CORRUPT_CONTINUE_STATE) {
-                ;//do nothing. 
-                //Just fall through and and behave as normal complete
-            }
+            hashTree = TigerTreeCache.instance().getHashTree(sha1);  
         }
         
-        if (status==-1) //InterruptedException was thrown in tryAllDownloads3
-            throw new InterruptedException();
-        if (status!=COMPLETE)
-            return status;
+        URN fileHash;
+        int status;
+
+        // Continue doing the download until we've recovered all
+        // corrupt bytes.
+        for(int i = 0; ; i++) {
+            status = -1;  //TODO: is this equal to COMPLETE etc?            
+            try {
+                //2. Do the download
+                status = tryAllDownloads3();//Exception may be thrown here.
+            } catch (InterruptedException e) { }
+    
+            //Close the file controlled by commonOutFile.
+            commonOutFile.close();
+            
+            // if the user hasn't answered our corrupt question yet, wait.
+            waitForCorruptResponse();
+            // if they really wanted to stop, do that instead of anything else
+            if (corruptState == CORRUPT_STOP_STATE) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            }            
         
-        //3. Find out the hash of the file and verify that its the same
-        // as the hash of the bucket it was downloaded from.
-        //If the hash is different, we should ask the user about corruption
+            if (status == -1) //InterruptedException from tryAllDownloads3
+                throw new InterruptedException();
+            if (status != COMPLETE) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("stopping early with status: " + status);
+                return status;
+            }
+
+            //3. Find out the hash of the file and verify that its the same
+            // as the hash of the bucket it was downloaded from.
+            //If the hash is different, we try to automatically recover if
+            //we have a HashTree.
+            fileHash = scanForCorruption(i);
+            if (corruptState == CORRUPT_STOP_STATE) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            }
+
+            //if we didn't identify any corrupted ranges, break out of the loop
+            if(state != IDENTIFY_CORRUPTION)
+                break;                
+        }
+        
+        // 4. Save the file to disk.
+        return saveFile(fileHash);
+    }
+    
+    /**
+     * Waits indefinitely for a response to the corrupt message prompt.
+     */
+    private void waitForCorruptResponse() {
+        if(corruptState != NOT_CORRUPT_STATE) {
+            synchronized(corruptStateLock) {
+                try {
+                    while(corruptState==CORRUPT_WAITING_STATE)
+                        corruptStateLock.wait();
+                } catch(InterruptedException ignored) {}
+            }
+        }
+    }        
+    
+    /**
+     * Scans the file for corruption, returning the hash of the file on disk.
+     */
+    private URN scanForCorruption(int iteration) {
+        // if we already were told to stop, then stop.
+        if (corruptState==CORRUPT_STOP_STATE)
+            return null;
+        
         //if the user has not been asked before.               
         URN bucketHash = buckets.getURNForBucket(bucketNumber);
         URN fileHash=null;
@@ -1821,32 +1874,79 @@ public class ManagedDownloader implements Downloader, Serializable {
             // let the user know we're hashing the file
             setState(HASHING);
             fileHash = URN.createSHA1Urn(incompleteFile);
-        } catch(IOException ignored) {}
-        if(bucketHash!=null) { //if bucketHash==null, we cannot check
-            //if fileHash == null, it will be a mismatch
-            synchronized(corruptStateLock) {
-                if(!bucketHash.equals(fileHash)) {
-                    // immediately set as corrupt,
-                    // will change to non-corrupt later if user ignores
-                    setState(CORRUPT_FILE);
-                    promptAboutCorruptDownload();
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("hash verification problem, fileHash="+
-                                       fileHash+", bucketHash="+bucketHash);
-                }
-                try {
-                    while(corruptState==CORRUPT_WAITING_STATE)
-                        corruptStateLock.wait();
-                } catch(InterruptedException ignored2) {
-                    //interrupted while waiting for user. do nothing.
-                }
-            }
-            if (corruptState==CORRUPT_STOP_STATE) {
-                cleanupCorrupt(incompleteFile, completeFile.getName());
-                return CORRUPT_FILE;
-            } 
+        }
+        catch(IOException ignored) {}
+        catch(InterruptedException ignored) {}
+        
+        // If bucketHash is null, we can't check at all.
+        if(bucketHash == null)
+            return fileHash;
+
+        // If they're equal, everything's fine.
+        //if fileHash == null, it will be a mismatch
+        if(bucketHash.equals(fileHash))
+            return fileHash;
+        
+        if(LOG.isWarnEnabled())
+            LOG.warn("hash verification problem, fileHash="+
+                           fileHash+", bucketHash="+bucketHash);
+
+        synchronized(corruptStateLock) {
+            // immediately set as corrupt,
+            // will change to non-corrupt later if user ignores
+            setState(CORRUPT_FILE);
+            // Note that no prompting or waiting will be done if hashTree
+            // is null, but we still want to use promptAboutCorruptDownload
+            // because it removes the file from being shared.
+            promptAboutCorruptDownload();
+            waitForCorruptResponse();
         }
         
+        // If we wanted to stop, stop.
+        if (corruptState==CORRUPT_STOP_STATE)
+            return fileHash;
+            
+        // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
+        if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
+            treeRecoveryFailed(bucketHash);
+        } else if (hashTree != null) {
+            // we can try to use the hashtree to identify corrupt ranges!
+            try {
+                setState(IDENTIFY_CORRUPTION);
+                LOG.debug("identifying corruption...");
+                int deleted = commonOutFile.deleteCorruptedBlocks(hashTree,
+                                                             incompleteFile);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("deleted " + deleted + " blocks");
+                
+                corruptState = NOT_CORRUPT_STATE;
+                if(deleted == 0)
+                    treeRecoveryFailed(bucketHash);
+            } catch (IOException ioe) {
+                LOG.debug(ioe);
+                treeRecoveryFailed(bucketHash);
+            }
+        }
+        
+        return fileHash;        
+    }
+    
+    /**
+     * Recovering from the TigerTree has failed, notify the user about
+     * corruption.
+     */
+    private void treeRecoveryFailed(URN hash) {
+        TigerTreeCache.instance().purgeTree(hash);
+        hashTree = null;
+        promptAboutCorruptDownload();
+        waitForCorruptResponse();
+        setState(RECOVERY_FAILED);
+    }
+    
+    /**
+     * Saves the file to disk.
+     */
+    private int saveFile(URN fileHash) {
         // let the user know we're saving the file...
         setState( SAVING );
         
@@ -1918,9 +2018,18 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(validAlts != null && 
-		   fileDesc!=null && 
-		   fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) {
+		if(validAlts != null && fileDesc != null)
+		    sendAlternateLocations(fileDesc);
+
+		return COMPLETE;
+    }
+    
+    /**
+     * Notifies hosts about alternate locations, if necessary.
+     */
+    private void sendAlternateLocations(FileDesc fileDesc) {
+        URN fileHash = fileDesc.getSHA1Urn();
+		if(fileHash.equals(validAlts.getSHA1Urn())) {
 		    LOG.trace("MANAGER: adding valid alts to FileDesc");
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
@@ -1947,7 +2056,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 headThread.start();
             }
         }
-        return COMPLETE;
     }
     
     /**
@@ -2020,78 +2128,44 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private int tryAllDownloads3() throws InterruptedException {
         LOG.trace("MANAGER: entered tryAllDownloads3");
-        
+
         //The parts of the file we still need to download.
-        //INVARIANT: all intervals are disjoint and non-empty
+        //INVARIANT: all intervals are disjoint and non-empty        
         int completedSize = -1;
         synchronized(this) {
             needed=new IntervalSet();
-            {//all variables in this block have limited scope
-                Assert.that(incompleteFile != null);
-                synchronized (incompleteFileManager) {
-                    if( commonOutFile != null )
-                        commonOutFile.clearManagedDownloader();
-                    //get VerifyingFile
-                    commonOutFile=
-                    incompleteFileManager.getEntry(incompleteFile);
-                }
-                if(commonOutFile==null) {//no entry in incompleteFM
-                    LOG.trace("creating a verifying file");
-                    commonOutFile = new VerifyingFile(true);
-                    try {
-                        //we must add an entry in IncompleteFileManager
-                        incompleteFileManager.
-                                   addEntry(incompleteFile,commonOutFile);
-                    } catch(IOException ioe) {
-                        ErrorService.error(ioe, "file: " + incompleteFile);
-                        return COULDNT_MOVE_TO_LIBRARY;
-                    }
-                    {//debugging block
-                      FileDesc fd = 
-                        fileManager.getFileDescForFile(incompleteFile);
-                      URN bHash = buckets.getURNForBucket(bucketNumber);
-                      if(bHash != null && fd != null &&
-                         !bHash.equals(fd.getSHA1Urn())) {
-                            File canon = null;
-                            Exception ioe = null;
-                            try {
-                                canon =
-                                    FileUtils.getCanonicalFile(incompleteFile);
-                            } catch(IOException e) {
-                                ioe = e;
-                            }
-                            Assert.silent(false, 
-                              "URNs in FM and IFM don't match.\n" +
-                              "Type: " + this.getClass().getName() + "\n" +
-                              "Bucket Hash: " + bHash + "\n" +
-                              "FD Hash    : " + fd.getSHA1Urn() + "\n" +
-                              "IncompleteFile: " + incompleteFile + "\n" +
-                              "FD.getFile    : " + fd.getFile() + "\n" +
-                              "Canonical     : " + canon + "\n" +
-                              "Error: " + 
-                          (ioe == null ? "(none)" : ioe.getMessage()) + "\n" +
-                             "IFM hashes: " + 
-                             incompleteFileManager.dumpHashes());
-                            //dont fail later
-                            fileManager.removeFileIfShared(incompleteFile);
-                      }
-                    }
-                }
-                //need to get the VerifyingFile ready to write
+            Assert.that(incompleteFile != null);
+            synchronized (incompleteFileManager) {
+                if( commonOutFile != null )
+                    commonOutFile.clearManagedDownloader();
+                //get VerifyingFile
+                commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+            }
+            if(commonOutFile==null) {//no entry in incompleteFM
+                LOG.trace("creating a verifying file");
+                commonOutFile = new VerifyingFile(true);
                 try {
-                    commonOutFile.open(incompleteFile,this);
-                } catch(IOException e) {
-                    if(!IOUtils.handleException(e, "DOWNLOAD"))
-                        ErrorService.error(e);
+                    //we must add an entry in IncompleteFileManager
+                    incompleteFileManager.
+                               addEntry(incompleteFile,commonOutFile);
+                } catch(IOException ioe) {
+                    ErrorService.error(ioe, "file: " + incompleteFile);
                     return COULDNT_MOVE_TO_LIBRARY;
                 }
-                //update needed
-                completedSize =
-                   (int)IncompleteFileManager.getCompletedSize(incompleteFile);
-                Iterator iter=commonOutFile.getFreeBlocks(completedSize);
-                while (iter.hasNext())
-                    addToNeeded((Interval)iter.next());
             }
+            //need to get the VerifyingFile ready to write
+            try {
+                commonOutFile.open(incompleteFile,this);
+            } catch(IOException e) {
+                if(!IOUtils.handleException(e, "DOWNLOAD"))
+                    ErrorService.error(e);
+                return COULDNT_MOVE_TO_LIBRARY;
+            }
+            completedSize =
+               (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+            Iterator iter=commonOutFile.getFreeBlocks(completedSize);
+                while (iter.hasNext())
+                    addToNeeded((Interval)iter.next());               
         }
 
         //The current RFDs that are being connected to.
@@ -2099,8 +2173,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         int size = -1;
         int connectTo = -1;
         int dloadsCount = -1;
-        Assert.that(threads.size()==0,
-                    "wrong threads size: " + threads.size());
+        //Assert.that(threads.size()==0,
+        //            "wrong threads size: " + threads.size());
 
         //While there is still an unfinished region of the file...
         while (true) {
@@ -2147,7 +2221,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                             return COMPLETE;
                         }
                     } 
-                    
+            
                     if (threads.size() == 0) {                        
                         //No downloaders worth living for.
                         if ( files.size() > 0 && calculateWaitTime() > 0) {
@@ -2160,11 +2234,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                         // else (files.size() > 0 && calculateWaitTime() == 0)
                         // fallthrough ...
                     }
-                    size = files.size();
-                    connectTo = getNumAllowedDownloads();
-                    dloadsCount = dloaders.size();
                 }
             }
+            
+            size = files.size();
+            connectTo = getNumAllowedDownloads();
+            dloadsCount = dloaders.size();
         
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
@@ -2285,71 +2360,90 @@ public class ManagedDownloader implements Downloader, Serializable {
             //downloader should choose a part of the file to download
             //and send the appropriate HTTP hearders
             //Note: 0=disconnected,1=tcp-connected,2=http-connected            
-            int connected;
+            ConnectionStatus status;
             http11 = rfd.isHTTP11();
             while(true) { //while queued, connect and sleep if we queued
-                int[] qInfo ={-1,-1};//reset the sleep value, and queue position
-                connected = assignAndRequest(dloader,qInfo,http11);
-                boolean addQueued = killQueuedIfNecessary(connected,qInfo[1]);
-                //an uploader we want to stay connected with
-                if(connected == 4)
-                    continue; // and has partial ranges
-                if(connected!=1)
-                    break;
+                status = null;
                 
-                if(connected==1 && !addQueued) {
-                    //I'm queued, but no thread was killed for me. die!
-                    return true; //manager! keep churning more threads
-                }
-                if(connected==1) {//we have a queued thread, sleep
-                    Assert.that(qInfo[0]>-1&&qInfo[1]>-1,
-                                                    "inconsistent queue data");
-                    try {
-                        // make sure that we're not in dloaders if we're
-                        // sleeping/queued.  this would ONLY be possible
-                        // if some uploader was misbehaved and queued
-                        // us after we succesfully managed to download some
-                        // information.  despite the rarity of the situation,
-                        // we should be prepared.
-                        synchronized(this) {
-                            dloaders.remove(dloader);
+                // request THEX from te dloader if the tree we have
+                // isn't good enough (or we don't have a tree)
+                if (dloader.hasHashTree() &&
+                  (hashTree == null || !hashTree.isGoodDepth())) {
+                    status = dloader.requestHashTree();
+                    if(status.isThexResponse()) {
+                        HashTree temp = status.getHashTree();
+                        if (temp.isBetterTree(hashTree)) {
+                            hashTree = temp;
+                            // persist the hashTree in the TigerTreeCache
+                            // because we won't save it in ManagedDownloader
+                            TigerTreeCache.instance().addHashTree(
+                                    rfd.getSHA1Urn(),
+                                    hashTree);
                         }
-                        Thread.sleep(qInfo[0]);//value from QueuedException
-                    } catch (InterruptedException ix) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("worker: interrupted while asleep in "+
-                              "queue" + dloader);
-                        queuedThreads.remove(Thread.currentThread());
-                        dloader.stop();//close connection
-                                // notifying will make no diff, coz the next 
-                                //iteration will throw interrupted exception.
-                        return true;
                     }
                 }
-                else
-                    Assert.that(false,"this should never happen");
+                
+                // if we didn't get queued doing the tree request,
+                // request another file.
+                if(status == null || !status.isQueued()) {
+                    status = assignAndRequest(dloader, http11);
+                }
+                
+                if(status.isPartialData()) {
+                    // loop again if they had partial ranges.
+                    continue;
+                } else if(status.isNoFile() || status.isNoData()) {
+                    //if they didn't have the file or we didn't need data,
+                    //break out of the loop.
+                    break;
+                }
+                
+                // must be queued or connected.
+                Assert.that(status.isQueued() || status.isConnected());
+                boolean addQueued = killQueuedIfNecessary(status);
+                
+                // we should have been told to stay alive if we're connected
+                // but it's possible that we are above our swarm capacity
+                // and nothing else was queued, in which case we really should
+                // kill ourselves, but there's no reason to not accept the
+                // extra host.
+                if(status.isConnected())
+                    break;
+                
+                Assert.that(status.isQueued());
+                // if we didn't want to stay queued
+                // or we got interrupted while sleeping,
+                // then try other sources
+                if(!addQueued || handleQueued(status, dloader))
+                    return true;
             }
             //we have been given a slot remove this thread from queuedThreads
             synchronized(this) {
                 //no problem even if this thread is  not in there
                 queuedThreads.remove(Thread.currentThread()); 
-            } 
-
-            //Now, connected is either 0, 2 or 3.
-            Assert.that(connected==0 || connected==2 || connected==3,
-                        "invalid return from assignAndRequest "+connected);
-            if(connected==0) { // File Not Found, Try Again Later, etc...
-                dloader.stop(); // close the connection for now.
-                return true;
             }
-            else if(connected==3) { // Nothing more to download
+
+            switch(status.getType()) {
+            case ConnectionStatus.TYPE_NO_FILE:
+                // close the connection for now.            
+                dloader.stop();
+                return true;            
+            case ConnectionStatus.TYPE_NO_DATA:
                 // close the connection since we're finished.
                 dloader.stop();
                 return false;
-            }            
+            case ConnectionStatus.TYPE_CONNECTED:
+                break;
+            default:
+                throw new IllegalStateException("illegal status: " + 
+                                                status.getType());
+            }
+
+            Assert.that(status.isConnected());
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            boolean downloadOK = doDownload(dloader,http11);
+            boolean downloadOK = doDownload(dloader, http11);
+            // If the download failed, don't keep trying to download.
             if(!downloadOK)
                 break;
         } // end of while(http11)
@@ -2362,72 +2456,101 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         
-        //came out of the while loop, http1.0 spawn a thread
+        //tell manager to iterate for more sources
         return true;
     }
     
     /**
-     * @param connectCode 0 means no connection, 1 means connection queued, 2
-     * means connection made, 3 means no connection required, 4 means partial
-     * range available
-     * @param queuePos the position of this downloader in the remote queue, MUST
-     * be equal to -1 unless connectCode == 1 
-     * <P>
-     * Interrupts a remotely queued thread if the value of connectCode is 2
-     * (meaning queuePos is -1) or connectCode is 1(meaning queuePos is the the
-     * remote position of this thread) AND a thread has a worse position than
-     * queuePos.  
+     * Handles a queued downloader with the given ConnectionStatus.
+     * BLOCKING (while sleeping).
+     *
+     * @return true if we need to tell the manager to churn another
+     *         connection and let this one die, false if we are
+     *         going to try this connection again.
+     */
+    private boolean handleQueued(ConnectionStatus status,
+                                 HTTPDownloader dloader) {
+        try {
+            // make sure that we're not in dloaders if we're
+            // sleeping/queued.  this would ONLY be possible
+            // if some uploader was misbehaved and queued
+            // us after we succesfully managed to download some
+            // information.  despite the rarity of the situation,
+            // we should be prepared.
+            synchronized(this) {
+                dloaders.remove(dloader);
+            }
+            Thread.sleep(status.getQueuePollTime());//value from QueuedException
+            return false;
+        } catch (InterruptedException ix) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("worker: interrupted while asleep in "+
+                  "queue" + dloader);
+            queuedThreads.remove(Thread.currentThread());
+            dloader.stop();//close connection
+                    // notifying will make no diff, coz the next 
+                    //iteration will throw interrupted exception.
+            return true;
+        }
+    }
+    
+    /**
+     * Interrupts a remotely queued thread if we this status is connected,
+     * or if the status is queued and our queue position is better than
+     * an existing queued status.
+     *
+     * @param status The ConnectionStatus of this downloader.
+     *
      * @return true if this thread should be kept around, false otherwise --
      * explicitly, there is no need to kill any threads, or if the currentThread
      * is already in the queuedThreads, or if we did kill a thread worse than
      * this thread.  
      */
-    private boolean killQueuedIfNecessary(int connectCode, int queuePos) {
-        //check integrity constriants first
-        Assert.that(connectCode>=0 && connectCode <=4,"Invalid connectCode");
-        if(connectCode==2)
-            Assert.that(queuePos==-1,"inconsistnet parameter queuePos");
-        if(queuePos > -1)
-            Assert.that(connectCode==1,"inconsistnet parameter connectCode");
-
-        if(connectCode==0) //no need to replace a thread, server not available
-            return false;
-        if(connectCode==3) //no need to kill a thread for NoSuchElement
-            return false;
-        if(connectCode==4) //Partial ranges, don't kill now, defer the decision
-            return false;
+    private boolean killQueuedIfNecessary(ConnectionStatus status) {
         //Either I am queued or downloading, find the highest queued thread
         Thread killThread = null;
         Thread currentThread = Thread.currentThread();
-        synchronized(this) {            
-            if(getNumDownloaders() < getSwarmCapacity()) {//need not kill anyone
-                if(connectCode==1) //queued thread with no replacement required
-                    queuedThreads.put(currentThread,new Integer(queuePos));
+        int queuePos = status.isQueued() ? status.getQueuePosition() : -1;
+
+        synchronized(this) {
+            // No replacement required?...
+            if(getNumDownloaders() < getSwarmCapacity()) {
+                if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
                 return true;
             }
+            
+            // Already Queued?...
             if(queuedThreads.containsKey(currentThread)) {
-                //we are already in there, update position if we're still queued
-                if(connectCode==1)
-                    queuedThreads.put(currentThread,new Integer(queuePos));
+                // update position
+                if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
                 return true;
             }
+            
+            // Search for the queued thread with a slot worse than ours.
             Iterator iter = queuedThreads.keySet().iterator();
-            int highest = queuePos;
+            int highest = queuePos; // -1 if we aren't queued.
             while(iter.hasNext()) {
                 Object o = iter.next();
                 int currQueue = ((Integer)queuedThreads.get(o)).intValue();
-                if(currQueue > highest) { //queuePos==-1 for downloading threads
+                if(currQueue > highest) {
                     killThread=(Thread)o;
                     highest = currQueue;
                 }
             }
-            if(killThread == null) //no kill candidate
+
+            // No one worse than us?... kill us.
+            if(killThread == null)
                 return false;
-            //OK. let's kill this guy
+
+            //OK. let's kill this guy 
             killThread.interrupt();
+
             //OK. I should add myself to queuedThreads if I am queued
-            if(connectCode == 1)
-                queuedThreads.put(currentThread,new Integer(queuePos));
+            if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
+            
             return true;
         }        
     }
@@ -2629,17 +2752,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
-     * @param refQueueInfo this parameter is used for pass by reference, this
-     * method puts the minPollTime as the 0th element of this array, and the
-     * remote queue postion of the downloader in the 1st element
-     * @return 0 if (the server is not giving us the file)
-     * TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
-     * otherwise if queued return 1
-     * otherwise if connected successfully return 2
-     * otherwise if NoSuchElement( we have no areas to steal) return 3
-     * otherwise if rfd was partial uploader and gave us ranges to try return 4 */
-    private int assignAndRequest(HTTPDownloader dloader,int[] refQueueInfo, 
-                                                              boolean http11) {
+     * @return the ConnectionStatus.
+     */
+    private ConnectionStatus assignAndRequest(HTTPDownloader dloader,
+                                              boolean http11) {
         synchronized(stealLock) {
             RemoteFileDesc rfd = dloader.getRemoteFileDesc();
             boolean updateNeeded = true;
@@ -2651,10 +2767,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (shouldAssignWhite) {
                     assignWhite(dloader,http11);
                 } else {
-                    updateNeeded = false;      //1. See comment in finally
+                    updateNeeded = false; //1. See comment in finally
                     assignGrey(dloader,http11); 
                 }
-                updateNeeded = false;          //2. See comment in finally
+                updateNeeded = false; //2. See comment in finally
             } catch(NoSuchElementException nsex) {
                 if(RECORD_STATS)
                     DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -2669,7 +2785,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // this rfd
                     files.add(rfd);
                 }
-                return 3;
+                return ConnectionStatus.getNoData();
             } catch (NoSuchRangeException nsrx) { 
                 if(RECORD_STATS)
                     DownloadStat.NSR_EXCEPTION.incrementStat();
@@ -2685,7 +2801,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     files.add(rfd);
                 }
                 rfd.resetFailedCount();                
-                return 0;                
+                return ConnectionStatus.getNoFile();
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
@@ -2704,11 +2820,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if(dloaders.size() > 0 &&
                        rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
                        rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
-
+    
                     files.add(rfd);//try this rfd later
                 }
                 rfd.resetFailedCount();                
-                return 0;
+                return ConnectionStatus.getNoFile();
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
@@ -2716,29 +2832,27 @@ public class ManagedDownloader implements Downloader, Serializable {
                     LOG.debug("rnae thrown in assignAndRequest "+dloader,rnae);
                 rfd.resetFailedCount();                
                 informMesh(rfd, true);
-                return 4; //no need to add to files or busy we keep iterating
+                //no need to add to files or busy we keep iterating
+                return ConnectionStatus.getPartialData();
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("fnfx thrown in assignAndRequest"+dloader, fnfx);
                 informMesh(rfd, false);
-                return 0;//discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("nsx thrown in assignAndRequest "+dloader, nsx);
                 informMesh(rfd, false);
-                return 0;//discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
                     DownloadStat.Q_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
-                //The extra time to sleep can be tuned. For now it's 1 S.
-                refQueueInfo[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
-                refQueueInfo[1] = qx.getQueuePosition();
                 synchronized(this) {
                     if(dloaders.size()==0) {
                         setState(REMOTE_QUEUED);
@@ -2752,14 +2866,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }                    
                 }
                 rfd.resetFailedCount();                
-                return 1;
+                return ConnectionStatus.getQueued(qx.getQueuePosition(),
+                                                  qx.getMinPollTime());
             } catch(ProblemReadingHeaderException prhe) {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("prhe thrown in assignAndRequest "+dloader,prhe);
                 informMesh(rfd, false);
-                return 0; //discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
@@ -2768,13 +2883,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                               ") thrown in assignAndRequest " +
                               dloader, uce);
                 informMesh(rfd, false);
-                return 0; //discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (ContentUrnMismatchException cume) {
             	if(RECORD_STATS)
             		DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
             	if(LOG.isDebugEnabled())
             		LOG.debug("cume thrown in assignAndRequest " + dloader, cume);
-				return 0;            		
+    			return ConnectionStatus.getNoFile();
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
@@ -2793,7 +2908,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 } else //tried the location twice -- it really is bad
                     informMesh(rfd, false);         
-                return 0;
+                return ConnectionStatus.getNoFile();
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
@@ -2819,7 +2934,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Equivalent: update the needed list IF we assigned white and 
                 //            we weren't able to start the download
                 if(updateNeeded)
-                    updateNeeded(dloader);
+                    updateNeeded(dloader);                
             }
             
             //did not throw exception? OK. we are downloading
@@ -2827,17 +2942,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 DownloadStat.RETRIED_SUCCESS.incrementStat();    
             
             rfd.resetFailedCount();
-
+    
             synchronized(this) {
                 setState(DOWNLOADING);
             }
+    
             if (stopped) {
                 LOG.trace("Stopped in assignAndRequest");
                 synchronized(this) {
                     updateNeeded(dloader); //give back a white area
                     files.add(rfd);
                 }
-                return 0;//throw new InterruptedException();
+                return ConnectionStatus.getNoData();
             }
             synchronized(this) {
                 // only add if not already added.
@@ -2848,7 +2964,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             if(RECORD_STATS)
                 DownloadStat.RESPONSE_OK.incrementStat();            
-            return 2;
+            return ConnectionStatus.getConnected();
         }
     }
 	
@@ -2961,7 +3077,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /**
-     * Steals a grey area from the biggesr HHTPDownloader and gives it to
+     * Steals a grey area from the biggesr HTTPDownloader and gives it to
      * the HTTPDownloader this method will return. 
      * <p> 
      * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
@@ -3214,7 +3330,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         return interval;
-    }
+    }   
 
     /**
      * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range
@@ -3439,7 +3555,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /**
-     * package access. Passes the call up to the activity callback
+     * Asks the user if we should continue or discard this download.
+     * Will only prompt if we have not received a HashTree that we
+     * can use to rebuild the download and we haven't already
+     * asked the user.
      */
     void promptAboutCorruptDownload() {
         synchronized(corruptStateLock) {
@@ -3447,8 +3566,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
             
-            //For any other state we don't do anything
-            if(corruptState == NOT_CORRUPT_STATE) {
+            if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
                 //when the user has made a decision. Until then the corruptState
@@ -3461,13 +3579,23 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+    /**
+     * Informs this downloader about how to handle corruption.
+     *
+     * If we received a HashTree while waiting for the response,
+     * we ignore the response and will recover automatically.
+     * Otherwise, we may continue the download or stop it immediately.
+     */
     public void discardCorruptDownload(boolean delete) {
-        if(delete) {
+        if(hashTree != null) {
+            corruptState = CORRUPT_CONTINUE_STATE;
+        } else if(delete) {
             corruptState = CORRUPT_STOP_STATE;
             stop();
-        }
-        else 
+        } else {
             corruptState = CORRUPT_CONTINUE_STATE;
+        }
+
         synchronized(corruptStateLock) {
             corruptStateLock.notify();
         }
@@ -3500,7 +3628,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         miniRFDToLock.clear();
         threadLockToSocket.clear();
         if(needed != null) //it's null while before we try first bucket
-            needed.clear();
+            needed.clear();        
         files = null;
         validAlts = null;
     }    
