@@ -1106,6 +1106,11 @@ public class UDPConnectionProcessor {
                     }
                 }
 
+                // Make sure that data reading is alive
+                if ( _outputToInputStream != null ) {
+                    _outputToInputStream.wakeup();
+                }
+
             } else if (msg instanceof FinMessage) {
                 // Stop sending data
                 _receiverWindowSpace    = 0;
