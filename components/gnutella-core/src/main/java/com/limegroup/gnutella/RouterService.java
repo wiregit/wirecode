@@ -763,5 +763,13 @@ public class RouterService
 		return chatter;
 	}
 
+    /**
+     * Tells whether the node is a supernode or not
+     * @return true, if supernode, false otherwise
+     */
+    public boolean isSupernode()
+    {
+        return manager.isSupernode();
+    }
 
 }
