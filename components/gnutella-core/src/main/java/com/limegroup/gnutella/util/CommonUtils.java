@@ -609,7 +609,24 @@ public final class CommonUtils {
             && !version.startsWith("1.2") 
 		    && !version.startsWith("1.1")  
 		    && !version.startsWith("1.0"); 
-    }   
+    }
+    
+    /**
+     * Determines if your version of java is out of date.
+     */
+    public static boolean isJavaOutOfDate() {
+        return isWindows() &&
+               !isSpecificJRE() &&
+               (getJavaVersion().startsWith("1.3") ||
+                getJavaVersion().startsWith("1.4.0"));
+    }
+    
+    /**
+     * Determines if this was loaded from a specific JRE.
+     */
+    public static boolean isSpecificJRE() {
+        return new File(".", "jre").isDirectory();
+    }
 
     /** 
 	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
