@@ -9,31 +9,49 @@ import java.io.UnsupportedEncodingException;
 /**
  * An UDP equivalent of the HEAD request method with a twist.
  * 
- * The host sending the ping can request that the pong be sent
- * somewhere else.  This is useful if we want to enable nodes in the
- * download mesh tell firewalled notes to punch holes to other nodes.
+ * It can be routed like a push request to firewalled alternate locations.
+ * As long as the pinging host can receive solicited udp 
+ * it can be firewalled as well.
  * 
- * In order to prevent easy ddosing, if the ping is intended to go 
- * to a different host it will contain only the minimal information.
+ * Illustration of NodeA pinging firewalled host NodeB:
+ * 
+ * 
+ * NodeB --------(PUSH_PING,udp)-------->Push
+ *    <-------------------(udp)--------- Proxy
+ *                                       /|\  | (tcp)
+ *                                        |   |
+ *                                        |  \|/
+ *                                        NodeB
  * 
  */
 
 public class HeadPing extends VendorMessage {
 	public static final int VERSION = 1;
 	
+	/**
+	 * requsted content of the pong
+	 */
 	public static final int PLAIN = 0x0;
 	public static final int INTERVALS = 0x1;
 	public static final int ALT_LOCS = 0x2;
-	public static final int FIREWALL_REDIRECT=0x4;
-	public static final int PUSH_ALTLOCS=0x8;
+	public static final int PUSH_ALTLOCS=0x4;
 	
+	
+	/**
+	 * whether this ping should be routed like a push request
+	 */
+	public static final int PUSH_PING=0x8;
+	
+	/**
+	 * the feature mask.
+	 */
 	public static final int FEATURE_MASK=0xF;
 	
 	private final URN _urn;
 	
 	private final byte _features;
 	
-	private final IpPort _address;
+	private final GUID _guid;
 	
 	/**
 	 * creates a message object with data from the network.
@@ -50,10 +68,6 @@ public class HeadPing extends VendorMessage {
 		byte features;
 		features = (byte) (payload [0] & FEATURE_MASK);
 		
-		//if this is a request for a redirect, strip all other features
-		//to avoid ddosing.
-		if ((features & FIREWALL_REDIRECT) == FIREWALL_REDIRECT)
-			features = (byte)FIREWALL_REDIRECT;
 		
 		_features = features;
 		
@@ -74,14 +88,14 @@ public class HeadPing extends VendorMessage {
 			_urn = urn;
 		}
 		
-		//parse the address that is supposed to receive the pong
-		if(_features != FIREWALL_REDIRECT)
-			_address=null;
-		else {
-			String host = NetworkUtils.ip2string(payload,42);
-			int port = ByteOrder.leb2short(payload,46);
-			_address = new Endpoint(host,port);
+		//parse the client guid if this is a push request
+		if ((_features & PUSH_PING) == PUSH_PING) {
+			byte [] guidBytes = new byte[16];
+			System.arraycopy(payload,42,guidBytes,0,16);
+			_guid = new GUID(guidBytes);
 		}
+		else _guid=null;
+		
 	}
 	
 	/**
@@ -90,26 +104,33 @@ public class HeadPing extends VendorMessage {
 	 * @param features which features to include in the response
 	 */
 	public HeadPing(URN urn, int features) {
-		 super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(urn, features,null));
-		 _urn = urn;
-		 _features = (byte) (features & FEATURE_MASK);
-		 _address=null;
+		 this (urn, null, features);
 	}
 	
 	/**
-	 * creates a new udp head request whose response should be
-	 * sent to the provided address.
-	 * @param urn the sha1 to provide information about
-	 * @param address the address to send the reply to.
+	 * creates a HeadPing that will be routed like a push request once it
+	 * reaches the push proxy.  
+	 * 
+	 * @param sha1 the sha1 urn of the file we want info about
+	 * @param clientGuid the clientGuid of the firewalled host
+	 * @param features the format of the pong.  
 	 */
-	public HeadPing(URN urn, IpPort address) {
+	public HeadPing(URN sha1,GUID clientGuid,int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(urn, FIREWALL_REDIRECT,address));
-		 _urn = urn;
-		 _features = FIREWALL_REDIRECT;
-		 _address=address;
+		 		derivePayload(sha1, features,clientGuid));
+		
+		//make sure the push flag is set if pushing
+		if (clientGuid!=null)
+			features = features | PUSH_PING;
+		
+		features = features & FEATURE_MASK;
+		
+		_features = (byte)features;
+		_guid =clientGuid;
+		_urn = sha1;
+		
 	}
+	
 	
 	/**
 	 * creates a plain udp head request
@@ -118,34 +139,48 @@ public class HeadPing extends VendorMessage {
 		this(urn, PLAIN);
 	}
 	
-	private static byte [] derivePayload(URN urn, int features, IpPort address) {
-		boolean redirect=false;
+	/**
+	 * creates a ping that should be forwarded to a shielded leaf.
+	 * both messages have the same guid.
+	 * 
+	 * @param original the original ping received from the pinger
+	 * @return the new ping, with stripped clientGuid and updated features.
+	 */
+	public HeadPing createForwardPing(HeadPing original) {
+		
+		HeadPing ret = 
+			new HeadPing(original.getUrn(),
+					original.getFeatures() & ~PUSH_PING);
+		
+		ret.setGUID(new GUID(original.getGUID()));
+		
+		return ret;
+	}
+	
+	private static byte [] derivePayload(URN urn, int features, GUID clientGuid) {
+		 
+		//make sure the push flag is set if pushing
+		if (clientGuid!=null)
+			features = features | PUSH_PING;
+		
 		features = features & FEATURE_MASK;
 		
-		// if this is a ping requesting a redirect, clear the other fields.
-		if ((features & FIREWALL_REDIRECT) ==  FIREWALL_REDIRECT) {
-			if ( address == null)
-				throw new IllegalArgumentException(
-					"requested a redirect, but no redirect address provided!");
-			else {
-				features = features & FIREWALL_REDIRECT;
-				redirect=true;
-			}
-		}
 		
 		String urnStr = urn.httpStringValue();
 		int urnlen = urnStr.getBytes().length;
-		byte [] ret = new byte[urnlen+ (redirect ? 7 : 1)];
+		int totalLen = urnlen;
+		totalLen= totalLen+ (clientGuid!=null ? 
+					clientGuid.bytes().length+1 : 1);
+		
+		byte []ret = new byte[totalLen];
+		
 		ret[0]=(byte)features;
+		
 		System.arraycopy(urnStr.getBytes(),0,ret,1,urnlen);
 		
-		//if the pong is meant to be sent elsewhere, include the ip address.
-		if (redirect) {
-			System.arraycopy(address.getInetAddress().getAddress(),0,
-				ret,urnlen+1,4);
+		if (clientGuid!=null)
+			System.arraycopy(clientGuid.bytes(),0,ret,urnlen+1,16);
 		
-			ByteOrder.short2leb((short)address.getPort(),ret,urnlen+5);
-		}
 		
 		return ret;
 	}
@@ -175,10 +210,11 @@ public class HeadPing extends VendorMessage {
 	}
 	
 	/**
-	 * @return the receiver of the pong to this ping.
-	 * if null, the reply goes to the originating host.
+	 * 
+	 * @return the client guid that this ping should be 
+	 * forwarded to.  if null, this is not a push ping.
 	 */
-	public IpPort getAddress() {
-		return _address;
+	public GUID getClientGuid() {
+		return _guid;
 	}
 }
