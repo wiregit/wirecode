@@ -202,11 +202,12 @@ public class LimeXMLSchema
      * with __ (double underscore).
      * So element.attribute ==> element__attribute__
      *
-     * @return list (of SchemaFieldInfo) of all the fields in this schema.
+     * @return unmodifiable list (of SchemaFieldInfo) of all the fields 
+     * in this schema.
      */
     public List getCanonicalizedFields()
     {
-        return _canonicalizedFields;
+        return Collections.unmodifiableList(_canonicalizedFields);
     }
     
     /**
