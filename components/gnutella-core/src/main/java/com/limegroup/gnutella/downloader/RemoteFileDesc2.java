@@ -35,7 +35,8 @@ public class RemoteFileDesc2 extends URLRemoteFileDesc {
 			  rfd.getXMLDoc(),
 			  rfd.getUrns(),
 			  rfd.isReplyToMulticast(),
-              rfd.getUrl());
+              rfd.getUrl(),
+              rfd.getPushProxies());
     }
 }
 

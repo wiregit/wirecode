@@ -53,7 +53,7 @@ import com.limegroup.gnutella.updates.*;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler {
+	implements ReplyHandler, PushProxyInterface {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -242,6 +242,11 @@ public class ManagedConnection extends Connection
      *  this certain hops value....
      */
     private int softMaxHops = -1;
+
+    /** Use this if a PushProxyAck is received for this MC meaning the remote
+     *  Ultrapeer can serve as a PushProxy
+     */
+    private int pushProxyPort = -1;
 
     /** The class wide static counter for the number of udp connect back 
      *  request sent.
@@ -1063,7 +1068,32 @@ public class ManagedConnection extends Connection
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             softMaxHops = hops.getHopValue();
         }
+        else if (vm instanceof PushProxyAcknowledgement) {
+            // this connection can serve as a PushProxy, so note this....
+            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
+            if (Arrays.equals(ack.getGUID(),
+                              RouterService.getMessageRouter()._clientGUID))
+                pushProxyPort = ack.getListeningPort();
+            // else mistake on the server side - the guid should be my client
+            // guid - not really necessary but whatever
+        }
         else if (vm instanceof MessagesSupportedVendorMessage) {
+
+            // see if you need a PushProxy - the remoteHostSupportsPushProxy
+            // test incorporates my leaf status in it.....
+            if (remoteHostSupportsPushProxy() > -1) {
+                // get the client GUID and send off a PushProxyRequest
+                GUID clientGUID =
+                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                try {
+                    PushProxyRequest req = new PushProxyRequest(clientGUID);
+                    send(req);
+                }
+                catch (BadPacketException never) {
+                    never.printStackTrace();
+                }
+            }
+
             // if we are ignoring local addresses and the connection is local
             // or the guy has a similar address then ignore
             if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
@@ -1301,6 +1331,23 @@ public class ManagedConnection extends Connection
     public void setQueryRouteTableSent(QueryRouteTable qrt) {
         _lastQRPTableSent = qrt;
     }
+
+    
+    /** @return a non-negative integer representing the proxy's port for UDP
+     *  communication, a negative number if PushProxy isn't supported.
+     */
+    public int getPushProxyPort() {
+        return pushProxyPort;
+    }
+
+    /** @return the InetAddress of the remote host - only meaningful if
+     *  getPushProxyPort() > -1
+     *  @see getPushProxyPort()
+     */
+    public InetAddress getPushProxyAddress() {
+        return getInetAddress();
+    }
+    
 
     
     /** 

@@ -1084,12 +1084,14 @@ public class RouterService {
      * while browsing host
      * @param serventID The guid of the client to browse from.  I need this in
      * case I need to push....
+     * @param proxies the list of PushProxies we can use - may be null.
 	 */
 	public static void doBrowseHost(String host, int port, 
-                             GUID guid, GUID serventID) {
+                                    GUID guid, GUID serventID,
+                                    PushProxyInterface[] proxies) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
                                                           guid, serventID);
-        handler.browseHost(host, port);
+        handler.browseHost(host, port, proxies);
 	}
 
     /**

@@ -1,0 +1,95 @@
+package com.limegroup.gnutella.messages.vendor;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.*;
+import java.io.*;
+
+/** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
+ *  Used to ask a host you connect to do a TCP ConnectBack.
+ */
+public final class PushProxyAcknowledgement extends VendorMessage {
+
+    public static final int VERSION = 1;
+
+    /** The payload has a 16-bit unsigned value - the port - at which one should
+     *  connect back.
+     */
+    private final int _port;
+
+    PushProxyAcknowledgement(byte[] guid, byte ttl, byte hops, int version, 
+                             byte[] payload) 
+        throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, version,
+              payload);
+
+        if (getVersion() > VERSION)
+            throw new BadPacketException("UNSUPPORTED VERSION");
+
+        if (getPayload().length != 2)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         payload.length);
+        // get the port from the payload....
+        _port = ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 0));
+    }
+
+
+    /** @param port The port you want people to connect back to.  If you give a
+     *  bad port I don't check so check yourself!
+     */
+    public PushProxyAcknowledgement(int port) throws BadPacketException {
+        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
+              derivePayload(port));
+        _port = port;
+    }
+
+    /** @param port The port you want people to connect back to.  If you give a
+     *  bad port I don't check so check yourself!
+     *  @param guid In case you want to set the guid (the PushProxy protocol
+     *  advises this).
+     */
+    public PushProxyAcknowledgement(int port,
+                                    GUID guid) throws BadPacketException {
+        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
+              derivePayload(port));
+        _port = port;
+        setGUID(guid);
+    }
+
+    /** @return the port the PushProxy is listening on....
+     */
+    public int getListeningPort() {
+        return _port;
+    }
+
+    private static byte[] derivePayload(int port) throws BadPacketException{
+        try {
+            // i do it during construction....
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)port,baos); // write _port
+            return baos.toByteArray();
+        }
+        catch (IOException ioe) {
+            // this should never happen!!!
+            ioe.printStackTrace();
+            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        }
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        if (RECORD_STATS)
+            ;
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    public void recordDrop() {
+        super.recordDrop();
+    }
+
+
+}

@@ -7,6 +7,8 @@ import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.bitzi.util.Base32;
 
 
 /** 
@@ -562,7 +564,9 @@ public class DownloadManager implements BandwidthTracker {
 
             //2. Attempt to give to an existing downloader.
             synchronized (this) {
-                BrowseHostHandler.handlePush(index,new GUID(clientGUID),socket);
+                if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), 
+                                                 socket))
+                    return;
                 for (Iterator iter=active.iterator(); iter.hasNext();) {
                     ManagedDownloader md=(ManagedDownloader)iter.next();
                     if (md.acceptDownload(file, socket, index, clientGUID))
@@ -707,7 +711,53 @@ public class DownloadManager implements BandwidthTracker {
      *  <tt>false</tt>
      */
     public boolean sendPush(RemoteFileDesc file) {
-        
+        debug("DM.sendPush(): entered.");
+        PushProxyInterface[] proxies = file.getPushProxies();
+        if (proxies != null) {
+            //TODO: investigate not sending a HTTP request to a proxy
+            //you are directly connected to.  How much of a problem is this?
+            //Probably not much of one at all.  Classic example of code
+            //complexity versus efficiency.  It may be hard to actually
+            //distinguish a PushProxy from one of your UP connections if the
+            //connection was incoming since the port on the socket is ephemeral 
+            //and not necessarily the proxies listening port
+            // we have proxy info - give them a try
+            debug("DM.sendPush(): proxy info exists.");
+            boolean requestSuccessful = false;
+
+            // set up request
+            final String requestString = "/gnutella/pushproxy?ServerID=" + 
+                Base32.encode(file.getClientGUID());
+            final String nodeString = "X-Node:";
+            final String nodeValue = 
+                NetworkUtils.ip2string(RouterService.getAddress()) +
+                ":" + RouterService.getPort();
+
+            // try to contact each proxy
+            for (int i = 0; (i < proxies.length) && !requestSuccessful; i++) {
+                try {
+                    String ip = proxies[i].getPushProxyAddress().getHostName();
+                    int port = proxies[i].getPushProxyPort();
+                    URL url = new URL("http", ip, port, requestString);
+                    HttpURLConnection connection = 
+                    (HttpURLConnection) url.openConnection();
+                    connection.setUseCaches(false);
+                    connection.setRequestProperty(nodeString, nodeValue);
+                    requestSuccessful = (connection.getResponseCode() == 202);
+                    connection.disconnect();
+                }
+                catch (MalformedURLException url) {
+                    url.printStackTrace();
+                }
+                catch (IOException ioe) {
+                }
+            }
+
+            if (requestSuccessful)
+                return requestSuccessful;
+            // else just send a PushRequest as normal
+        }
+
         // handle multicast replies specially...
         boolean multicast = file.isReplyToMulticast();
         

@@ -4,7 +4,9 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
+import java.net.*;
 import java.util.Locale;
+import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 
 /**
@@ -88,6 +90,10 @@ public class QueryReply extends Message implements Serializable{
 	/** The raw ip address of the host returning the hit.*/
 	private byte[] _address = new byte[4];
 
+    /** the PushProxy info for this hit.
+     */
+    private PushProxyInterface[] _proxies;
+
     /** Our static and final instance of the GGEPUtil helper class.
      */
     private static final GGEPUtil _ggepUtil = new GGEPUtil();
@@ -105,7 +111,8 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             false, false, false, false, false, false, true, isMulticastReply);
+             false, false, false, false, false, false, true, isMulticastReply,
+             new PushProxyInterface[0]);
     }
 
 
@@ -133,7 +140,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply);
+             true, isMulticastReply, new PushProxyInterface[0]);
     }
 
 
@@ -167,12 +174,50 @@ public class QueryReply extends Message implements Serializable{
             boolean isMulticastReply) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
+             supportsChat, isMulticastReply, new PushProxyInterface[0]);
+    }
+
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is ON by default.  
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
+     * @param xmlBytes The (non-null) byte[] containing aggregated
+     * and indexed information regarding file metadata.  In terms of byte-size, 
+     * this should not be bigger than 65535 bytes.  Anything larger will result
+     * in an Exception being throw.  This String is assumed to consist of
+     * compressed data.
+     * @param supportsChat true iff the host currently allows chatting.
+     * @param proxies an array of PushProxy interfaces.  will be included in 
+     * the replies GGEP extension.
+     * @exception IllegalArgumentException Thrown if 
+     * xmlBytes.length > XML_MAX_SIZE
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID, byte[] xmlBytes,
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply, PushProxyInterface[] proxies) 
+        throws IllegalArgumentException {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
-             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply);
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             proxies);
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("XML bytes too big: "+xmlBytes.length);
         _xmlBytes = xmlBytes;        
     }
+
 
     /** Creates a new query reply with data read from the network. */
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
@@ -219,12 +264,9 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply) {
+             boolean isMulticastReply, PushProxyInterface[] proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              11 +                             // 11 bytes of header
-              rLength(responses) +             // file records size
-              qhdLength(includeQHD, xmlBytes, supportsBH, isMulticastReply) + 
-                                               // conditional xml-style QHD len
+              0,                               // length, update later
               16);                             // 16-byte footer
         // you aren't going to send this.  it will throw an exception above in
         // the appropriate constructor....
@@ -242,88 +284,98 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid num responses: "+n);
 		}
 
-        payload=new byte[getLength()];
-        //Write beginning of payload.
-        //Downcasts are ok, even if they go negative
-        payload[0]=(byte)n;
-        ByteOrder.short2leb((short)port,payload,1);
-        payload[3]=ip[0];
-        payload[4]=ip[1];
-        payload[5]=ip[2];
-        payload[6]=ip[3];
-        ByteOrder.int2leb((int)speed,payload,7);
+        // set up proxies
+        _proxies = proxies;
 
-        //Write each response at index i
-        int i=11;
-        for (int left=n; left>0; left--) {
-            Response r=responses[n-left];
-            i = r.writeToArray(payload,i);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try {
+            //Write beginning of payload.
+            //Downcasts are ok, even if they go negative
+            baos.write(n);
+            ByteOrder.short2leb((short)port, baos);
+            baos.write(ip, 0, ip.length);
+            ByteOrder.int2leb((int)speed, baos);
+            
+            //Write each response
+            for (int left=n; left>0; left--) {
+                Response r=responses[n-left];
+                r.writeToStream(baos);
+            }
+            
+            //Write QHD if desired
+            if (includeQHD) {
+                //a) vendor code.  This is hardcoded here for simplicity,
+                //efficiency, and to prevent character decoding problems.  If you
+                //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
+                //well.
+                baos.write(76); //'L'
+                baos.write(73); //'I'
+                baos.write(77); //'M'
+                baos.write(69); //'E'
+                
+                //b) payload length
+                baos.write(COMMON_PAYLOAD_LEN);
+                
+                // size of standard, no options, ggep block...
+                int ggepLen=
+                    _ggepUtil.getQRGGEP(false, false, 
+                                        new PushProxyInterface[0]).length;
+                
+                //c) PART 1: common area flags and controls.  See format in
+                //parseResults2.
+                byte flags=
+                    (byte)((needsPush && !isMulticastReply ? PUSH_MASK : 0) 
+                           | BUSY_MASK 
+                           | UPLOADED_MASK 
+                           | SPEED_MASK
+                           | GGEP_MASK);
+                byte controls=
+                    (byte)(PUSH_MASK
+                           | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
+                           | (finishedUpload ? UPLOADED_MASK : 0)
+                           | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
+                           | (supportsBH || isMulticastReply ? 
+                              GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+
+                baos.write(flags);
+                baos.write(controls);
+                
+                //d) PART 2: size of xmlBytes + 1.
+                int xmlSize = xmlBytes.length + 1;
+                if (xmlSize > XML_MAX_SIZE)
+                    xmlSize = XML_MAX_SIZE;  // yes, truncate!
+                ByteOrder.short2leb(((short) xmlSize), baos);
+                
+                //e) private area: one byte with flags 
+                //for chat support
+                byte chatSupport=(byte)(supportsChat ? CHAT_MASK : 0);
+                baos.write(chatSupport);
+                
+                //f) the GGEP block
+                byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
+                                                       isMulticastReply,
+                                                       _proxies);
+                baos.write(ggepBytes, 0, ggepBytes.length);
+                
+                //g) actual xml.
+                baos.write(xmlBytes, 0, xmlBytes.length);
+                
+                // write null after xml, as specified
+                baos.write(0);
+            }
+
+            //Write footer
+            baos.write(clientGUID, 0, 16);
+            
+            // setup payload params
+            payload = baos.toByteArray();
+            updateLength(payload.length);
+        }
+        catch (IOException reallyBad) {
+            reallyBad.printStackTrace();
         }
 
-        //Write QHD if desired
-        if (includeQHD) {
-            //a) vendor code.  This is hardcoded here for simplicity,
-            //efficiency, and to prevent character decoding problems.  If you
-            //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
-            //well.
-            payload[i++]=(byte)76; //'L'
-            payload[i++]=(byte)73; //'I'
-            payload[i++]=(byte)77; //'M'
-            payload[i++]=(byte)69; //'E'
-
-            //b) payload length
-            payload[i++]=(byte)COMMON_PAYLOAD_LEN;
-
-            // size of standard, no options, ggep block...
-            int ggepLen = _ggepUtil.getQRGGEP(false, false).length;
-
-            //c) PART 1: common area flags and controls.  See format in
-            //parseResults2.
-            payload[i++]=(byte)(
-                (needsPush && !isMulticastReply ? PUSH_MASK : 0) 
-                | BUSY_MASK 
-                | UPLOADED_MASK 
-                | SPEED_MASK
-                | GGEP_MASK);
-            payload[i++]=(byte)(PUSH_MASK
-                | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
-                | (finishedUpload ? UPLOADED_MASK : 0)
-                | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
-                | (supportsBH || isMulticastReply ? 
-                   GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
-
-
-            //d) PART 2: size of xmlBytes + 1.
-            int xmlSize = xmlBytes.length + 1;
-            if (xmlSize > XML_MAX_SIZE)
-                xmlSize = XML_MAX_SIZE;  // yes, truncate!
-            ByteOrder.short2leb(((short) xmlSize), payload, i);
-            i += 2;
-
-            //e) private area: one byte with flags 
-            //for chat support
-            payload[i++]=(byte)(supportsChat ? CHAT_MASK : 0);
-
-            //f) the GGEP block
-            byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
-                                                   isMulticastReply);
-            System.arraycopy(ggepBytes, 0,
-                             payload, i, ggepBytes.length);
-            i += ggepBytes.length;
-
-            //g) actual xml.
-            System.arraycopy(xmlBytes, 0, 
-                             payload, i, xmlSize-1);
-            // adjust i...
-            i += xmlSize-1;
-            // write null after xml, as specified
-            payload[i++] = (byte)0;
-        }
-
-        //Write footer at payload[i...i+16-1]
-        for (int j=0; j<16; j++) {
-            payload[i+j]=clientGUID[j];
-        }
 		setAddress();
     }
 
@@ -356,33 +408,6 @@ public class QueryReply extends Message implements Serializable{
             ret += responses[i].getLength();
         }
         return ret;
-    }
-
-    /** Returns the number of bytes necessary to represent the QHD in the
-     *  payload.  Needs to take account of size of XML and whether or not to
-     *  even include a QHD.
-     */
-    private static int qhdLength(boolean includeQHD, 
-                                 byte[] xmlBytes, 
-                                 boolean supportsBH,
-                                 boolean isMulticastReply) {
-        int retInt = 0;
-        if (includeQHD) {
-            retInt += 4; // 'LIME'
-            retInt += 1; // 1 byte for size of public area
-            retInt += COMMON_PAYLOAD_LEN; 
-            // the size of the GGEP block for Query Replies with optional Browse
-            // Host flag...
-            retInt += _ggepUtil.getQRGGEP(supportsBH, isMulticastReply).length;
-            retInt += 1;//One byte in the private area for chat
-            // size of xml string, max XML_MAX_SIZE            
-            int numBytes = xmlBytes.length;
-            if ((numBytes + 1) > XML_MAX_SIZE)
-                retInt += XML_MAX_SIZE;
-            else
-                retInt += (numBytes + 1);
-        }
-        return retInt;
     }
 
 	// inherit doc comment
@@ -625,6 +650,15 @@ public class QueryReply extends Message implements Serializable{
             return false;
         }
     }
+
+    /**
+     * @return null or a non-zero lenght array of PushProxy hosts.
+     */
+    public PushProxyInterface[] getPushProxies() {
+        parseResults();
+        return _proxies;
+    }
+
     
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
@@ -739,6 +773,7 @@ public class QueryReply extends Message implements Serializable{
             int supportsChatT=UNDEFINED;
             int supportsBrowseHostT=UNDEFINED;
             int replyToMulticastT=UNDEFINED;
+            PushProxyInterface[] proxies=null;
             
             //a) extract vendor code
             try {
@@ -795,6 +830,7 @@ public class QueryReply extends Message implements Serializable{
                             replyToMulticastT = TRUE;
                         else
                             replyToMulticastT = FALSE;
+                        proxies = _ggepUtil.getPushProxies(ggepBlocks);
                     }
                     catch (BadGGEPBlockException ignored) {
                     }
@@ -847,6 +883,7 @@ public class QueryReply extends Message implements Serializable{
             this.supportsChat=supportsChatT;
             this.supportsBrowseHost=supportsBrowseHostT;
             this.replyToMulticast=replyToMulticastT;
+            this._proxies=proxies;
 
             debug("QR.parseResults2(): returning w/o exception.");
 
@@ -935,7 +972,8 @@ public class QueryReply extends Message implements Serializable{
 												   supportsBrowseHost,
 												   currResp.getDocument(),
 												   currResp.getUrns(),
-												   isReplyToMulticast);
+												   isReplyToMulticast,
+                                                   _proxies);
         }
         
         return retArray;
@@ -1055,6 +1093,7 @@ public class QueryReply extends Message implements Serializable{
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
      */
     static class GGEPUtil {
+
         /** The standard GGEP block for a LimeWire QueryReply.  
          *  Currently has no keys.
          */
@@ -1128,9 +1167,55 @@ public class QueryReply extends Message implements Serializable{
          * desire. 
          */
         public byte[] getQRGGEP(boolean supportsBH,
-                                boolean isMulticastResponse) {
+                                boolean isMulticastResponse,
+                                PushProxyInterface[] proxies) {
             byte[] retGGEPBlock = _standardGGEP;
-            if (supportsBH && isMulticastResponse)
+            if ((proxies != null) && (proxies.length > 0)) {
+                final int MAX_PROXIES = 3;
+                GGEP retGGEP = new GGEP();
+
+                // write easy extensions if applicable
+                if (supportsBH)
+                    retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                if (isMulticastResponse)
+                    retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+
+                // if a PushProxyInterface is valid, write up to MAX_PROXIES
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int numWritten = 0, index = 0;
+                while ((index < proxies.length) && (numWritten < MAX_PROXIES)) {
+                    String host = 
+                        proxies[index].getPushProxyAddress().getHostAddress();
+                    int port = proxies[index].getPushProxyPort();
+                    try {
+                        IPPortCombo combo = new IPPortCombo(host, port);
+                        baos.write(combo.toBytes());
+                        numWritten++;
+                    }
+                    catch (UnknownHostException bad) {
+                    }
+                    catch (IOException terrible) {
+                        terrible.printStackTrace();
+                    }
+                    index++;
+                }
+
+                try {
+                    // add the PushProxies
+                    if (numWritten > 0)
+                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY,
+                                    baos.toByteArray());
+                    // set up return value
+                    baos.reset();
+                    retGGEP.write(baos);
+                    retGGEPBlock = baos.toByteArray();
+                }
+                catch (IOException terrible) {
+                    terrible.printStackTrace();
+                }
+
+            }
+            else if (supportsBH && isMulticastResponse)
                 retGGEPBlock = _comboGGEP;
             else if (supportsBH)
                 retGGEPBlock = _bhGGEP;
@@ -1168,7 +1253,163 @@ public class QueryReply extends Message implements Serializable{
             return retBool;
         }
 
+        
+        /** @return non-zero-length array of PushProxyInterfaces or null,
+         *  as described by the GGEP blocks.
+         */
+        public PushProxyInterface[] getPushProxies(GGEP[] ggeps) {
+            List proxies = new ArrayList();
+            for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
+                Set headers = ggeps[i].getHeaders();
+                // if the block has a PUSH_PROXY value, get it, parse it,
+                // and move to the next
+                if (headers.contains(GGEP.GGEP_HEADER_PUSH_PROXY)) {
+                    byte[] proxyBytes = null;
+                    try {
+                        proxyBytes = 
+                            ggeps[i].getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+                    }
+                    catch (BadGGEPPropertyException bad) {
+                        bad.printStackTrace();  // unexpected
+                        continue;
+                    }
+
+                    ByteArrayInputStream bais = 
+                        new ByteArrayInputStream(proxyBytes);
+                    while (bais.available() > 0) {
+                        byte[] combo = new byte[6];
+                        if (bais.read(combo, 0, combo.length) == combo.length) {
+                            try {
+                                proxies.add(new PushProxyContainer(combo));
+                            }
+                            catch (IllegalArgumentException malformedPair) {
+                            }
+                        }                        
+                    }
+                }
+            }
+
+            if (proxies.size() > 0) {
+                PushProxyInterface[] retProxies = 
+                    new PushProxyInterface[proxies.size()];
+                retProxies = (PushProxyInterface[]) proxies.toArray(retProxies);
+                return retProxies;
+            }
+            return null;
+        }
+
 
     }
+
+    /** A simple utility class for doling out PushProxy information.
+     */
+    public static class PushProxyContainer implements PushProxyInterface {
+        IPPortCombo _combo;
+
+        public PushProxyContainer(String hostAddress, int port) 
+            throws UnknownHostException {
+            _combo = new IPPortCombo(hostAddress, port);
+        }
+
+        public PushProxyContainer(byte[] fromNetwork)
+            throws IllegalArgumentException {
+            _combo = IPPortCombo.getCombo(fromNetwork);
+        }
+
+        public int getPushProxyPort() {
+            return _combo.getPort();
+        }
+        public InetAddress getPushProxyAddress() {
+            return _combo.getAddress();
+        }
+
+        public boolean equals(Object other) {
+            if (other instanceof PushProxyContainer) {
+                PushProxyContainer iface = (PushProxyContainer) other;
+                return _combo.equals(iface._combo);
+            }
+            return false;
+        }
+        
+    }
+
+    /** Another utility class the encapsulates some complexity.
+     *  Keep in mind that I very well could have used Endpoint here, but I
+     *  decided against it mainly so I could do validity checking.
+     *  This may be a bad decision.  I'm sure someone will let me know during
+     *  code review.
+     */
+    private static class IPPortCombo {
+        private int _port;
+        private InetAddress _addr;
+        
+        public static final String DELIM = ":";
+
+        /** @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
+         */
+        public static IPPortCombo getCombo(byte[] fromNetwork) 
+            throws IllegalArgumentException {
+            if (fromNetwork.length != 6)
+                throw new IllegalArgumentException("Weird Input");
+            
+            String host = NetworkUtils.ip2string(fromNetwork, 0);
+            int port = ByteOrder.ubytes2int(ByteOrder.leb2short(fromNetwork, 4));
+
+            try {
+                return new IPPortCombo(host, port);
+            }
+            catch (UnknownHostException uhe) {
+                throw new IllegalArgumentException("Unknown Host");
+            }
+        }
+
+        public IPPortCombo(String hostAddress, int port) 
+            throws UnknownHostException, IllegalArgumentException  {
+            if (hostAddress.equals("0.0.0.0"))
+                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
+            _addr = InetAddress.getByName(hostAddress);
+            if (!NetworkUtils.isValidPort(port))
+                throw new IllegalArgumentException("Bad Port");
+            _port = port;
+        }
+
+        public int getPort() {
+            return _port;
+        }
+        public InetAddress getAddress() {
+            return _addr;
+        }
+
+        /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
+         *  //TODO if IPv6 kicks in, this may fail, don't worry so much now.
+         */
+        public byte[] toBytes() {
+            byte[] retVal = new byte[6];
+            
+            for (int i=0; i < 4; i++)
+                retVal[i] = _addr.getAddress()[i];
+
+            ByteOrder.short2leb((short)_port, retVal, 4);
+
+            return retVal;
+        }
+
+        public boolean equals(Object other) {
+            if (other instanceof IPPortCombo) {
+                IPPortCombo combo = (IPPortCombo) other;
+                return _addr.equals(combo._addr) && (_port == combo._port);
+            }
+            return false;
+        }
+
+    }
+
+
+    private static final int min(int a, int b) {
+        if (a < b)
+            return a;
+        else return b;
+    }
+
 
 } //end QueryReply

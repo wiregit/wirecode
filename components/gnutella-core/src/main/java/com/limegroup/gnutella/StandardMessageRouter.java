@@ -297,6 +297,10 @@ public class StandardMessageRouter extends MessageRouter {
             xmlBytes = xmlCollectionString.getBytes();
         }
         
+        // get the *latest* push proxies
+        PushProxyInterface[] proxies = 
+            (notIncoming ? _manager.getPushProxies() : null);
+        
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
             // ok, need to partition responses up once again and send out
@@ -331,7 +335,7 @@ public class StandardMessageRouter extends MessageRouter {
                                                 xmlCompressed, notIncoming, 
                                                 busy, uploaded, 
                                                 measuredSpeed, supportsChat,
-                                                isFromMcast);
+                                                isFromMcast, proxies);
                     queryReplies.add(queryReply);
                 }
             }
@@ -350,7 +354,8 @@ public class StandardMessageRouter extends MessageRouter {
             queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
                                         _clientGUID, xmlCompressed,
                                         notIncoming, busy, uploaded, 
-                                        measuredSpeed,supportsChat, isFromMcast);
+                                        measuredSpeed, supportsChat,
+                                        isFromMcast, proxies);
             queryReplies.add(queryReply);
         }
 

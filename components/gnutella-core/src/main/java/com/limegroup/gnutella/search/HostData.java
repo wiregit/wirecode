@@ -79,6 +79,11 @@ public final class HostData {
     private final String VENDOR_CODE;
     
 
+    /**
+     * The list of PushProxies for this Host.
+     */
+    private final PushProxyInterface[] PROXIES;
+
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
@@ -135,7 +140,7 @@ public final class HostData {
 		} catch(BadPacketException bad) {
 		    multicast = false;
 		}
-
+        
 		try {
             vendor = reply.getVendor();
 		} catch(BadPacketException bad) {
@@ -150,6 +155,7 @@ public final class HostData {
         VENDOR_CODE = vendor;
 		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
         QUALITY = reply.calculateQualityOfService(ifirewalled);
+        PROXIES = reply.getPushProxies();
         
         if ( multicast )
             SPEED = Integer.MAX_VALUE;
@@ -282,4 +288,14 @@ public final class HostData {
 	public boolean isReplyToMulticastQuery() {
 	    return MULTICAST;
 	}
+
+    /**
+     * Returns the (potentially null) list of PushProxies.
+     *
+     * @return an array of PushProxies or null.
+     */
+    public PushProxyInterface[] getPushProxies() {
+        return PROXIES;
+    }
+
 }

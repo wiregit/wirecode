@@ -74,6 +74,15 @@ public final class HTTPUploader implements Uploader {
      */
     private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
+    /** The address as described by the "X-Node" header.
+     */
+    private String _nodeAddress;
+
+    /** The port as described by the "X-Node" header.
+     */
+    private int _nodePort;
+
+
     private BandwidthTrackerImpl bandwidthTracker=null;
 
 	/**
@@ -165,6 +174,9 @@ public final class HTTPUploader implements Uploader {
         switch(_index) {
         case UploadManager.BROWSE_HOST_FILE_INDEX:
             setState(BROWSE_HOST);
+            return;
+        case UploadManager.PUSH_PROXY_FILE_INDEX:
+            setState(PUSH_PROXY);
             return;
         case UploadManager.UPDATE_FILE_INDEX:
             setState(UPDATE_FILE);
@@ -408,6 +420,9 @@ public final class HTTPUploader implements Uploader {
         case BROWSE_HOST:
             _state = new BrowseHostUploadState(this);
             break;
+        case PUSH_PROXY:
+            _state = new PushProxyUploadState(this);
+            break;
         case UPDATE_FILE:
             _state = new UpdateFileState(this);
             break;
@@ -529,6 +544,10 @@ public final class HTTPUploader implements Uploader {
         return !_userAgent.startsWith("Morpheus 3.0.2");
     }
     
+    public String getNodeAddress() {return _nodeAddress; }
+    
+    public int getNodePort() {return _nodePort; }
+    
     /**
      * The amount of bytes that this upload has transferred.
      * For HTTP/1.1 transfers, this number is the amount uploaded
@@ -599,6 +618,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
+                else if ( readNodeHeader(str)      ) ;
         	}
         } finally {
             // we want to ensure these are always set, regardless
@@ -756,6 +776,7 @@ public final class HTTPUploader implements Uploader {
         //Allow them to browse the host though
 		if (SettingsManager.instance().getAllowBrowser() == false
             && !(_stateNum == BROWSE_HOST)  
+            && !(_stateNum == PUSH_PROXY)  
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
 			// if we are not supposed to read from them
 			// throw an exception
@@ -854,6 +875,30 @@ public final class HTTPUploader implements Uploader {
         _supportsQueueing = true;
         return true;
     }
+
+    /** 
+     * Reads the X-Node header
+     *
+     * @return true if the header had an node description value
+     */
+    private boolean readNodeHeader(String str) {
+        if ( indexOfIgnoreCase(str, "X-Node") == -1 )
+            return false;
+           
+        StringTokenizer st = new StringTokenizer(str, ":");
+        // we are expecting 3 tokens - only evalute if you see 3
+        if (st.countTokens() >= 3) {
+            try {
+                // discard X-Node
+                st.nextToken();
+                _nodeAddress = st.nextToken().trim();
+                _nodePort = Integer.parseInt(st.nextToken().trim());
+            }
+            catch (NumberFormatException nfe) {} // crappy port
+        }
+            
+        return true;
+    }	
 
 	/**
 	 * This method parses the "X-Gnutella-Content-URN" header, as specified

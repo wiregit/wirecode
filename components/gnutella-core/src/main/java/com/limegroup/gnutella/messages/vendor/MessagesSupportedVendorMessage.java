@@ -7,7 +7,8 @@ import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 
 /** The message that lets other know what messages you support.  Everytime you
- *  add a subclass of VendorMessagePayload you should modify this class.
+ *  add a subclass of VendorMessage you should modify this class (assuming your
+ *  message is delivered over TCP).
  */
 public final class MessagesSupportedVendorMessage extends VendorMessage {
 
@@ -69,6 +70,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     }
 
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
+    // you should only add messages supported over TCP
     private static void addSupportedMessages(Set hashSet) {
         // TCP Connect Back
         SupportedMessageBlock smp = null;
@@ -83,6 +85,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
                                         HopsFlowVendorMessage.VERSION);
         hashSet.add(smp);
+        // Push Proxy Request
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,
+                                        PushProxyRequest.VERSION);
+        hashSet.add(smp);        
     }
 
 
@@ -137,6 +143,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      */
     public int supportsHopsFlow() {
         return supportsMessage(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
+    }
+
+    /**
+     * @return -1 if the message isn't supported, else it returns the version 
+     * of the message supported.
+     */
+    public int supportsPushProxy() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ);
     }
 
     // override super

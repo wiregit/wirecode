@@ -127,6 +127,12 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final int MALFORMED_REQUEST_INDEX = -4;
 
+    /** 
+     * The file index used in this structure to indicate a Push Proxy 
+     * request.
+     */
+    public static final int PUSH_PROXY_FILE_INDEX = -5;
+    
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
@@ -306,6 +312,7 @@ public final class UploadManager implements BandwidthTracker {
      */
     private boolean shouldShowInGUI(Uploader uploader) {
         return uploader.getState() != Uploader.BROWSE_HOST &&
+               uploader.getState() != Uploader.PUSH_PROXY &&
                uploader.getState() != Uploader.UPDATE_FILE &&
                uploader.getState() != Uploader.MALFORMED_REQUEST &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
@@ -1107,6 +1114,16 @@ public final class UploadManager implements BandwidthTracker {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
                 UploadStat.UPDATE_FILE.incrementStat();
+            } else if (fileInfoPart.startsWith("/gnutella/pushproxy")) {
+                index = PUSH_PROXY_FILE_INDEX;
+                // set the filename as the servent ID
+                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=");
+                if (stLocal.countTokens() < 2)
+                    throw new IOException("Malformed PushProxy HTTP Request");
+                // skip first part
+                stLocal.nextToken();
+                // had better be the client GUID
+                fileName = stLocal.nextToken();
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information

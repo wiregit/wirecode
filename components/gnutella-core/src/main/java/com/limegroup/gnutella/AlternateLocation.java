@@ -697,7 +697,7 @@ public final class AlternateLocation
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  EMPTY_GUID, 1000,
-								  true, 3, false, null, urnSet, false);
+								  true, 3, false, null, urnSet, false, null);
 	}
 
 	/**

@@ -33,6 +33,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
     /** The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
+    /** The extension header (key) for PushProxy support. */
+    public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
@@ -75,6 +77,14 @@ public class GGEP extends Object {
      */
     public GGEP(boolean notNeedCOBS) {
         this.notNeedCOBS=notNeedCOBS;
+    }    
+
+    /** 
+     * Creates a new empty GGEP block.  Typically this is used for outgoing
+     * messages and mutated before encoding.  This does do COBS encoding.
+     */
+    public GGEP() {
+        this(false);
     }    
 
     /** Constructs a GGEP instance based on the GGEP block beginning at

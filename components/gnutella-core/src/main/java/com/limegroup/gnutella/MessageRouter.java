@@ -268,6 +268,16 @@ public abstract class MessageRouter {
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
+        else if (msg instanceof PushProxyRequest) {
+			if(RECORD_STATS)
+                ;
+            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
+        }
+        else if (msg instanceof PushProxyAcknowledgement) {
+			if(RECORD_STATS)
+                ;
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        }
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -856,6 +866,32 @@ public abstract class MessageRouter {
         }
         catch (SecurityException se) {
             // whatever
+        }
+    }
+
+
+    /**
+     * 1) confirm that the connection is Ultrapeer to Leaf, then send your
+     * listening port in a PushProxyAcknowledgement.
+     * 2) Also cache the client's client GUID.
+     */
+    protected void handlePushProxyRequest(PushProxyRequest ppReq,
+                                          ManagedConnection source) {
+        if (source.isSupernodeClientConnection()) {
+            try {
+                // 1)
+                PushProxyAcknowledgement ack = 
+                    new PushProxyAcknowledgement(RouterService.getPort(),
+                                                 ppReq.getClientGUID());
+                source.send(ack);
+                
+                // 2)
+                _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
+                                           source);
+            }
+            catch (BadPacketException tooTerribleToIgnore) {
+                tooTerribleToIgnore.printStackTrace();
+            }
         }
     }
 
@@ -1619,7 +1655,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    protected void sendPushRequest(PushRequest push)
+    public void sendPushRequest(PushRequest push)
         throws IOException {
         if(push == null) {
             throw new NullPointerException("null push");
