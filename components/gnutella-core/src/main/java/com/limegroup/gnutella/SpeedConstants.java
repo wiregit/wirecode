@@ -8,7 +8,7 @@ package com.limegroup.gnutella;
 
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-public class SpeedConstants {
+public final class SpeedConstants {
 	
 	/**
 	 * INTS ASSOCIATED WITH CONNECTION SPEED NAMES.  See 
