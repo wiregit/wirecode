@@ -18,6 +18,12 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	private ReceivedMessageStat() {}
 
 	/**
+	 * Private class for handling byte statistics.
+	 */
+	private static class ReceivedMessageStatBytes 
+		extends AbstractKilobytesStatistic {}
+
+	/**
 	 * Private class for keeping track of filtered messages.
 	 */
 	private static class FilteredReceivedMessageStat 
@@ -54,7 +60,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 * Private class for keeping track of filtered messages, in bytes.
 	 */
 	private static class FilteredReceivedMessageStatBytes
-		extends ReceivedMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_FILTERED_MESSAGES_BYTES.incrementStat();
@@ -66,7 +72,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 * UDP messages.
 	 */
 	private static class UDPReceivedMessageStatBytes 
-		extends ReceivedMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
@@ -79,7 +85,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 * TCP messages.
 	 */
 	private static class TCPReceivedMessageStatBytes 
-		extends ReceivedMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
@@ -212,25 +218,25 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 * <tt>Statistic</tt> for all messages received.
 	 */
 	public static final Statistic ALL_MESSAGES_BYTES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all UPD messages received.
 	 */
 	public static final Statistic ALL_UDP_MESSAGES_BYTES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages received.
 	 */
 	public static final Statistic ALL_TCP_MESSAGES_BYTES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES_BYTES =
-		new ReceivedMessageStat();
+		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pings received over UDP.

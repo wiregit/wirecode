@@ -16,7 +16,7 @@ public interface Statistic {
 	 * @return the total of this statistic recorded, regardless of any
 	 *  time increments
 	 */
-	long getTotal();
+	double getTotal();
 
 	/**
 	 * Accessor for the average number of this statistic type received 
@@ -25,7 +25,7 @@ public interface Statistic {
 	 * @return the average number of this statistic type received 
 	 *  per recording time period
 	 */
-	float getAverage();
+	double getAverage();
 
 	/**
 	 * Accessor for the maximum recorded stat value over all recorded
@@ -34,7 +34,7 @@ public interface Statistic {
 	 * @return the maximum recorded stat value over all recorded
 	 *  time periods
 	 */
-	int getMax();
+	double getMax();
 
 	/**
 	 * Increments this statistic by one.

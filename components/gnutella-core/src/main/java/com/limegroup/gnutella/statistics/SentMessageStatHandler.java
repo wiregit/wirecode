@@ -35,7 +35,7 @@ public final class SentMessageStatHandler {
 	 * @param byteStat the statistic for keeping track of the total bytes
 	 */
 	private SentMessageStatHandler(Statistic numberStat, 
-									   Statistic byteStat) {
+								   Statistic byteStat) {
 		NUMBER_STAT = numberStat;
 		BYTE_STAT = byteStat;
 	} 

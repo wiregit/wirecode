@@ -38,7 +38,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 * Variable for the total number of messages received for this 
 	 * statistic.
 	 */
-	protected long _total = 0;
+	protected double _total = 0;
 
 	/**
 	 * The total number of stats recorded.
@@ -48,7 +48,7 @@ public abstract class AbstractStatistic implements Statistic {
 	/**
 	 * The maximum value ever recorded for any time period.
 	 */
-	protected int _max = 0;
+	protected double _max = 0;
 
 	/**
 	 * Constructs a new <tt>Statistic</tt> instance with 0 for all 
@@ -62,17 +62,17 @@ public abstract class AbstractStatistic implements Statistic {
 	}
 
 	// inherit doc comment
-	public long getTotal() {
+	public double getTotal() {
 		return _total;
 	}
 
 	// inherit doc comment
-	public float getAverage() {
+	public double getAverage() {
 		return _total/_totalStatsRecorded;
 	}
 
 	// inherit doc comment
-	public int getMax() {
+	public double getMax() {
 		return _max;
 	}
 

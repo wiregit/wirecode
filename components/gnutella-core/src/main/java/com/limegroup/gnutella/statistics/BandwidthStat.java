@@ -4,27 +4,13 @@ package com.limegroup.gnutella.statistics;
  * This class contains a type-safe enumeration of all classes for
  * bandwidth data.
  */
-public class BandwidthStat extends AbstractStatistic {
-
+public class BandwidthStat extends AbstractKilobytesStatistic {
 	
 	/**
 	 * Make the constructor private so that only this class can construct
 	 * a <tt>BandwidthStat</tt> instances.
 	 */
 	private BandwidthStat() {}
-
-
-	public long getTotal() {
-		return (long)(_total/128);
-	}
-
-	public int getMax() {
-		return (int)(_max/128);
-	}
-
-	public float getAverage() {
-		return (float)(getTotal()/_totalStatsRecorded);
-	}
 
 	/**
 	 * Specialized class for accumulating all upstream bandwidth data.

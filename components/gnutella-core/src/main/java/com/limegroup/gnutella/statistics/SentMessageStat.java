@@ -18,6 +18,12 @@ public class SentMessageStat extends AbstractStatistic {
 	private SentMessageStat() {}
 
 	/**
+	 * Private class for handling byte statistics.
+	 */
+	private static class SentMessageStatBytes 
+		extends AbstractKilobytesStatistic {}
+
+	/**
 	 * Private class for keeping track of filtered messages.
 	 */
 	private static class FilteredSentMessageStat 
@@ -54,7 +60,7 @@ public class SentMessageStat extends AbstractStatistic {
 	 * Private class for keeping track of filtered messages, in bytes.
 	 */
 	private static class FilteredSentMessageStatBytes
-		extends SentMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_FILTERED_MESSAGES_BYTES.incrementStat();
@@ -66,7 +72,7 @@ public class SentMessageStat extends AbstractStatistic {
 	 * UDP messages.
 	 */
 	private static class UDPSentMessageStatBytes 
-		extends SentMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
@@ -79,7 +85,7 @@ public class SentMessageStat extends AbstractStatistic {
 	 * TCP messages.
 	 */
 	private static class TCPSentMessageStatBytes 
-		extends SentMessageStat {
+		extends AbstractKilobytesStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
@@ -212,25 +218,25 @@ public class SentMessageStat extends AbstractStatistic {
 	 * <tt>Statistic</tt> for all messages sent.
 	 */
 	public static final Statistic ALL_MESSAGES_BYTES =
-		new SentMessageStat();
+		new SentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all UPD messages sent.
 	 */
 	public static final Statistic ALL_UDP_MESSAGES_BYTES =
-		new SentMessageStat();
+		new SentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages sent.
 	 */
 	public static final Statistic ALL_TCP_MESSAGES_BYTES =
-		new SentMessageStat();
+		new SentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES_BYTES =
-		new SentMessageStat();
+		new SentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pings sent over UDP.
