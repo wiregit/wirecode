@@ -11,6 +11,8 @@ LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Hira
 LOCALE_SCRIPT_NAME=Hiragana, Katakana, Kanji
+LOCALE_ENGLISH_LANGUAGE_NAME=Japanese
+
 # UTF-8 file created in Windows 2000/XP NotePad with the "Ms Gothic" font.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

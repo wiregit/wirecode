@@ -11,6 +11,7 @@ LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=Międzynarodowy
 LOCALE_SCRIPT_CODE=Latn
 LOCALE_SCRIPT_NAME=Latin
+LOCALE_ENGLISH_LANGUAGE_NAME=Polish
 # UTF-8 file edited with NotePad on Windows NT/2000/XP with the "Courier New" font
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
