@@ -166,18 +166,17 @@ public class VerifyingFile {
 		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
 		/// some stuff to help debugging ///
-		if (!leasedBlocks.contains(intvl)) {
-			LOG.error("trying to write an interval that wasn't leased "+dumpState(), 
-					new Exception());
-			System.exit(1);
-		}
+		if (!leasedBlocks.contains(intvl)) { 
+			Assert.silent(false, "trying to write an interval "+intvl+
+                    " that wasn't leased "+dumpState());
+        }
+		
 		
 		if (verifiedBlocks.contains(intvl) || 
 				partialBlocks.contains(intvl) ||
 				pendingBlocks.contains(intvl)) {
-			LOG.error("trying to write an interval that was already written"+dumpState(), 
-					new Exception());
-			System.exit(1);
+            Assert.silent(false,"trying to write an interval "+intvl+
+                    " that was already written"+dumpState());
 		}
 		
 		////////////

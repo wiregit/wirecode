@@ -948,14 +948,7 @@ public class DownloadWorker implements Runnable {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
             if(http11) {
-                int chunkSize = _manager.getChunkSize();
-                int free = _commonOutFile.hasFreeBlocksToAssign();
-                
-                // if we have less than one free chunk, take half of that
-                if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
-                    chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
-                
-                interval = _commonOutFile.leaseWhite(chunkSize);
+                interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
                 interval = _commonOutFile.leaseWhite();
         }
@@ -984,7 +977,17 @@ public class DownloadWorker implements Runnable {
         return interval;
     }
 
-
+    private int findChunkSize() {
+        int chunkSize = _manager.getChunkSize();
+        int free = _commonOutFile.hasFreeBlocksToAssign();
+        
+        // if we have less than one free chunk, take half of that
+        if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
+            chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
+        
+        return chunkSize;
+    }
+    
     /**
      * Steals a grey area from the biggesr HTTPDownloader and gives it to
      * the HTTPDownloader this method will return. 
