@@ -27,6 +27,11 @@ public static void main(String[] args)
         //initialize it
         connection.initialize();
 
+        //start a thread to read messages
+        Thread receiveMessageThread = new Thread(new ReceiveMessageThread(connection));
+        receiveMessageThread.setDaemon(true);
+        receiveMessageThread.start();
+        
         Message m = null;
         
         //read messages
@@ -57,7 +62,10 @@ public static void main(String[] args)
             try
             {
                 long sleepTime = mt.getTime() + timeLag - System.currentTimeMillis();
-                Thread.sleep( sleepTime > 0 ? sleepTime : 0);
+                if(sleepTime > 0)
+                {
+                    Thread.sleep(sleepTime);
+                }
             }
             catch(InterruptedException ie)
             {
@@ -80,11 +88,40 @@ public static void main(String[] args)
  
 }//end of fn main
 
-private static void syntaxError() {
-	System.err.println("Syntax: java com.limegroup.gnutella.tests.MessageSimulator "
-			   +"<host> <port>");
-	System.exit(1);
+private static void syntaxError() 
+{
+    System.err.println("Syntax: java com.limegroup.gnutella.tests.MessageSimulator "
+                       +"<host> <port>");
+    System.exit(1);
+}
+
+private static class ReceiveMessageThread implements Runnable
+{
+    private Connection conn;
+    
+    public ReceiveMessageThread(Connection conn)
+    {
+        this.conn = conn;
     }
+    
+    public void run()
+    {
+        
+        while(true)
+        {
+            try
+            {
+                conn.receive();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    
+}
 
 
 }
