@@ -56,7 +56,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
      * since our connectin pass this headers, and this is what the
      * per-connection soft max is based on.
 	 */    
-    private static final byte SOFT_MAX = (byte)5; // X-Max-TTL+1
+    private static final byte SOFT_MAX = (byte)4; // X-Max-TTL+1
 
 
 	/**
