@@ -285,7 +285,8 @@ public final class URN {
 	 * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
 	 */
 	public boolean equals(Object urn) {
-		if(!(urn instanceof URN)){
+		if(urn == this) return true;
+		if(!(urn instanceof URN)) {
 			return false;
 		}
 		return ((URN)urn).getURNString().equals(URN_STRING);
