@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
+import com.limegroup.gnutella.ByteOrder;
 
 /** For implementation details, please see:
  *  http://www.acm.org/sigcomm/sigcomm97/papers/p062.pdf 
@@ -15,14 +16,14 @@ public class COBSUtil {
      */
     public static byte[] cobsEncode(byte[] src) throws IOException {
         final int srcLen = src.length;
-        byte code = (byte) 0x01;
+        int code =  1;
         int currIndex = 0;
         ByteArrayOutputStream sink = new ByteArrayOutputStream();
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
 
         while (currIndex < srcLen) {
             if (src[currIndex] == 0) {
-                sink.write((int)code);
+                sink.write(code);
                 sink.write(temp.toByteArray());
                 temp.reset();
                 code = (byte) 0x01;
@@ -31,7 +32,7 @@ public class COBSUtil {
                 temp.write((int)src[currIndex]);
                 code++;
                 if (code == 0xFF) {
-                    sink.write((int)code);
+                    sink.write(code);
                     sink.write(temp.toByteArray());
                     temp.reset();
                     code = (byte) 0x01;
@@ -40,7 +41,7 @@ public class COBSUtil {
             currIndex++;
         }
 
-        sink.write((int)code);
+        sink.write(code);
         sink.write(temp.toByteArray());
         return sink.toByteArray();
     }
