@@ -201,18 +201,9 @@ public class MetaFileManager extends FileManager {
                     i++){
                     //One ReplyCollection per schema
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
-                    if (s.equalsIgnoreCase("audio")){
-                        //Map nameToFile = getAllMP3FilesRecursive();
-                        collection = 
-                        new LimeXMLReplyCollection(fileToHash.keySet(), 
-                                                   schemas[i],
-                                                   this, true);
-                    }
-                    else
-                        collection = 
-                        new LimeXMLReplyCollection(fileToHash.keySet(),
-                                                   schemas[i],
-                                                   this, false);
+                    collection = 
+                    new LimeXMLReplyCollection(fileToHash, schemas[i], this, 
+                                               s.equalsIgnoreCase("audio"));
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
                 }                

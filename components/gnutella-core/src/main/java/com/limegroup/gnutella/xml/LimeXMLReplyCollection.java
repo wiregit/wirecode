@@ -14,21 +14,27 @@ import org.xml.sax.*;
  *  So when a search comes in, we only have to look at the set of replies
  *  that correspond to the schema of the query.
  * 
+ *  Locking: Never obtain a this' monitor PRIOR to obtaining that of the
+ *  FileManager.
  * @author Sumeet Thadani
  */
 
 public class LimeXMLReplyCollection{
     
     private String schemaURI;
-    //a list of reply docs in the client machine that correspond to the Schema
-    //Note: Each ReplyCollection is written out to 1 physical file on shutdown.
+    /** a list of reply docs in the client machine that correspond to the Schema
+     *  Note: Each ReplyCollection is written out to 1 physical file on 
+     *  shutdown.
+     *  Locking: Never obtain a lock on mainMap PRIOR to obtaining that of
+     *  hashSet (the input hashSet upon construction).
+     */
     private HashMap mainMap;
     public boolean audio = false;//package access
-    private ID3Editor editor = null;
-    private List replyDocs = null;
     private File dataFile = null;//flat file where all data is stored.
-    private String changedHash = null;
     private MetaFileManager metaFileManager = null;
+    /** used for synching when writing...
+     */
+    private Object writeLock = new Object(); 
 
     public static final int NORMAL = 0;
     public static final int FILE_DEFECTIVE = 1;
@@ -44,12 +50,12 @@ public class LimeXMLReplyCollection{
     public static final int HASH_FAILED  = 11;
 
     /**
-     * @param hashSet The set of Hashes you want us to make a collection out of.
+     * @param fileToHash The map of files to hashes for all shared files.
      * @param URI This collection's schema URI
      * @param fm A pointer to the system wide (Meta)FileManager .
      * @param audio Whether this is a collection of audio files.
      */
-    public LimeXMLReplyCollection(Set hashSet, String URI, 
+    public LimeXMLReplyCollection(Map fileToHash, String URI, 
                                   FileManager fm, boolean audio) {
         this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
@@ -77,11 +83,12 @@ public class LimeXMLReplyCollection{
         // LimeXMLDocument out of each.=  Then add it to the collection.
         // we assume the hashSet input into the collection is the aggregate of
         // files shared by LimeWire....
-        Iterator iter = hashSet.iterator();
+        synchronized (fileToHash) {
+        Iterator iter = fileToHash.keySet().iterator();
         ID3Reader id3Reader = new ID3Reader();
         while((iter != null) && iter.hasNext()) {
             File file = (File)iter.next();
-            String hash = metaFileManager.readFromMap(file);
+            String hash = (String) fileToHash.get(file);
             Object xml = hashToXMLStr.get(hash); //lookup in store from disk
             // at this point, xml can be either 1. a LimeXMLDoc, 2. a string 
             // (a xml string), or 3. null
@@ -137,10 +144,9 @@ public class LimeXMLReplyCollection{
             // if i've gotten this far, the doc is non-null and should be added.
             addReply(hash, doc);
         }
-        
-        if (hashSet != null)
-            checkDocuments(hashSet,false);
-
+        checkDocuments(fileToHash, false);
+        }
+    
         debug("LimeXMLReplyCollection(): returning.");
 
         write();
@@ -164,23 +170,33 @@ public class LimeXMLReplyCollection{
         return retList;
     }
 
-    private void checkDocuments(Set hashSet, boolean mp3){
-        //compare fileNames  from documents in mainMap to 
-        //actual filenames as per the map
-        Iterator iter = null;
-        if (hashSet != null)
-            iter = hashSet.iterator();
+    /** This method resolves any discrepancy between the identifier in the 
+     *  LimeXMLDocument with the actual file name of the file the
+     *  LimeXMLDocument refers to.
+     */
+    private void checkDocuments(Map fileToHash, boolean mp3){
+        synchronized (fileToHash) {
+        // FLOW:
+        // 1. get the set of files
+        // 2. for each file, see if it has a doc associated with it.
+        // 3. if the file has a doc, then see if the id of the doc conflicts
+        //    with the actual file name.
+        // 1
+        Iterator iter = fileToHash.keySet().iterator();
         if (iter == null)
             return;
         while(iter.hasNext()){
             File file  = (File)iter.next();
-            String hash=metaFileManager.readFromMap(file);
+            String hash = (String) fileToHash.get(file);
             LimeXMLDocument doc;
             synchronized(mainMap){
                 doc = (LimeXMLDocument)mainMap.get(hash);
             }
-            if(doc==null)//File in current round has no docs of this schema
+            // 2
+            if(doc==null)
                 continue;
+
+            // 3
             String actualName = null;
             try {
                 actualName = file.getCanonicalPath();
@@ -194,8 +210,7 @@ public class LimeXMLReplyCollection{
             String identifier = doc.getIdentifier();
             if(!actualName.equalsIgnoreCase(identifier))
                 doc.setIdentifier(actualName);
-            //TODO: Commit this to disk if any of the docs was dirty!
-            //toDisk("");//write the change out to disk
+        }
         }
     }
 
@@ -237,13 +252,11 @@ public class LimeXMLReplyCollection{
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
-        replyDocs=null;//things have changed
     }
 
 
-    public synchronized void addReplyWithCommit(File f, 
-                                                String hash, 
-                                                LimeXMLDocument replyDoc) {
+    public void addReplyWithCommit(File f, String hash, 
+                                   LimeXMLDocument replyDoc) {
         String identifier ="";
         try{
             identifier = f.getCanonicalPath();
@@ -276,9 +289,7 @@ public class LimeXMLReplyCollection{
     }
 
     public List getCollectionList(){
-        if (replyDocs !=null)
-            return replyDocs;
-        replyDocs = new ArrayList();
+        List replyDocs = new ArrayList();
         synchronized(mainMap){
             Iterator iter = mainMap.keySet().iterator();
             while(iter.hasNext()){
@@ -302,7 +313,7 @@ public class LimeXMLReplyCollection{
             while(iter.hasNext()){
                 Object hash = iter.next();
                 LimeXMLDocument currReplyDoc=
-                                      (LimeXMLDocument)mainMap.get(hash); 
+                (LimeXMLDocument)mainMap.get(hash); 
                 boolean match = LimeXMLUtils.match(currReplyDoc, queryDoc);
                 if(match){
                     matchingReplyDocs.add(currReplyDoc);
@@ -323,12 +334,10 @@ public class LimeXMLReplyCollection{
             oldDoc = (LimeXMLDocument)mainMap.get(hash);
             mainMap.put(hash,newDoc);
         }
-        replyDocs=null;//things have changed
         return oldDoc;
     }
 
-    public synchronized boolean removeDoc(String hash){
-        replyDocs=null;//things will change
+    public boolean removeDoc(String hash){
         boolean found;
         Object val;
         synchronized(mainMap){
@@ -337,7 +346,6 @@ public class LimeXMLReplyCollection{
         }
         boolean written = false;
         if(found){
-            //ID3Editor editor = null;
             written = write();
         }
         if(!written && found){//put it back to maintin consistency
@@ -363,27 +371,30 @@ public class LimeXMLReplyCollection{
         }        
         try{
             MapSerializer ms = new MapSerializer(dataFile, mainMap);
-            ms.commit();
+            synchronized (writeLock) {
+                ms.commit();
+            }
         }catch (Exception e){
             return false;
         }
         return true;
     }
     
-    public synchronized int mp3ToDisk(String mp3FileName){
+    public int mp3ToDisk(String mp3FileName){
         boolean wrote=false;
         int mp3WriteState = -1;
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        if (ripMP3XML(mp3FileName)) 
+        Object[] output = ripMP3XML(mp3FileName);
+        if (((Boolean) output[0]).booleanValue()) 
             // now we need to commit ID3 data to disk
-            mp3WriteState = commitID3Data(mp3FileName);
+            mp3WriteState = commitID3Data(mp3FileName,
+                                          (String) output[1],
+                                          (ID3Editor) output[2]);
         
         // write out the mainmap in serial form...
         wrote = write();
-        this.changedHash = null;
-        this.editor= null; //reset the value
 
         if(!wrote) //writing serialized map failed
             return RW_ERROR;
@@ -391,33 +402,44 @@ public class LimeXMLReplyCollection{
         return mp3WriteState;//wrote successful, return mp3WriteState
     }
 
-    
-    private boolean ripMP3XML(String modifiedFile) {
+    /** @return A Object[] of size 3.  First object is a boolean indicated
+    whether you should commit this ID3 to disk, second is the new hash (String)
+    of the file, and third is the ID3Editor to use....
+     */
+    private Object[] ripMP3XML(String modifiedFile) {
+        Object[] retObjs = new Object[3];
+        retObjs[0] = new Boolean(false);
         if (!LimeXMLUtils.isMP3File(modifiedFile))
-            return false;
+            return retObjs;
         try {
             String hash = 
             new String(LimeXMLUtils.hashFile(new File(modifiedFile)));
-            LimeXMLDocument doc = (LimeXMLDocument) mainMap.get(hash);
+            LimeXMLDocument doc = null;
+            synchronized (mainMap) {
+                doc = (LimeXMLDocument) mainMap.get(hash);
+            }
             String fName = doc.getIdentifier();
             if (LimeXMLUtils.isMP3File(modifiedFile)) {
                 ID3Editor e = new ID3Editor();
                 String xml = doc.getXMLStringWithIdentifier();
                 e.removeID3Tags(xml);
-                this.editor = e;
-                this.changedHash = hash;
+                retObjs[0] = new Boolean(true);
+                retObjs[1] = hash;
+                retObjs[2] = e;
             }
-            return true;
+            return retObjs;
         }
         catch (Exception e) {
-            return false;
+            return retObjs;
         }
     }
 
 
-    private int commitID3Data(String mp3FileName) {
+    private int commitID3Data(String mp3FileName,
+                              String changedHash,
+                              ID3Editor editor) {
         //write to mp3 file...
-        int retVal = this.editor.writeID3DataToDisk(mp3FileName);
+        int retVal = editor.writeID3DataToDisk(mp3FileName);
         if (retVal != NORMAL)
             return retVal;
         
