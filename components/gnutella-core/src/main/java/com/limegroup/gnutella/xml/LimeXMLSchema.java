@@ -11,6 +11,13 @@ import java.io.*;
 import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
 
 /**
  * Stores a XML schema, and provides access to various components
@@ -58,25 +65,87 @@ public class LimeXMLSchema
     
     /**
      * Initilizes the schema after parsing it from the input source
-     * @param inputSource The source representing the XML schema definition
+     * @param schemaInputSource The source representing the XML schema definition
      * to be parsed
      */
-    private void initializeSchema(InputSource inputSource)
+    private void initializeSchema(InputSource schemaInputSource)
     {
         //get an instance of DocumentBuilderFactory
         DocumentBuilderFactory documentBuilderFactory =
             DocumentBuilderFactory.newInstance();
         //set validating, and namespace awareness
-        documentBuilderFactory.setValidating(true);
-        documentBuilderFactory.setNamespaceAware(true);
+        //documentBuilderFactory.setValidating(true);
+        //documentBuilderFactory.setNamespaceAware(true);
             
-        //    
-            
+        //get the document builder from factory    
+        DocumentBuilder documentBuilder=null;
+        try
+        {
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        }
+        catch(ParserConfigurationException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+        // Set an entity resolver to resolve the schema
+        documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
+
+        // Parse the schema and create a  document
+        Document document=null;  
+        try
+        {
+            document = documentBuilder.parse(schemaInputSource);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return;
+        }
+        
+        //print some of the elements
+        Element root = document.getDocumentElement();
+        printNode(root);
+        
+        //get the fields
+        LimeXMLSchemaFieldExtractor.getFields(document);
+        
+//        String rootName = root.getTagName();
+//        System.out.println("root = " + rootName);
+//        NodeList children = root.getChildNodes();
+//        int numChildren = children.getLength();
+//        System.out.println("no of children "+numChildren);
+//        for(int i=0;i<numChildren; i++)
+//        {
+//            Node n = children.item(i);
+//            String childName = n.getNodeName();
+//            System.out.println("child Name is "+childName);
+//        }
+        
+        
+        
         //TODO anu
             
     }
     
-    
+    private void printNode(Node n)
+    {
+        System.out.print("node = " + n.getNodeName() + " ");
+        
+        //get attributes
+        NamedNodeMap  nnm = n.getAttributes();
+        Node name = nnm.getNamedItem("name");
+        if(name != null)
+            System.out.print(name + "" );
+        System.out.println("");
+        NodeList children = n.getChildNodes();
+        int numChildren = children.getLength();
+        for(int i=0;i<numChildren; i++)
+        {
+            Node child = children.item(i);
+            printNode(child);
+	    }
+    }
     
     /**
      * Returns the unique identifier which identifies this particular schema
@@ -130,5 +199,47 @@ public class LimeXMLSchema
         //TODO
         //return null;
     }
+    
+    public static void Test()
+    {
+        try
+        {
+            LimeXMLSchema schema = new LimeXMLSchema(new File(
+                LimeXMLProperties.instance().getXMLSchemaDir() 
+                + File.separator
+                + "gen_books.xsd"));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void main(String[] args)
+    {
+        Test();
+    }
+    
+    
+    private static final class Resolver implements EntityResolver
+    {
+        private InputSource schema;
+        
+        public Resolver(InputSource s)
+        {
+            schema = s;
+        }
+        
+        public InputSource resolveEntity(String publicId, String systemId)
+        {
+            String Id = systemId+publicId;
+            String schemaId = schema.getSystemId()+schema.getPublicId();
+            if (Id.equals(schemaId))
+                return schema;
+            else
+                return null;
+        }
+    }//end of private innner class
+    
     
 }
