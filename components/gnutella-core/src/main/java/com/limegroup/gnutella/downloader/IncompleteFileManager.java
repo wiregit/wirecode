@@ -143,7 +143,8 @@ public class IncompleteFileManager implements Serializable {
                     //an older client with a newer download.dat downloads one
                     //byte extra for each interval.
                     interval.high = interval.high-1;
-                    vf.addInterval(interval);
+                    if(interval.high >= interval.low)
+                        vf.addInterval(interval);
                 }
                 retMap.put(incompleteFile,vf);
             }
@@ -155,11 +156,22 @@ public class IncompleteFileManager implements Serializable {
      *  of File->List<Interval>*/
     private Map invTransform() {
         Map retMap = new HashMap();
-        for(Iterator i=blocks.keySet().iterator(); i.hasNext();) {
-            Object incompleteFile = i.next();
+        for(Iterator iter=blocks.keySet().iterator(); iter.hasNext();) {
+            List writeList = new ArrayList();//the list we will write out
+            Object incompleteFile = iter.next();
             VerifyingFile vf  = (VerifyingFile)blocks.get(incompleteFile);
-            List l = vf.getBlocksAsList();
-            retMap.put(incompleteFile,l);
+            synchronized(vf) {
+                List l = vf.getBlocksAsList();
+                for(int i=0; i< l.size(); i++ ) {
+                    //clone the list because we cant mutate VerifyingFile's List
+                    Interval inter = (Interval)l.get(i);
+                    //Increment interval.high by 1 to maintain semantics of
+                    //Inerval
+                    Interval interval = new Interval(inter.low,inter.high+1);
+                    writeList.add(interval);
+                }
+            }
+            retMap.put(incompleteFile,writeList);
         }
         return retMap;
     }

@@ -148,6 +148,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      *
      * Never acquire stealLock's monitor if you have this' monitor.
      *
+     * Never acquire incompleteFileManager's monitor if you have commonOutFile's
+     * monitor.
+     *
      * Also, always hold stealLock's monitor before REMOVING elements from 
      * needed. As always, we must obtain this' monitor before modifying needed.
      ***********************************************************************/
