@@ -105,8 +105,8 @@ public abstract class MessageRouter {
 	 * generated queries that adjust to the number of results received, the
 	 * number of connections, etc.
 	 */
-	private final DynamicQuerier DYNAMIC_QUERIER =
-		DynamicQuerier.instance();
+	private final QueryDispatcher DYNAMIC_QUERIER =
+		QueryDispatcher.instance();
 	
 	/**
 	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
