@@ -368,6 +368,10 @@ public class QueryRequest extends Message implements Serializable{
 		}
     }
 
+	public byte[] getPayload() {
+		return payload;
+	}
+
     /** 
      * Returns the query string of this message.<p>
      *
@@ -464,9 +468,11 @@ public class QueryRequest extends Message implements Serializable{
 
     public String toString() {
  		return "<query: \""+getQuery()+"\", "+
-        "meta: \""+getRichQuery()+"\", "+
-        "types: "+getRequestedUrnTypes().size()+","+
-        "urns: "+getQueryUrns().size()+">";
+			"ttl: "+getTTL()+", "+
+			"hops: "+getHops()+", "+
+			"meta: \""+getRichQuery()+"\", "+
+			"types: "+getRequestedUrnTypes().size()+","+
+			"urns: "+getQueryUrns().size()+">";
     }
 }
 
