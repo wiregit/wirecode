@@ -59,8 +59,13 @@ public class HTTPUploader implements Uploader {
 		_manager = m;
 		_index = index;
 		_amountRead = 0;
-		FileDesc desc = FileManager.instance().get(_index);
-		_fileSize = desc._size;
+		FileDesc desc;
+		try {
+			desc = FileManager.instance().get(_index);
+			_fileSize = desc._size;
+		} catch (IndexOutOfBoundsException e) {
+			setState(COULDNT_CONNECT);
+		}
 		setState(CONNECTING);
 		try {
 		    _ostream = _socket.getOutputStream();
@@ -80,8 +85,13 @@ public class HTTPUploader implements Uploader {
 		_hostName = host;
 		_guid = guid;
 		_port = port;
-		FileDesc desc = FileManager.instance().get(_index);
-		_fileSize = desc._size;
+		FileDesc desc;
+		try {
+			desc = FileManager.instance().get(_index);
+			_fileSize = desc._size;
+		} catch (IndexOutOfBoundsException e) {
+			setState(PUSH_FAILED);
+		}
 		setState(CONNECTING);
 	}
 
