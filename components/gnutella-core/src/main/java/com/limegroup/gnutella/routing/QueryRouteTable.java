@@ -30,22 +30,8 @@ import java.io.*;
 public class QueryRouteTable {
     /** The suggested default table size. */
     public static final int DEFAULT_TABLE_SIZE=1<<14;  //16KB
-    /** The suggested default max table TTL. */
-    public static final byte DEFAULT_INFINITY=(byte)7;
     /** The maximum size of patch messages, in bytes. */
     public static final int MAX_PATCH_SIZE=1024; //1 KB
-
-    /** 
-     * The table of keywords and their associated TTLs.  Each value table[i] is
-     * the minimum number of hops <b>minus one</b> to a file that matches a
-     * keyword with hash i.  (Note that this corresponds to the minimum TTL for
-     * a matching query.)  If table[i]>=infinity, no file in the horizon matches
-     * a keyword with hash i.
-     *
-     * In other words, [0, 0, ... ] represents a completely full table, while
-     * [infinity, infinity, ...] represents an empty table.  
-     */
-    private byte[] table;
 
     /** The *new* table implementation.  The table of keywords - each value in
      *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
@@ -59,13 +45,6 @@ public class QueryRouteTable {
      *  methods don't seem to offer what is needed.
      */
     private int bitTableLength;
-
-    /** The max distance (measured in hops) of files tracked by this, i.e., the 
-     *  value used in table for infinity. */
-    private byte infinity;
-    /** The number of entries in this, used to make entries() run in O(1) time.
-     *  INVARIANT: entries=number of i s.t. table[i]<infinity */
-    private int entries;
 
     /** The number of entries in this, used to make entries() run in O(1) time.
      *  INVARIANT: bitEntries=number of i s.t. bitTable[i]==true */
@@ -90,7 +69,7 @@ public class QueryRouteTable {
 
     /** Creates a QueryRouteTable with default sizes. */
     public QueryRouteTable() {
-        this(DEFAULT_TABLE_SIZE, DEFAULT_INFINITY);
+        this(DEFAULT_TABLE_SIZE);
     }
 
     /** 
@@ -99,17 +78,13 @@ public class QueryRouteTable {
      * empty, i.e., contains no keywords.  Hosts may want to send queries
      * down this table's connection until it is fully patched.
      */
-    public QueryRouteTable(int initialSize, byte infinity) {
-        initialize(initialSize, infinity);
+    public QueryRouteTable(int initialSize) {
+        initialize(initialSize);
     }
 
-    private void initialize(int initialSize, byte infinity) {
-        this.table=new byte[initialSize];
-        Arrays.fill(table, infinity);
+    private void initialize(int initialSize) {
         this.bitTable=new BitSet(initialSize);
         this.bitTableLength=initialSize;
-        this.infinity=infinity;
-        this.entries=0;
         this.bitEntries=0;
         this.sequenceNumber=-1;
         this.sequenceSize=-1;
@@ -124,8 +99,7 @@ public class QueryRouteTable {
      */
     public boolean contains(QueryRequest qr) {
         int ttl=qr.getTTL();
-        byte bits=Utilities.log2(table.length);
-        // byte bits=Utilities.log2(bitTableLength);
+        byte bits=Utilities.log2(bitTableLength);
 
         //1. First we check that all the normal keywords of qr are in the route
         //   table.  Note that this is done with zero allocations!  Also note
@@ -142,7 +116,7 @@ public class QueryRouteTable {
 
             //...and look up its hash.
             int hash=HashFunction.hash(query, j, k, bits);
-            if (! contains(hash, ttl))
+            if (!contains(hash))
                 return false;
             i=k+1;
         }        
@@ -160,7 +134,7 @@ public class QueryRouteTable {
             doc = new LimeXMLDocument(richQuery);
             String docSchemaURI = doc.getSchemaURI();
             int hash = HashFunction.hash(docSchemaURI, bits);
-            if (! contains(hash, ttl))//don't know the URI? can't answer query
+            if (!contains(hash))//don't know the URI? can't answer query
                 return false;
         } catch(Exception e) {//malformed XML
             //TODO: avoid generic catch(Exception)
@@ -190,7 +164,7 @@ public class QueryRouteTable {
                 
                 //...and look up its hash.
                 int hash=HashFunction.hash(words, j, k, bits);
-                if (contains(hash, ttl))
+                if (contains(hash))
                     matchCount++;
                 wordCount++;
                 i=k+1;
@@ -204,10 +178,6 @@ public class QueryRouteTable {
             return ((float)matchCount/(float)wordCount) > 0.67;
     }
     
-    private final boolean contains(int hash, int ttl) {
-        return table[hash]<infinity;
-    }
-    
     // In the new version, we will not accept TTLs for methods.  Tables are only
     // 1 hop deep....
     private final boolean contains(int hash) {
@@ -215,29 +185,10 @@ public class QueryRouteTable {
     }
 
     /**
-     * For all keywords k in filename, adds <k, 1> to this.
+     * For all keywords k in filename, adds <k> to this.
      */
     public void add(String filename) {
-        add(filename, 1);
         addBTInternal(filename);
-    }
-
-    /**
-     * For all keywords k in filename, adds <k, ttl> to this.
-     * <b>For testing purposes only.</b>
-     */
-    public void add(String filename, int ttl) {
-        String[] words=HashFunction.keywords(filename);
-        String[] keywords=HashFunction.getPrefixes(words);
-        for (int i=0; i<keywords.length; i++) {
-            int hash=HashFunction.hash(keywords[i], 
-                                       Utilities.log2(table.length));
-            if (ttl<table[hash]) {
-                if (table[hash]>=infinity)
-                    entries++;  //added new entry
-                table[hash]=(byte)ttl;
-            }
-        }
     }
 
 
@@ -256,18 +207,6 @@ public class QueryRouteTable {
 
 
     public void addIndivisible(String iString) {
-        final int ttl = 1;
-        final int hash = HashFunction.hash(iString, 
-                                           Utilities.log2(table.length));
-        if (ttl < table[hash]) {
-            if (table[hash] >= infinity)
-                entries++;  //added new entry
-            table[hash] = (byte)ttl;
-        }
-    }
-
-
-    public void addBTIndivisible(String iString) {
         final int hash = HashFunction.hash(iString, 
                                            Utilities.log2(bitTableLength));
         if (!bitTable.get(hash)) {
@@ -278,60 +217,18 @@ public class QueryRouteTable {
 
 
     /**
-     * For all <keyword_i, ttl_i> in m, adds <keyword_i, (ttl_i)+1> to this.
-     * (This is useful for unioning lots of route tables for propoagation.)
-     *
-     *    @modifies this
-     */
-    public void addAll(QueryRouteTable qrt) {
-        //This algorithm scales between tables of different lengths and TTLs.
-        //Refer to the query routing paper for a full explanation.  If
-        //performance is a problem, it's possible to special-case the algorithm
-        //for when both tables have the same length and infinity:
-        //
-        //          for (int i=0; i<table.length; i++)
-        //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
-        //              //update entries accordingly
-
-        int m=qrt.table.length;
-        int m2=this.table.length;
-        double scale=((double)m2)/((double)m);   //using float can cause round-off!
-        for (int i=0; i<m; i++) {
-            int low=(int)Math.floor(i*scale);
-            int high=(int)Math.ceil((i+1)*scale);
-            Assert.that(low>=0 && low<m2,
-                        "Low value "+low+" for "+i+" incompatible with "+m2);
-            Assert.that(high>=0 && high<=m2,
-                        "High value "+high+" for "+i+" incompatible with "+m2);
-            for (int i2=low; i2<high; i2++) {
-                byte other;
-                if (qrt.table[i]>=qrt.infinity)
-                    other=this.infinity;
-                else
-                    other=(byte)(qrt.table[i]+1);
-                if (other<table[i2]) {
-                    if (table[i2]>=infinity)
-                        entries++; //added new entry
-                    table[i2]=other;
-                }
-            }
-        }
-    }
-
-
-    /**
      * For all <keyword_i> in qrt, adds <keyword_i> to this.
      * (This is useful for unioning lots of route tables for propoagation.)
      *
      *    @modifies this
      */
-    public void addBTAll(QueryRouteTable qrt) {
+    public void addAll(QueryRouteTable qrt) {
         //This algorithm scales between tables of 2different lengths and TTLs.
         //Refer to the query routing paper for a full explanation.  If
         //performance is a problem, it's possible to special-case the algorithm
         //for when both tables have the same length and infinity:
         //
-        //          for (int i=0; i<table.length; i++)
+        //          for (int i=0; i<bitTableLength; i++)
         //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
         //              //update entries accordingly
 
@@ -360,29 +257,11 @@ public class QueryRouteTable {
 
     /** Returns the number of entries in this. */
     public int entries() {
-        return entries;
-    }        
-
-    /** True if o is a QueryRouteTable with the same entries of this. */
-    public boolean equals(Object o) {
-        if (! (o instanceof QueryRouteTable))
-            return false;
-
-        //TODO: two qrt's can be equal even if they have different TTL ranges.
-        QueryRouteTable other=(QueryRouteTable)o;
-        if (this.table.length!=other.table.length)
-            return false;
-
-        for (int i=0; i<this.table.length; i++) {
-            if (this.table[i]!=other.table[i])
-                return false;
-        }
-
-        return true;
+        return bitEntries;
     }
 
     /** True if o is a QueryRouteTable with the same entries of this. */
-    public boolean btEquals(Object o) {
+    public boolean equals(Object o) {
         if (! (o instanceof QueryRouteTable))
             return false;
 
@@ -398,14 +277,7 @@ public class QueryRouteTable {
     }
 
     public String toString() {
-        StringBuffer buf=new StringBuffer();
-        buf.append("{");
-        for (int i=0; i<table.length; i++) {
-            if (table[i]<infinity)
-                buf.append(i+"/"+table[i]+", ");
-        }
-        buf.append("}");
-        return buf.toString();
+        return bitTable.toString();
     }
 
 
@@ -419,7 +291,7 @@ public class QueryRouteTable {
         switch (m.getVariant()) {                      
         case RouteTableMessage.RESET_VARIANT:
             ResetTableMessage reset=(ResetTableMessage)m;
-            initialize(reset.getTableSize(), reset.getInfinity()); 
+            initialize(reset.getTableSize()); 
             return;
         case RouteTableMessage.PATCH_VARIANT:
             PatchTableMessage patch=(PatchTableMessage)m;
@@ -478,19 +350,12 @@ public class QueryRouteTable {
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
-                boolean wasInfinity=(table[nextPatch]>=infinity);
-                table[nextPatch]+=data[i];
-                boolean isInfinity=(table[nextPatch]>=infinity);
-                if (wasInfinity && !isInfinity)
-                    entries++;  //added entry
-                else if (!wasInfinity && isInfinity)
-                    entries--;  //removed entry
-                wasInfinity=(!bitTable.get(nextPatch));
+                boolean wasInfinity=(!bitTable.get(nextPatch));
                 if (data[i] == -6)
                     bitTable.set(nextPatch);
                 else if (data[i] == 6)
                     bitTable.clear(nextPatch);
-                isInfinity=(!bitTable.get(nextPatch));
+                boolean isInfinity=(!bitTable.get(nextPatch));
                 if (wasInfinity && !isInfinity)
                     bitEntries++;  //added entry
                 else if (!wasInfinity && isInfinity)
@@ -532,39 +397,31 @@ public class QueryRouteTable {
     public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
         List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
-            // buf.add(new ResetTableMessage(bitTableLength, infinity));
-            buf.add(new ResetTableMessage(table.length, infinity));
+            buf.add(new ResetTableMessage(bitTableLength, (byte)7));
         else
-            // Assert.that(prev.bitTableLength==this.bitTableLength,
-            Assert.that(prev.table.length==this.table.length,
+            Assert.that(prev.bitTableLength==this.bitTableLength,
                         "TODO: can't deal with tables of different lengths");
 
         //1. Calculate patch array
-        byte[] data=new byte[table.length];
+        byte[] data=new byte[bitTableLength];
         //        byte[] data=new byte[bitTableLength];
         boolean needsPatch=false;
         boolean needsFullByte=false;
         for (int i=0; i<data.length; i++) {
-            if (prev!=null)
-                data[i]=(byte)(this.table[i]-prev.table[i]);
-            else
-                data[i]=(byte)(this.table[i]-infinity);
-
-//             if (prev!=null) {
-//                 if (this.bitTable.get(i) == prev.bitTable.get(i))
-//                     data[i] = 0;
-//                 else if (this.bitTable.get(i))
-//                     data[i] = -6;
-//                 else // prev.bitTable.get(i)
-//                     data[i] = 6;
-//             }
-//             else {
-//                 if (this.bitTable.get(i))
-//                     data[i] = -6;
-//                 else
-//                     data[i] = 0;
-//             }
-                
+            if (prev!=null) {
+                if (this.bitTable.get(i) == prev.bitTable.get(i))
+                    data[i] = 0;
+                else if (this.bitTable.get(i))
+                    data[i] = -6;
+                else // prev.bitTable.get(i)
+                    data[i] = 6;
+            }
+            else {
+                if (this.bitTable.get(i))
+                    data[i] = -6;
+                else
+                    data[i] = 0;
+            }
 
             if (data[i]!=0)
                 needsPatch=true;
@@ -691,7 +548,7 @@ public class QueryRouteTable {
     ////////////////////////////// Unit Tests ////////////////////////////////
     
     /** Unit test */
-
+ 
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
 
@@ -736,12 +593,12 @@ public class QueryRouteTable {
         Assert.that(Arrays.equals(halve(big), small));
         Assert.that(Arrays.equals(unhalve(small), big));
 
-        QueryRouteTable qrt=new QueryRouteTable(1000, (byte)7);
+        QueryRouteTable qrt=new QueryRouteTable(1000);
         qrt.add("good book");
         Assert.that(qrt.entries()==2);
-        qrt.add("bad", 3);   //{good/1, book/1, bad/3}
+        qrt.add("bad");   //{good/1, book/1, bad/3}
         Assert.that(qrt.entries()==3);
-        qrt.add("bad", 4);   //{good/1, book/1, bad/3}
+        qrt.add("bad");   //{good/1, book/1, bad/3}
         Assert.that(qrt.entries()==3);
 
         //1. Simple keyword tests (add, contains)
@@ -759,23 +616,23 @@ public class QueryRouteTable {
                                                     "good bad bok")));
 
         //2. addAll tests
-        QueryRouteTable qrt2=new QueryRouteTable(1000, (byte)7);
+        QueryRouteTable qrt2=new QueryRouteTable(1000);
         Assert.that(qrt2.entries()==0);
-        qrt2.add("new", 3);
-        qrt2.add("book", 1);
+        qrt2.add("new");
+        qrt2.add("book");
         qrt2.addAll(qrt);     //{book/1, good/2, new/3, bad/4}
-        QueryRouteTable qrt3=new QueryRouteTable(1000, (byte)7);
+        QueryRouteTable qrt3=new QueryRouteTable(1000);
         Assert.that(qrt2.entries()==4);
-        qrt3.add("book", 1);
-        qrt3.add("good", 2);
-        qrt3.add("new", 3);
-        qrt3.add("bad", 4);
+        qrt3.add("book");
+        qrt3.add("good");
+        qrt3.add("new");
+        qrt3.add("bad");
         Assert.that(qrt2.equals(qrt3));
         Assert.that(qrt3.equals(qrt2));
 
         //3. encode-decode test--with compression
         //qrt={good/1, book/1, bad/3}
-        qrt2=new QueryRouteTable(1000, (byte)7);
+        qrt2=new QueryRouteTable(1000);
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             try { 
@@ -788,8 +645,8 @@ public class QueryRouteTable {
         }
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
 
-        qrt.add("bad", 2);
-        qrt.add("other", 4); //qrt={good/1, book/1, bad/2, other/4}
+        qrt.add("bad");
+        qrt.add("other"); //qrt={good/1, book/1, bad/2, other/4}
         Assert.that(! qrt2.equals(qrt));
         for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
@@ -807,18 +664,20 @@ public class QueryRouteTable {
         Iterator iter=qrt2.encode(qrt);
         Assert.that(! iter.hasNext());                     //test optimization
 
-        iter=(new QueryRouteTable(1000, (byte)7)).encode(null);  //blank table
+        iter=(new QueryRouteTable(1000).encode(null));  //blank table
         Assert.that(iter.next() instanceof ResetTableMessage);
         Assert.that(! iter.hasNext());
-
+        
         //4. encode-decode test--without compression.  (We know compression
-        //won't work because the table is very small and filled with random bytes.)
-        qrt=new QueryRouteTable(10, (byte)10);
+        //won't work because the table is very small and filled with random 
+        //bytes.)
+        qrt=new QueryRouteTable(10);
         rand=new Random();
-        for (int i=0; i<qrt.table.length; i++)
-            qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
-        qrt.table[0]=(byte)1;
-        qrt2=new QueryRouteTable(10, (byte)10);
+        for (int i=0; i<qrt.bitTableLength; i++) 
+            if (rand.nextBoolean())
+                qrt.bitTable.set(i);
+        qrt.bitTable.set(0);
+        qrt2=new QueryRouteTable(10);
         Assert.that(! qrt2.equals(qrt));
 
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
@@ -834,11 +693,12 @@ public class QueryRouteTable {
         Assert.that(qrt2.equals(qrt));
 
         //4b. Encode/decode tests with multiple patched messages.
-        qrt=new QueryRouteTable(5000, (byte)10);
+        qrt=new QueryRouteTable(5000);
         rand=new Random();
-        for (int i=0; i<qrt.table.length; i++)
-            qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
-        qrt2=new QueryRouteTable(5000, (byte)10);
+        for (int i=0; i<qrt.bitTableLength; i++)
+            if (rand.nextBoolean())
+                qrt.bitTable.set(i);
+        qrt2=new QueryRouteTable(5000);
         Assert.that(! qrt2.equals(qrt));
 
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
@@ -852,61 +712,61 @@ public class QueryRouteTable {
 
         //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
         //added to everything!
-        qrt=new QueryRouteTable(4, (byte)7);  // 1 4 5 X ==> 2 6
-        qrt2=new QueryRouteTable(2, (byte)7);
-        qrt.table[0]=(byte)1;
-        qrt.table[1]=(byte)4;
-        qrt.table[2]=(byte)5;
-        qrt.table[3]=qrt.infinity;
+        qrt=new QueryRouteTable(4);  // 1 4 5 X ==> 2 6
+        qrt2=new QueryRouteTable(2);
+        qrt.bitTable.set(0);
+        qrt.bitTable.set(1);
+        qrt.bitTable.set(2);
+        qrt.bitTable.clear(3);
         qrt2.addAll(qrt);
-        Assert.that(qrt2.table[0]==(byte)2, "Got: "+qrt2.table[0]);
-        Assert.that(qrt2.table[1]==(byte)6, "Got: "+qrt2.table[1]);
+        Assert.that(qrt2.bitTable.get(0));
+        Assert.that(qrt2.bitTable.get(1));
 
         //This also tests tables with different TTL problem.  (The 6 is qrt
         //is interepreted as infinity in qrt2, not a 7.)
-        qrt=new QueryRouteTable(2, (byte)6);  // 1 X ==> 2 2 X X
-        qrt2=new QueryRouteTable(4, (byte)8);
-        qrt.table[0]=(byte)1;
-        qrt.table[1]=qrt.infinity;
+        qrt=new QueryRouteTable(2);  // 1 X ==> 2 2 X X
+        qrt2=new QueryRouteTable(4);
+        qrt.bitTable.set(0);
+        qrt.bitTable.clear(1);
         qrt2.addAll(qrt);
-        Assert.that(qrt2.table[0]==(byte)2);
-        Assert.that(qrt2.table[1]==(byte)2);
-        Assert.that(qrt2.table[2]>=qrt.infinity);
-        Assert.that(qrt2.table[3]>=qrt.infinity);
+        Assert.that(qrt2.bitTable.get(0));
+        Assert.that(qrt2.bitTable.get(1));
+        Assert.that(qrt2.bitTable.get(2));
+        Assert.that(qrt2.bitTable.get(3));
 
-        qrt=new QueryRouteTable(4, (byte)8);  // 1 2 4 X ==> 2 3 5
-        qrt2=new QueryRouteTable(3, (byte)7);
-        qrt.table[0]=(byte)1;
-        qrt.table[1]=(byte)2;
-        qrt.table[2]=(byte)4;
-        qrt.table[3]=qrt.infinity;
+        qrt=new QueryRouteTable(4);  // 1 2 4 X ==> 2 3 5
+        qrt2=new QueryRouteTable(3);
+        qrt.bitTable.set(0);
+        qrt.bitTable.set(1);
+        qrt.bitTable.set(2);
+        qrt.bitTable.clear(3);
         qrt2.addAll(qrt);
-        Assert.that(qrt2.table[0]==(byte)2);
-        Assert.that(qrt2.table[1]==(byte)3);
-        Assert.that(qrt2.table[2]==(byte)5);
+        Assert.that(qrt2.bitTable.get(0));
+        Assert.that(qrt2.bitTable.get(1));
+        Assert.that(qrt2.bitTable.get(2));
         Assert.that(qrt2.entries()==3);
 
-        qrt=new QueryRouteTable(3, (byte)7);  // 1 4 X ==> 2 2 5 X
-        qrt2=new QueryRouteTable(4, (byte)7);
-        qrt.table[0]=(byte)1;
-        qrt.table[1]=(byte)4;
-        qrt.table[2]=qrt.infinity;
+        qrt=new QueryRouteTable(3);  // 1 4 X ==> 2 2 5 X
+        qrt2=new QueryRouteTable(4);
+        qrt.bitTable.set(0);
+        qrt.bitTable.set(1);
+        qrt.bitTable.clear(2);
         qrt2.addAll(qrt);
-        Assert.that(qrt2.table[0]==(byte)2);
-        Assert.that(qrt2.table[1]==(byte)2, "Got: "+qrt2.table[1]);
-        Assert.that(qrt2.table[2]==(byte)5);
-        Assert.that(qrt2.table[3]==qrt.infinity);
+        Assert.that(qrt2.bitTable.get(0));
+        Assert.that(qrt2.bitTable.get(1));
+        Assert.that(qrt2.bitTable.get(2));
+        Assert.that(!qrt2.bitTable.get(3));
         Assert.that(qrt2.entries()==3);
 
         //5b. Black-box test for addAll.
-        qrt=new QueryRouteTable(128, (byte)7);
+        qrt=new QueryRouteTable(128);
         qrt.add("good book");
-        qrt.add("bad", 3);   //{good/1, book/1, bad/3}
-        qrt2=new QueryRouteTable(512, (byte)7);
+        qrt.add("bad");   //{good/1, book/1, bad/3}
+        qrt2=new QueryRouteTable(512);
         qrt2.addAll(qrt);
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
-        qrt2=new QueryRouteTable(32, (byte)7);
+        qrt2=new QueryRouteTable(32);
         qrt2.addAll(qrt);
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
