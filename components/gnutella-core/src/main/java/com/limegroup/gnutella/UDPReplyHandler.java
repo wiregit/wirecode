@@ -288,4 +288,8 @@ public final class UDPReplyHandler implements ReplyHandler {
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		UDPService.instance().send(m, IP, PORT);
 	}
+	
+	public int getPort() {
+		return PORT;
+	}
 }

@@ -315,7 +315,7 @@ public abstract class Message
 				    guid, ttl, hops, payload, network);
             case F_QUERY_REPLY:
                 if (length<26) break;
-                return new QueryReply(guid,ttl,hops,payload);
+                return new QueryReply(guid,ttl,hops,payload,network);
             case F_PUSH:
                 return new PushRequest(guid,ttl,hops,payload, network);
             case F_ROUTE_TABLE_UPDATE:

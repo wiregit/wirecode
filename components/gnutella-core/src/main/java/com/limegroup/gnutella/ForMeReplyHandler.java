@@ -77,6 +77,12 @@ public final class ForMeReplyHandler implements ReplyHandler {
             return;
         }
         
+        if (reply.isUDP()) {
+        	Assert.that(handler instanceof UDPReplyHandler);
+        	UDPReplyHandler udpHandler = (UDPReplyHandler)handler;
+        	reply.setOOBAddress(udpHandler.getInetAddress(),udpHandler.getPort());
+        }
+        
         // XML must be added to the response first, so that
         // whomever calls toRemoteFileDesc on the response
         // will create the cachedRFD with the correct XML.

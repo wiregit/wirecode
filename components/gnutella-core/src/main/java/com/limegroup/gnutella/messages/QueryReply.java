@@ -104,6 +104,7 @@ public class QueryReply extends Message implements Serializable{
      * Only set if this QueryReply is parsed.
      */
     private HostData _hostData;
+    
 
     /** Our static and final instance of the GGEPUtil helper class.
      */
@@ -235,7 +236,13 @@ public class QueryReply extends Message implements Serializable{
     /** Creates a new query reply with data read from the network. */
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
 		throws BadPacketException {
-        super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
+    	this(guid,ttl,hops,payload,Message.N_UNKNOWN);
+                                       
+    }
+    
+    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,int network) 
+    	throws BadPacketException{
+    	super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length,network);
         this._payload=payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
@@ -257,7 +264,7 @@ public class QueryReply extends Message implements Serializable{
 		    throw new BadPacketException("invalid address");
 		}
 		
-        //repOk();                               
+        //repOk();
     }
 
     /**
@@ -420,6 +427,12 @@ public class QueryReply extends Message implements Serializable{
         _address[2] = _payload[5];
         _address[3] = _payload[6];		
 	}
+	
+	public void setOOBAddress(InetAddress addr, int port) {
+		_address =addr.getAddress();
+		ByteOrder.short2leb((short)port,_payload,1);
+		
+	}
 
     /**
      * Sets the guid for this message. Is needed, when we want to cache 
@@ -445,6 +458,7 @@ public class QueryReply extends Message implements Serializable{
     public void setBrowseHostReply(boolean isBH) {
         _browseHostReply = isBH;
     }
+    
     
     /**
      * Gets whether or not this reply is from a browse host request.

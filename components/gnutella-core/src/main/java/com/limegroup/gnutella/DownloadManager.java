@@ -4,8 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -64,6 +63,22 @@ public class DownloadManager implements BandwidthTracker {
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
+    
+    /**
+     * files that we have sent an udp pushes and are waiting a connection from.
+     * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
+     */
+    private final Map /* of byte [] guids -> Set of Strings*/ 
+		UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
+    
+    private final ProcessingQueue FAILOVERS 
+		= new ProcessingQueue("udp failovers");
+    
+    /**
+     * how long we think should take a host that receives an udp push
+     * to connect back to us.
+     */
+    private static long UDP_PUSH_FAILTIME=5000;
 
 
     /** The global minimum time between any two requeries, in milliseconds.
@@ -731,6 +746,19 @@ public class DownloadManager implements BandwidthTracker {
             String file=line.file;
             int index=line.index;
             byte[] clientGUID=line.clientGUID;
+            
+            synchronized(UDP_FAILOVER) {
+            	// if the push was sent through udp, make sure we cancel
+            	// the failover push.
+            	byte [] key = clientGUID;
+            	Set files = (Set)UDP_FAILOVER.get(key);
+            
+            	if (files!=null) {
+            		files.remove(file);
+            		if (files.isEmpty())
+            			UDP_FAILOVER.remove(key);
+            	}
+            }
 
             //2. Attempt to give to an existing downloader.
             synchronized (this) {
@@ -874,27 +902,14 @@ public class DownloadManager implements BandwidthTracker {
         return true;
     }
 
-
-    /**
-     * Sends a push request for the given file.  Returns false iff no push could
-     * be sent, i.e., because no routing entry exists. That generally means you
-     * shouldn't send any more pushes for this file.
-     *
-     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
-     *  hit, containing data about the host we're pushing to
-     * @return <tt>true</tt> if the push was successfully sent, otherwise
-     *  <tt>false</tt>
-     */
-    public boolean sendPush(RemoteFileDesc file) {
-        LOG.trace("DM.sendPush(): entered.");
-        
+    private boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
         // Send as multicast if it's multicast.
-        if( file.isReplyToMulticast() ) {
+    	if( file.isReplyToMulticast() ) {
             byte[] addr = RouterService.getNonForcedAddress();
             int port = RouterService.getNonForcedPort();
             if( NetworkUtils.isValidAddress(addr) &&
                 NetworkUtils.isValidPort(port) ) {
-                PushRequest pr = new PushRequest(GUID.makeGuid(),
+                PushRequest pr = new PushRequest(guid,
                                          (byte)1, //ttl
                                          file.getClientGUID(),
                                          file.getIndex(),
@@ -904,17 +919,73 @@ public class DownloadManager implements BandwidthTracker {
                 return true;
             }
         }
-        
-        // Make sure we know our correct address/port.
-        // If we don't, we can't send pushes yet.
-        byte[] addr = RouterService.getAddress();
+    	
+    	return false;
+    }
+    
+    private boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
+    	LOG.trace("DM.sendPushUDP(): entered.");
+    
+    	byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
-        if( !NetworkUtils.isValidAddress(addr) || 
-            !NetworkUtils.isValidPort(port) )
-            return false;
+        
         
         // If it wasn't multicast, try sending to the proxies if it had them.
-        Set proxies = file.getPushProxies();
+        // and cannot accept udp push or the udp push was already sent.
+                
+        //send the push through udp if we can
+        
+        PushRequest pr = 
+                new PushRequest(guid,
+                                (byte)2,
+                                file.getClientGUID(),
+                                file.getIndex(),
+                                addr,
+                                port,
+								Message.N_UDP);
+        	
+        if (LOG.isInfoEnabled())
+        		LOG.info("Sending push request through udp "+pr);
+            
+            
+        			
+        UDPService udpService = UDPService.instance();
+        
+        //and send the push to the node 
+        try {
+        	
+        	InetAddress address = InetAddress.getByName(file.getHost());
+        	
+        	udpService.send(pr,
+            		address,file.getPort());
+        	
+        }catch(UnknownHostException notCritical) {}
+        	//We can't send the push to a host we don't know
+        	//but we can still send it to the proxies.
+        finally {
+        
+        	//make sure we send it to the proxies, if any
+        	Set proxies = file.getPushProxies();
+        	for (Iterator iter = proxies.iterator();iter.hasNext();) {
+        		PushProxyInterface ppi = (PushProxyInterface)iter.next();
+        		udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
+        	}
+        }
+        
+        return true;
+        
+        
+
+
+    }
+    
+    private boolean sendPushTCP(RemoteFileDesc file, byte []guid) {
+    	LOG.trace("DM.sendPushTCP(): entered.");
+    	
+    	byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+    	
+    	Set proxies = file.getPushProxies();
         if (!proxies.isEmpty()) {
             //TODO: investigate not sending a HTTP request to a proxy
             //you are directly connected to.  How much of a problem is this?
@@ -970,9 +1041,10 @@ public class DownloadManager implements BandwidthTracker {
                 return requestSuccessful;
             // else just send a PushRequest as normal
         }
-        
+
+        //send the push through tcp.
         PushRequest pr = 
-            new PushRequest(GUID.makeGuid(),
+        	new PushRequest(guid,
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
@@ -981,14 +1053,66 @@ public class DownloadManager implements BandwidthTracker {
 
         if(LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
-
+        
+        
+        
         try {
-            router.sendPushRequest(pr);
+        	router.sendPushRequest(pr);
         } catch (IOException e) {
-            return false;
+        	return false;
         }
 
         return true;
+    	
+    }
+
+    /**
+     * Sends a push request for the given file.  Returns false iff no push could
+     * be sent, i.e., because no routing entry exists. That generally means you
+     * shouldn't send any more pushes for this file.
+     *
+     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
+     *  hit, containing data about the host we're pushing to
+     * @return <tt>true</tt> if the push was successfully sent, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean sendPush(final RemoteFileDesc file) {
+    	
+    	//Make sure we know our correct address/port.
+        // If we don't, we can't send pushes yet.
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if( !NetworkUtils.isValidAddress(addr) || 
+            !NetworkUtils.isValidPort(port) )
+            return false;
+        
+        final byte []guid = GUID.makeGuid();
+        
+    	if (sendPushMulticast(file,guid))
+    		return true;
+    	
+    	//remember that we are waiting a push from this host 
+        //for the specific file.
+        byte[] key = file.getClientGUID();        	
+        
+        synchronized(UDP_FAILOVER) {
+        	Set files = (Set)UDP_FAILOVER.get(key);
+        	
+        	if (files==null)
+        		files = new HashSet();
+        	
+        	files.add(file.getFileName());
+        	
+        	UDP_FAILOVER.put(key,files);
+        }
+        	
+        // schedule the failover tcp pusher
+        RouterService.schedule(new Runnable(){
+        	public void run() {
+        		FAILOVERS.add(new PushFailoverRequestor(file,guid));
+        	}},UDP_PUSH_FAILTIME,0);
+        
+    	return sendPushUDP(file,guid);
     }
 
 
@@ -1032,7 +1156,7 @@ public class DownloadManager implements BandwidthTracker {
             if (next==null || (! next.equals(""))) {
                 throw new IOException();
             }
-        } catch (IOException e) {        
+        } catch (IOException e) {      
             throw e;                   
         }   
 
@@ -1106,5 +1230,39 @@ public class DownloadManager implements BandwidthTracker {
         dm.extractQueryStringUNITTEST();
     }
     */
+	
+	/**
+	 * sends a tcp push if the udp push has failed.
+	 */
+	private class PushFailoverRequestor implements Runnable {
+		
+		final RemoteFileDesc _file;
+		final byte [] _guid;
+		
+		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid) {
+			_file = file;
+			_guid = guid;
+		}
+		
+		public void run() {
+			boolean proceed = false;
+			
+			byte[] key =_file.getClientGUID();
+
+			synchronized(UDP_FAILOVER) {
+				Set files = (Set) UDP_FAILOVER.get(key);
+			
+				if (files!=null && files.contains(_file.getFileName())) {
+					proceed = true;
+					files.remove(_file.getFileName());
+					if (files.isEmpty())
+						UDP_FAILOVER.remove(key);
+				}
+			}
+			
+			if (proceed)
+				sendPushTCP(_file,_guid);
+		}
+	}
 
 }

@@ -104,4 +104,27 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         
     }
+    
+    public void testNetworkConstructor() throws Exception {
+    	byte[] guid=new byte[16];
+        byte[] clientGUID=new byte[16]; clientGUID[0]=(byte)0xFF;
+        clientGUID[15]=(byte)0xF1;
+        long index=2343;
+        byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)1};
+        int port=6346;
+
+        PushRequest pr=new PushRequest(guid, (byte)0,
+                                       clientGUID, index, ip, port,
+									   Message.N_UDP);
+        
+        assertEquals(Message.N_UDP,pr.getNetwork());
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        pr.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        
+        PushRequest pr2 = (PushRequest)Message.read(bais);
+        
+        assertEquals(Message.N_UDP,pr.getNetwork());
+    }
 }

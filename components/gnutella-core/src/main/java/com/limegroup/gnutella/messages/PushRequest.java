@@ -53,8 +53,23 @@ public class PushRequest extends Message implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl,
                byte[] clientGUID, long index, byte[] ip, int port) {
-        super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE);
-		if(clientGUID.length != 16) {
+    	this(guid, ttl, clientGUID, index, ip, port, Message.N_UNKNOWN);
+    }
+    
+    /**
+     * Creates a new PushRequest from scratch.  Allows the caller to 
+     * specify the network.
+     *
+     * @requires clientGUID.length==16,
+     *           0 < index < 2^32 (i.e., can fit in 4 unsigned bytes),
+     *           ip.length==4 and ip is in <i>BIG-endian</i> byte order,
+     *           0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
+     */
+    public PushRequest(byte[] guid, byte ttl,
+            byte[] clientGUID, long index, byte[] ip, int port, int network) {
+    	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
+    	
+    	if(clientGUID.length != 16) {
 			throw new IllegalArgumentException("invalid guid length: "+
 											   clientGUID.length);
 		} else if((index&0xFFFFFFFF00000000l)!=0) {
