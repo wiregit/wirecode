@@ -21,6 +21,12 @@ public final class NIOMessageWriter implements MessageWriter {
      * Constant for the <tt>SocketChannel</tt> that this writer writes to.
      */
 	private final SocketChannel CHANNEL;
+    
+    /**
+     * Constant for the <tt>Connection</tt> that uses this writer
+     * for sending messages.
+     */
+    private final Connection CONNECTION;
 
     /**
 	 * Variable for the current message being written.
@@ -36,14 +42,15 @@ public final class NIOMessageWriter implements MessageWriter {
      * @return a new <tt>MessageWriter</tt> instance
      */
     public static NIOMessageWriter createWriter(Connection conn) {
-        return new NIOMessageWriter(conn.getSocket().getChannel());
+        return new NIOMessageWriter(conn);
     }
     
 	/**
 	 * Creates a new <tt>MessageWriter</tt> instance for the specified channel.
 	 */
-	private NIOMessageWriter(SocketChannel channel) {
-		CHANNEL = channel;
+	private NIOMessageWriter(Connection conn) {
+		CHANNEL = conn.getSocket().getChannel();
+        CONNECTION = conn;
 	}
 	
 	/**
@@ -110,6 +117,7 @@ public final class NIOMessageWriter implements MessageWriter {
     		_message = null;
     		return true;
     	} else {
+            NIODispatcher.instance().addWriter(CONNECTION);
     		return false;
     	}
     }
