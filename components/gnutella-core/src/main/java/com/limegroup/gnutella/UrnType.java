@@ -11,12 +11,12 @@ import java.io.*;
  */
 public class UrnType implements Serializable {
 
-	static final long serialVersionUID = -8211681448456483713L;
+	private static final long serialVersionUID = -8211681448456483713L;
 
 	/**
 	 * Identifier string for the SHA1 type.
 	 */
-	public static final transient String SHA1_STRING = "sha1";
+	public static final String SHA1_STRING = "sha1";
 
 	/**
 	 * Constant for the leading URN string identifier, as specified in
@@ -24,7 +24,7 @@ public class UrnType implements Serializable {
 	 * should be used in a case-insensitive manner in compliance with
 	 * the URN specification (RFC 2141).
 	 */
-	public static final transient String URN_NAMESPACE_ID = "urn:";
+	public static final String URN_NAMESPACE_ID = "urn:";
 
 	/**
 	 * Constant string for the URN type.
