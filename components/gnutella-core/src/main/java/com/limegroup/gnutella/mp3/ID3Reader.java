@@ -175,6 +175,8 @@ public final class ID3Reader {
             nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
         if(seconds > 0) 
             nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
+        if(nameValList.isEmpty())
+            throw new IOException("invalid/no data.");
 
         return new LimeXMLDocument(nameValList, schemaURI);
     }

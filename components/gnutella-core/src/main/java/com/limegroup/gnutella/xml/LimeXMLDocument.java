@@ -85,6 +85,8 @@ public class LimeXMLDocument implements Serializable {
         createMap(node,rootElement.getNodeName());
         if(fieldToValue.isEmpty())
             throw new IOException("no elements.");
+        if(getXMLString().equals(""))
+            throw new IOException("invalid elements.");
     }
 
     /**
@@ -118,6 +120,15 @@ public class LimeXMLDocument implements Serializable {
             }
             //update the field to value map
             fieldToValue.put(name.trim(), value);
+        }
+        
+        // Verify that the data read from the collection had valid info
+        // for this schema.
+        try {
+            if(getXMLString().equals(""))
+                throw new IllegalArgumentException("invalid collection data.");
+        } catch(SchemaNotFoundException snfe) {
+            throw new IllegalArgumentException("invalid schema.");
         }
     }
     
