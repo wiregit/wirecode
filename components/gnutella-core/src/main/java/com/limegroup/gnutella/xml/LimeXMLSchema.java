@@ -216,7 +216,7 @@ public class LimeXMLSchema
             LimeXMLSchema schema = new LimeXMLSchema(new File(
                 LimeXMLProperties.instance().getXMLSchemaDir() 
                 + File.separator
-                + "personal.xsd"));
+                + "audio.xsd"));
             
             System.out.println("Printing fields:");
             
