@@ -57,10 +57,7 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
 	}
 	
 	public void testDefVerFile() throws Exception {
-		try {
-			specificTest("def_verFile.xml",false);
-			fail("ClassCastException expected due to bad version file");
-		}catch(ClassCastException cce){}
+        specificTest("def_verFile.xml",false);
 	}
 	
 
