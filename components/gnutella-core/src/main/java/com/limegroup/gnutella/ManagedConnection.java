@@ -73,7 +73,8 @@ public class ManagedConnection
      */
     private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
-    private MessageRouter _router;
+	/** Handle to the <tt>ConnectionManager</tt>.
+	 */
     private ConnectionManager _manager;
 
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
@@ -309,7 +310,6 @@ public class ManagedConnection
 							  Properties props, 
 							  HandshakeResponder responder) {	
         super(host, port, props, responder);        
-        _router = RouterService.getMessageRouter();
         _manager = RouterService.getConnectionManager();		
 	}
 
@@ -328,7 +328,6 @@ public class ManagedConnection
 			      socket.getInetAddress().getHostAddress())) : 
 			  (HandshakeResponder)(new ClientHandshakeResponder(
 				  socket.getInetAddress().getHostAddress())));
-        _router = RouterService.getMessageRouter();
         _manager = RouterService.getConnectionManager();
     }
 
@@ -650,7 +649,6 @@ public class ManagedConnection
                     handleCrawlerPing((PingRequest)m);
                     return;
                 }
-
             }// end of (if m is PingRequest)
         } // End of while(true)
         } catch (IOException e) {
@@ -760,6 +758,7 @@ public class ManagedConnection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
+		MessageRouter router = RouterService.getMessageRouter();
         while (true) {
             Message m=null;
             try {
@@ -782,7 +781,7 @@ public class ManagedConnection
             }
 
             //call MessageRouter to handle and process the message
-            _router.handleMessage(m, this);            
+            router.handleMessage(m, this);            
         }
     }
 
