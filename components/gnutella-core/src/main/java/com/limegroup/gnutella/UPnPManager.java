@@ -184,8 +184,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/**
 	 * Waits for a small amount of time before the device is discovered.
 	 */
-	public synchronized void waitForDevice() {
-	    
+	public void waitForDevice() {
 	    synchronized(DEVICE_LOCK) {
     	    // already have it.
     	    if(isNATPresent())
@@ -203,38 +202,38 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * this method will be called when we discover a UPnP device.
 	 */
 	public synchronized void deviceAdded(Device dev) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Device added: " + dev.getFriendlyName());
-		
-		// we've found what we need
-		if (_service != null && _router != null) {
-			LOG.debug("we already have a router");
-			return;
-		}
-
-		// did we find a router?
-		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
-			_router = dev;
-		
-		if (_router == null) {
-			LOG.debug("didn't get router device");
-			return;
-		}
-		
-		discoverService();
-		
-		// did we find the service we need?
-		if (_service == null) {
-			LOG.debug("couldn't find service");
-			_router=null;
-		} else {
-		    if(LOG.isDebugEnabled())
-		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
-            synchronized(DEVICE_LOCK) {
+	    synchronized(DEVICE_LOCK) {
+            if(LOG.isTraceEnabled())
+                LOG.trace("Device added: " + dev.getFriendlyName());
+    		
+    		// we've found what we need
+    		if (_service != null && _router != null) {
+    			LOG.debug("we already have a router");
+    			return;
+    		}
+    
+    		// did we find a router?
+    		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
+    			_router = dev;
+    		
+    		if (_router == null) {
+    			LOG.debug("didn't get router device");
+    			return;
+    		}
+    		
+    		discoverService();
+    		
+    		// did we find the service we need?
+    		if (_service == null) {
+    			LOG.debug("couldn't find service");
+    			_router=null;
+    		} else {
+    		    if(LOG.isDebugEnabled())
+    		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
                 DEVICE_LOCK.notify();
-            }
-			stop();
-		}
+    			stop();
+    		}
+        }
 	}
 	
 	/**
