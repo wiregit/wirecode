@@ -192,8 +192,8 @@ public class SettingsManager implements SettingsInterface
         throws IOException {
         write_ = false;
         String p;
-        byte b;
-        int i;
+        //byte b;
+        //int i;
         Enumeration enum = tempProps.propertyNames();
         while(enum.hasMoreElements()){
             String key;
@@ -201,60 +201,25 @@ public class SettingsManager implements SettingsInterface
                 key = (String)enum.nextElement();
                 p = tempProps.getProperty(key);
                 if(key.equals(SettingsInterface.TTL)) {
-                    try {
-                        b = Byte.parseByte(p);
-                        try {setTTL(b);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setTTL(Byte.parseByte(p));
                 }
                 else if(key.equals(SettingsInterface.SOFT_MAX_TTL)) {
-                    try {
-                        b = Byte.parseByte(p);
-                        try {setSoftMaxTTL(b);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
-                }
+					setSoftMaxTTL(Byte.parseByte(p));
+				}
                 else if(key.equals(SettingsInterface.MAX_TTL)) {
-                    try {
-                        b = Byte.parseByte(p);
-                        try {setMaxTTL(b);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setMaxTTL(Byte.parseByte(p));
                 }
                 else if(key.equals(SettingsInterface.MAX_LENGTH)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setMaxLength(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setMaxLength(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.PARALLEL_SEARCH)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try { setParallelSearchMax(i); }
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setParallelSearchMax(Integer.parseInt(p)); 
                 }
-                else if(key.equals(SettingsInterface.MAX_SIM_DOWNLOAD)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try { setMaxSimDownload(i); }
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+                else if(key.equals(SettingsInterface.MAX_SIM_DOWNLOAD)) {					
+					setMaxSimDownload(Integer.parseInt(p)); 
                 }
                 else if(key.equals(SettingsInterface.MAX_UPLOADS)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try { setMaxUploads(i); }
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setMaxUploads(Integer.parseInt(p)); 
                 }
                 else if(key.equals(SettingsInterface.CLEAR_DOWNLOAD)) {
                     boolean bs;
@@ -264,8 +229,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try { setClearCompletedDownload(bs); }
-                    catch (IllegalArgumentException ie){}
+                    setClearCompletedDownload(bs); 
                 }
                 else if(key.equals(SettingsInterface.CLEAR_UPLOAD)) {
                     boolean bs;
@@ -275,92 +239,50 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try { setClearCompletedUpload(bs); }
-                    catch (IllegalArgumentException ie){}
+                    setClearCompletedUpload(bs); 
                 }
                 else if(key.equals(SettingsInterface.TIMEOUT)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setTimeout(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setTimeout(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.KEEP_ALIVE)) {
-                    try {
-                        //Verified for real later.  See note below.
-                        i = Integer.parseInt(p);
-                        try {setKeepAlive(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					//Verified for real later.  See note below.
+					setKeepAlive(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.PORT)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setPort(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setPort(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.SPEED)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setConnectionSpeed(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setConnectionSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.UPLOAD_SPEED)) {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setUploadSpeed(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
-
+					setUploadSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.SEARCH_LIMIT)) {
-                    try {
-                        b = Byte.parseByte(p);
-                        try {setSearchLimit(b);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					setSearchLimit(Byte.parseByte(p));
                 }
 
                 else if(key.equals(SettingsInterface.CLIENT_ID)) {
-                    try {setClientID(p);}
-                    catch (IllegalArgumentException ie){}
+                    setClientID(p);
                 }
 
                 else if(key.equals(SettingsInterface.MAX_INCOMING_CONNECTIONS)) {
-                    try {
-                        //Verified for real later.  See note below.
-                        i = Integer.parseInt(p);
-                        try {setMaxIncomingConnections(i);}
-                        catch (IllegalArgumentException ie){}
-                    }
-                    catch(NumberFormatException nfe){}
+					//Verified for real later.  See note below.
+					setMaxIncomingConnections(Integer.parseInt(p));
                 }
 
                 else if(key.equals(SettingsInterface.SAVE_DIRECTORY)) {
-                    try {setSaveDirectory(p);}
-                    catch (IllegalArgumentException ie){}
+                    setSaveDirectory(p);
                 }
 
                 else if(key.equals(SettingsInterface.DIRECTORIES)) {
-                    try {setDirectories(p);}
-                    catch (IllegalArgumentException ie){}
+                    setDirectories(p);
                 }
 
                 else if(key.equals(SettingsInterface.EXTENSIONS)) {
-                    try {setExtensions(p);}
-                    catch (IllegalArgumentException ie){}
+                    setExtensions(p);
                 }
 				else if(key.equals(SettingsInterface.LAST_VERSION_CHECKED)) {
-                    try {setLastVersionChecked(p);}
-                    catch (IllegalArgumentException ie){}
+                    setLastVersionChecked(p);
                 }
 				else if(key.equals(SettingsInterface.CHECK_AGAIN)) {
                     boolean bs;
@@ -370,21 +292,17 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try { setCheckAgain(bs); }
-                    catch (IllegalArgumentException ie){}
+                    setCheckAgain(bs); 
                 }
 
                 else if(key.equals(SettingsInterface.INCOMPLETE_DIR)) {
                     setIncompleteDirectory(p);
                 }
-
                 else if(key.equals(SettingsInterface.BANNED_IPS)) {
-                    try {setBannedIps(decode(p));}
-                    catch (IllegalArgumentException ie){}
+                    setBannedIps(decode(p));
                 }
                 else if(key.equals(SettingsInterface.BANNED_WORDS)) {
-                    try {setBannedWords(decode(p));}
-                    catch (IllegalArgumentException ie){}
+                    setBannedWords(decode(p));
                 }
                 else if(key.equals(SettingsInterface.FILTER_ADULT)) {
                     boolean bs;
@@ -394,8 +312,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setFilterAdult(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setFilterAdult(bs);
                 }
                 else if(key.equals(SettingsInterface.FILTER_DUPLICATES)) {
                     boolean bs;
@@ -405,8 +322,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setFilterDuplicates(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setFilterDuplicates(bs);
                 }
                 else if(key.equals(SettingsInterface.FILTER_HTML)) {
                     boolean bs;
@@ -416,8 +332,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setFilterHtml(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setFilterHtml(bs);
                 }
                 else if(key.equals(SettingsInterface.FILTER_VBS)) {
                     boolean bs;
@@ -427,8 +342,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setFilterVbs(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setFilterVbs(bs);
                 }
                 else if(key.equals(SettingsInterface.FILTER_GREEDY_QUERIES)) {
                     boolean bs;
@@ -438,8 +352,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setFilterGreedyQueries(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setFilterGreedyQueries(bs);
                 }
                 else if(key.equals(SettingsInterface.USE_QUICK_CONNECT)) {
                     boolean bs;
@@ -449,44 +362,30 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setUseQuickConnect(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setUseQuickConnect(bs);
                 }
-                else if(key.equals(SettingsInterface.QUICK_CONNECT_HOSTS))
-                {
-                    try {setQuickConnectHosts(decode(p));}
-                    catch (IllegalArgumentException ie){}
+                else if(key.equals(SettingsInterface.QUICK_CONNECT_HOSTS)) {
+                    setQuickConnectHosts(decode(p));
                 }
-                else if(key.equals(SettingsInterface.SEARCH_ANIMATION_TIME))
-                {
-                    try {
-                        i = Integer.parseInt(p);
-                        try {setSearchAnimationTime(i);}
-                        catch (IllegalArgumentException ie){}
-                    } catch(NumberFormatException nfe){}
+                else if(key.equals(SettingsInterface.SEARCH_ANIMATION_TIME)) {
+					setSearchAnimationTime(Integer.parseInt(p));
                 }
-
                 else if(key.equals(SettingsInterface.SAVE_DEFAULT)){
-                    try{setSaveDefault(p);}
-                    catch(IllegalArgumentException e){}
+                    setSaveDefault(p);
                 }
                 else if(key.equals(SettingsInterface.CONNECT_STRING)) {
-                    try{setConnectString(p);}
-                    catch(IllegalArgumentException e){}
+                    setConnectString(p);
                 }
                 else if(key.equals(SettingsInterface.CONNECT_OK_STRING)){
-                    try{setConnectOkString(p);}
-                    catch(IllegalArgumentException e){}
+                    setConnectOkString(p);
                 }
 
                 else if(key.equals(SettingsInterface.BASIC_QUERY_INFO)){
-					i = Integer.parseInt(p);
-                    setBasicInfoForQuery(i);
+                    setBasicInfoForQuery(Integer.parseInt(p));
                 }
 
                 else if(key.equals(SettingsInterface.ADVANCED_QUERY_INFO)){
-					i = Integer.parseInt(p);
-                    setAdvancedInfoForQuery(i);
+                    setAdvancedInfoForQuery(Integer.parseInt(p));
                 }
                 else if(key.equals(SettingsInterface.FORCE_IP_ADDRESS)){  
 					boolean bs;
@@ -496,19 +395,13 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    try {setForceIPAddress(bs);}
-                    catch (IllegalArgumentException ie){}
+                    setForceIPAddress(bs);
 				}
                 else if(key.equals(SettingsInterface.FORCED_IP_ADDRESS)){
-					try {setForcedIPAddress(p);}
-                    catch (IllegalArgumentException ie){}
+					setForcedIPAddress(p);
 				}
                 else if(key.equals(SettingsInterface.FORCED_PORT)){
-					try {
-						i = Integer.parseInt(p);
-						setForcedPort(i);
-					}
-                    catch (IllegalArgumentException ie){}
+					setForcedPort(Integer.parseInt(p));
 				}
             }
             catch(ClassCastException cce){}
@@ -1120,8 +1013,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the soft maximum time to live */
-    public void setSoftMaxTTL(byte softmaxttl)
-        throws IllegalArgumentException {
+    public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
             throw new IllegalArgumentException();
         else {
@@ -1132,8 +1024,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the port to connect on */
-    public synchronized void setPort(int port)
-        throws IllegalArgumentException {
+    public synchronized void setPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
         if(port > 65536 || port < 0)
@@ -1271,8 +1162,6 @@ public class SettingsManager implements SettingsInterface
     }
 	
 	public void setForceIPAddress(boolean force) {
-		//  if (force == null)
-//  			throw new IllegalArgumentException();
 		String c;
 		if (force == true)
 			c = "true";
@@ -1280,7 +1169,6 @@ public class SettingsManager implements SettingsInterface
 			c = "false";
 		forceIPAdress_ = force;
 		props_.put(SettingsInterface.FORCE_IP_ADDRESS, c);
-		//writeProperties();
 	}
 
 	public void setForcedIPAddress(String address) {
@@ -1288,41 +1176,24 @@ public class SettingsManager implements SettingsInterface
 			throw new IllegalArgumentException();
 		forcedIPAdress_ = address;
 		props_.put(SettingsInterface.FORCED_IP_ADDRESS, address);
-		//writeProperties();
 	}
 
 	public void setForcedPort(int port) {
-		//  if (port == null)
-//  			throw new IllegalArgumentException();
-		forcedPort_ = port;
-		String s = Integer.toString(forcedPort_);
-		props_.put(SettingsInterface.FORCED_PORT, s);
-		//writeProperties();
+        // if the entered port is outside accepted
+        // port numbers, throw the exception
+        if(port > 65536 || port < 1)
+            throw new IllegalArgumentException();
+		else {
+			forcedPort_ = port;
+			String s = Integer.toString(forcedPort_);
+			props_.put(SettingsInterface.FORCED_PORT, s);
+		}
 	}
 	
 
     /******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
      ******************************************************/
-
-	// IN HERE TWICE FOR SOME REASON
-//  	public void setLastVersionChecked(String last) {
-//  		lastVersionChecked_ = last;
-//  		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
-//  		writeProperties();
-//  	}
-	
-//  	public void setCheckAgain(boolean check) {
-//  		checkAgain_ = check;
-//  		String c;
-//  		if (check == true)
-//  			c = "true";
-//  		else 
-//  			c = "false";
-//  		props_.put(SettingsInterface.CHECK_AGAIN, c);
-//          writeProperties();
-
-//  	}
 
     public synchronized void setBannedIps(String[] bannedIps) {
         if(bannedIps == null)
