@@ -274,18 +274,18 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Use this if a PushProxyAck is received for this MC meaning the remote
      * Ultrapeer can serve as a PushProxy.
      */
-    private InetAddress pushProxyAddr = null;
+    private InetAddress _pushProxyAddr = null;
 
     /** 
      * Use this if a PushProxyAck is received for this MC meaning the remote
      * Ultrapeer can serve as a PushProxy.
      */
-    private int pushProxyPort = -1;
+    private int _pushProxyPort = -1;
     
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
      */
-    private int softMaxHops = -1;
+    private int _softMaxHops = -1;
 
 
     /** The class wide static counter for the number of udp connect back 
@@ -427,15 +427,15 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
-            softMaxHops = hops.getHopValue();
+            _softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof PushProxyAcknowledgement) {
             // this connection can serve as a PushProxy, so note this....
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(),
                               RouterService.getMessageRouter()._clientGUID)) {
-                pushProxyPort = ack.getListeningPort();
-                pushProxyAddr = ack.getListeningAddress();
+                _pushProxyPort = ack.getListeningPort();
+                _pushProxyAddr = ack.getListeningAddress();
             }
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
@@ -1196,9 +1196,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public void send(Message msg) {
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time....
-        if ((softMaxHops > -1) &&
+        if ((_softMaxHops > -1) &&
             (msg instanceof QueryRequest) &&
-            (msg.getHops() >= softMaxHops)) {
+            (msg.getHops() >= _softMaxHops)) {
                 
             //TODO: record stats for this
             return;
@@ -1992,7 +1992,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  communication, a negative number if PushProxy isn't supported.
      */
     public int getPushProxyPort() {
-        return pushProxyPort;
+        return _pushProxyPort;
     }
 
     /** @return the InetAddress of the remote host - only meaningful if
@@ -2000,7 +2000,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  @see getPushProxyPort()
      */
     public InetAddress getPushProxyAddress() {
-        return pushProxyAddr;
+        return _pushProxyAddr;
     }
  
     /**
