@@ -26,11 +26,18 @@ import com.sun.java.util.collections.*;
  * In addition, LimeWire GUIDs may be marked as follows:
  * <ol>
  * <li>G[13][14]=tag(G[0]G[1], G[9][10]).  This was used by LimeWire 2.2.0-2.2.3
- *  to mark automatic requeries.  Unfortunately these versions inadvertently sent
- *  requeries when cancelling uploads or when sometimes encountering a group of
- *  busy hosts.
+ * to mark automatic requeries.  Unfortunately these versions inadvertently sent
+ * requeries when cancelling uploads or when sometimes encountering a group of
+ * busy hosts. VERSION 0
+ * </ol>
  * <li>G[13][14]=tag(G[0][1], G[2][3]).  This marks requeries from versions of
- *  LimeWire that have fixed the requery bug, e.g., 2.2.4 and later.
+ *  LimeWire that have fixed the requery bug, e.g., 2.2.4 and all 2.3s.  VERSION
+ * 1
+ * </ol>
+ * <li>G[13][14]=tag(G[0][1], G[11][12]).  This marks requeries from versions of
+ * LimeWire that have much reduced the amount of requeries that can be sent by
+ * an individual client.  a client can only send 32 requeries amongst ALL
+ * requeries a day.  VERSION 2
  * </ol>
  *
  * Note that this still leaves 10-12 bytes for randomness.  That's plenty of
@@ -92,7 +99,7 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         byte[] ret = makeGuid();
 
         //Apply LimeWire's marking.
-        tagGuid(ret, 0, 2, 13);
+        tagGuid(ret, 0, 11, 13);
 
         return ret;
     }
@@ -113,9 +120,9 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     }
     
 
-    /** Same as isLimeRequeryGUID(this.bytes, isOld) */
-    public boolean isLimeRequeryGUID(boolean isOld) {
-        return isLimeRequeryGUID(this.bytes, isOld);
+    /** Same as isLimeRequeryGUID(this.bytes, version) */
+    public boolean isLimeRequeryGUID(int version) {
+        return isLimeRequeryGUID(this.bytes, version);
     }
     
 
@@ -148,22 +155,25 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
      *  caller will probably want to check that.
      */
     public static boolean isLimeRequeryGUID(byte[] bytes) {    
-        return isLimeRequeryGUID(bytes, false)
-            || isLimeRequeryGUID(bytes, true);
+        return isLimeRequeryGUID(bytes, 0) || 
+        isLimeRequeryGUID(bytes, 1) || isLimeRequeryGUID(bytes, 2);
     }    
 
     /** Returns true if this is a specially marked LimeWire Requery GUID.
      *  This does NOT mean that it's a new GUID as well; the caller
      *  will probably want to check that. 
      *
-     *  @param isOld true if the caller is interested in LW 2.2.0-2.2.3
-     *   requery GUIDs, false if the caller is interested 2.2.4+ GUIDs.
+     *  @param version The version of RequeryGUID you want to test for.  0 for
+     *  requeries up to 2.2.4, 1 for requeries between 2.2.4 and all 2.3s, and 2
+     *  for current requeries....
      */
-    public static boolean isLimeRequeryGUID(byte[] bytes, boolean isOld) {    
-        if (isOld)
+    public static boolean isLimeRequeryGUID(byte[] bytes, int version) {    
+        if (version == 0)
             return checkMatching(bytes, 0, 9, 13);
-        else
+        else if (version == 1)
             return checkMatching(bytes, 0, 2, 13);
+        else
+            return checkMatching(bytes, 0, 11, 13);
     }    
     
     
@@ -417,7 +427,7 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         Assert.that(g1.isLimeGUID());
         System.out.println(g1);
 
-        // Test old requery marking
+        // Test version 0 requery marking
         //Note everything is LITTLE endian.
         //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
         bytes=new byte[16];
@@ -435,10 +445,11 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
         g1 = new GUID(bytes);
         Assert.that(g1.isLimeRequeryGUID());
-        Assert.that(g1.isLimeRequeryGUID(true));
-        Assert.that(! g1.isLimeRequeryGUID(false));
+        Assert.that(g1.isLimeRequeryGUID(0));
+        Assert.that(! g1.isLimeRequeryGUID(1));
+        Assert.that(! g1.isLimeRequeryGUID(2));
 
-        // Test new requery marking
+        // Test version 1 requery marking
         //Note everything is LITTLE endian.
         //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
         bytes=new byte[16];
@@ -456,8 +467,31 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
         g1 = new GUID(bytes);
         Assert.that(g1.isLimeRequeryGUID());
-        Assert.that(! g1.isLimeRequeryGUID(true));
-        Assert.that(g1.isLimeRequeryGUID(false));
+        Assert.that(g1.isLimeRequeryGUID(1));
+        Assert.that(! g1.isLimeRequeryGUID(0));
+        Assert.that(! g1.isLimeRequeryGUID(2));
+
+        // Test new (version 2) requery marking
+        //Note everything is LITTLE endian.
+        //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
+        bytes=new byte[16];
+        bytes[0]=(byte)0x02;
+        bytes[1]=(byte)0x01;
+        bytes[11]=(byte)0x17;
+        bytes[12]=(byte)0x05;
+        bytes[13]=(byte)0x2E;
+        bytes[14]=(byte)0x05;
+        s1=ByteOrder.leb2short(bytes, 0);
+        s2=ByteOrder.leb2short(bytes, 11);
+        tag=tag(s1,s2);
+        Assert.that(s1==(short)0x0102, Integer.toHexString(s1));
+        Assert.that(s2==(short)0x0517, Integer.toHexString(s2));
+        Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
+        g1 = new GUID(bytes);
+        Assert.that(g1.isLimeRequeryGUID());
+        Assert.that(! g1.isLimeRequeryGUID(0));
+        Assert.that(! g1.isLimeRequeryGUID(1));
+        Assert.that(g1.isLimeRequeryGUID(2));
 
 
 
@@ -467,8 +501,9 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         System.out.println(gReq);
         Assert.that(gReq.isLimeGUID());
         Assert.that(gReq.isLimeRequeryGUID());
-        Assert.that(gReq.isLimeRequeryGUID(false));
-        Assert.that(! gReq.isLimeRequeryGUID(true));
+        Assert.that(gReq.isLimeRequeryGUID(2));
+        Assert.that(! gReq.isLimeRequeryGUID(0));
+        Assert.that(! gReq.isLimeRequeryGUID(1));
 
         //Test hashcode, compareTo for same
         java.util.Random r=new java.util.Random();       
