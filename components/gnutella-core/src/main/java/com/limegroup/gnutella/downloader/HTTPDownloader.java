@@ -369,18 +369,24 @@ public class HTTPDownloader implements BandwidthTracker {
 				throw new 
 				    com.limegroup.gnutella.downloader.FileNotFoundException();
 			else if (code == 410) // not shared.
-				throw new 
-                    com.limegroup.gnutella.downloader.NotSharingException();
-            else if (code == 416) //requested range not available
-                throw new
-               com.limegroup.gnutella.downloader.RangeNotAvailableException();
-			else if (code == 503) { // busy or queued.
+				throw new NotSharingException();
+            else if (code == 416) //Shareaza's requested range not available
+                throw new RangeNotAvailableException();
+			else if (code == 503) { // busy or queued, or range not available.
                 int min = refQueueInfo[0];
                 int max = refQueueInfo[1];
                 int pos = refQueueInfo[2];
                 if(min != -1 && max != -1 && pos != -1)
                     throw new QueuedException(min,max,pos);
-                //no QueuedException? not queued.
+                    
+                // per the PFSP spec, a 503 should be returned.
+                // but, to let us distinguish between a busy &
+                // a range not available, check if the partial
+                // sources are filled up ...
+                if( _rfd.isPartialSource() )
+                    throw new RangeNotAvailableException();
+                    
+                //no QueuedException or RangeNotAvailableException? not queued.
 				throw new TryAgainLaterException();
                 // a general catch for 4xx and 5xx's
                 // should maybe be a different exception?
