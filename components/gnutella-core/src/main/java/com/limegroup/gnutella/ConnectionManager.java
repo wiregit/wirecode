@@ -382,140 +382,99 @@ public class ConnectionManager implements Runnable {
      *   in order to accept incoming connections, SettingsManager is
      *   changed accordingly.
      */
-    public void run() {	
-	//1. Start background threads to fetch the desired number of
-	//   connections.  These run in parallel until each has launched
-	//   a connection--or there are no connections left to try.
-        
-        /** //anu //we dont really need to initiate the connections. Its a router 
-        //and is just gonna listen for connections
-	for (int i=0; i<keepAlive; i++) {	    
-	    ConnectionFetcher fetcher=new ConnectionFetcher(this,1);
-	    fetcher.start();
-	    fetchers.add(fetcher);
-	}
-        */
-	//2. Create the server socket, bind it to a port, and listen for
-	//   incoming connections.  If there are problems, we can continue
-	//   onward.
-	try {
-	    int oldPort=port;
-	    setListeningPort(port,true);
-	    if (port!=oldPort) {
-		SettingsManager.instance().setPort(port);
-		if (callback!=null)
-		    callback.setPort(port);
-	    }
-	} catch (IOException e) {
-	    error(ActivityCallback.ERROR_0);
-	}
+    public void run() 
+    {	
+        //1. Start background threads to fetch the desired number of
+        //   connections.  These run in parallel until each has launched
+        //   a connection--or there are no connections left to try.
 
-	//3. Start the statistics thread
-	try{
-	    Stat s = new Stat(this);
-	    Thread stat = new Thread(s);
-	    if (stats==true)
-		stat.start();
-	}
-	catch (Exception e){
-	    error(ActivityCallback.ERROR_1);
-	}
-        
-        
-	while (true) {
-	    Connection c = null;
-	    try {
-		//Accept an incoming connection, make it into a Connection
-		//object, handshake, and give it a thread to service it.
-		//If not bound to a port, wait until we are.  We have a timeout
-		//here so that setListeningPort will not block for more than
-		//a second.  We may want to disable setListeningPort in
-		//the router version of this class and get rid of the timeout here.
-		Socket client=null;
-		synchronized (socketLock) {
-		    if (socket!=null) {
-			socket.setSoTimeout(500); //0.5 second
-			try { 
-			    client=socket.accept(); 
-			} catch (InterruptedIOException e) {
-			    continue;
-			}
-		    } else {
-			try { socketLock.wait(); } catch (InterruptedException e) {}
-			continue;
-		    }
-		}
-		//Check if IP address of the incoming socket is in badHosts (initialized in propertyManager()
-		if (badHosts.contains(client.getInetAddress().getHostAddress() ) ){
-		    client.close();
-		    continue;
-		}
-		try {
-		    InputStream in=client.getInputStream();
-		    String word=readWord(in);
+            /** //anu //we dont really need to initiate the connections. Its a router 
+            //and is just gonna listen for connections
+        for (int i=0; i<keepAlive; i++) {	    
+            ConnectionFetcher fetcher=new ConnectionFetcher(this,1);
+            fetcher.start();
+            fetchers.add(fetcher);
+        }
+            */
+        //2. Create the server socket, bind it to a port, and listen for
+        //   incoming connections.  If there are problems, we can continue
+        //   onward.
+        try {
+            int oldPort=port;
+            setListeningPort(port,true);
+            if (port!=oldPort) {
+            SettingsManager.instance().setPort(port);
+            if (callback!=null)
+                callback.setPort(port);
+            }
+        } catch (IOException e) {
+            error(ActivityCallback.ERROR_0);
+        }
 
-		    c = null;
+        //3. Start the statistics thread
+        try{
+            Stat s = new Stat(this);
+            Thread stat = new Thread(s);
+            if (stats==true)
+            stat.start();
+        }
+        catch (Exception e){
+            error(ActivityCallback.ERROR_1);
+        }
 
-		    if (word.equals(SettingsManager.instance().getConnectStringFirstWord())) {
-			//a) Gnutella connection
 
-                        /** //anu //we just wanna return good hostnames and dont really
-                        //want to maintain connections.
-                        //So just open a Reject Connection instead
-			if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
-			    c = new Connection( getHostName(client.getInetAddress() ), 
-						client.getPort(), true);
-			    tryingToConnect(c, true);
-			    c.initIncoming(client); 
-			    c.setManager(this);
-			    add(c);		 
-			    Thread t=new Thread(c);
-			    t.setDaemon(true);
-			    t.start();
-			}
-                        */
-			//anu //else{// we have more connections than we can handle
-			    RejectConnection rc = new RejectConnection(client);
-			    rc.setManager(this);
-			    Thread t = new Thread(rc);
-			    t.setDaemon(true);
-			    t.start();
-			//}
+        while (true) {
+            try 
+            {
+            //Accept an incoming connection, make it into a Connection
+            //object, handshake, and give it a thread to service it.
+            //If not bound to a port, wait until we are.  We have a timeout
+            //here so that setListeningPort will not block for more than
+            //a second.  We may want to disable setListeningPort in
+            //the router version of this class and get rid of the timeout here.
+            Socket client=null;
+            synchronized (socketLock) {
+                if (socket!=null) {
+                socket.setSoTimeout(500); //0.5 second
+                try { 
+                    client=socket.accept(); 
+                } catch (InterruptedIOException e) {
+                    continue;
+                }
+                } else {
+                try { socketLock.wait(); } catch (InterruptedException e) {}
+                continue;
+                }
+            }
 
-		    } 
-                    /* //anu //we dont wanna handle any other requests
-		    //Incoming file transfer connection: normal HTTP and push.
-                    //we 
-		    else if (word.equals("GET")) {
-			HTTPManager mgr = new HTTPManager(client, this, false);
-		    } 
-		    else if (word.equals("GIV")) {
-			HTTPManager mgr = new HTTPManager(client, this, true);
-		    }
-                    */
-                    
-                    //else just close the connection //anu
-		    else {
-			throw new IOException();
-		    }
-		} catch (IOException e) { 
-		    //handshake failed: try to close connection.
-		    if ( c != null )
-		        failedToConnect(c);
-		    try { client.close(); } catch (IOException e2) { }		    
-		    continue;
-		}
-	    } catch (IOException e) {
-		error(ActivityCallback.ERROR_2);
-		return;
-	    } catch (SecurityException e) {	
-		error(ActivityCallback.ERROR_3);
-		return;
-	    } catch (Exception e) {
-		//Internal error!
-		error(ActivityCallback.ERROR_20, e);
-	    }
-	}
+            //anu
+            //now we have got a connection from the Client
+            //do everything now in a separate thread
+            Thread rejectConnectionHandler = new Thread(
+                                        new RejectConnectionHandler(client, this));
+            //start the new Thread    
+            rejectConnectionHandler.setDaemon(true);
+            rejectConnectionHandler.start();
+
+
+
+            }//end of try
+            catch (IOException e)
+            {
+                error(ActivityCallback.ERROR_2);
+                return;
+            } 
+            catch (SecurityException e)
+            {
+                error(ActivityCallback.ERROR_3);
+                return;
+            } 
+            catch (Exception e)
+            {
+                //Internal error!
+                error(ActivityCallback.ERROR_20, e);
+            }
+        }
     }
 
     /** Returns the first word (i.e., no whitespace) of less than 8 characters
@@ -798,6 +757,129 @@ public class ConnectionManager implements Runnable {
 //  	    System.out.println("Couldn't connect to host.  Try again.");
 //  	}
 //      }
+    
+    
+    //INNER CLASS
+    private class RejectConnectionHandler implements Runnable
+    {
+
+        Socket client = null;
+        ConnectionManager connectionManager = null;
+
+        public RejectConnectionHandler(Socket client, 
+                                    ConnectionManager connectionManager)
+        {
+            this.client = client;
+            this.connectionManager = connectionManager;
+        }
+
+        public void run()
+        {
+            //set Time out for the client Socket
+            try
+            {
+                client.setSoTimeout(8000); //8 seconds
+            }
+            catch(SocketException se)
+            {
+                //return if we socket is not valid
+                return;
+            }
+            //Check if IP address of the incoming socket is in badHosts 
+            //(initialized in propertyManager()
+            if (badHosts.contains(client.getInetAddress().getHostAddress() ) )
+            {
+                try
+                {
+                    client.close();
+                }
+                catch(IOException ioe)
+                {
+                    
+                }
+                return;
+            }
+
+            RejectConnection rc = null;
+            //read the first word, and if it is the expected one, proceed
+            try
+            {
+                InputStream in=client.getInputStream();
+                String word=readWord(in);
+
+                if (word.equals(SettingsManager.instance().getConnectStringFirstWord()))
+                {
+                    //a) Gnutella connection
+
+                    /** //anu //we just wanna return good hostnames and dont really
+                    //want to maintain connections.
+                    //So just open a Reject Connection instead
+                    if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
+                    c = new Connection( getHostName(client.getInetAddress() ),
+                    client.getPort(), true);
+                    tryingToConnect(c, true);
+                    c.initIncoming(client);
+                    c.setManager(this);
+                    add(c);
+                    Thread t=new Thread(c);
+                    t.setDaemon(true);
+                    t.start();
+                    }
+                     */
+                    //anu //else{// we have more connections than we can handle
+                    
+                    //send the pongs (RejectConnection handles this)
+                    rc = new RejectConnection(client);
+                    rc.setManager(connectionManager);
+                    
+                    //no need to start a new thread, we r already in a thread
+                    //just call the run method without starting a new thread
+                    rc.run();
+                    
+                    //Thread t = new Thread(rc);
+                    //t.setDaemon(true);
+                    //t.start();
+                    //}
+
+                }
+                /* //anu //we dont wanna handle any other requests
+                //Incoming file transfer connection: normal HTTP and push.
+                //we
+                else if (word.equals("GET")) {
+                HTTPManager mgr = new HTTPManager(client, this, false);
+                }
+                else if (word.equals("GIV")) {
+                HTTPManager mgr = new HTTPManager(client, this, true);
+                }
+                 */
+
+                //else just close the connection //anu
+                else
+                {
+                    throw new IOException();
+                }
+            } 
+            catch (IOException e)
+            {
+                //handshake failed: try to close connection.
+                if ( rc != null )
+                failedToConnect(rc);
+                try
+                { 
+                    client.close(); 
+                } 
+                catch (IOException e2)
+                { 
+                }
+                return;
+            }
+
+        }//end of run
+    }//end of class RejectConnectionHandler
+    
+    
+    
+    
 }
 
 /** Asynchronously fetches new connections from hostcatcher.  */
@@ -864,4 +946,8 @@ class ConnectionFetcher extends Thread {
     }		
 
 }
+
+
+
+
 
