@@ -97,12 +97,17 @@ public class WriteRegulator {
         int  usedSpots   = _sendWindow.getUsedSpots(); 
         int  windowSize  = _sendWindow.getWindowSize(); 
         long windowStart = _sendWindow.getWindowStart(); 
+
+        int   rto        = _sendWindow.getRTO();
+        float rttvar     = _sendWindow.getRTTVar();
+        float srtt       = _sendWindow.getSRTT();
+        int   isrtt      = (int) srtt;
+
         int  rtt;
-        int  realRTT     = _sendWindow.averageRoundTripTime();
+        int  realRTT     = isrtt;//_sendWindow.averageRoundTripTime();
         int  lowRTT      = _sendWindow.lowRoundTripTime();
-        int  smoothRTT   = _sendWindow.smoothRoundTripTime();
-        int  sentWait    = _sendWindow.calculateWaitTime( currTime, 3);
-        //rtt = sentWait + lowRTT;
+        int  smoothRTT   = isrtt;//_sendWindow.smoothRoundTripTime();
+        int  sentWait    = isrtt;//_sendWindow.calculateWaitTime( currTime, 3);
         rtt = sentWait + 1;
         if  (rtt == 0) 
             rtt = 10;
@@ -115,9 +120,6 @@ public class WriteRegulator {
         int minTime      = 0;
         int gettingSlow  = 0;
 
-        int   rto        = _sendWindow.getRTO();
-        float rttvar     = _sendWindow.getRTTVar();
-        float srtt       = _sendWindow.getSRTT();
 
         // Ensure the sleep time is fairly distributed in the normal case
         if ( sleepTime < windowSize ) {
