@@ -48,5 +48,9 @@ public final class CountingInputStream extends FilterInputStream {
         return _count;
     }
     
+    public void clearAmountRead() {
+        _count = 0;
+    }
+    
     
 } // class

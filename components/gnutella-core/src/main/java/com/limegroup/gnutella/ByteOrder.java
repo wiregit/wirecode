@@ -220,6 +220,20 @@ public class ByteOrder {
             throw new IllegalArgumentException("No bytes specified");
         }
     }
+    
+    /**
+     * Little-endian bytes to long.  Stream version.
+     */
+    public static long leb2long(InputStream is) throws IOException {
+        return ( (long)is.read() & 0xFFL       ) |
+               (((long)is.read() & 0xFFL) <<  8) |
+               (((long)is.read() & 0xFFL) << 16) |
+               (((long)is.read() & 0xFFL) << 24) |
+               (((long)is.read() & 0xFFL) << 32) |
+               (((long)is.read() & 0xFFL) << 40) |
+               (((long)is.read() & 0xFFL) << 48) |
+               ( (long)is.read()          << 56);
+    }
 
     /**
      * Big-endian bytes to long.  Unlike beb2long(x, offset), this version can
