@@ -1,15 +1,15 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.util.Date;
-import java.net.*;
+import java.io.IOException;
+import java.net.URL;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.TreeMap;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
@@ -77,12 +77,12 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 */
 	public void testUrlUrnConstructorForSuccess() throws Exception {
 		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-			URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
+			URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
 			URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
 							  HTTPConstants.URI_RES_N2R+
 							  HugeTestUtils.URNS[i].httpStringValue());
-			AlternateLocation al = 
-			    AlternateLocation.createAlternateLocation(url);
+            
+            AlternateLocation.createAlternateLocation(url);
 		}
 	}
 
@@ -92,12 +92,11 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 */
 	public void testStringUrnConstructorForSuccess() throws Exception {
 		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-			URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
+			URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
 			String url = "http://"+HugeTestUtils.HOST_STRINGS[i]+":6346"+ 
 				HTTPConstants.URI_RES_N2R+
 				HugeTestUtils.URNS[i].httpStringValue();
-			AlternateLocation al = 
-			    AlternateLocation.createAlternateLocation(url);
+			AlternateLocation.createAlternateLocation(url);
 		}
 	}
 
@@ -109,8 +108,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(url);
+				AlternateLocation.createAlternateLocation(url);
 				fail("AlternateLocation constructor should have thrown an exception");
 			}
 		} catch(IOException e) {
@@ -127,8 +125,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				String url = "http://" +HugeTestUtils.HOST_STRINGS[i]+":6346/test.htm";
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(url);
+				AlternateLocation.createAlternateLocation(url);
 				fail("AlternateLocation constructor should have thrown an exception");
 			}
 		} catch(IOException e) {
@@ -216,8 +213,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	public void testStringConstructorForNotTimestampedLocs() throws Exception {
 		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 			try {
-				AlternateLocation al = 
-					AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
+				AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
 			} catch(IOException e) {
 				fail("failed on loc: "+HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], e); 
 			}		
@@ -230,8 +226,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	public void testStringConstructorForInvalidLocs() {
 		try {
 			for(int i=0; i<HugeTestUtils.INVALID_LOCS.length; i++) {
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
+				AlternateLocation.createAlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
 				fail("alternate location string should not have been accepted");
 			}
 		} catch(IOException e) {
@@ -242,8 +237,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	public void testConstructorForBadPorts() throws Exception {
 		try {
 			for(int i=0; i<HugeTestUtils.BAD_PORT_URLS.length; i++) {
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(HugeTestUtils.BAD_PORT_URLS[i]);
+				AlternateLocation.createAlternateLocation(HugeTestUtils.BAD_PORT_URLS[i]);
 				fail("alternate location string should not have been accepted: "+
 					 HugeTestUtils.BAD_PORT_URLS[i]);
 			}			
@@ -442,7 +436,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         for(int i=0; i<HugeTestUtils.FIREWALLED_LOCS.length; i++) {
             String loc = HugeTestUtils.FIREWALLED_LOCS[i];
             try {
-                AlternateLocation al = AlternateLocation.createAlternateLocation(loc);
+                AlternateLocation.createAlternateLocation(loc);
                 fail("alt loc should not have accepted firewalled loc: "+loc);
             } catch(Exception e) {
                 // this is expected 
@@ -451,7 +445,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 
         for(int i=0; i<HugeTestUtils.NON_FIREWALLED_LOCS.length; i++) {
             String loc = HugeTestUtils.NON_FIREWALLED_LOCS[i];
-            AlternateLocation al = AlternateLocation.createAlternateLocation(loc);
+            AlternateLocation.createAlternateLocation(loc);
         }
     }
 }
