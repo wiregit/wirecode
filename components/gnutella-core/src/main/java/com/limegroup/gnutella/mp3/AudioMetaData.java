@@ -181,50 +181,6 @@ public abstract class AudioMetaData extends MetaData {
         return list;
     }
     
-    /**
-     * Writes the data to an XML string.
-     *
-     * If ID3Only is true, the data is a complete XML string, otherwise
-     * it is an excerpt of an XML string.
-     */
-    public String toXML(String path, boolean id3Only) {
-        StringBuffer strB = new StringBuffer();
-        if(id3Only) {
-            appendStrings("<audios noNamespaceSchemaLocation=\"",
-            				schemaURI,
-                          strB);
-            strB.append("><audio ");
-            appendStrings(" identifier=\"", path, strB);
-        }
-
-
-        if(isValid(title))
-            appendStrings(" title=\"", title, strB);
-        if(isValid(artist))
-            appendStrings(" artist=\"", artist, strB);
-        if(isValid(album))
-            appendStrings(" album=\"", album, strB);
-        if(isValid(track))
-            appendStrings(" track=\"", ""+track, strB);
-        if(isValid(genre))
-            appendStrings(" genre=\"", genre, strB);
-        if(isValid(year))
-            appendStrings(" year=\"", year, strB);
-        if(isValid(comment))
-            appendStrings(" comments=\"", comment, strB);
-        if(isValid(bitrate))
-            appendStrings(" bitrate=\"", ""+bitrate, strB);
-        if(isValid(length))
-            appendStrings(" seconds=\"", ""+length, strB);
-
-        if(id3Only) {
-            strB.append("/>");
-            strB.append("</audios>");
-        }
-
-        return strB.toString();
-    }
-    
     private void add(List list, String value, String key) {
         if(isValid(value))
             list.add(new NameValue(key, value.trim()));

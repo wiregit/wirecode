@@ -29,14 +29,6 @@ public abstract class MetaData {
 	 */
 	public abstract List toNameValueList();
 	/**
-	 * Writes the data to an XML string.
-	 *
-	 * @param complete if true, the data is a complete XML string, otherwise
-	 * it is an excerpt of an XML string.
-	 */
-	public abstract String toXML(String path, boolean complete);
-	
-    /**
 	 * populates this's data fields with data read from the media file
 	 * all subclasses need to implement it
 	 * @throws IOException parsing failed

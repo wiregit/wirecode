@@ -4,26 +4,17 @@ package com.limegroup.gnutella.mp3;
 import java.io.*;
 
 import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
+
 
 import com.sun.java.util.collections.*;
 
 /**
- * Superclass of all readers that extract metadata from media files
+ * Utility class that creates a <tt>LimeXMLDocument</tt> 
+ * from a file
  */
 public class MetaDataReader {
 	
-	/**
-	 * Generates an XML description of the file's id3 data.
-	 * @param asString true if String we return is the only document associated
-	 * with the file. 
-	 */
-	public static String readDocument(File file, boolean asString) throws IOException {
-		
-		MetaData data = MetaData.parse(file);
-		return data.toXML(file.getCanonicalPath(), asString);
-	    
-	}
+	private MetaDataReader(){}
 
 	/**
 	 * Generates a LimeXMLDocument of the file's id3 data.
