@@ -51,28 +51,6 @@ public class QueryRequest extends Message implements Serializable{
         this.queryUrns=queryUrns;
         buildPayload(); // now the length has been set
     }
-    
-    private void buildPayload() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
-            baos.write(query.getBytes());              // write query
-            baos.write(0);                             // null
-            // now write any & all HUGE v0.93 General Extension Mechanism extensions
-            boolean addDelimiterBefore = false;
-            addDelimiterBefore = writeGemExtension(baos, addDelimiterBefore, richQuery);
-            addDelimiterBefore = writeGemExtensions(baos, addDelimiterBefore, 
-                                                    queryUrns == null ? null : queryUrns.iterator());
-            addDelimiterBefore = writeGemExtensions(baos, addDelimiterBefore, 
-                                                    requestedUrnTypes == null ? null : requestedUrnTypes.iterator());
-            baos.write(0);                             // final null
-            payload=baos.toByteArray();
-            updateLength(payload.length); 
-            payloadHarmonized=true;
-        } catch (IOException ioe) {
-            System.out.println("QueryRequest.buildPayload() IOException");
-        }
-    }
 
     /**
      * Older form of the constructor calls the newer form of the constructor
@@ -102,6 +80,39 @@ public class QueryRequest extends Message implements Serializable{
             byte[] payload) {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
         this.payload=payload;
+    }
+    
+    private void buildPayload() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
+            baos.write(query.getBytes());              // write query
+            baos.write(0);                             // null
+            // now write any & all HUGE v0.93 General Extension Mechanism extensions
+            boolean addDelimiterBefore = false;
+			
+			// add the rich query
+            addDelimiterBefore = 
+			    writeGemExtension(baos, addDelimiterBefore, richQuery);
+
+			// add the urns
+            addDelimiterBefore = 
+			    writeGemExtensions(baos, addDelimiterBefore, 
+								   queryUrns == null ? null : queryUrns.iterator());
+
+			// add the urn types
+            addDelimiterBefore = 
+			    writeGemExtensions(baos, addDelimiterBefore, 
+								   requestedUrnTypes == null ? null : 
+								   requestedUrnTypes.iterator());
+
+            baos.write(0);                             // final null
+            payload=baos.toByteArray();
+            updateLength(payload.length); 
+            payloadHarmonized=true;
+        } catch (IOException ioe) {
+            System.out.println("QueryRequest.buildPayload() IOException");
+        }
     }
 
     protected void writePayload(OutputStream out) throws IOException {
@@ -169,7 +180,7 @@ public class QueryRequest extends Message implements Serializable{
 			// it's an URN to match, of form "urn:namespace:etc"
 			URN urn = null;
 			try {
-				urn = new URN(urnString);
+				urn = URNFactory.createURN(urnString);
 			} catch(IOException e) {
 				// the urn string is invalid -- just return
 				return;
