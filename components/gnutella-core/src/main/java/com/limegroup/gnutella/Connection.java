@@ -532,30 +532,20 @@ public class Connection implements Runnable {
 			
 			//unpack message
 			//make HTTP connection with originator
-			//TODO1: Rob makes HHTTP connection
 			String host = new String(req.getIP());
-
 			byte[] ip = req.getIP();
-
 			StringBuffer buf=new StringBuffer();
 			buf.append(ByteOrder.ubyte2int(ip[0])+".");
 			buf.append(ByteOrder.ubyte2int(ip[1])+".");
 			buf.append(ByteOrder.ubyte2int(ip[2])+".");
 			buf.append(ByteOrder.ubyte2int(ip[3])+"");
 			String h = buf.toString();
-
-			System.out.println("Host in Conn " + h);
-
-
 			int port = req.getPort();
 			
 			FileManager fmanager = FileManager.getFileManager();
 			int index = (int)req.getIndex();
-
-			System.out.println("THe index is " + index); 
 			
-			FileDesc desc;
-			
+			FileDesc desc;			
 			try {
 			    desc =(FileDesc)fmanager._files.get(index); 
 			}
@@ -563,14 +553,13 @@ public class Connection implements Runnable {
 			    // tell the client the file does not exist
 			    return;
 			} 
-			System.out.println("THe size is " + fmanager._files.size()); 
-
 			String file = desc._name;
 			
-			HTTPUploader up = new 
-			    HTTPUploader("http", h, port, file, manager, 0, 0);
-
-			up.run();
+//  			HTTPUploader up = new 
+//  			    HTTPUploader("http", h, port, file, manager, 0, 0);
+//  			Thread t=new 
+			
+//  			up.run();
 
 		    }
 		    else{// the message has arrived in error or is spam
