@@ -5,13 +5,20 @@ import java.nio.channels.*;
 import java.io.*;
 
 /**
- * Performs non-blocking writing of headers.
- *
+ * Performs non-blocking writing of Gnutella connection headers.  This in
+ * particular handles properly registering this writer when TCP buffers are 
+ * full and we are only able to perform partial writes.
  */
 public final class NIOHeaderWriter implements HeaderWriter {
 
+    /**
+     * The <tt>SocketChannel</tt> for writing data to the other host.
+     */
     private final SocketChannel CHANNEL;
 
+    /**
+     * <tt>ByteBuffer</tt> for writing headers to the other host.
+     */
     private ByteBuffer _headerBuffer = ByteBuffer.allocate(1024);
 
     /**
