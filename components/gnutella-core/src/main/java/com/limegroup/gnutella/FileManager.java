@@ -957,12 +957,9 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
-        try {
-            f = FileUtils.getCanonicalFile(f);
-        } catch(IOException ioe) {
+        FileDesc fd = getFileDescForFile(f);
+        if( fd == null )
             return null;
-        }
-        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
         List xmlDocs = new LinkedList();
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
@@ -980,17 +977,9 @@ public abstract class FileManager {
      */
     public synchronized FileDesc removeFileIfShared(File f) {
         repOk();
-        //Take care of case, etc.
-        try {
-            f=FileUtils.getCanonicalFile(f);
-        } catch (IOException e) {
-            e.printStackTrace();
-            repOk();
-            return null;
-        }
-
-        //Look for a file matching <file>...
-        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
+        
+        // Look for matching file ... 
+        FileDesc fd = getFileDescForFile(f);
         if (fd==null)
             return null;
         
@@ -1072,7 +1061,7 @@ public abstract class FileManager {
      */
     public synchronized boolean renameFileIfShared(File oldName,
                                                    File newName) {
-        FileDesc fd = (FileDesc)_fileToFileDesc.get(oldName);
+        FileDesc fd = getFileDescForFile(oldName);
         if( fd == null )
             return false;
         List xmlDocs = new LinkedList();
