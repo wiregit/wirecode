@@ -769,6 +769,7 @@ public class ConnectionManager {
      */
     private boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
+        if(userAgent == null) return false;
         if(userAgent.startsWith("Morpheus")) return false;
         return true;
     }
