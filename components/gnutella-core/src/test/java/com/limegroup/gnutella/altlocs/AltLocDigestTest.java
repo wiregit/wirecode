@@ -148,6 +148,15 @@ public class AltLocDigestTest extends BaseTestCase {
 	    byte [] digest3 = parsed.toBytes();
 	    assertTrue(Arrays.equals(digest3,digest2));
 	    
+	    // add an extra location, make sure it expands the serialized size with 2 bytes
+	    AlternateLocation altloc =AlternateLocation.create("1.2.3.4:5",FileDescStub.DEFAULT_SHA1); 
+	    parsed.add(altloc);
+	    digest3 = parsed.toBytes();
+	    assertEquals(digest2.length+2,digest3.length);
+	    
+	    parsed = AltLocDigest.parseDigest(digest3,0,15);
+	    assertTrue(parsed.contains(altloc));
+	    
 	    // try boundary conditions
 	    digest = new byte[24*8+3];
 	    digest[0]=24;
@@ -160,6 +169,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    parsed = AltLocDigest.parseDigest(digest2,0,digest2.length);
 	    digest3 = parsed.toBytes();
 	    assertTrue(Arrays.equals(digest3,digest2));
+	    
 	}
 	
 	/**

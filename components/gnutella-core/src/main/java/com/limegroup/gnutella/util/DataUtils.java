@@ -166,7 +166,6 @@ public final class DataUtils {
                 element |= extractedBit;
                 offset++;
             }
-            if (element < 0) element+=256;
             ret[i] = element;
         }
         

@@ -500,6 +500,15 @@ public class HeadTest extends BaseTestCase {
 	    pong = reparse(new HeadPong(ping));
 	    
 	    assertNull(pong.getPushLocs());
+	    
+	    // add an extra loc, try again.
+	    GUID g = new GUID(GUID.makeGuid());
+	    _pushCollection.add(AlternateLocation.create(g.toHexString()+";5:1.2.3.4;1.2.3.4:5",_havePartial));
+	    pong = reparse(new HeadPong(ping));
+	    
+	    assertNotNull(pong.getPushLocs());
+	    assertEquals(1,pong.getSkippedLocs(false));
+	    assertEquals(2,pong.getTotalLocs(false));
 	}
 	
 	private HeadPong reparse(HeadPong original) throws Exception{

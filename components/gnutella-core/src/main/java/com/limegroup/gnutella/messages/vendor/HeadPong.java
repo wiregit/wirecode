@@ -32,6 +32,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.CountingGGEP;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -185,7 +186,7 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * the ggep block contained in this pong
 	 */
-	private CountingGGEP _ggep;
+	private GGEP _ggep;
 	
 	/**
 	 * creates a message object with data from the network.
@@ -265,7 +266,7 @@ public class HeadPong extends VendorMessage {
 	private void parseGGEPPong(byte [] payload) 
 		throws BadGGEPBlockException, BadGGEPPropertyException, BadPacketException {
 	    
-	    _ggep = new CountingGGEP(payload,7);
+	    _ggep = new GGEP(payload,7);
 	    byte [] props = _ggep.get(GGEPHeadConstants.GGEP_PROPS);
 	    if (props.length < 1)
 	        throw new BadPacketException("invalid properties field");
