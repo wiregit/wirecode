@@ -15,6 +15,9 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     protected static File _savedDir;
     protected static File _incompleteDir;
     protected static File _settingsDir;
+    protected static File _xmlDir;
+    protected static File _xmlDataDir;
+    protected static File _xmlSchemasDir;
     protected static Class _testClass;
     protected Thread _testThread;
     protected TestResult _testResult;
@@ -278,7 +281,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public static File getTestDirectory() throws Exception {
         File f =
-            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");            
+            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         f = f.getCanonicalFile(); // make it a full (not relative) path
         
                  //gnutella       // limegroup    // com         // tests
@@ -297,11 +300,17 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");
         _settingsDir = new File(_baseDir, "settings");
-        
+        _xmlDir = new File(_settingsDir, "xml");
+        _xmlDataDir = new File(_xmlDir, "data");
+        _xmlSchemasDir = new File(_xmlDir, "schemas");
+
         _baseDir.mkdirs();
         _savedDir.mkdirs();
         _sharedDir.mkdirs();
         _settingsDir.mkdirs();
+        _xmlDir.mkdirs();
+        _xmlDataDir.mkdirs();
+        _xmlSchemasDir.mkdirs();
         
         SettingsManager settings = SettingsManager.instance();
         settings.setSaveDirectory(_savedDir);
@@ -310,7 +319,20 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         PrivilegedAccessor.setValue(CommonUtils.class,
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
-        
+
+        // copy over the necessary schemas to the schemas dir
+        File audioSchema = 
+            CommonUtils.getResourceFile("lib/xml/schemas/audio.xsd");
+        File videoSchema =
+            CommonUtils.getResourceFile("lib/xml/schemas/video.xsd");
+        assertTrue(audioSchema.exists());
+        assertTrue(videoSchema.exists());
+        assertTrue(_xmlSchemasDir.canWrite() && _xmlSchemasDir.exists());
+        assertTrue(CommonUtils.copy(audioSchema, new File(_xmlSchemasDir,
+                                                          "audio.xsd")));
+        assertTrue(CommonUtils.copy(videoSchema, new File(_xmlSchemasDir,
+                                                          "video.xsd")));
+
         //make sure it'll delete even if something odd happens.
         _baseDir.deleteOnExit();
     }
