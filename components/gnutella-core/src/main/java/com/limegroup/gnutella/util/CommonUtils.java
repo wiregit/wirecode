@@ -6,16 +6,12 @@ import java.io.*;
 /**
  * This class handles common utility functions that many classes
  * may want to access.
- *
- * @author Adam Fisk
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-
-
 public class CommonUtils {
 
 	// constant for the current version of LimeWire
-	private static final String LIMEWIRE_VERSION = "1.6d";
+	private static final String LIMEWIRE_VERSION = "1.7";
 	
 	// variable for the system properties
 	private static Properties _props;
@@ -38,12 +34,12 @@ public class CommonUtils {
 	private static boolean _isSolaris    = false;
 	
 	/**
-	 * make sure the constructor can never be called.
+	 * Make sure the constructor can never be called.
 	 */
 	private CommonUtils() {}
 
 	/**
-	 * initialize the settings statically. 
+	 * Initialize the settings statically. 
 	 */
 	static {
 		// get the system properties object
@@ -68,7 +64,7 @@ public class CommonUtils {
 	}
 
 	/**
-	 * returns the current version number of LimeWire as
+	 * Returns the current version number of LimeWire as
      * a string, e.g., "1.4".
 	 */
 	public static String getLimeWireVersion() {
@@ -84,28 +80,28 @@ public class CommonUtils {
 	}    
 
 	/**
-	 * returns the version of java we're using.
+	 * Returns the version of java we're using.
 	 */
 	public static String getJavaVersion() {
 		return _props.getProperty("java.version");
 	}
 
 	/**
-	 * returns the operating system
+	 * Returns the operating system.
 	 */
 	public static String getOS() {
 		return _props.getProperty("os.name");;
 	}
 
 	/**
-	 * returns the user's current working directory.
+	 * Returns the user's current working directory.
 	 */
 	public static String getCurrentDirectory() {
 		return _props.getProperty("user.dir");
 	}
 
 	/**
-	 * returns whether or not the os is some version of Windows
+	 * Returns whether or not the os is some version of Windows
 	 */
 	public static boolean isWindows() {
 		return _isWindows;
@@ -120,43 +116,45 @@ public class CommonUtils {
     }
 
 	/** 
-	 * returns whether or not the os is Mac 9.1 or earlier.
+	 * Returns whether or not the os is Mac 9.1 or earlier.
 	 */
 	public static boolean isMacClassic() {
 		return _isMacClassic;
 	}
 
 	/** 
-	 * returns whether or not the os is Mac OSX
+	 * Returns whether or not the os is Mac OSX.
 	 */
 	public static boolean isMacOSX() {
 		return _isMacOSX;
 	}
 
 	/** 
-	 * returns whether or not the os is Solaris
+	 * returns whether or not the os is Solaris.
 	 */
 	public static boolean isSolaris() {
 		return _isSolaris;
 	}
 
 	/** 
-	 * returns whether or not the os is Linux
+	 * Returns whether or not the os is Linux.
 	 */
 	public static boolean isLinux() {
 		return _isLinux;
 	}
 
 	/** 
-	 * returns whether or not the os is some version of
-	 * Unix, defined here as only Solaris or Linux
+	 * Returns whether or not the os is some version of
+	 * Unix, defined here as only Solaris or Linux.
 	 */
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
 	}   
 
-    /** Copies the file 'src' to 'dst', returning true iff the copy succeeded.
-     *  If 'dst' already exists, the copy may or may not succeed. */
+    /** 
+	 * Copies the file 'src' to 'dst', returning true iff the copy succeeded.
+     * If 'dst' already exists, the copy may or may not succeed. 
+	 */
     public static boolean copy(File src, File dst) {
         boolean ok=true;
         InputStream in=null;
