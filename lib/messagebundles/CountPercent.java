@@ -1,5 +1,4 @@
 
-
 import java.text.*;
 import java.util.*;
 import java.io.*;
@@ -11,19 +10,26 @@ public class CountPercent {
     private static final String UTF8_EXT = ".UTF-8.txt";
     private static final String DEFAULT_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
     
+    /** minimum completion levels for the status HTML page */
+    private static final double MIN_PERCENTAGE_COMPLETED     = 0.75;
+    private static final double MIN_PERCENTAGE_NEED_REVISION = 0.66;
+    private static final double MIN_PERCENTAGE_MIDWAY        = 0.50;
+    private static final int    MIN_COUNT_STARTED            = 20;
+    
+    /** constant link to the translate mailing list. */
     private static final String HTML_TRANSLATE_EMAIL_ADDRESS =
-"\n<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
+"<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
 "// Protected email script by Joe Maller JavaScripts available at http://www.joemaller.com\n" +
 "// This script is free to use and distribute but please credit me and/or link to my site.\n" + 
-"emailE = ('limewire.org'); emailE = ('translate' + '@' + emailE);\n" +
-"document.write('<a href=\"mailto:' + emailE + '\">' + emailE + '</a>');\n" +
-"//--></script><noscript>&lt;<a href=\"#\">Email address protected by JavaScript:\n" +
-"please enable JavaScript to contact me</a></noscript></b>";
+"e_mA_iL_E = ('limewire' + \"&#46;\" + 'org'); e_mA_iL_E = ('translate' + \"&#64;\" + e_mA_iL_E);\n" +
+"document.write('<a href=\"mai' + \"lto:\" + e_mA_iL_E + '\">' + e_ma_ilE + '</a>');\n" +
+"//--></script><noscript><a href=\"#\">[Email address protected by JavaScript:\n" +
+"please enable JavaScript to contact me]</a></noscript></b>";
     
     private static final int ACTION_STATISTICS = 0;
     private static final int ACTION_HTML = 1;
     private static final int ACTION_CHECK = 2;
-
+    
     public static void main(String[] args) throws java.io.IOException {
         final int action;
         if (args != null && args.length > 0) {
@@ -99,18 +105,33 @@ public class CountPercent {
     }
     
     private Set getAdvancedKeys() throws java.io.IOException  {
-        BufferedReader reader = new BufferedReader(new FileReader(new File(BUNDLE_NAME + PROPS_EXT)));
-        String read = reader.readLine();
-        while (read != null &&
-               !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
-            read = reader.readLine();
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(new File(BUNDLE_NAME + PROPS_EXT)),
+                "ISO-8859-1"));
+        } catch (java.io.UnsupportedEncodingException uee) {
+            System.err.println(uee); //shouldn't occur
+            throw uee;
+        }
+        String read;
+        while ((read = reader.readLine()) != null &&
+               !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"));
         
         StringBuffer sb = new StringBuffer();
-        while (read != null) {
-            sb.append("\n").append(read);
-            read = reader.readLine();
+        while ((read = reader.readLine()) != null) {
+            if (read.length() == 0 ||
+                read.charAt(0) == '#')
+            continue;
+            sb.append(read).append("\n");
         }
-        InputStream in = new ByteArrayInputStream(sb.toString().getBytes());
+        InputStream in;
+        try {
+            in = new ByteArrayInputStream(sb.toString().getBytes("ISO-8859-1"));
+        } catch (java.io.UnsupportedEncodingException uee) {
+            System.err.println(uee); //shouldn't occur
+            throw uee;
+        }
         Properties p = new Properties();
         p.load(in);
         
@@ -159,14 +180,14 @@ public class CountPercent {
                 InputStream in =
                     new FileInputStream(new File(lib, linkFileName/*files[i]*/));
                 if (skipUTF8LeadingBOM) try { /* skip the three-bytes leading BOM */
-                   /* the leading BOM (U+FEFF), if present is coded in UTF-8 as three
-                    * bytes: 0xEF, 0xBB, 0xBF */
+                   /* the leading BOM (U+FEFF), if present, is coded in UTF-8 as three
+                    * bytes 0xEF, 0xBB, 0xBF; they are not part of a resource key. */
                    in.mark(3);
                    if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
                        in.reset();
                 } catch (java.io.IOException ioe) {
                 }
-                loadFile(langs, in, linkFileName);
+                loadFile(langs, in, linkFileName, skipUTF8LeadingBOM);
             } catch (FileNotFoundException fnfe) {
                 // oh well.
             }
@@ -176,11 +197,39 @@ public class CountPercent {
     /**
      * Loads a single file into the languages map.
      */
-    private LanguageInfo loadFile(Map langs, InputStream in, String filename) {
+    private LanguageInfo loadFile(Map langs, InputStream in, String filename, boolean isUTF8) {
         try {
             in = new BufferedInputStream(in);
             final Properties props = new Properties();
             props.load(in);
+            /* note that the file is read in ISO-8859-1 only, even if it is encoded
+             * with another charset. However, the Properties has its unique legacy parser
+             * and we want to use it to make sure we use the same syntax. So we'll need to
+             * correct the parsed values after the file is read and interpreted as a set of
+             * properties (keys,values).
+             */
+            if (isUTF8) {
+                // actually the file was UTF-8-encoded: convert bytes read incorrectly as
+                // ISO-8859-1 characters, into actual Unicode UTF-16 code units.
+                for (Iterator i = props.entrySet().iterator(); i.hasNext(); ) {
+                    final Map.Entry entry = (Map.Entry)i.next();
+                    final String key = (String)entry.getKey();
+                    final String value = (String)entry.getValue();
+                    byte[] bytes = null;
+                    try {
+                        bytes = value.getBytes("ISO-8859-1");
+                    } catch (java.io.IOException ioe) {
+                        //should not occur
+                    }
+                    try {
+                        final String correctedValue = new String(bytes, "UTF-8");
+                        if (!correctedValue.equals(value))
+                            props.put(key, correctedValue);
+                    } catch (java.io.IOException ioe) {
+                        System.err.println(ioe); //should not occur
+                    }
+                }
+            }
             String lc = props.getProperty("LOCALE_LANGUAGE_CODE", "");
             String cc = props.getProperty("LOCALE_COUNTRY_CODE", "");
             String vc = props.getProperty("LOCALE_VARIANT_CODE", "");
@@ -190,10 +239,11 @@ public class CountPercent {
             String vn = props.getProperty("LOCALE_VARIANT_NAME", vc);
             String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc);
             String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
+            boolean rtl = props.getProperty("LAYOUT_RIGHT_TO_LEFT", "false").equals("true");
             
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
                                                ln, cn, vn, sn,
-                                               dn, filename, props);
+                                               dn, rtl, filename, props);
             langs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {
@@ -312,13 +362,13 @@ public class CountPercent {
             final int count = props.size();
             final double percentage = (double)count / (double)basicTotal;
             li.setPercentage(percentage);
-            if (percentage >= 0.75)
+            if (percentage >= MIN_PERCENTAGE_COMPLETED)
                 langsCompleted.add(li);
-            else if (percentage >= 0.66)
+            else if (percentage >= MIN_PERCENTAGE_NEED_REVISION)
                 langsNeedRevision.add(li);
-            else if (percentage >= 0.40)
+            else if (percentage >= MIN_PERCENTAGE_MIDWAY)
                 langsMidway.add(li);
-            else if (percentage >= 0.03)
+            else if (count >= MIN_COUNT_STARTED)
                 langsStarted.add(li);
             else
                 langsEmbryonic.add(li);
@@ -398,7 +448,7 @@ public class CountPercent {
 "     the open source development environment and this website, LimeWire.org. We\n" +
 "     will try to make this process as computer science-free as possible.<br />\n" +
 "     <br />\n" +
-"     <b>How LimeWire Renders Code to a Spoken Language</b><br />\n" + 
+"     <b><big>How LimeWire Renders Code to a Spoken Language</big></b><br />\n" + 
 "     <br />\n" +
 "     Open up this <a href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n" +
 "     target=\"_blank\">LimeWire Screenshot</a>.<br />\n" +
@@ -428,7 +478,7 @@ public class CountPercent {
                              List langsStarted,
                              List langsEmbryonic) {
         page.append(
-"     <b>Translations Status:</b>\n" +
+"     <b><big>Translations Status:</big></b>\n" +
 "     <br />\n" +
 "     <ol>\n");
         buildStatus(page, langsCompleted,
@@ -474,7 +524,7 @@ public class CountPercent {
     private void buildAfterStatus(StringBuffer page) {
         page.append(
 "     <br />\n" +
-"     <b>Which tool or editor is needed to work on a translation:</b><br />\n" + 
+"     <b><big>Which tool or editor is needed to work on a translation:</big></b><br />\n" + 
 "     <br />\n" + 
 "     For <b>Western European Latin-based languages</b>, which can use the US-ASCII \n" +
 "     or ISO-8859-1 character set, any text editor (such as NotePad on Windows) can\n" +
@@ -487,10 +537,26 @@ public class CountPercent {
 "     text file (which can be edited with NotePad on Windows 2000/XP), or a\n" +
 "     correctly marked-up HTML document such as HTML email, or a Word document.<br />\n" +
 "     <br />\n" +
-"     For <b>other European or Semitic languages</b>, the preferred format is a\n" +
-"     plain text file, encoded with a ISO-8859-* character set which you must\n" +
-"     explicitly specify, or a correctly marked-up HTML document, or a Word\n" +
-"     document.<br />\n" +
+"     For <b>other European languages</b>, the preferred format is a plain-text\n" +
+"     file, encoded preferably with UTF-8 or a ISO-8859-* character set that\n" +
+"     you must explicitly specify to us, or a correctly marked-up HTML document,\n" +
+"     or a Word document. Please specify your working operating system and editor\n" +
+"     you used to create plain-text files (we may support Windows codepages or Mac\n" +
+"     charsets, but we will convert them to Unicode UTF-8 in our repository).<br />\n" +
+"     <br />\n" +
+"     For <b>Semitic languages</b> (Arabic, Hebrew...), the preferred format is a\n" +
+"     plain-text file edited with a editor that supports the right-to-left layout,\n" +
+"     encoded preferably with UTF-8 or a ISO-8859-* character set, in logical order.\n" +
+"     Be careful with the relative order of keys and values, and with the\n" +
+"     appearance of ASCII punctuations around right-to-left words: <i>make sure that\n" +
+"     your editor uses the RTL layout with the edited text aligned on the right</i>;\n" +
+"     please don't insert BiDi control overrides; but you may need to place LRM/PDF\n" +
+"     marks (U+200F/U+202C) locally around non-Semitic words inserted within Semitic\n" +
+"     sentences. <i>Also the \"</i><code>\\n</code><i>\" sequences that encode a newline\n" +
+"     will be displayed within semitic text as \"</i><code>n\\</code><i>\": don't use\n" +
+"     BiDi overrides for such special sequence whose appearance in your editor is not\n" +
+"     important, but that MUST be entered with a leading backslash before the 'n'\n" +
+"     character.</i><br />\n" +
 "     <br />\n" +
 "     For <b>Asian Languages</b>, the preferred submission format is a Unicode text\n" +
 "     file encoded with UTF-8. Users of Windows 2000/XP can use NotePad but you\n" +
@@ -506,7 +572,7 @@ public class CountPercent {
 "     specific format for text attachments (we may enventually have difficulties to\n" +
 "     decipher some Mac encodings used in simple text files attachment). On Mac OSX,\n" +
 "     the best tool is \"TextEdit\", from the Jaguar accessories, with\n" +
-"     which you can directly edit and save plain text files encoded with UTF-8.\n" +
+"     which you can directly edit and save plain-text files encoded with UTF-8.<br />\n" +
 "     <br />\n" +
 "     <b>Linux users</b> can also participate if they have a correctly setup\n" +
 "     environment for their locale. Files can be edited with \"vi\", \"emacs\", or\n" +
@@ -532,7 +598,7 @@ public class CountPercent {
 "     <a href=\"http://www.cs.tut.fi/~jkorpela/chars.html\"\n" +
 "     target=\"_blank\">http://www.cs.tut.fi/~jkorpela/chars.html</a></li><br />\n" +
 "     <br />\n" +
-"     <b>How to submit corrections or enhancements for your language:</b><br />\n" +
+"     <b><big>How to submit corrections or enhancements for your language:</big></b><br />\n" +
 "     <br />\n" +
 "     Users that don't have the correct tools to edit a Messages Bundle can send us\n" +
 "     an Email in English or in French, that explain their needs.<br />\n" +
@@ -550,20 +616,20 @@ public class CountPercent {
 "     replaced), with your comments. <i>We will review your translations and integrate\n" +
 "     them into our existing versions after review.</i><br />\n" +
 "     <br />\n" +
-"     <b>How to test a new translation:</b><br />\n" +
+"     <b><big>How to test a new translation:</big></b><br />\n" +
 "     <br />\n" +
-"     Only Windows and Unix simple text editors can create a plain text file which\n" +
+"     Only Windows and Unix simple text editors can create a plain-text file which\n" +
 "     will work in LimeWire, and only for languages using the Western European\n" +
 "     Latin character set. Don't use \"SimpleText\" on Mac OS to edit\n" +
-"     properties files as SimpleText does not create plain text files. Other\n" +
+"     properties files as SimpleText does not create plain-text files. Other\n" +
 "     translations need to be converted into regular properties files, encoded\n" +
 "     using the ISO-8859-1 Latin character set and Unicode escape sequences, with a\n" +
 "     tool \"native2ascii\" found in the Java Development Kit.<br />\n" +
 "     <br />\n" +
 "     You don't need to rename your translated and converted bundle, which can\n" +
 "     coexist with the English version. LimeWire will load the appropriate\n" +
-"     resources file according to the \"LANGUAGE=\", and\n" +
-"     \"COUNTRY=\" settings stored in your \"limewire.props\"\n" +
+"     resources file according to the \"<code>LANGUAGE=</code>\", and\n" +
+"     \"<code>COUNTRY=</code>\" settings stored in your \"limewire.props\"\n" +
 "     preferences file. Lookup for the correct language code to use, in the list\n" +
 "     beside.<br />\n" +
 "     <br />\n" +
@@ -574,12 +640,16 @@ public class CountPercent {
 "     <br />\n" +
 "     Since version 2.5, bundles are searched in a single <b>zipped archive</b>\n" +
 "     named \"MessagesBundles.jar\" installed with LimeWire. All bundles\n" +
-"     are named \"MessagesBundle_xx.properties\", where \"xx\" is\n" +
-"     replaced by the language code (as shown on the table beside).\n" +
+"     are named \"MessagesBundle_xx.properties\", where \"xx\" is replaced by\n" +
+"     the language code (as shown on the table beside).\n" +
+"     Note that bundles for languages using non-Western European Latin characters\n" +
+"     will be converted from UTF-8 to ASCI using a special format with hexadecimal\n" +
+"     Unicode escape sequences, prior to their inclusion in this archive. This can be\n" +
+"     performed using the <code>native2ascii</code> tool from the Java Development Kit.\n" +
 "     If you don't know how to proceed to test the translation yourself,\n" +
 "     ask us for assistance at the same email address used for your contributions.<br />\n" +
 "     <br />\n" +
-"     <b>How to create a new translation:</b><br />\n" +
+"     <b><big>How to create a new translation:</big></b><br />\n" +
 "     <br />\n" +
 "     Users that wish to contribute with a new translation must be fluent in the\n" +
 "     target language, preferably native of a country where this language is\n" +
@@ -615,7 +685,7 @@ public class CountPercent {
 "     receive comments from users or other translators.<br />\n" +
 "     <br />\n" +
 "     After you've plugged in your translations into your language's Messages\n" +
-"     Bundle, send your copy as a plain text file attachement to\n" +
+"     Bundle, send your copy as a plain-text file attachement to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <i>We will review your translations and integrate them into our existing\n" +
 "     versions after review.</i><br />\n"+
@@ -716,6 +786,7 @@ class LanguageInfo implements Comparable {
     private final String countryName;
     private final String variantName;
     private final String scriptName;
+    private boolean isRightToLeft;
     private final String displayName;
     private final String fileName;
     private final Properties properties;
@@ -728,7 +799,8 @@ class LanguageInfo implements Comparable {
      */
     public LanguageInfo(String lc, String cc, String vc, String sc,
                         String ln, String cn, String vn, String sn,
-                        String dn, String fn, Properties props) {
+                        String dn, boolean rtl,
+                        String fn, Properties props) {
         languageCode = lc.trim();
         countryCode  = cc.trim();
         variantCode  = vc.trim();
@@ -737,26 +809,10 @@ class LanguageInfo implements Comparable {
         countryName  = cn.trim();
         variantName  = vn.trim();
         scriptName   = sn.trim();
+        isRightToLeft = rtl;
         displayName  = dn.trim();
         fileName     = fn.trim();
         properties   = props;
-    }
-    
-    /**
-     * Returns a description of this language.
-     * If the variantName is not 'international' or '', then 
-     * the display is:
-     *    languageName, variantName (countryName)
-     * Otherwise, the display is:
-     *    languageName (countryName)
-     */
-    public String toString() {
-        if (variantName != null &&
-            !variantName.toLowerCase().equals("international") &&
-            !variantName.equals("") )
-            return languageName + ", " + variantName + " (" + countryName + ")";
-        else
-            return languageName + " (" + countryName + ")";
     }
     
     /**
@@ -774,6 +830,10 @@ class LanguageInfo implements Comparable {
         return variantCode.compareTo(o.variantCode);
     }
     
+    public boolean isVariant() {
+        return !"".equals(variantCode) || !"".equals(countryCode);
+    }
+    
     public String getBaseCode() {
         return languageCode;
     }
@@ -786,17 +846,6 @@ class LanguageInfo implements Comparable {
         return languageCode;
     }
     
-    public String getScript() { return scriptName; }
-    
-    public String getFileName() { return fileName; }
-    
-    public String getName() { return displayName; }
-    
-    public String getLink() {
-        return "<a href=\"" + CountPercent.PRE_LINK + fileName + "\">" +
-               displayName + "</a>";
-    }
-    
     public void setPercentage(double percentage) {
         this.percentage = percentage;
     }
@@ -805,11 +854,45 @@ class LanguageInfo implements Comparable {
         return percentage;
     }
     
-    public boolean isVariant() {
-        return !"".equals(variantCode) || !"".equals(countryCode);
-    }
-    
     public Properties getProperties() {
        return properties;
     }
+
+    /**
+     * Returns a description of this language.
+     * If the variantName is not 'international' or '', then 
+     * the display is:
+     *    languageName, variantName (countryName)
+     * Otherwise, the display is:
+     *    languageName (countryName)
+     */
+    public String toString() {
+        if (variantName != null &&
+            !variantName.toLowerCase().equals("international") &&
+            !variantName.equals(""))
+            return languageName + ", " + variantName + " (" + countryName + ")";
+        else
+            return languageName + " (" + countryName + ")";
+    }
+    
+    public String getScript() { return scriptName; }
+    
+    public String getFileName() { return fileName; }
+    
+    public String getName() { return displayName; }
+    
+    public String getLink() {
+        final String tip;
+        if (isRightToLeft)
+            tip = "\u200f" /* RLM control: Right-To-Left Mark */
+                + toString()
+                + "\u202c"; /* PDF control: Pop Directional Format */
+        else
+            tip = toString();
+        return
+           "<a href=\"" + CountPercent.PRE_LINK + fileName +
+           "\" title=\"" + tip + "\">" +
+           displayName + "</a>";
+    }
+    
 }
