@@ -1,37 +1,15 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Properties;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Set;
 
 /**
@@ -40,8 +18,6 @@ import com.sun.java.util.collections.Set;
  * Ultrapeers.
  */
 public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
-
-    private static MyActivityCallback callback;
 
     private final int REPORT_INTERVAL = SearchResultHandler.REPORT_INTERVAL;
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;

@@ -1,19 +1,27 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.bitzi.util.*;
-
-import junit.framework.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Properties;
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
+
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Sets up a Test Scenario of a Leaf connected to some Ultrapeers (default of

@@ -2,29 +2,18 @@ package com.limegroup.gnutella;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
 import com.bitzi.util.Base32;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -32,13 +21,8 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -94,7 +78,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         drain(testUP[0]);
 
         // make sure leaf is sharing
-        assertEquals(2, rs.getFileManager().getNumFiles());
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
@@ -128,7 +112,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                         rs.getMessageRouter()._clientGUID,
+                                         RouterService.getMessageRouter()._clientGUID,
                                          0, 
                                          InetAddress.getLocalHost().getAddress(),
                                          9000);
@@ -150,7 +134,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // confirm a GIV
         currLine = reader.readLine();
         String givLine = "GIV 0:" + 
-        (new GUID(rs.getMessageRouter()._clientGUID)).toHexString();
+        (new GUID(RouterService.getMessageRouter()._clientGUID)).toHexString();
         assertTrue(currLine.startsWith(givLine));
 
         // everything checks out!
@@ -166,7 +150,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "boalt.org");
+        RouterService.query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -196,8 +180,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { ((MyActivityCallback)getCallback()).getRFD() }), true, 
-                    new GUID(m.getGUID()));
+        RouterService.download((new RemoteFileDesc[] 
+            { ((MyActivityCallback)getCallback()).getRFD() }), true, 
+                new GUID(m.getGUID()));
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -227,7 +212,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // send back a 202 and make sure no PushRequest is sent via the normal
@@ -277,7 +262,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "golf is awesome");
+        RouterService.query(guid, "golf is awesome");
 
         // the testUP[0] should get it
         Message m = null;
@@ -300,8 +285,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        rs.download((new RemoteFileDesc[] { ((MyActivityCallback)getCallback()).getRFD() }), true,
-                    new GUID(m.getGUID()));
+        RouterService.download((new RemoteFileDesc[] 
+            { ((MyActivityCallback)getCallback()).getRFD() }), true,
+                new GUID(m.getGUID()));
 
         // await a PushRequest
         do {
@@ -317,7 +303,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "berkeley.edu");
+        RouterService.query(guid, "berkeley.edu");
 
         // the testUP[0] should get it
         Message m = null;
@@ -349,8 +335,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { ((MyActivityCallback)getCallback()).getRFD() }), true,
-                    new GUID((m.getGUID())));
+        RouterService.download((new RemoteFileDesc[] 
+            { ((MyActivityCallback)getCallback()).getRFD() }), true,
+                new GUID((m.getGUID())));
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();

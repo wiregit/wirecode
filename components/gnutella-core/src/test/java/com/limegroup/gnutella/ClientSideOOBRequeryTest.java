@@ -10,9 +10,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -20,10 +18,6 @@ import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -32,10 +26,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -67,17 +58,17 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-    }
+    }      
     
     private static void doSettings() {
         TIMEOUT = 3000;
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
-    }        
+    }   
     
     ///////////////////////// Actual Tests ////////////////////////////
 
@@ -196,8 +187,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(rs.isGUESSCapable());
-        assertTrue(rs.acceptedIncomingConnection());
+        assertTrue(RouterService.isGUESSCapable());
+        assertTrue(RouterService.acceptedIncomingConnection());
 
         // set smaller clear times so we can test in a timely fashion
 
@@ -208,8 +199,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -252,7 +243,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -263,9 +254,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            rs.stopQuery(new GUID(qr.getGUID()));
+            RouterService.stopQuery(new GUID(qr.getGUID()));
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -287,8 +278,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "berkeley");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -345,7 +336,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -372,7 +363,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -390,7 +381,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
         
         // sleep to make sure the download starts 
@@ -404,7 +395,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -426,8 +417,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "berkeley");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -484,7 +475,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -511,7 +502,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -529,7 +520,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         // sleep to make sure the download starts 
         Thread.sleep(5000);
@@ -542,7 +533,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -551,12 +542,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertEquals(1, endpoints.size());
         }
         
-        rs.stopQuery(new GUID(guid));
+        RouterService.stopQuery(new GUID(guid));
 
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -579,8 +570,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "metadata");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "metadata");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -637,7 +628,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -664,7 +655,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -682,16 +673,16 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         UploadSettings.UPLOAD_SPEED.setValue(5);
 
-        rs.stopQuery(new GUID(guid));
+        RouterService.stopQuery(new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
 
         {
             // download still in progress, don't purge
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -713,7 +704,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -734,8 +725,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -792,7 +783,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -803,7 +794,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                new GUID(guid));
         
         Thread.sleep(1000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
@@ -844,7 +836,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -864,8 +856,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -922,7 +914,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -933,7 +925,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                new GUID(guid));
         
         Thread.sleep(100);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
@@ -1050,7 +1043,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -1070,8 +1063,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1129,7 +1122,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -1155,7 +1148,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // confirm download will try to GUESS
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                new GUID(guid));
         
         Thread.sleep(1000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
@@ -1199,7 +1193,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -1219,8 +1213,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1286,7 +1280,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -1296,9 +1290,11 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                new GUID(guid));
         Downloader downloader2 = 
-            rs.download(new RemoteFileDesc[] { rfd2 }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd2 }, false, 
+                new GUID(guid));
         
 
         // let downloaders do stuff  
@@ -1315,7 +1311,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // we should still have bypassed results since downloader2 alive
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -1330,7 +1326,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());
@@ -1362,8 +1358,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = rs.newQueryGUID();
-        rs.query(guid, "whatever");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1420,7 +1416,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // all the UDP ReplyNumberVMs should have been bypassed
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(1, _bypassedResults.size());
@@ -1429,9 +1425,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertEquals(UDP_ACCESS.length, endpoints.size());
         }
         
-        long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                new GUID(guid));
         
         Thread.sleep(1000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
@@ -1534,7 +1530,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter clears the map
             Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                                   "_bypassedResults");
             assertNotNull(_bypassedResults);
             assertEquals(0, _bypassedResults.size());

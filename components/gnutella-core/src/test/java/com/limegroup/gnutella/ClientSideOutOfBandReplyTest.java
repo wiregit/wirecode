@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -10,16 +9,10 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -29,17 +22,9 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.QueryHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
-import com.sun.java.util.collections.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -64,10 +49,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    private static void doSettings() {
-        TIMEOUT = 3000;
-    }        
+         
     
     ///////////////////////// Actual Tests ////////////////////////////
 
@@ -184,18 +166,19 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(rs.isGUESSCapable());
-        assertTrue(rs.acceptedIncomingConnection());
+        assertTrue(RouterService.isGUESSCapable());
+        assertTrue(RouterService.acceptedIncomingConnection());
         
         keepAllAlive(testUP);
         // clear up any messages before we begin the test.
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        assertTrue(GUID.addressesMatch(queryGuid.bytes(), rs.getAddress(), 
-                                       rs.getPort()));
-        rs.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
+                                       RouterService.getAddress(), 
+                                       RouterService.getPort()));
+        RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -213,7 +196,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
-                                  testUP[0].getInetAddress(), rs.getPort());
+                                  testUP[0].getInetAddress(), 
+                                  RouterService.getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -242,10 +226,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // the user) we don't request OOB replies for it
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        assertTrue(GUID.addressesMatch(queryGuid.bytes(), rs.getAddress(), 
-                                       rs.getPort()));
-        rs.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
+                        RouterService.getAddress(), 
+                        RouterService.getPort()));
+        RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -263,7 +248,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
-                                  testUP[0].getInetAddress(), rs.getPort());
+                                  testUP[0].getInetAddress(), 
+                                  RouterService.getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -285,7 +271,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         assertEquals(10, ack.getNumResults());
 
         // now stop the query
-        rs.stopQuery(queryGuid);
+        RouterService.stopQuery(queryGuid);
         keepAllAlive(testUP);
         drainAll();
 
@@ -295,7 +281,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
-                                  testUP[0].getInetAddress(), rs.getPort());
+                                  testUP[0].getInetAddress(), 
+                                  RouterService.getPort());
         UDP_ACCESS.send(pack);
 
         // we should NOT get a LimeACK in response
@@ -328,10 +315,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         keepAllAlive(testUP);
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        assertTrue(GUID.addressesMatch(queryGuid.bytes(), rs.getAddress(), 
-                                       rs.getPort()));
-        rs.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
+                                       RouterService.getAddress(), 
+                                       RouterService.getPort()));
+        RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -349,7 +337,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
-                                  testUP[0].getInetAddress(), rs.getPort());
+                                  testUP[0].getInetAddress(), 
+                                  RouterService.getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -392,7 +381,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
-                                  testUP[0].getInetAddress(), rs.getPort());
+                                  testUP[0].getInetAddress(), 
+                                  RouterService.getPort());
         UDP_ACCESS.send(pack);
 
         // we should NOT get a LimeACK in response

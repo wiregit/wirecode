@@ -2,24 +2,16 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -30,13 +22,7 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 import com.sun.java.util.collections.Set;
 
@@ -46,8 +32,6 @@ import com.sun.java.util.collections.Set;
  * Ultrapeers.
  */
 public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
-
-    private static MyActivityCallback callback;
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -189,17 +173,18 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(rs.isGUESSCapable());
-        assertTrue(rs.acceptedIncomingConnection());
+        assertTrue(RouterService.isGUESSCapable());
+        assertTrue(RouterService.acceptedIncomingConnection());
         
         // get rid of any messages that are stored up.
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        assertTrue(GUID.addressesMatch(queryGuid.bytes(), rs.getAddress(), 
-                                       rs.getPort()));
-        rs.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
+                       RouterService.getAddress(), 
+                       RouterService.getPort()));
+        RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // some connected UPs should get a OOB query
@@ -243,7 +228,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         }
 
         // shut off the query....
-        rs.stopQuery(queryGuid);
+        RouterService.stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {
@@ -274,18 +259,17 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         return new MyActivityCallback();
     }
 
+    
     public static class MyActivityCallback extends ActivityCallbackStub {
         private RemoteFileDesc rfd = null;
         public RemoteFileDesc getRFD() {
             return rfd;
         }
 
-        public void handleQueryResult(RemoteFileDesc rfd,
+        public void handleQueryResult(RemoteFileDesc returnedRfd,
                                       HostData data,
                                       Set locs) {
-            this.rfd = rfd;
+            this.rfd = returnedRfd;
         }
     }
-
-
 }
