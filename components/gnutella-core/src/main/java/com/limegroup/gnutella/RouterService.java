@@ -762,8 +762,7 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isGUESSCapable() && !uploadManager.isBusy() && 
-            OutOfBandThroughputStat.isSuccessRateGood() &&
+        if (isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood() &&
             acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
             SearchSettings.OOB_ENABLED.getValue() &&
             acceptor.isAddressExternal())
