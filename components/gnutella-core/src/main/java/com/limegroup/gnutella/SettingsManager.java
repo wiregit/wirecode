@@ -485,6 +485,9 @@ public class SettingsManager implements SettingsInterface {
                 else if(key.equals(CLASSPATH)){
                     setClassPath(p);
                 }
+                else if(key.equals(MAIN_CLASS)){
+                    setMainClass(p);
+                }
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -571,6 +574,7 @@ public class SettingsManager implements SettingsInterface {
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
+		setMainClass(DEFAULT_MAIN_CLASS);
     }
 
 
@@ -873,6 +877,13 @@ public class SettingsManager implements SettingsInterface {
      */
     public String getClassPath() {
         return _props.getProperty(CLASSPATH);
+    }
+
+    /**
+     * returns the main class to load on startup.
+     */
+    public String getMainClass() {
+        return _props.getProperty(MAIN_CLASS);
     }
 
     /******************************************************
@@ -1729,6 +1740,13 @@ public class SettingsManager implements SettingsInterface {
      */
     public void setClassPath(String classpath) {
         _props.put(CLASSPATH, classpath);
+    }
+
+    /**
+     * sets the main class to use at startup.
+     */
+    public void setMainClass(String mainClass) {
+        _props.put(MAIN_CLASS, mainClass);
     }
 	
     /******************************************************

@@ -122,6 +122,8 @@ public interface SettingsInterface {
 	public static final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
 	public static final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+	public static final String  DEFAULT_MAIN_CLASS           
+		= "a.a.a.b.Main";
 
 
     // The property key name constants
@@ -191,6 +193,7 @@ public interface SettingsInterface {
 	public static final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
 	public static final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
 	public static final String CLASSPATH             = "CLASSPATH";
+	public static final String MAIN_CLASS            = "MAIN_CLASS";
 }
 
 
