@@ -34,6 +34,11 @@ public final class HostData {
 	 * Constant for whether or not the host is busy.
 	 */
 	private final boolean BUSY;
+	
+	/**
+	 * Constant for whether or not this is a reply to a multicast query
+	 */
+	private final boolean MULTICAST;
 
 	/**
 	 * Constant for whether or not chat is enabled.
@@ -85,6 +90,7 @@ public final class HostData {
 		boolean browseHostEnabled = false;
 		boolean chatEnabled       = false;
 		boolean measuredSpeed     = false;
+		boolean multicast     = false;
 
 		try {
 			firewalled = reply.getNeedsPush();
@@ -111,12 +117,18 @@ public final class HostData {
 		} catch (BadPacketException bad) {
 			busy = true;
 		}
+		try {
+		    multicast = reply.isReplyToMulticastQuery();
+		} catch(BadPacketException bad) {
+		    multicast = false;
+		}
 
-		FIREWALLED = firewalled;
+		FIREWALLED = firewalled && !multicast;
 		BUSY = busy;
 		BROWSE_HOST_ENABLED = browseHostEnabled;
 		CHAT_ENABLED = chatEnabled;
-		MEASURED_SPEED = measuredSpeed;
+		MEASURED_SPEED = measuredSpeed || multicast;
+		MULTICAST = multicast;
 		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
         QUALITY = reply.calculateQualityOfService(ifirewalled);
 	}
@@ -226,5 +238,15 @@ public final class HostData {
 	 */
 	public boolean isMeasuredSpeed() {
 		return MEASURED_SPEED;
+	}
+	
+	/**
+	 * Returns whether or not this was a response to a multicast query.
+	 *
+	 * @return <tt>true</tt> if this is a response to a multicast query,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isReplyToMulticastQuery() {
+	    return MULTICAST;
 	}
 }
