@@ -21,11 +21,13 @@ public class CountPercent {
         NumberFormat rc = NumberFormat.getNumberInstance();
         rc.setMinimumIntegerDigits(4);
         rc.setMaximumIntegerDigits(4);
-        
+
+        Set advanced = getAdvancedKeys();        
         Map /* String -> Properties */ langs = new HashMap();
-        loadLanguages(langs);
+        loadLanguages(advanced, langs);
         
         Properties english = getEnglish();
+        removeAdvanced(advanced, english);
         int total = english.size();
         
         System.out.println("Total Number of Resources: " + total);
@@ -54,7 +56,32 @@ public class CountPercent {
         return p;
     }
     
-	private void loadLanguages(Map langs) {
+    private Set getAdvancedKeys() throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(new File("MessagesBundle.properties")));
+        String read = reader.readLine();
+        while(read != null && !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
+            read = reader.readLine();
+        
+        StringBuffer sb = new StringBuffer();
+        while(read != null) {
+            sb.append("\n").append(read);
+            read = reader.readLine();
+        }
+        InputStream in = new ByteArrayInputStream(sb.toString().getBytes());
+        Properties p = new Properties();
+        p.load(in);
+        
+        in.close();
+        reader.close();
+        return p.keySet();
+    }
+    
+    private void removeAdvanced(Set a, Properties p) {
+        for(Iterator i = a.iterator(); i.hasNext(); )
+            p.remove(i.next());
+    }
+    
+	private void loadLanguages(Set advanced, Map langs) {
 	    File lib = new File(".");
 	    if(!lib.isDirectory())
 	        return;
@@ -69,7 +96,7 @@ public class CountPercent {
 	        try {
                 InputStream in =
                     new FileInputStream(new File(lib, files[i]));
-	            loadFile(langs, in);
+	            loadFile(langs, in, advanced);
             } catch(FileNotFoundException fnfe) {
                 // oh well.
             }
@@ -79,11 +106,12 @@ public class CountPercent {
 	/**
 	 * Loads a single file into a List.
 	 */
-	private void loadFile(Map langs, InputStream in) {
+	private void loadFile(Map langs, InputStream in, Set advanced) {
 	    Properties p = new Properties();
         try {
             in = new BufferedInputStream(in);
             p.load(in);
+            removeAdvanced(advanced, p);
 
             String lc = p.getProperty("LOCALE_LANGUAGE_CODE");
             String cc = p.getProperty("LOCALE_COUNTRY_CODE");
