@@ -627,6 +627,14 @@ public class QueryReply extends Message implements Serializable{
         parsed=true;
     }
 
+    /**
+     * Parses the individual results for the hit.  If any one of the 
+     * results is invalid, none of them will be initialized, and the
+     * accessor methods for this class will all throw 
+     * <tt>BadPacketException</tt>.  This is because a single invalid
+     * response invalidates other invariants, such as the field for
+     * the number of results matching the size of the result array.
+     */
     private void parseResults2() {
         //index into payload to look for next response
         int i=11;
