@@ -76,6 +76,17 @@ public class Response {
 	 */
 	private static final String CLOSE_TAG = "\">";
 
+	/**
+	 * Constant for the KBPS string to avoid constructing it too many
+	 * times.
+	 */
+	private static final String KBPS = "kbps";
+
+	/**
+	 * Constant for kHz to string to avoid excessive string construction.
+	 */
+	private static final String KHZ = "kHz";
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -155,15 +166,15 @@ public class Response {
 		boolean bearShare1 = false;        
 		boolean bearShare2 = false;
 		boolean gnotella = false;
-		if(second.startsWith("kbps"))
+		if(second.startsWith(KBPS))
 			bearShare1 = true;
-		else if (first.endsWith("kbps"))
+		else if (first.endsWith(KBPS))
 			bearShare2 = true;
 		if(bearShare1){
 			bitrate = first;
 		}
 		else if (bearShare2){
-			int j = first.indexOf("kbps");
+			int j = first.indexOf(KBPS);
 			bitrate = first.substring(0,j);
 		}
 		if(bearShare1 || bearShare2){
@@ -171,11 +182,11 @@ public class Response {
 				length=tok.nextToken();
 			//OK we have the bitrate and the length
 		}
-		else if (ext.endsWith("kHz")){//Gnotella
+		else if (ext.endsWith(KHZ)){//Gnotella
 			gnotella = true;
 			length=first;
 			//extract the bitrate from second
-			int i=second.indexOf("kbps");
+			int i=second.indexOf(KBPS);
 			if(i>-1)//see if we can find the bitrate                
 				bitrate = second.substring(0,i);
 			else//not gnotella, after all...some other format we do not know
