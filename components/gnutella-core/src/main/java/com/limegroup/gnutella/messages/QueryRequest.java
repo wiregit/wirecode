@@ -32,6 +32,7 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_FIREWALL_MASK  = 0x0040;
     public static final int SPECIAL_XML_MASK       = 0x0020;
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
+    public static final int SPECIAL_FWTRANS_MASK   = 0x0002;
 
     /** Mask for audio queries - input 0 | AUDIO_MASK | .... to specify
      *  audio responses.
@@ -1019,6 +1020,10 @@ public class QueryRequest extends Message implements Serializable{
 		// set the firewall bit if i'm firewalled
 		if (isFirewalled && !isMulticast())
 			minSpeed |= SPECIAL_FIREWALL_MASK;
+        // if i'm firewalled and can do solicited, mark the query for fw
+		// transfer capability.
+        if (isFirewalled && UDPService.instance().canReceiveSolicited())
+            minSpeed |= SPECIAL_FWTRANS_MASK;
         // THE DEAL:
         // if we can NOT receive out of band replies, we want in-band XML - so
 		// set the correct bit.
@@ -1466,6 +1471,18 @@ public class QueryRequest extends Message implements Serializable{
     public boolean desiresXMLResponses() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_XML_MASK) > 0)
+                return true;
+        }
+        return false;        
+    }
+
+
+    /**
+     * Returns true if the query source can do a firewalled transfer.
+     */
+    public boolean canDoFirewalledTransfer() {
+        if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
+            if ((MIN_SPEED & SPECIAL_FWTRANS_MASK) > 0)
                 return true;
         }
         return false;        

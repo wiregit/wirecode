@@ -922,10 +922,13 @@ public abstract class MessageRouter {
             // anything when this node's an Ultrapeer
             forwardQueryRequestToLeaves(request, handler);
             
-            // if I'm not firewalled AND the source isn't firewalled reply ....
-            if (request.isFirewalledSource() &&
-                !RouterService.acceptedIncomingConnection() &&
-                !ApplicationSettings.SERVER.getValue())
+            // if (I'm firewalled AND the source is firewalled) AND 
+            // NOT(he can do a FW transfer and so can i) then don't reply...
+            if ((request.isFirewalledSource() &&
+                 !RouterService.acceptedIncomingConnection()) &&
+                !(request.canDoFirewalledTransfer() &&
+                  UDPService.instance().canReceiveSolicited())
+                )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
         }
