@@ -111,6 +111,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, 
                                         F_UDP_CONNECT_BACK_REDIR,
                                         UDPConnectBackRedirect.VERSION);
+        hashSet.add(smp);
         // UDP Crawl support
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
         								F_ULTRAPEER_LIST,
