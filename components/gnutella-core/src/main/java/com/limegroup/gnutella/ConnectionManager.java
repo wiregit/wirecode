@@ -150,12 +150,13 @@ public class ConnectionManager {
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
   		watchdog.start();
-
-		if(_settings.getConnectOnStartup()) {
-			setKeepAlive(_settings.getKeepAlive());
-		}
-        //setMaxIncomingConnections(
-		//SettingsManager.instance().getMaxIncomingConnections());
+        
+        //We used to set the keep-alive to zero here, but that caused problems
+        //because connection fetchers could wait in HostCatcher.getAnEndpoint()
+        //before HostCatcher.expire() had been called.  As a result, LimeWire
+        //sometimes failed to connect on startup, esp. if the gnutella.net file
+        //was empty.  Turns out this code isn't needed, as
+        //RouterService.initialize() does the right thing.
     }
 
 
