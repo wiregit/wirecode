@@ -44,6 +44,7 @@ public interface SettingsInterface
     public boolean    getFilterVbs();
     public boolean    getFilterHtml();
     public boolean    getFilterGreedyQueries();
+    public boolean    getFilterBearShareQueries();
     public boolean    getUseQuickConnect();
     public String[]   getQuickConnectHosts();
     public int        getParallelSearchMax();
@@ -175,6 +176,7 @@ public interface SettingsInterface
     public void setFilterVbs(boolean b);
     public void setFilterHtml(boolean b);
     public void setFilterGreedyQueries(boolean b);
+    public void setFilterBearShareQueries(boolean b);
 
     public void setUseQuickConnect(boolean b);
     public void setQuickConnectHosts(String[] hosts);
@@ -261,6 +263,7 @@ public interface SettingsInterface
     /** Filter .htm[l] files? */
     public static final boolean DEFAULT_FILTER_HTML    = false;
     public static final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
+    public static final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
     /** List of hosts to try on quick connect */
@@ -312,6 +315,7 @@ public interface SettingsInterface
     public static final String FILTER_HTML    = "FILTER_HTML";
     public static final String FILTER_VBS     = "FILTER_VBS";
     public static final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
+    public static final String FILTER_BEARSHARE_QUERIES = "FILTER_HIGHBIT_QUERIES";
     public static final String USE_QUICK_CONNECT = "USE_QUICK_CONNECT";
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
