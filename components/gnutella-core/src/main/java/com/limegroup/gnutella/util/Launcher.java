@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.GUIMediator;
 
 
 /**
@@ -161,7 +160,7 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			GUIMediator.instance().showError(msg);
+			throw new IOException(msg);
 		}
 		return -1;		
 	}
