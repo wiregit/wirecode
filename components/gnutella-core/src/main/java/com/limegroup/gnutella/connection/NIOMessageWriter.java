@@ -97,9 +97,13 @@ public final class NIOMessageWriter implements MessageWriter {
      * @throws IOException if there is an IO error writing to the channel
      * @throws IllegalStateException if there is a previous message that was 
      *  not fully sent
+     * @throws NullPointerException if the <tt>msg</tt> argument is 
+     *  <tt>null</tt>
      */
     public synchronized boolean write(Message msg) throws IOException {
-        
+        if(msg == null) {
+            throw new NullPointerException("cannot add null message");
+        }
         // pending messages indicate that the TCP upstream buffer has filled,
         // so we should start our application-level buffering of messages to
         // make sure we prioritize certain traffic over others
@@ -147,7 +151,14 @@ public final class NIOMessageWriter implements MessageWriter {
                 return true;
             }
     		Message msg = QUEUE.removeNext();
-            Assert.that(msg != null, "should have obtained queued message");
+            if(msg == null) {
+                // This indicates that there were no more messages left, so 
+                // we've sent all we can on this connection.  Note that this 
+                // can happen even if QUEUE.size() == 0 in the call above
+                // because some messages could have expired since that call
+                // was made.
+                return true;
+            }
             return write(msg);
     	} else if(!CHANNEL.isConnected()) {
             throw new IOException("connection closed");
