@@ -717,8 +717,10 @@ public class HostCatcher {
      * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
      *  that they have free leaf slots
      */
-    public synchronized Collection getUltrapeersWithFreeLeafSlots() {
-        return new HashSet(FREE_LEAF_SLOTS);
+    public Collection getUltrapeersWithFreeLeafSlots() {
+        synchronized(FREE_LEAF_SLOTS) {
+            return new HashSet(FREE_LEAF_SLOTS);
+        }
     }
 
     /**
