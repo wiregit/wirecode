@@ -78,36 +78,6 @@ public final class SearchResultHandler {
         }
     }
 
-// 	public void addGuid(GUID key) {
-// 		synchronized(GUID_MAP) {
-// 			if(GUID_MAP.containsKey(key)) return;
-// 			GUID_MAP.put(key, new Integer(0));
-// 		}
-// 	}
-
-// 	public void removeGuid(GUID key) {
-// 		synchronized(GUID_MAP) {
-// 			GUID_MAP.remove(key);
-// 		}
-// 	}
-
-// 	public int getNumResults(GUID key) {
-// 		synchronized(GUID_MAP) {
-// 			Integer results = (Integer)GUID_MAP.get(key);
-// 			return results.intValue();
-// 		}
-// 	}
-
-// 	private void addResult(GUID key) {
-// 		synchronized(GUID_MAP) {
-// 			if(!GUID_MAP.containsKey(key))
-// 				throw new IllegalArgumentException("GUID not in map: "+key);
-// 			Integer results = (Integer)GUID_MAP.get(key);
-// 			int newResults = results.intValue();
-// 			newResults++;
-// 			GUID_MAP.put(key, new Integer(newResults));
-// 		}
-// 	}
 
 	/**
 	 * Private class for processing replies as they come in -- does some
