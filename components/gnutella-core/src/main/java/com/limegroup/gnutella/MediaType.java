@@ -109,7 +109,7 @@ public class MediaType implements Serializable {
             new String[] {
                 "mp3", "mpa", "mp1", "mpga",
                 "ra", "rm", "ram", "rmj",
-                "wma", "wav",
+                "wma", "wav", "m4a", "m4p","mp4",
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
                 "au", "snd", "s3m",
