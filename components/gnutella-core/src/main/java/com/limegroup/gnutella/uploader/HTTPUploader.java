@@ -47,7 +47,7 @@ public final class HTTPUploader implements Uploader {
 	private final int _index;
 	private String _userAgent;
 	private boolean _headersParsed;
-	private final String _fileName;
+	private String _fileName;
 	private final String _hostName;
 	private int _stateNum = CONNECTING;
 	private int _lastTransferStateNum;
@@ -183,8 +183,20 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the file cannot be read from the disk.
 	 */
 	public void setFileDesc(FileDesc fd) throws IOException {
+	    if(fd == null) {
+	        File f = CommonUtils.getResourceFile(getFileName());
+	        if(f != null) {
+	            _fis = new BufferedInputStream(new FileInputStream(f));
+	            _fileSize = (int)f.length();
+	        } else {
+	            throw new IOException();
+            }
+            return;
+        }
+	    
 	    _fileDesc = fd;
 	    _fileSize = (int)fd.getSize();
+	    _fileName = fd.getName();
 	    // initializd here because we'll only write locs if a FileDesc exists
 	    // only initialize once, so we don't write out previously written locs
 	    if( _writtenLocs == null )
@@ -422,6 +434,10 @@ public final class HTTPUploader implements Uploader {
 	public int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
     public int getUploadEnd() {return _uploadEnd;}
+    
+    public void setFileSize(int i) {
+        _fileSize = i;
+    }
 
 	// implements the Uploader interface
 	public int getFileSize() {
@@ -533,12 +549,9 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {
-	    if(_stateNum == THEX_REQUEST) {
-	        if(_ostream == null)
-	            return 0;
-	        else
-	            return _ostream.getAmountWritten();
-	    } else
+	    if(_ostream != null && _ostream.isCounting())
+            return _ostream.getAmountWritten();
+	    else
 	        return _amountRead;
     }
 	
@@ -549,12 +562,9 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the Uploader interface.
 	 */
 	public int getTotalAmountUploaded() {
-	    if(_stateNum == THEX_REQUEST) {
-	        if(_ostream == null)
-	            return 0;
-	        else
-	            return _ostream.getAmountWritten();
-	    } else
+	    if(_ostream != null && _ostream.isCounting())
+            return _ostream.getAmountWritten();
+	    else
 	        return _totalAmountRead + _amountRead;
     }
 

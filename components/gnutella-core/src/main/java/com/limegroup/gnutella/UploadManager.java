@@ -432,8 +432,6 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != UPDATE_FILE_INDEX &&
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
-               uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
-               uploader.getIndex() != RESOURCE_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -523,9 +521,6 @@ public class UploadManager implements BandwidthTracker {
         case FILE_VIEW_FILE_INDEX:
             uploader.setState(Uploader.FILE_VIEW);
             return;
-        case RESOURCE_INDEX:
-            uploader.setState(Uploader.RESOURCE_GET);
-            return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
             return;
@@ -538,28 +533,43 @@ public class UploadManager implements BandwidthTracker {
         case MALFORMED_REQUEST_INDEX:
             uploader.setState(Uploader.MALFORMED_REQUEST);
             return;
+        case RESOURCE_INDEX:
+            uploader.setState(Uploader.RESOURCE_GET);
         default:
         
             // This is the normal case ...
             FileManager fm = RouterService.getFileManager();
             FileDesc fd = null;
-            int index = uploader.getIndex();
-            // First verify the file index
-            synchronized(fm) {
-                if(fm.isValidIndex(index)) {
-                    fd = fm.get(index);
-                } 
+            
+            boolean pureResource = false;
+            if(uploader.getIndex() == RESOURCE_INDEX) {
+                if(uploader.getFileName().toLowerCase().startsWith("urn:")) {
+                    try {
+                        fd = RouterService.getFileManager().getFileDescForUrn(URN.createSHA1Urn(uploader.getFileName()));
+                    } catch(IOException ieo) {}
+                } else {
+                    pureResource = true;
+                }
+            } else {
+                // First verify the file index
+                synchronized(fm) {
+                    int index = uploader.getIndex();
+                    if(fm.isValidIndex(index)) {
+                        fd = fm.get(index);
+                    } 
+                }
             }
 
             // If the index was invalid or the file was unshared, FNF.
-            if(fd == null) {
+            if(!pureResource && fd == null) {
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " fd is null");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
+
             // If the name they want isn't the name we have, FNF.
-            if(!uploader.getFileName().equals(fd.getName())) {
+            if(uploader.getIndex() != RESOURCE_INDEX && !uploader.getFileName().equals(fd.getName())) {
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " wrong file name");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
@@ -575,7 +585,8 @@ public class UploadManager implements BandwidthTracker {
                 return;
             }
 
-            assertAsConnecting( uploader.getState() );
+            if(uploader.getIndex() != RESOURCE_INDEX)
+                assertAsConnecting( uploader.getState() );
         }
     }
     
@@ -1288,6 +1299,7 @@ public class UploadManager implements BandwidthTracker {
                 //special case for file view gif get
                 index = RESOURCE_INDEX;
                 fileName = fileInfoPart.substring(RESOURCE_GET.length());
+                hadPassword = true;
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";

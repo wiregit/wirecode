@@ -43,4 +43,8 @@ public final class CountingOutputStream extends FilterOutputStream {
         _isCounting = count;
     }
     
+    public boolean isCounting() {
+        return _isCounting;
+    }
+    
 }

@@ -66,6 +66,8 @@ public final class FileViewUploadState implements HTTPMessage {
         }
         else
             BAOS.write(BAD_PASS_REPLY);
+            
+        _uploader.setFileSize(BAOS.size());
      
         String str;
 		str = "HTTP/1.1 200 OK\r\n";

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.html;
 
+import javax.imageio.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.io.File;
@@ -62,17 +63,21 @@ public class FileListHTMLPage {
             // get all the Shared files from the FM
             final String beginURL = "\r\n<a href=\"/get/";
             for (int i = 0; i < sharedFiles.length; i++) {
-                if (!(sharedFiles[i] instanceof IncompleteFileDesc)) {
-                    File currFile = sharedFiles[i].getFile();
-                    sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
-                              UploadManager.FV_PASS + "/" +
-                              StringUtils.replace(URLEncoder.encode(currFile.getName()),
-                                                  "+", "%20") + "\">" + 
-                              currFile.getName() + "</a><br>");
-                    
-                    if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
-                        shouldShowMagnets = true;
+                if (sharedFiles[i] instanceof IncompleteFileDesc)
+                    continue;
+                
+                File currFile = sharedFiles[i].getFile();
+                if(isImageFile(currFile)) {
+                    sb.append(htmlImageLink(sharedFiles[i]));
                 }
+                sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
+                          UploadManager.FV_PASS + "/" +
+                          StringUtils.replace(URLEncoder.encode(currFile.getName()),
+                                              "+", "%20") + "\">" + 
+                          currFile.getName() + "</a><br>");
+                
+                if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
+                    shouldShowMagnets = true;
             }
         }
         
@@ -104,6 +109,15 @@ public class FileListHTMLPage {
     // 1 is you, so you need 2 (or more)
     private boolean hasEnoughAltLocs(FileDesc fd) {
         return (fd.getAlternateLocationCollection().getAltLocsSize() > 1);
+    }
+    
+    private boolean isImageFile(File f) {
+        String ext = FileUtils.getFileExtension(f);
+        return ext != null && ImageIO.getImageReadersBySuffix(ext).hasNext();
+    }
+    
+    private String htmlImageLink(FileDesc fd) {
+        return "<img src=\""+UploadManager.RESOURCE_GET+fd.getSHA1Urn() + "\" alt=\"\">";
     }
 
 
