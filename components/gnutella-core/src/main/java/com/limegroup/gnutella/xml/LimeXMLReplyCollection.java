@@ -29,7 +29,6 @@ public class LimeXMLReplyCollection{
     private int count;
     private String changedHash = null;
     private MetaFileManager metaFileManager=null;
-    private Object mainMapLock = new Object();
 
     public static final int NORMAL = 0;
     public static final int FILE_DEFECTIVE = 1;
@@ -126,9 +125,12 @@ public class LimeXMLReplyCollection{
             while(iter.hasNext()) {
                 File file = (File)iter.next();
                 String hash = metaFileManager.readFromMap(file, audio);
-                // ok,i thought i should remove them, but that seems to kill
-                // things.  i'm not sure why though - i'm going to investigate
-                // it and find out.  in the meantime, just 'get' it
+                // don't call remove.  if two files conflict by hash (a definite
+                // possibility) you don't want to recalculate the doc.  so just
+                // keep it around.  but are we doing extra work in the main
+                // constructor - not really, doing a get is no biggie.  don't
+                // how much this is going to happen anyways, so the cost should
+                // be small. 
                 Object xml = hashToXMLStr.get(hash);
                 try{
                     if (xml instanceof LimeXMLDocument) // NEW
@@ -160,7 +162,7 @@ public class LimeXMLReplyCollection{
     protected List getKeyWords(){
         List retList = new ArrayList();
         Iterator docs;
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             docs = mainMap.values().iterator();
             while(docs.hasNext()){
                 LimeXMLDocument d = (LimeXMLDocument)docs.next();
@@ -183,7 +185,7 @@ public class LimeXMLReplyCollection{
                 File file  = (File)iter.next();
                 String hash=metaFileManager.readFromMap(file,mp3);
                 LimeXMLDocument doc;
-                synchronized(mainMapLock){
+                synchronized(mainMap){
                     doc = (LimeXMLDocument)mainMap.get(hash);
                 }
                 if(doc==null)//File in current round has no docs of this schema
@@ -192,7 +194,7 @@ public class LimeXMLReplyCollection{
                 try {
                     actualName = file.getCanonicalPath();
                 }catch (IOException ioe) {
-                    synchronized(mainMapLock){
+                    synchronized(mainMap){
                         mainMap.remove(hash);
                         //File don't exist - remove meta-data
                     }
@@ -241,7 +243,7 @@ public class LimeXMLReplyCollection{
     }
 
     public void addReply(String hash,LimeXMLDocument replyDoc){
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
         replyDocs=null;//things have changed
@@ -278,7 +280,7 @@ public class LimeXMLReplyCollection{
      * may return null if the hash is not found
      */
     public LimeXMLDocument getDocForHash(String hash){
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             return (LimeXMLDocument)mainMap.get(hash);
         }
     }
@@ -287,7 +289,7 @@ public class LimeXMLReplyCollection{
         if (replyDocs !=null)
             return replyDocs;
         replyDocs = new ArrayList();
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             Iterator iter = mainMap.keySet().iterator();
             while(iter.hasNext()){
                 Object hash = iter.next();
@@ -304,7 +306,7 @@ public class LimeXMLReplyCollection{
      */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
         List matchingReplyDocs;
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             Iterator iter = mainMap.keySet().iterator();
             matchingReplyDocs = new ArrayList();
             while(iter.hasNext()){
@@ -327,7 +329,7 @@ public class LimeXMLReplyCollection{
      */
     public LimeXMLDocument replaceDoc(Object hash, LimeXMLDocument newDoc){
         LimeXMLDocument oldDoc = null;
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             oldDoc = (LimeXMLDocument)mainMap.get(hash);
             mainMap.put(hash,newDoc);
         }
@@ -339,7 +341,7 @@ public class LimeXMLReplyCollection{
         replyDocs=null;//things will change
         boolean found;
         Object val;
-        synchronized(mainMapLock){
+        synchronized(mainMap){
             val = mainMap.remove(hash);
             found = val==null?false:true;
         }
@@ -349,7 +351,7 @@ public class LimeXMLReplyCollection{
             written = write();
         }
         if(!written && found){//put it back to maintin consistency
-            synchronized(mainMapLock){
+            synchronized(mainMap){
                 mainMap.put(hash,val);
             }
         }
@@ -438,7 +440,7 @@ public class LimeXMLReplyCollection{
             return retVal;
         }
         
-        synchronized (mainMapLock) {
+        synchronized (mainMap) {
             Object mainValue = mainMap.remove(changedHash);
             mainMap.put(newHash, mainValue);
         }
