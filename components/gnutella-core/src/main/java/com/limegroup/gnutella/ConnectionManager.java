@@ -32,58 +32,17 @@ import com.limegroup.gnutella.filters.IPFilter;
  * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager {
-    /*********** IMPORTANT NOTE ABOUT THIS CLASS *************
-     * The acceptConnection() method is a template method, and the behaviour
-     * is modified in the subclasses by providing alternate implementations 
-     * for the 'protected' methods called from this method, as well as from the
-     * methods invoked from this method.
-     *
-     * Therefore, please be lenient while thinking of changing the method names
-     * of the 'protected' methods of this class, as well as their use. The
-     * implementation of these methods can be changed (as long as the
-     * specifications are not changed.
-     *
-     * NOTE: Note that we could have used Template Design Pattern over here,
-     * and could move the algorithm to the abstract class, but after 
-     * discussions with other developers, it was observed that the subclasses
-     * of this class dont really wanna provide a different implementation,
-     * but want to handle special cases, and fall back on the implementations 
-     * in this class for normal cases. Also, most of the methods depend a
-     * lot on the private variables. Therefore having abstract class wont
-     * necessarily help too much.
-     * 
-     * Please send an email to dev@core.limewire.org if and when you plan to 
-     * change the behaviour of these methods.
-     **********************************************************
-     */
-   
-
-    /** Minimum number of outdegree=30 connections that an ultrapeer 
-	 * with leaf connections must have, meaning the number of ultrapeer
-	 * connections to other ultrapeers that also have 30 connections.*/
-    //private static final int MIN_OUT_DEGREE_30_CONNECTIONS = 20;
-    //private static final int RESERVED_GOOD_UTLRAPEERS = 20;
-
-	/** The maximum number of connections to maintain to older Ultrapeers
-	 * that have low-degrees of intra-Ultrapeer connections --
-	 * connections to the "low-density" network.*/
-	//private static final int MAX_LOW_DEGREE_ULTRAPEERS = 15;
-
-    /** Minimum number of connections that an ultrapeer with leaf connections
-     * must have. */
-    //public static final int MIN_CONNECTIONS_FOR_ULTRAPEER = 
-	//MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
 
 	/**
-	 * The number of Ultrapeer connections to ideally maintain.
+	 * The number of Ultrapeer connections to ideally maintain as an Ultrapeer.
 	 */
 	public static final int ULTRAPEER_CONNECTIONS =
         ConnectionSettings.NUM_CONNECTIONS.getValue();
 
-    /** Ideal number of connections for a leaf.  */
+    /** 
+     * The number of connections leaves should maintain to Ultrapeers.
+     */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 4;
-
-	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
 	/**
 	 * The number of leaf connections reserved for "good" clients.  As
@@ -105,10 +64,11 @@ public class ConnectionManager {
 	private static final int MAX_LEAVES = 
 		UltrapeerSettings.MAX_LEAVES.getValue();
 
-    
+    /**
+     * Reference to the <tt>HostCatcher</tt> for retrieving host data as well 
+     * as adding host data.
+     */
     private HostCatcher _catcher;
-	private final ConnectionWatchdog _watchdog;
-
 
     /** The number of connections to keep up.  */
     private volatile int _keepAlive=0;
@@ -186,7 +146,6 @@ public class ConnectionManager {
      */
     public ConnectionManager(Authenticator authenticator) {
         _authenticator = authenticator; 
-        _watchdog = new ConnectionWatchdog(this);
     }
 
     /**
@@ -195,12 +154,6 @@ public class ConnectionManager {
      */
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
-
-        // Start a thread to police connections.
-        // Perhaps this should use a low priority?
-        Thread watchdog = new Thread(_watchdog, "ConnectionWatchdog");
-        watchdog.setDaemon(true);
-  		watchdog.start();
     }
 
 
@@ -281,8 +234,8 @@ public class ConnectionManager {
      }
 
     /** 
-     * Used by killExcess.  Sorts by outgoing/incoming, then by number of
-     * messages sent. 
+     * Utility class that compares connections based on the number of messages
+     * they have sent and received.
      */
     private static final class ManagedConnectionComparator implements Comparator {
         public int compare(Object connection1, Object connection2) {
@@ -303,23 +256,22 @@ public class ConnectionManager {
     }
      
     /**
-     * @modifies this, route table
-     * @effects closes c and removes it from this' connection list and
-     *  all corresponding errors from the route table.  If
-     *  c is not in the connection list, does nothing.  May
-     *  try to establish a new outgoing connection to replace
-     *  this one.
+     * Removes the specified connection from currently active connections, also
+     * removing this connection from routing tables and modifying active 
+     * connection fetchers accordingly.
+     *
+     * @param mc the <tt>ManagedConnection</tt> instance to remove
      */
-    public synchronized void remove(ManagedConnection c) {
+    public synchronized void remove(ManagedConnection mc) {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
-        removeInternal(c);
+        removeInternal(mc);
 
         adjustConnectionFetchers();
     }
 
     /**
-     * Get the number of connections wanted to be maintained
+     * Get the number of connections we are attempting to maintain.
      */
     public int getKeepAlive() {
         return _keepAlive;
@@ -925,7 +877,7 @@ public class ConnectionManager {
      * This is called from initializeExternallyGeneratedConnection, for 
      * incoming connections
      */
-    protected void connectionInitializingIncoming(ManagedConnection c) {
+    private void connectionInitializingIncoming(ManagedConnection c) {
         connectionInitializing(c);
     }
     
