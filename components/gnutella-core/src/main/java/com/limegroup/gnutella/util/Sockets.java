@@ -216,7 +216,7 @@ public class Sockets {
 			//b) Timeout case
 			else {            
 				timedOut=true;
-				throw new IOException();
+				throw new IOException("SocketOpener timed out");
 			}            
 		}
 		
