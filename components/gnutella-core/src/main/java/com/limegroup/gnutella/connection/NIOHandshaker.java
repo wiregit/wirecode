@@ -223,7 +223,12 @@ public class NIOHandshaker extends AbstractHandshaker {
         buffer.put(connectBytes);
         buffer.put(headerBytes);
         return buffer;
-    }  
+    } 
+    
+    // inherit doc comment
+    public ByteBuffer getRemainingData() {
+        return _headerReader.getRemainingData();
+    } 
     
     private static void printBuffer(ByteBuffer buffer)  {
         buffer.flip();
@@ -528,6 +533,11 @@ public class NIOHandshaker extends AbstractHandshaker {
 
             if(_requestLine == null) {    
                 _requestLine = NIOHandshaker.this._headerReader.readConnect();
+                
+                // stay in this state if we were unable to read the whole line
+                if(_requestLine == null) {
+                    return this;
+                }
                 // if they didn't give an expected response format, abort
                 if (!notLessThan06(_requestLine))  {
                     throw new IOException("Unexpected connect: "+_requestLine);
@@ -718,8 +728,6 @@ public class NIOHandshaker extends AbstractHandshaker {
                     return this;
                 }
             }
-    
-            // TODO1:: deal with any message data we may have read here.
 
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createResponse(
@@ -738,12 +746,14 @@ public class NIOHandshaker extends AbstractHandshaker {
                     }
                       
                     _readComplete = true;
-                      
+                    
+                    // Any leftover message data will be handled by the message
+                    // reader
                     CONNECTION.handshakeComplete();
                       
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return this;
-                  }
+                }
             } else {
                 Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
                             "Response code: "+code);
@@ -852,16 +862,5 @@ public class NIOHandshaker extends AbstractHandshaker {
 
             return true;       
         }
-        /**
-         * Accessor for the <tt>ByteBuffer</tt> instance used for writing out
-         * headers.
-         *
-         * @return the <tt>ByteBuffer</tt> containing the message and message
-         *  headers to be written to the network
-         */
-        //public ByteBuffer getByteBuffer() {
-          //  return BUFFER;
-            
-        //}      
     }
 }
