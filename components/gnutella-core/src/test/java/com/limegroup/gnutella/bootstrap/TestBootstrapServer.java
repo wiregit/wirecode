@@ -120,11 +120,12 @@ public class TestBootstrapServer {
                     _request=in.readLine();
                     LOG.debug("read: " + _request);
                     // gobble up headers.
-                    while(!_request.equals("")) {
-                        _request = in.readLine();
-                        if(_request == null)
+                    String restOfLine = _request;
+                    while(!restOfLine.equals("")) {
+                        restOfLine = in.readLine();
+                        if(restOfLine == null)
                             break;
-                        LOG.debug("continued read: " + _request);
+                        LOG.debug("continued read: " + restOfLine);
                     }
                     LOG.debug("finished reading request.");
                     _numRequests++;
