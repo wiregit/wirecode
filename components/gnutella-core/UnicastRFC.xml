@@ -516,7 +516,13 @@
 			messages over UDP MUST advertise that fact in a
 			new GGEP extension in 
 			pongs.<xref target="refs.GGEP"/>
-			TODO: describe the GGEP extension in more detail.		  
+            The GGEP extension should have the value "UDP" as its
+			extension header.  The extension value should be the version
+			number of the protocol supported - for example, this is
+			version .01.  The version number in the GGEP block should the
+			version number support multiplied by 10 (i.e. .01 would have 1,
+			2.4 would have 24, etc.).  This will allow for potential
+			feature specific use in the future.
 		  </t>
 		</section>
 	  </section>

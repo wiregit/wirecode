@@ -1,7 +1,7 @@
 Content-Type: text/html
 
 <html><head><title>Gnutella Developer Forum: Gnutella UltraPeer Crawling v0.01</title>
-<meta http-equiv="Expires" content="Thu, 29 Aug 2002 20:04:33 +0000">
+<meta http-equiv="Expires" content="Thu, 29 Aug 2002 20:38:17 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -633,7 +633,13 @@ Acknowledgements<br></b>
 			messages over UDP MUST advertise that fact in a
 			new GGEP extension in 
 			pongs.<a href="#refs.GGEP" title="Thomas, J., Gnutella Generic Extension Protocol (GGEP) v0.51, Fedruary 2002.">[9]</a>
-			TODO: describe the GGEP extension in more detail.		  
+            The GGEP extension should have the value "UDP" as its
+			extension header.  The extension value should be the version
+			number of the protocol supported - for example, this is
+			version .01.  The version number in the GGEP block should the
+			version number support multiplied by 10 (i.e. .01 would have 1,
+			2.4 would have 24, etc.).  This will allow for potential
+			feature specific use in the future.
 		  
 </p>
 <a name="features"><br><hr size="1" shade="0"></a>
