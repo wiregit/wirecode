@@ -7,7 +7,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 
-/** Immutable IP/port pair.  Also contains an optional number and size of files. */
+/** 
+ * Immutable IP/port pair.  Also contains an optional number and size
+ * of files. 
+ */
 public class Endpoint implements Cloneable, Serializable,
 com.sun.java.util.collections.Comparable
 {
