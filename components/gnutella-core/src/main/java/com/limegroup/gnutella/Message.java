@@ -10,10 +10,11 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
  *
  * All messages have message IDs, function IDs, TTLs, hops taken, and
  * data length.  Messages come in two flavors: requests (ping, search)
- * and replies (pong, search results).  Only the TTL and hops field of
- * a message can be changed.
+ * and replies (pong, search results).  Message are mostly immutable;
+ * only the TTL, hops, and priority field can be changed.
  */
-public abstract class Message implements Serializable{
+public abstract class Message 
+        implements Serializable, com.sun.java.util.collections.Comparable {
     //Functional IDs defined by Gnutella protocol.
     public static final byte F_PING=(byte)0x0;
     public static final byte F_PING_REPLY=(byte)0x1;
@@ -37,6 +38,10 @@ public abstract class Message implements Serializable{
     private byte ttl;
     private byte hops;
     private int length;
+
+    /** Priority for flow-control.  Lower numbers mean higher priority.NOT
+     *  written to network. */
+    private int priority=0;
 
     /** Rep. invariant */
     protected void repOk() {
@@ -293,8 +298,33 @@ public abstract class Message implements Serializable{
             return ttl;
     }
 
+    /** Returns this user-defined priority.  Lower values are higher priority. */
+    public int getPriority() {
+        return priority;
+    }
+
+    /** Set this user-defined priority for flow-control purposes.  Lower values
+     *  are higher priority. */
+    public void setPriority(int priority) {
+        this.priority=priority;
+    }
+
+    /** 
+     * Returns a negative value if this is of lesser priority than message,
+     * positive value if of higher priority, or zero if of same priority.
+     * Remember that lower priority numbers mean HIGHER priority.
+     *
+     * @exception ClassCastException message not an instance of Message 
+     */
+    public int compareTo(Object message) {
+        Message m=(Message)message;
+        return m.getPriority() - this.getPriority();
+    }
+
     public String toString() {
-        return "{guid="+(new GUID(guid)).toString()+", ttl="+ttl+"}";
+        return "{guid="+(new GUID(guid)).toString()
+             +", ttl="+ttl
+             +", priority="+getPriority()+"}";
     }
 
     /** Unit test. */
@@ -320,6 +350,13 @@ public abstract class Message implements Serializable{
         buf[2]=(byte)254;
         buf[3]=(byte)255;
         Assert.that(ip2string(buf).equals("252.253.254.255"));
+
+        Message m1=new PingRequest((byte)3);
+        Message m2=new PingRequest((byte)3);
+        m2.setPriority(5);
+        Assert.that(m1.compareTo(m2)>0);
+        Assert.that(m2.compareTo(m1)<0);
+        Assert.that(m2.compareTo(m2)==0);
     }
     */
 }

@@ -79,7 +79,8 @@ public class ManagedConnection
     {
         _outputQueue[PRIORITY_WATCHDOG]   =new MessageQueue(true,QUEUE_SIZE,1);
         _outputQueue[PRIORITY_PUSH]       =new MessageQueue(true,QUEUE_SIZE,3);
-        _outputQueue[PRIORITY_QUERY_REPLY]=new MessageQueue(true,QUEUE_SIZE,2);
+        _outputQueue[PRIORITY_QUERY_REPLY]=new MessageQueue(true,QUEUE_SIZE,
+                                                            2, true); //sorted
         _outputQueue[PRIORITY_QUERY]      =new MessageQueue(true,QUEUE_SIZE,1);
         _outputQueue[PRIORITY_PING_REPLY] =new MessageQueue(true,QUEUE_SIZE,1);
         _outputQueue[PRIORITY_PING]       =new MessageQueue(true,QUEUE_SIZE,1);
@@ -481,6 +482,7 @@ public class ManagedConnection
                 System.out.println(i+" "+_outputQueue[i].size());
             }
             System.out.println("* "+queued()+"\n");
+            System.out.println(_outputQueue[PRIORITY_QUERY_REPLY]);
         }
     }
 
@@ -1241,23 +1243,28 @@ public class ManagedConnection
         m=new PingRequest((byte)5);
         m.hop();
         out.send(m);
-        out.send(new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
-                                new Response[0], new byte[16]));
+        m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
+                         new Response[0], new byte[16]);
+        m.setPriority(3);
+        out.send(m);
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6340));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6341));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6342));
-        out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
-                                new Response[0], new byte[16]));
+        m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+                         new Response[0], new byte[16]);
+        out.send(m);
         m=new PingReply(new byte[16], (byte)5, 6341, new byte[4], 0, 0);
         m.hop();
         out.send(m);
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(new PingReply(new byte[16], (byte)5, 6342, new byte[4], 0, 0));
-        out.send(new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
-                                new Response[0], new byte[16]));
+        m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
+                         new Response[0], new byte[16]);
+        m.setPriority(1);
+        out.send(m);
         out.send(new PatchTableMessage((short)1, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 0, 5));
@@ -1270,7 +1277,7 @@ public class ManagedConnection
         //became non-zero.  Buffers look this before emptying:
         //  WATCHDOG: pong/6342 ping
         //  PUSH: x/6340 x/6341 x/6342
-        //  QUERY_REPLY: x/6340 /6341 x/6342
+        //  QUERY_REPLY: 6340/3 6342/1 6341/0 (highest priority)
         //  QUERY: "test"
         //  PING_REPLY: x/6341
         //  PING: x
@@ -1296,13 +1303,13 @@ public class ManagedConnection
         Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
         Assert.that(((PushRequest)m).getPort()==6340);
 
-        m=in.receive(); //reply/6342
-        Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6342);
-
-        m=in.receive(); //reply/6341
+        m=in.receive(); //reply/6341 (high priority)
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6341);
+
+        m=in.receive(); //reply/6342 (medium priority)
+        Assert.that(m instanceof QueryReply);
+        Assert.that(((QueryReply)m).getPort()==6342);
 
         m=in.receive(); //query "test"
         Assert.that(m instanceof QueryRequest);

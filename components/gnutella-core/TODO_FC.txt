@@ -11,21 +11,36 @@ Steps
         -fractional
 -add timeouts.  Don't forget to increment drop count (see
 -add GUID prioritization (yay heap!)
+        +Add priorities to Message
+        +Augment RouteTable
+        -Use new RouteTable method in MessageRouter
+        -Add heap support to MessageQueue
 +refactor.  
         +Make OutputRunner smaller.
         +can we use an array of smart object for each priority level?
 -optimize:
         -add size INVARIANT (sum of all buffers), changed queued()
         -avoid inner loop for common case ratio
+        -locking?
 -change GUI to eliminate race condition displaying results.
--cap max througput, using OutputStream
+-cap max throughput, using ThrottledOutputStream
+
+-this assumes that the internal latency between reading queueing for send is 0.
+ What if filtering/matching takes a long time?
 
 
-Per priority level:
--LIFO or FIFO
--buffer size
--name
--predicate for matching messages
--ratio
--expire time (if any)
--time or binary heap
+
+Name            Preferred Name          Purpose
+---------------------------------------------------------------
+routeReply          add                     updating push reply route
+tryToRouteReply     addConditional          checking duplicate request, updating reply
+getReplyhandler                             routing replies
+removeReplyHandler                          cleaning up connections
+
+
+com.limegroup.gnutella.AssertFailure: 
+	at com.limegroup.gnutella.Assert.that(Assert.java:22)
+	at com.limegroup.gnutella.Assert.that(Assert.java:31)
+	at com.limegroup.gnutella.tests.LeafTester.testNoBroadcastFromOld(LeafTester.java:227)
+	at com.limegroup.gnutella.tests.LeafTester.main(LeafTester.java:41)
+Done

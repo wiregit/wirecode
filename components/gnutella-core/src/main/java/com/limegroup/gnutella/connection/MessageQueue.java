@@ -11,12 +11,20 @@ import com.limegroup.gnutella.util.*;
  * resetCycle/extractMax instead of a simple iterator.
  */
 public final class MessageQueue {
-    private Buffer _buf;
-    private boolean _lifo;
+    /** The underlying data structure.  Usually implemented by a OrderedBuffer 
+     *  or a BinaryHeap. */
+    private FixedSizeCollection _buf;
 
     private int _cycleSize;
     private int _leftInCycle;
     
+    /** Same as this(lifo, size, cycle, false) */
+    public MessageQueue(boolean lifo,
+                        int size,
+                        int cycle) throws IllegalArgumentException {
+        this(lifo, size, cycle, false);
+    }
+
     /**
      * @param lifo true if this uses LIFO order, false if this uses FIFO ordering
      * @param timeout the max time to keep queued messages, in milliseconds.
@@ -30,23 +38,24 @@ public final class MessageQueue {
      */
     public MessageQueue(boolean lifo,
                         int size,
-                        int cycle) {
+                        int cycle,
+                        boolean sorted) throws IllegalArgumentException {
         if (size<=0)
             throw new IllegalArgumentException("Size too small: "+size);
         if (cycle<=0)
             throw new IllegalArgumentException("Cycle too small: "+cycle);
 
-        
-        this._buf=new Buffer(size);
-        this._lifo=lifo;
+        if (sorted)
+            this._buf=new BinaryHeap(size);
+        else
+            this._buf=new OrderedBuffer(size, lifo);
         this._cycleSize=cycle;
         this._leftInCycle=cycle;
     }
 
     /** Adds m to this, returning the number of messages dropped in the process. */
     public int add(Message m) {
-        Object dropped=_buf.addLast(m);
-        return dropped==null ? 0 : 1;
+        return _buf.addR(m);
     }
            
     /** Resets the cycle counter used to control removeNext(). */
@@ -66,10 +75,7 @@ public final class MessageQueue {
         if (_buf.isEmpty())
             return null;
         
-        if (_lifo) 
-            return (Message)_buf.removeLast();
-        else
-            return (Message)_buf.removeFirst();
+        return (Message)_buf.remove();
     }  
 
     /** Returns the number of queued messages. */
@@ -77,5 +83,35 @@ public final class MessageQueue {
         return _buf.size();
     }
 
-    //No unit tests; this code is covered by ManagedConnection.
+    public String toString() {
+        return _buf.toString();
+    }
+
+    //No unit tests; this code is covered by tests in ManagedConnection.
+    //(Actually most of this code used to be in ManagedConnection.)
+}
+
+
+/**
+ * Adapts Buffer to implement FixedSizeCollection, defining the add
+ * method in terms of LIFO/FIFO behavior.
+ */
+class OrderedBuffer extends Buffer implements FixedSizeCollection {
+    private boolean _lifo;
+
+    public OrderedBuffer(int capacity, boolean lifo) {
+        super(capacity);
+        this._lifo=lifo;
+    }
+
+    public Object remove() {
+        if (_lifo)
+            return removeLast();
+        else
+            return removeFirst();
+    }
+
+    public int addR(Object x) {
+        return addLast(x)==null ? 0 : 1;
+    }
 }

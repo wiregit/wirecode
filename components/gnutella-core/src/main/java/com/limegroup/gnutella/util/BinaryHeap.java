@@ -16,7 +16,7 @@ import com.sun.java.util.collections.Iterator;
  *
  * @author Anurag Singla 
  */
-public class BinaryHeap
+public class BinaryHeap implements FixedSizeCollection
 {
     /**
      * number of elements currently present in the heap
@@ -188,6 +188,15 @@ public class BinaryHeap
     }//end of insert
 
     /**
+     * Same as insert, but returns the number of elements removed (1 or 0).
+     * @param ClassCastException x is not Comparable
+     */
+    public int addR(Object x) 
+    {
+        return insert((Comparable)x)==null ? 0 : 1;
+    }
+
+    /**
      * Returns the largest element in this, without modifying this.  If this is
      * empty, throws NoSuchElementException instead.  
      */
@@ -222,6 +231,12 @@ public class BinaryHeap
 
         //return the max element
         return max;
+    }
+
+    /** Same as extractMax(). */
+    public Object remove() 
+    {
+        return extractMax();
     }
 
     /** 
@@ -349,7 +364,7 @@ public class BinaryHeap
         //try inserting when overfilled
         q=new BinaryHeap(4);
         Assert.that(q.insert(one)==null);
-        Assert.that(q.insert(four)==null);
+        Assert.that(q.addR(four)==0);
         Assert.that(q.insert(three)==null);
         Assert.that(q.insert(two)==null);
         System.out.println("The following tests are STRONGER than required"
@@ -357,7 +372,7 @@ public class BinaryHeap
         System.out.println("(The spec does not say that the smallest"
                            +" element is removed on overflow.)");
         Assert.that(q.insert(five)!=null);
-        Assert.that(q.insert(five)!=null);
+        Assert.that(q.addR(five)==1);
         Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(four));

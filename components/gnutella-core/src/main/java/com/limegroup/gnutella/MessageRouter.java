@@ -556,19 +556,24 @@ public abstract class MessageRouter
     public void handleQueryReply(QueryReply queryReply,
                                  ManagedConnection receivingConnection)
     {
-        ReplyHandler replyHandler =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID());
+        //For flow control reasons, we keep track of the bytes routed for this
+        //GUID.  Replies with less volume have higher priorities (i.e., lower
+        //numbers).
+        RouteTable.ReplyRoutePair rrp =
+            _queryRouteTable.getReplyHandler(queryReply.getGUID(),
+                                             queryReply.getTotalLength());
 
-        if(replyHandler != null)
+        if(rrp != null)
         {
+            queryReply.setPriority(rrp.getBytesRouted());
             _numQueryReplies++;
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        receivingConnection);
-            replyHandler.handleQueryReply(queryReply,
-                                          receivingConnection);
+            rrp.getReplyHandler().handleQueryReply(queryReply,
+                                                   receivingConnection);
         }
         else
         {
@@ -633,17 +638,22 @@ public abstract class MessageRouter
     public void sendQueryReply(QueryReply queryReply)
         throws IOException
     {
-        ReplyHandler replyHandler =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID());
+        //For flow control reasons, we keep track of the bytes routed for this
+        //GUID.  Replies with less volume have higher priorities (i.e., lower
+        //numbers).
+        RouteTable.ReplyRoutePair rrp =
+            _queryRouteTable.getReplyHandler(queryReply.getGUID(),
+                                             queryReply.getTotalLength());
 
-        if(replyHandler != null)
+        if(rrp != null)
         {
+            queryReply.setPriority(rrp.getBytesRouted());
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        _forMeReplyHandler);
-            replyHandler.handleQueryReply(queryReply, null);
+            rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else
             throw new IOException();

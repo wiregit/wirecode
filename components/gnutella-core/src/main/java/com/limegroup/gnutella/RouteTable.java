@@ -9,7 +9,11 @@ import com.sun.java.util.collections.*;
  * mappings may be purged without warning, preferably using a FIFO
  * policy.  This class makes a distinction between not having a mapping
  * for a GUID and mapping that GUID to null (in the case of a removed
- * ReplyHandler).
+ * ReplyHandler).<p>
+ *
+ * This class can also optionally keep track of the number of reply bytes 
+ * routed per guid.  This can be useful for implementing fair flow-control
+ * strategies.
  */
 class RouteTable {
     /**
@@ -21,7 +25,7 @@ class RouteTable {
      * valuable information for preventing duplicate queries).
      *
      * Instead we use a layer of indirection.  _newMap/_oldMap maps GUIDs to
-     * Integers, which act as IDs for each connection.  _idMap maps IDs to
+     * integers, which act as IDs for each connection.  _idMap maps IDs to
      * ReplyHandlers.  _handlerMap maps ReplyHandler to IDs.  So to clean up a
      * connection, we just purge the entries from _handlerMap and _idMap; there
      * is no need to iterate through the entire GUID mapping.  Adding GUIDs and
@@ -40,6 +44,9 @@ class RouteTable {
      * N to 2N minutes worth of GUIDs.  This is superior to a fixed size route
      * table.
      *
+     * For flow-control reasons, we also store the number of bytes routed per
+     * GUID in each table.  Hence the RouteTableEntry class.
+     *
      * INVARIANT: keys of _newMap and _oldMap are disjoint
      * INVARIANT: _idMap and _replyMap are inverses
      *
@@ -48,9 +55,9 @@ class RouteTable {
      *  into ConnectionManager._initialized[Client]Connections, we would not
      *  need _idMap either.  However, this increases dependenceies.  
      */
-    private Map /* byte[] -> Integer */ _newMap=
+    private Map /* byte[] -> RouteTableEntry */ _newMap=
         new TreeMap(new GUID.GUIDByteComparator());
-    private Map /* byte[] -> Integer */ _oldMap=
+    private Map /* byte[] -> RouteTableEntry */ _oldMap=
         new TreeMap(new GUID.GUIDByteComparator());
     private int _mseconds;
     private long _nextSwitchTime;
@@ -59,6 +66,19 @@ class RouteTable {
     private Map /* Integer -> ReplyHandler */ _idMap=new HashMap();
     private Map /* ReplyHandler -> Integer */ _handlerMap=new HashMap();
     private int _nextID;
+
+    /** Values stored in _newMap/_oldMap. */
+    private static class RouteTableEntry {
+        /** The numericID of the reply connection. */
+        int handlerID;
+        /** The bytes already routed for this GUID. */
+        int bytesRouted;
+        /** Creates a new entry for the given ID, with zero bytes routed. */
+        RouteTableEntry(int handlerID) {
+            this.handlerID=handlerID;
+            this.bytesRouted=0;
+        }
+    }
 
     /**
      * Creates a new route table with enough space to hold the last seconds to
@@ -92,9 +112,21 @@ class RouteTable {
         if (! replyHandler.isOpen())
             return;
 
-        Integer id=handler2id(replyHandler);
-        _oldMap.remove(guid);   //renews keys
-        _newMap.put(guid, id);
+        //First clear out any old entries for the guid, memorizing the volume
+        //routed if found.  Note that if the guid is found in _newMap, we don't
+        //need to look in _oldMap.
+        int id=handler2id(replyHandler).intValue();
+        RouteTableEntry entry=(RouteTableEntry)_newMap.remove(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.remove(guid);
+
+        //Now map the guid to the new reply handler, using the volume routed if
+        //found, or zero otherwise.
+        if (entry==null)
+            entry=new RouteTableEntry(id);
+        else
+            entry.handlerID=id;            //avoids allocation
+        _newMap.put(guid, entry);
     }
 
     /**
@@ -118,8 +150,8 @@ class RouteTable {
             return false;
 
         if(!_newMap.containsKey(guid) && !_oldMap.containsKey(guid)) {
-            Integer id=handler2id(replyHandler);
-            _newMap.put(guid, id);
+            int id=handler2id(replyHandler).intValue();
+            _newMap.put(guid, new RouteTableEntry(id));
             return true;
         } else {
             return false;
@@ -127,10 +159,10 @@ class RouteTable {
     }
 
     /**
-     * Looks up the ReplyHandler for a given guid.
+     * Looks up the reply route for a given guid.
      *
      * @requires guid.length==16
-     * @effects returns the corresponding Connection for this GUID.     
+     * @effects returns the corresponding ReplyHandler for this GUID.     
      *  Returns null if no mapping for guid, or guid maps to null (i.e., 
      *  to a removed ReplyHandler.
      */
@@ -139,12 +171,63 @@ class RouteTable {
         repOk();
 
         //Look up guid in _newMap. If not there, check _oldMap. 
-        Integer id=(Integer)_newMap.get(guid);
-        if (id==null)
-            id=(Integer)_oldMap.get(guid);
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
 
-        return (id==null) ? null : id2handler(id);  //may be null
+        //Note that id2handler may return null.
+        return (entry==null) ? null : id2handler(new Integer(entry.handlerID));
     }
+
+    /**
+     * Looks up the reply route and route volume for a given guid, incrementing
+     * the count of bytes routed for that GUID.
+     *
+     * @requires guid.length==16
+     * @effects if no mapping for guid, or guid maps to null (i.e., to a removed
+     *  ReplyHandler) returns null.  Otherwise returns a tuple containing the
+     *  corresponding ReplyHandler for this GUID along with the volume of
+     *  messages already routed for that guid.  Afterwards, increments the reply
+     *  count by replyBytes.
+     */
+    public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
+                                                       int replyBytes) {
+        //no purge
+        repOk();
+
+        //Look up guid in _newMap. If not there, check _oldMap. 
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
+        
+        //If no mapping for guid, or guid maps to a removed reply handler,
+        //return null.
+        if (entry==null)
+            return null;
+        ReplyHandler handler=id2handler(new Integer(entry.handlerID));
+        if (handler==null)
+            return null;
+            
+        //Increment count, returning old count in tuple.
+        ReplyRoutePair ret=new ReplyRoutePair(handler, entry.bytesRouted);
+        entry.bytesRouted+=replyBytes;
+        return ret;
+    }
+
+    /** The return value from getReplyHandler. */
+    public static class ReplyRoutePair {
+        private ReplyHandler handler;
+        private int volume;
+        ReplyRoutePair(ReplyHandler handler, int volume) {
+            this.handler=handler;
+            this.volume=volume;
+        }
+        /** Returns the ReplyHandler to route your message */
+        public ReplyHandler getReplyHandler() { return handler; }
+        /** Returns the volume of messages already routed for the given GUID. */
+        public int getBytesRouted() { return volume; }
+    }
+
 
     /**
      * Clears references to a given ReplyHandler.
@@ -162,10 +245,11 @@ class RouteTable {
                     "Null replyHandler in removeReplyHandler");
 
         //Note that _map is not modified.  See overview of class for rationale.
+        //Also, handler2id may actually allocate a new ID for replyHandler, when
+        //killing a connection for which we've routed no replies.  That's ok;
+        //we'll just clean up the new ID immediately.
         Integer id=handler2id(replyHandler);
-        if (id!=null) {
-            _idMap.remove(id);
-        }
+        _idMap.remove(id);
         _handlerMap.remove(replyHandler);
     }
 
@@ -241,8 +325,8 @@ class RouteTable {
             byte[] key=(byte[])iter.next();
             buf.append(new GUID(key)); // GUID
             buf.append("->");
-            Integer id=(Integer)bothMaps.get(key);
-            ReplyHandler handler=id2handler(id);
+            int id=((RouteTableEntry)bothMaps.get(key)).handlerID;
+            ReplyHandler handler=id2handler(new Integer(id));
             buf.append(handler==null ? "null" : handler.toString());//connection
             if (iter.hasNext())
                 buf.append(", ");
@@ -251,32 +335,43 @@ class RouteTable {
         return buf.toString();
     }
 
+    private static boolean warned=false;
     /** Tests internal consistency.  VERY slow. */
     private final void repOk() {
-//          //Check that _idMap is inverse of _handlerMap...
-//          for (Iterator iter=_idMap.keySet().iterator(); iter.hasNext(); ) {
-//              Integer key=(Integer)iter.next();
-//              ReplyHandler value=(ReplyHandler)_idMap.get(key);
-//              Assert.that(_handlerMap.get(value)==key);
-//          }
-//          //..and vice versa
-//          for (Iterator iter=_handlerMap.keySet().iterator(); iter.hasNext(); ) {
-//              ReplyHandler key=(ReplyHandler)iter.next();
-//              Integer value=(Integer)_handlerMap.get(key);
-//              Assert.that(_idMap.get(value)==key);
-//          }
+        /*
+        if (!warned) {
+            System.err.println(
+                "WARNING: RouteTable.repOk enabled.  Expect performance problems!");
+            warned=true;
+        }
 
-//          //Check that keys of _newMap aren't in _oldMap
-//          for (Iterator iter=_newMap.keySet().iterator(); iter.hasNext(); ) {
-//              byte[] guid=(byte[])iter.next();
-//              Assert.that(! _oldMap.containsKey(guid));
-//          }
-
-//          //Check that keys of _oldMap aren't in _newMap
-//          for (Iterator iter=_oldMap.keySet().iterator(); iter.hasNext(); ) {
-//              byte[] guid=(byte[])iter.next();
-//              Assert.that(! _newMap.containsKey(guid));
-//          }
+        //Check that _idMap is inverse of _handlerMap...
+        for (Iterator iter=_idMap.keySet().iterator(); iter.hasNext(); ) {
+            Integer key=(Integer)iter.next();
+            ReplyHandler value=(ReplyHandler)_idMap.get(key);
+            Assert.that(_handlerMap.get(value)==key);
+        }
+        //..and vice versa
+        for (Iterator iter=_handlerMap.keySet().iterator(); iter.hasNext(); ) {
+            ReplyHandler key=(ReplyHandler)iter.next();
+            Integer value=(Integer)_handlerMap.get(key);
+            Assert.that(_idMap.get(value)==key);
+        }
+        
+        //Check that keys of _newMap aren't in _oldMap, values are RouteTableEntry
+        for (Iterator iter=_newMap.keySet().iterator(); iter.hasNext(); ) {
+            byte[] guid=(byte[])iter.next();
+            Assert.that(! _oldMap.containsKey(guid));
+            Assert.that(_newMap.get(guid) instanceof RouteTableEntry);
+        }
+        
+        //Check that keys of _oldMap aren't in _newMap
+        for (Iterator iter=_oldMap.keySet().iterator(); iter.hasNext(); ) {
+            byte[] guid=(byte[])iter.next();
+            Assert.that(! _newMap.containsKey(guid));
+            Assert.that(_oldMap.get(guid) instanceof RouteTableEntry);
+        }
+        */
     }
 
     /** Unit test */
@@ -300,14 +395,14 @@ class RouteTable {
         rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
         Assert.that(rt.getReplyHandler(g1)==c1);
         Assert.that(rt.getReplyHandler(g2)==c2);
-        Assert.that(rt.getReplyHandler(g3)==c3);
-        Assert.that(rt.getReplyHandler(g4)==null);
+        Assert.that(rt.getReplyHandler(g3, 0).getReplyHandler()==c3);
+        Assert.that(rt.getReplyHandler(g4, 0)==null);
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         Assert.that(rt.tryToRouteReply(g4, c4));  //{g1, g2, g3}, {g4}
         Assert.that(rt.getReplyHandler(g1)==c1);
         rt.routeReply(g1, c1);                    //{g2, g3}, {g1, g4}
         Assert.that(rt.getReplyHandler(g1)==c1);
-        Assert.that(rt.getReplyHandler(g2)==c2);
+        Assert.that(rt.getReplyHandler(g2, 0).getReplyHandler()==c2);
         Assert.that(rt.getReplyHandler(g3)==c3);
         Assert.that(rt.getReplyHandler(g4)==c4);
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
@@ -360,6 +455,8 @@ class RouteTable {
 
         rt.removeReplyHandler(c1);                       //g1->null
         rt.removeReplyHandler(c3);                       //g2->null
+        Assert.that(rt.getReplyHandler(g1, 0)==null);
+        Assert.that(rt.getReplyHandler(g2)==null);
         Assert.that(! rt.tryToRouteReply(g1, c1));   
         Assert.that(! rt.tryToRouteReply(g2, c3));
         Assert.that(rt.getReplyHandler(g1)==null);
@@ -380,6 +477,39 @@ class RouteTable {
         Assert.that(rt.getReplyHandler(g4)==c1);
         Assert.that(rt._handlerMap.size()==1);
         Assert.that(rt._idMap.size()==1);
+
+        //3. Test reply counting logic.
+        RouteTable.ReplyRoutePair rrp=null;
+        rt=new RouteTable(MSECS/1000, Integer.MAX_VALUE);
+        Assert.that(rt.tryToRouteReply(g1, c1));  //g1 -> <c1, 0>
+        rrp=rt.getReplyHandler(g1, 5);            //g1 -> <c1, 0+5>
+        Assert.that(rrp.getReplyHandler()==c1);
+        Assert.that(rrp.getBytesRouted()==0);
+        rrp=rt.getReplyHandler(g1, 1);            //g1 -> <c1, 5+1>
+        Assert.that(rrp.getReplyHandler()==c1);
+        Assert.that(rrp.getBytesRouted()==5);
+        rt.routeReply(g1, c2);                    //g1 -> <c2, 6>
+        rrp=rt.getReplyHandler(g1, 2);            //g1 -> <c2, 6+2>
+        Assert.that(rrp.getReplyHandler()==c2);
+        Assert.that(rrp.getBytesRouted()==6, 
+                    "Reply bytes: "+rrp.getBytesRouted());
+        Assert.that(rt._newMap.size()==1);
+        Assert.that(rt._oldMap.size()==0);
+        try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
+        rt.purge();
+        Assert.that(rt._newMap.size()==0);
+        Assert.that(rt._oldMap.size()==1);
+        rrp=rt.getReplyHandler(g1, 3);            //g1 -> <c2, 8+3>
+        Assert.that(rrp.getReplyHandler()==c2);
+        Assert.that(rrp.getBytesRouted()==8);
+        rt.routeReply(g1, c3);                    //g1 -> <c3, 11>
+        Assert.that(rt._newMap.size()==1);
+        Assert.that(rt._oldMap.size()==0);
+        rrp=rt.getReplyHandler(g1, 10);            //g1 -> <c3, 11+10>
+        Assert.that(rrp.getReplyHandler()==c3);
+        Assert.that(rrp.getBytesRouted()==11);
+        rt.removeReplyHandler(c3);
+        Assert.that(rt.getReplyHandler(g1,0)==null);                    
     }
 
     private static class StubReplyHandler implements ReplyHandler {
