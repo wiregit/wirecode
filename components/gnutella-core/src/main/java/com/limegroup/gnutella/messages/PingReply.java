@@ -142,6 +142,8 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Cached constant for the vendor GGEP extension.
      */
     private static final byte[] CACHED_VENDOR = new byte[5];
+    
+    private static final String BOGUS_UHC_ADDR = "0.0.0.0";
 
     // performs any necessary static initialization of fields,
     // such as the vendor GGEP extension
@@ -586,7 +588,9 @@ public class PingReply extends Message implements Serializable, IpPort {
 			throw new BadPacketException("invalid port: "+port); 
         }
         String ipString = NetworkUtils.ip2string(payload, 2);
-        if(!NetworkUtils.isValidAddress(ipString)) {
+        
+        if(!NetworkUtils.isValidAddress(ipString) && 
+                !ipString.equals(BOGUS_UHC_ADDR)) {
             ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
             throw new BadPacketException("invalid address: " + ipString);
         }
@@ -669,9 +673,26 @@ public class PingReply extends Message implements Serializable, IpPort {
                     throw new BadPacketException(bad.getMessage());
                 }
             }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+                try{
+                    String dns = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+                    ip = InetAddress.getByName(dns);
+                    ipString = ip.getHostAddress();
+                }catch(BadGGEPPropertyException maybeBad) {
+                    if (ipString.equals(BOGUS_UHC_ADDR))
+                        throw new BadPacketException(maybeBad.getMessage());
+                }catch(UnknownHostException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+            }
                 
         }
 
+        // we received a pong from 0.0.0.0 that wasn't an UHC? bad.
+        if (ipString.equals(BOGUS_UHC_ADDR))
+            throw new BadPacketException("invalid address "+ipString);
+        
         return new PingReply(guid, ttl, hops, payload, ggep, ip);
     }
      
