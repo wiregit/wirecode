@@ -55,7 +55,7 @@ public class ConnectionManager implements Runnable {
 	Collections.synchronizedList(new ArrayList());
     public  HostCatcher catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
     
-    /** Queued up entries to send to each. TODO2: used fixed-size buffer here. */
+    /** Queued up entries to send to each */
     static class MessagePair {
 	Message m;
 	Connection except;
@@ -315,8 +315,12 @@ public class ConnectionManager implements Runnable {
 	try {
 	    int oldPort=port;
 	    setListeningPort(port,true);
-	    if (port!=oldPort)
+	    if (port!=oldPort) {
 		SettingsManager.instance().setPort(port);
+		//TODO: it would really be better to notify the GUI
+		//directly via ActivityCallback in case the GUI has
+		//already read the properties settings.
+	    }
 	} catch (IOException e) {
 	    error(ActivityCallback.ERROR_0);
 	}
