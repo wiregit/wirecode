@@ -9,6 +9,9 @@ import com.limegroup.gnutella.connection.UltraPeerListener;
  * This class listens for incoming messages on the open UDP port,
  * dispatching those message the appropriate message routers and 
  * reply handlers.
+ *
+ * @see UDPReplyHandler
+ * @see MessageRouter
  */
 public final class UDPAcceptor implements Runnable, UltraPeerListener {
 
@@ -97,13 +100,12 @@ public final class UDPAcceptor implements Runnable, UltraPeerListener {
 				_socket.receive(datagram);
 				byte[] data = datagram.getData();
 				int length = datagram.getLength();
-				// TODO: send an ack??
 				try {
-					//Message message = Message.readUdpData(data);	
 					// we do things the old way temporarily
 					InputStream in = new ByteArrayInputStream(data);
 					Message message = Message.read(in);		
 					if(message == null) continue;
+					sendAcknowledgement(datagram, message.getGUID());
 					router.handleUDPMessage(message, datagram);					
 				} catch(BadPacketException e) {
 					continue;
@@ -118,6 +120,41 @@ public final class UDPAcceptor implements Runnable, UltraPeerListener {
 			//}
 		}
 		_socket.close();
+	}
+
+	/**
+	 * Sends an ack back to the GUESS client node.  
+	 */
+	private void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
+		ConnectionManager manager = RouterService.getConnectionManager();
+		Endpoint host = manager.getConnectedUltrapeer();
+		PingReply reply;
+		if(host != null) {
+			try {
+				reply = new PingReply(guid, (byte)1,
+									  host.getPort(),
+									  host.getHostBytes(),
+									  (long)0, (long)0, true);
+			} catch(UnknownHostException e) {
+				reply = getPingReply(guid);
+			}
+		} else {
+			reply = getPingReply(guid);
+		}
+		send(reply, datagram.getAddress(), datagram.getPort());
+	}
+
+	/**
+	 * Returns a <tt>PingReply</tt> for localhost.
+	 */
+	private PingReply getPingReply(byte[] guid) {
+		return new PingReply(guid, (byte)1,
+							 RouterService.getPort(),
+							 RouterService.getAddress(),
+							 RouterService.getNumSharedFiles(),
+							 RouterService.getSharedFileSize()/1024,
+							 RouterService.isSupernode(),
+							 Statistics.instance().calculateDailyUptime());		
 	}
 
 	/**
