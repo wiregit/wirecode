@@ -18,7 +18,7 @@ public class SynMessage extends UDPConnectionMessage {
         super(
           /* his connectionID           */ (byte)0, 
           /* opcode                     */ OP_SYN, 
-          /* sequenceNumber             */ (byte)0, 
+          /* sequenceNumber             */ 0, 
           /* my data is my connectionID */ buildByteArray(connectionID),
           /* data length                */ 1
           );

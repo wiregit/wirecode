@@ -22,7 +22,7 @@ public class DataWindow
     private static final float DEVIATION_GAIN      = 1.0f / 4.0f;
 
 	private HashMap window;
-	private int     windowStart;
+	private long    windowStart;
 	private int     windowSize;
 	private long    averageRTT;
 	private long    smoothRTT;
@@ -37,7 +37,7 @@ public class DataWindow
      *  The size defines how much look ahead there is.  Start is normally zero
      *  or one.
      */
-	public DataWindow(int size, int start) {
+	public DataWindow(int size, long start) {
 		windowStart = start;
 		windowSize  = size;
 		window      = new HashMap(size+2);
@@ -68,7 +68,7 @@ public class DataWindow
     /** 
      *  Get the block based on the sequenceNumber.
      */
-	public DataRecord getBlock(int pnum) {
+	public DataRecord getBlock(long pnum) {
 		String     pkey = String.valueOf(pnum);
 		DataRecord d    = (DataRecord) window.get(pkey);
 		return d;
@@ -78,7 +78,7 @@ public class DataWindow
      *  Get the start of the data window. The start will generally be the
      *  sequence number of the lowest unacked message.
      */
-    public int getWindowStart() {
+    public long getWindowStart() {
         return windowStart;
     }
 
@@ -96,7 +96,7 @@ public class DataWindow
         DataRecord d;
         String     pkey;
         int        count = 0;
-        for (int i = windowStart; i < windowStart+windowSize+3; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+3; i++) {
             pkey = String.valueOf(i);
             // Count the spots that are full and not written
             if ( (d = (DataRecord) window.get(pkey)) != null &&
@@ -122,7 +122,7 @@ public class DataWindow
         String     pkey;
         int        count = 0;
 		long       totalDelta = 0;
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks == 0 ) {
@@ -146,7 +146,7 @@ public class DataWindow
         DataRecord d;
         String     pkey;
         int        count = 0;
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
@@ -164,9 +164,9 @@ public class DataWindow
      *  From the window, find the number for the next block. 
      *  i.e. sequenceNumber
      */
-    public int getLowestUnsentBlock() {
+    public long getLowestUnsentBlock() {
         String pkey;
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
             if (window.get(pkey) == null)
                 return(i);
@@ -184,7 +184,7 @@ public class DataWindow
         DataRecord d;
         String     pkey;
         int        count = 0;
-        for (int i = windowStart+1; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart+1; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
@@ -243,7 +243,7 @@ public class DataWindow
      *  Record that a block was acked and calculate the 
      *  round trip time and averages from it.
      */
-	public DataRecord ackBlock(int pnum) {
+	public DataRecord ackBlock(long pnum) {
 		DataRecord drec = getBlock(pnum);
 		if ( drec != null ) {
 			drec.acks++;
@@ -313,14 +313,14 @@ public class DataWindow
      *  Record an ack if not yet present for blocks up to the receiving 
 	 *  windowStart sent from the receiving connection.
      */
-	public void pseudoAckToReceiverWindow(int wStart) {
+	public void pseudoAckToReceiverWindow(long wStart) {
 
 		// If the windowStart is old, just ignore it
 		if ( wStart <= windowStart )
 			return;
 
 		DataRecord drec;
-		for (int i = windowStart; i < wStart; i++) {
+		for (long i = windowStart; i < wStart; i++) {
 			drec = getBlock(i);
 			if ( drec != null && drec.acks == 0) {
 				// Presumably the ack got lost or is still incoming so ack it
@@ -340,7 +340,7 @@ System.out.println("Successful pseudoAck of: "+i);
 
         // Find the oldest block.
         DataRecord oldest = null;
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
                 if ( d.acks == 0 &&
@@ -359,7 +359,7 @@ System.out.println("Successful pseudoAck of: "+i);
         DataRecord d;
 
         // Find a writable block
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
                 if (d.written) continue;
@@ -381,9 +381,9 @@ System.out.println("Successful pseudoAck of: "+i);
         String     pkey;
         int        count = 0;
 
-		int maxBlock      = windowStart+windowSize;
-		int newMaxBlock   = maxBlock+windowSize;
-		int lastBlock     = -1;
+		long maxBlock      = windowStart+windowSize;
+		long newMaxBlock   = maxBlock+windowSize;
+		long lastBlock     = -1;
 
 		// Find the last block
         /*
@@ -399,7 +399,7 @@ System.out.println("Successful pseudoAck of: "+i);
         // it is removed.  Note: windowSpace must reflect the true 
         // potential space.   
         //for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
-        for (int i = windowStart; i < windowStart + windowSize + 1; i++) {
+        for (long i = windowStart; i < windowStart + windowSize + 1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
@@ -421,7 +421,7 @@ System.out.println("Successful pseudoAck of: "+i);
         DataRecord mostAcked = null;
 
 		// Compare ack numbers
-		for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
 			if ( mostAcked == null ) {
 				mostAcked = d;
@@ -441,7 +441,7 @@ System.out.println("Successful pseudoAck of: "+i);
         int count = 0;
 
 		// Count the number of records not written
-		for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
 			if ( d != null && !d.written) {
 				count++;
@@ -458,7 +458,7 @@ System.out.println("Successful pseudoAck of: "+i);
         int count = 0;
 
 		// Count the number of records not acked
-		for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
 			if ( d != null && d.acks <=0) {
 				count++;
@@ -484,7 +484,7 @@ System.out.println("Successful pseudoAck of: "+i);
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {
-	public int 			 		pnum;     // sequence number
+	public long			 		pnum;     // sequence number
 	public String 				pkey;     // sequence number as a String
 	public UDPConnectionMessage msg;      // the actual data message
     public int                  sends;    // count of the sends

@@ -9,7 +9,7 @@ public class FinMessage extends UDPConnectionMessage {
     /**
      * Construct a new FinMessage with the specified settings.
      */
-    public FinMessage(byte connectionID, int sequenceNumber) 
+    public FinMessage(byte connectionID, long sequenceNumber) 
       throws BadPacketException {
 
         super(

@@ -39,7 +39,7 @@ public abstract class UDPConnectionMessage extends Message {
     protected byte _opcode;
 
     /** The communications message sequence number.         2 bytes  */
-    protected int _sequenceNumber;
+    protected long _sequenceNumber;
     
     /** The first piece of data in this message.
         This will hold any data stored in the GUID.         14 bytes */
@@ -89,7 +89,7 @@ public abstract class UDPConnectionMessage extends Message {
 	 * settings and data.
      */
     protected UDPConnectionMessage(
-      byte connectionID, byte opcode, int sequenceNumber, byte[] data,
+      byte connectionID, byte opcode, long sequenceNumber, byte[] data,
 	  int  datalength ) 
       throws BadPacketException {
 
@@ -140,15 +140,23 @@ public abstract class UDPConnectionMessage extends Message {
     /**
      *  Return the messages sequence number
      */
-	public int getSequenceNumber() {
+	public long getSequenceNumber() {
 		return _sequenceNumber;
+	}
+
+    /**
+     *  Extend the sequence number of incoming messages with the full 8 bytes
+	 *  of state
+     */
+	public void extendSequenceNumber(long seqNo) {
+		_sequenceNumber = seqNo;
 	}
 
     /**
      * Allocate and fill in the data packed in the GUID.
      */
     private static byte[] buildGUID(byte connectionID, byte opcode, 
-      int sequenceNumber, byte[] data, int datalength) {
+      long sequenceNumber, byte[] data, int datalength) {
         int guidDataLength = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
           datalength);
 
@@ -181,7 +189,7 @@ public abstract class UDPConnectionMessage extends Message {
         _connectionID   = guid[0];
         _opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
         _sequenceNumber = 
-          (((int) guid[2] & 0xff) << 8) | ((int) guid[3] & 0xff);
+          (((long) guid[2] & 0xff) << 8) | ((long) guid[3] & 0xff);
 
         _data1          = guid;
         _data1Offset    = GUID_DATA_START;
@@ -217,10 +225,12 @@ public abstract class UDPConnectionMessage extends Message {
         return darray;
     } 
 
+    /**
+     *  Return an int from 2 unsigned bytes
+     */
     public static int getShortInt(byte b1, byte b2) {
           return (((int) b1 & 0xff) << 8) | ((int) b2 & 0xff);
     }
-
 
     /** 
      *  Return the length of data stored in this message.

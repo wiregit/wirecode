@@ -15,22 +15,23 @@ import com.limegroup.gnutella.messages.BadPacketException;
  */
 public class KeepAliveMessage extends UDPConnectionMessage {
 
-    int _windowStart;
-    int _windowSpace;
+    private long _windowStart;
+    private int  _windowSpace;
 
     /**
      * Construct a new KeepAliveMessage with the specified settings and data
      */
     public KeepAliveMessage(byte connectionID, 
-      int windowStart, int windowSpace) 
+      long windowStart, int windowSpace) 
       throws BadPacketException {
 
         super(
           /* his connectionID                 */ connectionID, 
           /* opcode                           */ OP_KEEPALIVE, 
-          /* Keepalive has no sequenceNumber  */ (byte) 0, 
+          /* Keepalive has no sequenceNumber  */ 0, 
           /* window Start and Space           */ 
-          buildByteArray(windowStart, (windowSpace < 0 ? 0 : windowSpace)),
+          buildByteArray((int) windowStart & 0xfff, 
+			(windowSpace < 0 ? 0 : windowSpace)),
           /* 2 short ints => 4 bytes          */ 4
           );
         _windowStart = windowStart;
@@ -47,7 +48,7 @@ public class KeepAliveMessage extends UDPConnectionMessage {
       	super(guid, ttl, hops, payload);
 
         // Parse the added windowStart and windowSpace information
-        _windowStart = 
+        _windowStart = (long)
           getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
         _windowSpace = 
           getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
@@ -58,9 +59,17 @@ public class KeepAliveMessage extends UDPConnectionMessage {
      *  coming from the receiving end of the connection.  It is saying, I have 
      *  received everything up to one minus this. (Note: it rolls)
      */
-    public int getWindowStart() {
+    public long getWindowStart() {
         return _windowStart;
     }
+
+    /**
+     *  Extend the windowStart of incoming messages with the full 8 bytes
+	 *  of state
+     */
+	public void extendWindowStart(long wStart) {
+		_windowStart = wStart;
+	}
 
     /**
      *  The windowSpace is a measure of how much more data the receiver can 

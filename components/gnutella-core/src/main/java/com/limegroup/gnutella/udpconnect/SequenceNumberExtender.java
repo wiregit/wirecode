@@ -44,7 +44,7 @@ public class SequenceNumberExtender {
 	public  SequenceNumberExtender() {
 	}
 
-	public long extendSequenceNumber(int sequenceNumber) {
+	public long extendSequenceNumber(long sequenceNumber) {
 		long extendedSeqNo;
 		if ( sequenceNumber >= HIGH_BASE_SWITCH_POINT && 
 			 sequenceNumber <  LOW_BASE_SWITCH_POINT  && 

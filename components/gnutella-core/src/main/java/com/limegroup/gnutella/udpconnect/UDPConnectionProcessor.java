@@ -158,7 +158,11 @@ public class UDPConnectionProcessor {
 
 
     /** The current sequence number of messages originated here */
-	private int               _sequenceNumber;
+	private long              _sequenceNumber;
+
+	/** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
+		8 byte longs of essentially infinite size */
+	private SequenceNumberExtender _extender;
 
     /** The last time that a message was sent to other host */
     private long              _lastSendTime;
@@ -213,6 +217,9 @@ public class UDPConnectionProcessor {
 
 		// Precreate the receive window for responce reporting
         _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
+
+		// All incoming messages get incremented
+		_extender        = new SequenceNumberExtender();
 
         // Register yourself for incoming messages
 		_myConnectionID    = _multiplexor.register(this);
@@ -280,7 +287,7 @@ public class UDPConnectionProcessor {
      */
     private synchronized void prepareOpenConnection() {
         _connectionState = CONNECT_STATE;
-        incrementSequenceNumber();
+        _sequenceNumber++;
         scheduleKeepAlive();
 
         // Create the delayed connection components
@@ -408,15 +415,6 @@ public class UDPConnectionProcessor {
 
         // If ack timeout exists but is infinite then yes an update is required.
         return (_ackTimeoutEvent.getEventTime() == Long.MAX_VALUE);
-    }
-
-    // TODO: Use this and make associated changes.
-    /**
-     *  Move the outgoing message sequence number forward with possible 
-     *  rollover.
-     */
-    private synchronized void incrementSequenceNumber() {
-        _sequenceNumber = (_sequenceNumber + 1) % MAX_SEQUENCE_NUMBER;
     }
 
     /**
@@ -675,7 +673,7 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
             int adjRTO   = (rto * 5) / 2;
             int waitTime = rto / 2;
 
-            int start = _sendWindow.getWindowStart();
+            long start   = _sendWindow.getWindowStart();
 
 //log2("Soft resend data:"+ start+ " rto:"+rto+
 //" uS:"+_sendWindow.getUsedSpots());
@@ -684,13 +682,10 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
             _writeRegulator.hitResendTimeout();
 
             DataRecord drec;
-            int        blockNum;
             int        numResent = 0;
 
             // Resend up to 1
             for (int i = 0; i < 1; i++) {
-
-                //blockNum = (start + i) % DataWindow.MAX_SEQUENCE_NUMBER;
 
                 // Get the oldest unacked block out of storage
                 drec = _sendWindow.getOldestUnackedBlock();
@@ -788,6 +783,10 @@ log2("Soft resending message:"+drec.msg.getSequenceNumber());
      */
     public synchronized void handleMessage(UDPConnectionMessage msg) {
 
+		// Extend the msgs sequenceNumber to 8 bytes based on past state
+		msg.extendSequenceNumber(
+		  _extender.extendSequenceNumber(msg.getSequenceNumber()) );
+
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
 log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
@@ -810,8 +809,13 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
             safeSendAck(msg);
         } else if (msg instanceof AckMessage) {
             AckMessage    amsg   = (AckMessage) msg;
-            int           seqNo  = amsg.getSequenceNumber();
-            int           wStart = amsg.getWindowStart();
+
+			// Extend the windowStart to 8 bytes the same as the sequenceNumber
+			amsg.extendWindowStart(
+		  	  _extender.extendSequenceNumber(amsg.getWindowStart()) );
+
+            long          seqNo  = amsg.getSequenceNumber();
+            long          wStart = amsg.getWindowStart();
     		int           priorR = _receiverWindowSpace;
     		_receiverWindowSpace = amsg.getWindowSpace();
 
@@ -843,8 +847,8 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
             DataMessage dmsg = (DataMessage) msg;
 
             // If message is more than limit beyond window, then throw it away
-            int seqNo      = dmsg.getSequenceNumber();
-            int baseSeqNo  = _receiveWindow.getWindowStart();
+            long seqNo     = dmsg.getSequenceNumber();
+            long baseSeqNo = _receiveWindow.getWindowStart();
             if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
 log2("Received block num too far ahead: "+ seqNo);
                return;
@@ -868,9 +872,14 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             safeSendAck(msg);
         } else if (msg instanceof KeepAliveMessage) {
             KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
-            int              seqNo  = kmsg.getSequenceNumber();
+
+			// Extend the windowStart to 8 bytes the same as the sequenceNumber
+			kmsg.extendWindowStart(
+		  	  _extender.extendSequenceNumber(kmsg.getWindowStart()) );
+
+            long             seqNo  = kmsg.getSequenceNumber();
 			// TODO: make use of this as a pseudo ack
-            int              wStart = kmsg.getWindowStart(); 
+            long             wStart = kmsg.getWindowStart(); 
     		int              priorR = _receiverWindowSpace;
     		_receiverWindowSpace    = kmsg.getWindowSpace();
 
