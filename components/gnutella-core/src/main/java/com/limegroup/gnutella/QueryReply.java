@@ -878,7 +878,11 @@ public class QueryReply extends Message implements Serializable{
         final int port = getPort(), qual = calculateQualityOfService(this);
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
-        final boolean supportsChat = getSupportsChat();
+        boolean supportsChat = false;
+        try {
+            supportsChat = getSupportsChat();
+        }
+        catch (Exception ignored) {} // don't let chat kill me....
         
         // construct RFDs....
         while (respIter.hasNext()) {
