@@ -36,37 +36,36 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
    
     /** The network constructor. */
     UDPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                                byte[] payload) 
-        throws BadPacketException {
+                                byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 
               version, payload);
-
-        if (getVersion() > VERSION) // we don't support it!!
-            throw new BadPacketException("UNSUPPORTED VERSION");
-
+              
         try {
-            // get the port and guid from the payload....
-            ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-
-            // get the port....
-            _port = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            payload = getPayload();
+            ByteArrayInputStream bais;
+            switch(getVersion()) {
+            case 1:
+                if( payload.length != 18 )
+                    throw new BadPacketException("invalid version1 payload");
+                bais = new ByteArrayInputStream(payload);
+                _port = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+                byte[] guidBytes = new byte[16];
+                int bytesRead = bais.read(guidBytes, 0, guidBytes.length);
+                _guid = new GUID(guidBytes);
+                break;
+            case 2:
+                if( payload.length != 2 )
+                    throw new BadPacketException("invalid version2 payload");
+                bais = new ByteArrayInputStream(payload);
+                _port = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+                _guid = new GUID(super.getGUID());
+                break;
+            default:
+                throw new BadPacketException("Unsupported Version");
+            }
 
             if( !NetworkUtils.isValidPort(_port) )
                 throw new BadPacketException("invalid connectback port.");
-
-            if (getVersion() == 1) {
-                // get the guid....
-                byte[] guidBytes = new byte[16];
-                int bytesRead = bais.read(guidBytes, 0, guidBytes.length);
-                if ((bytesRead != 16) || (bais.available() > 0))
-                    throw new BadPacketException("MALFORMED GUID!!!");
-                _guid = new GUID(guidBytes);
-            }
-            else if (getVersion() == 2)
-                _guid = new GUID(super.getGUID());
-            else 
-                throw new BadPacketException("UNSUPPORTED OLD VERSION");
-                
         }
         catch (IOException ioe) {
             throw new BadPacketException("Couldn't read from a ByteStream!!!");

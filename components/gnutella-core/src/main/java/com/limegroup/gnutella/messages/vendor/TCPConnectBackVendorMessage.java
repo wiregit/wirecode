@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.NetworkUtils;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
@@ -31,6 +32,8 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
                                          payload.length);
         // get the port from the payload....
         _port = ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 0));
+        if( !NetworkUtils.isValidPort(_port) )
+            throw new BadPacketException("invalid port");
     }
 
 
