@@ -163,12 +163,12 @@ public final class PushManager {
 
 
     /** @requires caller has this's monitor */
-	private void insertFailedPush(String host, int index) {
+	private synchronized void insertFailedPush(String host, int index) {
 		_failedPushes.add(new PushedFile(host, index));
 	}
 	
     /** @requires caller has this's monitor */
-	private boolean testFailedPush(String host, int index) {
+	private synchronized boolean testFailedPush(String host, int index) {
 		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _failedPushes.iterator();
@@ -182,12 +182,12 @@ public final class PushManager {
 	}
 
     /** @requires caller has this's monitor */
-	private void insertAttemptingPush(String host, int index) {
+	private synchronized void insertAttemptingPush(String host, int index) {
 		_attemptingPushes.add(new PushedFile(host, index));
 	}
 
     /** @requires caller has this's monitor */
-	private boolean testAttemptingPush(String host, int index) {
+	private synchronized boolean testAttemptingPush(String host, int index) {
 		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
@@ -200,7 +200,7 @@ public final class PushManager {
 	}
 
     /** @requires caller has this's monitor */	
-	private void removeAttemptingPush(String host, int index) {
+	private synchronized void removeAttemptingPush(String host, int index) {
 		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
@@ -215,7 +215,7 @@ public final class PushManager {
 	}
 
     /** @requires caller has this's monitor */
-	private void clearFailedPushes() {
+	private synchronized void clearFailedPushes() {
 		// First remove all files that were pushed more than a few minutes ago
 		Date time = new Date();
 		time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
