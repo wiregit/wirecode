@@ -117,7 +117,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	/**
 	 * @return whether we are behind an UPnP-enabled NAT/router
 	 */
-	public synchronized boolean NATPresent() {
+	public synchronized boolean isNATPresent() {
 		return _router != null && _service != null;
 	}
 
@@ -136,7 +136,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		Action getIP;
 		
 		synchronized(this) {
-			if (!NATPresent())
+			if (!isNATPresent())
 				return null;
 			getIP = _service.getAction("GetExternalIPAddress");
 		}
@@ -226,9 +226,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	
 		// try adding new mappings with the same port
 		Mapping udp = new Mapping("",
-				""+port,
+				port,
 				localAddress,
-				""+localPort,
+				localPort,
 				"UDP",
 				UDP_PREFIX + GUID_SUFFIX);
 		
@@ -246,9 +246,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 				gen = new Random();
 			port = gen.nextInt(50000)+2000;
 			udp = new Mapping("",
-					""+port,
+					port,
 					localAddress,
-					""+localPort,
+					localPort,
 					"UDP",
 					UDP_PREFIX + GUID_SUFFIX);
 		}
@@ -263,9 +263,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		// we can't afford to change the port here.  So if mapping to this port on tcp
 		// fails, we give up and clean up the udp mapping.
 		Mapping tcp = new Mapping("",
-				""+port,
+				port,
 				localAddress,
-				""+localPort,
+				localPort,
 				"TCP",
 				TCP_PREFIX + GUID_SUFFIX);
 		if (!addMapping(tcp)) {
@@ -360,7 +360,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		Thread remover = new ManagedThread(cleaner);
 		remover.setDaemon(false);
 		remover.setName("shutdown mapping cleaner");
-		Runtime.getRuntime().addShutdownHook(remover);
+		try {
+		    Runtime.getRuntime().addShutdownHook(remover);
+		} catch (IllegalStateException ignored){}
 	}
 	
 	public void finalize() {
@@ -379,6 +381,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		public final int _internalPort;
 		public final String _protocol,_description;
 		
+		// network constructor
 		public Mapping(String externalAddress,String externalPort,
 				String internalAddress, String internalPort,
 				String protocol, String description) throws NumberFormatException{
@@ -386,6 +389,23 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			_externalPort=Integer.parseInt(externalPort);
 			_internalAddress=internalAddress;
 			_internalPort=Integer.parseInt(internalPort);
+			_protocol=protocol;
+			_description=description;
+		}
+		
+		// internal constructor
+		public Mapping(String externalAddress,int externalPort,
+				String internalAddress, int internalPort,
+				String protocol, String description) {
+
+			if ( !NetworkUtils.isValidPort(externalPort) ||
+				!NetworkUtils.isValidPort(internalPort))
+			    throw new IllegalArgumentException();
+
+			_externalAddress=externalAddress;
+			_externalPort=externalPort;
+			_internalAddress=internalAddress;
+			_internalPort=internalPort;
 			_protocol=protocol;
 			_description=description;
 		}
