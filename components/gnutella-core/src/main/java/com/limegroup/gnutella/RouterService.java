@@ -947,19 +947,6 @@ public class RouterService {
 		return manager.isConnected();
 	}
 
-    /**
-     *  Returns the number searches made to the local database.
-     */
-//      public static int getNumLocalSearches() {
-//          return router.getNumQueryRequests();
-//      }
-
-    /**
-     *  Ensures that the given host:port pair is not in the host catcher.
-     */
-    public static void removeHost(String host, int port) {
-        catcher.removeHost(host, port);
-    }
 
     /**
      * Returns the number of files being shared locally.
