@@ -800,7 +800,7 @@ public class QueryReply extends Message implements Serializable{
         
         boolean iFirewalled = false;
         if (RouterService.instance() != null)
-            iFirewalled = RouterService.instance().acceptedIncomingConnection();
+            iFirewalled = !RouterService.instance().acceptedIncomingConnection();
 
 		/*********************************************************************
          *  There are 9 possible QHD states, though only 7 can appear in the
