@@ -155,7 +155,7 @@ public class LimeXMLReplyCollection{
     }
         
     private String joinAudioXMLStrings(String mp3Str, String fileStr){
-        int p = fileStr.lastIndexOf("<");//the one closing the root element
+        int p = fileStr.lastIndexOf("></audio>");//the one closing the root element
         String a = fileStr.substring(0,p);//all but the closing part
         String b = fileStr.substring(p);//closing part
         //phew, thank god this schema has depth 1.
