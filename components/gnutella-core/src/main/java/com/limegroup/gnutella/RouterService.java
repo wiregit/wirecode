@@ -9,7 +9,8 @@ import java.util.*;
 public class RouterService
 {	
     private ConnectionManager manager;
-
+    private ResponseVerifier verifier = new ResponseVerifier();
+    
     /**
      * Create a connection manager using the default port
      */
@@ -232,12 +233,17 @@ public class RouterService
     public byte[] query(String query, int minSpeed) {
 	QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(), minSpeed, query);
 	manager.fromMe(qr);
+	verifier.record(qr); //record the sent query with verifier to be able to find accuracy of replies.
 	try {
 	    manager.sendToAll(qr);
 	    return qr.getGUID();
 	} catch (IOException e) { 
 	    return null;
 	}
+    }
+
+    public int score(byte[] Guid, Response resp){
+	return verifier.score(Guid,resp);
     }
 
     /**
