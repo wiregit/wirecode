@@ -3,14 +3,14 @@ package com.limegroup.gnutella;
 import java.io.*;
 
 /**
- * Provides utility I/O methods made used by multiple classes
+ * Provides utility I/O methods, used by multiple classes
  * @author Anurag Singla
  */
 public class IOUtils
 {
     /**
      * Returns the first word (i.e., no whitespace) of specified maximum size.
-     * Note that only one extra character is read from the stream in teh case of 
+     * Note that only one extra character is read from the stream in the case of 
      * success (the white space character after the word).
      * @param in The input stream from where to read the word
      * @param maxSize The maximum size of the word.
@@ -31,10 +31,12 @@ public class IOUtils
             { //got word.  Exclude space.
                 return new String(buf,0,i);
             }
-            buf[i]=(char)got;
+            //We dont store the last letter
+            if(i != maxSize)
+                buf[i]=(char)got;
         }
         //if word of size upto maxsize not found, throw an IOException to
-        //indicate that
+        //indicate that (Fixes bug 26 in 'core' project)
         throw new IOException();
     }
 }
