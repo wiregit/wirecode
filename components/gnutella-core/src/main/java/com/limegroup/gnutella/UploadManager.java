@@ -124,9 +124,7 @@ public final class UploadManager implements BandwidthTracker {
 
                 //create an uploader
                 HTTPUploader uploader = new HTTPUploader(method, line._fileName, 
-                    socket, line._index, this, 
-					RouterService.getFileManager(), 
-					RouterService.getMessageRouter());
+                    socket, line._index); 
 
                 //do the upload
                 doSingleUpload(uploader, 
@@ -293,10 +291,8 @@ public final class UploadManager implements BandwidthTracker {
                                               final int port, 
 											  final int index, 
                                               final String guid) { 
-		final HTTPUploader GIVuploader = new HTTPUploader
-                         (file, host, port, index, guid, this, 
-						  RouterService.getFileManager(),
-                          RouterService.getMessageRouter());
+		final HTTPUploader GIVuploader = 
+		    new HTTPUploader(file, host, port, index, guid);
         //Note: GIVuploader is just used to connect, and while connecting, 
         //the GIVuploader uploads the GIV message.
 
