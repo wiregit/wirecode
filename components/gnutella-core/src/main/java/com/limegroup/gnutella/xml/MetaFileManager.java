@@ -171,6 +171,7 @@ public class MetaFileManager extends FileManager {
      * handle the meta-data and its relation to the file system
      */
     protected void loadSettingsBlocking(boolean notifyOnClear){
+		_callback.setAnnotateEnabled(false);
         // let FileManager do its work....
         super.loadSettingsBlocking(notifyOnClear);
         if (loadThreadInterrupted())
@@ -215,7 +216,9 @@ public class MetaFileManager extends FileManager {
             */
             //showXMLData();
         }//end of synchronized block
+		_callback.setAnnotateEnabled(true);
     }//end of loadSettings.
+
 
     private Response[] union(Response[] normals, Response[] metas){       
         if(normals == null)
