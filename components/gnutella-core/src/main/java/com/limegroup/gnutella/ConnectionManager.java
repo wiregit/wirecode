@@ -182,23 +182,36 @@ public class ConnectionManager implements Runnable {
 		Socket client=sock.accept();
 		try {
 		    InputStream in=client.getInputStream();
-		    //Is it a Gnutella connection?.  
-		    //TODO1: handle HTTP GET and PUT, and timeouts.
-		    byte[] word=new byte[8];		    
-		    in.read(word);
-		    if (! (new String(word)).equals("GNUTELLA"))
-			throw new IOException();
-		    tryingToConnect(
-                      getHostName(client.getInetAddress()), 
-                      client.getPort(), 
-                      true);
+		    String word=readWord(in);
 
-		    Connection c=new Connection(client); 
-		    c.setManager(this);
-		    add(c);		 
-		    Thread t=new Thread(c);
-		    t.setDaemon(true);
-		    t.start();
+		    if (word.equals("GNUTELLA")) {
+			//a) Gnutella connection
+			tryingToConnect(
+					getHostName(client.getInetAddress()), 
+					client.getPort(), 
+					true);
+			
+			Connection c=new Connection(client); 
+			c.setManager(this);
+			add(c);		 
+			Thread t=new Thread(c);
+			t.setDaemon(true);
+			t.start();
+		    } else if (word.equals("PUT")) {
+			//b) HTTP with PUT command
+			TransferConnection xfer=new TransferConnection(client,false);
+			Thread t=new Thread(xfer);
+			t.setDaemon(true);
+			t.start();
+		    } else if (word.equals("GET")) {
+			//c) HTTP with GET command
+			TransferConnection xfer=new TransferConnection(client,true);
+			Thread t=new Thread(xfer);
+			t.setDaemon(true);
+			t.start();
+		    } else {
+			throw new IOException();
+		    }
 		} catch (IOException e) { 
 		    //handshake failed: try to close connection.
 		    error("Could not establish incoming connection from "+
@@ -215,6 +228,23 @@ public class ConnectionManager implements Runnable {
 		return;
 	    }
 	}
+    }
+
+    /** Returns the first word (i.e., no whitespace) of less than 8 characters
+     *  read from sock, or throws IOException if none found. */
+    private static String readWord(InputStream sock) throws IOException {
+	final int N=9;  //number of characters to look at
+	char[] buf=new char[N];
+	for (int i=0 ; i<N ; i++) {
+	    int got=sock.read();
+	    if (got==-1)  //EOF
+		throw new IOException();
+	    if ((char)got==' ') { //got word.  Exclude space.
+		return new String(buf,0,i);
+	    }
+	    buf[i]=(char)got;
+	}
+	throw new IOException();       	    
     }
 
     public static void error(String msg) {
