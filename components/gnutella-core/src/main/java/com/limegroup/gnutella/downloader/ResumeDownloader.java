@@ -47,8 +47,10 @@ public class ResumeDownloader extends ManagedDownloader
                             File incompleteFile,
                             String name,
                             int size) {
-        super(name, new RemoteFileDesc[0], incompleteFileManager);
+        super(new RemoteFileDesc[0], incompleteFileManager);
         this._incompleteFile=incompleteFile;
+        if(name==null || name.equals(""))
+            throw new IllegalArgumentException("Bad name in ResumeDownloader");
         this._name=name;
         this._size=size;
         this._hash=incompleteFileManager.getCompletedHash(incompleteFile);

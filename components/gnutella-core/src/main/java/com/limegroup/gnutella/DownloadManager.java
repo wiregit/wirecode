@@ -226,7 +226,7 @@ public class DownloadManager implements BandwidthTracker {
      *
      *     @modifies this, disk 
      */
-    public synchronized Downloader download(String name, RemoteFileDesc[] files,
+    public synchronized Downloader download(RemoteFileDesc[] files,
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
@@ -242,12 +242,10 @@ public class DownloadManager implements BandwidthTracker {
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
             File downloadDir = SettingsManager.instance().getSaveDirectory();
-            for (int i=0; i<files.length; i++) {
-                String filename=files[i].getFileName();
-                File completeFile = new File(downloadDir, filename);  
-                if ( completeFile.exists() ) 
-                    throw new FileExistsException(filename);            
-            }
+            String filename=files[0].getFileName();
+            File completeFile = new File(downloadDir, filename);  
+            if ( completeFile.exists() ) 
+                throw new FileExistsException(filename);            
         }
 
         //Purge entries from incompleteFileManager that have no corresponding
@@ -261,7 +259,7 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-			new ManagedDownloader(name, files, incompleteFileManager);
+			new ManagedDownloader(files, incompleteFileManager);
         downloader.initialize(this, fileManager, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
@@ -38,7 +37,7 @@ public class RequeryDownloader extends ManagedDownloader
      */
     public RequeryDownloader(IncompleteFileManager incompleteFileManager,
                              AutoDownloadDetails add) {
-        super("WISHLIST DOWNLOADER",new RemoteFileDesc[0], incompleteFileManager);
+        super(new RemoteFileDesc[0], incompleteFileManager);
         Assert.that(add != null, 
                     "Instantiated with a null AutoDownloadDetail!");
         _add = add;
@@ -101,7 +100,6 @@ public class RequeryDownloader extends ManagedDownloader
                 if (_add.addDownload(other)) {
                     _add.commitDownload(other);
                     _hasFile = true;
-					_fileName = CommonUtils.convertFileName(other.getFileName());
                     return true;
                 } else {
                     return false;

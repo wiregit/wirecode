@@ -402,7 +402,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=dm.download(rfd1.getFileName(), new RemoteFileDesc[] {rfd1}, false);
+        download=dm.download(new RemoteFileDesc[] {rfd1}, false);
         ((ManagedDownloader)download).addDownload(rfd2);
 
         waitForComplete(download);
@@ -475,7 +475,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         Downloader download=null;
         //Start one location, wait a bit, then add another.
-        download=dm.download(rfd1.getFileName(),new RemoteFileDesc[] {rfd1,rfd2}, false);
+        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         if(deleteCorrupt)
             waitForCorrupt(download);
         else
@@ -508,7 +508,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=dm.download(rfd1.getFileName(),new RemoteFileDesc[] {rfd1,rfd2}, false);
+        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
 
         if(deleteCorrupt)
             waitForCorrupt(download);
@@ -538,7 +538,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         Downloader download = null;
         
-        download = dm.download(rfd1.getFileName(),new RemoteFileDesc[] {rfd1}, false);        
+        download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
 
         if(deleteCorrupt)
             waitForCorrupt(download);
@@ -936,7 +936,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
         Downloader download=null;
 
-        download=dm.download(rfds[0].getFileName(),rfds, false);
+        download=dm.download(rfds, false);
 
         waitForComplete(download);
         if (isComplete())

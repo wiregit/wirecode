@@ -80,8 +80,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		args[0] = List.class;
 
 		ManagedDownloader md = 
-			new ManagedDownloader("test", 
-								  new RemoteFileDesc[]{rf1}, 
+			new ManagedDownloader(new RemoteFileDesc[]{rf1}, 
 								  new IncompleteFileManager());
 
 		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
@@ -197,7 +196,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
-			new ManagedDownloader("test", new RemoteFileDesc[] { rfd }, ifm);
+			new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm);
         downloader.initialize(manager, fileman, callback);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -240,8 +239,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
             uploader.stopAfter(100);
             downloader=
-				new ManagedDownloader("test",
-									  new RemoteFileDesc[] {newRFD("another testfile.txt")},
+				new ManagedDownloader(
+						new RemoteFileDesc[] {newRFD("another testfile.txt")},
                 new IncompleteFileManager());
             downloader.initialize(new DownloadManagerStub(), 
                                   new FileManagerStub(),
@@ -294,7 +293,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
-            super(files[0].getFileName(),files, new IncompleteFileManager());
+            super(files, new IncompleteFileManager());
         }
 
         public QueryRequest newRequery2() throws CantResumeException {

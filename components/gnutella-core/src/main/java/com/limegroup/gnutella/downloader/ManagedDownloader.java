@@ -28,6 +28,9 @@ import java.net.*;
  * default locations, and the getFileName() method to specify the completed
  * file name.<p>
  * 
+ * Subclasses that pass this RemoteFileDesc arrays of size 0 MUST override
+ * the getFileName method, otherwise an assert will fail.<p>
+ * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
  * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
@@ -386,37 +389,20 @@ public class ManagedDownloader implements Downloader, Serializable {
     private float averageBandwidth = 0f;
 
     /**
-	 * Constant for the file name to use for this downloading file.
-	 */
-	protected String _fileName;
-
-    /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
      * any other methods until that point.
-	 *
-	 * @param name the name of the file on disk -- this can change slightly
-	 *  to eliminate any characters that are problematic on certain 
-	 *  platforms
      * @param files the list of files to get.  This stops after ANY of the
      *  files is downloaded.
      * @param ifc the repository of incomplete files for resuming
      */
-    public ManagedDownloader(String name, RemoteFileDesc[] files,
-                             IncompleteFileManager ifc) {
-		if(name == null) {
-			throw new NullPointerException("null file name");
-		}
-		if(name.length() == 0) {
-			throw new IllegalArgumentException("zero length name");
-		}
+    public ManagedDownloader(RemoteFileDesc[] files,IncompleteFileManager ifc) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
 		if(ifc == null) {
 			throw new NullPointerException("null incomplete file manager");
 		}
-		_fileName = CommonUtils.convertFileName(name);
         this.allFiles = files;
         this.incompleteFileManager = ifc;
     }
@@ -2232,29 +2218,19 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getFileName() {       
-		if(_fileName != null) return _fileName;
-
         //Return the most specific information possible.  Case (b) is critical
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
         String ret = null;
-        //a) Return names of one of the active downloaders.
-        if (dloaders.size()>0)
-            ret = ((HTTPDownloader)dloaders.get(0))
-                      .getRemoteFileDesc().getFileName();
-        //b) Return name of first element of current download bucket.
-        else if (files!=null && files.size()>0)
-            ret = ((RemoteFileDesc)files.get(0)).getFileName();
-        //c) Return name of some arbitrary RFD;
-        else if (allFiles.length > 0)
+        //a) Return name of the file the user clicked on same as rfd[0]
+        //This solves core bug 122, as well as makes sure we display a filename
+        if (allFiles.length > 0)
             ret = allFiles[0].getFileName();
-        //d) Give up.  Note that subclass may take action.
         else
-            ret = UNKNOWN_FILENAME;
-
-        _fileName = CommonUtils.convertFileName(ret);
-        return _fileName;
+            Assert.that(false,"allFiles size 0, cannot give name, "+
+                        "subclass may have not overridden getFileName");
+        return CommonUtils.convertFileName(ret);
     }
 
 
