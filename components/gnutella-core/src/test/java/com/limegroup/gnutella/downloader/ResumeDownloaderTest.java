@@ -119,7 +119,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
         );
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
-        QueryRequest qr=rd.newRequery(1); //the first requery won't have a hash
+        QueryRequest qr=rd.newRequery(0);
         if (expectHash) {
             assertEquals("unexpected amount of urns",
                 1, qr.getQueryUrns().size());

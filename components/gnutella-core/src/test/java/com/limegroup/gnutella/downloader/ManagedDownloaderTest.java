@@ -113,6 +113,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
+        try { Thread.sleep(1000); } catch (InterruptedException e) { }
     }
 
     /** Tests that the progress is not 0% when resume button is hit while
@@ -126,13 +127,13 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
             uploader.stopAfter(100);
             downloader=new ManagedDownloader(
-                new RemoteFileDesc[] {newRFD("some file.txt")},
+                new RemoteFileDesc[] {newRFD("another testfile.txt")},
                 new IncompleteFileManager());
             downloader.initialize(new DownloadManagerStub(), 
                                   new FileManagerStub(),
                                   new ActivityCallbackStub());
             //Wait for it to download until error.
-            try { Thread.sleep(4000); } catch (InterruptedException e) { }
+            try { Thread.sleep(6000); } catch (InterruptedException e) { }
             assertEquals("should be waiting for results",
                          Downloader.WAITING_FOR_RESULTS, 
                          downloader.getState());

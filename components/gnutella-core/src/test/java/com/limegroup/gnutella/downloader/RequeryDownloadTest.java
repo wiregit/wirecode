@@ -193,17 +193,15 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         QueryRequest qr=(QueryRequest)m;
         // First query is not a requery
         //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("should have queried for filename", filename, qr.getQuery());
+        assertEquals("should not have queried for filename", "\\", qr.getQuery());
         assertNotNull("should have some requested urn types", 
             qr.getRequestedUrnTypes() );
         assertEquals("unexpected amount of requested urn types",
             1, qr.getRequestedUrnTypes().size() );
         Set urns=qr.getQueryUrns();
         assertNotNull("urns shouldn't be null", urns);
-        assertEquals("should have sent with no urn", 0, urns.size());
-        // Since first query needs filename, it doesn't send the hash.
-        //assertEquals("should only have one urn", 1, urns.size());
-        //assertTrue("urns should contain the hash", urns.contains(hash));
+        assertEquals("should only have one urn", 1, urns.size());
+        assertTrue("urns should contain the hash", urns.contains(hash));
 
         //Send a response to the query.
         Set responseURNs=null;
@@ -281,7 +279,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             1, qr.getRequestedUrnTypes().size());
         assertNotNull("should have sent atleast an empty length urn set",
             qr.getQueryUrns() );
-        assertEquals("shouldn't have sent urn on first attempt",
+        assertEquals("wishlist has no URN",
             0, qr.getQueryUrns().size() );
         assertEquals("downloader should be waiting for results", 
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
