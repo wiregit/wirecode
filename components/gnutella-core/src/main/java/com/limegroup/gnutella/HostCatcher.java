@@ -30,9 +30,9 @@ public class HostCatcher {
     private static final int BAD_SIZE=10;
     private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
-    private static final int GOOD_PRIORITY=2;
-    private static final int NORMAL_PRIORITY=1;
-    private static final int BAD_PRIORITY=0;
+    public static final int GOOD_PRIORITY=2;
+    public static final int NORMAL_PRIORITY=1;
+    public static final int BAD_PRIORITY=0;
 
     /* Our representation consists of a set and a queue, both bounded in size.
      * The set lets us quickly check if there are duplicates, while the queue
@@ -262,18 +262,19 @@ public class HostCatcher {
             return;
         }
 
-        //Current policy: "Pong cache" connections are considered good.  Private
+        //Current policy: Supernodes are the highest priority. Every other
+        //node is a normal priority. Private
         //addresses are considered real bad (negative weight).  This means that
         //the host catcher will still work on private networks, although we will
         //normally ignore private addresses.  Note that if e is already in this,
         //but with a different weight, we don't bother re-heapifying.
-        if (e.isPrivateAddress())
-            e.setWeight(BAD_PRIORITY);
-        else if (receivingConnection!=null
-                    && receivingConnection.isRouterConnection())
-            e.setWeight(GOOD_PRIORITY);
-        else
-            e.setWeight(NORMAL_PRIORITY);
+        
+        //dont set the weight, if already good priority set
+        if(!(e.getWeight() == GOOD_PRIORITY))
+            if (e.isPrivateAddress())
+                e.setWeight(BAD_PRIORITY);
+            else
+                e.setWeight(NORMAL_PRIORITY);
 
         boolean notifyGUI=false;
         synchronized(this) {
@@ -652,4 +653,3 @@ public class HostCatcher {
 //              new byte[] {(byte)64, (byte)61, (byte)25, (byte)170}));
 //      }
 }
-
