@@ -214,8 +214,8 @@ public class StandardMessageRouter extends MessageRouter {
         // send it off as usual.  only send out-of-band if you are GUESS-
         // capable (being GUESS capable implies that you can receive 
         // incoming TCP) AND not firewalled AND not servicing too many
-        // uploads AND not connected to AND query is hopped enough
-        if (query.desiresOutOfBandReplies() && (query.getHops() > 1) &&
+        // uploads AND not connected to the originator of the query
+        if (query.desiresOutOfBandReplies() &&
             !isConnectedTo(query, handler) &&
             RouterService.isGUESSCapable() && 
             RouterService.acceptedIncomingConnection() &&
@@ -285,10 +285,6 @@ public class StandardMessageRouter extends MessageRouter {
      */
     private final boolean isConnectedTo(QueryRequest query, 
                                         ReplyHandler handler) {
-        // special case for testing - hate to do this but what can we do?
-        // if the query has a hop of 1 (or less), we can assume we are connected.
-        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
-            return (query.getHops() <= 1);
         return query.matchesReplyAddress(handler.getInetAddress().getAddress());
     }
 
