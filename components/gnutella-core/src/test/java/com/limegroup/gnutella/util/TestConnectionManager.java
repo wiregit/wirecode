@@ -226,7 +226,7 @@ public final class TestConnectionManager extends ConnectionManager {
         return new LinkedList(CONNECTIONS);
     }
 
-    public List getInitializedClientConnections2() {
+    public List getInitializedClientConnections() {
         return LEAF_CONNECTIONS;
     }
 
