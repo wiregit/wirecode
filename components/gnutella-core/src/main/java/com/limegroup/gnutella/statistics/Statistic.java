@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
+import com.limegroup.gnutella.util.*;
+
 /**
  * Interface for generalized access to a <tt>Statistic</tt>.
  */
@@ -58,7 +60,7 @@ public interface Statistic {
 	 * @return the <tt>Integer</tt> array for all statistics recorded for
 	 *  this statistic
 	 */
-	Integer[] getStatHistory();	
+	IntBuffer getStatHistory();	
 
 	/**
 	 * Stores the current set of gathered statistics into the history set,
