@@ -75,41 +75,41 @@ public final class NIODispatcher implements Runnable {
 	}
 	
 	/**
-	 * Adds the specified <tt>Connection</tt> as needing to be registered for 
+	 * Adds the specified <tt>ManagedConnection</tt> as needing to be registered for 
      * read events.  Read events occur whenever data comes in from the network 
      * on that channel.
 	 * 
-	 * @param conn the <tt>Connection</tt> instance that will be reading data 
+	 * @param mc the <tt>ManagedConnection</tt> instance that will be reading data 
      * from the network
-     * @throws NullPointerException if the <tt>conn</tt> argument is 
+     * @throws NullPointerException if the <tt>mc</tt> argument is 
      *  <tt>null</tt>
 	 */
-    public void addReader(Connection conn) {
-        if(conn == null) {
+    public void addReader(ManagedConnection mc) {
+        if(mc == null) {
             throw new NullPointerException("adding null connection");
         }
-		READERS.add(conn);
+		READERS.add(mc);
 		_selector.wakeup();
 	}
 	
 	/**
-	 * Adds the specified <tt>Connection</tt> as needing an additional write.  
+	 * Adds the specified <tt>ManagedConnection</tt> as needing an additional write.  
      * This is only called when a former call to write on the channel did not 
      * write all of the requested data.  In that case, this method should be 
      * called so that the connection registers itself for write events.  Write 
      * events occur whenever there is room in the TCP buffers, allowing the 
      * unwritten data to go through.
 	 * 
-	 * @param conn the <tt>Connection</tt> instance containing a message that 
+	 * @param mc the <tt>ManagedConnection</tt> instance containing a message that 
      *  was not fully written
-     * @throws NullPointerException if the <tt>conn</tt> argument is 
+     * @throws NullPointerException if the <tt>mc</tt> argument is 
      *  <tt>null</tt>
 	 */
-	public void addWriter(Connection conn) {
-        if(conn == null) {
+	public void addWriter(ManagedConnection mc) {
+        if(mc == null) {
             throw new NullPointerException("adding null connection");
         }
-		WRITERS.add(conn);
+		WRITERS.add(mc);
 		
 		// we have not added this writer to the selector yet, as this call is 
         // made from a separate thread, so we need to wake up the selector so 
@@ -278,12 +278,17 @@ public final class NIODispatcher implements Runnable {
 			keyIter.remove();
 			if(!key.isValid()) continue;
 			if(key.isWritable()) {
-				Connection conn = (Connection)key.attachment();
-				if(conn.getWriter().write()) {
-                    // if the message was successfully written, switch it back 
-                    // to only being registered for read events
-                    register(conn, SelectionKey.OP_READ);
-				}
+				ManagedConnection conn = 
+                    (ManagedConnection)key.attachment();
+				try {
+                    if(conn.getWriter().write()) {
+                        // if the message was successfully written, switch it back 
+                        // to only being registered for read events
+                        register(conn, SelectionKey.OP_READ);
+                    }
+                } catch (IOException e) {
+                    RouterService.removeConnection(conn);
+                }
 			}
 		}			
 	}
