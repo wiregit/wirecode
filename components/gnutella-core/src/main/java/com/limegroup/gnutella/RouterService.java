@@ -1170,6 +1170,20 @@ public class RouterService {
         return manager.getNumFreeNonLeafSlots();
     }
 
+    /**
+     * @return the number of free leaf slots available for limewires.
+     */
+    public static int getNumFreeLimeWireLeafSlots() {
+            return manager.getNumFreeLimeWireLeafSlots();
+    }
+
+    
+    /**
+     * @return the number of free non-leaf slots available for limewires.
+     */
+    public static int getNumFreeLimeWireNonLeafSlots() {
+        return manager.getNumFreeLimeWireNonLeafSlots();
+    }
 
 
     /**

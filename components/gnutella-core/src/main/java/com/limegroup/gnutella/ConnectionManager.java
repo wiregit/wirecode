@@ -500,6 +500,16 @@ public class ConnectionManager {
         else
             return 0;
     }
+    
+    /**
+     * @return the number of free leaf slots that LimeWires can connect to.
+     */
+    public int getNumFreeLimeWireLeafSlots() {
+        return Math.max(0, 
+                 getNumFreeLeafSlots() - 
+                 Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - _nonLimeWireLeaves)
+               );
+    }
 
     
     /**
@@ -508,8 +518,16 @@ public class ConnectionManager {
     public int getNumFreeNonLeafSlots() {
         return ULTRAPEER_CONNECTIONS - getNumInitializedConnections();
     }
-
-
+    
+    /**
+     * @return the number of free non-leaf slots that LimeWires can connect to.
+     */
+    public int getNumFreeLimeWireNonLeafSlots() {
+        return Math.max(0, 
+                 getNumFreeNonLeafSlots() - 
+                 Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
+               );
+    }
 
 	/**
 	 * Returns whether or not the client has an established connection with
