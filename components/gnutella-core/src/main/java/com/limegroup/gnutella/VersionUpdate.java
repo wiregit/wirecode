@@ -10,6 +10,7 @@ import com.limegroup.gnutella.gui.Utilities;
 import com.limegroup.gnutella.gui.UpdateHandler;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.util.URLOpener;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Checks if a newer version of LimeWire is available for download,
@@ -23,7 +24,7 @@ import com.limegroup.gnutella.util.URLOpener;
 public class VersionUpdate
 {
     /** The max time to wait when looking for a new version, in msecs. */
-    private static final int CONNECT_TIMEOUT=1500;
+    private static final int CONNECT_TIMEOUT = 1500;
 	private String _latest;
 	private String _newVersion;
 	private String _currentDirectory;
@@ -62,15 +63,15 @@ public class VersionUpdate
 		if (!_settings.getCheckAgain())
 			return;
 
-		if(Utilities.isWindows()) {
+		if(CommonUtils.isWindows()) {
 			handleWindowsUpdate();
-		} else if(Utilities.isMacClassic()) {
+		} else if(CommonUtils.isMacClassic()) {
 			handleMacClassicUpdate();
-		} else if(Utilities.isMacOSX()) {
+		} else if(CommonUtils.isMacOSX()) {
 			handleMacOSXUpdate();
-		} else if(Utilities.isLinux()) {
+		} else if(CommonUtils.isLinux()) {
 			handleLinuxUpdate();
-		} else if(Utilities.isSolaris()) {
+		} else if(CommonUtils.isSolaris()) {
 			handleSolarisUpdate();
 		} 
 	}
