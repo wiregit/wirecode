@@ -219,19 +219,10 @@ public final class SupernodeAssigner implements Runnable {
 			_maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
   			SETTINGS.setMaxDownstreamBytesPerSec(_maxDownstreamBytesPerSec);
   		}
+    
+        //check if became supernode capable
+        isSupernodeCapable();
         
-        //check if the state changed
-        boolean isSupernodeCapable = isSupernodeCapable();
-        if(!SETTINGS.getForcedSupernodeMode() 
-            && (isSupernodeCapable != _wasSupernodeCapable) &&
-            !_manager.hasSupernodeOrClientnodeStatusForced()){
-                if(_manager.hasShieldedClientSupernodeConnection()
-                    && isSupernodeCapable){
-                    _manager.setSupernodeMode(isSupernodeCapable);
-                    _manager.reconnect();
-                }
-        }
-            _wasSupernodeCapable = isSupernodeCapable;
 	}
 
 }

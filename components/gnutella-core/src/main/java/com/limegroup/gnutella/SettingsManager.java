@@ -259,7 +259,6 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
-    private volatile boolean DEFAULT_SUPERNODE_MODE = false;
     
 
 	/**
@@ -518,8 +517,6 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private volatile int _maxShieldedClientConnections;
     private volatile int _minShieldedClientConnections;
-    /** This is the forced supernode mode */
-    private volatile boolean _supernodeModeForced;
 
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
@@ -949,10 +946,6 @@ public final class SettingsManager {
                 else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_MODE))
-                {
-                    setForcedSupernodeMode((new Boolean(p)).booleanValue());
-                }
 				else if(key.equals(CONNECT_ON_STARTUP)) {
 					setConnectOnStartup((new Boolean(p)).booleanValue());
 				}
@@ -1059,7 +1052,6 @@ public final class SettingsManager {
             DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
         setMinShieldedClientConnections(
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
-        setForcedSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
@@ -1763,12 +1755,6 @@ public final class SettingsManager {
      */
     public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
-    }
-    
-    /** Returns forced supernode mode */
-    public boolean getForcedSupernodeMode()
-    {
-        return _supernodeModeForced;
     }
 
 	/**
@@ -2858,16 +2844,6 @@ public final class SettingsManager {
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
-    }
-    
-    /**
-     * Sets forced supernode mode
-     */
-    public void setForcedSupernodeMode(boolean supernodeMode)
-    {
-        this._supernodeModeForced = supernodeMode;
-        PROPS.put(SUPERNODE_MODE, 
-            (new Boolean(supernodeMode)).toString());
     }
     
 	/**

@@ -103,8 +103,7 @@ public class ConnectionManager {
      * the execution of program 
      */
     private volatile boolean _supernodeModeTransit 
-        = SettingsManager.instance().getForcedSupernodeMode();
-    private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
+        = SettingsManager.instance().getEverSupernodeCapable();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -332,26 +331,6 @@ public class ConnectionManager {
     }
     
     /**
-     * Tells whether the node's status has been forced,
-     * in which case SupernodeAssigner Thread wont try
-     * to change the status
-     */
-    public boolean hasSupernodeOrClientnodeStatusForced()
-    {
-        return _hasSupernodeOrClientnodeStatusForced;
-    }
-    
-    /**
-     * Sets the node's status flag. If the flag is true, it indicates that
-     * the  SupernodeAssigner Thread wont try
-     * to change the status
-     */
-    public void setSupernodeOrClientnodeStatusForced(boolean flag)
-    {
-        _hasSupernodeOrClientnodeStatusForced = flag;
-    }
-    
-    /**
      * @return true if there is a connection to the given host.
      */
     public boolean isConnected(Endpoint host) {
@@ -572,6 +551,9 @@ public class ConnectionManager {
             ManagedConnection c=(ManagedConnection)iter.next();
             remove(c);
         }
+        
+        //set supernodeMode
+        setSupernodeMode(_settings.getEverSupernodeCapable());
     }
     
     /**
@@ -927,9 +909,10 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        setSupernodeOrClientnodeStatusForced(false);
         if(_connections.size() == 0)
         {
+            //set supernodeMode
+            setSupernodeMode(_settings.getEverSupernodeCapable());
             //set the _hasShieldedClientSupernodeConnection flag to false
             _hasShieldedClientSupernodeConnection = false;
 
