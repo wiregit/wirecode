@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
 import java.io.*;
-import java.util.*;
 import java.net.*;
 
 /**
@@ -31,7 +27,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
     public static final String SHARED_EXTENSION = "tmp";
 
     /** Port that normal backend will listen on */
-    public static final int PORT = 6300;
+    public static final int BACKEND_PORT = 6300;
     
     /** Port that the reject backend will listen on */
     public static final int REJECT_PORT = 6301;
@@ -64,22 +60,12 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      */
     private static ErrorMonitor errorMonitor = null;
 
-    /**
-     * Standard arguments to pass to new backends.
-     */
-    private static final String[] ARGS = {
-        "java", 
-        "-classpath", 
-        System.getProperty("java.class.path", "."),
-        Backend.class.getName(),
-    };
-
 
     /**
      * Return the linstening port number
      */
     public static int getPort() {
-        return PORT;
+        return BACKEND_PORT;
     }
     
     /**
@@ -95,7 +81,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public synchronized static boolean launch() 
         throws IOException {
-        return launch(PORT);
+        return launch(BACKEND_PORT);
     }    
 
 
@@ -117,20 +103,6 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
     public synchronized static boolean launchLeaf() 
         throws IOException {
         return launch(LEAF_PORT);
-    }
-
-    /**
-     * Utility method for creating the array of arguments to pass
-     * to the backend's main method.
-     *
-     * @param type the type of backend to create
-     * @return the array of arguments to pass to the backend
-     */
-    private static String[] createArgs(String type) {
-        String[] args = new String[5];
-        System.arraycopy(ARGS, 0, args, 0, ARGS.length);
-        args[4] = type;
-        return args;
     }
 
     /**
@@ -341,10 +313,10 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
         super("Backend");
 		System.out.println(port == REJECT_PORT ? "STARTING REJECT BACKEND" :
                            port == LEAF_PORT ? "STARTING LEAF BACKEND" :
-                           port == PORT ? "STARTING NORMAL BACKEND" :
+                           port == BACKEND_PORT ? "STARTING NORMAL BACKEND" :
                            "STARTING UNKNOWN BACKEND");
         
-        int shutdownPort = (port == PORT ? SHUTDOWN_PORT : 
+        int shutdownPort = (port == BACKEND_PORT ? SHUTDOWN_PORT : 
                             port == REJECT_PORT ? SHUTDOWN_REJECT_PORT :
                             port == LEAF_PORT ? SHUTDOWN_LEAF_PORT :
                             -1);
@@ -359,15 +331,15 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             populateSharedDirectory();
             ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
             ROUTER_SERVICE.start();
-            if (!reject) ROUTER_SERVICE.connect();
+            if (!reject) RouterService.connect();
 
             try {
                 // sleep to let the file manager initialize
                 Thread.sleep(2000);
             } catch(InterruptedException e) {}
-            if (ROUTER_SERVICE.getPort() != port) {
+            if (RouterService.getPort() != port) {
                 throw new IOException("Opened wrong port (wanted: "
-                     + port + ", was: " + ROUTER_SERVICE.getPort() +")");
+                     + port + ", was: " + RouterService.getPort() +")");
             }
             
             waitForShutdown(shutdownSocket);
@@ -458,7 +430,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
                                  : "NORMAL BACKEND SHUTDOWN");
         if (msg != null) message = message + ": " + msg;                                 
 		System.out.println(message); 
-		ROUTER_SERVICE.shutdown();
+		RouterService.shutdown();
 		System.exit(0);
 	}
 
