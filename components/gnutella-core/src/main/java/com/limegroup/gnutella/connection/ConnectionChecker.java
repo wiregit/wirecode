@@ -158,7 +158,7 @@ public final class ConnectionChecker implements Runnable {
         head.setFollowRedirects(true);
         HttpClient client = HttpClientManager.getNewClient();
         try {
-            HttpClientManager.executeMethodRedirecting(client, head);
+            client.executeMethod(head);
             _connected = true;
             
             if(LOG.isDebugEnabled()) {
@@ -172,8 +172,10 @@ public final class ConnectionChecker implements Runnable {
             LOG.warn("Exception while handling server", e);
             _unsuccessfulAttempts++;
         } finally {
-            // Close the connection.
+            //Reclaim this connection
             head.releaseConnection();
+            //Close it -- just to make sure it's closed.
+            head.abort();
         }        
     }
 }
