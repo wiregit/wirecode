@@ -169,7 +169,7 @@ public class HTTPDownloader implements BandwidthTracker {
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
-        out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
+        out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
