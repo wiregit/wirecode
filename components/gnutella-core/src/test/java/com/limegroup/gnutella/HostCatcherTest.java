@@ -21,10 +21,14 @@ public class HostCatcherTest extends TestCase {
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
         HostCatcher.DEBUG=true;
+		RouterService.setCallback(new ActivityCallbackStub());
+
         //This creates an acceptor thread.  We should probably use an Acceptor
         //stub or write a tearDown() method.
-        hc=new HostCatcher();
-        hc.initialize();
+		if(!RouterService.instance().isStarted()) {
+			RouterService.instance().start();
+		}
+        hc = RouterService.instance().getHostCatcher();
     }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
