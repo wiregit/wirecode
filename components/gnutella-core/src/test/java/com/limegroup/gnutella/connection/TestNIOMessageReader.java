@@ -3,7 +3,9 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.nio.channels.SelectionKey;
+import java.util.Properties;
 
+import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.LinkedList;
@@ -23,11 +25,16 @@ public class TestNIOMessageReader extends NIOMessageReader {
         
     public static NIOMessageReader createReader(Connection conn) {
         
-        return new TestNIOMessageReader(conn);
+        try {
+            return new TestNIOMessageReader(conn);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
-    private TestNIOMessageReader(Connection conn) {
-        super(conn);
+    private TestNIOMessageReader(Connection conn) throws IOException {
+        super(conn, NIOHandshaker.createHandshaker(conn, new Properties(),
+            new UltrapeerHandshakeResponder("")));
     }
     
     /**
