@@ -6,6 +6,7 @@ import java.io.*;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.UDPServiceStub;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.IOUtils;
@@ -41,7 +42,9 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Setup the test to use the UDPServiceStub
         UDPConnectionProcessor.setUDPServiceForTesting(
             UDPServiceStub.instance());
-        new RouterService(new ActivityCallbackStub());
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        Acceptor      ac = rs.getAcceptor();
+        ac.start();
     }
 
 
