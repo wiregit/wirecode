@@ -116,10 +116,12 @@ public class Acceptor implements Runnable {
     /**
      * Returns the port at which the Connection Manager listens for incoming
      * connections
+     *
+     * @param checkForce whether or not to check if the port is forced.     
      * @return the listening port
      */
-    public int getPort() {
-		if(SettingsManager.instance().getForceIPAddress())
+    public int getPort(boolean checkForce) {
+        if(checkForce && SettingsManager.instance().getForceIPAddress())
 			return SettingsManager.instance().getForcedPort();
         return _port;
     }

@@ -376,13 +376,13 @@ public final class RouterService {
         } catch(UnknownHostException e) {
             return;
         }
-        if ((cIP[0] == 127) && (portnum==acceptor.getPort()) &&
+        if ((cIP[0] == 127) && (portnum==acceptor.getPort(true)) &&
 			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
 			return;
         } else {
             byte[] managerIP=acceptor.getAddress(true);
             if (Arrays.equals(cIP, managerIP)
-                && portnum==acceptor.getPort())
+                && portnum==acceptor.getPort(true))
                 return;
         }
 
@@ -1132,7 +1132,16 @@ public final class RouterService {
      * @see Acceptor#getPort
      */    
 	public static int getPort() {
-		return acceptor.getPort();
+		return acceptor.getPort(true);
+	}
+	
+    /**
+	 * Returns the Non-Forced port for this host.
+	 *
+	 * @return the non-forced port for this host
+	 */
+	public static int getNonForcedPort() {
+	    return acceptor.getPort(false);
 	}
 
 	/**

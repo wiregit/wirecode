@@ -1486,7 +1486,10 @@ public abstract class MessageRouter {
 			
 			boolean mcast = queryRequest.isMulticast();
 			// if it is a multicasted response, use the non-forced address.
-			if ( mcast ) ip = RouterService.getNonForcedAddress();
+			if ( mcast ) {
+			    ip = RouterService.getNonForcedAddress();
+			    port = RouterService.getNonForcedPort();
+            }
 
             // create the new queryReply
             List qrList = createQueryReply(guid, ttl, port, ip, speed, 
