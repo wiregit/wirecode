@@ -256,7 +256,7 @@ public final class SettingsManager {
 		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve;nsv;med;mod;7z;iso";
+		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp";
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
