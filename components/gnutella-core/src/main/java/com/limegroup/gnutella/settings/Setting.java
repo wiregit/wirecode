@@ -30,6 +30,11 @@ abstract class Setting {
 	protected final String KEY;
 
 	/**
+	 * Constant for the default value for this <tt>Setting</tt>.
+	 */
+	protected final String DEFAULT_VALUE;
+
+	/**
 	 * Constructs a new setting with the specified key and default
 	 * value.  Private access ensures that only this class can construct
 	 * new <tt>Setting</tt>s.
@@ -43,9 +48,17 @@ abstract class Setting {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;
 		KEY = key;
+		DEFAULT_VALUE = defaultValue;
 		if(DEFAULT_PROPS.containsKey(key)) {
 			throw new IllegalArgumentException("duplicate setting key");
 		}
 		DEFAULT_PROPS.put(KEY, defaultValue);
+	}
+
+	/**
+	 * Revert to the default value.
+	 */
+	public void revertToDefault() {
+		PROPS.put(KEY, DEFAULT_VALUE);
 	}
 }
