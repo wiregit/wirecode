@@ -88,6 +88,24 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
+    /** 
+     * Exactly the other constructor, but includes a BearShare 2.2.0-style QHD.
+     * <b>TODO: this is currently stubbed out.</b>
+     *
+     * @param vendor the vendor code, typically "LIME".  
+     *  REQUIRES: vendor.size()==4.
+     * @param needsPush true if this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true if this server is busy, i.e., has no more upload slots
+     */
+    public QueryReply(byte[] guid, byte ttl, int port, byte[] ip, long speed,
+                      Response[] responses, byte[] clientGUID,
+                      String vendor, boolean needsPush, boolean isBusy) {
+        //Implement!
+        this(guid, ttl, port, ip, speed, responses, clientGUID);
+    }
+
+
     /**
     * Creates a new query reply from the passed query Reply. The new one is
     * same as the passed one, but with different specified GUID
@@ -182,9 +200,9 @@ public class QueryReply extends Message implements Serializable{
 
     /** 
      * Returns true if this's push flag is set, i.e., a push download is needed.
-     * Returns false if the flag is present but not set isn't set.  Throws
+     * Returns false if the flag is present but not set.  Throws
      * BadPacketException if the flag couldn't be extracted, either because it
-     * is missing or corrupted.
+     * is missing or corrupted.  
      */
     public boolean getNeedsPush() throws BadPacketException {
         parseResults();
@@ -193,6 +211,15 @@ public class QueryReply extends Message implements Serializable{
         return pushFlagSet;
     }
 
+    /** 
+     * Returns true if this has no more download slots.  Returns false if the
+     * busy bit is present but not set.  Throws BadPacketException if the flag
+     * couldn't be extracted, either because it is missing or corrupted.  
+     * <b>TODO: this is stubbed out now.</b>
+     */
+    public boolean getIsBusy() throws BadPacketException {
+        return false;
+    }
 
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
