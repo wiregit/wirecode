@@ -345,6 +345,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private RequeryLock reqLock = new RequeryLock();
 
+    /** Lock used to communicate between waitForUserInput() and forceRequery().
+     */
+    private Object userInputLock = new Object();
+
 	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
 	 */
@@ -445,6 +449,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //initializer statements, as they're not executed.  Nor should it be
         //done in initialize, as that could cause problems in resume().
         reqLock=new RequeryLock();
+        userInputLock=new Object();
     }
 
     /** 
@@ -561,6 +566,42 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
     }
 
+
+    /**
+     * This dictates whether this downloader should wait for user input before
+     * spawning a Requery.  Subclasses should override with desired behavior as
+     * necessary.
+     * @param numRequeries The number of requeries sent so far.
+     */
+    protected void pauseForRequery(int numRequeries) {
+        // MD's never want to requery without user input.
+        setState(WAITING_FOR_USER);
+        waitForUserInput();
+    }
+
+    /** Call this when you want to wait for user input.  Very handy for
+     *  subclasses.
+     */
+    protected final void waitForUserInput() {
+        synchronized (userInputLock) {
+            try {
+                userInputLock.wait();
+            }
+            catch (InterruptedException ie) {}
+        }
+    }
+
+
+    /**
+     * Call this when you want us to force out a Requery.  The downloader will
+     * only send a Requery if it was in the WAITING_FOR_USER state.  Otherwise
+     * we'll probably just ignore you!!
+     */
+    private void forceRequery() {
+        synchronized (userInputLock) {
+            userInputLock.notify();
+        }
+    }
 
     /** Returns the URNs for requery, i.e., the union of all requeries 
      *  (within reason).
@@ -842,7 +883,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Ignore request if already in the download cycle.
         synchronized (this) {
             if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-                   state==ABORTED || state==WAITING_FOR_RESULTS))
+                   state==ABORTED || state==WAITING_FOR_RESULTS) ||
+                   state==WAITING_FOR_USER)
                 return false;
         }
 
@@ -868,7 +910,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             } else if (state==WAITING_FOR_RESULTS) {
                 // wake up the requerier...
                 reqLock.release();
-            }
+            } else if (state==WAITING_FOR_USER) 
+                forceRequery();
             return true;
         }
     }
@@ -1012,6 +1055,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final long currTime = System.currentTimeMillis();
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
+                    // pauseForRequery delegates to subclasses when necessary
+                    pauseForRequery(numRequeries);
 					waitForStableConnections();
                     // yeah, it is about time and i've not sent too many...
                     try {
