@@ -4,7 +4,7 @@ import junit.framework.*;
     
 /**
  * A set of assert comparisons to check greater than / less than
- * situations and instanceof.
+ * situations, instanceof and not equals.
  */
 public class AssertComparisons extends TestCase {
         
@@ -40,23 +40,6 @@ public class AssertComparisons extends TestCase {
             fail(formatComparison(INSTANCE_OF, msg, 
                     expected.getName(), actual.getClass().getName()));
     }
-    
-    /**
-     * Asserts that actual is not the same as expected.  If they are the same,
-     * an AssertionFailedError is thrown.
-     */
-    static public void assertNotSame(Object expected, Object actual) {
-        assertNotSame(null, expected, actual);
-    }
-    
-    /**
-     * Asserts that actual is not the same as expected.  If they are the same,
-     * an AssertionFailedError is thrown with the given message.
-     */
-    static public void assertNotSame(String msg, Object expected, Object actual) {
-        if ( actual == expected )
-            fail(formatComparison(NOT_SAME, msg, expected, actual));
-    }            
     
     /**
      * Asserts that actual is not equal to expected.  If they are equal,

@@ -550,18 +550,6 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertNotEquals("string", "a", "b");
     }
     
-    public void testNotSame() {
-        Object a = new Object();
-        try {
-            assertNotSame(a, a);
-            assertNotSame("string", a, a);
-            fail("objects were the same");
-        } catch(AssertionFailedError ignored) {}
-        
-        assertNotSame(a, new Object());
-        assertNotSame("string", a, new Object());
-    }
-    
     public void testInstanceof() {
         try {
             assertInstanceof(Number.class, new Object());
