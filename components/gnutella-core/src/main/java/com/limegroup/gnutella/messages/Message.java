@@ -232,8 +232,14 @@ public abstract class Message
                 //the right constructor.
                 return RouteTableMessage.read(guid, ttl, hops, payload);
             case F_VENDOR_MESSAGE:
+                if ((ttl != 1) || (hops != 0))
+                    throw new BadPacketException("VM with bad ttl/hops: " +
+                                                 ttl + "/" + hops);
                 return new VendorMessage(guid, ttl, hops, payload);
             case F_VENDOR_MESSAGE_STABLE:
+                if ((ttl != 1) || (hops != 0))
+                    throw new BadPacketException("VM with bad ttl/hops: " +
+                                                 ttl + "/" + hops);
                 return new VendorMessage(guid, ttl, hops, payload);
         }
         throw new BadPacketException("Unrecognized function code: "+func);
