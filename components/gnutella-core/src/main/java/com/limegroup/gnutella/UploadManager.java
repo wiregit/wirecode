@@ -321,6 +321,7 @@ public class UploadManager implements BandwidthTracker {
 
     /** Increments the count of uploads in progress for host.
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
+     *  Always accept Browse Host requests, though....
      *  Notifies callback of this.
      *      @requires this' monitor is held
      *      @modifies _uploadsInProgress, uploader, _callback */
@@ -328,9 +329,10 @@ public class UploadManager implements BandwidthTracker {
 		// add to the Map
 		insertIntoMapAndList(uploader, host);
 
-		if ( (! testPerHostLimit(host) ) ||
-			 ( ! testTotalUploadLimit() ) )
-			 uploader.setState(Uploader.LIMIT_REACHED);
+		if ( ( (! testPerHostLimit(host) ) ||
+               ( ! testTotalUploadLimit() ) ) &&
+             uploader.getState() != Uploader.BROWSE_HOST )
+            uploader.setState(Uploader.LIMIT_REACHED);
 		
 		_callback.addUpload(uploader);		
 
