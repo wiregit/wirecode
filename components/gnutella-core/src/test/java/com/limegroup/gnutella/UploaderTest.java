@@ -140,7 +140,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         try { //still queued - cannot jump line.
             connectDloader(d4,false, rfd4,true);
             fail("uploader allowed to jump the line");
-        } catch (QueuedException talx){//correct behaviour
+        } catch (QueuedException qx) {
+            assertEquals("should be queued", 2, qx.getQueuePosition());
         } catch (Exception e) {//any other is bad
             fail("wrong exception thrown", e);
         }
@@ -148,7 +149,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         try { //should get the slot
             connectDloader(d3,false,rfd3,true);
         } catch (QueuedException e) {
-            fail("downloader should have got slot "+e.getQueuePosition(), e);
+            fail("downloader should have got slot, but was queued at "+e.getQueuePosition(), e);
         }
         //Test that uploads in queue advance. d4 should have 0th position
         Thread.sleep((UploadManager.MIN_POLL_TIME+
@@ -484,7 +485,11 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         final Socket sa=psf.getSocketA();
         Thread runner=new Thread() {
             public void run() {
-                upman.acceptUpload(HTTPRequestMethod.GET,sa);
+                try {
+                    upman.acceptUpload(HTTPRequestMethod.GET,sa);
+                } catch(Throwable e) {
+                    ErrorService.error(e);
+                }
             }
         };
         runner.setDaemon(true);

@@ -31,6 +31,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int index=0;
     /** Our listening port for pushes. */
     private static final int callbackPort = 6671;
+    private UploadManager upMan;
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new ActivityCallbackStub());
@@ -84,8 +85,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("ports should be equal",
                      PORT, SettingsManager.instance().getPort());
 
+        upMan = RouterService.getUploadManager();
 
-        try {Thread.sleep(300); } catch (InterruptedException e) { }
+        try {Thread.sleep(1000); } catch (InterruptedException e) { }
         //System.out.println(
         //    "Please make sure your client is listening on port "+port+"\n"
         //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
@@ -106,18 +108,24 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     ///////////////////push downloads with HTTP1.0///////////
     public void testHTTP10Push() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed = downloadPush(file, null,alphabet);
         assertTrue("Push download",passed);
     }
 
     public void testHTTP10PushEncodedFile() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;        
         passed=downloadPush(encodedFile, null,alphabet);
         assertTrue("Push download, encoded file name",passed);
     }
 
     public void testHTTP10PushRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =downloadPush(file, "Range: bytes=2-5","cdef");
         assertTrue("Push download, middle range, inclusive",passed);
@@ -125,6 +133,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     ///////////////////push downloads with HTTP1.1///////////////            
     public void testHTTP11Push() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed = downloadPush1(file, null, alphabet);
         assertTrue("Push download with HTTP1.1",passed);
@@ -132,6 +142,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
      
 
     public void testHTTP11PushEncodedFile() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );        
         boolean passed = false;
         passed =downloadPush1(encodedFile, null,
                          "abcdefghijklmnopqrstuvwxyz");
@@ -139,6 +151,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP11PushRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =downloadPush1(file, "Range: bytes=2-5","cdef");
         assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
@@ -146,6 +160,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
      
 
     public void testHTTP11Head() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         assertTrue("Persistent push HEAD requests", 
                    downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
     }
@@ -155,12 +171,16 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     //////////////normal downloads with HTTP 1.0//////////////
 
     public void testHTTP10Download() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, null,"abcdefghijklmnopqrstuvwxyz");
         assertTrue("No range header",passed);
     }
     
     public void testHTTP10DownloadRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range: bytes=2-", 
                     "cdefghijklmnopqrstuvwxyz");
@@ -168,6 +188,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP10DownloadMissingRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range: bytes 2-", 
                     "cdefghijklmnopqrstuvwxyz");
@@ -176,6 +198,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP10DownloadMiddleRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range: bytes=2-5","cdef",
                     "Content-range: bytes 2-5/26");
@@ -183,6 +207,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP10DownloadRangeNoSpace() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range:bytes 2-",
                     "cdefghijklmnopqrstuvwxyz",
@@ -191,12 +217,16 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP10DownloadRangeLastByte() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range: bytes=-5","vwxyz");
         assertTrue("Last bytes of file",passed);
     }
 
     public void testHTTP10DownloadRangeTooBigNegative() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range: bytes=-30",
                     "abcdefghijklmnopqrstuvwxyz");
@@ -205,6 +235,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testHTTP10DownloadRangeExtraSpace() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download(file, "Range:   bytes=  2  -  5 ", "cdef");
         assertTrue("Lots of extra space",passed);
@@ -212,6 +244,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testHTTP10DownloadURLEncoding() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile), file,
                      java.net.URLDecoder.decode(encodedFile));
         boolean passed = false;
@@ -222,20 +256,25 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     ////////////normal download with HTTP 1.1////////////////
 
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz");
         assertTrue("No range header with HTTP1.1",passed);
     }
 
     public void testHTTP11DownloadStandardRangeHeader() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(file, "Range: bytes=2-", 
                      "cdefghijklmnopqrstuvwxyz");
         assertTrue("Standard range header with HTTP1.1",passed);
     }
 
-
     public void testHTTP11DownloadRangeMissingEquals() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(file, "Range: bytes 2-", 
                      "cdefghijklmnopqrstuvwxyz");
@@ -244,12 +283,16 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP11DownloadMiddleRange() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(file, "Range: bytes=2-5","cdef");
         assertTrue("Middle range, inclusive with HTTP1.1",passed);
     }
         
     public void testHTTP11DownloadRangeNoSpaceAfterColon() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(file, "Range:bytes 2-",
                      "cdefghijklmnopqrstuvwxyz");
@@ -257,13 +300,17 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP11DownloadRangeLastByte() throws Exception {
-        boolean passed = false;
+
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );        boolean passed = false;
         passed =download1(file, "Range: bytes=-5","vwxyz");
         assertTrue("Last bytes of file with HTTP1.1",passed);
     }
 
 
     public void testHTTP11DownloadRangeLotsOfExtraSpace() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );        
         boolean passed = false;
         passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef");
         assertTrue("Lots of extra space with HTTP1.1",passed);        
@@ -274,6 +321,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testHTTP11DownloadURLEncoding() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
         assertTrue("URL encoded with HTTP1.1",passed);
@@ -282,6 +331,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 //////////////////Pipelining tests with HTTP1.1//////////////             
     public void testHTTP11PipeliningDownload() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed = pipelineDownloadNormal(file, null, 
                                     "abcdefghijklmnopqrstuvwxyz");
@@ -289,6 +340,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
             
     public void testHTTP11PipeliningDownloadPush() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         boolean passed = false;
         passed = pipelineDownloadPush(file,null, 
                                        "abcdefghijklmnopqrstuvwxyz");
@@ -296,10 +349,14 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
          
     public void testHTTP11DownloadMixedPersistent() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         tMixedPersistentRequests();
     }
 
     public void testHTTP11DownloadPersistentURI() throws Exception {
+        assertEquals("unexpected uploads in progress", 
+            0, upMan.uploadsInProgress() );
         tPersistentURIRequests();
     }
 
@@ -321,6 +378,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
         //first request with the socket
         String value=downloadInternal1(file,header,out,in,expResp.length());
         //System.out.println("Sumeet: first return value "+value);
@@ -353,7 +412,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
-
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
         String ret=downloadInternal(file, header, out, in, expHeader);
         in.close();
         out.close();
@@ -382,54 +442,57 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
 		c.initialize();
 		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-            c.send(query);
-            c.flush();
-            QueryReply reply=null;
-            while (true) {
-                Message m=c.receive(2000);
-                if (m instanceof QueryReply) {
-                    reply=(QueryReply)m;
-                    break;
-                } 
-            }
-            PushRequest push =
-                new PushRequest(GUID.makeGuid(),
-                                (byte)3,
-                                reply.getClientGUID(),
-                                0,
-                                new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                                callbackPort);
+        c.send(query);
+        c.flush();
+        QueryReply reply=null;
+        while (true) {
+            Message m=c.receive(2000);
+            if (m instanceof QueryReply) {
+                reply=(QueryReply)m;
+                break;
+            } 
+        }
+        PushRequest push =
+            new PushRequest(GUID.makeGuid(),
+                            (byte)3,
+                            reply.getClientGUID(),
+                            0,
+                            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                            callbackPort);
 
-            //Create listening socket, then send push.
-            ServerSocket ss=new ServerSocket(callbackPort);
-            c.send(push);
-            c.flush();
-            Socket s=ss.accept();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                s.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                s.getOutputStream()));
-
-            in.readLine(); //skip GIV
-            in.readLine(); //skip blank line
-            
-            //Download from the (incoming) TCP connection.
-            String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
-            assertEquals("unexpected HTTP response message body", expResp, retStr);
-            boolean ret = retStr.equals(expResp);
-            
-            // reset string variable
-            retStr = downloadInternal1(request, file, header, out, in,expResp.length());
-            assertEquals("unexpected HTTP response message body in second request", 
-                         expResp, retStr);
-            
-            ret = ret && retStr.equals(expResp);
-            
-            //Cleanup
-            c.close();
-            s.close();
-            ss.close();        
-            return ret;
+        //Create listening socket, then send push.
+        ServerSocket ss=new ServerSocket();
+        ss.setReuseAddress(true);
+        ss.bind( new InetSocketAddress(callbackPort) );
+        c.send(push);
+        c.flush();
+        Socket s=ss.accept();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
+        in.readLine(); //skip GIV
+        in.readLine(); //skip blank line
+        
+        //Download from the (incoming) TCP connection.
+        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
+        assertEquals("unexpected HTTP response message body", expResp, retStr);
+        boolean ret = retStr.equals(expResp);
+        
+        // reset string variable
+        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
+        assertEquals("unexpected HTTP response message body in second request", 
+                     expResp, retStr);
+        
+        ret = ret && retStr.equals(expResp);
+        
+        //Cleanup
+        c.close();
+        s.close();
+        ss.close();        
+        return ret;
     }
 
 
@@ -461,7 +524,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             callbackPort);
 
         //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
+        ServerSocket ss=new ServerSocket();
+        ss.setReuseAddress(true);
+        ss.bind( new InetSocketAddress(callbackPort) );
         c.send(push);
         c.flush();
         Socket s=ss.accept();
@@ -469,6 +534,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
+        
 		in.readLine(); //skip GIV
 		in.readLine(); //skip blank line
 
@@ -613,7 +681,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                                (s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter
                                                 (s.getOutputStream()));
-        
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
         //write first request
         out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
         if (header!=null)
@@ -649,6 +718,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             int c = in.read();
             buf.append((char)c);
         }
+        in.close();
+        out.close();
+        s.close();
         return ret && buf.toString().equals(expResp);
     }
 
@@ -678,7 +750,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             callbackPort);
 
         //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
+        ServerSocket ss=new ServerSocket();
+        ss.setReuseAddress(true);
+        ss.bind( new InetSocketAddress(callbackPort) );
         c.send(push);
         c.flush();
         Socket s=ss.accept();
@@ -686,6 +760,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
+        assertNotNull("input stream null", in);
+        assertNotNull("output stream null", out);
         in.readLine();  //skip GIV        
         in.readLine();  //skip blank line
         
@@ -724,6 +800,10 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             int c1 = in.read();
             buf.append((char)c1);
         }
+        in.close();
+        out.close();
+        s.close();
+        ss.close();
         return ret && buf.toString().equals(expResp);
     }
 
@@ -738,6 +818,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
                                                           s.getOutputStream()));
+            assertNotNull("input stream null", in);
+            assertNotNull("output stream null", out);
             //2. Send HEAD request
             assertEquals("",
                 downloadInternal1("HEAD", "/get/"+index+"/"+encodedFile, 
@@ -762,6 +844,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
                                                           s.getOutputStream()));
+            assertNotNull("input stream null", in);
+            assertNotNull("output stream null", out);
             //2. Send GET request in URI form
             assertEquals(alphabet,
                          downloadInternal1("GET", "/uri-res/N2R?"+hash,
