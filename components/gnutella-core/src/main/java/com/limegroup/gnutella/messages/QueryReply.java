@@ -6,7 +6,6 @@ import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.net.*;
 import java.util.Locale;
-import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 
 /**
@@ -39,32 +38,32 @@ public class QueryReply extends Message implements Serializable{
      */
     public static final int COMMON_PAYLOAD_LEN = 4;
 
-    private byte[] payload;
+    private byte[] _payload;
     /** True if the responses and metadata have been extracted. */
-    private volatile boolean parsed=false;        
+    private volatile boolean _parsed = false;        
     /** If parsed, the response records for this, or null if they could not
      *  be parsed. */
-    private volatile Response[] responses=null;
+    private volatile Response[] _responses = null;
 
     /** If parsed, the responses vendor string, if defined, or null
      *  otherwise. */
-    private volatile String vendor=null;
+    private volatile String _vendor = null;
     /** If parsed, one of TRUE (push needed), FALSE, or UNDEFINED. */
-    private volatile int pushFlag=UNDEFINED;
+    private volatile int _pushFlag = UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int busyFlag=UNDEFINED;
+    private volatile int _busyFlag = UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int uploadedFlag=UNDEFINED;
+    private volatile int _uploadedFlag = UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int measuredSpeedFlag=UNDEFINED;
+    private volatile int _measuredSpeedFlag = UNDEFINED;
     /** If parsed, one of TRUE (client supports chat), FALSE, or UNDEFINED. */
-    private volatile int supportsChat=UNDEFINED;
+    private volatile int _supportsChat = UNDEFINED;
      /** If parsed, one of TRUE (client supports browse host), 
       * FALSE, or UNDEFINED. */
-    private volatile int supportsBrowseHost=FALSE;
+    private volatile int _supportsBrowseHost = FALSE;
      /** If parsed, one of TRUE (reply sent in response to a multicast query), 
       * FALSE, or UNDEFINED. */
-    private volatile int replyToMulticast=FALSE;
+    private volatile int _replyToMulticast = FALSE;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
@@ -225,7 +224,7 @@ public class QueryReply extends Message implements Serializable{
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
 		throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
-        this.payload=payload;
+        this._payload=payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
 		    if( RECORD_STATS )
@@ -261,7 +260,7 @@ public class QueryReply extends Message implements Serializable{
         super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
 			  reply.getLength());
         //set the payload field
-        this.payload = reply.payload;
+        this._payload = reply._payload;
 		setAddress();
     }
 
@@ -379,8 +378,8 @@ public class QueryReply extends Message implements Serializable{
             baos.write(clientGUID, 0, 16);
             
             // setup payload params
-            payload = baos.toByteArray();
-            updateLength(payload.length);
+            _payload = baos.toByteArray();
+            updateLength(_payload.length);
         }
         catch (IOException reallyBad) {
             ErrorService.error(reallyBad);
@@ -393,10 +392,10 @@ public class QueryReply extends Message implements Serializable{
 	 * Sets the IP address bytes.
 	 */
 	private void setAddress() {
-		_address[0] = payload[3];
-        _address[1] = payload[4];
-        _address[2] = payload[5];
-        _address[3] = payload[6];		
+		_address[0] = _payload[3];
+        _address[1] = _payload[4];
+        _address[2] = _payload[5];
+        _address[3] = _payload[6];		
 	}
 
     /**
@@ -411,7 +410,7 @@ public class QueryReply extends Message implements Serializable{
 
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
-        out.write(payload);
+        out.write(_payload);
 		if(RECORD_STATS) {
 			SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 		}
@@ -428,11 +427,11 @@ public class QueryReply extends Message implements Serializable{
     /** Return the number of results N in this query. */
     public short getResultCount() {
         //The result of ubyte2int always fits in a short, so downcast is ok.
-        return (short)ByteOrder.ubyte2int(payload[0]);
+        return (short)ByteOrder.ubyte2int(_payload[0]);
     }
 
     public int getPort() {
-        return ByteOrder.ubytes2int(ByteOrder.leb2short(payload,1));
+        return ByteOrder.ubytes2int(ByteOrder.leb2short(_payload,1));
     }
 
     /** Returns the IP address of the responding host in standard
@@ -451,7 +450,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     public long getSpeed() {
-        return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,7));
+        return ByteOrder.ubytes2long(ByteOrder.leb2int(_payload,7));
     }
 
     /** Returns an iterator that will yield the results, each as an
@@ -459,9 +458,9 @@ public class QueryReply extends Message implements Serializable{
      *  this data couldn't be extracted.  */
     public Iterator getResults() throws BadPacketException {
         parseResults();
-        if (responses==null)
+        if (_responses==null)
             throw new BadPacketException();
-        List list=Arrays.asList(responses);
+        List list=Arrays.asList(_responses);
         return list.iterator();
     }
 
@@ -471,9 +470,9 @@ public class QueryReply extends Message implements Serializable{
      *  this data couldn't be extracted.  */
     public List getResultsAsList() throws BadPacketException {
         parseResults();
-        if (responses==null)
+        if (_responses==null)
             throw new BadPacketException("results are null");
-        List list=Arrays.asList(responses);
+        List list=Arrays.asList(_responses);
         return list;
     }
 
@@ -485,9 +484,9 @@ public class QueryReply extends Message implements Serializable{
      */
     public String getVendor() throws BadPacketException {
         parseResults();
-        if (vendor==null)
+        if (_vendor==null)
             throw new BadPacketException();
-        return vendor;        
+        return _vendor;        
     }
 
     /** 
@@ -499,7 +498,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getNeedsPush() throws BadPacketException {
         parseResults();
 
-        switch (pushFlag) {
+        switch (_pushFlag) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -507,7 +506,7 @@ public class QueryReply extends Message implements Serializable{
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for push flag: "+pushFlag);
+            Assert.that(false, "Bad value for push flag: "+_pushFlag);
             return false;
         }
     }
@@ -520,7 +519,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getIsBusy() throws BadPacketException {
         parseResults();
 
-        switch (busyFlag) {
+        switch (_busyFlag) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -528,7 +527,7 @@ public class QueryReply extends Message implements Serializable{
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for busy flag: "+pushFlag);
+            Assert.that(false, "Bad value for busy flag: "+_pushFlag);
             return false;
         }
     }
@@ -541,7 +540,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getHadSuccessfulUpload() throws BadPacketException {
         parseResults();
 
-        switch (uploadedFlag) {
+        switch (_uploadedFlag) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -549,7 +548,7 @@ public class QueryReply extends Message implements Serializable{
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for uploaded flag: "+pushFlag);
+            Assert.that(false, "Bad value for uploaded flag: "+_pushFlag);
             return false;
         }
     }
@@ -563,7 +562,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getIsMeasuredSpeed() throws BadPacketException {
         parseResults();
 
-        switch (measuredSpeedFlag) {
+        switch (_measuredSpeedFlag) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -571,7 +570,7 @@ public class QueryReply extends Message implements Serializable{
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for measured speed flag: "+pushFlag);
+            Assert.that(false, "Bad value for measured speed flag: "+_pushFlag);
             return false;
         }
     }
@@ -585,7 +584,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getSupportsChat() throws BadPacketException {
         parseResults();
 
-        switch (supportsChat) {
+        switch (_supportsChat) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -593,7 +592,7 @@ public class QueryReply extends Message implements Serializable{
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for supportsChat: "+supportsChat);
+            Assert.that(false, "Bad value for supportsChat: "+_supportsChat);
             return false;
         }
     }
@@ -610,7 +609,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean getSupportsBrowseHost() throws BadPacketException {
         parseResults();
 
-        switch (supportsBrowseHost) {
+        switch (_supportsBrowseHost) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -619,7 +618,7 @@ public class QueryReply extends Message implements Serializable{
             return false;
         default:
             Assert.that(false, "Bad value for supportsBrowseHost: "
-                + supportsBrowseHost);
+                + _supportsBrowseHost);
             return false;
         }
     }
@@ -636,7 +635,7 @@ public class QueryReply extends Message implements Serializable{
     public boolean isReplyToMulticastQuery() throws BadPacketException {
         parseResults();
 
-        switch (replyToMulticast) {
+        switch (_replyToMulticast) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -645,7 +644,7 @@ public class QueryReply extends Message implements Serializable{
             return false;
         default:
             Assert.that(false, "Bad value for replyToMulticast: "
-                + replyToMulticast);
+                + _replyToMulticast);
             return false;
         }
     }
@@ -666,10 +665,10 @@ public class QueryReply extends Message implements Serializable{
      *    or vendor is null.
      */
     private void parseResults() {
-        if (parsed)
+        if (_parsed)
             return;
         parseResults2();
-        parsed=true;
+        _parsed=true;
     }
 
     /**
@@ -692,7 +691,7 @@ public class QueryReply extends Message implements Serializable{
         Response[] responses=new Response[left];
         try {
             InputStream bais = 
-                new ByteArrayInputStream(payload,i,payload.length-i);
+                new ByteArrayInputStream(_payload,i,_payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = Response.createFromStream(bais);
@@ -700,7 +699,7 @@ public class QueryReply extends Message implements Serializable{
                 i+=r.getLength();
             }
             //All set.  Accept parsed results.
-            this.responses=responses;
+            this._responses=responses;
         } catch (ArrayIndexOutOfBoundsException e) {
             return;
         } catch (IOException e) {
@@ -760,7 +759,7 @@ public class QueryReply extends Message implements Serializable{
          * Last 16 Bytes: client GUID.
          */
         try {
-			if (i >= (payload.length-16)) {   //see above
+			if (i >= (_payload.length-16)) {   //see above
                 throw new BadPacketException("No QHD");
             }
             //Attempt to verify.  Results are not copied to this until verified.
@@ -778,7 +777,7 @@ public class QueryReply extends Message implements Serializable{
             try {
                 //Must use ISO encoding since characters are more than two
                 //bytes on other platforms.  TODO: test on different installs!
-                vendorT=new String(payload, i, 4, "ISO-8859-1");
+                vendorT=new String(_payload, i, 4, "ISO-8859-1");
                 Assert.that(vendorT.length()==4,
                             "Vendor length wrong.  Wrong character encoding?");
             } catch (UnsupportedEncodingException e) {
@@ -787,19 +786,19 @@ public class QueryReply extends Message implements Serializable{
             i+=4;
 
             //b) extract payload length
-            int length=ByteOrder.ubyte2int(payload[i]);
+            int length=ByteOrder.ubyte2int(_payload[i]);
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
             i++;
-            if ((i + length) > (payload.length-16)) // 16 is trailing GUID size
+            if ((i + length) > (_payload.length-16)) // 16 is trailing GUID size
                 throw new BadPacketException("Common payload length imprecise!");
 
             //c) extract push and busy bits from common payload
             // REMEMBER THAT THE PUSH BIT IS SET OPPOSITE THAN THE OTHERS.
             // (The 'I understand' is the second bit, the Yes/No is the first)
             if (length > 1) {   //BearShare 2.2.0+
-                byte control=payload[i];
-                byte flags=payload[i+1];
+                byte control=_payload[i];
+                byte flags=_payload[i+1];
                 if ((flags & PUSH_MASK)!=0)
                     pushFlagT = (control&PUSH_MASK)==1 ? TRUE : FALSE;                
                 if ((control & BUSY_MASK)!=0)
@@ -813,8 +812,8 @@ public class QueryReply extends Message implements Serializable{
                     // iterate past flags...
                     int magicIndex = i + 2;
                     for (; 
-                         (payload[magicIndex]!=GGEP.GGEP_PREFIX_MAGIC_NUMBER) &&
-                         (magicIndex < payload.length);
+                         (_payload[magicIndex]!=GGEP.GGEP_PREFIX_MAGIC_NUMBER) &&
+                         (magicIndex < _payload.length);
                          magicIndex++)
                         ; // get the beginning of the GGEP stuff...
                     GGEP[] ggepBlocks = null;
@@ -822,7 +821,7 @@ public class QueryReply extends Message implements Serializable{
                         // if there are GGEPs, see if Browse Host supported...
                         // TODO: stop using GGEP.read(2) - move to GGEP.read(3)
                         // or fix up GGEP.read(2)
-                        ggepBlocks = GGEP.read(payload, magicIndex);
+                        ggepBlocks = GGEP.read(_payload, magicIndex);
                         if (_ggepUtil.allowsBrowseHost(ggepBlocks))
                             supportsBrowseHostT = TRUE;
                         if (_ggepUtil.replyToMulticastQuery(ggepBlocks))
@@ -842,15 +841,15 @@ public class QueryReply extends Message implements Serializable{
                 //first we should get its size, then we have to look 
                 //backwards and get the actual xml...
                 int a, b, temp;
-                temp = ByteOrder.ubyte2int(payload[i++]);
+                temp = ByteOrder.ubyte2int(_payload[i++]);
                 a = temp;
-                temp = ByteOrder.ubyte2int(payload[i++]);
+                temp = ByteOrder.ubyte2int(_payload[i++]);
                 b = temp << 8;
                 int xmlSize = a | b;
                 if (xmlSize > 1) {
-                    int xmlInPayloadIndex = payload.length-16-xmlSize;
+                    int xmlInPayloadIndex = _payload.length-16-xmlSize;
                     _xmlBytes = new byte[xmlSize-1];
-                    System.arraycopy(payload, xmlInPayloadIndex,
+                    System.arraycopy(_payload, xmlInPayloadIndex,
                                      _xmlBytes, 0,
                                      (xmlSize-1));
                 }
@@ -861,27 +860,27 @@ public class QueryReply extends Message implements Serializable{
             //Parse LimeWire's private area.  Currently only a single byte
             //whose LSB is 0x1 if we support chat, or 0x0 if we do.
             //Shareaza also supports our chat, don't disclude them...
-            int privateLength=payload.length-i;
+            int privateLength=_payload.length-i;
             if (privateLength>0 && (vendorT.equals("LIME") ||
                                     vendorT.equals("RAZA"))) {
-                byte privateFlags = payload[i];
+                byte privateFlags = _payload[i];
                 supportsChatT = (privateFlags&CHAT_MASK)!=0 ? TRUE : FALSE;
             }
 
-            if (i>payload.length-16)
+            if (i>_payload.length-16)
                 throw new BadPacketException(
                     "Common payload length too large.");
             
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
-            this.vendor=vendorT.toUpperCase(Locale.US);
-            this.pushFlag=pushFlagT;
-            this.busyFlag=busyFlagT;
-            this.uploadedFlag=uploadedFlagT;
-            this.measuredSpeedFlag=measuredSpeedFlagT;
-            this.supportsChat=supportsChatT;
-            this.supportsBrowseHost=supportsBrowseHostT;
-            this.replyToMulticast=replyToMulticastT;
+            this._vendor=vendorT.toUpperCase(Locale.US);
+            this._pushFlag=pushFlagT;
+            this._busyFlag=busyFlagT;
+            this._uploadedFlag=uploadedFlagT;
+            this._measuredSpeedFlag=measuredSpeedFlagT;
+            this._supportsChat=supportsChatT;
+            this._supportsBrowseHost=supportsBrowseHostT;
+            this._replyToMulticast=replyToMulticastT;
             if(proxies == null) {
                 this._proxies = DataUtils.EMPTY_SET;
             } else {
@@ -908,7 +907,7 @@ public class QueryReply extends Message implements Serializable{
         //be metainformation before the client GUID.  So it is not correct
         //to simply count after the last result record.
         int length=super.getLength();
-        System.arraycopy(payload, length-16, result, 0, 16);
+        System.arraycopy(_payload, length-16, result, 0, 16);
         return result;
     }
 
@@ -930,7 +929,7 @@ public class QueryReply extends Message implements Serializable{
      *    (e.g., four stars) for RemoteFileDesc.
      *   @exception java.lang.Exception Thrown if attempt fails.
      */
-    public RemoteFileDesc[] toRemoteFileDescArray(boolean acceptedIncoming) 
+    public RemoteFileDesc[] toRemoteFileDescArray() 
             throws BadPacketException {
         List responses = null;
         try { // get the responses, some data from them is needed...
@@ -1425,13 +1424,4 @@ public class QueryReply extends Message implements Serializable{
         }
 
     }
-
-
-    private static final int min(int a, int b) {
-        if (a < b)
-            return a;
-        else return b;
-    }
-
-
 } //end QueryReply
