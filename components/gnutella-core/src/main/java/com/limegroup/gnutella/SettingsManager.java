@@ -603,13 +603,13 @@ public class SettingsManager implements SettingsInterface {
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
     /** 
-	 * Returns the directory for saving files.
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the directory for saving files.
 	 *
 	 * @return  A <code>File</code> instance denoting the abstract
 	 *          pathname of the save directory.
-	 *
-	 * @throws  NullPointerException 
-	 *          If the save directory is null.
+	 *          Returns <code>null</code> if the save directory has
+	 *          not been set successfully.
 	 */
     public File getSaveDirectory() {
 		return _saveDirectory;
@@ -621,16 +621,23 @@ public class SettingsManager implements SettingsInterface {
 	 *
 	 * @return  A <code>File</code> instance denoting the abstract
 	 *          pathname of the directory for saving incomplete files.
+	 *          Returns <code>null</code> if the incomplete directory has
+	 *          not been set successfully.
 	 */
     public File getIncompleteDirectory() {
 		return _incompleteDirectory;
     }
 
     /** 
-	 * returns the default save directory path. 
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the default directory for saving incomplete files. This
+	 * is a shared directory within the current working directory.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the default directory for saving files.
 	 */	
-    public String getSaveDefault() {		
-		return new File(SAVE_DIRECTORY_NAME).getAbsolutePath();
+    public File getSaveDefault() {		
+		return new File(SAVE_DIRECTORY_NAME);
     }
 
     /** returns the directories to search */
@@ -1107,8 +1114,8 @@ public class SettingsManager implements SettingsInterface {
 	 * Sets the directory for saving files. 
 	 *
 	 * @param   saveDir  A <code>File</code> instance denoting the 
-	 *                   platform-specific pathname of the directory 
-	 *                   for saving files.  
+	 *                   abstract pathname of the directory for
+	 *                   saving files.  
 	 *
 	 * @throws  IOException 
 	 *          If the directory denoted by the directory pathname
