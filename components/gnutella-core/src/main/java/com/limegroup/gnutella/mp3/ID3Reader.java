@@ -88,51 +88,51 @@ public final class ID3Reader {
         // Length
         int seconds  = (int) mp3Info.getLengthInSeconds();
         
-        String str = "";
+        StringBuffer strB = new StringBuffer();
         if(solo){
-            str = str+ "<audios noNamespaceSchemaLocation=\""+this.schemaURI;
-            str = str+"\"";
-            str = str+"><audio ";
+            appendStrings("<audios noNamespaceSchemaLocation=\"",
+                          this.schemaURI,
+                          strB);
+            strB.append("><audio ");
             String filename = file.getCanonicalPath();
             //str = str+"\""+" identifier=\""+filename+"\">";
-            str = str+" identifier=\""+filename+"\"";
+            appendStrings(" identifier=\"", filename, strB);
         }
         //end of head
         if(!title.equals(""))
-            //str=str+"<title>"+title+"</title>";
-            str=str+" title=\""+title+"\"";
+            appendStrings(" title=\"", title, strB);
         if(!artist.equals(""))
-            //str = str+"<artist>"+artist+"</artist>";
-            str = str+" artist=\""+artist+"\"";
+            appendStrings(" artist=\"", artist, strB);
         if(!album.equals(""))
-            //str = str+"<album>"+album+"</album>";
-            str = str+" album=\""+album+"\"";
+            appendStrings(" album=\"", album, strB);
         if(track>0)
-            //str = str+"<track>"+track+"</track>";
-            str = str+" track=\""+track+"\"";
+            appendStrings(" track=\"", ""+track, strB);
         String genre = getGenreString(gen);
         if(!genre.equals(""))
-            //str = str+"<genre>"+genre+"</genre>";
-            str = str+" genre=\""+genre+"\"";
+            appendStrings(" genre=\"", genre, strB);
         if(!year.equals(""))
-            //str = str+"<year>"+year+"</year>";
-            str = str+" year=\""+year+"\"";
+            appendStrings(" year=\"", year, strB);
         if(!comment.equals(""))
-            //str = str+"<comments>"+comment+"</comments>";
-            str = str+" comments=\""+comment+"\"";
+            appendStrings(" comments=\"", comment, strB);
         if(bitrate > 0)
-            str = str+" bitrate=\""+bitrate+"\"";
+            appendStrings(" bitrate=\"", ""+bitrate, strB);
         if(seconds > 0)
-            str = str+" seconds=\""+seconds+"\"";
+            appendStrings(" seconds=\"", ""+seconds, strB);
         if(solo){
             //str = str+"</audio>";
-            str = str+"/>";
-            str=str+"</audios>";
+            strB.append("/>");
+            strB.append("</audios>");
         }
         
         randomAccessFile.close();
         //System.out.println("SumeetID3Reader XMLString="+str);
-        return str;
+        return strB.toString();
+    }
+
+    private void appendStrings(String key, String value,StringBuffer appendTo) {
+        appendTo.append(key);
+        appendTo.append(value);
+        appendTo.append("\"");
     }
 
     /**
