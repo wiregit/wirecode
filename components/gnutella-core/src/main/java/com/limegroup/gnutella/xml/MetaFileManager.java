@@ -54,6 +54,11 @@ public class MetaFileManager extends FileManager {
      * The reasoning behind not setting the document when there are multiple
      * XML docs is that presumably the query will be a 'rich' query,
      * and we want to include only the schema that was in the query.
+     * 
+     * @param response the <tt>Response</tt> instance that XML should be 
+     *  added to 
+     * @param fd the <tt>FileDesc</tt> that provides access to the 
+     *   <tt>LimeXMLDocuments</tt> to add to the response
      */
     protected void addXMLToResponse(Response response, FileDesc fd) {
         List docs = fd.getLimeXMLDocuments();
@@ -138,7 +143,7 @@ public class MetaFileManager extends FileManager {
      * handle the meta-data and its relation to the file system
      */
     protected void loadSettingsBlocking(boolean notifyOnClear){
-		_callback.setAnnotateEnabled(false);
+		RouterService.getCallback().setAnnotateEnabled(false);
         // let FileManager do its work....
         super.loadSettingsBlocking(notifyOnClear);
         if (loadThreadInterrupted())
@@ -170,7 +175,7 @@ public class MetaFileManager extends FileManager {
             }
             //showXMLData();
         }//end of synchronized block
-		_callback.setAnnotateEnabled(true);
+		RouterService.getCallback().setAnnotateEnabled(true);
     }
 
     /**

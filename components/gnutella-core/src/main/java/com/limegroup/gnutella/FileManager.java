@@ -179,11 +179,6 @@ public abstract class FileManager {
      */
     private Object _loadThreadLock=new Object();
     
-    /** The callback for adding shared directories and files, or null
-     *  if this has no callback.
-     */
-    protected ActivityCallback _callback;
-    
     /**
      * The only ShareableFileFilter object that should be used.
      */
@@ -253,8 +248,7 @@ public abstract class FileManager {
      *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
      *      @see loadSettings */
-    public void initialize() {
-		this._callback = RouterService.getCallback();
+    public void start() {
 		loadSettings(false);
     }
 
@@ -469,8 +463,13 @@ public abstract class FileManager {
                         for (int j = 0; 
                              (j < filter.length) && (ext != null); 
                              j++)
-                            if (ext.equalsIgnoreCase(filter[j]))
+                            if (ext.equalsIgnoreCase(filter[j]))  {
                                 shouldAdd = true;
+                                
+                                // don't keep looping through all filters --
+                                // one match is good enough
+                                break;
+                            }
                     }
 
                     if (shouldAdd)
@@ -554,7 +553,7 @@ public abstract class FileManager {
                 public void run() {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
-						_callback.fileManagerLoaded();
+						RouterService.getCallback().fileManagerLoaded();
 					} catch(Throwable t) {
 						ErrorService.error(t);
 					}
@@ -611,7 +610,7 @@ public abstract class FileManager {
         //clear this, list of directories retreived
         final File[] directories = tempDirVar;
         if (notifyOnClear) 
-            _callback.clearSharedFiles();
+            RouterService.getCallback().clearSharedFiles();
         
         //Load the shared directories and their files.
         //Duplicates in the directories list will be ignored.  Note that the
@@ -689,8 +688,8 @@ public abstract class FileManager {
                 return new LinkedList();
                 
             _sharedDirectories.put(directory, new IntSet());
-            if( _callback != null )
-                _callback.addSharedDirectory(directory, parent);
+            
+            RouterService.getCallback().addSharedDirectory(directory, parent);
                 
             _numPendingFiles += numShareable;
         }
@@ -839,8 +838,8 @@ public abstract class FileManager {
                 "Add directory \""+parent+"\" not in "+_sharedDirectories);
             boolean added=siblings.add(fileIndex);
             Assert.that(added, "File "+fileIndex+" already found in "+siblings);
-            if (_callback!=null)
-                _callback.addSharedFile(fileDesc, parent);
+            
+            RouterService.getCallback().addSharedFile(fileDesc, parent);
 		
             //Index the filename.  For each keyword...
             String[] keywords=StringUtils.split(fileDesc.getPath(), DELIMETERS);
@@ -925,10 +924,9 @@ public abstract class FileManager {
         _fileToFileDesc.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
-        if (_callback != null) {
-            File parent = FileUtils.getParentFile(incompleteFile);
-            _callback.addSharedFile(ifd, parent);
-        }
+        
+        File parent = FileUtils.getParentFile(incompleteFile);
+        RouterService.getCallback().addSharedFile(ifd, parent);
     }
 
     /**
@@ -1237,8 +1235,8 @@ public abstract class FileManager {
             } if(!busy || 
                  desc.getNumberOfAlternateLocations() < 10) {
                 desc.incrementHitCount();
-                if ( _callback != null )
-                    _callback.handleSharedFileUpdate(desc.getFile());
+                
+                RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
                 Response resp = new Response(desc);
                 if(includeXML)
                     addXMLToResponse(resp, desc);
