@@ -420,27 +420,107 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         //GiveStatsSpecific traffic within our small network
 
         TCP_TEST_LEAF.send(query1);
-        TCP_TEST_LEAF.send(query2);
-        TCP_TEST_LEAF.send(query3);
+        TCP_TEST_LEAF.flush();
         
         byte[] ipBytes = {(byte)127,(byte)0,(byte)0,(byte)1};
 
-        QueryRequest q1 = null;
-        QueryRequest q2 = null;
-        QueryRequest q3 = null;
+        QueryRequest qLeaf1 = null;
+        QueryRequest qLeaf2 = null;
+        QueryRequest qLeaf3 = null;
+        QueryRequest qLeaf4 = null;
+        QueryRequest qUP1 = null;
+        QueryRequest qUP2 = null;
 
         //Leaf1 should get query1 and query2
         //If we get a ClassCastException here we are in deep trouble.
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
+        qLeaf1 = (QueryRequest)getFirstInstanceOfMessageType(
                                                       LEAF_1,query1.getClass());
-        q2 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_1,query2.getClass());
-        q3  = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_1,query3.getClass());
-        System.out.println("Sumeet:"+q1);
-        assertEquals("Wrong message reached LEAF_1", q1.getGUID(), GUID1);
-        assertEquals("Wrong message reached LEAF_1", q2.getGUID(), GUID2);
-        assertNull("Leaf got three messages instead of 2", q3);
+        qLeaf2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_2,query1.getClass());
+        qLeaf3  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_3,query1.getClass());
+        qLeaf4  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_4,query1.getClass());
+        qUP1 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_1,query1.getClass());
+        qUP2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_2,query1.getClass());
+
+        assertEquals("Wrong message reached LEAF_1", GUID1,
+                     new GUID(qLeaf1.getGUID()));       
+        assertEquals("Wrong message reached LEAF_2", GUID1, 
+                     new GUID(qLeaf2.getGUID()));
+        assertEquals("Wrong message reached LEAF_3", GUID1, 
+                     new GUID(qLeaf3.getGUID()));
+        assertEquals("Wrong message reached UP1", GUID1, 
+                     new GUID(qUP1.getGUID()));
+        //This expected even though the UP never sent qrp entries
+        assertEquals("Wrong message reached UP2", GUID1, 
+                     new GUID(qUP2.getGUID()));
+        assertNull("Leaf4 got  messages when it should not have", qLeaf4);
+
+                
+        //Send the second query and make sure it goes to all the right places
+        TCP_TEST_LEAF.send(query2);
+        TCP_TEST_LEAF.flush();
+
+        qLeaf1 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                      LEAF_1,query2.getClass());
+        qLeaf2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_2,query2.getClass());
+        qLeaf3  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_3,query2.getClass());
+        qLeaf4  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_4,query2.getClass());
+        qUP1 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_1,query2.getClass());
+        qUP2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_2,query2.getClass());
+        assertEquals("Wrong message reached LEAF_1", GUID2, 
+                     new GUID(qLeaf1.getGUID()));
+        assertEquals("Wrong message reached LEAF_2", GUID2, 
+                     new GUID(qLeaf2.getGUID()));
+        assertEquals("Wrong message reached UP1", GUID2, 
+                     new GUID(qUP1.getGUID()));
+        //This expected even though the UP never sent qrp entries
+        assertEquals("Wrong message reached UP2", GUID2, 
+                     new GUID(qUP2.getGUID()));
+        assertNull("Leaf got  messages when it should not have", qLeaf3);
+        assertNull("Leaf got  messages when it should not have", qLeaf4);
+
+        //Send the third query and make sure it goes to all the right places
+        TCP_TEST_LEAF.send(query3);
+        TCP_TEST_LEAF.flush();
+        qLeaf1 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                      LEAF_1,query3.getClass());
+        qLeaf2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_2,query3.getClass());
+        qLeaf3  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_3,query3.getClass());
+        qLeaf4  = (QueryRequest)getFirstInstanceOfMessageType(
+                                                    LEAF_4,query3.getClass());
+        qUP1 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_1,query3.getClass());
+        qUP2 = (QueryRequest)getFirstInstanceOfMessageType(
+                                                ULTRAPEER_2,query3.getClass());
+
+        assertNull("Leaf got  messages when it should not have", qLeaf1);
+        assertNull("Leaf got  messages when it should not have", qLeaf2);
+        assertNull("Leaf got  messages when it should not have", qLeaf3);
+        assertNull("Leaf got  messages when it should not have", qLeaf4);
+        
+//          System.out.println(""+GUID1);
+//          System.out.println(""+GUID2);
+//          System.out.println(""+GUID3);
+
+        assertEquals("Wrong message reached UP1", GUID3, 
+                     new GUID(qUP1.getGUID()));
+        //This expected even though the UP never sent qrp entries
+        assertEquals("Wrong message reached UP2", GUID3, 
+                     new GUID(qUP2.getGUID()));
+
+        //Now let make the leaves send some responses
+
         Response[] resps = {new Response(0l, 12l, "sumeet.txt") };
         QueryReply reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
@@ -450,65 +530,32 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         QueryReply reply2 = new QueryReply(GUID2.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_1.send(reply2);
-        //Leaf 1 final score incoming queries = 2, query replies = 2
 
-        //Leaf2 should get query1 and query2
-        //If we get a ClassCastException here we are in deep trouble.
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                      LEAF_2,query1.getClass());
-        q2 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_2,query2.getClass());
-        q3  = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_2,query3.getClass());
-        assertEquals("Wrong message reached LEAF_2", q1.getGUID(), GUID1);
-        assertEquals("Wrong message reached LEAF_3", q2.getGUID(), GUID2);
-        assertNull("LEAF_2 got three messages instead of 2", q3);
         Response[] r2 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r2;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_2.send(reply1);
-        //Leaf 2 final score incoming queries = 2, query replies = 1
         
-        //Leaf 3 should have received query 1
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                     LEAF_3,query1.getClass());
-        q2  = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_3,query2.getClass());
-        assertEquals("Wrong message reached LEAF_3", q2.getGUID(), GUID2);
-        assertNull("LEAF_3 got 2 messages instead of 3", q2);
         Response[] r3 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r3;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_2.send(reply1);
-        //LEAF_3 final score incoming queries = 1 query replies = 1
 
-        //LEAF_4 should have received no queries
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                     LEAF_4,query1.getClass());
-        assertNull("LEAF_3 got 1 messages instead of 0", q1);
-        //LEAF_4 final score incoming queries = 0 query replies = 0
-        
-        //UP1 should have received query 1
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                     LEAF_3,query1.getClass());
-        q2  = (QueryRequest)getFirstInstanceOfMessageType(
-                                                    LEAF_3,query2.getClass());
-        assertEquals("Wrong message reached LEAF_3", q1.getGUID(), GUID1);
-        assertNull("LEAF_3 got 2 messages instead of 1", q2);
         Response[] r4 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r4;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_2.send(reply1);
-        //UP1 final score incoming queries = 1 query replies = 1
-        
-        //UP2 should not receive any queries
-        q1 = (QueryRequest)getFirstInstanceOfMessageType(
-                                                     LEAF_4,query1.getClass());
-        assertNull("LEAF_3 got 1 messages instead of 0", q1);
-        //UP2 final score incoming queries = 0 query replies = 0
+
+
+        //Leaf 1 final score incoming queries = 2, query replies = 2
+        //Leaf 2 final score incoming queries = 2, query replies = 1
+        //LEAF_3 final score incoming queries = 1 query replies = 1
+        //LEAF_4 final score incoming queries = 0 query replies = 0
+        //UP1 final score incoming queries = 3 query replies = 1        
+        //UP2 final score incoming queries = 3 query replies = 0
 
         //OK. Now we can send the Give Stats Message to the central UP, and see
         //what the response is
@@ -524,7 +571,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         StatisticVendorMessage statsAck = 
         (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
                                                                Class.forName(
-            "com.limegroup.gnutella.messages.vendor.StatisticsVendorMessage"));
+            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
         String returnedStats = new String(statsAck.getPayload());
         //TODO 1 make sure this is what is expected. 
         System.out.println(returnedStats);        
