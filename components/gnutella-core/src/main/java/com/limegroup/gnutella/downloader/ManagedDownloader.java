@@ -189,13 +189,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int PUSH_TRIES=2;
     /** The time to wait trying to establish each normal connection, in
      *  milliseconds.*/
-    private static final int NORMAL_CONNECT_TIME=4000; //4 seconds
+    private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
     /** The time to wait trying to establish each push connection, in
      *  milliseconds.  This needs to be larger than the normal time. */
-    private static final int PUSH_CONNECT_TIME=10000;  //10 seconds
-    /** The maximum time, in SECONDS, allowed between a push request and an
-     *  incoming push connection. */
-    private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
+    private static final int PUSH_CONNECT_TIME=16000;  //16 seconds
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The interval size for downloaders with persistenace support  */
