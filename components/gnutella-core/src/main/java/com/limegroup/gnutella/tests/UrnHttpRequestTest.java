@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
@@ -102,7 +103,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			String request = "/uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
 			" HTTP/1.1\r\n\r\n";
-			sendRequestThatShouldSucceed(request, fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);
 		}
 	}
 
@@ -115,7 +117,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
-			sendRequestThatShouldSucceed(request, fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);
 		}				
 	}
 
@@ -127,7 +130,13 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testTraditionalGetWithContentUrn() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			sendRequestThatShouldSucceed("/get/"+fd.getIndex()+"/"+fd.getName()+ 
+			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, 
+										 "/get/"+fd.getIndex()+"/"+
+										 fd.getName()+ 
+										 " HTTP/1.1\r\n\r\n", fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, 
+										 "/get/"+fd.getIndex()+"/"+
+										 fd.getName()+ 
 										 " HTTP/1.1\r\n\r\n", fd);
 		}
 	}
@@ -143,7 +152,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+
 			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"+"\r\n\r\n";
-			sendRequestThatShouldFail(request, fd, STATUS_404);
+			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_404);
+			sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_404);
 		}				
 	}
 
@@ -156,7 +166,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn();
-			sendRequestThatShouldFail(request, fd, STATUS_404);
+			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_404);
+			sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_404);
 		}				
 	}
 
@@ -171,7 +182,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
-			sendRequestThatShouldFail(request, fd, STATUS_503);
+			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_503);
+			sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_503);
 		}				
 		SettingsManager.instance().setMaxUploads(maxUploads);
 	}
@@ -181,12 +193,13 @@ public final class UrnHttpRequestTest extends TestCase {
 	 * Sends an HTTP request that should succeed and send back all of the
 	 * expected headers.
 	 */
-	private void sendRequestThatShouldSucceed(String request, FileDesc fd) {
+	private void sendRequestThatShouldSucceed(HTTPRequestMethod method, String request, 
+											  FileDesc fd) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(request.getBytes());
 			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			_uploadManager.acceptUpload(sock);
+			_uploadManager.acceptUpload(method, sock);
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
 			boolean contentUrnHeaderPresent = false;
@@ -234,12 +247,13 @@ public final class UrnHttpRequestTest extends TestCase {
 	 * Sends an HTTP request that should fail if everything is working 
 	 * correctly.
 	 */
-	private void sendRequestThatShouldFail(String request, FileDesc fd, String error) {
+	private void sendRequestThatShouldFail(HTTPRequestMethod method, String request, 
+										   FileDesc fd, String error) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(request.getBytes());
 			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			_uploadManager.acceptUpload(sock);
+			_uploadManager.acceptUpload(method, sock);
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
 			boolean sentExpectedError = false;
