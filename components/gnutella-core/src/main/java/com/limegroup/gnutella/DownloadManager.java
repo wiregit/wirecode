@@ -298,7 +298,7 @@ public class DownloadManager implements BandwidthTracker {
                     currD.addDownload(rfds[i]);
                     break;
                 }
-            }        
+            }
     }
 
 
@@ -644,9 +644,44 @@ public class DownloadManager implements BandwidthTracker {
     ///////////////////// AUTO DOWNLOADER FUNCTIONALITY //////////////////
     /////////////////////             BEGIN             //////////////////
 
+    private Hashtable htGuidToADD = new Hashtable();
+
     public void registerAutomaticDownload(byte[] guid, String query,
                                           String richQuery, MediaType type) {
+        
+        GUID key = new GUID(guid);
+        // in the off case that a key (GUID) inserted is already in the HT, then
+        // just ignore.  this shouldn't happen every since the guid space is so
+        // big and we'd assume no client will be up that long....
+        htGuidToADD.put(key, new AutoDownloadDetails(query, richQuery, type));
+    }
 
+
+    /** Encapsulates important details about a auto download....
+     */
+    private class AutoDownloadDetails {
+        private String query = null;
+        private String richQuery = null;
+        private MediaType type = null;
+
+        public AutoDownloadDetails(String inQuery, String inRichQuery, 
+                                   MediaType inType) {
+            query = inQuery;
+            richQuery = inRichQuery;
+            type = inType;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public String getRichQuery() {
+            return richQuery;
+        }
+        
+        public MediaType getMediaType() {
+            return type;
+        }
     }
 
 
