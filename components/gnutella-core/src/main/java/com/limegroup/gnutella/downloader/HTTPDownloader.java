@@ -595,7 +595,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Stops this immediately.  This method is always safe to call.
      *     @modifies this
      */
-	public void stop() {        
+	public void stop() {
         if (_byteReader != null)
             _byteReader.close();
         try {
