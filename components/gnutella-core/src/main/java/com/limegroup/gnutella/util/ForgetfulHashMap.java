@@ -10,7 +10,9 @@ import com.sun.java.util.collections.*;
  * [ (K1, V1), ... (KN, VN) ] ordered from youngest to oldest.  When
  * inserting a new pair, (KN, VN) is discarded if N is greater than
  * some threshold.  This threshold is fixed when the table is
- * constructed.<p>
+ * constructed.  <b>However, this property may not hold if keys are
+ * remapped to different values</b>; if you need this, use 
+ * FixedsizeForgetfulHashmap.<p>
  *
  * Technically, this not a valid subtype of HashMap, but it makes
  * implementation really easy. =) Also, ForgetfulHashMap is <b>not
@@ -55,6 +57,13 @@ public class ForgetfulHashMap extends HashMap {
         n=size;
     }
 
+    /**
+     * @requires key is not in this
+     * @modifies this
+     * @effects adds the given key value pair to this, removing some
+     *  older mapping if necessary.  The return value is undefined; it
+     *  exists solely to conform with the superclass' signature.
+     */
     public Object put(Object key, Object value) {
         Object ret=super.put(key,value);
         //Purge oldest entry if we're all full, or if we'll become full
@@ -73,6 +82,8 @@ public class ForgetfulHashMap extends HashMap {
         return ret;
     }
 
+    /** Calls put on all keys in t.  See put(Object, Object) for 
+     *  specification. */
     public void putAll(Map t) {
         Iterator iter=t.keySet().iterator();
         while (iter.hasNext()) {
