@@ -33,6 +33,8 @@ import com.limegroup.gnutella.util.SystemUtils;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.TimerTask;
+import java.util.Timer;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
@@ -45,8 +47,11 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     protected static File _xmlDataDir;
     protected static File _xmlSchemasDir;
     protected static Class _testClass;
+    private   static Timer _testKillerTimer = new Timer(true);
     protected Thread _testThread;
     protected TestResult _testResult;
+    protected TimerTask _testKiller;
+    protected long _startTimeForTest;
 
 	/**
 	 * Unassigned port for tests to use.
@@ -255,6 +260,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ErrorService.setErrorCallback(this);
         setupSettings();
         setupUniqueDirectories();
+        setupTestTimer();
         
         // The backend must also have its error callback reset
         // for each test, otherwise it could send errors to a stale
@@ -289,6 +295,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public void postTearDown() {
         cleanFiles(_baseDir, false);
+        stopTestTimer();
     }
     
     /**
@@ -297,6 +304,31 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     public static void afterAllTestsTearDown() throws Throwable {
         cleanFiles(_baseDir, true);
         shutdownBackends();
+    }
+    
+    /**
+     * Sets up the TimerTask to kill the running test after a certian amount of time.
+     */
+    private final void setupTestTimer() {
+        _startTimeForTest = System.currentTimeMillis();
+        _testKiller = new TimerTask() {
+            public void run() {
+                long now = System.currentTimeMillis();
+                error(new RuntimeException("Stalled!  Took " +
+                                    (now - _startTimeForTest) + " ms."),
+                      "Test Took Too Long");
+            }
+        };
+        // kill in a bit.
+        _testKillerTimer.schedule(_testKiller, 7 * 60 * 1000);
+    }
+    
+    /**
+     * Stops the test timer since the test finished.
+     */
+    private final void stopTestTimer() {
+        _testKiller.cancel();
+        _testKiller = null;
     }
     
     /**
