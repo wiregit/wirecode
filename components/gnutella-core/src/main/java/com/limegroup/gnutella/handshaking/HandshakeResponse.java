@@ -179,7 +179,7 @@ public final class HandshakeResponse {
      HandshakeResponse(int code, String message, Properties headers) { 
          STATUS_CODE = code;
          STATUS_MESSAGE = message;
-         HEADERS = headers;//Collections.unmodifiableMap(headers);
+         HEADERS = headers;
          DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
          HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
          ULTRAPEER_QRP = 
@@ -190,10 +190,6 @@ public final class HandshakeResponse {
              isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
          PROBE_QUERIES = 
              isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
-         //GOOD = isHighDegreeConnection() &&
-         //  isUltrapeerQueryRoutingConnection() &&
-         //  (getMaxTTL() < 5) &&
-         //  isDynamicQueryConnection();
 
          GOOD_LEAF = isHighDegreeConnection() &&
              isUltrapeerQueryRoutingConnection() &&
