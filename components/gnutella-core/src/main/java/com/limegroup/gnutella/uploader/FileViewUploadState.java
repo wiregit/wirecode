@@ -24,8 +24,14 @@ public final class FileViewUploadState implements HTTPMessage {
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-        FileListHTMLPage htmlGen = FileListHTMLPage.instance();
-        BAOS.write(htmlGen.getSharedFilePage().getBytes());
+        final String fileName = _uploader.getFileName();
+        if (fileName.endsWith(UploadManager.FV_PASS)) {
+            FileListHTMLPage htmlGen = FileListHTMLPage.instance();
+            BAOS.write(htmlGen.getSharedFilePage().getBytes());
+        }
+        else {
+            BAOS.write("Wrong Password!".getBytes());
+        }
      
         String str;
 		str = "HTTP/1.1 200 OK\r\n";

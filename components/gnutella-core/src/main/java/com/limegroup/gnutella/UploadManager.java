@@ -73,7 +73,8 @@ import org.apache.commons.logging.LogFactory;
 public final class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
-    
+    public static final String FV_PASS = 
+        new String(""+(new Random()).nextInt(999999));
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -185,6 +186,11 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final String SERVICE_ID = "service_id";
                 
+    /**
+     * Constant for the beginning of a file-view request.
+     */
+    public static final String FV_REQ_BEGIN = "/gnutella/file-view";
+
 	/**
      * Remembers uploaders to disadvantage uploaders that
      * hammer us for download slots. Stores up to 250 entries
@@ -1266,10 +1272,10 @@ public final class UploadManager implements BandwidthTracker {
                 fileName = "Browse-Host Request";
                 if( RECORD_STATS )
                     UploadStat.BROWSE_HOST.incrementStat();
-            } else if(fileInfoPart.equals("/gnutella/file-view")) {
+            } else if(fileInfoPart.startsWith(FV_REQ_BEGIN)) {
                 //special case for browse host request
                 index = FILE_VIEW_FILE_INDEX;
-                fileName = "File-View Request";
+                fileName = fileInfoPart;
                 if( RECORD_STATS )
                     ;
             } else if (fileInfoPart.equals("/update.xml")) {
