@@ -153,17 +153,29 @@ public class QueryReply extends Message {
 		long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
 		i+=8;
 
-		//Search for double null terminator. Could be optimized a bit.
+		//The file name is supposed to be terminated by a double null
+		//terminator.  But Gnotella inserts meta-information between
+		//these null characters.  So we have to handle this.
+		//
+		//See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
+
+		//Search for first single null terminator.
 		int j=i;
 		for ( ; ; j++) {
-		    if (payload[j]==(byte)0 && payload[j+1]==(byte)0)
+		    if (payload[j]==(byte)0)
 			break;
 		}
 		
-		//payload[i..j-1] is name. payload[j] and payload[j+1] are null.
-		String name=new String(payload,i,j-i); //no null terminator
+		//payload[i..j-1] is name.  This excludes the null terminator.
+		String name=new String(payload,i,j-i);
 		responses[responses.length-left]=new Response(index,size,name);
-		i=j+2;
+
+		//Search for remaining null terminator.
+		for ( j=j+1; ; j++) {
+		    if (payload[j]==(byte)0)
+			break;
+		}
+		i=j+1;
 	    }
 	    if (i<payload.length-16)
 		throw new BadPacketException("Extra data after "
@@ -227,6 +239,44 @@ public class QueryReply extends Message {
 //  	    Assert.that(false);
 //  	} catch (NoSuchElementException e) {
 //  	    Assert.that(false);
+//  	}
+
+//  	////////////////////  Contruct from Raw Bytes /////////////
+	
+//  	//Normal case: double null-terminated result
+//  	byte[] payload=new byte[11+11+16];
+//  	payload[0]=1;            //Number of results
+//  	payload[11+8]=(byte)65;  //The character 'A'
+//  	qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+//  			  payload);
+//  	try {
+//  	    Iterator iter=qr.getResults();
+//  	    Response response=(Response)iter.next();
+//  	    Assert.that(response.getName().equals("A"), 
+//  			"'"+response.getName()+"'");
+//  	    Assert.that(! iter.hasNext());
+//  	} catch (Exception e) {
+//  	    Assert.that(false);
+//  	    e.printStackTrace();
+//  	}
+	
+
+//  	//Weird case: metadata between null characters.
+//  	payload=new byte[11+11+1+16];
+//  	payload[0]=1;            //Number of results
+//  	payload[11+8]=(byte)65;  //The character 'A'
+//  	payload[11+10]=(byte)66; //The metadata 'B'
+//  	qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+//  			  payload);
+//  	try {
+//  	    Iterator iter=qr.getResults();
+//  	    Response response=(Response)iter.next();
+//  	    Assert.that(response.getName().equals("A"), 
+//  			"'"+response.getName()+"'");
+//  	    Assert.that(! iter.hasNext());
+//  	} catch (Exception e) {
+//  	    Assert.that(false);
+//  	    e.printStackTrace();
 //  	}
 //      }
 }
