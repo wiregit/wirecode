@@ -430,8 +430,8 @@ public final class UploadManager implements BandwidthTracker {
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
         if( uploader.getMethod() != HTTPRequestMethod.HEAD &&
-            uploader.getState() == Uploader.QUEUED ||
-            uploader.getState() == Uploader.CONNECTING ) {
+            (uploader.getState() == Uploader.QUEUED ||
+            uploader.getState() == Uploader.CONNECTING) ) {
             UploadStat.ATTEMPTED.incrementStat();        
         }
         
