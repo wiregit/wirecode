@@ -3,6 +3,9 @@ package com.limegroup.gnutella.tests;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.stubs.*;
+
 import java.util.Properties;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
@@ -10,12 +13,11 @@ import java.io.*;
 import java.net.*;
 
 /**
- * Out-of-process test to check whether (multi)leaves avoid forwarding messages
- * to ultrapeers, do redirects properly, etc.  This test is interactive; you
- * must establish connections and initiate a query on your leaf.
+ * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
+ * redirects properly, etc.
  */
 public class LeafTester {
-    static final int PORT=6347;
+    static final int PORT=6669;
     static final int TIMEOUT=500;
     static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
@@ -28,15 +30,37 @@ public class LeafTester {
     static Connection old2;
 
     public static void main(String args[]) {
-        System.out.println(
-            "Please make sure you have a leaf running with no connections,\n"
-            +"listening on port "+PORT+", without any connection fetchers,\n"
-            +"an empty host cache, and connection watchdogs disabled\n");
-        
+        //Setup LimeWire backend.  For testing other vendors, you can skip all
+        //this and manually configure a client in leaf mode to listen on port
+        //6669, with no slots and no connections.  But you need to re-enable
+        //the interactive prompts below.
+        SettingsManager settings=SettingsManager.instance();
+        settings.setPort(PORT);
+        settings.setDirectories(new File[0]);
+        settings.setUseQuickConnect(false);
+        settings.setQuickConnectHosts(new String[0]);
+        settings.setConnectOnStartup(false);
+        settings.setEverSupernodeCapable(false);
+        settings.setDisableSupernodeMode(true);
+        settings.setForceSupernodeMode(false);
+        settings.setKeepAlive(0);
+        ActivityCallback callback=new ActivityCallbackStub();
+        FileManager files=new FileManagerStub();
+        MessageRouter router=new MessageRouterStub();
+        RouterService rs=new RouterService(callback,
+                                           router,
+                                           files,
+                                           new DummyAuthenticator());
+        Assert.that(settings.getPort()==PORT, "Bad port: "+settings.getPort());
+        rs.initialize();
+        rs.clearHostCatcher();
+        Assert.that(PORT==settings.getPort());
+
+        //Run tests
         try {
-            connect();
+            connect(rs);
             testRedirect();
-            testLeafBroadcast();
+            testLeafBroadcast(rs);
             testBroadcastFromUltrapeer();
             testNoBroadcastFromOld();
             shutdown();
@@ -55,23 +79,32 @@ public class LeafTester {
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect() throws IOException, BadPacketException {
-         System.out.println("Please establish a connection to localhost:6350\n");
+     private static void connect(RouterService rs) 
+             throws IOException, BadPacketException {
+         //Ugh, there is a race condition here from the old days when this was
+         //an interactive test.  If rs connects before the listening socket is
+         //created, the test will fail.
+
+         //System.out.println("Please establish a connection to localhost:6350\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6350);
          ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
          ultrapeer1.initialize();
          replyToPing(ultrapeer1, true);
 
-         System.out.println("Please establish a connection to localhost:6351\n");
+         //System.out.println("Please establish a connection to localhost:6351\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6351);
          ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
          ultrapeer2.initialize();
          replyToPing(ultrapeer2, true);
 
-         System.out.println("Please establish a connection to localhost:6352\n");
+         //System.out.println("Please establish a connection to localhost:6352\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6352);
          old1=new Connection(accept(6352), new OldResponder());
          old1.initialize();
          replyToPing(old1, false);
 
-         System.out.println("Please establish a connection to localhost:6353\n");
+         //System.out.println("Please establish a connection to localhost:6353\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6353);
          old2=new Connection(accept(6353), new OldResponder());
          old2.initialize();
          replyToPing(old2, false);
@@ -127,12 +160,14 @@ public class LeafTester {
 
      ///////////////////////// Actual Tests ////////////////////////////
 
-    private static void testLeafBroadcast() 
+    private static void testLeafBroadcast(RouterService rs) 
             throws IOException, BadPacketException {
-        System.out.println("Please send a query for \"crap\" from your leaf\n");
-        try {
-            Thread.sleep(6000);
-        } catch (InterruptedException e) { }
+        //System.out.println("Please send a query for \"crap\" from your leaf\n");
+        //try {
+        //    Thread.sleep(6000);
+        //} catch (InterruptedException e) { }
+        byte[] guid=rs.newQueryGUID();
+        rs.query(guid, "crap", 0);
         System.out.println("-Testing broadcast from leaf");
 
         while (true) {
