@@ -460,6 +460,10 @@ public class ConnectionManager {
         PingRequest initialPing = 
             new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
         connection.send(initialPing);
+        //Ensure that the initial ping request is written in a timely fashion.
+        try {
+            connection.flush();
+        } catch (IOException e) { /* close it later */ }
     }
 
     /**
@@ -732,15 +736,13 @@ public class ConnectionManager {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				PingRequest pingRequest;
-
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && 
                     origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
-				    pingRequest = _router.createGroupPingRequest(group);
+				    PingRequest pingRequest = _router.createGroupPingRequest(group);
                     _connection.send(pingRequest);
 				}
 				else
@@ -752,6 +754,10 @@ public class ConnectionManager {
                 // Add any pongs sent in Old-Pongs header.
                 _catcher.addOldPongs(_connection);
                 _connection.loopForMessages();
+                //Ensure that the initial ping request is written in a timely fashion
+                try {
+                    _connection.flush();
+                } catch (IOException e) { /* close it later */ }
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
