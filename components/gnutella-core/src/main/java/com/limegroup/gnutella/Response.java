@@ -144,7 +144,7 @@ public class Response {
      *  0 <= index, size < 2^32
      */
     public Response(long index, long size, String name) {
-		this(index, size, name, "", null, null);
+		this(index, size, name, "", null, null, null);
     }
 
 
@@ -154,7 +154,7 @@ public class Response {
      * @param doc the metadata to include
      */
     public Response(long index, long size, String name, LimeXMLDocument doc) {
-        this(index, size, name, extractMetadata(doc), null, doc);
+        this(index, size, name, extractMetadata(doc), null, doc, null);
     }
 
 
@@ -164,7 +164,7 @@ public class Response {
      * @param metadata a string of metadata, typically XML
      */
     public Response(long index, long size, String name, String metadata) {
-		this(index, size, name, metadata, null, null);
+		this(index, size, name, metadata, null, null, null);
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class Response {
 	 */
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
-			 "", fd.getUrns(), null);
+			 "", fd.getUrns(), null, null);
 	}
 
     /**
@@ -195,7 +195,8 @@ public class Response {
 	 *  the file
      */
     public Response(long index, long size, String name,
-					 String metadata, Set urns, LimeXMLDocument doc) {
+					 String metadata, Set urns, LimeXMLDocument doc, 
+					 byte[] rawMeta) {
         Assert.that((index & 0xFFFFFFFF00000000l)==0,
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
@@ -217,7 +218,10 @@ public class Response {
 		else {
 			this.urns = Collections.unmodifiableSet(urns);
 		}
-		this.extBytes = createExtBytes(this.urns);
+		if ( rawMeta != null )
+		    this.extBytes = rawMeta;
+		else 
+		    this.extBytes = createExtBytes(this.urns);
 
 		if(((metadata == null) || (metadata.equals(""))) && (doc != null)) {
 			// this is guaranteed to be non-null, although it could be the
@@ -280,7 +284,8 @@ public class Response {
         while((c=is.read())!=0) {
             baos.write(c);
         }
-        String betweenNulls = new String(baos.toByteArray());
+        byte[] rawMeta = baos.toByteArray();
+        String betweenNulls = new String(rawMeta);
         if(betweenNulls==null || betweenNulls.equals("")) {
 			if(is.available() < 16) {
 				throw new IOException("not enough room for the GUID");
@@ -309,7 +314,7 @@ public class Response {
 					metaString = createXmlString(name, ext);
 				}
 			}			
-			return new Response(index, size, name, metaString, urns, null);
+			return new Response(index, size, name, metaString, urns, null, rawMeta);
         }
     }  
 
@@ -331,6 +336,10 @@ public class Response {
 		}
 		String first  = tok.nextToken();
 		String second = tok.nextToken();
+		if (first != null)
+		    first = first.toLowerCase();
+		if (second != null)
+		    second = second.toLowerCase();
 		String length="";
 		String bitrate="";
 		boolean bearShare1 = false;        
