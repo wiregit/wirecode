@@ -121,8 +121,11 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         
         // don't create more than this many nodes
         int maxNodes = 1 << depth;        
-        // calculate ideal node size, rounding up!
-        int idealNodeSize = (int) (fileSize + 1) / maxNodes;
+        // calculate ideal node size, 
+        int idealNodeSize = (int) (fileSize) / maxNodes;
+        // rounding up!
+        if (fileSize % maxNodes != 0)
+            idealNodeSize++;
         // calculate nodes size, node size must equal to 2^n, n in {10,11,...}
         int n = log2Ceil(idealNodeSize);
         // 2^n
@@ -136,11 +139,11 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize >= fileSize / maxNodes,
+        Assert.that(nodeSize * maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-        Assert.that(nodeSize <= (fileSize / maxNodes) * 2,
+        Assert.that(nodeSize * maxNodes <= fileSize * 2,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);

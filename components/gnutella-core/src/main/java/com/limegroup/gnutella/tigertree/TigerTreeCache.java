@@ -49,6 +49,11 @@ public final class TigerTreeCache {
         LogFactory.getLog(TigerTreeCache.class);
 
     /**
+     * A tree that is not fully constructed yet
+     */
+    private static final Object BUSH = new Object();
+    
+    /**
      * TigerTreeCache container.
      */
     private static Map /* SHA1_URN -> HashTree */ TREE_MAP;
@@ -79,9 +84,14 @@ public final class TigerTreeCache {
      * @return HashTree for File
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
-        HashTree tree = (HashTree) TREE_MAP.get(fd.getSHA1Urn());
-        if (tree == null)
+        Object obj = TREE_MAP.get(fd.getSHA1Urn());
+        if (obj != null && obj.equals(BUSH))
+            return null;
+        HashTree tree = (HashTree) obj;
+        if (tree == null) {
+            TREE_MAP.put(fd.getSHA1Urn(), BUSH);
             QUEUE.add(new HashRunner(fd));
+        }
         return tree;
     }
 
@@ -93,8 +103,12 @@ public final class TigerTreeCache {
      * @return HashTree for URN
      */
     public synchronized HashTree getHashTree(URN sha1) {
-        HashTree tree = (HashTree) TREE_MAP.get(sha1);
-        return tree;
+        Object tree = TREE_MAP.get(sha1);
+        
+        if (tree != null && tree.equals(BUSH))
+            return null;
+        
+        return (HashTree)tree;
     }
     
     /**
@@ -188,7 +202,7 @@ public final class TigerTreeCache {
                 // that many anyway. Maybe some of the files are
                 // just temporarily unshared.
                 continue;
-            map.remove(sha1);
+            iter.remove();
         }
     }
 
