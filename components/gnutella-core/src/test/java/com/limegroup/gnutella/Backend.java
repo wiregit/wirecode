@@ -5,8 +5,10 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 /**
  * Utility class that constructs a LimeWire backend for testing
@@ -16,208 +18,322 @@ import java.util.*;
  * <tt>ActivityCallbackStub</tt>.  Otherwise, all classes are 
  * constructed as they normally would be in the client.
  */
-public class Backend {
 
-    /**
-     * The default port that backend instances run on.
-     */
-    public static final int DEFAULT_PORT = 6300;
+/** This isn't really a JUNIT test class, but subclassing BastTestCase
+ * gives us access to a lot of neat support routines and does no harm.
+ * Side benefit, as soon as the constructor is called the internal save
+ * and user preference directories will be switched to harmless test
+ * directories, saving us from having to save and restore important files.
+ */
+public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 
-    /**
-     * The default port that backend instances run on if they are
-     * a backend that rejects all connections.
-     */
-    public static final int DEFAULT_REJECT_PORT = 6301;
+    /** Extensions of files that the backend automatically shares */
+    public static final String SHARED_EXTENSION = "tmp";
 
-    private final int PORT;
+    /** Port that normal backend will listen on */
+    public static final int PORT = 6300;
+    
+    /** Port that the reject backend will listen on */
+    public static final int REJECT_PORT = 6301;
+    
+    /* Port that will shutdown the normal backend process */
+    private static final int SHUTDOWN_PORT = 6310;
+    
+    /* Port that will shutdown the reject backend process */
+    private static final int SHUTDOWN_REJECT_PORT = 6311;
+    
+    /* Port used to pass error reports to reporting JVM */
+    private static final int ERROR_PORT = 6399;
+
 
 	/**
 	 * The <tt>RouterService</tt> instance the constructs the backend.
 	 */
 	private RouterService ROUTER_SERVICE;
-
-	private final File TEMP_DIR = new File("temp");
-
-	private final Timer TIMER = new Timer();
-
-	/**
-	 * The number of milliseconds to wait before automatically shutting off.
-	 */
-	private final int TIMEOUT;
-
-	/**
-	 * The <tt>MessageRouter</tt> instance to use.
-	 */
-	private final MessageRouter ROUTER;
-	
-	/**
-	 * The <tt>ActivityCallback</tt> to use.
-	 */
-	private final ActivityCallback CALLBACK;
-
-	/**
-	 * The files that should be copied to a temporary directory on startup and
-	 * returned to their original locations on shutdown.
-	 */
-	private final File[] FILES_TO_SAVE = {
-		new File(CommonUtils.getUserSettingsDir(), "gnutella.net"),
-		new File(CommonUtils.getUserSettingsDir(), "limewire.props"),
-	};
-
-
-	public static Backend createBackend(ActivityCallback callback, int timeout){
-		return new Backend(callback, timeout);
-	}
-
-
-	public static Backend createBackend(int timeout) {
-		return new Backend(new ActivityCallbackStub(), timeout);
-	}
-
-    /**
-     * @return a BackEnd that will live until you shutdown() it.
-     */
-	public static Backend createLongLivedBackend() {
-		return new Backend(new ActivityCallbackStub(), 0);
-	}
-    
     
     /**
-     * @return a BackEnd that will live until you shutdown() it.
+     * Server socket on which we will listen for error reports from backend
+     * servers running in other JVM's.   Not that this is not used by the
+     * backend server process itself, but by test classes that are calling
+     * the launch and shutdown methods
      */
-	public static Backend createLongLivedBackend(ActivityCallback callback) {
-		return new Backend(callback, 0);
-	}
+    private static ServerSocket errorServer = null;
 
     /**
-     * @return a BackEnd that will live until you shutdown() it.
+     * Return the linstening port number
      */
-	public static Backend createLongLivedBackend(ActivityCallback callback,
-                                                 MessageRouter router) {
-		return new Backend(callback, router, 0, DEFAULT_PORT);
-	}
-
-    /**
-     * @return a BackEnd that will live until you shutdown() it.
-     */
-	public static Backend createLongLivedBackend(MessageRouter router) {
-		return new Backend(new ActivityCallbackStub(), router, 0, DEFAULT_PORT);
-	}
-
-	/**
-	 * Creates a new <tt>Backend</tt> that will only accept connections
-	 * from the local machine.
-	 *
-	 * @param timeout the number of milliseconds to wait before automatically
-	 *  shutting down
-	 */
-	public static Backend createLocalBackend(int timeout) {
-		return new LocalBackend(new ActivityCallbackStub(), null, 
-                                timeout, DEFAULT_PORT);
-	}
-
-	/**
-	 * Creates a new <tt>Backend</tt> that will only accept connections
-	 * from the local machine.
-	 *
-	 * @param callback the <tt>ActivityCallback</tt> instance to use
-	 */
-	public static Backend createLocalBackend(ActivityCallback callback) {
-		return new LocalBackend(callback, null, 0, DEFAULT_PORT);
-	}
-
-	/**
-	 * Creates a new <tt>Backend</tt> that will only accept connections
-	 * from the local machine.
-	 *
-	 * @param callback the <tt>ActivityCallback</tt> instance to use
-	 * @param router the <tt>MessageRouter</tt> to use
-	 */
-	public static Backend createLocalBackend(ActivityCallback callback, 
-											 MessageRouter router) {
-		return new LocalBackend(callback, router, 0, DEFAULT_PORT);
-	}
-											 
-    /**
-     * Creates a backend that rejects all incoming requests.
-     */
-    private static Backend createRejectingBackend(int timeout) {
-		return new LocalBackend(new ActivityCallbackStub(), null, 
-                                timeout, DEFAULT_REJECT_PORT);
+    public static int getPort() {
+        return PORT;
     }
     
     /**
-     * Creates a <tt>Backend</tt> instance with the specified 
-     * <tt>ActivityCallback</tt> and timeout.
+     * erturn the reject server listening port number
      */
-    private Backend(ActivityCallback callback, int timeout) {
-        this(callback, null, timeout, DEFAULT_PORT);
+    public static int getRejectPort() {
+        return REJECT_PORT;
     }
+    
+    /**
+     * Launch normal backend process if it isn't already running
+     * @return true if we have launched a new backend process
+     * false if one was already running
+     * @throws IOException if backend launch was unsucessful
+     */
+    public synchronized static boolean launch() 
+    throws IOException {
+        return launch(false);
+    }
+    
+    /**
+     * Launch backend process if it isn't already running
+     * @param reject true to launch the reject backend server,
+     * false to launch the regular backend server
+     * @return true if we have launched a new backend process
+     * false if one was already running
+     * @throws IOException if backend launch was unsucessful
+     */
+    public synchronized static boolean launch(boolean reject) 
+        throws IOException {
+        
+        // Try to open a connection to our listening port.  If it works, we 
+        // will assume the backend is up and running
+        int port = (reject ? REJECT_PORT : PORT);
+        if (isPortInUse(port)) return false;
 
-
+        String[] args = new String[reject ? 5 : 4];
+        args[0] = "java";
+        args[1] = "-classpath";
+        args[2] = System.getProperty("java.class.path", ".");
+        args[3] = "com.limegroup.gnutella.Backend";
+        if (reject) args[4] = "reject";
+        Process proc = Runtime.getRuntime().exec(args);
+        new CopyThread(proc.getErrorStream(), System.err);
+        new CopyThread(proc.getInputStream(), System.out);
+        try { Thread.sleep(10000); } catch (InterruptedException ex) {}
+        if (! isPortInUse(port)) {
+            proc.destroy();
+            throw new IOException("Backend process failed to open port");
+        }
+        return true;
+    }
+    
+    /** Simple thread to copy backend stdout and stderr */
+    private static class CopyThread extends Thread {
+        private InputStream is;
+        private PrintStream os;
+        
+        public CopyThread(InputStream is, PrintStream os) {
+            this.is = is;
+            this.os = os;
+            start();
+        }
+        
+        public void run() {
+            try {
+                while (true) {
+                    int chr = is.read();
+                    if (chr < 0) break;
+                    os.print((char)chr);
+                }
+            } catch (IOException ex) {}
+        }
+    }
+    
+    /**
+     * Determine if specfied port is in use
+     * @param port the port number
+     * @return true if port is in use
+     */
+    private static boolean isPortInUse(int port) {
+        try {
+            Socket sock = new Socket("127.0.0.1", port);
+            try { sock.close(); } catch (IOException ex) {}
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+    
 	/**
-	 * Constructs a new <tt>Backend</tt>.
-     * @param timeout a non-positive timeout will make this BackEnd long-lived.
-     * In that case, be sure to call shutdown() yourself!!  Any positive timeout
-     * will cause the BackEnd to be shutoff in timeout milliseconds.
+	 * Sets the <tt>ErrorCallback</tt> class to which errors detected backend
+     * the backend servers will be reported.   Only one of these an be 
+     * active at any time.
+     * @param callback Callback interface to be called to report errors, or
+     * null to release the interface.
 	 */
-	protected Backend(ActivityCallback callback, MessageRouter router,
-					  int timeout, int port) {
-		System.out.println("STARTING BACKEND ON PORT "+port); 
-		AbstractSettings.setShouldSave(false);
-        PORT = port;
-		makeSharedDirectory();
-		copySettingsFiles();
-		setStandardSettings();
-		CALLBACK = callback;
-		ROUTER = router;
-		TIMEOUT = timeout;
-        if(PORT == DEFAULT_REJECT_PORT) {
-            ConnectionSettings.KEEP_ALIVE.setValue(0);
+	public static void setErrorCallback(ErrorCallback callback) 
+        throws IOException {
+        if (callback == null) {
+            if (errorServer != null) {
+                ServerSocket tmpServer = errorServer;
+                errorServer = null;
+                try { tmpServer.close(); } catch (IOException ex) {}
+            }
+        }
+        
+        else {
+            if (errorServer != null) {
+                throw new IOException("Error callback already active");
+            }
+            errorServer = new ServerSocket(ERROR_PORT);
+            new ErrorMonitorThread(callback);
         }
 	}
-
-	/**
-	 * Starts all backend threads.
-	 */
-	public void start() {
-        if (ROUTER == null)
-            ROUTER_SERVICE = new RouterService(CALLBACK);
-        else
-            ROUTER_SERVICE = new RouterService(CALLBACK, ROUTER);
-        ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
-        if(PORT != DEFAULT_REJECT_PORT) {
-            RouterService.connect();
+    
+    public static class ErrorMonitorThread extends Thread {
+        private ErrorCallback callback;
+        
+        public ErrorMonitorThread(ErrorCallback callback) {
+            super("ErrorMonitorThread");
+            this.callback = callback;
+            setDaemon(true);
+            start();
         }
-		try {
-			// sleep to let the file manager initialize
-			Thread.sleep(2000);
-		} catch(InterruptedException e) {
-		}
-		System.out.println("BACKEND LISTENING ON PORT: "+RouterService.getPort()); 
-        if (TIMEOUT > 0) {
-            TIMER.schedule(new TimerTask() {
-                    public void run() {
-                        shutdown("AUTOMATED");
+        
+        public void run() {
+            try {
+                while (true) {
+                    Socket sock = errorServer.accept();
+                    try {
+                        sock.setSoTimeout(1000);
+                        ObjectInputStream ois = 
+                            new ObjectInputStream(sock.getInputStream());
+                        Throwable error = (Throwable)ois.readObject();
+                        callback.error(error);
+                        sock.close();
+                    } catch (Exception ex) {
+                        callback.error(ex);
                     }
-                }, TIMEOUT);
+                }
+            } catch (IOException ex) {
+                if (errorServer != null) {
+                    callback.error(ex);
+                    try { errorServer.close(); } catch (IOException ex2) {}
+                    errorServer = null;
+                }
+            }
         }
+    }
+        
+    
+    /**
+     * Shutdown normal backend process
+     */
+    public static void shutdown() {
+        shutdown(false);
+    }
+    
+    /**
+     * Shutdown backend process
+     * @param reject true to shut down the reject backend process
+     * false to shut down the normal reject process
+     */
+    public static void shutdown(boolean reject) {
+        /* This might be called from an entirely separate JVM than the one
+         * running the backend, so we can't trust any of the mutable data
+         * members.
+         *
+         * Just opening a cnonection to the shutdown port should do it
+         */
+        isPortInUse(reject ? SHUTDOWN_REJECT_PORT : SHUTDOWN_PORT);
+    }
+
+	/**
+	 * Main method is necessary to run a stand-alone server that tests can be 
+	 * run off of.
+	 */
+	public static void main(String[] args) throws IOException {
+        boolean reject = false;
+        boolean shutdown = false;
+        for (int ii = 0; ii < args.length; ii++) {
+            if (args[ii].equalsIgnoreCase("REJECT")) reject = true;
+            if (args[ii].equalsIgnoreCase("SHUTDOWN")) shutdown = true;
+        }
+        
+        if (shutdown) {
+            shutdown(reject);
+        } else {
+            new Backend(reject);
+        }
+    }
+
+
+	/**
+	 * Constructs and launches a new <tt>Backend</tt>.
+     * @param reject true to launch a reject server
+	 */
+	private Backend(boolean reject) throws IOException {
+        super("Backend");
+		System.out.println(reject ? "STARTING REJECT BACKEND" 
+                                  : "STARTING NORMAL BACKEND"); 
+        
+        int port = (reject ? REJECT_PORT : PORT);
+        int shutdownPort = (reject ? SHUTDOWN_REJECT_PORT : SHUTDOWN_PORT);
+
+        ServerSocket shutdownSocket = null;
+        try {
+            shutdownSocket = new ServerSocket(shutdownPort);
+            
+            preSetUp();
+    		setStandardSettings(port, reject);
+            populateSharedDirectory();
+            ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+            ROUTER_SERVICE.start();
+            if (!reject) ROUTER_SERVICE.connect();
+
+            try {
+                // sleep to let the file manager initialize
+                Thread.sleep(2000);
+            } catch(InterruptedException e) {}
+            if (ROUTER_SERVICE.getPort() != port) {
+                throw new IOException("Opened wrong port");
+            }
+            
+            waitForShutdown(shutdownSocket);
+            doShutdown(reject, "");
+        } catch (Exception ex) {
+            ErrorService.error(ex);
+            doShutdown(reject, "Exception thrown by monitor thread");
+        } finally {
+            try {
+                if (shutdownSocket != null) shutdownSocket.close();
+            } catch (IOException ex2) {}
+            postTearDown();
+        }
+        
 	}
+    
+    private void waitForShutdown(ServerSocket shutdownSocket) 
+        throws IOException {
+    
+        Socket sock = null;
+        try {
+            while (true) {
+                sock = shutdownSocket.accept();
+                String host = sock.getInetAddress().getHostAddress();
+                sock.close();
+                if (host.equals("127.0.0.1")) break;
+                System.out.println("Ignoring shutdown request from" + host);
+            }
+        } catch (IOException ex) {
+            try { if (sock != null) sock.close(); } catch (IOException ex2) {}
+            throw ex;
+        }
+    }
 
 	/**
 	 * Creates a temporary shared directory for testing purposes.
 	 */
-	protected void makeSharedDirectory() {
-		TEMP_DIR.mkdirs();
-		TEMP_DIR.deleteOnExit();
-		File coreDir = CommonUtils.getResourceFile("com/limegroup/gnutella");
+	private void populateSharedDirectory() {
+        File coreDir;
+        coreDir = CommonUtils.getResourceFile("com/limegroup/gnutella");				
 		File[] files = coreDir.listFiles();
 
         if ( files != null ) {
     		for(int i=0; i<files.length; i++) {
     			if(!files[i].isFile()) continue;
-    			copyResourceFile(files[i], files[i].getName() + ".tmp");
+    			copyResourceFile(files[i], files[i].getName() + "."+
+                                 SHARED_EXTENSION);
     		}		
         }
 	}
@@ -226,11 +342,10 @@ public class Backend {
 	 * Sets the standard settings for a test backend, such as the ports, the
 	 * number of connections to maintain, etc.
 	 */
-	protected void setStandardSettings() {
+	private void setStandardSettings(int port, boolean reject) {
 		SettingsManager settings = SettingsManager.instance();
-		settings.setPort(PORT);
-		settings.setDirectories(new File[] {TEMP_DIR});
-		settings.setExtensions("tmp");
+		settings.setPort(port);
+		settings.setExtensions(SHARED_EXTENSION);
 		ConnectionSettings.KEEP_ALIVE.setValue(10);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -238,47 +353,22 @@ public class Backend {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
-	}
-
-	
-
-	protected void copySettingsFiles() {
-		for(int i=0; i<FILES_TO_SAVE.length; i++) {
-			File curDirFile = new File(FILES_TO_SAVE[i].getName());
-			curDirFile.delete();
-			FILES_TO_SAVE[i].renameTo(curDirFile);
-		}
-	}
-
-
-	protected void restoreSettingsFiles() {
-		for(int i=0; i<FILES_TO_SAVE.length; i++) {
-			File curDirFile = new File(FILES_TO_SAVE[i].getName());
-			FILES_TO_SAVE[i].delete();
-			curDirFile.renameTo(FILES_TO_SAVE[i]);
-			curDirFile.delete();
-		}		
-	}
-
-	/**
-	 * Accessor for the <tt>RouterService</tt> instance for this 
-	 * <tt>Backend</tt>.
-	 *
-	 * @return the <tt>RouterService</tt> instance for this <tt>Backend</tt>
-	 */
-	public RouterService getRouterService() {
-		return ROUTER_SERVICE;
+        settings.setBannedIps(new String[] {"*.*.*.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*"});        
 	}
 
 	/**
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
-	public void shutdown(String msg) {
-		System.out.println("BACKEND SHUTDOWN: "+msg); 
+	private void doShutdown(boolean reject, String msg) {
+        String message = (reject ? "REJECT BACKEND SHUTDOWN"
+                                 : "NORMAL BACKEND SHUTDOWN");
+        if (msg != null) message = message + ": " + msg;                                 
+		System.out.println(message); 
 		ROUTER_SERVICE.shutdown();
-		restoreSettingsFiles();
-        System.exit(0);
+		System.exit(0);
 	}
 
 	/**
@@ -290,7 +380,7 @@ public class Backend {
 	 */
 	private final void copyResourceFile(final File fileToCopy, String newName) {
 
-		File file = new File(TEMP_DIR, newName);
+		File file = new File(getSharedDirectory(), newName);
 		// return quickly if the file is already there, no copy necessary
 		if(file.exists() ) return;
 
@@ -322,24 +412,23 @@ public class Backend {
 			} catch(IOException ioe) {}	// all we can do is try to close the streams
 		} 
 	}
-
-	/**
-	 * Main method is necessary to run a stand-alone server that tests can be 
-	 * run off of.
-	 */
-	public static void main(String[] args) {
-        Backend be = null;
-        if(args.length == 0) {
-            be = Backend.createLocalBackend(20000);
-        } else if(args.length == 1) {
-            be = Backend.createLocalBackend(Integer.parseInt(args[0]));
-        } else if(args[1].equals("reject")) {
-            System.out.println("STARTING REJECT SERVER"); 
-            be = Backend.createRejectingBackend(Integer.parseInt(args[0]));
-        } else {
-            be = Backend.createLocalBackend(Integer.parseInt(args[0]));
-        }
-		be.start();
-	}
+    
+    /** Handles throwable error report from the backend */
+    public void error(Throwable ex) {
+        // First try to serialize the exception to the error port
+        try {
+            Socket sock = new Socket("127.0.0.1", ERROR_PORT);
+            ObjectOutputStream oos = 
+                new ObjectOutputStream(sock.getOutputStream());
+            oos.writeObject(ex);
+            oos.flush();
+            sock.close();
+            return;
+        } catch (IOException ex2) {}
+        
+        // If that didn't work, print a stack tracke and throw a runtime exception
+        ex.printStackTrace();
+        throw new RuntimeException(ex);
+    }
 }
 
