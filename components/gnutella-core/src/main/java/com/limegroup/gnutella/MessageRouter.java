@@ -2613,6 +2613,7 @@ public abstract class MessageRouter {
      * notifying doesn't have to hold any locks.
      */
     public void registerMessageListener(byte[] guid, MessageListener ml) {
+        ml.registered(guid);
         synchronized(MESSAGE_LISTENER_LOCK) {
             Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
             listeners.putAll(_messageListeners);
@@ -2627,7 +2628,6 @@ public abstract class MessageRouter {
                 all.add(ml);
             }
             listeners.put(guid, Collections.unmodifiableList(all));
-            ml.registered(guid);
             _messageListeners = Collections.unmodifiableMap(listeners);
         }
     }
@@ -2639,11 +2639,13 @@ public abstract class MessageRouter {
      * notifying doesn't have to hold any locks.
      */
     public void unregisterMessageListener(byte[] guid, MessageListener ml) {
+        boolean removed = false;
         synchronized(MESSAGE_LISTENER_LOCK) {
             List all = (List)_messageListeners.get(guid);
             if(all != null) {
                 all = new ArrayList(all);
                 if(all.remove(ml)) {
+                    removed = true;
                     Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
                     listeners.putAll(_messageListeners);
                     if(all.isEmpty())
@@ -2651,10 +2653,11 @@ public abstract class MessageRouter {
                     else
                         listeners.put(guid, Collections.unmodifiableList(all));
                     _messageListeners = Collections.unmodifiableMap(listeners);
-                    ml.unregistered(guid);
                 }
             }
         }
+        if(removed)
+            ml.unregistered(guid);
     }
 
 

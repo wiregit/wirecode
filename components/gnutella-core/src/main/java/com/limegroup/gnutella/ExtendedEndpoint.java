@@ -212,6 +212,18 @@ public class ExtendedEndpoint extends Endpoint {
     }
     
     /**
+     * Decrements the failures for this UDP Host Cache.
+     *
+     * This is intended for use when the network has died and
+     * we really don't want to consider the host a failure.
+     */
+    public void decrementUDPHostCacheFailure() {
+        Assert.that(isUDPHostCache());
+        // don't go below 0.
+        udpHostCacheFailures = Math.max(0, udpHostCacheFailures-1);
+    }
+    
+    /**
      * Records a UDP Host Cache success.
      */
     public void recordUDPHostCacheSuccess() {
@@ -415,8 +427,13 @@ public class ExtendedEndpoint extends Endpoint {
      * </ul>
      */
     public static Comparator priorityComparator() {
-        return new PriorityComparator();
+        return PRIORITY_COMPARATOR;
     }
+    
+    /**
+     * The sole priority comparator.
+     */
+    private static final Comparator PRIORITY_COMPARATOR = new PriorityComparator();
 
     static class PriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {

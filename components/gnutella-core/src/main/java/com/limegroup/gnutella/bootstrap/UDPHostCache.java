@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Collections;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -48,17 +50,18 @@ public class UDPHostCache {
     public static final int PERMANENT_SIZE = 100;
     
     /**
-     * A sorted (by uptime) list of UDP caches.
-     * This is sorted by list so that the permanent caching (to/from disk)
-     * keeps the caches with the highest uptime.
-     * For convenience, a Set is also maintained, to easily look up
-     * duplicates.
+     * The number of hosts we try to fetch from at once.
+     */
+    public static final int FETCH_AMOUNT = 5;
+    
+    /**
+     * A list of UDP Host caches, to allow easy sorting & randomizing.
+     * For convenience, a Set is also maintained, to easily look up duplicates.
      * INVARIANT: udpHosts contains no duplicates and contains exactly
      *  the same elements and udpHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private final FixedsizePriorityQueue /* of ExtendedEndpoint */ udpHosts =
-        new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
-                                   PERMANENT_SIZE);
+    private final List /* of ExtendedEndpoint */ udpHosts =
+        new ArrayList(PERMANENT_SIZE);
     private final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
     
     /**
@@ -66,6 +69,11 @@ public class UDPHostCache {
      * again.
      */
     private final Set /* of ExtendedEndpoint */ attemptedHosts;
+    
+    /**
+     * Whether or not we need to resort the udpHosts by failures.
+     */
+    private boolean dirty = false;
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 minutes.
@@ -100,11 +108,24 @@ public class UDPHostCache {
     }
     
     /**
-     * Erases the attempted hosts.
+     * Erases the attempted hosts & decrements the failure counts.
      */
     public synchronized void resetData() {
         LOG.debug("Clearing attempted udp host caches");
         attemptedHosts.clear();
+        decrementFailures();
+    }
+    
+    /**
+     * Decrements the failure count for each known cache.
+     */
+    protected synchronized void decrementFailures() {
+        for(Iterator i = udpHosts.iterator(); i.hasNext(); ) {
+            ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+            ep.decrementUDPHostCacheFailure();
+            // we do not set dirty because _every_ host changed,
+            // meaning the order stays the same.
+        }
     }
     
     /**
@@ -113,20 +134,21 @@ public class UDPHostCache {
      * Contacts 10 UDP hosts at a time.
      */
     public synchronized boolean fetchHosts() {
-        LinkedList temp = new LinkedList();
-        // add caches so they're ordered best -> worst
-        for(Iterator i = udpHosts.iterator(); i.hasNext(); ) {
-            Object next = i.next();
-            if(!attemptedHosts.contains(next))
-                temp.addFirst(next);
+        // If the order has possibly changed, resort.
+        if(dirty) {
+            Collections.sort(udpHosts, FAILURE_COMPARATOR);
+            dirty = false;
         }
         
-        // Keep only the first 10 of the valid hosts.
-        // Note that we had to add all possible ones first, 
-        // 'cause udpHosts.iterator() returns from worst -> best
-        List validHosts = new ArrayList(Math.min(10, temp.size()));
-        for(Iterator i = temp.iterator(); i.hasNext() && validHosts.size() < 10; )
-            validHosts.add(i.next());
+        // Keep only the first FETCH_AMOUNT of the valid hosts.
+        List validHosts =
+            new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
+        for(Iterator i = udpHosts.iterator();
+         i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
+            Object next = i.next();
+            if(!attemptedHosts.contains(next))
+                validHosts.add(next);
+        }
 
         attemptedHosts.addAll(validHosts);
         
@@ -191,20 +213,29 @@ public class UDPHostCache {
             return false;
         if (udpHostsSet.contains(e))
             return false;
+            
+        // note that we do not do any comparisons to ensure that
+        // this host is "better" than existing hosts.
+        // the rationale is that we'll only ever be adding hosts
+        // who have a failure count of 0 (unless we're reading
+        // from gnutella.net, in which case all will be added),
+        // and we always want to try new people.
         
-        Object removed=udpHosts.insert(e);
-        if (removed!=e) {
-            //Was actually added...
-            udpHostsSet.add(e);
-            if (removed!=null)
-                //...and something else was removed.
-                udpHostsSet.remove(removed);
-            return true;
-        } else {
-            //Uptime not good enough to add.  (Note that this is 
-            //really just an optimization of the above case.)
-            return false;
+        // if we've exceeded the maximum size, remove the worst element.
+        if(udpHosts.size() >= PERMANENT_SIZE) {
+            Object removed = udpHosts.remove(udpHosts.size() - 1);
+            udpHostsSet.remove(removed);
         }
+        
+        // just insert him at the beginning.  we'll sort later.
+        udpHosts.add(0, e);
+        udpHostsSet.add(e);
+        // we need to sort if this guy had any failures.
+        // otherwise, the front of the list is the place
+        // to go.
+        if(e.getUDPHostCacheFailures() != 0)
+            dirty = true;
+        return true;
     }
     
     /**
@@ -252,7 +283,10 @@ public class UDPHostCache {
         public void processMessage(Message m, ReplyHandler handler) {
             // allow only udp replies.
             if(handler instanceof UDPReplyHandler) {
-                hosts.remove(handler);
+                if(hosts.remove(handler)) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Recieved: " + m);
+                }
                 // OPTIMIZATION: if we've gotten succesful responses from
                 // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
@@ -271,23 +305,39 @@ public class UDPHostCache {
          * Notification that this listener is now unregistered for the specified guid.
          */
         public void unregistered(byte[] g) {
-            // Record the failures...
-            for(Iterator i = hosts.iterator(); i.hasNext(); ) {
-                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-                if(LOG.isTraceEnabled())
-                    LOG.trace("No response from cache: " + ep);
-                ep.recordUDPHostCacheFailure();
-                if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
-                    remove(ep);
+            synchronized(UDPHostCache.this) {
+                // Record the failures...
+                for(Iterator i = hosts.iterator(); i.hasNext(); ) {
+                    ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("No response from cache: " + ep);
+                    ep.recordUDPHostCacheFailure();
+                    dirty = true;
+                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
+                        remove(ep);
+                }
+                // Then record the successes...
+                allHosts.removeAll(hosts);
+                for(Iterator i = allHosts.iterator(); i.hasNext(); ) {
+                    ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Valid response from cache: " + ep);
+                    ep.recordUDPHostCacheSuccess();
+                    dirty = true;
+                }
             }
-            // Then record the successes...
-            allHosts.removeAll(hosts);
-            for(Iterator i = allHosts.iterator(); i.hasNext(); ) {
-                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-                if(LOG.isTraceEnabled())
-                    LOG.trace("Valid response from cache: " + ep);
-                ep.recordUDPHostCacheSuccess();
-            }
+        }
+    }
+    
+    /**
+     * The only FailureComparator we'll ever need.
+     */
+    private static final Comparator FAILURE_COMPARATOR = new FailureComparator();
+    private static class FailureComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            ExtendedEndpoint e1 = (ExtendedEndpoint)a;
+            ExtendedEndpoint e2 = (ExtendedEndpoint)b;
+            return e1.getUDPHostCacheFailures() - e2.getUDPHostCacheFailures();
         }
     }
 }

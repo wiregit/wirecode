@@ -6,6 +6,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
+import java.util.Collections;
 import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
@@ -97,61 +99,132 @@ public class UDPHostCacheTest extends BaseTestCase {
         }
     }
     
-    public void testUsesTenAtATime() {
+    public void testUsesFiveAtATime() {
         assertEquals(0, cache.getSize());
         
-        for(int i = 0; i < 20; i++)
+        for(int i = 0; i < 23; i++)
             cache.add(create("1.2.3." + i));
-        assertEquals(20, cache.getSize());
+        assertEquals(23, cache.getSize());
         
         assertEquals(-1, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
+        cache.fetchHosts();
+        assertEquals(5, cache.amountFetched);
+        cache.fetchHosts();
+        assertEquals(5, cache.amountFetched);
+        cache.fetchHosts();
+        assertEquals(3, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
         
         // add newer hosts, should use them.
         for(int i = 0; i < 5; i++)
             cache.add(create("2.3.4." + i));
-        assertEquals(25, cache.getSize());
+        assertEquals(28, cache.getSize());
         cache.fetchHosts();
         assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
         
         // add hosts we already added, shouldn't do nothin' with them
-        for(int i = 0; i < 20; i++)
+        for(int i = 0; i < 23; i++)
             cache.add(create("1.2.3." + i));
         for(int i = 0; i < 5; i++)
             cache.add(create("2.3.4." + i));
-        assertEquals(25, cache.getSize());
+        assertEquals(28, cache.getSize());
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
     }
     
+    public void testUsesFiveBestAtATime() {
+        assertEquals(0, cache.getSize());
+        
+        List endpoints = new LinkedList();
+        
+        // add 8 hosts with 0 failures, 3 with 1 failure,
+        // 5 with 2 failures, 4 with 3 failures,
+        // and 7 with 4 failures -- we should get'm in the right order
+        // regardless of how they were added.
+        int i = 0;
+        for(; i < 8; i++)
+            endpoints.add(create("1.2.3." + i, 0));
+        for(; i < 8+3; i++)
+            endpoints.add(create("1.2.3." + i, 1));
+        for(; i < 8+3+5; i++)
+            endpoints.add(create("1.2.3." + i, 2));
+        for(; i < 8+3+5+4; i++)
+            endpoints.add(create("1.2.3." + i, 3));
+        for(; i < 8+3+5+4+7; i++)
+            endpoints.add(create("1.2.3." + i, 4));
+        
+        // make sure they're in random order, then add them to the cache.    
+        Collections.shuffle(endpoints);
+        for(Iterator iter = endpoints.iterator(); iter.hasNext(); )
+            cache.add((ExtendedEndpoint)iter.next());
+        
+        assertEquals(-1, cache.amountFetched);    
+        assertEquals(8+3+5+4+7, cache.getSize());
+        
+        // Fetch until we run out, adding them all to a list
+        // in order we fetched'm.  (Note that we already have
+        // a test that makes sure we only do 5 at a time --
+        // this test just ensures we do them in the right order.)
+        List fetchedHosts = new ArrayList();
+        while(true) {
+            cache.fetchHosts();
+            if(cache.amountFetched == 0)
+                break;
+            fetchedHosts.addAll(cache.lastFetched);
+        }
+        
+        int max = 8+3+5+4+7;
+        assertEquals(max, fetchedHosts.size());
+        for(i = 0; i < 8+3+5+4+7; i++) {
+            ExtendedEndpoint ep = (ExtendedEndpoint)fetchedHosts.get(i);
+            if(i < 8)
+                assertEquals(0, ep.getUDPHostCacheFailures());
+            else if(i < 8+3)
+                assertEquals(1, ep.getUDPHostCacheFailures());
+            else if(i < 8+3+5)
+                assertEquals(2, ep.getUDPHostCacheFailures());
+            else if(i < 8+3+5+4)
+                assertEquals(3, ep.getUDPHostCacheFailures());
+            else if(i < 8+3+5+4+7)
+                assertEquals(4, ep.getUDPHostCacheFailures());
+            else
+                fail("wrong i: " + i);
+        }
+    }
+            
+    
     public void testAttemptedExpiresAfterTime() throws Exception {
         assertEquals(0, cache.getSize());
 
-        for(int i = 0; i < 20; i++)
+        for(int i = 0; i < 13; i++)
             cache.add(create("1.2.3." + i));
-        assertEquals(20, cache.getSize());
+        assertEquals(13, cache.getSize());
         
         assertEquals(-1, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
+        cache.fetchHosts();
+        assertEquals(3, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
         
         // Wait the attempted expiry time.
         Thread.sleep(StubCache.EXPIRY_TIME + 1000); // +1000 for fudging time.
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
+        cache.fetchHosts();
+        assertEquals(3, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
     }
@@ -159,24 +232,24 @@ public class UDPHostCacheTest extends BaseTestCase {
     public void testResetDataStartsFresh() {
         assertEquals(0, cache.getSize());
 
-        for(int i = 0; i < 20; i++)
+        for(int i = 0; i < 8; i++)
             cache.add(create("1.2.3." + i));
-        assertEquals(20, cache.getSize());
+        assertEquals(8, cache.getSize());
         
         assertEquals(-1, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(3, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
         
         cache.resetData();
         
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(5, cache.amountFetched);
         cache.fetchHosts();
-        assertEquals(10, cache.amountFetched);
+        assertEquals(3, cache.amountFetched);
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);        
     }
@@ -221,12 +294,15 @@ public class UDPHostCacheTest extends BaseTestCase {
         cache.write(writer);
         String written = writer.toString();
         BufferedReader reader = new BufferedReader(new StringReader(written));
+        // note: these tests are dependent on the order of the
+        //       way UDPHostCache internally stores the values.
+        //       thus, this is more stringent than it needs to be.
         String read = reader.readLine();
-        assertTrue(read, read.startsWith("www.limewire.com:6346"));
+        assertTrue(read, read.startsWith("www.eff.org:6346"));
         read = reader.readLine();
         assertTrue(read, read.startsWith("1.2.3.4:6346"));
         read = reader.readLine();
-        assertTrue(read, read.startsWith("www.eff.org:6346"));
+        assertTrue(read, read.startsWith("www.limewire.com:6346"));
         read = reader.readLine();
     }
     
@@ -337,7 +413,18 @@ public class UDPHostCacheTest extends BaseTestCase {
         assertEquals(3, e3.getUDPHostCacheFailures());
         assertEquals(6, e4.getUDPHostCacheFailures());
         assertEquals(4, e5.getUDPHostCacheFailures());
-        assertEquals(4, cache.getSize());        
+        assertEquals(4, cache.getSize());
+        
+        // now try a real reset data that decrements failures,
+        // ensure the caches failures went down 
+        // (except for e4, which was ejected)
+        cache.doRealDecrement = true;
+        cache.resetData();
+        assertEquals(0, e1.getUDPHostCacheFailures());
+        assertEquals(0, e2.getUDPHostCacheFailures());
+        assertEquals(2, e3.getUDPHostCacheFailures());
+        assertEquals(6, e4.getUDPHostCacheFailures());
+        assertEquals(3, e5.getUDPHostCacheFailures());
     }
     
     private void routeFor(String host, byte[] guid) throws Exception {
@@ -353,12 +440,20 @@ public class UDPHostCacheTest extends BaseTestCase {
         return (new ExtendedEndpoint(host, 6346)).setUDPHostCache(true);
     }
     
+    private ExtendedEndpoint create(String host, int failures) {
+        ExtendedEndpoint ep = create(host);
+        for(int i = 0; i < failures; i++)
+            ep.recordUDPHostCacheFailure();
+        return ep;
+    }
+    
     private static class StubCache extends UDPHostCache {
         private static final int EXPIRY_TIME = 10 * 1000;        
         private int amountFetched = -1;
         private Collection lastFetched;
         private boolean doRealFetch = false;
         private byte[] guid = null;
+        private boolean doRealDecrement = false;
         
         public StubCache() {
             super(EXPIRY_TIME);
@@ -381,6 +476,14 @@ public class UDPHostCacheTest extends BaseTestCase {
             PingRequest pr = super.getPing();
             guid = pr.getGUID();
             return pr;
+        }
+        
+        protected void decrementFailures() {
+            if(doRealDecrement) {
+                super.decrementFailures();
+            } else {
+                ;
+            }
         }
     }
 }
