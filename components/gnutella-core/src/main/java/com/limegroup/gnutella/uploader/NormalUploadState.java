@@ -93,6 +93,9 @@ public final class NormalUploadState implements HTTPMessage {
             // Content Length
             HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 
                 _amountRequested, ostream);
+            
+            // Date
+            HTTPUtils.writeDate(ostream);
 			
 			// Version 0.5 of limewire misinterpreted Content-range
 			// to be 1 - n instead of 0 - (n-1), but because this is
