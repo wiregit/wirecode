@@ -91,7 +91,7 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */
-    public LimeXMLDocument(List nameValueList, String schemaURI){
+    public LimeXMLDocument(Collection nameValueList, String schemaURI){
        
         //set the schema URI
         this.schemaUri = schemaURI;
