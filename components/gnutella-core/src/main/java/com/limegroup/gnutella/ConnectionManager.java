@@ -63,20 +63,22 @@ public class ConnectionManager {
     private boolean _noInternetConnection;
     
     /**
-     * Flag for whether or not we've checked to make sure the user's Internet
-     * connection is live on this connection attempt.
+     * Timestamp of our last successful connection.
      */
-    private volatile boolean _checkedConnection;
+    private volatile long _lastSuccessfulConnect = 0;
+    
+    /**
+     * Timestamp of the last time we checked to verify that the user has a live
+     * Internet connection.
+     */
+    private volatile long _lastConnectionCheck = 0;
+   
 
     /**
      * Counter for the number of connection attempts we've made.
      */
     private volatile static int _connectionAttempts;
     
-    /**
-     * Flag for whether or not we've made any successful TCP connection.
-     */
-    private static boolean _successfullyConnected;
 
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
@@ -1104,7 +1106,9 @@ public class ConnectionManager {
         
         _connectionAttempts = 0;
         _noInternetConnection = false;
-        _checkedConnection = false;
+        _lastConnectionCheck = 0;
+        _lastSuccessfulConnect = 0;
+        //_lastConnectionCheck = Long.MIN_VALUE;
 
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
@@ -1761,9 +1765,15 @@ public class ConnectionManager {
                 // If we've been trying to connect for awhile and have not 
                 // already checked our connection, check to make sure the
                 // user's internet connection is live.
-                if(!_successfullyConnected && _connectionAttempts > 40 &&
-                   !_checkedConnection) {
-                    _checkedConnection = true;
+                long curTime = System.currentTimeMillis();
+                if(_connectionAttempts > 40 && 
+                   ((curTime - _lastSuccessfulConnect)>2000) &&
+                   ((curTime - _lastConnectionCheck)>60000)) {
+                    _connectionAttempts = 0;
+                    _lastConnectionCheck = curTime;
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("checking for live connection");
+                    }
                     ConnectionChecker.checkForLiveConnection();
                 }
                 
@@ -1773,11 +1783,11 @@ public class ConnectionManager {
                 //but couldn't handshake (NoGnutellaOkException).
                 try {
                     initializeFetchedConnection(connection, this);
-                    _successfullyConnected = true;
+                    _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
                 } catch (NoGnutellaOkException e) {
+                    _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
-                    _successfullyConnected = true;
                     throw e;                    
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
@@ -1790,6 +1800,10 @@ public class ConnectionManager {
                 //Internal error!
                 ErrorService.error(e);
             }
+        }
+        
+        public String toString() {
+            return "ConnectionFetcher";
         }
 	}
 
