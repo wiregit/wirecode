@@ -318,7 +318,8 @@ public class LimeXMLReplyCollection {
                     trie = new Trie(true); //ignore case.
                     trieMap.put(name, trie);
                 }
-                List allDocs = (List)trie.get(value);
+                List allDocs = 
+                    (List)trie.get(I18NConvert.instance().getNorm(value));
                 // if no list of docs for this value created, create & insert.
                 if( allDocs == null ) {
                     allDocs = new LinkedList();
