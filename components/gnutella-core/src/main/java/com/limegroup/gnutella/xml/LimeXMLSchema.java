@@ -29,6 +29,11 @@ public class LimeXMLSchema extends LimeXMLDocument{
         
     }
     
+    //TODO anu
+    //this constructor may not be needed
+    public LimeXMLSchema()
+    {
+    }
     
     /**
      * Returns the unique identifier which identifies this particular schema
@@ -36,8 +41,12 @@ public class LimeXMLSchema extends LimeXMLDocument{
      */
     public String getSchemaIdentifier()
     {
+        //TODO anu remove
+        return "schemas/gen_books.xsd";
+        //end remove
+        
         //TODO
-        return null;
+        //return null;
         
     }
     
@@ -63,8 +72,20 @@ public class LimeXMLSchema extends LimeXMLDocument{
      */
     public String[] getCanonicalizedFieldNames()
     {
+        //TODO anu remove
+        String[] result =
+            {
+                "gen_book_info__Title__",
+                "gen_book_info__Author__",
+                "gen_book_info__NumChapters__",
+                "gen_book_info__Genre__"
+            };
+            return result;
+        
+        //end remove
+        
         //TODO
-        return null;
+        //return null;
     }
     
 }

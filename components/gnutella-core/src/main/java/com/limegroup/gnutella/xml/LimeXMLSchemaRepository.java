@@ -86,7 +86,12 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     {
         synchronized(_uriSchemaMap)
         {
-            return (LimeXMLSchema)_uriSchemaMap.get(uri);
+            //TODO anu remove
+            return new LimeXMLSchema();
+            //end remove
+            
+            //TODO anu uncomment 
+//            return (LimeXMLSchema)_uriSchemaMap.get(uri);
         }
     }
     
@@ -98,7 +103,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     {
         
         //TODO anu remove
-        String[] result = {"temp1", "temp2"};
+        String[] result = {"LimewireBookSchema", "LimewireRealEstateSchema"};
         return result;
         //end remove
 //        synchronized(_uriSchemaMap)

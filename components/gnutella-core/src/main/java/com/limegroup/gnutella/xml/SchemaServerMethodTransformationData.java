@@ -35,6 +35,11 @@ public class SchemaServerMethodTransformationData
      */
     private int _method = HTTP_POST;
     
+    /**
+     * Path of the script to send the HTTP request to
+     */
+    private String _scriptPath = "";
+    
     /** 
      * Map of CanonicalizedFieldNameInXMLSchema (String) ==>
      * NamesUnderstoodByServer (String)
