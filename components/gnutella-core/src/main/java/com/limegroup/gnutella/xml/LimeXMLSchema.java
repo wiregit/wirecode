@@ -31,7 +31,7 @@ public class LimeXMLSchema
      * information)
      */
     private List /* of SchemaFieldInfo */ _canonicalizedFields 
-        = new LinkedList();
+        = new ArrayList();
     
     /**
      * The URI for this schema
