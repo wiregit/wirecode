@@ -54,11 +54,6 @@ public final class UploadManager implements BandwidthTracker {
 	private List /* of Uploaders */ _activeUploadList =
 		new LinkedList();
 
-    /**
-     * The number of uploads that are actually transferring data.
-     */
-    private volatile int _activeUploads= 0;
-
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
 
@@ -180,22 +175,21 @@ public final class UploadManager implements BandwidthTracker {
      * Does some book-keeping and makes the downloader, start the download
      * @param uploader This method assumes that uploader is connected.
      */
-    private void doSingleUpload(Uploader uploader, String host,
-        int index) {
+    private void doSingleUpload(Uploader uploader, String host, int index) {
         long startTime=-1;
 
-        // check if it complies with the restrictions.
-        // and set the uploader state accordingly
-        boolean accepted=insertAndTest(uploader, host);
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
-        // don't want to show browse host status in gui...
-        if (!isBHUploader)
+        // check if it complies with the restrictions.
+        // and set the uploader state accordingly
+        boolean accepted = false;
+        if(!isBHUploader) { //testing and book-keeping only if !browse host
+            accepted=insertAndTest(uploader, host);//add to list
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
             _callback.addUpload(uploader);
-
+        }
         
         //Note: We do not call connect() anymore. That's because connect would
         //never do anything in the case of a normal upload  - becasue the
@@ -203,11 +197,6 @@ public final class UploadManager implements BandwidthTracker {
         // if a push was calling this method. 
         //Now the acceptPushDownload method connects directly.
         
-        synchronized(this) { 
-            if (accepted && !isBHUploader) 
-                _activeUploads++; 
-        }
-
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
         // way to handle it?
@@ -229,9 +218,7 @@ public final class UploadManager implements BandwidthTracker {
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
             removeFromList(uploader);
-            if (accepted && !isBHUploader)
-                _activeUploads--;
-            if (!isBHUploader) // it was never added
+            if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
                 _callback.removeUpload(uploader);		
         }
     }
@@ -297,9 +284,6 @@ public final class UploadManager implements BandwidthTracker {
                     Socket s = GIVuploader.connect();
                     //delegate to the normal upload
                     acceptUpload(HTTPRequestMethod.GET, s);
-                    //Note: we do not do any book-keeping - like incrementing
-                    //_activeUploads. Because that is taken care off in 
-                    //acceptUpload.
                 } catch(IOException ioe){//connection failed? do book-keeping
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
@@ -339,7 +323,7 @@ public final class UploadManager implements BandwidthTracker {
 	}
 
 	public int uploadsInProgress() {
-		return _activeUploads;
+		return _activeUploadList.size();
 	}
 
 
@@ -363,25 +347,15 @@ public final class UploadManager implements BandwidthTracker {
      *  Notifies callback of this.
      *      @modifies uploader, _callback 
      */
-	private synchronized boolean insertAndTest(Uploader uploader, 
-                                               String host) {
-		// add to the List
-		insertIntoList(uploader);
-
-		if ( ( (! hostLimitReached(host) ) ||
-               ( this.isBusy() ) ) &&
-             uploader.getState() != Uploader.BROWSE_HOST ) {                 
+	private synchronized boolean insertAndTest(Uploader uploader, String host) {
+		if ( ( (! hostLimitReached(host) )||(this.isBusy() ) ) && 
+                              uploader.getState() != Uploader.BROWSE_HOST ) {
             uploader.setState(Uploader.LIMIT_REACHED);
             return false;
         }
-        return true;
-	}
-
-    /** 
-     * Increments the count of uploads in progress for host. 
-     */
-	private void insertIntoList(Uploader uploader) {
+		// add to the List only if we need to
 		_activeUploadList.add(uploader);
+        return true;
 	}
 
 	/**
@@ -392,14 +366,20 @@ public final class UploadManager implements BandwidthTracker {
 	 * This method also removes the <tt>Uploader</tt> from the <tt>List</tt>
 	 * of active uploads.
 	 */
-  	private void removeFromList(Uploader uploader) {
-		_activeUploadList.remove(uploader);
+  	private synchronized void removeFromList(Uploader uploader) {
+		_activeUploadList.remove(uploader);//no effect is not in
 
 		// Enable auto shutdown
-		if(_activeUploads == 0)
+		if( _activeUploadList.size()== 0)
 			_callback.uploadsComplete();
   	}
 	
+    /**
+     * @return true if the number of uploads from the host is strictly LESS than
+     * the MAX, although we want to allow exactly MAX uploads from the same
+     * host. This is because this method is called BEFORE we add/allow the.
+     * upload.
+     */
 	private synchronized boolean hostLimitReached(String host) {
         int max = SettingsManager.instance().getUploadsPerPerson();
         int i=0;
@@ -409,7 +389,7 @@ public final class UploadManager implements BandwidthTracker {
             if(u.getHost().equals(host))
                 i++;
         }
-        return i<=max;
+        return i<max;
 	}
 
 	/**
