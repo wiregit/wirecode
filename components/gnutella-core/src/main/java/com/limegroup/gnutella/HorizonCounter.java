@@ -70,8 +70,6 @@ public final class HorizonCounter {
          if (elapsed<HORIZON_UPDATE_TIME)
              return;
          _lastRefreshHorizonTime=now;
-
-        System.out.println("refreshing horizon stats");
         
          //Ok, now update stats.
          _numHorizonHosts=_nextNumHorizonHosts;
