@@ -368,7 +368,7 @@ public class ConnectionManager {
      *
      * @return true if this is probably connected to <tt>host</tt> 
      */
-    public boolean isConnected(Endpoint host) {        
+    private boolean isConnectedTo(Endpoint host) {        
         String hostName=host.getHostname();
         //A clone of the list of all connections, both initialized and
         //uninitialized, leaves and unrouted.  If Java could be prevented from
@@ -377,10 +377,9 @@ public class ConnectionManager {
         //(Remember that _connections is never mutated.)
         List connections=getConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if(!mc.isInitialized()) continue;
+            ManagedConnection mc = (ManagedConnection)iter.next();
  
-            if (mc.getInetAddress().getHostAddress().equals(hostName))
+            if (mc.getIPString().equals(hostName))
                 return true;
         }
         return false;
@@ -1625,7 +1624,7 @@ public class ConnectionManager {
                     return;
                 }
             } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
-                      isConnected(endpoint) );                      
+                      isConnectedTo(endpoint) );                      
 
             Assert.that(endpoint != null);
 
@@ -1660,5 +1659,4 @@ public class ConnectionManager {
             }
         }
 	}
-
 }
