@@ -41,7 +41,7 @@ public class Connection {
      * synchronization reasons, it is important that this only be modified by
      * the send(m) and receive() methods.
      */
-    private String _host;
+    private final String _host;
     private int _port;
     private Socket _socket;
     private InputStream _in;
@@ -249,16 +249,16 @@ public class Connection {
 
         
         // Check to see if this is an attempt to connect to ourselves
-        byte[] localAddress = _socket.getLocalAddress().getAddress();
+		InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-            Arrays.equals(_socket.getInetAddress().getAddress(), localAddress) && 
+            _socket.getInetAddress().equals(localAddress) &&
             _port == SETTINGS.getPort()) {
             throw new IOException("Connection to self");
         }
 
         try {
             // Set the Acceptors IP address
-            Acceptor.setAddress( localAddress );
+            RouterService.getAcceptor().setAddress( localAddress );
             
             _in = getInputStream(_socket);
             _out = getOutputStream(_socket);
@@ -334,8 +334,7 @@ public class Connection {
      *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
-    private void concludeOutgoingHandshake() throws IOException
-    {
+    private void concludeOutgoingHandshake() throws IOException {
         //This step may involve handshaking multiple times so as
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
@@ -363,7 +362,8 @@ public class Connection {
                                                 theirResponse.getStatusCode(),
                                                 "Server sent fatal response");
 
-            //3. Write "GNUTELLA/0.6 200 OK" and headers.
+            //3. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
+			//   and headers.
             HandshakeResponse ourResponse = _propertiesWrittenR.respond(
                 theirResponse, true);
             sendString(GNUTELLA_06 + " " 
@@ -443,8 +443,7 @@ public class Connection {
      *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
-    private void concludeIncomingHandshake() throws IOException
-    {
+    private void concludeIncomingHandshake() throws IOException {
         //Respond to the handshake.  This step may involve handshaking multiple
         //times so as to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
