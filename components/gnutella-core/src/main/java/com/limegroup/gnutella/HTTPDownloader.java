@@ -94,6 +94,7 @@ public class HTTPDownloader implements Runnable {
 	construct(file, m);
 	_mode = 1;
 	_socket = s;
+	_index=index;
 
     }
 
@@ -174,7 +175,6 @@ public class HTTPDownloader implements Runnable {
     /** Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"  
      *  (Response will be read later in readHeader()). */
     public void initOne() {
-
 	try {
 	    _istream = _socket.getInputStream();
 	    _br = new ByteReader(_istream);
@@ -197,7 +197,6 @@ public class HTTPDownloader implements Runnable {
 	    OutputStreamWriter osw = new OutputStreamWriter(os);
 	    BufferedWriter out=new BufferedWriter(osw);
 	    
-	    // new OutputStreamWriter(_socket.getOutputStream()));
 	    out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
 	    out.write("User-Agent: Gnutella\r\n");
 	    out.write("\r\n");
@@ -340,7 +339,6 @@ public class HTTPDownloader implements Runnable {
 	PushRequest push = new PushRequest(messageGUID, ttl, clientGUID, 
   					   _index, myIP, myPort);
 	
-
 	try {
 	    //ROUTE the push to the appropriate connection, if possible.
 	    Connection c=_manager.pushRouteTable.get(clientGUID);
@@ -488,9 +486,16 @@ public class HTTPDownloader implements Runnable {
 	boolean foundRangeInitial = false;
 	boolean foundRangeFinal = false;
 		
-	while (!str.equals("")) {
-	    
-	    str = _br.readLine();
+	while (true) {
+	    try {
+		str = _br.readLine();
+	    } catch (IOException e) {
+		_state = ERROR;
+		return;
+	    }
+	    //EOF?
+	    if (str==null || str.equals(""))
+		break;
 	    
 	    if (str.indexOf("Content-length:") != -1) {
 
@@ -573,7 +578,7 @@ class PushRequestedFile {
 	    && filename.equals(prf.filename)
 	    //Because of the following line, hosts that used faked 
 	    //IP addresses will not be able to connect to you.
-  	    && Arrays.equals(ip, prf.ip)
+//    	    && Arrays.equals(ip, prf.ip)
 	    && index==prf.index;
     }
     
