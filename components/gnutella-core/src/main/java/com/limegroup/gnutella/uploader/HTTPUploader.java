@@ -522,23 +522,23 @@ public final class HTTPUploader implements Uploader {
         //send some.
         
         coll = _fileDesc.getPushAlternateLocationCollection();
-        
-        synchronized(coll) {
-            Iterator iter  = coll.iterator();
-            //Synchronization note: We hold the locks of two
-            //AlternateLocationCollections concurrently, but one of them is a
-            //local variable, so we are OK.            
-            for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-                AlternateLocation al = (AlternateLocation)iter.next();
-                if(_writtenPushLocs.contains(al))
-                    continue;
-                _writtenPushLocs.add(al);
-                if(ret == null) ret = new HashSet();
-                ret.add(al);
-                i++;
-            }
+        if (coll != null && _wantsFalts)
+        	synchronized(coll) {
+        		Iterator iter  = coll.iterator();
+        		//Synchronization note: We hold the locks of two
+        		//AlternateLocationCollections concurrently, but one of them is a
+        		//local variable, so we are OK.            
+        		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+        			AlternateLocation al = (AlternateLocation)iter.next();
+        			if(_writtenPushLocs.contains(al))
+        				continue;
+        			_writtenPushLocs.add(al);
+        			if(ret == null) ret = new HashSet();
+        			ret.add(al);
+        			i++;
+        		}
             
-        }
+        	}
         
         return ret == null ? DataUtils.EMPTY_SET : ret;
     }
