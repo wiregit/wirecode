@@ -78,17 +78,23 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		
 		Class[] args = new Class[1];
 		args[0] = List.class;
+
+		ManagedDownloader md = 
+			new ManagedDownloader("test", 
+								  new RemoteFileDesc[]{rf1}, 
+								  new IncompleteFileManager());
+
 		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
 												new Class[]{List.class});
 
 		m.setAccessible(true);
-		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		testRFD = (RemoteFileDesc)m.invoke(md, new Object[]{list});
 		assertEquals("rfds should be equal", testRFD, rf7);
 
-		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		testRFD = (RemoteFileDesc)m.invoke(md, new Object[]{list});
 		assertEquals("rfds should be equal", testRFD, rf6);
 
-		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		testRFD = (RemoteFileDesc)m.invoke(md, new Object[]{list});
 		assertEquals("rfds should be equal", testRFD, rf1);
 
 		assertEquals("unexpected size", 2, list.size());
@@ -96,14 +102,14 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		assertTrue("should contain rfd", list.contains(rf4));
 		assertTrue("should contain rfd", list.contains(rf5));
 
-		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		testRFD = (RemoteFileDesc)m.invoke(md, new Object[]{list});
 		assertEquals("rfds should be equal", testRFD, rf5);
 
 		assertEquals("unexpected size", 1, list.size());
 
 		assertTrue("should contain rfd", list.contains(rf4));
 
-		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		testRFD = (RemoteFileDesc)m.invoke(md, new Object[]{list});
 		assertEquals("rfds should be equal", testRFD, rf4);
 
 		assertEquals("unexpected size", 0, list.size());
