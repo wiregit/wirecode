@@ -34,19 +34,19 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				log2("Created UDPSocket");
 
 				if ( args.length == 2 ) {
-                    tlog("Starting SimpleTest:");
+                    tlogstart("Starting SimpleTest:");
 					simpleTest(usock);
                 } else if (args[2].equals("-ec")) {
-                    tlog("Starting EchoClient:");
+                    tlogstart("Starting EchoClient:");
                     echoClient(usock);
                 } else if (args[2].equals("-es")) {
-                    tlog("Starting EchoServer:");
+                    tlogstart("Starting EchoServer:");
                     echoServer(usock);
 				} else if (args[2].equals("-uc")) {
-                    tlog("Starting UnidirectionalClient:");
+                    tlogstart("Starting UnidirectionalClient:");
 					unidirectionalClient(usock);
 				} else if (args[2].equals("-us")) {
-                    tlog("Starting UnidirectionalServer:");
+                    tlogstart("Starting UnidirectionalServer:");
 					unidirectionalServer(usock);
                 }
 
@@ -69,8 +69,17 @@ public class UTest implements ActivityCallback, ErrorCallback {
         System.out.println(str);
     }
 
-    private static void tlog(String str) {
-        System.out.println(str +" "+ System.currentTimeMillis());
+    private static long startTime;
+    private static long endTime;
+    private static void tlogstart(String str) {
+        startTime = System.currentTimeMillis();
+        System.out.println(str +" "+ startTime);
+    }
+
+    private static void tlogend(String str) {
+        endTime = System.currentTimeMillis();
+        System.out.println(str +" "+ endTime);
+        System.out.println("Total : "+(endTime -startTime)/1000 +" seconds");
     }
 
     private static int TARGET_BYTES = 2000000;
@@ -89,7 +98,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		log("Done write");
 		
 		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
-        tlog("Done echoClient test");
+        tlogend("Done echoClient test");
 	}
 
 	static class ClientReader extends Thread {
@@ -144,7 +153,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		}
 		log("Done echo");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlog("Done echoServer test");
+        tlogend("Done echoServer test");
 	}
 
     private static void unidirectionalClient(UDPConnection usock) 
@@ -160,7 +169,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
         log2("Write reached: "+i);
         
         try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
-        tlog("Done unidirectionalClient test");
+        tlogend("Done unidirectionalClient test");
     }
 
     private static void unidirectionalServer(UDPConnection usock) 
@@ -187,7 +196,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
         log2("Read reached: "+i);
         
         try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlog("Done unidirectionalServer test");
+        tlogend("Done unidirectionalServer test");
     }
 
 	private static void simpleTest(UDPConnection usock) throws IOException {
@@ -206,7 +215,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 
 		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
 		log2("Done sleep");
-        tlog("Done simple test");
+        tlogend("Done simple test");
 	}
 
 	private static void waitOnUDP() {
