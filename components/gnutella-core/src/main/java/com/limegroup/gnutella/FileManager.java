@@ -27,6 +27,7 @@ import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.TreeMap;
 import com.sun.java.util.collections.TreeSet;
 
@@ -325,8 +326,18 @@ public abstract class FileManager {
     public synchronized boolean isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
-    
-    
+
+
+    /**
+     * Returns the <tt>URN<tt> for the File.  May return null;
+     */    
+    public synchronized URN getURNForFile(File f) {
+        FileDesc fd = getFileDescForFile(f);
+        if (fd != null) return fd.getSHA1Urn();
+        return null;
+    }
+
+
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared.
@@ -651,9 +662,13 @@ public abstract class FileManager {
 		if (! loadThreadInterrupted())
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
+
+        // prune away old creation times that may still exist
+        CreationTimeCache.instance().pruneTimes();
 		    
-		// write out the cache of URNs
+		// write out the cache of URNs and creation times
 		UrnCache.instance().persistCache();
+        CreationTimeCache.instance().persistCache();
     }
     
     /**
@@ -743,7 +758,7 @@ public abstract class FileManager {
             KeyValue info = (KeyValue)i.next();
             File[] shareables = (File[])info.getValue();
             for(int j=0; j<shareables.length && !loadThreadInterrupted();j++) {
-                addFile(shareables[j]);
+                addFile(shareables[j], -1);
                 synchronized(this) { _numPendingFiles--; }
             }
             // let the gc clean up the array of shareables.
@@ -763,6 +778,21 @@ public abstract class FileManager {
      *  added, otherwise <tt>null</tt>
      */
 	public FileDesc addFileIfShared(File file) {
+        return addFileIfShared(file, -1);
+    }
+
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists in a shared 
+     *  directory and has a shared extension.  Returns true iff the file
+     *  was actually added.  <b>WARNING: this is a potential security 
+     *  hazard.</b> 
+     *
+     * @param creationTime -1 if not known, will use file.lastModified.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
+     */
+	public FileDesc addFileIfShared(File file, long creationTime) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
@@ -785,7 +815,7 @@ public abstract class FileManager {
         }
         FileDesc fd;
         if (directoryShared) {
-            fd = addFile(f);
+            fd = addFile(f, creationTime);
             synchronized(this) { _numPendingFiles--; }
             _needRebuild = true;
         } else {
@@ -805,7 +835,23 @@ public abstract class FileManager {
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-	public abstract FileDesc addFileIfShared(File file, List metadata);
+	public FileDesc addFileIfShared(File file, List metadata) {
+        return addFileIfShared(file, metadata, -1);
+    }
+
+    /**
+     * @modifies this
+     * @effects calls addFileIfShared(file), then optionally stores any metadata
+     *  in the given XML documents.  metadata may be null if there is no data.
+     *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
+     *  security hazard.</b> 
+     *
+     * @param creationTime -1 if not known, will use file.lastModified.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
+     */
+	public abstract FileDesc addFileIfShared(File file, List metadata,
+                                             long creationTime);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -815,10 +861,11 @@ public abstract class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b>
      *
+     * @param creationTime -1 if not known, will use file.lastModified.
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-    private FileDesc addFile(File file) {
+    private FileDesc addFile(File file, long creationTime) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
@@ -881,6 +928,15 @@ public abstract class FileManager {
                 indices.add(fileIndex);
             }
 		
+            // Populate the creation time cache if necessary
+            URN mainURN = fileDesc.getSHA1Urn();
+            Long cTime = CreationTimeCache.instance().getCreationTime(mainURN);
+            if (cTime == null)
+                CreationTimeCache.instance().addTime(mainURN, 
+                                                     (creationTime > 0 ?
+                                                      creationTime :
+                                                      file.lastModified()));
+
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
             _needRebuild = true;            
@@ -981,10 +1037,14 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
+        URN oldURN = getURNForFile(f);
+        Long cTime = CreationTimeCache.instance().getCreationTime(oldURN);
+        Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        return addFileIfShared(f);
+        FileDesc fd = addFileIfShared(f, cTime.longValue());
+        return fd;
     }
 
     /**
@@ -1044,7 +1104,7 @@ public abstract class FileManager {
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        //Remove references to this from index.                                            
+        //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
@@ -1058,6 +1118,9 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
+        //Remove creation time information
+        if (_urnIndex.get(fd.getSHA1Urn()) == null)
+            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         repOk();
         return fd;
@@ -1110,7 +1173,8 @@ public abstract class FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());            
         fd = removeFileIfShared(oldName);
         Assert.that( fd != null, "invariant broken.");
-        fd = addFileIfShared(newName, xmlDocs);
+        // hash didn't change so no need to re-input creation time
+        fd = addFileIfShared(newName, xmlDocs, -1);
         return (fd != null);
     }
 
@@ -1234,6 +1298,43 @@ public abstract class FileManager {
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
         boolean includeXML = shouldIncludeXMLInResponse(request);
+
+        //Special case: return up to 3 of your 'youngest' files.
+        if (request.isWhatIsNewRequest()) {
+            // see if there are any files to send....
+            // NOTE: we only request up to 10 urns.  we don't need to worry
+            // about partial files because we don't add them to the cache.
+            Iterator iter = CreationTimeCache.instance().getFiles(3);
+            if (!iter.hasNext())
+                return EMPTY_RESPONSES;
+            
+            // get the appropriate responses
+            Set responses = new HashSet();
+            while (iter.hasNext() && (responses.size() < 3)) {
+                URN currURN = (URN) iter.next();
+                FileDesc desc = getFileDescForUrn(currURN);
+
+                // should never happen since we don't add times for IFDs and
+                // we clear removed files...
+                if ((desc==null) || (desc instanceof IncompleteFileDesc))
+                    ErrorService.error(new Exception("Unexpected file = " +
+                                                     desc));
+
+                // Formulate the response
+                Response r = new Response(desc);
+                if(includeXML)
+                    addXMLToResponse(r, desc);
+                
+                // Cache it
+                responses.add(r);
+            }
+
+            // send them off
+            if (responses.size()==0)
+                return EMPTY_RESPONSES;
+            else 
+                return (Response[]) responses.toArray(new Response[responses.size()]);
+        }
 
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,

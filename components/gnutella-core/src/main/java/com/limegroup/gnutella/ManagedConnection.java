@@ -397,7 +397,8 @@ public class ManagedConnection extends Connection
      *  in the tables, otherwise <tt>false</tt>
      */
     public boolean hitsQueryRouteTable(QueryRequest query) {
-        if(_lastQRPTableReceived == null) return false;
+        if(query.isWhatIsNewRequest()) return remoteHostSupportsWhatIsNew();
+        else if(_lastQRPTableReceived == null) return false;
         return _lastQRPTableReceived.contains(query);
     }
 

@@ -32,6 +32,8 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_XML_MASK       = 0x0020;
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
 
+    public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNew";
+
     /**
      * The payload for the query -- includes the query string, the
      * XML query, any URNs, GGEP, etc.
@@ -56,6 +58,11 @@ public class QueryRequest extends Message implements Serializable{
      * The LimeXMLDocument of the rich query.
      */
     private final LimeXMLDocument XML_DOC;
+
+    /**
+     * Whether or not the GGEP header for What is was found.
+     */
+    private boolean whatIsGGEPHeaderFound = false;
 
     // HUGE v0.93 fields
     /** 
@@ -133,7 +140,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
 
 	}
 
@@ -154,7 +161,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
 
 	}
 	/**
@@ -181,7 +188,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
 
 	}
 
@@ -209,7 +216,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
 
 	}
 
@@ -237,7 +244,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
 	}
 	
 	/**
@@ -253,10 +260,11 @@ public class QueryRequest extends Message implements Serializable{
 	        throw new NullPointerException("null urnSet");
 	    if(urnTypeSet == null)
 	        throw new NullPointerException("null urnTypeSet");
-	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "",
+	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
+                                DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN, false);
+	                            Message.N_UNKNOWN, false, false);
     }
 	    
 	
@@ -352,6 +360,33 @@ public class QueryRequest extends Message implements Serializable{
         byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
         return QueryRequest.createOutOfBandQuery(guid, query, "");
     }                                
+
+    /**
+     * Creates a new 'What is new'? query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
+     */
+    public static QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl) {
+        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
+        return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
+                                "", null, null, null,
+                                !RouterService.acceptedIncomingConnection(),
+                                Message.N_UNKNOWN, false, true);
+    }
+   
+
+    /**
+     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
+     */
+    public static QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl) {
+        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
+        return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
+                                "", null, null, null,
+                                !RouterService.acceptedIncomingConnection(),
+                                Message.N_UNKNOWN, true, true);
+    }
    
 
 	/**
@@ -462,7 +497,8 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
-								qr.getNetwork(), qr.desiresOutOfBandReplies());
+								qr.getNetwork(), qr.desiresOutOfBandReplies(),
+                                qr.isWhatIsNewRequest());
 	}
 
 	/**
@@ -477,7 +513,8 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
-								qr.getNetwork(), false);
+								qr.getNetwork(), false, 
+                                qr.isWhatIsNewRequest());
 	}
 
     /**
@@ -507,7 +544,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
     }
 
 
@@ -537,7 +574,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false);
+								Message.N_UNKNOWN, false, false);
     }
 
 
@@ -565,7 +602,8 @@ public class QueryRequest extends Message implements Serializable{
             new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
                              qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
                              qr.getQueryUrns(), qr.getQueryKey(), false, 
-                             Message.N_MULTICAST, false);
+                             Message.N_MULTICAST, false, 
+                             qr.isWhatIsNewRequest());
         mQr.setHops(qr.getHops());
         return mQr;
 	}
@@ -585,7 +623,8 @@ public class QueryRequest extends Message implements Serializable{
                                 qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Message.N_UNKNOWN,
-                                qr.desiresOutOfBandReplies());
+                                qr.desiresOutOfBandReplies(),
+                                qr.isWhatIsNewRequest());
 	}
 
 	/**
@@ -598,7 +637,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, 
 								FileManager.INDEXING_QUERY, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false);
+                                false, Message.N_UNKNOWN, false, false);
 	}
 
 	/**
@@ -614,7 +653,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false);
+                                false, Message.N_UNKNOWN, false, false);
 	}
 
 
@@ -672,7 +711,8 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, false);
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+             false, false);
     }
 
     /**
@@ -687,7 +727,7 @@ public class QueryRequest extends Message implements Serializable{
                          boolean canReceiveOutOfBandReplies) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
-             canReceiveOutOfBandReplies);
+             canReceiveOutOfBandReplies, false);
     }
 
     /**
@@ -709,7 +749,8 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set requestedUrnTypes, Set queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies) {
+                        int network, boolean canReceiveOutOfBandReplies,
+                        boolean isWhatIsNewRequest) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
 		if((query == null || query.length() == 0) &&
@@ -806,22 +847,33 @@ public class QueryRequest extends Message implements Serializable{
 								   tempRequestedUrnTypes == null ? null : 
 								   tempRequestedUrnTypes.iterator());
 
-            // add the GGEP Extension
+            // add the GGEP Extension, if necessary....
+            // *----------------------------
+            // construct the GGEP block
+            GGEP ggepBlock = new GGEP(false); // do COBS
+
+            // add the query key?
             if (this.QUERY_KEY != null) {
                 // get query key in byte form....
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 this.QUERY_KEY.write(qkBytes);
-                // construct the GGEP block
-                GGEP ggepBlock = new GGEP(false); // do COBS
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
+            }
+
+            // add the What Is header
+            if (isWhatIsNewRequest)
+                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS);
+
+            // if there are GGEP headers, write them out...
+            if ((this.QUERY_KEY != null) || isWhatIsNewRequest) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
-                addDelimiterBefore =
-                    writeGemExtension(baos, addDelimiterBefore,
-                                      ggepBytes.toByteArray());
+                addDelimiterBefore = writeGemExtension(baos, addDelimiterBefore,
+                                                       ggepBytes.toByteArray());
             }
+            // ----------------------------*
 
             baos.write(0);                             // final null
 		} 
@@ -896,6 +948,8 @@ public class QueryRequest extends Message implements Serializable{
                             byte[] qkBytes = ggep.getBytes(QK_SUPP);
                             tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                         }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
+                            whatIsGGEPHeaderFound = true;
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
@@ -1153,6 +1207,15 @@ public class QueryRequest extends Message implements Serializable{
                 return true;
         }
         return false;
+    }
+
+
+    /**
+     * Returns true if this query is for 'What is new?' content, i.e. usually
+     * the top 3 YOUNGEST files in your library.
+     */
+    public boolean isWhatIsNewRequest() {
+        return QUERY.equals(WHAT_IS_NEW_QUERY_STRING) && whatIsGGEPHeaderFound;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful

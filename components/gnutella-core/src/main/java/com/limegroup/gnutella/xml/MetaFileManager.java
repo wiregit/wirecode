@@ -91,6 +91,8 @@ public class MetaFileManager extends FileManager {
      */
     public FileDesc fileChanged(File f) {
         FileDesc fd = getFileDescForFile(f);
+        Long cTime = 
+            CreationTimeCache.instance().getCreationTime(fd.getSHA1Urn());
         if( fd == null )
             return null;
         List xmlDocs = new LinkedList();
@@ -107,7 +109,7 @@ public class MetaFileManager extends FileManager {
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
         _needRebuild = true;
-        return addFileIfShared(f, xmlDocs);
+        return addFileIfShared(f, xmlDocs, cTime.longValue());
     }        
     
     /**
@@ -150,8 +152,9 @@ public class MetaFileManager extends FileManager {
      *
      * @return The FileDesc that was added, or null if nothing added.
      */
-	public FileDesc addFileIfShared(File file, List metadata) {
-        FileDesc fd = super.addFileIfShared(file);
+	public FileDesc addFileIfShared(File file, List metadata, 
+                                    long creationTime) {
+        FileDesc fd = super.addFileIfShared(file, creationTime);
         
         // if not added, exit.
         if( fd == null )

@@ -223,7 +223,7 @@ public class ClientSidePushProxyTest
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
-                                              null, false, 0, false);
+                                              null, false, 0, false, false);
         testUP.send(query);
         testUP.flush();
 
