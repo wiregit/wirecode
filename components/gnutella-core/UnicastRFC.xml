@@ -36,14 +36,15 @@
 	<keyword>LimeWire</keyword>	
     <abstract>
 	  <t>
-	    This RFC outlines a technique for performing unicast searches 
-		of UltraPeers on the Gnutella network.  Shifting from the 
-		current broadcast search model to this system of unicast 
-		searches can dramatically reduce the overall network bandwidth, 
-		CPU, and memory required to support the Gnutella search 
-		architecture while providing search results comparable to 
-		the old broadcast model.  For rare files, the unicast search 
-		model may even provide better results than broadcast.
+	    This RFC outlines a technique for performing iterative unicast 
+		searches of UltraPeers on the Gnutella network, or "UltraPeer 
+		crawling."  Shifting from the current broadcast search model 
+		to this system of unicast searches can dramatically reduce the 
+		overall network bandwidth, CPU, and memory required to support 
+		the Gnutella search architecture while providing comparable 
+		search results to the old broadcast model.  For rare files, the 
+		unicast search model may even provide better results than 
+		broadcast.
 	  </t>
     </abstract>
   </front>
@@ -150,7 +151,7 @@
 	      </t>
 	    </section>
 	  </section>
-	  <section title="Switch to Iterative Unicast">
+	  <section title="Switch to Iterative Unicast, or UltraPeer Crawling">
 	    <t>
 	      We propose to alleviate these issues by reducing the TTL to 1 on
 		  outgoing queries and by sending queries to one UltraPeer at a time
@@ -320,9 +321,9 @@
 		control over the query and would eliminate benefits such as
 		no longer needing to concern ourselves 
 		with <xref target="cycles">cycles</xref>.  The current practice
-		of not forwarding TTL=1 queries to leaves also avoids using 
-		the powerful UltraPeer infrastructure that can be used more
-		productively. 
+		of not forwarding TTL=1 queries to leaves also fails to take
+		advantage of the powerful UltraPeer infrastructure that 
+		can be used more productively. 
 		</t>
 	  </section>
 	  <section anchor="discovery" title="UltraPeer Discovery">
@@ -346,7 +347,31 @@
 		  do this, UltraPeers send pings over UDP to the UltraPeers
 		  in their search cache.  This provides access to pongs
 		  that may not be within the horizon of the normal ping
-		  broadcast.  
+		  broadcast.  When UltraPeers receive these pings
+		  over UDP with pongs, they SHOULD handle them 
+		  differently from normal pings.  Instead of responding,
+		  with their normal pong, the UltraPeer SHOULD respond
+		  with pongs that it has cached for other hosts 
+		  supporting this proposal. So, these pongs SHOULD
+		  have 
+		  the <xref target="ggep_pongs">GGEP extension</xref>
+		  specifying support for this proposal, including the 
+		  version they support.  UltraPeers
+		  SHOULD NOT include a pong for themselves, as 
+		  presumably the requester already knows about them --
+		  otherwise it would not have sent the ping.
+
+		  <vspace/>
+		  <vspace/>
+		  Seeing as this requires specialized handling for these
+		  specific pings, hosts MAY choose instead to send the
+		  normal broadcast pings over these UDP connections.
+		  If developers choose to do this, they MUST
+		  limit the TTL to 4 or below.  In this case, this 
+		  implementation should only be seen as a temporary solution,
+		  with developers ultimately moving towards the 
+		  first scheme, as these broadcasts will generate 
+		  considerably more traffic.
 		  
 		  <vspace/>
 		  <vspace/>
@@ -498,11 +523,11 @@
     <section anchor="features" title="Additional Features">
 	  <section anchor="cycles" title="Cycles No Longer a Concern">
 	    <t>
-	      Adoption of this proposal has several additional benefits.  For example,
-		  concern for cycles in intra-UltraPeer connections is eliminated.  In the
-		  current network, cycles can be a serious problem in the worst case,
-		  resulting in nodes receiving many duplicate 
-		  messages, wasting bandwidth, CPU, and 
+	      Adoption of this proposal has several additional benefits.  For 
+		  example, concern for cycles in intra-UltraPeer connections is 
+		  eliminated.  In the current network, cycles can be a serious 
+		  problem in the worst case, resulting in nodes receiving many 
+		  duplicate messages, wasting bandwidth, CPU, and 
 		  memory.<xref target="refs.RandomWalk"/>  This eliminates
 		  these duplicates except in the case where leaves are connected to 
 		  multiple UltraPeers, and two or more of their UltraPeers are sent
@@ -527,6 +552,13 @@
 		  serving the file will only be from 2 to 3 hops away 
 		  (depending on whether the node serving the file is
 		  a leaf or an UltraPeer).
+		</t>
+	  </section>
+	  <section anchor="stop" title="Stopping Queries Has Meaning">
+	    <t>
+		  Another benefit of this scheme is that the user manually "stopping"
+		  a query can, in fact, stop that query from being sent to more
+		  hosts, saving network resources.
 		</t>
 	  </section>
 	</section>

@@ -1,7 +1,7 @@
 Content-Type: text/html
 
 <html><head><title>Gnutella Developer Forum: Gnutella UltraPeer Crawling v0.01</title>
-<meta http-equiv="Expires" content="Wed, 28 Aug 2002 17:26:27 +0000">
+<meta http-equiv="Expires" content="Thu, 29 Aug 2002 20:04:33 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -45,7 +45,7 @@ Content-Type: text/html
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">Gnutella Developer Forum</td><td width="33%" bgcolor="#666666" class="header">S. Daswani</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">A. Fisk</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">LimeWire LLC</td></tr>
-<tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 28, 2002</td></tr>
+<tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 29, 2002</td></tr>
 </table></td></tr></table>
 <div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella UltraPeer Crawling v0.01</span></b></font></div>
 <font face="verdana, helvetica, arial, sans-serif" size="2">
@@ -53,14 +53,15 @@ Content-Type: text/html
 <h3>Abstract</h3>
 
 <p>
-	    This RFC outlines a technique for performing unicast searches 
-		of UltraPeers on the Gnutella network.  Shifting from the 
-		current broadcast search model to this system of unicast 
-		searches can dramatically reduce the overall network bandwidth, 
-		CPU, and memory required to support the Gnutella search 
-		architecture while providing search results comparable to 
-		the old broadcast model.  For rare files, the unicast search 
-		model may even provide better results than broadcast.
+	    This RFC outlines a technique for performing iterative unicast 
+		searches of UltraPeers on the Gnutella network, or "UltraPeer 
+		crawling."  Shifting from the current broadcast search model 
+		to this system of unicast searches can dramatically reduce the 
+		overall network bandwidth, CPU, and memory required to support 
+		the Gnutella search architecture while providing comparable 
+		search results to the old broadcast model.  For rare files, the 
+		unicast search model may even provide better results than 
+		broadcast.
 	  
 </p><a name="toc"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
@@ -79,7 +80,7 @@ Out of Control Queries<br></b>
 <b><a href="#hits">1.3.2</a>&nbsp;
 Out of Control Query Hits<br></b>
 <b><a href="#anchor2">1.4</a>&nbsp;
-Switch to Iterative Unicast<br></b>
+Switch to Iterative Unicast, or UltraPeer Crawling<br></b>
 <b><a href="#searching_architecture">2.</a>&nbsp;
 Searching Architecture<br></b>
 <b><a href="#algorithm">2.1</a>&nbsp;
@@ -110,6 +111,8 @@ Additional Features<br></b>
 Cycles No Longer a Concern<br></b>
 <b><a href="#push">6.2</a>&nbsp;
 Higher Success Rate for Push Downloads<br></b>
+<b><a href="#stop">6.3</a>&nbsp;
+Stopping Queries Has Meaning<br></b>
 <b><a href="#rfc.references1">&#167;</a>&nbsp;
 References<br></b>
 <b><a href="#rfc.authors">&#167;</a>&nbsp;
@@ -234,7 +237,7 @@ Acknowledgements<br></b>
 		  devouring network resources as they go.
 	      
 </p>
-<a name="rfc.section.1.4"></a><h4><a name="anchor2">1.4</a>&nbsp;Switch to Iterative Unicast</h4>
+<a name="rfc.section.1.4"></a><h4><a name="anchor2">1.4</a>&nbsp;Switch to Iterative Unicast, or UltraPeer Crawling</h4>
 
 <p>
 	      We propose to alleviate these issues by reducing the TTL to 1 on
@@ -423,9 +426,9 @@ Acknowledgements<br></b>
 		control over the query and would eliminate benefits such as
 		no longer needing to concern ourselves 
 		with <a href="#cycles">cycles</a>.  The current practice
-		of not forwarding TTL=1 queries to leaves also avoids using 
-		the powerful UltraPeer infrastructure that can be used more
-		productively. 
+		of not forwarding TTL=1 queries to leaves also fails to take
+		advantage of the powerful UltraPeer infrastructure that 
+		can be used more productively. 
 		
 </p>
 <a name="rfc.section.2.3"></a><h4><a name="discovery">2.3</a>&nbsp;UltraPeer Discovery</h4>
@@ -451,7 +454,32 @@ Acknowledgements<br></b>
 		  do this, UltraPeers send pings over UDP to the UltraPeers
 		  in their search cache.  This provides access to pongs
 		  that may not be within the horizon of the normal ping
-		  broadcast.  
+		  broadcast.  When UltraPeers receive these pings
+		  over UDP with pongs, they SHOULD handle them 
+		  differently from normal pings.  Instead of responding,
+		  with their normal pong, the UltraPeer SHOULD respond
+		  with pongs that it has cached for other hosts 
+		  supporting this proposal. So, these pongs SHOULD
+		  have 
+		  the <a href="#ggep_pongs">GGEP extension</a>
+		  specifying support for this proposal, including the 
+		  version they support.  UltraPeers
+		  SHOULD NOT include a pong for themselves, as 
+		  presumably the requester already knows about them --
+		  otherwise it would not have sent the ping.
+
+		  <br>
+<br>
+
+		  Seeing as this requires specialized handling for these
+		  specific pings, hosts MAY choose instead to send the
+		  normal broadcast pings over these UDP connections.
+		  If developers choose to do this, they MUST
+		  limit the TTL to 4 or below.  In this case, this 
+		  implementation should only be seen as a temporary solution,
+		  with developers ultimately moving towards the 
+		  first scheme, as these broadcasts will generate 
+		  considerably more traffic.
 		  
 		  <br>
 <br>
@@ -615,11 +643,11 @@ Acknowledgements<br></b>
 <a name="rfc.section.6.1"></a><h4><a name="cycles">6.1</a>&nbsp;Cycles No Longer a Concern</h4>
 
 <p>
-	      Adoption of this proposal has several additional benefits.  For example,
-		  concern for cycles in intra-UltraPeer connections is eliminated.  In the
-		  current network, cycles can be a serious problem in the worst case,
-		  resulting in nodes receiving many duplicate 
-		  messages, wasting bandwidth, CPU, and 
+	      Adoption of this proposal has several additional benefits.  For 
+		  example, concern for cycles in intra-UltraPeer connections is 
+		  eliminated.  In the current network, cycles can be a serious 
+		  problem in the worst case, resulting in nodes receiving many 
+		  duplicate messages, wasting bandwidth, CPU, and 
 		  memory.<a href="#refs.RandomWalk" title="Lv, Q., Cao, P., Cohen, E., Li, K. and S. Shenker, Search and Replication in Unstructured Peer-to-Peer Networks, June 2002.">[1]</a>  This eliminates
 		  these duplicates except in the case where leaves are connected to 
 		  multiple UltraPeers, and two or more of their UltraPeers are sent
@@ -645,6 +673,14 @@ Acknowledgements<br></b>
 		  serving the file will only be from 2 to 3 hops away 
 		  (depending on whether the node serving the file is
 		  a leaf or an UltraPeer).
+		
+</p>
+<a name="rfc.section.6.3"></a><h4><a name="stop">6.3</a>&nbsp;Stopping Queries Has Meaning</h4>
+
+<p>
+		  Another benefit of this scheme is that the user manually "stopping"
+		  a query can, in fact, stop that query from being sent to more
+		  hosts, saving network resources.
 		
 </p>
 <a name="rfc.references1"><br><hr size="1" shade="0"></a>
