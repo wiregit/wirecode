@@ -260,7 +260,7 @@ public final class NIOMessageReader extends AbstractMessageReader {
      * Used only for testing.  
      */
     public Message read() throws IOException, BadPacketException {
-        return _lastMessage;
+        return read(2000);
     }
 
     /**
