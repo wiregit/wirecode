@@ -16,7 +16,8 @@ import java.net.*;
  */
 public class ByteReader {
 
-    private int BUFSIZE = 80;
+    private static final byte R = '\r';
+    private static final byte N = '\n';
 
     private InputStream _istream;
     
@@ -92,71 +93,36 @@ public class ByteReader {
      * Note that calling readLine on "ab<EOF>" returns null.
      */
     public String readLine() throws IOException {
-        //TODO: this method desperately need cleanup:
-        //1. Internationalization problems.  It assumes that getBytes
-        //   does the right thing.  (We should hardcode the ASCII values.)
-        //   Also, we probably shouldn't use the String(byte[],int,int)
-        //   constructor.
-        //2. There's no need to use buf and sBuffer.  It just makes the
-        //   code confusing.  Just append characters to sBuffer.
-        //3. The i and numBytes variables are redundant.  As far as I can
-        //   tell, they're exactly the same.  Actually if you use the
-        //   above suggestion, you can just call sBuffer.append(..); no
-        //   need for any variables.
         if (_istream == null)
             return "";
 
 		StringBuffer sBuffer = new StringBuffer();
-
-        byte[] buf = new byte[BUFSIZE];
-
         int c = -1; //the character just read
-        int i = 0;  
-        int numBytes = 0;
 
-        String cr = "\r";
-        byte[] creturn = cr.getBytes();
+		while (true) {
+			c = _istream.read();
 
-        String nl = "\n";
-        byte[] nline = nl.getBytes();
+			// if we reached an EOF ...
+			if (c == -1)
+				return null;
 
-		try {
-			while (true) {
-				
-				c = _istream.read();
-				
-				if (c == -1) 
-					return null;
-				
-				if ( c == creturn[0] ) {
-					continue;
-				}
-				
-				else if ( c == nline[0] ) { 
-					break;
-				} 
-                
-				else {
-					buf[i++] = (byte)c;
-					numBytes++;
-					
-				}
-
-				if (numBytes == BUFSIZE) {
-					sBuffer.append(new String(buf, 0, numBytes));
-					i = 0;
-					numBytes = 0;
-				}
-				
+			// if this was a \r character, ignore it.
+			if ( c == R ) {
+				continue;
 			}
-		} catch(ArrayIndexOutOfBoundsException e) {
-			sBuffer.append(new String(buf, 0, numBytes));
-			throw new ArrayIndexOutOfBoundsException(e.getMessage() + 
-													 " in ByteReader:\r\n"+
-													 sBuffer.toString());													 
+
+			// if this was a \n character, break out of the reading loop
+			else if ( c == N ) {
+				break;
+			}
+
+            // if it was any other character, append it to the buffer.
+			else {
+			    sBuffer.append((char)c);
+			}
 		}
 
-		sBuffer.append(new String(buf, 0, numBytes));
+		// return the string we have read.
 		return sBuffer.toString();
     }
 }
