@@ -3,9 +3,13 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.HttpClientManager;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.HttpClient;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
@@ -184,29 +188,25 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
     private static int contentLength(URL url) throws IOException {
-        URLConnection connection=null;
+        HttpMethod head = new HeadMethod(url.toExternalForm());
+        head.addRequestHeader("User-Agent",
+                              CommonUtils.getHttpServer());
+        HttpClient client = HttpClientManager.getNewClient();
         try {
-            //Send a HEAD request to the URL.
-            connection=url.openConnection();
-            if (! (connection instanceof HttpURLConnection))
-                throw new IOException();
-            HttpURLConnection httpConnection=(HttpURLConnection)connection;
-            httpConnection.setRequestMethod("HEAD");
-            //Send User-Agent to bypass browser blocking.
-            httpConnection.setRequestProperty("User-Agent",
-                                              CommonUtils.getHttpServer());
+            client.executeMethod(head);
             //Extract Content-length, but only if the response was 200 OK.
             //Generally speaking any 2xx response is ok, but in this situation
             //we expect only 200.
-            if (httpConnection.getResponseCode()!=HttpURLConnection.HTTP_OK)
+            if (head.getStatusCode() != HttpURLConnection.HTTP_OK)
                 throw new IOException("No 200 OK");
-            int length=httpConnection.getContentLength();
+            
+            int length = head.getResponseContentLength();
             if (length<0)
                 throw new IOException("No content length");
             return length;
         } finally {
-            if (connection!=null && (connection instanceof HttpURLConnection))
-                ((HttpURLConnection)connection).disconnect();
+            if(head != null)
+                head.releaseConnection();
         }
     }
 
