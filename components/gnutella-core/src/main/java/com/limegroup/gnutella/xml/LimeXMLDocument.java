@@ -178,7 +178,11 @@ public class LimeXMLDocument{
     }
 
     /**
-     * returns all the values - so long they are not numbers
+     * Returns all the non-numeric fields in this.  These are
+     * not necessarily QRP keywords.  For example, one of the
+     * elements of the returned list may be "Some comment-blah".
+     * QRP code may want to split this into the QRP keywords
+     * "Some", "comment", and "blah".
      */
     public List getKeyWords(){
         List retList = new ArrayList();
