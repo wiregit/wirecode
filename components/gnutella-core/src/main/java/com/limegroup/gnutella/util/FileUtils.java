@@ -11,7 +11,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
+import java.io.DataInputStream; 
+import java.io.RandomAccessFile;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -301,20 +302,33 @@ public class FileUtils
         }
         
         //verify that we wrote everything correctly
-        DataInputStream dis = null;
-        byte[] read = new byte[data.length];
-        try {
-            dis = new DataInputStream(new BufferedInputStream(new FileInputStream(tmp)));
-            dis.readFully(read);
-            if (!Arrays.equals(read, data))
-                return false;
-        } catch(IOException bad) {
+        byte[] read = readFileFully(tmp);
+        if(read == null || !Arrays.equals(read, data))
             return false;
-        } finally {
-            IOUtils.close(dis);
-        }
         
         return forceRename(tmp, out);
+    }
+    
+    /**
+     * Reads a file, filling a byte array.
+     */
+    public static byte[] readFileFully(File source) {
+        DataInputStream raf = null;
+        int length = (int)source.length();
+        if(length <= 0)
+            return null;
+
+        byte[] data = new byte[length];
+        try {
+            raf = new DataInputStream(new BufferedInputStream(new FileInputStream(source)));
+            raf.readFully(data);
+        } catch(IOException ioe) {
+            return null;
+        } finally {
+            IOUtils.close(raf);
+        }
+        
+        return data;
     }
 
 }

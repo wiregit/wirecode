@@ -63,7 +63,8 @@ public class UpdateHandler {
      * Initializes data as read from disk.
      */
     private void initialize() {
-        handleNewData(readDataFromDisk());
+        LOG.trace("Initializing UpdateHandler");
+        handleDataInternal(readDataFromDisk(), true);
     }
     
     /**
@@ -73,7 +74,8 @@ public class UpdateHandler {
         if(data != null) {
             QUEUE.add(new Runnable() {
                 public void run() {
-                    handleDataInternal(data);
+                    LOG.trace("Parsing new data...");
+                    handleDataInternal(data, false);
                 }
             });
         }
@@ -96,24 +98,30 @@ public class UpdateHandler {
     /**
      * Handles processing a newly arrived message.
      */
-    private void handleDataInternal(byte[] data) {
-        String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA");
+    private void handleDataInternal(byte[] data, boolean fromDisk) {
+        String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
         if(xml != null) {
             UpdateCollection uc = UpdateCollection.create(xml);
             if(uc.getId() > _lastId)
-                storeAndUpdate(data, uc);
+                storeAndUpdate(data, uc, fromDisk);
+        } else {
+            LOG.warn("Couldn't verify signature on data.");
         }
     }
     
     /**
      * Stores the given data to disk & posts an update.
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection uc) {
-        FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
+    private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
+        LOG.trace("Retrieved new data, storing & updating.");
         _lastId = uc.getId();
         _lastBytes = data;
-        CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
+        
+        if(!fromDisk) {
+            FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
+            CapabilitiesVM.reconstructInstance();
+            RouterService.getConnectionManager().sendUpdatedCapabilities();
+        }
 
         Version limeV;
         try {
@@ -140,17 +148,19 @@ public class UpdateHandler {
                                           style,
                                           javaV);
 
-        notifyAboutInfo(uc.getTimestamp());
+        notifyAboutInfo(uc.getTimestamp(), fromDisk);
     }
     
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(long timestamp) {
-        if(_updateInfo == null)
+    private void notifyAboutInfo(long timestamp, boolean fromDisk) {
+        if(_updateInfo == null) {
+            LOG.warn("No relevant update info to notify about.");
             return;
+        }
             
-        System.out.println("There is an update availble: " + _updateInfo);
+        System.out.println("There is an update available: " + _updateInfo);
         // TODO: pass this to the GUI in a certain amount of time, if necessary.
     }
     

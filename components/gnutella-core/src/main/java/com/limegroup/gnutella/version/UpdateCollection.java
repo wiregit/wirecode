@@ -111,6 +111,9 @@ class UpdateCollection {
      * to the elements in the XML.
      */
     static UpdateCollection create(String xml) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Parsing Update XML: " + xml);
+
         UpdateCollection collection = new UpdateCollection();
         collection.parse(xml);
         return collection;

@@ -60,6 +60,13 @@ class Version implements Comparable {
     }
     
     /**
+     * Equality.
+     */
+    public boolean equals(Object o) {
+        return compareTo(o) == 0;
+    }
+    
+    /**
      * Parses a version for major/minor/service.
      */
     private int[] parse(String vers) throws VersionFormatException {

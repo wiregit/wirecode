@@ -56,7 +56,9 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
+
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -419,6 +421,8 @@ public class RouterService {
             callback.componentLoading("SAVED_FILE_MANAGER");
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
+            
+            UpdateHandler.instance();
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
