@@ -263,7 +263,7 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
-			if(ttl == 4 && remainingConnections > 10) {
+			if(ttl == 4 && remainingConnections > 4) {
 				ttl = 3;
 			}
 			QueryRequest query = createQuery(ttl);
