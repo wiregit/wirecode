@@ -258,6 +258,7 @@ public class Main implements ActivityCallback {
 
 	public void setAnnotateEnabled(boolean enabled) {};
 
-    public void notifyUserAboutUpdate(String message, boolean isPro) {};
+    public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
+    };
 }
 

@@ -15,11 +15,30 @@ import java.io.*;
  */
 public class UpdateManager {
     
+    /**
+     * Used when handshaking with other LimeWires. 
+     */
     private String latestVersion;
+    /**
+     * The language specific string that contains the new features of the 
+     * version discovered in the network
+     */ 
     private String message = "";
-    private static UpdateManager INSTANCE=null;
+    /**
+     * true if message is as per the user's language  preferences.
+     */
+    private boolean usesLocale;
     
+    private static UpdateManager INSTANCE=null;
 
+    /**
+     * Constructor, reads the latest update.xml file from the last run on the
+     * network, and srores the values in latestVersion, message and usesLocale.
+     * latestVersion is the only variable whose value is used after start up. 
+     * The other two message and usesLocale are used only once when showing the 
+     * user a message at start up. So although this class is a singleton, it's 
+     * safe for the constructor to set these two values for the whole session.
+     */
     private UpdateManager() {
         try {
             File file = new File("lib\\update.xml");
@@ -38,6 +57,7 @@ public class UpdateManager {
             UpdateFileParser parser = new UpdateFileParser(xml);
             latestVersion = parser.getVersion();
             message = parser.getMessage();
+            usesLocale = parser.usesLocale();
         } catch(Exception e) {//SAXException or IOException, we react similarly
             latestVersion = CommonUtils.getLimeWireVersion();
         } 
@@ -66,7 +86,7 @@ public class UpdateManager {
             return;
         //OK. myVersion < latestVersion
         String guiMessage = latestVersion+". "+message;
-        gui.notifyUserAboutUpdate(guiMessage, CommonUtils.isPro());
+        gui.notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(),usesLocale);
     }
 
     public void checkAndUpdate(Connection connection) {
