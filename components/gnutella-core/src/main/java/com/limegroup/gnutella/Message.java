@@ -96,6 +96,9 @@ public abstract class Message
      */
     protected Message(byte[] guid, byte func, byte ttl,
               byte hops, int length) {
+		if(guid.length != 16) {
+			throw new IllegalArgumentException("invalid guid length: "+guid.length);
+		} 		
         this.guid=guid; this.func=func; this.ttl=ttl;
         this.hops=hops; this.length=length;
         //repOk();
