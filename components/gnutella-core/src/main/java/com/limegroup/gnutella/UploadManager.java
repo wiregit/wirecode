@@ -819,24 +819,6 @@ public class UploadManager implements BandwidthTracker {
         
     }
 
-	/** 
-     * Returns whether or not there are currently upload slots available,
-     * not taking the queue into account.  In particular, if there are 
-     * no upload slots, but there are queue slots, this will still
-     * return <tt>true</tt>.
-     *
-     * @return <tt>true</tt> if there are no upload slots available
-     */
-	public synchronized boolean isBusy() {
-		// return true if Limewire is shutting down
-		if (RouterService.getIsShuttingDown())
-		    return true;
-		
-		// testTotalUploadLimit returns true is there are
-		// slots available, false otherwise.
-		return !testTotalUploadLimit();
-	}
-
     /**
      * Returns whether or not the upload queue is full.
      *
@@ -1003,7 +985,7 @@ public class UploadManager implements BandwidthTracker {
             LOG.debug(uploader+" checking if given uploader is can be accomodated ");
         // If we have atleast one slot available, see if the position
         // in the queue is small enough to be accepted.
-        if(!this.isBusy() && hasFreeSlot(posInQueue + uploadsInProgress())) {
+        if(hasFreeSlot(posInQueue + uploadsInProgress())) {
             ret = ACCEPTED;
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader+" accepting upload");
@@ -1131,16 +1113,6 @@ public class UploadManager implements BandwidthTracker {
             return fastest>MINIMUM_UPLOAD_SPEED;
         }
     }
-
-	/**
-	 * Returns true iff another upload is allowed.  Note that because this test
-	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
-	 * if a push request takes a long time to respond.  REQUIRES: this'
-     * monitor is held.
-     */
-	private boolean testTotalUploadLimit() {
-	    return hasFreeSlot(uploadsInProgress());
-	}
 
 
 	////////////////// Bandwith Allocation and Measurement///////////////

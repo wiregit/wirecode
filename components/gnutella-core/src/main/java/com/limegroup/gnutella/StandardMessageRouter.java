@@ -222,7 +222,7 @@ public class StandardMessageRouter extends MessageRouter {
         if (query.desiresOutOfBandReplies() &&
             !isConnectedTo(query, handler) && 
 			RouterService.canReceiveSolicited() &&
-            !RouterService.getUploadManager().isBusy()) {
+            RouterService.getUploadManager().isServiceable()) {
             
             // send the replies out-of-band - we need to
             // 1) buffer the responses
