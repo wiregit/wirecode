@@ -22,25 +22,7 @@ public class BadLicense implements License {
      * Attempts to guess what the license URI is from the license text.
      */    
     private URL guessLicenseDeed() {
-        // find where "creativecommons.org/licenses/" is.
-        int idx = license.indexOf(CCConstants.CC_URI_PREFIX);
-        if(idx == -1)
-            return null;
-        // find the "http://" before it.
-        int httpIdx = license.lastIndexOf("http://", idx);
-        if(httpIdx == -1)
-            return null;
-        // find where the first space is after the http://.
-        // if it's before the creativecommons.org part, that's bad.
-        int spaceIdx = license.indexOf(" ", httpIdx);
-        if(spaceIdx < idx)
-            return null;
-     
-        try {       
-            return new URL(license.substring(httpIdx, spaceIdx));
-        } catch(MalformedURLException bad) {
-            return null;
-        }
+        return CCConstants.guessLicenseDeed(license);
     }    
     
     public boolean isVerified() { return true; }

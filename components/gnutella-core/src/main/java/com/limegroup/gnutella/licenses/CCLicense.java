@@ -115,35 +115,7 @@ class CCLicense implements License, Serializable, Cloneable {
      * Attempts to guess what the license URI is from the license text.
      */    
     private URL guessLicenseDeed() {
-        if(license == null)
-            return null;
-        
-        // find where "creativecommons.org/licenses/" is.
-        int idx = license.indexOf(CCConstants.CC_URI_PREFIX);
-        if(idx == -1)
-            return null;
-        // find the "http://" before it.
-        int httpIdx = license.lastIndexOf("http://", idx);
-        if(httpIdx == -1)
-            return null;
-        // make sure that there's a space before it or it's the start.
-        if(httpIdx != 0 && license.charAt(httpIdx-1) != ' ')
-            return null;
-
-        // find where the first space is after the http://.
-        // if it's before the creativecommons.org part, that's bad.
-        int spaceIdx = license.indexOf(" ", httpIdx);
-        if(spaceIdx == -1)
-            spaceIdx = license.length();
-        else if(spaceIdx < idx)
-            return null;
-     
-        try {       
-            return new URL(license.substring(httpIdx, spaceIdx));
-        } catch(MalformedURLException bad) {
-            LOG.warn("Unable to create URL from license: " + license, bad);
-            return null;
-        }
+        return CCConstants.guessLicenseDeed(license);
     }
         
     /**

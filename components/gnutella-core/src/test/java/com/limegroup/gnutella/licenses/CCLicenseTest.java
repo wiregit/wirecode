@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.bootstrap.*;
 
 import org.apache.commons.httpclient.*;
 
@@ -280,6 +281,32 @@ public final class CCLicenseTest extends BaseTestCase {
         assertTrue(l.isVerified());
         assertFalse(l.isValid(null));
     }
+    
+    public void testHTTPRetrieval() throws Exception {
+        TestBootstrapServer server = new TestBootstrapServer(20181);
+        try {
+            server.setResponseData("<html><head>Hi</head><body><--\n"+
+                                   RDF_GOOD + "\n--></body></html>");
+            
+            License l = LicenseFactory.create("verify at http://127.0.0.1:20181/");
+            l.verify(null);
+            Thread.sleep(1000);
+            assertTrue(l.isVerified());
+    	    assertTrue(l.isValid(null));
+    	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
+    	    assertFalse(l.isValid(URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));	    
+    	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed().toExternalForm());
+    	    // more stringent than necessary - asserting order too.
+    	    assertEquals("Permitted: Reproduction, Distribution, DerivativeWorks\n" +
+    	                 "Prohibited: Fun\n" +
+    	                 "Required: Attribution, Notice", l.getLicenseDescription());
+            assertEquals(1, server.getConnectionAttempts());
+            assertEquals(1, server.getRequestAttempts());
+        } finally {
+            server.shutdown();
+        }
+    }
+        
     
     private static class Callback implements VerificationListener {
         boolean completed = false;
