@@ -366,8 +366,9 @@ public class LimeXMLReplyCollection{
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
         }
         
-        // TODO:: what happens if oldDoc is null??  we currently won't add 
-        // newDoc in this case -- should we???
+        if(oldDoc == null)  {
+            Assert.that(false, "attempted to replace doc that did not exist!!");
+        }
         fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
     }
