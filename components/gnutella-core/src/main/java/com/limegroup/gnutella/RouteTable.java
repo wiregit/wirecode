@@ -15,7 +15,7 @@ import com.sun.java.util.collections.*;
  * routed per guid.  This can be useful for implementing fair flow-control
  * strategies.
  */
-class RouteTable {
+public final class RouteTable {
     /**
      * The obvious implementation of this class is a mapping from GUID to
      * ReplyHandler's.  The problem with this representation is it's hard to
@@ -68,16 +68,22 @@ class RouteTable {
     private int _nextID;
 
     /** Values stored in _newMap/_oldMap. */
-    private static class RouteTableEntry {
+    public static class RouteTableEntry {
         /** The numericID of the reply connection. */
-        int handlerID;
+        private int handlerID;
         /** The bytes already routed for this GUID. */
-        int bytesRouted;
+        private int bytesRouted;
+        /** The number of replies already routed for this GUID. */
+        private int repliesRouted;
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
-            this.handlerID=handlerID;
-            this.bytesRouted=0;
+            this.handlerID = handlerID;
+            this.bytesRouted = 0;
+			this.repliesRouted = 0;
         }
+		
+		/** Accessor for the number of query replies routed for this entry. */
+		public int getRepliesRouted() { return repliesRouted; }
     }
 
     /**
@@ -103,14 +109,17 @@ class RouteTable {
      * @effects if replyHandler is open, adds the routing entry to this,
      *  replacing any routing entries for guid.  This has effect of 
      *  "renewing" guid.  Otherwise returns without modifying this.
+	 *
+	 * @return the <tt>RouteTableEntry</tt> entered into the routing 
+	 *  tables, or <tt>null</tt> if it could not be entered
      */
-    public synchronized void routeReply(byte[] guid,
-                                        ReplyHandler replyHandler) {
+    public synchronized RouteTableEntry routeReply(byte[] guid,
+												   ReplyHandler replyHandler) {
         repOk();
         purge();
         Assert.that(replyHandler != null);
         if (! replyHandler.isOpen())
-            return;
+            return null;
 
         //First clear out any old entries for the guid, memorizing the volume
         //routed if found.  Note that if the guid is found in _newMap, we don't
@@ -127,6 +136,7 @@ class RouteTable {
         else
             entry.handlerID=id;            //avoids allocation
         _newMap.put(guid, entry);
+		return entry;
     }
 
     /**
@@ -157,6 +167,7 @@ class RouteTable {
             return false;
         }
     }
+
 
     /**
      * Looks up the reply route for a given guid.
@@ -210,17 +221,20 @@ class RouteTable {
             
         //Increment count, returning old count in tuple.
         ReplyRoutePair ret=new ReplyRoutePair(handler, entry.bytesRouted);
-        entry.bytesRouted+=replyBytes;
+
+        entry.bytesRouted += replyBytes;
+        entry.repliesRouted++;
         return ret;
     }
 
     /** The return value from getReplyHandler. */
     public static class ReplyRoutePair {
-        private ReplyHandler handler;
-        private int volume;
+        private final ReplyHandler handler;
+        private final int volume;
+
         ReplyRoutePair(ReplyHandler handler, int volume) {
-            this.handler=handler;
-            this.volume=volume;
+            this.handler = handler;
+            this.volume = volume;
         }
         /** Returns the ReplyHandler to route your message */
         public ReplyHandler getReplyHandler() { return handler; }
