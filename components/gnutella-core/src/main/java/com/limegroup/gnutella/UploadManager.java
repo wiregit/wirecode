@@ -1325,14 +1325,10 @@ public class UploadManager implements BandwidthTracker {
                 // get the index
                 String str_index = fileInfoPart.substring( (g+5), d );
                 index = Integer.parseInt(str_index);
-                // get the filename, which should be right after
-                // the "/", and before the next " ".
-                int f = fileInfoPart.indexOf( " HTTP/", d );
 				try {
-					fileName = URLDecoder.decode(
-					             fileInfoPart.substring( (d+1), f));
+					fileName = URLDecoder.decode(fileInfoPart.substring(d+1));
 				} catch(IllegalArgumentException e) {
-					fileName = fileInfoPart.substring( (d+1), f);
+					fileName = fileInfoPart.substring(d+1);
 				}
                 UploadStat.TRADITIONAL_GET.incrementStat();				
             }

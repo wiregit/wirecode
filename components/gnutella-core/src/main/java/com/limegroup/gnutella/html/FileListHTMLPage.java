@@ -4,6 +4,7 @@ import com.limegroup.gnutella.image.ImageHandler;
 import com.limegroup.gnutella.image.ImageManipulator;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.SecuritySettings;
 import java.io.File;
 import java.net.URLEncoder;
 
@@ -91,7 +92,11 @@ public class FileListHTMLPage {
     private boolean writeStartOfPage(StringBuffer sb, FileDesc[] sharedFiles) {
         ImageHandler handler = ImageManipulator.getDefaultImageHandler();        
         boolean shouldShowMagnets = false;
-        final String beginURL = "\r\n<a href=\"/get/";
+        final String keyParam;
+        if(SecuritySettings.FILE_VIEW_USE_PASSWORD.getValue())
+            keyParam = "?" + UploadManager.FV_PASS_KEY + "=" + UploadManager.FV_PASS;
+        else
+            keyParam = "";
         for (int i = 0; i < sharedFiles.length; i++) {
             if (sharedFiles[i] instanceof IncompleteFileDesc)
                 continue;
@@ -100,11 +105,11 @@ public class FileListHTMLPage {
             if(handler != null && handler.isImageFile(currFile))
                 sb.append(htmlImageLink(sharedFiles[i]));
 
-            sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
-                      UploadManager.FV_PASS + "/" +
+            sb.append("\r\n<a href=\"/get/" +
+                      sharedFiles[i].getIndex() + "/" + 
                       StringUtils.replace(URLEncoder.encode(currFile.getName()),
-                                          "+", "%20") + "\">" + 
-                      currFile.getName() + "</a><br>");
+                                          "+", "%20") + 
+                      keyParam + "\">" + currFile.getName() + "</a><br>");
             
             if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
                 shouldShowMagnets = true;

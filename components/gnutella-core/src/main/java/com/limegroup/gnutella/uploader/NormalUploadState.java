@@ -245,7 +245,11 @@ public final class NormalUploadState implements HTTPMessage {
 	 * in the details of this later. Assume binary for now. 
 	 */
 	private String getMimeType() {
-        return "application/binary";                  
+	    String type = HTTPUtils.getMimeType(_fileName);
+	    if(type != null)
+	        return type;
+	    else
+	        return "application/binary";                  
 	}
     
     /**
