@@ -263,7 +263,6 @@ public final class PongCacherTest extends BaseTestCase {
         assertEquals("pong's locale doesn't match",
                      ((PingReply)pongs.get(1)).getClientLocale(),
                      "ja");
-        System.out.println("pongs size: " + pongs.size());
     }
 
     
