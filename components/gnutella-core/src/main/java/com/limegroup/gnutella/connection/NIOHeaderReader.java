@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -204,9 +202,7 @@ public final class NIOHeaderReader implements HeaderReader {
     }
 
     // inherit doc comment
-    public InputStream getRemainingData() {
-        byte[] extraBytes = new byte[_headerByteBuffer.remaining()];
-        _headerByteBuffer.get(extraBytes);
-        return new ByteArrayInputStream(extraBytes);
+    public ByteBuffer getRemainingData() {
+        return _headerByteBuffer;
     }
 }
