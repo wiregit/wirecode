@@ -121,17 +121,21 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		}
 		Method m = 
 			PrivilegedAccessor.getMethod(HandshakeResponse.class, 
-				"createEndpointString", new Class[] {Iterator.class});
+				"createEndpointString", 
+                new Class[] {Iterator.class, Integer.TYPE});
+        
+        int limit = leaves.size();
 		String leafStr =
 			(String)m.invoke(HandshakeResponse.class, 
-                new Object[] {leaves.iterator()});	
+                new Object[] {leaves.iterator(), new Integer(limit)});	
 		
 		List leavesFromString = createListFromIPPortString(leafStr);
 		assertAllConnectionsAreEqual(leaves, leavesFromString);
 		
+        limit = ultrapeers.size();
 		String ultrapeerStr =
 		    (String)m.invoke(HandshakeResponse.class, 
-                new Object[] {ultrapeers.iterator()});	
+                new Object[] {ultrapeers.iterator(), new Integer(limit)});	
 		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
 		assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);
 		
