@@ -246,7 +246,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
-                                              null, false, 0, false);
+                                              null, false, 0, false, false);
         ULTRAPEER_1.send(query);
         ULTRAPEER_1.flush();
 

@@ -769,6 +769,36 @@ public final class QueryRequestTest extends BaseTestCase {
         assertEquals(Message.N_MULTICAST, qr.getNetwork());
     }
     
+
+    public void testWhatIsNewQuery() throws Exception {
+        QueryRequest outQuery = null, inQuery = null;
+        ByteArrayOutputStream baos = null;
+        ByteArrayInputStream bais = null;
+
+        {
+            outQuery = QueryRequest.createWhatIsNewQuery(GUID.makeGuid(), 
+                                                         (byte)3);
+            baos = new ByteArrayOutputStream();
+            outQuery.write(baos);
+            bais = new ByteArrayInputStream(baos.toByteArray());
+            inQuery = (QueryRequest) Message.read(bais);
+            assertTrue(inQuery.isWhatIsNewRequest());
+            assertEquals(inQuery, outQuery);
+        }
+
+        {
+            outQuery = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), 
+                                                         (byte)3);
+            baos = new ByteArrayOutputStream();
+            outQuery.write(baos);
+            bais = new ByteArrayInputStream(baos.toByteArray());
+            inQuery = (QueryRequest) Message.read(bais);
+            assertTrue(inQuery.isWhatIsNewRequest());
+            assertEquals(inQuery, outQuery);
+        }
+
+    }
+
     
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();
