@@ -21,105 +21,162 @@ public class ID3Editor{
     private String comment_;
     private String genre_;
 
-    public String removeID3Tags(String xmlStr){
-        //title
-        int i = xmlStr.indexOf("<title>");
-        int j;
-        String a="";
-        String b="";
-        String title="";
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+8);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            title = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //artist
-        String artist="";
-        i=xmlStr.indexOf("<artist>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+9);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            artist = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //album
-        String album="";
-        i=xmlStr.indexOf("<album>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+8);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            album = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //year
-        String year="";
-        i=xmlStr.indexOf("<year>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+7);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            year = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //track
-        String track="";
-        i=xmlStr.indexOf("<track>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+8);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            track = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //comment
-        String comment="";
-        i=xmlStr.indexOf("<comments>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+11);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            comment = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        //genre
-        String genre="";
-        i=xmlStr.indexOf("<genre>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+8);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            genre = xmlStr.substring(i,j);
-            xmlStr = a+b;
-        }
-        String bitrate="";
-        i=xmlStr.indexOf("<bitrate>");
-        if(i>=0){
-            j = xmlStr.indexOf(">",i+10);
-            a = xmlStr.substring(0,i);
-            b = xmlStr.substring(j+1);
-            // the value is thrown away, user can't change bitrate
-            xmlStr = a+b;
-        }
-       
+    private static final String TITLE_STRING   = "title";
+    private static final String ARTIST_STRING  = "artist";
+    private static final String ALBUM_STRING   = "album";
+    private static final String YEAR_STRING    = "year";
+    private static final String TRACK_STRING   = "track";
+    private static final String COMMENT_STRING = "comments";
+    private static final String GENRE_STRING   = "genre";
+    private static final String BITRATE_STRING = "bitrate";
 
-        if(!title.equals(""))
-            this.title_ = getInfo(title);
-        if(!artist.equals(""))
-            this.artist_ = getInfo(artist);
-        if(!album.equals(""))
-            this.album_ = getInfo(album);
-        if(!year.equals(""))
-            this.year_ = getInfo(year);
-        if(!track.equals(""))
-            this.track_ = getInfo(track);
-        if(!comment.equals(""))
-            this.comment_ = getInfo(comment);
-        if(!genre.equals(""))
-            this.genre_ = getInfo(genre);
+    private final boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+
+
+    /* @return object[0] = (Integer) index just before beginning of tag=value, 
+     * object[1] = (Integer) index just after end of tag=value, object[2] =
+     * (String) value of tag.
+     * @exception Throw if rip failed.
+     */
+    private Object[] ripTag(String source, String tagToRip) throws Exception {
+
+        Object[] retObjs = new Object[3];
+
+        int begin = source.indexOf(tagToRip);
+        if (begin < 0)
+            throw new Exception();
+
+        if (begin != 0)            
+            retObjs[0] = new Integer(begin-1);
+        if (begin == 0)            
+            retObjs[0] = new Integer(begin);
+
+        int end = begin;
+        int i, j; // begin and end of value to return
+
+        for ( ; source.charAt(end) != '='; end++)
+            ; // found '=' sign
+        
+        for ( ; source.charAt(end) != '"'; end++)
+            ; // found first '"' sign
+        i = ++end;  // set beginning of value
+
+        for ( ; source.charAt(end) != '"'; end++)
+            ; // found second '"' sign
+        j = end; // set end of value
+
+        retObjs[1] = new Integer(end+1);
+        debug("ID3Editor.ripTag(): i = " + i +
+              ", j = " + j);
+        retObjs[2] = source.substring(i,j);
+                       
+        return retObjs;
+    }
+
+
+    /*
+     */
+    public String removeID3Tags(String xmlStr){
+
+        // will be used to reconstruct xmlStr after ripping stuff from it
+        int i, j;
+        Object[] rippedStuff = null;
+
+        //title        
+        try {
+            rippedStuff = ripTag(xmlStr, TITLE_STRING);
+
+            title_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //artist
+        try {
+            rippedStuff = ripTag(xmlStr, ARTIST_STRING);
+
+            artist_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //album
+        try {
+            rippedStuff = ripTag(xmlStr, ALBUM_STRING);
+
+            album_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //year
+        try {
+            rippedStuff = ripTag(xmlStr, YEAR_STRING);
+
+            year_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //track
+        try {
+            rippedStuff = ripTag(xmlStr, TRACK_STRING);
+
+            track_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //comment
+        try {
+            rippedStuff = ripTag(xmlStr, COMMENT_STRING);
+
+            comment_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //genre
+        try {
+            rippedStuff = ripTag(xmlStr, GENRE_STRING);
+
+            genre_ = (String)rippedStuff[2];
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+        //bitrate
+        try {
+            rippedStuff = ripTag(xmlStr, BITRATE_STRING);
+
+            // we get bitrate info from the mp3 file....
+
+            i = ((Integer)rippedStuff[0]).intValue();
+            j = ((Integer)rippedStuff[1]).intValue();        
+            xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+        } 
+        catch (Exception e) {};
+
+
+
         return xmlStr;//this has been suitable modified
     }
     
@@ -338,6 +395,51 @@ public class ID3Editor{
         else if(genre_.equals("Dance Hall")) return 125;
         else return 0;
         }
+
+    /*
+    public static void main(String argv[]) throws Exception {
+        ID3Editor mine = new ID3Editor();        
+        //        mine.testRipTag();
+        String source = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\"><audio bitrate=\"192\" genre=\"Blues\" title=\"HonkyTonk Man\" artist=\"Elvis\" album=\"Live at Five\" year=\"1978\" comments=\"wiggidy wack!\" leftover=\"stay here\" track=\"3\"/></audios>";        
+        System.out.println("source before = " + source);
+        System.out.println("source after = " + mine.removeID3Tags(source));
+    }
+
+    public void testRipTag() throws Exception {
+        
+        String source = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\"><audio bitrate=\"192\" genre=\"Blues\"/></audios>";
+        //        String source = "bitrate=\"192\" genre=\"Susheel\"";
+
+        Object[] test = ripTag(source, "bitrate");
+        System.out.println("first = " +  (Integer)test[0] +
+                           ", last = " + (Integer)test[1] +
+                           ", value = " + (String)test[2]);
+
+        {
+            int i = ((Integer)test[0]).intValue();
+            int j = ((Integer)test[1]).intValue();
+            source = source.substring(0,i) + source.substring(j,source.length());
+        }        
+
+        test = ripTag(source, "genre");
+        System.out.println("first = " +  (Integer)test[0] +
+                           ", last = " + (Integer)test[1] +
+                           ", value = " + (String)test[2]);
+
+
+        {
+            int i = ((Integer)test[0]).intValue();
+            int j = ((Integer)test[1]).intValue();
+            source = source.substring(0,i) + source.substring(j,source.length());
+        }        
+
+        System.out.println("source = " + source + ", source length = " +
+                           source.length());
+        
+        
+    }
+    */
+
 
 
 
