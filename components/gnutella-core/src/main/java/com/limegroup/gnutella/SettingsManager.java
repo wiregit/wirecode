@@ -424,7 +424,7 @@ public class SettingsManager implements SettingsInterface
 					setTotalUptime(Long.parseLong(p));
 				}
 				else if(key.equals(SESSIONS)) {
-					setSessions(Integer.parseInt(p));
+					setSessions(Integer.parseInt(p)+1);
 				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
@@ -703,14 +703,17 @@ public class SettingsManager implements SettingsInterface
 
 	/** updates all of the uptime settings based on the
 	 *  passed in time value for the most recent session. */
-	public void updateUptime(long currentTime) {
+	public void updateUptime(int currentTime) {
 		totalUptime_ += currentTime;
 		averageUptime_ = totalUptime_/sessions_;
-		setSessions(sessions_++);		
 		setTotalUptime(totalUptime_);
 		setAverageUptime(averageUptime_);
 	}
 
+	// sets the total number of times limewire
+	// has been run -- used in calculating the
+	// average amount of time this user leaves
+	// limewire on.
 	private void setSessions(int sessions) {
 		if(sessions_ < 1)
 			sessions_ = 10;
@@ -719,12 +722,15 @@ public class SettingsManager implements SettingsInterface
 		props_.put(SESSIONS, s);
 	}
 
+	// sets the average time this user leaves LimeWire
+	// running.
 	private void setAverageUptime(long averageUptime) {
 		averageUptime_ = averageUptime;
 		String s = Long.toString(averageUptime_);
 		props_.put(AVERAGE_UPTIME, s);
 	}
 
+	// sets the total time this user has used LimeWire
 	private void setTotalUptime(long totalUptime) {
 		totalUptime_ = totalUptime;
 		String s = Long.toString(totalUptime_);
