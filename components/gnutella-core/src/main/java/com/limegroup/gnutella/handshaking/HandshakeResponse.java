@@ -370,7 +370,7 @@ public final class HandshakeResponse {
      *  should have -- this will always be 5 or less
      */
     public byte getMaxTTL() {
-        return extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);        
+        return extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
     }
     
     /**
@@ -423,6 +423,21 @@ public final class HandshakeResponse {
 	public boolean isHighDegreeConnection() {
 		return getNumIntraUltrapeerConnections() >= 15;
 	}
+
+    /**
+     * Returns whether or not this connections is a "good" connection,
+     * a definition that changes over time as features are added
+     * to the network.
+     *
+     * @return <tt>true</tt> if this connection is considered "good",
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isGoodConnection() {
+        return isHighDegreeConnection() &&
+            isUltrapeerQueryRoutingConnection() &&
+            isMaxTTLConnection() &&
+            isDynamicQueryConnection();
+    }    
 
 
 	/**
@@ -621,9 +636,8 @@ public final class HandshakeResponse {
      */
     private static boolean isFalseValue(Properties headers, String headerName) {
         String value = headers.getProperty(headerName);
-        if(value == null) return false;
-        
-        return !Boolean.valueOf(value).booleanValue();
+        if(value == null) return false;        
+        return value.equalsIgnoreCase("false");
     }
 
 
