@@ -143,7 +143,8 @@ public class DownloadManager {
      *     @modifies this, disk */
     public synchronized Downloader getFiles(RemoteFileDesc[] files,
                                             boolean overwrite) 
-            throws FileExistsException, AlreadyDownloadingException {
+            throws FileExistsException, AlreadyDownloadingException, 
+				   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.

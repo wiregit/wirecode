@@ -347,9 +347,13 @@ public class RouterService
 		}
         //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
-        File incompleteDir=SettingsManager.instance().getIncompleteDirectory();
-
-		if(incompleteDir == null) return;
+        File incompleteDir=null;
+		try {
+			incompleteDir=SettingsManager.instance().getIncompleteDirectory();
+		} catch(java.io.FileNotFoundException fnfe) {
+			// if we could not get the incomplete directory, simply return.
+			return;
+		}
 
         String[] files=incompleteDir.list();
         for (int i=0; i<files.length; i++) {
@@ -669,7 +673,8 @@ public class RouterService
      *     @modifies this, disk 
      */
     public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
-        throws FileExistsException, AlreadyDownloadingException {
+        throws FileExistsException, AlreadyDownloadingException, 
+			   java.io.FileNotFoundException {
         return downloader.getFiles(files, overwrite);
     }
 
