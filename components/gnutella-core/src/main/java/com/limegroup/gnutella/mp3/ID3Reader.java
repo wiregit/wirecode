@@ -277,8 +277,9 @@ public final class ID3Reader {
                 //Note: It's possible that the user entered her own genre in
                 //which case there could be spurious braces, the id3v2 braces
                 //enclose values between 0 - 127 so the index of the closing
-                //brace should be either 2, 3 or 4
-                if(index == -1 || !(index==2 || index==3 || index==4) )
+                //brace should be either 2, 3 or 4, maybe 5 as seen in the field
+                if(index == -1 ||
+                   !(index==2 || index==3 || index==4 || index==5) )
                     data.setGenre(frameContent);
                 else 
                     data.setGenre(frameContent.substring(index+1));
