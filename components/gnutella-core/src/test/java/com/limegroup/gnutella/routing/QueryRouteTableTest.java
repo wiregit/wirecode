@@ -162,6 +162,9 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertEquals(3,entries(qrt));
         qrt.add("bad");   //{good, book, bad}
         assertEquals(3,entries(qrt));
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        assertEquals(4,entries(qrt));
+
 
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
@@ -175,7 +178,9 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                                                   "good bad book", (byte)3)));
         assertTrue(! qrt.contains(QueryRequest.createQuery(
                                                     "good bad bok", (byte)3)));
-
+        assertTrue(qrt.contains(QueryRequest.createQuery(
+                                                         HugeTestUtils.UNIQUE_SHA1)));
+        
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
         assertEquals(0,entries(qrt2));
@@ -183,11 +188,12 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2.add("book");
         qrt2.addAll(qrt);     //{book, good, new, bad}
         QueryRouteTable qrt3=new QueryRouteTable(1000);
-        assertEquals(4, entries(qrt2));
+        assertEquals(5, entries(qrt2));
         qrt3.add("book");
         qrt3.add("good");
         qrt3.add("new");
         qrt3.add("bad");
+        qrt3.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         assertEquals(qrt2,qrt3);
         assertEquals(qrt3,qrt2);
 
