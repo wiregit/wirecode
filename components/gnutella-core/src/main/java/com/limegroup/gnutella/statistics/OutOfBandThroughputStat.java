@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.*;
 
 /**
@@ -12,10 +15,34 @@ import com.limegroup.gnutella.*;
  */
 public class OutOfBandThroughputStat extends BasicStatistic {
 
-    public static final int MIN_SAMPLE_SIZE = 500;
+	private static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
+	
+    public static int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
+    public static final int TERRIBLE_SUCCESS_RATE = 40;
+    
+    private static final int thirtyMins = 30 * 60 * 1000;
+    
 
+    private static final Runnable adjuster = new Runnable() {
+        public void run() {
+        	if (LOG.isDebugEnabled())
+        		LOG.debug("current success rate "+ getSuccessRate()+
+        				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
+						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
+            if (!isSuccessRateGreat() &&
+                !isSuccessRateTerrible()) {
+            	LOG.debug("boosting sample size by 500");
+                MIN_SAMPLE_SIZE += 500;
+            }
+        }
+    };
+    
+    static {
+    	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+    }
+    
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
@@ -78,6 +105,16 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
         return (getSuccessRate() > PROXY_SUCCESS_RATE);
+    }
+
+    /**
+     * @return whether or not the success rate is terrible (less than 40%).
+     */
+    public static boolean isSuccessRateTerrible() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return false;
+        return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
     }
 
     /**

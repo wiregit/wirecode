@@ -951,6 +951,11 @@ public abstract class MessageRouter {
                 iterator = responsesToQueryReplies(bundle._responses, 
                                                    bundle._query, 1);
 
+            //if we will be sending at least one reply back, add a reply handler for  
+            //ourselves (like we do with tcp responses) 
+            if (iterator.hasNext()) 
+            	_pushRouteTable.routeReply(_clientGUID, FOR_ME_REPLY_HANDLER); 
+            
             //send the query replies
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
