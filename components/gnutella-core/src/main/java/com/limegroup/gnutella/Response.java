@@ -28,9 +28,9 @@ public class Response {
      */
     public Response(long index, long size, String name) {
         Assert.that((index & 0xFFFFFFFF00000000l)==0,
-                "Response constructor: index too big!");
+                "Response constructor: index "+index+" too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
-                "Response constructor: size too big!");
+                "Response constructor: size "+size+" too big!");
 
         this.index=index;
         this.size=size;
