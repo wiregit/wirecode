@@ -84,7 +84,9 @@ public class HostCatcher {
 	    }
 	    
 	    //Everything passed!  Add it.
-	    candidates.add(new Endpoint(host, port));	    
+	    Endpoint e = new Endpoint(host, port);	    
+	    candidates.add(e);	    
+    	    addKnownHost(e);
 	}	
     }
 
@@ -137,6 +139,7 @@ public class HostCatcher {
 	    //them to the elected set via addGood.
 	    if (! elected.contains(e)) {
 		candidates.add(e);
+    	        addKnownHost(e);
 	    }
 	}
     }
@@ -180,14 +183,17 @@ public class HostCatcher {
 	    //   successful, add the endpoint to the elected set so we 
 	    //   can write to disk and try later.
 	    try {
+		//System.out.println("trying IP ="+e.hostname);
+		manager.tryingToConnect(e.hostname,e.port, false);
 		Connection ret=new Connection(manager,e.hostname,e.port);
 		synchronized(elected) {
 		    elected.add(e);
 		}
-		System.out.println("OK");
+		//System.out.println("OK");
 		return ret;
 	    } catch (IOException exc) {
-		System.out.println("FAILED");
+		//System.out.println("FAILED");
+		manager.failedToConnect(e.hostname,e.port);
 		continue;
 	    }
 	}
@@ -216,6 +222,30 @@ public class HostCatcher {
 		return e;
 
     }//end of getAnEndpoint
+
+    /**
+     *  Return the number of good hosts
+     */
+    public int getNumHosts() {
+	return( candidates.size() );
+    }
+
+    /**
+     *  Return an iterator on the candidates
+     */
+    public Iterator getHosts() {
+	return( candidates.iterator() );
+    }
+
+    /**
+     *  Add a known host/port
+     */
+    public void addKnownHost(Endpoint e)
+    {
+	if ( manager.getCallback() != null )
+	    manager.getCallback().knownHost(e);
+    }
+
 
 
     public String toString() {

@@ -40,6 +40,7 @@ public class Connection implements Runnable {
     /** The number of packets I sent and received.  This includes bad packets. */
     private int sent;
     private int received;
+    private static int total;
 
 
     /** 
@@ -145,6 +146,7 @@ public class Connection implements Runnable {
 	    m.write(out);
 	    out.flush();
 	    sent++;
+	    total++;
 	}
 	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
@@ -160,6 +162,7 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
+	    total++;
 	    //if (m!=null)
 	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
@@ -308,6 +311,22 @@ public class Connection implements Runnable {
 
     public boolean isOutgoing() {
 	return !incoming;
+    }
+
+    /**
+     *  Shutdown the Connections socket and thus the connection itself.
+     */
+    public void shutdown() {
+	try {
+	    sock.close();
+	} catch(Exception e) {}
+    }
+
+    /**
+     *  Return the total number of messages sent and received
+     */
+    public static int getTotalMessages() {
+	return( total );
     }
 
     /** Returns the port of the foreign host this is connected to. */

@@ -26,8 +26,9 @@ public class ConnectionManager implements Runnable {
     public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
     private List /* of Connection */ connections=Collections.synchronizedList(
 						      new ArrayList());
-    public HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
+    public  HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
     private int keepAlive=0;
+    private ActivityCallback callback;
     private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
     public String ClientId;
 
@@ -135,6 +136,10 @@ public class ConnectionManager implements Runnable {
 		//object, handshake, and give it a thread to service it.
 		Socket client=sock.accept();
 		try {
+		    tryingToConnect(
+                      getHostName(client.getInetAddress()), 
+                      client.getPort(), 
+                      true);
 		    Connection c=new Connection(this, client, true);		   
 		    Thread t=new Thread(c);
 		    t.setDaemon(true);
@@ -161,6 +166,14 @@ public class ConnectionManager implements Runnable {
 	System.err.println(msg);
     }
 
+    /** 
+     *  Start passing on connection events
+     */
+    public void setActivityCallback(ActivityCallback connection) {
+        callback = connection;
+	//System.out.println("ConnectionManager init -  cc ="+connection);
+    }
+
     /** @requires c not in this
      *  @effects adds c to this
      */
@@ -170,6 +183,39 @@ public class ConnectionManager implements Runnable {
 	//port is ephemeral.
 	if (c.isOutgoing())
 	    catcher.addGood(c);
+
+	//System.out.println("add - cc="+callback);
+	// Tell the listener that this connection is okay.
+	if ( callback != null )
+	    callback.updateConnection(
+              getHostName(c.getInetAddress()), 
+              c.getPort(), 
+              callback.STATUS_CONNECTED);
+    }
+
+    /** 
+     *  @effects passes connecting information to ActivityCallback
+     */
+    public void tryingToConnect(String host, int port, boolean incoming) {
+	//System.out.println("trying - cc="+callback);
+	// Tell the listener that this connection is connecting.
+	if ( callback != null )
+	    callback.addConnection(
+              host, 
+              port, 
+	      (incoming ? callback.CONNECTION_INCOMING :
+                          callback.CONNECTION_OUTGOING), 
+              callback.STATUS_CONNECTING);
+    }
+
+    /** 
+     *  @effects passes failed connect information to ActivityCallback
+     */
+    public void failedToConnect(String host, int port) {
+	//System.out.println("failed - cc="+callback);
+	// Remove this connection
+	if ( callback != null )
+	    callback.removeConnection( host, port );
     }
 	
     /** 
@@ -191,8 +237,35 @@ public class ConnectionManager implements Runnable {
 		Thread t=new ConnectionFetcher(this,1);
 		t.start();
 	    }
+
+	    //System.out.println("remove - cc="+callback);
+	    // Tell the listener that this connection is removed.
+	    if ( callback != null )
+		callback.removeConnection(
+		  getHostName(c.getInetAddress()), c.getPort() );
 	}	
     }
+    
+    public ActivityCallback getCallback()
+    {
+	return( callback );
+    }
+
+    private static String getHostName( InetAddress ia )
+    {
+	//System.out.println("InetAddr = " + ia );
+	String host = ia.getHostAddress();
+	
+	return(host);
+    }
+
+    /**
+     *  Returns the number of connections 
+     */
+    public int getNumConnections() {
+	return connections.size();
+    }
+
     /**Returns true if the given ClientID matches the ClientID of this host
      *else returns false.
      *This method will be called when a push request is being made and a 
@@ -207,7 +280,6 @@ public class ConnectionManager implements Runnable {
 	    return true;
 	return false;
     }
-    
     
     /** Returns an unmodifiable iterator of this' connections.
      *  The iterator yields items in any order.
@@ -252,6 +324,7 @@ class ConnectionFetcher extends Thread {
 	this.manager=manager;
 	this.n=n;
 	setDaemon(true);
+	//System.out.println("Fetcher Started");
     }
 
     public void run() {
@@ -263,9 +336,11 @@ class ConnectionFetcher extends Thread {
 		t.setDaemon(true);
 		t.start();
 		//Manager.error("Asynchronously established outgoing connection.");
+		System.out.println("Got a connection");
 	    } catch (NoSuchElementException e) {
 		//give up
 		//Manager.error("Host catcher is empty");
+		System.out.println("HOST CATCHER IS EMPTY");
 		return;
 	    }
 	}
