@@ -1,4 +1,4 @@
-﻿# BEGIN CASE
+# BEGIN CASE
 heあllo;ＨＥあＬＬＯ
 limewire;ＬＩＭＥＷＩＲＥ
 hello;ＨＥllo
