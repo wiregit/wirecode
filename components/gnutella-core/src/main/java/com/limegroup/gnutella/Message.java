@@ -195,14 +195,14 @@ public abstract class Message {
 	return length;
     }
 
-    /** Returns the ip (in LITTLE-endian) format as standard
+    /** Returns the ip (given in LITTLE-endian) format as standard
      *  dotted-decimal, e.g., 192.168.0.1 */
     protected static String ip2string(byte[] ip) {
 	StringBuffer buf=new StringBuffer();
 	buf.append(ByteOrder.ubyte2int(ip[3])+".");
 	buf.append(ByteOrder.ubyte2int(ip[2])+".");
 	buf.append(ByteOrder.ubyte2int(ip[1])+".");
-	buf.append(ByteOrder.ubyte2int(ip[3])+"");
+	buf.append(ByteOrder.ubyte2int(ip[0])+"");
 	return buf.toString();
     }
 
