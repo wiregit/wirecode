@@ -2,6 +2,9 @@ package com.limegroup.gnutella.udpconnect;
 
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  *  This class defines a DataWindow for sending or receiving data 
  *  using UDP with possible out of order data.  Within a certain window 
@@ -16,6 +19,11 @@ import java.util.HashMap;
  */
 public class DataWindow
 {
+	private static final Log LOG =
+	      LogFactory.getLog(DataWindow.class);
+	static{
+		LOG.debug("log system initialized debug level");
+	}
     public  static final int   MAX_SEQUENCE_NUMBER = 0xFFFF;
     private static final int   HIST_SIZE           = 4;
     private static final float RTT_GAIN            = 1.0f / 8.0f;
@@ -50,6 +58,8 @@ public class DataWindow
      *  Add a new message to the window.  
      */
 	public DataRecord addData(UDPConnectionMessage msg) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 		DataRecord d;
 		d          = new DataRecord();
 		d.pnum     = msg.getSequenceNumber();
@@ -199,14 +209,12 @@ public class DataWindow
      *  the RTO, it looks like a message was lost.
      */
     public boolean acksAppearToBeMissing(long time, int multiple) {
-        int irto = (int) rto;
-
 		// Check for first record being old
 		DataRecord drec = getBlock(windowStart);
-		if ( irto > 0 &&
+		if ( rto > 0 &&
 			 drec != null   &&
 			 drec.acks < 1  &&
-		     drec.sentTime + (multiple * irto) < time ) {
+		     drec.sentTime + (multiple * rto) < time ) {
 			return true;
 		}
 
@@ -260,6 +268,8 @@ public class DataWindow
      *  round trip time and averages from it.
      */
 	public DataRecord ackBlock(long pnum) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("entered ackBlock with # "+pnum);
 		DataRecord drec = getBlock(pnum);
 		if ( drec != null ) {
 			drec.acks++;
@@ -322,6 +332,8 @@ public class DataWindow
 				}
 			}
 		}
+		if (LOG.isDebugEnabled())
+			LOG.debug("returning "+drec);
 		return drec;
 	}
 
@@ -371,18 +383,29 @@ public class DataWindow
      *  Get a writable block which means unwritten ones at the start of Window
      */
     public DataRecord getWritableBlock() {
+    	if (LOG.isDebugEnabled())
+    		LOG.debug("entered getWritableBlock wStart "+windowStart+" wSize "+windowSize);
         DataRecord d;
 
         // Find a writable block
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
-                if (d.written) continue;
-                else return d;
+            	LOG.debug("current block not null");
+                if (d.written) {
+                	LOG.debug("current block is written");
+                	continue;
+                }
+                else {
+                	LOG.debug("returning a block");
+                	return d;
+                }
             } else {
+            	LOG.debug("log is null");
                 break;
             }
         }
+        LOG.debug("returning null");
         return null;
     }
 
