@@ -207,7 +207,6 @@ public class ConnectionManager {
              connection = new ManagedConnection(socket, _router, this);
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
-			 e.printStackTrace();
              if(connection != null){
 				 connection.close();
              }
