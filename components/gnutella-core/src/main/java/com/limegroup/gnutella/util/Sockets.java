@@ -20,6 +20,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  */
 public class Sockets {
 
+    private static volatile int _attempts=0;
 	/**
 	 * Ensure this cannot be constructed.
 	 */
@@ -82,6 +83,7 @@ public class Sockets {
 					return connectSocksV5(host, port, timeout);
 			}
 		}
+		_attempts++;
 		return connectPlain(host, port, timeout);
 	}
 
@@ -345,6 +347,13 @@ public class Sockets {
 		return proxySocket;
 	}
 
+	public static int getAttempts() {
+	    return _attempts;
+	}
+	
+	public static void clearAttempts() {
+	    _attempts=0;
+	}
 	/** 
 	 * Opens Java sockets with a bounded timeout using threads.  Typical use:
 	 *
