@@ -25,15 +25,37 @@ public class Endpoint implements Cloneable, Serializable,
      * The number of other nodes that this node is connected to
      */
     private int connectivity = 0;	
+
+	/**
+	* The weight is used in ranking the endpoints 
+	*/
+	private int weight = 0;
     
     /**
      * Sets the connectivity of the node
      * @param connectivity the connectivity to be set 
      */
     public void setConnectivity(int connectivity){
-	this.connectivity = connectivity;
+		this.connectivity = connectivity;
     }
-    
+
+	 /**
+     * Sets the weight of the node
+     * @param weight the weight to be set 
+     */
+    public void setWeight(int weight){
+		this.weight = weight;
+    }
+
+	/**
+	* Gets the weight of this endpoint
+	* @return The weight of the endpoint
+	*/
+	public int getWeight()
+	{
+		return weight;
+	}
+	
     /**
      * returns the connectivity of the node
      * @return The connectivity of the node 
