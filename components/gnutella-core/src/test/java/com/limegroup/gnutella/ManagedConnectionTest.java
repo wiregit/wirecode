@@ -9,6 +9,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -305,7 +306,8 @@ public class ManagedConnectionTest extends BaseTestCase {
 		MiniAcceptor acceptor = new MiniAcceptor(SERVER_PORT);
 		
 		//2. Remote close: discovered on read
-		ManagedConnection out = new ManagedConnection("localhost", SERVER_PORT);
+		ManagedConnection out = ManagedConnection.createTestConnection("localhost", SERVER_PORT,
+                new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
 		out.initialize();            
 		out.buildAndStartQueues();
         Connection in = acceptor.accept(); 
@@ -329,17 +331,18 @@ public class ManagedConnectionTest extends BaseTestCase {
         //semantics, we need TWO writes to discover this.  (See unit tests
         //for Connection.)
         acceptor = new com.limegroup.gnutella.MiniAcceptor(SERVER_PORT);
-        out = new ManagedConnection("localhost", SERVER_PORT);
+        out = ManagedConnection.createTestConnection("localhost", SERVER_PORT,
+                new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
         out.initialize();            
         out.buildAndStartQueues();
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
         in.close();
-        Message m = new PingRequest((byte)3);
+        Message m = new PingRequest((byte)4);
         m.hop();
         out.send(m);        
-        out.send(new PingRequest((byte)3));
+        out.send(new PingRequest((byte)4));
         sleep(100);
 
         assertTrue("connection should not be open", !out.isOpen());
