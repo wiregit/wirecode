@@ -24,7 +24,7 @@ public final class ConnectionSettings extends AbstractSettings {
 	 * Settings for the number of connections to maintain.
 	 */
 	public static final IntSetting KEEP_ALIVE =
-        FACTORY.createIntSetting("KEEP_ALIVE", 20);
+        FACTORY.createIntSetting("KEEP_ALIVE", 25);
 
 	
     /**
@@ -37,7 +37,7 @@ public final class ConnectionSettings extends AbstractSettings {
      * If this is the case, the TTL is set to SOFT_MAX - hops.
      */
     public static final ByteSetting SOFT_MAX =
-        CFG_FACTORY.createByteSetting("SOFT_MAX", (byte)4);
+        CFG_FACTORY.createByteSetting("SOFT_MAX", (byte)3);
 
 	/**
 	 * Settings for whether or not to local addresses should be considered
