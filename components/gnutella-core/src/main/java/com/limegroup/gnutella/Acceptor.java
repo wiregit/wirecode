@@ -303,7 +303,11 @@ public class Acceptor extends Thread {
 				SettingsManager.instance().setAcceptedIncoming(_acceptedIncoming);
 
                 //Dispatch asynchronously.
-                new ConnectionDispatchRunner(client);
+                ConnectionDispatchRunner dispatcher =
+					new ConnectionDispatchRunner(client);
+				Thread dispatchThread = new Thread(dispatcher, "ConnectionDispatchRunner");
+				dispatchThread.setDaemon(true);
+				dispatchThread.start();
 
             } catch (SecurityException e) {
                 callback.error(ActivityCallback.SOCKET_ERROR);
@@ -315,8 +319,9 @@ public class Acceptor extends Thread {
         }
     }
 
-    private class ConnectionDispatchRunner extends Thread {
-        private Socket _socket;
+    private static class ConnectionDispatchRunner implements Runnable {
+
+        private final Socket _socket;
 
         /**
          * @modifies socket, this' managers
@@ -327,10 +332,7 @@ public class Acceptor extends Thread {
          *  returns.
          */
         public ConnectionDispatchRunner(Socket socket) {
-            super("ConnectionDispatchRunner");
-            _socket=socket;
-            setDaemon(true);
-            start();
+            _socket = socket;
         }
 
         public void run() {
