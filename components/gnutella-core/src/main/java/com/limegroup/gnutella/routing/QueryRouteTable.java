@@ -55,21 +55,21 @@ public class QueryRouteTable {
      * The current infinity this table is using.  Necessary for creating
      * ResetTableMessages with the correct infinity.
      */
-    public byte infinity;
+    private byte infinity;
     
     /**
      * What should come across the wire if a keyword is present.
      * The nature of this value is dependent on the infinity of the
      * ResetTableMessage.
      */
-    public byte keywordPresent;
+    private byte keywordPresent;
     
     /**
      * What should come across the wire if a keyword is absent.
      * The nature of thsi value is dependent on the infinity of the
      * ResetTableMessage.
      */
-    public byte keywordAbsent;
+    private byte keywordAbsent;
 
     /** The *new* table implementation.  The table of keywords - each value in
      *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
