@@ -8,7 +8,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.stubs.*;
 
-public class QueryUnicasterTest extends TestCase {
+public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon

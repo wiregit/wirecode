@@ -7,7 +7,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
-public class HostCatcherTest extends TestCase {  
+public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {  
     private HostCatcher hc;
     private RouterService rs;
 

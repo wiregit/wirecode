@@ -16,7 +16,7 @@ import junit.framework.*;
  * downloaders, a stubbed-out MessageRouter (no real messaging connections), and
  * test uploaders.
  */
-public class RequeryDownloadTest extends TestCase {
+public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     /** The main test fixture.  Contains the incomplete file and hash below. */
     DownloadManager mgr; 
     /** Where to send and receive messages */
@@ -33,12 +33,6 @@ public class RequeryDownloadTest extends TestCase {
 
     /** The uploader */
     TestUploader uploader;
-
-    static { // Don't wait for network connections for testing
-        ManagedDownloader.NO_DELAY = true;	
-    }
-
-
 
     class TestMessageRouter extends MessageRouterStub {
         List /* of QueryMessage */ broadcasts=new LinkedList();
@@ -67,6 +61,7 @@ public class RequeryDownloadTest extends TestCase {
     }
 
     public void setUp() {
+        ManagedDownloader.NO_DELAY = true;	
         (new File(filename)).delete();
 		ConnectionSettings.KEEP_ALIVE.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

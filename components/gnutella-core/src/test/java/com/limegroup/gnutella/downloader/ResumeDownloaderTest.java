@@ -14,7 +14,7 @@ import com.sun.java.util.collections.*;
  * larger integration tests.
  * @see RequeryDownloadTest 
  */
-public class ResumeDownloaderTest extends TestCase {
+public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     static final String filePath="com/limegroup/gnutella/downloader/";
     static final String name="filename.txt";
     static final URN hash=TestFile.hash();

@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 
-public class StatisticsTest extends TestCase { 
+public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase { 
     //Most of this code assumes a window factor W of 7 days.
 
     /** Fudge factor */

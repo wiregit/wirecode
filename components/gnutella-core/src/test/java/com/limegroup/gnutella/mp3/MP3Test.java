@@ -12,7 +12,7 @@ import com.sun.java.util.collections.*;
  * @author  cHANCE mOORE, ctmoore@gottapee.com - 30 July 2002
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789
-public class MP3Test extends TestCase {
+public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	private static final int runs = 900;
 	

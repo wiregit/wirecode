@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * Tests BandwidthThrottle and ThrottledOutputStream.
  */
-public class BandwidthThrottleTest extends TestCase {
+public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestCase {
     public BandwidthThrottleTest(String name) {
         super(name);
     }

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.ByteOrder;
 /**
  * Tests COBSUtil
  */
-public class COBSUtilTest extends TestCase {
+public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
     public COBSUtilTest(String name) {
         super(name);
     }

@@ -19,7 +19,7 @@ import java.io.*;
  * ultrapeers handle query routing, normal routing, routing of marked pongs,
  * etc.
  */
-public class UltrapeerRoutingTest extends TestCase {
+public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6667;
     private static final int TIMEOUT=500;
 
@@ -36,29 +36,17 @@ public class UltrapeerRoutingTest extends TestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF =
-		new Connection("localhost", PORT, 
-					   new LeafProperties(),
-					   new EmptyResponder()
-					   );
+    private static Connection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static final Connection ULTRAPEER_1 = 
-		new Connection("localhost", PORT,
-					   new UltrapeerProperties(),
-					   new EmptyResponder()
-					   );
+    private static Connection ULTRAPEER_1;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private static final Connection ULTRAPEER_2 = 
-		new Connection("localhost", PORT,
-					   new UltrapeerProperties(),
-					   new EmptyResponder()
-					   );
+    private static Connection ULTRAPEER_2;
 
 	private static final RouterService ROUTER_SERVICE = 
 		new RouterService(new ActivityCallbackStub());
@@ -74,8 +62,28 @@ public class UltrapeerRoutingTest extends TestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+	
+	private void buildConnections() {
+	    LEAF =
+		new Connection("localhost", PORT, 
+					   new LeafProperties(),
+					   new EmptyResponder()
+					   );
+        
+        ULTRAPEER_1 = 
+		new Connection("localhost", PORT,
+					   new UltrapeerProperties(),
+					   new EmptyResponder()
+					   );
 
-	static {
+        ULTRAPEER_2 = 
+		new Connection("localhost", PORT,
+					   new UltrapeerProperties(),
+					   new EmptyResponder()
+					   );
+    }
+
+	public void setUp() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
@@ -96,9 +104,8 @@ public class UltrapeerRoutingTest extends TestCase {
 		ConnectionSettings.KEEP_ALIVE.setValue(6);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-	}
 
-	public void setUp() {
+
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
 		if(!ROUTER_SERVICE.isStarted()) {
@@ -111,6 +118,7 @@ public class UltrapeerRoutingTest extends TestCase {
 				e.printStackTrace();
 				fail("unexpected exception: "+e);
 			}
+			buildConnections();
 		}
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());

@@ -13,7 +13,7 @@ import java.net.*;
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
  */
-public final class RemoteFileDescTest extends TestCase {	  
+public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTestCase {	  
 
 	private byte[] TEST_GUID;
 

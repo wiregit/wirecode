@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * Tests certain features of CommonUtils
  */
-public class CommonUtilsTest extends TestCase {
+public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public CommonUtilsTest(String name) {
         super(name);

@@ -8,7 +8,7 @@ import com.limegroup.gnutella.messages.*;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
-public class MessagesSupportedVendorMessageTest extends TestCase {
+public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public MessagesSupportedVendorMessageTest(String name) {
         super(name);
     }

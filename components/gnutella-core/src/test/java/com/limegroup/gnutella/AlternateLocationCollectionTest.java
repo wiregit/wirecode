@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class AlternateLocationCollectionTest extends TestCase {
+public final class AlternateLocationCollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	private Set _urnSet;
 	private Set _alternateLocations;

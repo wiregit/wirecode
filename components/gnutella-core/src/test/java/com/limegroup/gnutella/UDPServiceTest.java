@@ -10,7 +10,7 @@ import java.net.*;
  * Tests the <tt>UDPService</tt> class.  This class requires that a server on
  * is already running that can accept queries.
  */
-public class UDPServiceTest extends TestCase {
+public class UDPServiceTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	//private static final Backend BACKEND_0 = Backend.instance();
 

@@ -10,7 +10,7 @@ import com.limegroup.gnutella.stubs.*;
 
 /** Tests the Server Side of GUESS....
  */ 
-public class GUESSServerSideTest extends TestCase {
+public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon

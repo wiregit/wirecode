@@ -12,7 +12,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
-public class ManagedConnectionBufferTest extends TestCase {
+public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.BaseTestCase {
 	
     public static final int PORT=6666;
 

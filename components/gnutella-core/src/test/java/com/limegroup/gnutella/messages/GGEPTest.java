@@ -4,7 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 
-public class GGEPTest extends TestCase {
+public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
     public GGEPTest(String name) {
         super(name);
     }

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 import java.io.IOException;
 
-public class RemoteFileDescGrouperTest extends TestCase {
+public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public RemoteFileDescGrouperTest(String name) {
         super(name);

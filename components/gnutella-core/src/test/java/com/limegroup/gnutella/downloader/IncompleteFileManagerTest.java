@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 import junit.framework.*;
 import java.io.*;
 
-public class IncompleteFileManagerTest extends TestCase {
+public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
     

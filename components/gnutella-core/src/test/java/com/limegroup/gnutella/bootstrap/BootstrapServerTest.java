@@ -8,7 +8,7 @@ import java.text.ParseException;
 /**
  * Unit tests for BootstrapServerTest.
  */
-public class BootstrapServerTest extends TestCase {
+public class BootstrapServerTest extends com.limegroup.gnutella.util.BaseTestCase {
     public BootstrapServerTest(String name) {
         super(name);
     }

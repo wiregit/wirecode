@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 /**
  * Unit tests for Utilities
  */
-public class UtilitiesTest extends TestCase {
+public class UtilitiesTest extends com.limegroup.gnutella.util.BaseTestCase {
     public UtilitiesTest(String name) {
         super(name);
     }

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
-public class MessageTest extends TestCase {
+public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     public MessageTest(String name) {
         super(name);

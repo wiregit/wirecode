@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  *
  * NOTE: Must be run from the directory where the relevant .sxml files reside.
  */
-public class XMLDocSerializerTest extends TestCase {
+public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     final String fileLocation = "com/limegroup/gnutella/xml/";
 

@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
-public class ManagedDownloaderTest extends TestCase {
+public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
 
     public ManagedDownloaderTest(String name) {

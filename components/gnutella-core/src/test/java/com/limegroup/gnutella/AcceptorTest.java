@@ -4,7 +4,7 @@ import junit.framework.*;
 import java.io.IOException;
 import java.net.*;
 
-public class AcceptorTest extends TestCase {
+public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public AcceptorTest(String name) {
         super(name);

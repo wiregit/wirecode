@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import java.io.*;
 import junit.framework.*;
 
-public class AutoDownloaderDetailsTest extends TestCase {
+public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public AutoDownloaderDetailsTest(String name) {
         super(name);

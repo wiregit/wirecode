@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 
-public class MiniRemoteFileDescTest extends TestCase {
+public class MiniRemoteFileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public MiniRemoteFileDescTest(String name) {
         super(name);

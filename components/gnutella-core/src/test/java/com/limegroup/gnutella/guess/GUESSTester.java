@@ -10,7 +10,7 @@ import com.limegroup.gnutella.messages.*;
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
  *  tuned and will now work in general.
  */
-public class GUESSTester extends TestCase {
+public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon

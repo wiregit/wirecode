@@ -12,7 +12,7 @@ import junit.extensions.*;
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
  */
-public final class QueryRequestTest extends TestCase {
+public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	/**
 	 * Constructs a new test instance for query requests.

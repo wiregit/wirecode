@@ -10,7 +10,7 @@ import junit.extensions.*;
 /**
  * Tests the public methods of the UrnCache class.
  */
-public final class UrnCacheTest extends TestCase {
+public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     /**
      * File where urns (currently SHA1 urns) get persisted to

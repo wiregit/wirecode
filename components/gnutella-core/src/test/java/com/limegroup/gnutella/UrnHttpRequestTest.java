@@ -18,7 +18,7 @@ import java.util.*;
  * utilizing the X-Gnutella-Content-URN header and the 
  * X-Gnutella-Alternate-Location header.
  */
-public final class UrnHttpRequestTest extends TestCase {
+public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * FileManager instance to test against.

@@ -12,7 +12,7 @@ import junit.framework.*;
 /**
  * Tests backwards compatibility with old downloads.dat files.
  */
-public class OldDownloadsTest extends TestCase {
+public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final String filePath = "com/limegroup/gnutella/downloader/";
 
     public OldDownloadsTest(String name) {

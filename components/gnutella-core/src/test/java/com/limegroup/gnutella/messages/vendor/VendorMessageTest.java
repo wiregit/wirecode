@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 import java.io.*;
 
-public class VendorMessageTest extends TestCase {
+public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
         super(name);
     }

@@ -14,7 +14,7 @@ import java.net.*;
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
  */
-public final class AlternateLocationTest extends TestCase {
+public final class AlternateLocationTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
 	private static final String[] equalLocs = {

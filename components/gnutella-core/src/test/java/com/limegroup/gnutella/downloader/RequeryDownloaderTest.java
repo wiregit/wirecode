@@ -9,7 +9,7 @@ import junit.framework.*;
  * Tests RequeryDownloader serialization.
  * @see RequeryDownloadTest
  */
-public class RequeryDownloaderTest extends TestCase {
+public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public RequeryDownloaderTest(String name) {
         super(name);

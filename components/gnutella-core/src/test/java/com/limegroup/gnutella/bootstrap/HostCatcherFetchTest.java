@@ -8,7 +8,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 /**
  * Unit tests for the HostCatcher/BootstrapServerManager interface.
  */
-public class HostCatcherFetchTest extends TestCase {
+public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCase {
     private HostCatcher hc;
     private RecordingBootstrapServerManager gWebCache;
 

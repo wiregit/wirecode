@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.*;
 
-public class IntervalTest extends TestCase {
+public class IntervalTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public IntervalTest(String name) {
         super(name);

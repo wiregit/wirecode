@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 import junit.framework.*;
 import com.sun.java.util.collections.*;
 
-public class FixedsizePriorityQueueTest extends TestCase {
+public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.BaseTestCase {
     private final Integer one=new Integer(1);
     private final Integer two=new Integer(2);
     private final Integer three=new Integer(3);

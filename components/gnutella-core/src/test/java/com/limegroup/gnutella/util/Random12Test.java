@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 /**
  * Unit tests for Random12
  */
-public class Random12Test extends TestCase {
+public class Random12Test extends com.limegroup.gnutella.util.BaseTestCase {
     public Random12Test(String name) {
         super(name);
     }

@@ -12,7 +12,7 @@ import com.limegroup.gnutella.stubs.*;
 
 /** This test should NOT be run by the nightly tests build.
  */
-public class VendorMessageSupportTest extends TestCase {
+public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     private String _remoteHost = "localhost";
     private int _remotePort = 6000;

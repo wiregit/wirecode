@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 /**
  * Tests StringUtils.
  */
-public class StringUtilsTest extends TestCase {
+public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     public StringUtilsTest(String name) {
         super(name);
     }

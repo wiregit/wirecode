@@ -6,7 +6,7 @@ import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
-public class PingRequestTest extends TestCase {
+public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PingRequestTest(String name) {
         super(name);
     }

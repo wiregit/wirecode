@@ -4,7 +4,7 @@ import junit.framework.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.Assert;
 
-public class BufferTest extends TestCase {
+public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
     public BufferTest(String name) {
         super(name);
     }

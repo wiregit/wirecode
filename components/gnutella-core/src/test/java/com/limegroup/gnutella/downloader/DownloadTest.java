@@ -18,7 +18,7 @@ import junit.framework.*;
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
  */
-public class DownloadTest extends TestCase {
+public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final String filePath =
         "com/limegroup/gnutella/downloader/DownloadTestData/";
     
@@ -64,10 +64,6 @@ public class DownloadTest extends TestCase {
 	private static final int SIMPLE_ALTERNATE_LOCATIONS = 20;
 
     static { 
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        // Don't wait for network connections for testing
-        ManagedDownloader.NO_DELAY = true;
-        
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
@@ -94,10 +90,10 @@ public class DownloadTest extends TestCase {
     }
     
     public void setUp() {
-        
-        try {
-            Thread.sleep(300);   
-        } catch (InterruptedException ignored) {}
+
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        // Don't wait for network connections for testing
+        ManagedDownloader.NO_DELAY = true;
         
         uploader1=new TestUploader("6346", 6346);
         uploader2=new TestUploader("6347", 6347);
@@ -161,17 +157,19 @@ public class DownloadTest extends TestCase {
         dir.delete();
     }
 
+        /*
     public void testLegacy() {
         String args[] = {};
         
-        /*
+
         tOverlapCheckSpeed(5);
         cleanup();
         tOverlapCheckSpeed(25);
         cleanup();
         tOverlapCheckSpeed(125);
-        cleanup(); */
+        cleanup();
     }
+            */
     
     /**
      * Tests to see if this 'i' is one of the testsToRun
@@ -1071,21 +1069,21 @@ public class DownloadTest extends TestCase {
     /** Waits for the given download to complete. */
     private static void waitForComplete(Downloader d) {
         //Current implementation: polling (ugh)
-        while (d.getState()!=Downloader.COMPLETE) {
-            try {
+        try {
+            while (d.getState()!=Downloader.COMPLETE) {
                 Thread.sleep(100);
-            } catch (InterruptedException e) { }
-        }
+            }
+        } catch (InterruptedException e) { }
     }
 
 
     private static void waitForCorrupt(Downloader d) {
         //Current implementation: polling (ugh)
-        while (d.getState()!=Downloader.CORRUPT_FILE) {
-            try {
+        try {
+            while (d.getState()!=Downloader.CORRUPT_FILE) {
                 Thread.sleep(100);
-            } catch (InterruptedException e) { }
-        }
+            }
+        } catch (InterruptedException e) { }
     }
 
     /** Returns true if the complete file exists and is complete */

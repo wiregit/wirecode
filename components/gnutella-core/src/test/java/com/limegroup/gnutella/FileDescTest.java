@@ -11,7 +11,7 @@ import java.net.*;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class FileDescTest extends TestCase {
+public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	private final String [] containedURNStrings = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",

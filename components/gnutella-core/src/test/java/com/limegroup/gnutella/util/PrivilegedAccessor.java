@@ -36,7 +36,11 @@ public class PrivilegedAccessor {
      */
     public static Object getValue(Object instance, String fieldName )     
            throws IllegalAccessException, NoSuchFieldException {
-        Field field = getField(instance.getClass(), fieldName);
+        Field field;
+        if ( instance instanceof Class )
+            field = getField((Class)instance, fieldName);
+        else
+            field = getField(instance.getClass(), fieldName);
         field.setAccessible(true);
         return field.get(instance);
     }
@@ -52,7 +56,11 @@ public class PrivilegedAccessor {
                                 String fieldName, 
                                 Object value) 
             throws IllegalAccessException, NoSuchFieldException {
-        Field field = getField(instance.getClass(), fieldName);
+        Field field;
+        if ( instance instanceof Class )
+            field = getField((Class)instance, fieldName);
+        else
+            field = getField(instance.getClass(), fieldName);
         field.setAccessible(true);
         field.set(instance, value);
     }

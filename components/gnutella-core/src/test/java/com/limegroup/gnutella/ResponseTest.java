@@ -11,7 +11,7 @@ import junit.extensions.*;
 /**
  * This class tests the Response class.
  */
-public final class ResponseTest extends TestCase {
+public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constructs a new test instance for responses.

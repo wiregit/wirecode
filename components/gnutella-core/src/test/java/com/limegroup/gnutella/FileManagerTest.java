@@ -4,7 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 import java.io.*;
 
-public class FileManagerTest extends TestCase {
+public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	private static File _testDir;
 

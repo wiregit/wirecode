@@ -13,7 +13,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
-public class ManagedConnectionTest extends TestCase {  
+public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestCase {  
     public static final int PORT=6666;
 
 
@@ -28,8 +28,7 @@ public class ManagedConnectionTest extends TestCase {
         return new TestSuite(ManagedConnectionTest.class);
     }    
 
-    static {
-		AbstractSettings.revertToDefault();
+    public void setUp() {
         SettingsManager.instance().setPort(6444);
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -38,10 +37,8 @@ public class ManagedConnectionTest extends TestCase {
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-    }
-
-
-    public void setUp() {
+        
+        
         if(ROUTER_SERVICE.isStarted()) return;
 
         ROUTER_SERVICE.start();

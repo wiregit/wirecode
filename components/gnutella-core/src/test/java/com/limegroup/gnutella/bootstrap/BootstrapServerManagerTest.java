@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 /**
  * Unit tests for BootstrapServerManager.
  */
-public class BootstrapServerManagerTest extends TestCase {
+public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     public BootstrapServerManagerTest(String name) {
         super(name);
     }

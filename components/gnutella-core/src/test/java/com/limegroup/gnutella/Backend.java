@@ -164,6 +164,7 @@ public class Backend {
 	protected Backend(ActivityCallback callback, MessageRouter router,
 					  int timeout, int port) {
 		System.out.println("STARTING BACKEND ON PORT "+port); 
+		AbstractSettings.setShouldSave(false);
         PORT = port;
 		makeSharedDirectory();
 		copySettingsFiles();

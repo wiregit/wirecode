@@ -9,7 +9,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import junit.framework.*;
 
-public class QueryRouteTableTest extends TestCase {
+public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryRouteTableTest(String name) {
         super(name);
     }

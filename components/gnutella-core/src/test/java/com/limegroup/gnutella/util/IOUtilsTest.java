@@ -4,7 +4,7 @@ import junit.framework.*;
 import junit.extensions.*;
 import java.io.*;
 
-public final class IOUtilsTest extends TestCase {
+public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constructs a new <tt>IOUtilsTest</tt> with the specified name.

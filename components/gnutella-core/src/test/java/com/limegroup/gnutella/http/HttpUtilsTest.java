@@ -7,7 +7,7 @@ import junit.extensions.*;
 /**
  * Tests the HTTPUtils class.
  */
-public final class HttpUtilsTest extends TestCase {
+public final class HttpUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	/**
 	 * Constructs a new HttpUtilsTest.

@@ -7,7 +7,7 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 
-public class QueryKeyTest extends TestCase {
+public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryKeyTest(String name) {
         super(name);
     }

@@ -21,7 +21,7 @@ import java.net.*;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-public class LeafRoutingTest extends TestCase {
+public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6669;
     private static final int TIMEOUT=500;
     private static final byte[] ultrapeerIP=

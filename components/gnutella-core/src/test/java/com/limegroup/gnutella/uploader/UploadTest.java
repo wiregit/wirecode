@@ -18,7 +18,7 @@ import com.limegroup.gnutella.handshaking.*;
  * Test that a client uploads a file correctly.  Depends on a file
  * containing the lowercase characters a-z.
  */
-public class UploadTest extends TestCase {
+public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static String address;
     private static final int PORT = 6668;
     /** The file name, plain and encoded. */
@@ -40,7 +40,20 @@ public class UploadTest extends TestCase {
 	 */
 	public UploadTest(String name) {
 		super(name);
-		
+	}
+
+	/**
+	 * Allows this test to be run as a set of suites.
+	 */
+	public static Test suite() {
+		return new TestSuite(UploadTest.class);
+	}
+
+	public static void main(String args[]) {
+		junit.textui.TestRunner.run(suite());
+	}
+
+	protected void setUp() {
 		try {
   			address = InetAddress.getLocalHost().getHostAddress();
   		} catch(UnknownHostException e) {
@@ -70,21 +83,8 @@ public class UploadTest extends TestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 
         if ( !ROUTER_SERVICE.isStarted() )
-            ROUTER_SERVICE.start();		
-	}
-
-	/**
-	 * Allows this test to be run as a set of suites.
-	 */
-	public static Test suite() {
-		return new TestSuite(UploadTest.class);
-	}
-
-	public static void main(String args[]) {
-		junit.textui.TestRunner.run(suite());
-	}
-
-	protected void setUp() {
+            ROUTER_SERVICE.start();			    
+	    
         assertEquals("ports should be equal",
                      PORT, SettingsManager.instance().getPort());
 

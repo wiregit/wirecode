@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 /**
  * Unit tests for GUID.
  */
-public class GUIDTest extends TestCase {
+public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
     private byte[] bytes;
     private byte[] b1;
     private byte[] b2;

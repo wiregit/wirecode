@@ -10,7 +10,7 @@ import java.io.*;
  * needs to be run from either the core directory or the directory above
  * the core directory.
  */
-public final class UrnTest extends TestCase {
+public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	private static final String [] VALID_URNS = {
 		"urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB",

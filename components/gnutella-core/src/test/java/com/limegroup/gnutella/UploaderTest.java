@@ -11,7 +11,7 @@ import com.limegroup.gnutella.http.*;
 import java.io.*;
 import java.net.*;
 
-public class UploaderTest extends TestCase {
+public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     private ActivityCallback ac;
     private FileManager fm;

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
-public class PushRequestTest extends TestCase {
+public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PushRequestTest(String name) {
         super(name);
     }

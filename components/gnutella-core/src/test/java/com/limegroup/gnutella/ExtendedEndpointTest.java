@@ -8,7 +8,7 @@ import com.sun.java.util.collections.*;
 /**
  * Unit tests for ExtendedEndpoint.
  */
-public class ExtendedEndpointTest extends TestCase {
+public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
     private ExtendedEndpoint e;
     private Comparator comparator;
 

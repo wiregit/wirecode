@@ -15,23 +15,12 @@ import com.limegroup.gnutella.util.*;
  * of right events.  VERY slow--involves lots of timeouts--so not part of the
  * standard test suite.  
  */
-public class ConnectionManagerTest extends TestCase {
+public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static final TestHostCatcher CATCHER = new TestHostCatcher();
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new ActivityCallbackStub());
-
-    static {
-        SettingsManager.instance().setPort(6346);
-		ConnectionSettings.KEEP_ALIVE.setValue(1);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);		
-    }
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -46,6 +35,15 @@ public class ConnectionManagerTest extends TestCase {
     }
 
     public void setUp() {
+        SettingsManager.instance().setPort(6346);
+		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);	
+
         String serversRunning = System.getProperty("servers"); 
         int maxPortRunning = 0;
         if(serversRunning != null) {

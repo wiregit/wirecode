@@ -4,7 +4,7 @@ import com.limegroup.gnutella.http.*;
 
 import junit.framework.*;
 
-public class HTTPDownloaderTest extends TestCase {
+public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public HTTPDownloaderTest(String name) {
         super(name);

@@ -10,7 +10,7 @@ import junit.extensions.*;
 /**
  * This class tests the QueryReply class.
  */
-public final class QueryReplyTest extends TestCase {
+public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	/**
 	 * Constructs a new test instance for query replies.

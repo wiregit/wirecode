@@ -9,7 +9,7 @@ import junit.framework.*;
 /** Unit test for LimeXMLReplyCollection.
  * Should run in the tests/xml directory (ie where this file is located).
  */
-public class CollectionTest extends TestCase {
+public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     final Map files = new HashMap();
     final String fileLocation = "com/limegroup/gnutella/xml/";
