@@ -1033,9 +1033,9 @@ public abstract class MessageRouter {
         // 1)
         final GUID guidToUse = udp.getConnectBackGUID();
         final int portToContact = udp.getConnectBackPort();
+        InetAddress sourceAddr = source.getInetAddress();
         List redirect = _manager.getUDPRedirectUltrapeers();
         if (redirect.size() > 0) {
-            InetAddress sourceAddr = source.getInetAddress();
             UDPConnectBackRedirect redir = null;
             try {
                 // make a new redirect message
@@ -1055,7 +1055,7 @@ public abstract class MessageRouter {
         // 2)
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        UDPService.instance().send(pr, source.getInetAddress(), portToContact);
+        UDPService.instance().send(pr, sourceAddr, portToContact);
     }
 
 
@@ -1119,9 +1119,9 @@ public abstract class MessageRouter {
 
         // 1)
         final int portToContact = tcp.getConnectBackPort();
+        InetAddress sourceAddr = source.getInetAddress();
         List redirect = _manager.getTCPRedirectUltrapeers();
         if (redirect.size() > 0) {
-            InetAddress sourceAddr = source.getInetAddress();
             TCPConnectBackRedirect redir = null;
             try {
                 // make a new redirect message
@@ -1138,7 +1138,7 @@ public abstract class MessageRouter {
         }
 
         // 2)
-        final String addrToContact = source.getInetAddress().getHostAddress();
+        final String addrToContact = sourceAddr.getHostAddress();
 
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
