@@ -64,20 +64,21 @@ public class RouteServer {
 
 	//3. Now write replies as fast as possible from each of the connections.
 	//   Because the connections are randomized, the replies appear to come in
-	//   random order to the router.  Note that the message is only decoded
-	//   once.
+	//   random order to the router.  We have to create a new reply packet
+	//   each time in case the servent is using anti-spam technology.
 	System.out.println("done.\nSending replies.  Press Ctrl-C to end.");
-	byte[] ip={(byte)127, (byte)0, (byte)0, 1};
 	Response[] responses={new Response(0, 20, "file.mp3")};
-	//A very bogus reply packet!  (Yes, that is the wrong ID at the end.)
-	QueryReply reply=new QueryReply(request.getGUID(), (byte)4, 6346,
-					ip, 56, responses, request.getGUID());
-					
-	ByteArrayOutputStream baos=new ByteArrayOutputStream();
-	reply.write(baos);
-	byte[] replyBytes=baos.toByteArray();
+	byte[] guid=request.getGUID();
+	byte[] clientGUID=new byte[16]; //different for each response
+	byte[] ip=new byte[4];          //different for each response
+
 	for (int i=0; ;i=(i+1) % n) {
-	    connections[i].sendRaw(replyBytes); 	    //c.send(reply);
+	    random.nextBytes(clientGUID);
+	    random.nextBytes(ip);
+	    QueryReply reply=new QueryReply(guid, (byte)5, 6346,
+					    ip, 56, responses, clientGUID);
+	    reply.hop();  //so servent doesn't think it's from me
+	    connections[i].send(reply); 
 	}	
     }
 
