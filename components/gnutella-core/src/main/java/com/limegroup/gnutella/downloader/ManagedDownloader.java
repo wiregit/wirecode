@@ -1029,6 +1029,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
+        rfd.setDownloading(true);
                                                             
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )

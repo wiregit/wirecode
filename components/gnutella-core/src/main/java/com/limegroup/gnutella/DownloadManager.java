@@ -162,6 +162,13 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Determines if the given URN has an incomplete file.
+     */
+    public boolean isIncomplete(URN urn) {
+        return incompleteFileManager.getFileForUrn(urn) != null;
+    }
+    
+    /**
      * Returns the IncompleteFileManager used by this DownloadManager
      * and all ManagedDownloaders.
      */

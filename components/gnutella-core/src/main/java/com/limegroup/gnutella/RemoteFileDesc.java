@@ -105,11 +105,25 @@ public class RemoteFileDesc implements Serializable {
      */
     private transient long _earliestRetryTime = 0;
 
+    /**
+     * The cached hash code for this RFD.
+     */
     private transient int _hashCode = 0;
 
+    /**
+     * Whether or not THEX retrieval has failed with this host.
+     */
     private transient boolean _THEXFailed = false;
 
+    /**
+     * The cached RemoteHostData for this rfd.
+     */
     private transient RemoteHostData _hostData = null;
+    
+    /**
+     * Whether or not this RFD is/was used for downloading.
+     */
+    private transient boolean _isDownloading = false;
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -354,6 +368,20 @@ public class RemoteFileDesc implements Serializable {
     public void setTHEXFailed() {
         _THEXFailed = true;
     }
+    
+    /**
+     * Sets this RFD as downloading.
+     */
+    public void setDownloading(boolean dl) {
+        _isDownloading = dl;
+    }
+    
+    /**
+     * Determines if this RFD is downloading.
+     *
+     * @return whether or not this is downloading
+     */
+    public boolean isDownloading() { return _isDownloading; }
 
 	/**
 	 * Accessor for the host ip with this file.

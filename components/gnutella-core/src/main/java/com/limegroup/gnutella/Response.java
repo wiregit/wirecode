@@ -109,6 +109,11 @@ public class Response {
      * The set of other locations that have this file.
      */
     private final Set /* of Endpoint */ otherLocations;
+    
+    /**
+     * The cached RemoteFileDesc created from this Response.
+     */
+    private volatile RemoteFileDesc cachedRFD;
 
 	
 	/**
@@ -829,25 +834,33 @@ public class Response {
      * Returns this Response as a RemoteFileDesc.
      */
     public RemoteFileDesc toRemoteFileDesc(HostData data){
-        return new RemoteFileDesc(
-             data.getIP(),
-             data.getPort(),
-             getIndex(),
-             getName(),
-             (int)getSize(),
-             data.getClientGUID(),
-             data.getSpeed(),
-             data.isChatEnabled(),
-             data.getQuality(),
-             data.isBrowseHostEnabled(),
-             getDocument(),
-             getUrns(),
-             data.isReplyToMulticastQuery(),
-             data.isFirewalled(), 
-             data.getVendorCode(),
-             System.currentTimeMillis(),
-             data.getPushProxies()
-            );
+        if(cachedRFD != null &&
+           cachedRFD.getPort() == data.getPort() &&
+           cachedRFD.getHost().equals(data.getIP()))
+            return cachedRFD;
+        else {
+            RemoteFileDesc rfd = new RemoteFileDesc(
+                 data.getIP(),
+                 data.getPort(),
+                 getIndex(),
+                 getName(),
+                 (int)getSize(),
+                 data.getClientGUID(),
+                 data.getSpeed(),
+                 data.isChatEnabled(),
+                 data.getQuality(),
+                 data.isBrowseHostEnabled(),
+                 getDocument(),
+                 getUrns(),
+                 data.isReplyToMulticastQuery(),
+                 data.isFirewalled(), 
+                 data.getVendorCode(),
+                 System.currentTimeMillis(),
+                 data.getPushProxies()
+                );
+            cachedRFD = rfd;
+            return rfd;
+        }
     }
 
 	/**
