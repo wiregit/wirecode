@@ -192,85 +192,25 @@ public class HTTPDownloader implements Runnable {
     /** Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"
      *  (Response will be read later in readHeader()). */
     public void initOne() {
-        try {
-            _istream = _socket.getInputStream();
-            //The try-catch below works around JDK bug 4091706.
-            _br = new ByteReader(_istream);
-        }
-        catch (Exception e) {
-            _state = ERROR;
-            return;
-        }
 
         _state = CONNECTED;
-
         _resume = false;
 
-        //Note that the following code is similar to initTwo except
-        //that it does not use the built in Java URL/URLConnection
-        //classes (since we've already
-        //established the connection).  Ideally we should have special methods
-        //to handle the HTTP formatting, but this is kind of a hack.
         try {
-            //The try-catch below works around JDK bug 4091706.
-            BufferedWriter out=null;
-            try {
-                OutputStream os = _socket.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(os);
-                out=new BufferedWriter(osw);
-            } catch (Exception e) {
-                throw new IOException();
-            }
-
-            out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
-            out.write("User-Agent: LimeWire\r\n");
-            out.write("\r\n");
-            out.flush();
+			connect(null);
         } catch (IOException e) {
             _state = ERROR;
             return;
         }
     }
 
-	/**
-	 *  Do a direct socket connect to address with a HTTP request
-	 */
-    private void connect() throws IOException {
-        //1. Establish connection.
-        try {
-            _socket=new Socket(_host, _port);
-        } catch (SecurityException e) {
-            throw new IOException();
-        }
-
-		try {                
-			_br=new ByteReader(_socket.getInputStream());
-		} catch (Exception e) {
-			throw new IOException();
-		}
-
-		BufferedWriter out=null;
-		try {
-			OutputStream os = _socket.getOutputStream();
-			OutputStreamWriter osw = new OutputStreamWriter(os);
-			out=new BufferedWriter(osw);
-		} catch (Exception e) {
-			throw new IOException();
-		}
-
-		out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
-		out.write("User-Agent: LimeWire\r\n");
-		out.write("\r\n");
-		out.flush();
-	}
-
-
 
     public void initTwo() {
         _state = NOT_CONNECTED;
 
+		_socket = null;
         try {
-			connect();
+			connect(null);
         }
         catch (IOException e) {
 
@@ -331,15 +271,11 @@ public class HTTPDownloader implements Runnable {
         String startRange = java.lang.String.valueOf(start);
 
         // Now, try to establish a socket connection
-        URLConnection conn;
-        String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
+        String extraHeaders = "Range: " + "bytes="+ startRange + "-"+"\r\n";
 
+		_socket = null;
         try {
-            URL url = new URL(_protocol, _host, _port, furl);
-            conn = url.openConnection();
-            conn.setRequestProperty("Range", "bytes="+ startRange + "-");
-            conn.setRequestProperty("User-Agent", "LimeWire");
-            conn.connect();
+			connect(extraHeaders);
         } catch (Exception e) {
             // for some reason the connection could not
             // be established;
@@ -347,24 +283,52 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;     _resume = true;
             return;
         }
-        // try to get the input stream from the connection
-        try {
-            //The try-catch below works JDK bug 4091706.
-            _istream = conn.getInputStream();
-            _br = new ByteReader(_istream);
-        }
-        catch (Exception e) {
-            // for some reason the inputstream could
-            // not be opened.
-            _stateString = "Resumed Connection Failed";
-            _state = ERROR;
-            return;
-        }
 
         _state = CONNECTED;
-
-
     }
+
+	/**
+	 *  Do a direct socket connect to address with a HTTP request
+     *  Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"
+	 *  Pass along any extra header information.
+	 *  If the _socket is not already established then it will be.
+	 */
+    private void connect(String extraHeaders) throws IOException {
+        //1. Establish connection.
+		if ( _socket == null )
+		{
+			try {
+				_socket=new Socket(_host, _port);
+			} catch (SecurityException e) {
+				throw new IOException();
+			}
+		}
+
+		try {                
+			_br=new ByteReader(_socket.getInputStream());
+		} catch (Exception e) {
+			throw new IOException();
+		}
+
+		BufferedWriter out=null;
+		try {
+			OutputStream os = _socket.getOutputStream();
+			OutputStreamWriter osw = new OutputStreamWriter(os);
+			out=new BufferedWriter(osw);
+		} catch (Exception e) {
+			throw new IOException();
+		}
+
+		out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+		out.write("User-Agent: LimeWire\r\n");
+		if ( extraHeaders != null )
+			out.write(extraHeaders);
+
+		out.write("\r\n");
+		out.flush();
+	}
+
+
 
     public void run() {
 
