@@ -592,6 +592,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		if (str==null || str.equals(""))
             throw new IOException();
+
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str, _rfd);	
@@ -651,13 +652,6 @@ public class HTTPDownloader implements BandwidthTracker {
             	parseFeatureHeader(str);
             else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
                 parseTHEXHeader(str);
-            else if (str.indexOf("urn:bitprint:") > -1) { 
-                // REMOVEME this is a hack for testing because Shareaza doesn't comply
-                // with the PFSP proposal which we require. And I don't see any necessity
-                // not to require the TigerTree root hash in the X-Thex-Uri header when
-                // it's obviously required by the protocol!
-                _root32 = str.substring(str.lastIndexOf(".")+1).trim();
-            }            	
         }
 
 
@@ -712,10 +706,17 @@ public class HTTPDownloader implements BandwidthTracker {
         if(sha1 == null)
             return;
         
-        String contentUrnString = HTTPUtils.extractHeaderValue(str);
+        String value = HTTPUtils.extractHeaderValue(str);
+        if (_root32 == null && value.indexOf("urn:bitprint:") > -1) { 
+            // If the root32 was not in the X-Thex-URI header
+            // (the spec requires it be there), then steal it from
+            // the content-urn if it was a bitprint.
+            _root32 = value.substring(value.lastIndexOf(".")+1).trim();
+        }
+        
         URN contentUrn = null;
         try {
-            contentUrn = URN.createSHA1Urn(contentUrnString);
+            contentUrn = URN.createSHA1Urn(value);
         } catch (IOException ioe) {
             // could be an URN type we don't know. So ignore all
             return;
