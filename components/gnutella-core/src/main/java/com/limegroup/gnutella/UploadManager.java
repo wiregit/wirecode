@@ -476,29 +476,28 @@ public final class UploadManager implements BandwidthTracker {
      */
     private void setUploaderStateOffHeaders(HTTPUploader uploader) {
         FileDesc fd = uploader.getFileDesc();
-
-        // If it's the wrong URN, File Not Found it.
-        URN urn = uploader.getRequestedURN();
-		if(fd != null && urn != null && !fd.containsUrn(urn)) {
-            uploader.setState(Uploader.FILE_NOT_FOUND);
-            return;
+        
+        // If it's still trying to connect, do more checks ...
+        if( uploader.getState() == Uploader.CONNECTING ) {    
+            // If it's the wrong URN, File Not Found it.
+            URN urn = uploader.getRequestedURN();
+    		if(fd != null && urn != null && !fd.containsUrn(urn)) {
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+                return;
+            }
+            
+            // If they requested an incomplete file, determine
+            // if we have the correct range.  If not, change
+            // state appropriately.
+            if (fd instanceof IncompleteFileDesc) {
+                IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+                int upStart = uploader.getUploadBegin();
+                int upEnd = uploader.getUploadEnd();
+                if ( !ifd.isRangeSatisfiable(upStart, upEnd) )
+                    uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                return;
+            }
         }
-        
-        // If they requested an incomplete file, determine
-        // if we have the correct range.  If not, change
-        // state appropriately.
-        if (fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            int upStart = uploader.getUploadBegin();
-            int upEnd = uploader.getUploadEnd();
-            if ( !ifd.isRangeSatisfiable(upStart, upEnd) )
-                uploader.setState(Uploader.UNAVAILABLE_RANGE);
-            return;
-        }
-        
-        assertAsConnecting( uploader.getState() );
-        
-        return;
     }
         
     /**
