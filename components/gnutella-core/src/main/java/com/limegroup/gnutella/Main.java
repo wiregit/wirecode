@@ -27,7 +27,7 @@ public class Main implements ActivityCallback {
     {
         try
         {
-            Thread.sleep(500000); //sleep for 500 seconds
+            Thread.sleep(250); //sleep for 1/4 seconds
         }
         catch(InterruptedException ie)
         {
