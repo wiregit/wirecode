@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
+import java.util.*;
 import java.io.IOException;
 
 /**

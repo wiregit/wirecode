@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A mapping that "forgets" keys and values using a FIFO replacement

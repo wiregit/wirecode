@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -11,8 +11,7 @@ import java.net.UnknownHostException;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files.
  */
-public class Endpoint implements Cloneable, Serializable,
-com.sun.java.util.collections.Comparable
+public class Endpoint implements Cloneable, Serializable, java.lang.Comparable
 {
     /**
     * serial version (needed for serialization/deserialization)

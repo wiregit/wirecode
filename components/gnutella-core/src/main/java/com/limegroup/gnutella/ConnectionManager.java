@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * The list of all connections.  Accepts new connections and creates

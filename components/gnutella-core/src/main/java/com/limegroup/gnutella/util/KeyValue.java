@@ -1,7 +1,7 @@
 
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
 * This class stores a pair of a property key, and its corresponding value.

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A 16-bit globally unique ID.  Immutable.<p>

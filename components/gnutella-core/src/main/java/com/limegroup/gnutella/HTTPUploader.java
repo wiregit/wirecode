@@ -11,10 +11,9 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
-public class HTTPUploader implements Runnable, 
-                    com.sun.java.util.collections.Comparable {
+public class HTTPUploader implements Runnable, java.lang.Comparable {
     /**
      * The list of all files that we've tried unsuccessfully to upload
      * via pushes.  (Here successful means we were able to connect.

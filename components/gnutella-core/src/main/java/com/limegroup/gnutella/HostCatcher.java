@@ -1,10 +1,9 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.BucketQueue;
-import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
-import java.util.Date;
+import java.util.*;
 
 /**
  * The host catcher.  This peeks at pong messages coming on the

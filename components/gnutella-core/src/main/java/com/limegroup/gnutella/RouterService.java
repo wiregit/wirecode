@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * The External interface into the router world.

@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * The reply routing table.  Given a GUID from a reply message header,

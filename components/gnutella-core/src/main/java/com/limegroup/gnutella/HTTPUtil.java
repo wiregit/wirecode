@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 public class HTTPUtil {
 

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.Iterator;
+import java.util.*;
 import java.net.Socket;
 import java.io.IOException;
 

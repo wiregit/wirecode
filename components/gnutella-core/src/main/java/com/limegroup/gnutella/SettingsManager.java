@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.util.Properties;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;

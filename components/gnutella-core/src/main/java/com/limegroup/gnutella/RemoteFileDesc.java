@@ -8,10 +8,11 @@ package com.limegroup.gnutella;
  * @file RemoteFileDesc.java
  */
 
-import com.sun.java.util.collections.Comparator;
-import com.sun.java.util.collections.Comparable;
+//import com.sun.java.util.collections.Comparator;
+//import com.sun.java.util.collections.Comparable;
 import com.limegroup.gnutella.gui.GUIStyles;
-import com.sun.java.util.collections.Arrays;
+import java.util.*;
+//import com.sun.java.util.collections.Arrays;
 
 public class RemoteFileDesc implements Comparable {
 
