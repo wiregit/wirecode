@@ -22,14 +22,31 @@ public class HostCatcherTest extends TestCase {
     /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
+        
         HostCatcher.DEBUG=true;
 		rs = new RouterService(new ActivityCallbackStub());
 
         hc = new HostCatcher();
+
+        //move gnutella.dot before we initialize
+        //test it specifically in other places.
+        File gdotnet = new File( SettingsManager.instance().getHostList() );
+        if ( gdotnet.exists() ) {
+            gdotnet.renameTo( new File("gdotnet.tmp") );
+        }
+        
+        
 		hc.initialize();		
     }
 
 	public void tearDown() {
+	    
+	    // put the gnutella.dot file back.
+	    File gtmp = new File( "gdotnet.tmp" );
+	    if( gtmp.exists() ) {
+	        gtmp.renameTo( new File(SettingsManager.instance().getHostList()) );
+	    }
+	    
 	}
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
@@ -54,42 +71,61 @@ public class HostCatcherTest extends TestCase {
     public void testAddPriorities() {
         //Endpoints.
         setUp();
+        
+        // Adding a private host should add 1 more to the numPrivateHosts...
         hc.add(new Endpoint("192.168.0.1"), false);
-        assertEquals("should not be any Ultrapeer hosts in catcher",
-					 0,hc.getNumUltrapeerHosts());
-        assertTrue(hc.getNumNormalHosts()==0);
-        assertTrue(hc.getNumPrivateHosts()==1);
+        assertEquals("private endpoint added as ultrapeer",
+					 0, hc.getNumUltrapeerHosts());
+        assertEquals("private endpoint added as normal",
+                     0, hc.getNumNormalHosts());
+        assertEquals("private endpoint not added as private",
+                    1, hc.getNumPrivateHosts());
 
         setUp();
+        // Adding a normal host should add 1 more to numNormalHosts
         hc.add(new Endpoint("18.239.0.1"), false);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
-        assertTrue(hc.getNumNormalHosts()==1);
-        assertTrue(hc.getNumPrivateHosts()==0);
+        assertEquals("normal endpoint added as ultrapeer",
+                0, hc.getNumUltrapeerHosts());
+        assertEquals("normal endpoint not added as normal",
+                1, hc.getNumNormalHosts());
+        assertEquals("normal endpoint added as private",
+                0, hc.getNumPrivateHosts());
 
         setUp();
+        // Adding a ultrapeer should add 1 more to numUltrapeerHosts
         hc.add(new Endpoint("18.239.0.1"), true);
-        assertTrue(hc.getNumUltrapeerHosts()==1);
-        assertTrue(hc.getNumNormalHosts()==0);
-        assertTrue(hc.getNumPrivateHosts()==0);
+        assertEquals("ultrapeer endpoint not added as ultrapeer",
+                1, hc.getNumUltrapeerHosts());
+        assertEquals("ultrapeer endpoint added as normal",
+                0, hc.getNumNormalHosts());
+        assertEquals("ultrapeer endpoint added as private",
+                0, hc.getNumPrivateHosts());
 
         //PingReply's.
         setUp();
+        // Adding a private should add 1 more to numPrivateHosts
         hc.add(new PingReply(new byte[16], (byte)3, 6346, 
                              new byte[] {(byte)192,(byte)168,(byte)0,(byte)1},
                              0, 0),
                null);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
-        assertTrue(hc.getNumNormalHosts()==0);
-        assertTrue(hc.getNumPrivateHosts()==1);
+        assertEquals("private PingReply added as ultrapeer",
+					 0 ,hc.getNumUltrapeerHosts());
+        assertEquals("private PingReply added as normal",
+                     0, hc.getNumNormalHosts());
+        assertEquals("private PingReply not added as private",
+                    1, hc.getNumPrivateHosts());
 
         setUp();
         hc.add(new PingReply(new byte[16], (byte)3, 6346, 
                              new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
                              0, 0),
                null);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
-        assertTrue(hc.getNumNormalHosts()==1);
-        assertTrue(hc.getNumPrivateHosts()==0);
+        assertEquals("normal PingReply added as ultrapeer",
+                0, hc.getNumUltrapeerHosts());
+        assertEquals("normal PingReply not added as normal",
+                1, hc.getNumNormalHosts());
+        assertEquals("normal PingReply added as private",
+                0, hc.getNumPrivateHosts());
 
 
         setUp();
@@ -97,9 +133,12 @@ public class HostCatcherTest extends TestCase {
                              new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
                              0, 0, true),
                null);
-        assertTrue(hc.getNumUltrapeerHosts()==1);
-        assertTrue(hc.getNumNormalHosts()==0);
-        assertTrue(hc.getNumPrivateHosts()==0);
+        assertEquals("ultrapeer PingReply not added as ultrapeer",
+                1, hc.getNumUltrapeerHosts());
+        assertEquals("ultrapeer PingReply added as normal",
+                0, hc.getNumNormalHosts());
+        assertEquals("ultrapeer PingReply added as private",
+                0, hc.getNumPrivateHosts());
     }
 
     public void testIterators() {
