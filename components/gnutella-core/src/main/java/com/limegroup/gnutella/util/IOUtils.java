@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import java.io.ByteArrayInputStream;
@@ -177,16 +175,6 @@ public class IOUtils {
     	return skipped;
     }
     
-
-    
-    public static void close(DataInputStream in) {
-        if(in != null) {
-            try {
-                in.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
     public static void close(InputStream in) {
         if(in != null) {
             try {
@@ -196,14 +184,6 @@ public class IOUtils {
     }
     
     public static void close(OutputStream out) {
-        if(out != null) {
-            try {
-                out.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
-    public static void close(DataOutputStream out) {
         if(out != null) {
             try {
                 out.close();
