@@ -187,42 +187,6 @@ public class NormalUploadState implements UploadState {
         }
     }
     
-	/************************* PRIVATE METHODS ***********************/
-	
-	/**
-	 * prepares the file to be read for sending accross the socket
-	 */
-//  	private void prepareFile() throws IOException {
-//  		// get the appropriate file descriptor
-//  		FileDesc fdesc;
-//  		try {
-//  			fdesc = FileManager.instance().get(_index);
-//  		} catch (IndexOutOfBoundsException e) {
-//  			throw new IOException();
-//  		}
-		
-//  		/* For regular (client-side) uploads, get name. 
-//  		 * For pushed (server-side) uploads, check to see that 
-//  		 * the index matches the filename. */
-//  		String name = fdesc._name;
-//  		if (_fileName == null) {
-//              _fileName = name;
-//          } else {
-//  			/* matches the name */
-//  			if ( !name.equals(_fileName) ) {
-//  				throw new IOException();
-//  			}
-//          }
-
-//  		// set the file size
-//          _fileSize = fdesc._size;
-
-//  		// get the fileInputStream
-//  		String path = fdesc._path;
-//  		File myFile = new File(path);
-//  		_fis = new FileInputStream(myFile);
-
-//  	}
 
 	/** eventually this method should determine the 
 	 * mime type of a file fill in the details of 
@@ -270,8 +234,6 @@ public class NormalUploadState implements UploadState {
 									  _fileDesc.getAlternateLocationCollection(),
 									  _ostream);
 			}
-			//_fileDesc.writeUrnTo(_ostream);
-			//_fileDesc.writeAlternateLocationsTo(_ostream);
 		}
 		
 		 str = "\r\n";
