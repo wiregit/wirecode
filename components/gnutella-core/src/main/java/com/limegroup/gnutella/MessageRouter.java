@@ -663,5 +663,11 @@ public abstract class MessageRouter
         {
             handlePushRequestForMe(pushRequest, receivingConnection);
         }
+
+        public boolean isOpen() 
+        {
+            //I'm always ready to handle replies.
+            return true;
+        }
     }
 }

@@ -25,4 +25,10 @@ interface ReplyHandler
      */
     void handlePushRequest(PushRequest pushRequest,
                            ManagedConnection receivingConnection);
+
+    /**
+     * Returns true if the reply handler is still able to handle
+     * a reply.
+     */
+    boolean isOpen();
 }
