@@ -60,7 +60,16 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
     private static void setUpFiles() throws Exception {
         for(int i = 0; i < 5; i++) {
             File f = 
-                new File(I18NSendReceive.class.getResource("/com/limegroup/gnutella/testfiles/" + FILES[i]).getFile());
+                new File("com/limegroup/gnutella/testfiles/" + FILES[i]);
+            if(!f.exists()) {
+                f.createNewFile();
+                //make sure its not 0kb
+                FileOutputStream fo = new FileOutputStream(f);
+                BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fo));
+                buf.write("a");
+                buf.flush();
+                buf.close();
+            }
             CommonUtils.copy(f, new File(_sharedDir, FILES[i]));
         }
     }
