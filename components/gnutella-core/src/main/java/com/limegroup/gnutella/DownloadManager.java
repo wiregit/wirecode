@@ -12,7 +12,6 @@ import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -412,14 +411,9 @@ public class DownloadManager implements BandwidthTracker {
         //just leave it and download the same file twice.
 
         //Instantiate downloader, validating incompleteFile first.
-        MagnetDownloader downloader = new MagnetDownloader(this,
-                                              fileManager,
-                                              incompleteFileManager,
-                                              callback,
-                                              urn,
-                                              textQuery,
-                                              filename,
-                                              defaultURL);
+        MagnetDownloader downloader = 
+            new MagnetDownloader(incompleteFileManager, urn, textQuery,
+                filename, defaultURL);
         startDownload(downloader, false);
         return downloader;
     }
