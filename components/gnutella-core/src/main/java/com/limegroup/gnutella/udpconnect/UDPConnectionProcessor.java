@@ -309,6 +309,9 @@ public class UDPConnectionProcessor {
         if ( _safeWriteWakeup != null ) 
             _scheduler.unregister(_safeWriteWakeup);
 
+        // Unregister for message multiplexing
+        _multiplexor.unregister(this);
+
 		// Register that the connection is closed
         _connectionState = FIN_STATE;
 
@@ -498,6 +501,13 @@ public class UDPConnectionProcessor {
      */
     public synchronized boolean isConnected() {
         return (_connectionState == CONNECT_STATE);
+    }
+
+    /**
+     *  Test whether the connection is closed
+     */
+    public synchronized boolean isClosed() {
+        return (_connectionState == FIN_STATE);
     }
 
     /**
@@ -869,135 +879,148 @@ public class UDPConnectionProcessor {
     /**
      *  Take action on a received message.
      */
-    public synchronized void handleMessage(UDPConnectionMessage msg) {
+    public void handleMessage(UDPConnectionMessage msg) {
+        boolean doYield = false;  // Trigger a yield at the end
 
-		// Extend the msgs sequenceNumber to 8 bytes based on past state
-		msg.extendSequenceNumber(
-		  _extender.extendSequenceNumber(msg.getSequenceNumber()) );
+        synchronized (this) {
+            // Extend the msgs sequenceNumber to 8 bytes based on past state
+            msg.extendSequenceNumber(
+              _extender.extendSequenceNumber(msg.getSequenceNumber()) );
 
-		// Record when the last message was received
-		_lastReceivedTime = System.currentTimeMillis();
-        if(LOG.isDebugEnabled())  
-            LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
+            // Record when the last message was received
+            _lastReceivedTime = System.currentTimeMillis();
+            if(LOG.isDebugEnabled())  
+                LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
-        if (msg instanceof SynMessage) {
-            // First Message from other host - get his connectionID.
-            SynMessage smsg        = (SynMessage) msg;
-            byte       theirConnID = smsg.getSenderConnectionID();
-            if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
-                // Keep track of their connectionID
-                _theirConnectionID = theirConnID;
-            } else if ( _theirConnectionID == theirConnID ) {
-                // Getting a duplicate SYN so just ack it again.
-            } else {
-                // Unmatching SYN so just ignore it
-                return;
+            if (msg instanceof SynMessage) {
+                // First Message from other host - get his connectionID.
+                SynMessage smsg        = (SynMessage) msg;
+                byte       theirConnID = smsg.getSenderConnectionID();
+                if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
+                    // Keep track of their connectionID
+                    _theirConnectionID = theirConnID;
+                } else if ( _theirConnectionID == theirConnID ) {
+                    // Getting a duplicate SYN so just ack it again.
+                } else {
+                    // Unmatching SYN so just ignore it
+                    return;
+                }
+
+                // Ack their SYN message
+                safeSendAck(msg);
+            } else if (msg instanceof AckMessage) {
+                AckMessage    amsg   = (AckMessage) msg;
+
+                // Extend the windowStart to 8 bytes the same as the sequenceNumber
+                amsg.extendWindowStart(
+                  _extender.extendSequenceNumber(amsg.getWindowStart()) );
+
+                long          seqNo  = amsg.getSequenceNumber();
+                long          wStart = amsg.getWindowStart();
+                int           priorR = _receiverWindowSpace;
+                _receiverWindowSpace = amsg.getWindowSpace();
+
+                // Reactivate writing if required
+                if ( priorR == 0 && _receiverWindowSpace > 0 )
+                    writeSpaceActivation();
+
+                // If they are Acking our SYN message, advance the state
+                if ( seqNo == 0 && isConnecting() ) { 
+                    // The connection should be successful assuming that I
+                    // receive their SYN so move state to CONNECT_STATE
+                    // and get ready for activity
+                    prepareOpenConnection();
+                } else {
+                    // Record the ack
+                    _sendWindow.ackBlock(seqNo);
+
+                    // Ensure that all messages up to sent windowStart are acked
+                    _sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
+                    
+                    // Clear out the acked blocks at window start
+                    _sendWindow.clearLowAckedBlocks();	
+
+                    // Update the chunk limit for fast (nonlocking) access
+                    _chunkLimit = _sendWindow.getWindowSpace();
+                }
+            } else if (msg instanceof DataMessage) {
+                // Pass the data message to the output window
+                DataMessage dmsg = (DataMessage) msg;
+
+                // If message is more than limit beyond window, 
+                // then throw it away
+                long seqNo     = dmsg.getSequenceNumber();
+                long baseSeqNo = _receiveWindow.getWindowStart();
+                if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
+                    if(LOG.isDebugEnabled())  
+                        LOG.debug("Received block num too far ahead: "+ seqNo);
+                   return;
+                }
+
+                // Make sure the data is not before the window start
+                if ( seqNo >= baseSeqNo ) {
+                    // Record the receipt of the data in the receive window
+                    DataRecord drec = _receiveWindow.addData(dmsg);  
+                    drec.ackTime = System.currentTimeMillis();
+                    drec.acks++;
+
+                    // Notify InputStream that data is available for reading
+                    if ( _outputToInputStream != null ) {
+                        _outputToInputStream.wakeup();
+
+                        // Get the reader moving at the end of method
+                        doYield = true; 
+                    }
+                } else {
+                    if(LOG.isDebugEnabled())  
+                        LOG.debug("Received duplicate block num: "+ 
+                          dmsg.getSequenceNumber());
+                }
+
+                // Ack the Data message
+                safeSendAck(msg);
+            } else if (msg instanceof KeepAliveMessage) {
+                KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
+
+                // Extend the windowStart to 8 bytes the same 
+                // as the sequenceNumber
+                kmsg.extendWindowStart(
+                  _extender.extendSequenceNumber(kmsg.getWindowStart()) );
+
+                long             seqNo  = kmsg.getSequenceNumber();
+                // TODO: make use of this as a pseudo ack
+                long             wStart = kmsg.getWindowStart(); 
+                int              priorR = _receiverWindowSpace;
+                _receiverWindowSpace    = kmsg.getWindowSpace();
+
+                // Ensure that all messages up to sent windowStart are acked
+                // Note, you could get here preinitialization - in which case,
+                // do nothing.
+                if ( _sendWindow != null ) {  
+                    _sendWindow.pseudoAckToReceiverWindow(wStart);
+                    
+                    // Reactivate writing if required
+                    if ( priorR == 0 && _receiverWindowSpace > 0 )
+                        writeSpaceActivation();
+                }
+
+            } else if (msg instanceof FinMessage) {
+                // Stop sending data
+                _receiverWindowSpace    = 0;
+
+                // Ack the Fin message
+                safeSendAck(msg);
+
+                // If a fin message is received then close connection
+                closeAndCleanup();
             }
-
-            // Ack their SYN message
-            safeSendAck(msg);
-        } else if (msg instanceof AckMessage) {
-            AckMessage    amsg   = (AckMessage) msg;
-
-			// Extend the windowStart to 8 bytes the same as the sequenceNumber
-			amsg.extendWindowStart(
-		  	  _extender.extendSequenceNumber(amsg.getWindowStart()) );
-
-            long          seqNo  = amsg.getSequenceNumber();
-            long          wStart = amsg.getWindowStart();
-    		int           priorR = _receiverWindowSpace;
-    		_receiverWindowSpace = amsg.getWindowSpace();
-
-			// Reactivate writing if required
-			if ( priorR == 0 && _receiverWindowSpace > 0 )
-    			writeSpaceActivation();
-
-            // If they are Acking our SYN message, advance the state
-            if ( seqNo == 0 && isConnecting() ) { 
-                // The connection should be successful assuming that I
-                // receive their SYN so move state to CONNECT_STATE
-                // and get ready for activity
-                prepareOpenConnection();
-            } else {
-            	// Record the ack
-				_sendWindow.ackBlock(seqNo);
-
-				// Ensure that all messages up to sent windowStart are acked
-				_sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
-				
-				// Clear out the acked blocks at window start
-				_sendWindow.clearLowAckedBlocks();	
-
-                // Update the chunk limit for fast (nonlocking) access
-                _chunkLimit = _sendWindow.getWindowSpace();
-			}
-        } else if (msg instanceof DataMessage) {
-            // Pass the data message to the output window
-            DataMessage dmsg = (DataMessage) msg;
-
-            // If message is more than limit beyond window, then throw it away
-            long seqNo     = dmsg.getSequenceNumber();
-            long baseSeqNo = _receiveWindow.getWindowStart();
-            if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
-                if(LOG.isDebugEnabled())  
-                    LOG.debug("Received block num too far ahead: "+ seqNo);
-               return;
-            }
-
-            // Make sure the data is not before the window start
-            if ( seqNo >= baseSeqNo ) {
-				// Record the receipt of the data in the receive window
-                DataRecord drec = _receiveWindow.addData(dmsg);  
-            	drec.ackTime = System.currentTimeMillis();
-				drec.acks++;
-
-				// Notify InputStream that data is available for reading
-				if ( _outputToInputStream != null )
-					_outputToInputStream.wakeup();
-            } else {
-                if(LOG.isDebugEnabled())  
-                    LOG.debug("Received duplicate block num: "+ 
-                      dmsg.getSequenceNumber());
-            }
-
-            // Ack the Data message
-            safeSendAck(msg);
-        } else if (msg instanceof KeepAliveMessage) {
-            KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
-
-			// Extend the windowStart to 8 bytes the same as the sequenceNumber
-			kmsg.extendWindowStart(
-		  	  _extender.extendSequenceNumber(kmsg.getWindowStart()) );
-
-            long             seqNo  = kmsg.getSequenceNumber();
-			// TODO: make use of this as a pseudo ack
-            long             wStart = kmsg.getWindowStart(); 
-    		int              priorR = _receiverWindowSpace;
-    		_receiverWindowSpace    = kmsg.getWindowSpace();
-
-			// Ensure that all messages up to sent windowStart are acked
-            // Note, you could get here preinitialization - in which case,
-            // do nothing.
-            if ( _sendWindow != null ) {  
-			    _sendWindow.pseudoAckToReceiverWindow(wStart);
-				
-			    // Reactivate writing if required
-			    if ( priorR == 0 && _receiverWindowSpace > 0 )
-    			    writeSpaceActivation();
-            }
-
-        } else if (msg instanceof FinMessage) {
-            // Stop sending data
-            _receiverWindowSpace    = 0;
-
-            // Ack the Fin message
-            safeSendAck(msg);
-
-			// If a fin message is received then close connection
-			closeAndCleanup();
         }
 
-        // TODO: fill in
+        // Yield to the reading thread if it has been woken up 
+        // in the hope that it will start reading immediately 
+        // rather than getting backlogged
+        if ( doYield ) 
+            Thread.yield();
     }
 
     /**
@@ -1098,6 +1121,11 @@ public class UDPConnectionProcessor {
             long time = System.currentTimeMillis();
             if(LOG.isDebugEnabled())  
                 LOG.debug("keepalive: "+ time);
+
+            // If connection closed, then make sure that keepalives have ended
+            if (isClosed() ) {
+                _scheduler.unregister(_keepaliveEvent);
+            }
 
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
