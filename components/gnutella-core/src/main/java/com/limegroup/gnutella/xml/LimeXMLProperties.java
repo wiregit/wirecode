@@ -67,6 +67,11 @@ public class LimeXMLProperties
     private static final String SCHEMA_TRANSFORMATION_DATA_MAP_FILE_DEF 
         = "etc" + File.separator + "STDataMap.dat";
     
+    
+    private static final String HTTP_MAPPING_FILE = "HTTP_MAPPING_FILE";
+    private static final String HTTP_MAPPING_FILE_DEF =  "etc"
+        + File.separator + "httpmapping.xml";
+    
     /**
      * Constructor: Initializes various default values, and loads the settings
      * from the properties file.
@@ -141,6 +146,19 @@ public class LimeXMLProperties
     }
     
     /**
+     * Returns the name of the file that contains basic mapping information
+     * regarding the schemas which need to be mapped to http requests
+     */
+    public String getHTTPMappingFile()
+    {
+        String httpMappingFile = _properties.getProperty(
+            HTTP_MAPPING_FILE, 
+            HTTP_MAPPING_FILE_DEF);
+
+        return getPath() + httpMappingFile;   
+    }
+    
+    /**
      * Returns the files pertaining to the XML Schemas used for 
      * querying/responding
      */
@@ -164,7 +182,7 @@ public class LimeXMLProperties
     /**
      * Returns the base path for properties
      */
-    private String getPath()
+    private static String getPath()
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
