@@ -314,7 +314,7 @@ public class HTTPUploader implements Uploader {
 		try {
 			URL url = 
 			    new URL("http", _hostName, _port, 
-						URNFactory.createHttpUrnFileString(_fileDesc.getSHA1Urn()));
+						URNFactory.createHttpUrnServiceRequest(_fileDesc.getSHA1Urn()));
 			AlternateLocation al = new AlternateLocation(url);
 			_fileDesc.addAlternateLocation(al);
 		} catch(MalformedURLException e) {
