@@ -43,6 +43,10 @@ public class BestCandidates {
 	
 	private BestCandidates() {
 		_best = new Candidate[3];
+		
+		if(_advertiser!=null)
+			_advertiser.interrupt();
+		
 		_advertiser = new CandidateAdvertiser();
 		_advertiser.setDaemon(true);
 		_advertiser.setName("candidate advertiser");
@@ -66,9 +70,9 @@ public class BestCandidates {
 		Comparator comparator = RemoteCandidate.priorityComparator();
 		Candidate best = instance._best[0];
 		synchronized(instance) {
-			if (comparator.compare(instance._best[1],best) > 1)
+			if (comparator.compare(instance._best[1],best) > 0)
 				best = instance._best[1];
-			if (comparator.compare(instance._best[2],best) > 1)
+			if (comparator.compare(instance._best[2],best) > 0)
 				best = instance._best[2];
 		}
 		return best;
@@ -220,14 +224,23 @@ public class BestCandidates {
 	/**
 	 * purges the table of best candidates.
 	 * useful when disconnecting.
+	 * 
+	 * WARNING: calling this method will delay the next advertisement of
+	 * candidates for another CandidateAdvertiser.INITIAL_DELAY.
 	 */
 	public static void purge() {
-		if (instance == null)
-			instance = new BestCandidates();
-		else
-			synchronized(instance) {
-				instance._best = new Candidate[3];
-			}
+		instance = new BestCandidates();
+	}
+	
+	/**
+	 * resets the table and initializes it with our best candidate.
+	 *
+	 */
+	public static void initialize() {
+		synchronized(instance) {
+			instance._best=new Candidate[3];  //do we want to lose our already known candidates?
+			instance._best[0]=electBest(0);
+		}
 	}
 	
 	

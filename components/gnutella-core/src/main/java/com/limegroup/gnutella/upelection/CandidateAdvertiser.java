@@ -48,7 +48,8 @@ public class CandidateAdvertiser extends ManagedThread {
 		try{
 			Thread.sleep(INITIAL_DELAY);
 		
-			//TODO: add code for initial leaf selection before loop here.
+			//initialize the best candidates table.
+			BestCandidates.initialize();
 			
 			while(true) {
 			
