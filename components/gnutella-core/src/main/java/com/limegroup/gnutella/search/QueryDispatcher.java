@@ -80,6 +80,7 @@ public final class QueryDispatcher implements Runnable {
 		// NEW_QUERIES
 		synchronized(NEW_QUERIES) {
 			_queries.addAll(NEW_QUERIES);
+			NEW_QUERIES.clear();
 		}
 
 		//System.out.println("QueryDispatcher::processQueries::got lock"); 
