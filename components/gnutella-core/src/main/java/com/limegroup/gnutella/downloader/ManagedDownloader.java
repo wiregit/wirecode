@@ -2000,12 +2000,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
                     {//debugging block
-                      FileDesc f=fileManager.getFileDescForFile(incompleteFile);
-                      URN bucketHash = buckets.getURNForBucket(bucketNumber);
-                      if(bucketHash != null && f!=null &&
-                         !bucketHash.equals(f.getSHA1Urn())) {
-                            Assert.silent(false,
-                                        "IncompleteFileManager wrong fd");
+                      FileDesc fd = 
+                        fileManager.getFileDescForFile(incompleteFile);
+                      URN bHash = buckets.getURNForBucket(bucketNumber);
+                      if(bHash != null && fd != null &&
+                         !bHash.equals(fd.getSHA1Urn())) {
+                            Assert.silent(false, 
+                              "URNs in FM and IFM don't match.\n" +
+                              "Bucket Hash: " + bHash + "\n" +
+                              "FD Hash    : " + fd.getSHA1Urn() + "\n" +
+                              "IncompleteFile: " + incompleteFile + "\n" +
+                              "FD.getFile    : " + fd.getFile() + "\n" +
+                              "IFM hashes: " + 
+                                incompleteFileManager.dumpHashes());
                           //dont fail later
                           fileManager.removeFileIfShared(incompleteFile);
                       }
