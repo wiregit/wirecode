@@ -209,6 +209,13 @@ public class UploadManager {
 		return true;
 	}
 		
+
+	/**
+	 * Returns 'false' if the total number of uploads has been
+	 * reached, and true otherwise.  Note that because this test 
+	 * relies on the uploadsInProgress() method, it may sometimes
+	 * be incorrect if a push request takes a long time to respond. 
+	 */
 	private boolean testTotalUploadLimit() {
 		int max = SettingsManager.instance().getMaxUploads();
 		int current = uploadsInProgress();
