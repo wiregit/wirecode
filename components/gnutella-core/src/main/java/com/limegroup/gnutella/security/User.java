@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.security;
 import java.io.Serializable;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 
 /**
  * Contains authentication information for a user
@@ -23,6 +25,13 @@ public class User implements Serializable
     private String _password;
     
     /**
+     * The set of domains to which the user belongs
+     */
+    private Set /* of String */ _domains;
+    
+    private static final String DEFAULT_DOMAIN = "DEFAULT";
+    
+    /**
      * creates a new user
      * @param username unique name for the user
      * @param password User's password to be used for authentication
@@ -31,7 +40,21 @@ public class User implements Serializable
     {
         this._username = username;
         this._password = password;
+        //create default domain set
+        _domains = createDefaultDomainSet();
     }
+    
+    /**
+     * creates a default domain set, that contains defualt domain
+     * @return Set (of String) of default domains
+     */
+    public static Set createDefaultDomainSet(){
+        Set domainSet = new HashSet();
+        //add the default domain to the list of domains
+        domainSet.add(DEFAULT_DOMAIN);
+        return domainSet;
+    }
+    
     
     /**
      * Returns the username for the user
@@ -52,12 +75,40 @@ public class User implements Serializable
     }
     
     /**
+     * Adds the passed domain to the set of domains user belongs to
+     * @param domain The domain to be added
+     */
+    public void addDomain(String domain)
+    {
+        _domains.add(domain);
+    }
+    
+    /**
+     * Removes the passed domain from the set of domains user belongs to
+     * @param domain The domain to be removed
+     */
+    public void removeDomain(String domain)
+    {
+        _domains.remove(domain);
+    }
+    
+    /**
+     * Returns the set of domains to which the user belongs
+     * @return the set of domains to which the user belongs
+     */
+    public Set getDomains()
+    {
+        return _domains;
+    }
+    
+    /**
      * returns the string representation of the contents
      * @return the string representation of the contents
      */
     public String toString()
     {
-        return "username=" + _username + "&password=" + _password;
+        return "username=" + _username + "&password=" + _password 
+            + "&domains=" + _domains;
     }
     
 }
