@@ -40,6 +40,7 @@ public class CreationTimeCacheTest
     private static RouterService rs;
 
     private static MyActivityCallback callback;
+    private static MyFileManager fm;
 
     private static URN hash1;
     private static URN hash2;
@@ -105,9 +106,9 @@ public class CreationTimeCacheTest
         doSettings();
 
         callback=new MyActivityCallback();
-        
-        rs=new RouterService(callback, new StandardMessageRouter(),
-                             new MyFileManager());
+        fm = new MyFileManager();
+        rs=new RouterService(callback, new StandardMessageRouter(), fm);
+
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         rs.start();
@@ -209,10 +210,13 @@ public class CreationTimeCacheTest
     public void testMapCreation() throws Exception {
         // mock up our own createtimes.txt
         Map toSerialize = new HashMap();
-        toSerialize.put(hash1, new Long(0));
-        toSerialize.put(hash2, new Long(1));
-        toSerialize.put(hash3, new Long(1));
-        toSerialize.put(hash4, new Long(2));
+        Long old = new Long(1);
+        Long middle = new Long(2);
+        Long young = new Long(3);
+        toSerialize.put(hash1, old);
+        toSerialize.put(hash2, middle);
+        toSerialize.put(hash3, middle);
+        toSerialize.put(hash4, young);
 
         ObjectOutputStream oos = 
         new ObjectOutputStream(new FileOutputStream(new File(_settingsDir,
@@ -232,10 +236,13 @@ public class CreationTimeCacheTest
     public void testGetFiles() throws Exception {
         // mock up our own createtimes.txt
         Map toSerialize = new HashMap();
-        toSerialize.put(hash1, new Long(1));
-        toSerialize.put(hash2, new Long(2));
-        toSerialize.put(hash3, new Long(0));
-        toSerialize.put(hash4, new Long(1));
+        Long old = new Long(1);
+        Long middle = new Long(2);
+        Long young = new Long(3);
+        toSerialize.put(hash1, middle);
+        toSerialize.put(hash2, young);
+        toSerialize.put(hash3, old);
+        toSerialize.put(hash4, middle);
 
         ObjectOutputStream oos = 
         new ObjectOutputStream(new FileOutputStream(new File(_settingsDir,
@@ -246,10 +253,10 @@ public class CreationTimeCacheTest
         // now have the CreationTimeCache read it in
         CreationTimeCache ctCache = new CreationTimeCache();
         // is everything mapped correctly from URN to Long?
-        assertEquals(ctCache.getCreationTime(hash1), new Long(1));
-        assertEquals(ctCache.getCreationTime(hash2), new Long(2));
-        assertEquals(ctCache.getCreationTime(hash3), new Long(0));
-        assertEquals(ctCache.getCreationTime(hash4), new Long(1));
+        assertEquals(ctCache.getCreationTime(hash1), middle);
+        assertEquals(ctCache.getCreationTime(hash2), young);
+        assertEquals(ctCache.getCreationTime(hash3), old);
+        assertEquals(ctCache.getCreationTime(hash4), middle);
 
         {
             Iterator iter = ctCache.getFiles();
@@ -305,7 +312,89 @@ public class CreationTimeCacheTest
         }
 
     }
-    
+
+
+    /** Tests the getFiles() method.
+     */
+    public void testSettersAndGetters() throws Exception {
+        CreationTimeCache ctCache = null;
+        Iterator iter = null;
+        Map TIME_MAP = null;
+        Long old = new Long(1);
+        Long middle = new Long(2);
+        Long young = new Long(3);
+        deleteCacheFile();
+        
+        // should be a empty cache
+        // ---------------------------
+        ctCache = new CreationTimeCache();
+        assertFalse(ctCache.getFiles().hasNext());
+
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        assertEquals(0, TIME_MAP.size());
+
+        ctCache.addTime(hash1, middle.longValue());
+        ctCache.persistCache();
+        iter = ctCache.getFiles();
+        assertEquals(hash1, iter.next());
+        assertFalse(iter.hasNext());
+        ctCache = null;
+        // ---------------------------
+
+        // should have one value
+        // ---------------------------
+        ctCache = new CreationTimeCache();
+        iter = ctCache.getFiles();
+        assertEquals(hash1, iter.next());
+        assertFalse(iter.hasNext());
+
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        assertEquals(1, TIME_MAP.size());
+
+        ctCache.addTime(hash2, old.longValue());
+        ctCache.addTime(hash3, young.longValue());
+        ctCache.addTime(hash4, middle.longValue());
+        ctCache.removeTime(hash1);
+        ctCache.persistCache();
+        iter = ctCache.getFiles();
+        assertEquals(hash3, iter.next());
+        // just clear out two middles
+        iter.next(); iter.next();
+        assertEquals(hash2, iter.next());
+        assertFalse(iter.hasNext());
+        ctCache = null;
+        // ---------------------------
+
+        // should have three values
+        // ---------------------------
+        ctCache = new CreationTimeCache();
+        iter = ctCache.getFiles();
+        assertEquals(hash3, iter.next());
+        assertEquals(hash4, iter.next());
+        assertEquals(hash2, iter.next());
+        assertFalse(iter.hasNext());
+
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        assertEquals(3, TIME_MAP.size());
+        ctCache.removeTime(hash3);
+        ctCache.persistCache();
+        // ---------------------------
+
+        // should have two values but exclude one
+        // ---------------------------
+        fm.setExcludeURN(hash4);
+        ctCache = new CreationTimeCache();
+        iter = ctCache.getFiles();
+        assertEquals(hash2, iter.next());
+        assertFalse(iter.hasNext());
+
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        assertEquals(1, TIME_MAP.size());
+        ctCache = null;
+        fm.clearExcludeURN();
+        // ---------------------------
+    }
+
 
     /**
      * Test read & write of map
@@ -398,6 +487,14 @@ public class CreationTimeCacheTest
 
     public static class MyFileManager extends MetaFileManager {
         private FileDesc fd = null;
+        public URN toExclude = null;
+
+        public void setExcludeURN(URN urn) {
+            toExclude = urn;
+        }
+        public void clearExcludeURN() {
+            toExclude = null;
+        }
 
         public FileDesc getFileDescForUrn(URN urn){
             if (fd == null) {
@@ -406,10 +503,11 @@ public class CreationTimeCacheTest
                 urnSet.add(hash1);
                 fd = new FileDesc(cacheFile, urnSet, 0);
             }
-            if (urn.equals(hash1) ||
-                urn.equals(hash2) ||
-                urn.equals(hash3) ||
-                urn.equals(hash4)) return fd;
+            if ((toExclude != null) && toExclude.equals(urn)) return null;
+            else if (urn.equals(hash1) ||
+                     urn.equals(hash2) ||
+                     urn.equals(hash3) ||
+                     urn.equals(hash4)) return fd;
             else return super.getFileDescForUrn(urn);
         }
     }
