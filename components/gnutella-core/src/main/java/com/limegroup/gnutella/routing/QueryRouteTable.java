@@ -18,7 +18,7 @@ import java.io.*;
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=1<<13;  //8KB
+    public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
     /** The suggested default max table TTL. */
     public static final byte DEFAULT_INFINITY=(byte)7;
     /** The maximum size of patch messages, in bytes. */
@@ -91,96 +91,63 @@ public class QueryRouteTable {
      * been decremented, i.e., is the outbound not inbound TTL.  
      */
     public boolean contains(QueryRequest qr) {
-        int ttl=qr.getTTL();
-        byte bits=log2(table.length);
-
-        //1. First we check that all the normal keywords of qr are in the route
-        //   table.  Note that this is done with zero allocations!  Also note
-        //   that HashFunction.hash() takes cares of the capitalization.
-        String query=qr.getQuery();
-        for (int i=0 ; ; ) {
-            //Find next keyword...
-            //    _ _ W O R D _ _ _ A B
-            //    i   j       k
-            int j=HashFunction.keywordStart(query, i);     
-            if (j<0)
-                break;
-            int k=HashFunction.keywordEnd(query, j);
-
-            //...and look up its hash.
-            int hash=HashFunction.hash(query, j, k, bits);
-            if (! contains(hash, ttl))
-                return false;
-            i=k+1;
-        }        
-        
-        //2. Now we extract meta information in the query.  If there isn't any,
-        //   declare success now.  Otherwise ensure that the URI is in the 
-        //   table.  TODO: avoid allocations.
-        //TODO2: avoid parsing if possible
         String richQuery = qr.getRichQuery();
-        if (richQuery.equals(""))
-            //Normal case for matching query with no metadata.
-            return true;
         LimeXMLDocument doc = null;
-        try {
+        try{
             doc = new LimeXMLDocument(richQuery);
-            String docSchemaURI = doc.getSchemaURI();
-            int hash = HashFunction.hash(docSchemaURI, bits);
-            if (! contains(hash, ttl))//don't know the URI? can't answer query
-                return false;
-        } catch(Exception e) {//malformed XML
-            //TODO: avoid generic catch(Exception)
-            return true;//coz leaf can answer based on normal query
+        }catch(Exception e){
+            doc = null;
         }
+        String richQueryWords="";
+        if(doc!=null){            
+            {   // check if this client can handle this uri....
+                String docSchemaURI = doc.getSchemaURI();
+                int hash = HashFunction.hash(docSchemaURI, 
+                                             log2(table.length));
+                if ((table[hash] > qr.getTTL()) || 
+                    (table[hash] >= infinity))
+                    return false;
+            }
             
-        //3. Finally check that "enough" of the metainformation keywords are in
-        //   the table: 2/3 or 3, whichever is more.
-        int wordCount=0;
-        int matchCount=0;
-        Iterator iter=doc.getKeyWords().iterator();
-        while(iter.hasNext()) {
-            //getKeyWords only returns all the fields, so we still need to split
-            //the words.  The code is copied from part (1) above.  It could be
-            //factored, but that's slightly tricky; the above code terminates if
-            //a match fails--a nice optimization--while this code simply counts
-            //the number of words and matches.
-            String words = (String)iter.next();
-            for (int i=0 ; ; ) {
-                //Find next keyword...
-                //    _ _ W O R D _ _ _ A B
-                //    i   j       k
-                int j=HashFunction.keywordStart(words, i);     
-                if (j<0)
-                    break;
-                int k=HashFunction.keywordEnd(words, j);
-                
-                //...and look up its hash.
-                int hash=HashFunction.hash(words, j, k, bits);
-                if (contains(hash, ttl))
-                    matchCount++;
-                wordCount++;
-                i=k+1;
+            Iterator iter = doc.getKeyWords().iterator();
+            while(iter.hasNext()){
+                String str = (String)iter.next();
+                richQueryWords=richQueryWords+" "+str;
             }
         }
-        if (wordCount<3)
-            //less than three word? 100% match required
-            return wordCount==matchCount;
-        else 
-            //a 67% match will do...
-            return ((float)matchCount/(float)wordCount) > 0.67;
+        String allWords = richQueryWords+" "+qr.getQuery();
+        //there are bound to be some blank spaces on either left side
+        allWords = allWords.trim();
+        //Check that all hashed keywords are reachable with given TTL.
+        String[] keywords=HashFunction.keywords(allWords);
+        int totalCount = keywords.length;
+        int matchCount=0;
+        int ttl=qr.getTTL();
+        for (int i=0; i<keywords.length; i++) {
+            String keyword=keywords[i];
+            int hash=HashFunction.hash(keyword, log2(table.length));
+            /*
+              if (table[hash]>ttl || table[hash]>=infinity)
+              return false;
+            */
+            if (table[hash]<=ttl && table[hash]<infinity)
+                matchCount++;
+        }
+        if(totalCount<3)//less than three word? 100% match required
+            return (totalCount == matchCount);
+        else{// a 67% match will do...
+            if( ((float)matchCount/(float)totalCount) > 0.67)
+                return true;
+            else
+                return false;
+        }
     }
     
-    private final boolean contains(int hash, int ttl) {
-        return table[hash]<=ttl && table[hash]<infinity;
-    }
-
     /**
      * @requires num be a power of 2.
      */
     private static byte log2(int num)
     {
-        //TODO: can do this more efficiently through bit operations
         return (byte)(Math.log(num)/Math.log(2));
     }
     
@@ -542,12 +509,8 @@ public class QueryRouteTable {
     ////////////////////////////// Unit Tests ////////////////////////////////
     
     /** Unit test */
-    /*
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
-        System.out.println("TODO: warning these tests were written "
-                          +"before the restriction that are tables are "
-                          +"powers of 2 in length.");
 
         //0. compress/uncompress.  First we make a huge array with lots of
         //random bytes but also long strings of zeroes.  This means that
@@ -762,14 +725,14 @@ public class QueryRouteTable {
         Assert.that(qrt2.entries()==3);
 
         //5b. Black-box test for addAll.
-        qrt=new QueryRouteTable(128, (byte)7);
+        qrt=new QueryRouteTable(100, (byte)7);
         qrt.add("good book");
         qrt.add("bad", 3);   //{good/1, book/1, bad/3}
-        qrt2=new QueryRouteTable(512, (byte)7);
+        qrt2=new QueryRouteTable(213, (byte)7);
         qrt2.addAll(qrt);
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
-        qrt2=new QueryRouteTable(32, (byte)7);
+        qrt2=new QueryRouteTable(59, (byte)7);
         qrt2.addAll(qrt);
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
@@ -784,5 +747,4 @@ public class QueryRouteTable {
 //          } catch (BadPacketException e) { }
         
     }
-    */
 }
