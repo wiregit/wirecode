@@ -75,23 +75,46 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * Creates a new <tt>AlternateLocation</tt> instance for the given host
-	 * and the specified <tt>URN</tt>.
+	 * Creates a new <tt>AlternateLocation</tt> instance for the givel 
+	 * <tt>URL</tt> instance.  This constructor creates an alternate
+	 * location with the current date and time as its timestamp.
+	 * This can be used, for example, for newly uploaded files.
 	 *
-	 * @param hostName the address of the alternate location host
-	 * @param urn the <tt>URN</tt> for the resource
+	 * @param url the <tt>URL</tt> instance for the resource
 	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
 	 *  could not be succussfully constructed from the supplied arguments
 	 */
-	public AlternateLocation(final String hostName, URN urn) 
+	public AlternateLocation(final URL url) 
 		throws MalformedURLException {
-		String fullUrl = hostName+HTTPConstants.URI_RES_N2R+urn.toString();
-		this.URL = new URL(fullUrl);
-
+		// create a new URL instance from the data for the given url
+		// and the urn
+		this.URL = new URL(url.getProtocol(), url.getHost(), url.getPort(),
+						   url.getFile());
 		// make the date the current time
 		Date date = new Date();
 		TIME = date.getTime();
 		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
+	}
+
+	/**
+	 * Returns an instance of the <tt>URL</tt> instance for this 
+	 * alternate location.
+	 *
+	 * @return a <tt>URL</tt> instance corresponding to the URL for this 
+	 *  alternate location, or <tt>null</tt> if an instance could not
+	 *  be created
+	 */
+	public URL getUrl() {
+		try {
+			return new URL(this.URL.getProtocol(), 
+						   this.URL.getHost(), 
+						   this.URL.getPort(),
+						   this.URL.getFile());
+		} catch(MalformedURLException e) {
+			// this should never happen in practice, but retun null 
+			// nevertheless
+			return null;
+		}
 	}
 
 	/**
@@ -181,41 +204,6 @@ public final class AlternateLocation
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Returns an instance of the <tt>URL</tt> instance for this 
-	 * alternate location.
-	 *
-	 * @return a <tt>URL</tt> instance corresponding to the URL for this 
-	 *  alternate location, or <tt>null</tt> if an instance could not
-	 *  be created
-	 */
-	public URL getUrl() {
-		try {
-			return new URL(this.URL.getProtocol(), 
-						   this.URL.getHost(), 
-						   this.URL.getPort(),
-						   this.URL.getFile());
-		} catch(MalformedURLException e) {
-			// this should never happen in practice, but retun null 
-			// nevertheless
-			return null;
-		}
-	}
-
-	/**
-	 * A <tt>long</tt> representing the timestamp for this alternate 
-	 * location, or the number of milliseconds since January 1, 1970, 
-	 * 00:00:00 GMT.  If the alternate location is not timestamped, 
-	 * this will return 0 (the oldest possible time).
-	 * 
-	 * @return a <tt>long</tt> representing the timestamp for this alternate 
-	 *  location, or the number of milliseconds since January 1, 1970, 
-	 *  00:00:00 GMT
-	 */
-	public long getTimestamp() {
-		return TIME;
 	}
 
 	/**
@@ -370,8 +358,8 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if this <tt>AlternateLocation</tt> includes
 	 *  a timestamp, <tt>false</tt> otherwise
 	 */
-	public boolean isTimestamped() {
-		return (TIME != 0);
+	private boolean isTimestamped() {
+		return (OUTPUT_DATE_TIME != null);
 	}
 
 	/**
@@ -414,7 +402,10 @@ public final class AlternateLocation
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;		
-		return ((al.TIME == this.TIME) && al.URL.equals(this.URL));
+		return ((OUTPUT_DATE_TIME == null ? al.OUTPUT_DATE_TIME == null :
+				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
+				(URL == null ? al.URL == null :
+				 al.URL.equals(this.URL)));
 	}
 
 	/**
@@ -444,9 +435,9 @@ public final class AlternateLocation
 	 */
 	public String toString() {
 		if(this.isTimestamped()) {
-			return (this.URL.toString()+" "+OUTPUT_DATE_TIME);
+			return (this.URL.toExternalForm()+" "+OUTPUT_DATE_TIME);
 		} else {
-			return this.URL.toString();
+			return this.URL.toExternalForm();
 		}
 	}
 
@@ -476,10 +467,8 @@ public final class AlternateLocation
 	}
 
 	
-	/*
+	
 	public static void main(String[] args) {
-		System.out.println("TESTING VALID ALTERNATE LOCATIONS...");
-		System.out.println(); 
 		String[] validTimestampedLocs = {
 			"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg "+
@@ -515,10 +504,85 @@ public final class AlternateLocation
 			"http: //Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg"
 		};
+
+
+		String [] validURNS = {
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		};
+
+		String [] validURLS = {
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org",
+		    "www.limewire.org"
+		};
 		
 		boolean failureEncountered = false;
+		boolean thisTestFailed = false;
+
+		// TEST ALTERNATE LOCATION CONSTRUCTOR THAT TAKES A URL AND A URN
+		System.out.println("TESTING URL/URN CONSTRUCTOR...");
+		try {
+			for(int i=0; i<validURNS.length; i++) {
+				URN urn = new URN(validURNS[i]);
+				URL url1 = new URL("http", validURLS[i], 6346, 
+								   URNFactory.createHttpUrnFileString(urn));
+				URL url2 = new URL("http", validURLS[i], "/test.htm");
+				AlternateLocation al1 = new AlternateLocation(url1);
+				AlternateLocation al2 = new AlternateLocation(url2);
+				AlternateLocation al3 = 
+				    new AlternateLocation("http://"+validURLS[i] + ":6346"+
+										  URNFactory.createHttpUrnFileString(urn)+
+										  " "+convertDateToString(new Date()));
+				AlternateLocation al4 = 
+				    new AlternateLocation("http://"+validURLS[i] + "/test.htm"+
+										  " "+convertDateToString(new Date()));
+				URL urlTest1 = al1.getUrl();
+				URL urlTest2 = al2.getUrl();
+				Date date1 = new Date(al1.TIME);
+				Date date2 = new Date(al2.TIME);
+				String dateStr1 = AlternateLocation.convertDateToString(date1);
+				String dateStr2 = AlternateLocation.convertDateToString(date2);
+				Assert.that(al1.equals(al3));
+				Assert.that(al2.equals(al4));
+				Assert.that(url1.equals(urlTest1));				
+				Assert.that(url2.equals(urlTest2));			
+				Assert.that(dateStr1.equals(dateStr2));
+				//System.out.println("al:   "+al1);
+				//System.out.println("file: "+al1.getUrl().getFile()); 
+			}
+			System.out.println("TEST PASSED"); 
+		} catch(IOException e) {
+			// this also catches MalformedURLException
+			System.out.println("TEST FAILED WITH EXCEPTION: "); 
+			System.out.println(e); 
+			e.printStackTrace();
+			failureEncountered = true;
+		} 
+
 		// TEST ALTERNATE LOCATIONS WITH TIMESTAMPS
+		System.out.println(); 
 		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITH TIMESTAMPS..."); 
+		thisTestFailed = false;
 		try {
 			for(int i=0; i<validTimestampedLocs.length; i++) {
 				AlternateLocation al = new AlternateLocation(validTimestampedLocs[i]);
@@ -526,15 +590,16 @@ public final class AlternateLocation
 					System.out.println("TEST FAILED -- ALTERNATE LOCATION STRING "+
 									   "NOT CONSIDERED STAMPED"); 
 					failureEncountered = true;
+					thisTestFailed = true;
 				}
 				if(!al.isTimestamped()) {
 					System.out.println("TEST FAILED -- ALTERNATE LOCATION INSTANCE "+
 									   "NOT CONSIDERED STAMPED"); 
 					failureEncountered = true;
+					thisTestFailed = true;
 				}
-				System.out.println(al); 
 			}
-			if(!failureEncountered) {
+			if(!thisTestFailed) {
 				System.out.println("TEST PASSED"); 
 			}
 		} catch(IOException e) {
@@ -543,18 +608,14 @@ public final class AlternateLocation
 			failureEncountered = true;
 		}		
 
-		// TEST ALTERNATE LOCATIONS WITH NO TIMESTAMPS
-		failureEncountered = false;
+		// TEST ALTERNATE LOCATIONS WITH NO TIMESTAMPS		
 		System.out.println(); 
 		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITHOUT TIMESTAMPS..."); 
 		try {
 			for(int i=0; i<validlocs.length; i++) {
 				AlternateLocation al = new AlternateLocation(validlocs[i]);
-				System.out.println(al); 
 			}
-			if(!failureEncountered) {
-				System.out.println("TEST PASSED"); 
-			}
+			System.out.println("TEST PASSED"); 
 		} catch(IOException e) {
 			System.out.println("TEST FAILED WITH EXCEPTION: "); 
 			e.printStackTrace();
@@ -562,7 +623,6 @@ public final class AlternateLocation
 		}		
 
 		// TEST DATE METHODS
-		failureEncountered = false;
 		System.out.println(); 
 		System.out.println("TESTING CONVERT DATE TO STRING METHOD...");
 		
@@ -580,7 +640,7 @@ public final class AlternateLocation
 			System.out.println("ALL TESTS PASSED"); 
 		}
 	}
-	*/
+   
 }
 
 
