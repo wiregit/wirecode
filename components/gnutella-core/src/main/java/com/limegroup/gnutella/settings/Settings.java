@@ -58,10 +58,28 @@ public final class Settings extends AbstractSettings {
 		"black_theme.zip",
 	}; 
 	
+	/**
+	 * Statically expand any zip files in our jar if they're newer than the
+	 * ones on disk.
+	 */
 	static {
-	    for(int i=0; i<THEMES.length; i++) { 
-			CommonUtils.copyResourceFile(THEMES[i], 
-										 new File(THEME_DIR_FILE, THEMES[i]));
+		File themesJar = new File("themes.jar");
+		if(!themesJar.isFile()) {
+			themesJar = new File(new File("lib"), "themes.jar");
+		}
+		if(themesJar.isFile()) {
+			long jarMod = themesJar.lastModified();
+			for(int i=0; i<THEMES.length; i++) { 
+				File zipFile = new File(THEME_DIR_FILE, THEMES[i]);
+				if(zipFile.isFile()) {
+					long zipMod = zipFile.lastModified();
+					if(jarMod > zipMod) {
+						CommonUtils.copyResourceFile(THEMES[i], 
+													 new File(THEME_DIR_FILE, 
+															  THEMES[i]), true);
+					}
+				}
+			}
 		}
 	}
 	
