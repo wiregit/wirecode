@@ -174,7 +174,7 @@ public class UDPHeadPong extends VendorMessage {
 		
 		//parse any included altlocs
 		if ((_features & UDPHeadPing.ALT_LOCS) == UDPHeadPing.ALT_LOCS) {
-			int size = dais.readByte();
+			int size = dais.readShort();
 			byte [] altlocs = new byte[size];
 			dais.readFully(altlocs);
 			_altLocs = new HashSet();
@@ -205,6 +205,7 @@ public class UDPHeadPong extends VendorMessage {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		CountingOutputStream caos = new CountingOutputStream(baos);
+		DataOutputStream daos = new DataOutputStream(caos);
 		
 		byte retCode=0;
 		byte queueStatus;
@@ -231,9 +232,9 @@ public class UDPHeadPong extends VendorMessage {
 		
 		//we have the file... is it complete or not?
 		if (desc instanceof IncompleteFileDesc)
-			retCode = (byte) (retCode | COMPLETE_FILE);
-		else 
 			retCode = (byte) (retCode | PARTIAL_FILE);
+		else 
+			retCode = (byte) (retCode | COMPLETE_FILE);
 		caos.write(retCode);
 		
 		//write the vendor id
@@ -263,7 +264,7 @@ public class UDPHeadPong extends VendorMessage {
 			
 			//write the ranges only if they will fit in the packet
 			if (caos.getAmountWritten() + ranges.length <= PACKET_SIZE) {
-				caos.write((short)ranges.length);
+				daos.writeShort((short)ranges.length);
 				caos.write(ranges);
 			} 
 			else { //the ranges will not fit - say we didn't send them.
@@ -288,7 +289,7 @@ public class UDPHeadPong extends VendorMessage {
 				features = (byte) ( features & ~UDPHeadPing.ALT_LOCS);
 				baos.toByteArray()[0] = features;
 			} else { 
-				caos.write((byte)altbytes.length);
+				daos.writeShort((short)altbytes.length);
 				caos.write(altbytes);
 			}
 				
@@ -348,6 +349,10 @@ public class UDPHeadPong extends VendorMessage {
 	 */
 	public boolean isFirewalled() {
 		return _isFirewalled;
+	}
+	
+	public int getQueueStatus() {
+		return _queueStatus;
 	}
 }
 	
