@@ -29,9 +29,27 @@ public class ConnectionHandshakeHeaders
         "X-Domains-Authenticated";
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
     public static final String REMOTE_IP            = "Remote-IP";
+
     public static final String GGEP                 = "GGEP";
+
+	/**
+	 * Header name for the GUESS version.
+	 */
     public static final String X_GUESS              = "X-Guess";
     public static final String X_VERSION            = "X-Version";
+
+	/**
+	 * Header name for the degree of intra-Ultrapeer connections the
+	 * host tries to maintain.
+	 */
+	public static final String X_DEGREE             = "X-Degree";
+
+	/**
+	 * Header for the version of query routing supported at the Ultrapeer level.
+	 */
+	public static final String X_ULTRAPEER_QUERY_ROUTING = 
+		"X-Ultrapeer-Query-Routing";
+
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
