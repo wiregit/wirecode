@@ -643,7 +643,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 System.arraycopy(data,0,myip,0,4);
                 
                 try{
-                    myIp = InetAddress.getByAddress(myip);
+                    myIp = NetworkUtils.getByAddress(myip);
                 }catch(UnknownHostException bad) {
                     throw new BadPacketException(bad.getMessage());
                 }
@@ -809,7 +809,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 
                 if (NetworkUtils.isValidAddress(myip)) {
                     try{
-                        myIP = InetAddress.getByAddress(myip);
+                        myIP = NetworkUtils.getByAddress(myip);
                         myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
 
 

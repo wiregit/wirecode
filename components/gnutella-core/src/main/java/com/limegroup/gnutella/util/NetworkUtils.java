@@ -347,6 +347,14 @@ public final class NetworkUtils {
     	
     	return Collections.unmodifiableList(ret);
     }
+    
+    /**
+     * Returns an InetAddress representing the given IP address.
+     */
+    public static InetAddress getByAddress(byte[] addr) throws UnknownHostException {
+        String addrString = NetworkUtils.ip2string(addr);
+        return InetAddress.getByName(addrString);
+    }
 }
 
 
