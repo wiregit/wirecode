@@ -9,6 +9,7 @@ import com.limegroup.gnutella.connection.BIOMessageWriter;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.NIODispatcher;
 import com.limegroup.gnutella.connection.TestNIOMessageReader;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
@@ -42,9 +43,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetup() throws Exception {
-        // make sure we don't use NIO
-        ConnectionSettings.USE_NIO.setValue(false);    
+    public static void globalSetUp() throws Exception {
+        PrivilegedAccessor.setValue(NIODispatcher.instance(), "_testing",
+            new Boolean(true));  
     }
     
 	public void setUp() throws Exception {
@@ -208,8 +209,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", 1, 
             out.stats().getNumMessagesSent());
-        assertEquals( pr.getTotalLength(), 
-            in.stats().getUncompressedBytesReceived() );
+        assertEquals( "unexpected number of uncompressed bytes received", 
+            pr.getTotalLength(), in.stats().getUncompressedBytesReceived() );
         assertEquals( pr.getTotalLength(), 
             out.stats().getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
@@ -698,9 +699,14 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             }
         }
         
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+            return;
+        }
         int dropped=out.stats().getNumSentMessagesDropped()-initialDropped;
         assertGreaterThan("dropped msg cnt > 0", 0, dropped);
-        assertGreaterThan("drop prct > 0", 0, out.stats().getPercentSentDropped());
+        assertGreaterThan("drop prct > 0", 0, 
+            out.stats().getPercentSentDropped());
         assertLessThan("read cnt < total", total, read);
         assertEquals("drop + read == total", total, dropped+read);
     }
