@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Response;
@@ -43,9 +44,9 @@ public final class LimeXMLDocumentHelper{
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
             while(mapsIterator.hasNext()) {
                 try {
-                    Map map = (Map)mapsIterator.next();
+                    TreeMap map = (TreeMap)mapsIterator.next();
                     int index = Integer.parseInt((String)map.get(indexKey));
-                    documents[index] = new LimeXMLDocument(map.entrySet(),parsingResult.schemaURI);
+                    documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
                 } catch(Exception x) {continue;}//bad data, ignore
             }
             results.add(documents);
