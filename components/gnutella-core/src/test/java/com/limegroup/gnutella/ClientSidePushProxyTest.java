@@ -212,7 +212,9 @@ public class ClientSidePushProxyTest
         assertEquals(2, rs.getFileManager().getNumFiles());
 
         // send a query that should be answered
-        QueryRequest query = QueryRequest.createQuery("berkeley.txt");
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
+                                              "berkeley", null, null, null,
+                                              null, false, 0, false);
         testUP.send(query);
         testUP.flush();
 
@@ -224,8 +226,15 @@ public class ClientSidePushProxyTest
 
         // confirm it has proxy info
         QueryReply reply = (QueryReply) m;
-        assertTrue(reply.getPushProxies() != null);
+        assertNotNull(reply.getPushProxies());
 
+        // check out PushProxy info
+        PushProxyInterface[] proxies = reply.getPushProxies();
+        assertEquals(proxies.length, 1);
+        assertEquals(proxies[0].getPushProxyPort(), 6355);
+        assertTrue(proxies[0].getPushProxyAddress().getHostAddress().startsWith("127"));
+
+        // everything checks out!
     }
 
 
