@@ -226,6 +226,7 @@ public class ClientSideLeafGuidanceTest
             // send a MessagesSupportedMessage
             testUPs[i].send(MessagesSupportedVendorMessage.instance());
             testUPs[i].flush();
+            drain(testUPs[i]);
         }
 
         // spawn a query and make sure all UPs get it
