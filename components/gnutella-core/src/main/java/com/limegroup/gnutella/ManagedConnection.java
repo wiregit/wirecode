@@ -110,6 +110,8 @@ public class ManagedConnection extends Connection
      * latency.  
      */
 
+    /** A lock for QRP activity on this connection */
+    private final Object QRP_LOCK=new Object();
     /** A lock to protect _outputQueue. */
     private Object _outputQueueLock=new Object();
     /** The producer's queues, one priority per mesage type. 
@@ -1313,4 +1315,8 @@ public class ManagedConnection extends Connection
     boolean runnerDied() {
         return _runnerDied;
     }
+
+	public Object getQRPLock() {
+		return QRP_LOCK;
+	}
 }

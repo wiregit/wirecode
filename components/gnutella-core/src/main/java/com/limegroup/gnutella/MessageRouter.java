@@ -69,11 +69,6 @@ public abstract class MessageRouter {
 		ForMeReplyHandler.instance();
 		
     /**
-     * The lock to hold before updating or propogating tables.  TODO3: it's 
-     * probably possible to use finer-grained locking.
-     */
-    private Object queryUpdateLock=new Object();
-    /**
      * The time when we should next broadcast route table updates.
      * (Route tables are stored per connection in ManagedConnectionQueryInfo.)
      * LOCKING: obtain queryUpdateLock
@@ -1319,17 +1314,15 @@ public abstract class MessageRouter {
      * guid.
      */
     private static boolean shouldDropReply(int bytesRouted, int ttl) {
-        // send replies with ttl above 3 if we've routed under 50K 
-        if(ttl > 3 && bytesRouted < 50    * 1024) return false;
+        // send replies with ttl above 2 if we've routed under 50K 
+        if(ttl > 2 && bytesRouted < 50    * 1024) return false;
         // send replies with ttl 0 if we've routed under 50K, as this 
 		// shouldn't happen 
         if(ttl == 0 && bytesRouted < 50   * 1024) return false;
         // send replies with ttl 1 if we've routed under 1000K 
-        if(ttl == 1 && bytesRouted < 1000 * 1024) return false;
+        if(ttl == 1 && bytesRouted < 200 * 1024) return false;
         // send replies with ttl 2 if we've routed under 333K 
-        if(ttl == 2 && bytesRouted < 333  * 1024) return false;
-        // send replies with ttl 3 if we've routed under 111K 
-        if(ttl == 3 && bytesRouted < 111  * 1024) return false;
+        if(ttl == 2 && bytesRouted < 100  * 1024) return false;
 
         // if none of the above conditions holds true, drop the reply
         return true;
@@ -1455,7 +1448,7 @@ public abstract class MessageRouter {
                                             
         //Mutate query route table associated with receivingConnection.  
         //(This is legal.)  Create a new one if none exists.
-        synchronized (queryUpdateLock) {
+        synchronized (receivingConnection.getQRPLock()) {
             ManagedConnectionQueryInfo qi =
                 receivingConnection.getQueryRouteState();
             if (qi==null) {
@@ -1477,6 +1470,7 @@ public abstract class MessageRouter {
             }
         }
     }
+
 
     /** Thread the processing of QRP Table delivery. */
     private class QRPPropagator extends Thread {
@@ -1510,63 +1504,68 @@ public abstract class MessageRouter {
      */    
     private void forwardQueryRouteTables() {
 		//System.out.println("MessageRouter::forwardQueryRouteTables"); 
-        synchronized (queryUpdateLock) {
-			//Check the time to decide if it needs an update.
-			long time = System.currentTimeMillis();
-			if(time < _nextQueryUpdateTime) return;
 
-			_nextQueryUpdateTime = time + 1000;
+		//Check the time to decide if it needs an update.
+		long time = System.currentTimeMillis();
+		if(time < _nextQueryUpdateTime) return;
 
-            //For all connections to new hosts c needing an update...
-            List list=_manager.getInitializedConnections2();
-            QueryRouteTable table = null;
-            for(int i=0; i<list.size(); i++) {                        
-                ManagedConnection c=(ManagedConnection)list.get(i);
-                
+		_nextQueryUpdateTime = time + 1000;
 
-				// continue if I'm an Ultrapeer and the node on the
-				// other end doesn't support Ultrapeer-level query
-				// routing
-				if(RouterService.isSupernode()) { 
-                    // only skip it if it's not an Ultrapeer query routing
-                    // connection
-                    if(!c.isUltrapeerQueryRoutingConnection()) { 
-                        continue;
-                    }
-				} 				
-				// otherwise, I'm a leaf, and don't send routing
-				// tables if it's not a connection to an Ultrapeer
-				// or if query routing is not enabled on the connection
-				else if (!(c.isClientSupernodeConnection() && 
-						   c.isQueryRoutingEnabled())) {
+		//For all connections to new hosts c needing an update...
+		List list=_manager.getInitializedConnections2();
+		QueryRouteTable table = null;
+		for(int i=0; i<list.size(); i++) {                        
+			ManagedConnection c=(ManagedConnection)list.get(i);
+			
+
+			// continue if I'm an Ultrapeer and the node on the
+			// other end doesn't support Ultrapeer-level query
+			// routing
+			if(RouterService.isSupernode()) { 
+				// only skip it if it's not an Ultrapeer query routing
+				// connection
+				if(!c.isUltrapeerQueryRoutingConnection()) { 
 					continue;
 				}
-                
-                if (time<c.getNextQRPForwardTime())
-                    continue;
-                //c.setNextQRPForwardTime(time+QUERY_ROUTE_UPDATE_TIME);
+			} 				
+			// otherwise, I'm a leaf, and don't send routing
+			// tables if it's not a connection to an Ultrapeer
+			// or if query routing is not enabled on the connection
+			else if (!(c.isClientSupernodeConnection() && 
+					   c.isQueryRoutingEnabled())) {
+				continue;
+			}
+			
+			// See if it is time for this connections QRP update
+			// This call is safe since only this thread updates time
+			if (time<c.getNextQRPForwardTime())
+				continue;
+
+			// Lock up this connections QRP structures
+			synchronized (c.getQRPLock()) {
+
 				c.incrementNextQRPForwardTime(time);
 
-                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
-                if (qi==null) {
-                    qi=new ManagedConnectionQueryInfo();
-                    c.setQueryRouteState(qi);
-                }
-                    
-                //Create table to send on this connection...
-                if (table == null) {
-                    table=createRouteTable();
-                }                    
+				ManagedConnectionQueryInfo qi=c.getQueryRouteState();
+				if (qi==null) {
+					qi=new ManagedConnectionQueryInfo();
+					c.setQueryRouteState(qi);
+				}
+					
+				//Create table to send on this connection...
+				if (table == null) {
+					table=createRouteTable();
+				}                    
 
-                //..and send each piece.
-                //TODO2: use incremental and interleaved update
-                for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
-                    RouteTableMessage m=(RouteTableMessage)iter.next();
-                    c.send(m);
-                }
-                qi.lastSent=table;
-            }
-        }
+				//..and send each piece.
+				//TODO2: use incremental and interleaved update
+				for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
+					RouteTableMessage m=(RouteTableMessage)iter.next();
+					c.send(m);
+				}
+				qi.lastSent=table;
+			}
+		}
     }
 
     /**
