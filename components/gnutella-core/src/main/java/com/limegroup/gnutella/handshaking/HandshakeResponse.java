@@ -269,14 +269,14 @@ public final class HandshakeResponse {
             int minor = -1;
             boolean ret = false;
             boolean error = false;
+            if(tok.countTokens() < 3) //not limewire
+                return false;
             try {
                 String str = tok.nextToken();//"limewire"
                 str = tok.nextToken();
                 major = Integer.parseInt(str);
                 str = tok.nextToken();
                 minor = Integer.parseInt(str);
-            } catch (NoSuchElementException nssx) {
-                error = true;
             } catch (NumberFormatException nfx) {
                 error = true;
             } 
