@@ -22,4 +22,17 @@ class AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
 		StatisticsManager.instance().addAdvancedStatistic(this);
 		_fileName = fileName;
 	}
+	
+	public void incrementStat() {
+		// if we're not recording advanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
+		super.incrementStat();
+	}
+
+	// override to only record
+	public void addData(int data) {
+		// if we're not recording advanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
+		super.addData(data);
+	}	
 }
