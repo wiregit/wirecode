@@ -87,7 +87,7 @@ public class PingReply extends Message implements Serializable {
              int port, byte[] ip, long files, long kbytes,
              boolean isUltrapeer, int dailyUptime) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             dailyUptime>=0 ? newGGEP(dailyUptime, true) : null);
+             dailyUptime>=0 ? newGGEP(dailyUptime, isUltrapeer) : null);
     }
 
     /**
