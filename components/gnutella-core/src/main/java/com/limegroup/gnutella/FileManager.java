@@ -7,7 +7,6 @@ import java.io.IOException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileComparator;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.IntSet;
@@ -15,7 +14,6 @@ import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Comparator;
@@ -35,7 +33,7 @@ import com.sun.java.util.collections.TreeSet;
  *
  * This class is thread-safe.
  */
-public class FileManager {
+public abstract class FileManager {
     /** The string used by Clip2 reflectors to index hosts. */
     public static final String INDEXING_QUERY="    ";
     /** The string used by LimeWire to browse hosts. */
@@ -834,10 +832,7 @@ public class FileManager {
      * @return -1 if the file was not added.  Otherwise the index of the newly
      * added file.
      */
-	public int addFileIfShared(File file, List metadata) {
-        return addFileIfShared(file);
-        //This implementation does nothing with metadata.  See MetaFileManager.
-    }
+	public abstract int addFileIfShared(File file, List metadata);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -1375,16 +1370,13 @@ public class FileManager {
      * It is expected that MetaFileManager overrides this and returns
      * true in some instances.
      */
-    protected boolean shouldIncludeXMLInResponse(QueryRequest qr) {
-        return false;
-    }
+    protected abstract boolean shouldIncludeXMLInResponse(QueryRequest qr);
     
     /**
      * This implementation does nothing.
      */
-    protected void addXMLToResponse(Response res, FileDesc desc) {
-        // left for MetaFileManager.
-    }
+    protected abstract void addXMLToResponse(Response res, FileDesc desc);
+
 
     /**
      * Returns a set of indices of files matching q, or null if there are no
