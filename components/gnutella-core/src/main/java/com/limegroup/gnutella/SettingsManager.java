@@ -88,6 +88,9 @@ public class SettingsManager implements SettingsInterface
     private int      advancedQueryInfo_;
     private int      freeLoaderFiles_;
     private int      freeLoaderAllowed_;
+	private int      sessions_;
+	private long     averageUptime_;
+	private long     totalUptime_;
 
     /** Set up a local variable for the properties */
     private Properties props_;
@@ -416,6 +419,15 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(FREELOADER_ALLOWED)) {
                     setFreeloaderAllowed(Integer.parseInt(p));
                 }
+				else if(key.equals(AVERAGE_UPTIME)) {
+					setAverageUptime(Long.parseLong(p));
+				}
+				else if(key.equals(TOTAL_UPTIME)) {
+					setTotalUptime(Long.parseLong(p));
+				}
+				else if(key.equals(SESSIONS)) {
+					setSessions(Integer.parseInt(p));
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -498,7 +510,9 @@ public class SettingsManager implements SettingsInterface
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
 
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
-
+		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
+		setTotalUptime(DEFAULT_TOTAL_UPTIME);
+		setSessions(DEFAULT_SESSIONS);
         write_ = true;
         writeProperties();
     }
@@ -673,6 +687,18 @@ public class SettingsManager implements SettingsInterface
         return freeLoaderAllowed_;
     }
 
+	public long getAverageUptime() {
+		return averageUptime_;
+	}
+
+	public long getTotalUptime() {
+		return totalUptime_;
+	}
+
+	public int getSessions() {
+		return sessions_;
+	}
+
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -681,6 +707,36 @@ public class SettingsManager implements SettingsInterface
     /******************************************************
      *************  START OF MUTATOR METHODS **************
      ******************************************************/
+
+	/** updates all of the uptime settings based on the
+	 *  passed in time value for the most recent session. */
+	public void updateUptime(long currentTime) {
+		totalUptime_ += currentTime;
+		averageUptime_ = totalUptime_/sessions_;
+		setSessions(sessions_++);		
+		setTotalUptime(totalUptime_);
+		setAverageUptime(averageUptime_);
+	}
+
+	private void setSessions(int sessions) {
+		if(sessions_ < 1)
+			sessions_ = 10;
+		sessions_ = sessions;
+		String s = Integer.toString(sessions_);
+		props_.put(SESSIONS, s);
+	}
+
+	private void setAverageUptime(long averageUptime) {
+		averageUptime_ = averageUptime;
+		String s = Long.toString(averageUptime_);
+		props_.put(AVERAGE_UPTIME, s);
+	}
+
+	private void setTotalUptime(long totalUptime) {
+		totalUptime_ = totalUptime;
+		String s = Long.toString(totalUptime_);
+		props_.put(TOTAL_UPTIME, s);
+	}
 
     /** sets the maximum length of packets (spam protection)*/
     public synchronized void setMaxLength(int maxLength)
