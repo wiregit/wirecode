@@ -39,7 +39,7 @@ public class BrowseHostUploadState implements UploadState
             // send back a 406...
             String str;
             _ostream = uploader.getOutputStream();
-            str = "HTTP/1.1 406 Not Acceptable\r\n";
+            str = "HTTP/1.0 406 Not Acceptable\r\n";
             _ostream.write(str.getBytes());
             _ostream.flush();
             debug("BHUS.doUpload(): client does not accept QRs.");
@@ -73,7 +73,7 @@ public class BrowseHostUploadState implements UploadState
         
         //write out the headers
         String str;
-		str = "HTTP/1.1 200 OK\r\n";
+		str = "HTTP/1.0 200 OK\r\n";
 		_ostream.write(str.getBytes());
 		str = "User-Agent: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
