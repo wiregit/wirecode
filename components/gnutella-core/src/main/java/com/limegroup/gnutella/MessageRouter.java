@@ -116,22 +116,6 @@ public abstract class MessageRouter {
      */
     private static final FixedsizeHashMap _tcpConnectBacks = 
         new FixedsizeHashMap(200);
-    
-    /**
-     * Keeps track of the proxied GUID per handler (leaf connection).
-     * No need to limit the size as a well-behaved leaf should be shutting
-     * off queries.  If this is a concern we can have an Expirer run but
-     * that adds complexity.
-     * ReplyHandler -> GUID.  The GUID is the OOB guid, not the original one.
-     * This is a Hashtable since we need synchronization everywhere...
-     */
-    private static final Map _proxiedGUIDs = new Hashtable();
-
-    /**
-     * Maps the guid that we use in our proxy request to the original guid.
-     * GUID -> GUID
-     */
-    private static final Map _proxyGUIDToOrigGUID = new Hashtable();
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -881,35 +865,6 @@ public abstract class MessageRouter {
                 handler.canBeOOBProxied() &&
                 OutOfBandThroughputStat.isSuccessRateGreat();
             
-            if (canOOBProxy) {
-                GUID origGUID = new GUID(request.getGUID());
-                GUID newGUID = 
-                    origGUID.addressEncodeGuid(RouterService.getAddress(),
-                                               RouterService.getPort());
-
-                // create a mapping between 1) handler and set of guids mapped
-                // and 2) newGUID and origGUID
-                // first do 2) cuz we need to know if there is a conflict
-                boolean conflict = false;
-                synchronized (_proxyGUIDToOrigGUID) {
-                    if (_proxyGUIDToOrigGUID.containsKey(newGUID))
-                        conflict = true;
-                    else 
-                        _proxyGUIDToOrigGUID.put(newGUID, origGUID);
-                }
-                if (!conflict) {
-                    // we can proceed, store more info and morph query
-                    synchronized (_proxiedGUIDs) {
-                        Set guidSet = (Set) _proxiedGUIDs.get(handler);
-                        if (guidSet == null)
-                            guidSet = new HashSet();
-                        guidSet.add(newGUID);
-                    }
-                    request = QueryRequest.createProxyQuery(request,
-                                                            newGUID.bytes());
-                }
-
-            }
 
             // don't send it to leaves here -- the dynamic querier will 
             // handle that
