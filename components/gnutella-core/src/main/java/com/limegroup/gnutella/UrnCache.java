@@ -36,6 +36,12 @@ public final class UrnCache {
         new File(CommonUtils.getUserSettingsDir(), "fileurns.cache");
 
     /**
+     * Last good version of above.
+     */
+    private static final File URN_CACHE_BACKUP_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.bak");
+
+    /**
      * UrnCache instance variable.  LOCKING: obtain UrnCache.class.
      */
     private static UrnCache instance = null;
@@ -112,30 +118,44 @@ public final class UrnCache {
     }
         
     /**
-     * Loads values from cache file, if available
+     * Loads values from cache file, if available.  If the cache file is
+     * not readable, tries the backup.
      */
     private static Map createMap() {
+        Map result;
+        result = readMap(URN_CACHE_FILE);
+        if(result == null)
+            result = readMap(URN_CACHE_BACKUP_FILE);
+        if(result == null)
+            result = new HashMap();
+        return result;
+    }
+    
+    /**
+     * Loads values from cache file, if available.
+     */
+    private static Map readMap(File file) {
+        Map result;
         ObjectInputStream ois = null;
 		try {
-            ois = 
-			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));            
-			return (Map)ois.readObject();
+            ois = new ObjectInputStream(new FileInputStream(file));
+			result = (Map)ois.readObject();
         } catch (IOException e) {
-            return new HashMap();
+            result = null;
         } catch (ClassCastException e) {
-            return new HashMap();
+            result = null;
         } catch (ClassNotFoundException e) {
-            return new HashMap();
+            result = null;
         } catch(ArrayStoreException e) {
-            return new HashMap();
+            result = null;
         } catch(IndexOutOfBoundsException e) {
-            return new HashMap();
+            result = null;
         } catch(NegativeArraySizeException e) {
-            return new HashMap();
+            result = null;
         } catch(IllegalStateException e) {
-            return new HashMap();
+            result = null;
         } catch(SecurityException e) {
-            return new HashMap();
+            result = null;
         } finally {
             if(ois != null) {
                 try {
@@ -145,6 +165,7 @@ public final class UrnCache {
                 }
             }
         }
+        return result;
 	}
 
 	/**
@@ -175,6 +196,7 @@ public final class UrnCache {
     public synchronized void persistCache() {
         //It's not ideal to hold a lock while writing to disk, but I doubt think
         //it's a problem in practice.
+        URN_CACHE_FILE.renameTo(URN_CACHE_BACKUP_FILE);
         try {
             ObjectOutputStream oos = 
 			    new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
