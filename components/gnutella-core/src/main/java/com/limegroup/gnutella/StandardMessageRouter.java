@@ -168,17 +168,6 @@ public class StandardMessageRouter extends MessageRouter {
         if ( (responses == null) || ((responses.length < 1)) )
             return;
 
-        // get the appropriate queryReply information
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = 
-		    RouterService.getUploadManager().measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
-            measuredSpeed=false;
-        }
-
         //convert responses to QueryReplies
         Iterator /*<QueryReply>*/iterator= responsesToQueryReplies(responses,
                                                                    queryRequest);
