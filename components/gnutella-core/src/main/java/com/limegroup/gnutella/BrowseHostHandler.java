@@ -12,6 +12,8 @@ import com.limegroup.gnutella.util.*;
  */
 public class BrowseHostHandler {
 
+    private static final long EXPIRE_TIME = 9000; // 9 seconds
+
     private static final int SPECIAL_INDEX = 0;
 
     /** Map from serventID to BrowseHostHandler instance.
@@ -39,6 +41,13 @@ public class BrowseHostHandler {
      */
     private GUID _serventID = null;
 
+    /** Expires pushes that we are waiting for.
+     */
+    private static Expirer expirer = new Expirer();
+    static {
+        RouterService.instance().schedule(expirer, 0, EXPIRE_TIME);
+    }
+
     /**
      * @param callback A instance of a ActivityCallback, so I can notify it of
      * incoming QReps...
@@ -62,7 +71,7 @@ public class BrowseHostHandler {
      * @param host The IP of the host you want to browse.
      * @param port The port of the host you want to browse.
      */
-    public void browseHost(String host, int port) throws IOException {
+    public void browseHost(String host, int port) {
 
         // flow of operation:
         // 1. check if you need to push.
@@ -94,11 +103,20 @@ public class BrowseHostHandler {
             // register with the map so i get notified about a response to my
             // Push.
             synchronized (_pushedHosts) {
-                _pushedHosts.put(_serventID, this);
+                _pushedHosts.put(_serventID, new PushRequestDetails(this));
             }
             // send the Push after registering in case you get a response really
             // quickly.
-            _router.sendPushRequest(pr);
+            try {
+                _router.sendPushRequest(pr);
+            }
+            catch (IOException ioe) {
+                // didn't work, unregister yourself...
+                synchronized (_pushedHosts) {
+                    _pushedHosts.remove(_serventID);
+                }
+                _callback.browseHostFailed(_guid);
+            }
             break;
         }
     }
@@ -266,18 +284,53 @@ public class BrowseHostHandler {
         if (index == SPECIAL_INDEX)
             ; // you'd hope, but not necessary...
 
-        BrowseHostHandler handler = null;
+        PushRequestDetails prd = null;
         synchronized (_pushedHosts) {
-            handler = (BrowseHostHandler) _pushedHosts.remove(serventID);
+            prd = (PushRequestDetails) _pushedHosts.remove(serventID);
         }
-        if (handler != null) 
-            handler.browseExchange(socket);
+        if (prd != null) 
+            prd.bhh.browseExchange(socket);
         else
             debug("BHH.handlePush(): no matching BHH.");
 
         debug("BHH.handlePush(): returning.");
     }
 
+    /** Can be run to invalidate pushes that we are waiting for....
+     */
+    private static class Expirer implements Runnable {
+        public void run() {
+            Iterator keys = null;
+            synchronized (_pushedHosts) {
+                keys = _pushedHosts.keySet().iterator();
+            }
+            while (keys.hasNext()) {
+                Object currKey = keys.next();
+                PushRequestDetails currPRD = null;
+                synchronized (_pushedHosts) {
+                    currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
+                    if ((currPRD != null) && (currPRD.isExpired())) {
+                        _pushedHosts.remove(currKey);
+                        currPRD.bhh._callback.browseHostFailed(currPRD.bhh._guid);
+                    }
+                }
+            }
+        }
+    }
+
+    private class PushRequestDetails { 
+        public BrowseHostHandler bhh;
+        private long timeStamp;
+        
+        public PushRequestDetails(BrowseHostHandler bhh) {
+            timeStamp = System.currentTimeMillis();
+            this.bhh = bhh;
+        }
+
+        public boolean isExpired() {
+            return ((System.currentTimeMillis() - timeStamp) > EXPIRE_TIME);
+        }
+    }
 
     private final static boolean debugOn = false;
     private final static void debug(String out) {

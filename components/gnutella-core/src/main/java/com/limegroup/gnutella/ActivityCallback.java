@@ -80,6 +80,11 @@ public interface ActivityCallback
 	/** display an error message in the chat gui */
 	public void chatErrorMessage(Chatter chatter, String str);
 
+    /** display an error message since the browse host failed. 
+     *  @param guid The GUID of the browse host.
+     */    
+    public void browseHostFailed(GUID guid);
+
     /**
      * Notifies the GUI that the given directory has been shared.  This method
      * is called exactly once per directory per change to the shared directory

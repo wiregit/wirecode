@@ -929,12 +929,9 @@ public class RouterService
      * while browsing host
      * @param serventID The guid of the client to browse from.  I need this in
      * case I need to push....
-     * @exception IOException in case any I/O error occurs while 
-     * connecting/reading/writing from the host
 	 */
 	public void doBrowseHost(String host, int port, 
-                             GUID guid, GUID serventID) 
-        throws IOException {
+                             GUID guid, GUID serventID) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
                                                           acceptor, guid,
                                                           serventID);
