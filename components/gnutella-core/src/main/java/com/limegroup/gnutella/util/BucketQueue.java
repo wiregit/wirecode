@@ -12,7 +12,7 @@ import com.sun.java.util.collections.Iterator;
  * the same specifications as BinaryHeap.  This also has a few additional
  * methods not found in BinaryHeap.  <b>This class is not synchronized.</b> 
  */
-public class BucketQueue {
+public class BucketQueue implements Cloneable {
     /** 
      * Within each bucket, elements at the FRONT are newer then the back.  It is
      * assumed that buckets is very small; otherwise additional state could
@@ -29,6 +29,15 @@ public class BucketQueue {
         this.buckets=new Buffer[capacities.length];
         for (int i=0; i<buckets.length; i++) 
             buckets[i]=new Buffer(capacities[i]);
+    }
+
+    /** "Copy constructor": constructs a a new shallow copy of other. */
+    public BucketQueue(BucketQueue other) {
+        //Note that we can't just shallowly clone other.buckets
+        this.buckets=new Buffer[other.buckets.length];
+        for (int i=0; i<this.buckets.length; i++) {
+            this.buckets[i]=new Buffer(other.buckets[i]); //clone
+        }
     }
 
     public void clear() {
@@ -154,6 +163,11 @@ public class BucketQueue {
         }
     }
 
+    /** Returns a shallow copy of this, of type BucketQueue */
+    public Object clone() {
+        return new BucketQueue(this);        
+    }
+
     /** Unit test */
     /*
     public static void main(String args[]) {
@@ -226,6 +240,28 @@ public class BucketQueue {
         Assert.that(q.getMax()==f1);
         Assert.that(q.removeAll(f1)==true);
         Assert.that(q.isEmpty());        
+
+        //Test clone
+        q=new BucketQueue(new int[] {10, 10, 10, 10, 10});
+        q.insert(e4);
+        q.insert(e2a);
+        q.insert(e0);
+
+        BucketQueue q2=new BucketQueue(q);
+        Assert.that(q.size()==q2.size());
+        Iterator iter1=q.iterator();
+        Iterator iter2=q.iterator();
+        while (iter1.hasNext()) {
+            try {
+                Assert.that(iter1.next().equals(iter2.next()));
+            } catch (NoSuchElementException e) {
+                Assert.that(false);
+            }
+        }
+        Assert.that(! iter2.hasNext());
+
+        q.insert(e2b);
+        Assert.that(q.size()==(q2.size()+1));
     }
     */
 }

@@ -9,7 +9,7 @@ import com.sun.java.util.collections.*;
  * data structure when you want to use a fix amount of resources.
  * This is not thread-safe.
  */
-public class Buffer {
+public class Buffer implements Cloneable {
     /**
      * The abstraction function is
      *   [ buf[head], buf[head+1], ..., buf[tail-1] ] if head<=tail
@@ -47,6 +47,18 @@ public class Buffer {
         buf=new Object[size+1];
         head=0;
         tail=0;
+    }
+
+    /** "Copy constructor": constructs a a new shallow copy of other. */
+    public Buffer(Buffer other) {
+        this.size=other.size;
+        this.head=other.head;
+        this.tail=other.tail;
+
+        this.buf=new Object[other.buf.length];
+        System.arraycopy(other.buf, 0,
+                         this.buf, 0,
+                         other.buf.length);
     }
 
     /** Returns true iff this is empty. */
@@ -308,6 +320,11 @@ public class Buffer {
         }
     }
 
+    /** Returns a shallow copy of this, of type Buffer */
+    public Object clone() {
+        return new Buffer(this);        
+    }
+
     /*
     public static void main(String args[]) {
         //1. Tests of old methods.
@@ -522,6 +539,23 @@ public class Buffer {
         Assert.that(buf.removeAll("b")==true);
         Assert.that(buf.size()==1);
         Assert.that(buf.get(0).equals("c"));
+
+        //5. Test clone() method.
+        buf=new Buffer(2);
+        buf.addLast("a");
+        buf.addLast("b");
+        Buffer buf2=new Buffer(buf);
+        Assert.that(buf2.size()==buf.size());
+        Assert.that(buf2.getCapacity()==buf.getCapacity());
+        Assert.that(buf2.first().equals(buf.first()));
+        Assert.that(buf2.last().equals(buf.last()));
+        
+        Assert.that(buf.removeFirst()!=null); //buf2 unmodified
+        Assert.that(buf.size()==1);
+        Assert.that(buf2.size()==2);
+        Assert.that(buf.first().equals("b"));
+        Assert.that(buf2.first().equals("a"));
+        Assert.that(buf2.last().equals("b"));
     }
-    */  
+    */
 }
