@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.text.ParseException;
-import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
 
 
 /**
