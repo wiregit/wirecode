@@ -284,6 +284,9 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid num responses: "+n);
 		}
 
+        // set up proxies
+        _proxies = proxies;
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try {
