@@ -73,19 +73,8 @@ public final class BrowseHostUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
         _uploader.setAmountUploaded(BAOS.size());
-        _uploader.setState(_uploader.COMPLETE);
         debug("BHUS.doUpload(): returning.");
 	}
-
-    /**
-     * Tells if the upload state doesnt allow the connection to receive
-     * another request on the same connection. This state doesnt allow
-     * next request
-     * @return always true
-     */
-    public boolean getCloseConnection() {
-        return true;
-    }
 
     private final static boolean debugOn = false;
     private final void debug(String out) {

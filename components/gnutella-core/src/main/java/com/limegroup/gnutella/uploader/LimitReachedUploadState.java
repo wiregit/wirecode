@@ -65,16 +65,4 @@ public class LimitReachedUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
 	}
-    
-    /**
-     * Tells if the upload state doesnt allow the connection to receive
-     * another request on the same connection. This state never allows 
-     * receiving next request.
-     * @return true, if the upload state doesnt allow the connection to receive
-     * another request on the same connection, false otherwise
-     */
-    public boolean getCloseConnection(){
-        return true;
-    }    
-
 }

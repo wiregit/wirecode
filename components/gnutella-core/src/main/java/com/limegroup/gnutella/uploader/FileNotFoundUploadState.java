@@ -36,17 +36,4 @@ public final class FileNotFoundUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
 	}
-    
-    /**
-     * Tells if the upload state doesnt allow the connection to receive
-     * another request on the same connection. This state always allows 
-     * receiving next request, as the user may request another file that 
-     * may be valid
-     * @return true, if the upload state doesnt allow the connection to receive
-     * another request on the same connection, false otherwise
-     */
-    public boolean getCloseConnection() {
-        return false;
-    }    
-
 }

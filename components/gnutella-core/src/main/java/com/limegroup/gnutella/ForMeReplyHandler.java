@@ -72,6 +72,11 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		dm.handleQueryReply(reply);
 	}
 
+    /**
+     * If there are problems with the request, just ignore it.
+     * There's no point in sending them a GIV to have them send a GET
+     * just to return a 404 or Busy or Malformed Request, etc..
+     */
 	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler) {
         //Ignore push request from banned hosts.
         if (handler.isPersonalSpam(pushRequest))
@@ -88,10 +93,14 @@ public final class ForMeReplyHandler implements ReplyHandler {
         
         // if the IP is banned, don't accept it
         if (RouterService.getAcceptor().isBannedIP(h)) {
-            // TODO: return different status code??
             return;
         }
         int port = pushRequest.getPort();
+        // if invalid port, exit
+        if (!NetworkUtils.isValidPort(port) ) {
+            return;
+        }
+        
         int index = (int)pushRequest.getIndex();
 
         FileManager fm = RouterService.getFileManager();
@@ -107,13 +116,12 @@ public final class ForMeReplyHandler implements ReplyHandler {
         
         // if the file has been unshared, return
         if(desc == null) {
-            // TODO: make sure we return a 404 here
             return;
         }
 
         String file = desc.getName();
 
-        RouterService.getUploadManager().
+        RouterService.getPushManager().
             acceptPushUpload(file, h, port, 
                              index, req_guid_hexstring,
                              pushRequest.isMulticast() // force accept

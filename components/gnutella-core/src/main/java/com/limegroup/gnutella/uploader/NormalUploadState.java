@@ -49,12 +49,6 @@ public final class NormalUploadState implements HTTPMessage {
 	 */
 	private final FileDesc _fileDesc;
 
-    /** 
-	 * Flag indicating whether we should close the connection after serving
-     * the request or not.
-	 */
-    private boolean _closeConnection = false;
-
 	/**
 	 * Constant for the MIME type to return.
 	 */
@@ -80,7 +74,6 @@ public final class NormalUploadState implements HTTPMessage {
 	public void writeMessageHeaders(OutputStream network) throws IOException {
 		try {
 		    StringWriter ostream = new StringWriter();
-			_uploader.setState(Uploader.UPLOADING);
 			_fis =  _uploader.getInputStream();
 			_uploadBegin =  _uploader.getUploadBegin();
 			_uploadEnd =  _uploader.getUploadEnd();
@@ -141,28 +134,20 @@ public final class NormalUploadState implements HTTPMessage {
 			// if it was stalled, an IOException would have been thrown
 			// causing us to fall out to the catch clause
 			_stalledChecker.deactivate();
-			
-			_uploader.setState(_uploader.COMPLETE);
 		} catch(IOException e) {
 		    _stalledChecker.deactivate(); // no need to kill now.
-            //set the connection to be closed, in case of IO exception
-            _closeConnection = true;
             throw e;
 		} 
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         try {            
-			_uploader.setState(Uploader.UPLOADING);
-            long a = _fis.skip(_uploadBegin);            
+            long a = _fis.skip(_uploadBegin);
             upload(ostream);
         } catch(IOException e) {
             _stalledChecker.deactivate(); // no need to kill now
-            _closeConnection = true;
             throw e;
         }
-
-        _uploader.setState(_uploader.COMPLETE);
 	}
 
     /**
@@ -217,11 +202,6 @@ public final class NormalUploadState implements HTTPMessage {
 	private String getMimeType() {
         return "application/binary";                  
 	}
-    
-    //inherit doc comment
-    public boolean getCloseConnection() {
-        return _closeConnection;
-    }
     
     /**
      * @return the bandwidth for uploads in bytes per second

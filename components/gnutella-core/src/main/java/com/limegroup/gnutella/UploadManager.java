@@ -17,6 +17,51 @@ import java.util.StringTokenizer;
  * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>
  * to handle individual uploads.
  *
+ * The state of HTTPUploader is maintained by this class.
+ * HTTPUploader's state follows the following pattern:
+ *                                                           \ /
+ *                             /->---- PUSH_PROXY --------->--|
+ *                            /-->---- FILE NOT FOUND ----->--|
+ *                           /--->---- MALFORMED REQUEST -->--|
+ *                          /---->---- BROWSE HOST -------->--|
+ *                         /----->---- UPDATE FILE -------->--|
+ *                        /------>---- QUEUED ------------->--|
+ *                       /------->---- LIMIT REACHED ------>--|
+ *                      /-------->---- UPLOADING ---------->--|
+ * -->--CONNECTING-->--/                                      |
+ *        |                                                  \|/
+ *        |                                                   |
+ *       /|\                                                  |--->INTERRUPTED
+ *        |--------<---COMPLETE-<------<-------<-------<------/      (done)
+ *                        |
+ *                        |
+ *                      (done)
+ *
+ * The states in the middle (those other than CONNECTING, COMPLETE
+ *   and INTERRUPTED) are part of the "State Pattern" and have an 
+ * associated class that implements HTTPMessage.
+ *
+ * These state pattern classes are ONLY set while a transfer is active.
+ * For example, after we determine a request should be 'File Not Found',
+ * and send the response back, the state will become COMPLETE (unless
+ * there was an IOException while sending the response, in which case
+ * the state will become INTERRUPTED).  To retrieve the last state
+ * that was used for transferring, use HTTPUploader.getLastTransferState().
+ *
+ * Of particular note is that Queued uploaders are actually in COMPLETED
+ * state for the majority of the time.  The QUEUED state is only active
+ * when we are actively writing back the 'You are queued' response.
+ *
+ * COMPLETE uploaders may be using HTTP/1.1, in which case the HTTPUploader
+ * recycles back to CONNECTING upon receiving the next GET/HEAD request
+ * and repeats.
+ *
+ * INTERRUPTED HTTPUploaders are never reused.  However, it is possible that
+ * the socket may be reused.  This odd case is ONLY possible when a requester
+ * is queued for one file and sends a subsequent request for another file.
+ * The first HTTPUploader is set as interrupted and a second one is created
+ * for the new file, using the same socket as the first one.
+ *
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
@@ -30,30 +75,6 @@ public final class UploadManager implements BandwidthTracker {
      *  queued hosts. */
     public static final int MIN_POLL_TIME = 45000; //45 sec, same as Shareaza
     public static final int MAX_POLL_TIME = 120000; //120 sec, same as Shareaza
-    
-	/**
-	 * LOCKING: obtain this' monitor before modifying any 
-	 * of the data structures
-	 */
-
-	/** The maximum time in SECONDS after an unsuccessful push until we will
-     *  try the push again.  This should be larger than the 15+4*30=135 sec
-     *  window in which Gnotella resends pushes by default */
-    private static final int PUSH_INVALIDATE_TIME=60*5;  //5 minutes
-	  /**
-     * The list of all files that we've tried unsuccessfully to upload
-     * via pushes.  (Here successful means we were able to connect.
-     * It does not mean the file was actually transferred.) If we get
-     * another push request from one of these hosts (e.g., because the
-     * host is firewalled and sends multiple push packets) we will not
-     * try again.
-     *
-     * INVARIANT: for all i>j, ! failedPushes[i].before(failedPushes[j])
-	 */
-	private List /* of PushRequestedFile */ _failedPushes=
-        new LinkedList();
-    private List /* of PushRequestedFile */ _attemptingPushes=
-        new LinkedList();
 
 	/**
 	 * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
@@ -71,6 +92,11 @@ public final class UploadManager implements BandwidthTracker {
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
 
+    
+	/**
+	 * LOCKING: obtain this' monitor before modifying any 
+	 * of the data structures
+	 */
 
     /** The number of uploads considered when calculating capacity, if possible.
      *  BearShare uses 10.  Settings it too low causes you to be fooled be a
@@ -159,10 +185,12 @@ public final class UploadManager implements BandwidthTracker {
             boolean startedNewFile = false;
             //do uploads
             while(true) {
-                //parse the get line
-                if(iStream == null) {
+                if( uploader != null )
+                    assertAsComplete( uploader.getState() );
+                
+                if(iStream == null)
                     iStream = new BufferedInputStream(socket.getInputStream());
-                }
+
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
 
                 debug(uploader + " successfully parsed request");
@@ -211,7 +239,16 @@ public final class UploadManager implements BandwidthTracker {
                     uploader.reinitialize(currentMethod);
                 }
                 
-                uploader.readHeader(iStream);
+                assertAsConnecting( uploader.getState() );
+        
+                setInitialUploadingState(uploader);
+                try {
+                    uploader.readHeader(iStream);
+                } catch(IOException ioe) {
+                    uploader.setState(Uploader.INTERRUPTED);
+                    throw ioe;
+                }
+                setUploaderStateOffHeaders(uploader);
                 
                 debug(uploader+" HTTPUploader created and read all headers");
 
@@ -234,14 +271,15 @@ public final class UploadManager implements BandwidthTracker {
                 // Do the actual upload.
                 doSingleUpload(uploader);
                 
+                assertAsFinished( uploader.getState() );
+                
                 oldFileName = fileName;
                 
-                //if not to keep the connection open (either due to protocol
-                //not being HTTP 1.1, or due to error state, then return
-                if ((!line.isHTTP11()||uploader.getCloseConnection())
-                  && queued!=QUEUED) {
+                //if this is not HTTP11, then exit, as no more requests will
+                //come.
+                if ( !line.isHTTP11() )
                     return;
-                }
+
                 //read the first word of the next request and proceed only if
                 //"GET" or "HEAD" request.  Versions of LimeWire before 2.7
                 //forgot to switch the request method.
@@ -270,23 +308,21 @@ public final class UploadManager implements BandwidthTracker {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             debug(uploader + " IOE thrown, closing socket");
-        } catch(ArrayIndexOutOfBoundsException ae) {
-            debug(uploader + " AIOOBE thrown, closing socket");
         } finally {
-            // If the socket timed out while waiting for the next request,
-            // then this is considered interupted.
-            if( uploader != null && !uploader.isInactive())
-                uploader.setState(Uploader.INTERRUPTED);
-                
+            if( uploader != null )
+                assertAsFinished( uploader.getState() );
+            
             synchronized(this) {
-                // If this uploader is still in the queue,
-                // remove it.
+                // If this uploader is still in the queue, remove it.
+                // Also change its state from COMPLETE to INTERRUPTED
+                // because it didn't really complete.
                 boolean found = false;
                 for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
                     KeyValue kv = (KeyValue)iter.next();
                     if(kv.getKey()==socket) {
                         iter.remove();
                         found = true;
+                        break;
                     }
                 }
                 if(found)
@@ -311,10 +347,10 @@ public final class UploadManager implements BandwidthTracker {
      * in the GUI.
      */
     private boolean shouldShowInGUI(Uploader uploader) {
-        return uploader.getState() != Uploader.BROWSE_HOST &&
-               uploader.getState() != Uploader.PUSH_PROXY &&
-               uploader.getState() != Uploader.UPDATE_FILE &&
-               uploader.getState() != Uploader.MALFORMED_REQUEST &&
+        return uploader.getIndex() != BROWSE_HOST_FILE_INDEX &&
+               uploader.getIndex() != PUSH_PROXY_FILE_INDEX &&
+               uploader.getIndex() != UPDATE_FILE_INDEX &&
+               uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
@@ -344,6 +380,10 @@ public final class UploadManager implements BandwidthTracker {
      */
     private void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
         debug(uploader + " cleaning up finished.");
+        
+        int state = uploader.getState();
+        assertAsFinished(state);
+                     
         long finishTime = System.currentTimeMillis();
         synchronized(this) {
             //Report how quickly we uploaded the data.
@@ -356,25 +396,90 @@ public final class UploadManager implements BandwidthTracker {
         
         uploader.closeFileStreams();
         
-        if(uploader.getMethod() != HTTPRequestMethod.HEAD) {
-            switch(uploader.getState()) {
-                case Uploader.COMPLETE:
-                    UploadStat.COMPLETED.incrementStat();
-                    break;
-                case Uploader.INTERRUPTED:
-                    UploadStat.INTERRUPTED.incrementStat();
-                    break;
-            }
+        switch(state) {
+            case Uploader.COMPLETE:
+                UploadStat.COMPLETED.incrementStat();
+                break;
+            case Uploader.INTERRUPTED:
+                UploadStat.INTERRUPTED.incrementStat();
+                break;
         }
         
         if ( shouldShowInGUI(uploader) ) {
             FileDesc fd = uploader.getFileDesc();
-            if( fd != null && uploader.getState() == Uploader.COMPLETE ) {
+            if( fd != null && state == Uploader.COMPLETE ) {
                 fd.incrementCompletedUploads();
                 RouterService.getCallback().handleSharedFileUpdate(
                     fd.getFile());
     		}
             RouterService.getCallback().removeUpload(uploader);
+        }
+    }
+    
+    /**
+     * Initializes the uploader's state.
+     * If the file is valid for uploading, this leaves the state
+     * as connecting.
+     */
+    private void setInitialUploadingState(HTTPUploader uploader) {
+        switch(uploader.getIndex()) {
+        case BROWSE_HOST_FILE_INDEX:
+            uploader.setState(Uploader.BROWSE_HOST);
+            return;
+        case PUSH_PROXY_FILE_INDEX:
+            uploader.setState(Uploader.PUSH_PROXY);
+            return;
+        case UPDATE_FILE_INDEX:
+            uploader.setState(Uploader.UPDATE_FILE);
+            return;
+        case BAD_URN_QUERY_INDEX:
+            uploader.setState(Uploader.FILE_NOT_FOUND);
+            return;
+        case MALFORMED_REQUEST_INDEX:
+            uploader.setState(Uploader.MALFORMED_REQUEST);
+            return;
+        default:
+        
+            // This is the normal case ...
+            FileManager fm = RouterService.getFileManager();
+            FileDesc fd = null;
+            int index = uploader.getIndex();
+            // First verify the file index
+            if(fm.isValidIndex(index)) {
+                fd = fm.get(index);
+            } 
+            // If the index was invalid or the file was unshared, FNF.
+            if(fd == null) {
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+                return;
+            }
+            // If the name they want isn't the name we have, FNF.
+            if(!uploader.getFileName().equals(fd.getName())) {
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+                return;
+            }
+            
+            try {
+                uploader.setFileDesc(fd);
+            } catch(IOException ioe) {
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+                return;
+            }
+            
+            assertAsConnecting( uploader.getState() );
+        }
+    }
+    
+    /**
+     * Sets the uploader's state based off values read in the headers.
+     */
+    private void setUploaderStateOffHeaders(HTTPUploader uploader) {
+        // If the content URN they asked for 
+        URN urn = uploader.getRequestedURN();
+        FileDesc fd = uploader.getFileDesc();
+		if(fd != null && urn != null && !fd.containsUrn(urn)) {
+            uploader.setState(Uploader.FILE_NOT_FOUND);
+            return;
         }
     }
         
@@ -391,7 +496,7 @@ public final class UploadManager implements BandwidthTracker {
      *    If it is determined that the uploader is accepted, the uploader
      *    is added to the _activeUploadList.
      */
-    private int processNewRequest(Uploader uploader, 
+    private int processNewRequest(HTTPUploader uploader, 
                                   Socket socket,
                                   boolean forceAllow) throws IOException {
         debug(uploader + " processing new request.");
@@ -408,7 +513,12 @@ public final class UploadManager implements BandwidthTracker {
             // or reject the uploader.
             else {
                 // note that checkAndQueue can throw an IOException
-                queued = checkAndQueue(uploader, socket);
+                try {
+                    queued = checkAndQueue(uploader, socket);
+                } catch(IOException ioe) {
+                    uploader.setState(Uploader.INTERRUPTED);
+                    throw ioe;
+                }
                 Assert.that(queued != -1);
             
             }
@@ -426,8 +536,7 @@ public final class UploadManager implements BandwidthTracker {
                 socket.setSoTimeout(MAX_POLL_TIME);
                 break;
             case ACCEPTED:
-                Assert.that(uploader.getState() == Uploader.CONNECTING,
-                            "invalid state for accepted uploader");
+                assertAsConnecting( uploader.getState() );
                 synchronized (this) {
                     _activeUploadList.add(uploader);
                 }
@@ -450,11 +559,7 @@ public final class UploadManager implements BandwidthTracker {
         
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
-        if( uploader.getMethod() != HTTPRequestMethod.HEAD &&
-            (uploader.getState() == Uploader.QUEUED ||
-            uploader.getState() == Uploader.CONNECTING) ) {
-            UploadStat.ATTEMPTED.incrementStat();        
-        }
+        UploadStat.ATTEMPTED.incrementStat();
         
         //We are going to notify the gui about the new upload, and let
         //it decide what to do with it - will act depending on it's
@@ -473,7 +578,7 @@ public final class UploadManager implements BandwidthTracker {
     /**
      * Does the actual upload.
      */
-    private void doSingleUpload(Uploader uploader) throws IOException {
+    private void doSingleUpload(HTTPUploader uploader) throws IOException {
         
         switch(uploader.getState()) {
             case Uploader.FILE_NOT_FOUND:
@@ -489,19 +594,26 @@ public final class UploadManager implements BandwidthTracker {
                 UploadStat.QUEUED.incrementStat();
                 break;
             case Uploader.CONNECTING:
+                uploader.setState(Uploader.UPLOADING);
                 UploadStat.UPLOADING.incrementStat();
+                break;
+            case Uploader.COMPLETE:
+            case Uploader.INTERRUPTED:
+                Assert.that(false, "invalid state in doSingleUpload");
                 break;
         }
         
-        uploader.writeResponse();
+        debug(uploader + " doing single upload");
         
-        switch( uploader.getState() ) {
-            case Uploader.UPLOADING:
-            case Uploader.CONNECTING:
-                debug(uploader + " uploader in wrong state: "
-                         + uploader.getState());
-                throw new IOException("invalid state after writeResponse: " +
-                                      uploader.getState());
+        try {
+            uploader.initializeStreams();
+            uploader.writeResponse();
+            uploader.setState(Uploader.COMPLETE);
+        } catch(IOException failed) {
+            uploader.setState(Uploader.INTERRUPTED);
+            throw failed;
+        } finally {
+            uploader.closeFileStreams();
         }
     }
 
@@ -523,87 +635,6 @@ public final class UploadManager implements BandwidthTracker {
                 socket.close();
         } catch (Exception e) {}
     }
-    
-	/**
-	 * Accepts a new push upload, creating a new <tt>HTTPUploader</tt>.
-     * NON-BLOCKING: creates a new thread to transfer the file.
-	 * <p>
-     * The thread makes the uploader connect (which does the connecting 
-     * and also writes out the GIV, so the state of the returned socket 
-     * is the same as a socket which the accpetUpload methos would 
-     * expect)and delegates to the acceptUpload method with the socket 
-     * it gets from connecting.
-     * <p>
-	 * @param file the fully qualified pathname of the file to upload
-	 * @param host the ip address of the host to upload to
-	 * @param port the port over which the transfer will occur
-	 * @param index the index of the file in <tt>FileManager</tt>
-	 * @param guid the unique identifying client guid of the uploading client
-     * @param forceAllow whether or not to force the UploadManager to send
-     *  accept this request when it comes back.
-	 */
-	public void acceptPushUpload(final String file, 
-											  final String host, 
-                                              final int port, 
-											  final int index, 
-                                              final String guid,
-                                              final boolean forceAllow) { 
-		final HTTPUploader GIVuploader = new HTTPUploader
-                         (file, host, port, index, guid);
-        //Note: GIVuploader is just used to connect, and while connecting, 
-        //the GIVuploader uploads the GIV message.
-
-        // Test if we are either currently attempting a push, or we have
-        // unsuccessfully attempted a push with this host in the past.
-        synchronized(UploadManager.this) {
-    		clearFailedPushes();
-            if ( !forceAllow && (
-                 (! testAttemptingPush(host, index) )  ||
-                 (! testFailedPush(host, index) ) ) )
-                return;
-            insertAttemptingPush(host, index);
-        }    
-
-        Thread runner=new Thread() {
-            public void run() {
-                try {
-                    //create the socket and send the GIV message
-                    Socket s = GIVuploader.connect();
-
-                    //read GET or HEAD and delegate appropriately.
-                    String word = IOUtils.readWord(
-                        s.getInputStream(), 4);
-                    if (word.equals("GET")) {
-                        UploadStat.PUSHED_GET.incrementStat();
-                        acceptUpload(HTTPRequestMethod.GET, s, forceAllow);
-                    } else if (word.equals("HEAD")) {
-                        UploadStat.PUSHED_HEAD.incrementStat();
-                        acceptUpload(HTTPRequestMethod.HEAD, s, forceAllow);
-                    } else {
-                        UploadStat.PUSHED_UNKNOWN.incrementStat();
-                        throw new IOException();
-                    }
-                } catch(IOException ioe){//connection failed? do book-keeping
-                    UploadStat.PUSH_FAILED.incrementStat();
-                    synchronized(UploadManager.this) { 
-                        insertFailedPush(host, index);  
-                    }
-                } catch(Throwable e) {
-					ErrorService.error(e);
-				}
-                finally {
-                    //close the socket
-                    GIVuploader.stop();
-                    // do this here so if the index changes, there is no
-                    // confusion
-                    synchronized(UploadManager.this) {
-                        removeAttemptingPush(host, index);
-                    }                    
-                }
-            }
-        };
-        runner.start();
-	}
 
 	/** 
      * Returns whether or not there are currently upload slots available,
@@ -658,7 +689,7 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	public boolean hadSuccesfulUpload() {
 		return _hadSuccesfulUpload;
-	} 
+	}
 
 
 	/////////////////// Private Interface for Testing Limits /////////////////
@@ -834,68 +865,6 @@ public final class UploadManager implements BandwidthTracker {
             }
             return fastest>MINIMUM_UPLOAD_SPEED;
         }
-	}
-
-    /** @requires caller has this' monitor */
-	private void insertFailedPush(String host, int index) {
-		_failedPushes.add(new PushedFile(host, index));
-	}
-	
-	private boolean testFailedPush(String host, int index) {
-		PushedFile pf = new PushedFile(host, index);
-		PushedFile pfile;
-		Iterator iter = _failedPushes.iterator();
-		while ( iter.hasNext() ) {
-			pfile = (PushedFile)iter.next();
-			if ( pf.equals(pfile) ) 
-				return false;
-		}
-		return true;
-
-	}
-
-	private void insertAttemptingPush(String host, int index) {
-		_attemptingPushes.add(new PushedFile(host, index));
-	}
-
-	private boolean testAttemptingPush(String host, int index) {
-		PushedFile pf = new PushedFile(host, index);
-		PushedFile pfile;
-		Iterator iter = _attemptingPushes.iterator();
-		while ( iter.hasNext() ) {
-			pfile = (PushedFile)iter.next();
-			if ( pf.equals(pfile) )
-				return false;
-		}
-		return true;
-	}
-	
-	private void removeAttemptingPush(String host, int index) {
-		PushedFile pf = new PushedFile(host, index);
-		PushedFile pfile;
-		Iterator iter = _attemptingPushes.iterator();
-		while ( iter.hasNext() ) {
-			pfile = (PushedFile)iter.next();
-			if ( pf.equals(pfile) )
-				// calling iter.remove() rather than
-				// remove on the list, since this will be
-				// safer while iterating through the list.
-				iter.remove();
-		}
-	}
-
-    /** @requires caller has this' monitor */
-	private void clearFailedPushes() {
-		// First remove all files that were pushed more than a few minutes ago
-		Date time = new Date();
-		time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
-		Iterator iter = _failedPushes.iterator();
-		while (iter.hasNext()) {
-			PushedFile pf=(PushedFile)iter.next();
-			if (pf.before(time))
-				iter.remove();
-		}
-		
 	}
 
 
@@ -1215,6 +1184,30 @@ public final class UploadManager implements BandwidthTracker {
 	private boolean isHTTP11Request(final String requestLine) {
 		return requestLine.endsWith("1.1");
 	}
+	
+	/**
+	 * Asserts the state is CONNECTING.
+	 */
+	private void assertAsConnecting(int state) {
+	    Assert.that( state == Uploader.CONNECTING,
+	     "invalid state: " + state);
+	}
+	
+	/**
+	 * Asserts the state is COMPLETE.
+	 */
+	private void assertAsComplete(int state) {
+	    Assert.that( state == Uploader.COMPLETE,
+	     "invalid state: " + state);
+	}
+	
+	/**
+	 * Asserts that the state is an inactive/finished state.
+	 */
+	private void assertAsFinished(int state) {
+	    Assert.that(state==Uploader.INTERRUPTED || state==Uploader.COMPLETE,
+	     "invalid state: " + state);
+	}	    
     
 	/**
 	 * This is an immutable class that contains the data for the GET line of
@@ -1260,37 +1253,6 @@ public final class UploadManager implements BandwidthTracker {
             return _http11;
         }
   	}
-
-	/**
-	 * Keeps track of a push requested file and the host that requested it.
-	 */
-	private static class PushedFile {
-		private final String _host;
-        private final int _index;
-		private final Date _time;        
-
-		public PushedFile(String host, int index) {
-			_host = host;
-            _index = index;
-			_time = new Date();
-		}
-		
-        /** Returns true iff o is a PushedFile with same _host and _index.
-         *  Time doesn't matter. */
-		public boolean equals(Object o) {
-			if(o == this) return true;
-            if (! (o instanceof PushedFile))
-                return false;
-            PushedFile pf=(PushedFile)o;
-			return _index==pf._index && _host.equals(pf._host);
-		}
-		
-		public boolean before(Date time) {
-			return _time.before(time);
-		}
-		
-	}
-
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {

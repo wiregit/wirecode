@@ -11,22 +11,21 @@ import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 
 /**
- * There are two constructors that are necessary.  The 
- * first is to handle the case where there is a regular
- * upload.  in that case, the manager class has already
- * processed a message that looks like: 
- * GET /get/0/sample.txt HTTP/1.0
- * and already given a socket connection.  all that we
- * need to do is actually upload the file to the socket.
+ * Maintains state for an HTTP upload request.  This class follows the
+ * State Pattern, delegating its writeResponse method to the appropriate
+ * state.  All states except for CONNECTING, COMPLETE, and INTERRUPTED
+ * have an associated state class that implements HTTPMessage.
  *
- * In the second case, we have recieved a push request,
- * so we are going to need to establish the connection
- * on this end.  We do this by creating the socket, and
- * then writing out the GIV 0:99999999/sample.txt
- * and then wait for the GET to come back.
+ * Care must be taken to call closeFileStreams whenever a chunk of the
+ * transfer is finished, and to call stop when the entire HTTP/1.1
+ * session is finished.
+ *
+ * A single HTTPUploader should be reused for multiple chunks of a single
+ * file in an HTTP/1.1 session.  However, multiple HTTPUploaders
+ * should be used for multiple files in a single HTTP/1.1 session.
  */
 public final class HTTPUploader implements Uploader {
-
+    
 	private OutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
@@ -42,10 +41,8 @@ public final class HTTPUploader implements Uploader {
 	private boolean _headersParsed;
 	private final String _fileName;
 	private final String _hostName;
-	private final String _guid;
-	private final int _port;
 	private int _stateNum = CONNECTING;
-
+	private int _lastTransferStateNum;
 	private HTTPMessage _state;
 	
 	private boolean _chatEnabled;
@@ -121,11 +118,9 @@ public final class HTTPUploader implements Uploader {
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
-		_index = index;;
-		_guid = null;
-		_port = 0;
+		_index = index;
 		reinitialize(method);
-        }
+    }
     
     /**
      * Reinitializes this uploader for a new request method.
@@ -135,17 +130,12 @@ public final class HTTPUploader implements Uploader {
         _amountRequested = 0;
         _uploadBegin = 0;
         _uploadEnd = 0;
-        _fileSize = 0;
-        _userAgent = null;
         _headersParsed = false;
         _stateNum = CONNECTING;
         _state = null;
-        _chatEnabled = false;
-        _browseEnabled = false;
         _gnutellaPort = 0;
         _supportsQueueing = false;
         _requestedURN = null;
-        _fileDesc = null;
         _clientAcceptsXGnutellaQueryreplies = false;
         _alternateLocationCollection = null;
         
@@ -161,165 +151,33 @@ public final class HTTPUploader implements Uploader {
             _totalAmountRead += _amountRead;
             _amountRead = 0;
         }
-        
-		try {			
-			_ostream = _socket.getOutputStream();
-        } catch(IOException e) {
-            // the connection was broken
-			setState(FILE_NOT_FOUND);            
-            return;
-        }
-
-        //special case for certain states
-        switch(_index) {
-        case UploadManager.BROWSE_HOST_FILE_INDEX:
-            setState(BROWSE_HOST);
-            return;
-        case UploadManager.PUSH_PROXY_FILE_INDEX:
-            setState(PUSH_PROXY);
-            return;
-        case UploadManager.UPDATE_FILE_INDEX:
-            setState(UPDATE_FILE);
-            return;
-        case UploadManager.BAD_URN_QUERY_INDEX:
-            setState(FILE_NOT_FOUND);
-            return;
-        case UploadManager.MALFORMED_REQUEST_INDEX:
-            setState(MALFORMED_REQUEST);
-            return;
-        }
-            
-        FileManager fm = RouterService.getFileManager();
-        if(fm.isValidIndex(_index)) {
-            _fileDesc = fm.get(_index);
-        } 
-        if(_fileDesc == null) {
-            setState(FILE_NOT_FOUND);
-            return;
-        }
-        
-        _fileSize = (int)_fileDesc.getSize();        
-        // if the requested name does not match our name on disk,
-        // report File Not Found
-        if(!_fileName.equals(_fileDesc.getName())) {
-            setState(FILE_NOT_FOUND);
-        }
-        else {
+	}
+	
+	/**
+	 * Sets the FileDesc for this HTTPUploader to use.
+	 * Throws IOException if the file cannot be read from the disk.
+	 */
+	public void setFileDesc(FileDesc fd) throws IOException {
+	    _fileDesc = fd;
+	    _fileSize = (int)fd.getSize();
+	    
+        // if there already was an input stream, close it.
+        if( _fis != null ) {
             try {
-                // if there already was an input stream, close it.
-                if( _fis != null ) {
-                    try {
-                        _fis.close();
-                    } catch(IOException ignored) {}
-                }
-                _fis = _fileDesc.createInputStream();
-                setState(CONNECTING);
-			} catch(FileNotFoundException e) {
-                // could not access the file on disk
-                setState(FILE_NOT_FOUND);
-            }
-		}
+                _fis.close();
+            } catch(IOException ignored) {}
+        }
+        _fis = _fileDesc.createInputStream();
 	}
-		
-
-    /**
-     * The other constructor that is used for push uploads. This constructor *
-	 *  does not take a socket. An uploader created with this constructor * must
-	 *  eventually connect to the downloader using the connect method of * this
-	 *  class.  
-     *  Note: This uploader dies after receiving the GIV. So this constructor 
-     * does not have all the critical features the other constructr has.
-	 *  need to change
-     * @param fileName The name of the file to be uploaded
-     * @param host The downloaders ip address
-     * @param port The port at which the downloader is listneing 
-     * @param index index of file to be uploaded
-	 * @param guid the GUID of the request */
-	public HTTPUploader(String fileName, String host, int port, 
-                                            int index, String guid) {
-        STALLED_WATCHDOG = null; // not used to transfer.
-		_fileName = fileName;
-		_index = index;
-		_uploadBegin = 0;
-		_amountRead = 0;
-		_totalAmountRead = 0;
-		_hostName = host;
-		_guid = guid;
-		_port = port;
-
-        FileManager fm = RouterService.getFileManager();
-        if(!fm.isValidIndex(_index)) {
-            setState(PUSH_FAILED);
-            return;
-        }
-        _fileDesc = fm.get(_index);
-        if(_fileDesc == null) {
-            setState(PUSH_FAILED);
-            return;                
-        }
-        
-        _fileSize = (int)_fileDesc.getSize();
-        
-            
-        // if the requested name does not match our name on disk,
-        // report File Not Found
-        if(!_fileName.equals(_fileDesc.getName())) {
-            setState(FILE_NOT_FOUND);
-        }
-        else {
-            try {
-                _fis = _fileDesc.createInputStream();
-                setState(CONNECTING);
-            } catch(IOException e) {
-                setState(FILE_NOT_FOUND);                    
-            }
-        }
+	
+	/**
+	 * Initializes the OutputStream for this HTTPUploader to use.
+	 * Throws IOException if the connection was closed.
+	 */
+	public void initializeStreams() throws IOException {
+	    _ostream = _socket.getOutputStream();
 	}
-
-    /**
-     * Establishes a push upload.  If this is already connected, returns
-     * immediately.  Otherwise attempts to establish a TCP connection to the
-     * remote host and send a GIV request.
-     *
-     * @return this' underlying socket, for which a GIV has been sent but
-     *  nothing has been read.  Typically the caller will read the GET or HEAD
-     *  request from this socket.  The socket is needed for persistence and
-     *  queueing purposes; caller must be careful when modifying it.
-     * @throws IOException couldn't establish the connection
-     */
-	public Socket connect() throws IOException {
-        // This method is only called from acceptPushUpload() now. 
-        // So this will never happen...but lets just leave it in there.
-		if (_socket != null)
-			return _socket;
-
-		try {
-			// try to create the socket.
-			_socket = new Socket(_hostName, _port);
-			// open a stream for writing to the socket
-			_ostream = _socket.getOutputStream();		
-			// ask chris about Assert
-			Assert.that(_fileName != null);  
-			// write out the giv
-
-			Assert.that(_fileName != "");  
-
-			String giv = "GIV " + _index + ":" + _guid + "/" + 
-			             _fileName + "\n\n";
-			_ostream.write(giv.getBytes());
-			_ostream.flush();
-
-            //OK. We connected, sent the GIV.  Now just return the socket.
-            return _socket;
-		} catch (SecurityException e) {
-			this.setState(Uploader.PUSH_FAILED);
-			throw new IOException("security exception");
-        } catch (IOException e) {
-			this.setState(Uploader.PUSH_FAILED);
-			throw e;
-		}
-	}
-
+	    
     
 	/**
 	 * Starts "uploading" the requested file.  The behavior of the upload,
@@ -334,29 +192,23 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
-	public void writeResponse() {
+	public void writeResponse() throws IOException {
 		try {
-			if(_ostream != null) {
-				_method.writeHttpResponse(_state, _ostream);
-			}
+			_method.writeHttpResponse(_state, _ostream);
 		} catch (IOException e) {
-            // set it to be completed if they read what they wanted
-            // regardless of interruption
-            if ( _amountRead >= _amountRequested ) {
-                setState(COMPLETE);
+            // Only propogate the exception if they did not read
+            // as much as they wanted to.
+            if ( _amountRead < _amountRequested )
+                throw e;
+		} finally {    
+    		if(_alternateLocationCollection != null && _fileDesc != null) {
+    			// making this call now is necessary to avoid writing the 
+    			// same alternate locations back to the requester as were 
+    			// sent in the request headers
+    			_fileDesc.addAlternateLocationCollection(
+    			    _alternateLocationCollection);
             }
-            else {
-			    // really what we want to be doing???
-			    setState(INTERRUPTED);
-			}
-		}
-
-		if(_alternateLocationCollection != null && _fileDesc != null) {
-			// making this call now is necessary to avoid writing the 
-			// same alternate locations back to the requester as were 
-			// sent in the request headers
-			_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
-		}
+        }
 	}
 
     /**
@@ -401,7 +253,7 @@ public final class HTTPUploader implements Uploader {
 	public void setState(int state) {
 		_stateNum = state;
 		switch (state) {
-		case CONNECTING:
+		case UPLOADING:
 			_state = new NormalUploadState(this, STALLED_WATCHDOG);
 			break;
         case QUEUED:
@@ -410,9 +262,6 @@ public final class HTTPUploader implements Uploader {
             break;
 		case LIMIT_REACHED:
 			_state = new LimitReachedUploadState(_fileDesc);
-			break;
-		case PUSH_FAILED:
-			_state = new PushFailedUploadState();
 			break;
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
@@ -431,10 +280,25 @@ public final class HTTPUploader implements Uploader {
             break;
         case MALFORMED_REQUEST:
             _state = new MalformedRequestState();
+            break;
 		case COMPLETE:
-		case INTERRUPTED:		   
+		case INTERRUPTED:
+		case CONNECTING:
+		    _state = null;
 			break;
+        default:
+            Assert.that(false, "Invalid state: " + state);
 		}
+		
+		// look again to set the last transfer state.
+		switch(state) {
+	    case COMPLETE:
+	    case INTERRUPTED:
+	    case CONNECTING:
+	        break;
+        default:
+            _lastTransferStateNum = state;
+        }
 	}
 	
 	OutputStream getOutputStream() {return _ostream;}
@@ -452,7 +316,7 @@ public final class HTTPUploader implements Uploader {
      * Returns the queued position if queued.
      */
     public int getQueuePosition() {
-        if( _stateNum != QUEUED )
+        if( _lastTransferStateNum != QUEUED || _stateNum == INTERRUPTED)
             return -1;
         else
             return RouterService.getUploadManager().positionInQueue(_socket);
@@ -475,7 +339,7 @@ public final class HTTPUploader implements Uploader {
     
 	/**
 	 * Returns whether or not this upload is in what is considered an "inactive"
-	 * state, such as completeed, aborted, failed, etc.
+	 * state, such as completed or aborted.
 	 *
 	 * @return <tt>true</tt> if this upload is in an inactive state,
 	 *  <tt>false</tt> otherwise
@@ -483,11 +347,7 @@ public final class HTTPUploader implements Uploader {
 	public boolean isInactive() {
         switch(_stateNum) {
         case COMPLETE:
-        case PUSH_FAILED:
-        case LIMIT_REACHED:
         case INTERRUPTED:
-        case FILE_NOT_FOUND:
-        case FREELOADER:
             return true;
         default:
             return false;
@@ -513,6 +373,9 @@ public final class HTTPUploader implements Uploader {
 
 	// implements the Uploader interface
 	public int getState() {return _stateNum;}
+	
+	// implements the Uploader interface
+	public int getLastTransferState() { return _lastTransferStateNum; }
 
 	// implements the Uploader interface
 	public String getHost() {return _hostName;}
@@ -580,6 +443,13 @@ public final class HTTPUploader implements Uploader {
     boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
     }
+    
+    /**
+     * Returns the content URN that the client asked for.
+     */
+    public URN getRequestedURN() {
+        return _requestedURN;
+    }
 
 	/**
      * Reads the HTTP header sent by the requesting client -- note that the
@@ -618,19 +488,22 @@ public final class HTTPUploader implements Uploader {
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
-                else if ( readNodeHeader(str)      ) ;
+                else if ( readNodeHeader(str)        ) ;
         	}
         } finally {
             // we want to ensure these are always set, regardless
             // of if an exception was thrown.
             
 			//if invalid end-index, then upload up to the end of file
-			if( _uploadEnd <= 0
-			   || _uploadEnd <= _uploadBegin 
-			   || _uploadEnd > _fileSize ) {
-			    _uploadEnd = _fileSize;      
-		    }		
-            _amountRequested = _uploadEnd - _uploadBegin;		
+			//or mark as unknown to bet when file size is set.
+			if( _uploadEnd <= 0 ||
+			  _uploadEnd <= _uploadBegin || 
+			  _uploadEnd > _fileSize) {
+                _uploadEnd = _fileSize;
+            }
+
+            _amountRequested = _uploadEnd - _uploadBegin;
+            
             _headersParsed = true;
         }
 	}
@@ -814,20 +687,7 @@ public final class HTTPUploader implements Uploader {
         if ( ! HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str) )
             return false;
 
-        // Do we actually set the uploading file to be the URN anywhere?
-        // Or do we expect that we recieved the right index/filename ?
-        // IE: is it possible to a client to send a GET request with 
-        // only the URN as the specifier?        
-        URN requestedURN = HTTPUploader.parseContentUrn(str);
-		if(requestedURN == null) {
-            // TODO: do we really want to set the state to not found?
-            // what if keywords match?
-			setState(FILE_NOT_FOUND);
-		} else if(_fileDesc != null) {
-			if(!_fileDesc.containsUrn(requestedURN)) {
-				setState(FILE_NOT_FOUND);
-			}
-		}
+        _requestedURN = HTTPUploader.parseContentUrn(str);
 		
 		return true;
 	}
@@ -920,14 +780,12 @@ public final class HTTPUploader implements Uploader {
 	private static URN parseContentUrn(final String contentUrnStr) {
 		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
 		
-		// return null if the header value could not be extracted
-		if(urnStr == null) return null;
+		if(urnStr == null)
+		    return URN.INVALID;
 		try {
 			return URN.createSHA1Urn(urnStr);
 		} catch(IOException e) {
-			// this will be thrown if the URN string was invalid for any
-			// reason -- just return null
-			return null;
+		    return URN.INVALID;
 		}		
 	}
 	
@@ -996,13 +854,8 @@ public final class HTTPUploader implements Uploader {
     
     public float getAverageBandwidth() {
         return bandwidthTracker.getAverageBandwidth();
-    }    
-    
-    //inherit doc comment
-    public boolean getCloseConnection() {
-        return _state.getCloseConnection();
     }
-
+    
     private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
@@ -1011,7 +864,7 @@ public final class HTTPUploader implements Uploader {
 
 	// overrides Object.toString
 	public String toString() {
-        return "<"+_hostName+":"+_port+", "+ _index +">";
+        return "<"+_hostName+":"+ _index +">";
 //  		return "HTTPUploader:\r\n"+
 //  		       "File Name: "+_fileName+"\r\n"+
 //  		       "Host Name: "+_hostName+"\r\n"+

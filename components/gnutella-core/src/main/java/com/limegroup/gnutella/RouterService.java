@@ -98,6 +98,11 @@ public class RouterService {
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
     private static UploadManager uploadManager = new UploadManager();
+    
+    /**
+     * <tt>PushManager</tt> for handling push requests.
+     */
+    private static PushManager pushManager = new PushManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
@@ -310,6 +315,15 @@ public class RouterService {
      */
 	public static UploadManager getUploadManager() {
 		return uploadManager;
+	}
+	
+	/**
+	 * Accessor for the <tt>PushManager</tt> instance.
+	 *
+	 * @return the <tt>PushManager</tt> in use
+	 */
+	public static PushManager getPushManager() {
+	    return pushManager;
 	}
 	
     /** 
