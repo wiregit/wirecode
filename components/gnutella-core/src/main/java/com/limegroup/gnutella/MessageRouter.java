@@ -359,10 +359,10 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-		RouteTable.RouteTableEntry entry = 
+		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
-		if(entry != null) {
+		if(counter != null) {
 			//if(_queryRouteTable.tryToRouteReply(request.getGUID(), receivingConnection)) {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
 			//connection as unkillable so the ConnectionWatchdog will not police it
@@ -372,7 +372,7 @@ public abstract class MessageRouter {
                 && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
 				receivingConnection.setKillable(false);
 			}
-            handleQueryRequest(request, receivingConnection, entry);
+            handleQueryRequest(request, receivingConnection, counter);
 		} else {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
@@ -388,12 +388,11 @@ public abstract class MessageRouter {
 	 */
 	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-		RouteTable.RouteTableEntry entry = 
+		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
-		if(entry != null) {
-			//if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler) {
-            handleQueryRequest(request, handler, entry);
+		if(counter != null) {
+            handleQueryRequest(request, handler, counter);
 		} else {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
@@ -534,7 +533,7 @@ public abstract class MessageRouter {
      */
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
-									  RouteTable.RouteTableEntry entry) {
+									  ResultCounter counter) {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -549,7 +548,8 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			sendDynamicQuery(QueryHandler.createHandler(request), handler, entry);
+			sendDynamicQuery(QueryHandler.createHandler(request), handler, 
+							 counter);
 		} else if(request.getTTL() > 0) {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
@@ -629,7 +629,7 @@ public abstract class MessageRouter {
 		if(qh == null) {
 			throw new NullPointerException("null QueryHandler");
 		}
-		// get the RouteTableEntry so we can track the number of results
+		// get the result counter so we can track the number of results
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(qh.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
@@ -649,7 +649,7 @@ public abstract class MessageRouter {
 	 *
 	 * @param qh the <tt>QueryHandler</tt> instance that generates
 	 *  queries for this dynamic query
-	 * @throws <tt>NullPointerException</tt> if the <tt>RouteTableEntry</tt>
+	 * @throws <tt>NullPointerException</tt> if the <tt>ResultCounter</tt>
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
 	 */

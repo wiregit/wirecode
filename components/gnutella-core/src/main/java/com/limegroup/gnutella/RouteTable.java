@@ -69,7 +69,7 @@ public final class RouteTable {
     private int _nextID;
 
     /** Values stored in _newMap/_oldMap. */
-    static final class RouteTableEntry implements ResultCounter {
+    private static final class RouteTableEntry implements ResultCounter {
         /** The numericID of the reply connection. */
         private int handlerID;
         /** The bytes already routed for this GUID. */
@@ -114,8 +114,8 @@ public final class RouteTable {
 	 * @return the <tt>RouteTableEntry</tt> entered into the routing 
 	 *  tables, or <tt>null</tt> if it could not be entered
      */
-    public synchronized RouteTableEntry routeReply(byte[] guid,
-												   ReplyHandler replyHandler) {
+    public synchronized ResultCounter routeReply(byte[] guid,
+												 ReplyHandler replyHandler) {
         repOk();
         purge();
 		if(replyHandler == null) {
@@ -153,8 +153,8 @@ public final class RouteTable {
      *  replyHandler is still open, adds the routing entry to this
      *  and returns true.  Otherwise returns false, without modifying this.
      */
-    public synchronized RouteTableEntry tryToRouteReply(byte[] guid,
-														ReplyHandler replyHandler) {
+    public synchronized ResultCounter tryToRouteReply(byte[] guid,
+													  ReplyHandler replyHandler) {
         repOk();
         purge();
         Assert.that(replyHandler != null);
