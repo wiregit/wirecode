@@ -87,10 +87,11 @@ public class PushAltLoc extends AlternateLocation {
     }
     
     /**
-     * @return whether this altloc supports Firewall to Firewall transfers.
+     * @return the Firewall transfer protocol version this altloc supports.
+     * 0 if its not supported.
      */
-    public int supportsF2FTransfers() {
-    	return _pushAddress.supportsFWTransfers();
+    public int supportsFWTVersion() {
+    	return _pushAddress.supportsFWTVersion();
     }
 	
 	public boolean equals(Object o) {

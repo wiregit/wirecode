@@ -350,7 +350,7 @@ public class HeadPong extends VendorMessage {
 			LOG.debug("adding only fwt-enabled pushlocs in pong");
 			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
 				PushAltLoc current = (PushAltLoc)iter.next();
-				if (current.supportsF2FTransfers() <1)
+				if (current.supportsFWTVersion() <1)
 					iter.remove();
 			}
 		}	

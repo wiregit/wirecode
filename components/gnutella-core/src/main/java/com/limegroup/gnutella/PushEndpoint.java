@@ -314,7 +314,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	/**
 	 * @return which version of F2F transfers this PE supports.
 	 */
-	public int supportsFWTransfers() {
+	public int supportsFWTVersion() {
 		return _fwtVersion;
 	}
 	
@@ -363,4 +363,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public String httpStringValue() {
 		return _httpString;
 	}
+	
+	public int getFeatures() {
+		return _features;
+	}
+	
 }

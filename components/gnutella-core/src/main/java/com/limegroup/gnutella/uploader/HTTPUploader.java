@@ -70,10 +70,11 @@ public final class HTTPUploader implements Uploader {
     private boolean _wantsFalts = false;
     
     /**
-     * whether the remote side wants only altlocs that support f2f transfers.
-     * INVARIANT: if this is set, _wantsFalts is set too.
+     * the version of the F2F transfer protocol the altloc supports.
+     * if this is greater than 0, the other host is most likely firewalled.
+     * INVARIANT: if this is greater than 0, _wantsFalts is set.
      */
-    private boolean _wantsFWTFalts = false;
+    private int _FWTVersion = 0;
 
     /**
      * The Watchdog that will kill this uploader if it takes too long.
@@ -555,8 +556,13 @@ public final class HTTPUploader implements Uploader {
         			if(_writtenPushLocs.contains(al))
         				continue;
         			
-        			if (_wantsFWTFalts && al.supportsF2FTransfers() <1)
-        				continue;
+        			//if the downloader indicated that they are firewalled
+        			//but the altloc did not say that it support FWT transfer,
+        			//we do not send it.
+        			if (_FWTVersion>0 && al.supportsFWTVersion()==0)
+        					continue;
+
+        			
         			
         			_writtenPushLocs.add(al);
         			if(ret == null) ret = new HashSet();
@@ -680,7 +686,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readNAltLocationHeader(str)) ;
                 else if ( readFAltLocationHeader(str)) ;
-                else if ( readBFAltLocationHeader(str));
+                else if ( readNFAltLocationHeader(str));
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
@@ -939,7 +945,7 @@ public final class HTTPUploader implements Uploader {
         return true;
     }
 
-    private boolean readBFAltLocationHeader(String str) {
+    private boolean readNFAltLocationHeader(String str) {
         if (!HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(str))
             return false;
 
@@ -1045,7 +1051,17 @@ public final class HTTPUploader implements Uploader {
             	_wantsFalts=true;
             else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
             	_wantsFalts=true;
-            	_wantsFWTFalts=true;
+            	
+            	//for this header we care about the version.
+            	String versionS = feature.substring(slash+1);
+            	
+            	try {
+            		_FWTVersion = (int)Float.parseFloat(versionS);
+            	}catch(NumberFormatException nfe) {
+            		//we couldn't parse the version number - we should ignore
+            		//this header.
+            		continue;
+            	}
             }
 			
 		}
@@ -1145,8 +1161,8 @@ public final class HTTPUploader implements Uploader {
     	return _wantsFalts;
     }
     
-    public boolean wantsFWTAlts() {
-    	return _wantsFWTFalts;
+    public int wantsFWTAlts() {
+    	return _FWTVersion;
     }
     
     private final boolean debugOn = false;

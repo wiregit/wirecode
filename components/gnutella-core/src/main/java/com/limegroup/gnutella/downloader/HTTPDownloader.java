@@ -210,11 +210,6 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private boolean _wantsFalts = false;
     
-    /**
-     * whether the other side wants to receive only fwt altlocs. (not used atm)
-     * INVARIANT: if this is set, _wantsFalts must be set too.
-     */
-    private boolean _wantsFWTFalts = false;
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -465,10 +460,11 @@ public class HTTPDownloader implements BandwidthTracker {
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
         
-        //if I'm not firewalled, send out fawt feature.
-        //TODO: after FWT gets implemented, add conditional for fwawt.
-        if (RouterService.acceptedIncomingConnection())
-        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+        //say that I want firewalled altlocs.
+        //if I am firewalled, send the version of the FWT protocol I support.
+        features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+        if (!RouterService.acceptedIncomingConnection())
+        	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
 
         // Add ourselves to the mesh if the partial file is valid
         if( isPartialFileValid() ) {
@@ -1370,6 +1366,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private void parseFeatureHeader(String str) {
         str = HTTPUtils.extractHeaderValue(str);
         StringTokenizer tok = new StringTokenizer(str, ",");
+        
+        
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
             String protocol = "";
@@ -1387,11 +1385,6 @@ public class HTTPDownloader implements BandwidthTracker {
                 _browseEnabled = true;
             else if (protocol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
-            else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
-            	_wantsFalts=true;
-            	_wantsFWTFalts=true;
-            }
-            	
         }
     }
 
