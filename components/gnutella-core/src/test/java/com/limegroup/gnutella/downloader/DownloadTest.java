@@ -2389,6 +2389,8 @@ public class DownloadTest extends BaseTestCase {
                 ErrorService.error(bad);
             }catch(IOException bad) {
                 ErrorService.error(bad);
+            }finally {
+                sock.close();
             }
             
 
