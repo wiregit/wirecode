@@ -858,6 +858,14 @@ public abstract class MessageRouter {
                 // continue below, everything looks good
             }
 
+            // we may be able to be an OOB proxy for this query....
+            final boolean canOOBProxy = 
+                !request.desiresOutOfBandReplies() && 
+                RouterService.isOOBCapable() &&
+                handler.canBeOOBProxied() &&
+                OutOfBandThroughputStat.isSuccessRateGreat();
+            
+
             // don't send it to leaves here -- the dynamic querier will 
             // handle that
             locallyEvaluate = false;

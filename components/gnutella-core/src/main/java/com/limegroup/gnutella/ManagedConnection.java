@@ -1419,6 +1419,13 @@ public class ManagedConnection extends Connection
         return pushProxyAddr;
     }
     
+    /** Returns true if the underlying implementation is a TCP Leaf Connection
+     *  that can do Leaf Guidance.
+     */
+    public boolean canBeOOBProxied() {
+        return (isSupernodeClientConnection() &&
+                (remoteHostSupportsLeafGuidance() > 0));
+    }
 
     
     /** 

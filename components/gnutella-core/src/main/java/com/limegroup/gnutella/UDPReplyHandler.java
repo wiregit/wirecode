@@ -264,6 +264,13 @@ public final class UDPReplyHandler implements ReplyHandler {
         return false;
     }
 
+    /** Returns true if the underlying implementation is a TCP Leaf Connection
+     *  that can do Leaf Guidance.
+     */
+    public boolean canBeOOBProxied() {
+        return false;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

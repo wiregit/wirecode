@@ -158,4 +158,10 @@ public interface ReplyHandler {
      */ 
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
 
+    /** Returns true if the underlying implementation is a TCP Leaf Connection
+     *  that can do Leaf Guidance.
+     */
+    public boolean canBeOOBProxied();
+
+
 }

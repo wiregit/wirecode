@@ -269,6 +269,13 @@ public final class ForMeReplyHandler implements ReplyHandler {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 
+    /** Returns true if the underlying implementation is a TCP Leaf Connection
+     *  that can do Leaf Guidance.
+     */
+    public boolean canBeOOBProxied() {
+        return false;
+    }
+
     /**
      * Returns <tt>true</tt> to indicate that this node is always stable.
      * Simply the fact that this method is being called indicates that the
