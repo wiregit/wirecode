@@ -97,7 +97,15 @@ public class VerifyingFile {
      */
     private IntervalSet pendingBlocks;
     
+    /**
+     * The hashtree we use to verify chunks, if any
+     */
     private HashTree hashTree;
+    
+    /**
+     * Whether we are actually verifying chunks
+     */
+    private boolean discardBad = true;
     
     /**
      * Constructs a new VerifyingFile, without a given completion size.
@@ -195,7 +203,8 @@ public class VerifyingFile {
         partialBlocks.add(intvl);
 
 		//5. verify chunks
-        checkVerifyableChunks();
+        if (hashTree != null)
+            checkVerifyableChunks();
     }
 
 	/**
@@ -221,23 +230,14 @@ public class VerifyingFile {
 	 */
 	private void checkVerifyableChunks() {
         // if we have a tree, see if there is a completed chunk in the partial list
-		 
-		if (hashTree != null) {
-			for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
-				Interval i = (Interval) iter.next();
-				partialBlocks.delete(i);
-				pendingBlocks.add(i);
-				if (LOG.isDebugEnabled())
-					LOG.debug("will schedule for verification "+i);
-				CHUNK_VERIFIER.add(new ChunkVerifier(i,hashTree));
-			}
-		} else
-			// if we couldn't find a tree during the entire download, 
-			// we have to bite the bullet and rely on SHA1 alone
-			if (partialBlocks.getSize() == completedSize) {
-				Interval all = partialBlocks.removeFirst();
-				verifiedBlocks.add(all);
-			}
+        for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
+            Interval i = (Interval) iter.next();
+            partialBlocks.delete(i);
+            pendingBlocks.add(i);
+            if (LOG.isDebugEnabled())
+                LOG.debug("will schedule for verification "+i);
+            CHUNK_VERIFIER.add(new ChunkVerifier(i,hashTree));
+        }
 	}
 	
     /**
@@ -269,7 +269,7 @@ public class VerifyingFile {
         }
         
         // special case for the last chunk
-        if (partial.size() > verifyable.size()) {
+        if (!partial.isEmpty()) {
             Interval last = (Interval) partial.get(partial.size() - 1);
             if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
@@ -423,7 +423,10 @@ public class VerifyingFile {
      * Determines if all blocks have been written to disk and verified
      */
     public synchronized boolean isComplete() {
-        return (verifiedBlocks.getSize() == completedSize);
+        if (discardBad && hashTree != null)
+            return (verifiedBlocks.getSize() == completedSize);
+        else 
+            return (verifiedBlocks.getSize() + partialBlocks.getSize() == completedSize);
     }
     
     /**
@@ -517,6 +520,10 @@ public class VerifyingFile {
         hashTree = tree;
     }
     
+    public synchronized void setDiscardUnverified(boolean yes) {
+        discardBad = yes;
+    }
+    
     public synchronized int getChunkSize() {
         return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
     }
@@ -541,8 +548,10 @@ public class VerifyingFile {
                 pendingBlocks.delete(_interval);
                 if (good) 
                     verifiedBlocks.add(_interval);
+                else if (!discardBad)
+                    partialBlocks.add(_interval);
                 else
-					lostSize += (_interval.high - _interval.low + 1);
+                    lostSize += (_interval.high - _interval.low + 1);
             }
         }
         

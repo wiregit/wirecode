@@ -2532,21 +2532,33 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Informs this downloader about how to handle corruption.
      */
-    public void discardCorruptDownload(boolean delete) {
-        synchronized(corruptStateLock) {
-            if(delete) {
-                corruptState = CORRUPT_STOP_STATE;
-            } else {
-                corruptState = CORRUPT_CONTINUE_STATE;
-            }
-        }
-
-        if (delete)
-            stop();
+    public void discardCorruptDownload(final boolean delete) {
         
-        synchronized(corruptStateLock) {
-            corruptStateLock.notify();
-        }
+        // offload this from the swing thread since it will require
+        // access to the verifying file.
+        Runnable r = new Runnable() {
+            public void run() {
+                synchronized(corruptStateLock) {
+                    if(delete) {
+                        corruptState = CORRUPT_STOP_STATE;
+                    } else {
+                        corruptState = CORRUPT_CONTINUE_STATE;
+                    }
+                }
+
+                if (delete)
+                    stop();
+                else 
+                    commonOutFile.setDiscardUnverified(false);
+                
+                synchronized(corruptStateLock) {
+                    corruptStateLock.notify();
+                }
+            }
+        };
+        
+        RouterService.schedule(r,0,0);
+
     }
             
 

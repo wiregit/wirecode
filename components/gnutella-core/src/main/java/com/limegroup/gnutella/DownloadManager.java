@@ -307,8 +307,14 @@ public class DownloadManager implements BandwidthTracker {
         return waiting.size();
     }
     
-    public synchronized ManagedDownloader getDownloaderForURN(URN sha1) {
-        for (Iterator iter = active.iterator(); iter.hasNext();) {
+    public ManagedDownloader getDownloaderForURN(URN sha1) {
+        List l;
+        synchronized(this) {
+            l = new ArrayList(active);
+            l.addAll(waiting);
+        }
+        
+        for (Iterator iter = l.iterator(); iter.hasNext();) {
             ManagedDownloader current = (ManagedDownloader) iter.next();
             if (current.getSHA1Urn().equals(sha1))
                 return current;

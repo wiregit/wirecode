@@ -40,8 +40,6 @@ public class VerifyingFileTest extends BaseTestCase {
     private static final String sha1 = 
         "urn:sha1:UBJSGDTCVZDSBS4K3ZDQJV5VQ3WTBCOK";
     
-    private static MyDownloader downloader;
-    
     public static void globalSetUp() throws Exception {
         try {
             defaultHashTree = (HashTree) PrivilegedAccessor.invokeMethod(
@@ -60,9 +58,9 @@ public class VerifyingFileTest extends BaseTestCase {
     public void setUp() {
         hashTree=defaultHashTree;
         vf = new VerifyingFile((int)completeFile.length());
-        downloader = new MyDownloader();
         try {
-        vf.open(new File("outfile"),downloader);
+        vf.open(new File("outfile"));
+        vf.setHashTree(defaultHashTree);
         raf.seek(0);
         }catch(IOException e) {
             ErrorService.error(e);
@@ -141,12 +139,12 @@ public class VerifyingFileTest extends BaseTestCase {
         vf.leaseWhite((int)completeFile.length());
         
         int pos = 0;
-        int numChunks = ((int)completeFile.length() / downloader.getChunkSize());
+        int numChunks = ((int)completeFile.length() / vf.getChunkSize());
         byte [] chunk;
-        while(pos < numChunks * downloader.getChunkSize()) {
+        while(pos < numChunks * vf.getChunkSize()) {
             
             // read the file from the original file
-            chunk = new byte[downloader.getChunkSize()];
+            chunk = new byte[vf.getChunkSize()];
             raf.read(chunk);
             raf.seek(pos + chunk.length);
             
@@ -212,8 +210,8 @@ public class VerifyingFileTest extends BaseTestCase {
         assertEquals(800*1024, vf.getBlockSize());
         
         // write something in part of the last chunk, should not change anything
-        int numChunks = ((int)completeFile.length() / downloader.getChunkSize());
-        int lastOffset = numChunks * downloader.getChunkSize();
+        int numChunks = ((int)completeFile.length() / vf.getChunkSize());
+        int lastOffset = numChunks * vf.getChunkSize();
         chunk = new byte[((int)completeFile.length() - lastOffset)/2 +1];
         
         raf.seek(completeFile.length()-chunk.length);
@@ -290,17 +288,43 @@ public class VerifyingFileTest extends BaseTestCase {
         assertTrue(vf.isHopeless());
     }
     
-    private static class MyDownloader extends ManagedDownloader {
-        public MyDownloader() {
-            super(new RemoteFileDesc[0], new IncompleteFileManager(),null);
-        }
+    public void testWriteCompleteNoTree() throws Exception {
+        vf.setHashTree(null);
+        vf.leaseWhite((int)completeFile.length());
+        byte [] chunk = new byte[(int)completeFile.length()];
         
-        public HashTree getHashTree() {
-            return hashTree;
-        }
+        raf.readFully(chunk);
+        vf.writeBlock(0,chunk);
+        assertTrue(vf.isComplete());
+    }
+    
+    public void testWriteSomeVerifiedSomeNot() throws Exception {
+        vf.leaseWhite((int)completeFile.length());
         
-        public int getChunkSize() {
-            return hashTree.getNodeSize();
-        }
+        vf.setDiscardUnverified(false);
+        byte [] chunk = new byte[hashTree.getNodeSize()];
+        raf.readFully(chunk);
+        vf.writeBlock(0,chunk);
+        
+        Thread.sleep(500);
+        assertEquals(chunk.length, vf.getVerifiedBlockSize());
+        
+        // write a bad chunk, it should not be discarded
+        vf.writeBlock(chunk.length,chunk);
+        Thread.sleep(500);
+        assertEquals(chunk.length, vf.getVerifiedBlockSize());
+        assertEquals(2*chunk.length, vf.getBlockSize());
+        
+        // the rest of the chunks will be good.
+        raf.readFully(chunk);
+        chunk = new byte[(int)completeFile.length() - 512*1024];
+        raf.readFully(chunk);
+        
+        vf.writeBlock(512*1024,chunk);
+        Thread.sleep(1000);
+        
+        assertEquals((int)completeFile.length() - 256*1024, vf.getVerifiedBlockSize());
+        assertTrue(vf.isComplete());
+        
     }
 }
