@@ -106,24 +106,21 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         hc.add(new Endpoint("192.168.0.1"), false);
         assertEquals("private endpoint added as ultrapeer",
 					 0, hc.getNumUltrapeerHosts());
-        assertEquals("private endpoint not added as private",
-                    1, hc.getNumPrivateHosts());
+
+        assertEquals("private endpoint added at all",
+					 0, hc.getNumHosts());
 
         setUp();
         // Adding a normal host should add 1 more to numNormalHosts
         hc.add(new Endpoint("18.239.0.1"), false);
         assertEquals("normal endpoint added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
-        assertEquals("normal endpoint added as private",
-                0, hc.getNumPrivateHosts());
 
         setUp();
         // Adding a ultrapeer should add 1 more to numUltrapeerHosts
         hc.add(new Endpoint("18.239.0.1"), true);
         assertEquals("ultrapeer endpoint not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
-        assertEquals("ultrapeer endpoint added as private",
-                0, hc.getNumPrivateHosts());
 
         //PingReply's.
         setUp();
@@ -134,8 +131,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("private PingReply added as ultrapeer",
 					 0 ,hc.getNumUltrapeerHosts());
-        assertEquals("private PingReply not added as private",
-                    1, hc.getNumPrivateHosts());
 
         setUp();
         hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
@@ -144,8 +139,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("normal PingReply added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
-        assertEquals("normal PingReply added as private",
-                0, hc.getNumPrivateHosts());
 
 
         setUp();
@@ -155,8 +148,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("ultrapeer PingReply not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
-        assertEquals("ultrapeer PingReply added as private",
-                0, hc.getNumPrivateHosts());
     }
 
     public void testIterators() {
