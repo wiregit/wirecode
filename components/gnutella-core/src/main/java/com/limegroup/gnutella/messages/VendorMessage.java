@@ -38,15 +38,6 @@ public class VendorMessage extends Message {
     //----------------------------------
 
 
-    /** Construct a useless Vendor Message.  No semantic meaning.
-     */
-    private VendorMessage() {
-        super((byte)0x31, (byte)1, LENGTH_MINUS_PAYLOAD);
-        _vendorIDBytes = LIME_BYTES;
-        _subSelector = (_version = 0);
-        _payload = new byte[0];
-    }
-
     /** Package Level access only.  Used by specific vendor-message to
      *  construct a Vendor Message.
      *  @param vendorIDBytes The Vendor ID of this message (bytes).  
@@ -61,9 +52,9 @@ public class VendorMessage extends Message {
         super((byte)0x31, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length);
         if ((vendorIDBytes.length != 4))
             throw new IllegalArgumentException("Vendor ID Invalid!");
-        if ((selector | 0xFF00) != 0)
+        if ((selector & 0xFFFF0000) != 0)
             throw new IllegalArgumentException("Selector Invalid!");
-        if ((version | 0xFF00) != 0)
+        if ((version & 0xFFFF0000) != 0)
             throw new IllegalArgumentException("Version Invalid!");
         _vendorIDBytes = vendorIDBytes;
         _subSelector = selector;
@@ -105,8 +96,11 @@ public class VendorMessage extends Message {
         return new String(_vendorIDBytes);
     }
 
-    public byte[] getVendorIDBytes() {
-        return _vendorIDBytes;
+    public VendorMessagePayload getVendorMessagePayload() {
+        return VendorMessagePayload.getVendorMessagePayload(_vendorIDBytes,
+                                                            _subSelector,
+                                                            _version,
+                                                            _payload);
     }
 
     //----------------------------------
