@@ -305,28 +305,59 @@ public class ByteOrderTest extends BaseTestCase {
         
     }   
     
+    public void testLeb2Long() {
+        assertEquals(0, ByteOrder.leb2long(new byte[] {(byte)0}, 0, 1));
+        assertEquals(1, ByteOrder.leb2long(new byte[] {(byte)1}, 0, 1));
+        assertEquals(7, ByteOrder.leb2long(new byte[] {(byte)7}, 0, 1));
+        assertEquals(0x1c,
+            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
+                                           (byte)0x1}, 1, 1));
+
+        assertEquals(0x11c,
+            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
+                                           (byte)0x1}, 1, 2));
+
+        assertEquals(0x11c7f,
+            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
+                                           (byte)0x1}, 0, 3));
+
+        assertEquals(0x1011c7f,
+            ByteOrder.leb2long(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
+                                           (byte)0x1, (byte)0x1}, 1, 4));
+
+        try {
+            ByteOrder.leb2long(new byte[] {}, 0, 0);
+            fail("illegalargument expected.");
+        } catch(IllegalArgumentException ignored) {}
+
+        try {
+            ByteOrder.leb2long(new byte[] {}, 0, 9);
+            fail("illegalargument expected.");
+        } catch(IllegalArgumentException ignored) {}            
+    }
+    
     public void testLeb2Int() {
-          assertEquals(0, ByteOrder.leb2int(new byte[] {(byte)0}, 0, 1));
-          assertEquals(1, ByteOrder.leb2int(new byte[] {(byte)1}, 0, 1));
-          assertEquals(7, ByteOrder.leb2int(new byte[] {(byte)7}, 0, 1));
-          assertEquals(0x1c,
-            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
-          assertEquals(0x11c,
-            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 2));
-          assertEquals(0x11c7f,
-            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
-          assertEquals(0x1011c7f,
-            ByteOrder.leb2int(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
-                                          (byte)0x1, (byte)0x1}, 1, 4));
-            
-          try {
+        assertEquals(0, ByteOrder.leb2int(new byte[] {(byte)0}, 0, 1));
+        assertEquals(1, ByteOrder.leb2int(new byte[] {(byte)1}, 0, 1));
+        assertEquals(7, ByteOrder.leb2int(new byte[] {(byte)7}, 0, 1));
+        assertEquals(0x1c,
+        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
+        assertEquals(0x11c,
+        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 2));
+        assertEquals(0x11c7f,
+        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
+        assertEquals(0x1011c7f,
+        ByteOrder.leb2int(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
+                                      (byte)0x1, (byte)0x1}, 1, 4));
+        
+        try {
             ByteOrder.leb2int(new byte[] {}, 0, 0);
             fail("illegalargument expected.");
-          } catch(IllegalArgumentException ignored) {}
-          
-          try {
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
             ByteOrder.leb2int(new byte[] {}, 0, 5);
             fail("illegalargument expected.");
-          } catch(IllegalArgumentException ignored) {}            
-   }    
+        } catch(IllegalArgumentException ignored) {}            
+    }    
 }        
