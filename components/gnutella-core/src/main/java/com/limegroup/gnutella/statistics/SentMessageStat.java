@@ -57,7 +57,7 @@ public class SentMessageStat extends AbstractStatistic {
 		extends SentMessageStat {
 		public void incrementStat() {
 			super.incrementStat();
-			ALL_FILTERED_MESSAGES.incrementStat();
+			ALL_FILTERED_MESSAGES_BYTES.incrementStat();
 		}
 	}
 
@@ -69,8 +69,8 @@ public class SentMessageStat extends AbstractStatistic {
 		extends SentMessageStat {
 		public void addData(int data) {
 			super.addData(data);
-			ALL_MESSAGES.addData(data);
-			ALL_UDP_MESSAGES.addData(data);
+			ALL_MESSAGES_BYTES.addData(data);
+			ALL_UDP_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -82,8 +82,8 @@ public class SentMessageStat extends AbstractStatistic {
 		extends SentMessageStat {
 		public void addData(int data) {
 			super.addData(data);
-			ALL_MESSAGES.addData(data);
-			ALL_TCP_MESSAGES.addData(data);
+			ALL_MESSAGES_BYTES.addData(data);
+			ALL_TCP_MESSAGES_BYTES.addData(data);
 		}
 	}
 
