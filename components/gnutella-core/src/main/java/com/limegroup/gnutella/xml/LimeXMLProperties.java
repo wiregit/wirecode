@@ -219,7 +219,7 @@ public class LimeXMLProperties
             new FilenameFilter()
             {
                 //the files to be accepted to be returned
-                public boolean accept(File dir, String name)
+                public boolean accept(File directory, String name)
                 {
                     if(name.endsWith(".xsd"))
                     {
