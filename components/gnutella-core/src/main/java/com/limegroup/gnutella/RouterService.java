@@ -210,7 +210,7 @@ public class RouterService {
 		catcher.initialize();
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
-        fileManager.initialize();
+        fileManager.start();
 
         // Restore any downloads in progress.
         downloader.postGuiInit();
