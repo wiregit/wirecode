@@ -485,8 +485,10 @@ public class DownloadTest extends BaseTestCase {
         
         Downloader download=null;
         //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1,rfd2}, false,
+        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false,
                                         null);
+        ((ManagedDownloader)download).addDownload(rfd2,true);                                        
+                                        
         waitForComplete(deleteCorrupt);
         LOG.debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
@@ -515,8 +517,10 @@ public class DownloadTest extends BaseTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1,rfd2}, false,
+        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false,
                                         null);
+        ((ManagedDownloader)download).addDownload(rfd2,true);
+
         waitForComplete(deleteCorrupt);
         LOG.debug("passed"+"\n");//got here? Test passed
     }
@@ -1653,13 +1657,25 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
+    private static void tGenericCorrupt(RemoteFileDesc[] now)
+      throws Exception {
+        tGenericCorrupt(now, null);
+    }    
+    
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
-    private static void tGenericCorrupt(RemoteFileDesc[] rfds) throws Exception {
+    private static void tGenericCorrupt(RemoteFileDesc[] rfds,
+                                        RemoteFileDesc[] later)
+                                        throws Exception {
         Downloader download=null;
 
         download=RouterService.download(rfds, false, null);
+        if(later != null) {
+            Thread.sleep(100);
+            for(int i = 0; i < later.length; i++)
+                ((ManagedDownloader)download).addDownload(later[i], true);
+        }
 
         waitForComplete(false);
         if (isComplete())
