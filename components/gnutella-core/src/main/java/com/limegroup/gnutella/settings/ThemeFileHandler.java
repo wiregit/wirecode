@@ -376,6 +376,13 @@ public final class ThemeFileHandler {
 		FACTORY.createColorSetting("SEARCH_PRIVATE_IP_COLOR", 
 								   new Color(255, 0, 0));
 
+    /**
+     * Setting for the filter title color.
+     */
+    public static final ColorSetting FILTER_TITLE_COLOR =
+        FACTORY.createColorSetting("SEARCH_FILTER_TITLE_COLOR",
+                                   new Color(0xFF, 0xCC, 0));
+
 	/*
 	public static void main(String[] args) {
 		ThemeSettings.reload();
