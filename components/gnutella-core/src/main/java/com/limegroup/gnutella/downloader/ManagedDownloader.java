@@ -553,6 +553,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The time the last query was sent out.
      */
     private long lastQuerySent;
+    
+    /**
+     * The current priority of this download -- only valid if inactive.
+     * Has no bearing on the download itself, and is used only so that the
+     * download doesn't have to be indexed in DownloadManager's inactive list
+     * every second, for GUI updates.
+     */
+    private volatile int inactivePriority;
 
 
     /**
@@ -3515,6 +3523,20 @@ public class ManagedDownloader implements Downloader, Serializable {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
         }
+    }
+    
+    /**
+     * Sets the inactive priority of this download.
+     */
+    public void setInactivePriority(int priority) {
+        inactivePriority = priority;
+    }
+    
+    /**
+     * Gets the inactive priority of this download.
+     */
+    public int getInactivePriority() {
+        return inactivePriority;
     }
 
 

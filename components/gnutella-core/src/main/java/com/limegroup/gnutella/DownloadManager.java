@@ -203,6 +203,7 @@ public class DownloadManager implements BandwidthTracker {
      * attention.
      */
     private synchronized void pumpDownloads() {
+        int index = 1;
         for(Iterator i = waiting.iterator(); i.hasNext(); ) {
             ManagedDownloader md = (ManagedDownloader)i.next();
             if(md.isCancelled()) {
@@ -213,6 +214,8 @@ public class DownloadManager implements BandwidthTracker {
                 active.add(md);
                 md.startDownload();
             } else {
+                if(!md.isPaused())
+                    md.setInactivePriority(index++);
                 md.handleInactivity();
             }
         }
@@ -827,6 +830,24 @@ public class DownloadManager implements BandwidthTracker {
             cleanupCompletedDownload(downloader, true);
         else
             waiting.add(downloader);
+    }
+    
+    /**
+     * Bumps the priority of an inactive download either up or down.
+     */
+    public synchronized void bumpPriority(Downloader downloader,
+                                          boolean up) {
+        int idx = waiting.indexOf(downloader);
+        if(idx == -1)
+            return;
+
+        if(up && idx != 0) {
+            waiting.remove(idx);
+            waiting.add(idx - 1, downloader);
+        } else if(!up && idx != waiting.size() - 1) {
+            waiting.remove(idx);
+            waiting.add(idx + 1, downloader);
+        }
     }
     
     /**

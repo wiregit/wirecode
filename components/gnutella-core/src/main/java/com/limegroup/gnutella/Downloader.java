@@ -55,6 +55,11 @@ public interface Downloader extends BandwidthTracker {
      * from.
      */
     public boolean isInactive();
+    
+    /**
+     * Returns the inactive priority of this download.
+     */
+    public int getInactivePriority();
 
     /**
      * Resumes this.  If the download is GAVE_UP, tries all locations again and
