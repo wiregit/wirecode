@@ -44,8 +44,16 @@ public class OSAException extends NativeException {
 	public static final int errOSAComponentMismatch       = -1761; /* Parameters are from 2 different components */
 	public static final int errOSACantOpenComponent       = -1762; /* Can't connect to scripting system with that ID */
     
-    public OSAException(int errorCode, byte[] msg) {
-        super((msg != null) ? (new String(msg)) : createMessage(errorCode), errorCode);
+    private AEDesc desc;
+    
+    public OSAException(int errorCode, AEDesc desc) {
+        super((desc != null) ? (new String(desc.getData())) : createMessage(errorCode), errorCode);
+        
+        this.desc = desc;
+    }
+
+    public AEDesc getAEDesc() {
+        return desc;
     }
 
     /**

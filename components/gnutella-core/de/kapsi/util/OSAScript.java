@@ -149,11 +149,10 @@ public class OSAScript implements Serializable {
     }
     
     /**
-     * Executes the script and returns the results as byte-array.
-     * It is up to you to interpret the data (usually Strings). The
-     * script will be compiled automatically if necessary.
+     * Executes the script and returns the results or null. 
+     * The script will be compiled automatically if necessary.
      */
-    public byte[] execute() throws OSAException {
+    public AEDesc execute() throws OSAException {
     
         if (!compiled) {
             compile();
@@ -163,13 +162,12 @@ public class OSAScript implements Serializable {
     }
     
     /**
-     * Executes a specific subroutine of the script and returns the results as byte-array.
-     * It is up to you to interpret the data (usually Strings). The script will be compiled 
-     * automatically if necessary.
+     * Executes a specific subroutine of the script and returns the results or null.
+     * The script will be compiled automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public byte[] execute(String subroutine) throws OSAException {
+    public AEDesc execute(String subroutine) throws OSAException {
     
         if (!compiled) {
             compile();
@@ -180,12 +178,11 @@ public class OSAScript implements Serializable {
     
     /**
      * Executes a specific subroutine of the script with optional parameters and returns the 
-     * results as byte-array. It is up to you to interpret the data (usually Strings). The script 
-     * will be compiled automatically if necessary.
+     * results or null. The script will be compiled automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public byte[] execute(String subroutine, String[] args) throws OSAException {
+    public AEDesc execute(String subroutine, String[] args) throws OSAException {
     
         if (!compiled) {
             compile();
@@ -203,8 +200,8 @@ public class OSAScript implements Serializable {
     private static native synchronized void ReleaseOSAScript(int ptr) throws OSAException;
     
     private static native synchronized boolean CompileOSAScript(int ptr) throws OSAException;
-    private static native synchronized byte[] ExecutOSAScript(int ptr) throws OSAException;
-    private static native synchronized byte[] ExecuteOSAScriptEvent(int ptr, String subroutine, String[] args) throws OSAException;
+    private static native synchronized AEDesc ExecutOSAScript(int ptr) throws OSAException;
+    private static native synchronized AEDesc ExecuteOSAScriptEvent(int ptr, String subroutine, String[] args) throws OSAException;
     
     private static native synchronized byte[] GetOSAScriptBinaries(int ptr) throws OSAException;
 }
