@@ -27,19 +27,17 @@ public final class PongCacher {
      * Constant for the number of hops to keep track of in our pong cache.
      */
     public static final int NUM_HOPS = 6;
+    
+    /**
+     * Constant for the number of seconds to wait before expiring cached pongs.
+     */
+    public static final int EXPIRE_TIME = 6000;
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
     private static final BucketQueue PONGS =
         new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
-
-    /**
-     * Variable for the last time a pong was added, in milliseconds.
-     * This is used to determine whether or not we should cache pongs 
-     * from old connections.
-     */
-    private static long _lastPongAddTime = 0L; 
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -66,8 +64,28 @@ public final class PongCacher {
             Iterator iter = PONGS.iterator();
             int i = 0;
             List pongs = new LinkedList();
+            List removeList = null;
+            long curTime = System.currentTimeMillis();
             for(;iter.hasNext() && i<NUM_HOPS; i++) {
-                pongs.add((PingReply)iter.next());
+                PingReply pr = (PingReply)iter.next();
+                
+                // If the pong is very old, purge it.
+                if(curTime - pr.getCreationTime() > EXPIRE_TIME) {
+                    if(removeList == null) {
+                        removeList = new LinkedList();
+                    }
+                    removeList.add(pr);
+                } else {
+                    pongs.add(pr);
+                }
+            }
+            
+            if(removeList != null) {
+                iter = removeList.iterator();
+                while(iter.hasNext()) {
+                    PingReply pr = (PingReply)iter.next();
+                    PONGS.removeAll(pr);
+                }
             }
             return pongs;
         }
@@ -83,31 +101,14 @@ public final class PongCacher {
         // if we're not an Ultrapeer, we don't care about caching the pong
         if(!RouterService.isSupernode()) return;
 
+        // If the host returning the pong does not have free connection slots,
+        // ignore it.
+        if(!pr.hasFreeSlots()) return;
+        
         // if the hops are too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
             PONGS.insert(pr, pr.getHops());
-            _lastPongAddTime = System.currentTimeMillis();
-        }
-    }
-
-    /**
-     * Returns whether or not we need pongs for the cacher.
-     *
-     * @return <tt>true</tt> if we need new pongs to cache, otherwise
-     *  <tt>false</tt>
-     */
-    public boolean needsPongs() {
-        // if we're not an Ultrapeer, we don't care about caching the pong
-        if(!RouterService.isSupernode()) return false;
-
-        
-        if(System.currentTimeMillis() - _lastPongAddTime > 1000) {
-            return true;
-        }
-
-        synchronized(PONGS) {
-            return PONGS.size() < NUM_PONGS_PER_HOP*NUM_HOPS;
         }
     }
 }
