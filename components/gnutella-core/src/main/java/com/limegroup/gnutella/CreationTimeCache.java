@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.ErrorService;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
@@ -76,7 +75,7 @@ public final class CreationTimeCache {
     private CreationTimeCache() {
         URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
-        TIME_TO_URNSET_MAP = new TreeMap(new MyComparator());
+        TIME_TO_URNSET_MAP = new TreeMap(Comparators.inverseLongComparator());
         pruneTimes(false);
         constructURNMap();
 	}
@@ -333,16 +332,4 @@ public final class CreationTimeCache {
             }
         }
 	}
-
-    private static final class MyComparator implements Comparator {
-
-        // switches the usual meaning of compare....        
-        public int compare(Object o1, Object o2) {
-            if ((o1 instanceof Long) && (o2 instanceof Long))
-                return 0 - ((Long)o1).compareTo(((Long)o2));
-            throw new IllegalArgumentException("Should only compare longs!!" +
-                                               "  o1.class = " + o1.getClass() +
-                                               ", o2.class = " + o2.getClass());
-        }
-    }
 }
