@@ -38,6 +38,8 @@ public class HTTPUploader implements Runnable {
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
+	System.out.println("In the first upload constructor");
+
 	file = file.trim();
 
 	_filename = file;
@@ -55,11 +57,13 @@ public class HTTPUploader implements Runnable {
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
+	    System.out.println("ERROR A");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
+	    System.out.println("ERROR B");
   	    doNoSuchFile();
     	    return;
     	}
@@ -69,19 +73,32 @@ public class HTTPUploader implements Runnable {
 	try {
 	    OutputStream _ostream = _socket.getOutputStream();
 	    OutputStreamWriter osw = new OutputStreamWriter(_ostream);
-	    _out = new BufferedWriter(osw); 
+  	    _out = new BufferedWriter(osw, 1); 
 	}
 	catch (Exception e) {
+	    System.out.println("ERROR C");
 	    uploadError("unable to open outputsetream");
 	}
 
 	try {
-	    File myFile = new File(_fdesc._path);  /* _path is the full name */
-	    _fin = new BufferedReader(new FileReader(myFile));
+	    String f = _fdesc._path;
+	    System.out.println("The path is " + f);
+	    
+	    File myFile = new File(f);  /* _path is the full name */
+	    // _fin = new BufferedReader(new FileReader(myFile));
+
+	    String foo = myFile.toString();
+	    
+	    System.out.println("myFile: " + foo);
+
 	    _fis = new FileInputStream(myFile);
+	
+	    if (_fis == null)
+		System.out.println("fis is null");
 	}
 
 	catch (Exception e) {
+	    System.out.println("ERROR D");
 	    uploadError("unable to open file");
 	}
 
@@ -90,6 +107,10 @@ public class HTTPUploader implements Runnable {
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
+
+	System.out.println("In the second upload constructor");
+
+	System.out.println("host " + host + ", port " + port);
 
 	_host = host;
 	_filename = file;
@@ -199,6 +220,7 @@ public class HTTPUploader implements Runnable {
 	    _out.write("Content-type:" + type + "\r\n"); 	
 	    _out.write("Content-length:"+ _sizeOfFile + "\r\n");
 	    _out.write("\r\n");
+	    _out.flush();
 	}
 
 	catch (Exception e) {
@@ -224,6 +246,69 @@ public class HTTPUploader implements Runnable {
 	
 	int available = 0;
 
+	// _bis = new BufferedInputStream(_fis);
+//  	_bos = new BufferedOutputStream(_ostream);
+
+	// byte[] buf = new byte[1024]; 
+
+  	
+	while (true){
+	    // System.out.println("amount just read "  + c);
+	    try {
+		// c = _fis.read(buf);
+		c = _fis.read();
+	    }
+	    catch (IOException e) {
+		uploadError("Unable to read from the file");		
+		e.printStackTrace();
+	    }
+
+	    // System.out.println("after first try/catch");
+
+	    if (c == -1)
+		break;
+	    // System.out.println("after first try/catch");
+	    try {
+		//  if (_ostream == null)
+//  		    System.out.println("ostream is null");
+		// _ostream.write(buf, 0, c);
+		_out.write(c);
+
+	    }		
+	    catch (IOException e) {
+		uploadError("Unable to write to the socket");		
+		e.printStackTrace();
+	    }
+	    // System.out.println("after second try/catch");
+
+	    _amountRead += c;
+	}
+
+	try {
+	    // _ostream.close();
+	    _out.close();
+	}
+	catch (IOException e) {
+	    uploadError("Unable to close the socket");		
+	} 
+	
+	//}
+	
+  	//  catch (Exception e) {
+//    	    uploadError("Unable to read from the file");
+//    	    return;
+//    	}
+
+    }
+    
+    public void doSchmupload() {
+
+        writeHeader();
+	
+	int c = -1;
+	
+	int available = 0;
+
 	byte[] buff;
 
 	_bis = new BufferedInputStream(_fis);
@@ -231,7 +316,7 @@ public class HTTPUploader implements Runnable {
 
   	try {
   	    while (true){
-		
+		System.out.println("amount just read "  + c);
 		available = _bis.available();
 		buff = new byte[available];		
   		c = _bis.read(buff);
@@ -283,7 +368,7 @@ public class HTTPUploader implements Runnable {
 
     private void uploadError(String str)
     {
-	// System.out.println(str);
+	System.out.println(str);
 	// These should not go anywhere for uploads
     }
 

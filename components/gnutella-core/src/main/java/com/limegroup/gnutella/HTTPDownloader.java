@@ -247,17 +247,11 @@ public class HTTPDownloader implements Runnable {
 		// while ((c = _istream.read(buf) != -1)) {
 		    
 		while (true) {
-		    
 		    c = _istream.read(buf);
-		    
 		    if (c == -1) 
 			break;
-
 		    fos.write(buf, 0, c);
 		    _amountRead+=c;
-
-		    System.out.println("THe amount read: " + _amountRead);		   
-
 		}
 
 
