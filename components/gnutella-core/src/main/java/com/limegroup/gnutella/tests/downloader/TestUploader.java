@@ -15,6 +15,8 @@ public class TestUploader {
     private volatile int rate;    
     /**The number of bytes this uploader uploads before dying*/
     private volatile int stopAfter;
+    /** This is stopped. */
+    private boolean stopped;
 
 
     /** 
@@ -42,6 +44,7 @@ public class TestUploader {
         totalUploaded = 0;
         stopAfter = -1;
         rate = 10000;
+        stopped = false;
     }
 
     public int amountUploaded() {
@@ -79,7 +82,8 @@ public class TestUploader {
             Socket s=null;
             try {
                 s = server.accept();
-                handleRequest(s); //TODO: could use thread per request
+                if (!stopped)
+                    handleRequest(s); //TODO: could use thread per request
             } catch (IOException e) {
                 if (s!=null)
                     try {
@@ -152,6 +156,7 @@ public class TestUploader {
             for (int j=0; j<(rate*1024) && i<stop; j++) {
                 //if we are above the threshold, simulate an interrupted connection
                 if (stopAfter>-1 && totalUploaded>=stopAfter) {
+                    stopped=true;
                     out.flush();
                     throw new IOException();
                 }

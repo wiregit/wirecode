@@ -40,6 +40,8 @@ public class DownloadTester {
         cleanup();
         testSwarmWithInterrupt();
         cleanup();
+        testStealerInterrupted();
+        cleanup();
         testAddDownload();
         cleanup();
     }
@@ -139,6 +141,35 @@ public class DownloadTester {
         check(u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR, "u1 did all the work");
         check(u2==STOP_AFTER, "u2 did all the work");
     }
+
+
+    private static void testStealerInterrupted() {
+        System.out.print("-Testing unequal swarming with stealer dying...");
+        final int RATE=10;
+        final int STOP_AFTER = 5*TestFile.length()/8;//second half of file + 1/8 of the file
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE/10);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        check(u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR, "u1 did all the work");
+        check(u2==STOP_AFTER, "u2 did all the work");
+    }
+
 
 
     private static void testAddDownload() {
