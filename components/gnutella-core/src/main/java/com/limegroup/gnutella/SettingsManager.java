@@ -534,7 +534,7 @@ public class SettingsManager implements SettingsInterface
     /** sets the time to live */
     public synchronized void setTTL(byte ttl) 
 		throws IllegalArgumentException {
-		if(ttl > softmaxttl_ || ttl < 1)
+		if (ttl < 1 || ttl > 14)
 			throw new IllegalArgumentException();
 		else {
 			ttl_ = ttl;
@@ -547,7 +547,7 @@ public class SettingsManager implements SettingsInterface
     /** sets the soft maximum time to live */
     public synchronized void setSoftMaxTTL(byte softmaxttl)
 		throws IllegalArgumentException {
-		if(softmaxttl < 0 || softmaxttl > 16)
+		if (softmaxttl < 0 || softmaxttl > 14)
 			throw new IllegalArgumentException();
 		else {
 			softmaxttl_ = softmaxttl;
