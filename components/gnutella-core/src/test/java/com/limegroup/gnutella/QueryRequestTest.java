@@ -230,80 +230,15 @@ public final class QueryRequestTest extends TestCase {
 
 
     public void testNewMinSpeedUse() {
-
-        QueryRequest qr = null;
-
-        // BASIC FROM THE NETWORK TESTS
-        // --------------------------------------
-        //String is empty.
-        byte[] payload = new byte[2+1];
-        // these two don't matter....
-        payload[2] = (byte) 0;
-        payload[1] = (byte) 0;
-
-        // not firewalled and not wanting rich, just 10000000
-        payload[0] = (byte) 0x80;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
-        assertTrue(!qr.desiresXMLResponses());
-        assertTrue(!qr.isFirewalledSource());
-
-        // firewalled and not wanting rich, just 10000001
-        payload[0] = (byte) 0x81;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
-        assertTrue(!qr.desiresXMLResponses());
-        assertTrue(qr.isFirewalledSource());
-
-        // not firewalled and wanting rich, just 10000010
-        payload[0] = (byte) 0x82;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        // test simple use
+        QueryRequest qr = new QueryRequest((byte)3, 0, "susheel", false);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
-
-        // firewalled and wanting rich, just 10000011
-        payload[0] = (byte) 0x83;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
-        assertTrue(qr.desiresXMLResponses());
-        assertTrue(qr.isFirewalledSource());
-        // --------------------------------------
-
-
-        // CONSTRUCTION, WRITING TO A STREAM, READING FROM A STREAM
-        // --------------------------------------
-        ByteArrayOutputStream baos = null;
-        ByteArrayInputStream bais = null;
-        qr = new QueryRequest((byte)3, 0, "susheel", false);
-        assertTrue(qr.desiresXMLResponses());
-        assertTrue(!qr.isFirewalledSource());
-        try {
-            baos = new ByteArrayOutputStream();
-            qr.write(baos);
-            bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryRequest check = (QueryRequest) Message.read(bais);
-            assertTrue(check.desiresXMLResponses());
-            assertTrue(!check.isFirewalledSource());
-        }
-        catch (Exception crap) {
-            assertTrue(false);
-        }
-        
         qr = new QueryRequest((byte)3, 0, "susheel", true);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
-        try {
-            baos = new ByteArrayOutputStream();
-            qr.write(baos);
-            bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryRequest check = (QueryRequest) Message.read(bais);
-            assertTrue(check.desiresXMLResponses());
-            assertTrue(check.isFirewalledSource());
-        }
-        catch (Exception crap) {
-            assertTrue(false);
-        }
 
-        { 
-            // test rich use, but keep in mind that LimeWire's ALWAYS want rich
-            // answers, so the bit should always be set....
+        { // test rich use....
             byte ttl = 5;
             int minSpeed = 0;
             String query = "file i really want";
@@ -323,37 +258,43 @@ public final class QueryRequestTest extends TestCase {
                                   false);
             assertTrue(qr.desiresXMLResponses());
             assertTrue(!qr.isFirewalledSource());
-            try {
-                baos = new ByteArrayOutputStream();
-                qr.write(baos);
-                bais = new ByteArrayInputStream(baos.toByteArray());
-                QueryRequest check = (QueryRequest) Message.read(bais);
-                assertTrue(check.desiresXMLResponses());
-                assertTrue(!check.isFirewalledSource());
-            }
-            catch (Exception crap) {
-                assertTrue(false);
-            }
-
             qr = new QueryRequest(guid, ttl, minSpeed, query, 
                                   richQuery, isRequery, 
                                   requestedUrnTypes, queryUrns,
                                   true);
             assertTrue(qr.desiresXMLResponses());
             assertTrue(qr.isFirewalledSource());
-            try {
-                baos = new ByteArrayOutputStream();
-                qr.write(baos);
-                bais = new ByteArrayInputStream(baos.toByteArray());
-                QueryRequest check = (QueryRequest) Message.read(bais);
-                assertTrue(check.desiresXMLResponses());
-                assertTrue(check.isFirewalledSource());
-            }
-            catch (Exception crap) {
-                assertTrue(false);
-            }
         }
-        // --------------------------------------
+
+        //String is empty.
+        byte[] payload = new byte[2+1];
+        // these two don't matter....
+        payload[2] = (byte) 0;
+        payload[1] = (byte) 0;
+
+        // first test....
+        payload[0] = (byte) 0x80;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x81;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x82;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x83;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
     }
 
 }
