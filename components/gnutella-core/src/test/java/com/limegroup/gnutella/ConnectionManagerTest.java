@@ -263,7 +263,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         pretendConnected();
         
         assertEquals(32, mgr.getNumFreeNonLeafSlots());
-        assertEquals(26, mgr.getNumFreeLimeWireNonLeafSlots());
+        assertEquals(27, mgr.getNumFreeLimeWireNonLeafSlots());
         assertEquals(30, mgr.getNumFreeLeafSlots());
         assertEquals(28, mgr.getNumFreeLimeWireLeafSlots());
         
