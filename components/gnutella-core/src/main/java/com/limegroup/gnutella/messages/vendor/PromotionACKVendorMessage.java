@@ -30,7 +30,7 @@ public class PromotionACKVendorMessage extends VendorMessage {
 	 * creates a new ACK message.
 	 */
 	public PromotionACKVendorMessage() {
-		super(F_LIME_VENDOR_ID,F_PROMOTION_REQUEST,VERSION,new byte[0]);
+		super(F_LIME_VENDOR_ID,F_PROMOTION_ACK,VERSION,new byte[0]);
 	} 
 	
 }

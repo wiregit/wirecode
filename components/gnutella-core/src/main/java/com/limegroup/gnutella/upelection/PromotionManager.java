@@ -1,5 +1,9 @@
 /*
  * This class maintains state for the election process.
+ * 
+ * If a promotion request arrives while we are currently promoting
+ * ourselves, add the promoter to the list because we know for sure that
+ * that UP needs is running out of slots, so we will connect to it.
  */
 package com.limegroup.gnutella.upelection;
 
@@ -7,8 +11,29 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.vendor.*;
 
+import com.sun.java.util.collections.*;
 
 public class PromotionManager {
+	
+	/**
+	 * a list of <tt>Endpoint</tt>'s of people requesting promotion.  
+	 */
+	private List _requestors = Collections.synchronizedList(new ArrayList());
+	
+	/**
+	 * the time we sent out the last ACK.
+	 */
+	private long _lastRequestTime;
+	
+	/**
+	 * if we don't get a pong from the request[or|ee] within 30 secs, discard.
+	 */
+	private static final long REQUEST_TIMEOUT = 30*1000;
+	
+	/**
+	 * a ref to the thread which resets the state
+	 */
+	private Thread _expirer;
 
 	/**
 	 * keeps a list of the people who advertised their best candidate.  
@@ -45,21 +70,32 @@ public class PromotionManager {
 	 * initiates the promotion process.  It sends out an udp ping to the
      * original requestor and when the ack comes back it the listener will 
      * start the crawl in a separate thread.
+     * 
+     * TODO: decide what to do if a new request arrives while we're already promoting.
      */
     public void initiatePromotion(PromotionRequestVendorMessage msg) {
     	
     	//set the promotion partner
+    	Endpoint requestor = new Endpoint (
+				msg.getRequestor().getAddress(),
+				msg.getRequestor().getPort());
+    	
     	synchronized(_promotionLock) {
-    		_promotionPartner = new Endpoint (
-    				msg.getRequestor().getAddress(),
-					msg.getRequestor().getPort());
+    		if (_promotionPartner == null)
+    			_promotionPartner = requestor; 
+    		else
+    			_requestors.add(requestor);
     	}
+    	
+    	
+    	//schedule the expiration of the process
+    	_expirer = new ManagedThread(new Expirer());
     	
     	//ping the original requestor
     	System.out.println("pinging the original requestor");
+    	
     	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
-    	UDPService.instance().send( ping,
-    		msg.getRequestor().getInetAddress(),msg.getRequestor().getPort());
+    	UDPService.instance().send( ping, _promotionPartner);
     }
 	/**
 	 * @return Returns the _candidateAdvertisers.
@@ -88,7 +124,7 @@ public class PromotionManager {
     	Endpoint partner = null;
     	
     	synchronized(_promotionLock) {
-    		if (_promotionPartner == null)
+    		if (_promotionPartner == null) 
     			return;
     		
     		//check if we received the ACK from the right person
@@ -100,7 +136,14 @@ public class PromotionManager {
     		_promotionPartner = null;
     	}
     	
-    	//we know we have received a proper ACK.  Proceed as appropriate:
+    	//*************************
+    	//we know we have received a proper ACK.
+    	
+    	
+    	//first, stop the expiration thread
+    	_expirer.interrupt();
+    	
+    	//then, proceed as appropriate:
     	
     	//if we are a leaf, start the promotion process
     	if (!RouterService.isSupernode()) {
@@ -114,5 +157,26 @@ public class PromotionManager {
     		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
     		UDPService.instance().send(pong, sender);
     	}
+	}
+	
+	/**
+	 * expires the partner if we don't get an ACK.
+	 * interrupt to cancel.
+	 * 
+	 */
+	private class Expirer implements Runnable {
+		public void run() {
+			try {
+				//sleep some time
+				Thread.sleep(REQUEST_TIMEOUT);
+			
+				//clear the state
+				synchronized(_promotionLock) {
+					_promotionPartner=null;
+				}
+			}catch(InterruptedException iex) {
+				//end the thread.
+			}
+		}
 	}
 }
