@@ -1,7 +1,3 @@
-/**
- * Read data from the net and write to disk.
- */
-
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
@@ -14,6 +10,7 @@ import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.altlocs.*;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -412,7 +409,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     alc = AlternateLocationCollection.createCollection(alSha1);
 
                 if(alSha1.equals(alc.getSHA1Urn()))
-                    alc.addAlternateLocation(al);
+                    alc.add(al);
 
 			} catch(IOException e) {
 				// continue without adding it.

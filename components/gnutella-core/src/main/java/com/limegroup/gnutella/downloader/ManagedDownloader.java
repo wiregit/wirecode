@@ -5,6 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.sun.java.util.collections.*;
@@ -1336,7 +1337,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //totalAlternateLocations
         if( sha1!=null && 
             (totalAlternateLocations == null || 
-             !totalAlternateLocations.getSHA1().equals(sha1)) )
+             !totalAlternateLocations.getSHA1Urn().equals(sha1)) )
             totalAlternateLocations=
                         AlternateLocationCollection.createCollection(sha1);
         
@@ -1443,7 +1444,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// in their original headers
 			if (fileDesc != null && 
               fileDesc.getSHA1Urn().equals(totalAlternateLocations.getSHA1Urn())) {                
-                fileDesc.addAlternateLocationCollection(totalAlternateLocations);
+                fileDesc.addAll(totalAlternateLocations);
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
                 HashSet set = null;
@@ -2105,7 +2106,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             totalAlternateLocations =
                 AlternateLocationCollection.createCollection(alt.getSHA1Urn());
                 
-        boolean added = totalAlternateLocations.addAlternateLocation(alt);
+        boolean added = totalAlternateLocations.add(alt);
         
         // if the location didn't accept the new one.
         if(!added) {
@@ -2138,7 +2139,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             for(Iterator i = alts.values().iterator(); i.hasNext(); ) {
     		    AlternateLocation alt;
     		    alt = (AlternateLocation)i.next();
-    		    if( totalAlternateLocations.addAlternateLocation(alt) ) {
+    		    if( totalAlternateLocations.add(alt) ) {
     		        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
     			    addDownload(alt.createRemoteFileDesc(completeSize), false);
                 } else {
@@ -2167,7 +2168,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
 	    // remove this location
-	    if(totalAlternateLocations.removeAlternateLocation(toRemove) &&
+	    if(totalAlternateLocations.remove(toRemove) &&
 	       RECORD_STATS)
 	        DownloadStat.ALTERNATE_REMOVED.incrementStat();
     }

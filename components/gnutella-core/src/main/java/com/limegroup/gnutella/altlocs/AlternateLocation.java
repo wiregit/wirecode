@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.altlocs;
 
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.io.*;
+import com.limegroup.gnutella.*;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
@@ -18,7 +19,6 @@ import java.io.*;
  *
  * This class is immutable.
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class AlternateLocation 
 	implements com.sun.java.util.collections.Comparable, HTTPHeaderValue  {
 

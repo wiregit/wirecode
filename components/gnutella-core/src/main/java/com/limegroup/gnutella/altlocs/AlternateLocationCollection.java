@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.altlocs;
 
 import com.limegroup.gnutella.http.*; 
 import com.limegroup.gnutella.util.Random12;
@@ -7,6 +7,7 @@ import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
+import com.limegroup.gnutella.*;
 
 /**
  * This class holds a collection of <tt>AlternateLocation</tt> instances,
@@ -20,24 +21,15 @@ public final class AlternateLocationCollection
 	implements HTTPHeaderValue, AlternateLocationCollector {
 	    
     private static final int MAX_LOCATIONS = 100;
-    private static final int MAX_REMOVED = 500;
-    
-    private static final long DAY = 1000 * 60 * 60 * 24;
-    private static final long FIVEHOURS = 1000 * 60 * 60 * 5;
-    private static final long ONEHOUR = 1000 * 60 * 60;
-    private static final long HALFHOUR = 1000 * 60 * 30;
 
 	/**
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
 	 * <tt>AlternateLocation</tt> instances.  
 	 * This uses a <tt>FixedSizeForgetfulHashMap</tt> so that the oldest
 	 * entry inserted is removed when the limit is reached.
-     * LOCKING: obtain LOCATIONS monitor when iterating -- otherwise 
+     * LOCKING: obtain this' monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
-     * LOCKING: Obtain LOCATIONS monitor before removing or adding elements to
-     *          REMOVED. 
-     * LOCKING: Never try to obtain LOCATIONS's monitor when holding REMOVED's
-     *          monitor
+     *
      * INVARIANT: LOCATIONS.get(k)==k
      *
      * This is NOT SORTED because of the way we look for locations.
@@ -54,24 +46,10 @@ public final class AlternateLocationCollection
      * the synchronized map does not extend Fixedsize.., and Fixedsize..
      * uses private variables for the equals comparison.
 	 */
-	private final Map _locations =
-        new FixedsizeForgetfulHashMap(MAX_LOCATIONS);
-    private final Map LOCATIONS = Collections.synchronizedMap(_locations);
-		
-    /**
-     * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that we've
-     * removed from this collection.  Attempts to add to this collection
-     * will first check to see if the location has been previously removed.
-     * If so, we will not re-add them.
-     * LOCKING: obtain REMOVED's monitor when iterating -- otherwise
-     *          it's synchronized on its own
-     * INVARIANT: REMOVED.get(k)==k
-     *
-     * See note on sorting in the comments for LOCATIONS.
-     */
-    private final Map REMOVED = Collections.synchronizedMap(
-        new FixedsizeForgetfulHashMap(MAX_REMOVED));
-
+    //Sumeet:TODO2: Should this be a map
+    //TODO1: Make sure the synchronization of this class works.
+	private final Map LOCATIONS=new FixedsizeForgetfulHashMap(MAX_LOCATIONS);
+        
     /**
      * SHA1 <tt>URN</tt> for this collection.
      */
@@ -124,7 +102,7 @@ public final class AlternateLocationCollection
 				}
 
 				if(al.getSHA1Urn().equals(alc.getSHA1Urn())) {
-					alc.addAlternateLocation(al);
+					alc.add(al);
 				}
 			} catch(IOException e) {
 				continue;
@@ -149,15 +127,10 @@ public final class AlternateLocationCollection
 		SHA1 = sha1;
 	}
 
-    // inherit doc comment
-	public URN getSHA1Urn() {
-		return SHA1;
-	}
-	
 	/**
 	 * Returns the SHA1 for this AlternateLocationCollection.
 	 */
-	public URN getSHA1() {
+	public URN getSHA1Urn() {
 	    return SHA1;
 	}
 
@@ -176,26 +149,13 @@ public final class AlternateLocationCollection
 	 *  the urn for this collection
 	 * @return true if added, false otherwise.
 	 */
-	public boolean addAlternateLocation(AlternateLocation al) {
+	public boolean add(AlternateLocation al) {
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
 		
-		// All these operations must be done atomically with
-		// respect to LOCATIONS
-		synchronized(LOCATIONS) {
-		    
-    		// if it's not a valid time, don't attempt to add.
-            if ( !isValidTime(al.getTime()) ) {
-                return false;
-            }
-    		
-    		// do not add this if it was previously removed.
-    		if ( wasRemoved(al) ) {
-    		    return false;
-            }
-            
+		synchronized(this) {
             // See if this location already exists in the map somewhere.
             AlternateLocation toUpdate = (AlternateLocation)LOCATIONS.get(al);
             // if it doesn't, or if this one is newer, put this entry in
@@ -205,90 +165,24 @@ public final class AlternateLocationCollection
                 LOCATIONS.put(al, al);
                 return true;
             }
-        }
-        
+        }        
         return false;
 	}
 	
-	/**
-	 * Determine if the time of the alternate location is valid.
-	 */
-	private boolean isValidTime(long alTime) {
-        //Hold this monitor so we don't get an incorrect value of size
-        synchronized(LOCATIONS) {
-            long now = System.currentTimeMillis();
-            int size = LOCATIONS.size() + REMOVED.size();
-            long diff = now - alTime;
-            
-            // always allow locations
-            if ( size <= 25 )
-                return true;
-            
-            // only allow if location was generated under a day ago
-            if ( size <= 75 ) {
-                return diff <= DAY;
-            }
-            
-            // only allow if location was generated under 5 hours ago
-            if ( size <= 150 ) {
-                return diff <= FIVEHOURS;
-            }
-            
-            // only allow if location was generated under 1 hour ago
-            if ( size <= 300 ) {
-                return diff <= ONEHOUR;
-            }
-            
-            // only allow if location was generated under a half hour ago
-            return diff <= HALFHOUR;
-        }
-    }
 	        
 	/**
 	 * Removes this <tt>AlternateLocation</tt> from the active locations
 	 * and adds it to the removed locations.
 	 */
-	 public boolean removeAlternateLocation(AlternateLocation al) {
+	 public boolean remove(AlternateLocation al) {
 	    URN sha1 = al.getSHA1Urn();
-        if(!sha1.equals(SHA1)) {
-			return false; // it cannot be in this list if it has a different SHA1
-		}
+        if(!sha1.equals(SHA1)) 
+			return false; //it cannot be in this list if it has a different SHA1
 		
 		//This must be atomic with respect to LOCATIONS
-		synchronized(LOCATIONS) {
-            REMOVED.put(al, al);
+		synchronized(this) {
             return LOCATIONS.remove(al) != null;
 		}
-    }
-    
-    /**
-     * Determines if this <tt>AlternateLocation</tt> was once removed
-     * from this collection.  If 'al' has a newer timestamp then
-     * the item in the removed list, we remove it from the removed list
-     * and return false.
-     */
-    public boolean wasRemoved(AlternateLocation al) {
-        URN sha1 = al.getSHA1Urn();
-        // it could never have been added (or removed) if the sh1 is different
-        if(!sha1.equals(SHA1))
-            return false;
-        synchronized(LOCATIONS) {
-            AlternateLocation removed = (AlternateLocation)REMOVED.get(al);
-            
-            // it was never removed.
-            if( removed == null )
-                return false;
-            
-            // it was removed, but this is a newer location, remove it from
-            // REMOVED
-            if(removed.compareTo(al) > 0) {
-                REMOVED.remove(al);
-                return false;
-            }
-        
-            // it is older or the same.
-            return true;
-        }
     }
     
 	/**
@@ -302,8 +196,7 @@ public final class AlternateLocationCollection
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
      *  collection to add does not match the collection of <tt>this</tt>
      */
-	public int 
-        addAlternateLocationCollection(AlternateLocationCollection alc) {
+	public int addAll(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("ALC is null");
         }
@@ -312,11 +205,11 @@ public final class AlternateLocationCollection
 		}
 		
 		int added = 0;
-		synchronized(alc.LOCATIONS) {
+		synchronized(alc) {
 			Iterator iter = alc.LOCATIONS.keySet().iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				if( addAlternateLocation(curLoc) )
+				if( add(curLoc) )
 				    added++;
 			}
 		}
@@ -351,20 +244,30 @@ public final class AlternateLocationCollection
         // 2) We have not removed this location from our collection
         // 3) This location could potentially be added to our collection
         //    based on the timestamp.
-        synchronized(alc.LOCATIONS) {
+        synchronized(alc) {
 		    Iterator iter = alc.LOCATIONS.keySet().iterator();
 		    AlternateLocation value;
     		while (iter.hasNext()) {
     			value = (AlternateLocation)iter.next();
-                if (!LOCATIONS.containsKey(value)
-                  && !wasRemoved(value) 
-                  && isValidTime(value.getTime()) ) 
-    			    nalc.addAlternateLocation(value);
+                if (!LOCATIONS.containsKey(value))
+    			    nalc.add(value);
             }
         }
 		return nalc;
 	}
 
+    /**
+     * @return true is this contains loc
+     */
+    public synchronized boolean contains(AlternateLocation loc) {
+        for(Iterator iter = LOCATIONS.keySet().iterator();iter.hasNext();) {
+            AlternateLocation al = (AlternateLocation)iter.next();
+            if(al.equals(loc))//todo1: is this correct
+                return true;
+        }
+        return false;
+    }
+        
 	/**
 	 * Returns a <tt>Collection</tt> of <tt>AlternateLocation</tt>s that has
 	 * been randomized to avoid distributed DOS attacks on servants.
@@ -373,7 +276,7 @@ public final class AlternateLocationCollection
 	 */
 	public Collection values() {
         List list;
-        synchronized(LOCATIONS) {
+        synchronized(this) {
 		    list = new ArrayList(LOCATIONS.keySet());
         }
 		Collections.shuffle(list);
@@ -394,7 +297,7 @@ public final class AlternateLocationCollection
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		boolean wrote = false;
-        synchronized(LOCATIONS) {
+        synchronized(this) {
 	        Iterator iter = LOCATIONS.keySet().iterator();
             int start = random12.nextInt(LOCATIONS.size());
             start = Math.max(0, start-10); // start from 0, or 10 before this one.
@@ -436,7 +339,7 @@ public final class AlternateLocationCollection
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
-		synchronized(LOCATIONS) {
+		synchronized(this) {
 			Iterator iter = LOCATIONS.keySet().iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
@@ -460,7 +363,7 @@ public final class AlternateLocationCollection
         // because we not using the SynchronizedMap versions, and equals
         // will inherently call methods that would have been synchronized.
         synchronized(AlternateLocationCollection.class) {
-                ret = _locations.equals(alc._locations);
+                ret = LOCATIONS.equals(alc.LOCATIONS);
         }
         return ret;
     }

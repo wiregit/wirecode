@@ -9,6 +9,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.altlocs.*;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the
@@ -205,8 +206,7 @@ public final class HTTPUploader implements Uploader {
     			// making this call now is necessary to avoid writing the 
     			// same alternate locations back to the requester as were 
     			// sent in the request headers
-    			_fileDesc.addAlternateLocationCollection(
-    			    _alternateLocationCollection);
+    			_fileDesc.addAll(_alternateLocationCollection);
             }
         }
 	}
@@ -852,7 +852,7 @@ public final class HTTPUploader implements Uploader {
 				
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {
-                    alc.addAlternateLocation(al);
+                    alc.add(al);
                 }
 			} catch(IOException e) {
 				// just return without adding it.

@@ -1,4 +1,6 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.altlocs;
+
+import com.limegroup.gnutella.*;
 
 /**
  * Interface for classes that serve as collection points for alternate sources
@@ -10,7 +12,7 @@ public interface AlternateLocationCollector {
 	 * Adds an <tt>AlternateLocation</tt> instance to the collection of 
 	 * <tt>AlternateLocation</tt>s.
 	 */
-	public boolean addAlternateLocation(AlternateLocation al);
+	public boolean add(AlternateLocation al);
 
 	/**
 	 * Adds the specified collection of <tt>AlternateLocation</tt>s to
@@ -19,7 +21,7 @@ public interface AlternateLocationCollector {
 	 * @param alc the <tt>AlternateLocationCollection</tt> instance to
 	 *  add this alternate location to the collection 
 	 */
-	public int addAlternateLocationCollection(AlternateLocationCollection alc);
+	public int addAll(AlternateLocationCollection alc);
 
 	/**
 	 * Returns whether or not this <tt>AlternateLocationCollector</tt> has
