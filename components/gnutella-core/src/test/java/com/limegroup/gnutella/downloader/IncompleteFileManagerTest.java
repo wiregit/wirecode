@@ -195,7 +195,11 @@ public class IncompleteFileManagerTest extends TestCase {
         File file2=ifm.getFile(rfd2);
         File file2b=ifm.getFile(rfd2b);
         assertEquals(file2, file2b);
-        file2.createNewFile();
+        try {
+            file2.createNewFile();
+        } catch (IOException e) {
+            fail("Couldn't create "+file2);
+        }
 
         //After purging, only hashes associated with files that exists remain.
         ifm.purge(true);
@@ -203,6 +207,7 @@ public class IncompleteFileManagerTest extends TestCase {
         assertTrue(!file1b.equals(file1c));
         File file2c=ifm.getFile(rfd2b);
         assertTrue(file2b.equals(file2c));
+        file2.delete();
     }
 
     /** Tests that hash information is not purged when calling purge(false). */

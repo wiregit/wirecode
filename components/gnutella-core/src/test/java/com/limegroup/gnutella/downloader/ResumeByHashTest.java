@@ -176,7 +176,9 @@ public class ResumeByHashTest extends TestCase {
             downloader=mgr.startResumeDownload(incompleteFile);
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
-        }                
+        } catch (CantResumeException e) {
+            fail("Invalid incomplete file.");
+        }                                
         try { Thread.sleep(200); } catch (InterruptedException e) { }        
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
