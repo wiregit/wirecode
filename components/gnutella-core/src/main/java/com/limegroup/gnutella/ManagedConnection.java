@@ -420,6 +420,14 @@ public class ManagedConnection extends Connection
         return _lastQRPTableReceived == null ?
             0 : _lastQRPTableReceived.getPercentFull();
     }
+    
+    /**
+     * Accessor for the last QueryRouteTable's size.
+     */
+    public int getQueryRouteTableSize() {
+        return _lastQRPTableReceived == null ?
+            0 : _lastQRPTableReceived.getSize();
+    }
 
     /**
      * Throttles the super's OutputStream.  This works quite well with
