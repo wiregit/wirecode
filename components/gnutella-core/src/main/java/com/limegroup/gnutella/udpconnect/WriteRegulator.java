@@ -58,7 +58,13 @@ public class WriteRegulator {
         if  (rtt == 0) 
             rtt = 10;
         int baseWait   = Math.min(realRTT, 2000)/3;  
-        int sleepTime  = ((usedSpots) * baseWait) / windowSize;
+        int sleepTime  = ((usedSpots) * baseWait);
+
+        if ( sleepTime < windowSize ) 
+            sleepTime      = 1;
+        else 
+            sleepTime      = sleepTime / windowSize;
+
         int rto        = _sendWindow.getRTO();
 System.out.println(
 "sleepTime:"+sleepTime+
@@ -122,6 +128,5 @@ System.out.println("UPP reset:"+_skipLimit);
 System.out.println("sleepTime: "+sleepTime);
         return (long) sleepTime;
         //------------- Sleep ------------------------
-
     }
 }
