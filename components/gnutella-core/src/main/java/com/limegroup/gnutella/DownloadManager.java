@@ -263,7 +263,7 @@ public class DownloadManager implements BandwidthTracker {
         for (int i = 0; i < rfds.length; i++) 
             for (int j = 0; j < downloaders.size(); j++) {
                 ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
-                if (currD.conflicts(rfds[i]))
+                if (currD.conflictsLAX(rfds[i]))
                     currD.addDownload(rfds[i]);
             }        
     }

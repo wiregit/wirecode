@@ -245,6 +245,76 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+    private final long SIZE_CLOSE_RANGE = 100;
+    private final boolean sizeClose(long one, long two) {
+        boolean retVal = false;
+        if (one == two)
+            retVal = true;
+        else if (one < two) {
+            if ((one + SIZE_CLOSE_RANGE) >= two)
+                retVal = true;
+        }
+        else { // one > two
+            if ((two + SIZE_CLOSE_RANGE) >= one)
+                retVal = true;
+        }        
+
+        return retVal;
+    }
+
+    private final float MATCH_PRECISION = 0.8f;
+    private ApproximateMatcher matcher = new ApproximateMatcher();
+    private final boolean namesClose(final String one, 
+                                     final String two) {
+        boolean retVal = false;
+        retVal = matcher.matches(matcher.process(one),
+                                 matcher.process(two),
+                                 MATCH_PRECISION);
+        return retVal;
+    }
+
+
+
+    /**
+     * Returns true if 'other' could conflict with one of the files in this. 
+     * This is a much less strict version compared to conflicts().
+     * WARNING - THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
+     * STATE!!!  Ideally used when WAITING_FOR_RESULTS....
+     */
+    private boolean initDone = false; // used to init
+    public boolean conflictsLAX(RemoteFileDesc other) {
+
+        if (!initDone) {
+            matcher.setIgnoreCase(true);
+            matcher.setIgnoreWhitespace(true);
+            matcher.setCompareBackwards(true);
+            initDone = true;
+        }
+
+        synchronized (this) {
+            // get other info...
+            final String otherName = other.getFileName();
+            final long otherLength = other.getSize();
+
+            // compare to allFiles....
+            for (int i=0; i<allFiles.length; i++) {
+                // get current info....
+                RemoteFileDesc rfd = (RemoteFileDesc) allFiles[i];
+                final String thisName = rfd.getFileName();
+                final long thisLength = rfd.getSize();
+
+                // if they are similarly named and are close in length....
+                // do sizeClose() first, much less expensive.....
+                if (sizeClose(otherLength, thisLength))
+                    if (namesClose(otherName, thisName)) 
+                        return true;                
+            }
+        }
+        return false;
+    }
+
+
+
     /** 
      * Adds the given location to this.  This will terminate after
      * downloading rfd or any of the other locations in this.  This
