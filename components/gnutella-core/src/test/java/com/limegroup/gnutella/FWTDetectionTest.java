@@ -61,6 +61,7 @@ public class FWTDetectionTest extends BaseTestCase {
     public static void globalSetUp() {
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        
         cmStub = new CMStub();
         
         try{
@@ -75,8 +76,6 @@ public class FWTDetectionTest extends BaseTestCase {
         cmStub.setConnected(false);
         assertFalse(RouterService.isConnected());
         
-        assertNotNull(UDPService.instance());
-        assertNotNull(RouterService.getUdpService());
         
         // move our existing gnutella.net out of the way
         originalNet = new File(CommonUtils.getUserSettingsDir(), 
@@ -87,6 +86,7 @@ public class FWTDetectionTest extends BaseTestCase {
             tempNet.delete();
             originalNet.renameTo( tempNet );
         }
+        
     }
     
     public static void globalTearDown() {
@@ -100,10 +100,11 @@ public class FWTDetectionTest extends BaseTestCase {
         }
     }
     
-    public void tearDown() {
+    public void setUp() {
         cmStub.setConnected(false);
-        ponger1.drain();
-        ponger2.drain();
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
         try {
             UDPService service = UDPService.instance();
@@ -111,13 +112,17 @@ public class FWTDetectionTest extends BaseTestCase {
             PrivilegedAccessor.setValue(service,"_previousIP",null);
             PrivilegedAccessor.setValue(service,"_lastReportedIP",null);
             PrivilegedAccessor.setValue(service,"_lastReportedPort",
-                    new Integer(RouterService.getPort()));
+                    new Integer(6348));
             PrivilegedAccessor.setValue(service,"_portStable",new Boolean(true));
-            PrivilegedAccessor.setValue(Acceptor.class,"_externalAddress",
-                    new byte[]{(byte)0,(byte)0,(byte)0,(byte)0});
+            PrivilegedAccessor.setValue(Acceptor.class,"_externalAddress",new byte[4]);
         }catch(Exception bad) {
             ErrorService.error(bad);
         }
+    }
+    
+    public void tearDown() {
+        ponger1.drain();
+        ponger2.drain();
     }
     
     /**
@@ -287,33 +292,46 @@ public class FWTDetectionTest extends BaseTestCase {
         assertFalse(UDPService.instance().canDoFWT());
     }
     
+    public void testPongCarriesBadAddressBeforeConnect() throws Exception {
+        Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
+        ponger1.reply(badAddress);
+        Thread.sleep(500);
+        cmStub.setConnected(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        
+        assertFalse(UDPService.instance().canDoFWT());
+    }
+    
     /**
      * tests the case where our external address gets updated 
      * and the next pong we receive with the new address does not 
      * disable FWT, nor does a late pong with the old address.
      */
     public void testTCPUpdatePreventsDisabling() throws Exception {
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         connectAsync();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
+        cmStub.setConnected(true);
         
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
-        Endpoint myself = new Endpoint(InetAddress.getLocalHost().getAddress(),
-                RouterService.getPort());
+        Endpoint myself = new Endpoint(InetAddress.getLocalHost().getAddress(), RouterService.getPort());
         ponger1.reply(myself);
+        Thread.sleep(1000);
         
         assertTrue(UDPService.instance().canDoFWT());
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("127.0.0.1"));
         
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("127.0.0.2"));
-        
-        Endpoint myNewSelf = new Endpoint("1.2.3.4",RouterService.getPort());
-        
+        Endpoint myNewSelf = new Endpoint("127.0.0.1",RouterService.getPort());
         ponger1.reply(myNewSelf);
         
+        Thread.sleep(1000);
         assertTrue(UDPService.instance().canDoFWT());
         
         ponger1.reply(myself);
@@ -368,10 +386,6 @@ public class FWTDetectionTest extends BaseTestCase {
                 DatagramPacket pack = new DatagramPacket(data,1024);
                 _sock.receive(pack);
                 _lastAddress = pack.getSocketAddress();
-                
-                //also set the external address based on that ping
-                //ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-                //RouterService.getAcceptor().setExternalAddress(pack.getAddress());
                 
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
                     
