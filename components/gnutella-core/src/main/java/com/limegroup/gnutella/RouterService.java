@@ -823,5 +823,9 @@ public class RouterService
     public boolean hasClientSupernodeConnection() {
         return manager.hasClientSupernodeConnection();
     }
+    
+    public boolean hasSupernodeClientConnection() {
+        return manager.hasSupernodeClientConnection();
+    }
 
 }

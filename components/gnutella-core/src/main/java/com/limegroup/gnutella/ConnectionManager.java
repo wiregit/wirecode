@@ -295,6 +295,8 @@ public class ConnectionManager {
         //volatile value
         if(_incomingClientConnections > 0 
             && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
+            SettingsManager.instance().setKeepAlive(
+                MIN_CONNECTIONS_FOR_SUPERNODE);
             setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
         }
     }
@@ -324,6 +326,16 @@ public class ConnectionManager {
             ManagedConnection first=(ManagedConnection)connections.get(0);
             return first.isClientSupernodeConnection();
         }
+    }
+    
+    /**
+     * Returns true if this is a super node with a connection to a leaf. 
+     */
+    public boolean hasSupernodeClientConnection() {
+        if(_incomingClientConnections > 0)
+            return true;
+        else
+            return false;
     }
     
     /**
