@@ -61,10 +61,9 @@ public class UltrapeerHandshakeResponder
 			//Fine, we'll become a leaf.
 			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
-
-		//We do this last, to prevent reject connections from being deflated,
-		//which may actually increase the amount of bandwidth needed.		
-		if(response.isDeflateAccepted()) {
+		// only encode if we're not going to become a leaf.
+		// (because leaves send such little traffic)
+		else if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 		    

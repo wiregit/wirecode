@@ -190,7 +190,8 @@ public final class HandshakeResponse {
 
          ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
          LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
-         DEFLATE_ENCODED = isStringValue(HEADERS, "Content-Encoding", "deflate");
+         DEFLATE_ENCODED = isStringValue(HEADERS,
+            HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
      }
    
     /**
@@ -540,6 +541,8 @@ public final class HandshakeResponse {
      * Returns whether or not this connnection is encoded in deflate.
      */
     public boolean isDeflateEnabled() {
+        //this does NOT check the setting because we have already told the
+        //outgoing side we support encoding, and they're expecting us to use it
         return DEFLATE_ENCODED;
     }
     

@@ -46,11 +46,11 @@ public final class LeafHandshakeResponder
         }
         
         Properties ret = new Properties();
-		//We do this last, to prevent reject connections from being deflated,
-		//which may actually increase the amount of bandwidth needed.        
-		if(response.isDeflateAccepted()) {
-		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
-		}
+
+        // leaves don't need to encode, they send such little traffic.   
+//		if(response.isDeflateAccepted()) {
+//		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+//		}
         
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
@@ -69,14 +69,16 @@ public final class LeafHandshakeResponder
         Properties ret = new LeafHeaders(getRemoteIP());
         
 
-        if (RouterService.isLeaf()) {
+        if (RouterService.isShieldedLeaf()) {
             //a) If we're already a leaf, reject
             return HandshakeResponse.createRejectIncomingResponse(ret);
-        }
+        } 
 
-		//We do this last, to prevent reject connections from being deflated,
-		//which may actually increase the amount of bandwidth needed.        
-		if(hr.isDeflateAccepted()) {
+		// Only encode if the other side's not an ultrapeer &
+		// we'd be creating an unshielded connection.
+		// (If it's shielded there's such little traffic we'd send
+		//  that it doesn't matter.)
+		if(!hr.isUltrapeer() && hr.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 

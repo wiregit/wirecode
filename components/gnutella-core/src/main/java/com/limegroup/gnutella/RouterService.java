@@ -1057,12 +1057,13 @@ public final class RouterService {
     }
 
 	/**
-	 * Accessor for whether or not this node is a leaf.
+	 * Accessor for whether or not this node is a shielded leaf.
 	 *
-	 * @return <tt>true</tt> if this node is a leaf, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if this node is a shielded leaf, 
+	 *  <tt>false</tt> otherwise
 	 */
-    public static boolean isLeaf() {
-        return manager.isLeaf();
+    public static boolean isShieldedLeaf() {
+        return manager.isShieldedLeaf();
     }    
 
 

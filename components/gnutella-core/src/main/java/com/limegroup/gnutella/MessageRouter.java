@@ -674,7 +674,7 @@ public abstract class MessageRouter {
 																	  handler), 
 								 handler, counter);
 			}
-		} else if(request.getTTL() > 0 && !RouterService.isLeaf()) {
+		} else if(request.getTTL() > 0 && !RouterService.isShieldedLeaf()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
             if(handler.isGoodConnection()) {
