@@ -761,7 +761,7 @@ public class Connection {
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {
-            Message m = Message.read(_in, _softMax);
+            Message m = Message.read(_in, HEADER_BUF, _softMax);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
