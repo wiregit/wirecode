@@ -73,11 +73,6 @@ public class Library {
 	    try {
 		Runtime runtime = Runtime.getRuntime();
 		String str = "cmd /c "+"\""+ checkChars(path)+"\"";
-		
-		//String st = "cmd /c \""+ path + "\"";
-		//String [] str = {st};
-		// str = checkChars(str);
-		System.out.println(str);
 		Process p1 = runtime.exec(str);
 	    }catch (Exception e) {
 		return false;
@@ -101,12 +96,6 @@ public class Library {
 	
 	for (int i=0; i < length; i++) {
 	    
-	  //    if (escapeChars.indexOf(chars[i]) != -1 ) {
-//  		// add escape char
-//  		new_chars[index++] = '^';
-//  		new_chars[index++] = chars[i];
-//  	    }
-//  	    if(chars[i] == ' ') {
 	    if (escapeChars.indexOf(chars[i]) != -1 ) {
 		new_chars[index++] = '"';
 		new_chars[index++] = chars[i];
