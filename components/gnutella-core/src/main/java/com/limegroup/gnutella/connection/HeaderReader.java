@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.http.HTTPHeader;
 
@@ -72,4 +74,16 @@ public interface HeaderReader {
      *  channel but have not processed, otherwise <tt>false</tt>
      */
     boolean hasRemainingData();
+
+    /**
+     * Accessor for any data remaining in the header reader.  This is 
+     * particularly useful for NIO header reading where we will frequently
+     * read into the first message or so sent from the remote host at the end
+     * of the handshake.  This allows that message data to be retrieved and 
+     * processed.
+     * 
+     * @return a <tt>InputStream</tt> containing any left over data read from 
+     *  the remote host but not yet processed
+     */
+    InputStream getRemainingData();
 }
