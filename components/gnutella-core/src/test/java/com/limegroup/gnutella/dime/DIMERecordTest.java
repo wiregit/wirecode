@@ -703,8 +703,8 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    out.write( new byte[] { 0, 0 } ); // id length: 0
 	    out.write( new byte[] { 0, 0 } ); // type length: 0
 	    // one over Integer.MAX_VALUE (in big endian format)
-	    out.write( new byte[] { (byte)0xFF, (byte)0xFF, 
-	                            (byte)0x01, (byte)0x00 } );
+	    out.write( new byte[] { (byte)0x80, (byte)0x00, 
+	                            (byte)0x00, (byte)0x00 } );
         in = new ByteArrayInputStream(out.toByteArray());   
         try {
             record = DIMERecord.createFromStream(in);
