@@ -544,8 +544,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 null,           //metadata query
                                 true,           //mark as requery
                                 null,           //requested URNs
-                                extractUrns()); //the hashes
-                                
+                                extractUrns(),  //the hashes
+                                !RouterService.acceptedIncomingConnection());
     }
 
     /** Returns the URNs for requery, i.e., the union of all requeries 

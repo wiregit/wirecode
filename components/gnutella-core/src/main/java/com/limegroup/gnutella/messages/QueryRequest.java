@@ -74,7 +74,7 @@ public class QueryRequest extends Message implements Serializable{
      * Whether or not this is a repeat query is encoded in guid.  GUID must have
      * been created via newQueryGUID; this allows the caller to match up results
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query,
                         boolean isFirewalled) {
         this(guid, ttl, minSpeed, query, "", isFirewalled);
     }
@@ -82,7 +82,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Builds a new query from scratch, with no metadata, with a default GUID.
      */
-    public QueryRequest(byte ttl, int minSpeed, String query
+    public QueryRequest(byte ttl, int minSpeed, String query,
                         boolean isFirewalled) {
         this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null,
              null, isFirewalled);
@@ -463,7 +463,7 @@ public class QueryRequest extends Message implements Serializable{
     }
 
     public String toString() {
- 		return "<query: \""+getQuery()+"\", "+
+ 		return "<query: \""+getQuery()+"\", "+ 
         "meta: \""+getRichQuery()+"\", "+
         "types: "+getRequestedUrnTypes().size()+","+
         "urns: "+getQueryUrns().size()+">";
