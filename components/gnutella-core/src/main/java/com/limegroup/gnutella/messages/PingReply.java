@@ -119,6 +119,28 @@ public class PingReply extends Message implements Serializable {
     }
 
     /**
+     * Use this constructor to make an unsolicited, ConnectBack PingReply.  The
+     * GUID is generated for you (no referring GUID cuz it is unsolicited) and
+     * the ttl is 1 because it should only go 1 hop.
+     *
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     */
+    public PingReply(int port, byte[] ip, long files, long kbytes, 
+                     boolean isUltrapeer, QueryKey queryKey) {
+        this(GUID.makeGuid(), (byte)1, port, ip, files, kbytes, isUltrapeer,
+             cbGGEP());
+    }
+
+    /**
      * Wrap a PingReply around stuff snatched from the network.
      * <p>
      * Initially this method required that payload.lenghth == 14. But now we
@@ -191,7 +213,8 @@ public class PingReply extends Message implements Serializable {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             //See above.
             Assert.that(false, "Couldn't encode uptime or udp");
             return null;
@@ -214,9 +237,31 @@ public class PingReply extends Message implements Serializable {
             baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             //See above.
             Assert.that(false, "Couldn't encode QueryKey" + queryKey);
+            return null;
+        }
+    }
+
+
+    /** Returns the GGEP payload bytes to encode the given QueryKey */
+    private static byte[] cbGGEP() {
+        try {
+            GGEP ggep=new GGEP(true);
+
+            // populate GGEP....
+            ggep.put(GGEP.GGEP_HEADER_CONNECT_BACK);
+
+            // actually write the badboy
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ggep.write(baos);
+            return baos.toByteArray();
+        } 
+        catch (IOException e) {
+            //See above.
+            Assert.that(false, "Couldn't make a CB GGEP block.");
             return null;
         }
     }
@@ -329,8 +374,10 @@ public class PingReply extends Message implements Serializable {
     }
 
 
-    /** Returns the average daily uptime in seconds from the GGEP payload.
-     *  @exception BadPacketException if the uptime is not known or corrupt. */
+    /** Returns true if the pong describes a GUESS-capable servent.
+     *  @exception BadPacketException thrown if the GGEP block is nonexistent or
+     *  corrupt. 
+     */
     public synchronized boolean supportsUnicast() throws BadPacketException {
         parseGGEP();
         if (ggep==null)
@@ -412,6 +459,18 @@ public class PingReply extends Message implements Serializable {
         return null;
     }
 
+
+
+    /** Returns true if the client would like you to try to connect back to him.
+     *  @exception BadPacketException thrown if the GGEP block is nonexistent or
+     *  corrupt. 
+     */
+    public synchronized boolean needsConnectBack() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        return ggep.hasKey(GGEP.GGEP_HEADER_CONNECT_BACK);
+    }
 
 
     public synchronized boolean hasGGEPExtension() {
