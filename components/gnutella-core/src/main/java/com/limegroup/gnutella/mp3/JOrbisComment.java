@@ -57,9 +57,12 @@ class JOrbisComment {
    * @param file the .ogg file to be updated
    */
   public void update(Comment comment, File file) throws IOException{
-    
+  	FileInputStream in =null;
+  	FileOutputStream out = null;
+  	File tempFile = null;
+  	try {
     state =new State();
-    FileInputStream in =new FileInputStream(file);
+    in =new FileInputStream(file);
     
     read(in);
     
@@ -67,7 +70,7 @@ class JOrbisComment {
     state.vc=comment;
     
     //copy the newly created file in a temp folder
-    File tempFile=null;
+    tempFile=null;
     try {
      tempFile = File.createTempFile(file.getName(),"tmp");
     }catch(IOException e) {
@@ -83,20 +86,23 @@ class JOrbisComment {
     			File.separator+
 				file.getName()+".tmp");
     }
-    OutputStream out=new FileOutputStream(tempFile);
+    out=new FileOutputStream(tempFile);
     
     
     LOG.debug("about to write ogg file");
     
     write(out);
-    out.close();
-    in.close();
     
     //rename fails on some rare filesystem setups
     LOG.debug("about to rename ogg file");
     
     tempFile.renameTo(file);
-    
+  	}finally {
+  		if (out!=null)
+  		try {out.close(); }catch(IOException ignored){}
+  		if (in!=null)
+  	  		try {in.close(); }catch(IOException ignored){}
+  	}
     
     
   }

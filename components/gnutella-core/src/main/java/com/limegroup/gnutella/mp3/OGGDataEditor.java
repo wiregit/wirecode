@@ -45,38 +45,40 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 			
 			String tmp;
 			
-
-			tmp = OGGMetaData.TITLE_TAG+"="+title_;
+			
+			tmp = OGGMetaData.TITLE_TAG+"="+(title_!=null ? title_ : "");
 			commentBytes[0]=tmp.getBytes();
 			comment.comment_lengths[0] = tmp.length();
 			
 
-			tmp=OGGMetaData.ARTIST_TAG+"="+artist_;
+			
+			tmp=OGGMetaData.ARTIST_TAG+"="+(artist_!=null ? artist_ : "");
 			commentBytes[1]=tmp.getBytes();
 			comment.comment_lengths[1] = tmp.length();
 			
 
-			tmp=OGGMetaData.ALBUM_TAG+"="+album_;
+			
+			tmp=OGGMetaData.ALBUM_TAG+"="+(album_!=null ? album_: "");
 			commentBytes[2]=tmp.getBytes();
 			comment.comment_lengths[2] = tmp.length();
 			
 
-			tmp=OGGMetaData.COMMENT_TAG+"="+comment_;
+			tmp=OGGMetaData.COMMENT_TAG+"="+(comment_!=null ? comment_ :"");
 			commentBytes[3]=tmp.getBytes();
 			comment.comment_lengths[3] = tmp.length();
 			
 			
-			tmp=OGGMetaData.GENRE_TAG+"="+genre_;
+			tmp=OGGMetaData.GENRE_TAG+"="+(genre_!=null ? genre_ : "");
 			commentBytes[4]=tmp.getBytes();
 			comment.comment_lengths[4] = tmp.length();
 			
 			
-			tmp=OGGMetaData.TRACK_TAG+"="+track_;
+			tmp=OGGMetaData.TRACK_TAG+"="+(track_ != null ? track_ : "");
 			commentBytes[5]=tmp.getBytes();
 			comment.comment_lengths[5] = tmp.length();
 			
 			
-			tmp=OGGMetaData.DATE_TAG+"="+year_;
+			tmp=OGGMetaData.DATE_TAG+"="+(year_!=null ? year_ :"");
 			commentBytes[6]=tmp.getBytes();
 			comment.comment_lengths[6] = tmp.length();
 			
