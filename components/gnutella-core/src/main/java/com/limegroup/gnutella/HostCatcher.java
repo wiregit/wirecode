@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.InetAddress;
 
 /**
  * The host catcher.  This peeks at pong messages coming on the
@@ -27,6 +28,7 @@ public class HostCatcher {
      */     
     private List /* of Endpoint */ queue=new ArrayList();
     private Set /* of Endpoint */ set=new HashSet();
+    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
 
     /*
      * The list of all connections.  Used exclusively for callbacks
@@ -96,7 +98,7 @@ public class HostCatcher {
 	    //Everything passed!  Add it.  No need to synchronize because
 	    //this is a constructor.
 	    Endpoint e = new Endpoint(host, port);	    
-	    if (! set.contains(e)) {
+	    if ((! set.contains(e)) && (! isMe(host, port))) {
 		queue.add(0,e); //add e to the head.  Order matters!
 		//no need to call notify since nothing can be waiting on this.
 		set.add(e);
@@ -163,6 +165,10 @@ public class HostCatcher {
 	if (manager!=null && manager.isConnected(e))
 	    return;
 
+	//Skip if this would connect us to our listening port.
+	if (isMe(e.getHostname(), e.getPort()))
+	    return;	
+
 	synchronized(this) {
 	    if (! (set.contains(e))) {
 		set.add(e);
@@ -218,8 +224,9 @@ public class HostCatcher {
 	    Connection ret = null;
 	    try {
 		ret = new Connection(e.hostname,e.port);
-		if (manager!=null)
+		if (manager!=null) {		   
 		    manager.tryingToConnect(ret, false);
+		}
 		ret.connect();
 		return ret;
 	    } catch (IOException exc) {
@@ -312,6 +319,36 @@ public class HostCatcher {
 	set.clear();
     }
 
+    /** 
+     * If manager==null, returns false.  
+     * If host is not a valid host address, returns false.
+     * Otherwise, returns true if connecting to host:port would connect to 
+     *  the manager's listening port.
+     */
+    private boolean isMe(String host, int port) {
+	if (manager==null) { 
+	    return false;
+	}
+
+	//Don't allow connections to yourself.  We have to special
+	//case connections to "localhost" or "127.0.0.1" since
+	//they are aliases for what is returned by manager.getListeningPort.	
+	byte[] cIP;
+	try {
+	    cIP=InetAddress.getByName(host).getAddress();
+	} catch (IOException e) {
+	    return false;
+	}
+
+	if (Arrays.equals(cIP, LOCALHOST)) {
+	    return port==manager.getListeningPort();
+	} else {
+	    byte[] managerIP=manager.getAddress();
+	    return Arrays.equals(cIP, managerIP)
+		&& port==manager.getListeningPort();
+	}
+    }
+	
     public String toString() {
 	return queue.toString();
     }

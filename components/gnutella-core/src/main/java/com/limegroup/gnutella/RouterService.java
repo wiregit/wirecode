@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.InetAddress;
 import com.sun.java.util.collections.*;
 
 /**
@@ -83,13 +84,31 @@ public class RouterService
 		System.out.println(iter.next().toString());
     }
 
+	private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established.
+	 * If establishing c would connect us to the listening socket,
+	 * the connection is not established.
      */
     public void connectToHost( Connection c ) throws IOException
-    {
+    {					
 	try {
+		//Don't allow connections to yourself.  We have to special
+		//case connections to "localhost" or "127.0.0.1" since
+		//they are aliases for what is returned by manager.getListeningPort.
+	    byte[] cIP=InetAddress.getByName(c.getOrigHost()).getAddress();
+		if (Arrays.equals(cIP, LOCALHOST)) {
+			if (c.getOrigPort()==manager.getListeningPort())
+				throw new IOException();
+		} else {
+			byte[] managerIP=manager.getAddress();
+			if (Arrays.equals(cIP, managerIP)
+				&& c.getOrigPort()==manager.getListeningPort())
+				throw new IOException();
+		}
+
+		
 	    manager.tryingToConnect(c,false);
 	    c.connect();
 	    c.setManager(manager);
