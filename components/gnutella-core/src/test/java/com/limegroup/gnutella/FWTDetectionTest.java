@@ -95,9 +95,6 @@ public class FWTDetectionTest extends BaseTestCase {
         
         try {
             UDPService service = UDPService.instance();
-            PrivilegedAccessor.setValue(service,"_tcpAddressInitialized",new Boolean(false));
-            PrivilegedAccessor.setValue(service,"_previousIP",null);
-            PrivilegedAccessor.setValue(service,"_lastReportedIP",null);
             PrivilegedAccessor.setValue(service,"_lastReportedPort",
                     new Integer(RouterService.getPort()));
             PrivilegedAccessor.setValue(service,"_acceptedSolicitedIncoming",new Boolean(true));
@@ -210,7 +207,6 @@ public class FWTDetectionTest extends BaseTestCase {
     }
     /**
      * tests if the pings are requesting ip:port check properly
-     *
      */
     public void testPingsRequesting() throws Exception {
         
@@ -260,35 +256,6 @@ public class FWTDetectionTest extends BaseTestCase {
         cmStub.setConnected(false);
     }
     
-    /**
-     * tests the case where both pinged hosts reply with the same
-     * ip:port.  Between the first and the second ping we learn our
-     * external address from a tcp connection
-     */
-    public void testPongsCarryGoodInfoBetweenConnect() throws Exception {
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-        
-        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
-        
-        assertTrue(ponger1.listen().requestsIP());
-        assertTrue(ponger2.listen().requestsIP());
-        
-        Endpoint myself = new Endpoint(InetAddress.getLocalHost().getAddress(),
-                RouterService.getPort());
-        ponger1.reply(myself);
-        
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
-        
-        ponger2.reply(myself);
-        
-        Thread.sleep(500);
-        cmStub.setConnected(true);
-        assertTrue(UDPService.instance().canDoFWT());
-        assertFalse(ConnectionSettings.EVER_DISABLED_FWT.getValue());
-        cmStub.setConnected(false);
-    }
     
     /**
      * tests the case where a pong says we have a different port
@@ -301,6 +268,7 @@ public class FWTDetectionTest extends BaseTestCase {
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
         Endpoint badPort = new Endpoint(InetAddress.getLocalHost().getAddress(),12345);
         ponger1.reply(badPort);
@@ -310,66 +278,6 @@ public class FWTDetectionTest extends BaseTestCase {
         assertFalse(UDPService.instance().canDoFWT());
         assertTrue(ConnectionSettings.EVER_DISABLED_FWT.getValue());
         cmStub.setConnected(false);
-    }
-    
-    /**
-     * tests the case where the pong says we have different address
-     */
-    public void testPongCarriesBadAddress() throws Exception {
-        
-        Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
-        ponger1.reply(badAddress);
-        Thread.sleep(500);
-        cmStub.setConnected(true);
-        assertFalse(UDPService.instance().canDoFWT());
-    }
-    
-    public void testPongCarriesBadAddressBeforeConnect() throws Exception {
-        Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
-        ponger1.reply(badAddress);
-        Thread.sleep(500);
-        cmStub.setConnected(true);
-        assertFalse(UDPService.instance().canDoFWT());
-        
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
-        
-        assertFalse(UDPService.instance().canDoFWT());
-    }
-    
-    /**
-     * tests the case where our external address gets updated 
-     * and the next pong we receive with the new address does not 
-     * disable FWT, nor does a late pong with the old address.
-     */
-    public void testTCPUpdatePreventsDisabling() throws Exception {
-        
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
-        
-        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
-        
-        assertTrue(ponger1.listen().requestsIP());
-        assertTrue(ponger2.listen().requestsIP());
-        cmStub.setConnected(true);
-        
-        
-        Endpoint myself = new Endpoint(InetAddress.getLocalHost().getAddress(), RouterService.getPort());
-        ponger1.reply(myself);
-        Thread.sleep(1000);
-        
-        assertTrue(UDPService.instance().canDoFWT());
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        
-        Endpoint myNewSelf = new Endpoint("127.0.0.1",RouterService.getPort());
-        ponger1.reply(myNewSelf);
-        
-        Thread.sleep(1000);
-        assertTrue(UDPService.instance().canDoFWT());
-        
-        ponger1.reply(myself);
-        assertTrue(UDPService.instance().canDoFWT());
-        
     }
     
     /**

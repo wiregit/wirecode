@@ -14,6 +14,9 @@ import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -41,6 +44,8 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  */
 public class UDPService implements Runnable {
 
+    private static final Log LOG = LogFactory.getLog(UDPService.class);
+    
 	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
@@ -108,32 +113,11 @@ public class UDPService implements Runnable {
      */
     private boolean _portStable = true;
     
-    /** The last reported port as seen from the outside 
+    /** The last reported port as seen from the outside
      *  LOCKING: this
      */
-    private int _lastReportedPort = ConnectionSettings.PORT.getValue();
+    private int _lastReportedPort = -1;
 
-    /** The last reported address as seen from the outside 
-     * LOCKING: this
-     */
-    private byte[] _lastReportedIP;
-    
-    
-    /**
-     * if our isp changed our ip, this holds the previous value
-     * LOCKING: this
-     */
-    private byte[] _previousIP;
-
-    /**
-     * Whether we have discovered our external tcp address.
-     * Used to differentiate between initial connection to the network
-     * and subsequent address changes by the ISP.
-     * LOCKING: this
-     */
-    private boolean _tcpAddressInitialized;
-    
-    
     /**
      * Whether we have received a Pong carrying our address.
      * LOCKING: this
@@ -274,7 +258,6 @@ public class UDPService implements Runnable {
                 // set the port in the FWT records
                 if (_socket!=null)
                     synchronized(this) {
-                        _lastReportedIP=_socket.getLocalAddress().getAddress();
                         _lastReportedPort=_socket.getLocalPort();
                         _portStable=true;
                     }
@@ -368,24 +351,15 @@ public class UDPService implements Runnable {
                 _acceptedSolicitedIncoming = true;
                 
                 PingReply r = (PingReply)message;
-                if (r.getMyInetAddress() != null) {
-                    
-                    byte [] newAddr = r.getMyInetAddress().getAddress();
-                    
-                    synchronized(this){ 
+                if (r.getMyPort() != 0) {
+                    synchronized(this){
+                        Assert.that(_lastReportedPort != -1 , "got a pong without socket!");
                         
                         _receivedIPPong=true;
                         
-                        // we may receive a late pong after the isp has
-                        // changed our address.  We should not let that pong
-                        // affect us. (port is unaffected)
-                        if (_previousIP==null || 
-                                !Arrays.equals(_previousIP,newAddr)) 
-                            _lastReportedIP=newAddr;
-                    
                         if (_lastReportedPort!=r.getMyPort()) {
-                            _portStable=false;
-                            _lastReportedPort=r.getMyPort();
+                            _portStable = false;
+                            _lastReportedPort = r.getMyPort();
                         }
                     }
                 }
@@ -690,29 +664,34 @@ public class UDPService implements Runnable {
 	 *  If we have received an udp packet but are not connected, or haven't 
 	 * received a pong carrying ip info yet, see if we ever disabled fwt in the 
 	 * past.
-	 *  If we are connected and have gotten ip pongs, the criteria are:
-	 *   - our port does not change and is the same as our tcp port
-	 *   - our ip address is the same as our address as seen from tcp 
-	 *   connections.
+	 *  If we are connected and have gotten ip pongs, our port must not change 
+	 * and is the same as our tcp port.
 	 */
 	public boolean canDoFWT(){
 	    // this does not affect EVER_DISABLED_FWT.
 	    if (!canReceiveSolicited()) 
-		return false;
+	        return false;
 
 	    if (!RouterService.isConnected())
 	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
 	    
 	    boolean ret = true;
 	    synchronized(this) {     	
-	        if (!_receivedIPPong)
+	        if (!_receivedIPPong) 
 	            return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	        
+	        if (LOG.isTraceEnabled()) {
+	            LOG.trace("stable "+_portStable+
+	                    " last reported port "+_lastReportedPort+
+	                    " vs. external port "+RouterService.getPort()+
+	                    " valid external addr "+NetworkUtils.isValidAddress(
+	                            RouterService.getExternalAddress()));
+	        }
 	        
 	        ret= 
 	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
 	    		_portStable &&
-	    		_lastReportedPort==RouterService.getPort() &&
-	    		ipStable();
+	    		_lastReportedPort==RouterService.getPort();
 	    }
 	    
 	    if (!ret)
@@ -721,41 +700,19 @@ public class UDPService implements Runnable {
 	    return ret;
 	}
 	
-	public synchronized boolean ipStable() {
-	    return _lastReportedIP!=null &&
-			Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
-	}
-	
+	// Some getters for bug reporting 
 	public boolean portStable() {
 	    return _portStable;
 	}
-
-	/**
-	 * called by Acceptor when we discover our external address. 
-	 * Used to initialize our address.  
-	 * Since the isp may change our ip address,  we reset our FWT status.
-	 */
-	synchronized void updateExternalAddr(byte [] addr) {
-	    
-	    // before we have connected to the network, our _lastReportedIP
-	    // will have been initialized by the udp pongs.  We do not 
-	    // want to lose that information.
-
-        // if our tcp address changes after we have connected to the 
-        // network and we were able to do FWT, we need to update our 
-	    // state since any newly received pongs will disable FWT.
-	    
-	    if (!_tcpAddressInitialized) {
-	        if (_lastReportedIP==null ||
-	                NetworkUtils.isPrivateAddress(_lastReportedIP))
-	            _lastReportedIP=addr;
-	        _tcpAddressInitialized=true;
-	    }
-	    else {
-	        _previousIP=_lastReportedIP;
-	        _lastReportedIP=addr;
-	    }
+	
+	public boolean receivedIpPong() {
+	    return _receivedIPPong;
 	}
+	
+	public int lastReportedPort() {
+	    return _lastReportedPort;
+	}
+
 	/**
 	 * Sets whether or not this node is capable of receiving SOLICITED
      * UDP packets.  This is useful for testing UDPConnections.

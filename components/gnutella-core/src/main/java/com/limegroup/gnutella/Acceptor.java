@@ -154,8 +154,6 @@ public class Acceptor implements Runnable {
 		synchronized(Acceptor.class) {
 		    _externalAddress = byteAddr;
 		}
-		
-		UDPService.instance().updateExternalAddr(byteAddr);
     }
 
     /**
