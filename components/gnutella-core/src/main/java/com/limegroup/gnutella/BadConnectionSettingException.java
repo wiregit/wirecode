@@ -11,7 +11,6 @@ package com.limegroup.gnutella;
 public class BadConnectionSettingException extends RuntimeException {
     public final static int NEGATIVE_VALUE=0x1;
     public final static int TOO_HIGH_FOR_SPEED=0x2;
-    public final static int OUT_GREATER_THAN_IN=0x4;
     
     /** INVARIANT: One of the static fields defined above. */
     private int reason;
@@ -22,8 +21,7 @@ public class BadConnectionSettingException extends RuntimeException {
 
     /**
      * @param reason why the settings were rejected.  This value
-     *  must be one of NEGATIVE_VALUE, TOO_HIGH_FOR_SPEED, or
-     *  OUT_GREATER_THAN_IN.
+     *  must be one of NEGATIVE_VALUE, TOO_HIGH_FOR_SPEED
      * @param suggestedOutgoing the suggested KEEP_ALIVE
      * @param suggestedIncoming the suggested MAX_INCOMING_CONNECTIONS
      */

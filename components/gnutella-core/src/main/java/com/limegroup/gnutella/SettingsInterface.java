@@ -218,7 +218,7 @@ public interface SettingsInterface
     /** Default name for the network discovery properties */
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */
-    public static final int     DEFAULT_KEEP_ALIVE     = 3;
+    public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
@@ -230,7 +230,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=3;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */

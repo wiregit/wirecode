@@ -407,15 +407,14 @@ public class SettingsManager implements SettingsInterface
             catch(IllegalArgumentException iae){ /* continue */ }
             catch(ClassCastException cce){ /* continue */ }
         }
-
-        //Special case: the legality of KEEP_ALIVE and MAX_INCOMING_CONNECTIONS
-        //are dependent on the connection speed.  Now that the connection speed
-        //has been loaded in, verify the properties for real.  If they don't
-        //work, use suggested value.
-        int incoming=getMaxIncomingConnections();
-        int outgoing=getKeepAlive();
-        setBothConnections(incoming, outgoing);
-            
+          
+        //Special case: if this is a modem, ensure that KEEP_ALIVE and
+        //MAX_INCOMING_CONNECTIONS are sufficiently low.
+        if ( getConnectionSpeed()<=28 ) { //modem
+            setKeepAlive(Math.min(2, getKeepAlive()));
+            setMaxIncomingConnections(0);
+        }
+  
         write_ = true;
         writeProperties();
     }
@@ -706,56 +705,32 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Internal method to set both connections at the same time,
-     *  adjust both values as necessary. */
-    private synchronized void setBothConnections(int outgoing,
-                                                 int incoming) {
-        incoming=Math.max(0, incoming);
-        incoming=Math.min(incoming, maxConnections(true));
-        outgoing=Math.max(0, outgoing);
-        outgoing=Math.min(outgoing, maxConnections(false));
-        if (incoming < outgoing)
-            outgoing=incoming;
-        setKeepAlive(outgoing);
-        setMaxIncomingConnections(incoming);
-    }
-
     /**
      * Sets the keep alive. If keepAlive is negative, throws
      * BadConnectionSettingException with a suggested value of 0.
      *
-     * If checkLimit is true, then if keepAlive is too large for the current
-     * connection speed or too large for the current number of incoming
-     * connections, BadConnectionSettingException is thrown with suggested new
-     * values.  The suggestions attempt to set KEEP_ALIVE to keepAlive, even if
-     * that means adjusting MAX_INCOMING_CONNECTIONS.  The suggestions are not
-     * necessarily guaranteed to be valid however.
+     * If checkLimit is true, BadConnectionSettingException is thrown if
+     * keepAlive is too large for the current connection speed.  The suggestions
+     * are not necessarily guaranteed to be valid however.  
      */
     public synchronized void setKeepAlive(int keepAlive,
                                           boolean checkLimit)
         throws BadConnectionSettingException {
         int incoming=getMaxIncomingConnections();
         if (checkLimit) {
-            int max=maxConnections(false);
+            int max=maxConnections();
             //Too high for this connection speed?  Decrease it.
             if (keepAlive > max) {
                 throw new BadConnectionSettingException(
                     BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    max, maxConnections(true));
-            }
-            //Too high for the number of incoming connections?
-            //Increase those.
-            if (keepAlive > incoming) {
-                throw new BadConnectionSettingException(
-                    BadConnectionSettingException.OUT_GREATER_THAN_IN,
-                    keepAlive, Math.min(keepAlive, maxConnections(true)));
+                    max, getMaxIncomingConnections());
             }
         }
 
         if (keepAlive<0) {
             throw new BadConnectionSettingException(
                 BadConnectionSettingException.NEGATIVE_VALUE,
-                0, incoming);
+                0, getMaxIncomingConnections());
         } else {
             keepAlive_ = keepAlive;
             String s = Integer.toString(keepAlive_);
@@ -764,21 +739,20 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Returns the maximum number of incoming/outgoing connections for the
-     *  given connection speed. 
-     */
-    private int maxConnections(boolean incoming) {
+    /** Returns the maximum number of connections for the given connection
+     *  speed.  */
+    private int maxConnections() {
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
-        //depend on GUI code, though.  Ideally we'd restrict modem users to only
-        //ONE incoming connection.  But that breaks the rule that incoming
-        //connects>=outgoing.
-        if (speed<=56)        //ISDN
-            return 2;
-        else if (speed<=350)  //cable
+        //depend on GUI code, though. 
+        if (speed<=28)        //modem
+            return 3;
+        else if (speed<=56)        //ISDN
             return 4;
-        else if (speed<=1000) //T1
+        else if (speed<=350)  //cable
             return 6;
+        else if (speed<=1000) //T1
+            return 10;
         else                  //T3: no limit
             return Integer.MAX_VALUE;
     }
@@ -837,28 +811,20 @@ public class SettingsManager implements SettingsInterface
     public synchronized void setMaxIncomingConnections(int maxConn,
                                                        boolean checkLimit)
         throws BadConnectionSettingException {
-        int outgoing=getKeepAlive();
         if (checkLimit) {
-            int max=maxConnections(true);
+            int max=maxConnections();
             //Too high for this connection speed?  Decrease it.
             if (maxConn > max) {
                 throw new BadConnectionSettingException(
                     BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    outgoing, max);
-            }
-            //Too low for the number of outgoing connections?
-            //Decrease those.
-            if (maxConn < outgoing) {
-                throw new BadConnectionSettingException(
-                    BadConnectionSettingException.OUT_GREATER_THAN_IN,
-                    maxConn, maxConn);
+                    getKeepAlive(), max);
             }
         }
 
         if(maxConn < 0) {
             throw new BadConnectionSettingException(
                 BadConnectionSettingException.NEGATIVE_VALUE,
-                0, 0);
+                getKeepAlive(), 0);
         } else {
             maxIncomingConn_ = maxConn;
             String s = Integer.toString(maxConn);

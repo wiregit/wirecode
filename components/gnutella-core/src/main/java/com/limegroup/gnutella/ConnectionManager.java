@@ -20,7 +20,7 @@ public class ConnectionManager {
      * exactly those endpoints that could be made from the elements of
      * "connections".
      *
-     * INVARIANT: numFetchers = max(0, keepAlive - getNumOutConnections())
+     * INVARIANT: numFetchers = max(0, keepAlive - getNumConnections())
      *            Number of fetchers equals number of connections needed, unless
      *            that number is less than zero.
      *
@@ -216,21 +216,6 @@ public class ConnectionManager {
     }
 
     /**
-     * @return the number of outgoing connections
-     */
-    private int getNumOutConnections() {
-        //This could be optimized if desired by augmenting the state of
-        //ConnectionManager.
-        int ret=0;
-        //Note that we DON'T use getInitializedConnections.
-        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
-            if (((Connection)iter.next()).isOutgoing())
-                ret++;
-        }
-        return ret;
-    }
-
-    /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
@@ -366,7 +351,7 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        int need = _keepAlive - getNumOutConnections() - _fetchers.size();
+        int need = _keepAlive - getNumConnections() - _fetchers.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {
