@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.util;
 
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.*;
 
 /**
  * A mapping that "forgets" keys and values using a FIFO replacement
@@ -69,11 +70,17 @@ public class ForgetfulHashMap extends HashMap {
             return null;
         }
 
+        //declare an object to store the returnValuePair
+        //in case we delete something from the map
+        Map.Entry returnValue = null;
+        
         //Purge oldest entry if we're all full, or if we'll become full
         //after adding this entry.  It's ok if queue[next] is no longer
         //in the map.
         Object oldestKey=queue[next];
         if (queue[next]!=null) {
+            //get the old value
+            returnValue = new KeyValue(oldestKey, super.get(oldestKey));
             super.remove(oldestKey);
         }
         //And make (key,value) the newest entry.  It is ok
@@ -83,7 +90,7 @@ public class ForgetfulHashMap extends HashMap {
         if (next>=n) {
             next=0;
         }
-        return oldestKey;
+        return returnValue;
     }
 
     public void putAll(Map t) {
@@ -92,7 +99,7 @@ public class ForgetfulHashMap extends HashMap {
             Object key=iter.next();
             put(key,t.get(key));
         }
-        return removed;
+        
     }
 
     //      /** Unit test */
