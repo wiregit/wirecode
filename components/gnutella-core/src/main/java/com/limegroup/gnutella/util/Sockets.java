@@ -172,8 +172,12 @@ public class Sockets {
 	 *
 	 * This is basically just a hack to work around JDK bug 4110694.  It is
 	 * implemented in a similar way as Wayne Conrad's SocketOpener class, using
-	 * Thread.stop().  This is necessary because of bugs in earlier Java 
+	 * Thread.interrupt().  This is necessary because of bugs in earlier Java 
 	 * implementations, where certain sockets fail to die.
+	 * It is imperitive that interrupt is used instead of stop, or a thread
+	 * in the middle of loading the native socket library could be killed,
+	 * causing NoClassDefFoundErrors to pop up in every thread attempting
+	 * to create a Socket.
 	 *
 	 * For an outrageous listing of large amounts of SocketOpener threads
 	 * left open, see the following bug reports:
@@ -237,7 +241,7 @@ public class Sockets {
 			}
 			// Ensure that the SocketOpener is killed.
 			if( !completed )
-			    t.stop();
+			    t.interrupt();
 			
 			//a) Normal case
 			if (socket!=null) {
@@ -268,9 +272,6 @@ public class Sockets {
 						}
 					}
                 } catch(Throwable t) {
-                    // Note that if ThreadDeath is thrown, ErrorService will
-                    // correctly rethrow the death instead of reporting it
-                    // so that the thread can die.
 					ErrorService.error(t);
 				}
 			}
