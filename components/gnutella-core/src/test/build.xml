@@ -16,6 +16,7 @@
   <property name="jl011"       value="${lib}jl011.jar"/>
   <property name="playerlib"   value="${jl011}"/>
   <property name="mp3sp"       value="${lib}mp3sp14.jar"/>
+  <property name="id3gen"      value="${corelib}id3gen.jar"/>
   <property name="logicrypto"  value="${corelib}logicrypto.jar"/>
   <property name="ui"          value="${lib}ui.jar"/>
   <property name="mrj"         value="${lib}MRJToolkitStubs.jar"/>
@@ -42,6 +43,7 @@
     <pathelement location="${builddir}" />
     <pathelement location="${coredir}" />
     <pathelement location="${collections}" />
+    <pathelement location="${id3gen}" />
     <pathelement location="${xerces}" />
     <pathelement location="${playerlib}" />
     <pathelement location="${mp3sp}" />
