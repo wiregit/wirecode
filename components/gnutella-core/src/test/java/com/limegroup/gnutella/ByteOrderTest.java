@@ -140,6 +140,10 @@ public class ByteOrderTest extends BaseTestCase {
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(0), new byte[] {(byte)0}));
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(1), new byte[] {(byte)1}));
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(7), new byte[] {(byte)7}));
+        assertTrue(Arrays.equals(ByteOrder.int2minLeb(255), 
+                                 new byte[] {(byte)0xFF}));
+        assertTrue(Arrays.equals(ByteOrder.int2minLeb(256), 
+                                 new byte[] {(byte)0, (byte)0x1}));
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(72831), 
             new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}));
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(731328764), 
