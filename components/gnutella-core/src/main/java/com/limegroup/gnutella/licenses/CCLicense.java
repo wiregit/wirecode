@@ -107,7 +107,6 @@ class CCLicense implements License, Serializable, Cloneable {
     public boolean isVerified() { return verified == VERIFIED; }
     public String getLicense() { return license; }
     public URL getLicenseDeed() { return licenseURL == null ? guessLicenseDeed() : licenseURL; }
-    public URN getExpectedURN() { return expectedURN; }
     public long getLastVerifiedTime() { return lastVerifiedTime; }
     public URI getLicenseURI() { return licenseLocation; }
 
@@ -234,6 +233,7 @@ class CCLicense implements License, Serializable, Cloneable {
             HttpClientManager.executeMethodRedirecting(client, get);
             return get.getResponseBodyAsString();
         } catch(IOException ioe) {
+            LOG.warn("Can't contact license server: " + licenseLocation, ioe);
             return null;
         } finally {
             get.releaseConnection();

@@ -48,11 +48,6 @@ public interface License {
     public URL getLicenseDeed();
     
     /**
-     * Retrieves the URN this verification should have, if any.
-     */
-    public URN getExpectedURN();
-    
-    /**
      * Returns the license, in human readable form.
      */
     public String getLicense();

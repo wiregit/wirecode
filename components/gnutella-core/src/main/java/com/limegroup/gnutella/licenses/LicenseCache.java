@@ -41,7 +41,7 @@ class LicenseCache {
     private final File CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "licenses.cache");        
     
-    private final Map /* String (URL) -> License */ licenses = createMap();
+    private final Map /* URI -> License */ licenses = createMap();
 
     private static final LicenseCache INSTANCE = new LicenseCache();
     private LicenseCache() {}
@@ -51,8 +51,7 @@ class LicenseCache {
      * Adds a verified license.
      */
     synchronized void addVerifiedLicense(License license) {
-        String url = license.getLicenseURI().toString();
-        licenses.put(url, license);
+        licenses.put(license.getLicenseURI(), license);
     }
     
     /**
@@ -60,7 +59,7 @@ class LicenseCache {
      * the license string for a new one.
      */
     synchronized License getLicense(String licenseString, URI licenseURI) {
-        License license = (License)licenses.get(licenseURI.toString());
+        License license = (License)licenses.get(licenseURI);
         if(license != null)
             return license.copy(licenseString);
         else
@@ -71,18 +70,8 @@ class LicenseCache {
      * Determines if the license is verified for the given URN and URI.
      */
     synchronized boolean isVerifiedAndValid(URN urn, URI uri) {
-        License license = (License)licenses.get(uri.toString());
-        if(license != null) {
-            if(!license.isValid(urn))
-                return false;
-            URN expect = license.getExpectedURN();
-            if(expect != null)
-                return expect.equals(urn);
-            else // cannot do URN match if no expected URN.
-                return true;
-        } else {
-            return false; // unverified.
-        }
+        License license = (License)licenses.get(uri);
+        return license != null && license.isValid(urn);
     }
     
    /**

@@ -31,7 +31,6 @@ public class BadLicense implements License {
     public String getLicenseDescription() { return license;  }
     public URI getLicenseURI() { return null; }
     public URL getLicenseDeed() { return guessLicenseDeed(); }
-    public URN getExpectedURN() { return null; }
     public String getLicense() { return license; }
     public void verify(VerificationListener listener) {}
     public long getLastVerifiedTime() { return 0; }

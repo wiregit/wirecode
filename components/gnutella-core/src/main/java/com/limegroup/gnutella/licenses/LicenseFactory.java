@@ -23,9 +23,7 @@ public final class LicenseFactory {
      */
     public static boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
-        if(uri == null)
-            return false;
-        return LicenseCache.instance().isVerifiedAndValid(urn, uri);
+        return uri != null && LicenseCache.instance().isVerifiedAndValid(urn, uri);
     }    
     
     /**
@@ -45,7 +43,8 @@ public final class LicenseFactory {
                 return new BadLicense(licenseString);
             else
                 return null;
-        }
+        } else if(LOG.isDebugEnabled())
+            LOG.debug("Creating license from URI: " + licenseURI);
         
         // See if we have a cached license before we create a new one.
         License license = LicenseCache.instance().getLicense(licenseString, licenseURI);
@@ -68,7 +67,7 @@ public final class LicenseFactory {
     /**
      * Determines the URI to verify this license at from the license string.
      */
-    private static URI getLicenseURI(String license) {
+    static URI getLicenseURI(String license) {
         if(license == null)
             return null;
         
@@ -85,7 +84,18 @@ public final class LicenseFactory {
         URI uri = null;
         try {
             uri = new URI(url.toCharArray());
+            
+            // Make sure the scheme is HTTP.
+            String scheme = uri.getScheme();
+            if(scheme == null || !scheme.equalsIgnoreCase("http"))
+                throw new URIException("Invalid scheme: " + scheme);
+            // Make sure the scheme has some authority.
+            String authority = uri.getAuthority();
+            if(authority == null || authority.equals("") || authority.indexOf(' ') != -1)
+                throw new URIException("Invalid authority: " + authority);
+            
         } catch(URIException e) {
+            uri = null;
             LOG.error("Unable to create URI", e);
         }
         
