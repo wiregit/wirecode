@@ -18,7 +18,7 @@ public class IOUtils
      * @exception IOException if the word of specified maxSize couldnt be read,
      * either due to stream errors, or timeouts
      */
-    static String readWord(InputStream in, int maxSize) throws IOException
+    public static String readWord(InputStream in, int maxSize) throws IOException
     {
         char[] buf=new char[maxSize];
         //iterate till maxSize +1 (for white space)
