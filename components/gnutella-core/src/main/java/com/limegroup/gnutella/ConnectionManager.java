@@ -32,7 +32,6 @@ public class ConnectionManager implements Runnable {
 
     private int keepAlive=0;
     private ActivityCallback callback;
-    private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
     public String ClientId;
     private int   activeAttempts = 0;
     public boolean stats;
@@ -55,7 +54,6 @@ public class ConnectionManager implements Runnable {
      * call run. */
     public ConnectionManager(int port) {
 	this.port=port;
-	propertyManager();
     }
 
 	/**
@@ -71,22 +69,21 @@ public class ConnectionManager implements Runnable {
      *	incoming connections. */
     public ConnectionManager() {
 	this(6346);
-	propertyManager();
     }  
     
     /** 
      *This method is used to get important properties (ClientId for now) at initialization
      *If the property is not set, a value is given to the property.
      */
-    private void propertyManager(){
-	ClientId = lp.getProperty("clientID");
+    public void propertyManager(){
+	ClientId = LimeProperties.getProperties().getProperty("clientID");
 	if (ClientId == null){
 	    ClientId = new String(Message.makeGuid() );
-	    lp.setProperty("ClientID",ClientId);
+	    LimeProperties.getProperties().setProperty("ClientID",ClientId);
 	}
-	String statVal=lp.getProperty("stats");
+	String statVal=LimeProperties.getProperties().getProperty("stats");
 	if (statVal==null)
-	    lp.setProperty("stats","off");
+	    LimeProperties.getProperties().setProperty("stats","off");
 	else {
 	    if (statVal.equals("on"))
 		stats= true;
