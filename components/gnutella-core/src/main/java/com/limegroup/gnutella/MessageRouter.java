@@ -394,6 +394,7 @@ public abstract class MessageRouter {
         _pingRouteTable.removeReplyHandler(rh);
         _queryRouteTable.removeReplyHandler(rh);
         _pushRouteTable.removeReplyHandler(rh);
+        _headPongRouteTable.removeReplyHandler(rh);
     }
 
 	/**
@@ -482,7 +483,7 @@ public abstract class MessageRouter {
             handleSimppVM((SimppVM)msg);
         } 
         else if (msg instanceof HeadPong) {  
-            handleHeadPongTCP((HeadPong)msg); 
+            handleHeadPong((HeadPong)msg, receivingConnection); 
         } 
         else if (msg instanceof VendorMessage) {
             receivingConnection.handleVendorMessage((VendorMessage)msg);
@@ -591,7 +592,7 @@ public abstract class MessageRouter {
         }
         else if (msg instanceof HeadPing) {
         	//TODO: add the statistics recording code
-        	handleHeadPing((HeadPing)msg, datagram);
+        	handleHeadPing((HeadPing)msg, handler);
         }
         notifyMessageListener(msg, handler);
     }
@@ -2109,17 +2110,29 @@ public abstract class MessageRouter {
             throw new NullPointerException("null ReplyHandler");
         }
         // Note the use of getClientGUID() here, not getGUID()
-        ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(request.getClientGUID());
+        ReplyHandler replyHandler = getPushHandler(request.getClientGUID());
 
         if(replyHandler != null)
             replyHandler.handlePushRequest(request, handler);
-    	else if (Arrays.equals(_clientGUID, request.getClientGUID()))
-            FOR_ME_REPLY_HANDLER.handlePushRequest(request, handler);
         else {
 			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
+    }
+    
+    /**
+     * Returns the appropriate handler from the _pushRouteTable.
+     * This enforces that requests for my clientGUID will return
+     * FOR_ME_REPLY_HANDLER, even if it's not in the table.
+     */
+    protected ReplyHandler getPushHandler(byte[] guid) {
+        ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid);
+        if(replyHandler != null)
+            return replyHandler;
+        else if(Arrays.equals(_clientGUID, guid))
+            return FOR_ME_REPLY_HANDLER;
+        else
+            return null;
     }
 
     /**
@@ -2181,15 +2194,10 @@ public abstract class MessageRouter {
         
 
         // Note the use of getClientGUID() here, not getGUID()
-        ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(push.getClientGUID());
+        ReplyHandler replyHandler = getPushHandler(push.getClientGUID());
 
         if(replyHandler != null)
             replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
-        
-        //this is a little weird case but we may use it somewhere (??)
-        else if (Arrays.equals(_clientGUID,push.getClientGUID()))
-    	    FOR_ME_REPLY_HANDLER.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else
             throw new IOException("no route for push");
     }
@@ -2683,80 +2691,61 @@ public abstract class MessageRouter {
     }
     
     /**
-     * replies to a head ping that came through udp, 
-     * unless the same person has pinged us too recently.
+     * Replies to a head ping sent from the given ReplyHandler.
      */
-    private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
-    	InetAddress host = datagram.getAddress();
-    	int port = datagram.getPort();
-    	if (_udpHeadRequests.add(host)) {
-    		
-    		if (ping.getClientGuid() != null && 
-    				!Arrays.equals(ping.getClientGuid().bytes(),RouterService.getMyGUID()))
-    			routeHeadPing(ping,datagram);
-    		else {
-    			HeadPong pong = new HeadPong(ping);
-    			UDPService.instance().send(pong, host, port);
-    		}
-    	}
-    }
-    
-    /**
-     * routes a HeadPing the same way push requests are routed, remembering
-     * where the ping came from.
-     */
-    private void routeHeadPing(HeadPing ping, DatagramPacket datagram) { 
-       InetAddress host = datagram.getAddress(); 
-       int port = datagram.getPort(); 
+    private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
+        GUID clientGUID = ping.getClientGuid();
+        ReplyHandler pingee;
         
-       ReplyHandler pingee =  
-           _pushRouteTable.getReplyHandler(ping.getClientGuid().bytes()); 
+        if(clientGUID != null)
+            pingee = getPushHandler(clientGUID.bytes());
+        else
+            pingee = FOR_ME_REPLY_HANDLER; // handle ourselves.
         
-       //drop the ping if no entry 
-       if (pingee == null) 
+        //drop the ping if no entry for the given clientGUID
+        if (pingee == null) 
            return; 
-       
-       //don't bother routing if this is intended for me. 
-       if (pingee instanceof ForMeReplyHandler)  
-           handleHeadPing(ping,datagram); 
         
-       //remember where to send the pong to. 
-       //the pong will have the same GUID as the ping. 
-       UDPReplyHandler pinger = new UDPReplyHandler(host,port); 
-       _headPongRouteTable.routeReply(ping.getGUID(),pinger); 
-        
-       //and send off the routed ping 
-       pingee.reply(ping); 
+        //don't bother routing if this is intended for me. 
+        // TODO:  Clean up ReplyHandler interface so we aren't
+        //        afraid to use it like it's intended.
+        //        That way, we can do pingee.handleHeadPing(ping)
+        //        and not need this anti-OO instanceof check.
+        if (pingee instanceof ForMeReplyHandler) {
+            // If it's for me, reply directly to the person who sent it.
+            HeadPong pong = new HeadPong(ping);
+            handler.reply(pong); // 
+        } else {
+            // Otherwise, remember who sent it and forward it on.
+                
+            //remember where to send the pong to. 
+            //the pong will have the same GUID as the ping. 
+            // Note that this uses the messageGUID, not the clientGUID
+            _headPongRouteTable.routeReply(ping.getGUID(), handler); 
+            
+            //and send off the routed ping 
+            pingee.reply(ping); 
+        }
    } 
     
     
     /** 
-     * for now just sends the pong back to the pinger. 
+     * Handles a pong received from the given handler.
      */ 
-    private void handleHeadPongTCP(HeadPong pong) { 
-        ReplyHandler handler =  
-            _headPongRouteTable.getReplyHandler(pong.getGUID()); 
+    private void handleHeadPong(HeadPong pong, ReplyHandler handler) { 
+        ReplyHandler forwardTo =  _headPongRouteTable.getReplyHandler(pong.getGUID()); 
+
+        // TODO: Clean up ReplyHandler interface so we're not afraid
+        //       to use it correctly.
+        //       Ideally, we'd do forwardTo.handleHeadPong(pong)
+        //       instead of this instanceof check
          
         // if this pong is for me, process it as usual (not implemented yet)
-        if (handler != null && !(handler instanceof ForMeReplyHandler)) { 
-            handler.reply(pong); 
-            _headPongRouteTable.removeReplyHandler(handler); 
+        if (forwardTo != null && !(forwardTo instanceof ForMeReplyHandler)) { 
+            forwardTo.reply(pong); 
+            _headPongRouteTable.removeReplyHandler(forwardTo); 
         } 
     } 
-    
-        
-    /**
-     * replies to a head ping that came through tcp
-     * unless the same person has pinged us too recently.
-     * 
-     * Note: if I'm a leaf, I can only receive these pings
-     * from my Ultrapeer(s). In this case, the time limit is ignored.
-     * 
-     */
-    private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
-    	HeadPong pong = new HeadPong(ping);
-    	conn.send(pong);
-    }
     
     
     private static class QueryResponseBundle {
