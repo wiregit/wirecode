@@ -485,6 +485,16 @@ public class QueryRouteTable {
                     entries++;  //added entry
                 else if (!wasInfinity && isInfinity)
                     entries--;  //removed entry
+                wasInfinity=(!bitTable.get(nextPatch));
+                if (data[i] == -6)
+                    bitTable.set(nextPatch);
+                else if (data[i] == 6)
+                    bitTable.clear(nextPatch);
+                isInfinity=(!bitTable.get(nextPatch));
+                if (wasInfinity && !isInfinity)
+                    bitEntries++;  //added entry
+                else if (!wasInfinity && isInfinity)
+                    bitEntries--;  //removed entry
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
@@ -522,13 +532,16 @@ public class QueryRouteTable {
     public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
         List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
+            // buf.add(new ResetTableMessage(bitTableLength, infinity));
             buf.add(new ResetTableMessage(table.length, infinity));
         else
+            // Assert.that(prev.bitTableLength==this.bitTableLength,
             Assert.that(prev.table.length==this.table.length,
                         "TODO: can't deal with tables of different lengths");
 
         //1. Calculate patch array
         byte[] data=new byte[table.length];
+        //        byte[] data=new byte[bitTableLength];
         boolean needsPatch=false;
         boolean needsFullByte=false;
         for (int i=0; i<data.length; i++) {
@@ -536,6 +549,22 @@ public class QueryRouteTable {
                 data[i]=(byte)(this.table[i]-prev.table[i]);
             else
                 data[i]=(byte)(this.table[i]-infinity);
+
+//             if (prev!=null) {
+//                 if (this.bitTable.get(i) == prev.bitTable.get(i))
+//                     data[i] = 0;
+//                 else if (this.bitTable.get(i))
+//                     data[i] = -6;
+//                 else // prev.bitTable.get(i)
+//                     data[i] = 6;
+//             }
+//             else {
+//                 if (this.bitTable.get(i))
+//                     data[i] = -6;
+//                 else
+//                     data[i] = 0;
+//             }
+                
 
             if (data[i]!=0)
                 needsPatch=true;
