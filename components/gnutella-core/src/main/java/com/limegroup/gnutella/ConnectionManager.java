@@ -109,6 +109,9 @@ public class ConnectionManager implements Runnable {
 	    ip=new byte[4];
 	}
 
+        
+       
+        
 	//If we're using quick-connect by default, don't load gnutella.net file.
 	//(In this case, RouterService will call quick connect.)
 	boolean quickConnect=SettingsManager.instance().getUseQuickConnect();
@@ -117,9 +120,11 @@ public class ConnectionManager implements Runnable {
 	else
 	    catcher=new HostCatcher(this,SettingsManager.instance().getHostList());	    
 
+        /** //anu //we dont need message broadcaster
 	Thread t=new Thread(new MessageBroadcaster());
 	t.setDaemon(true);
-	t.start();    
+	t.start();
+        */
     }
     
     /** Creates a manager that listens on the default port. Equivalent to

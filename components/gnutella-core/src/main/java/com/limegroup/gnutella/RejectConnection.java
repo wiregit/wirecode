@@ -40,6 +40,7 @@ class RejectConnection extends Connection{
             //declare a message instane
             Message m=null;
             
+           
             //receive a message
             try {
                 m=receive(SettingsManager.instance().getTimeout()); //gets the timeout from SettingsManager
@@ -62,8 +63,9 @@ class RejectConnection extends Connection{
                 //this is the only kind of message we will deal with in Reject Connection
                 //If any other kind of message comes in we drop 
                 
+                 System.out.println("gonna send pongs");
                 //get and send the pongs with good hosts info to the connected host
-                sendPongs();
+                sendPongs(m.getGUID());
                 
                 // we have sent the pongs. Now close the connection
                 shutdown();
@@ -77,8 +79,9 @@ class RejectConnection extends Connection{
     /**
     * Get good hosts from the Network Discovery Engine, and
     * sends pongs to the connected host, with the retrieved hosts
+    * @param guid GUID for the pong
     */
-    private void sendPongs()
+    private void sendPongs(byte[] guid)
     {
         
         try
@@ -89,8 +92,9 @@ class RejectConnection extends Connection{
             //iterate over the endpoints
             for(int i=0; i < endpoints.length; i++)
             {
+                System.out.println("Endpoint[" + i + "]=" + endpoints[i]);
                 // make a pong with this host info, set the TTL to 1
-                PingReply pr = new PingReply(m.getGUID(),(byte)1,endpoints[i].getPort(),
+                PingReply pr = new PingReply(guid,(byte)1,endpoints[i].getPort(),
                                              endpoints[i].getHostBytes(), endpoints[i].getFiles(),
                                              endpoints[i].getKbytes());
                 //send the pong (ping reply)
@@ -99,6 +103,7 @@ class RejectConnection extends Connection{
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             //doesnt matter if we r not able to send pongs
         }
     }
