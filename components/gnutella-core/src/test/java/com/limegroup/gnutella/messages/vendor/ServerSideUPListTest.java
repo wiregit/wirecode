@@ -240,12 +240,64 @@ public class ServerSideUPListTest extends BaseTestCase {
  	 * @throws Exception
  	 */
  	public void testMsgAll() throws Exception {
+ 		
+ 		UPListVendorMessage reply = tryMessage(msgAll);
+ 		//test whether we got proper # of results
+ 		assertEquals(reply.getLeaves().size(), 3);
+ 		assertEquals(reply.getUltrapeers().size(), 3);
+ 		
+ 	}
+ 	
+ 	/**
+ 	 * sends a message requesting 0 leafs and 0 ups.
+ 	 */
+ 	public void testMsgNone() throws Exception {
+ 		UPListVendorMessage reply = tryMessage(msgNone);
+ 		
+ 		assertEquals(reply.getLeaves().size(),0);
+ 		assertEquals(reply.getUltrapeers().size(),0);
+ 	}
+ 	
+ 	/**
+ 	 * sends a malformed message
+ 	 */
+ 	public void testMsgBad() throws Exception {
+ 		UDP_ACCESS.setSoTimeout(1000);
+ 		try {
+ 			UPListVendorMessage reply = tryMessage(msgBad);
+ 			fail("ioex expected");
+ 		}
+ 		catch(IOException iox) {}
+
+ 	}
+ 	
+ 	/**
+ 	 * sends a message requesting leafs only
+ 	 */
+ 	public void testMsgLeafs() throws Exception {
+ 		UPListVendorMessage reply = tryMessage(msgLeafsOnly);
+ 		
+ 		assertEquals(reply.getLeaves().size(),2);
+ 		assertEquals(reply.getUltrapeers().size(),0);
+ 	}
+ 	
+ 	/**
+ 	 * sends a message requesting 1 leafs and 2 ups.
+ 	 */
+ 	public void testMsgSome() throws Exception {
+ 		UPListVendorMessage reply = tryMessage(msgSome);
+ 		
+ 		assertEquals(reply.getLeaves().size(),1);
+ 		assertEquals(reply.getUltrapeers().size(),2);
+ 	}
+ 	
+ 	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
  		_udpAddress = UDP_ACCESS.getLocalAddress();
  		_udpPort = PORT;
  		
  		//send a packet
  		ByteArrayOutputStream baos = new ByteArrayOutputStream();
- 		msgAll.write(baos);
+ 		which.write(baos);
  		DatagramPacket pack = new DatagramPacket(baos.toByteArray(),
  							baos.toByteArray().length,
 							_udpAddress, _udpPort);
@@ -257,19 +309,11 @@ public class ServerSideUPListTest extends BaseTestCase {
  		_udpAddress = UDP_ACCESS.getLocalAddress();
  		_udpPort = UDP_ACCESS.getLocalPort();
  		pack = new DatagramPacket(new byte[1000],1000);
- 		try {
- 			UDP_ACCESS.receive(pack);
- 		} catch(IOException bad) {
- 			fail("did not get reply",bad);
- 		}
  		
- 		//truncate the response to the appropriate size
- 		/*assertNotEquals(pack.getLength(),1000);
- 		byte [] full = pack.getData();
- 		byte []truncated = new byte [pack.getLength()];
- 		System.arraycopy(full,0,truncated,0,truncated.length);
- 		pack = new DatagramPacket(truncated,truncated.length);
- 		*/
+ 		//not catching IOEx here because not replying is a valid scenario.
+ 		UDP_ACCESS.receive(pack);
+ 		
+ 		
  		//parse the response
  		InputStream in = new ByteArrayInputStream(pack.getData());
  		UPListVendorMessage reply = null;
@@ -285,9 +329,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		}
  		
  		//then test whether the guids are the same
-
- 		assertEquals(new String(reply.getGUID()),new String(msgAll.getGUID()));
- 		
- 		
+ 		assertEquals(new String(reply.getGUID()),new String(which.getGUID()));
+ 		return reply;
  	}
 }
