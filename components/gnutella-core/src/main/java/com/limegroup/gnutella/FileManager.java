@@ -130,6 +130,36 @@ public class FileManager {
 
 
     /**
+     * Returns a list of all shared files in the given directory, in any order.
+     * Returns null if directory is not shared, or a zero-length array if it is
+     * shared but contains no files.  This method is not recursive; files in any
+     * of the directory's children are not returned.  
+     */
+    public synchronized File[] getSharedFiles(File directory) {        
+        //Remove case, trailing separators, etc.
+        try {
+            directory=getCanonicalFile(directory);
+        } catch (IOException e) {
+            return null;
+        }
+
+        //Lookup indices of files in the given directory...
+        IntSet indices=(IntSet)_sharedDirectories.get(directory);
+        if (indices==null)
+            return null;
+        //...and pack them into an array.
+        File[] ret=new File[indices.size()];
+        IntSet.IntSetIterator iter=indices.iterator(); 
+        for (int i=0; iter.hasNext(); i++) {
+            FileDesc fd=(FileDesc)_files.get(iter.next());
+            Assert.that(fd!=null, "Directory has null entry");
+            ret[i]=new File(fd._path);
+        }
+        return ret;
+    }
+
+
+    /**
      * Ensures this contains exactly the files specified by the
      * EXTENSIONS_TO_SEARCH_FOR and DIRECTORIES_TO_SEARCH_FOR_FILES properties.
      * That is, clears this and loads all files with the given extensions in the
@@ -285,6 +315,7 @@ public class FileManager {
         if (dir==null)
             return;
 
+        //TODO: if overwriting an existing, take special care.
         if (_sharedDirectories.containsKey(dir))
             addFile(f);
     }
@@ -408,7 +439,7 @@ public class FileManager {
         //canonicalized if a directory, but it can't hurt.f
         while (true) {
             String name=f.getAbsolutePath();
-            if (name.endsWith(File.separator))
+            if (! name.endsWith(File.separator))
                 break;
             f=new File(name.substring(0, name.length()-1));
         }
@@ -569,37 +600,75 @@ public class FileManager {
     ///////////////////////////////////// Testing //////////////////////////////
 
     /** Checks this' rep. invariants.  VERY expensive. */
-    /*
     protected synchronized void repOk() {
-        //Get the set of indices in the _index.
+        //Verify index.  Get the set of indices in the _index....
         IntSet indices=new IntSet();
         for (Iterator iter=_index.getPrefixedBy(""); iter.hasNext(); ) {
             IntSet set=(IntSet)iter.next();
             indices.addAll(set);
         }
-        //Make sure all indices are in _files. 
-        //(Note that we don't check filenames.)
+        //...and make sure all indices are in _files. 
+        //(Note that we don't check filenames; I'm lazy)
         for (IntSet.IntSetIterator iter=indices.iterator(); iter.hasNext(); ) {
             int i=iter.next();
             FileDesc desc=(FileDesc)_files.get(i);
             Assert.that(desc!=null,
                         "Null entry for index value "+i);
         }
-        //Make sure all non-null files have right index and are in index.
-        //(Note we don't check filenames.)
+
+        //Verify directory listing.  Make sure directory only contains 
+        //legal values.
+        Iterator iter=_sharedDirectories.keySet().iterator();
+        while (iter.hasNext()) {
+            File directory=(File)iter.next();
+            IntSet children=(IntSet)_sharedDirectories.get(directory);
+            
+            IntSet.IntSetIterator iter2=children.iterator();
+            while (iter2.hasNext()) {
+                int i=iter2.next();
+                Assert.that(i>=0 && i<_files.size(),
+                            "Bad index "+i+" in directory");
+                FileDesc fd=(FileDesc)_files.get(i);
+                Assert.that(fd!=null, "Directory listing points to empty file");
+            }
+        }
+
+        //For all files...
+        int numFilesCount=0;
+        int sizeFilesCount=0;
         for (int i=0; i<_files.size(); i++) {
             if (_files.get(i)==null)
                 continue;
             FileDesc desc=(FileDesc)_files.get(i);
+            numFilesCount++;
+            sizeFilesCount+=desc._size;
+
+            //a) Ensure is has the right index.
             Assert.that(desc._index==i,
                         "Bad index value.  Got "+desc._index+" not "+i);
+            //b) Ensured name indexed indexed. 
+            //   (Note we don't check filenames; I'm lazy.)
             Assert.that(indices.contains(i),
                         "Index does not contain entry for "+i);
-        }            
+            //c) Ensure properly listed in directory
+            try {
+                IntSet siblings=(IntSet)_sharedDirectories.get(
+                    getCanonicalFile(getParentFile(new File(desc._path))));
+                Assert.that(siblings!=null, 
+                    "Directory for "+desc._path+" isn't shared");
+                Assert.that(siblings.contains(i),
+                    "Index "+i+" not in directory");
+            } catch (IOException e) {
+                Assert.that(false);
+            }
+        }   
+        Assert.that(_numFiles==numFilesCount,
+                    _numFiles+" should be "+numFilesCount);
+        Assert.that(_size==sizeFilesCount,
+                    _size+" should be "+sizeFilesCount);
     }
-    */
 
-    /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
+    /** Unit test.  REQUIRES JAVA2 FOR createTempFile */
     /*
     public static void main(String args[]) {
         //Test some of add/remove capability
@@ -608,14 +677,25 @@ public class FileManager {
         File f3=null;
         try {
             f1=createNewTestFile(1);
+            File directory=getParentFile(f1);
             System.out.println("Creating temporary files in "+f1.getParent());
             FileManager fman=FileManager.instance();
-            fman.setExtensions("XYZ");
-            fman.addDirectory(f1.getParent());
+            File[] files=fman.getSharedFiles(directory);
+            Assert.that(files==null);
+
+            //One file
+            SettingsManager settings=SettingsManager.instance();
+            settings.setExtensions("XYZ");
+            settings.setDirectories(directory.getAbsolutePath());
+            //Since we don't have a non-blocking loadSettings method, we just
+            //wait a little time and cross our fingers.
+            fman.loadSettings();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) { }
             f2=createNewTestFile(3);
             f3=createNewTestFile(11);
 
-            //One file
             Assert.that(fman.getNumFiles()==1, fman.getNumFiles()+"");
             Assert.that(fman.getSize()==1, fman.getSize()+"");
             Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit"));
@@ -626,9 +706,14 @@ public class FileManager {
             Assert.that(fman.getSize()==1);
             Assert.that(fman.getNumFiles()==1);
             fman.get(0);
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==1);
+            Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
+            files=fman.getSharedFiles(getParentFile(directory));
+            Assert.that(files==null);
 
             //Two files
-            fman.addFile(f2.getAbsolutePath());
+            fman.addFileIfShared(f2.getAbsolutePath());
             Assert.that(fman.getNumFiles()==2, fman.getNumFiles()+"");
             Assert.that(fman.getSize()==4, fman.getSize()+"");
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
@@ -637,6 +722,10 @@ public class FileManager {
                 Assert.that(responses[i].getIndex()==0
                                || responses[i].getIndex()==1);
             }
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==2);
+            Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
+            Assert.that(files[1].equals(f2), files[0]+" differs from "+f2);
 
             //Remove file that's shared.  Back to 1 file.
             Assert.that(fman.removeFileIfShared(f2)==true);
@@ -644,8 +733,12 @@ public class FileManager {
             Assert.that(fman.getNumFiles()==1);
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
             Assert.that(responses.length==1);
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==1);
+            Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
 
-            fman.addFile(f3.getAbsolutePath());
+            //Add a new second file, with new index.
+            fman.addFileIfShared(f3.getAbsolutePath());
             Assert.that(fman.getSize()==12, "size of files: "+fman.getSize());
             Assert.that(fman.getNumFiles()==2, "# files: "+fman.getNumFiles());
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
@@ -662,6 +755,11 @@ public class FileManager {
             responses=fman.query(new QueryRequest((byte)3,0,"*unit*"));
             Assert.that(responses.length==2, "response: "+responses.length);
 
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==2);
+            Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
+            Assert.that(files[1].equals(f3), files[0]+" differs from "+f3);
+
         } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();
@@ -671,12 +769,13 @@ public class FileManager {
 
     static File createNewTestFile(int size) {
         try {
-            File ret=File.createTempFile("FileManager_unit_test",".XYZ");
-            OutputStream out=new FileOutputStream(ret);
+            File file=File.createTempFile("FileManager_unit_test",".XYZ");
+            OutputStream out=new FileOutputStream(file);
             out.write(new byte[size]);
             out.flush();
             out.close();
-            return ret;
+            //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
+            return getCanonicalFile(file);
         } catch (Exception e) {
             System.err.println("Couldn't run test");
             e.printStackTrace();
