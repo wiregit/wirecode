@@ -98,6 +98,10 @@
                   title="LimeWire - ${clover.time}"
                   historyDir="${cloverdir}/history">
         <format type="html"/>
+        <overview/>
+        <coverage/>
+        <metrics/>
+        <movers range="20" interval="2w"/>
       </historical>
     </clover-report>
   </target>
