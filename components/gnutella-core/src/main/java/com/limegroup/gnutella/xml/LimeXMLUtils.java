@@ -67,7 +67,6 @@ public class LimeXMLUtils
     {
         //open the file, read it, and derive the structure, store internally
         StringBuffer sb = new StringBuffer();
-        InputSource inputSource;
         String line = "";
      
         //open the file
@@ -517,7 +516,6 @@ public class LimeXMLUtils
      */
     public static String processColName(String colName)
     {
-        int count=1;//not attribute - default case
         if (colName.endsWith(XMLStringUtils.DELIMITER)){//remove the last delim
             colName=
             colName.substring(0,colName.lastIndexOf(XMLStringUtils.DELIMITER));
@@ -600,6 +598,7 @@ public class LimeXMLUtils
 
 
     /** Returns a GZIP'ed version of data. */
+    /*
     private static byte[] compressGZIP(byte[] data) {
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -615,7 +614,7 @@ public class LimeXMLUtils
             Assert.that(false, "Couldn't write to byte stream");
             return null;
         }
-    }
+    } */
 
     /** @return Correctly uncompressed data (according to Content-Type header) 
      *  May return a byte[] of length 0 if something bad happens. 
@@ -712,18 +711,6 @@ public class LimeXMLUtils
             baos.write(b);
         }
         return baos.toByteArray();
-    }
-
-
-    private static int max3(int a, int b, int c) {
-        return max2(max2(a,b),c);
-    }
-
-    private static int max2(int a, int b) {        
-        if (a > b)
-            return a;
-        else
-            return b;
     }
 
 
