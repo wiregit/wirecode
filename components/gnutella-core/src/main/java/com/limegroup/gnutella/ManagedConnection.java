@@ -136,21 +136,6 @@ public class ManagedConnection extends Connection {
 		super.initialize(CONNECT_TIMEOUT);
     }
 
-    /** 
-     * Call this method when the Connection has been initialized and accepted
-     * as 'long-lived'.
-     */
-    protected void postInit() {
-        try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
-            if(headers().supportsVendorMessages()) {
-                send(MessagesSupportedVendorMessage.instance());
-            }
-        } catch (BadPacketException bpe) {
-            // should never happen.
-            ErrorService.error(bpe);
-        }
-    }
-
     /**
      * Throttles the super's OutputStream.  This works quite well with
      * compressed streams, because the chaining mechanism writes the
