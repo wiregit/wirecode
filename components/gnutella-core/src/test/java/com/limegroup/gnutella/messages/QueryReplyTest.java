@@ -73,6 +73,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
  		//Normal case: double null-terminated result
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
+		payload[1]=1;            //non-zero port
 		payload[11+8]=(byte)65;  //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -98,6 +99,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //the client GUID, but not the results.
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
+		payload[1]=1;                    //non-zero port
         payload[11+8]=(byte)65;          //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -116,6 +118,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Test case modified by Susheel Daswani to check the metadata part
         payload=new byte[11+11+(4+1+4+5)+16];
         payload[0]=1;                    //Number of results
+		payload[1]=1;                    //non-zero port        
         payload[11+8]=(byte)65;          //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -150,6 +153,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Normal case: basic metainfo with no vendor data
         payload=new byte[11+11+(4+1+4+4)+16];
         payload[0]=1;            //Number of results
+		payload[1]=1;            //non-zero port
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -172,6 +176,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Normal case: basic metainfo with extra vendor data
         payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
+		payload[1]=1;            //non-zero port
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -202,6 +207,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
+		payload[1]=1;            //non-zero port
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
 
@@ -219,6 +225,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Bad case.  Common payload length lies.
         payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
+		payload[1]=1;            //non-zero port
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -243,6 +250,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //(We don't bother testing undefined and set.  Who cares?)
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
+		payload[1]=1;                //non-zero port
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -280,6 +288,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         payload=new byte[11+11+(4+1+4+1+1)+16];
         payload[0]=1;                //Number of results
+		payload[1]=1;                //non-zero port
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)73;   //The character 'I'
@@ -304,6 +313,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Normal case: busy and push bits defined and unset
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
+		payload[1]=1;                //non-zero port
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -799,6 +809,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // result is empty.  This should be rejected!
 		byte[] payload=new byte[11+11+16];
 		payload[0] = 1;            //Number of results
+		payload[1]=1;              //non-zero port
 		//payload[11+8]=(byte)65;  //The character 'A'
 
 		QueryReply qr = 
