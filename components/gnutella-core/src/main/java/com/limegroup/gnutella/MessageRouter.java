@@ -97,16 +97,17 @@ public abstract class MessageRouter {
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
 
-    /** The maximum amount of UDP replies to buffer up
+    /** The maximum number of UDP replies to buffer up.  Non-final for 
+     *  testing.
      */
     static int MAX_BUFFERED_REPLIES = 250;
 
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
      * if the sink wants them).  Cleared every CLEAR_TIME seconds.
-     * TimedGUID->QueryResponseBundle
+     * TimedGUID->QueryResponseBundle.
      */
-    private Hashtable _outOfBandReplies = new Hashtable();
+    private final Map _outOfBandReplies = new Hashtable();
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -749,7 +750,7 @@ public abstract class MessageRouter {
     protected void handleLimeACKMessage(LimeACKVendorMessage ack,
                                         DatagramPacket datagram) {
 
-        GUID refGUID = new GUID(ack.getGUID());
+        TimedGUID refGUID = new TimedGUID(new GUID(ack.getGUID()));
         QueryResponseBundle bundle = 
             (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
 
@@ -1578,9 +1579,9 @@ public abstract class MessageRouter {
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
      * @return Iterator (on QueryReply) over the Query Replies
      */
-    public Iterator responsesToQueryReplies(Response[] responses,
-                                            QueryRequest queryRequest,
-                                            final int REPLY_LIMIT) {
+    private Iterator responsesToQueryReplies(Response[] responses,
+                                             QueryRequest queryRequest,
+                                             final int REPLY_LIMIT) {
         //List to store Query Replies
         List /*<QueryReply>*/ queryReplies = new LinkedList();
         
@@ -1934,9 +1935,8 @@ public abstract class MessageRouter {
          *  in this bundle.
          */
         public boolean equals(Object other) {
-            if (other instanceof GUID)
-                return _guid.equals(other);
-            else if (other instanceof TimedGUID) 
+            if (other == this) return true;
+            if (other instanceof TimedGUID) 
                 return _guid.equals(((TimedGUID) other)._guid);
             return false;
         }
