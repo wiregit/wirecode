@@ -743,6 +743,11 @@ public abstract class MessageRouter
 				rrp.getReplyHandler()==_forMeReplyHandler) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
                                                        handler);
+                // also add to the QueryUnicaster for accounting - basically,
+                // most results will not be relevant, but since it is a simple
+                // HashSet lookup, it isn't a prohibitive expense...
+                UNICASTER.handleQueryReply(queryReply);
+
             }
         }
         else
