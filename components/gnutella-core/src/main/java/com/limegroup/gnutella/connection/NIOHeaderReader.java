@@ -32,8 +32,10 @@ public final class NIOHeaderReader implements HeaderReader {
     private StringBuffer _buffer = new StringBuffer();
     
     /**
-     * @param connection
-     * @return
+     * Creates a new <tt>NIOHeaderReader</tt> for the specified connection.
+     * 
+     * @param conn the <tt>Connection</tt> this header reader will read for
+     * @return a new <tt>NIOHeaderReader</tt> for the specified connection
      */
     public static NIOHeaderReader createReader(Connection conn) {
         // TODO Auto-generated method stub
