@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import java.io.IOException;
-import java.net.*;
 
 /**
  * This interface outlines the basic functionality for a class that 

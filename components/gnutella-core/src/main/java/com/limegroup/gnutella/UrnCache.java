@@ -13,7 +13,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
