@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.guess;
 
-import com.limegroup.gnutella.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 public class GUESSStatistics {
 

@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*; 
 
 /** Provides primitives for contacting GUESS nodes on the network.
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 

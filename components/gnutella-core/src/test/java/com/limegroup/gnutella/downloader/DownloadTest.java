@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.net.URL;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;

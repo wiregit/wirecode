@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.*; 
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*; 
 
 /**
  * Unit tests for GUIDFilterTest

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.messages.*; 
 import java.io.*;
 import java.util.*;
 import java.net.*;

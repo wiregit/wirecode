@@ -22,12 +22,12 @@ public class AllTests {
         suite.addTest(FileManagerTest.suite());
         suite.addTest(ManagedConnectionTest.suite());
         suite.addTest(GUIDTest.suite());
-        suite.addTest(MessageTest.suite());
+        suite.addTest(com.limegroup.gnutella.messages.MessageTest.suite());
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
-		suite.addTest(QueryReplyTest.suite());
-		suite.addTest(QueryRequestTest.suite());
+		suite.addTest(com.limegroup.gnutella.messages.QueryReplyTest.suite());
+		suite.addTest(com.limegroup.gnutella.messages.QueryRequestTest.suite());
 		suite.addTest(FileDescTest.suite());
 		suite.addTest(RemoteFileDescTest.suite());
 		suite.addTest(AlternateLocationTest.suite());

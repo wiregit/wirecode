@@ -4,6 +4,7 @@ import junit.framework.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 
 public class QueryUnicasterTest extends TestCase {
