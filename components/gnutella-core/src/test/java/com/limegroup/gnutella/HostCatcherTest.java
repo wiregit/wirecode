@@ -25,7 +25,8 @@ public class HostCatcherTest extends TestCase {
         //stub or write a tearDown() method.
         hc=new HostCatcher(new ActivityCallbackStub());
         hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null, null));
+                      new ConnectionManager(null, null),
+                      new RouterService(null, null, null, null));
     }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same

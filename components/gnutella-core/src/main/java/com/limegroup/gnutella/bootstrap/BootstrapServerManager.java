@@ -10,13 +10,19 @@ import com.limegroup.gnutella.*;
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
  * from these servers, find the addresses of more such servers, and update the
- * addresses of these and other servers.
+ * addresses of these and other servers.<p>
+ * 
+ * Information on the GWebCache protocol can be found at 
+ * http://zero-g.net/gwebcache/specs.html
  */
 public class BootstrapServerManager {
     /** The minimum number of endpoints to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
     /** The maximum number of bootstrap servers. */
     private static final int MAX_BOOTSTRAP_SERVERS=200;
+    /** The amount of time in milliseconds between update requests. 
+     *  Public and non-final for testing purposes. */
+    public static int UPDATE_DELAY_MSEC=60*60*1000;
 
     /** 
      * The bounded-size list of GWebCache servers, each as a BootstrapServer.
@@ -26,6 +32,12 @@ public class BootstrapServerManager {
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
     private List /* of BootstrapServer */ _servers=new ArrayList();
+    /** The last bootstrap server we successfully connected to, or null if none.
+     *  Used for sending updates.  _lastConnectable will generally be in
+     *  _servers, though this is not strictly required because of _servers'
+     *  random replacement strategy.  _lastConnectable should be nulled if we
+     *  later unsuccessfully try to reconnect to it. */
+    private BootstrapServer _lastConnectable;
     /** Where to deposit fetched endpoints. */
     private HostCatcher _catcher; 
     /** Source of randomness for picking servers. 
@@ -59,22 +71,37 @@ public class BootstrapServerManager {
     }
 
     /** 
-     * Asynchronously fetches other bootstrap hosts and stores them in this.
-     * Stops after getting "enough" endpoints or exhausting all caches.
-     * Uses the "urlfile=1" message.
+     * Asynchronously fetches other bootstrap URLs and stores them in this.
+     * Stops after getting "enough" endpoints or exhausting all caches.  Uses
+     * the "urlfile=1" message.
      */
     public void fetchBootstrapServersAsync() {
-        requestAsync(new UrlfileRequest());
+        requestAsync(new UrlfileRequest(), "GWebCache urlfile");
     }
 
     /** 
-     * Asynchronously fetches endpoints from bootstrap servers and stores them
-     * in catcher.  Stops after getting "enough" endpoints or exhausting all
-     * caches.  Uses the "hostfile=1" message.
+     * Asynchronously fetches host addresses from bootstrap servers and stores
+     * them in the HostCatcher.  Stops after getting "enough" endpoints or
+     * exhausting all caches.  Uses the "hostfile=1" message.
      */
     public void fetchEndpointsAsync() {
-        requestAsync(new HostfileRequest());
+        requestAsync(new HostfileRequest(), "GWebCache hostfile");
     }
+
+    /** 
+     * Asynchronously sends an update message to a cache.  May do nothing if
+     * nothing to update.  Uses the "url" and "ip" messages.
+     *
+     * @param myIP my listening address and port, or null if I cannot accept 
+     *  incoming connections or am not a supernode.
+     */
+    public void sendUpdatesAsync(Endpoint myIP) {
+        //For now we only send updates if the "ip=" parameter is null,
+        //regardless of whether we have a url.
+        if (myIP!=null)
+            requestAsync(new UpdateRequest(myIP), "GWebCache update");
+    }
+
 
 
     /////////////////////////// Request Types ////////////////////////////////
@@ -87,9 +114,11 @@ public class BootstrapServerManager {
          *  it from the list. */
         public void handleError(BootstrapServer server) {
             //For now, we just remove the host.  
-            //TODO: Eventually we put it on probation.
+            //Eventually we put it on probation.
             synchronized (BootstrapServerManager.this) {
                 _servers.remove(server);
+                if (_lastConnectable==server)
+                    _lastConnectable=null;
             }
         }
         /** Called when we got a line of data.  Implementation may wish
@@ -128,8 +157,8 @@ public class BootstrapServerManager {
         public void handleResponseData(BootstrapServer server, String line) {
             try {
                 BootstrapServer e=new BootstrapServer(line);
-                //Ensure url in this.  If list is too big, remove random element.
-                //TODO: eventually we may remove "worst" element.
+                //Ensure url in this.  If list is too big, remove random
+                //element.  Eventually we may remove "worst" element.
                 synchronized (BootstrapServerManager.this) {
                     if (! _servers.contains(e))
                         _servers.add(e);
@@ -147,15 +176,65 @@ public class BootstrapServerManager {
         }
     }
 
+    class UpdateRequest extends GWebCacheRequest {
+        private boolean gotResponse=false;
+        private Endpoint myIP;
+
+        /** @param ip my ip address, or null if this can't accept incoming connections. */ 
+        public UpdateRequest(Endpoint myIP) {
+            this.myIP=myIP;
+        }
+        public String requestURL(String url) {
+            //The url of good server.  There's a small chance that we send a
+            //host its own address.
+            String urlPart=null;
+            if (_lastConnectable!=null)       //TODO: URL encode!
+                urlPart="url="+_lastConnectable.getURL().toString(); 
+            //My ip address as a parameter.
+            String ipPart=null;
+            if (myIP!=null) 
+                ipPart="ip="+myIP.getHostname()+":"+myIP.getPort();
+
+            //Some of these case are disallowed by sendUpdatesAsync, but we
+            //handle all of them here.
+            if (urlPart==null && ipPart==null)
+                return url;
+            else if (urlPart!=null && ipPart==null)
+                return url+"?"+urlPart;
+            else if (urlPart==null && ipPart!=null)
+                return url+"?"+ipPart;
+            else {
+                Assert.that(urlPart!=null && ipPart!=null);
+                return url+"?"+ipPart+"&"+urlPart;            
+            }
+        }
+        public void handleResponseData(BootstrapServer server, String line) {
+            if (line.startsWith("OK"))      //TODO: ignore case
+                gotResponse=true;
+        }
+        public boolean needsMoreData() {
+            return !gotResponse;
+        }
+    }
+
+
 
     /////////////////////////// Generic Request Functions ///////////////////////
 
-    private void requestAsync(final GWebCacheRequest request) {
+    /** @param threadName a name for the thread created, for debugging */
+    private void requestAsync(final GWebCacheRequest request,
+                              String threadName) {
         Thread runner=new Thread() {
             public void run() {
-                requestBlocking(request);
+                try {
+                    requestBlocking(request);
+                } catch (Exception e) {
+                    e.printStackTrace();  //TODO: this will never be seen
+                    Assert.that(false, "Uncaught exception: "+e);         
+                }
             }
         };
+        runner.setName(threadName);
         runner.setDaemon(true);
         runner.start();
     }
@@ -183,17 +262,30 @@ public class BootstrapServerManager {
             BufferedReader in=new BufferedReader(
                                   new InputStreamReader(
                                       connection.getInputStream()));
+            //For each line of data (excludes HTTP headers)...
+            boolean firstLine=true;
+            boolean errors=false;
             while (true) {                
                 String line=in.readLine();
                 if (line==null)
                     break;
-                if (line.startsWith("ERROR"))
+
+                if (firstLine && line.startsWith("ERROR")) { //TODO: ignore case
                     request.handleError(server);
-                else
+                    errors=true;
+                } else {
                     request.handleResponseData(server, line);
+                }
+
+                firstLine=false;
             }
-            //Close.  TODO: is this really the preferred way?
-            in.close();
+
+            //If no errors, record the address AFTER sending requests so we
+            //don't send a host its own url in update requests.
+            if (!errors)
+                _lastConnectable=server;
+            //Close the connection.  TODO: is this really the preferred way?
+            in.close();   
         } catch (IOException ioe) {
             request.handleError(server);
         }

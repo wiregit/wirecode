@@ -133,9 +133,15 @@ public class HostCatcher {
 
     /**
      * Links the HostCatcher up with the other back end pieces
+     * @param acceptor used to get the list of banned addresses, and to
+     *  find out my address of GWebCache purposes
+     * @param manager used to find out if I'm an ultrapeer for GWebCache
+     * @param rs used to schedule GWebCache updates
      */
-    public void initialize(Acceptor acceptor, ConnectionManager manager) {
-        initialize(acceptor, manager, null);
+    public void initialize(Acceptor acceptor, 
+                           ConnectionManager manager, 
+                           RouterService rs) {
+        initialize(acceptor, manager, rs, null);
     }
 
     /**
@@ -146,8 +152,10 @@ public class HostCatcher {
      * empty.  The file is expected to contain a sequence of lines in the format
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
-    public void initialize(Acceptor acceptor, ConnectionManager manager,
-                           String filename) {
+    public void initialize(final Acceptor acceptor, 
+                           final ConnectionManager manager,
+                           final RouterService rs,
+                           final String filename) {
         this.acceptor = acceptor;
         this.manager = manager;
 
@@ -158,6 +166,24 @@ public class HostCatcher {
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         }
+
+        //Register to send updates every hour (starting in one hour) if we're a
+        //supernode and have accepted incoming connections.  I think we should
+        //only do this if we also have incoming slots, but John Marshall from
+        //Gnucleus says otherwise.
+        Runnable updater=new Runnable() {
+            public void run() {
+                if (acceptor.acceptedIncoming() && manager.isSupernode()) {
+                    Endpoint e=new Endpoint(acceptor.getAddress(),
+                                            acceptor.getPort());
+                    //This spawn another thread, so blocking is not an issue.
+                    gWebCache.sendUpdatesAsync(e);
+                }
+            }
+        };
+        rs.schedule(updater, 
+                    BootstrapServerManager.UPDATE_DELAY_MSEC, 
+                    BootstrapServerManager.UPDATE_DELAY_MSEC);
     }
 
 

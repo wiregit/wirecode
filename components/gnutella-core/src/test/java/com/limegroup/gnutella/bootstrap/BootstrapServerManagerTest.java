@@ -191,6 +191,40 @@ public class BootstrapServerManagerTest extends TestCase {
         assertTrue(! url3.equals(iter.next()));
     }
 
+    public void testSendUpdatesAsyncNoURL() {
+        s3.setResponseData("OK\r\n");
+        bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
+        sleep();
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", s3.getRequest());
+        assertEquals(null, s2.getRequest());
+        assertEquals(null, s1.getRequest());
+    }
+
+    public void testSendUpdatesAsyncURL() {
+        //Force _lastConnectable to be url3
+        bman.fetchEndpointsAsync();
+        sleep();
+        
+        s2.setResponseData("OK\r\n");
+        bman.sendUpdatesAsync(new Endpoint("18.239.0.145", 6348));
+        sleep();
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.145:6348&url="+url3+" HTTP/1.1", 
+                     s2.getRequest());
+        assertEquals(null, s1.getRequest());
+    }
+
+    public void testSendUpdatesAsyncNoOK() {
+        s3.setResponseData("");
+        s2.setResponseData("OK\r\n");
+        bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
+        sleep();
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", s3.getRequest());
+        //Yes, url3 is sent to s2 even though url3 never sent OK.  TODO: fix this.
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347&url="+url3+" HTTP/1.1", 
+                     s2.getRequest());
+        assertEquals(null, s1.getRequest());
+    }
+
     private void sleep() {
         //Wait 0.5 second--that should be long enough for request to happen.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
