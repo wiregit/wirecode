@@ -134,6 +134,12 @@ public class ConnectionManager {
     public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
 
     /**
+     * The desired number of old fashioned unrouted connections to
+     * keep, in order to prevent fragmentation of the network.
+     */
+    public static final int DESIRED_OLD_CONNECTIONS = 2;
+
+    /**
      * Ideal number of connections for a leaf.
      */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
@@ -266,6 +272,7 @@ public class ConnectionManager {
                 ensureConnectionsForSupernode();
              
              sendInitialPingRequest(connection);
+             killExcessConnections();  //see hasAvailableIncoming()
              connection.loopForMessages();
          } catch(IOException e) {
          } catch(Exception e) {
@@ -280,6 +287,66 @@ public class ConnectionManager {
                 lostShieldedClientSupernodeConnection();
          }
      }
+
+     /**
+      * Kills any old-style connections that are no longer needed.
+      * @see hasAvailableIncoming
+      */
+     private void killExcessConnections() {
+         //Kill extra 0.4 connections using the following heuristics, in order:
+         //1. Prefer incoming connections before outgoing.  It's necessary for
+         //   old clients to prefer incoming because many hosts are firewalled.
+         //   Modern LimeWires don't have this problem because firewalled hosts
+         //   become leaf nodes.
+         //2. Prefer connections that have processed large numbers of
+         //   messages.  Presumably connections that have sent fewer messages 
+         //   are either less well connected or have been up shorter.  In the
+         //   latter case, we assume the less the connection has been alive,
+         //   the less its expected lifetime.
+
+         //Find all potential candidates.
+         List /* of ManagedConnection */ candidates=new ArrayList();
+         for (Iterator iter=getInitializedConnections().iterator(); 
+                 iter.hasNext(); ) {
+             ManagedConnection c=(ManagedConnection)iter.next();
+             if (c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)==null)
+                 //old-fashioned
+                 candidates.add(c);
+         }
+
+         //Sort in order of increasing fitness, outgoing first.
+         Collections.sort(candidates, new ManagedConnectionComparator());
+
+         //Third, kill off worst excess candidates, usually just one.
+         int excess=getNumInitializedConnections() - _keepAlive;   
+         for (Iterator iter=candidates.iterator(); excess>0 && iter.hasNext(); ) {
+             ManagedConnection c=(ManagedConnection)iter.next();
+             remove(c);
+             excess--;
+         }
+     }
+
+    /** 
+     * Used by killExcess.  Sorts by outgoing/incoming, then by number of
+     * messages sent. 
+     */
+    private static class ManagedConnectionComparator implements Comparator {
+        public int compare(Object connection1, Object connection2) {
+            ManagedConnection mc1=(ManagedConnection)connection1;
+            ManagedConnection mc2=(ManagedConnection)connection2;
+            if (mc1.isOutgoing()!=mc2.isOutgoing()) {
+                //Primary key: outgoing status
+                return mc1.isOutgoing() ? -1 : 1;
+            } else {
+                //Secondary key: number of messages
+                int total1=mc1.getNumMessagesSent()
+                          +mc1.getNumMessagesReceived();
+                int total2=mc2.getNumMessagesSent()
+                          +mc2.getNumMessagesReceived();
+                return total1-total2;
+            }
+        }
+    }
 
      /**
       * Increments the appropriate connection count, based upon the 
@@ -541,6 +608,21 @@ public class ConnectionManager {
      */
     public synchronized boolean hasAvailableIncoming(boolean isUltrapeerAware,
                                                      boolean isLeaf) {
+        //Old versions of LimeWire used to prefer incoming connections over
+        //outgoing.  The rationale was that a large number of hosts were
+        //firewalled, so those who weren't had to make extra space for them.
+        //With the introduction of ultrapeers, this is not an issue; all
+        //firewalled hosts become leaf nodes.  Hence we make no distinction
+        //between incoming and outgoing.
+        //
+        //However, now we prefer ultrapeers to old (0.4) connections, gradually
+        //replacing old-style connections with ultrapeers.  Hence there are
+        //never more than _keepAlive connections.  See killExcess() for details.
+        //One caveat: in order to prevent fragmentation of ultrapeers and old
+        //clients, we give the best DESIRED_OLD_CONNECTIONS old connections
+        //immunity from this kill logic.  Effectively these connections are
+        //treated like ultrapeers.
+
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
@@ -549,26 +631,25 @@ public class ConnectionManager {
         else if (hasClientSupernodeConnection())
             //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
             return false;  
-        else if (isUltrapeerAware) {
-            if (isLeaf) {
-                //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
-                int shieldedMax=
-                   SettingsManager.instance().getMaxShieldedClientConnections();
-                return _incomingClientConnections < shieldedMax;
-            } else {
-                //2. Ultrapeer.  Changed ultrapeers to prefer other ultrapeers.
-                //incoming ultrapeers are always allowed if there are fewer than
-                //KEEP_ALIVE ultrapeer connections, regardless of the number of
-                //incoming connections. So if you fetched KEEP_ALIVE outgoing
-                //connections, received KEEP_ALIVE incoming old-fashioned
-                //connections, then received KEEP_ALIVE incoming ultrapeer
-                //connections, you could temporarily have 3*KEEP_ALIVE (~18)
-                //connections!  Thankfully this almost never happens.
-                return ultrapeerConnections() < _keepAlive;
-            }
+
+        else if (isLeaf) {
+            //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
+            int shieldedMax=
+                SettingsManager.instance().getMaxShieldedClientConnections();
+            return _incomingClientConnections < shieldedMax;
+        } else if (isUltrapeerAware) {
+            //2. Ultrapeer.  Allow even if that brings the number of connections
+            //over the desired amount; we'll kill off some old connections to
+            //make up.  The first K old-style connections are given same status
+            //as ultrapeers.  TODO3: no need to loop through all old connections
+            //if we're just going to take the min.
+            int preferred=ultrapeerConnections()
+                         +Math.min(oldConnections(), DESIRED_OLD_CONNECTIONS);
+            return preferred < _keepAlive;
         } else {
-            //3. Old-style unrouted connection.
-            return _incomingConnections < _keepAlive;
+            //3. Old-style, e.g., "0.4" connections.  Note there is no longer
+            //preferencing to incoming connections.
+            return getNumInitializedConnections() < _keepAlive;
         }
     }
         
@@ -589,6 +670,19 @@ public class ConnectionManager {
             ManagedConnection mc=(ManagedConnection)iter.next();
             if (mc.isSupernodeConnection())
                 ret++;
+        }
+        return ret;
+    }
+
+    /** Returns the number of old-fashioned unrouted connections.  Caller MUST
+     *  hold this' monitor. */
+    private int oldConnections() {
+        //TODO3: augment state of this if needed to avoid loop
+        int ret=0;
+        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (mc.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)==null)
+                ret++;            
         }
         return ret;
     }
@@ -1583,4 +1677,45 @@ public class ConnectionManager {
             }
         }
     }
+
+    /*
+    public static void main(String[] args) {
+        TestManagedConnection i13=new TestManagedConnection(false, 1, 3);
+        TestManagedConnection o13=new TestManagedConnection(true, 1, 3);
+        TestManagedConnection i10=new TestManagedConnection(false, 1, 0);
+        TestManagedConnection o10=new TestManagedConnection(true, 1, 0);
+        
+        List l=new ArrayList(); l.add(i13); l.add(o13); l.add(i10); l.add(o10);
+        Collections.sort(l, new ManagedConnectionComparator());
+        Assert.that(l.get(0)==o10);
+        Assert.that(l.get(1)==o13);
+        Assert.that(l.get(2)==i10);
+        Assert.that(l.get(3)==i13);
+    }
+
+    private static class TestManagedConnection extends ManagedConnection {
+        private boolean isOutgoing;
+        private int sent;
+        private int received;
+
+        public TestManagedConnection(boolean isOutgoing, int sent, int received) {
+            super();  //may require adding stub constructor to ManagedConnection
+            this.isOutgoing=isOutgoing;
+            this.sent=sent;
+            this.received=received;
+        }
+
+        public boolean isOutgoing() {
+            return isOutgoing;
+        }
+
+        public int getNumMessagesSent() {
+            return sent;
+        }
+        
+        public int getNumMessagesReceived() {
+            return received;
+        }        
+    }
+    */
 }
