@@ -2010,7 +2010,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
-                informMesh(dloader.getRemoteFileDesc(),false);
                 return 0;
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
