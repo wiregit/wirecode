@@ -54,6 +54,12 @@ public class ManagedConnection
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
 
+    /*
+     * LOCKING: obtain this before modifying any variables of this, including
+     * all statistics (e.g., _numSentMessagesDropped).  Do NOT hold this before
+     * performing any blocking socket writes or reads; use _writeLock for that.
+     */
+
     private MessageRouter _router;
     private ConnectionManager _manager;
 
@@ -62,7 +68,10 @@ public class ManagedConnection
         SpamFilter.newPersonalFilter();
 
     /** Priority queue of messages to send. */
-    CompositeQueue _queue=new CompositeQueue();
+    private CompositeQueue _queue=new CompositeQueue();
+    /** Locking to ensure that messages are not dropped if write() is called
+     *  from multiple threads */
+    private Object _writeLock=new Object();
 
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
@@ -78,12 +87,12 @@ public class ManagedConnection
 
     /**
      * The number of messages sent.  This includes messages that are eventually
-     * dropped.  This stat is synchronized by this.
+     * dropped. 
      */
     private int _numMessagesSent;
     /**
      * The number of messages received.  This includes messages that are
-     * eventually dropped.  This stat is synchronized by this.
+     * eventually dropped.
      */
     private int _numMessagesReceived;
     /**
@@ -104,8 +113,7 @@ public class ManagedConnection
      * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
      * of _numMessagesSent/_numSentMessagesDropped and
      * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
-     * getPercentDropped.  LOCKING: These are synchronized by this;
-     * finer-grained schemes could be used. 
+     * getPercentDropped. 
      */
     private int _lastReceived;
     private int _lastRecvDropped;
@@ -130,8 +138,6 @@ public class ManagedConnection
      * updateHorizonStats) and start recounting.  While we are recounting, we
      * return the last size of the set.  So pongs in the set are
      * HORIZON_UPDATE_TIME to 2*HORIZON_UPDATE_TIME milliseconds old.
-     * 
-     * LOCKING: obtain this' monitor
      **************************************************************************/
     private boolean _horizonEnabled=true;
     /** The approximate time to expire pongs, in milliseconds. */
@@ -321,18 +327,18 @@ public class ManagedConnection
             _router.countMessage();   //why count messages snet?
             _numMessagesSent++;
             _queue.add(m);
-            _numSentMessagesDropped+=_queue.resetDropped();            
-            if (! isBlocking()) {
-                //NON-BLOCKING IO: attempt to write queued data, not necessarily
-                //m.  This calls super.write(m'), which may call
-                //listener.needsWrite().
-                return this.write();
-            } else {
-                //BLOCKING IO: writing data could stall another reader thread.
-                //So queue it and notify write thread.
-                _listener.needsWrite(this);
-                return true;
-            }
+            _numSentMessagesDropped+=_queue.resetDropped();    
+        }        
+        if (! isBlocking()) {
+            //NON-BLOCKING IO: attempt to write queued data, not necessarily
+            //m.  This calls super.write(m'), which may call
+            //listener.needsWrite().
+            return this.write();
+        } else {
+            //BLOCKING IO: writing data could stall another reader thread.
+            //So queue it and notify write thread.
+            _listener.needsWrite(this);
+            return true;
         }
     }
 
@@ -345,32 +351,38 @@ public class ManagedConnection
      * call listener.needsWrite.  If this is a blocking connection, blocks until
      * data is sent.
      */
-    public synchronized boolean write() {
-        //Terminate when either
-        //a) super cannot send any more data because its send
-        //   buffer is full OR
-        //b) neither super nor this have any queued data
-        //c) the socket is closed
-        while (isOpen()) {
-            //Add more queued data to super if possible.
-            if (! super.hasQueued()) {
-                Message m=_queue.removeNext();
-                if (m==null)
-                    return false;    //Nothing left to send (a)
-                _numSentMessagesDropped+=_queue.resetDropped();
-                _bytesSent+=m.getTotalLength();
-                boolean hasUnsentData=super.write(m);
-                if (hasUnsentData)
-                    return true;     //needs another write (b)
-            }     
-            //Otherwise write data from super.  Abort if this didn't complete.
-            else {
-                boolean hasUnsentData=super.write();
-                if (hasUnsentData)
-                    return true;     //needs another write (b)
+    public boolean write() {
+        synchronized (_writeLock) {
+            //Terminate when either
+            //a) super cannot send any more data because its send
+            //   buffer is full OR
+            //b) neither super nor this have any queued data
+            //c) the socket is closed
+            while (isOpen()) {
+                //Add more queued data to super if possible.
+                if (! super.hasQueued()) {
+                    Message m=null;
+                    synchronized (this) {
+                        m=_queue.removeNext();
+                        if (m==null)
+                            return false;    //Nothing left to send (a)
+                        _numSentMessagesDropped+=_queue.resetDropped();
+                        _bytesSent+=m.getTotalLength();
+                    }
+                    boolean hasUnsentData=super.write(m);
+                    if (hasUnsentData)
+                        return true;         //needs another write (b)
+                }     
+                //Otherwise write data from super.  Abort if this didn't
+                //complete.
+                else {
+                    boolean hasUnsentData=super.write();
+                    if (hasUnsentData)
+                        return true;         //needs another write (b)
+                }
             }
+            return false;                    //socket closed (c)
         }
-        return false;                //socket closed (c)
     }
 
     public boolean hasQueued() {

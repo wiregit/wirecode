@@ -57,19 +57,19 @@ class BlockingConnectionDriver extends ConnectionDriver {
 
         public void run() {
             while (_connection.isOpen()) {
+                //Wait for queued data.  Notify() called by needsWrite(), 
+                //which is called from within ManagedConnection.write(m).
                 synchronized (_connection) {
-                    //Wait for queued data.  Notify() called by needsWrite(), 
-                    //which is called from within ManagedConnection.write(m).
                     while (! _connection.hasQueued()) {
                         try { 
                             _connection.wait();
                         } catch (InterruptedException ignore) { }
                     }
-                    //Write.  Ok if no data is available.
-                    //System.out.println(System.currentTimeMillis()
-                    //                   +" write "+_connection);
-                    _connection.write();
                 }
+                //Write.  Ok if no data is available.  Do NOT hold monitor.
+                //System.out.println(System.currentTimeMillis()
+                //                   +" write "+_connection);
+                _connection.write();
             }
         }
     }
