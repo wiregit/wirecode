@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * NIO server used to test blocking vs. non-blocking performance.
@@ -135,7 +136,8 @@ public class NonBlockingServer implements Runnable {
                 continue;
             }
             
-            java.util.Iterator iter = SELECTOR.selectedKeys().iterator();
+            Set selectedKeys = SELECTOR.selectedKeys();
+            java.util.Iterator iter = selectedKeys.iterator();
             while(iter.hasNext())  {
                 SelectionKey key = (SelectionKey)iter.next();
                 
@@ -160,6 +162,8 @@ public class NonBlockingServer implements Runnable {
                 } catch(CancelledKeyException e) {
                     e.printStackTrace();
                 }
+                
+                selectedKeys.clear();
             }
         }
     }
