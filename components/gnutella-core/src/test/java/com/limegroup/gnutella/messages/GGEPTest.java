@@ -302,6 +302,45 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         catch (BadGGEPBlockException expected) {}
 
+        bytes = new byte[32];
+        bytes[0] = (byte)0x0;
+        bytes[1] = (byte)0x85;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[9] = (byte)0x15;
+        bytes[10] = (byte)'B';
+        bytes[11] = (byte)'H';
+        bytes[12] = (byte)'O';
+        bytes[13] = (byte)'S';
+        bytes[14] = (byte)'T';
+        bytes[15] = (byte)0x40;
+        bytes[16] = (byte)0x87;
+        bytes[17] = (byte)'S';
+        bytes[18] = (byte)'U';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'H';
+        bytes[21] = (byte)'E';
+        bytes[22] = (byte)'E';
+        bytes[23] = (byte)'L';
+        bytes[24] = (byte)0x47;
+        bytes[25] = (byte)'D';
+        bytes[26] = (byte)'A';
+        bytes[27] = (byte)'S';
+        bytes[28] = (byte)'W';
+        bytes[29] = (byte)'A';
+        bytes[30] = (byte)'N';
+        bytes[31] = (byte)'I';
+        try {
+            temp = GGEP.read(bytes,0);
+            assertTrue(false);
+        }
+        catch (BadGGEPBlockException expected) {}
+
     }
 
 
