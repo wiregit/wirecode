@@ -1299,6 +1299,16 @@ public class ManagedConnection extends Connection
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             softMaxHops = hops.getHopValue();
+            
+            if( m_bSupportsBusyLeaf && isSupernodeClientConnection() ){
+                //	If the connection is to a leaf, and the leaf supports
+                //	the busy leaf QRT scheme, then set the connection's 
+                //	busy leaf flag appropriately
+                if( softMaxHops==0 )
+                    m_bBusyLeaf=true;
+                else
+                    m_bBusyLeaf=false;
+            }
         }
         else if (vm instanceof PushProxyAcknowledgement) {
             // this connection can serve as a PushProxy, so note this....

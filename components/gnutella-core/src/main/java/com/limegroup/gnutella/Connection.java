@@ -282,6 +282,19 @@ public class Connection implements IpPort {
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
 
+
+    /**
+     * True if this host has shown support (via vendormessage) of Busy Leaf
+     * QRT suppression 
+     */
+    protected boolean m_bSupportsBusyLeaf=false;
+    
+    /**
+     * True if this host IS a busy leaf, and its QRT shouldn't be included in
+     * our last-hop QRT
+     */
+    protected boolean m_bBusyLeaf=false;
+    
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
@@ -1830,6 +1843,16 @@ public class Connection implements IpPort {
      the headers. */
     public boolean isTempConnection() {
 		return _headers.isTempConnection();
+    }
+    
+    /** Returns true iff this connection is a shielded leaf connection, and has 
+     * signalled that he is currently busy (full on upload slots).  If so, we will 
+     * not include his QRT table in last hop QRT tables we send out (if we are an 
+     * Ultrapeer) -DN
+     * @return true iff this connection is a busy leaf (don't include his QRT table)
+     */
+    public boolean isBusyLeaf(){
+        return isSupernodeClientConnection() && m_bSupportsBusyLeaf && m_bBusyLeaf;
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,

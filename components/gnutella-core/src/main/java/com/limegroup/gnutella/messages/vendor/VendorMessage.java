@@ -21,6 +21,7 @@ public abstract class VendorMessage extends Message {
     //Functional IDs defined by Gnutella VendorMessage protocol....
     protected static final int F_MESSAGES_SUPPORTED = 0;
     protected static final int F_HOPS_FLOW = 4;
+    protected static final int F_BUSY_LEAF = 4;
     protected static final int F_TCP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
@@ -273,6 +274,12 @@ public abstract class VendorMessage extends Message {
             // HOPS FLOW MESSAGE
             return new HopsFlowVendorMessage(guid, ttl, hops, version, 
                                              restOf);
+        if ((selector == F_BUSY_LEAF) &&
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID))){
+            // BUSY LEAF MESSAGE - NOT USED, functionality piggybacks off of BearHopsFlow
+            ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
+            throw new BadPacketException("Vendor message Lime4v1 is not used currently");
+        }            
         if ((selector == F_LIME_ACK) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             // LIME ACK MESSAGE

@@ -2602,6 +2602,10 @@ public abstract class MessageRouter {
 	/**
 	 * Adds all query routing tables of leaves to the query routing table for
 	 * this node for propagation to other Ultrapeers at 1 hop.
+	 * 
+	 * 3/29/05 - Added "busy leaf" support to prevent a busy leaf from having its 
+	 * 	QRT table added to the Ultrapeer's last-hop QRT table.  This should reduce
+	 *  BW costs for UPs with busy leaves.  -DN
 	 *
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
@@ -2611,10 +2615,14 @@ public abstract class MessageRouter {
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
         	synchronized (mc.getQRPLock()) {
-                QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
-				if(qrtr != null) {
-					qrt.addAll(qrtr);
-				}
+        	    //	Don't include busy leaves
+        	    if( !mc.isBusyLeaf() )
+        	    {
+                	QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
+					if(qrtr != null) {
+						qrt.addAll(qrtr);
+					}
+        	    }
 			}
 		}
 	}
