@@ -291,6 +291,7 @@ public class ID3Editor {
         for(Iterator iter = updateFrames.keySet().iterator(); iter.hasNext();) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String val = (String)updateFrames.get(frame);
+            val = val==null?"":val;
             ID3v2Frame repFrame = new ID3v2Frame(frame.getID(),
                                              val.getBytes(),
                                              frame.getTagAlterPreservation(),
