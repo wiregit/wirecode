@@ -283,7 +283,7 @@ public class DownloadManager implements BandwidthTracker {
         ManagedDownloader downloader =
 			new ManagedDownloader(files, incompleteFileManager);
 
-        startDownload(downloader);
+        startDownload(downloader, false);
         return downloader;
     }   
     
@@ -324,7 +324,7 @@ public class DownloadManager implements BandwidthTracker {
                                               textQuery,
                                               filename,
                                               defaultURL);
-        startDownload(downloader);
+        startDownload(downloader, false);
         return downloader;
     }
 
@@ -386,7 +386,7 @@ public class DownloadManager implements BandwidthTracker {
             throw new CantResumeException(incompleteFile.getName());
         }
         
-        startDownload(downloader);
+        startDownload(downloader, true);
         return downloader;
     }
 
@@ -425,7 +425,7 @@ public class DownloadManager implements BandwidthTracker {
         RequeryDownloader downloader=
             new RequeryDownloader(incompleteFileManager,add);
 
-        startDownload(downloader);
+        startDownload(downloader, false);
         return downloader;        
     }
     
@@ -436,8 +436,8 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void startDownload(ManagedDownloader md) {
-        md.initialize(this, fileManager, callback, false);
+    private void startDownload(ManagedDownloader md, boolean deserialized) {
+        md.initialize(this, fileManager, callback, deserialized);
         waiting.add(md);
         callback.addDownload(md);
         writeSnapshot(); // Save state for crash recovery.

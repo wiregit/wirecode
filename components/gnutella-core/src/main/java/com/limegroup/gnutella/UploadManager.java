@@ -512,10 +512,15 @@ public final class UploadManager implements BandwidthTracker {
                 return;
             }
             
-            // If they requested an incomplete file, determine
-            // if we have the correct range.  If not, change
-            // state appropriately.
-            if (fd instanceof IncompleteFileDesc) {
+            // Special handling for incomplete files...
+            if (fd instanceof IncompleteFileDesc) {                
+                // Check to see if we're allowing PFSP.
+                if( !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
+                    uploader.setState(Uploader.FILE_NOT_FOUND);
+                    return;
+                }
+                                
+                // If we are allowing, see if we have the range.
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
                 int upStart = uploader.getUploadBegin();
                 int upEnd = uploader.getUploadEnd();

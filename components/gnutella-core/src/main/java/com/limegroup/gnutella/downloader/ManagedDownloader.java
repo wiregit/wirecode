@@ -526,16 +526,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Adds alternate locations that may have been stored in the
      * IncompleteFileDesc for this download.
-     * This should be called after the incomplete file has been initialized
-     * and added to the incomplete file manager.
      */
-    protected synchronized void initializeAlternateLocations() {
+    private synchronized void initializeAlternateLocations() {
         Assert.that( incompleteFile != null, "null incomplete file");
             
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
+        System.out.println("initializing alt locs.");
         if( hash != null ) {
+            System.out.println("hash: " + hash);
             long size = incompleteFileManager.getCompletedSize(incompleteFile);
             // Create our AlternateLocationCollection if we haven't already.
             if( totalAlternateLocations == null )
@@ -1046,6 +1046,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
+            // if this was read from the disk, read the alternate locations
+            // that may be stored in the IncompleteFileDesc
+            if(deserialized) {
+                System.out.println("deserialized, adding.");
+                initializeAlternateLocations();
+            }
         }
         //While not success and still busy...
         while (true) {
