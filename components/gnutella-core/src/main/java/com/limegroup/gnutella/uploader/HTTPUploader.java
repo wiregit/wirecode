@@ -365,23 +365,6 @@ public class HTTPUploader implements Uploader {
 	public int getChatPort() {return _chatPort;}
 
 	/**
-	 * Accessor for the <tt>URN</tt> instance for the file requested, which
-	 * is <tt>null</tt> if there is no URN for the file.
-	 *
-	 * @return the <tt>URN</tt> instance for the file being uploaded, which
-	 *  can be <tt>null</tt> if no URN has been assigned
-	 */
-	public URN getUrn() {return _fileDesc.getSHA1Urn();}
-
-	/**
-	 * Returns the requested <tt>URN</tt> as specified in the 
-	 * "X-Gnutella-Content-URN" extension header, defined in HUGE v0.93.
-	 *
-	 * @return the requested <tt>URN</tt>
-	 */
-	public URN getRequestedUrn() {return _requestedURN;}
-
-	/**
 	 * Returns the <tt>FileDesc</tt> instance for this uploader.
 	 *
 	 * @return the <tt>FileDesc</tt> instance for this uploader, or
@@ -393,8 +376,6 @@ public class HTTPUploader implements Uploader {
     public boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
     }    
-	/****************** private methods *******************/
-
 
 	/**
 	 * Reads the HTTP header sent by the requesting client -- note that the
@@ -404,21 +385,19 @@ public class HTTPUploader implements Uploader {
 	 *  the header
 	 */
 	private void readHeader() throws IOException {
-        String str = "";
         _uploadBegin = 0;
         _uploadEnd = 0;
 		String userAgent;
 		_clientAcceptsXGnutellaQueryreplies = false;
         
-		InputStream istream = _socket.getInputStream();
-		ByteReader br = new ByteReader(istream);
+		ByteReader br = new ByteReader(_socket.getInputStream());
         
 		// NOTE: it might improve readability to move
 		// the try and catches around the big loops.
 
 		while (true) {
 			// read the line in from the socket.
-            str = br.readLine();
+            String str = br.readLine();
             debug("HTTPUploader.readHeader(): str = " +  str);
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
@@ -561,7 +540,15 @@ public class HTTPUploader implements Uploader {
 				userAgent = str.substring(11).trim();
 			}
 			else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str)) {
-				_requestedURN = HTTPUploader.readContentUrn(str);
+				URN requestedURN = HTTPUploader.readContentUrn(str);
+				if(requestedURN == null) {
+					setState(FILE_NOT_FOUND);
+				} 		
+				if(_fileDesc != null) {
+					if(!_fileDesc.equals(_fileManager.getFileDescForUrn(requestedURN))) {
+						setState(FILE_NOT_FOUND);
+					}
+				}
 			}
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
 				if(_alternateLocationCollection == null) {
