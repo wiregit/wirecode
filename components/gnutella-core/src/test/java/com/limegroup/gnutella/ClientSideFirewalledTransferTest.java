@@ -15,6 +15,7 @@ import com.limegroup.gnutella.udpconnect.SynMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -113,6 +114,11 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
     public void testStartsUDPTransfer() throws Exception {
 
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                                    "_externalAddress",
+                                    new byte[] {(byte) 10, (byte) 07,
+                                                (byte) 19, (byte) 76});
+
         drain(testUP[0]);
         drainUDP();
 
@@ -138,7 +144,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // confirm it has proxy info
         QueryReply reply = (QueryReply) m;
-        assertEquals("127.0.0.1", reply.getIP());
+        assertEquals(reply.getIP(), "10.7.19.76", reply.getIP());
         assertTrue(reply.getSupportsFWTransfer());
         assertNotNull(reply.getPushProxies());
 
@@ -233,7 +239,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Thread runLater = new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                     RouterService.download((new RemoteFileDesc[] 
                                             {((MyActivityCallback)getCallback()).getRFD() }), 
                                            true, fGuid);
@@ -279,7 +285,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), RouterService.getAddress());
+        assertEquals(addr.getAddress(), RouterService.getExternalAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // send back a 202 and make sure no PushRequest is sent via the normal
