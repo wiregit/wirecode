@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.*;
 import java.util.Properties;
 import java.io.*;
 import java.awt.*;
@@ -216,6 +216,7 @@ public final class SettingsFactory {
             FileUtils.setWriteable(SETTINGS_FILE);
             out = new FileOutputStream(SETTINGS_FILE);
 
+
             // Properties.store is not in Java 1.1.8, and Properties.save
             // doesn't throw an IOException, so we must test the writing
             // to ensure that an IOException won't be thrown.
@@ -224,7 +225,8 @@ public final class SettingsFactory {
             // save the properties to disk.
             toSave.save( out, HEADING);            
         } catch(FileNotFoundException e) {
-			ErrorService.error(e);
+            if(!IOUtils.handleException(e, null))//use the generic message
+                ErrorService.error(e);
         } catch (IOException e) {
 			ErrorService.error(e);
         } finally {

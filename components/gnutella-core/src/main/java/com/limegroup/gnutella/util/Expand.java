@@ -97,32 +97,37 @@ public final class Expand {
      *  any other IO error
      */
     public static void expandFile(File source, File dest, boolean overwrite) 
-        throws IOException {        
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(source));
-        ZipEntry ze = null;
-        
-        while ((ze = zis.getNextEntry()) != null) {
-            File f = new File(dest, ze.getName());
-            // create intermediary directories - sometimes zip don't add them
-            File dirF=new File(f.getParent());
-            dirF.mkdirs();
+        throws IOException {
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(source));
+            ZipEntry ze = null;
             
-            if (ze.isDirectory()) {
-                f.mkdirs(); 
-            } else if ( ze.getTime() > f.lastModified() ||
-                        overwrite ) {
-                FileUtils.setWriteable(f);
-                byte[] buffer = new byte[1024];
-                int length = 0;
-                FileOutputStream fos = new FileOutputStream(f);
+            while ((ze = zis.getNextEntry()) != null) {
+                File f = new File(dest, ze.getName());
+                // create intermediary directories - sometimes zip don't add them
+                File dirF=new File(f.getParent());
+                dirF.mkdirs();
                 
-                while ((length = zis.read(buffer)) >= 0) {
-                    fos.write(buffer, 0, length);
+                if (ze.isDirectory()) {
+                    f.mkdirs(); 
+                } else if ( ze.getTime() > f.lastModified() ||
+                            overwrite ) {
+                    FileUtils.setWriteable(f);
+                    byte[] buffer = new byte[1024];
+                    int length = 0;
+                    FileOutputStream fos = new FileOutputStream(f);
+                    
+                    while ((length = zis.read(buffer)) >= 0) {
+                        fos.write(buffer, 0, length);
+                    }
+                    
+                    fos.close();
                 }
-                
-                fos.close();
             }
+            zis.close();
+        } catch (FileNotFoundException fnx) {
+            if(!IOUtils.handleException(fnx,null))//Use generic message
+               throw fnx;
         }
-        zis.close();
     }
 }
