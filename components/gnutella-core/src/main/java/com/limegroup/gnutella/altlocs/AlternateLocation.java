@@ -220,13 +220,13 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	private AlternateLocation(final URL url, final URN sha1)
 	  throws IOException {
 		if(!NetworkUtils.isValidPort(url.getPort()))
-			throw new IOException("invalid port");
+			throw new IOException("invalid port: " + url.getPort());
         if(!NetworkUtils.isValidAddress(url.getHost()))
-            throw new IOException("invalid address");			
+            throw new IOException("invalid address: " + url.getHost());
         if(NetworkUtils.isPrivateAddress(url.getHost()))
             throw new IOException("invalid address: " + url.getHost());
         if(sha1 == null)
-            throw new IOException("invalid/null sha1");	    
+            throw new IOException("null sha1");	    
 	    
 		this.URL       = url;
 		this.SHA1_URN  = sha1;
