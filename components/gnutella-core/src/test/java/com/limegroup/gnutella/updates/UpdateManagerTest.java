@@ -48,13 +48,19 @@ public class UpdateManagerTest extends BaseTestCase {
 
     static final int PORT = 6347;
     
+    private static boolean testCallback = false;
+    
+    private static final Object lock = new Object();
+
+    private static final long DELAY = 60l*1000;//1 min
+    
 
 	public UpdateManagerTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);//, "testJava118NetworkVerification");
+		return buildTestSuite(UpdateManagerTest.class);//, "testUpdateMessageDelayed");
 	}
 
 	public static void main(String[] args) {
@@ -63,7 +69,7 @@ public class UpdateManagerTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+        RouterService rs = new RouterService(new MyActivityCallbackStub());
         rs.start();
         rs.clearHostCatcher();
         rs.connect();
@@ -479,18 +485,33 @@ public class UpdateManagerTest extends BaseTestCase {
                                               "2.9.3", man.getVersion());
    }
     
-    /*
+    
     public void testUpdateMessageDelayed() {
-        //TODO: This test should make sure that the gui blinks after a random
-        //interval of time between 1 and 7 hours from the time of the update
-        //files being published, and after 7 hours starts blinking immediately.
-
-        //There is no easy way to do this, since we need to create signed files
-        //at the time of the test starting. So this test will have to wait until
-        //I can think of a way of making this happen
+        //Note:If the update file does not contain the timestamp attibute, the
+        //UpdateManager assumes it is the current time. We can use this to test
+        //that there is a delay in our displaying the message
+        testCallback = true;
+        updateVersion = OLD;
+        changeUpdateFile();        
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6682, "3.6.3", NEW);//no timestamp
+        } catch (IOException e) {
+            fail("could not setup test");
+        }
+        conn.start();
+        long startTime = System.currentTimeMillis();
+        synchronized(lock) {
+            try {
+                lock.wait(DELAY);
+            } catch (InterruptedException ix) {}
+            if(System.currentTimeMillis() == startTime)
+                fail("GUI notified too soon");
+            else if(System.currentTimeMillis() > startTime+DELAY)
+                fail("GUI notified too late");
+        }
+        testCallback = false;
     }
-    */
-
 
     /**
      * puts an update file in the user pref dir based on updateVersion and set
@@ -518,10 +539,22 @@ public class UpdateManagerTest extends BaseTestCase {
         //Set UpdateManager.INSTANCE to null
         try {
             PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
+            PrivilegedAccessor.setValue(UpdateManager.class, "DELAY", 
+                                        new Long(DELAY));
         } catch(IllegalAccessException eax) {
             fail("unable to nullify UpdateManager.INSTANCE");
         } catch(NoSuchFieldException nsfx) {
             fail("unable to nullify UpdateManager.INSTANCE");
+        }
+    }
+    
+    private static class MyActivityCallbackStub extends ActivityCallbackStub {
+        public void indicateNewVersion() {
+            if(!testCallback)
+                return;
+            synchronized(lock) {
+                lock.notifyAll();
+            }
         }
     }
 

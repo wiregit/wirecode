@@ -36,7 +36,7 @@ public class UpdateManager {
      */
     private boolean usesLocale;
 
-    private static final long SEVEN_HOURS = 7*60*60*1000;//7 hours
+    private static long DELAY = 7*60*60*1000;//7 hours
     
     private static UpdateManager INSTANCE=null;
 
@@ -242,9 +242,9 @@ public class UpdateManager {
                         //to seven hours, otherwise if it's been seven hours
                         //since the file was published, we can show the user and
                         //update right now.
-                        if(System.currentTimeMillis() < makeTime+SEVEN_HOURS) {
+                        if(System.currentTimeMillis() < makeTime+DELAY) {
                             Random rand = new Random();
-                            long sleep = rand.nextLong() % SEVEN_HOURS;
+                            long sleep = rand.nextLong() % DELAY;
                             if(sleep<0)
                                 sleep = -1*sleep;
                             try {
