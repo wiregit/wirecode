@@ -14,7 +14,7 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ByteReader;
 
 /**
- * Tests the SequenceNumberExtender class.
+ * Put full UDPConnection system through various tests.
  */
 public final class UDPConnectionTest extends BaseTestCase {
 
@@ -46,6 +46,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
 
     public static void globaltearDown() throws Exception {
+        // Cleanup the UDPServiceStub usage
         UDPConnectionProcessor.setUDPServiceForTesting(null);
     }
 
@@ -57,6 +58,7 @@ public final class UDPConnectionTest extends BaseTestCase {
     
 
     public void tearDown() throws Exception {
+        // Clrear out the receiver parameters for the UDPServiceStub
         UDPServiceStub.stubInstance().clearReceivers();
     }  
 
