@@ -197,8 +197,8 @@ public class StatisticsRecorder
                     {
                         PercentageStatisticValue percentValue = 
                             (PercentageStatisticValue)value;
-                        statValue = new String(value.calculatePercent() + " " +
-                            value.getMetric());
+                        statValue = new String(percentValue.calculatePercent() + 
+                            " " + value.getMetric());
                     }
                     else if (value.isAverageStatistic())
                         statValue = new String(value.calculateAverage() + " " + 
