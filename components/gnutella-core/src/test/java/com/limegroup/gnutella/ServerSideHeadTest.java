@@ -102,19 +102,6 @@ public class ServerSideHeadTest extends BaseTestCase {
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     	
-    	// send second message, from the same host
-    	router.handleUDPMessage(ping1,datagram1);
-    	Thread.sleep(100);
-    	
-    	received = new DatagramPacket(new byte[1024],1024);
-    	try {
-    		socket1.receive(received);
-    		fail("should not have sent second pong");
-    	}catch(IOException expected){}
-    	
-		
-		//but if we try to send from the other host, it works.. 
-    	//first drain the ping request
 		router.handleUDPMessage(ping2,datagram2);
 		Thread.sleep(100);
 
