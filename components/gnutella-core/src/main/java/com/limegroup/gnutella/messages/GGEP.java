@@ -82,6 +82,9 @@ public class GGEP extends Object {
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
         throws BadGGEPBlockException {
 
+        if (messageBytes.length < 4)
+            throw new BadGGEPBlockException();
+
         // all GGEP blocks start with this prefix....
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
             throw new BadGGEPBlockException();
@@ -91,8 +94,13 @@ public class GGEP extends Object {
         while (!onLastExtension) {
 
             // process extension header flags
-            // bit order is interpreted as 76543210            
-            sanityCheck(messageBytes[currIndex]);
+            // bit order is interpreted as 76543210
+            try {
+                sanityCheck(messageBytes[currIndex]);
+            }
+            catch (ArrayIndexOutOfBoundsException malformedInput) {
+                throw new BadGGEPBlockException();
+            }
             onLastExtension = isLastExtension(messageBytes[currIndex]);
             boolean encoded = isEncoded(messageBytes[currIndex]);
             boolean compressed = isCompressed(messageBytes[currIndex]);
@@ -100,9 +108,14 @@ public class GGEP extends Object {
 
             // get the extension header
             currIndex++;
-            String extensionHeader = new String(messageBytes,
-                                                currIndex,
-                                                headerLen);
+            String extensionHeader = null;
+            try {
+                extensionHeader = new String(messageBytes, currIndex,
+                                             headerLen);
+            }
+            catch (StringIndexOutOfBoundsException inputIsMalformed) {
+                throw new BadGGEPBlockException();
+            }
 
             // get the data length
             currIndex += headerLen;
@@ -117,7 +130,13 @@ public class GGEP extends Object {
                 // ok, data is present, get it....
 
                 byte[] data = new byte[dataLength];
-                System.arraycopy(messageBytes, currIndex, data, 0, dataLength);
+                try {
+                    System.arraycopy(messageBytes, currIndex, data, 0, 
+                                     dataLength);
+                }
+                catch (ArrayIndexOutOfBoundsException malformedInput) {
+                    throw new BadGGEPBlockException();
+                }
 
                 // cobs decode this bad boy....
                 if (encoded) {
@@ -212,7 +231,12 @@ public class GGEP extends Object {
         final int MAX_ITERATIONS = 3;
         byte currByte;
         do {
-            currByte = buff[beginOffset++];
+            try {
+                currByte = buff[beginOffset++];
+            }
+            catch (ArrayIndexOutOfBoundsException malformedInput) {
+                throw new BadGGEPBlockException();
+            }
             length = (length << 6) | (currByte & 0x3f);
             if (++iterations > MAX_ITERATIONS)
                 throw new BadGGEPBlockException();
