@@ -72,8 +72,13 @@
   </target>
   
   <target name="clover.html" depends="with.clover">
+     <tstamp>
+       <format property="clover.time"
+               pattern="EEE, MMM d, yyyy hh:mm a"/>
+     </tstamp>
      <clover-report>
-       <current outfile="${cloverdir}/html">
+       <current outfile="${cloverdir}/html"
+                title="LimeWire - ${clover.time}">
          <format type="html"/> 
        </current>	 
      </clover-report>
