@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.*;
 
+import com.limegroup.gnutella.FileManager;
 import com.sun.java.util.collections.*;
 
 /**
@@ -86,6 +87,23 @@ public class FileUtils
         }
     
         return ret;
+    }
+
+    /** 
+     * Same as f.getParentFile() in JDK1.3. 
+     * @requires the File parameter must be a File object constructed
+     *  with the canonical path.
+     */
+    public static File getParentFile(File f) {
+    	// slight changes to get around getParent bug on Mac
+    	String name=f.getParent();
+    	if(name == null) return null;
+    	try {
+    		return FileManager.getCanonicalFile(new File(name));
+    	} catch(IOException ioe) {
+    		//if the exception occurs, simply return null
+    		return null;
+    	}
     }    
     
 }
