@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.routing;
 
 import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
@@ -79,6 +79,6 @@ public class PatchTableMessageTest extends BaseTestCase {
 
     static PatchTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (PatchTableMessage)Message.read(in);
+        return (PatchTableMessage)BIOMessageReader.read(in);
     }
 }

@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
@@ -58,6 +59,6 @@ public class ResetTableMessageTest extends BaseTestCase {
 
     static ResetTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (ResetTableMessage)Message.read(in);
+        return (ResetTableMessage)BIOMessageReader.read(in);
     }
 }

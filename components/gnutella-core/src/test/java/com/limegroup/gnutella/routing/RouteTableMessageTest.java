@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.routing;
 
 import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
-
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
@@ -34,7 +32,7 @@ public class RouteTableMessageTest extends BaseTestCase {
         message[23+0]=(byte)0xFF;                            //bogus variant
         InputStream in=new ByteArrayInputStream(message);
         try {
-            Message m=(ResetTableMessage)Message.read(in);
+            Message m = (ResetTableMessage)BIOMessageReader.read(in);
             fail("exception should have been thrown");
         } catch (BadPacketException e) {
         }
