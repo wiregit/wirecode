@@ -39,7 +39,7 @@ private ConnectionManager manager = null;
 /**
 *	Queue of EndPoints (hosts) for BFS traversal of hosts
 */
-private List hostQueue = (List)Collections.synchronizedList(new LinkedList());
+private List hostQueue = Collections.synchronizedList(new LinkedList());
 
 /** 
 *	Object for synchronizing access to graph
