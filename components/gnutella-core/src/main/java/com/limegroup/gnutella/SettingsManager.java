@@ -372,10 +372,8 @@ public class SettingsManager implements SettingsInterface
 	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
-	try{setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
-	catch(IllegalArgumentException e){setDirectories(home_);}
-	try{setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
-	catch(IllegalArgumentException e){setSaveDirectory(home_);}
+	setDirectories(home_);
+	setSaveDirectory(home_);
 	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 	setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
 	setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
