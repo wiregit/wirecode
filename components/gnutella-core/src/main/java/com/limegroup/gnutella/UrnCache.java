@@ -53,7 +53,9 @@ public class UrnCache {
     /**
      * Find any URNs remembered from a previous session for a file
      */
-    public HashSet getUrns(String path, long modTime) {
+    public HashSet getUrns(File file) {
+		long modTime = file.lastModified();
+		String path = file.getAbsolutePath();
 		HashSet urns = new HashSet();
 
         /** one or more "urn:" names for this file */
@@ -78,7 +80,9 @@ public class UrnCache {
     /**
      * Add URNs to theUrnCache
      */
-    public void persistUrns(String path, long modTime, HashSet urns) {
+    public void persistUrns(File file, HashSet urns) {
+		long modTime = file.lastModified();
+		String path = file.getAbsolutePath();
         theUrnCache.put(modTime+" "+path, urns);
     }
     
