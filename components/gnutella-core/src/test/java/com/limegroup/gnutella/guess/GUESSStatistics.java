@@ -41,6 +41,32 @@ public class GUESSStatistics {
     }
 
 
+    /* @return a Object[] of length 3.  First is a Float - num Received, second
+     * is a Float - num Sent, and last is the average time for a reply.
+     */
+    public static Object[] getPingStatistics(String host, int port) {
+        float numAttempted = 0, numReceived = 0, timeSum = 0;
+        GUESSTester tester = new GUESSTester("whatever");
+        while (numAttempted < 100) {
+            try {
+                long timeTook = tester.testPing(host, port);
+                if (timeTook > 0) {
+                    numReceived++;
+                    long endTime = System.currentTimeMillis();
+                    timeSum += timeTook;
+                }
+            }
+            catch (Exception ignored) {}
+            numAttempted++;
+        }
+        Object[] retObjs = new Object[3];
+        retObjs[0] = new Float(numReceived);
+        retObjs[1] = new Float(numAttempted);
+        retObjs[2] = new Float(timeSum/numReceived);
+        return retObjs;
+    }
+
+
     public static void getQueryStatistics(String host, int port,
                                           String searchKey) {
         float numAttempted = 0, numReceived = 0;

@@ -146,6 +146,37 @@ public class GUESSTester extends TestCase {
     }
 
     /** This method blocks for possibly several seconds.
+     *  @return a non-negative value if the ack was recieved.  else 0...
+     */
+    public synchronized long testPing(String host, int port) 
+        throws UnknownHostException, IOException {
+        synchronized (_pongLock) {
+            _pong = null;
+        }
+        PingRequest pr = new PingRequest((byte)1);
+        InetAddress addr = InetAddress.getByName(host);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        pr.write(baos);
+        DatagramPacket toSend = new DatagramPacket(baos.toByteArray(),
+                                                   baos.toByteArray().length,
+                                                   addr, port);
+        long startTime = 0, endTime = 0;
+        synchronized (_pongLock) {
+            startTime = System.currentTimeMillis();
+            _socket.send(toSend);
+            try {
+                // wait up to WAIT_TIME seconds for an ack....
+                _pongLock.wait(WAIT_TIME);
+            }
+            catch (InterruptedException ignored) {}
+            endTime = System.currentTimeMillis();
+        }
+        if (_pong == null)
+            return 0;
+        else return (endTime - startTime);
+    }
+
+    /** This method blocks for possibly several seconds.
      *  @return A QueryReply to your input Query.  May be null.
      */ 
     public synchronized QueryReply testQuery(String host, int port, 
