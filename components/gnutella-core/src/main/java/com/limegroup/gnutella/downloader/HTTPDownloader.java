@@ -1099,6 +1099,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 //         ^
                 int high = Integer.parseInt(line.substring(start, stop).trim());
                 
+                if(high >= rfd.getSize())
+                    high = rfd.getSize()-1;
+
+                if(low > high)//interval read off network is bad, try next one
+                    continue;
+
                 // this interval should be inclusive at both ends
                 interval = new Interval( low, high );
                 
