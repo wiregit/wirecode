@@ -15,8 +15,9 @@ package com.limegroup.gnutella;
 import java.util.*;
 import java.net.*;
 import java.io.*;
-import com.limegroup.gnutella.gui.*;
 import javax.swing.*;
+import com.limegroup.gnutella.gui.*;
+import com.limegroup.gnutella.downloader.*;
 
 public class VersionUpdate implements Runnable
 {
@@ -25,7 +26,10 @@ public class VersionUpdate implements Runnable
 	private static VersionUpdate _updater;
 	
 	private String _latest;
-
+	private String _newVersion;
+	private int _amountRead;
+	private String _currentDirectory;
+	private int _updateSize;
 
 	// private constructor for singleton
 	private VersionUpdate() 
@@ -47,7 +51,6 @@ public class VersionUpdate implements Runnable
 	
 	public void check() 
 	{
-
 		SettingsManager sm = SettingsManager.instance();
 		boolean checkAgain;		
 		checkAgain = sm.getCheckAgain();
@@ -73,9 +76,7 @@ public class VersionUpdate implements Runnable
 		}
 		// read in the version number
 		while (true) {
-
 			String str = " ";
-
 			try {
                 str = br.readLine();
 				// this should get us the version number
@@ -84,15 +85,11 @@ public class VersionUpdate implements Runnable
             } catch (Exception e) {
 				br.close();
                 return;
-            }
-			
+            }			
             //EOF?
             if (str==null || str.equals(""))
                 break;
-
 		}
-
-
 
 		String current = sm.getCurrentVersion(); 
 		int version = compare(current, latest);
@@ -113,6 +110,7 @@ public class VersionUpdate implements Runnable
 
 			else {
 				// otherwise ask...
+				_newVersion = latest;
 				askUpdate(current, latest);
 			}
 
@@ -261,12 +259,190 @@ public class VersionUpdate implements Runnable
 		"If using Windows or Unix, you may also"+
 		" run the auto-update feature from your LimeWire folder.";
 		
-		Utilities.showVersionMessage(msg);
-		// SettingsManager.instance().setCheckAgain(response);
-
-	
-		
+		//Utilities.showVersionMessage(msg);
+		Utilities.showUpdatePrompt();
+		// SettingsManager.instance().setCheckAgain(response);			
 	}
-	
 
+	public void update() throws CantConnectException
+	{	
+		_currentDirectory = System.getProperty("user.dir");
+		if(!_currentDirectory.endsWith(File.separator))
+			_currentDirectory += File.separator;		
+		StringBuffer newFileBuf = new StringBuffer("LimeWire");
+		StringTokenizer fileTok = new StringTokenizer(_newVersion,".");
+		newFileBuf.append(fileTok.nextToken());
+		newFileBuf.append(fileTok.nextToken());
+		newFileBuf.append(".jar");	   
+		String newFileName = newFileBuf.toString();
+		String fullPath = _currentDirectory + newFileName;	
+		System.out.println("file to download: "+newFileName);
+		try {
+			// open the http connection, and grab 
+			// the file with the version number in it.
+			String pathName = "/"+newFileName;
+			URL url = new URL("http", "www.limewire.com", 
+							  pathName);
+			URLConnection conn = url.openConnection();
+			conn.connect();
+			_updateSize = conn.getContentLength();
+			UpdateWindow window = new UpdateWindow(_updateSize);
+			
+			InputStream is = conn.getInputStream();
+			ByteReader byteReader = new ByteReader(is);
+			FileOutputStream fos = new FileOutputStream(fullPath, true);
+
+			int percentRead = 0;
+			_amountRead = 0;
+			int newBytes = -1;
+			byte[] buf = new byte[1024];
+			while(true) {
+				System.out.println("amountRead: "+_amountRead);
+				window.setAmountRead(_amountRead);
+				SwingUtilities.invokeLater(window);
+				//window.updatePercentRead(_amountRead);
+				if(_amountRead == _updateSize)
+					break;
+				if(_amountRead > _updateSize) {
+					//handleError();
+					break;					
+				}
+				newBytes = byteReader.read(buf);
+				if(newBytes == -1) 
+					break;
+				fos.write(buf, 0, newBytes);
+				_amountRead += newBytes;
+			}
+
+			byteReader.close();
+			fos.close();
+			
+			if(_amountRead == _updateSize) {
+				window.setComplete();
+				updateLAXFile(newFileName);
+			}
+			
+		} catch(MalformedURLException mue) {
+		} catch(IOException ioe) {
+		}
+	}
+
+	/** returns the amount of the update file that has 
+	 *  been read.  */
+	public int getAmountRead() {
+		return _amountRead;
+	}
+
+	public int getUpdateSize() {
+		return _updateSize;
+	}
+
+	// updates the LimeWire.LAX file that is used by
+	// InstallAnywhere to set the classpath
+	public void updateLAXFile(final String newFileName) {
+		File laxFile = new File(_currentDirectory, "LimeWire.lax");
+		File tempLaxFile = new File(_currentDirectory, "LimeWireTemp.lax");
+		String laxPath = "";
+		//final String newFileName = _newFileName;
+		try {
+			laxPath = laxFile.getCanonicalPath();
+		}
+		catch(IOException ioe) {
+			showErrorMessage("lax file get canonical path error");
+			return;
+		}
+		if(laxFile.exists()) {
+			String newClasspaths = "lax.class.path=";;
+			try {
+				FileReader fr = new FileReader(laxFile);
+				FileWriter fw = null;
+				try {
+					fw = new FileWriter(tempLaxFile);
+				}
+				catch(IOException ioe) {
+					showErrorMessage("updateLAXFile::IOException from FileWriter");
+					System.out.println("exception caught");
+				}
+				BufferedReader br = new BufferedReader(fr);
+				BufferedWriter bw = new BufferedWriter(fw);
+				String line = br.readLine();
+				//char[] lineChars = new char[line.length()];
+				while(line != null) {
+					//line.getChars(0,line.length(),lineCh`ars,0);					
+					if(line.startsWith(newClasspaths)) {
+						System.out.println("lax line1: "+line);
+						line = line.substring(15);
+						System.out.println("lax line2: "+line);
+						StringBuffer sb = new StringBuffer(newClasspaths);
+						StringTokenizer st = new StringTokenizer(line, ";");
+						String curTok = st.nextToken()+";";
+						while(st.hasMoreTokens()) {							
+							System.out.println("current token: "+curTok);
+							if(curTok.startsWith("LimeWire")) {
+								if(!curTok.endsWith("update.jar;")) {
+									curTok = newFileName+";";
+									System.out.println("found it");
+								}
+							}
+							sb.append(curTok);
+							curTok = st.nextToken()+";";
+						}
+						line = sb.toString();
+						System.out.println("new classpath string: "+line);
+						//bw.write(newClasspaths, 0, newClasspaths.length());
+					}
+					bw.write(line, 0, line.length());						
+					bw.newLine();
+					line = br.readLine();
+				}
+				System.out.println("got outside of the loop");
+				br.close();
+				System.out.println("closed br");
+				fr.close();
+				System.out.println("closed fr");
+
+				fw.flush();
+				System.out.println("flushed fw");
+
+				bw.flush();
+				System.out.println("flushed bw");
+
+				fw.close();
+				System.out.println("closed fw");
+				bw.close();
+				System.out.println("closed bw");
+			} catch(java.io.FileNotFoundException fnfe) {
+				showErrorMessage("updateLAXFile::FileNotFoundException");
+			} catch(IOException ioe) {
+				showErrorMessage("updateLAXFile::IOException");
+			}
+			String str = "";
+			try {
+				str = laxFile.getCanonicalPath();
+			}
+			catch(IOException ioe) {}
+			laxFile.delete();
+			if(!tempLaxFile.renameTo(laxFile)) {
+				String message = "Your LimeWire update has encountered an "+
+				"internal error. Please go to your LimeWire installation folder "+
+				"and rename the file \"LimeWireTemp.lax\" to \"LimeWire.lax\" to "+
+				"complete your update.";
+				Utilities.showMessage(message);
+			}
+		}
+		else {
+			showErrorMessage("lax file does not exist");
+		}
+	}
+
+	private static void showErrorMessage(String error) {
+		String message = "LimeWire update failed. Please download "+
+		"the new version of LimeWire at www.limewire.com.";
+		Utilities.showMessage(error);
+	}
+
+	public static void main(String args[]) {
+		VersionUpdate vu = VersionUpdate.instance();
+		vu.updateLAXFile("LimeWire12.jar");
+	}
 }
