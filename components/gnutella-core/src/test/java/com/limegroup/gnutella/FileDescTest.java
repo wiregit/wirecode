@@ -102,7 +102,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		try {
 			FileDesc.calculateAndCacheURN(file);
 			fail("nonexistent files should not be permitted");
-		} catch(IllegalArgumentException e) {
+		} catch(IOException e) {
 		}		
 
 		try {
