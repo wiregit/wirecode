@@ -469,11 +469,17 @@ public class HTTPDownloader implements Runnable {
 
 	    String incompleteDir = set.getIncompleteDirectory();
 
-        String pathname = incompleteDir +  _filename;
-        File myFile = new File(pathname);
+        // String pathname = incompleteDir +  _filename;
+        // File myFile = new File(pathname);
+        File myFile = new File(incompleteDir, _filename);
+		String pathname = myFile.getAbsolutePath();
 
-	    String path = _downloadDir + _filename;
-        File myTest = new File(path);
+
+	    // String path = _downloadDir + _filename;
+        // File myTest = new File(path);
+		File myTest = new File(_downloadDir, _filename);
+		String path = myTest.getAbsolutePath();
+
 
         if ((myTest.exists()) && (!_resume)) {
             // ask the user if the file should be overwritten
