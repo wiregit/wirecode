@@ -766,16 +766,7 @@ public final class RouterService {
 
 		try {
 			_lastQueryTime = System.currentTimeMillis();
-			// per HUGE v0.94, ask for URNs on responses
-			Set urnTypes = new HashSet();
-			urnTypes.add(UrnType.ANY_TYPE);
-			Set urns = new HashSet();
-			QueryRequest qr = 
-				new QueryRequest(guid, 
-								 SettingsManager.instance().getTTL(), 
-								 minSpeed, 
-								 query, richQuery, false, urnTypes, urns,
-								 !acceptedIncomingConnection());
+			QueryRequest qr = QueryRequest.createQuery(guid, query, richQuery);
 			verifier.record(qr, type);
 			router.sendDynamicQuery(qr);
 		} catch(Throwable t) {
