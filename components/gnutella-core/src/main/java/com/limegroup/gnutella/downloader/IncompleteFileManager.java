@@ -420,13 +420,19 @@ public class IncompleteFileManager implements Serializable {
      */
     public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
         // We must canonicalize the file.
+        boolean ioproblem = false;
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
-        } catch(IOException ignored) {}
+        } catch(IOException ignored) {
+            ioproblem = true;
+        }
 
         blocks.put(incompleteFile,vf);
         
-        registerIncompleteFile(incompleteFile);
+        // If there was no IO problem getting the canonicalized file,
+        // allow this to be partially shared.
+        if(!ioproblem)
+            registerIncompleteFile(incompleteFile);
     }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {

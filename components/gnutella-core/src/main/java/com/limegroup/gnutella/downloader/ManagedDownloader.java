@@ -1716,6 +1716,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //same temporary file.
         incompleteFile=incompleteFileManager.getFile(
                                                   (RemoteFileDesc)files.get(0));
+
         File saveDir;
         String fileName = getFileName();
         try {
@@ -2005,12 +2006,23 @@ public class ManagedDownloader implements Downloader, Serializable {
                       URN bHash = buckets.getURNForBucket(bucketNumber);
                       if(bHash != null && fd != null &&
                          !bHash.equals(fd.getSHA1Urn())) {
+                            File canon = null;
+                            Exception ioe = null;
+                            try {
+                                canon =
+                                    FileUtils.getCanonicalFile(incompleteFile);
+                            } catch(IOException e) {
+                                ioe = e;
+                            }
                             Assert.silent(false, 
                               "URNs in FM and IFM don't match.\n" +
                               "Bucket Hash: " + bHash + "\n" +
                               "FD Hash    : " + fd.getSHA1Urn() + "\n" +
                               "IncompleteFile: " + incompleteFile + "\n" +
                               "FD.getFile    : " + fd.getFile() + "\n" +
+                              "Canonical     : " + canon + "\n" +
+                              "Error: " + 
+                                (ioe == null ? "(none)" : ioe.getMessage()) +
                               "IFM hashes: " + 
                                 incompleteFileManager.dumpHashes());
                           //dont fail later
