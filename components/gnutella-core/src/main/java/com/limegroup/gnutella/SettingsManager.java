@@ -632,6 +632,7 @@ public class SettingsManager implements SettingsInterface
 	    throw new IllegalArgumentException();
 	else
 	    {
+		FileManager.getFileManager().reset();
 		FileManager.getFileManager().addDirectories(dir);
 		directories_ = dir;
 		props_.setProperty(SettingsInterface.DIRECTORIES, dir);
