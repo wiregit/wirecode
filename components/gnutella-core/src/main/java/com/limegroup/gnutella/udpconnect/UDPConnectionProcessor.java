@@ -418,8 +418,6 @@ public class UDPConnectionProcessor {
 	 *  data window.
      */
 	public int getChunkLimit() {
-		// Just access the windowSpace for chunkLimit for now
-        _chunkLimit = _sendWindow.getWindowSpace();  // TODO: performance?
 
 log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
 		return Math.min(_chunkLimit, _receiverWindowSpace);
@@ -492,6 +490,9 @@ log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
 			DataRecord drec = _sendWindow.addData(dm);  
             drec.sentTime = System.currentTimeMillis();
 			drec.sends++;
+
+            // Update the chunk limit for fast (nonlocking) access
+            _chunkLimit = _sendWindow.getWindowSpace();
 
 			_sequenceNumber++;
 
@@ -765,6 +766,9 @@ log("handleMessage :"+msg+" t:"+_lastReceivedTime);
 				
 				// Clear out the acked blocks at window start
 				_sendWindow.clearLowAckedBlocks();	
+
+                // Update the chunk limit for fast (nonlocking) access
+                _chunkLimit = _sendWindow.getWindowSpace();
 
 log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 			}
