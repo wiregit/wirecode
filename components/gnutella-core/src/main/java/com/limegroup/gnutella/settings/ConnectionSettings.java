@@ -276,6 +276,12 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",25,5);
     
     /**
+     * Setting to disable bootstrapping.. used only in tests.
+     */
+    public static final BooleanSetting DO_NOT_BOOTSTRAP = 
+        FACTORY.createBooleanSetting("DO_NOT_BOOTSTRAP",false);
+    
+    /**
      * Helper method left from Settings Manager
      *
 	 * Returns the maximum number of connections for the given connection

@@ -70,6 +70,7 @@ public class LeafRoutingTest extends BaseTestCase {
         //the interactive prompts below.
         ConnectionSettings.PORT.setValue(SERVER_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);

@@ -1250,6 +1250,8 @@ public class HostCatcher {
          * and if we need them, gets them.
          */
         public synchronized void run() {
+            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
+                return;
             // If no one's waiting for an endpoint, don't get any.
             if(_catchersWaiting == 0)
                 return;
