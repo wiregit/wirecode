@@ -500,7 +500,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private File completeFile;
     /**
      * The position of the downloader in the uploadQueue */
-    private int queuePosition;
+    private transient int queuePosition;
     /**
      * The vendor the of downloader we're queued from.
      */
