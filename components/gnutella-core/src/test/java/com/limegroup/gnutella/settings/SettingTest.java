@@ -99,6 +99,9 @@ public class SettingTest extends BaseTestCase {
 
     public void testSetting() throws Exception {
         
+        // Necessary to work on OSX without the graphics environment .. 
+        // harmless elsewhere.
+        System.setProperty("java.awt.headless", "true");
         
         String testFilePath;
         String testFilePath2;
