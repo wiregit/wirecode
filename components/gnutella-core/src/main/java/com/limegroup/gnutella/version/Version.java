@@ -1,12 +1,37 @@
 package com.limegroup.gnutella.version;
 
-
+/**
+ * Enscapulates a version, allowing easy compareTos.
+ */
 class Version implements Comparable {
-    
+   
+    /**
+     * The version string.
+     */ 
     private final String v;
+    
+    /**
+     * The major version.
+     * X in X.Y.Z_r
+     */
     private final int major;
+    
+    /**
+     * The minor version.
+     * Y in X.Y.Z_r
+     */
     private final int minor;
+    
+    /**
+     * The service version.
+     * Z in X.Y.Z_r
+     */
     private final int service;
+    
+    /**
+     * The revision.
+     * r in X.Y.Z_r
+     */
     private final int revision;
     
     /**
@@ -67,7 +92,8 @@ class Version implements Comparable {
     }
     
     /**
-     * Parses a version for major/minor/service.
+     * Parses a version for major/minor/service & revision.
+     * Major, Minor & Service are required.  Revision can be implied.
      */
     private int[] parse(String vers) throws VersionFormatException {
 	    int major, minor, service, revision;

@@ -27,7 +27,11 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
-
+/**
+ * An abstraction for the update XML.
+ * Contains the ID & timestamp of the message, as well as the list
+ * of UpdateData information for individual messages.
+ */
 class UpdateCollection {
     
     private static final Log LOG = LogFactory.getLog(UpdateCollection.class);
@@ -145,6 +149,10 @@ class UpdateCollection {
     
     /**
      * Parses the document element.
+     *
+     * This requires that the element be "update" and has the attribute 'id'.
+     * The 'timestamp' attribute is checked (but is optional), as are child 'msg'
+     * elements.
      */
     private void parseDocumentElement(Node doc) {
         // Ensure the document element is the 'update' element.

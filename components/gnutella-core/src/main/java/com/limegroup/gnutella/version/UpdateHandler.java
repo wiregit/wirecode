@@ -17,6 +17,12 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+/**
+ * Manager for version updates.
+ *
+ * Handles queueing new data for parsing and keeping track of which current
+ * version is stored in memory & on disk.
+ */
 public class UpdateHandler {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
@@ -67,6 +73,9 @@ public class UpdateHandler {
     
     /**
      * Notification that a new message has arrived.
+     *
+     * (The actual processing is passed of to be run in a different thread.
+     *  All notifications are processed in the same thread, sequentially.)
      */
     public void handleNewData(final byte[] data) {
         if(data != null) {
@@ -104,6 +113,8 @@ public class UpdateHandler {
     
     /**
      * Handles processing a newly arrived message.
+     *
+     * (Processes the data immediately.)
      */
     private void handleDataInternal(byte[] data, boolean fromDisk) {
         if(data != null) {
@@ -121,7 +132,7 @@ public class UpdateHandler {
     }
     
     /**
-     * Stores the given data to disk & posts an update.
+     * Stores the given data to disk & posts an update to neighboring connections.
      */
     private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
         LOG.trace("Retrieved new data, storing & updating.");

@@ -5,6 +5,11 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+/**
+ * A single message for updating.
+ *
+ * Contains information if the current architecture applies to this update.
+ */
 class UpdateData implements Cloneable, UpdateInformation {
     
     private static final Log LOG = LogFactory.getLog(UpdateData.class);
