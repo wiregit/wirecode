@@ -778,7 +778,12 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        int need = _keepAlive - getNumConnections() - _fetchers.size();
+        //This is just an approximation.  The assumption is that all the
+        //initializing connections are going to be unrouted connections.  Leaf
+        //nodes, if any, will come to us.
+        int nonLeafConnections=getNumConnections()
+                                   - _initializedClientConnections.size();
+        int need = _keepAlive - nonLeafConnections - _fetchers.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {
