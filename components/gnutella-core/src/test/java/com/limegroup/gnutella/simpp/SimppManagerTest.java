@@ -51,7 +51,7 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(SimppManagerTest.class,"testNewerSimppRequested");
+        return buildTestSuite(SimppManagerTest.class);//,"testNewerSimppRequested");
     }
 
     public static void main(String[] args) {
@@ -191,13 +191,13 @@ public class SimppManagerTest extends BaseTestCase {
         //a simpp request from limewire
         TestConnection conn = null;
         try {
-            conn = new TestConnection(PORT, NEW, true);
+            conn = new TestConnection(PORT, NEW, true, true);//expect, respond
         } catch(IOException iox) {
             fail("could not set up test connection");
         }
         conn.start();
         try {
-            Thread.sleep(100000);//let the message exchange take place
+            Thread.sleep(1000);//let the message exchange take place
         } catch (InterruptedException ix) {
             fail("interrupted while waiting for simpp exchange to complete");
         }

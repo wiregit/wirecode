@@ -24,13 +24,24 @@ public class TestConnection {
     //The simpp message number this connection is expected to send
     private int _simppMessageNumber;
 
-
-    public TestConnection(int port, int simppNumber, boolean expectSimppReq) 
+    /**
+     * When creating a TestConnection you want to specify 4 things
+     * @param port The port on which the TestConnection should connect to LW
+     * @param simppNumber The simppNumber the TestConnection should pretend to
+     * have, this affects the simpp-data that this TestConnection eventually
+     * sends.
+     * @param expectSimppReq whether or not the TestConnection should expect to
+     * receive a SimppRequestVM
+     * @param sendSimppData whether or not the TestConnection should send the
+     * simpp-data when it receives a SimppRequestVM
+     */
+    public TestConnection(int port, int simppNumber, boolean expectSimppReq,
+                          boolean sendSimppData) 
                                                           throws IOException {
         _simppData = readCorrectFile(simppNumber);        
         _simppMessageNumber = simppNumber;
         _expectSimppRequest = expectSimppReq;
-        _sendSimppData = true;//we want to send in the default case
+        _sendSimppData = sendSimppData;
     }
     
     public void start() {
@@ -96,26 +107,34 @@ public class TestConnection {
         //testing can be done.
         
         CapabilitiesVM capVM = makeCapabilitiesVM();
-        System.out.println("Test Connection sending"+capVM);
         capVM.write(os);
         os.flush();
         //now, lets see if we expect a request or not
         Message message = null;
         boolean done = false;
-        while(!done) {
+        for(int i=0; i<5; i++) {//read 5 messages
             try {
                 message = Message.read(is, Message.N_TCP);
-            } catch (BadPacketException bpx) {
-                bpx.printStackTrace();
+            } catch(BadPacketException bpx) {
+                Assert.that(false, "failed while receiving message from LW");
             }
-            System.out.println(message);
-            if(message instanceof SimppRequestVM) {
-                System.out.println("Sumeet: we are done");
-                done = true;
-            }            
+            if(message instanceof SimppRequestVM) 
+                break;
         }
-        //TODO: now write back the SIMPP_DATA and let the testing continue
-
+        if(_expectSimppRequest)
+            Assert.that((message instanceof SimppRequestVM), 
+                                             "failed -- expected SimppRequest");
+        else
+            Assert.that( !(message instanceof SimppRequestVM), 
+                         "failed -- we should not have received SimppRequest");
+ 
+        //send back the simppdata if reqd.
+        if(_sendSimppData) {
+            Message simppVM = new SimppVM(_simppData);
+            simppVM.write(os);
+            os.flush();
+        }
+        
         //Read messages, if (_expectSimppRequest) make sure we get it, otherwise
         //make sure we do not get it. Then based on _sendSimppData send the data
         //back once if we got the SimppRequestVM        
