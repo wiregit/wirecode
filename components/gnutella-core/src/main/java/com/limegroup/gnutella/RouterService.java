@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
@@ -16,9 +17,7 @@ import com.limegroup.gnutella.util.*;
  * constructing the backend components.  Typical use is as follows:
  *
  * <pre>
- * RouterService rs=new RouterService(callback, router);
- * rs.initialize();
- * ... //construct GUI
+ * RouterService rs = new RouterService(callback);
  * rs.postGuiInit();
  * rs.query(...);
  * rs.download(...);
@@ -45,9 +44,9 @@ import com.limegroup.gnutella.util.*;
  *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors
  * </ul> 
  */
-public class RouterService
-{
-    private ActivityCallback callback;
+public final class RouterService {
+    private static ActivityCallback callback;
+
     private HostCatcher catcher;
     private MessageRouter router;
     private Acceptor acceptor;
@@ -75,56 +74,47 @@ public class RouterService
      */
     private boolean isShuttingDown;
 
-    private static RouterService me = null;
+	/**
+	 * <tt>RouterService</tt> instance, following singleton.
+	 */
+    private static RouterService instance;
 
     /**
 	 * Accessor for the <tt>RouterService</tt> instance.  This is a bit of a
 	 * hack in that it does not really follow traditional singleton, as this
-	 * may return <tt>null</tt>.  Equally as dangerous, this can return an
-	 * instance that is not fully initialized.
+	 * may return <tt>null</tt>. 
 	 *
-	 * @return the <tt>RouterService</tt> instance, which can be uninitialized
-	 *  if initialize has not been called, and which can be <tt>null</tt> if
-	 *  the constructor has not been called
+	 * @return the <tt>RouterService</tt> instance, which can be <tt>null</tt> 
+	 *  if the constructor has not been called
      */
     public static RouterService instance() {
-        return me;
+		if(instance == null) {
+			instance = new RouterService();
+		}
+        return instance;
     }
 
 	/**
-	 * Creates a unitialized RouterService.  No work is done until
-     * initialize() is called.
+	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
+	 * the backend, including fetching new connections, listening for 
+	 * messages, etc.
+	 *
      * @param activityCallback the object to be notified of backend changes
-     * @param router the algorithm to use for routing messages.  
-     * @param fManager FileManager instance for all file system related duties
-     * @param authenticator Authenticator instance for authenticating users
+     * @param router the algorithm to use for routing messages.
 	 */
-  	public RouterService(ActivityCallback activityCallback,
-  						 MessageRouter router,
-                         FileManager fManager,
-                         Authenticator authenticator) {
-  		this.callback = activityCallback;
+  	private RouterService() {
+		this.fileManager = new MetaFileManager();
 		SettingsManager settings = SettingsManager.instance();
-  		int port = settings.getPort();
-  		this.acceptor = new Acceptor(port, callback);
-  		this.router = router;
-        this.fileManager = fManager;
-        this.authenticator = authenticator;
-        this.timer = new SimpleTimer(true, activityCallback);
+  		this.acceptor = new Acceptor(settings.getPort());
 		this.udpAcceptor = UDPAcceptor.instance();
-		Assert.setCallback(this.callback);
-        
-        me = this;
-  	}
 
-	/**
-     * Initializes the key backend components.  Some tasks are postponed
-     * until postGuiInit().
-	 */
-  	public void initialize() {
-		SettingsManager settings = SettingsManager.instance();
-  		this.manager = createConnectionManager();
-  		this.catcher = createHostCatcher();
+		// this used to be given as a parameter, allowing other components,
+		// like the server, to use their own MessageRouter.
+  		this.router = new MetaEnabledMessageRouter(callback, fileManager);
+        this.authenticator = new ServerAuthenticator();
+        this.timer = new SimpleTimer(true, callback);
+  		this.manager = new ConnectionManager(callback, authenticator);
+  		this.catcher = new HostCatcher();
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
 											   this.fileManager);
@@ -132,14 +122,8 @@ public class RouterService
         this.chatManager = ChatManager.instance();
 
 		// Now, link all the pieces together, starting the various threads.
-		this.catcher.initialize(acceptor, manager,
-								settings.getHostList());
-		this.router.initialize(acceptor, manager, catcher, uploadManager,
-							   downloader, callback, fileManager);
+		this.router.initialize(acceptor, manager, catcher, uploadManager);
 		this.manager.initialize(router, catcher);		
-		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
-		this.acceptor.initialize(manager, downloader, uploadManager);
-        this.chatManager.setActivityCallback(callback);
 
 		//We used to call the following code here:
         //  		if(settings.getConnectOnStartup()) {
@@ -159,9 +143,9 @@ public class RouterService
         //Ensure statistcs have started (by loading class).
         Statistics.instance();
 
-		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
-                                                   downloader, 
-                                                   manager);
+		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
+													 downloader, 
+													 manager);
 		sa.start(this);
 
 		if(settings.getConnectOnStartup()) {
@@ -170,31 +154,49 @@ public class RouterService
 			if ( outgoing > 0 ) 
 				connect();
 		}
+  	}
+
+	/**
+	 * Static method that sets the <tt>ActivityCallback</tt> instance.  This
+	 * is a significant hack, as this MUST be called before the call
+	 * to RouterService.instance when the application is first being
+	 * constructed.  If it isn't, null pointers will be thrown.  Note that
+	 * this is not an issue at all once the program is up and running.
+	 *
+	 * @param callback the <tt>ActivityCallback</tt> instance for 
+	 *  visual display
+	 */
+	public static void setCallback(ActivityCallback callback) {
+		callback = callback;
+	}
+
+	/**
+	 * Starts various threads and tasks once all core classes have
+	 * been constructed.
+	 */
+	public void start() {
+		fileManager.initialize();
+		acceptor.initialize();
 
 		// start up the UDP server thread
 		Thread udpThread = new Thread(udpAcceptor);
 		udpThread.start();
-  	}
+		
+		catcher.start();
+
+        // Asynchronously load files now that the GUI is up, notifying
+        // callback.
+        fileManager.initialize();
+
+        // Restore any downloads in progress.
+        downloader.postGuiInit();
+	}
 
     /**
      * Returns the ActivityCallback passed to this' constructor.
      */ 
-    public ActivityCallback getActivityCallback() {
+    public ActivityCallback getCallback() {
         return callback;
-    }
-
-    /**
-     * Returns a new instance of RouterService. Its a Factory Method.
-     */
-    protected ConnectionManager createConnectionManager() {
-        return new ConnectionManager(callback, authenticator);
-    }
-    
-    /**
-     * Returns a new instance of HostCatcher. Its a Factory Method.
-     */
-    protected HostCatcher createHostCatcher() {
-        return new HostCatcher(callback);
     }
     
 	/**
@@ -233,6 +235,33 @@ public class RouterService
 		return router;
 	}
 
+	/**
+	 * Accessor for the <tt>ConnectionManager</tt> instance.
+	 *
+	 * @return the <tt>ConnectionManager</tt> instance in use
+	 */
+	public ConnectionManager getConnectionManager() {
+		return manager;
+	}
+	
+    /** 
+     * Accessor for the <tt>UploadManager</tt> instance.
+     *
+     * @return the <tt>UploadManager</tt> in use
+     */
+	public UploadManager getUploadManager() {
+		return uploadManager;
+	}
+	
+    /** 
+     * Accessor for the <tt>Acceptor</tt> instance.
+     *
+     * @return the <tt>Acceptor</tt> in use
+     */
+	public Acceptor getAcceptor() {
+		return acceptor;
+	}
+
     /**
      * Schedules the given task for repeated fixed-delay execution on this'
      * backend thread.  <b>The task must not block for too long</b>, as 
@@ -249,16 +278,6 @@ public class RouterService
         timer.schedule(task, delay, period);
     }
 
-    /** Kicks off expensive backend tasks (like file loading) that should
-     *  only be done after GUI is loaded. */
-    public void postGuiInit() {
-        // Asynchronously load files now that the GUI is up, notifying
-        // callback.
-        fileManager.initialize(callback);
-        // Restore any downloads in progress.
-        downloader.postGuiInit(this);
-    }
-
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
 
@@ -273,6 +292,16 @@ public class RouterService
             throws IOException {
         return manager.createConnectionBlocking(hostname, portnum);
     }
+
+	/**
+	 * Accessor for the TCP port that the application is listening on for
+	 * Gnutella connections and messages.
+	 *
+	 * @return the TCP port that the application is listening on
+	 */
+	public int getTCPListeningPort() {
+		return acceptor.getPort();
+	}
 
     /**
      * Creates a new outgoing messaging connection to the given host and port. 
