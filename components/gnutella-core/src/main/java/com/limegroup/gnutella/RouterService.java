@@ -334,6 +334,76 @@ public class RouterService
     }
 
     /**
+     * Searches the given host for all its files.  Results are given
+     * to the GUI via handleQuery.  Returns null if the host couldn't
+     * be reached.  Blocks until the connection is established and
+     * the query is sent.
+     */
+    public byte[] browse(String host, int port) {
+	Connection c=null;
+
+	//1. See if we're connected....  
+	for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+	    Connection c2=(Connection)iter.next();
+	    //Get the IP address of c2 in dotted decimal form.  Note
+	    //that c2.getOrigHost is no good as it may return a
+	    //symbolic name.
+	    String ip=c2.getInetAddress().getHostAddress();
+	    if (ip.equals(host) && c2.getOrigPort()==port) {
+		c=c2;
+		break;
+	    }
+	}
+	//...if not, establish a new one.
+	if (c==null) {
+	    try {
+		c=new Connection(host, port);
+		connectToHost(c);
+	    } catch (IOException e) {
+		return null;
+	    }
+	}
+	    
+	//2. Send a query for "*.*" with a TTL of 1.
+	QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
+	manager.fromMe(qr);
+	try {
+	    c.send(qr);
+	} catch (IOException e) {
+	    return null;
+	}
+
+	//3. Remove a lesser connection if necessary.  Current heuristic:
+	//drop the connection other than c with least number of files.
+	//
+	//TODO: this should go in ConnectionManager, but that requires
+	//us to add MAX_KEEP_ALIVE property.  Besides being the logical 
+	//place for this functionality, it would make the network
+	//hill climbing a snap to implement.  It would also allow us to 
+	//synchronize properly to prevent race conditions.
+	if (manager.getNumConnections()>manager.getKeepAlive()) {
+	    Connection worst=null;
+	    long files=Long.MAX_VALUE;
+	    for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+		Connection c2=(Connection)iter.next();
+		//Don't remove the connection to the host we are browsing.
+		if (c2==c)
+		    continue;
+		long n=c2.getNumFiles();
+		if (n<files) {
+		    worst=c2;
+		    files=n;
+		}		
+	    }
+	    if (worst!=null) {
+		manager.remove(worst);	    		
+	    }
+	}
+		
+	return qr.getGUID();
+    }
+
+    /**
      *  Return an iterator on the hostcatcher hosts
      */
     public Iterator getHosts() {
