@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.9.4
+# Messages Bundle for LimeWire 3.9.5
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -885,7 +885,6 @@ ERROR_LOCKED_BY_PROCESS_GENERIC=لم يتمكن LimeWire من فتح أحد ال
 ERROR_ACCESS_DENIED_DOWNLOAD=لم يكن LimeWire قادرا على إنشاء أو استكمال كتابة ملف غير كامل للملف المراد تنزيله وذلك لأنك لا تمتلك صلاحية كتابة الملفات في مجلد الملفات الغير تامة. لكي تستكمل استخدام LimeWire اختر مجلدا آخرا للحفظ.
 ERROR_ACCESS_DENIED_GENERIC=لم يتمكن LimeWire من كتابة أحد الملفات الضرورية نتيجة عدم امتلاكك الصلاحيات الضرورية لذلك. قد لا يتم حفظ التفضيلات في المرة القادمة التي تقوم فيها بتشغيل LimeWire.
 
-
 ################################################################################
 # Key/Value pairs for internal error messages
 ################################################################################
@@ -947,6 +946,10 @@ ERROR_REMOVE_LAST_COL=لا يمكنك عدم تفعيل جميع الأعمدة.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير موجودة أو غير صالحة. من فضلك قم باختيار ملف آخر أو استخدم السمة الافتراضية.
+#??? ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
+#??? ERROR_THEME_OUT_OF_DATE_TITLE=Invalid skin
+ERROR_THEME_OUT_OF_DATE_GET_MORE=المزيد من السمات
+ERROR_THEME_OUT_OF_DATE_LATER=لاحقا
 ERROR_BAD_MAGNET_LINK=لا يمكن تشغيل وصلة MAGNET.
 ERROR_INVALID_URLS_IN_MAGNET=واحدة أو أكثر من وصلات MAGNET غير صالحة. قد لا يتم تنزيل الملف بصورة صحيحة.
 #??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
