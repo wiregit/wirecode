@@ -1079,8 +1079,6 @@ public class ConnectionManager {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public synchronized void connect() {
-        _catcher.sendPings();
-        
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
         //within a week.)
@@ -1670,7 +1668,8 @@ public class ConnectionManager {
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
 	    Thread.currentThread().setName("MessageLoopingThread");
-		if(conn.isGUESSUltrapeer()) {
+		if(conn.isGUESSUltrapeer() && 
+            !NetworkUtils.isPrivateAddress(conn.getInetAddress())) {
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
 				conn.getListeningPort());
 		}
