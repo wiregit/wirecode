@@ -86,6 +86,10 @@ public class RouterService
 		this.manager.initialize(router, catcher);		
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
+
+		// Make the call to connect to the router after everything else has
+		// been initialized
+		this.catcher.connectToRouter();
 		this.downloader.initialize(callback, router, acceptor,
                                    FileManager.instance());
 		
