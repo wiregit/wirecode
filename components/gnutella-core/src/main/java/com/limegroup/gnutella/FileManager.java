@@ -1543,7 +1543,7 @@ public abstract class FileManager {
         //Extract responses for all non-null (i.e., not deleted) files.
         //Because we ignore all incomplete files, _numFiles continues
         //to work as the expected size of ret.
-        Response[] ret=new Response[_numFiles];
+        Response[] ret=new Response[_numFiles-_numNetworkShares];
         int j=0;
         for (int i=0; i<_files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
@@ -1551,6 +1551,10 @@ public abstract class FileManager {
             // DO NOT SEND IT.
             if (desc==null || desc instanceof IncompleteFileDesc) 
                 continue;    
+            File parent = desc.getFile().getParentFile();
+            if(parent != null && parent.equals(SUBDIR_SHARE))
+                continue;
+        
             Assert.that(j<ret.length,
                         "_numFiles is too small");
             ret[j] = new Response(desc);
