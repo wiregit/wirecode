@@ -106,7 +106,7 @@ public class RouterService {
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    private static final DownloadManager downloader = new DownloadManager();
+    private static DownloadManager downloader = new DownloadManager();
 
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
@@ -175,6 +175,18 @@ public class RouterService {
 	 * Whether or not we are running at full power.
 	 */
 	private static boolean _fullPower = true;
+	
+	private static final byte [] MYGUID;
+	static {
+	    byte [] myguid=null;
+	    try {
+	        myguid = GUID.fromHexString(ApplicationSettings.CLIENT_ID.getValue());
+	    }catch(IllegalArgumentException iae) {
+	        myguid = GUID.makeGuid();
+	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
+	    }
+	    MYGUID=myguid;
+	}
 
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
@@ -467,6 +479,10 @@ public class RouterService {
 	 */
 	public static PromotionManager getPromotionManager() {
 		return promotionManager;
+	}
+	
+	public static byte [] getMyGUID() {
+	    return MYGUID;
 	}
 
     /**

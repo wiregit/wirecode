@@ -11,15 +11,18 @@ import junit.framework.Test;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
@@ -27,6 +30,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -39,6 +43,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -657,6 +662,63 @@ public class UploadTest extends BaseTestCase {
         assertEquals(al, alc.iterator().next());
     }        
     
+    /**
+     * tests that when reading the NFAlt header we only remove proxies
+     */
+    public void testRemovingNFAlt() throws Exception {
+        
+        boolean passed;
+        GUID g = new GUID(GUID.makeGuid());
+        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
+        alc.clear();
+        
+        assertEquals(0,FD.getAltLocsSize());
+        URN urn = URN.createSHA1Urn(hash);
+        
+        Map m =(Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3",
+                urn,
+                true);
+        
+        String abcHttp = abc.httpStringValue();
+        m.clear();
+        
+        PushAltLoc bcd=(PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";2.2.2.2:2;3.3.3.3:3;4.4.4.4:4",
+                urn,
+                true);
+        
+        String bcdHttp = bcd.httpStringValue();
+        
+        FD.add(bcd);
+        assertEquals(1,FD.getAltLocsSize());
+        
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + abcHttp,
+                "abcdefghijklmnopqrstuvwxyz",
+                null);
+        assertTrue("alt failed", passed);
+        
+        //two of the proxies of bcd should be gone
+        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
+        
+        
+        //now repeat, sending all three original proxies of bce as NFAlts
+        Thread.sleep(1000);
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + bcdHttp,
+                "abcdefghijklmnopqrstuvwxyz",
+                null);
+        assertTrue("alt failed", passed);
+        
+        // all proxies should be gone, and bcd should be removed from 
+        // the filedesc
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
+    }
+    
     // unfortunately we can't test with private addresses
     // because all these connections require that local_is_private
     // is false, which turns off isPrivateAddress checking.
@@ -1114,11 +1176,106 @@ public class UploadTest extends BaseTestCase {
     public void testFeatureHeader() throws Exception {
         ChatSettings.CHAT_ENABLED.setValue(true);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0, chat/0.1"));
+                   "X-Features: fwalt/0.1, browse/1.0, chat/0.1"));
                    
         ChatSettings.CHAT_ENABLED.setValue(false);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0"));
+                   "X-Features: fwalt/0.1, browse/1.0"));
+    }
+    
+    /**
+     * tests that the node sends a proper proxies header
+     */
+    public void testProxiesHeaderNotSent() throws Exception {
+        
+        // try when we are not firewalled
+        PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(true));
+        
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        assertFalse(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+        
+        Thread.sleep(1000);
+        
+        // now try with an empty set of proxies
+        s = getSocketFromPush();
+        in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
+		
+		PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
+		
+        assertFalse(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+    }
+    
+    public void testProxiesHeaderSent() throws Exception{
+        
+        Socket s = getSocketFromPush();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        Writer out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
+		
+        // now try with some proxies
+        ConnectionManager original = RouterService.getConnectionManager();
+        
+        final Set proxies = new HashSet();
+        QueryReply.PushProxyContainer ppi = 
+            new QueryReply.PushProxyContainer("1.2.3.4",5);
+        proxies.add(ppi);
+        
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public Set getPushProxies() {
+                return proxies;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
+        
+		
+		PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
+		
+        assertTrue(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",original);
+                
     }
     
     //////////  test thex works /////////////
@@ -1504,7 +1661,7 @@ public class UploadTest extends BaseTestCase {
                 break;
             if (requiredHeader != null) {
                 Header found = new Header(line);
-                if( found.equals(expectedHeader) ) {
+                if( found.equals(expectedHeader)) {
                     foundHeader = true;
                 }
             }
@@ -1517,7 +1674,49 @@ public class UploadTest extends BaseTestCase {
 			assertTrue("Didn't find header: " + requiredHeader, foundHeader);
 		}
 		return length;
-    }        
+    }
+    
+    private static boolean containsHeader(String requestMethod,
+                                            String file,
+                                            String header,
+                                            Writer out,
+                                            Reader in,
+                                            String requiredHeader)
+    	throws IOException {
+        // send request
+        out.write( requestMethod + " " + makeRequest(file) + " " + 
+            "HTTP/1.1\r\n");
+        if (header != null)
+            out.write(header + "\r\n");
+        out.write("Connection: Keep-Alive\r\n");            
+        out.write("\r\n");
+        out.flush();
+
+        //2. Read response code and headers, remember the content-length.
+        boolean foundHeader = false;
+        Header expectedHeader = null;
+        
+        if( requiredHeader != null )
+            expectedHeader = new Header(requiredHeader);
+            
+        while (true) { 
+            String line = readLine(in);
+            if( line == null)
+                throw new InterruptedIOException("connection closed");
+            //System.out.println("<< " + line);
+                
+            if (line.equals(""))
+                break;
+            if (requiredHeader != null) {
+                Header found = new Header(line);
+                if( found.title.equals(expectedHeader.title)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+        
+    }
     
     private static class Header {
         final String title;

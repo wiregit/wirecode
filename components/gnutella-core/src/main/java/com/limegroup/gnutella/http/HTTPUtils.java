@@ -3,6 +3,7 @@ package com.limegroup.gnutella.http;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.*;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,11 @@ public final class HTTPUtils {
 	 * Cached colon to avoid excessive allocations.
 	 */
 	private static final String COLON = ":";
+	
+	/**
+	 * Cached slash to avoid excessive allocations.
+	 */
+	private static final String SLASH = "/";
 
 	/**
 	 * Private constructor to ensure that this class cannot be constructed
@@ -271,12 +277,38 @@ public final class HTTPUtils {
      * Utlity method for getting the currently supported features.
      */
     private static Set getFeaturesValue() {
-        Set features = new HashSet(2);
+        Set features = new HashSet(4);
         features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
         if (ChatSettings.CHAT_ENABLED.getValue())
             features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+        
+       	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+       	
+       	//TODO: make this check also UDPService.canDoFWT() when merged
+       	if (!RouterService.acceptedIncomingConnection())
+       	    features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
+        
         return features;
-    }        
+    }
+    
+    /**
+     * Utility method for extracting the version from a feature token.
+     */
+    public static float parseFeatureToken(String token) throws
+    	ProblemReadingHeaderException{
+        int slashIndex = token.indexOf(SLASH);
+        
+        if (slashIndex == -1 || slashIndex >= token.length()-1)
+            throw new ProblemReadingHeaderException("invalid feature token");
+        
+        String versionS = token.substring(slashIndex+1);
+        
+        try {
+            return Float.parseFloat(versionS);
+        }catch (NumberFormatException bad) {
+            throw new ProblemReadingHeaderException(bad);
+        }
+    }
     
     /**
      * Utility method for getting the date value for the "Date" header in

@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -25,6 +26,8 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.RoundRobinQueue;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.AssertComparisons;
 import java.util.Iterator;
@@ -61,6 +64,7 @@ public class TestUploader extends AssertComparisons {
 	private URN                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
+    private Socket socket;
     private boolean busy = false;
     private int retryAfter = -1;
     private int timesBusy = Integer.MAX_VALUE;
@@ -136,6 +140,16 @@ public class TestUploader extends AssertComparisons {
     private boolean useBadThexResponseHeader = false;
     
     /**
+     * whether or not we are interested in receiving push locs
+     */
+    private boolean interestedInFalts = false;
+    
+    /**
+     * whether we are firewalled
+     */
+    private boolean isFirewalled = false;
+    
+    /**
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
@@ -152,6 +166,12 @@ public class TestUploader extends AssertComparisons {
      * <tt>IPFilter</tt> for only allowing local connections.
      */
     private final IPFilter IP_FILTER = IPFilter.instance();
+    
+    
+    /**
+     * String to send if we are writing the X-Push-Proxies header
+     */
+    private String _proxiesString;
 
 
     /** 
@@ -179,6 +199,7 @@ public class TestUploader extends AssertComparisons {
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
             LOG.debug("Couldn't bind socket to port "+port+"\n");
+            
             //System.out.println("Couldn't listen on port "+port);
             ErrorService.error(e);
             return;
@@ -196,6 +217,37 @@ public class TestUploader extends AssertComparisons {
         };
         t.setDaemon(true);
         t.start();        
+    }
+    
+    public TestUploader(String name) throws IOException{
+        super(name);
+        this.name=name;
+        reset();
+        LOG.debug("starting to handle request with direct socket given");
+        
+        Thread t = new Thread(name) {
+            public void run() {
+                synchronized(TestUploader.this) {
+                    try{
+                    while(socket==null) {LOG.debug("socket is null");
+                        TestUploader.this.wait();
+                    }
+                    }catch(InterruptedException hmm) {
+                        ErrorService.error(hmm);
+                    }
+                }
+                Runnable r = new SocketHandler(socket);
+                r.run();
+            }
+        };
+        t.start();
+
+    }
+    
+    public synchronized void setSocket(Socket s) {
+        LOG.debug("setting socket");
+        socket=s;
+        notify();
     }
 
     public void stopThread() {
@@ -381,6 +433,27 @@ public class TestUploader extends AssertComparisons {
     }
     
     /**
+     * Sets whether or not the uploader should receive falts
+     */
+    public void setInterestedInFalts(boolean yes) {
+        interestedInFalts=yes;
+    }
+    
+    /**
+     * sets whether the uploader is firewalled, which affects headers written
+     */
+    public void setFirewalled(boolean yes) {
+        isFirewalled=yes;
+    }
+    
+    /**
+     * sets which proxies we should write in the proxies header
+     */
+    public void setProxiesString(String str) {
+        _proxiesString=str;
+    }
+    
+    /**
      * Sets whether or not we'll use a bad thex response header.
      */
     public void setUseBadThexResponseHeader(boolean yes ) {
@@ -452,34 +525,7 @@ public class TestUploader extends AssertComparisons {
                 LOG.debug("Uploader accepted connection");
                 //spawn thread to handle request
                 final Socket mySocket = socket;
-                Thread runner=new Thread() {
-                    public void run() {          
-                        try {
-                            while(http11 && !stopped) {
-                                handleRequest(mySocket);
-                                if (queue) { 
-                                    mySocket.setSoTimeout(MAX_POLL);
-                                    if(unqueue) // second time give slot
-                                        queue = false;
-                                    handleRequest(mySocket);
-                                }
-                                mySocket.setSoTimeout(8000);
-                            }
-                        } catch (IOException e) {
-                            if(totalUploaded < totalAmountToUpload)
-                                killedByDownloader = true;
-                            LOG.debug("Exception in uploader (" + name + ")", e);
-                        } catch(Throwable t) {
-                            ErrorService.error(t);
-                        } finally {
-                            try {
-                                mySocket.close();
-                            } catch (IOException e) {
-                                return;
-                            }
-                        }//end of finally
-                    }//end of run
-                };
+                Thread runner=new Thread(new SocketHandler(mySocket),name);
                 runner.start();
             } catch (IOException e) {
                 LOG.debug("exception in accept", e);
@@ -498,6 +544,7 @@ public class TestUploader extends AssertComparisons {
     public boolean isBannedIP(String ip) {        
         return !IP_FILTER.allow(ip);
     }
+    
     
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
@@ -518,7 +565,7 @@ public class TestUploader extends AssertComparisons {
         AlternateLocationCollection goodLocs = null;
         boolean thexReq = false;
         while (true) {
-            String line=input.readLine();
+            String line=input.readLine();LOG.debug("read "+line);
             if (firstLine) {
                 if(line != null && !line.equals("")) {
                     requestsReceived++;
@@ -535,10 +582,13 @@ public class TestUploader extends AssertComparisons {
 				_sha1 = readContentUrn(line);
 			}
             
-            if(HTTPHeaderName.NALTS.matchesStartOfString(line))
-                badLocs = readAlternateLocations(line);
-			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
-				goodLocs = readAlternateLocations(line);
+            if(HTTPHeaderName.NALTS.matchesStartOfString(line) ||
+                    HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(line))
+                badLocs=readAlternateLocations(line,false);
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line) ||
+			        HTTPHeaderName.FALT_LOCATION.matchesStartOfString(line))
+			    goodLocs=readAlternateLocations(line,true);
+			    
 
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
@@ -575,8 +625,10 @@ public class TestUploader extends AssertComparisons {
             if(goodLocs!=null) {
                 synchronized(goodLocs) {
                     Iterator iter = goodLocs.iterator();
-                    while(iter.hasNext()) 
-                        incomingAltLocs.add((AlternateLocation)iter.next());
+                    while(iter.hasNext()) {
+                        AlternateLocation altloc = (AlternateLocation)iter.next();
+                        incomingAltLocs.add(altloc);
+                    }
                 }        
             }
         }
@@ -714,6 +766,29 @@ public class TestUploader extends AssertComparisons {
                                   TestFile.tree(),
                                   out);
         }
+        if(interestedInFalts)
+            if (!isFirewalled) 
+                HTTPUtils.writeFeatures(out);
+            else {
+                boolean previous = RouterService.acceptedIncomingConnection();
+                
+                try{
+                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                        "_acceptedIncoming",new Boolean(false));
+                    
+                    HTTPUtils.writeFeatures(out);
+                    
+                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                            "_acceptedIncoming",new Boolean(previous));
+                }catch(Exception bad) {
+                    ErrorService.error(bad);
+                }
+            }
+        
+
+        if (isFirewalled && _proxiesString!=null) {
+            HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
+        }
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
@@ -724,13 +799,14 @@ public class TestUploader extends AssertComparisons {
             out.close();
             return;
         }
-        
+
         //Write data.
         for (int i=start; i<stop; ) {
             //1 second write cycle
             if (stopAfter > -1 && totalUploaded == stopAfter) {
                 stopped=true;
                 out.flush();
+                LOG.debug(name+" stopped at "+totalUploaded);
                 throw new IOException();
             }
             throttle.request(1);
@@ -740,6 +816,7 @@ public class TestUploader extends AssertComparisons {
                 out.write(TestFile.getByte(i)+(byte)1);
             else
                 out.write(TestFile.getByte(i));
+            
             totalUploaded++;
             i++;
         }
@@ -855,10 +932,10 @@ public class TestUploader extends AssertComparisons {
 	 *  locations should be added to
 	 */
 	private AlternateLocationCollection readAlternateLocations
-                                                     (final String altHeader) {
+                                                     (final String altHeader,boolean good) {
         AlternateLocationCollection alc=null;
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-
+		
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return null;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
@@ -873,10 +950,10 @@ public class TestUploader extends AssertComparisons {
 				// continuations.
 				AlternateLocation al = 
 				    AlternateLocation.create(
-				        st.nextToken().trim(), _sha1);
-				alc.add(al);
+				        st.nextToken().trim(), _sha1,good);
+				if (good)
+				    alc.add(al);
 			} catch(IOException e) {
-                e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
@@ -905,5 +982,51 @@ public class TestUploader extends AssertComparisons {
 			// reason -- just return null
 			return null;
 		}		
+	}
+	
+	private static final RoundRobinQueue rr = new RoundRobinQueue();
+	private class SocketHandler implements Runnable {
+	    private final Socket mySocket;
+	    public SocketHandler(Socket s) {
+	        mySocket=s;
+	    }
+	    public void run() {  
+	        LOG.debug(name+" starting to upload.. ");
+            try {
+                while(http11 && !stopped) {
+
+                    handleRequest(mySocket);
+                    if (queue) { 
+                        mySocket.setSoTimeout(MAX_POLL);
+                        if(unqueue) // second time give slot
+                            queue = false;
+                        handleRequest(mySocket);
+                    }
+                    mySocket.setSoTimeout(8000);
+                }
+            } catch (IOException e) {
+                if(totalUploaded < totalAmountToUpload)
+                    killedByDownloader = true;
+                LOG.debug("Exception in uploader (" + name + ")", e);
+            } catch(Throwable t) {
+                ErrorService.error(t);
+            } finally {
+                
+                synchronized(rr) {
+                    rr.remove(this);
+                    if (rr.size() > 0){
+                        Object next = rr.next();
+                        synchronized(next){
+                            next.notify();
+                        }
+                    }
+                }
+                try {
+                    mySocket.close();
+                } catch (IOException e) {
+                    return;
+                }
+            }//end of finally
+        }
 	}
 }

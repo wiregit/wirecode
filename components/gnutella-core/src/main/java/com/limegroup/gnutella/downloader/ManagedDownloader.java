@@ -251,6 +251,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The time to wait trying to establish each push connection, in
      *  milliseconds.  This needs to be larger than the normal time. */
     private static final int PUSH_CONNECT_TIME=20000;  //20 seconds
+    /** The time to wait trying to establish a push connection
+     * if only a UDP push has been sent (as is in the case of altlocs) */
+    private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The interval size for downloaders with persistenace support  */
@@ -1017,6 +1020,21 @@ public class ManagedDownloader implements Downloader, Serializable {
                         addDownload(loc.createRemoteFileDesc((int)size),false);
                     }
                 }
+                
+                //also adds any existing firewalled locations.
+                //If I'm firewalled, only those that support FWT are added.
+                //this assumes that FWT will always be backwards compatible
+                boolean open = RouterService.acceptedIncomingConnection();
+                coll = fd.getPushAlternateLocationCollection();
+                synchronized(coll) {
+                	Iterator iter = coll.iterator();
+                	while(iter.hasNext()) {
+                		PushAltLoc loc = (PushAltLoc)iter.next();
+                		if (open || loc.supportsFWTVersion()>0)
+                		    addDownload(loc.createRemoteFileDesc((int)size),false);
+                	}
+                }
+                
             }
         }
     }
@@ -1288,7 +1306,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Add to the list of RFDs to connect to.
         if (!isRFDAlreadyStored(rfd))
             added = files.add(rfd);
-        
+
         //Append to allFiles for resume purposes if caching...
         if(cache) {
             RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
@@ -1318,7 +1336,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // this.  since we can't guarantee we won't be holding this' lock,
             // we leave it up to manager to start us off if we have new sources
         }
-        
+
         return true;
     }
     
@@ -1326,9 +1344,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Determines if we already have this RFD in our lists.
      */
     private synchronized boolean isRFDAlreadyStored(RemoteFileDesc rfd) {
-        if( currentRFDs != null && currentRFDs.contains(rfd))
+        if( currentRFDs != null && currentRFDs.contains(rfd)) 
             return true;
-        if( files != null && files.contains(rfd))
+        if( files != null && files.contains(rfd)) 
             return true;
         return false;
     }
@@ -1460,7 +1478,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         if(!rfd.isAltLocCapable())
             return;
-            
+        
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
         Assert.that(downloadSHA1 != null, "null hash.");
@@ -1484,12 +1502,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
-            if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
-                continue;//no need to tell uploader about itself
-            if(good)
-                httpDloader.addSuccessfulAltLoc(loc);
-            else
-                httpDloader.addFailedAltLoc(loc);
+            
+            // no need to tell uploader about itself and since many firewalled
+            // downloads may have the same port and host, we also check their
+            // push endpoints
+            if(!r.needsPush() ? 
+                    (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
+                    r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
+                continue;
+            
+            
+            
+            //no need to send push altlocs to older uploaders
+            if (loc instanceof DirectAltLoc || 
+            		httpDloader.wantsFalts())
+            	if (good)
+            		httpDloader.addSuccessfulAltLoc(loc);
+            	else
+            		httpDloader.addFailedAltLoc(loc);
+            
+           	
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
@@ -1517,14 +1549,21 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //AlternateLocationCollections
                 if(!validAlts.contains(loc)) {
                     if(rfd.isFromAlternateLocation() )
-                        DownloadStat.ALTERNATE_WORKED.incrementStat(); 
+                        if (rfd.needsPush())
+                            DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
+                        else
+                            DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(loc);
                     if( ifd != null )
                         ifd.addVerified(forFD);
                 }
             }  else {
                     if(rfd.isFromAlternateLocation() )
-                        DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                        if(rfd.needsPush())
+                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
+                        else
+                                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                    
                     validAlts.remove(loc);
                     if( ifd != null )
                         ifd.remove(forFD);
@@ -2326,12 +2365,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 Iterator iter = validAlts.iterator();
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
-                    dloader.addSuccessfulAltLoc((AlternateLocation)iter.next());
-                    count++;
+                	AlternateLocation current = (AlternateLocation)iter.next();
+                	dloader.addSuccessfulAltLoc(current);
+                	count++;
                 }
                 iter = recentInvalidAlts.iterator();
                 while(iter.hasNext()) {
-                    dloader.addFailedAltLoc((AlternateLocation)iter.next());
+                	AlternateLocation current = (AlternateLocation)iter.next();
+                	dloader.addFailedAltLoc(current);
+                	count++;
                 }
             }
         }
@@ -2381,12 +2423,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(stealLock) {
                     // if we didn't get queued doing the tree request,
                     // request another file.
-                    if(status == null || !status.isQueued()) {
-                        status = assignAndRequest(dloader, http11);
+                    try {
+                        if(status == null || !status.isQueued()) {
+                            status = assignAndRequest(dloader, http11);
+                        }
+                    } finally {
+                        if( status == null || !status.isConnected() )
+                            releaseRanges(dloader);
                     }
-                    
-                    if(!status.isConnected())
-                        releaseRanges(dloader);
                 }
                 
                 if(status.isPartialData()) {
@@ -2442,10 +2486,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             Assert.that(status.isConnected());
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            boolean downloadOK = doDownload(dloader, http11);
+            boolean downloadOK = false;
             
-            // Always release the ranges that were leftover from this download
-            releaseRanges(dloader);
+            try {
+                downloadOK = doDownload(dloader, http11);
+            } finally {
+                // Always release the ranges that were leftover from this download
+                releaseRanges(dloader);
+            }
             
             // If the download failed, don't keep trying to download.
             if(!downloadOK)
@@ -2599,7 +2647,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         File incFile = incompleteFile;
         HTTPDownloader ret;
-        boolean needsPush = needsPush(rfd);
+        boolean needsPush = rfd.needsPush();
+        
         
         synchronized (this) {
             currentLocation=rfd.getHost();
@@ -2652,20 +2701,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // fall through to the push ...
             }
         }
-        
-        // must notify that we cannot connect directly.
-        informMesh(rfd, false);
-
-        if (!rfd.isFromAlternateLocation()) {
-            try {
+        try {
                  ret = connectWithPush(rfd, incFile);
                  return ret;
-            } catch(IOException e) {
+        } catch(IOException e) {
                 // even the push failed :(
-            }
         }
         
+        
         // if we're here, everything failed.
+        
+        informMesh(rfd, false);
+        
         return null;
     }
         
@@ -2718,7 +2765,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //Language Specifications.)  Look at acceptDownload for
             //details.
             try {
-                threadLock.wait(PUSH_CONNECT_TIME);  
+                threadLock.wait(rfd.isFromAlternateLocation()? 
+                        UDP_PUSH_CONNECT_TIME: 
+                            PUSH_CONNECT_TIME);  
             } catch(InterruptedException e) {
                 DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                 throw new IOException("push interupted.");
@@ -2760,7 +2809,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                               boolean http11) {
         RemoteFileDesc rfd = dloader.getRemoteFileDesc();
         if(LOG.isTraceEnabled())
-            LOG.trace("assignAndRequest for: " + rfd);
+            LOG.trace(Thread.currentThread().hashCode()+" assignAndRequest for: " + rfd);
         
         try {
             if (commonOutFile.hasFreeBlocksToAssign()) {
@@ -2771,7 +2820,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())            
-                LOG.debug("nsex thrown in assingAndRequest "+dloader,nsex);
+                LOG.debug(Thread.currentThread().hashCode()+" nsex thrown in assingAndRequest "+dloader,nsex);
             synchronized(this) {
                 // Add to files, keep checking for stalled uploader with
                 // this rfd
@@ -2908,6 +2957,24 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 }
             }
+            
+            //we also want to try the firewalled push locs
+            //if we are firewalled, try only those that support FWT 
+            c = dloader.getPushLocsReceived();
+            boolean open = RouterService.acceptedIncomingConnection();
+            if(c!=null ) {
+                synchronized(c) { 
+                    Iterator iter = c.iterator();
+                    while(iter.hasNext()) {
+                        PushAltLoc al=(PushAltLoc)iter.next();
+                        if (open || al.supportsFWTVersion() > 0) {
+                            RemoteFileDesc rfd1 =
+                                al.createRemoteFileDesc(rfd.getSize());
+                            addDownload(rfd1, false);//don't cache
+                        }
+                    }
+                }
+            }
         }
         
         //did not throw exception? OK. we are downloading
@@ -3035,19 +3102,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         int newHigh = (dloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
         if(newLow > low) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: Host gave subrange, different low.  Was: " +
+                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                        " Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
             commonOutFile.releaseBlock(new Interval(low, newLow-1));
         }
         if(newHigh < high) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: Host gave subrange, different high.  Was: " +
+                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                        " Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
             commonOutFile.releaseBlock(new Interval(newHigh+1, high));
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("WORKER: assigning white " + newLow + "-" + newHigh +
+            LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                    " assigning white " + newLow + "-" + newHigh +
                       " to " + dloader);
     }
 
@@ -3077,6 +3147,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         synchronized (this) {
+            if (dloaders.isEmpty()) {
+                Assert.silent(commonOutFile.hasFreeBlocksToAssign());
+                assignWhite(dloader,http11);
+                return;
+            }
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                 HTTPDownloader h = (HTTPDownloader)iter.next();
                 // If this guy isn't downloading, don't steal from him.
@@ -3121,19 +3196,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 bandwidthVictim = biggest.getAverageBandwidth();
                 biggest.getMeasuredBandwidth(); // trigger IDE.
             } catch (InsufficientDataException ide) {
-                LOG.debug("victim does not have datapoints", ide);
+                LOG.debug(Thread.currentThread().hashCode()+" victim does not have datapoints", ide);
                 bandwidthVictim = -1;
             }
             try {
                 bandwidthStealer = dloader.getAverageBandwidth();
                 dloader.getMeasuredBandwidth(); // trigger IDE.
             } catch(InsufficientDataException ide) {
-                LOG.debug("stealer does not have datapoints", ide);
+                LOG.debug(Thread.currentThread().hashCode()+" stealer does not have datapoints", ide);
                 bandwidthStealer = -1;
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: " + dloader + " attempting to steal from " + 
+                LOG.debug("WORKER: "+Thread.currentThread().hashCode()+" " 
+                        	+ dloader + " attempting to steal from " + 
                           biggest + ", stealer speed [" + bandwidthStealer +
                           "], victim speed [ " + bandwidthVictim + "]");
             
@@ -3171,7 +3247,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     throw new IOException("bad stealer.");
                 }
                 if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER: picking stolen grey "
+                    LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                            " picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
                 biggest.stopAt(start);
                 biggest.stop();
@@ -3289,7 +3366,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             if(LOG.isDebugEnabled())
-                LOG.debug("    WORKER: terminating from "+downloader+" at "+stop+ 
+                LOG.debug("    WORKER:+"+Thread.currentThread().hashCode()+
+                        " terminating from "+downloader+" at "+stop+ 
                   " error? "+problem);
             synchronized (this) {
                 if (problem) {
@@ -3402,27 +3480,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean removed = files.remove(ret);
         Assert.that(removed == true, "unable to remove RFD.");
         return ret;
-    }
-
-    /** Returns true iff rfd should be attempted by push download, either 
-     *  because it is a private address or was unreachable in the past. */
-    private static boolean needsPush(RemoteFileDesc rfd) {
-        // if replying to multicast, do a push.
-        if ( rfd.isReplyToMulticast() )
-            return true;
-        //Return true if rfd is private or unreachable
-        if (rfd.isPrivate()) {
-            // Don't do a push for magnets in case you are in a private network.
-            // Note to Sam: This doesn't mean that isPrivate should be true.
-            if (rfd instanceof URLRemoteFileDesc) 
-                return false;
-            else  // Otherwise obey push rule for private rfds.
-                return true;
-        }
-        else if (!NetworkUtils.isValidPort(rfd.getPort()))
-            return true;
-        else
-            return false;
     }
 
     /**

@@ -12,23 +12,23 @@ import com.limegroup.gnutella.util.CommonUtils;
  * An implementaiton of the UploadState interface
  * when the request is to get a file view.
  */
-public final class FileViewUploadState implements HTTPMessage {
+public final class FileViewUploadState extends UploadState {
 
     public final static byte[] BAD_PASS_REPLY = "Wrong Password!".getBytes();
     public final static byte[] MALFORMED_REQUEST_REPLY = 
         "Malformed Request!".getBytes();
     
-    private final HTTPUploader _uploader;
+    
 
 	private final ByteArrayOutputStream BAOS = 
 		new ByteArrayOutputStream();
     
     public FileViewUploadState(HTTPUploader uploader) {
-		this._uploader = uploader;
+		super(uploader);
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-        final String fileName = _uploader.getFileName();
+        final String fileName = UPLOADER.getFileName();
         final String pass = 
             UploadManager.FV_REQ_BEGIN + "/" + UploadManager.FV_PASS;
 
@@ -82,7 +82,7 @@ public final class FileViewUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
-        _uploader.setAmountUploaded(BAOS.size());
+        UPLOADER.setAmountUploaded(BAOS.size());
         debug("BHUS.doUpload(): returning.");
 	}
 	

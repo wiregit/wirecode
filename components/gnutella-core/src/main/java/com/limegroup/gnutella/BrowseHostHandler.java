@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 
@@ -144,7 +145,7 @@ public class BrowseHostHandler {
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
                                        null, null,false,false,"",0l, proxies,
-                                       -1, canDoFWTransfer);
+                                       -1, canDoFWTransfer ? UDPConnection.VERSION : 0);
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {

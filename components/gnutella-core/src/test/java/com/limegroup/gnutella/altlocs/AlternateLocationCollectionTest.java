@@ -2,12 +2,17 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
@@ -41,7 +46,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
             try {
                 _alternateLocations.add(
-                        AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
+                        HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]));
             } catch (IOException e) {
                 fail("could not set up test");
             }
@@ -158,15 +163,16 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	public void testHTTPStringValue() throws Exception {
 		String val = _alCollection.httpStringValue();
 		StringTokenizer st = new StringTokenizer(val, ",");
-		AlternateLocationCollection alc1 = 
-			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
+		
 		while(st.hasMoreTokens()) {
 			String str = st.nextToken();
 			str = str.trim();
-			AlternateLocation al = 
-			    AlternateLocation.create(str, _alCollection.getSHA1Urn());
-			alc1.add(al);
+			AlternateLocation al=
+			        AlternateLocation.create(str, _alCollection.getSHA1Urn(),true);
+
+			assertTrue(_alCollection.contains(al));
 		}
+		
 	}
 	
 	/**
@@ -179,7 +185,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for( ; iter.hasNext() ; ) {
             AlternateLocation al=(AlternateLocation)iter.next();
             i++;
-            assertFalse("location already demoted "+al,al.getDemoted());
+            assertFalse("location already demoted "+al,al.isDemoted());
             boolean removed = _alCollection.remove(al);//demoted
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there
@@ -203,7 +209,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for( ; iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next(); 
             i++;
-            assertFalse("location already demoted "+al,al.getDemoted());
+            assertFalse("location already demoted "+al,al.isDemoted());
             boolean removed = _alCollection.remove(al);//demoted
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there
@@ -211,7 +217,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
                                             al,_alCollection.contains(al));
             //add it back
             _alCollection.add(al);
-            assertFalse("location not promoted after add  "+al,al.getDemoted());
+            assertFalse("location not promoted after add  "+al,al.isDemoted());
             removed = _alCollection.remove(al);//demoted again
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there
@@ -235,7 +241,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         for(int i=0; i<5; i++) {
             AlternateLocation al = null;
             try {
-                al= AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]);
+                al= HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]);
             } catch (MalformedURLException e) {
                 fail("unable to set up test");
             } catch (IOException e) {
@@ -246,7 +252,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         }
         
         try {
-            c1.add(AlternateLocation.create(HugeTestUtils.UNEQUAL_URLS[2]));
+            c1.add(HugeTestUtils.create(HugeTestUtils.UNEQUAL_URLS[2]));
             fail("exception should have been thrown by now");
         } catch(Exception e) {
             //expected behaviour
@@ -356,7 +362,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		Iterator parsedIter = parsed.iterator();
 		
     	for(Iterator iter = _alCollection.iterator();iter.hasNext();) {
-    		AlternateLocation current = (AlternateLocation)iter.next();
+    		DirectAltLoc current = (DirectAltLoc)iter.next();
     		QueryReply.IPPortCombo address = (QueryReply.IPPortCombo) parsedIter.next();
     		
     		assertEquals(current.getHost().getInetAddress(),address.getInetAddress());
@@ -364,6 +370,81 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
     		
     	}
     	
+    }
+    
+    public void testToBytesPush() throws Exception {
+    	
+    	//add some firewalled altlocs
+    	PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",6346);
+    	PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",6346);
+    	PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.7",6346);
+		Set proxies = new HashSet();
+		Set proxies2 = new HashSet();
+		proxies.add(ppi);
+		proxies2.add(ppi2);proxies2.add(ppi3);proxies2.add(ppi4);
+		
+		Map m= (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2);
+
+        updateProxies(pe);
+        updateProxies(pe2);
+        
+        assertNotNull(pe.getProxies());
+        assertNotNull(pe2.getProxies());
+        
+		Set peSet = new HashSet();
+		peSet.add(pe);peSet.add(pe2);
+        
+		RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                HugeTestUtils.URNS[0].httpStringValue(), 
+                10, 10, true, 2, true, 
+                null, HugeTestUtils.URN_SETS[0], false,
+                true,"ALT",0,0,
+                pe);
+		
+		RemoteFileDesc fwalled2 = new RemoteFileDesc(fwalled,pe2);
+
+		assertEquals(proxies.size(),fwalled.getPushProxies().size());
+		
+		AlternateLocation firewalled = AlternateLocation.create(fwalled);
+		AlternateLocation firewalled2 = AlternateLocation.create(fwalled2);
+		
+		
+		_alCollection.add(firewalled);
+		
+		byte [] data = _alCollection.toBytesPush(3);
+		
+		assertLessThanOrEquals(41,data.length);
+		
+		Vector v = new Vector(NetworkUtils.unpackPushEPs(data));
+		
+		assertEquals(1,v.size());
+		
+		PushEndpoint received = (PushEndpoint)v.get(0);
+		assertEquals(pe,received);
+		
+		_alCollection.add(firewalled2);
+		
+		data = _alCollection.toBytesPush();
+		
+		Set set = new HashSet(NetworkUtils.unpackPushEPs(data));
+		
+		assertEquals(2,set.size());
+		assertEquals(2,peSet.size());
+		set.retainAll(peSet);
+		
+		assertEquals(2,set.size());
+		
+    }
+    
+    private void updateProxies(PushEndpoint pe) throws Exception {
+        PrivilegedAccessor.invokeAllStaticMethods(
+                PushEndpoint.class,"updateProxies",
+                new Object[]{pe,new Boolean(true)},
+                new Class[]{PushEndpoint.class,boolean.class});
     }
 }
 

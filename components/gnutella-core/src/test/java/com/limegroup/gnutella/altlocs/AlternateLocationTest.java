@@ -1,26 +1,25 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import com.limegroup.gnutella.util.*;
+import java.util.*;
+
+import com.limegroup.gnutella.messages.*;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
  */
 public final class AlternateLocationTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    
 
 	private static final String[] equalLocs = {
 		"http://200.30.1.02:6352" + HTTPConstants.URI_RES_N2R +
@@ -86,8 +85,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
 							  HTTPConstants.URI_RES_N2R+
 							  HugeTestUtils.URNS[i].httpStringValue());
-			AlternateLocation al = 
-			    AlternateLocation.create(url);
+			AlternateLocation al = HugeTestUtils.create(url);
 		}
 	}
 
@@ -114,8 +112,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
-				AlternateLocation al = 
-				    AlternateLocation.create(url);
+				AlternateLocation al = HugeTestUtils.create(url);
 				fail("AlternateLocation constructor should have thrown an exception");
 			}
 		} catch(IOException e) {
@@ -155,31 +152,54 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    false,false,"",0,null, -1);
 
             // just make sure this doesn't throw an exception
-			AlternateLocation.create(rfd);
+			AlternateLocation loc = AlternateLocation.create(rfd);
+			assertFalse(loc instanceof PushAltLoc);
 		}
 
-        try {
-            RemoteFileDesc rfd = 
-                new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
+
+        RemoteFileDesc rfd = 
+            new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,false,"",0,null, -1);
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        GUID guid = new GUID(rfd.getClientGUID());
+        m.put(guid,Collections.EMPTY_SET);
 
-            // this should throw an exception, since it's a private address.
-            AlternateLocation.create(rfd);        
 
-            fail("should have rejected the location because the address is private");
-        } catch(IOException e) {
-            // expected for private addresses
-        }
+        AlternateLocation.create(rfd);
+
+        
+        
+
 
         try {
             AlternateLocation.create((RemoteFileDesc)null);
             fail("should have thrown a null pointer");
         } catch(NullPointerException e) {
             // this is expected
-        }                
+        }
+        
+        PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        guid = new GUID(fwalled.getClientGUID());
+        m.put(guid,proxies);
+        // its ok to lose the previous mapping at this point
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        assertTrue(loc instanceof PushAltLoc);
+        m.clear();
         
 	}
 
@@ -187,13 +207,67 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 * Tests the factory method that creates a RemoteFileDesc from an alternate
 	 * location.
 	 */
-	public void testCreateRemoteFileDesc() {
+	public void testCreateRemoteFileDesc() throws Exception{
 		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
-			AlternateLocation al = HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
+			DirectAltLoc al = (DirectAltLoc) HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
 			RemoteFileDesc rfd = al.createRemoteFileDesc(10);
 			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
-			assertEquals("urls should be equal", al.getUrl(), rfd.getUrl());
+			assertEquals("hosts should be equals",al.getHost().getAddress(),
+					rfd.getHost());
+			assertEquals("ports should be equals",al.getHost().getPort(),
+					rfd.getPort());
 		}
+		
+		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        GUID guid = new GUID(fwalled.getClientGUID());
+        m.put(guid,proxies);
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        RemoteFileDesc other = loc.createRemoteFileDesc(3);
+        
+        assertEquals(fwalled.getClientGUID(),other.getClientGUID());
+        assertEquals(fwalled.getPushAddr(),other.getPushAddr());
+        m.clear();
+	}
+	
+	public void testCloningPushLocs() throws Exception {
+	    PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        GUID guid = new GUID(fwalled.getClientGUID());
+        m.put(guid,proxies);
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        assertTrue(loc instanceof PushAltLoc);
+        
+        AlternateLocation loc2 = loc.createClone();
+        
+        assertTrue(loc2 instanceof PushAltLoc);
+        
+        assertEquals(loc,loc2);
+        m.clear();
 	}
 
 	/**
@@ -245,8 +319,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	public void testConstructorForBadPorts() throws Exception {
 		try {
 			for(int i=0; i<HugeTestUtils.BAD_PORT_URLS.length; i++) {
-				AlternateLocation al = 
-				    AlternateLocation.create(HugeTestUtils.BAD_PORT_URLS[i]);
+				AlternateLocation al = HugeTestUtils.create(HugeTestUtils.BAD_PORT_URLS[i]);
 				fail("alternate location string should not have been accepted: "+
 					 HugeTestUtils.BAD_PORT_URLS[i]);
 			}			
@@ -266,7 +339,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	    // First test with old-style locs.
 		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 			AlternateLocation al = AlternateLocation.create(
-			    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+			    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn,true);
 		}
 		
 		// Now make sure that the URN-mismatch works
@@ -274,7 +347,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 			try {
 				AlternateLocation al = AlternateLocation.create(
-				    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+				    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn,true);
                 fail("IOException expected");
 			} catch(IOException expected) {}
 		}
@@ -282,7 +355,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		// Now try the new-style values
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        AlternateLocation al = AlternateLocation.create(ip + ":50", urn);
+	        DirectAltLoc al = (DirectAltLoc) AlternateLocation.create(ip + ":50", urn,true);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(50, ep.getPort());
@@ -292,7 +365,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         // Try without a port.
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        AlternateLocation al = AlternateLocation.create(ip, urn);
+	        DirectAltLoc al = (DirectAltLoc)AlternateLocation.create(ip, urn,true);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(6346, ep.getPort());
@@ -304,25 +377,89 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		    try {
 	            String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100)+".1";
 	            AlternateLocation al =
-	                AlternateLocation.create(ip + ":50", urn);
+	                AlternateLocation.create(ip + ":50", urn,true);
                 fail("IOException expected");
             } catch(IOException expected) {}
         }
         
         try {
-            AlternateLocation.create("0.1.2.3", urn);
+            AlternateLocation.create("0.1.2.3", urn,true);
+            fail("IOException expected");
+        } catch(IllegalArgumentException expected) {}
+
+        try {
+            AlternateLocation.create("1.2.3.4/25", urn,true);
             fail("IOException expected");
         } catch(IOException expected) {}
 
         try {
-            AlternateLocation.create("1.2.3.4/25", urn);
+            AlternateLocation.create("limewire.org", urn,true);
             fail("IOException expected");
         } catch(IOException expected) {}
-
+        
+        //try some firewalled locs
+        GUID clientGUID = new GUID(GUID.makeGuid());
+        String httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
+        
+        PushAltLoc pal = (PushAltLoc)AlternateLocation.create(
+        		httpString,urn,true);
+        
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(2,pal.getPushAddress().getProxies().size());
+        
+        
+        //try some valid push proxies, some invalid ones
+        clientGUID = new GUID(GUID.makeGuid());
+        httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";0.1.2.3:100000;1.2.3.6:17",urn,true);
+    	
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(3,pal.getPushAddress().getProxies().size());
+        
+        //HashSets do not guarantee order so the resulting http string 
+        //may contain the proxies in different order
+        assertNotEquals(-1,pal.httpStringValue().indexOf(clientGUID.toHexString()));
+        assertNotEquals(-1,pal.httpStringValue().indexOf("1.2.3.4:15"));
+        assertNotEquals(-1,pal.httpStringValue().indexOf("1.2.3.5:16"));
+        
+        //try some valid push proxies and an empty one
+        clientGUID = new GUID(GUID.makeGuid());
+        httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";;1.2.3.6:17",urn,true);
+    	
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(3,pal.getPushAddress().getProxies().size());
+        
+        
+        //try an altloc with no push proxies
+        clientGUID = new GUID(GUID.makeGuid());
+      	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn,true);
+      	
+      	// try skipping invalid ip:port strings
+      	pal = (PushAltLoc) AlternateLocation.create(
+        		clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn,true);
+        assertTrue(pal.getPushAddress().getProxies().isEmpty());
+        
+        
+        //try some invalid ones
         try {
-            AlternateLocation.create("limewire.org", urn);
-            fail("IOException expected");
-        } catch(IOException expected) {}
+        	pal = (PushAltLoc) AlternateLocation.create("asdf2345dgalshlh",urn,true);
+        	fail("created altloc from garbage");
+        }catch(IOException expected) {}
+        
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create("",urn,true);
+        	fail("created altloc from empty string");
+        }catch(IOException expected) {}
+        
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create(null,urn,true);
+        	fail("created altloc from null string");
+        }catch(IOException expected) {}
+        
     }
 
     public void testDemotedEquals() throws Exception {
@@ -531,4 +668,5 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
             AlternateLocation al = AlternateLocation.create(loc);
         }
     }
+    
 }

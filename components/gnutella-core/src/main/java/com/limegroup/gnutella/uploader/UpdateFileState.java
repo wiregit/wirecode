@@ -1,21 +1,28 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
-public class UpdateFileState implements HTTPMessage {
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.util.CommonUtils;
+
+public class UpdateFileState extends UploadState {
     
     //this will be populated with the contents of the file.
     //this need not be created everytime we get a request for a file. 
     //rather it should be cached and updated everytime the file gets updated.
     byte[] updateContents;
 
-    private final HTTPUploader _uploader;
+    
 
     public UpdateFileState(HTTPUploader uploader) {
-        this._uploader = uploader;
+    	super(uploader);
+        
     }
 
 
@@ -46,7 +53,7 @@ public class UpdateFileState implements HTTPMessage {
     
     public void writeMessageBody(OutputStream ostream) throws IOException  {
         ostream.write(updateContents); 
-        _uploader.setAmountUploaded(updateContents.length);
+        UPLOADER.setAmountUploaded(updateContents.length);
     }
     
 	public boolean getCloseConnection() {

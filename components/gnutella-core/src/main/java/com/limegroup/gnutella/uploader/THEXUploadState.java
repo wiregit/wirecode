@@ -32,9 +32,7 @@ import java.util.Set;
  * 
  * @author Gregorio Roper
  */
-public class THEXUploadState implements HTTPMessage {
-    private final FileDesc FILE_DESC;
-    private final HTTPUploader UPLOADER;
+public class THEXUploadState extends UploadState {
     private final HashTree TREE;
     private final StalledUploadWatchdog WATCHDOG;
 
@@ -53,9 +51,9 @@ public class THEXUploadState implements HTTPMessage {
      *            the <tt>HTTPUploader</tt> that sends this message
      */
     public THEXUploadState(HTTPUploader uploader, StalledUploadWatchdog dog) {
+    	super(uploader);
     	LOG.debug("creating thex upload state");
-        UPLOADER = uploader;
-        FILE_DESC = uploader.getFileDesc();
+
         TREE = FILE_DESC.getHashTree();
         if(TREE == null)
             throw new NullPointerException("null TREE in THEXUploadState");

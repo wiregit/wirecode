@@ -5,9 +5,14 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.*;
 import java.util.*;
 
@@ -29,7 +34,8 @@ public class HeadTest extends BaseTestCase {
 	/**
 	 * two collections of altlocs, one for the complete and one for the incomplete file
 	 */
-	static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete;
+	static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete,
+		_pushCollection;
 	
 	/**
 	 * URNs for the 3 files that will be requested
@@ -44,7 +50,11 @@ public class HeadTest extends BaseTestCase {
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-	static IntervalSet _ranges, _rangesMedium, _rangesTooBig;
+	static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig;
+	
+	static PushEndpoint pe;
+	
+	static int PACKET_SIZE;
 	
 	
 	public HeadTest(String name) {
@@ -54,6 +64,8 @@ public class HeadTest extends BaseTestCase {
 	public static Test suite() {
 		return buildTestSuite(HeadTest.class);
 	}
+	
+	private static final byte [] SOMEGUID=GUID.makeGuid();
 	
 	/**
 	 * sets up the testing environment for the UDPHeadPong.
@@ -65,6 +77,26 @@ public class HeadTest extends BaseTestCase {
 	 * @throws Exception
 	 */
 	public static void globalSetUp() throws Exception{
+	    
+	    MessageRouterStub mrStub = new MessageRouterStub() {
+	        public byte[] getOurGUID() {
+	            return SOMEGUID;
+	        }
+	    };
+	    
+	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
+	    
+	    ManagedConnectionStub mStub = new ManagedConnectionStub();
+	    final Set conns = new HashSet();
+	    conns.add(mStub);
+	    
+	    ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+	        public Set getPushProxies() {
+	            return conns;
+	        }
+	    };
+	    
+	    PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
 		_fm = new FileManagerStub();
 		_um = new UploadManagerStub();
@@ -79,15 +111,23 @@ public class HeadTest extends BaseTestCase {
 		
 		base=0;
 		_rangesMedium = new IntervalSet();
-		for (int i=2;i<63;i++) {
+		for (int i=2;i<70;i++) {
 			int low = base;
 			_rangesMedium.add(new Interval(low,low+i));
 			base+=2*i;
 		}
 		
 		base=0;
+		_rangesJustFit = new IntervalSet();
+		for (int i=2;i<73;i++) {
+			int low = base;
+			_rangesJustFit.add(new Interval(low,low+i));
+			base+=2*i;
+		}
+		
+		base=0;
 		_rangesTooBig = new IntervalSet();
-		for (int i=2;i<200;i++) {
+		for (int i=2;i<220;i++) {
 			int low = base;
 			_rangesTooBig.add(new Interval(low,low+i));
 			base+=2*i;
@@ -105,6 +145,8 @@ public class HeadTest extends BaseTestCase {
 		
 		_complete.setAlternateLocationCollection(_alCollectionComplete);
 		_partial.setAlternateLocationCollection(_alCollectionIncomplete);
+		_partial.setPushAlternateLocationCollection(_pushCollection);
+		
 		
 		
 		Map urns = new HashMap();
@@ -121,6 +163,8 @@ public class HeadTest extends BaseTestCase {
 		
 		PrivilegedAccessor.setValue(HeadPong.class, "_fileManager",_fm);
 		PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager",_um);
+		
+		PACKET_SIZE = ((Integer)PrivilegedAccessor.getValue(HeadPong.class,"PACKET_SIZE")).intValue();
 		
 	}
 	
@@ -193,6 +237,28 @@ public class HeadTest extends BaseTestCase {
 	}
 	
 	/**
+	 * tests whether the downloading flag is set properly.
+	 */
+	public void testDownloading() throws Exception {
+		
+		//replace the downloadManger with a stub
+		Object originalDM = RouterService.getDownloadManager();
+		
+		_partial.setActivelyDownloading(true);
+		HeadPing ping = new HeadPing(_havePartial);
+		HeadPong pong = reparse (new HeadPong(ping));
+		
+		assertTrue(pong.isDownloading());
+		
+		_partial.setActivelyDownloading(false);
+		pong = reparse (new HeadPong(ping));
+		
+		assertFalse(pong.isDownloading());
+		
+		//restore the original download manager
+		PrivilegedAccessor.setValue(RouterService.class,"downloader",originalDM);
+	}
+	/**
 	 * tests requesting ranges from complete, incomplete files
 	 * as well as requesting too big ranges to fit in packet.
 	 */
@@ -220,7 +286,7 @@ public class HeadTest extends BaseTestCase {
 		pongi = reparse(new HeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
-		assertLessThan(512,pongi.getPayload().length);
+		assertLessThan(PACKET_SIZE,pongi.getPayload().length);
 		
 		_partial.setRangesByte(_ranges.toBytes());
 	}
@@ -252,7 +318,7 @@ public class HeadTest extends BaseTestCase {
 		_um.setIsBusy(true);
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(new HeadPong(ping));
-		assertGreaterThanOrEquals(127,pong.getQueueStatus());
+		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
 	}
 	
 	/**
@@ -279,7 +345,79 @@ public class HeadTest extends BaseTestCase {
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
 		
 		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());
-		assertLessThan(512,pong2.getPayload().length);
+		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
+		
+		//now test if no locs will fit because of too many ranges
+		_partial.setRangesByte(_rangesJustFit.toBytes());
+		ping2 = new HeadPing(_havePartial,
+				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
+		pong2 = reparse (new HeadPong(ping2));
+		
+		assertNotNull(pong2.getRanges());
+		assertNull(pong2.getAltLocs());
+		
+		//restore medium ranges to partial file
+		_partial.setRangesByte(_rangesMedium.toBytes());
+	}
+	
+	public void testFirewalledAltlocs() throws Exception {
+		
+		//try with a file that doesn't have push locs
+		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS);
+		assertTrue(ping1.requestsPushLocs());
+		HeadPong pong1 = reparse (new HeadPong(ping1));
+		assertNull(pong1.getPushLocs());
+		
+		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		assertTrue(ping1.requestsPushLocs());
+		pong1 = reparse (new HeadPong(ping1));
+
+		assertNull(pong1.getRanges());
+		assertNull(pong1.getAltLocs());
+		assertNotNull(pong1.getPushLocs());
+		
+		RemoteFileDesc dummy = 
+			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
+			        		10, GUID.makeGuid(), 10, true, 2, true, null, 
+							   HugeTestUtils.URN_SETS[1],
+                               false,false,"",0,null, -1);
+		
+		Set received = pong1.getAllLocsRFD(dummy);
+		assertEquals(1,received.size());
+		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
+		PushEndpoint point = rfd.getPushAddr();
+		assertEquals(pe,point);
+		
+		//now ask only for fwt push locs - nothing returned
+		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
+		assertTrue(ping1.requestsFWTPushLocs());
+		pong1 = reparse(new HeadPong(ping1));
+		assertNull(pong1.getPushLocs());
+	}
+	
+	public void testMixedLocs() throws Exception {
+		HeadPing ping = new HeadPing(_havePartial,
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);
+		
+		HeadPong pong = reparse(new HeadPong(ping));
+		
+		assertNotNull(pong.getAltLocs());
+		assertNotNull(pong.getPushLocs());
+		
+		RemoteFileDesc rfd = new RemoteFileDesc(
+				"1.2.3.4",1,1,"filename",
+				1,null,1,
+				false,1,false,
+				null,null,
+				false,false,
+				"",0,
+				null,1);
+		
+		Set rfds = pong.getAllLocsRFD(rfd);
+		
+		assertEquals(pong.getAltLocs().size() + pong.getPushLocs().size(),
+				rfds.size());
+		
 	}
 	
 	private HeadPong reparse(HeadPong original) throws Exception{
@@ -291,48 +429,38 @@ public class HeadTest extends BaseTestCase {
 	
 	private static void  createCollections() throws Exception{
 			
-		Set alternateLocations = new HashSet();
-        
-		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
-             alternateLocations.add(
-                       AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
-		}
+		
 
 
-        boolean created = false;
-		Iterator iter = alternateLocations.iterator();
-		for(; iter.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-			if(!created) {
-				_alCollectionComplete = 
-					AlternateLocationCollection.create(al.getSHA1Urn());
-                created = true;
-			}            
+        _alCollectionComplete=AlternateLocationCollection.create(_haveFull);
+        _alCollectionIncomplete=AlternateLocationCollection.create(_havePartial);
+        _pushCollection=AlternateLocationCollection.create(_havePartial);
+		
+		for(int i=0;i<10;i++ ) {
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull,true);
 			_alCollectionComplete.add(al);
 		}
-        assertTrue("failed to set test up",_alCollectionComplete.getAltLocsSize()==alternateLocations.size());
+        assertEquals("failed to set test up",10,
+        		_alCollectionComplete.getAltLocsSize());
         
-        alternateLocations = new HashSet();
-        
-		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
-             alternateLocations.add(
-                       AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
-		}
-
-
-        created = false;
-		iter = alternateLocations.iterator();
-		for(; iter.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-			if(!created) {
-				_alCollectionIncomplete = 
-					AlternateLocationCollection.create(al.getSHA1Urn());
-                created = true;
-			}            
+        for(int i=0;i<10;i++ ) {
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial,true);
 			_alCollectionIncomplete.add(al);
 		}
+        assertEquals("failed to set test up",10,
+        		_alCollectionIncomplete.getAltLocsSize());
+        
 
-        assertTrue("failed to set test up",_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
+        
+        //add some firewalled altlocs to the incomplete collection
+        
+        GUID guid = new GUID(GUID.makeGuid());
+		
+		AlternateLocation firewalled = AlternateLocation.create(guid.toHexString()+
+				";1.2.3.4:5",_havePartial,true);
+		pe = ((PushAltLoc)firewalled).getPushAddress();
+		_pushCollection=AlternateLocationCollection.create(_havePartial);
+		_pushCollection.add(firewalled);
 	}
 	
 }
