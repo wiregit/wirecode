@@ -265,20 +265,22 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         // then reading it and rewriting it, etc...
         if (!(this instanceof Backend) )
             Backend.setErrorCallback(this);
-            
-        // SystemUtils must pretend to not be loaded, so the idle
-        // time isn't counted.
-        // For tests that are testing SystemUtils specifically, they can
-        // set loaded to true.
-        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
     }
     
     /**
      * Called statically before any settings.
      */
     public static void beforeAllTestsSetUp() throws Throwable {
+        // SystemUtils must pretend to not be loaded, so the idle
+        // time isn't counted.
+        // For tests that are testing SystemUtils specifically, they can
+        // set loaded to true.
+        SystemUtils.getIdleTime(); // make it loaded.
+        // then unload it.
+        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
+        
         setupSettings();
-        setupUniqueDirectories();        
+        setupUniqueDirectories();
     }
     
     /**
