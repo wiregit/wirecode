@@ -35,7 +35,6 @@ public class HTTPDownloader {
 	public HTTPDownloader(String file, Socket socket, 
 							 int index, byte[] guid) 
 		throws IOException {
-		System.out.println("Constructing...");
 		_filename = file;
 		_index = index;
 		_guid = guid;
@@ -44,28 +43,7 @@ public class HTTPDownloader {
 		_fileSize = -1;
 		_initialReadingPoint = 0;
 
-		_socket = socket;
-
-		InputStream istream;
-		_byteReader = null;
-		try {
-			istream = _socket.getInputStream();
-            _byteReader = new ByteReader(istream);
-		} catch (IOException e) {
-			// e.printStack
-			throw e;
-		}  
-		try {
-            OutputStream os = _socket.getOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(os);
-            BufferedWriter out=new BufferedWriter(osw);
-            out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
-            out.write("User-Agent: Gnutella\r\n");
-            out.write("\r\n");
-            out.flush();
-        } catch (IOException e) {
-			throw e;
-        }
+		connect(socket, file, index);
 		
 	}
 	
@@ -74,11 +52,9 @@ public class HTTPDownloader {
 							 int size, boolean resume) // size???
 		throws IOException {
 
-		System.out.println("Constructing...");
 		_filename = file;
 		_index = index;
 		_guid = guid;
-		
 		_amountRead = 0;
 		_fileSize = size;
 		_initialReadingPoint = 0;
@@ -109,40 +85,40 @@ public class HTTPDownloader {
 			}
 		}
 
-		InputStream istream;
-		_byteReader = null;
-        String furl = "/get/" + String.valueOf(index) + "/" + _filename;
-		URLConnection conn;
-		try {
-			URL url = new URL("http", host, port, furl);
-            conn = url.openConnection();
-			String startRange = java.lang.String.valueOf(_initialReadingPoint);
-			String range = "bytes=" + startRange + "-";
-			conn.setRequestProperty("Range", range);
-            conn.connect();
-		}
-		catch (ConnectException e) {
-			throw new CantConnectException();
-		}
-		catch (java.net.MalformedURLException e) {
-			throw new BadURLException();
-		}
-		try {
-            istream = conn.getInputStream();
-            _byteReader = new ByteReader(istream);
-		} catch (IOException e) {
-			String str = conn.getHeaderField(0);
-			if (str != null) {
-				if ( str.indexOf(" 404 ") > 0 )
-					throw new com.limegroup.gnutella.downloader.FileNotFoundException();
-				if  ( str.indexOf(" 503 ") > 0 )
-					throw new TryAgainLaterException();
-			}
-			throw e;
-		} 
+		connect(host, port, file, index);
 		
 	}
 
+	/**
+	 * Private connection methods
+	 */
+
+	private void connect(String host, int port, String file, int index ) 
+		throws IOException {
+		Socket socket = new Socket(host, port);
+		connect(socket, file, index);
+	}
+
+	private void connect(Socket s, String file, int index) throws IOException {
+		_socket = s;
+		try {
+			InputStream istream = _socket.getInputStream();
+			_byteReader = new ByteReader(istream);
+			OutputStream os = _socket.getOutputStream();
+			OutputStreamWriter osw = new OutputStreamWriter(os);
+			BufferedWriter out=new BufferedWriter(osw);
+			String startRange = java.lang.String.valueOf(_initialReadingPoint);
+			out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
+			out.write("User-Agent: Gnutella\r\n");
+			out.write("Range: bytes=" + startRange + "-\r\n");
+			out.write("\r\n");
+			out.flush();
+		} catch (ConnectException e) {
+			throw new CantConnectException();
+		} catch (java.net.MalformedURLException e) {
+			throw new BadURLException();
+		} 
+	}
 	
 	/** 
      * Start the download.  Throws IOException if the headers
@@ -194,29 +170,23 @@ public class HTTPDownloader {
 
 		if (_byteReader == null) 
 			throw new ReaderIsNullException();
-		
+
 		// Read the first line and then check for any possible errors
 		str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
 		
-		// TODO: Look for HTTP OK or one of the errors:
+		// TODO:  Now that we are no longer truncating the
+		// str, we need to correct the possible errors
+		// that we are looking for
 
-		// Handle a 503 error from Gnotella/Gnutella
-		if ( str.equals("3") || 
-			 str.startsWith("3 Upload limit reached") )
-			throw new TryAgainLaterException();
-		
-		// Handle a 404 error from Gnotella/Gnutella
-		else if ( str.equals("4") || str.startsWith("4 File Not Found") ) 
+  		if ( str.indexOf("503") > 0 ) 
+    			throw new TryAgainLaterException();
+		else if ( str.indexOf("404") > 0 ) 
 			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
-		
-		// Look for the HTTP OK (0 OK)
-		else if ( ! str.equals("0 OK") ) {			
-			System.out.println("The str is:");
-			System.out.println(str);
+		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
 			throw new NoHTTPOKException();
-		}
+
 		while (true) {
 				
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
@@ -368,8 +338,6 @@ public class HTTPDownloader {
 			
 			c = _byteReader.read(buf);
 
-			System.out.print(c);
-
 			if (c == -1) 
 				break;
 			
@@ -399,6 +367,10 @@ public class HTTPDownloader {
 			throw new FileIncompleteException();
 	}
 }
+
+
+
+
 
 
 
