@@ -16,6 +16,12 @@ public class Const {
      */
     public static int MAX_LENGTH=2048;
 
+    /**
+     * The time to wait for handshake response when establishing outgoing connections,
+     * in milliseconds.  A value of 0 means no timeout.  The default value is 2 seconds.
+     */
+    public static int TIMEOUT=4000;
+
     /** The name of the file containing hosts to contact */
     public static String HOSTLIST="gnutella.net";
     /** The number of outgoing connections to maintain */
