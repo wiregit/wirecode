@@ -277,6 +277,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
         _goodPushLocs = new HashSet();
+        _badPushLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
         _writtenBadLocs = new HashSet();
         _writtenPushLocs = new HashSet();
@@ -530,9 +531,15 @@ public class HTTPDownloader implements BandwidthTracker {
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
         
-        //if the other side indicated they want firewalled altlocs, send some
-        //we send both types of firewalled altlocs to the uploader since even if
-        //it can't support FWT it can still spread them to other downloaders.
+        // if the other side indicated they want firewalled altlocs, send some
+        //
+        // Note: we send both types of firewalled altlocs to the uploader since even if
+        // it can't support FWT it can still spread them to other downloaders.
+        //
+        // Note2: we can't know whether the other side wants to receive pushlocs until
+        // we read their headers. Therefore pushlocs will be sent from the second
+        // http request on.
+        
         if (_wantsFalts) {
         	writeClone = null;
         	synchronized(_goodPushLocs) {
