@@ -96,11 +96,11 @@ public class DataWindow
         DataRecord d;
         String     pkey;
         int        count = 0;
-        for (int i = windowStart; i < windowStart+windowSize+1; i++) {
+        for (int i = windowStart; i < windowStart+windowSize+3; i++) {
             pkey = String.valueOf(i);
             // Count the spots that are full and not written
             if ( (d = (DataRecord) window.get(pkey)) != null &&
-                  !d.written )
+                  !d.written && i == windowStart)
                 count++;
         }
         return(count);
