@@ -443,7 +443,14 @@ public class QueryRouteTable {
             this.sequenceSize=-1;
             this.nextPatch=0; //TODO: is this right?
         }   
-    }    
+    }
+    
+    /**
+     * Stub for calling encode(QueryRouteTable, true).
+     */
+    public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
+        return encode(prev, true);
+    }
 
     /**
      * Returns an iterator of RouteTableMessage that will convey the state of
@@ -458,7 +465,8 @@ public class QueryRouteTable {
      * Assert.that(prev.equals(m)); 
      * </pre> 
      */
-    public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
+    public Iterator /* of RouteTableMessage */ encode(
+      QueryRouteTable prev, boolean allowCompression) {
         List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
             buf.add(new ResetTableMessage(bitTableLength, DEFAULT_INFINITY));
@@ -500,18 +508,24 @@ public class QueryRouteTable {
 
 
         //2. Try compression.
+        //TODO: Should this not be done if compression isn't allowed?
         byte bits=8;
         if (! needsFullByte) {
             data=halve(data);
             bits=4;
         }
 
-        byte[] patchCompressed=compress(data);
         byte compression=PatchTableMessage.COMPRESSOR_NONE;
-        if (patchCompressed.length<data.length) {
-            //...Hooray!  Compression was efficient.
-            data=patchCompressed;
-            compression=PatchTableMessage.COMPRESSOR_DEFLATE;
+        //Optimization: If we are told it is safe to compress the message,
+        //then attempt to compress it.  Reasons it is not safe include
+        //the outgoing stream already being compressed.
+        if( allowCompression ) {
+            byte[] patchCompressed=compress(data);
+            if (patchCompressed.length<data.length) {
+                //...Hooray!  Compression was efficient.
+                data=patchCompressed;
+                compression=PatchTableMessage.COMPRESSOR_DEFLATE;
+            }
         }
                    
 

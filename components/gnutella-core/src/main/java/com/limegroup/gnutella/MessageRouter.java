@@ -1662,7 +1662,11 @@ public abstract class MessageRouter {
 
 			//..and send each piece.
 			//TODO2: use incremental and interleaved update
-			for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
+			//If writing is deflated, then do not the message to be
+			//compressed.  This is because the message is going
+			//to be compressed as a part of the outgoing stream, anyway.
+			Iterator iter=table.encode(qi.lastSent, !c.isWriteDeflated());
+			for (; iter.hasNext(); ) {  
 				RouteTableMessage m=(RouteTableMessage)iter.next();
 				c.send(m);
 			}
