@@ -712,7 +712,7 @@ public class Connection {
         try {
             Message m=Message.read(_in);
             if (m==null) {
-                throw new InterruptedIOException();
+                throw new InterruptedIOException("null message read");
             }
             return m;
         } finally {
