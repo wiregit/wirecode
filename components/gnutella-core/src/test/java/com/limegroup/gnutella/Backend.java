@@ -229,7 +229,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      * Inner class that listens for errors reported from the backends
      * and redirects them to the correct error callback.
      */
-    protected static class ErrorMonitor implements Runnable {
+    public static class ErrorMonitor implements Runnable {
         private volatile ErrorCallback callback;
         private volatile boolean isStopped = true;
         private ServerSocket listenSocket = null;

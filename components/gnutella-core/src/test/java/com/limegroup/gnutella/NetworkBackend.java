@@ -5,7 +5,8 @@
  * 
  * HOW TO USE:
  * 
- * 1. Implement a pair of NetworkClientCallbackStub and NetworkServerCallbackStub's
+ * 1. Implement a pair of NetworkClientCallbackStub and NetworkServerCallbackStub's.
+ * 		Make sure the client is static and not anonymous!
  * 2. Start the server by creating an instance as you normally would 
  * 3. Call the launch method, passing the class name of your client callback implementation
  *   Example:
@@ -15,7 +16,11 @@
  * 
  * More often than not you will probably use nested classes for callbacks.  Pass their full name
  * as you see it in stack traces.  Example:
+ * 
  *   "com.limegroup.gnutella.EnclosingClass$NestedClass"
+ * 
+ * This will also work on 1.5 as long as both the spawning and the spawned jvms are 1.5 or if
+ * you change the $ to a +.
  * 
  * 
  * The return value will tell you whether the launch was successful.  You may want to wait some
@@ -47,7 +52,7 @@ public class NetworkBackend extends Backend {
 	}
 	
 	
-	public static void Main(String []ar) throws Exception{
+	public static void main(String []ar) throws IOException{
 		//check if we get called with proper length
 		if  (ar.length < 5)
 			return;
@@ -58,30 +63,26 @@ public class NetworkBackend extends Backend {
 		String host = ar[3];
 		int serverPort = Integer.parseInt(ar[4]);
 		
-		//use reflection to get us a callback.. it better be in the classpath!
-		Class callbackClass;
-		if (ar[5].indexOf("$")==-1)
-			callbackClass= Class.forName(ar[5]); //top-level class
-		else{
-			//nested class. fun fun fun
-			String enclosingClassName = ar[5].substring(0,ar[5].indexOf("$"));
-			String nestedClassName = ar[5].substring(
-						ar[5].indexOf("$")+1,ar[5].length());
-			
-			Class enclosingClass = Class.forName(enclosingClassName);
-			callbackClass = PrivilegedAccessor.getClass(enclosingClass,nestedClassName);
-			
-		}
-			
-		Object []callbackArgs = new Object[2];
-		callbackArgs[0] = host;
-		callbackArgs[1] = new Integer(serverPort);
-		Class []callbackArgsClasses = new Class[2];
-		callbackArgsClasses[0] = String.class;
-		callbackArgsClasses[1] = int.class;
-		NetworkClientCallbackStub callback = 
+		//use reflection to get us a callback..
+		Class callbackClass=null;
+		NetworkClientCallbackStub callback = null;
+		
+		try{	
+			callbackClass= Class.forName(ar[5]); 
+			Object []callbackArgs = new Object[2];
+			callbackArgs[0] = host;
+			callbackArgs[1] = new Integer(serverPort);
+			Class []callbackArgsClasses = new Class[2];
+			callbackArgsClasses[0] = String.class;
+			callbackArgsClasses[1] = int.class;
+		
+		callback = 
 			(NetworkClientCallbackStub) PrivilegedAccessor.invokeConstructor(
 					callbackClass,callbackArgs,callbackArgsClasses);
+		}catch(Exception bad) {
+			//give up.
+			throw new Error(bad.getMessage());
+		}
 		
 		//set the node status
 		_ultrapeer=ultrapeer;
