@@ -31,6 +31,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
@@ -1243,9 +1244,10 @@ public class DownloadTest extends BaseTestCase {
     
     /**
      * tests that a pushloc which we thought did not support FWT 
-     * but actually does updates its status through the headers
+     * but actually does updates its status through the headers,
+     * as well as that the set of push proxies is getting updated.
      */
-    public void testPushLocUpdatesFWTStatus() throws Exception {
+    public void testPushLocUpdatesStatus() throws Exception {
         
         final int RATE=100;
         
@@ -1258,10 +1260,13 @@ public class DownloadTest extends BaseTestCase {
         pusher2.setRate(RATE);
         pusher2.stopAfter(200000);
         pusher2.setFirewalled(true);
+        pusher2.setProxiesString("1.2.3.4:5,6.7.8.9:10");
         pusher2.setInterestedInFalts(true);
         
         AlternateLocation pushLocFWT = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+        
+        PushEndpoint updatedLoc = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
@@ -1286,6 +1291,8 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
         assertTrue(readRFD.supportsFWTransfer());
+        
+        assertEquals(updatedLoc,pushLoc.getPushAddress());
         
     }
     

@@ -166,6 +166,12 @@ public class TestUploader extends AssertComparisons {
      * <tt>IPFilter</tt> for only allowing local connections.
      */
     private final IPFilter IP_FILTER = IPFilter.instance();
+    
+    
+    /**
+     * String to send if we are writing the X-Push-Proxies header
+     */
+    private String _proxiesString;
 
 
     /** 
@@ -438,6 +444,13 @@ public class TestUploader extends AssertComparisons {
      */
     public void setFirewalled(boolean yes) {
         isFirewalled=yes;
+    }
+    
+    /**
+     * sets which proxies we should write in the proxies header
+     */
+    public void setProxiesString(String str) {
+        _proxiesString=str;
     }
     
     /**
@@ -773,6 +786,9 @@ public class TestUploader extends AssertComparisons {
             }
         
 
+        if (isFirewalled && _proxiesString!=null) {
+            HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
+        }
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
