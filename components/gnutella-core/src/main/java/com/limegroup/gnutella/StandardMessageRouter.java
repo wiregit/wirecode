@@ -37,7 +37,9 @@ public class StandardMessageRouter extends MessageRouter {
             && !_manager.allowAnyConnection())
             return;
 
-        //SPECIAL CASE: for Crawle ping
+        //SPECIAL CASE: for crawler ping
+        // TODO:: this means that we can never send TTL=2 pings without
+        // them being interpreted as from the crawler!!
         if(hops ==1 && ttl==1) {
             handleCrawlerPing(pingRequest);
             //Note that the while handling crawler ping, we dont send our own
@@ -54,23 +56,17 @@ public class StandardMessageRouter extends MessageRouter {
         int num_files = RouterService.getNumSharedFiles();
         int kilobytes = RouterService.getSharedFileSize()/1024;
 
-        //We mark our ping replies if currently in the supernode state.
-        boolean markPong=RouterService.isSupernode();
         //We should indicate GUESS support....
         boolean isGUESSCapable=UDPService.instance().isGUESSCapable();
         //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
         int dailyUptime=Statistics.instance().calculateDailyUptime();
-        PingReply pingReply = new PingReply(pingRequest.getGUID(),
-                                            (byte)newTTL,
-                                            RouterService.getPort(),
-                                            RouterService.getAddress(),
-                                            num_files,
-                                            kilobytes,
-                                            markPong,
-                                            dailyUptime,
-                                            isGUESSCapable);
+        PingReply pingReply = 
+            new PingReply(pingRequest.getGUID(), (byte)newTTL,
+                          RouterService.getPort(), RouterService.getAddress(),
+                          num_files, kilobytes, RouterService.isSupernode(),
+                          dailyUptime, isGUESSCapable);
 
         try {
             sendPingReply(pingReply);
@@ -99,8 +95,7 @@ public class StandardMessageRouter extends MessageRouter {
 					new PingReply(request.getGUID(), (byte)1, 
 								  host.getPort(),
 								  host.getAddress().getAddress(), 
-								  (long)0, (long)0, 
-								  true);
+								  (long)0, (long)0, true);
 				try {
 					sendPingReply(reply);
 				} catch(IOException e) {					
