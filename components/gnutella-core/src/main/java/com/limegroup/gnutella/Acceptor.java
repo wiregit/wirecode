@@ -21,6 +21,7 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -42,6 +43,11 @@ public class Acceptor implements Runnable {
     static long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
     static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
+    
+    /** the UPnPManager to use */
+    private static final UPnPManager UPNP_MANAGER = 
+    	(CommonUtils.isJava14OrLater() && !ConnectionSettings.DISABLE_UPNP.getValue()) 
+			? UPnPManager.instance() : null;
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -154,12 +160,122 @@ public class Acceptor implements Runnable {
 		}
     }
 
+	/**
+	 * tries to bind the serversocket and create UPnPMappings.
+	 * call before running.
+	 */
+	public void init() {
+	    int tempPort = ConnectionSettings.PORT.getValue();
+
+        //0. Get local address.  This must be done here because it can
+        //   block under certain conditions.
+        //   See the notes for _address.
+        try {
+            setAddress(UPNP_MANAGER != null ? 
+                    UPNP_MANAGER.getLocalAddress() : 
+                        InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
+        }
+
+        // Create the server socket, bind it to a port, and listen for
+        // incoming connections.  If there are problems, we can continue
+        // onward.
+        //1. Try suggested port.
+		int oldPort = tempPort;
+        Exception socketError = null;
+        try {
+			setListeningPort(tempPort);
+			_port = tempPort;
+        } catch (IOException e) {
+            socketError = e;
+            // 2. Try 20 different ports. The first 10 tries increment
+            // sequentially from 6346. The next 10 tries are random ports between
+            // 2000 and 52000
+            int numToTry = 20;
+            Random gen = null;
+            for (int i=0; i<numToTry; i++) {
+                if(i < 10)
+                    tempPort = i+6346;
+                else {
+                    if(gen==null)
+                        gen = new Random();
+                    tempPort = gen.nextInt(50000);
+                    tempPort += 2000;//avoid the first 2000 ports
+                }
+				// do not try to bind to the multicast port.
+				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
+				    numToTry++;
+				    continue;
+				}
+                try {
+                    setListeningPort(tempPort);
+					_port = tempPort;
+                    break;
+                } catch (IOException e2) { 
+                    socketError = e2;
+                }
+            }
+
+            // If we still don't have a socket, there's an error
+            if(_socket == null) {
+                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+            }
+        }
+        // if we created a socket and have a NAT, and the user is not 
+        // explicitly forcing a port, create the mappings 
+        if (_socket != null && UPNP_MANAGER != null) {
+        	// if we haven't discovered the router by now, its not there
+        	UPNP_MANAGER.stop();
+        	
+        	boolean natted = UPNP_MANAGER.isNATPresent();
+        	boolean validPort = NetworkUtils.isValidPort(_port);
+        	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
+				!ConnectionSettings.UPNP_IN_USE.getValue();
+        	
+        	if(LOG.isDebugEnabled())
+        	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
+        	
+        	if(natted && validPort && !forcedIP) {
+        		int mappedPort = UPNP_MANAGER.mapPort(_port);
+        		if(LOG.isDebugEnabled())
+        		    LOG.debug("UPNP port mapped: " + mappedPort);
+        		
+			    //if we created a mapping successfully, update the forced port
+			    if (mappedPort != 0 ) {
+			        //  mark UPNP as being on so that if LimeWire shuts
+			        //  down prematurely, we know the FORCE_IP was from UPnP
+			        //  and that we can continue trying to use UPnP
+        		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        	        ConnectionSettings.UPNP_IN_USE.setValue(true);
+        		
+        		    // we could get our external address from the NAT but its too slow
+        		    // so we clear the last connect back times.
+        	        // This will not help with already established connections, but if 
+        	        // we establish new ones in the near future
+        		    resetLastConnectBackTime();
+        		    UDPService.instance().resetLastConnectBackTime();
+			    }			        
+        	}
+        }
+        
+        socketError = null;
+
+        if (_port!=oldPort) {
+            ConnectionSettings.PORT.setValue(_port);
+            SettingsHandler.save();
+            RouterService.addressChanged();
+        }
+
+	}
     /**
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
 	public void start() {
 	    MulticastService.instance().start();
 	    UDPService.instance().start();
+	    
 		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();
@@ -385,69 +501,7 @@ public class Acceptor implements Runnable {
      */
     public void run() {
 		
-        int tempPort = ConnectionSettings.PORT.getValue();
-
-        //0. Get local address.  This must be done here because it can
-        //   block under certain conditions.
-        //   See the notes for _address.
-        try {
-            setAddress(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-        } catch (SecurityException e) {
-        }
-
-        // Create the server socket, bind it to a port, and listen for
-        // incoming connections.  If there are problems, we can continue
-        // onward.
-        //1. Try suggested port.
-		int oldPort = tempPort;
-        Exception socketError = null;
-        try {
-			setListeningPort(tempPort);
-			_port = tempPort;
-        } catch (IOException e) {
-            socketError = e;
-            //2. Try 20 different ports. The first 10 tries increment
-            //sequentially from 6346. The next 10 tries are random ports between
-            //2000 and 52000
-            int numToTry = 20;
-            Random gen = null;
-            for (int i=0; i<numToTry; i++) {
-                if(i < 10)
-                    tempPort = i+6346;
-                else {
-                    if(gen==null)
-                        gen = new Random();
-                    tempPort = gen.nextInt(50000);
-                    tempPort += 2000;//avoid the first 2000 ports
-                }
-				// do not try to bind to the multicast port.
-				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
-				    numToTry++;
-				    continue;
-				}
-                try {
-                    setListeningPort(tempPort);
-					_port = tempPort;
-                    break;
-                } catch (IOException e2) { 
-                    socketError = e2;
-                }
-            }
-
-            // If we still don't have a socket, there's an error
-            if(_socket == null) {
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
-            }
-        }
-        socketError = null;
-
-        if (_port!=oldPort) {
-            ConnectionSettings.PORT.setValue(_port);
-            SettingsHandler.save();
-            RouterService.addressChanged();
-        }
-
+        
         while (true) {
             try {
                 //Accept an incoming connection, make it into a
@@ -675,6 +729,24 @@ public class Acceptor implements Runnable {
              System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
     }    
 
+    /**
+     * If we used UPnP Mappings this session, clean them up and revert
+     * any relevant settings.
+     */
+    public void haltUPnP() {
+    	if (UPNP_MANAGER == null || 
+    			!UPNP_MANAGER.isNATPresent() || 
+				!UPNP_MANAGER.mappingsExist()) 
+    		return;
+   
+    	UPNP_MANAGER.clearMappingsOnShutdown();
+    	
+    	// reset the forced port values - must happen before we save them to disk
+    	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
+    	ConnectionSettings.FORCED_PORT.revertToDefault();
+    	ConnectionSettings.UPNP_IN_USE.revertToDefault();
+    }
+    
     /**
      * (Re)validates acceptedIncoming.
      */

@@ -248,6 +248,23 @@ public class RouterService {
   		RouterService.router = router;
   	}
 
+  	/**
+  	 * Performs startup tasks that should happen while the GUI loads
+  	 */
+  	public void asyncGuiInit() {
+  	    Runnable r = new Runnable() {
+  	        public void run() {
+  	            // add more while-gui init tasks here
+  	            acceptor.init();
+  	        }
+  	    };
+  	    
+  	    Thread t = new ManagedThread(r);
+  	    t.setName("async gui initializer");
+  	    t.setDaemon(true);
+  	    t.start();
+  	}
+  	
 	/**
 	 * Starts various threads and tasks once all core classes have
 	 * been constructed.
@@ -723,6 +740,8 @@ public class RouterService {
             if(!isStarted())
                 return;
             
+            getAcceptor().haltUPnP();
+            
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
@@ -763,6 +782,7 @@ public class RouterService {
             UrnCache.instance().persistCache();
             CreationTimeCache.instance().persistCache();
             TigerTreeCache.instance().persistCache();
+            
         } catch(Throwable t) {
             ErrorService.error(t);
         }
