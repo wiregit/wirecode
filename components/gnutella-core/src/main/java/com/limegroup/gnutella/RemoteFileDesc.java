@@ -10,23 +10,26 @@ package com.limegroup.gnutella;
 
 public class RemoteFileDesc {
 
-	private Endpoint _endpoint;
+	private String _host;
+	private int _port;
 	private String _filename; 
 	private int _index;
 	private byte[] _clientGUID;
 	private int _priority;
 
 	/** 
-	 * @param endpoint the host information
+	 * @param host the host's ip
+	 * @param port the host's port
 	 * @param index the index of the file that the client sent
 	 * @param filename the name of the file
 	 * @param clientGUID the unique identifier of the client
 	 * @param priority this is still a little up in the air
 	 */
-	public RemoteFileDesc(Endpoint endpoint, int index, String filename,
+	public RemoteFileDesc(String host, int port, int index, String filename,
 						  byte[] clientGUID, int priority) {
 		
-		_endpoint = endpoint;
+		_host = host;
+		_port = port;
 		_index = index;
 		_filename = filename;
 		_clientGUID = clientGUID;
@@ -34,13 +37,15 @@ public class RemoteFileDesc {
 	}
 
 	/* Accessor Methods */
-	public Endpoint getEndpoint() {return _endpoint;}
+	public String getHost() {return _host;}
+	public int getPort() {return _port;}
 	public int getIndex() {return _index;}
 	public String getFileName() {return _filename;}
 	public byte[] getClientGUID() {return _clientGUID;}
 	public int getPriority() {return _priority;}
 
-	public void setEndpoint(Endpoint e) {_endpoint = e;}
+	public void setHost(String h) {_host = h;}
+	public void setPost(int p) {_port = p;}
 	public void setIndex(int i) {_index = i;}
 	public void setFileName(String name) {_filename = name;}
 	public void setClientGUID(byte[] b) {_clientGUID = b;}
