@@ -12,6 +12,10 @@ import java.io.*;
  * Provides the readLine method of a BufferedReader with no no automatic
  * buffering.  All methods are like those in InputStream except they return
  * -1 instead of throwing IOException.
+ *
+ * This also catches ArrayIndexOutOfBoundsExceptions while reading, as this
+ * exception can be thrown from native socket code on windows occasionally.
+ * The exception is treated exactly like an IOException.
  */
 public class ByteReader {
 
@@ -27,9 +31,7 @@ public class ByteReader {
     public void close() {
         try {
             _istream.close();
-        }
-        catch (IOException e) {
-        
+        } catch (IOException ignored) {
         }
     }
 
@@ -42,9 +44,10 @@ public class ByteReader {
     
         try {
             c =  _istream.read();
-        }
-        catch(IOException e) {
-
+        } catch(IOException ignored) {
+            // return -1
+        } catch(ArrayIndexOutOfBoundsException ignored) {
+            // return -1
         }
         return c;
     }
@@ -58,9 +61,10 @@ public class ByteReader {
 
         try {
             c = _istream.read(buf);
-        }
-        catch(IOException e) {
-
+        } catch(IOException ignored) {
+            // return -1
+        } catch(ArrayIndexOutOfBoundsException ignored) {
+            // return -1
         }
         return c;
     }
@@ -74,9 +78,11 @@ public class ByteReader {
 
         try {
             c = _istream.read(buf, offset, length);
-        }
-        catch(IOException e) {
-
+        } catch(IOException ignored) {
+            // return -1
+        } catch(ArrayIndexOutOfBoundsException ignored) {
+            // happens on windows machines occasionally.
+            // return -1
         }
         return c;
     }
