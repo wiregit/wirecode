@@ -200,73 +200,47 @@ public class NIOMessageReaderTest extends BaseTestCase {
             BUFFER = buffer;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#handshake()
-         */
+        // inherit doc comment
         public boolean handshake() throws IOException, NoGnutellaOkException {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#readComplete()
-         */
+        // inherit doc comment
         public boolean readComplete() {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#writeComplete()
-         */
+        // inherit doc comment
         public boolean writeComplete() {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#getHeadersRead()
-         */
+        // inherit doc comment
         public HandshakeResponse getHeadersRead() {
-            // TODO Auto-generated method stub
             return null;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#getHeadersWritten()
-         */
+        // inherit doc comment
         public Properties getHeadersWritten() {
-            // TODO Auto-generated method stub
             return null;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#getHeaderWritten(java.lang.String)
-         */
+        // inherit doc comment
         public String getHeaderWritten(String string) {
-            // TODO Auto-generated method stub
             return null;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#write()
-         */
+        // inherit doc comment
         public boolean write() throws IOException {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#read()
-         */
+        // inherit doc comment
         public void read() throws IOException {
-            // TODO Auto-generated method stub
             
         }
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.Handshaker#getRemainingData()
-         */
+        // inherit doc comment
         public ByteBuffer getRemainingData() {
             return BUFFER;
         }
