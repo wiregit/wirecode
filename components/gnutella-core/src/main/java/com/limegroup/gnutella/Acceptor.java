@@ -282,7 +282,6 @@ public class Acceptor extends Thread {
             settings.setPort(_port);
         }
 
-        System.out.println("Acceptor::listening on port: "+_port); 
         while (true) {
             try {
                 //Accept an incoming connection, make it into a
