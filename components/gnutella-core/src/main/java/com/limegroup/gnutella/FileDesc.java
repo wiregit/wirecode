@@ -313,7 +313,7 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("URN does not match:\n"+
 											   SHA1_URN+"\n"+sha1);
 		}
-		return ALT_LOCS.add(al);
+		return ALT_LOCS.addWithPromotion(al);
 	}
     /**
      * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
@@ -332,7 +332,7 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("URN does not match:\n"+
 											   SHA1_URN+"\n"+sha1);
 
-		return ALT_LOCS.remove(al);
+		return ALT_LOCS.removeWithDemotion(al);
     }
 
 	/**

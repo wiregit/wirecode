@@ -15,28 +15,14 @@ import com.limegroup.gnutella.*;
  * This class encapsulates the data for an alternate resource location, as 
  * specified in HUGE v0.93.  This also provides utility methods for such 
  * operations as comparing alternate locations based on the date they were 
- * stored.<p>
- *
- * This class is immutable.
+ * stored.
  */
-public final class AlternateLocation 
-	implements com.sun.java.util.collections.Comparable, HTTPHeaderValue  {
+public final class AlternateLocation implements HTTPHeaderValue {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
 	 */
 	private final URL URL;
-
-	/**
-	 * The <tt>String</tt> instance as it is written in the header.
-	 */
-	private final String OUTPUT_DATE_TIME;
-
-	/**
-	 * Contant long representation of the time in milliseconds since 
-	 * January 1, 1970, 00:00:00 GMT.
-	 */
-	private final long TIME;
 
 	/**
 	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
@@ -53,7 +39,18 @@ public final class AlternateLocation
 	 * Constant empty clientGUID for RFDs made from locations.
 	 */
 	private static final byte[] EMPTY_GUID = new byte[16];
+    
+    /**
+     * Not integral to the use of AlternateLocations. This is more like a
+     * utility field, which can be used to demote AlternateLocations, if the
+     * user of this class wishes to maintain that state. Specifically,
+     * LimeWire's download code does not demote AlternateLocations, but the
+     * upload code does.
+     */
+    private boolean _demoted = false;
 
+    ////////////////////////"Constructors"//////////////////////////////
+    
 	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
 	 * specified string argument.  
@@ -68,24 +65,12 @@ public final class AlternateLocation
 	 */
 	public static AlternateLocation create(final String location) 
                                                            throws IOException {
-		if(location == null || location.equals("")) {
+		if(location == null || location.equals(""))
 			throw new IOException("null or empty in alt loc: "+location);
-		}
 
 		URL url = AlternateLocation.createUrl(location);        
-		if(url == null) {
-			throw new IOException("could not parse url for alt loc: "+
-								  location);
-		}
-		String outputDateTime = AlternateLocation.extractTimestamp(location);
-		Date date;
-		if(outputDateTime == null) {
-			// just set the time to be as old as possible since there's
-			// no date information -- this makes comparisons easier
-			date = new Date(0);
-		} else {
-			date = AlternateLocation.createDateInstance(outputDateTime);
-		}
+		if(url == null)
+			throw new IOException("could not parse url for alt loc: "+location);
 
 		URN sha1 = null;
 		try {
@@ -95,9 +80,8 @@ public final class AlternateLocation
 			// understand
 			throw new IOException("no SHA1 in url: "+url);
 		}
-		return new AlternateLocation(url, date, sha1);
+		return new AlternateLocation(url, sha1);
 	}
-
 
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
@@ -115,19 +99,17 @@ public final class AlternateLocation
 	 */
 	public static AlternateLocation create(final URL url) 
 		                             throws MalformedURLException, IOException {
-		if(url == null) {
+		if(url == null) 
 			throw new NullPointerException("cannot accept null URL");
-		}
 
-		if((url.getPort() & 0xFFFF0000) != 0) {
+
+		if((url.getPort() & 0xFFFF0000) != 0)
 			throw new IllegalArgumentException("invalid port: "+url.getPort());
-		}
+
 		// create a new URL instance from the data for the given url
 		// and the urn
 		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
 							  url.getFile());
-		// make the date the current time
-		Date date = new Date();
 		URN sha1 = null;
 		try {
 			sha1 = URN.createSHA1UrnFromURL(tempUrl);
@@ -136,7 +118,7 @@ public final class AlternateLocation
 			// understand
 			throw new IOException("no SHA1 in url: "+url);
 		}
-		return new AlternateLocation(tempUrl, date, sha1);
+		return new AlternateLocation(tempUrl, sha1);
 	}
 
 	/**
@@ -174,7 +156,7 @@ public final class AlternateLocation
 
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-		return new AlternateLocation(url, new Date(), urn);
+		return new AlternateLocation(url, urn);
 	}
 
 	/**
@@ -190,7 +172,7 @@ public final class AlternateLocation
 					NetworkUtils.ip2string(RouterService.getAddress()), 
 					RouterService.getPort(), 
 					HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-		return new AlternateLocation(url, new Date(), urn);
+		return new AlternateLocation(url, urn);
 	}
 
 	/**
@@ -201,292 +183,89 @@ public final class AlternateLocation
 	 * @param date the <tt>Date</tt> timestamp for the 
 	 *  <tt>AlternateLocation</tt>
 	 */
-	private AlternateLocation(final URL url, final Date date, final URN sha1) {
+	private AlternateLocation(final URL url, final URN sha1) {
 		this.URL       = url;
-		this.TIME      = date.getTime();
 		this.SHA1_URN  = sha1;
-		if(TIME == 0) {
-			this.OUTPUT_DATE_TIME = null;
-		} else {
-			this.OUTPUT_DATE_TIME = 
-				AlternateLocation.convertDateToString(date);
-		}
 	}
 
+    //////////////////////////////accessors////////////////////////////
+
 	/**
-	 * Returns an instance of the <tt>URL</tt> instance for this 
-	 * alternate location.
-	 *
-	 * @return a <tt>URL</tt> instance corresponding to the URL for this 
-	 *  alternate location, or <tt>null</tt> if an instance could not
-	 *  be created
+	 * Returns an instance of the <tt>URL</tt> instance for this alternate
+	 * location.  
+     * <p>
+	 * @return a <tt>URL</tt> instance corresponding to the URL for this
+	 * alternate location, or <tt>null</tt> if an instance could not be created
 	 */
 	public URL getUrl() {
 		try {
-			return new URL(this.URL.getProtocol(), 
-						   this.URL.getHost(), 
-						   this.URL.getPort(),
-						   this.URL.getFile());
+			return new URL(this.URL.getProtocol(), this.URL.getHost(), 
+						   this.URL.getPort(),this.URL.getFile());
 		} catch(MalformedURLException e) {
-			// this should never happen in practice, but retun null 
-			// nevertheless
+			// this should never happen in practice, but retun null nevertheless
 			return null;
 		}
 	}
 
 	/**
 	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
-	 * 
+     * <p>
 	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>
 	 */
-	public URN getSHA1Urn() {
-		return SHA1_URN;
-	}
-	
+	public URN getSHA1Urn() { return SHA1_URN; }	
+    
+    /**
+     * Accessor to find if this has been demoted
+     */
+    public boolean getDemoted() { return _demoted; }
+    
 
-	/**
-	 * Accessor for the datetime of this location
-	 *
-	 * @return the time (in millisecond since epoch) that this was stamped
-	 */
-	public long getTime() {
-	    return TIME;
-	}
-	
+    ////////////////////////////Mesh utility methods////////////////////////////
 
-	/**
-	 * Converts the specified <tt>Date</tt> instance to a <tt>String</tt> 
-	 * that fits the syntax specified in the ISO 8601 subset we're using,
-	 * discussed at: http://www.w3.org/TR/NOTE-datetime.
-	 *
-	 * @param date the <tt>Date</tt> instance to convert
-	 * @return a new <tt>String</tt> instance that matches the standard
-	 *  syntax
-	 */
-	private static String convertDateToString(Date date) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		cal.setTime(date);
-		int[]    dateInts = new int[6];
-		String[] dateStrs = new String[6];
-
-
-		dateInts[0] = cal.get(Calendar.YEAR);		
-		// add a month because the Calendar class stores January as '0'
-		dateInts[1] = cal.get(Calendar.MONTH)+1;
-		dateInts[2] = cal.get(Calendar.DAY_OF_MONTH);
-		dateInts[3] = cal.get(Calendar.HOUR);
-		dateInts[4] = cal.get(Calendar.MINUTE);
-		dateInts[5] = cal.get(Calendar.SECOND);
-
-		// loop through the ints to convert them to strings with leading 
-		// zeros if they're less than 10
-		for(int i=0; i<dateInts.length; i++) {
-			if(dateInts[i] < 10) {
-				dateStrs[i] = "0"+String.valueOf(dateInts[i]);
-			}
-			else {
-				dateStrs[i] = String.valueOf(dateInts[i]);
-			}
-		}
-		final String DASH  = "-";
-		final String COLON = ":";
-		StringBuffer sb = new StringBuffer();
-		sb.append(dateStrs[0]);
-		sb.append(DASH);
-		sb.append(dateStrs[1]);
-		sb.append(DASH);
-		sb.append(dateStrs[2]);
-		sb.append("T");
-		sb.append(dateStrs[3]);
-		sb.append(COLON);
-		sb.append(dateStrs[4]);
-		sb.append(COLON);
-		sb.append(dateStrs[5]);
-		sb.append("Z");
-		return sb.toString();
+	public String httpStringValue() {
+        return this.URL.toExternalForm();
 	}
 
 	/**
-	 * Checks to see if the specified date string is valid, according to
-	 * our interpretation.  First, we are requiring date formats of the 
-	 * form specified at: http://www.w3.org/TR/NOTE-datetime, a subset of 
-	 * ISO 8601.  In addition to this, we require that the date at least
-	 * specify the day of the month.  If it does not do this, it is so 
-	 * general that it is useless for our purposes.
-	 *
-	 * @param date the date string to validate
-	 * @return <tt>true</tt> if the string represents a valid date 
-	 *  according to our critetia, <tt>false</tt> otherwise
+	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
+     *
+	 * @param size the size of the file for the new <tt>RemoteFileDesc</tt> 
+	 *  -- this is necessary to make sure the download bucketing works 
+	 *  correctly
+	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
+	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
-	private static boolean isValidTimestamp(final String timestamp) {
-		StringTokenizer st = new StringTokenizer(timestamp, "T");
-		int numToks = st.countTokens();
-		if(numToks == 1) {
-			return isValidDate(timestamp);
-		} else if(numToks == 2) {
-			String date = st.nextToken();
-			String time = st.nextToken();
-			return (isValidDate(date) && isValidTime(time));		
-		} else {
-			return false;
-		}
+	public RemoteFileDesc createRemoteFileDesc(int size) {
+		Set urnSet = new HashSet();
+		urnSet.add(getSHA1Urn());
+		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
+								  0, URL.getFile(), size,  
+								  EMPTY_GUID, 1000,
+								  true, 3, false, null, urnSet, false,
+                                  false, //assume altLoc is not firewalled
+                                  "ALT",//Never displayed, and we don't know
+                                  System.currentTimeMillis(),//Sumeet:TODO2:??
+                                  null);
 	}
 
-	
-	/**
-	 * Checks to see if the time specified in the given string is a valid time
-	 * according to the date-time formate specified at:<p>
-	 * 
-	 * http://www.w3.org/TR/NOTE-datetime
-	 *
-	 * @param time the time to check
-	 * @return <tt>true</tt> if the time fits the standard, <tt>false</tt> 
-	 *  otherwise
-	 */
-	private static boolean isValidTime(final String time) {
-		if(!time.endsWith("Z")) return false;
-		String timeStr = time.substring(0, time.length()-1);
-		StringTokenizer st = new StringTokenizer(timeStr, ":");
-		int tokens = st.countTokens();
+    ////////////////////////////modifiers///////////////////////////
+    /**
+     * package access method to "demote" an AlternateLocation -- used when 
+     * a downloader claims it failed to use the location. An AlternateLocation
+     * that has been demoted can be removed, so that two consecutive failures
+     * result in removal from the mesh. However, a demoted AlternateLocation
+     * can be re-instated if a download finds that it works. 
+     */
+    public void demote() {_demoted = true;}
 
-		// at least the hours and minutes must be specified if the time is
-		// specified at all, according to the specification
-		if(tokens < 2 || tokens > 3) {
-			return false;
-		}
-		try {
-			int hh = Integer.parseInt(st.nextToken());
-			if(hh < 0 || hh > 23) {
-				return false;
-			}
-			if(st.hasMoreTokens()) {
-				int mm = Integer.parseInt(st.nextToken());
-				if(mm < 0 || mm > 59) {
-					return false;
-				}
-			}
-			if(st.hasMoreTokens()) {
-				// get the first two characters of the seconds field, 
-				// ignoring fractions of a second
-				String ssStr = st.nextToken().substring(0, 2);				
-				int ss = Integer.parseInt(ssStr);
-				if(ss < 0 || ss > 59) {
-					return false;
-				}
-			}
-		} catch(NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Checks to see if the date specified in the given string is a valid date
-	 * according to the date-time formate specified at:<p>
-	 * 
-	 * http://www.w3.org/TR/NOTE-datetime
-	 *
-	 * @param date the date to check
-	 * @return <tt>true</tt> if the date fits the standard, <tt>false</tt> 
-	 *  otherwise
-	 */
-	private static boolean isValidDate(final String date) {
-		StringTokenizer dateTokenizer = new StringTokenizer(date, "-");		
-
-		
-		// we require that the date have the year, month, and day
-		if(dateTokenizer.countTokens() != 3) {
-			return false;
-		}
-		String YYYYStr = dateTokenizer.nextToken();
-		String MMStr   = dateTokenizer.nextToken();
-		String DDStr   = dateTokenizer.nextToken();		
-		try {
-			int YYYY = Integer.parseInt(YYYYStr);
-			int MM   = Integer.parseInt(MMStr);
-			int DD   = Integer.parseInt(DDStr);
-			
-			// no one implemented HUGE before 2001 and no one likely will 
-			// past 4000
-			if(YYYY < 2001 || YYYY > 4000) return false;
-			if(MM < 1 || MM > 12) return false;
-			if(DD < 1 || DD > 31) return false;
-		} catch(NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-
-	
+    /**
+     * package access to promote this. 
+     * @see demote
+     */
+    public void promote() {_demoted = false; }
 
 
-	/**
-	 * Creates a new <tt>Date</tt> instance from the date specified in
-	 * the alternate location header.
-	 *
-	 * @param dateTimeString the extracted date-time string from the
-	 *  alternate location header
-	 * @return a new <tt>Date</tt> instance for the date specified in
-	 *  the header, or a new <tt>Date</tt> instance of the oldest
-	 *  possible date (according to the <tt>Date</tt> class) in the case 
-	 *  where no timestamp data could be successfully created
-	 */
-	private static Date createDateInstance(final String dateTimeString) {
-		StringTokenizer st = new StringTokenizer(dateTimeString, "T");
-		int tokens = st.countTokens();
-		if(tokens < 1 || tokens > 2) {
-			return new Date(0);
-		}
-		String YYYYMMDD = st.nextToken();
-		StringTokenizer stdate = new StringTokenizer(YYYYMMDD, "-");
-		if(stdate.countTokens() != 3) {
-			return new Date(0);
-		}
-		String YYYYStr = stdate.nextToken();
-		String MMStr   = stdate.nextToken();
-		String DDStr   = stdate.nextToken();
-		int YYYY = Integer.parseInt(YYYYStr);
-
-		try {
-			// we subtract 1 because the Calendar class uses 0 for January,
-			// whereas the ISO 8601 subset we're using uses 1 for January
-			int MM = Integer.parseInt(MMStr)-1; 
-			int DD = Integer.parseInt(DDStr);		
-			
-			if(!st.hasMoreTokens()) {
-				Calendar cal = 
-					Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-				cal.set(YYYY, MM, DD);
-				return cal.getTime();
-			}
-			String hhmmss = st.nextToken();
-			if(!hhmmss.endsWith("Z")) {
-				return new Date(0);
-			}
-			hhmmss = hhmmss.substring(0, hhmmss.length()-1);
-			StringTokenizer sttime = new StringTokenizer(hhmmss, ":");
-			int numToks = sttime.countTokens();
-			if(numToks < 2 || numToks > 3) {
-				return new Date(0);
-			}
-			String hhStr = sttime.nextToken();
-			String mmStr = sttime.nextToken();
-			int hh = Integer.parseInt(hhStr);
-			int mm = Integer.parseInt(mmStr);
-			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-			if(sttime.hasMoreTokens()) {
-				String ssStr = sttime.nextToken().substring(0, 2);
-				int ss = Integer.parseInt(ssStr);		
-				cal.set(YYYY, MM, DD, hh, mm, ss);
-			} else {
-				cal.set(YYYY, MM, DD, hh, mm);
-			}
-			return cal.getTime();
-		} catch(NumberFormatException e) {
-			// a number could not be parsed, so consider it unstamped
-			return new Date(0);
-		}
-	}
+    ///////////////////////////////helpers////////////////////////////////
 
 	/**
 	 * Creates a new <tt>URL</tt> instance based on the URL specified in
@@ -545,29 +324,6 @@ public final class AlternateLocation
 		}
 	}
 
-	/**
-	 * Parses out the timestamp string from the alternate location
-	 * header string, throwing an exception if there is any error.
-	 *
-	 * @param location the full alternate-location HTTP header string,
-	 *  as specified in HUGE v0.93
-	 * @return the date/time string from the the alternate location
-	 *  header, or <tt>null</tt> if the date/time string could not
-	 *  be extracted, is invalid, or does not exist
-	 */
-	private static String extractTimestamp(final String location) {
-		StringTokenizer st = new StringTokenizer(location);
-		int numToks = st.countTokens();
-		String curTok = null;
-		for(int i=0; i<numToks; i++) {
-			curTok = st.nextToken();
-		}
-		if(AlternateLocation.isValidTimestamp(curTok)) {
-			return curTok;
-		} else {
-			return null;
-		}
-	}
 
 	/**
 	 * Removes the timestamp from an alternate location header.  This will
@@ -596,64 +352,7 @@ public final class AlternateLocation
 		return locationHeader.substring(0, tsIndex);
 	}
 
-
-	/**
-	 * Returns whether or not this <tt>AlternateLocation</tt> instance 
-	 * includes a timestamp for when it was last known to be valid.
-	 *
-	 * @return <tt>true</tt> if this <tt>AlternateLocation</tt> includes
-	 *  a timestamp, <tt>false</tt> otherwise
-	 */
-	public boolean isTimestamped() {
-		return (OUTPUT_DATE_TIME != null);
-	}
-
-	/**
-	 * Compares <tt>AlternateLocation</tt> instances by date.  This compares
-	 * alternate locations by how "good" we think they are, based on
-	 * their freshness.  So, an natural ordering will provide alternate
-	 * locations from latest to earliest, as the more recent locations
-	 * are the preferred locations.
-	 *
-	 * @param obj the <tt>Object</tt> instance to be compared
-     * @return  the value <tt>0</tt> if the argument is an 
-	 *  <tt>AlternateLocation</tt> with a timestamp equal to this 
-	 *  <tt>AlternateLocation</tt>'s timestamp; a value less than <tt>0</tt> 
-	 *  if the argument is an <tt>AlternateLocation</tt> with a timestamp 
-	 *  before this <tt>AlternateLocation</tt>s timestamp; and a value greater 
-	 *  than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
-	 *  with a timestamp after the timestamp of this 
-	 *  <tt>AlternateLocation</tt>
-     * @exception <tt>ClassCastException</tt> if the argument is not an
-     *  <tt>AlternateLocation</tt> 
-	 * @see java.lang.Comparable
-	 */
-	public int compareTo(Object obj) {
-		if(obj == this) return 0;
-		//if(equals(obj)) return 0;		
-		if(!(obj instanceof AlternateLocation)) return -1;
-		
-		AlternateLocation al = (AlternateLocation)obj;		
-		if(URL.equals(al.URL)) {
-		    return this.TIME < al.TIME ? 1 : this.TIME == al.TIME ? 0 : -1;
-		} 
-		if(isTimestamped() && al.isTimestamped()) {
-			if(this.TIME == al.TIME) {
-				return URL.toString().compareTo(al.URL.toString());
-			}
-			return (this.TIME<al.TIME ? 1 : -1);
-		}
-		if(isTimestamped()) {
-			return -1;
-		}
-		if(al.isTimestamped()) {
-			return 1;
-		}
-
-		// otherwise, niether location is timestamped and their URLs are 
-		// not equal, so just return -1
-		return -1;
-	}
+    /////////////////////Object's overridden methods////////////////
 
 	/**
 	 * Overrides the equals method to accurately compare 
@@ -671,32 +370,6 @@ public final class AlternateLocation
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
 		return URL == null ? al.URL == null : URL.equals(al.URL);
-//		return ((OUTPUT_DATE_TIME == null ? al.OUTPUT_DATE_TIME == null :
-//				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
-//				(URL == null ? al.URL == null :
-//				 URL.equals(al.URL)));
-	}
-
-	/**
-	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
-     *
-	 * @param size the size of the file for the new <tt>RemoteFileDesc</tt> 
-	 *  -- this is necessary to make sure the download bucketing works 
-	 *  correctly
-	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
-	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
-	 */
-	public RemoteFileDesc createRemoteFileDesc(int size) {
-		Set urnSet = new HashSet();
-		urnSet.add(getSHA1Urn());
-		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
-								  0, URL.getFile(), size,  
-								  EMPTY_GUID, 1000,
-								  true, 3, false, null, urnSet, false,
-                                  false, //assume altLoc is not firewalled
-                                  "ALT",//Never displayed, and we don't know
-                                  getTime(),//not accurate, best we can do
-                                  null);
 	}
 
 	/**
@@ -709,13 +382,8 @@ public final class AlternateLocation
 	 * @return a hash code value for this object
 	 */
 	public int hashCode() {
-		if(hashCode == 0) {
+		if(hashCode == 0)
 		    hashCode = 37 * this.URL.hashCode();
-//			int result = 17;
-//          result = (37*result) + (int)(TIME^(TIME >>> 32));
-//			result = (37*result) + this.URL.hashCode();
-//			hashCode = result;
-		}
 		return hashCode;
 	}
 
@@ -726,20 +394,9 @@ public final class AlternateLocation
 	 * @return the string representation of this alternate location
 	 */
 	public String toString() {
-		if(this.isTimestamped()) {
-			return (this.URL.toExternalForm()+" "+OUTPUT_DATE_TIME);
-		} else {
 			return this.URL.toExternalForm();
-		}
 	}
 
-	public String httpStringValue() {
-		if(this.isTimestamped()) {
-			return (this.URL.toExternalForm()+" "+OUTPUT_DATE_TIME);
-		} else {
-			return this.URL.toExternalForm();
-		}		
-	}
 }
 
 

@@ -11,10 +11,8 @@ import com.limegroup.gnutella.*;
 
 /**
  * This class holds a collection of <tt>AlternateLocation</tt> instances,
- * providing type safety for alternate location data.  <p>
- *
- * This class is thread-safe.
- *
+ * providing type safety for alternate location data. 
+ * <p>
  * @see AlternateLocation
  */
 public final class AlternateLocationCollection 
@@ -29,17 +27,8 @@ public final class AlternateLocationCollection
 	 * entry inserted is removed when the limit is reached.
      * LOCKING: obtain this' monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
-     *
+     * <p>
      * INVARIANT: LOCATIONS.get(k)==k
-     *
-     * This is NOT SORTED because of the way we look for locations.
-     * All retrieval operations inherently are based on simply the URL,
-     * and not the timestamp.  If a SortedMap were used, we would need
-     * to iterate over every location and manually do an equals on the URLs.
-     * By using a FixedsizeForgetfulHashMap, we are relying on when we
-     * add/renew/remove items from the map to determine how they are purged.
-     * This will not be exact, but with the time-limiting code (isValidTime),
-     * entries that are added earlier will necesarily be older entries.
      *
      * There must be a seperate _locations variable to do equals comparisons
      * on.  SynchronizedMap.equals(SynchronizedMap) won't work, because
@@ -95,15 +84,12 @@ public final class AlternateLocationCollection
 		while(st.hasMoreTokens()) {
 			String curTok = st.nextToken();
 			try {
-				AlternateLocation al = 
-                    AlternateLocation.create(curTok);
-				if(alc == null) {
+				AlternateLocation al = AlternateLocation.create(curTok);
+				if(alc == null)
 					alc = new AlternateLocationCollection(al.getSHA1Urn());
-				}
 
-				if(al.getSHA1Urn().equals(alc.getSHA1Urn())) {
+				if(al.getSHA1Urn().equals(alc.getSHA1Urn()))
 					alc.add(al);
-				}
 			} catch(IOException e) {
 				continue;
 			}
@@ -118,12 +104,10 @@ public final class AlternateLocationCollection
 	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
 	 */
 	private AlternateLocationCollection(URN sha1) {
-		if(sha1 == null) {
+		if(sha1 == null)
 			throw new NullPointerException("null URN");
-		}
-		if( sha1 != null && !sha1.isSHA1()) {
+		if( sha1 != null && !sha1.isSHA1())
 			throw new IllegalArgumentException("URN must be a SHA1");
-		}
 		SHA1 = sha1;
 	}
 
@@ -143,31 +127,28 @@ public final class AlternateLocationCollection
 	 *
 	 * Implements the <tt>AlternateLocationCollector</tt> interface.
 	 *
-	 * @param al the <tt>AlternateLocation</tt> to add	 
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>AlternateLocation</tt>
-	 *  being added does not have a SHA1 urn or if the SHA1 urn does not match
-	 *  the urn for this collection
-	 * @return true if added, false otherwise.
-	 */
+	 * @param al the <tt>AlternateLocation</tt> to add 
+     * 
+     * @throws <tt>IllegalArgumentException</tt> if the
+     * <tt>AlternateLocation</tt> being added does not have a SHA1 urn or if
+     * the SHA1 urn does not match the urn  for this collection
+	 * 
+     * @return true if added, false otherwise.  
+     */
 	public boolean add(AlternateLocation al) {
 		URN sha1 = al.getSHA1Urn();
-		if(!sha1.equals(SHA1)) {
+		if(!sha1.equals(SHA1))
 			throw new IllegalArgumentException("SHA1 does not match");
-		}
 		
 		synchronized(this) {
-            // See if this location already exists in the map somewhere.
-            AlternateLocation toUpdate = (AlternateLocation)LOCATIONS.get(al);
-            // if it doesn't, or if this one is newer, put this entry in
-            // (FixedsizeForgetfulHashMap takes care of removing the oldest)
-            if( toUpdate == null ||
-              ( toUpdate != null && toUpdate.compareTo(al) > 0 ) ) {
-                LOCATIONS.put(al, al);
+            AlternateLocation old = (AlternateLocation)LOCATIONS.get(al);
+            if(old==null) {
+                LOCATIONS.put(al,al);
                 return true;
             }
-        }        
-        return false;
-	}
+            return false;
+        }
+    }
 	
 	        
 	/**
@@ -179,12 +160,47 @@ public final class AlternateLocationCollection
         if(!sha1.equals(SHA1)) 
 			return false; //it cannot be in this list if it has a different SHA1
 		
-		//This must be atomic with respect to LOCATIONS
 		synchronized(this) {
             return LOCATIONS.remove(al) != null;
 		}
     }
     
+    /**
+     * @return true if alt was actually removed from the collection.
+     * if alt was merely demoted, returns false
+     */
+    public boolean removeWithDemotion(AlternateLocation altLoc) {
+        AlternateLocation alt = null;
+        synchronized(this) {
+            alt = LOCATIONS.get(altLoc);
+        }
+        if(alt==null) //we don't have it, so cannot remove it
+            return false;
+        if(alt.getDemoted()) //already demoted? remove
+            return remove(alt);
+        // We have it, and it's not demoted
+        alt.demote();
+        return false;
+    }
+
+    /**
+     * @return true iff we add and it was not already in the collection.
+     * if we promote it, we return false.
+     */
+    public boolean addWithPromotion(AlternateLocation altLoc) {
+        AlternateLocation alt = null;
+        synchronized(this) {
+            alt = LOCATIONS.get(altLoc);
+        }
+        if(alt==mull) //we don't have it, add it
+            return add(alt);
+        //OK. We already have it
+        if(alt.getDemoted())  //was it demoted?  promote it 
+            alt.promote();
+        //it's clear that we aleady have it, so we cannot add again
+        return false;
+    }
+
 	/**
      * Implements the <tt>AlternateLocationCollector</tt> interface.
      * Adds the specified <tt>AlternateLocationCollection</tt> to this 
@@ -197,12 +213,12 @@ public final class AlternateLocationCollection
      *  collection to add does not match the collection of <tt>this</tt>
      */
 	public int addAll(AlternateLocationCollection alc) {
-        if(alc == null) {
+        if(alc == null) 
             throw new NullPointerException("ALC is null");
-        }
-		if(!alc.getSHA1Urn().equals(SHA1)) {
+
+		if(!alc.getSHA1Urn().equals(SHA1)) 
 			throw new IllegalArgumentException("SHA1 does not match");
-		}
+
 		//Sumeet:TODO1: potential deadlock. Let a and b are 2
 		//AlternateLocationCollection, a.addAll(b) and b.addAll(a) are called on
 		//two threads at the same time, we could have a deadlock
@@ -215,7 +231,6 @@ public final class AlternateLocationCollection
 				    added++;
 			}
 		}
-		
 		return added;
 	}
 
@@ -224,42 +239,8 @@ public final class AlternateLocationCollection
     }
 
 	// implements the AlternateLocationCollector interface
-	public boolean hasAlternateLocations() {
+	public synchronized boolean hasAlternateLocations() {
 		return !LOCATIONS.isEmpty();
-	}
-
-	/**
-	 * Creates a new <tt>AlternateLocationCollection</tt> of the alternate
-	 * locations that are in <tt>alc</tt> but not in <tt>this</tt>.
-	 * 
-	 * @return a new <tt>AlternateLocationCollection</tt> with the alternate 
-	 *  locations in alc but not in this
-	 */
-	public AlternateLocationCollection 
-		diffAlternateLocationCollection(AlternateLocationCollection alc) {
-        if(alc==null) {
-            throw new NullPointerException("alc is null");
-        }
-        
-		AlternateLocationCollection nalc = 
-		    new AlternateLocationCollection(SHA1);
-        
-
-        // We only want to retain values if the following conditions are true:
-        // 1) We do not have this location in our collection
-        // 2) We have not removed this location from our collection
-        // 3) This location could potentially be added to our collection
-        //    based on the timestamp.
-        synchronized(alc) {
-		    Iterator iter = alc.LOCATIONS.keySet().iterator();
-		    AlternateLocation value;
-    		while (iter.hasNext()) {
-    			value = (AlternateLocation)iter.next();
-                if (!LOCATIONS.containsKey(value))
-    			    nalc.add(value);
-            }
-        }
-		return nalc;
 	}
 
     /**
