@@ -36,7 +36,7 @@ public class OSAScript {
     }
 	
 	/* friendly */
-    final int ptr;
+    int ptr = 0;
 	    
     /**
      * Creates a new OSAScript from the passed source code. E.g.
@@ -78,9 +78,6 @@ public class OSAScript {
                 throw new IOException();
             }
 			
-			in.close();
-			in = null;
-			
 			int[] tmp = new int[1]; // Call by reference
             int errorCode = NewOSAScriptWithBin(tmp, buf);
 			ptr = tmp[0];
@@ -98,31 +95,54 @@ public class OSAScript {
     }
 	
     /**
+     * Creates an OSAScript from a byte buffer
+     */
+    public OSAScript(byte[] script)
+        throws UnsatisfiedLinkError, OSAException {
+        
+        int[] tmp = new int[1]; // Call by reference
+        int errorCode = NewOSAScriptWithBin(tmp, script);
+        ptr = tmp[0];
+        
+        if (errorCode < 0) {
+            throw (new OSAException(this, errorCode));
+        }
+    }
+    
+    /**
      * Returns the binaries of this Script or null if script
      * is not compiled. The binaries have the same format as
      * precompiled .scpt files!
      */
-    public synchronized byte[] getBytes() throws OSAException {
-
-		int size = GetOSAScriptSize(ptr);
-		if (size == 0) { return null; }
-		
-		byte[] dst = new byte[size];
-		
-		int errorCode = GetOSAScript(ptr, dst, 0, size);
-		
-		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
-		}
-		
+    public byte[] getBytes() throws OSAException, IllegalStateException {
+        
+        if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+        
+        int size = GetOSAScriptSize(ptr);
+        if (size == 0) { return null; }
+        
+        byte[] dst = new byte[size];
+        
+        int errorCode = GetOSAScript(ptr, dst, 0, size);
+        
+        if (errorCode < 0) {
+            throw (new OSAException(this, errorCode));
+        }
+        
 		return dst;
     }
     
     /**
      * Compiles the script
      */
-    private synchronized void compile() throws OSAException {
-			
+    private void compile() throws OSAException, IllegalStateException {
+		
+        if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+        	
 		int errorCode = CompileOSAScript(ptr);
 			
 		if (errorCode < 0) {
@@ -135,8 +155,12 @@ public class OSAScript {
      * It is up to you to interpret the data (usually Strings). The
      * script will be compiled automatically if necessary.
      */
-    public synchronized AEDesc execute() throws OSAException {
+    public AEDesc execute() throws OSAException, IllegalStateException {
 
+        if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+        
 		int errorCode = ExecuteOSAScript(ptr);
 		
 		if (errorCode < 0) {
@@ -154,8 +178,12 @@ public class OSAScript {
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public synchronized AEDesc execute(String subroutine) throws OSAException {
+    public AEDesc execute(String subroutine) throws OSAException, IllegalStateException {
     
+        if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+        
 		int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, null);
 		
 		if (errorCode < 0) {
@@ -173,8 +201,12 @@ public class OSAScript {
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public synchronized AEDesc execute(String subroutine, String[] args) throws OSAException {
+    public AEDesc execute(String subroutine, String[] args) throws OSAException, IllegalStateException {
     
+        if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+        
         int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, args);
 	
 		if (errorCode < 0) {
@@ -185,8 +217,20 @@ public class OSAScript {
 		return (desc.getData() != null) ? desc : null;
     }
     
+    /**
+     * Releases the native resources
+     */
+    public void close() {
+        if (ptr > 0) {
+            ReleaseOSAScript(ptr);
+            ptr = 0;
+        }
+    }
+
     protected void finalize() throws Throwable {
-        ReleaseOSAScript(ptr);
+        if (ptr > 0) {
+            ReleaseOSAScript(ptr);
+        }
     }
 	
     private static native synchronized int NewOSAScriptWithSrc(int[] ptr, String src);
