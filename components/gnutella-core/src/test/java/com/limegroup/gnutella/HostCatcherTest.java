@@ -62,6 +62,13 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
     /**
+     * Test to make sure that the prioritization of hosts works as we 
+     * expect it to.
+     */
+    public void testHostPrioritization throws Exception {
+    }
+
+    /**
      * Tests the isMe method.
      */
     public void testIsMe() throws Exception {
