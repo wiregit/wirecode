@@ -11,11 +11,16 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.HttpClient;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
  * Has a singleton pattern.
  */
 public class UpdateManager {
+    
+    private static final Log LOG = LogFactory.getLog(UpdateManager.class);
     
     /**
      * Used when handshaking with other LimeWires. 
@@ -101,7 +106,9 @@ public class UpdateManager {
 
     public void checkAndUpdate(Connection connection) {
 		String nv = connection.getVersion();
-        debug("myVersion:"+latestVersion+" theirs: "+nv);
+		if(LOG.isTraceEnabled())
+            LOG.trace("Update check: myVersion: "+
+                      latestVersion+", theirs: "+nv);
         String myVersion = null;
         if(latestVersion.equals(SPECIAL_VERSION))
             //if I have @version@ on disk check against my real version
@@ -116,7 +123,7 @@ public class UpdateManager {
         final String myversion = myVersion;
         Thread checker = new Thread("UpdateFileRequestor") {
             public void run() {
-                debug("Getting update file");
+                LOG.trace("Getting update file");
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
@@ -138,22 +145,25 @@ public class UpdateManager {
                         new UpdateMessageVerifier(data);
                     if(!verifier.verifySource())
                         return;
-                    debug("Verified file contents");
+                    LOG.trace("Verified file contents");
                     String xml = new String(verifier.getMessageBytes(),"UTF-8");
                     UpdateFileParser parser = new UpdateFileParser(xml);
-                    debug("New version: "+parser.getVersion());
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("New version: "+parser.getVersion());
                     //we checked for new version while handshaking, but we
                     //should check again with the authenticated xml data.
                     String newVersion = parser.getVersion();
                     if(newVersion==null)
                         return;
                     if(isGreaterVersion(newVersion,myversion)) {
-                        debug("committing new update file");
+                        LOG.trace("committing new update file");
                         synchronized(UpdateManager.this) {
                             commitVersionFile(data);//could throw an exception
                             //committed file, update the value of latestVersion
                             latestVersion = newVersion;
-                            debug("commited file. Latest is:"+latestVersion);
+                            if(LOG.isTraceEnabled())
+                                LOG.trace("commited file. Latest is:" +
+                                          latestVersion);
                         }
                         //Note: At this point, the connections that are already
                         //established, still think the latest version is the
@@ -259,12 +269,4 @@ public class UpdateManager {
             throw new IOException();//dont update latestVersion
         }
     }
-    
-    private boolean debug = false;
-    
-    private void debug(String str) {
-        if(debug)
-            System.out.println(str);
-    }
-   
 }
