@@ -1039,13 +1039,13 @@ public abstract class MessageRouter {
         if(size > 3) randomlyForward = true;
         double percentToIgnore;
         for(int i=0; i<size; i++) {
-            ManagedConnection c = (ManagedConnection)list.get(i);
-
+            ManagedConnection mc = (ManagedConnection)list.get(i);
+            if(!mc.isStable()) continue;
             if (receivingConnection == FOR_ME_REPLY_HANDLER || 
-                (c != receivingConnection && 
-                 !c.isClientSupernodeConnection())) {
+                (mc != receivingConnection && 
+                 !mc.isClientSupernodeConnection())) {
 
-                if(c.supportsPongCaching()) {
+                if(mc.supportsPongCaching()) {
                     percentToIgnore = 0.40;
                 } else {
                     percentToIgnore = 0.90;
@@ -1054,7 +1054,7 @@ public abstract class MessageRouter {
                    (Math.random() < percentToIgnore)) {
                     continue;
                 } else {
-                    c.send(request);
+                    mc.send(request);
                 }
             }
         }
