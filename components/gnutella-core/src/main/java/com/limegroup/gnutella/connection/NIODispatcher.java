@@ -62,7 +62,8 @@ public final class NIODispatcher implements Runnable {
 	}
 
 	/**
-	 * Constructs the single <tt>NIODispatcher</tt> instance and starts its thread.
+	 * Constructs the single <tt>NIODispatcher</tt> instance and starts its 
+     * thread.
 	 */
 	private NIODispatcher() {
 		Thread nioThread = new Thread(this, "nio thread");
@@ -79,7 +80,6 @@ public final class NIODispatcher implements Runnable {
      * from the network
 	 */
     public void addReader(Connection conn) {
-        System.out.println("NIODispatcher::addReader");
 		READERS.add(conn);
 		_selector.wakeup();
 	}
@@ -98,9 +98,10 @@ public final class NIODispatcher implements Runnable {
 	public void addWriter(Connection conn) {
 		WRITERS.add(conn);
 		
-		// we have not added this writer to the selector yet, as this call is made from a 
-		// separate thread, so we need to wake up the selector so that it doesn't keep
-		// blocking in select() and instead registers the new Channel for write events
+		// we have not added this writer to the selector yet, as this call is 
+        // made from a separate thread, so we need to wake up the selector so 
+        // that it doesn't keep blocking in select() and instead registers the 
+        // new Channel for write events
 		_selector.wakeup();
 	}
 
@@ -157,7 +158,6 @@ public final class NIODispatcher implements Runnable {
 	 * read events.
      */
     private void registerReaders() {
-        System.out.println("NIODispatcher::registerReaders");
         synchronized(READERS) {
 			// do nothing if there are no new readers
 			if(READERS.isEmpty()) return;
@@ -204,10 +204,8 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
-        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
-            System.out.println("NIODispatcher::handleReaders::in while");
 			SelectionKey key = (SelectionKey)keyIter.next();
 			keyIter.remove();
 			
@@ -229,6 +227,7 @@ public final class NIODispatcher implements Runnable {
 						continue;
 					}
 
+                    mc.addReceived();
                     // make sure this message isn't considered spam                    
                     if(!mc.isSpam(msg)) {
                         // TODO:: don't use RouterService
