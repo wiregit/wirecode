@@ -1115,7 +1115,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
 		// Prepare a fresh set of alternate locations for these file
-		totalAlternateLocations = new AlternateLocationCollection(); 
+		//totalAlternateLocations = new AlternateLocationCollection(); 
+
+		// null out the alternate locations so we can create a new set
+		// for these files
+		totalAlternateLocations = null;  
 		RemoteFileDesc tempRFD;
 		String rfdStr;
 		URL    rfdURL;
@@ -1123,14 +1127,25 @@ public class ManagedDownloader implements Downloader, Serializable {
             for (Iterator iter=files.iterator(); iter.hasNext(); ) {
                 tempRFD = (RemoteFileDesc)iter.next();
 
+				URN sha1 = tempRFD.getSHA1Urn();
+
 				// Don't add a location to the alternate location list 
 				// if the RFD doesn't have a SHA1
-				if ( tempRFD.getSHA1Urn() == null)
+				if(sha1 == null)
 				    continue;
 
+				if(totalAlternateLocations == null) {
+					// Prepare a fresh set of alternate locations for these file
+					totalAlternateLocations = 
+						AlternateLocationCollection.createCollection(sha1);
+				} else if(!sha1.equals(totalAlternateLocations.getSHA1Urn())) {
+					// if the SHA1s don't match, keep going
+					continue;
+				}
 				try {
-				    totalAlternateLocations.addAlternateLocation(
-					    AlternateLocation.createAlternateLocation(tempRFD));
+					AlternateLocation location = 
+						AlternateLocation.createAlternateLocation(tempRFD);
+					totalAlternateLocations.addAlternateLocation(location);
 				} catch( IOException e ) {
                 }  
 			}

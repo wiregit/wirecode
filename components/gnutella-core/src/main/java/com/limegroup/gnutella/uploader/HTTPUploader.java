@@ -692,7 +692,8 @@ public final class HTTPUploader implements Uploader {
             return false;
         
    		if(_alternateLocationCollection == null)
-   			_alternateLocationCollection = new AlternateLocationCollection();
+   			_alternateLocationCollection = 
+				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
         HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
 
         return true;

@@ -56,8 +56,15 @@ public class HTTPDownloader implements BandwidthTracker {
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
-	private AlternateLocationCollection _alternateLocationsReceived;
-	private AlternateLocationCollection _alternateLocationsToSend; 
+	/**
+	 * The new alternate locations we've received for this file.
+	 */
+	private final AlternateLocationCollection _alternateLocationsReceived;
+
+	/**
+	 * The alternate locations we already know about for this file.
+	 */
+	private final AlternateLocationCollection _alternateLocationsToSend; 
 
 	private int _port;
 	private String _host;
@@ -116,7 +123,8 @@ public class HTTPDownloader implements BandwidthTracker {
         _browseEnabled = rfd.browseHostEnabled();
 
 		_alternateLocationsToSend   = alts; 
-		_alternateLocationsReceived = new AlternateLocationCollection(); 
+		_alternateLocationsReceived = 
+			AlternateLocationCollection.createCollection(alts.getSHA1Urn());
 
 		_amountRead = 0;
     }
@@ -194,7 +202,9 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking
 		// while holding the lock
-		AlternateLocationCollection alts = new AlternateLocationCollection();
+		AlternateLocationCollection alts = 
+			AlternateLocationCollection.createCollection(
+                _alternateLocationsToSend.getSHA1Urn());
 		synchronized(_alternateLocationsToSend) {
 		    alts.addAlternateLocationCollection(_alternateLocationsToSend);
 		}
@@ -634,6 +644,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	private HTTPDownloader(String str) {
 		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 		_byteReader = new ByteReader(stream);
+		_alternateLocationsReceived = null;
+		_alternateLocationsToSend = null;
 	}
     
     /**Package access unit tests. is called from JUnit tests. We kept this
