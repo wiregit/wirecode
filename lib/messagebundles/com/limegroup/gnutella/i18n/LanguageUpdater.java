@@ -13,6 +13,7 @@ class LanguageUpdater {
     private final File lib;
     private final Map langs;
     private final List englishList;
+    private boolean verbose = true;
    
     /**
      * Constructs a new LanguageUpdater.
@@ -22,6 +23,21 @@ class LanguageUpdater {
         this.langs = langs;
         this.englishList = englishLines;
         removeInitialComments(englishList);
+    }
+    
+    /**
+     * Determines if stuff should be printed.
+     */
+    void setSilent(boolean silent) {
+        verbose = !silent;
+    }
+    
+    /**
+     * Prints a message out if we're being verbose.
+     */
+    void print(String msg) {
+        if(verbose)
+            System.out.println(msg);
     }
     
     /**
@@ -42,11 +58,11 @@ class LanguageUpdater {
      */
     void updateLanguage(LanguageInfo info) {
         if(info == null) {
-            System.out.println("Unknown language.");
+            print("Unknown language.");
             return;
         }
         
-        System.out.print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
+        print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
         String filename = info.getFileName();
         File f = new File(lib, filename);
         if(!f.isFile())
@@ -61,17 +77,17 @@ class LanguageUpdater {
             writeBody(fos, info);
             fos.close();
             if(isDifferent(f, temp)) {
-                System.out.println("...changes.");
+                print("...changes.");
                 f.delete();
                 temp.renameTo(f);
             } else {
-                System.out.println("...no changes!");
+                print("...no changes!");
                 temp.delete();
             }
             if(info.isUTF8())
                 native2ascii(info);
         } catch(IOException ioe) {
-            System.out.println("...error! (" + ioe.getMessage() + ")");
+            print("...error! (" + ioe.getMessage() + ")");
         }
     }
     
@@ -85,7 +101,7 @@ class LanguageUpdater {
         InputStream in = null;
         OutputStream out = null;
         
-        System.out.print("\tConverting to ASCII... ");
+        print("\tConverting to ASCII... ");
         
         try  {
             in = new BufferedInputStream(new FileInputStream(info.getFileName()));
@@ -104,9 +120,9 @@ class LanguageUpdater {
             }
             writer.flush();
             out.flush();
-            System.out.println("... done!");
+            print("... done!");
         } catch(IOException ignored) {
-            System.out.println("... error! (" + ignored.getMessage() + ")");
+            print("... error! (" + ignored.getMessage() + ")");
         } finally {
             if(in != null)
                 try { in.close(); } catch(IOException ignored) {}

@@ -93,6 +93,8 @@ public class CountPercent {
             loader.retainKeys(validKeys);
             List lines = loader.getEnglishLines();
             LanguageUpdater updater = new LanguageUpdater(root, langs, lines);
+            if(action == ACTION_RELEASE)
+                updater.setSilent(true);
             if(code == null)
                 updater.updateAllLanguages();
             else {
