@@ -9,12 +9,13 @@ import java.lang.String;
 
 
 /**
- * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
- * be redistributed or modified in any form without restrictions as long as the 
- * portion of this comment from this paragraph through the end of the comment is 
- * not removed.  The author requests that he be notified of any application, 
- * applet, or other binary that makes use of this code, but that's more out of 
- * curiosity than anything and is not required.  This software includes no warranty.
+ * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and 
+ * may be redistributed or modified in any form without restrictions as long 
+ * as the portion of this comment from this paragraph through the end of the 
+ * comment is not removed.  The author requests that he be notified of any 
+ * application, applet, or other binary that makes use of this code, but that's 
+ * more out of curiosity than anything and is not required.  This software 
+ * includes no warranty.
  * <p>
  * Credits:
  * <br>Steven Spencer, JavaWorld magazine 
@@ -138,7 +139,7 @@ public class Launcher {
 	 *
 	 * @throws IOException if the file cannot be launched do to an IO problem
 	 */
-	public static int launchFile(File file) throws IOException {
+	public static int launchFile(File file) throws IOException,SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase();
 		if(!extCheckString.endsWith(".exe") &&
@@ -160,7 +161,7 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			throw new IOException(msg);
+			throw new SecurityException(msg);
 		}
 		return -1;		
 	}
