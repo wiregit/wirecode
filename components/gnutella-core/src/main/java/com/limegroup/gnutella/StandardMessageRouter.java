@@ -99,7 +99,7 @@ public class StandardMessageRouter extends MessageRouter
 	 * @param request the <tt>PingRequest</tt> to service
 	 */
 	protected void respondToUDPPingRequest(PingRequest request) {
-		List unicastEndpoints = QueryUnicaster.instance().getUnicastEndpoints();
+		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
 		while(iter.hasNext()) {
 			Endpoint host = (Endpoint)iter.next();
