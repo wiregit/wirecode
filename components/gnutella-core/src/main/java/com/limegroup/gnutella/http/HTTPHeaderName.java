@@ -57,6 +57,14 @@ public class HTTPHeaderName {
 		new HTTPHeaderName("X-Gnutella-Content-URN");
 
 	/**
+	 * Header for specifying the URN of the file, as per the
+	 * CAW spec at
+	 * http://www.open-content.net/specs/draft-jchapweske-caw-03.html .
+	 */
+	public static final HTTPHeaderName CONTENT_URN =
+		new HTTPHeaderName("X-Content-URN");
+
+	/**
 	 * Header for specifying the byte range of the content.
 	 */
 	public static final HTTPHeaderName CONTENT_RANGE =

@@ -604,6 +604,7 @@ public class HTTPDownloader implements BandwidthTracker {
 			str = _byteReader.readLine();
             if (str==null || str.equals(""))
                 break;
+                
 			if(!CommonUtils.isJava118()) 
 				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
             //As of LimeWire 1.9, we ignore the "Content-length" header;
@@ -630,10 +631,10 @@ public class HTTPDownloader implements BandwidthTracker {
                 _initialReadingPoint = low;
                 _amountToRead = high - low;
             }
-
+            else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str))
+				checkContentUrnHeader(str, _rfd.getSHA1Urn());
             else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str))
 				checkContentUrnHeader(str, _rfd.getSHA1Urn());
-			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
                 readAlternateLocations(str, false);
             else if(HTTPHeaderName.OLD_ALT_LOCS.matchesStartOfString(str))
@@ -703,9 +704,6 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private void checkContentUrnHeader(String str, URN sha1)
         throws ContentUrnMismatchException {
-        if(sha1 == null)
-            return;
-        
         String value = HTTPUtils.extractHeaderValue(str);
         if (_root32 == null && value.indexOf("urn:bitprint:") > -1) { 
             // If the root32 was not in the X-Thex-URI header
@@ -713,6 +711,10 @@ public class HTTPDownloader implements BandwidthTracker {
             // the content-urn if it was a bitprint.
             _root32 = value.substring(value.lastIndexOf(".")+1).trim();
         }
+
+        if(sha1 == null)
+            return;
+        
         
         URN contentUrn = null;
         try {
