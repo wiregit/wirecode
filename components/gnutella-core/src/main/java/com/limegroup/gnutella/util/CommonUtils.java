@@ -667,9 +667,6 @@ public final class CommonUtils {
             retval = 1;
         } else if ( o1.getClass() == String.class ) {
             retval = StringUtils.compareIgnoreCase( (String)o1, (String)o2 );
-        } else if( !CommonUtils.isJava118() &&
-                   o1 instanceof java.lang.Comparable ) {
-            retval = ((java.lang.Comparable)o1).compareTo(o2);
         } else if( o1 instanceof com.sun.java.util.collections.Comparable ) {
             retval =
                 ((com.sun.java.util.collections.Comparable)o1).compareTo(o2);
@@ -689,7 +686,7 @@ public final class CommonUtils {
             retval = 0;
         }
         return retval;
-    }  
+    } 
 
 
 	/**
