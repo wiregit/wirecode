@@ -549,7 +549,9 @@ public class DownloadManager implements BandwidthTracker {
 
             //2. Attempt to give to an existing downloader.
             synchronized (this) {
-                BrowseHostHandler.handlePush(index,new GUID(clientGUID),socket);
+                if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), 
+                                                 socket))
+                    return;
                 for (Iterator iter=active.iterator(); iter.hasNext();) {
                     ManagedDownloader md=(ManagedDownloader)iter.next();
                     if (md.acceptDownload(file, socket, index, clientGUID))

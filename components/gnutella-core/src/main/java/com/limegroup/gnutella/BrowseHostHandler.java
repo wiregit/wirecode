@@ -64,7 +64,8 @@ public class BrowseHostHandler {
      * @param host The IP of the host you want to browse.
      * @param port The port of the host you want to browse.
      */
-    public void browseHost(String host, int port) {
+    public void browseHost(String host, int port, 
+                           PushProxyInterface[] proxies) {
 
         // flow of operation:
         // 1. check if you need to push.
@@ -89,25 +90,21 @@ public class BrowseHostHandler {
             // if we're trying to push & we don't have a servent guid, it fails
             if ( _serventID == null ) {
                 _callback.browseHostFailed(_guid);
-            } else {
-                PushRequest pr = new PushRequest(GUID.makeGuid(),
-												 (byte)6,
-												 _serventID.bytes(), 
-												 SPECIAL_INDEX,
-												 RouterService.getAddress(),
-												 RouterService.getPort());
+            } 
+            else {
+                RemoteFileDesc fakeRFD = 
+                    new RemoteFileDesc(host, port, SPECIAL_INDEX, "", 0, 
+                                       _serventID.bytes(), 0, false, 0, false,
+                                       null, null, false, proxies);
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
                     _pushedHosts.put(_serventID, new PushRequestDetails(this));
                 }
-                // send the Push after registering in case you get a response really
-                // quickly.
-                try {
-                    _router.sendPushRequest(pr);
-                }
-                catch (IOException ioe) {
-                    debug(ioe);
+
+                // send the Push after registering in case you get a response 
+                // really quickly.  reuse code in DM cuz that works well
+                if (!RouterService.getDownloadManager().sendPush(fakeRFD)) {
                     // didn't work, unregister yourself...
                     synchronized (_pushedHosts) {
                         _pushedHosts.remove(_serventID);
@@ -277,9 +274,11 @@ public class BrowseHostHandler {
     }
 
 
-
-    public static void handlePush(int index, GUID serventID, Socket socket) 
+    /** @return true if the Push was handled by me.
+     */
+    public static boolean handlePush(int index, GUID serventID, Socket socket) 
         throws IOException {
+        boolean retVal = false;
         debug("BHH.handlePush(): entered.");
         if (index == SPECIAL_INDEX)
             ; // you'd hope, but not necessary...
@@ -288,12 +287,15 @@ public class BrowseHostHandler {
         synchronized (_pushedHosts) {
             prd = (PushRequestDetails) _pushedHosts.remove(serventID);
         }
-        if (prd != null) 
+        if (prd != null) {
             prd.bhh.browseExchange(socket);
+            retVal = true;
+        }
         else
             debug("BHH.handlePush(): no matching BHH.");
 
         debug("BHH.handlePush(): returning.");
+        return retVal;
     }
 
     /** Can be run to invalidate pushes that we are waiting for....
