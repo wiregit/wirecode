@@ -102,7 +102,7 @@ public final class PushManager {
         synchronized(this) {
     		clearFailedPushes();
             if ( !forceAllow && (
-                 (! testAttemptingPush(host, index) )  ||
+                 (! testAttemptingPush(host, index) && !isFWTransfer )  ||
                  (! testFailedPush(host, index) ) ) )
                 return;
             insertAttemptingPush(host, index);
