@@ -339,7 +339,7 @@ public class Acceptor extends Thread {
                 //   the user's value.
                 boolean useDefaultConnect=
                     SettingsManager.instance().getConnectString().equals(
-                         SettingsInterface.DEFAULT_CONNECT_STRING);
+                         SettingsManager.DEFAULT_CONNECT_STRING);
 
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {

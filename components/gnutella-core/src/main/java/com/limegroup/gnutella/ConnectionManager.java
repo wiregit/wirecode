@@ -661,7 +661,7 @@ public class ConnectionManager {
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && 
-                    origHost.equals(SettingsInterface.DEDICATED_LIMEWIRE_ROUTER))
+                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
