@@ -8,6 +8,14 @@ package com.limegroup.gnutella;
 public class MediaType {
     private String description;
     private String[] extensions;
+    private final static String ANY_TYPE = "MEDIA_ANY_TYPE";
+    private final static String DOCUMENTS = "MEDIA_DOCUMENTS";
+    private final static String PROGRAMS = "MEDIA_PROGRAMS";
+    private final static String AUDIO = "MEDIA_AUDIO";
+    private final static String VIDEO = "MEDIA_VIDEO";
+    private final static String IMAGES = "MEDIA_IMAGES";
+
+
 
     /**
      * @param a human readable description of this media type,
@@ -44,11 +52,13 @@ public class MediaType {
 		return false;
     }
 			
-    /** Returns this' human-readable description */
+    /** 
+        Returns this' human-readable description
+    */
     public String toString() {
-		return description;
+        return description;
     }
-
+    
     private static MediaType[] allMediaTypes = null;
     public static MediaType[] getDefaultMediaTypes() {
         if (allMediaTypes == null)
@@ -65,28 +75,28 @@ public class MediaType {
 
     /** Returns an array of default media types. */
     private static MediaType[] getTypes() {
-		MediaType any=new MediaType("Any Type", null);
+		MediaType any=new MediaType(ANY_TYPE, null);
 		//This list isn't exhaustive, but it's not clear that we want it
 		//to.  We may only want the most common file types here.
 		//See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
-		MediaType text=new MediaType("Documents",
+		MediaType text=new MediaType(DOCUMENTS,
 									 new String[] {"html", "htm", "xml", 
 												   "txt", "pdf", "ps",
 												   "rtf", "doc", "tex"});
-		MediaType programs=new MediaType("Programs",
+		MediaType programs=new MediaType(PROGRAMS,
 										 new String[] {"exe", "zip", "gz", "gzip",
 													   "hqx", "tar", "tgz", "z",
 										               "sit", "hqx", "bin",
 										               "dmg"});
-		MediaType audio=new MediaType("Audio", 
+		MediaType audio=new MediaType(AUDIO, 
 									  new String[] {"mp3", "wav", "au", 
 													"aif", "aiff", "ra", 
 													"ram", "rmj", "lqt", "ogg"});
-		MediaType video=new MediaType("Video", 
+		MediaType video=new MediaType(VIDEO, 
 									  new String[] {"mpg", "mpeg", "asf", "qt", 
 													"mov", "avi", "mpe", "swf", "dcr",
 									                "rm", "ram", "jve"});
-		MediaType images=new MediaType("Images",
+		MediaType images=new MediaType(IMAGES,
 									   new String[] {"gif", "jpg", "jpeg", "jpe",
 													 "png", "tif", "tiff"});	
 
