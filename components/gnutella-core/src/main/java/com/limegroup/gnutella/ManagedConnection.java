@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
@@ -644,7 +645,7 @@ public class ManagedConnection
                 // in Reject Connection
                 // If any other kind of message comes in we drop
               
-                //SPECIAL CASE: for Crawle ping
+                //SPECIAL CASE: for crawler ping
                 if(m.getTTL() == 2) {
                     handleCrawlerPing((PingRequest)m);
                     return;
@@ -728,21 +729,23 @@ public class ManagedConnection
             PingReply pr;
             if(connection.isSupernodeConnection()) {
                 pr = new PingReply(m.getGUID(),(byte)2,
-                connection.getOrigPort(),
-                connection.getInetAddress().getAddress(), 0, 0, true);  
+                                   connection.getOrigPort(),
+                                   connection.getInetAddress().getAddress(), 
+                                   0, 0, true);  
             } else if(connection.isLeafConnection() 
                 || connection.isOutgoing()){
                 //we know the listening port of the host in this case
                 pr = new PingReply(m.getGUID(),(byte)2,
-                connection.getOrigPort(),
-                connection.getInetAddress().getAddress(), 0, 0); 
+                                   connection.getOrigPort(),
+                                   connection.getInetAddress().getAddress(), 
+                                   0, 0); 
             }
             else{
                 //Use the port '0' in this case, as we dont know the listening
                 //port of the host
-                pr = new PingReply(m.getGUID(),(byte)2,
-                0,
-                connection.getInetAddress().getAddress(), 0, 0); 
+                pr = new PingReply(m.getGUID(),(byte)2, 0,
+                                   connection.getInetAddress().getAddress(), 
+                                   0, 0); 
             }
             
             //hop the message, as it is ideally coming from the connected host
@@ -929,12 +932,13 @@ public class ManagedConnection
     public void handlePushRequest(PushRequest pushRequest,
                                   ReplyHandler receivingConnection) {
         send(pushRequest);
-    }
+    }   
 
 
     protected void handleVendorMessage(VendorMessage vm) {
         // let Connection do as needed....
         super.handleVendorMessage(vm);
+
         // now i can process
         if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
@@ -942,6 +946,10 @@ public class ManagedConnection
             softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {
+            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
+               isLocal()) {
+                return;
+            }
             // do i need to send any ConnectBack messages????
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
@@ -950,8 +958,8 @@ public class ManagedConnection
                     GUID connectBackGUID =
                         RouterService.getUDPConnectBackGUID();
                     UDPConnectBackVendorMessage udp = 
-                    new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                    connectBackGUID);
+                        new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                        connectBackGUID);
                     send(udp);
                     _numUDPConnectBackRequests++;
                 }
