@@ -283,6 +283,7 @@ public class Acceptor extends Thread {
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
+				SettingsManager.instance().setAcceptedIncoming(_acceptedIncoming);
 
                 //Dispatch asynchronously.
                 new ConnectionDispatchRunner(client);

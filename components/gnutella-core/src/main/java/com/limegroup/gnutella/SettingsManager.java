@@ -27,7 +27,7 @@ public class SettingsManager implements SettingsInterface {
 
     private boolean checkAgain_;
 
-    /** Variables for the various settings */
+    /** Variablesg for the various settings */
 	private boolean  allowBroswer_;
     private byte     ttl_;
     private byte     softmaxttl_;
@@ -109,6 +109,8 @@ public class SettingsManager implements SettingsInterface {
     private String saveShareDir_;
 	private String oldJARName_ = "";
 	private boolean deleteOldJAR_ = false;
+
+	private boolean acceptedIncoming_ = false;
 
 
     /**
@@ -828,6 +830,12 @@ public class SettingsManager implements SettingsInterface {
 		Boolean b = Boolean.valueOf(props_.getProperty(MINIMIZE_TO_TRAY));
 		return b.booleanValue();	
 	}
+
+	/**
+	 * returns true is an incoming connection has ever been established
+	 * during a single session
+	 */
+	public boolean getAcceptedIncoming() {return acceptedIncoming_;}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1715,6 +1723,11 @@ public class SettingsManager implements SettingsInterface {
 		props_.put(MINIMIZE_TO_TRAY, b.toString());
 	}	
 
+
+	public void setAcceptedIncoming(boolean incoming) {
+		acceptedIncoming_ = incoming;
+	}
+	
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
