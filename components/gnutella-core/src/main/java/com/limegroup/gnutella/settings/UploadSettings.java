@@ -54,5 +54,5 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("SOFT_MAXIMUM_UPLOADS", 5);   
 
     public static final IntSetting TEST_UPLOAD_SETTING = 
-        FACTORY.createIntSetting("TEST_UPLOAD_SETTING", 4);
+        FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING", 4, true);
 }

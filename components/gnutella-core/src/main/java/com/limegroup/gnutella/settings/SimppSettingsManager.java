@@ -78,14 +78,25 @@ public class SimppSettingsManager {
             Set set = _simppProps.entrySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
                 Map.Entry currEntry = (Map.Entry)iter.next();
-                String simppSetting = (String)currEntry.getKey();
+                String rawSimppSettingStr = (String)currEntry.getKey();
+                String simppSetting = getSettingString(rawSimppSettingStr);
+                if(simppSetting == null) {//bad case, simpp message inconsistent
+                    continue;//ignore this setting and move on
+                    //TODO: Option 2 is to ignore this whole simpp message
+                    //return; //TODO: Error service here?
+                }
                 String simppValue = (String)currEntry.getValue();
-                System.out.println("setting:"+simppSetting);
-                System.out.println("simpp value:"+simppValue);
+                System.out.println("Sumeet:setting:"+simppSetting);
+                System.out.println("Sumeet:simpp value:"+simppValue);
                 //get the setting we want based on the name of the setting
                 Setting currSetting = findSettingByName(simppSetting);
-                if(currSetting == null) //create a new Setting
-                    currSetting = makeSettingPerType(simppSetting, simppValue);
+                if(currSetting == null) {
+                    //perhaps setting not touched with lazy loading, try load
+                    //the setting
+                    currSetting = loadSetting(rawSimppSettingStr);
+                    if(currSetting == null) //Still null?
+                        continue;//Perhaps this setting has been removed frm LW
+                }
                 if(!currSetting.isSimppEnabled())
                     continue;
                 //get the default/current value and cache it                
@@ -126,9 +137,44 @@ public class SimppSettingsManager {
         return limeProps.getSetting(settingName);
     }
 
-    private Setting makeSettingPerType(String settingKey, String settingValue) {
-        //TODO1: Implement this method
-        return null;
+    private String getSettingString(String rawSetting) {
+        //The raw string has the format settingStr{Classname.fieldname}
+        int index = rawSetting.indexOf("{");
+        if(index < 0) //we have a real serious problem
+            return null;
+        return rawSetting.substring(0,index);
+    }
+    
+    private String getSettingsClass(String rawSetting) {
+        int i = rawSetting.indexOf("{");
+        int j = rawSetting.indexOf("}");
+        if(i < 0 || j < 0) //we have a problem, the simpp message has bad format
+            return null;
+        return rawSetting.substring(i+1, j);
+    }
+
+    private Setting loadSetting(String rawSetting) {
+        System.out.println("Sumeet: loading setting");
+        String fullname = getSettingsClass(rawSetting);
+        if(fullname == null) //simpp messasge badly formatted
+            return null;
+        int dot = fullname.indexOf(".");
+        if(dot < 0) //simpp setting badly formatted
+            return null;
+        try {
+            String classname = fullname.substring(0, dot);
+            String fieldname = fullname.substring(dot+1);
+            Class settingsClass = Class.forName(classname);
+            Object obj = settingsClass.getField(fieldname).get(settingsClass);
+            Setting ret = (Setting)obj;
+            return ret;
+        } catch (ClassNotFoundException cnfx) {
+            return null;
+        } catch (NoSuchFieldException nsfx) {
+            return null;
+        } catch(IllegalAccessException iax) {
+            return null;
+        }
     }
 
 }
