@@ -144,11 +144,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize * maxNodes >= fileSize,
+        Assert.that(nodeSize * (long)maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-        Assert.that(nodeSize * maxNodes <= fileSize * 2,
+        Assert.that(nodeSize * (long)maxNodes <= fileSize * 2,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
@@ -200,51 +200,6 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         return new HashTree(HashTreeHandler.read(is, fileSize, root32),
                             sha1, fileSize);
     }
-
-    /**
-     * This method returns the ranges of a file that do no match the expected
-     * TigerTree hashes
-     * 
-     * @param is
-     *            an <tt>InputStream</tt>
-     * @return List of <tt>Interval</tt>
-     * @throws IOException
-     *             if there was a problem reading the file
-     */
-    public List getCorruptRanges(InputStream is) throws IOException {
-        LOG.trace("getting corrupt ranges ");
-
-        List ret = new ArrayList();
-        // calculate the node size using FILE_SIZE and DEPTH.
-        // nodeSize = 2^(log2Ceil(FILE_SIZE) - DEPTH);
-        int n = log2Ceil((int) FILE_SIZE) - DEPTH;
-        // 2^n
-        int nodeSize = 1 << n;
-        List fileHashes = createTTNodes(nodeSize, FILE_SIZE, is);
-        int minSize = Math.min(fileHashes.size(), NODES.size());
-        for (int i = 0; i < minSize; i++) {
-            byte[] aHash = (byte[]) fileHashes.get(i);
-            byte[] bHash = (byte[]) NODES.get(i);
-            for (int j = 0; j < aHash.length; j++) {
-                if (aHash[j] != bHash[j]) {
-                    Interval in =
-                        new Interval(
-                            i * nodeSize,
-                            (int) Math.min(
-                                (i + 1) * nodeSize - 1,
-                                FILE_SIZE - 1));
-                    ret.add(in);
-                    if (LOG.isDebugEnabled())
-                        LOG.debug(
-                            Base32.encode(ROOT_HASH)
-                                + " -> found corrupted range: "
-                                + in);
-                    break;
-                } 
-            }
-        }
-        return ret;
-    }
     
     /**
      * Checks whether the specific area of the file matches the hash tree. 
@@ -263,7 +218,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             if (LOG.isDebugEnabled())
                 LOG.debug("interval "+in+" verified "+ok);
             return !ok;
-        }
+        } 
         return true;
     }
 

@@ -140,31 +140,37 @@ public class HashTreeTest extends BaseTestCase {
         
     }
 
-    public void testGetCorruptRanges() throws Throwable {
+    public void testVerifyChunk() throws Throwable {
         File corrupt = new File("corruptFile");
         CommonUtils.copy(file, corrupt);
         assertTrue(corrupt.exists());
-        // Now corrupt the copy.
+        
+        // Now corrupt the 4th chunk.
+        int chunkSize = hashTree.getNodeSize();
+        
         RandomAccessFile raf = new RandomAccessFile(corrupt, "rw");
-        raf.seek(0);
+        raf.seek(3*chunkSize+5);
         raf.write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        raf.close();
         
-        // test getCorruptRanges()
-        List franges = hashTree.getCorruptRanges(new FileInputStream(file));
-        List cranges = hashTree.getCorruptRanges(new FileInputStream(corrupt));
-        assertEquals(franges.size(), 0);
-        assertEquals(cranges.size(), 1);
+        // chunks 1-3 are good
+        byte [] chunk = new byte[chunkSize];
+        for (int i = 0;i < 3*chunkSize ;i+=chunkSize) {
+            raf.seek(i);
+            raf.read(chunk);
+            assertFalse(hashTree.isCorrupt(new Interval(i,i+chunkSize-1),chunk));
+        }
         
-        List franges2 =
-            treeFromNetwork.getCorruptRanges(new FileInputStream(file));
-        List cranges2 =
-             treeFromNetwork.getCorruptRanges(new FileInputStream(corrupt));
-        assertEquals(franges2.size(), 0);
-        assertEquals(cranges2.size(), 1);
+        // the 4th is corrupt
+        raf.seek(3*chunkSize);
+        raf.read(chunk);
+        assertTrue(hashTree.isCorrupt(new Interval(3*chunkSize,4*chunkSize-1),chunk));
+        
+        // 5th works
+        raf.seek(4*chunkSize);
+        raf.read(chunk);
+        assertFalse(hashTree.isCorrupt(new Interval(4*chunkSize,5*chunkSize-1),chunk));
 
-        assertEquals(cranges.get(0), cranges2.get(0));
-        assertEquals(((Interval)cranges.get(0)).low, 0);
+        raf.close();
         
         corrupt.delete();
     }
