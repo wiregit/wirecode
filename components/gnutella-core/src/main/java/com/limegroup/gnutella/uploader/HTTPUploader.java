@@ -270,11 +270,8 @@ public final class HTTPUploader implements Uploader {
 				}
 			} catch (IOException e2) {};
 		} catch (IOException e) {
-            // set it to be completed if they read what they wanted.
-            // some servents (BearShare 4.0.0+) will read files in 'blocks'
-            // when swarming, and rather than interpret the disco as 
-            // interuption, it makes more sense to consider it complete,
-            // since they read what they wanted.
+            // set it to be completed if they read what they wanted
+            // regardless of interruption
             if ( _amountRead >= _amountRequested ) {
                 setState(COMPLETE);
             }
