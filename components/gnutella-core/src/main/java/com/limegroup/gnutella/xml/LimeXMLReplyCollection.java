@@ -42,7 +42,7 @@ public class LimeXMLReplyCollection {
      * SYNCHRONIZATION: Synchronize on mainMap when accessing,
      *  adding or removing.
      */
-    private final Trie /* String -> LinkedList */ index;
+    private final Trie /* String -> Set */ index;
     
     /**
      * Whether or not this LimeXMLReplyCollection is for audio files.
@@ -292,9 +292,9 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
                 String value = (String)i.next();
-                List allDocs = (List)index.get(value);
+                Set allDocs = (Set)index.get(value);
                 if( allDocs == null ) {
-                    allDocs = new LinkedList();
+                    allDocs = new HashSet();
                     index.add(value, allDocs);
                 }
                 //Add the value to the list of docs
@@ -310,7 +310,7 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
                 String value = (String)i.next();
-                List allDocs = (List)index.get(value);
+                Set allDocs = (Set)index.get(value);
                 if (allDocs != null) {
                     allDocs.remove(doc);
                     if( allDocs.size() == 0 )
@@ -414,7 +414,7 @@ public class LimeXMLReplyCollection {
                 String val = (String)i.next();
                 Iterator /* of List */ iter = index.getPrefixedBy(val);
                 while(iter.hasNext()) {
-                    List matchesVal = (List)iter.next();
+                    Set matchesVal = (Set)iter.next();
                     if( matchesVal != null ) {
                         if( matching == null )
                             matching = new HashSet();
