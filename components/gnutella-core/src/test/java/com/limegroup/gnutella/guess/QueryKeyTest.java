@@ -54,6 +54,24 @@ public class QueryKeyTest extends TestCase {
         QueryKey qk1 = QueryKey.getQueryKey(ip, port, key, pad);
         QueryKey qk2 = QueryKey.getQueryKey(ip, port, key, pad);
         assertTrue(qk1.equals(qk2));
+        try {
+            ip = InetAddress.getByName("10.254.0.42");
+        }
+        catch (Exception ignored) {
+            assertTrue(false);
+        }
+        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        assertTrue(qk1.equals(qk2));
+        try {
+            ip = InetAddress.getByName("127.0.0.1");
+        }
+        catch (Exception ignored) {
+            assertTrue(false);
+        }
+        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        assertTrue(qk1.equals(qk2));
     }
 
     public void testSamePadModulo() {
