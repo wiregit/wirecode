@@ -16,6 +16,9 @@ public class FileListHTMLPage {
     public static final String htmlMiddle = 
         "<br>\r\n</p>\r\n<p align=\"center\">\r\n";
 
+    public static final String htmlMagnet =
+        "</p>\r\n<br>\r\n<p align=\"center\">Magnet Links for Fast Downloads (if you have LimeWire installed)<br>";
+
     public static final String htmlEnd = "</p>\r\n<br>\r\n</body>\r\n</html>";
 
     private static final FileListHTMLPage _instance = new FileListHTMLPage();
@@ -34,12 +37,13 @@ public class FileListHTMLPage {
         // pretty simple - start the page and add a link per shared file
         StringBuffer sb = new StringBuffer();
         sb.append(htmlBegin);
-        
+
         // put the correct address
         final String host = NetworkUtils.ip2string(RouterService.getAddress());
         final String port = ""+RouterService.getPort();
         sb.append(host + ":" + port + htmlMiddle);
 
+        {
         // get all the Shared files from the FM
         final String beginURL = "\r\n<a href=/get/";
         FileManager fm = RouterService.getFileManager();
@@ -51,6 +55,26 @@ public class FileListHTMLPage {
                       StringUtils.replace(URLEncoder.encode(currFile.getName()),
                                           "+", "%20") + ">" + 
                       currFile.getName() + "</a><br>");
+        }
+        }
+
+        {
+        // put the magnet links
+        sb.append(htmlMagnet);
+        final String beginURL = "\r\n<a href=\"magnet:?xt=urn:sha1:";
+        final String middle1URL = "&dn=";
+        final String middle2URL = 
+            "&xs=http://" + host + ":" + port + "/uri-res/N2R?urn:sha1:";
+        final String middle3URL = "\">";
+        final String endURL = "</a><br>";
+        FileManager fm = RouterService.getFileManager();
+        FileDesc[] sharedFiles = fm.getAllSharedFileDescriptors();
+        for (int i = 0; i < sharedFiles.length; i++) {
+            final String sha1 = sharedFiles[i].getSHA1Urn().toString();
+            final String fname = sharedFiles[i].getFile().getName();
+            sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
+                      sha1 + middle3URL + fname + endURL);
+        }
         }
 
         // cap off the page
