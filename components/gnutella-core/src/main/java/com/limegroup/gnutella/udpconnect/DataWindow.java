@@ -100,7 +100,7 @@ public class DataWindow
             pkey = String.valueOf(i);
             // Count the spots that are full and not written
             if ( (d = (DataRecord) window.get(pkey)) != null &&
-                  (!d.written && i != windowStart))
+                  (!d.written || i != windowStart))
                 count++;
         }
         return(count);
