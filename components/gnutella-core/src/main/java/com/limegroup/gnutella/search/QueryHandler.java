@@ -54,7 +54,7 @@ public final class QueryHandler {
      * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
      * milliseconds.
      */
-    private long _timeToWaitPerHop = 2200;
+    private long _timeToWaitPerHop = 2400;
 
     /**
      * Constant for the maximum number of milliseconds the entire query
@@ -173,6 +173,7 @@ public final class QueryHandler {
 
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
+        
 	}
 
 
@@ -333,9 +334,14 @@ public final class QueryHandler {
                 _nextQueryTime = System.currentTimeMillis() + 6000;
             }   
             _theoreticalHostsQueried += newHosts;
+
+            // if we've already queried quite a few hosts, not gotten
+            // many results, and have been querying for awhile, start
+            // decreasing the per-hop wait time
             if(QUERIED_CONNECTIONS.size() > 4 && 
                _timeToWaitPerHop > 50 &&
-               RESULT_COUNTER.getNumResults() < 80) {
+               RESULT_COUNTER.getNumResults() < 80 &&
+               (_queryStartTime - System.currentTimeMillis()) > 10000) {
                 _timeToWaitPerHop -= 100; 
             }
         }
