@@ -149,8 +149,6 @@ public class FileDesc implements AlternateLocationCollector {
      * thread is interrupted while executing this, returns an empty set.  
 	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument is
 	 *  <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>file</tt> argument
-	 *  denotes a file that is not a file on disk
      * @throws <tt>IOException</tt> if there is an IO error calculating the 
      *  URN
      * @throws <tt>InterruptedException</tt> if the thread that calculates
@@ -158,12 +156,10 @@ public class FileDesc implements AlternateLocationCollector {
      */
     public static Set /* of URN */ calculateAndCacheURN(File file) 
         throws IOException, InterruptedException {
-        if(file == null) {
+        if(file == null)
             throw new NullPointerException("cannot accept null file argument");
-        } 
-		if(!file.isFile()) {
-			throw new IllegalArgumentException("file does not exist: "+file);
-		}
+		if(!file.isFile())
+			throw new IOException("not a file: "+file);
 		Set urns = UrnCache.instance().getUrns(file);
         // TODO: If we ever create more URN types (other than SHA1)
         // we cannot just check for size == 0, we must check for
