@@ -244,16 +244,18 @@ public final class UDPService implements Runnable {
                     if(message == null) continue;                    
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
-                            GUID guidReceived = new GUID(message.getGUID());
-                            if (CONNECT_BACK_GUID.equals(guidReceived))
+                            GUID guid = new GUID(message.getGUID());
+                            if(isValidForIncoming(CONNECT_BACK_GUID, guid,
+                                                  datagram))
                                 _acceptedUnsolicitedIncoming = true;
                         }
                         else if (message instanceof PingReply) {
-                            GUID guidReceived = new GUID(message.getGUID());
-                            if (SOLICITED_PING_GUID.equals(guidReceived))
+                            GUID guid = new GUID(message.getGUID());
+                            if(isValidForIncoming(SOLICITED_PING_GUID, guid,
+                                                  datagram))
                                 _acceptedSolicitedIncoming = true;
                             HostListener hl = 
-                                (HostListener)HOST_LISTENERS.get(guidReceived);
+                                (HostListener)HOST_LISTENERS.get(guid);
                             if(hl != null) {
                                 hl.addHost((PingReply)message);
                             }
@@ -273,6 +275,17 @@ public final class UDPService implements Runnable {
             ErrorService.error(t);
         }
 	}
+	
+	/**
+	 * Determines whether or not the specified message is valid for setting
+	 * LimeWire as accepting UDP messages (solicited or unsolicited).
+	 */
+	private boolean isValidForIncoming(GUID match, GUID guidReceived,
+	                                   DatagramPacket d) {
+	    String host = d.getAddress().getHostAddress();
+	    return match.equals(guidReceived) &&
+	           !RouterService.getConnectionManager().isConnectedTo(host);
+    }
     
     /**
      * Sends the specified <tt>Message</tt> to the specified host.
