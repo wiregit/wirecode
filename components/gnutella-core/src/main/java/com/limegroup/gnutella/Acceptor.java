@@ -68,7 +68,8 @@ public class Acceptor extends Thread {
 	 */
 	public static synchronized void setAddress(byte[] address) {
         //Ignore localhost.
-        if (address[0]==(byte)127)
+        if (address[0]==(byte)127 && 
+            ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return;
 
 		_address = address;
@@ -303,9 +304,7 @@ public class Acceptor extends Thread {
                     client.close();
                     continue;
                 }
-
 				
-
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
 				ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
@@ -313,7 +312,8 @@ public class Acceptor extends Thread {
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
 					new ConnectionDispatchRunner(client);
-				Thread dispatchThread = new Thread(dispatcher, "ConnectionDispatchRunner");
+				Thread dispatchThread = 
+                    new Thread(dispatcher, "ConnectionDispatchRunner");
 				dispatchThread.setDaemon(true);
 				dispatchThread.start();
 
@@ -327,8 +327,17 @@ public class Acceptor extends Thread {
         }
     }
 
+    /**
+     * Specialized class for dispatching incoming TCP connections to their
+     * appropriate handlers.  Gnutella connections are handled via 
+     * <tt>ConnectionManager</tt>, and HTTP connections are handled
+     * via <tt>UploadManager</tt> and <tt>DownloadManager</tt>.
+     */
     private static class ConnectionDispatchRunner implements Runnable {
 
+        /**
+         * The <tt>Socket</tt> instance for the connection.
+         */
         private final Socket _socket;
 
         /**
@@ -343,6 +352,10 @@ public class Acceptor extends Thread {
             _socket = socket;
         }
 
+        /**
+         * Dispatches the new connection based on connection type, such
+         * as Gnutella, HTTP, or MAGNET.
+         */
         public void run() {
 			ActivityCallback callback = RouterService.getCallback();
 			ConnectionManager cm      = RouterService.getConnectionManager();
@@ -354,12 +367,12 @@ public class Acceptor extends Thread {
                 try {
                     in=_socket.getInputStream(); 
                 } catch (Exception e) {
-                    throw new IOException();
+                    throw new IOException("could not access socket stream");
                 }
-                _socket.setSoTimeout(SettingsManager.instance().getTimeout());
+                _socket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
-                String word=IOUtils.readWord(in,8);
+                String word = IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
 
 				// Only selectively allow localhost connections
@@ -381,6 +394,7 @@ public class Acceptor extends Thread {
                 boolean useDefaultConnect=
                     SettingsManager.instance().getConnectString().equals(
                          SettingsManager.DEFAULT_CONNECT_STRING);
+
 
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
