@@ -33,6 +33,7 @@ public class SettingsManager implements SettingsInterface
     private static int      keepAlive_;
     private static int      port_;
     private static int      connectionSpeed_;
+    private static int      uploadSpeed_;
     private static byte     searchLimit_;
     private static boolean  stats_;
     private static String   clientID_;
@@ -226,6 +227,15 @@ public class SettingsManager implements SettingsInterface
 					}
 					catch(NumberFormatException nfe){}	    	
 				}
+                else if(key.equals(SettingsInterface.UPLOAD_SPEED)) {
+					try {
+						i = Integer.parseInt(p);
+						try {setUploadSpeed(i);}
+						catch (IllegalArgumentException ie){}
+					}
+					catch(NumberFormatException nfe){}	    	
+                        
+                }
 				else if(key.equals(SettingsInterface.SEARCH_LIMIT)) {
 					try {
 						b = Byte.parseByte(p);
@@ -384,6 +394,7 @@ public class SettingsManager implements SettingsInterface
 		setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
 		setPort(SettingsInterface.DEFAULT_PORT);
 		setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
+        setUploadSpeed(SettingsInterface.DEFAULT_UPLOAD_SPEED);
 		setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
 		//setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 		setClientID( (new GUID(Message.makeGuid())).toHexString() );	
@@ -442,6 +453,8 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the client's connection speed */
     public int getConnectionSpeed(){return connectionSpeed_;}
+
+    public int getUploadSpeed() { return uploadSpeed_; }
 
     /** returns the client's search speed */
     public byte getSearchLimit(){return searchLimit_;}
@@ -831,6 +844,19 @@ public class SettingsManager implements SettingsInterface
 		}
     }
 
+    /** Sets the percentage of total bandwidth (as given by
+     *  CONNECTION_SPEED) to use for uploads.  This is shared
+     *  equally among all uploads.  Throws IllegalArgumentException
+     *  if speed<0 or speed>100. */
+    public void setUploadSpeed(int speed) {
+        if (speed<0 || speed>100)
+            throw new IllegalArgumentException();
+        else {
+            uploadSpeed_ = speed;
+			String s = Integer.toString(uploadSpeed_);
+			props_.put(SettingsInterface.UPLOAD_SPEED, s);
+        }
+    }
 
     public void setConnectString(String connect) 
 		throws IllegalArgumentException {

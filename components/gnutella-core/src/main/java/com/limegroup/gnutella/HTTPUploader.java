@@ -35,6 +35,12 @@ public class HTTPUploader implements Runnable {
      *  try the push again.  This should be larger than the 15+4*30=135 sec
      *  window in which Gnotella resends pushes by default */
     private static final int PUSH_INVALIDATE_TIME=60*5;  //5 minutes
+    
+    /** The number of uploads in progress, i.e., already connected and
+     *  transferring.  This is used to calculate the bandwidth available to
+     *  throttled uploads.  LOCKING: obtain uploadsCountLock first. */
+    private static volatile int uploadCount=0;
+    private static Object uploadCountLock=new Object();
 
 
     //////////// Initialized in Constructors ///////////
@@ -397,7 +403,12 @@ public class HTTPUploader implements Runnable {
                 _state = CONNECTED;
             }
             //2. Actually do the transfer.
-            doUpload(); //sends headers via writeHeader
+            try {
+                synchronized(uploadCountLock) { uploadCount++; }
+                doUpload(); //sends headers via writeHeader
+            } finally {
+                synchronized(uploadCountLock) { uploadCount--; }
+            }
             _state = COMPLETE;
         } catch (IOException e) {
             _state = ERROR;
@@ -411,41 +422,88 @@ public class HTTPUploader implements Runnable {
         writeHeader();
         int c = -1;
         int available = 0;
-
         byte[] buf = new byte[1024];
 
-        //  int skip = 0;
-    //      if (_uploadBegin != 0)
-    //          skip = _uploadBegin -1;
-
-        //  System.out.println("skipping: " + _uploadBegin);
-
         long a = _fis.skip(_uploadBegin);
-
-        //  System.out.println("skipped: " + a);
-
         _amountRead+=a;
 
-        while (true) {
-            try {
+        SettingsManager manager=SettingsManager.instance();
+        int speed=manager.getUploadSpeed();
+        if (speed==100) {
+            //Special case: upload as fast as possible
+            while (true) {
+                try {
+                    c = _fis.read(buf);
+                }
+                catch (IOException e) {
+                    throw e;
+                }
+                if (c == -1)
+                    break;
+                try {
+                    _ostream.write(buf, 0, c);
+                } catch (IOException e) {
+                    throw e;
+                }
+                _amountRead += c;
+            }
+        } else {
+            //Normal case: throttle uploads. Similar to above but we
+            //sleep after sending data.
+            final int cycleTime=1000;
+        outerLoop:
+            while (true) {           
+                //1. Calculate max upload bandwidth for this connection.  The
+                //user has specified a theoretical link bandwidth and the
+                //percentage of this bandwidth to use for uploads. We divide
+                //this bandwidth equally among all the uploads in progress.
+                //TODO: if one connection isn't using all the bandwidth, some
+                //coul get more.
+                int theoreticalBandwidth=manager.getConnectionSpeed();
+                int maxBandwidth=(int)(theoreticalBandwidth*((float)speed/100.)
+                                             /(float)uploadCount);    
 
-            //  if ((_uploadEnd != 0) &&
-    //              (_uploadEnd == _amountRead ))
-    //              break;
-
-                c = _fis.read(buf);
+                //2. Send burstSize bytes of data as fast as possible, recording
+                //the time to send this.  How big should burstSize be?  We want
+                //the total time to complete one send/sleep iteration to be
+                //about one second. (Any less is inefficient.  Any more might
+                //cause the user to see erratic transfer speeds.)  So we send
+                //1000*maxBandwidth bytes.
+                int burstSize=maxBandwidth*cycleTime;
+                int burstSent=0;
+                Date start=new Date();
+                while (burstSent<burstSize) {
+                    try {
+                        c = _fis.read(buf);
+                    }
+                    catch (IOException e) {
+                        throw e;
+                    }
+                    if (c == -1)
+                        break outerLoop;  //get out of BOTH loops
+                    try {
+                        _ostream.write(buf, 0, c);
+                    } catch (IOException e) {
+                        throw e;
+                    }
+                    _amountRead += c;
+                    burstSent += c;
+                }
+                Date stop=new Date();
+                
+                //3.  Pause as needed so as not to exceed maxBandwidth.
+                int elapsed=(int)(stop.getTime()-start.getTime());
+                int sleepTime=cycleTime-elapsed;
+                if (sleepTime>0) {
+                    try {
+                        Thread.currentThread().sleep(sleepTime);
+                    } catch (InterruptedException e) { }
+                }
+//                  System.out.println("  sent "+burstSent+" of "+burstSize
+//                                     +" bytes in "+elapsed+" msecs at "
+//                                     +measuredBandwidth+" kb/sec, paused for "
+//                                     +sleepTime+" msecs");
             }
-            catch (IOException e) {
-                throw e;
-            }
-            if (c == -1)
-                break;
-            try {
-                _ostream.write(buf, 0, c);
-            } catch (IOException e) {
-                throw e;
-            }
-            _amountRead += c;
         }
 
         try {

@@ -29,6 +29,7 @@ public interface SettingsInterface
     public int        getKeepAlive();
     public int        getPort();
     public int        getConnectionSpeed();
+    public int        getUploadSpeed();
     public byte       getSearchLimit();
     public boolean    getStats();
     public String     getClientID();
@@ -102,6 +103,10 @@ public interface SettingsInterface
     /** set the network connection speed */
     public void setConnectionSpeed(int speed)
 	throws IllegalArgumentException;
+
+    /** sets the percentage of bandwidth to use for uploads. */
+    public void setUploadSpeed(int speed)
+    throws IllegalArgumentException;
 
     /** set the maximum number of searches */
     public void setSearchLimit(byte limit)
@@ -208,6 +213,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED          = 56;
+    public static final int     DEFAULT_UPLOAD_SPEED   = 100;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client/gu id */
@@ -262,6 +268,7 @@ public interface SettingsInterface
     public static final String KEEP_ALIVE     = "KEEP_ALIVE";
     public static final String PORT           = "PORT";
     public static final String SPEED          = "CONNECTION_SPEED";
+    public static final String UPLOAD_SPEED   = "UPLOAD_SPEED";
     public static final String SEARCH_LIMIT   = "SEARCH_LIMIT";
     public static final String CLIENT_ID      = "CLIENT_ID";
     public static final String STATS          = "STATS";
