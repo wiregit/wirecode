@@ -805,7 +805,7 @@ public class TestUploader extends AssertComparisons {
                                   TestFile.tree(),
                                   out);
         }
-        if(interestedInFalts)
+        if(interestedInFalts) {
             if (!isFirewalled) 
                 HTTPUtils.writeFeatures(out);
             else {
@@ -823,6 +823,7 @@ public class TestUploader extends AssertComparisons {
                     ErrorService.error(bad);
                 }
             }
+        }
         
 
         if (isFirewalled && _proxiesString!=null) {

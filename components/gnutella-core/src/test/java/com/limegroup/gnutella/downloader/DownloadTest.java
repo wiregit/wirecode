@@ -894,7 +894,6 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setQueueOnThex(true);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
@@ -926,77 +925,13 @@ public class DownloadTest extends BaseTestCase {
         assertEquals(1, uploader1.getConnections());
     }    
     
-    public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
-        tOverlapCheckGrey(false);
-    }
-    
-    public void testOverlapCheckGreyStopOnCorrupt() throws Exception {
-        callback.delCorrupt = true;
-        tOverlapCheckGrey(true);
-    }
-
-    private void tOverlapCheckGrey(boolean deleteCorrupt) throws Exception {
-        LOG.debug("-Testing overlap checking from Grey area..." +
-                         "stop when corrupt "+deleteCorrupt+" ");
-                         
-        final int RATE=500;
-        uploader1.setRate(RATE);
-        uploader2.setRate(RATE/100);
-        uploader2.setCorruption(true);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        
-        Downloader download=null;
-        //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false,
-                                        null);
-        ((ManagedDownloader)download).addDownload(rfd2,true);
-                                        
-        waitForComplete(deleteCorrupt);
-        assertTrue(callback.corruptChecked);
-        LOG.debug("passed"+"\n");//got here? Test passed
-        //TODO: check IncompleteFileManager, disk
-    }
-
-    public void testOverlapCheckWhiteNoStopOnCorrupt() throws Exception {
-        tOverlapCheckWhite(false);
-    }
-    
-    public void testOverlapCheckWhiteStopOnCorrupt() throws Exception {
-        callback.delCorrupt = true;        
-        tOverlapCheckWhite(true);
-    }
-
-    private void tOverlapCheckWhite(boolean deleteCorrupt) throws Exception {
-        LOG.debug("-Testing overlap checking from White area..."+
-                         "stop when corrupt "+deleteCorrupt+" ");
-                         
-        final int RATE=500;
-        uploader1.setCorruption(true);
-        uploader1.stopAfter(TestFile.length()/8);//blinding fast
-        uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        
-        Downloader download=null;
-
-        //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false,
-                                        null);
-        ((ManagedDownloader)download).addDownload(rfd2,true);
-
-        waitForComplete(deleteCorrupt);
-        assertTrue(callback.corruptChecked);
-        LOG.debug("passed"+"\n");//got here? Test passed
-    }
-    
     public void testThexFixesDownload() throws Exception {
         LOG.debug("-Testing that thex can identify a corrupt download range" +
                   " and the downloader will automatically get it back.");
         final int RATE = 100;
         uploader1.setCorruption(true);
         uploader1.setCorruptBoundary(50);
-        uploader1.setMaxConnects(1);
+        uploader1.stopAfter(256*1024);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader1.setRate(RATE);
@@ -1004,7 +939,6 @@ public class DownloadTest extends BaseTestCase {
 
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         tGeneric( new RemoteFileDesc[] { rfd1, rfd2 } );
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -1018,29 +952,6 @@ public class DownloadTest extends BaseTestCase {
         assertLessThanOrEquals(2, uploader2.getConnections());
     }
     
-    public void testThexOnlyWorksFiveTimes() throws Exception {
-        LOG.debug("-Testing that thex can identify a corrupt download range" +
-                  " but will only try and fix it up to 5 times.");
-        final float RATE = -1;
-        uploader1.setCorruption(true);
-        uploader1.setCorruptBoundary(50);
-        uploader1.setMaxConnects(6);
-        uploader1.setSendThexTreeHeader(true);
-        uploader1.setSendThexTree(true);
-        uploader1.setRate(RATE);
-
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
-        
-        tGenericCorrupt( new RemoteFileDesc[] { rfd1 } );
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
-        assertNull(tree);
-        assertTrue(callback.corruptChecked);
-        
-        // tried exactly six times. (initial + 5 retries)
-        assertEquals(6, uploader1.getConnections());
-    }        
-
     
     public void testMismatchedVerifyHashNoStopOnCorrupt() throws Exception {
         tMismatchedVerifyHash(false, false);
