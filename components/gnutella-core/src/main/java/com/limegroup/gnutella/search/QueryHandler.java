@@ -144,11 +144,16 @@ public final class QueryHandler {
     private final QueryRequest TTL_3_QUERY;
 
     /**
+     * Constant TTL 4 query for this dynamic query;
+     */
+    private final QueryRequest TTL_4_QUERY;
+
+    /**
      * Array of connections to query for the "probe" query.  The probe
      * determines more accurately how widely distributed the desired
      * content is.
      */
-    private final List[] PROBE_LISTS;
+    private final LinkedList[] PROBE_LISTS;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -178,6 +183,7 @@ public final class QueryHandler {
         TTL_1_QUERY = createQuery(QUERY, (byte)1);
         TTL_2_QUERY = createQuery(QUERY, (byte)2);
         TTL_3_QUERY = createQuery(QUERY, (byte)3);
+        TTL_4_QUERY = createQuery(QUERY, (byte)4);
         PROBE_LISTS = 
             createProbeLists(_connectionManager.getInitializedConnections2(),
                              TTL_1_QUERY);
@@ -295,6 +301,30 @@ public final class QueryHandler {
             return;
         }
 
+        
+        // should we keep working on the probe??
+        if(!PROBE_LISTS[0].isEmpty() || !PROBE_LISTS[1].isEmpty()) {
+            LinkedList ttl1List = PROBE_LISTS[0];
+            LinkedList ttl2List = PROBE_LISTS[1];
+            if(!ttl1List.isEmpty()) {
+                // send a TTL=1 probe query
+                ManagedConnection mc = 
+                    (ManagedConnection)ttl1List.removeFirst();
+                _theoreticalHostsQueried += 
+                    sendQueryToHost(TTL_1_QUERY, mc, this);
+            } else {
+                // send a TTL=2 probe query
+                ManagedConnection mc = 
+                    (ManagedConnection)ttl2List.removeFirst();
+                _theoreticalHostsQueried += 
+                    sendQueryToHost(TTL_2_QUERY, mc, this);
+            }
+        } else {
+            // otherwise, just send a normal query
+            _theoreticalHostsQueried += 
+                sendQuery(this, _connectionManager.getInitializedConnections2());             
+        }
+        /*
         if(!_probeCompleted) {
             _theoreticalHostsQueried += 
                 sendProbeQuery(this, 
@@ -312,6 +342,7 @@ public final class QueryHandler {
         _theoreticalHostsQueried += 
             sendQuery(this, _connectionManager.getInitializedConnections2()); 
         _nextQueryTime = System.currentTimeMillis() + 2000;
+        */
     }
 
     /**
@@ -370,12 +401,15 @@ public final class QueryHandler {
                                 mc.getNumIntraUltrapeerConnections(),
                                 mc.headers().getMaxTTL());
 
-			QueryRequest query = createQuery(handler.QUERY, ttl);
-
+			QueryRequest query = null;//createQuery(handler.QUERY, ttl);
+            if(ttl == 1) query = handler.TTL_1_QUERY;
+            if(ttl == 2) query = handler.TTL_2_QUERY;
+            if(ttl == 3) query = handler.TTL_3_QUERY;
+            else query = handler.TTL_4_QUERY;            
  
 			// send out the query on the network, returning the number of new
             // hosts theoretically reached
-            return sendQueryToHost(query, mc, handler, ttl);
+            return sendQueryToHost(query, mc, handler);
 		}
 
         // if we get here, the query didn't go out, and no new hosts were 
@@ -389,7 +423,7 @@ public final class QueryHandler {
      * This list will vary in size depending on how popular the content appears
      * to be.
      */
-    private static List[] createProbeLists(List connections, QueryRequest query) {
+    private static LinkedList[] createProbeLists(List connections, QueryRequest query) {
         Iterator iter = connections.iterator();
         
         LinkedList missConnections = new LinkedList();
@@ -413,9 +447,9 @@ public final class QueryHandler {
         }
 
         // final list of connections to query
-        List[] returnLists = new List[2];
-        List ttl1List = new LinkedList();
-        List ttl2List = new LinkedList();
+        LinkedList[] returnLists = new LinkedList[2];
+        LinkedList ttl1List = new LinkedList();
+        LinkedList ttl2List = new LinkedList();
         returnLists[0] = ttl1List;
         returnLists[1] = ttl2List;        
 
@@ -530,9 +564,9 @@ public final class QueryHandler {
      * @param hitConnections the <tt>List</tt> of connections with hits
      * @param returnLists the array of TTL=1 and TTL=2 connections to query
      */
-    private static List[] 
+    private static LinkedList[] 
         createAggressiveProbe(List oldConnections, List missConnections,
-                              List hitConnections, List[] returnLists) {
+                              List hitConnections, LinkedList[] returnLists) {
         
         // add as many connections as possible from first the old connections
         // list, then the connections that did not have hits
@@ -553,6 +587,7 @@ public final class QueryHandler {
      * @return the next time to send out the query -- another query should
      *  not be sent before this
 	 */
+    /*
 	private static int sendProbeQuery(QueryHandler handler, List list) {
         // send a TTL=1 query to hosts that have matches in their
         // QRP tables, running one at a time with pauses.
@@ -586,7 +621,7 @@ public final class QueryHandler {
             // until we know it has a QRP table
             qrConnections++;
             if(qi.lastReceived.contains(query)) {
-                sendQueryToHost(query, mc, handler, (byte)2);
+                sendQueryToHost(query, mc, handler);
                 qrConnectionsUsed++;
             }
         }
@@ -607,7 +642,7 @@ public final class QueryHandler {
                 continue;
             }
 
-            newHosts += sendQueryToHost(query, mc, handler, (byte)2);
+            newHosts += sendQueryToHost(query, mc, handler);
             hostsQueried++;
             i++;
 		}
@@ -616,6 +651,7 @@ public final class QueryHandler {
         }
         return newHosts;
 	}
+    */
 
     /**
      * Sends a query to the specified host.
@@ -623,19 +659,24 @@ public final class QueryHandler {
      * @param query the <tt>QueryRequest</tt> to send
      * @param mc the <tt>ManagedConnection</tt> to send the query to
      * @param handler the <tt>QueryHandler</tt> 
-     * @param ttl the time to live for the query
      * @return the number of new hosts theoretically hit by this query
      */
-    private static int sendQueryToHost(QueryRequest query, ManagedConnection mc, 
-                                       QueryHandler handler, byte ttl) {
+    private static int sendQueryToHost(QueryRequest query, 
+                                       ManagedConnection mc, 
+                                       QueryHandler handler) {
         RouterService.getMessageRouter().sendQueryRequest(query, mc, 
                                                           handler.REPLY_HANDLER);
         
+        byte ttl = query.getTTL();
+
         // add the reply handler to the list of queried hosts if it's not
         // a TTL=1 query or the connection does not support probe queries
         if(ttl != 1 || !mc.supportsProbeQueries()) {
             handler.QUERIED_HANDLERS.add(mc);
         }
+        
+        handler._nextQueryTime = System.currentTimeMillis() + 
+            (ttl * 1000);
 
         return calculateNewHosts(mc, ttl);
     }
