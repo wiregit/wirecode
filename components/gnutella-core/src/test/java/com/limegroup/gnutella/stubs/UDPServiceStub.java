@@ -237,6 +237,13 @@ public final class UDPServiceStub extends UDPService {
 				return 1;
 			return 0;
 		}
+
+        public String toString() {
+            if (_dp != null)
+                return _dp.toString();
+            else
+                return "null";
+        }
     }	
 
 

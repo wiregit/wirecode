@@ -2,6 +2,7 @@ package com.limegroup.gnutella.udpconnect;
 
 import junit.framework.Test;
 import java.io.*;
+import java.net.*;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.UDPServiceStub;
@@ -13,11 +14,16 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Put full UDPConnection system through various tests.
  */
 public final class UDPConnectionTest extends BaseTestCase {
+
+    private static RouterService rs;
+    private static Acceptor      ac;
 
 	/*
 	 * Constructs the test.
@@ -37,16 +43,18 @@ public final class UDPConnectionTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-
     public static void globalSetUp() throws Exception {
         // Setup the test to use the UDPServiceStub
         UDPConnectionProcessor.setUDPServiceForTesting(
             UDPServiceStub.instance());
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        Acceptor      ac = rs.getAcceptor();
-        ac.start();
+        rs = new RouterService(new ActivityCallbackStub());
+        ac = rs.getAcceptor();
+        ac.setAddress(InetAddress.getByName("127.0.0.1"));
+        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
     }
-
 
     public static void globaltearDown() throws Exception {
         // Cleanup the UDPServiceStub usage
@@ -54,12 +62,17 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
+        ac.setAddress(InetAddress.getByName("127.0.0.1"));
+        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+
         // Add some simulated connections to the UDPServiceStub
         UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 0);
         UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 0);
     }
     
-
     public void tearDown() throws Exception {
         // Clear out the receiver parameters for the UDPServiceStub
         UDPServiceStub.stubInstance().clearReceivers();
