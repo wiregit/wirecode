@@ -11,6 +11,10 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 
+/** 
+ * Provides the readLine method of a BufferedReader with no 
+ * no automatic buffering.
+ */
 public class ByteReader {
 
     private int BUFSIZE = 80;
@@ -61,7 +65,17 @@ public class ByteReader {
 	return c;
     }
 
-    public String readLine() {
+    /** 
+     * Reads a new line WITHOUT end of line characters.  A line is 
+     * defined as a minimal sequence of character ending with "\n", with
+     * all "\r"'s thrown away.  Hence calling readLine on a stream
+     * containing "abc\r\n" or "a\rbc\n" will return "abc".
+     *
+     * Throws IOException if there is an IO error.  Returns null if
+     * there are no more lines to read, i.e., EOF has been reached.
+     * Note that calling readLine on "ab<EOF>" returns null.
+     */
+    public String readLine() throws IOException {
 
 	if (_istream == null)
 	    return "";
@@ -70,8 +84,7 @@ public class ByteReader {
 
 	byte[] buf = new byte[BUFSIZE];
 
-	int c = -1;
-	int b = -1;
+	int c = -1; //the character just read
 	int i = 0;	
 	int numBytes = 0;
 	//	boolean endOfLine = false;
@@ -83,32 +96,23 @@ public class ByteReader {
   	byte[] nline = nl.getBytes();
 
 	while (true) {
-	    try {
-		c = _istream.read();
-	    }
-	    catch (IOException e) {
-
-	    }
+	    c = _istream.read();
 
 	    if (c == -1) 
-		break;
+		return null;
 	    
-	    if ( b == creturn[0] ) {
-		// do nothing
+	    if ( c == creturn[0] ) {
+		continue;
 	    }
 		
-	    else if ( c == nline[0] ) {
-		// break if either a "/r/n'"
-		// or a "/n/n" is found
-		if( ( b == creturn[0] ) ||
-		    ( b == nline[0] ) )
-		    break;
+	    else if ( c == nline[0] ) {	
+		break;
 	    } 
 	    		
 	    else {
 		buf[i++] = (byte)c;
 		numBytes++;
-		b = c;
+
 	    }
 
 	    if (numBytes == BUFSIZE) {
@@ -120,9 +124,32 @@ public class ByteReader {
 	}
 
 	finalString += new String(buf, 0, numBytes);
-	
 	return finalString;
 
     }
 
+//      public static void main(String args[]) {
+//  	try {
+//  	    InputStream in;
+//  	    ByteReader bin;
+//  	    String s;	    
+
+//  	    in=new StringBufferInputStream("abc\r\na\rbc\n");
+//  	    bin=new ByteReader(in);
+   
+//  	    s=bin.readLine(); Assert.that(s.equals("abc"), s);
+//  	    s=bin.readLine(); Assert.that(s.equals("abc"), s);
+//  	    s=bin.readLine(); Assert.that(s==null, s);
+//  	    s=bin.readLine(); Assert.that(s==null, s);
+	    
+//  	    in=new StringBufferInputStream("a\ne");
+//  	    bin=new ByteReader(in);
+	    
+//  	    s=bin.readLine(); Assert.that(s.equals("a"), s);
+//  	    s=bin.readLine(); Assert.that(s==null, s);	
+//  	} catch (IOException e) {
+//  	    e.printStackTrace();
+//  	    Assert.that(false);
+//  	}
+//      }
 }
