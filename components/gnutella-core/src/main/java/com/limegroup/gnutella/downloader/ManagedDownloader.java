@@ -312,9 +312,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * if only a UDP push has been sent (as is in the case of altlocs) */
     private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
+    private static final int MIN_SPLIT_SIZE=100000;      //100 KB
+    /** The default chunk size - if we don't have a tree we request chunks this big */
+    private static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
     /** The interval size for downloaders with persistenace support  */
-    private static final int CHUNK_SIZE=100000;//100 KB-chosen after studying
+    private transient volatile int _chunkSize = DEFAULT_CHUNK_SIZE;
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
@@ -1957,7 +1959,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // initialize the HashTree
 		if( downloadSHA1 != null ) {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
-            hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);  
+            hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
+            
+            // if we have a valid tree, update our chunk size
+            if (hashTree != null && hashTree.isDepthGoodEnough()) 
+                _chunkSize = hashTree.getNodeSize();
         }
         
         URN fileHash;
@@ -2518,6 +2524,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                         HashTree temp = status.getHashTree();
                         if (temp.isBetterTree(hashTree)) {
                             hashTree = temp;
+                            
+                            // update our chunk size with this new, better tree
+                            _chunkSize = hashTree.getNodeSize();
+                            
                             // persist the hashTree in the TigerTreeCache
                             // because we won't save it in ManagedDownloader
                             TigerTreeCache.instance().addHashTree(
@@ -3149,7 +3159,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !dloader.getRemoteFileDesc().isPartialSource() ) {
             if(http11)
-                interval = commonOutFile.leaseWhite(CHUNK_SIZE);
+                interval = commonOutFile.leaseWhite(_chunkSize);
             else
                 interval = commonOutFile.leaseWhite();
         }
@@ -3161,7 +3171,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     dloader.getRemoteFileDesc().getAvailableRanges();
                 if(http11)
                     interval =
-                        commonOutFile.leaseWhite(availableRanges, CHUNK_SIZE);
+                        commonOutFile.leaseWhite(availableRanges, _chunkSize);
                 else
                     interval = commonOutFile.leaseWhite(availableRanges);
             } catch(NoSuchElementException nsee) {
@@ -3270,7 +3280,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         int left = biggest.getAmountToRead()-amountRead;
         //check if we need to steal the last chunk from a slow downloader.
         //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
-        if ((http11 && left<CHUNK_SIZE) || (!http11 && left < MIN_SPLIT_SIZE)){ 
+        if ((http11 && left<_chunkSize) || (!http11 && left < MIN_SPLIT_SIZE)){ 
             float bandwidthVictim = -1;
             float bandwidthStealer = -1;
             
@@ -3343,7 +3353,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             int start;
             if(http11) { //steal CHUNK_SIZE bytes from the end
                 start = biggest.getInitialReadingPoint() +
-                        biggest.getAmountToRead() - CHUNK_SIZE + 1;
+                        biggest.getAmountToRead() - _chunkSize + 1;
             } else {
                 start= biggest.getInitialReadingPoint() + amountRead + left/2;
             }

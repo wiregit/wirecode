@@ -75,12 +75,21 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * The tree writer.
      */
     private transient HashTreeHandler _treeWriter;
+    
+    /**
+     * The size of each node
+     */
+    private transient int _nodeSize;
 
     /*
      * Constructs a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
     private HashTree(List allNodes, String sha1, long fileSize) {
+        this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
+    }
+    
+    private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
         NODES = (List)allNodes.get(allNodes.size()-1);
         FILE_SIZE = fileSize;
@@ -88,7 +97,10 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         Assert.that(log2Ceil(NODES.size()) == DEPTH);
         HashTreeNodeManager.instance().register(this, allNodes);
+        _nodeSize = nodeSize;
     }
+    
+    
 
     /**
      * Creates a new HashTree for the given FileDesc.
@@ -109,15 +121,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         }                
     }
     
-    /**
-     * Creates a new HashTree for the given file size, input stream and SHA1.
-     *
-     * Exists as a hook for tests, to create a HashTree from a File
-     * when no FileDesc exists.
-     */
-    private static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN sha1) throws IOException {
-        int depth = calculateDepth(fileSize);
+    public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
         int maxNodes = 1 << depth;        
@@ -147,12 +151,25 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-
+ 
+        return nodeSize;
+    }
+    
+    /**
+     * Creates a new HashTree for the given file size, input stream and SHA1.
+     *
+     * Exists as a hook for tests, to create a HashTree from a File
+     * when no FileDesc exists.
+     */
+    private static HashTree createHashTree(long fileSize, InputStream is,
+                                           URN sha1) throws IOException {
         // do the actual hashing
+        int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
         List nodes = createTTNodes(nodeSize, fileSize, is);
+        
         // calculate the intermediary nodes to get the root hash & others.
         List allNodes = createAllParentNodes(nodes);
-        return new HashTree(allNodes, sha1.toString(), fileSize);
+        return new HashTree(allNodes, sha1.toString(), fileSize, nodeSize);
     }
 
     /**
@@ -248,7 +265,8 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @return true if the DEPTH is ideal enough according to our own standards
      */
     public boolean isDepthGoodEnough() {
-        return DEPTH >= calculateDepth(FILE_SIZE);
+        // for some ranges newDepth actually returns smaller values than oldDepth
+        return DEPTH >= calculateDepth(FILE_SIZE) - 1;
     }
     
     /**
@@ -311,6 +329,14 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         return NODES;
     }
     
+    public synchronized int getNodeSize() {
+        if (_nodeSize == 0) {
+            // we were deserialized
+            _nodeSize = calculateNodeSize(FILE_SIZE,DEPTH);
+        }
+        return _nodeSize;
+    }
+    
     /**
      * @return The number of nodes in the full tree.
      */
@@ -327,6 +353,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         }
         return count;
     }
+    
     
     /**
      * @return all nodes.
@@ -363,28 +390,32 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @param size
      *            the fileSize
      * @return int the ideal generation depth for the fileSize
-     */
+     */    
     public static int calculateDepth(long size) {
-        if (size < 256 * KB)
+        if (size < 256 * KB) // 256KB chunk, 0b tree
             return 0;
-        else if (size < 512 * KB)
+        else if (size < 512 * KB) // 256KB chunk, 24B tree
             return 1;
-        else if (size < MB)
+        else if (size < MB)  // 256KB chunk, 72B tree
             return 2;
-        else if (size < 2 * MB)
+        else if (size < 2 * MB) // 256KB chunk, 168B tree
             return 3;
-        else if (size < 5 * MB)
+        else if (size < 4 * MB) // 256KB chunk, 360B tree
             return 4;
-        else if (size < 10 * MB)
+        else if (size < 8 * MB) // 256KB chunk, 744B tree
             return 5;
-        else if (size < 20 * MB)
+        else if (size < 16 * MB) // 256KB chunk, 1512B tree
             return 6;
-        else if (size < 50 * MB)
+        else if (size < 32 * MB) // 256KB chunk, 3048B tree
             return 7;
-        else if (size < 100 * MB)
+        else if (size < 64 * MB) // 256KB chunk, 6120B tree
             return 8;
-        else
+        else if (size < 256 * MB) // 512KB chunk, 12264B tree
             return 9;
+        else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
+            return 10;
+        else
+            return 11; // 2MB chunks, 49128B tree
     }
     
     /**
