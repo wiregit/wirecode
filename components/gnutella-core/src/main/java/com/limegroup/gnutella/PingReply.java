@@ -14,7 +14,7 @@ public class PingReply extends Message {
     /** 
      * Create a new PingReply from scratch 
      *
-     * @requires ip.length==4 and ip is in <i>big-endian</i> byte order,
+     * @requires ip.length==4 and ip is in <i>little-endian</i> byte order,
      *  0&<; port &<;2^16 (i.e., can fit in 2 unsigned bytes),
      *  0&<; files and kbytes &<;2^32 (i.e., can fit in 4 unsigned bytes)
      */
@@ -25,10 +25,10 @@ public class PingReply extends Message {
 	//It's ok if casting port, files, or kbytes turns negative.
 	ByteOrder.short2leb((short)port, payload, 0);
 	//Payload stores IP in LITTLE-ENDIAN
-	payload[2]=ip[3];
-	payload[3]=ip[2];
-	payload[4]=ip[1];
-	payload[5]=ip[0];
+	payload[2]=ip[0];
+	payload[3]=ip[1];
+	payload[4]=ip[2];
+	payload[5]=ip[3];
 	ByteOrder.int2leb((int)files, payload, 6);
 	ByteOrder.int2leb((int)kbytes, payload, 9);
     }
