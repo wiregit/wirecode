@@ -417,6 +417,13 @@ public class HostCatcher {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
+            //If we've run out of good hosts, asynchronously contact a GWebCache
+            //server to get more addresses.  Note, however, that this will not
+            //do anything if we're already in the process of connecting.  See
+            //also expire().
+            if (getNumUltrapeerHosts()==0) 
+                gWebCache.fetchEndpointsAsync();
+
             try { 
                 return getAnEndpointInternal();
             } catch (NoSuchElementException e) { }
@@ -570,9 +577,14 @@ public class HostCatcher {
      * out bootstrap pongs if necessary.
      */
     public synchronized void expire() {
-        //Connect to a GWebCache
-        gWebCache.fetchEndpointsAsync();
+        //Fetch more GWebCache urls once per session.
+        //(Well, once per connect really--good enough.)
         gWebCache.fetchBootstrapServersAsync();
+        //It's not strictly necessary to fetch endpoints here, since
+        //getAnEndpoint() does that when there are no more good endpoints.  But
+        //this can help get fresh values if LimeWire has been disconnected for a
+        //while.
+        gWebCache.fetchEndpointsAsync();
     }
 
     /**

@@ -47,6 +47,9 @@ public class BootstrapServerManager {
     /** Source of randomness for picking servers. 
      *  TODO: this is thread-safe, right? */
     private Random _rand=new Random();
+    /** True if a thread is currently executing a hostfile request. 
+     *  LOCKING: this (don't want multiple fetches) */
+    private boolean _hostFetchInProgress=false;
 
 
     /////////////////////////// Public Interface //////////////////////
@@ -82,7 +85,7 @@ public class BootstrapServerManager {
      * Stops after getting "enough" endpoints or exhausting all caches.  Uses
      * the "urlfile=1" message.
      */
-    public void fetchBootstrapServersAsync() {
+    public synchronized void fetchBootstrapServersAsync() {
         addDefaultsIfNeeded();
         requestAsync(new UrlfileRequest(), "GWebCache urlfile");
     }
@@ -90,11 +93,15 @@ public class BootstrapServerManager {
     /** 
      * Asynchronously fetches host addresses from bootstrap servers and stores
      * them in the HostCatcher.  Stops after getting "enough" endpoints or
-     * exhausting all caches.  Uses the "hostfile=1" message.
+     * exhausting all caches.  Does nothing if another endpoint request is in
+     * progress.  Uses the "hostfile=1" message.
      */
-    public void fetchEndpointsAsync() {
+    public synchronized void fetchEndpointsAsync() {
         addDefaultsIfNeeded();
-        requestAsync(new HostfileRequest(), "GWebCache hostfile");
+        if (! _hostFetchInProgress) {
+            _hostFetchInProgress=true;  //unset in HostfileRequest.done()
+            requestAsync(new HostfileRequest(), "GWebCache hostfile");
+        }
     }
 
     /** 
@@ -104,7 +111,7 @@ public class BootstrapServerManager {
      * @param myIP my listening address and port, or null if I cannot accept 
      *  incoming connections or am not a supernode.
      */
-    public void sendUpdatesAsync(Endpoint myIP) {
+    public synchronized void sendUpdatesAsync(Endpoint myIP) {
         addDefaultsIfNeeded();
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
@@ -143,9 +150,12 @@ public class BootstrapServerManager {
         }
         /** Called when we got a line of data.  Implementation may wish
          *  to call handleError if the data is in a bad format. */
-        public abstract void handleResponseData(BootstrapServer server, String line);
+        public abstract void handleResponseData(BootstrapServer server, 
+                                                String line);
         /** Should we go on to another host? */
         public abstract boolean needsMoreData();
+        /** Called when this is done.  Default: does nothing. */
+        public void done() { }
     }
     
     class HostfileRequest extends GWebCacheRequest {
@@ -155,9 +165,9 @@ public class BootstrapServerManager {
         }
         public void handleResponseData(BootstrapServer server, String line) {
             try {
-                //TODO: what priority to use when adding?  We don't know whether
-                //the host ia an ultrapeer or not, but we expect it to have a
-                //higher than usual average daily uptime.
+                //We don't know whether the host ia an ultrapeer or not, but we
+                //need to force a higher priority to prevent repeated fetching.
+                //(See HostCatcher.expire)
                 Endpoint host=new Endpoint(line);
                 _catcher.add(host, true);       
                 responses++;
@@ -168,6 +178,9 @@ public class BootstrapServerManager {
         }
         public boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
+        }
+        public void done() {
+            _hostFetchInProgress=false;
         }
     }
 
@@ -242,7 +255,7 @@ public class BootstrapServerManager {
 
 
 
-    /////////////////////////// Generic Request Functions ///////////////////////
+    ///////////////////////// Generic Request Functions //////////////////////
 
     /** @param threadName a name for the thread created, for debugging */
     private void requestAsync(final GWebCacheRequest request,
@@ -254,6 +267,8 @@ public class BootstrapServerManager {
                 } catch (Exception e) {
                     e.printStackTrace();  //TODO: this will never be seen
                     Assert.that(false, "Uncaught exception: "+e);         
+                } finally {
+                    request.done();
                 }
             }
         };
