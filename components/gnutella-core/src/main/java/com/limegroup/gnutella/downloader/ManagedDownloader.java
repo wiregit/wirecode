@@ -2067,7 +2067,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         int size = -1;
         int connectTo = -1;
         int dloadsCount = -1;
-        Assert.that(threads.size()==0);
+        Assert.that(threads.size()==0,
+                    "wrong threads size: " + threads.size());
 
         //While there is still an unfinished region of the file...
         while (true) {
