@@ -115,13 +115,11 @@ public class PushAltLoc extends AlternateLocation {
 		if (o==null || !(o instanceof PushAltLoc))
 			return false;
 		
-		if (!super.equals(o))
+		if (!super.equals(o)) {
 			return false;
-		
+		}
 		PushAltLoc other = (PushAltLoc)o;
-		
-		return _fileName.equals(other._fileName) &&
-			_pushAddress.equals(other._pushAddress);
+		return _pushAddress.equals(other._pushAddress);
 	}
 
 
