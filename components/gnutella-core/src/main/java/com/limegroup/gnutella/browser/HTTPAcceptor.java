@@ -156,8 +156,8 @@ public class HTTPAcceptor implements Runnable {
                     socketError = e2;
                 }
             }
-
-			if(error) // no luck setting up?
+            // no luck setting up and decent OS? show user error message
+			if(error && !CommonUtils.isMacClassic() ) 
                 MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
         }
 
