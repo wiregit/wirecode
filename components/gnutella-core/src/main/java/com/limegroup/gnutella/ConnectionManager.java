@@ -21,8 +21,16 @@ import java.util.*;
  * You should call the shutdown() method when you're done to ensure
  * that the gnutella.net file is written to disk.  */
 public class ConnectionManager implements Runnable {
-    /** The port to listen for incoming connections. */
-    private int port;
+    /** The socket that listens for incoming connections.  Initially
+     *  null until setIncomingPort is called.  Can be changed to
+     *  listen to new ports.
+     *
+     * LOCKING: obtain socketLock before modifying either.  Notify socketLock when done.
+     * INVARIANT: port==socket.getLocalPort() if socket!=null,  port==0 <==> socket==null 
+     */
+    private int port=0;
+    private volatile ServerSocket socket=null;
+    private Object socketLock=new Object();
 
     /** Routing information.  ME_CONNECTION is a hack described in Connection. */
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
@@ -31,9 +39,8 @@ public class ConnectionManager implements Runnable {
 
     /* List of all connections.  This is implemented with two data structures: a list
      * for fast iteration, and a set for quickly telling what we're connected to.
-     * This is <i>not</i> synchronized, so you must always hold this' monitor before 
-     * modifying it. 
      *
+     * LOCKING: obtain this' monitor before modifying connections or endpoints.
      * INVARIANT: "connections" contains no duplicates, and "endpoints" contains exactly
      * those endpoints that could be made from the elements of "connections".
      */
@@ -65,21 +72,69 @@ public class ConnectionManager implements Runnable {
     public ConnectionManager(int port) {
 	this.port=port;
     }
-
-	/**
-	* Returns the port at which the Connection Manager listens for incoming connections
-	* 	@return the listening port
-	*/
-	public int getListeningPort()
-	{
-		return port;
-	}
-
-    /** Creates a manager that listens on the default port (6346) for
-     *	incoming connections. */
+    
+    /** Creates a manager that listens on the default port. Equivalent to
+     *  ConnectionManager(SettingsManager.instance().getPort()) */
     public ConnectionManager() {
-	this(6346);
+	this(SettingsManager.instance().getPort());
     }  
+
+    /**
+     * Returns the port at which the Connection Manager listens for incoming connections
+     * 	@return the listening port
+     */
+    public int getListeningPort() {
+	return port;
+    }
+
+    /**
+     * @modifies this
+     * @effects sets the port on which the ConnectionManager is listening. 
+     *  If that fails, this is <i>not</i> modified and IOException is thrown.
+     *  If port==0, tells this to stop listening to incoming connections.
+     *  This is properly synchronized and can be called even while run() is
+     *  being called.
+     */
+    public void setListeningPort(int port) throws IOException {
+	synchronized (socketLock) {
+	    //Special case if port==0.  This ALWAYS works.
+	    if (port==0) {
+		//Close old socket (if non-null)
+		if (socket!=null) {
+		    try {
+			socket.close();
+		    } catch (IOException e) { }
+		}
+		socket=null;
+		this.port=0;
+		socketLock.notifyAll();
+		return;
+	    } 
+	    //Normal case.
+	    else {
+		//1. Try new port.
+		ServerSocket newSocket=null;
+		try {
+		    newSocket=new ServerSocket(port);
+		} catch (IOException e) {
+		    throw e;
+		} catch (IllegalArgumentException e) {
+		    throw new IOException();
+		}
+		//2. Close old socket (if non-null)
+		if (socket!=null) {
+		    try {
+			socket.close();
+		    } catch (IOException e) { }
+		}
+		//3. Replace with new sock.  Notify the accept thread.
+		socket=newSocket;
+		this.port=port;
+		socketLock.notifyAll();
+		return;
+	    }
+	}
+    }
     
     public void propertyManager(){
 	ClientId = SettingsManager.instance().getClientID();
@@ -169,16 +224,17 @@ public class ConnectionManager implements Runnable {
 	    fetcher.start();
 	    fetchers.add(fetcher);
 	}
-	//2. Create the server socket, bind it to a port, listen for incoming
-	//   connections, and accept them.
-	ServerSocket sock=null;
+	//2. Create the server socket, bind it to a port, and listen for
+	//   incoming connections.  If there are problems, we can continue
+	//   onward.
 	try {
-	    sock=new ServerSocket(port);
+	    setListeningPort(this.port);
 	} catch (IOException e) {
-	    error("Couldn't bind server socket to port");
-	    return;
+	    error("Can't listen for incoming connections on port "+port
+		  +"; please specify another port.");
 	}
-	// start the statistics thread
+
+	//3. Start the statistics thread
 	try{
 	    Stat s = new Stat(this);
 	    Thread stat = new Thread(s);
@@ -193,12 +249,27 @@ public class ConnectionManager implements Runnable {
 	    try {
 		//Accept an incoming connection, make it into a Connection
 		//object, handshake, and give it a thread to service it.
-		Socket client=sock.accept();
+		//If not bound to a port, wait until we are.  We have a timeout
+		//here so that setListeningPort will not block for more than
+		//a second.  We may want to disable setListeningPort in
+		//the router version of this class and get rid of the timeout here.
+		Socket client=null;
+		synchronized (socketLock) {
+		    if (socket!=null) {
+			socket.setSoTimeout(500); //0.5 second
+			try { 
+			    client=socket.accept(); 
+			} catch (InterruptedIOException e) {
+			    continue;
+			}
+		    } else {
+			try { socketLock.wait(); } catch (InterruptedException e) {}
+			continue;
+		    }
+		}
 		try {
 		    InputStream in=client.getInputStream();
 		    String word=readWord(in);
-
-		    //System.out.println("The Word: " + word);
 
 		    c = null;
 
@@ -231,22 +302,6 @@ public class ConnectionManager implements Runnable {
 			HTTPMgr mgr = new HTTPMgr(client);
 			
 		    }
-
-		  //    else if (word.equals("PUT")) {
-//  			//b) HTTP with PUT command
-//  			TransferConnection xfer=new TransferConnection(client,false);
-//  			Thread t=new Thread(xfer);
-//  			t.setDaemon(true);
-//  			t.start();
-//  		    } 
-//  		    else if (word.equals("GET")) {
-//  			//c) HTTP with GET command
-//  			TransferConnection xfer=new TransferConnection(client,true);
-//  			Thread t=new Thread(xfer);
-//  			t.setDaemon(true);
-//  			t.start();
-//  		    } 
-
 		    else {
 			throw new IOException();
 		    }
