@@ -22,6 +22,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.util.I18NConvert;
 
 
 /**
@@ -147,7 +148,7 @@ public class FileDesc implements AlternateLocationCollector {
 		// make a defensive copy
 		FILE = new File(file.getAbsolutePath());
         _index = index;
-        _name = FILE.getName();
+        _name = I18NConvert.instance().compose(FILE.getName());
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();

@@ -6,8 +6,6 @@ import com.limegroup.gnutella.ErrorService;
 
 /**
  * class that handles the removal of accents, etc.
- * Non 118 JVM's will use the icu4j package for 
- * conversion.
  */
 public class I18NConvert {
 
@@ -26,25 +24,9 @@ public class I18NConvert {
             //of abstract class AbstractI18NConverter
             _convertDelegator = new I18NConvertICU();
             _convertDelegator.getNorm("touch ICU code");
-        }
-        catch(IOException te) {
-            ErrorService.error(te);
-            convertTo118();
-        }
-        catch(ClassNotFoundException cnf) {
-            ErrorService.error(cnf);
-            convertTo118();
-        }
-    }
-
-    private void convertTo118() {
-        try {
-            _convertDelegator = new I18NConvert118();
-        }
-        catch(IOException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-        catch(ClassNotFoundException cnf) {
+        } catch(IOException te) {
+            throw new ExceptionInInitializerError(te);
+        } catch(ClassNotFoundException cnf) {
             throw new ExceptionInInitializerError(cnf);
         }
     }
@@ -58,6 +40,13 @@ public class I18NConvert {
     /** delegate to AbstractI18NConverter instance */
     public String getNorm(String s) {
         return _convertDelegator.getNorm(s);
+    }
+    
+    /**
+     * Simple composition.
+     */
+    public String compose(String s) {
+        return _convertDelegator.compose(s);
     }
 
 }
