@@ -120,13 +120,13 @@ public final class ConnectionStats {
     }  
     
     /**
-     * Adds the specified number of bytes to the number of compressed bytes 
+     * Sets the specified number of bytes to be the number of compressed bytes 
      * sent.
      * 
-     * @param bytes the number of compressed bytes to add
+     * @param bytes the number of compressed bytes sent
      */
-    public void addCompressedBytesSent(int bytes) {
-        _compressedBytesSent += bytes;    
+    public void setCompressedBytesSent(int bytes) {
+        _compressedBytesSent = bytes;    
     } 
     
     /**
