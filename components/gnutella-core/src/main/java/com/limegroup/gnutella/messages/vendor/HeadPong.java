@@ -293,9 +293,6 @@ public class HeadPong extends VendorMessage {
 			
 		}
 		
-		//TODO: add the firewalled altlocs first, since only a non-firewalled
-		//host would ask for them
-		
 		
 		//if we have any altlocs and enough room in the packet, add them.
 		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
@@ -406,15 +403,17 @@ public class HeadPong extends VendorMessage {
 	public Set getAllLocsRFD(RemoteFileDesc original){
 		Set ret = new HashSet();
 		
-		for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
-			Endpoint current = (Endpoint)iter.next();
-			ret.add(new RemoteFileDesc(original,current));
-		}
+		if (_altLocs!=null)
+			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
+				Endpoint current = (Endpoint)iter.next();
+				ret.add(new RemoteFileDesc(original,current));
+			}
 		
-		for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
-			PushEndpoint current = (PushEndpoint)iter.next();
-			ret.add(new RemoteFileDesc(original,current));
-		}
+		if (_pushLocs!=null)
+			for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
+				PushEndpoint current = (PushEndpoint)iter.next();
+				ret.add(new RemoteFileDesc(original,current));
+			}
 		
 		return ret;
 	}

@@ -36,13 +36,17 @@ public class HeadPing extends VendorMessage {
 	public static final int PLAIN = 0x0;
 	public static final int INTERVALS = 0x1;
 	public static final int ALT_LOCS = 0x2;
-	public static final int PUSH_ALTLOCS=0x4;
+	public static final int PUSH_ALTLOCS=0x8;
+	
+	//0x4 was used for an obsoleted flag FIREWALL_REDIRECT in 4.1.1
+	//It can be safely reused in the future if the payload 
+	// becomes greater than 48 bytes.
 	
 	
 	/**
 	 * the feature mask.
 	 */
-	public static final int FEATURE_MASK=0xF;
+	public static final int FEATURE_MASK=0xB;
 	
 	private final URN _urn;
 	
@@ -85,7 +89,6 @@ public class HeadPing extends VendorMessage {
 			_urn = urn;
 		}
 		
-		//parse the client guid if this is a push request
 		
 		
 	}
@@ -98,9 +101,8 @@ public class HeadPing extends VendorMessage {
 	public HeadPing(URN sha1, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
 		 		derivePayload(sha1, features));
-		features = features & FEATURE_MASK;
 		
-		_features = (byte)features;
+		_features = (byte)(features & FEATURE_MASK);
 		
 		_urn = sha1;
 	}
