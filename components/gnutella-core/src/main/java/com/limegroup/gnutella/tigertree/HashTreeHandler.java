@@ -335,14 +335,11 @@ class HashTreeHandler {
         private boolean parse() {
             // hack!
             // Shareaza sends invalid XML,
-            if (data.indexOf("system") > 0 && data.indexOf("system") < data.indexOf(SYSTEM_ID)) {
-                StringBuffer buf = new StringBuffer(data);
-                int offset = data.indexOf("system");
-                buf.replace(
-                    offset,
-                    offset + SYSTEM_STRING.length(),
-                    SYSTEM_STRING);
-                data = buf.toString();
+            int offset = data.indexOf("system");
+            if (offset > 0 && offset < data.indexOf(SYSTEM_ID)) {
+                data = data.substring(0, offset) + 
+                       SYSTEM_STRING +
+                       data.substring(offset + "system".length());
             }
             
             if (LOG.isDebugEnabled())
