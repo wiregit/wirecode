@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
@@ -1104,7 +1105,19 @@ public class ManagedConnection extends Connection
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
         }
-        else if (vm instanceof MessagesSupportedVendorMessage) {
+        else if (vm instanceof MessagesSupportedVendorMessage) {        
+            // If this is a ClientSupernodeConnection and the host supports
+            // leaf guidance (because we have to tell them when to stop)
+            // then see if there are any old queries that we can re-originate
+            // on this connection.
+            if(isClientSupernodeConnection() &&
+               (remoteHostSupportsLeafGuidance() >= 0)) {
+                SearchResultHandler srh =
+                    RouterService.getSearchResultHandler();
+                List queries = srh.getQueriesToReSend();
+                for(Iterator i = queries.iterator(); i.hasNext(); )
+                    send((Message)i.next());
+            }            
 
             // see if you need a PushProxy - the remoteHostSupportsPushProxy
             // test incorporates my leaf status in it.....
@@ -1115,8 +1128,7 @@ public class ManagedConnection extends Connection
                 try {
                     PushProxyRequest req = new PushProxyRequest(clientGUID);
                     send(req);
-                }
-                catch (BadPacketException never) {
+                } catch (BadPacketException never) {
                     ErrorService.error(never);
                 }
             }
@@ -1139,8 +1151,7 @@ public class ManagedConnection extends Connection
                                                         connectBackGUID);
                     send(udp);
                     _numUDPConnectBackRequests++;
-                }
-                catch (BadPacketException ignored) {
+                } catch (BadPacketException ignored) {
                     ErrorService.error(ignored);
                 }
             }
@@ -1152,8 +1163,7 @@ public class ManagedConnection extends Connection
                        new TCPConnectBackVendorMessage(RouterService.getPort());
                     send(tcp);
                     _numTCPConnectBackRequests++;
-                }
-                catch (BadPacketException ignored) {
+                } catch (BadPacketException ignored) {
                     ErrorService.error(ignored);
                 }
             }

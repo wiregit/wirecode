@@ -10,12 +10,24 @@ import com.limegroup.gnutella.xml.*;
 import java.io.IOException;
 import com.sun.java.util.collections.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Handles incoming search results from the network.  This class parses the 
  * results from <tt>QueryReply</tt> instances and performs the logic 
  * necessary to pass those results up to the UI.
  */
 public final class SearchResultHandler {
+    
+    private static final Log LOG =
+        LogFactory.getLog(SearchResultHandler.class);
+        
+    /**
+     * The maximum amount of time to allow a query's processing
+     * to pass before giving up on it as an 'old' query.
+     */
+    private static final int QUERY_EXPIRE_TIME = 30 * 1000; // 30 seconds.
 
     /** 
 	 * The maximum number of queries to buffer at any time. 
@@ -106,7 +118,8 @@ public final class SearchResultHandler {
      * @param qr The query that has been started.  We really just acces the guid.
      */ 
     public void addQuery(QueryRequest qr) {
-        GuidCount gc = new GuidCount(qr.getGUID());
+        LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
+        GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
     }
 
@@ -117,6 +130,7 @@ public final class SearchResultHandler {
      * @param guid the guid of the query that has been removed.
      */ 
     public void removeQuery(GUID guid) {
+        LOG.trace("entered SearchResultHandler.removeQuery(GUID)");
         GuidCount gc = removeQueryInternal(guid);
         if ((gc != null) && (!gc.isFinished())) {
             // shut off the query at the UPs - it wasn't finished so it hasn't
@@ -133,6 +147,35 @@ public final class SearchResultHandler {
             }
         }
     }
+
+    /**
+     * Returns a <tt>List</tt> of queries that require replanting into
+     * the network, based on the number of results they've had and/or
+     * whether or not they're new enough.
+     */
+    public List getQueriesToReSend() {
+        LOG.trace("entered SearchResultHandler.getQueriesToSend()");
+        List reSend = null;
+        synchronized (GUID_COUNTS) {
+            long now = System.currentTimeMillis();
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if( isQueryStillValid(currGC, now) ) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("adding " + currGC + 
+                                  " to list of queries to resend");
+                    if( reSend == null )
+                        reSend = new LinkedList();
+                    reSend.add(currGC.getQueryRequest());
+                }
+            }
+        }
+        if( reSend == null )
+            return DataUtils.EMPTY_LIST;
+        else
+            return reSend;
+    }        
 
 
     /**
@@ -151,6 +194,9 @@ public final class SearchResultHandler {
         else
             return -1;
     }
+    
+    /**
+     * Determines whether or not the specified 
     
     /*---------------------------------------------------    
       END OF PUBLIC INTERFACE METHODS
@@ -253,7 +299,7 @@ public final class SearchResultHandler {
         // you can match up metadata to responses
         String xmlCollectionString = "";
         try {
-            debug("Trying to do uncompress.....");
+            LOG.trace("Trying to do uncompress XML.....");
             byte[] xmlCompressed = qr.getXMLBytes();
             if (xmlCompressed.length > 1) {
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
@@ -261,7 +307,8 @@ public final class SearchResultHandler {
             }
         } catch (IOException ignored) {}
 
-        debug("xmlCollectionString = " + xmlCollectionString);
+        if(LOG.isDebugEnabled())
+            LOG.debug("xmlCollectionString = " + xmlCollectionString);
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
         Iterator iter = results.iterator();
@@ -308,7 +355,7 @@ public final class SearchResultHandler {
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
                                                  final int numSentToFrontEnd) {
 
-        debug("SRH.accountAndUpdateDynamicQueriers(): entered.");
+        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
         // technically Ultrapeers don't use this info, but we are keeping it
         // around for further use
@@ -322,14 +369,14 @@ public final class SearchResultHandler {
                 return;
             
             // update the object
-            debug("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
+            LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
             gc.increment(numSentToFrontEnd);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
-                    debug("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
+                    LOG.trace("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
                     gc.tallyReport();
                     if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
                         gc.markAsFinished();
@@ -351,7 +398,7 @@ public final class SearchResultHandler {
 
             }
         }
-        debug("SRH.accountAndUpdateDynamicQueriers(): returning.");
+        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");
     }
 
 
@@ -381,36 +428,48 @@ public final class SearchResultHandler {
         }
         return null;
     }
+    
+    /**
+     * Determines whether or not the query contained in the
+     * specified GuidCount is still valid.
+     * This depends on values such as the time the query was
+     * created and the amount of results we've received so far
+     * for this query.
+     */
+    private boolean isQueryStillValid(GuidCount gc, long now) {
+        LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
+        return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
+               (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
+    }
 
     /*---------------------------------------------------    
       END OF PRIVATE INTERFACE METHODS
      ----------------------------------------------------*/
-
-    private final boolean debugOn = false;
-    private void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-
     
     /** A container that simply pairs a GUID and an int.  The int should
      *  represent the number of non-filtered results for the GUID.
      */
     private static class GuidCount {
 
+        private final long _time;
         private final GUID _guid;
+        private final QueryRequest _qr;
         private int _numResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
-
-        public GuidCount(byte[] guid) {
-            _guid = new GUID(guid);
+        
+        public GuidCount(QueryRequest qr) {
+            _qr = qr;
+            _guid = new GUID(qr.getGUID());
             _numResults = 0;
+            _time = System.currentTimeMillis();
         }
 
         public GUID getGUID() { return _guid; }
         public int getNumResults() { return _numResults; }
         public int getNextReportNum() { return _nextReportNum; }
+        public long getTime() { return _time; }
+        public QueryRequest getQueryRequest() { return _qr; }
         public boolean isFinished() { return markAsFinished; }
         public void tallyReport() { 
             _nextReportNum = _numResults + REPORT_INTERVAL; 

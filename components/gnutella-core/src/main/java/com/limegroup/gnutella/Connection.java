@@ -346,10 +346,8 @@ public class Connection {
 			if(_headers.supportsVendorMessages()) {
                 send(MessagesSupportedVendorMessage.instance());
 			}
-        }
-        catch (IOException ioe) {
-        }
-        catch (BadPacketException bpe) {
+        } catch (IOException ioe) {
+        } catch (BadPacketException bpe) {
             // should never happen.
             ErrorService.error(bpe);
         }
