@@ -419,6 +419,9 @@ public class ExternalControl {
 			    options.put(iIndex, curOptions);
 		}
 		
+     	if (options.isEmpty())
+     	    return null;
+     	
 		ret = new MagnetOptions[options.size()];
 		ret = (MagnetOptions[]) options.values().toArray(ret);
 
