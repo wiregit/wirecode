@@ -32,17 +32,17 @@ public class MetaFileManager extends FileManager {
         return result;
     }
     
-    public FileDesc file2index(String fullName) {  
-        // TODO1: precompute and store in table.
-        for (int i=0; i<_files.size(); i++) {
-            FileDesc fd=(FileDesc)_files.get(i);
-            if (fd==null)  file://unshared
-            continue;
-            else if (fd._path.equals(fullName))
-                return fd;
-        }
-        return null;//The file with this name was not found.
-    }
+//    public FileDesc file2index(String fullName) {  
+//        // TODO1: precompute and store in table.
+//        for (int i=0; i<_files.size(); i++) {
+//            FileDesc fd=(FileDesc)_files.get(i);
+//            if (fd==null)  file://unshared
+//            continue;
+//            else if (fd._path.equals(fullName))
+//                return fd;
+//        }
+//        return null;//The file with this name was not found.
+//    }
     
     /**This method now breaks the contract of the super class. The super class
      * claims that this method is non-blocking. Because the the loadThread 

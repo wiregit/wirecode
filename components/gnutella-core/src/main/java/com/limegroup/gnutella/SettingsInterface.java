@@ -99,6 +99,7 @@ public interface SettingsInterface
 	public static final long    DEFAULT_AVERAGE_UPTIME = 200;
 	public static final long    DEFAULT_TOTAL_UPTIME = 0;
 	public static final int     DEFAULT_SESSIONS = 1;
+    public static final String  DEFAULT_SERVANT_TYPE = Constants.CLIENT;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
@@ -155,4 +156,6 @@ public interface SettingsInterface
     public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
     public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
     public static final String SESSIONS           = "SESSIONS";
+    
+    public static final String SERVANT_TYPE       = "SERVANT_TYPE";
 }

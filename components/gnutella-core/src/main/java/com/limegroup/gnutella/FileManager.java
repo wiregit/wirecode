@@ -4,7 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.MetaFileManager;
-
+import com.limegroup.gnutella.server.ServerFileManager;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -71,7 +71,21 @@ public class FileManager {
     private Object _loadThreadLock=new Object();
 
     /** The single instance of FileManager.  (Singleton pattern.) */
-    private static MetaFileManager _instance = new MetaFileManager();
+    private static FileManager _instance = null;
+    //initialize _instance
+    static
+    {
+        //get the servant type
+        String servantType = SettingsManager.instance().getServantType();
+        if(servantType.equals(Constants.XML_CLIENT))
+            _instance = new MetaFileManager();
+        else if(servantType.equals(Constants.SERVER))
+            _instance = new ServerFileManager();
+        else
+            _instance = new FileManager();
+    }
+    
+    
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     private static ActivityCallback _callback;
@@ -112,7 +126,7 @@ public class FileManager {
     
     /** Returns the single instance of the FileManager.  The FileManager has no
      *  files or callback until loadSettings() or initialize is called.  */
-    public static MetaFileManager instance() {
+    public static FileManager instance() {
         return _instance;
     }
 
@@ -641,6 +655,18 @@ public class FileManager {
         return response;
     }
 
+    public FileDesc file2index(String fullName) {  
+        // TODO1: precompute and store in table.
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc fd=(FileDesc)_files.get(i);
+            if (fd==null)  file://unshared
+            continue;
+            else if (fd._path.equals(fullName))
+                return fd;
+        }
+        return null;//The file with this name was not found.
+    }
+    
 
     /**
      * Returns a set of indices of files matching q, or null if there are no

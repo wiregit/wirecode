@@ -95,6 +95,11 @@ public class SettingsManager implements SettingsInterface
      *  network discoverer
      */
     private Properties ndProps_;
+    
+    /**
+     * Type of the servant: client, xml-client, server etc
+     */
+    private String    servantType_;
 
     /**
      *  Set up the manager instance to follow the
@@ -431,6 +436,9 @@ public class SettingsManager implements SettingsInterface
 				else if(key.equals(SESSIONS)) {
 					setSessions(Integer.parseInt(p)+1);
 				}
+                else if(key.equals(SERVANT_TYPE)) {
+					setServantType(p);
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -510,6 +518,8 @@ public class SettingsManager implements SettingsInterface
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
+        //anu added
+        setServantType(DEFAULT_SERVANT_TYPE);
     }
 
 
@@ -697,6 +707,14 @@ public class SettingsManager implements SettingsInterface
 	public int getSessions() {
 		return sessions_;
 	}
+    
+    /**
+     * Returns the type of the servant: client, xml-client, server etc
+     */
+    public String getServantType()
+    {
+        return servantType_;
+    }
 
 
     /******************************************************
@@ -1516,6 +1534,22 @@ public class SettingsManager implements SettingsInterface
                 // fails to create a file
             }
         }
+    }
+    
+    /**
+     * Sets the type of the servant: client, xml-client, server etc
+     */
+    private void setServantType(String servantType)
+    {
+        if(Constants.isValidServantType(servantType))
+        {
+            servantType_ = servantType;
+        }
+        else
+        {
+            servantType_ = DEFAULT_SERVANT_TYPE;
+        }
+        props_.put(SERVANT_TYPE, servantType_);
     }
 
     /******************************************************

@@ -62,7 +62,7 @@ public class RichQueryHandler{
         //matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
         Response[] retResponses = new Response[s];
-        MetaFileManager fManager = FileManager.instance();
+        FileManager fManager = FileManager.instance();
         //We need the MetaFileManager to get the FileDesc from full FileName
         //Note:FileManager has been changed to return a MetaFileManager now
         Response res;

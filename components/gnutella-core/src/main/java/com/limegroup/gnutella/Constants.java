@@ -30,20 +30,49 @@ public class Constants
     public static final int T1_SPEED_INT    = 1600;
     public static final int T3_SPEED_INT    = 3000;
     //public static final int OTHER_SPEED_INT = 28;
+    
+    //constants defining the names to be used to identify various kind
+    //of limewire gnutella servents that exist in the network
+    public static final String CLIENT = "CLIENT";
+    public static final String XML_CLIENT = "XML_CLIENT";
+    public static final String SERVER = "SERVER";
+    
         
     /** Converts the following bandwidth value, in kbytes/second, to 
      *  a human readable string. */
-    public static String speed2name(long rate) {
+    public static String speed2name(long rate)
+    {
         if (rate<=MODEM_SPEED_INT)
             return MODEM_SPEED;
         else if (rate<=CABLE_SPEED_INT)
             return CABLE_SPEED;
         else if (rate<=T1_SPEED_INT)
             return T1_SPEED;
-        else 
+        else
             return T3_SPEED;
     }
 
-    //END SPEED CONSTANTS
+    /**
+     * Returns true, if the passed servant type is avalid one, false
+     * otherwise
+     */
+    public static boolean isValidServantType(String servantType)
+    {
+        //checking condition
+        if(servantType == null)
+            return false;
+        
+        //see if the servantType is valid
+        if(servantType.equals(CLIENT) || servantType.equals(XML_CLIENT)
+            || servantType.equals(SERVER))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
     
 }
