@@ -1,7 +1,11 @@
 package com.limegroup.gnutella;
 
+import com.sun.java.util.collections.*;
 import java.net.*;
-import java.util.*;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.text.*;
 import java.io.*;
 
@@ -14,7 +18,8 @@ import java.io.*;
  * This class is immutable.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class AlternateLocation implements Comparable {
+public final class AlternateLocation 
+	implements com.sun.java.util.collections.Comparable {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -220,7 +225,7 @@ public final class AlternateLocation implements Comparable {
 		if(dateIndex == -1) {
 			return false;
 		}
-		else if((LOCATION_HEADER.length()-dateIndex) > 20) {
+		else if((LOCATION_HEADER.length()-dateIndex) > 21) {
 			return false;
 		}
 		return true;
@@ -278,10 +283,13 @@ public final class AlternateLocation implements Comparable {
 	 * @see java.lang.Comparable
 	 */
 	public int compareTo(Object obj) {
+		System.out.println("AlternateLocation::compareTo"); 
 		if(this.equals(obj)) return 0;
 		AlternateLocation al = (AlternateLocation)obj;		
 		long thisTime    = DATE.getTime();
 		long anotherTime = al.getTimestamp().getTime();
+		System.out.println("compareTo returning: "+
+						   (thisTime<anotherTime ? 1 : (thisTime==anotherTime ? 0 : -1)));
 		return (thisTime<anotherTime ? 1 : (thisTime==anotherTime ? 0 : -1));
 	}
 
@@ -300,6 +308,8 @@ public final class AlternateLocation implements Comparable {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
+		System.out.println("timestamp1: "+al.isTimestamped()); 
+		System.out.println("timestamp2: "+this.isTimestamped()); 
 		Date date = al.getTimestamp();
 		URL url = al.getUrl();
 		if(al.isTimestamped() && this.isTimestamped()) {
@@ -328,16 +338,62 @@ public final class AlternateLocation implements Comparable {
 		}
 	}
 
+	/**
+	 * A factory method for creating new <tt>Comparator</tt> instances 
+	 * for comparing alternate locations.
+	 *
+	 * @return a new <tt>Comparator</tt> instance for comparing
+	 * alternate locations
+	 */
+	public static com.sun.java.util.collections.Comparator createComparator() {
+		return new AlternateLocationsComparator();
+	}
+
+	/**
+	 * Private class for comparing <tt>AlternateLocation</tt> instances.
+	 */
+	private static class AlternateLocationsComparator 
+		implements com.sun.java.util.collections.Comparator {
+		public int compare(Object obj1, Object obj2) {
+			return ((AlternateLocation)obj1).compareTo(obj2);
+		}
+		
+		public boolean equals(Object obj) {
+			return this.equals(obj);
+		}
+	}
+
+	
 	/*
 	public static void main(String[] args) {
-		System.out.println("TESTING VALID ALTERNATE LOCATION CONSTRUCTION..."); 
-		String[] validlocs = {
+		System.out.println("TESTING VALID ALTERNATE LOCATIONS...");
+		System.out.println(); 
+		String[] validTimestampedLocs = {
 			"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg "+
 			"2002-04-09T20:32:33Z",
 			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg "+
 			"2002-04-09T20:32:33Z",
+			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg "+
+			"2002-04-09T20:32:33Z",
+			"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg "+
+			"2002-04-09T20:32:33Z",
+			"http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg "+
+			"2002-04-09T20:32:33Z",
+			"http: //Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg "+
+			"2002-04-09T20:32:33Z"
+		};
+
+		String[] validlocs = {
+			"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg",
+			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg",
 			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg",
 			"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
@@ -347,18 +403,58 @@ public final class AlternateLocation implements Comparable {
 			"http: //Y.Y.Y.Y:6352/get/2/"+
 			"lime%20capital%20management%2001.mpg"
 		};
+		
+		boolean failureEncountered = false;
+		// TEST ALTERNATE LOCATIONS WITH TIMESTAMPS
+		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITH TIMESTAMPS..."); 
+		try {
+			for(int i=0; i<validTimestampedLocs.length; i++) {
+				AlternateLocation al = new AlternateLocation(validTimestampedLocs[i]);
+				if(!AlternateLocation.isTimestamped(validTimestampedLocs[i])) {
+					System.out.println("TEST FAILED -- ALTERNATE LOCATION STRING "+
+									   "NOT CONSIDERED STAMPED"); 
+					failureEncountered = true;
+				}
+				if(!al.isTimestamped()) {
+					System.out.println("TEST FAILED -- ALTERNATE LOCATION INSTANCE "+
+									   "NOT CONSIDERED STAMPED"); 
+					failureEncountered = true;
+				}
+				System.out.println(al); 
+			}
+			if(!failureEncountered) {
+				System.out.println("TEST PASSED"); 
+			}
+		} catch(IOException e) {
+			System.out.println("TEST FAILED WITH EXCEPTION: "); 
+			e.printStackTrace();
+			failureEncountered = true;
+		}		
+
+		// TEST ALTERNATE LOCATIONS WITH NO TIMESTAMPS
+		failureEncountered = false;
+		System.out.println(); 
+		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITHOUT TIMESTAMPS..."); 
 		try {
 			for(int i=0; i<validlocs.length; i++) {
 				AlternateLocation al = new AlternateLocation(validlocs[i]);
 				System.out.println(al); 
 			}
-			System.out.println("TEST PASSED"); 
+			if(!failureEncountered) {
+				System.out.println("TEST PASSED"); 
+			}
 		} catch(IOException e) {
 			System.out.println("TEST FAILED WITH EXCEPTION: "); 
 			e.printStackTrace();
+			failureEncountered = true;
 		}		
+
+		if(!failureEncountered) {
+			System.out.println("ALL TESTS PASSED"); 
+		}
 	}
 	*/
+	
 	
 }
 
