@@ -204,8 +204,9 @@ public class HostCatcher {
         out.write(e.getHostname()+":"+e.getPort()+"\n");
     }
 
-    //////////////////////////////////////////////////////////////////////
 
+
+    //////////////////////////////// Add Pongs ///////////////////////////
 
     /**
      * @modifies this
@@ -288,6 +289,33 @@ public class HostCatcher {
             return false;
         }
     }
+
+
+    /**
+     * If host is not a valid host address, returns false.
+     * Otherwise, returns true if connecting to host:port would connect to
+     *  the manager's listening port.
+     */
+    private boolean isMe(String host, int port) {
+        //Don't allow connections to yourself.  We have to special
+        //case connections to "localhost" or "127.0.0.1" since
+        //they are aliases this machine.
+        byte[] cIP;
+        try {
+            cIP=InetAddress.getByName(host).getAddress();
+        } catch (IOException e) {
+            return false;
+        }
+
+        if (Arrays.equals(cIP, LOCALHOST)) {
+            return port == acceptor.getPort();
+        } else {
+            byte[] managerIP = acceptor.getAddress();
+            return (Arrays.equals(cIP, managerIP) &&
+                    (port==acceptor.getPort()));
+        }
+    }
+
 
     /**
      * This thread loops forever, contacting the pong server about every 30
@@ -385,13 +413,17 @@ public class HostCatcher {
         }
     } //end RouterConnectorThread
 
+
+
+    ///////////////////////////// Get Pongs /////////////////////////////
+
     /**
-     * @modifies this
-     * @effects atomically removes and returns the highest priority host in
-     *  this.  If no host is available, blocks until one is.  If the calling
-     *  thread is interrupted during this process, throws InterruptedException.
+     * Returns the highest priority host in this.  <b>Does not actually remove
+     * the host.  If no host is available, blocks until one is.</b> If the
+     * calling thread is interrupted during this process, throws
+     * InterruptedException.  
      */
-    public Endpoint getAnEndpoint() throws InterruptedException {
+    public Endpoint getBestHost() throws InterruptedException {
         //If cache has expired, wait for reconnect to finish (normally or
         //timeout).  See RouterConnectionThread.run().
         if(settings.getUseQuickConnect() && stale) {
@@ -420,7 +452,7 @@ public class HostCatcher {
         synchronized (this) { 
 			while (true)  {
 				try { 
-					endpoint = getAnEndpointInternal(); 
+					endpoint = removeBestHostInternal(); 
 					break; 
 				} catch (NoSuchElementException e) {
 					wait(); //throws InterruptedException 
@@ -447,7 +479,7 @@ public class HostCatcher {
      *  of quick-connect settings, etc.  Throws NoSuchElementException if
      *  this is empty.
      */
-    private Endpoint getAnEndpointInternal()
+    private Endpoint getBestHostInternal()
             throws NoSuchElementException {
         if (! queue.isEmpty()) {
             //            System.out.println("    GAEI: From "+set+",");
@@ -461,22 +493,14 @@ public class HostCatcher {
             throw new NoSuchElementException();
     }
 
-    /**
-     *  Return the number of hosts
+    /** 
+     * Returns the "n" best pongs with the given hops value that arrived after
+     * the given system time.  May return fewer if no such n pongs exits.
      */
-    public int getNumHosts() {
-        return( queue.size() );
+    public synchronized Iterator getBestHosts(int n, byte hops, long time) {
+        //TODO: consider all buckets.
     }
 
-    /**
-     * Returns an iterator of the hosts in this, in order of priority.
-     * This can be modified while iterating through the result, but
-     * the modifications will not be observed.
-     */
-    public synchronized Iterator getHosts() {
-        //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator();
-    }
 
     /**
      * @requires n>0
@@ -489,6 +513,28 @@ public class HostCatcher {
         //Clone the queue before iterating.
         return (new BucketQueue(queue)).iterator(n);
     }
+
+
+    /**
+     * Returns an iterator of the hosts in this, in order of priority.
+     * This can be modified while iterating through the result, but
+     * the modifications will not be observed.
+     */
+    public synchronized Iterator getHosts() {
+        //Clone the queue before iterating.
+        return (new BucketQueue(queue)).iterator();
+    }
+
+    /**
+     *  Return the number of hosts
+     */
+    public int getNumHosts() {
+        return( queue.size() );
+    }
+
+
+
+    ///////////////////////// Methods to Remove Pongs /////////////////////
 
     /**
      *  Remove unwanted or used entries
@@ -529,34 +575,16 @@ public class HostCatcher {
         routerConnectorThread.interrupt();
     }
 
-    /**
-     * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
-     *  the manager's listening port.
-     */
-    private boolean isMe(String host, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases this machine.
-        byte[] cIP;
-        try {
-            cIP=InetAddress.getByName(host).getAddress();
-        } catch (IOException e) {
-            return false;
-        }
-
-        if (Arrays.equals(cIP, LOCALHOST)) {
-            return port == acceptor.getPort();
-        } else {
-            byte[] managerIP = acceptor.getAddress();
-            return (Arrays.equals(cIP, managerIP) &&
-                    (port==acceptor.getPort()));
-        }
-    }
 
     public String toString() {
         return queue.toString();
     }
+
+    private class TaggedEndpoint extends Endpoint {
+        long systemTime;
+        String receivingHost;
+    }
+
 
 //      /** Unit test: just calls tests.HostCatcherTest, since it
 //       *  is too large and complicated for this.

@@ -11,7 +11,7 @@ import com.sun.java.util.collections.*;
  * mappings may be purged without warning, preferably using a FIFO
  * policy.
  */
-class RouteTable {
+public class RouteTable {
     /* Map is either a ForgetfulHashMap (pings and queries) or a 
      * FixedsizeForgetfulHashMap (pushes).  These classes take care
      * of the work of expiring old entries.  Note however they may

@@ -25,10 +25,6 @@ public abstract class MessageRouter
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
     /**
-     * Maps PingRequest GUIDs to PingReplyHandlers
-     */
-    private RouteTable _pingRouteTable = new RouteTable(2048);
-    /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
      */
     private RouteTable _queryRouteTable = new RouteTable(2048);
@@ -707,5 +703,22 @@ public abstract class MessageRouter
             //I'm always ready to handle replies.
             return true;
         }
+    }
+
+    
+    /**
+     * The information maintained per connection for the Rohrs/Falco ping-pong
+     * algorithm.  
+     */
+    private final class ConnectionPingState {
+        /** The earliest system time (in msecs) when we will accept another ping
+         * from this connection. */
+        long nextAcceptTime=0;
+        /** The GUID of the last ping accepted on this connection, or null of
+         *  none. */
+        GUID lastGUID=null;
+        /** needed[i] is the number of pongs with hops i needed by this
+         *  connection.  INVARIANT: all elements are non-negative. */
+        byte[] needed=new byte[SettingsManager.instance().getTTL()];
     }
 }
