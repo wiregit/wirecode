@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.NoSuchElementException;
 import com.sun.java.util.collections.Iterator;
 
@@ -33,6 +31,9 @@ public class BucketQueue implements Cloneable {
      *  capacityPerPriority*priorities elements in the queue.
      * @exception IllegalArgumentException priorities or capacityPerPriority
      *  is non-positive.
+     * TODO: given the skewed hops distribution of messages on the network,
+     * it probably doesn't make sense to have the same capacity for all
+     * hops
      */
     public BucketQueue(int priorities, int capacityPerPriority) 
             throws IllegalArgumentException {
