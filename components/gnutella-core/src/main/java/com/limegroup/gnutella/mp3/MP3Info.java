@@ -16,6 +16,9 @@ import com.limegroup.gnutella.ByteOrder;
  * @author  cHANCE mOORE, ctmoore@gottapee.com - 30 July 2002
  *			One of the Sindhis (both?), limewire team
  *			Gustav "Grim Reaper" Munkby, grd@swipnet.se
+ *
+ * TODO: remove all of the crazy catch(Throwable) instances from this class
+ *       -- add tests?
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789 
 public final class MP3Info {
@@ -53,7 +56,7 @@ public final class MP3Info {
 	    /**
 	     * @return int  suggested encoding quality, scaled 1 to 100
 	     */
-	    public int getScale() {
+	    int getScale() {
 		    return scale;
 	    }
 
@@ -61,14 +64,14 @@ public final class MP3Info {
 	     * Table of Contents holds byte pos -> % of song complete, 1 to 100%
 	     * @return byte[]  These bytes are raw java bytes, need to be "& 255"
 	     */
-	    public byte[] getTableOfContents() {
+	    byte[] getTableOfContents() {
 		    return toc;
 	    }
 
 	    /**
 	     * VBR header only returns a rate when frames and bytes are supplied
 	     */
-	    public int getBitRate() {
+	    int getBitRate() {
 		    if (numFrames != -1 && numBytes != -1) {
 			    double tpf = 0;
 			    switch (getLayerIndex()) {
@@ -93,7 +96,7 @@ public final class MP3Info {
 	    /**
 	     *
 	     */
-	    public int getLengthInSeconds() {
+	    int getLengthInSeconds() {
 		    if (numFrames != -1) {
 				double tpf = 0;
 			    switch (getLayerIndex()) {
@@ -116,6 +119,7 @@ public final class MP3Info {
 		}
 	     
 	}
+
     /**
      * An MPEG audio file is built up from smaller parts called frames, which
      * are generally independent items. Each frame has its own header and audio
@@ -276,7 +280,7 @@ public final class MP3Info {
 			
 		if (c == -1 || pos >= 20000) { // what the $#*!
 			_header = 0;
-			throw new Exception("MP3 header not found.");
+			throw new IOException("MP3 header not found.");
 		}
 
 		
@@ -346,7 +350,7 @@ public final class MP3Info {
 		finally { //cleanup
 			try {				
 				fis.close(); 
-			} catch (Exception e) {}//ignore
+			} catch (IOException e) {}//ignore
 		}
     }
 
@@ -657,6 +661,7 @@ public final class MP3Info {
 			return "<unknown>";
 		}
 	}
+
 	/**
 	 * Mode extension joins information not used for stereo effect, thus
 	 * reducing needed resources. These bits are dynamically determined by an
@@ -682,6 +687,8 @@ public final class MP3Info {
 		
 		return _header >> 6 & 3;  
 	}
+
+
     /**
      * FrameSize formula
      *   mpeg v1: FrameSize = 12 * BitRate / SampleRate + Padding               
@@ -715,6 +722,8 @@ public final class MP3Info {
            )
 		 );	
     }
+
+
 	/**
 	 * VBR header containing Table of Contents and Quality
 	 *
@@ -724,6 +733,7 @@ public final class MP3Info {
             
 		return _vbrHeader;
 	}
+
     /**
      * Based on the version index
      * -> 2.5, 0.0, 2.0, 1.0
@@ -749,6 +759,7 @@ public final class MP3Info {
 	        return 1.0;
         }        
 	}
+
     /**
      * Based on the version index
      * -> "MPEG Version 2.5", null, "MPEG Version 2.0", "MPEG Version 1.0"
@@ -777,10 +788,12 @@ public final class MP3Info {
 	        return "MPEG Version " + "?";
         }        
 	}
+
 	private int getVersionIndex()  {
 		
 		return _header >> 19 & 3;
 	}
+
 	/**
 	 * Whether the bits per frame are not constant
 	 * 
@@ -790,6 +803,7 @@ public final class MP3Info {
 	    
         return _vbrHeader != null;
     }
+
 	/**
      * Whether the copyright bit is flagged in the mp3 header
      *
@@ -799,6 +813,7 @@ public final class MP3Info {
 	    
 	    return (_header >> 3 & 1) != 0;
 	}
+
 	/**
      * Whether the original bit is flagged in the mp3 header
      *
@@ -808,6 +823,7 @@ public final class MP3Info {
 	    
 	    return (_header >> 2 & 1) != 0;
 	}
+
 	/**
      * Whether padding bit is set; Padding is used to fit bit rates exactly.
      * :Example: 128k 44.1kHz layer II uses a lot of 418 bytes and some of
@@ -820,6 +836,7 @@ public final class MP3Info {
 	    
 	    return (_header >> 9 & 1) != 0;
 	}
+
 	/**
      * Whether the private bit is flagged in the mp3 header
      *
@@ -829,6 +846,7 @@ public final class MP3Info {
 	    
 	    return (_header >> 8 & 1) != 0;
 	}
+
 	/**
      * Whether the protection bit is flagged in mp3 header
      *  Indicates CRC; 16 bit crc follows file header
@@ -840,6 +858,7 @@ public final class MP3Info {
 	    //CRC protection is ON when bit is not set
 	    return (_header >> 16 & 1) == 0;
 	}
+
 	/**
      * Whether this MP3 is embedded in a WAV file
      *
@@ -952,6 +971,7 @@ i 0
 		}	
 		catch (Throwable t) {} //bombed trying to build LAME tag
 	}
+
 	/** 
 	 * MPEG files frame bitrates may change in a variable bitrate (VBR). Each
 	 * frame is encoded at a different rate to maximaize quality/file size.
