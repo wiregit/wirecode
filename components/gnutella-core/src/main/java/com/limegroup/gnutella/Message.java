@@ -178,8 +178,8 @@ public abstract class Message
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
-        byte softMax=SettingsManager.instance().getSoftMaxTTL();
-        byte hardMax=SettingsManager.instance().getMaxTTL();
+        byte softMax=(byte)4;//SettingsManager.instance().getSoftMaxTTL();
+        byte hardMax=(byte)14;//SettingsManager.instance().getMaxTTL();
         if (hops<0)
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
