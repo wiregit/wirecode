@@ -8,8 +8,13 @@ public class SystemUtils {
     
     static {
         // Only load the library on systems where we've made it.
-        if(CommonUtils.isWindows() || CommonUtils.isMacOSX())
+        if(CommonUtils.isMacOSX())
             System.loadLibrary("SystemUtilities");
+        else if(CommonUtils.isWindows()) {
+            System.loadLibrary("GenericWindowsUtils");
+            if(CommonUtils.isWindows2000orXP())
+                System.loadLibrary("WindowsV5PlusUtils");
+        }
     }
     
     private SystemUtils() {}
