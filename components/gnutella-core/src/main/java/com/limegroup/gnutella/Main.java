@@ -54,7 +54,7 @@ public class Main implements ActivityCallback {
             int port=6346;
             if (commands.length>=3)
                 port=Integer.parseInt(commands[2]);
-            service.connectToHost(commands[1], port);
+            service.connectToHostBlocking(commands[1], port);
             } catch (IOException e) {
             System.out.println("Couldn't establish connection.");
             } catch (NumberFormatException e) {

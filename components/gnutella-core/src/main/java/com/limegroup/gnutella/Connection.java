@@ -15,28 +15,39 @@ import com.sun.java.util.collections.*;
  *
  * The class can be used in a number of ways.  The typical use, to
  * handle a normal Gnutella connection, involves creating a
- * ConnectionManager and a thread.<p>
+ * ConnectionManager.<p>
  *
  * <pre>
  *   //1. Setup manager and connection.
  *   ConnectionManager cm=new ConnectionManager();
- *   cm.createConnection(host, port);
+ *   cm.createConnectionAsynchronously(host, port);
  * </pre>
  *
- * The second use is for "do it yourselfers".  This is useful for
+ * or, if you need to use the Connection immediately:
+ *
+ * <pre>
+ *   //1. Setup manager and connection.
+ *   ConnectionManager cm=new ConnectionManager();
+ *   Connection c = cm.createConnectionBlock(host, port);
+ *   c.send(whatever);
+ * </pre>
+ *
+ * The third use is for "do it yourselfers".  This is useful for
  * Gnutella spiders. This goes something like this:<p>
  *
  * <pre>
  *   Connection c = new Connection(host, port);
  *   c.initialize();
+ *   c.send(whatever);
  * </pre>
  *
  * You will note that the constructors don't actually connect
- * this.  For that you must call intialize().  While this is awkward,
- * it is intentional, as it dealing with connection failures easier
+ * this.  For that you must call initialize().  While this is awkward,
+ * it is intentional, as it makes dealing with connection failures easier
  * The constuctor doesn't throw an exception, and the constructor does not
  * run for an unreasonable amount of time (i.e., the constructor does not
- * use the network).<p>
+ * use the network).  Often, the connection is initialized on a new
+ * thread for this reason. <p>
  *
  * All connections have two underlying spam filters: a personal filter
  * (controls what I see) and a route filter (also controls what I pass
@@ -222,13 +233,12 @@ public class Connection {
     public Message receive() throws IOException, BadPacketException {
         //Can't use same lock as send()!
         synchronized(_in) {
-            while (true) {
-                Message m=Message.read(_in);
-                if (m==null)
-                    continue;
-                _received++;
-                return m;
+            Message m = null;
+            while (m == null) {
+                m=Message.read(_in);
             }
+            _received++;
+            return m;
         }
     }
 

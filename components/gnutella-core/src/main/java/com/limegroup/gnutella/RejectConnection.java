@@ -16,65 +16,77 @@ import com.sun.java.util.collections.*;
  *
  *The connection that requested the connection thus gets fake pongs from us and
  *populates it's host catcher with the very best connections on the network at this time
+ *
  */
+class RejectConnection extends Connection {
+    private class PortMonitorThread extends Thread {
+        public PortMonitorThread() {
+            setDaemon(true);
+            start();
+        }
 
-class RejectConnection
-        extends Connection
-        implements Runnable {
+        public void run() {
+            try {
+                initialize();
+                loopForPingRequest();
+            } catch(IOException e) {
+                // finally does all the cleanup we need.
+            } finally {
+                shutdown(); // whether we have an IO Exception or
+                            // a successful set of PONGs, drop the connection
+            }
+        }
+    }
+
     private HostCatcher _hostCatcher;
 
     /**
      * Constructs a temporary connection that waits for a ping and then replies
      * with pongs for the given HostCatcher's ten best hosts.
+     *
+     * The constructor kicks off a thread that does the initialize() call,
+     * so allow you need to do is construct the RejectConnection, and it's
+     * off and running.
      */
     RejectConnection(Socket socket, HostCatcher hostCatcher) {
         super(socket);
         _hostCatcher = hostCatcher;
+        new PortMonitorThread(); // The constructor does the start call
     }
 
-    public void initialize() throws IOException {
-        super.initialize();
-        Thread t = new Thread(this);
-        t.setDaemon(true);
-        t.start();
-    }
-
-    public void run() {
-        try {
-            while (true) { // continue till we get a PingRequest
-                Message m=null;
-                try {
-                    m=receive(SettingsManager.instance().getTimeout()); //gets the timeout from SettingsManager
-                    if (m==null)
-                        continue;
-                }// end of try for BadPacketEception from socket
-                catch (BadPacketException e) {
-                    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
+    private void loopForPingRequest()
+            throws IOException {
+        while (true) { // continue till we get a PingRequest
+            Message m=null;
+            try {
+                // get the timeout from SettingsManager
+                m=receive(SettingsManager.instance().getTimeout());
+                if (m==null)
                     continue;
+            }// end of try for BadPacketEception from socket
+            catch (BadPacketException e) {
+                continue;
+            }
+            if((m instanceof PingRequest) && (m.getHops()==0)) {
+                // this is the only kind of message we will deal with
+                // in Reject Connection
+                // If any other kind of message comes in we drop
+                Iterator iter = _hostCatcher.getBestHosts(10);
+                 // we are going to send rejected host the top ten
+                 // connections
+                while(iter.hasNext()) {
+                    Endpoint bestEndPoint =(Endpoint)iter.next();
+                    // make a pong with this host info
+                    PingReply pr = new PingReply(m.getGUID(),(byte)1,
+                        bestEndPoint.getPort(),
+                        bestEndPoint.getHostBytes(), 0, 0);
+                    // the ttl is 1; and for now the number of files
+                    // and kbytes is set to 0 until chris stores more
+                    // state in the hostcatcher
+                    send(pr);
                 }
-                if((m instanceof PingRequest) && (m.getHops()==0)) {
-                    //this is the only kind of message we will deal with in Reject Connection
-                    //If any other kind of message comes in we drop
-                    Iterator iter = _hostCatcher.getBestHosts(10);
-                     // we are going to send rejected host the top ten connections
-                    while(iter.hasNext()) {
-                        Endpoint bestEndPoint =(Endpoint)iter.next();
-                        // make a pong with this host info
-                        PingReply pr = new PingReply(m.getGUID(),(byte)1,
-                            bestEndPoint.getPort(), bestEndPoint.getHostBytes(),
-                            0, 0);
-                        // the ttl is 1; and for now the number of files and kbytes is set to 0
-                        // until chris stores more state in the hostcatcher
-                        send(pr);
-                    }
-                    // we have sent 10 hosts. Now close the connection
-                    shutdown();
-                }// end of (if m is PingRequest)
-            } // End of while(true)
-        }// end of try
-        catch (IOException e){
-            shutdown();// if we have an IO Exception drop the connection
-            //e.printStackTrace(); // remove this later
-        } // end of catch
-    } // end of run
+                // we have sent 10 hosts, so this thread's work is done.
+            }// end of (if m is PingRequest)
+        } // End of while(true)
+    }
 }

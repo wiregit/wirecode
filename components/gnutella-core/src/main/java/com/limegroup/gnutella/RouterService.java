@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import com.sun.java.util.collections.*;
 
 /**
@@ -74,28 +75,40 @@ public class RouterService
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established.
+     */
+    public Connection connectToHostBlocking(String hostname, int portnum)
+            throws IOException {
+        return manager.createConnectionBlocking(hostname, portnum);
+    }
+
+    /**
+     * Connect to remote host (establish outgoing connection) on a separate
+     * thread.
      * If establishing c would connect us to the listening socket,
      * the connection is not established.
      */
-    public Connection connectToHost(String hostname, int portnum)
-            throws IOException {
+    public void connectToHostAsynchronously(String hostname, int portnum) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for what is returned by manager.getListeningPort.
-        byte[] cIP=InetAddress.getByName(hostname).getAddress();
+        byte[] cIP = null;
+        try {
+            cIP=InetAddress.getByName(hostname).getAddress();
+        } catch(UnknownHostException e) {
+            return;
+        }
         if ((Arrays.equals(cIP, LOCALHOST)) &&
             (portnum==manager.getListeningPort())) {
-                throw new IOException();
+                return;
         } else {
             byte[] managerIP=manager.getAddress();
             if (Arrays.equals(cIP, managerIP)
                 && portnum==manager.getListeningPort())
-                throw new IOException();
+                return;
         }
 
-        return manager.createConnection(hostname, portnum);
+        manager.createConnectionAsynchronously(hostname, portnum);
     }
-
 
     /**
      * Connects to hosts using the quick connect list.
@@ -125,7 +138,7 @@ public class RouterService
 
             //Connect...or try to.
             try {
-                connectToHost(e.getHostname(), e.getPort());
+                connectToHostBlocking(e.getHostname(), e.getPort());
             } catch (IOException exc) {
                 continue;
             }
@@ -342,7 +355,7 @@ public class RouterService
         //...if not, establish a new one.
         if (c==null) {
             try {
-            c = connectToHost(host, port);
+            c = connectToHostBlocking(host, port);
             } catch (IOException e) {
             return null;
             }

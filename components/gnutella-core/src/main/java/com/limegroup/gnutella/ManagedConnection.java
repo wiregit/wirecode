@@ -4,9 +4,7 @@ import java.io.*;
 import java.net.*;
 
 public class ManagedConnection
-    extends Connection
-    implements Runnable
-{
+        extends Connection {
     private ConnectionManager _manager;
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
@@ -62,10 +60,6 @@ public class ManagedConnection
                 throw e;
             }
         }
-
-        Thread t = new Thread(this);
-        t.setDaemon(true);
-        t.start();
     }
 
     /**
@@ -95,25 +89,20 @@ public class ManagedConnection
     }
 
     /**
-     * Handles core Gnutella request/reply protocol.
+     * Handles core Gnutella request/reply protocol.  This call
+     * will run until the connection is closed.  Note this this is called
+     * from the run methods of several different thread implementations
+     * that are inner classes of ConnectionManager.  This allows a single
+     * thread to be used for initialization and for the request/reply loop.
      *
-     * @requires this is in the CONNECTED state and
-     *   the manager to this has been set via setManager
+     * @requires this is initialized
      * @modifies the network underlying this, manager
      * @effects receives request and sends appropriate replies.
      *   Returns if either the connection is closed or an error happens.
-     *   If this happens, removes itself from the manager's connection list.
+     *   If this happens, removes itself from the manager's connection list,
+     *   so no further cleanup is necessary.  No exception is thrown
      */
-    public void run() {
-        //We won't wait more than TIMEOUT milliseconds for a half-completed message.
-        //However, we will wait as long as necessary for an incomplete message.
-        //See Message.read(..) for an explanation.
-        //  Disabled 9/1/2000 by crohrs.
-        //      try {
-        //          sock.setSoTimeout(SettingsManager.instance().getTimeout());
-        //      } catch (SocketException e) {
-        //          //Ignore?
-        //      }
+    void loopForMessages() {
         try {
             while (true) {
                 Message m=null;

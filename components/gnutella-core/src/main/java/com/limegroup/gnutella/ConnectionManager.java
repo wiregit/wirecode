@@ -310,7 +310,7 @@ public class ConnectionManager implements Runnable {
     }
 
     /** Broadcasts queued messages to connections. */
-    class MessageBroadcaster implements Runnable {
+    private class MessageBroadcaster implements Runnable {
         public void run() {
             while (true) {
                 //Get a MessagePair from the messageQueue. (Wait if empty.)
@@ -390,8 +390,9 @@ public class ConnectionManager implements Runnable {
                         continue;
                     }
                 }
-                //Check if IP address of the incoming socket is in badHosts (initialized in propertyManager()
-                if (badHosts.contains(client.getInetAddress().getHostAddress() ) ){
+                //Check if IP address of the incoming socket is in badHosts
+                if (badHosts.contains(
+                        client.getInetAddress().getHostAddress())) {
                     client.close();
                     continue;
                 }
@@ -399,35 +400,21 @@ public class ConnectionManager implements Runnable {
                     InputStream in=client.getInputStream();
                     String word=readWord(in);
 
-                    if (word.equals(SettingsManager.instance().getConnectStringFirstWord())) {
-                        //a) Gnutella connection
-
+                    if (word.equals(SettingsManager.instance().
+                            getConnectStringFirstWord())) {
                         if(getNumConnections() <
                                 SettingsManager.instance().getMaxConn()) {
-                            Connection c = new ManagedConnection(client, this);
-
-                            synchronized(this) {
-                                add(c);
-                                adjustConnectionFetchers();
-                            }
-                            callback.connectionInitializing(c);
-
-                            try {
-                                c.initialize();
-                            } catch(IOException e) {
-                                remove(c);
-                                throw e;
-                            }
-
-                            synchronized(this) {
-                                connectionInitialized(c);
-                            }
-                            callback.connectionInitialized(c);
+                            // Create a new connection and initialize it
+                            // on another thread
+                            new InitializingConnectionThread(
+                                new ManagedConnection(client, this));
                         }
                         else{// we have more connections than we can handle
-                            // No need to manage it -- it will complete after an
-                            // appropriate wait to send pongs
-                            (new RejectConnection(client, catcher)).initialize();
+                            // No need to manage it -- it will complete after
+                            // an appropriate wait to send pongs
+                            // No need to initialize it -- it kicks off
+                            // a thread to x
+                            new RejectConnection(client, catcher);
                         }
 
                     }
@@ -484,34 +471,98 @@ public class ConnectionManager implements Runnable {
         callback.error(msg, t);
     }
 
-    public ManagedConnection createConnection(String hostname, int portnum)
-            throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum, this);
+    public ActivityCallback getCallback() {
+        return callback;
+    }
 
-        synchronized(this) {
-            add(c);
-            adjustConnectionFetchers();
-        }
-        callback.connectionInitializing(c);
+    public HostCatcher getCatcher() {
+        return catcher;
+    }
 
-        try {
-            c.initialize();
-        } catch(IOException e) {
-            remove(c);
-            throw e;
-        }
+    public RouteTable getRouteTable() {
+        return routeTable;
+    }
 
-        synchronized(this) {
-            connectionInitialized(c);
-        }
-        callback.connectionInitialized(c);
+    public RouteTable getPushRouteTable() {
+        return pushRouteTable;
+    }
 
-        return c;
+    /**
+     * Get the number of connections wanted to be maintained
+     */
+    public int getKeepAlive() {
+        return keepAlive;
+    }
+
+    /**
+     *  Reset how many connections you want and start kicking more off
+     *  if required.  This IS synchronized because we don't want threads
+     *  adding or removing connections while this is deciding whether
+     *  to add more threads.
+     */
+    public synchronized void setKeepAlive(int newKeep) {
+        keepAlive = newKeep;
+        adjustConnectionFetchers();
+    }
+
+    /**Returns true if the given ClientID matches the ClientID of this host
+     *else returns false.
+     *This method will be called when a push request is being made and a
+     *host which receives the messages is unable to direct the message any further.
+     *The host then needs to check if it is the final destination.
+     *If this method returns true, then it is the final destination.
+     */
+    public boolean isClient(byte[] clientId){
+        //get the client ID from the gnutella.ini file.
+        return this.clientId.equals(new GUID(clientId));
+    }
+
+    public byte[] getClientGUID() {
+        return clientId.bytes();
+    }
+
+    /**
+     * returns true if there is a connection to the given host.
+     */
+    public boolean isConnected(Endpoint host) {
+        return endpoints.contains(host);
+    }
+
+    /**
+     * Returns the number of connections
+     */
+    public int getNumConnections() {
+        return connections.size();
+    }
+
+    /** Returns an iterator of a clone of this' initialized connections.
+     *  The iterator yields items in any order.  It <i>is</i> permissible
+     *  to modify this while iterating through the elements of this, but
+     *  the modifications will not be visible during the iteration.
+     */
+    public Iterator initializedConnections() {
+        List clone=new ArrayList();
+        clone.addAll(initializedConnections);
+        return clone.iterator();
+    }
+
+    /** Returns an iterator of a clone of all of this' connections.
+     *  The iterator yields items in any order.  It <i>is</i> permissible
+     *  to modify this while iterating through the elements of this, but
+     *  the modifications will not be visible during the iteration.
+     */
+    public Iterator connections() {
+        List clone=new ArrayList();
+        clone.addAll(connections);
+        return clone.iterator();
     }
 
     /**
      * Adds an initializing connection.
      * Should only be called from a thread that has this' monitor.
+     * This is called from initializeExternallyGeneratedConnection
+     * and initializeFetchedConnection, both times from within
+     * synchronized(this) block.
      */
     private void add(Connection c) {
         //REPLACE connections with the list connections+[c]
@@ -598,92 +649,6 @@ public class ConnectionManager implements Runnable {
         }
     }
 
-    public ActivityCallback getCallback() {
-        return callback;
-    }
-
-    public HostCatcher getCatcher() {
-        return catcher;
-    }
-
-    public RouteTable getRouteTable() {
-        return routeTable;
-    }
-
-    public RouteTable getPushRouteTable() {
-        return pushRouteTable;
-    }
-
-    /**
-     * Returns the number of connections
-     */
-    public int getNumConnections() {
-        return connections.size();
-    }
-
-    /**Returns true if the given ClientID matches the ClientID of this host
-     *else returns false.
-     *This method will be called when a push request is being made and a
-     *host which receives the messages is unable to direct the message any further.
-     *The host then needs to check if it is the final destination.
-     *If this method returns true, then it is the final destination.
-     */
-    public boolean isClient(byte[] clientId){
-        //get the client ID from the gnutella.ini file.
-        return this.clientId.equals(new GUID(clientId));
-    }
-
-    public byte[] getClientGUID() {
-        return clientId.bytes();
-    }
-
-    /**
-     * returns true if there is a connection to the given host.
-     */
-    public boolean isConnected(Endpoint host) {
-        return endpoints.contains(host);
-    }
-
-    /** Returns an iterator of a clone of this' initialized connections.
-     *  The iterator yields items in any order.  It <i>is</i> permissible
-     *  to modify this while iterating through the elements of this, but
-     *  the modifications will not be visible during the iteration.
-     */
-    public Iterator initializedConnections() {
-        List clone=new ArrayList();
-        clone.addAll(initializedConnections);
-        return clone.iterator();
-    }
-
-    /** Returns an iterator of a clone of all of this' connections.
-     *  The iterator yields items in any order.  It <i>is</i> permissible
-     *  to modify this while iterating through the elements of this, but
-     *  the modifications will not be visible during the iteration.
-     */
-    public Iterator connections() {
-        List clone=new ArrayList();
-        clone.addAll(connections);
-        return clone.iterator();
-    }
-
-    /**
-     * Get the number of connections wanted to be maintained
-     */
-    public int getKeepAlive() {
-        return keepAlive;
-    }
-
-    /**
-     *  Reset how many connections you want and start kicking more off
-     *  if required.  This IS synchronized because we don't want threads
-     *  adding or removing connections while this is deciding whether
-     *  to add more threads.
-     */
-    public synchronized void setKeepAlive(int newKeep) {
-        keepAlive = newKeep;
-        adjustConnectionFetchers();
-    }
-
     /**
      * Starts or stops connection fetchers to maintain the invariant
      * that numConnections + numFetchers >= keepAlive
@@ -736,14 +701,160 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
-     * Asynchronously fetches a connection from hostcatcher.
+     * Create a new connection, blocking until it's initialized
+     */
+    public ManagedConnection createConnectionBlocking(
+            String hostname, int portnum) throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum, this);
+
+        // Initialize synchronously
+        initializeExternallyGeneratedConnection(c);
+        // Kick off a thread for the message loop.
+        new InitializedConnectionThread(c);
+
+        return c;
+    }
+
+    /**
+     * Create a new connection, allowing it to initialize on its connection
+     * thread.
+     */
+    public void createConnectionAsynchronously(
+            String hostname, int portnum) {
+        // Initialize and loop for messages on another thread.
+        new InitializingConnectionThread(
+                new ManagedConnection(hostname, portnum, this));
+    }
+
+    /**
+     * Initializes an outgoing connection created by a ConnectionFetcher
+     *
+     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     */
+    private void initializeFetchedConnection(ManagedConnection c,
+                                             ConnectionFetcher fetcher)
+            throws IOException {
+        synchronized(this) {
+            if(fetcher.isInterrupted())
+                // Externally generated interrupt.
+                // The interrupting thread has recorded the
+                // death of the fetcher, so just return.
+                return;
+
+            add(c);
+            initializingFetchedConnections.add(c);
+            fetchers.remove(fetcher);
+        }
+        callback.connectionInitializing(c);
+
+        try {
+            c.initialize();
+        } catch(IOException e) {
+            synchronized(ConnectionManager.this) {
+                initializingFetchedConnections.remove(c);
+                removeInternal(c);
+                adjustConnectionFetchers();
+            }
+            throw e;
+        }
+
+        synchronized(this) {
+            initializingFetchedConnections.remove(c);
+            adjustConnectionFetchers();
+            connectionInitialized(c);
+        }
+        callback.connectionInitialized(c);
+    }
+
+    /**
+     * Initializes an outgoing connection created by createConnection or any
+     * incomingConnection.
+     *
+     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     */
+    private void initializeExternallyGeneratedConnection(ManagedConnection c)
+            throws IOException {
+        synchronized(this) {
+            add(c);
+            adjustConnectionFetchers();
+        }
+        callback.connectionInitializing(c);
+
+        try {
+            c.initialize();
+        } catch(IOException e) {
+            remove(c);
+            throw e;
+        }
+
+        synchronized(this) {
+            connectionInitialized(c);
+        }
+        callback.connectionInitialized(c);
+    }
+
+    /**
+     * This thread does the initialization and the message loop for
+     * ManagedConnections not created by ConnectionFetchers.
+     */
+    private class InitializingConnectionThread
+            extends Thread {
+        private ManagedConnection connection;
+
+        /**
+         * The constructor calls start(), so allow you need to do
+         * is construct the thread.
+         */
+        public InitializingConnectionThread(ManagedConnection connection) {
+            this.connection = connection;
+            setDaemon(true);
+            start();
+        }
+
+        public void run() {
+            try {
+                initializeExternallyGeneratedConnection(connection);
+            } catch(IOException e) {
+                return;
+            }
+            connection.loopForMessages();
+        }
+    }
+
+    /**
+     * This thread does the message loop for
+     * ManagedConnections not created by ConnectionFetchers.
+     * The conneciton passed in should be already initialized
+     */
+    private class InitializedConnectionThread
+            extends Thread {
+        private ManagedConnection connection;
+
+        /**
+         * The constructor calls start(), so allow you need to do
+         * is construct the thread.
+         */
+        public InitializedConnectionThread(ManagedConnection connection) {
+            this.connection = connection;
+            setDaemon(true);
+            start();
+        }
+
+        public void run() {
+            connection.loopForMessages();
+        }
+    }
+
+    /**
+     * Asynchronously fetches a connection from hostcatcher, then does
+     * then initialization and message loop.
      *
      * The ConnectionFetcher is responsible for recording its instantiation
      * by adding itself to the fetchers list.  It is responsible  for recording
      * its death by removing itself from the fetchers list only if it
-     * "interrupts itself", that is, only if the run method completes when it
-     * establishes a connection If the thread is interrupted externally, the
-     * interrupting thread is responsible for recording the death.
+     * "interrupts itself", that is, only if it establishes a connection. If
+     * the thread is interrupted externally, the interrupting thread is
+     * responsible for recording the death.
      */
     private class ConnectionFetcher
             extends Thread {
@@ -789,40 +900,16 @@ public class ConnectionManager implements Runnable {
 
             Assert.that(endpoint != null);
 
-            Connection c = new ManagedConnection(
+            ManagedConnection c = new ManagedConnection(
                 endpoint.hostname, endpoint.port,
                 ConnectionManager.this);
 
-            synchronized(ConnectionManager.this) {
-                if(isInterrupted())
-                    // Externally generated interrupt.
-                    // The interrupting thread has recorded the
-                    // death of the fetcher, so just return.
-                    return;
-
-                add(c);
-                initializingFetchedConnections.add(c);
-                fetchers.remove(this);
-            }
-            callback.connectionInitializing(c);
-
             try {
-                c.initialize();
+                initializeFetchedConnection(c, this);
             } catch(IOException e) {
-                synchronized(ConnectionManager.this) {
-                    initializingFetchedConnections.remove(c);
-                    removeInternal(c);
-                    adjustConnectionFetchers();
-                }
                 return;
             }
-
-            synchronized(ConnectionManager.this) {
-                initializingFetchedConnections.remove(c);
-                adjustConnectionFetchers();
-                connectionInitialized(c);
-            }
-            callback.connectionInitialized(c);
+            c.loopForMessages();
         }
     }
 }

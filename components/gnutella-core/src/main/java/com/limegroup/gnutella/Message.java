@@ -99,11 +99,11 @@ public abstract class Message {
         for (int i=0; i<23; ) {
             int got;
             try {
-            got=in.read(buf, i, 23-i);
+                got=in.read(buf, i, 23-i);
             } catch (InterruptedIOException e) {
-            //have we read any of the message yet?
-            if (i==0) return null;
-            else throw e;
+                //have we read any of the message yet?
+                if (i==0) return null;
+                else throw e;
             }
             if (got==-1) throw new IOException("Connection closed.");
             i+=got;
@@ -157,21 +157,21 @@ public abstract class Message {
 
         //Dispatch based on opcode.
         switch (func) {
-        case F_PING:
-            if (length!=0) break;
-            return new PingRequest(guid,ttl,hops);
-        case F_PING_REPLY:
-            if (length!=14) break;
-            return new PingReply(guid,ttl,hops,payload);
-        case F_QUERY:
-            if (length<3) break;
-            return new QueryRequest(guid,ttl,hops,payload);
-        case F_QUERY_REPLY:
-            if (length<26) break;
-            return new QueryReply(guid,ttl,hops,payload);
-        case F_PUSH:
-            if (length!=26) break;
-            return new PushRequest(guid,ttl,hops,payload);
+            case F_PING:
+                if (length!=0) break;
+                return new PingRequest(guid,ttl,hops);
+            case F_PING_REPLY:
+                if (length!=14) break;
+                return new PingReply(guid,ttl,hops,payload);
+            case F_QUERY:
+                if (length<3) break;
+                return new QueryRequest(guid,ttl,hops,payload);
+            case F_QUERY_REPLY:
+                if (length<26) break;
+                return new QueryReply(guid,ttl,hops,payload);
+            case F_PUSH:
+                if (length!=26) break;
+                return new PushRequest(guid,ttl,hops,payload);
         }
         throw new BadPacketException("Unrecognized function code: "+func);
     }
