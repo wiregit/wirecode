@@ -183,7 +183,8 @@ public class FileManager{
      *  to this.  <b>WARNING: this is a potential security hazard.</b>
      */
     public synchronized void addDirectories(String dir_names) {
-
+		
+		dir_names.trim();
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
         // need to see if there are duplicated directories...
