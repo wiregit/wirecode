@@ -29,6 +29,11 @@ public class BandwidthTrackerImpl implements Serializable {
      */
     private transient float averageBandwidth = 0;
     
+    /**
+     * The cached getMeasuredBandwidth value.
+     */
+    private transient float cachedBandwidth = 0;
+    
     long lastTime;
     int lastAmountRead;
 
@@ -64,11 +69,15 @@ public class BandwidthTrackerImpl implements Serializable {
         averageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
                             / ++numMeasures;
         snapShots.add(new Float(measuredBandwidth));
+        cachedBandwidth = 0;
     }
 
     /** @see BandwidthTracker#getMeasuredBandwidth */
     public synchronized float getMeasuredBandwidth() 
         throws InsufficientDataException {
+        if(cachedBandwidth != 0)
+            return cachedBandwidth;
+
         //TODO - make it throw and exception if not enough data
         int size = snapShots.getSize();
         if (size  < 3 )
@@ -78,7 +87,8 @@ public class BandwidthTrackerImpl implements Serializable {
         while(iter.hasNext()) {
             total+= ((Float)iter.next()).floatValue();
         }
-        return total/size;
+        cachedBandwidth = total/size;
+        return cachedBandwidth;
     }
     
     /**
