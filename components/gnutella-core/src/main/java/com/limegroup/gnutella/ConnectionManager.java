@@ -1086,8 +1086,8 @@ public class ConnectionManager {
         //directly.
         if (!c.isOutgoing() && 
                 !hasAvailableIncoming(c.isSupernodeClientConnection())) {
-            c.loopToReject(_catcher);            
-            remove(c);
+            c.loopToReject(_catcher);     
+            //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
 
