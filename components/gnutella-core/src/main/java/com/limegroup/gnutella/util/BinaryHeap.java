@@ -12,9 +12,9 @@ import com.sun.java.util.collections.Iterator;
  * implement java.lang.Comparable interface, as that is what is used for
  * comparison purposes so as to order the objects in the heap form.  While in
  * the heap, these objects must not be mutated in a way that affects compareTo.
- * <b>This class is not synchronized; that is up to the user.</b>
+ * <b>This class is not synchronized; that is up to the user.</b><p>
  *
- * @author Anurag Singla 
+ * BinaryHeap now contains a constructor to allow dynamic resizing as well.
  */
 public class BinaryHeap implements FixedSizeCollection
 {
@@ -29,19 +29,38 @@ public class BinaryHeap implements FixedSizeCollection
     private Comparable[] array;
 
     /**
-     * The maximum number of elements that can be put in the heap
+     * The maximum number of elements that can be put in the heap.  Memory
+     * allocated is maxSize+1 elements, as zeroth element is not used in the
+     * array, for convenience in heap operations.
      */
     private int maxSize;
 
     /**
-     * Constructor that initializes the size, and allocates sufficient memory to
-     * keep the elements (memory allocated for size+1 elements, as zeroth
-     * element is not used in the array, for convenience in heap operations)
-     *
-     * @param size The maximum size of the heap 
+     * True if we should dynamically resize this as needed.
      */
-    public BinaryHeap(int maxSize)
+    private boolean resizable=false;
+
+    /**
+     * Constructs a new fixed-size BinaryHeap.
+     *
+     * @param size the maximum size of the heap 
+     */
+    public BinaryHeap(int maxSize) {
+        this(maxSize, false);
+    }
+
+    /**
+     * Constructs a new BinaryHeap to initially hold the given number of
+     * elements.  Iff resize is true, the heap will grow dynamically to allow
+     * more elements as needed.
+     *
+     * @param size the initial size of the heap
+     * @param resizable true iff this should grow the heap to allow more 
+     *  elements
+     */
+    public BinaryHeap(int maxSize, boolean resizable)
     {
+        this.resizable=resizable;
         currentSize = 0;
         this.maxSize = maxSize;
         array = new Comparable[maxSize + 1];
@@ -73,6 +92,26 @@ public class BinaryHeap implements FixedSizeCollection
         this.maxSize = currentSize;
 
         buildHeap();
+    }
+
+    /** 
+     * If this is resizable and if the heap is full, allocates more memory.
+     * Returns true if the heap was actually resized.
+     */
+    private boolean resize() 
+    {
+        if (! isFull())
+            return false;
+        if (! resizable)
+            return false;
+
+        //Note that currentSize is not changed.  Also, note that first element
+        //of array is not used.
+        this.maxSize = currentSize*2;
+        Comparable[] newArray=new Comparable[1+maxSize];
+        System.arraycopy(array, 1, newArray, 1, currentSize);
+        this.array = newArray;
+        return true;
     }
 
     /**
@@ -163,6 +202,8 @@ public class BinaryHeap implements FixedSizeCollection
      */
     public Comparable insert(Comparable x)
     {
+        resize();
+
         Comparable ret=null;
         //Normal case
         if (currentSize<maxSize) {
@@ -273,14 +314,15 @@ public class BinaryHeap implements FixedSizeCollection
         return currentSize;
     }
 
-    /** Returns the maximum number of elements in this. */
+    /** Returns the maximum number of elements in this without growing the
+     *  heap. */
     public int capacity()
     {
         return maxSize;
     }
     
-    /** Returns true if this cannot store any more elements, i.e., 
-     *  size()==capacity() */
+    /** Returns true if this cannot store any more elements without growing the
+     *  heap, i.e., size()==capacity().  */
     public boolean isFull()
     {
         return currentSize==maxSize;
@@ -366,7 +408,9 @@ public class BinaryHeap implements FixedSizeCollection
         Assert.that(q.insert(one)==null);
         Assert.that(q.addR(four)==0);
         Assert.that(q.insert(three)==null);
+        Assert.that(! q.isFull());
         Assert.that(q.insert(two)==null);
+        Assert.that(q.isFull());
         System.out.println("The following tests are STRONGER than required"
                            +" the specification of insert.");
         System.out.println("(The spec does not say that the smallest"
@@ -378,6 +422,48 @@ public class BinaryHeap implements FixedSizeCollection
         Assert.that(q.extractMax().equals(four));
         Assert.that(q.extractMax().equals(three));
         Assert.that(q.isEmpty());
+
+        testResize();
+    }
+    
+    static void testResize() {
+        MyInteger one=new MyInteger(1);
+        MyInteger two=new MyInteger(2);
+        MyInteger three=new MyInteger(3);
+        MyInteger four=new MyInteger(4);
+        MyInteger five=new MyInteger(5);
+        BinaryHeap q=new BinaryHeap(2, true);
+
+        Assert.that(q.insert(one)==null);
+        Assert.that(! q.isFull());
+        Assert.that(q.addR(four)==0);
+        Assert.that(q.capacity()==2);
+        Assert.that(q.isFull());
+
+        Assert.that(q.insert(three)==null);
+        Assert.that(q.capacity()==4);
+        Assert.that(! q.isFull());
+        Assert.that(q.size()==3);
+        Assert.that(q.array.length==5);
+        Assert.that(q.array[0]==null);
+
+        Assert.that(q.insert(two)==null);
+        Assert.that(q.capacity()==4);
+        Assert.that(q.isFull());
+        Assert.that(q.size()==4);
+
+        Assert.that(q.insert(five)==null);
+        Assert.that(q.capacity()==8);
+        Assert.that(! q.isFull());
+        Assert.that(q.size()==5);
+
+        Assert.that(q.extractMax()==five);
+        Assert.that(q.extractMax()==four);
+        Assert.that(q.extractMax()==three);
+        Assert.that(q.extractMax()==two);;
+        Assert.that(q.extractMax()==one);
+        Assert.that(q.isEmpty());
+        Assert.that(q.capacity()==8);
     }
 
     //For testing with Java 1.1.8
