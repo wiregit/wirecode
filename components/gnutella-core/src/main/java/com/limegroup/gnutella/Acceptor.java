@@ -66,12 +66,14 @@ public class Acceptor extends Thread {
 	 *  to get around JDK bug #4073539, as well as to try to handle the case 
 	 *  of a computer whose IP address keeps changing.
 	 */
-	public static synchronized void setAddress(byte[] address) {
+	public void setAddress(InetAddress address) {
         //Ignore localhost.
-        if (address[0]==(byte)127)
-            return;
+		byte[] byteAddr = address.getAddress();
+		if(byteAddr[0] == 127) return;
 
-		_address = address;
+		synchronized(Acceptor.class) {
+			_address = byteAddr;
+		}
 	}
 
     /**
@@ -229,7 +231,7 @@ public class Acceptor extends Thread {
         //   block under certain conditions.
         //   See the notes for _address.
         try {
-            setAddress(InetAddress.getLocalHost().getAddress());
+            setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }
