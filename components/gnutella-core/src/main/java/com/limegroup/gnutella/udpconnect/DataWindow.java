@@ -360,15 +360,17 @@ public class DataWindow
 		int lastBlock     = -1;
 
 		// Find the last block
+        /*  Why is this code here???
 		for (int i = maxBlock; i < newMaxBlock; i++) {
 			d = getBlock(i);
 			if ( d != null )
 				lastBlock = i;
 		}
+        */
 
 		// Advance the window up to windowSize before lastBlock and clear old
 		// blocks
-        for (int i = windowStart; i < lastBlock-windowSize+1; i++) {
+        for (int i = windowStart; i < windowSize+1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
