@@ -408,19 +408,19 @@ public class QueryRouteTable {
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
-                boolean wasSet = bitTable.get(nextPatch);
-                boolean isSet = wasSet;
+                //boolean wasSet = bitTable.get(nextPatch);
+                //boolean isSet = wasSet;
                 if (data[i] == KEYWORD_PRESENT) {
                     bitTable.set(nextPatch);
-                    isSet = true;
+                    //isSet = true;
                 }
                 else if (data[i] == KEYWORD_ABSENT) {
                     bitTable.clear(nextPatch);
-                    isSet = false;
+                    //isSet = false;
                 }                
-                if (wasSet != isSet) {
+                //if (wasSet != isSet) {
                     resizedQRT = null;
-                }
+                //}
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
