@@ -47,7 +47,8 @@ public class UnavailableRangeUploadState extends UploadState {
 		ostream.write(str.getBytes());
 		
 		writeAlts(ostream);
-		writeRanges(ostream);        
+		writeRanges(ostream);
+		writeProxies(ostream);
 
 		
         if (FILE_DESC!=null && FILE_DESC instanceof IncompleteFileDesc) {

@@ -65,6 +65,7 @@ public final class BrowseHostUploadState extends UploadState {
 		ostream.write(str.getBytes());
 	    str = "Content-Length: " + BAOS.size() + "\r\n";
 		ostream.write(str.getBytes());
+		writeProxies(ostream);
 		str = "\r\n";
         ostream.write(str.getBytes());
 	}

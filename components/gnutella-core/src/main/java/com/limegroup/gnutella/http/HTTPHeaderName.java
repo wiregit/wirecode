@@ -182,6 +182,13 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName FEATURES =
         new HTTPHeaderName("X-Features");
 
+	/**
+	 * Header for updating the set of push proxies for a host.  Defined in
+	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 */
+	public static final HTTPHeaderName PROXIES =
+	    new HTTPHeaderName("X-Push-Proxy");
+	
     /**
      * Header for sending your own "<ip>:
      * <listening port>"

@@ -844,9 +844,11 @@ public class HTTPDownloader implements BandwidthTracker {
             	parseFeatureHeader(str);
             else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
                 parseTHEXHeader(str);
-            else if (HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str)){
+            else if (HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str))
             	parseFALTHeader(str);
-            }
+            else if (HTTPHeaderName.PROXIES.matchesStartOfString(str))
+                parseProxiesHeader(str);
+            
         }
 
 
@@ -1463,6 +1465,37 @@ public class HTTPDownloader implements BandwidthTracker {
     	readAlternateLocations(str);
     }
       
+    
+    /**
+     * parses the header containing the current set of push proxies for 
+     * the given host, and updates the rfd
+     */
+    private void parseProxiesHeader(String str) {
+        str = HTTPUtils.extractHeaderValue(str);
+        
+        if (_rfd.getPushAddr()==null || str==null || str.length()<12) 
+            return;
+        
+        // cheat - replace the proxies part in the current 
+        // http representation 
+        str.replace(",",";");
+        
+        PushEndpoint current = _rfd.getPushAddr();
+        PushEndpoint stripped = 
+            new PushEndpoint(current.getClientGUID(),
+                    null,
+                    current.getFeatures(),
+                    current.supportsFWTVersion());
+        
+        String updatedString = stripped.httpStringValue()+";"+str;
+        
+        try {
+            _rfd.setPushAddress(new PushEndpoint(updatedString));
+        }catch(IOException tooBad) {
+            // invalid header - ignore it.
+        }
+        
+    }
     /////////////////////////////// Download ////////////////////////////////
 
     /*

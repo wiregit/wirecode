@@ -311,19 +311,6 @@ public final class HTTPUtils {
     }
     
     /**
-     * Utility method for extracting the version from a feature token
-     * Also performs validation of the feature
-     */
-    public static float parseFeatureToken(String token, String featureName) 
-    	throws ProblemReadingHeaderException{
-        
-        if (!token.startsWith(featureName))
-            throw new ProblemReadingHeaderException("unexpected feature");
-        
-        return parseFeatureToken(token);
-    }
-    
-    /**
      * Utility method for getting the date value for the "Date" header in
      * standard format.
      * 

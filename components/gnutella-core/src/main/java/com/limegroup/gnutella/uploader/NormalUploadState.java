@@ -132,6 +132,7 @@ public final class NormalUploadState extends UploadState {
 			}
 			writeAlts(network);
 			writeRanges(network);
+			writeProxies(network);
 			if(FILE_DESC != null) {
 				URN urn = FILE_DESC.getSHA1Urn();
 				

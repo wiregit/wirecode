@@ -71,6 +71,7 @@ public class LimitReachedUploadState extends UploadState {
 		ostream.write(str.getBytes());
 		str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
 		ostream.write(str.getBytes());
+		writeProxies(ostream);
 		writeAlts(ostream);
 		if(FILE_DESC != null) {
 			// write the URN in case the caller wants it

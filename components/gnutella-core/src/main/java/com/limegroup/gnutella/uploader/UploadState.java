@@ -8,7 +8,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.*;
 
 /**
  * an Upload State.  has some utility methods all upload states can use.
@@ -69,6 +69,36 @@ public abstract class UploadState implements HTTPMessage {
                                   iFILE_DESC, os);
 			}
 		}
+	}
+	
+	
+	/**
+	 * writes out the X-Push-Proxies header as specified by 
+	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 */
+	protected void writeProxies(OutputStream os) throws IOException {
+	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    
+	    StringBuffer buf = new StringBuffer();
+	    int proxiesWritten =0;
+	    for (Iterator iter = proxies.iterator();
+	    	iter.hasNext() && proxiesWritten <4 ;) {
+	        PushProxyInterface current = (PushProxyInterface)iter.next();
+	        buf.append(current.getPushProxyAddress().getHostAddress())
+	        	.append(":")
+	        	.append(current.getPushProxyPort())
+	        	.append(",");
+	        
+	        proxiesWritten++;
+	    }
+	    
+	    if (proxiesWritten >0)
+	        buf.deleteCharAt(buf.length()-1);
+	    else
+	        return;
+	    
+	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
+	    
 	}
 
 }
