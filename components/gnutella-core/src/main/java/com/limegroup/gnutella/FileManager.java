@@ -27,13 +27,13 @@ public class FileManager{
      *  f[i]._path is in the shared folder with a shareable extension.
      *  LOCKING: obtain this before modifying. */
     private ArrayList /* of FileDesc */ _files;
-    /** an index mapping keywords in file names to the index in _files.  A
+    /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
-     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
-     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
+     * _index, for all i in _index.getAll(k), _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path, _index.getAll(k)
      * contains i. */
-    private Trie /* String -> List<Integer> */ _index;
+    private Trie /* String -> Integer*  */ _index;
 
     private String[] _extensions;
     private Set _sharedDirectories;
@@ -183,18 +183,7 @@ public class FileManager{
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 Integer j=new Integer(_files.size()-1);
-                List indices=(List)_index.get(keyword);
-                //...by adding new mappings...
-                if (indices==null) {
-                    indices=new ArrayList();
-                    indices.add(j);
-                    _index.put(keyword, indices);
-                }
-                //...or modifying existing mappings.
-                else {
-                    if (! indices.contains(j))
-                        indices.add(j);
-                }
+                _index.add(keyword, j);
             }
         }
     }
@@ -259,10 +248,7 @@ public class FileManager{
                                                     DELIMETERS);
                 for (int j=0; j<keywords.length; j++) {
                     String keyword=keywords[j];
-                    List indices=(List)_index.get(keyword);
-                    Assert.that(indices!=null, "File wasn't properly indexed.");
-                    indices.remove(new Integer(i));
-                    Assert.that(! indices.contains(new Integer(i))); //TODO3
+                    _index.remove(keyword, new Integer(i));
                 }
                 return true;  //No more files in list will match this.
             }
@@ -399,7 +385,7 @@ public class FileManager{
         //i.e., "_files=this._files"
 
         //TODO1: handle clip2 indexing query
-        
+        //TODO2: can we avoid allocating sets here?
         Set matches=null;
 
         //For each keyword in the query....  (Note that we avoid calling
@@ -414,27 +400,23 @@ public class FileManager{
                 if (isDelimeter(query.charAt(j)))
                     break;
             }
-            //Now keywords[i...j-1] is the keyword to search for.
 
+            //Now keywords[i...j-1] is the keyword to search for.
             Iterator /* of List<Integer> */ iter=
                 _index.getPrefixedBy(query, i, j);
-            //TODO1: avoid allocations, perhaps by making Trie a multimap.
             Set matches2=new TreeSet(ArrayListUtil.integerComparator());
             while (iter.hasNext()) {
-                List indices=(List)iter.next();
-                for (Iterator iter2=indices.iterator(); iter2.hasNext() ; ) {
-                    Integer k=(Integer)iter2.next();
-                    matches2.add(k);
-                }
-            }         
+                Integer k=(Integer)iter.next();
+                matches2.add(k);
+            }
+
             if (matches==null)   //first time through for loop?
                 matches=matches2;
             else
                 matches.retainAll(matches2);
-            //Optimization: if a keyword failed, don't check others..
+            //Optimization: if no matches, don't check others..
             if (matches.size()==0)
-                break;
-
+                return null;        
             i=j;
         }
         if (matches==null || matches.size()==0)
