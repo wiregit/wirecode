@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
@@ -519,6 +520,16 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertTrue(ping2.supportsPushDigests());
     	assertNotNull(ping.getDigest());
     	assertNotNull(ping.getPushDigest());
+    	assertNull(ping.getPE());
+    	
+    	// test a ping which carries return address
+    	PushEndpoint pe = new PushEndpoint(g.toHexString()+";5:1.2.3.4;2.3.4.5:6");
+    	ping = new HeadPing(urn,null,null,HeadPing.PLAIN,pe);
+    	baos = new ByteArrayOutputStream();
+    	ping.write(baos);
+    	bais = new ByteArrayInputStream(baos.toByteArray());
+    	ping = (HeadPing) Message.read(bais);
+    	assertEquals(pe,ping.getPE());
     	
     }
     

@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocDigest;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
@@ -103,6 +104,11 @@ public class HeadPing extends VendorMessage {
 	private final boolean _supportsBloom, _supportsPushBloom;
 	
 	/**
+	 * A return address the ping included, if any.
+	 */
+	private final PushEndpoint _me;
+	
+	/**
 	 * creates a message object with data from the network.
 	 */
 	protected HeadPing(byte[] guid, byte ttl, byte hops,
@@ -168,6 +174,16 @@ public class HeadPing extends VendorMessage {
         } 
 		
         _clientGUID=clientGuid;
+        
+        // extract the return address if any
+        PushEndpoint me = null;
+        if (_ggep != null) {
+            try {
+                byte [] pe = _ggep.getBytes((char)GGEPHeadConstants.GGEP_MYPE+GGEPHeadConstants.DATA);
+                me = PushEndpoint.fromBytes(pe);
+            }catch(BadGGEPPropertyException noPE){}
+        }
+        _me = me;
         _supportsBloom = supportsBloom;
         _supportsPushBloom = supportsPushBloom;
 	}
@@ -184,22 +200,27 @@ public class HeadPing extends VendorMessage {
 	
 	
 	public HeadPing(URN sha1, GUID clientGUID, AltLocDigest []digest, int features) {
+	    this(sha1,clientGUID,digest,features,null);
+	}
+	
+	public HeadPing(URN sha1, GUID clientGUID, AltLocDigest []digests, int features, PushEndpoint me){ 
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(sha1, clientGUID, digest, features));
+		 		derivePayload(sha1, clientGUID, digests, features,me));
 		_features = (byte)((features | GGEP_PING) & FEATURE_MASK);
 		_urn = sha1;
 		_clientGUID = clientGUID;
 		
-		if (digest == null || digest.length < 2) {
+		if (digests == null || digests.length < 2) {
 		    _digest = null;
 		    _pushDigest = null;
 		} else {
-		    _digest = digest[0];
-		    _pushDigest = digest[1];
+		    _digest = digests[0];
+		    _pushDigest = digests[1];
 		}
 		
 		_supportsBloom=true;
 		_supportsPushBloom=true;
+		_me = me;
 	}
 
 	
@@ -212,7 +233,8 @@ public class HeadPing extends VendorMessage {
 	
 
 	
-	private static byte [] derivePayload(URN urn, GUID clientGUID, AltLocDigest []filter, int features) {
+	private static byte [] derivePayload(URN urn, GUID clientGUID, AltLocDigest []filter, 
+	        int features, PushEndpoint me) {
 
 		features = features & FEATURE_MASK;
 
@@ -242,7 +264,11 @@ public class HeadPing extends VendorMessage {
 		
 		// is this a push ping?
 		if (clientGUID != null) 
-			ggep.put(GGEP_PUSH,clientGUID.bytes());  
+			ggep.put(GGEP_PUSH,clientGUID.bytes());
+		
+		// is there a PushEndpoint to include as a return address?
+		if (me != null) 
+		    ggep.put((char)GGEPHeadConstants.GGEP_MYPE+GGEPHeadConstants.DATA,me.toBytes());
 		
 		try {
 			daos.writeByte(features);
@@ -262,6 +288,13 @@ public class HeadPing extends VendorMessage {
 	 */
 	public URN getUrn() {
 		return _urn;
+	}
+	
+	/**
+	 * @return the PushEndpoint this ping came from, if included.
+	 */
+	public PushEndpoint getPE() {
+	    return _me;
 	}
 	
 	public boolean requestsRanges() {

@@ -608,7 +608,14 @@ public class HeadPong extends VendorMessage {
 	 * @return whether the host will understand an altloc digest sent to it. 
 	 */
 	public boolean supportsDigests() {
-	    return true;
+	    return (_ggepFeatures & (GGEPHeadConstants.GGEP_BLOOM | GGEPHeadConstants.GGEP_PUSH_BLOOM)) != 0;
+	}
+	
+	/**
+	 * @return whether the host will understand a ping containing a PE return address.
+	 */
+	public boolean supportsReturnPE() {
+	    return (_ggepFeatures & GGEPHeadConstants.GGEP_MYPE) != 0;
 	}
 	
 	//*************************************
