@@ -217,8 +217,6 @@ public class Main implements ActivityCallback {
 
 	public void acceptChat(Chatter chat) {}
 
-	public void removeChat(Chatter chat) {}
-
 	public void receiveMessage(Chatter chat) {}
 	
 	public void chatUnavailable(Chatter chatter) {}

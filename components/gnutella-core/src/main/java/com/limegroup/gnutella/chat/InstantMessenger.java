@@ -71,7 +71,6 @@ public class InstantMessenger implements Chatter {
 	/** stop the chat, and close the connections */
 	public void stop() {
 		_manager.removeChat(this);
-		_activityCallback.removeChat(this);
 		try {
 			_out.close();
 			_socket.close();

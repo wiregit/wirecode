@@ -51,9 +51,6 @@ public interface ActivityCallback
 	/** handle adding a chat, and messages to the chats */
 	public void acceptChat(Chatter ctr);
 
-	/** removes a chat from the gui */
-	public void removeChat(Chatter ctr);
-
 	public void receiveMessage(Chatter chr);
 
 	/** lets the user know that a host is no longer available */
