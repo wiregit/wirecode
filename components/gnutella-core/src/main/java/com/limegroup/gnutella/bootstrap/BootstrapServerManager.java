@@ -17,6 +17,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
  * http://zero-g.net/gwebcache/specs.html
  */
 public class BootstrapServerManager {
+
     /** The minimum number of endpoints/urls to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
     /** The maximum number of bootstrap servers to retain in memory. */
@@ -35,15 +36,15 @@ public class BootstrapServerManager {
      *  LOCKING: this 
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
-    private List /* of BootstrapServer */ _servers=new ArrayList();
+    private final List /* of BootstrapServer */ SERVERS=new ArrayList();
     /** The last bootstrap server we successfully connected to, or null if none.
      *  Used for sending updates.  _lastConnectable will generally be in
-     *  _servers, though this is not strictly required because of _servers'
+     *  SERVERS, though this is not strictly required because of SERVERS'
      *  random replacement strategy.  _lastConnectable should be nulled if we
      *  later unsuccessfully try to reconnect to it. */
     private BootstrapServer _lastConnectable;
     /** Where to deposit fetched endpoints. */
-    private HostCatcher _catcher; 
+    private final HostCatcher CATCHER; 
     /** Source of randomness for picking servers. 
      *  TODO: this is thread-safe, right? */
     private Random12 _rand=new Random12();
@@ -56,17 +57,19 @@ public class BootstrapServerManager {
 
     /** @param catcher where to deposit fetched endpoints. */
     public BootstrapServerManager(HostCatcher catcher) {
-        this._catcher=catcher;
+        this.CATCHER=catcher;
     }
 
     /**
      * Adds server to this.
      */
     public synchronized void addBootstrapServer(BootstrapServer server) {
-        if (! _servers.contains(server))
-            _servers.add(server);
-        if (_servers.size()>MAX_BOOTSTRAP_SERVERS) 
-            _servers.remove(randomServer());
+		if(server == null) 
+			throw new NullPointerException("null bootstrap server not allowed");
+        if (! SERVERS.contains(server))
+            SERVERS.add(server);
+        if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) 
+            SERVERS.remove(randomServer());
     }
 
     /**
@@ -77,7 +80,7 @@ public class BootstrapServerManager {
      * @return an Iterator of BootstrapServer.
      */
     public synchronized Iterator /*of BootstrapServer*/ getBootstrapServers() {
-        return _servers.iterator();
+        return SERVERS.iterator();
     }
 
     /** 
@@ -108,14 +111,17 @@ public class BootstrapServerManager {
      * Asynchronously sends an update message to a cache.  May do nothing if
      * nothing to update.  Uses the "url" and "ip" messages.
      *
-     * @param myIP my listening address and port, or null if I cannot accept 
-     *  incoming connections or am not a supernode.
+     * @param myIP my listening address and port
+	 * @throws <tt>NullPointerException</tt> if the ip param is <tt>null</tt>
      */
     public synchronized void sendUpdatesAsync(Endpoint myIP) {
+		if(myIP == null) {
+			throw new NullPointerException("cannot accept null update IP");
+		}
         addDefaultsIfNeeded();
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
-        if (myIP!=null && !myIP.isPrivateAddress())
+        if (!myIP.isPrivateAddress())
             requestAsync(new UpdateRequest(myIP), "GWebCache update");
     }
 
@@ -123,7 +129,7 @@ public class BootstrapServerManager {
      * Adds default bootstrap servers to this if this needs more entries.
      */
     private void addDefaultsIfNeeded() {
-        if (_servers.size()>0)
+        if (SERVERS.size()>0)
             return;
         DefaultBootstrapServers.addDefaults(this);        
     }
@@ -131,39 +137,39 @@ public class BootstrapServerManager {
 
     /////////////////////////// Request Types ////////////////////////////////
 
-    abstract class GWebCacheRequest {
+    private abstract class GWebCacheRequest {
         /** Returns the parameters for the given request, minus the "?" and any
          *  leading or trailing "&".  These will be appended after common
          *  parameters (e.g, "client"). */
-        public abstract String parameters();
+        protected abstract String parameters();
         /** Called when if were unable to connect to the URL, got a non-standard
          *  HTTP response code, or got an ERROR method.  Default value: remove
          *  it from the list. */
-        public void handleError(BootstrapServer server) {
+        protected void handleError(BootstrapServer server) {
             //For now, we just remove the host.  
             //Eventually we put it on probation.
             synchronized (BootstrapServerManager.this) {
-                _servers.remove(server);
+                SERVERS.remove(server);
                 if (_lastConnectable==server)
                     _lastConnectable=null;
             }
         }
         /** Called when we got a line of data.  Implementation may wish
          *  to call handleError if the data is in a bad format. */
-        public abstract void handleResponseData(BootstrapServer server, 
-                                                String line);
+        protected abstract void handleResponseData(BootstrapServer server, 
+												   String line);
         /** Should we go on to another host? */
-        public abstract boolean needsMoreData();
+        protected abstract boolean needsMoreData();
         /** Called when this is done.  Default: does nothing. */
-        public void done() { }
+        protected void done() { }
     }
     
-    class HostfileRequest extends GWebCacheRequest {
+    private final class HostfileRequest extends GWebCacheRequest {
         private int responses=0;
-        public String parameters() {
+        protected String parameters() {
             return "hostfile=1";
         }
-        public void handleResponseData(BootstrapServer server, String line) {
+        protected void handleResponseData(BootstrapServer server, String line) {
             try {
                 //Only accept numeric addresses.  (An earlier version of this
                 //did not do strict checking, possibly resulting in HTML in the
@@ -176,27 +182,27 @@ public class BootstrapServerManager {
 				// TODO: Can this cause a problem with the X-Try-Ultrapeer headers?
 				//       Might this cause a problem with reporting private addresses
 				//       in those headers?
-                _catcher.add(host, true);       
+                CATCHER.add(host, true);       
                 responses++;
             } catch (IllegalArgumentException bad) { 
                 //One strike and you're out; skip servers that send bad data.
                 handleError(server);
             }            
         }
-        public boolean needsMoreData() {
+        protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
         }
-        public void done() {
+        protected void done() {
             _hostFetchInProgress=false;
         }
     }
 
-    class UrlfileRequest extends GWebCacheRequest {
+    private final class UrlfileRequest extends GWebCacheRequest {
         private int responses=0;
-        public String parameters() {
+        protected String parameters() {
             return "urlfile=1";
         }
-        public void handleResponseData(BootstrapServer server, String line) {
+        protected void handleResponseData(BootstrapServer server, String line) {
             try {
                 BootstrapServer e=new BootstrapServer(line);
                 //Ensure url in this.  If list is too big, remove random
@@ -210,39 +216,40 @@ public class BootstrapServerManager {
                 handleError(server);
             }            
         }
-        public boolean needsMoreData() {
+        protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
         }
     }
 
-    class UpdateRequest extends GWebCacheRequest {
+    private final class UpdateRequest extends GWebCacheRequest {
         private boolean gotResponse=false;
         private Endpoint myIP;
 
         /** @param ip my ip address, or null if this can't accept incoming
          *  connections. */ 
-        public UpdateRequest(Endpoint myIP) {
+        protected UpdateRequest(Endpoint myIP) {
             this.myIP=myIP;
         }
-        public String parameters() {
+        protected String parameters() {
             //The url of good server.  There's a small chance that we send a
             //host its own address.  TODO: the encoding method we use is
             //deprecated because it doesn't take care of character conversion
             //properly.  What to do?
-            String urlPart=null;
-            if (_lastConnectable!=null)
-                urlPart="url="
-                       +URLEncoder.encode(_lastConnectable.getURL().toString());
+            String urlPart = null;
+            if (_lastConnectable != null)
+                urlPart = "url=" +
+					URLEncoder.encode(_lastConnectable.getURL().toString());
+
             //My ip address as a parameter.
-            String ipPart=null;
-            if (myIP!=null) 
-                ipPart="ip="+myIP.getHostname()+":"+myIP.getPort();
+            String ipPart = null;
+            if (myIP != null) 
+                ipPart = "ip="+myIP.getHostname()+":"+myIP.getPort();
 
             //Some of these case are disallowed by sendUpdatesAsync, but we
             //handle all of them here.
             if (urlPart==null && ipPart==null)
                 return "";
-            else if (urlPart!=null && ipPart==null)
+            else if (urlPart != null && ipPart == null)
                 return urlPart;
             else if (urlPart==null && ipPart!=null)
                 return ipPart;
@@ -251,11 +258,11 @@ public class BootstrapServerManager {
                 return ipPart+"&"+urlPart;            
             }
         }
-        public void handleResponseData(BootstrapServer server, String line) {
+        protected void handleResponseData(BootstrapServer server, String line) {
             if (StringUtils.startsWithIgnoreCase(line, "OK"))
                 gotResponse=true;
         }
-        public boolean needsMoreData() {
+        protected boolean needsMoreData() {
             return !gotResponse;
         }
     }
@@ -267,6 +274,9 @@ public class BootstrapServerManager {
     /** @param threadName a name for the thread created, for debugging */
     private void requestAsync(final GWebCacheRequest request,
                               String threadName) {
+		if(request == null) {
+			throw new NullPointerException("asynchronous request to null cache");
+		}
         Thread runner=new Thread() {
             public void run() {
                 try {
@@ -285,14 +295,17 @@ public class BootstrapServerManager {
     }
 
     private void requestBlocking(GWebCacheRequest request) {        
+		if(request == null) {
+			throw new NullPointerException("blocking request to null cache");
+		}
         for (int i=0; request.needsMoreData() && i<MAX_HOSTS_PER_REQUEST; i++) {
             //Pick a random server.  We may visit the same server twice, but
             //that's improbable.  Alternative: shuffle list and remove first.
             BootstrapServer e;
             synchronized (this) {
-                if (_servers.size()==0)
+                if (SERVERS.size()==0)
                     break;
-                e=(BootstrapServer)_servers.get(randomServer());
+                e=(BootstrapServer)SERVERS.get(randomServer());
             }
             requestFromOneHost(request, e);
         }
@@ -300,18 +313,24 @@ public class BootstrapServerManager {
                                         
     private void requestFromOneHost(GWebCacheRequest request,
                                     BootstrapServer server) {
-        BufferedReader in=null;
+		if(request == null) {
+			throw new NullPointerException("null cache in request to one host");
+		}
+		if(server == null) {
+			throw new NullPointerException("null server in request to one host");
+		}
+        BufferedReader in = null;
         try {
             //Prepare the request.  TODO: it would be great to add connection
             //timeouts, but URLConnection doesn't give us control over that.
             //One option on Java 1.4 is to set some system properties, e.g.,
             //http.defaultSocketTimeout.  See for example
             //   developer.java.sun.com/developer/bugParade/bugs/4143518.html
-            URL url=new URL(server.getURL().toString()
+            URL url = new URL(server.getURL().toString()
                 +"?client="+CommonUtils.QHD_VENDOR_NAME
                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                 +"&"+request.parameters());
-            HttpURLConnection connection=
+            HttpURLConnection connection =
                 (HttpURLConnection)url.openConnection();
             connection.setUseCaches(false);
             connection.setRequestProperty(
@@ -322,32 +341,32 @@ public class BootstrapServerManager {
                 "close");
             //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
             //weird characters on international systems.
-            in=new BufferedReader(
-                   new InputStreamReader(connection.getInputStream(), 
-                                         "ISO-8859-1"));
+            in = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), 
+									  "ISO-8859-1"));
 
             //For each line of data (excludes HTTP headers)...
-            boolean firstLine=true;
-            boolean errors=false;
+            boolean firstLine = true;
+            boolean errors = false;
             while (true) {                          
-                String line=in.readLine();
-                if (line==null)
+                String line = in.readLine();
+                if (line == null)
                     break;
 
-                if (firstLine&& StringUtils.startsWithIgnoreCase(line,"ERROR")){
+                if (firstLine && StringUtils.startsWithIgnoreCase(line,"ERROR")){
                     request.handleError(server);
-                    errors=true;
+                    errors = true;
                 } else {
                     request.handleResponseData(server, line);
                 }
 
-                firstLine=false;
+                firstLine = false;
             }
 
             //If no errors, record the address AFTER sending requests so we
             //don't send a host its own url in update requests.
             if (!errors)
-                _lastConnectable=server;
+                _lastConnectable = server;
         } catch (IOException ioe) {
             request.handleError(server);
         } finally {
@@ -357,14 +376,14 @@ public class BootstrapServerManager {
         }
     }
 
-    /** Returns an random valid index of _servers.  Protected so we can override
-     *  in test cases.  PRECONDITION: _servers.size>0. */
+    /** Returns an random valid index of SERVERS.  Protected so we can override
+     *  in test cases.  PRECONDITION: SERVERS.size>0. */
     protected int randomServer() {
-        return _rand.nextInt(_servers.size());
+        return _rand.nextInt(SERVERS.size());
     }
 
     /** Returns the number of servers in this. */
     protected synchronized int size() {
-        return _servers.size();
+        return SERVERS.size();
     }
 }
