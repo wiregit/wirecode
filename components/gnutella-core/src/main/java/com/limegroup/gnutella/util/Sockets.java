@@ -123,9 +123,7 @@ public class Sockets {
             sc.configureBlocking(false);
             sc.connect(addr);
 
-            Socket sock = sc.socket();
-            sock.setSoTimeout(timeout);
-            return sock;
+            return sc.socket();
         }
      
         if (timeout!=0) {
