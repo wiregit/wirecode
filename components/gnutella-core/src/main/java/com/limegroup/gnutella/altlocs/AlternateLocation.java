@@ -17,6 +17,11 @@ import com.sun.java.util.collections.Comparable;
  * stored.
  */
 public final class AlternateLocation implements HTTPHeaderValue, Comparable {
+    
+    /**
+     * The vendor to use.
+     */
+    public static final String ALT_VENDOR = "ALT";
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -33,11 +38,6 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
-	
-	/**
-	 * Constant empty clientGUID for RFDs made from locations.
-	 */
-	private static final byte[] EMPTY_GUID = new byte[16];
 
     /**
      * LOCKING: obtain this' monitor while changing/accessing _count and 
@@ -276,10 +276,10 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		urnSet.add(getSHA1Urn());
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
-								  EMPTY_GUID, 1000,
+								  DataUtils.EMPTY_GUID, 1000,
 								  true, 3, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
-                                  "ALT",//Never displayed, and we don't know
+                                  ALT_VENDOR,//Never displayed, and we don't know
                                   System.currentTimeMillis(), null);
 	}
 
