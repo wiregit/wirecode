@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.security.Authenticator;
+import com.limegroup.gnutella.security.Cookies;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -55,19 +57,28 @@ public class RouterService
     private UploadManager uploadManager;
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
+    
+    /**
+     * For authenticating users
+     */
+    private Authenticator authenticator;
 
 	/**
 	 * Creates a unitialized RouterService.  No work is done until
      * initialize() is called.
      * @param activityCallback the object to be notified of backend changes
      * @param router the algorithm to use for routing messages.  
+     * @param fManager FileManager instance for all file system related duties
+     * @param authenticator Authenticator instance for authenticating users
 	 */
   	public RouterService(ActivityCallback activityCallback,
   						 MessageRouter router,
-                         FileManager fManager) {
+                         FileManager fManager,
+                         Authenticator authenticator) {
   		this.callback = activityCallback;
   		this.router = router;
         this.fileManager = fManager;
+        this.authenticator = authenticator;
 		Assert.setCallback(this.callback);
   	}
 
@@ -79,7 +90,7 @@ public class RouterService
 		SettingsManager settings = SettingsManager.instance();
   		int port = settings.getPort();
   		this.acceptor = new Acceptor(port, callback);
-  		this.manager = new ConnectionManager(callback);
+  		this.manager = new ConnectionManager(callback, authenticator);
   		this.catcher = new HostCatcher(callback);
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager();
@@ -400,6 +411,9 @@ public class RouterService
                 file.delete();  //May or may not work; ignore return code.
             }
         }
+        
+        //save cookies
+        Cookies.instance().save();
     }
 
     /**
