@@ -42,12 +42,14 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.Map;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -186,6 +188,10 @@ public class UploadTest extends BaseTestCase {
 		    0, upMan.uploadsInProgress() );
         assertEquals("unexpected queued uploads",
             0, upMan.getNumQueuedUploads() );
+        
+        // clear the cache history so no banning occurs.
+        Map requests = (Map)PrivilegedAccessor.getValue(upMan, "REQUESTS");
+        requests.clear();
 	}
 
     //public void testAll() {
