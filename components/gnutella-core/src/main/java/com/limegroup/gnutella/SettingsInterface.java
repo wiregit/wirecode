@@ -29,6 +29,8 @@ public interface SettingsInterface
     public boolean    getStats();
     public String     getClientID();
     public int        getMaxConn();
+    public String     getDirectories();
+    public String     getExtensions();
 
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
@@ -83,6 +85,14 @@ public interface SettingsInterface
     public void setMaxConn(int maxConn)
 	throws IllegalArgumentException;
 
+    /** sets the string list of directories*/
+    public void setDirectories(String directories)
+	throws IllegalArgumentException;
+    
+    /** sets the string of extensions*/
+    public void setExtensions(String extensions)
+	throws IllegalArgumentException;
+
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
@@ -116,6 +126,10 @@ public interface SettingsInterface
     public static final boolean DEFAULT_STATS         = false;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_CONN      = 900;
+    /** Default directories for saving files */
+    public static final String  DEFAULT_DIRECTORIES   = "";
+    /** Default file extensions */
+    public static final String  DEFAULT_EXTENSIONS    = "";
 
     // The property key name constants 
     public static final String TTL                  = "TTL";
@@ -129,6 +143,8 @@ public interface SettingsInterface
     public static final String CLIENT_ID            = "CLIENT_ID";
     public static final String STATS                = "STATS";
     public static final String MAX_CONN             = "MAXIMUM_NUMBER_OF_CONNECTIONS";
+    public static final String DIRECTORIES          = "DIRECTORIES_TO_SEARCH_FOR_FILES";
+    public static final String EXTENSIONS           = "EXTENSIONS_TO_SEARCH_FOR";
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }

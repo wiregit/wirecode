@@ -31,6 +31,8 @@ public class SettingsManager implements SettingsInterface
     private static String   clientID_;
     private static int      maxConn_;
     private static int      localIP_;
+    private static String   directories_;
+    private static String   extensions_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -215,6 +217,18 @@ public class SettingsManager implements SettingsInterface
 			}
 			catch(NumberFormatException nfe){}
 		    }		
+
+		else if(key.equals(SettingsInterface.DIRECTORIES))
+		    {
+			try {setDirectories(p);}
+			catch (IllegalArgumentException ie){}
+		    }
+
+		else if(key.equals(SettingsInterface.EXTENSIONS))
+		    {
+			try {setExtensions(p);}
+			catch (IllegalArgumentException ie){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -237,6 +251,8 @@ public class SettingsManager implements SettingsInterface
 	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 	setStats(SettingsInterface.DEFAULT_STATS);
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
+	setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);
+	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
     }
 
     /** returns the time to live */
@@ -277,6 +293,13 @@ public class SettingsManager implements SettingsInterface
     /** returns the maximum number of connections to hold */
     public int getMaxConn(){return maxConn_;}
 
+    /** returns the string of file extensions*/
+    public String getExtensions(){return extensions_;}
+
+    /** returns the directories to search */
+    public String getDirectories(){return directories_;}
+
+    // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ndProps_;}
 
@@ -447,6 +470,32 @@ public class SettingsManager implements SettingsInterface
 		maxConn_ = maxConn;		
 		String s = Integer.toString(maxConn_);
 		props_.setProperty(SettingsInterface.MAX_CONN, s);
+		writeProperties();
+	    }
+    }
+
+    /** set the directories to search */
+    public void setDirectories(String dir)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		directories_ = dir;
+		props_.setProperty(SettingsInterface.DIRECTORIES, dir);
+		writeProperties();
+	    }
+    }
+
+    /** set the extensions to search for */
+    public void setExtensions(String ext)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		extensions_ = ext;
+		props_.setProperty(SettingsInterface.EXTENSIONS, ext);
 		writeProperties();
 	    }
     }
