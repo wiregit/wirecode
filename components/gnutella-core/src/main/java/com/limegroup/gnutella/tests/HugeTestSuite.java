@@ -24,6 +24,7 @@ public final class HugeTestSuite {
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(UrnCacheTest.suite());
 		suite.addTest(QueryRequestTest.suite());
+		suite.addTest(QueryReplyTest.suite());
 		return suite;
 	}
 }
