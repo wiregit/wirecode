@@ -73,6 +73,8 @@ public class LimeXMLDocument implements Serializable {
         InputSource doc = new InputSource(new StringReader(XMLStr));
         initialize(doc);
         this.xmlString = ripIdentifier(XMLStr);
+        if(xmlString.equals(""))
+            throw new SAXException("empty after identifier ripped");
     }
     
     
@@ -81,6 +83,10 @@ public class LimeXMLDocument implements Serializable {
         grabDocInfo(rootElement,true);
         grabDocInfo(node,false);
         createMap(node,rootElement.getNodeName());
+        if(fieldToValue.isEmpty())
+            throw new IOException("no elements.");
+        if(getXMLString().equals(""))
+            throw new IOException("invalid elements.");
     }
 
     /**
@@ -95,6 +101,8 @@ public class LimeXMLDocument implements Serializable {
        
         //set the schema URI
         this.schemaUri = schemaURI;
+        if(nameValueList.isEmpty())
+            throw new IllegalArgumentException("empty list");
                 
         //iterate over the passed list of fieldnames & values
         for(Iterator i = nameValueList.iterator(); i.hasNext(); ) {
@@ -113,8 +121,27 @@ public class LimeXMLDocument implements Serializable {
             //update the field to value map
             fieldToValue.put(name.trim(), value);
         }
+        
+        // Verify that the data read from the collection had valid info
+        // for this schema.
+        try {
+            if(getXMLString().equals(""))
+                throw new IllegalArgumentException("invalid collection data.");
+        } catch(SchemaNotFoundException snfe) {
+            throw new IllegalArgumentException("invalid schema.");
+        }
     }
     
+    /**
+     * Determines whether or not this LimeXMLDocument is valid.
+     */
+    boolean isValid() {
+        try {
+            return !getXMLString().equals("") && !fieldToValue.isEmpty();
+        } catch(SchemaNotFoundException snfe) {
+            return false;
+        }
+    }
 
     private void readObject(java.io.ObjectInputStream in)
         throws IOException, ClassNotFoundException {

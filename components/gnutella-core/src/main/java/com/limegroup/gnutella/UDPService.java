@@ -218,6 +218,10 @@ public final class UDPService implements Runnable {
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
      * This method should not be called if the client is not GUESS enabled.
      *
+     * If sending fails for reasons such as a BindException,
+     * NoRouteToHostException or specific IOExceptions such as
+     * "No buffer space available", this message is silently dropped.
+     *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
@@ -245,8 +249,11 @@ public final class UDPService implements Runnable {
             try {
                 _socket.send(dg);
             } catch(BindException be) {
-              // oh well, if we can't bind our socket, ignore it.. 
-              return;  
+                // oh well, if we can't bind our socket, ignore it.. 
+                return;
+            } catch(NoRouteToHostException nrthe) {
+                // oh well, if we can't find that host, ignore it ...
+                return;
             } catch(IOException ioe) {
                 //If we're full, just drop it.  UDP is unreliable like that.
                 if( "No buffer space available".equals(ioe.getMessage()) )

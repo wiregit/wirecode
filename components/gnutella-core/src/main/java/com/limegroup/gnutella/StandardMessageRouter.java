@@ -176,6 +176,12 @@ public class StandardMessageRouter extends MessageRouter {
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                          byte[] clientGUID) {
+        // Ensure that we have a valid IP & Port before we send the response.
+        // Otherwise the QueryReply will fail on creation.
+        if( !NetworkUtils.isValidPort(RouterService.getPort()) ||
+            !NetworkUtils.isValidAddress(RouterService.getAddress()))
+            return false;
+                                            
         // Run the local query
         Response[] responses = 
             RouterService.getFileManager().query(queryRequest);

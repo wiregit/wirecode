@@ -176,6 +176,14 @@ public class LimeXMLReplyCollection {
             if( doc == null ) // no document, ignore.
                 continue;
                 
+            // Verify the doc has information in it.
+            if(!doc.isValid()) {
+                //If it is invalid, try and rebuild it.
+                doc = constructDocument(null, file);
+                if(doc == null || !doc.isValid())
+                    continue;
+            }   
+                
             // check to see if it's corrupted and if so, fix it.
             if( ID3Reader.isCorrupted(doc) ) {
                 doc = ID3Reader.fixCorruption(doc);
