@@ -14,8 +14,6 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
-import java.util.StringTokenizer;
-import java.net.URLEncoder;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -99,11 +97,9 @@ public class HTTPAcceptor implements Runnable {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new ServerSocket(port);
+                newSocket = new ServerSocket(port);
             } catch (IOException e) {
                 throw e;
-            } catch (IllegalArgumentException e) {
-                throw new IOException();
             }
             //b) Close old socket (if non-null)
             if (_socket!=null) {
@@ -198,7 +194,7 @@ public class HTTPAcceptor implements Runnable {
             } catch (SecurityException e) {
 				ErrorService.error(e);
                 return;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 //Internal error!
 				ErrorService.error(e);
             }
@@ -225,13 +221,7 @@ public class HTTPAcceptor implements Runnable {
 
         public void run() {
             try {
-                //The try-catch below is a work-around for JDK bug 4091706.
-                InputStream in=null;
-                try {
-                    in=_socket.getInputStream(); 
-                } catch (Exception e) {
-                    throw new IOException();
-                }
+                InputStream in = _socket.getInputStream(); 
                 _socket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
@@ -246,16 +236,13 @@ public class HTTPAcceptor implements Runnable {
 			    else if (word.equals("MAGNET")) {
                     ExternalControl.fireMagnet(_socket);
                 }	
-                //4. Unknown protocol
-                else {
-                    throw new IOException();
-                }
             } catch (IOException e) {
-                //handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
-            } catch(Exception e) {
+            } catch(Throwable e) {
 				ErrorService.error(e);
-			}
+			} finally {
+			    // handshake failed: try to close connection.
+                try { _socket.close(); } catch (IOException e2) { }
+            }
         }
     }
 
