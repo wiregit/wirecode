@@ -12,13 +12,13 @@ public class CountPercent {
     private static final String DEFAULT_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
     
     private static final String HTML_TRANSLATE_EMAIL_ADDRESS =
-"<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
+"\n<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
 "// Protected email script by Joe Maller JavaScripts available at http://www.joemaller.com\n" +
 "// This script is free to use and distribute but please credit me and/or link to my site.\n" + 
 "emailE = ('limewire.org'); emailE = ('translate' + '@' + emailE);\n" +
 "document.write('<a href=\"mailto:' + emailE + '\">' + emailE + '</a>');\n" +
 "//--></script><noscript>&lt;<a href=\"#\">Email address protected by JavaScript:\n" +
-"please enable JavaScript to contact me</a></noscript>&gt;</b>";
+"please enable JavaScript to contact me</a></noscript></b>";
     
     private static final int ACTION_STATISTICS = 0;
     private static final int ACTION_HTML = 1;
@@ -506,7 +506,7 @@ public class CountPercent {
 "     specific format for text attachments (we may enventually have difficulties to\n" +
 "     decipher some Mac encodings used in simple text files attachment). On Mac OSX,\n" +
 "     the best tool is \"TextEdit\", from the Jaguar accessories, with\n" +
-"     which you can directly edit and save plain text files encoded with UTF-8.\n" +
+"     which you can directly edit and save plain text files encoded with UTF-8.<br>\n" +
 "     <br>\n" +
 "     <b>Linux users</b> can also participate if they have a correctly setup\n" +
 "     environment for their locale. Files can be edited with \"vi\", \"emacs\", or\n" +
