@@ -27,6 +27,22 @@ public final class HandshakeResponseTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    public void testSupportsProbeQueries() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not support probes", !hr.supportsProbeQueries());
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.0");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not support probes", !hr.supportsProbeQueries());
+
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.1");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should support probes", hr.supportsProbeQueries());
+
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.2");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should support probes", hr.supportsProbeQueries());
+    }
     
     /**
      * Tests the method for extracting the status message from a connection
@@ -268,7 +284,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
      */
     public void testFactoryConstructors() {
         Properties props = new Properties();
-        HandshakeResponse hr = HandshakeResponse.createAcceptOutgoingResponse(props);
+        HandshakeResponse hr = 
+            HandshakeResponse.createAcceptOutgoingResponse(props);
         assertTrue("should be accepted", hr.isAccepted());
         assertEquals("should not have any properties", 0, hr.props().size());
     }
