@@ -30,7 +30,7 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
     
     public void setUp() {
         FixedsizePriorityQueue.DEBUG=true;
-        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
+        q=new FixedsizePriorityQueue(Comparators.integerComparator(), 4);
         assertNull(q.insert(three));
         assertNull(q.insert(four));
         assertNull(q.insert(two));
@@ -46,7 +46,7 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
 
     public void testMin() {
         assertEquals(two, q.getMin());
-        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
+        q=new FixedsizePriorityQueue(Comparators.integerComparator(), 4);
         try {
             q.getMin();
             fail("No no such element exception");
@@ -55,7 +55,7 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
 
     public void testMax() {
         assertEquals(four, q.getMax());
-        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
+        q=new FixedsizePriorityQueue(Comparators.integerComparator(), 4);
         try {
             q.getMax();
             fail("No no such element exception");

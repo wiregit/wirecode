@@ -15,6 +15,11 @@ import com.sun.java.util.collections.Comparator;
 public final class Comparators {
 
     /**
+     * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s.
+     */
+    private static final Comparator INT_COMPARATOR = new IntComparator();
+
+    /**
      * <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
      */
     private static final Comparator LONG_COMPARATOR = new LongComparator();
@@ -46,6 +51,19 @@ public final class Comparators {
      * Ensure that this class cannot be constructed.
      */
     private Comparators() {}
+    
+    /**
+     * Instance accessor for the <tt>Comparator</tt> for <tt>Integer</tt>s.
+     * This is necessary because the <tt>Integer</tt> class did not implement 
+     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
+     * <tt>IntComparator</tt> has no state, allowing a single instance to be
+     * used whenever a <tt>Comparator</tt> is needed for <tt>Integer</tt>s.
+     * 
+     * @return the <tt>IntComparator</tt> instance
+     */
+    public static Comparator integerComparator() {
+        return INT_COMPARATOR;
+    }
     
     /**
      * Instance accessor for the <tt>Comparator</tt> for <tt>Long</tt>s.  This
@@ -110,6 +128,18 @@ public final class Comparators {
     public static Comparator caseInsensitiveStringComparator() {
         return CASE_INSENSITIVE_STRING_COMPARATOR;
     }
+    
+    /**
+     * Compares two Integers. 
+     */
+    private static final class IntComparator implements
+        Comparator, Serializable {
+        private static final long serialVersionUID = 830281396810831681L;        
+            
+        public int compare(Object o1, Object o2) {
+            return intCompareTo((Integer)o1, (Integer)o2);
+        }
+    }
 
     /**
      * Compares two <tt>Long</tt>s.  Useful for storing Java
@@ -154,7 +184,18 @@ public final class Comparators {
             return StringUtils.compareIgnoreCase((String)o1, (String)o2);
         }
     }
-            
+    
+    /**
+     * Compares two Integer objects numerically.  This function is identical
+     * to the Integer compareTo method.  The Integer compareTo method
+     * was added in Java 1.2, however, so any app that is 1.1.8 compatible
+     * must use this method.
+     */
+    public static int intCompareTo(Integer thisInt, Integer anotherInt) {
+    	int thisVal = thisInt.intValue();
+    	int anotherVal = anotherInt.intValue();
+    	return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
+    }
     
     /**
      * Compares two <code>Long</code> objects numerically.  This function is

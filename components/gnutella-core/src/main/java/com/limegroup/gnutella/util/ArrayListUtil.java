@@ -14,7 +14,7 @@ public class ArrayListUtil
      */
     public static ArrayList buildArray(int [] list) 
     {
-	ArrayList nlist = new ArrayList();
+	ArrayList nlist = new ArrayList(list.length);
 	for ( int i = 0; i < list.length; i++ )
 	{
 	    Integer val = new Integer(list[i]);
@@ -22,27 +22,4 @@ public class ArrayListUtil
 	}
 	return(nlist);
     }
-
-    /** 
-     *  Creates an Integer comparator 
-     */
-    public static Comparator integerComparator() 
-    {
-
-	class IntegerComparator implements Comparator 
-	{
-	    public int compare(Object a, Object b) {
-		Integer aint=(Integer)a;
-		Integer bint=(Integer)b;
-		return (aint.intValue() - bint.intValue());
-	    }
-
-	    public boolean equals(Object o) {
-		return false;
-	    }
-	}
-	return new IntegerComparator();
-    }
-    
-
 }
