@@ -1398,6 +1398,7 @@ public abstract class MessageRouter {
 
             //For all connections to new hosts c needing an update...
             List list=_manager.getInitializedConnections2();
+            QueryRouteTable table = null;
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 
@@ -1432,7 +1433,9 @@ public abstract class MessageRouter {
                 }
                     
                 //Create table to send on this connection...
-                QueryRouteTable table=createRouteTable(c);
+                if (table == null) {
+                    table=createRouteTable();
+                }                    
 
                 //..and send each piece.
                 //TODO2: use incremental and interleaved update
@@ -1450,7 +1453,7 @@ public abstract class MessageRouter {
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    private QueryRouteTable createRouteTable(ReplyHandler c) {
+    private QueryRouteTable createRouteTable() {
         //TODO: choose size according to what's been propogated.
         QueryRouteTable ret=new QueryRouteTable();
         

@@ -49,6 +49,11 @@ public class QueryRouteTable {
      *  the easy optimization of only using BitSets.
      */
     private BitSet bitTable;
+    
+    /**
+     * The cached resized QRT.
+     */
+    private QueryRouteTable resizedQRT = null;
 
     /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
      *  methods don't seem to offer what is needed.
@@ -57,7 +62,7 @@ public class QueryRouteTable {
 
     /** The number of entries in this, used to make entries() run in O(1) time.
      *  INVARIANT: bitEntries=number of i s.t. bitTable[i]==true */
-    private int bitEntries;
+//    private int bitEntries;
 
     /** The last message received of current sequence, or -1 if none. */
     private int sequenceNumber;
@@ -94,7 +99,7 @@ public class QueryRouteTable {
     private void initialize(int initialSize) {
         this.bitTable=new BitSet(initialSize);
         this.bitTableLength=initialSize;
-        this.bitEntries=0;
+//        this.bitEntries=0;
         this.sequenceNumber=-1;
         this.sequenceSize=-1;
         this.nextPatch=0;
@@ -227,7 +232,8 @@ public class QueryRouteTable {
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], log2);
             if (!bitTable.get(hash)) {
-                bitEntries++; //added new entry
+//                bitEntries++; //added new entry
+                resizedQRT = null;
                 bitTable.set(hash);
             }
         }
@@ -238,7 +244,8 @@ public class QueryRouteTable {
         final int hash = HashFunction.hash(iString, 
                                            Utilities.log2(bitTableLength));
         if (!bitTable.get(hash)) {
-            bitEntries++; //added new entry
+//            bitEntries++; //added new entry
+            resizedQRT = null;
             bitTable.set(hash);
         }
     }
@@ -251,18 +258,32 @@ public class QueryRouteTable {
      *    @modifies this
      */
     public void addAll(QueryRouteTable qrt) {
-        //This algorithm scales between tables of 2different lengths and TTLs.
-        //Refer to the query routing paper for a full explanation.  If
-        //performance is a problem, it's possible to special-case the algorithm
-        //for when both tables have the same length and infinity:
-        //
-        //          for (int i=0; i<bitTableLength; i++)
-        //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
-        //              //update entries accordingly
+        this.bitTable.or( qrt.resize(this.bitTableLength) );
+    }
+    
+    /**
+     * Scales the internal cached BitSet to size 'newSize'
+     */
+    private BitSet resize(int newSize) {
+        // if this bitTable is already the correct size,
+        // return it
+        if ( bitTableLength == newSize )
+            return bitTable;
+            
+        // if we already have a cached resizedQRT and
+        // it is the correct size, then use it.
+        if ( resizedQRT != null && resizedQRT.bitTableLength == newSize )
+            return resizedQRT.bitTable;
 
-        int m=qrt.bitTableLength;
-        int m2=this.bitTableLength;
+        // we must construct a new QRT of this size.            
+        resizedQRT = new QueryRouteTable(newSize);
+        
+        //This algorithm scales between tables of 2different lengths and TTLs.
+        //Refer to the query routing paper for a full explanation.
+        int m = this.bitTableLength;
+        int m2 = resizedQRT.bitTableLength;
         double scale=((double)m2)/((double)m);   //using float can cause round-off!
+    
         for (int i=0; i<m; i++) {
             int low=(int)Math.floor(i*scale);
             int high=(int)Math.ceil((i+1)*scale);
@@ -271,25 +292,30 @@ public class QueryRouteTable {
             Assert.that(high>=0 && high<=m2,
                         "High value "+high+" for "+i+" incompatible with "+m2);
             for (int i2=low; i2<high; i2++) {
-                if (qrt.bitTable.get(i)!=bitTable.get(i2)) {
-                    if (qrt.bitTable.get(i)) {
-                        bitTable.set(i2);
-                        bitEntries++;
-                    }
-                    // else bitTable[i] is already set..
+                // if the other is set
+                // we technically can check if this is set
+                // and only set if it isn't, but there's little-to-no
+                // optimization in that
+                if ( this.bitTable.get(i) ) {
+                    resizedQRT.bitTable.set(i2);
+//                  bitEntries++;
                 }
             }
         }
+        return resizedQRT.bitTable;
     }
 
 
     /** Returns the number of entries in this. */
-    public int entries() {
-        return bitEntries;
-    }
+//    public int entries() {
+//        return bitEntries;
+//    }
 
     /** True if o is a QueryRouteTable with the same entries of this. */
     public boolean equals(Object o) {
+        if ( this == o )
+            return true;
+            
         if (! (o instanceof QueryRouteTable))
             return false;
 
@@ -384,15 +410,19 @@ public class QueryRouteTable {
         for (int i=0; i<data.length; i++) {
             try {
                 boolean wasInfinity=(!bitTable.get(nextPatch));
-                if (data[i] == KEYWORD_PRESENT)
+                if (data[i] == KEYWORD_PRESENT) {
+                    resizedQRT = null;
                     bitTable.set(nextPatch);
-                else if (data[i] == KEYWORD_ABSENT)
+                }
+                else if (data[i] == KEYWORD_ABSENT) {
+                    resizedQRT = null;
                     bitTable.clear(nextPatch);
-                boolean isInfinity=(!bitTable.get(nextPatch));
-                if (wasInfinity && !isInfinity)
-                    bitEntries++;  //added entry
-                else if (!wasInfinity && isInfinity)
-                    bitEntries--;  //removed entry
+                }
+//                boolean isInfinity=(!bitTable.get(nextPatch));
+//                if (wasInfinity && !isInfinity)
+//                    bitEntries++;  //added entry
+//                else if (!wasInfinity && isInfinity)
+//                    bitEntries--;  //removed entry
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
@@ -411,8 +441,7 @@ public class QueryRouteTable {
             this.sequenceSize=-1;
             this.nextPatch=0; //TODO: is this right?
         }   
-    }
-    
+    }    
 
     /**
      * Returns an iterator of RouteTableMessage that will convey the state of
