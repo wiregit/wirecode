@@ -265,6 +265,14 @@ public abstract class MessageRouter {
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
+        else if (msg instanceof TCPConnectBackRedirect) {
+			if(RECORD_STATS)
+                ;
+        }
+        else if (msg instanceof UDPConnectBackRedirect) {
+			if(RECORD_STATS)
+                ;
+        }
         else if (msg instanceof PushProxyRequest) {
 			if(RECORD_STATS)
                 ;

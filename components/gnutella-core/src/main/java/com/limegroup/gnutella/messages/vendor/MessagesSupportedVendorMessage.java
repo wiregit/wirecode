@@ -92,7 +92,16 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         // Leaf Guidance Support
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,
                                         QueryStatusRequest.VERSION);
-        hashSet.add(smp);                
+        hashSet.add(smp);
+        // TCP CB Redirect
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK,
+                                        TCPConnectBackRedirect.VERSION);
+        hashSet.add(smp);
+        // UDP CB Redirect
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, 
+                                        F_UDP_CONNECT_BACK_REDIR,
+                                        UDPConnectBackRedirect.VERSION);
+        hashSet.add(smp);
     }
 
 
