@@ -6,6 +6,8 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
 
+import com.sun.java.util.collections.Set;
+
 /**
  *  Callback to notify the GUI of asynchronous backend events.
  *  The methods in this fall into the following categories:
@@ -53,7 +55,7 @@ public interface ActivityCallback
      */
     //public void handleQueryReply( QueryReply qr );
 
-	public void handleQueryResult(RemoteFileDesc rfd, HostData data);
+	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set locs);
 
     /**
      * Add a query string to the monitor screen
