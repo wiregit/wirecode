@@ -18,88 +18,9 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
 
 /**
- * This class manages the property settings.  It maintains default
- * settings for values not set in the saved settings files and
- * updates those settings based on user input, checking for errors
- * where appropriate.  It also saves the settings file to disk when
- * the session terminates.  Any properties that should persist between
- * user sessions should be added here.<p>
- *
- * Adding a new property is a bit cumbersome at first, but it's not so bad
- * once you get used to it.  Below are the steps that were necessary to
- * add the property for whether or not to automatically connect to the
- * network on startup. This should be used as a general outline for adding
- * more properties.<p>
- *
- * <ol>
- *      <li>Add a default value for the property using the general naming
- *          convention of DEFAULT_MY_PROPERTY_NAME for the constant, as
- *          illustrated below:<p>
- *
- *          private final boolean DEFAULT_CONNECT_ON_STARTUP = true;<p>
- *
- *      <li>Once this is added, the properties file also needs a key name to
- *          identify this property in the limewire.props file, as in:<p>
- *
- *          private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";<p>
- *
- *          Using human readable keys is useful if you want to allow developers
- *          (or savvy users) to easily modify the properties file.<p>
- *
- *      <li>The next step is to add accessors and mutator methods for the
- *          property.  This requires accessing the "PROPS" constant for the
- *          <tt>Properties</tt> class that loads the limewire.props file on
- *          startup.  While the <tt>Properties</tt> class is one of the most
- *          notoriously poorly designed clases in the JRE (it extends
- *          Hashtable -- that can't be good!), we don't have a lot of other
- *          options (ok, theres the preferences package in 1.4, but an 8MB
- *          download?).  You will notice that we use the deprecated put()
- *          method of the <tt>Properties</tt> class as well, but we only do
- *          this to remain compatible with the 1.1.8 JRE available on the
- *          Mac.<p>
- *
- *          So, getting back to our example, for our "connect on startup"
- *          property, we simply added the accessor:<p>
- *
- *          public boolean getConnectOnStartup() {
- * 		        return getBooleanValue(CONNECT_ON_STARTUP);
- *          }<p>
- *
- *          and the mutator:<p>
- *
- *          public void setConnectOnStartup(boolean connect) {
- *              setBooleanValue(CONNECT_ON_STARTUP, connect);
- *          }<p>
- *
- *          Notice that this is where the constant key for the property
- *          gets put to good use (CONNECT_ON_STARTUP).<p>
- *
- *      <li>The final step is to handle loading the property on startup.
- *          This is done in two private methods.  First, the "loadDefaults"
- *          method loads all of the default values for the properties.  For
- *          our example property, we simply added the line:<p>
- *
- *          setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);<p>
- *
- *          to the end of the loadDefaults() method.  Finally, we need to add
- *          the call to set the property from the file (which will overwrite
- *          the default if the property exists in limewire.props).  This
- *          is done in the "validateFile()" method.  In this example, we
- *          added the lines:<p>
- *
- *          else if(key.equals(CONNECT_ON_STARTUP)) {
- *              setConnectOnStartup((new Boolean(p)).booleanValue());
- *			}
- *
- *          Once you've done this, you're done.  Now that was, ahh, easy right?
- * </ol><p>
- *
- * The one major exception to the above set of rules is the case where you
- * are adding a property that will be accessed extremely frequently.  In this
- * case, you probably want to cache the value in a local variable instead of
- * looking it up in the PROPS constant each time.  There are many examples
- * of this in the code.  Also, as always, it's very important to add detailed
- * comments to all methods and constants.
+ * This class is still used to manage some property settings, but it is
+ * being phased out in favor of classes subclassed from AbstractSettings.
+ * Any new settings should be added to one of those classes.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class SettingsManager {
@@ -120,11 +41,6 @@ public final class SettingsManager {
 	 * Name of the host list file.
 	 */
 	private final String HOST_LIST_NAME = "gnutella.net";
-
-    /**
-	 * Default name for the properties file
-	 */
-    private final String PROPS_NAME = "limewire.props";
 
     /**
 	 * Default name for the network discovery properties
@@ -3232,23 +3148,7 @@ public final class SettingsManager {
 	 * get called once when the program shuts down.
      */
     public void writeProperties() {
-		FileOutputStream ostream = null;
-		try {
-			ostream = new FileOutputStream(PROPS_FILE);
-			PROPS.save(ostream, "");
-			ostream.close();
-		}
-		catch (Throwable e){
-            showInternalError(e);
-        }
-		finally {
-			try {
-				if(ostream != null) ostream.close();
-			}
-			catch(IOException e) {
-                showInternalError(e);
-            }
-		}
+        Settings.save();
 	}
 
     private static final String STRING_DELIMETER=";";
