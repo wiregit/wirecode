@@ -25,7 +25,11 @@ public class NativeLauncher {
 	 *  specify a valid file pathname or a valid URL.
 	 */
 	public static int launchFileWindows(String name) {
-		return nativeLaunchFileWindows(name);
+		int launchCode = -1;
+		try {
+			launchCode = nativeLaunchFileWindows(name);
+		} catch(UnsatisfiedLinkError ule) {}
+		return launchCode;
 	}
 
 	/** 
