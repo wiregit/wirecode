@@ -15,7 +15,7 @@ public final class PongCacher implements Runnable {
     /**
      * Single <tt>PongCacher</tt> instance, following the singleton pattern.
      */
-    private static final PongCacher INSTANCE = new PongCacher();
+    private static final PongCacher INSTANCE = new PongCacher();    
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
@@ -33,13 +33,19 @@ public final class PongCacher implements Runnable {
      * Constant for the number of pongs to store at each hop. Public to 
      * make testing easier.
      */
-    public static final int PONGS_PER_HOP = 20;
+    public static final int PONGS_PER_HOP = 10;
 
     /**
      * Constant for the number of cached pongs returned in response to
      * pings.  Public to make testing easier.
      */
     public static final int NUM_CACHED_PONGS = 10;
+
+    /**
+     * Constant for the number of milliseconds to wait before refreshing
+     * the set of cached pongs.  Public for testing convenience.
+     */
+    public static final int REFRESH_INTERVAL = 600;
 
     /**
      * Flag for whether or not we've received a new pong -- allows slight
@@ -76,7 +82,10 @@ public final class PongCacher implements Runnable {
         _started = true;
     }
 
-
+    /**
+     * Implements the <tt>Runnable</tt> interface.  Continually refreshes
+     * the set of cached pongs to new ones retrieved from the network.
+     */
     public void run() {
         try {
             while(true) {
@@ -84,7 +93,7 @@ public final class PongCacher implements Runnable {
                     _cachedPongs = Collections.unmodifiableSet(updatePongs());
                     _newPong = false;
                 }
-                Thread.sleep(600);
+                Thread.sleep(REFRESH_INTERVAL);
             }
         } catch(Throwable t) {
             ErrorService.error(t);
