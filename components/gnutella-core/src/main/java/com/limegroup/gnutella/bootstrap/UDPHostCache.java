@@ -125,11 +125,8 @@ public class UDPHostCache {
         // Note that we had to add all possible ones first, 
         // 'cause udpHosts.iterator() returns from worst -> best
         List validHosts = new ArrayList(Math.min(10, temp.size()));
-        for(Iterator i = temp.iterator(); i.hasNext(); ){
+        for(Iterator i = temp.iterator(); i.hasNext() && validHosts.size() < 10; )
             validHosts.add(i.next());
-            if(validHosts.size() == 10)
-                break;
-        }
 
         attemptedHosts.addAll(validHosts);
         
