@@ -106,6 +106,18 @@ public class RichQueryHandler{
             }
             valid = true;
         }
+
+        // need to ensure that no nulls are returned in my response[]
+        // z is a count of responses constructed, see just above...
+        // s == retResponses.length
+        if (z < s){
+            Response[] temp = new Response[z];  
+            for (int i = 0, j = 0; i < s; i++) // at most s responses
+                if (retResponses[i] != null)
+                    temp[j++] = retResponses[i];
+            retResponses = temp;
+        }
+
         return retResponses;
     }
 
