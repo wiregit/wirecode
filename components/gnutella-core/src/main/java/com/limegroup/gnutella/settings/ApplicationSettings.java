@@ -159,7 +159,7 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createStringSetting("CLASSPATH", JAR_NAME.getValue());
         
     /**
-     * Whether or not we are acting as a server.
+     * Whether or not we are acting as a peer server.
      */
     public static final BooleanSetting SERVER =
         FACTORY.createBooleanSetting("SERVER", false);

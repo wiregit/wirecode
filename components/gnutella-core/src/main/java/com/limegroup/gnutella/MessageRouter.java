@@ -799,7 +799,8 @@ public abstract class MessageRouter {
             
             // if I'm not firewalled AND the source isn't firewalled reply ....
             if (request.isFirewalledSource() &&
-                !RouterService.acceptedIncomingConnection())
+                !RouterService.acceptedIncomingConnection() &&
+                !ApplicationSettings.SERVER.getValue())
                 return;
             respondToQueryRequest(request, _clientGUID);
         }

@@ -163,7 +163,10 @@ public class RouterService {
         this(callback, new StandardMessageRouter());
     }
 
-    public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm) {
+    /**
+     * Constructor for the Peer Server.
+     */ 
+    public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm){
         this(ac,mr);
         RouterService.fileManager = fm;
     }
