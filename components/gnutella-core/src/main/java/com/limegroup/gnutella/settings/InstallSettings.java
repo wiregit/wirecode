@@ -17,7 +17,7 @@ public final class InstallSettings extends AbstractSettings {
     }
 
     private InstallSettings() {
-        super("installation.props", "LimeWire tables file");
+        super("installation.props", "LimeWire installs file");
     }
     
     /**
