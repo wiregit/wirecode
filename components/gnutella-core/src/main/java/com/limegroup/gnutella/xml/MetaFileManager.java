@@ -178,7 +178,7 @@ public class MetaFileManager extends FileManager {
                 if(d!=null){//we have a value...must replace
                     coll.removeDoc(oldHash);
                     coll.addReply(newHash,d);
-                    coll.toDisk("");
+                    coll.write();
                 }//affected collection done
             }
         }
