@@ -82,6 +82,11 @@ public final class RouterService {
 	private boolean started;
 
 	/**
+	 * Constant for the <tt>SettingsManager</tt>.
+	 */
+	private final SettingsManager SETTINGS = SettingsManager.instance();
+
+	/**
 	 * <tt>RouterService</tt> instance, following singleton.
 	 */
     private static RouterService instance;
@@ -106,15 +111,13 @@ public final class RouterService {
 	 * the backend.
 	 */
   	private RouterService() {
-		SettingsManager settings = SettingsManager.instance();
-
 		this.fileManager = new MetaFileManager();
 		// this used to be given as a parameter, allowing other components,
 		// like the server, to use their own MessageRouter.
   		this.router = new MetaEnabledMessageRouter(callback, fileManager);
 		this.authenticator = new ServerAuthenticator();
         this.timer = new SimpleTimer(true, callback);
-		this.acceptor = new Acceptor(settings.getPort());
+		this.acceptor = new Acceptor();
   		this.manager = new ConnectionManager(callback, authenticator);
 		this.catcher = new HostCatcher();
 		this.downloader = new DownloadManager();
@@ -133,9 +136,9 @@ public final class RouterService {
 													 manager);
 		sa.start(this);
 
-		if(settings.getConnectOnStartup()) {
+		if(SETTINGS.getConnectOnStartup()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
-			int outgoing = settings.getKeepAlive();
+			int outgoing = SETTINGS.getKeepAlive();
 			if ( outgoing > 0 ) 
 				connect();
 		}
@@ -161,12 +164,10 @@ public final class RouterService {
 	 */
 	public void start() {
 		// start up the UDP server thread
-		Thread udpThread = new Thread(udpAcceptor);
-		udpThread.start();
-		
 		catcher.initialize();
-
 		acceptor.initialize();
+		udpAcceptor.initialize();
+		
 
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
@@ -300,7 +301,8 @@ public final class RouterService {
 	 * Accessor for the TCP port that the application is listening on for
 	 * Gnutella connections and messages.
 	 *
-	 * @return the TCP port that the application is listening on
+	 * @return the TCP port that the application is listening on -- if the
+	 *  port has not yet been set, this will return -1
 	 */
 	public int getTCPListeningPort() {
 		return acceptor.getPort();
@@ -493,16 +495,16 @@ public final class RouterService {
 
         //Write gnutella.net
         try {
-            catcher.write(SettingsManager.instance().getHostList());
+            catcher.write(SETTINGS.getHostList());
         } catch (IOException e) {}
 		finally {
-			SettingsManager.instance().writeProperties();
+			SETTINGS.writeProperties();
 		}
         //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
         File incompleteDir=null;
 		try {
-			incompleteDir=SettingsManager.instance().getIncompleteDirectory();
+			incompleteDir=SETTINGS.getIncompleteDirectory();
 		} catch(java.io.FileNotFoundException fnfe) {
 			// if we could not get the incomplete directory, simply return.
 			return;
@@ -558,7 +560,7 @@ public final class RouterService {
         if(newKeep < 0)
             throw new BadConnectionSettingException(
                 BadConnectionSettingException.NEGATIVE_VALUE,
-                SettingsManager.instance().getKeepAlive());
+                SETTINGS.getKeepAlive());
         
         //TODO: we may want to re-enable this...with a higher limit.
         ////The request for increasing keep alive if we are leaf node is invalid
@@ -567,7 +569,7 @@ public final class RouterService {
         //       BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
 
         //max connections for this connection speed
-        int max = SettingsManager.instance().maxConnections();
+        int max = SETTINGS.maxConnections();
         if (manager.hasSupernodeClientConnection()) {
             //Also the request to decrease the keep alive below a minimum
             //level is invalid, if we are an Ultrapeer with leaves
@@ -629,6 +631,7 @@ public final class RouterService {
      */
     public void setListeningPort(int port) throws IOException {
         acceptor.setListeningPort(port);
+		udpAcceptor.resetPort();
     }
 
     /**
@@ -768,15 +771,8 @@ public final class RouterService {
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type) {  
-		// as specified in HUGE v0.93, ask for any available URNs on responses
-		Set reqUrns = new HashSet();
-		reqUrns.add(UrnType.ANY_TYPE);
-
-		QueryRequest qr=new QueryRequest(guid,SettingsManager.instance().getTTL(),
-										 minSpeed, query, "", false, reqUrns, null);
-		verifier.record(qr, type);
-		router.broadcastQueryRequest(qr);
+    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
+		query(guid, query, "", minSpeed, type);
 	}
 
 	/**
@@ -786,38 +782,25 @@ public final class RouterService {
 	 *  typically in XML format
 	 * @see query(byte[], String, int, MediaType)
 	 */
-	public void query(byte[] guid, String query, String richQuery, 
-					  int minSpeed, MediaType type) {
-                            
-		// per HUGE v0.93, ask for URNs on responses
-		Set reqUrns = new HashSet();
-		reqUrns.add(UrnType.ANY_TYPE);
+	public void query(final byte[] guid, final String query, 
+					  final String richQuery, 
+					  final int minSpeed, final MediaType type) {
 
-		QueryRequest qr=new QueryRequest(guid, SettingsManager.instance().getTTL(),
-                                         minSpeed, query, richQuery, false, reqUrns, null);
-		verifier.record(qr, type);
-		router.broadcastQueryRequest(qr);
-
-		/* 
-		 * We don't really use this. for now
-         //Rich query?
-         //Check if there are special servers to send this query to
-         //Then spawn the RichConnectionThread and send the rich query 
-         //out w/ it
-         try{
-         XMLHostCache xhc = new XMLHostCache();
-         String[] ips = xhc.getCachedHostsForURI(schemaURI);
-         if(ips!=null){
-         for(int i=0;i<ips.length;i++){//usually just  1 iteration
-         Thread rcThread=new 
-         RichConnectionThread(ips[i],qr,callback);
-         rcThread.start();
-         }
-         }
-         }catch(Exception e){
-         //do nothing
-         }
-        */
+		Thread searcherThread = new Thread() {
+			public void run() {
+				// per HUGE v0.93, ask for URNs on responses
+				Set reqUrns = new HashSet();
+				reqUrns.add(UrnType.ANY_TYPE);
+				
+				QueryRequest qr = new QueryRequest(guid, SETTINGS.getTTL(),
+												   minSpeed, query, richQuery, 
+												   false, reqUrns, null);
+				verifier.record(qr, type);
+				router.broadcastQueryRequest(qr);
+			}
+		};
+		searcherThread.setDaemon(true);
+		searcherThread.start();
     }
 
 
@@ -1069,5 +1052,14 @@ public final class RouterService {
     public boolean getIsShuttingDown() {
 		return isShuttingDown;
     }
+
+	/**
+	 * Returns the raw IP address for this host.
+	 *
+	 * @return the raw IP address for this host
+	 */
+	public byte[] getIPAddress() {
+		return acceptor.getAddress();
+	}
 
 }
