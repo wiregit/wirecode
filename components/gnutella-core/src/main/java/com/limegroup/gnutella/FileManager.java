@@ -1140,6 +1140,14 @@ public abstract class FileManager {
      * called when a query route table has to be made. The current 
      * implementaion just takes all the file names and they are split
      * internally when added the QRT
+     * 
+     * TODO: this method should probably change.  First, we don't return 
+     *  "keywords" here, we return file paths that are subsequently broken up
+     *  into keywords.  Second, it just doesn't make sense to rebuild the QRP
+     *  table for our files all the time.  FileManager should probably keep
+     *  track of the QRP table for our files and have a getQRPTable function.
+     *  This would enable it to update the QRP table internally whenever our
+     *  files changed.
      */
     public List getKeyWords(){
         FileDesc[] fds = getAllSharedFileDescriptors();
