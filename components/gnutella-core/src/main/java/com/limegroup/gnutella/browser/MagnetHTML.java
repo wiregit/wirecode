@@ -1,28 +1,16 @@
 package com.limegroup.gnutella.browser;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Date;
-
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.URLDecoder;
 import java.util.StringTokenizer;
-import java.net.URLEncoder;
+
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Allow various Magnet Related HTML page rendering.
  */
 public class MagnetHTML {
 
-    static String buildMagnetDetailPage(String cmd) {
+    static String buildMagnetDetailPage(String cmd) throws IOException {
         StringTokenizer st = new StringTokenizer(cmd, "&");
         String keystr;
         String valstr;
@@ -36,7 +24,12 @@ public class MagnetHTML {
         while (st.hasMoreTokens()) {
             keystr = st.nextToken();
             keystr = keystr.trim();
-            start  = keystr.indexOf("=")+1;
+            start  = keystr.indexOf("=");
+            if(start == -1) {
+                throw new IOException("invalid command: "+cmd);
+            } else {
+                start -= 1;
+            }
             valstr = keystr.substring(start);
             keystr = keystr.substring(0,start-1);
             valstr=URLDecoder.decode(valstr);   
