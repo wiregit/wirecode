@@ -632,7 +632,11 @@ public class Connection implements IpPort {
                         HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
                     }
                     throw NoGnutellaOkException.CLIENT_REJECT;
-                } else {
+                } 
+                else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
+                    throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
+                }
+                else {
                     if(CommonUtils.recordStats()) {
                         HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
                     }

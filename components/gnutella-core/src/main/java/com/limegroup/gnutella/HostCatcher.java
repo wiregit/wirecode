@@ -518,8 +518,6 @@ public class HostCatcher implements HostListener {
         return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), 
             priority);
     }
-
-
     
     /**
      * Adds the passed endpoint to the set of hosts maintained, temporary and

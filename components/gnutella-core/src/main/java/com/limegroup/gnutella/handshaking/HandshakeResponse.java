@@ -86,6 +86,13 @@ public final class HandshakeResponse {
     public static final String AUTHENTICATING = "AUTHENTICATING";
 
     /**
+     * ??? TODO: check about this error code...
+     */
+    public static final int LOCALE_NO_MATCH = 577;
+    public static final String LOCALE_NO_MATCH_MESSAGE 
+        = "Service Not Available";
+
+    /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
      */
     private final int STATUS_CODE;
@@ -466,6 +473,11 @@ public final class HandshakeResponse {
     static HandshakeResponse createLeafRejectOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SHIELDED_MESSAGE);        
+    }
+
+    static HandshakeResponse createLeafRejectLocaleOutgoingResponse() {
+        return new HandshakeResponse(HandshakeResponse.LOCALE_NO_MATCH,
+                                     HandshakeResponse.LOCALE_NO_MATCH_MESSAGE);
     }
 
     /**

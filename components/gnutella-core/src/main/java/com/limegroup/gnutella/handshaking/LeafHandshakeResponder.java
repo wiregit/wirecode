@@ -53,9 +53,14 @@ public final class LeafHandshakeResponder
 
         //check if this is a preferenced connection
         if(_pref) {
+            /* TODO: ADD STAT
+              if(RECORD_STATS)
+              HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
+            */
             if(!ApplicationSettings.LANGUAGE.getValue()
-                    .equals(response.getLocalePref()))
-                return HandshakeResponse.createLeafRejectOutgoingResponse();
+               .equals(response.getLocalePref())) {
+                return HandshakeResponse.createLeafRejectLocaleOutgoingResponse();
+            }
         }
         
         if(!response.isGoodUltrapeer()) {

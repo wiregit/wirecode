@@ -1347,8 +1347,10 @@ public class ConnectionManager {
     private void adjustConnectionFetchers() {
         if(RouterService.isShieldedLeaf() 
            && _needPref 
-           && _dedicatedPrefFetcher == null)
+           && _dedicatedPrefFetcher == null) {
+            System.out.println("creating dedicated fetcher");
             _dedicatedPrefFetcher = new ConnectionFetcher(true);
+        }
         //How many connections do we need?  To prefer ultrapeers, we try to
         //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
@@ -1891,11 +1893,18 @@ public class ConnectionManager {
                     initializeFetchedConnection(connection, this);
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
-                    _needPref = false;
+                    if(_pref) // if pref connection succeeded
+                        _needPref = false;
                 } catch (NoGnutellaOkException e) {
                     _lastSuccessfulConnect = System.currentTimeMillis();
-                    _catcher.doneWithConnect(endpoint, true);
-                    _catcher.putHostOnProbation(endpoint);
+                    if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
+                        //if it failed because of a locale matching issue
+                        _catcher.add(endpoint, true); //readd to hostcatcher??
+                    }
+                    else {
+                        _catcher.doneWithConnect(endpoint, true);
+                        _catcher.putHostOnProbation(endpoint);
+                    }
                     throw e;                    
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
