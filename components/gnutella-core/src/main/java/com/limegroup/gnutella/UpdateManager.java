@@ -56,6 +56,7 @@ public class UpdateManager {
                 final String UPDATE = "/update.xml";
                 String ip = c.getOrigHost();
                 int port = c.getOrigPort();
+                byte[] data = null;
                 //TODO1: if the ip and port are invalid, we should return
                 try {
                 URL url = new URL("HTTP",ip,port,UPDATE);
@@ -69,18 +70,26 @@ public class UpdateManager {
                 connection.setRequestProperty("accept","text/html");//??
                 
                 InputStream in = connection.getInputStream();
-                while(true) {
+                int len = connection.getContentLength();
+                data = new byte[len];
+                for(int i=0; i<len; i++) {
                     int a = in.read();
                     if(a==-1)
                          break;
-                    System.out.print((char)a);
+                    data[i] = (byte)a;
                 }
+                UpdateMessageVerifier verifier=new UpdateMessageVerifier(data);
+                boolean verified = verifier.verifySource();
+                if(!verified) {
+                    System.out.println("Sumeet: verification failed");
+                    return;
+                }
+                System.out.println("Sumeet:checked content "+new String(data));
+
                 } catch(Exception e ) {
-                    e.printStackTrace();
-                    System.out.println("failed");
+                    //any errors? We can't continue...forget it.
+                    return;
                 }
-                System.out.println("read headers");
-                //TODO1:verify authenticity
                 //TODO1:parseFile using UpdateFileParser
                 synchronized(UpdateManager.this) {
                     //write the file to disk
