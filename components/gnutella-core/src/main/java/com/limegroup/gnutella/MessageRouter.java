@@ -358,7 +358,7 @@ public abstract class MessageRouter
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
-                     && !receivingConnection.isClientSupernodeConnection())) {
+                     && !c.isClientSupernodeConnection())) {
                 c.send(pingRequest);
             }
         }
@@ -389,7 +389,7 @@ public abstract class MessageRouter
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
-                     && !receivingConnection.isClientSupernodeConnection())) {
+                     && !c.isClientSupernodeConnection())) {
                 c.send(queryRequest);
             }
         }
