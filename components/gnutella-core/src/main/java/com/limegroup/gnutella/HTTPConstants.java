@@ -9,7 +9,7 @@ public final class HTTPConstants {
 	 * Constant for the character that marks the end of an HTTP 
 	 * header key.
 	 */
-	private static final String HEADER_KEY_END = ":";
+	private static final String HEADER_KEY_END = ": ";
 
 	/**
 	 * Constant for the "X-Gnutella-Content-URN" header for specifying
