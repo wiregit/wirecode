@@ -44,7 +44,8 @@ public class UDPAcceptorTest extends TestCase {
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 		QueryRequest qr = new QueryRequest(GUID.makeGuid(),
-										   (byte)6, 4, "Huge");//fds[0].getName()); 
+										   (byte)6, (byte)4, 
+                                           (new String("Huge")).getBytes());//fds[0].getName()); 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			qr.write(baos);
