@@ -63,6 +63,51 @@ public class LimeXMLDocumentHelper{
     }
     
     /**
+     * Breaks the passed xml document in aggregate form (where the root
+     * element has multiple child nodes) to a list of xml documents
+     * where the root node has got only one child. In other words it breaks
+     * the multiple documents embedded in a single big document to respective
+     * non-embedded documents
+     * @param aggregateXMLStr string representing xml document in 
+     * aggregate form
+     * @return List (of LimeXMLDocument) of LimeXMlDocuments that we get 
+     * after breaking the 
+     * aggregate string. Returns null, if the aggregateXMLString is not a
+     * valid xml
+     */ 
+    public static List /* LimeXMLDocument */ breakSingleSchemaAggregateString(
+        String aggregrateXMLStr)
+    {
+        //get the root element of the aggregate string
+        Element rootElement = getDOMTree(aggregrateXMLStr);
+
+        //return null, if the passed xml couldnt be parsed
+        if(rootElement==null)
+            return null;
+        
+        //create a list to store the documents
+        ArrayList docs = new ArrayList();
+        
+        //get the child nodes, each of which will be transformed to 
+        //a separate document
+        List children = LimeXMLUtils.getElements(rootElement.getChildNodes());
+        
+        //Iterate over the children
+        for(Iterator iterator = children.iterator(); iterator.hasNext();)
+        {
+            //get the next child node
+            Node currNode = (Node)iterator.next();
+            //convert the subtree represented by the child node to an 
+            //instance of LimeXMLDocument, and add to the list of documents
+            docs.add(new LimeXMLDocument(currNode,rootElement));
+        }
+        
+        //return the list of documents
+        return docs;
+    }
+    
+    
+    /**
      * @param responses array is a set of responses. Sore have meta-data
      * some do not. 
      * The aggregrate string should reflect the indexes of the 
@@ -241,7 +286,7 @@ public class LimeXMLDocumentHelper{
      }
     
         
-    private Element getDOMTree(String aggrigateXMLStr){
+    private static Element getDOMTree(String aggrigateXMLStr){
         InputSource source=new InputSource(new StringReader(aggrigateXMLStr));
         DOMParser parser = new DOMParser();
         Document root = null;
