@@ -86,23 +86,30 @@ public class QueryRouteTable {
         this(DEFAULT_TABLE_SIZE);
     }
 
-    /** 
-     * Creates a new QueryRouteTable that has space for initialSize keywords
-     * with hops up to but not including infinity.  The table is completely
-     * empty, i.e., contains no keywords.  Hosts may want to send queries
-     * down this table's connection until it is fully patched.
+    /**
+     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
+     * size.  This <tt>QueryRouteTable</tt> will be completely empty with
+     * no keywords -- no queries will have hits in this route table until
+     * patch messages are received.
+     *
+     * @param size the size of the query routing table
      */
-    public QueryRouteTable(int initialSize) {
-        initialize(initialSize);
+    public QueryRouteTable(int size) {
+        initialize(size);
     }
 
-    private void initialize(int initialSize) {
-        this.bitTable=new BitSet(initialSize);
-        this.bitTableLength=initialSize;
-//        this.bitEntries=0;
-        this.sequenceNumber=-1;
-        this.sequenceSize=-1;
-        this.nextPatch=0;
+    /**
+     * Initializes this <tt>QueryRouteTable</tt> to the specified size.
+     * This table will be empty until patch messages are received.
+     *
+     * @param size the size of the query route table
+     */
+    private void initialize(int size) {
+        this.bitTableLength = size;
+        this.bitTable = new BitSet(bitTableLength);
+        this.sequenceNumber = -1;
+        this.sequenceSize = -1;
+        this.nextPatch = 0;                
     }
 
     /**
@@ -342,25 +349,30 @@ public class QueryRouteTable {
 
     ////////////////////// Core Encoding and Decoding //////////////////////
 
-    /*
-     * Adds or removes keywords according to m.  Does not resize this.
-     *     @modifies this 
+
+    /**
+     * Resets this <tt>QueryRouteTable</tt> to the specified size with
+     * no data.  This is done when a RESET message is received.
+     *
+     * @param rtm the <tt>ResetTableMessage</tt> containing the size
+     *  to reset the table to
      */
-    public void update(RouteTableMessage m) throws BadPacketException {
-        switch (m.getVariant()) {                      
-        case RouteTableMessage.RESET_VARIANT:
-            ResetTableMessage reset=(ResetTableMessage)m;
-            initialize(reset.getTableSize()); 
-            return;
-        case RouteTableMessage.PATCH_VARIANT:
-            PatchTableMessage patch=(PatchTableMessage)m;
-            handlePatch(patch);
-            return;
-        default:
-            //Ignore.
-            return;
-        }
+    public void reset(ResetTableMessage rtm) {
+        initialize(rtm.getTableSize());
     }
+
+    /**
+     * Adds the specified patch message to this query routing table.
+     *
+     * @param patch the <tt>PatchTableMessage</tt> containing the new
+     *  data to add
+     * @throws <tt>BadPacketException</tt> if the sequence number or size
+     *  is incorrect
+     */
+    public void patch(PatchTableMessage patch) throws BadPacketException {
+        handlePatch(patch);        
+    }
+
 
     //All encoding/decoding works in a pipelined manner, by continually
     //modifying a byte array called 'data'.  TODO2: we could avoid a lot of
