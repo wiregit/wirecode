@@ -104,6 +104,10 @@ public class OnDemandUnicaster {
         // ------
         QueryKey key = (QueryKey) _queryKeys.get(ep);
         if (key == null) {
+            GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
+                                                       ep.getPort());
+            SendLaterBundle bundle = new SendLaterBundle(queryURN);
+            _bufferedURNs.put(endpoint, bundle);
             PingRequest pr = PingRequest.createQueryKeyRequest();
             try {
                 _udp.send(pr, ep.getAddress(), ep.getPort());
@@ -113,25 +117,14 @@ public class OnDemandUnicaster {
             }
         }
         // ------
-        
         // if possible send query, else buffer
         // ------
-        if (key != null) {
+        else {
             QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
             try {
                 _udp.send(query, ep.getAddress(), ep.getPort());
             }
             catch (IOException ignored) {}
-        }
-        else {
-            // don't want to get a query key before buffering the query - this
-            // still may happen but it seems HIGHLY unlikely
-            synchronized (_bufferedURNs) {
-                GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
-                                                           ep.getPort());
-                SendLaterBundle bundle = new SendLaterBundle(queryURN);
-                _bufferedURNs.put(endpoint, bundle);
-            }
         }
         // ------
     }
