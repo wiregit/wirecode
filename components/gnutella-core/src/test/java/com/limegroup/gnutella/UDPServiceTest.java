@@ -6,7 +6,8 @@ import java.io.*;
 import java.net.*;
 
 /**
- * Tests the <tt>UDPService</tt> class.
+ * Tests the <tt>UDPService</tt> class.  This class requires that a server on
+ * is already running that can accept queries.
  */
 public class UDPServiceTest extends TestCase {
 
@@ -55,17 +56,19 @@ public class UDPServiceTest extends TestCase {
 
 		byte[] ipBytes = ROUTER_SERVICE.getAddress();
 		String address = Message.ip2string(ipBytes);
-		ROUTER_SERVICE.connectToHostAsynchronously(address, 6346);
-		
 		try {
+			ROUTER_SERVICE.connectToHostBlocking(address, 6346);
 			Thread.sleep(1000);
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
 		} catch(InterruptedException e) {
+			fail("unexpected exception: "+e);
 		}
-		//System.out.println("GUESS ENABLED: "+
-		//			   SettingsManager.instance().getGuessEnabled()); 
+		
+		RouterService.disconnect();
+
 		for(int i=0; i<fds.length; i++) {
 			String curName = fds[i].getName(); 
-			//System.out.println("TESTING FILE: "+curName); 
 			QueryRequest qr = new QueryRequest((byte)1, (byte)0, 
 											   curName); 
 			PingRequest ping = new PingRequest((byte)1);
@@ -78,23 +81,22 @@ public class UDPServiceTest extends TestCase {
 				UDPService service = ROUTER_SERVICE.getUdpService();
 				service.send(ping, ip, 6346);
 				MessageRouter router = ROUTER_SERVICE.getMessageRouter();
-				//router.broadcastPingRequest(new PingRequest((byte)1));
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {}
-				router.broadcastQueryRequest(qr);
+				ROUTER_SERVICE.query(ROUTER_SERVICE.newQueryGUID(), 
+									 curName, 0, null);
 				try {
 					while(_reply == null) {
 						Thread.sleep(100);
 					}
 				} catch(InterruptedException e) {
 					e.printStackTrace();
-				}
-
+				}				
 				
 				try {
 					RemoteFileDesc[] rfds = _reply.toRemoteFileDescArray();
-					assertEquals("should only be one response in reply", rfds.length, 1);								
+					assertEquals("should only be one response in reply", rfds.length, 1);	
 					assertEquals("reply name should equal query name", rfds[0].getFileName(),
 								 curName);
 					_reply = null;
@@ -102,24 +104,26 @@ public class UDPServiceTest extends TestCase {
 					fail("unexpected exception: "+e);
 				}
 			} catch(UnknownHostException e) {
+				fail("unexpected exception: "+e);
 				e.printStackTrace();
 			} catch(SocketException e) {
 				e.printStackTrace();
+				fail("unexpected exception: "+e);
 			} catch(IOException e) {
 				e.printStackTrace();
+				fail("unexpected exception: "+e);
 			}		
 		}
 
-		//System.out.println("ABOUT TO SHUTDOWN ROUTER SERVICE"); 
-		//BACKEND.shutdown();
+		BACKEND.shutdown("GUESS CLIENT");
 	}
 
 
+	/**
+	 * Helper class to intercept query hits coming back from the server.
+	 */
 	private class ActivityCallbackTest extends ActivityCallbackStub {
 		public void handleQueryReply(QueryReply reply) {
-			//System.out.println(""); 
-			//System.out.println(""); 
-			//System.out.println("RECEIVED REPLY: "+reply); 
 			_reply = reply;
 		}
 	}
