@@ -2384,32 +2384,15 @@ public abstract class MessageRouter {
      *     @requires queryUpdateLock held
      */
     private static QueryRouteTable createRouteTable() {
-        //TODO: choose size according to what's been propogated.
-        QueryRouteTable ret=new QueryRouteTable();
+        QueryRouteTable ret = _fileManager.getQRT();
         
-        //Add my files...
-        addQueryRoutingEntries(ret);
+        // Add leaves' files if we're an Ultrapeer.
+        if(RouterService.isSupernode()) {
+            addQueryRoutingEntriesForLeaves(ret);
+        }
         return ret;
     }
 
-
-    /**
-     * Adds all query routing tables for this' files to qrt.
-     *     @modifies qrt
-     */
-    private static void addQueryRoutingEntries(QueryRouteTable qrt) {
-        Iterator words = _fileManager.getKeyWords().iterator();
-        while(words.hasNext())
-            qrt.add((String)words.next());
-        // get 'indivisible' words and handle appropriately - you don't want the
-        // qrt to divide these guys up....
-        Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
-        while (indivisibleWords.hasNext()) 
-            qrt.addIndivisible((String) indivisibleWords.next());
-		if(RouterService.isSupernode()) {
-			addQueryRoutingEntriesForLeaves(qrt);
-		}
-    }
 
 	/**
 	 * Adds all query routing tables of leaves to the query routing table for

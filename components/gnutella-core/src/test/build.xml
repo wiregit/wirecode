@@ -36,8 +36,12 @@
   <property name="corebin"         value="${coredir}/bin"/>
   <property name="httpclient"      value="${corelib}/commons-httpclient.jar"/>
   <property name="logging"         value="${corelib}/commons-logging.jar"/>
+  <property name="i18njar"   value="${corelib}i18n.jar"/>
+  <property name="xmljar"   value="${lib}xml.jar"/>
+  <property name="icu4jjar" value="${corelib}icu4j.jar"/>
 
-  <!-- constants -->
+
+  <!-- constants --> 
   <property name="DEBUG" value="yes" />
   <property name="OPTIMIZE" value="no" />
   <property name="DEPRECATION" value="yes" />
@@ -46,6 +50,7 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
+    <pathelement location="${lib}" />
     <pathelement location="${builddir}" />
     <pathelement location="${coredir}" />
     <pathelement location="${collections}" />
@@ -67,6 +72,9 @@
     <pathelement location="${cocoaStubs}"/>
     <pathelement location="${httpclient}"/>
     <pathelement location="${logging}"/>
+	<pathelement location="${i18njar}"/>
+	<pathelement location="${xmljar}"/>
+	<pathelement location="${icu4jjar}"/>
   </path>
   
   <!-- CLOVER SETUP TASKS -->
@@ -270,3 +278,4 @@
 </project>
 
 
+           

@@ -245,7 +245,18 @@ public class Response {
 		else
 			this.name = name;
 
-        this.nameBytes = this.name.getBytes();
+        byte[] temp = null;
+        
+        try {
+            temp = this.name.getBytes("UTF-8");
+        }
+        catch(UnsupportedEncodingException namex) {
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(namex);
+        }
+        
+        this.nameBytes = temp;
 
 		if (urns == null)
 			this.urns = DataUtils.EMPTY_SET;
@@ -275,7 +286,9 @@ public class Response {
         try { //It's possible to get metadata between the null from others
             this.metaBytes = this.metadata.getBytes("UTF-8");
         } catch(UnsupportedEncodingException ueex) {
-            this.metaBytes = this.metadata.getBytes();
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(ueex);
         }
 		
 		// we don't generate this from the metadata string in the case where the
@@ -324,7 +337,7 @@ public class Response {
                 throw new IOException("EOF before null termination");
             baos.write(c);
         }
-        String name = new String(baos.toByteArray());
+        String name = new String(baos.toByteArray(), "UTF-8");
         if(name.length() == 0) {
             throw new IOException("empty name in response");
         }
@@ -650,7 +663,14 @@ public class Response {
 		// this is guaranteed to be non-null, although it could be the empty
 		// string
 		metadata = extractMetadata(document);
-		metaBytes = metadata.getBytes();
+        try {
+            metaBytes = metadata.getBytes("UTF-8");
+        }
+        catch(UnsupportedEncodingException uee) {
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(uee);
+        }
 	}
 	
     

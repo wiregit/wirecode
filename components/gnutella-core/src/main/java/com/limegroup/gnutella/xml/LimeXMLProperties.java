@@ -263,15 +263,23 @@ public class LimeXMLProperties
             if(!stringPath.endsWith(File.separator)) {
                 stringPath = stringPath + File.separator;
             }
+
             return stringPath;
         }
         else
         {
             if(!limeHome.endsWith("/") && !limeHome.endsWith("\\"))
                 limeHome = limeHome + File.separator;
+
             return limeHome + "lib" + File.separator;
         }
 //        return "e:/work/lib/";
     }    
     
 }//end of class
+
+
+
+
+
+

@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileComparator;
@@ -16,6 +17,7 @@ import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Comparator;
@@ -191,7 +193,16 @@ public abstract class FileManager {
      */
     public static FilenameFilter DIRECTORY_FILTER = new DirectoryFilter();
         
+    /**
+     * The QueryRouteTable kept by this.  The QueryRouteTable will be 
+     * lazily rebuilt when necessary 
+     */
+    protected static QueryRouteTable _queryRouteTable;
     
+    /**
+     * boolean for checking if the QRT needs to be rebuilt
+     */
+    protected static volatile boolean _needRebuild = true;
 
     /**
      * Characters used to tokenize queries and file names.
@@ -768,11 +779,12 @@ public abstract class FileManager {
             _numPendingFiles++;
         }
         FileDesc fd;
-        if (directoryShared)
-            fd = addFile(f);
+        if (directoryShared) 
+            fd = addFile(f);            
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
+        _needRebuild = true;
         return fd;
 	}
 
@@ -847,7 +859,8 @@ public abstract class FileManager {
             RouterService.getCallback().addSharedFile(fileDesc, parent);
 		
             //Index the filename.  For each keyword...
-            String[] keywords=StringUtils.split(fileDesc.getPath(), DELIMETERS);
+            String[] keywords = extractKeywords(fileDesc);
+            
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 //Ensure there _index has a set of indices associated with
@@ -863,7 +876,7 @@ public abstract class FileManager {
 		
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
-		
+            _needRebuild = true;            
             repOk();
             return fileDesc;
         }
@@ -930,7 +943,7 @@ public abstract class FileManager {
         _fileToFileDesc.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
-        
+        _needRebuild = true;
         File parent = FileUtils.getParentFile(incompleteFile);
         RouterService.getCallback().addSharedFile(ifd, parent);
     }
@@ -997,6 +1010,7 @@ public abstract class FileManager {
         
         _files.set(i,null);
         _fileToFileDesc.remove(f);
+        _needRebuild = true;
         
         // If it's an incomplete file, the only reference we 
         // have is the URN, so remove that and be done.
@@ -1023,9 +1037,8 @@ public abstract class FileManager {
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        //Remove references to this from index.
-        String[] keywords=StringUtils.split(fd.getPath(),
-                                            DELIMETERS);
+        //Remove references to this from index.                                            
+        String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
             IntSet indices=(IntSet)_index.get(keyword);
@@ -1038,9 +1051,23 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
-
+  
         repOk();
         return fd;
+    }
+    
+    /**
+     * Utility method to perform standardized keyword extraction for the given
+     * <tt>FileDesc</tt>.  This handles extracting keyword according to 
+     * locale-specific rules.
+     * 
+     * @param fd the <tt>FileDesc</tt> containing a file system path with 
+     *  keywords to extact
+     * @return an array of keyword strings for the given file
+     */
+    private static String[] extractKeywords(FileDesc fd) {
+        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
+            DELIMETERS);
     }
 
     /** Removes any URN index information for desc */
@@ -1122,35 +1149,48 @@ public abstract class FileManager {
     }
 
     /**
-     * called when a query route table has to be made. The current 
-     * implementaion just takes all the file names and they are split
-     * internally when added the QRT
+     * returns the QRTable.  
+     * if the shared files had changed, then it will rebuilt the
+     * qrt.
      */
-    public List getKeyWords(){
+    public QueryRouteTable getQRT() {
+        if(_needRebuild) {
+            buildQRT();
+            _needRebuild = false;
+        }
+
+        return _queryRouteTable;
+    }
+
+    /**
+     * build the qrt.  Subclasses can add other Strings to the
+     * QRT by calling buildQRT and then adding directly to the 
+     * _queryRouteTable variable. (see xml/MetaFileManager.java)
+     */
+    protected void buildQRT() {
+
+        _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
-        ArrayList retList = new ArrayList();
-        for(int i=0;i<fds.length;i++)
-            retList.add(fds[i].getFile().getAbsolutePath());
-        return retList;
+        for(int i = 0; i < fds.length; i++) {
+            addToQRT(fds[i]);
+        }
     }
     
-
-    /** @return A List of KeyWords from the FS that one does NOT want broken
-     *  upon hashing into a QRT.  Initially being used for schema hashing.
-     *  We add all the hashes of the files we share so queries with hashes
-     *  can be checked for potential positives against a QRT.
+    /**
+     * function add and addIndivisible from passed in FileDesc
      */
-    public List getIndivisibleKeyWords() {
-        ArrayList retList = new ArrayList();
-        FileDesc[] files = getAllSharedFileDescriptors();
-        for (int i = 0; i < files.length; i++) {
-            Set urnsForCurrFile = files[i].getUrns();
-            Iterator iter = urnsForCurrFile.iterator();
-            while (iter.hasNext())
-                retList.add(((URN)iter.next()).httpStringValue());
+    protected void addToQRT(FileDesc fd) {
+        // Don't add incomplete files to the QRP tables.
+        if(fd instanceof IncompleteFileDesc) {
+            return;
         }
-        return retList;
+        _queryRouteTable.add(fd.getPath());
+        Set urns = fd.getUrns();
+        Iterator iter = urns.iterator();
+        while(iter.hasNext())
+            _queryRouteTable.addIndivisible(((URN)iter.next()).httpStringValue());
     }
+
 
     ////////////////////////////////// Queries ///////////////////////////////
 
@@ -1477,3 +1517,9 @@ public abstract class FileManager {
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java
     //            core/com/limegroup/gnutella/tests/UrnRequestTest.java
 }
+
+
+
+
+
+

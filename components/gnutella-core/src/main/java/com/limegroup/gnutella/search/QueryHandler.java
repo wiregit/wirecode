@@ -685,8 +685,8 @@ public final class QueryHandler {
 
     /** @return simply returns the guid of the query this is handling.
      */
-    public byte[] getGUID() {
-        return QUERY.getGUID();
+    public GUID getGUID() {
+        return new GUID(QUERY.getGUID());
     }
 
 }

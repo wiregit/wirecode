@@ -16,7 +16,7 @@ public class InstantMessenger implements Chatter {
 
 	// Attributes
 	private Socket _socket;
-	private ByteReader _reader;
+	private BufferedReader _reader;
 	private BufferedWriter _out;
 	private String _host;
 	private int _port;
@@ -34,10 +34,10 @@ public class InstantMessenger implements Chatter {
 		_host = _socket.getInetAddress().getHostAddress();
 		_activityCallback = callback;
 		OutputStream os = _socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os);
+		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 		_out=new BufferedWriter(osw);
 		InputStream istream = _socket.getInputStream();
-		_reader = new ByteReader(istream);
+		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
 		readHeader();
 	}
 
@@ -57,7 +57,7 @@ public class InstantMessenger implements Chatter {
 		_socket =  new Socket(_host, _port);
 		_socket.setSoTimeout(Constants.TIMEOUT);
 		OutputStream os = _socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os);
+		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 		_out=new BufferedWriter(osw);
 		// CHAT protocal :
 		// First we send the Chat connect string, followed by 
@@ -71,7 +71,7 @@ public class InstantMessenger implements Chatter {
 		// by headers, and then a blank line.
 		// TODO: Add socket timeouts.
 		InputStream istream = _socket.getInputStream();
-		_reader = new ByteReader(istream);
+		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
 		// we are being lazy here: not actually checking for the 
 		// header, and reading until a blank line
 		while (true) {

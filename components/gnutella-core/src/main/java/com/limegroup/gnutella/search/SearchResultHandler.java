@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import com.sun.java.util.collections.*;
 
 import org.apache.commons.logging.LogFactory;
@@ -303,9 +304,19 @@ public final class SearchResultHandler {
             byte[] xmlCompressed = qr.getXMLBytes();
             if (xmlCompressed.length > 1) {
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
-                xmlCollectionString = new String(xmlUncompressed);
+                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
             }
-        } catch (IOException ignored) {}
+        }
+        catch (UnsupportedEncodingException use) {
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            //we won't throw a BadPacketException here but we will show it.
+            //the uee will effect the xml part of the reply but we could
+            //still show the reply so there shouldn't be any ill effect if
+            //xmlCollectionString is ""
+            ErrorService.error(use);
+        }
+        catch (IOException ignored) {}
 
         if(LOG.isDebugEnabled())
             LOG.debug("xmlCollectionString = " + xmlCollectionString);

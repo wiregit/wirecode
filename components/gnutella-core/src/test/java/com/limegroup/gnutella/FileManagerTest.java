@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.I18NConvert;
 import junit.framework.*;
 
 import com.limegroup.gnutella.settings.*;
@@ -11,13 +12,14 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-    private static final String EXTENSION = "XYZ";
+    protected static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
     
     private File f1 = null;
@@ -26,8 +28,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private File f4 = null;
     private File f5 = null;
     private File f6 = null;
-    private FileManager fman = null;
-    private Object loaded = new Object();
+    //changed to protected so that MetaFileManagerTest can
+    //use these varaiables as well.
+    protected FileManager fman = null;
+    protected Object loaded = new Object();
     private Response[] responses;
     private FileDesc[] files;
 
@@ -483,7 +487,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -510,7 +514,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -525,7 +529,95 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
     }	
-	
+    
+    /**
+     * tests for the QRP thats kept by the FileManager 
+     * tests that the function getQRP of FileManager returns
+     * the correct table after addition, removal, and renaming
+     * of shared files.
+     */
+    public void testFileManagerQRP() throws Exception {
+        f1 = createNewNamedTestFile(10, "hello");
+        f2 = createNewNamedTestFile(10, "\u5bae\u672c\u6b66\u8535\u69d8");
+        f3 = createNewNamedTestFile(10, "\u00e2cc\u00e8nts");
+        waitForLoad(); 
+
+        //get the QRT from the filemanager
+        QueryRouteTable qrt = fman.getQRT();
+
+        //test that QRT doesn't contain random keyword
+        QueryRequest qr = QueryRequest.createQuery("asdfasdf");
+        assertFalse("query should not be in qrt",
+                   qrt.contains(qr));
+
+        //test that the qrt contains the three files 
+        qr = get_qr(f1);
+        assertTrue("query not in QRT", qrt.contains(qr));
+        
+        qr = get_qr(f2);
+        assertTrue("query not in QRT", qrt.contains(qr));
+
+        qr = get_qr(f3);
+        assertTrue("query not in QRT", qrt.contains(qr));
+
+
+        //now remove one of the files
+        fman.removeFileIfShared(f3);
+        
+        qrt = fman.getQRT();
+        
+        //make sure the removed file is no longer in qrt
+        assertFalse("query should not be in qrt",
+                   qrt.contains(qr));
+        
+        //just check that the one of the other files is still 
+        //in the qrt
+        qr = get_qr(f2);
+        assertTrue("query not in QRT", qrt.contains(qr));
+
+        
+
+        //test rename
+        f4 = createNewNamedTestFile(10, "miyamoto_musashi_desu");
+        
+        //check that this file doesn't hit
+        qr = get_qr(f4);
+        assertFalse("query should not be in qrt", qrt.contains(qr));
+
+        //now rename one of the files
+        fman.renameFileIfShared(f2, f4);
+        qrt = fman.getQRT();
+        
+        //check hit with new name
+        qr = get_qr(f4);
+        assertTrue("query not in qrt", qrt.contains(qr));
+        
+        //check old name
+        qr = get_qr(f2);
+        assertFalse("query should not be in qrt", qrt.contains(qr));
+    }
+
+    //helper function to create queryrequest with I18N
+    private QueryRequest get_qr(File f) {
+        return 
+            QueryRequest.createQuery
+            (I18NConvert.instance().getNorm(f.getName()));
+    }
+
+    //helper function to create a new temporary file with passed in name
+    protected File createNewNamedTestFile(int size, String name) 
+        throws Exception {
+		File file = File.createTempFile(name, 
+                                        "." + EXTENSION , _sharedDir);
+		file.deleteOnExit();
+        OutputStream out=new FileOutputStream(file);
+        out.write(new byte[size]);
+        out.flush();
+        out.close();
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
+        return FileUtils.getCanonicalFile(file);
+    }
+
 	
 	private void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";
@@ -579,7 +671,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
-    File createNewTestFile(int size) throws Exception {
+    protected File createNewTestFile(int size) throws Exception {
 		File file = File.createTempFile("FileManager_unit_test", 
 		    "." + EXTENSION , _sharedDir);
 		file.deleteOnExit();
@@ -611,15 +703,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
-    private class FManCallback extends ActivityCallbackStub {
+    public class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized(loaded) {
                 loaded.notify();
             }
         }
     }
-    
-    private void waitForLoad() {
+
+    protected void waitForLoad() {
         synchronized(loaded) {
             try {
                 fman.loadSettings(false); // true won't matter either                
@@ -630,3 +722,4 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }    
 }
+

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.guess.*;
@@ -318,6 +319,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
     public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
                                                     String xmlQuery) {
+        query = I18NConvert.instance().getNorm(query);
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -424,6 +426,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
+        query = I18NConvert.instance().getNorm(query);
 		if(guid == null) {
 			throw new NullPointerException("null guid");
 		}
@@ -770,7 +773,7 @@ public class QueryRequest extends Message implements Serializable{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ByteOrder.short2leb((short)MIN_SPEED,baos); // write minspeed
-            baos.write(QUERY.getBytes());              // write query
+            baos.write(QUERY.getBytes("UTF-8"));              // write query
             baos.write(0);                             // null
 
 			
@@ -821,7 +824,18 @@ public class QueryRequest extends Message implements Serializable{
             }
 
             baos.write(0);                             // final null
-		} catch (IOException e) {
+		} 
+        catch(UnsupportedEncodingException uee) {
+            //this should never happen from the getBytes("UTF-8") call
+            //but there are UnsupportedEncodingExceptions being reported
+            //with UTF-8.
+            //Is there other information we want to pass in as the message?
+            throw new IllegalArgumentException("could not get UTF-8 bytes for query :"
+                                               + QUERY 
+                                               + " with richquery :"
+                                               + richQuery);
+        }
+        catch (IOException e) {
 		    ErrorService.error(e);
 		}
 
@@ -863,7 +877,7 @@ public class QueryRequest extends Message implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ubytes2int(sp);
-            tempQuery = new String(super.readNullTerminatedBytes(bais));
+            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
             // handle extensions, which include rich query and URN stuff
             byte[] extsBytes = super.readNullTerminatedBytes(bais);
             int currIndex = 0;
@@ -929,7 +943,13 @@ public class QueryRequest extends Message implements Serializable{
                     currIndex = delimIndex+1;
                 }
             }
-        } catch (IOException ioe) {
+        } 
+        catch(UnsupportedEncodingException uee) {
+            //couldn't build query from network due to unsupportedencodingexception
+            //so throw a BadPacketException 
+            throw new BadPacketException("encountered UnsupportedEncodingException with data snatched from network");
+        }
+        catch (IOException ioe) {
             ErrorService.error(ioe);
         }
 		QUERY = tempQuery;

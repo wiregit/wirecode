@@ -186,7 +186,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results", 
-                          1, results.size());
+                          1, results.size()); 
 
         // has one off by one....
         nameVals.clear();
@@ -288,6 +288,99 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         clearDirectory();
     }
 
+    //test LimeXMLReplyCollection with i18n chars
+    public void testI18NCharsInXML() throws Exception {
+        String[] keywds = {"\u9234\u6728\u6b66\u8535\u69d8",
+                           "thestudio",
+                           "\u5bae\u672c"};
+
+        String dir1 = "director=\"" + keywds[0] + "\"";
+        String dir2 = dir1 + " studio=\"" + keywds[1] + "\"";
+        String dir3 = dir1 + " studio=\"" + keywds[2] + "\"";
+
+
+        LimeXMLReplyCollection collection = 
+            new LimeXMLReplyCollection(files, schemaURIVideo, !audio);
+        
+
+        //documents to add to the collection
+        LimeXMLDocument newDoc =
+            new LimeXMLDocument(buildXMLString(dir2));
+        
+        LimeXMLDocument newDoc2 =
+            new LimeXMLDocument(buildXMLString(dir3));
+        
+        //addReply calls addKeywords (which uses I18NConvert)
+        collection.addReply(files[0], newDoc);
+        collection.addReply(files[1], newDoc2);
+
+        //check the keywords.
+        List l = collection.getKeyWords();
+        assertTrue("Couldn't find all keywords",
+                   (l.contains(keywds[0]) &&
+                    l.contains(keywds[1]) &&
+                    l.contains(keywds[2])));
+
+        //the query document
+        LimeXMLDocument newDocQ =
+            new LimeXMLDocument(buildXMLString(dir1));
+
+        LimeXMLDocument newDocQ2 =
+            new LimeXMLDocument(buildXMLString(dir3));
+
+        //make sure we get matches that we expect
+        l = collection.getMatchingReplies(newDocQ);
+        assertEquals("should of found two matches",
+                     2,
+                     l.size());
+        
+        l = collection.getMatchingReplies(newDocQ2);
+        assertEquals("should of found only one match",
+                     1,
+                     l.size());
+        
+        //make sure we get the same xml string...
+        assertEquals("didn't get expected xml string",
+                     newDoc2.getXMLString(),
+                     ((LimeXMLDocument)l.iterator().next()).getXMLString());
+
+
+        //check we get the right docs back from getDocForHash
+        LimeXMLDocument returnDoc = 
+            collection.getDocForHash(files[0].getSHA1Urn());
+        assertEquals("didn't get expected xml string (getDocForHash)",
+                     newDoc.getXMLString(),
+                     returnDoc.getXMLString());
+        
+        returnDoc =
+            collection.getDocForHash(files[1].getSHA1Urn());
+        assertEquals("didn't get expected xml string (getDocForHash)",
+                     newDoc2.getXMLString(),
+                     returnDoc.getXMLString());
+        
+
+        //remove 
+        collection.removeDoc(files[1]);
+        
+        l = collection.getMatchingReplies(newDocQ2);
+        assertEquals("should not of found a match",
+                     0,
+                     l.size());
+        
+        //make sure the keywords got deleted as well
+        l = collection.getKeyWords();
+        assertTrue("unexpected keywords",
+                   (l.contains(keywds[0]) &&
+                    l.contains(keywds[1]) &&
+                    !l.contains(keywds[2])));
+    }
+
+    // build xml string for video
+    private String buildXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video " 
+            + keyname 
+            + "></video></videos>";
+    }
 
     private void clearDirectory() {
         File dir = new File(LimeXMLProperties.instance().getXMLDocsDir());
@@ -357,3 +450,6 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }       
 }
+
+
+

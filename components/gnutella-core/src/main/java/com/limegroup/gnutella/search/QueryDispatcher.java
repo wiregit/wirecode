@@ -37,7 +37,11 @@ public final class QueryDispatcher implements Runnable {
 	private static final QueryDispatcher INSTANCE = 
 		new QueryDispatcher();
 	
-	
+	//list of user killed searches
+    private final Set _toRemove = 
+        Collections.synchronizedSet(new HashSet());
+    
+
 	/**
 	 * Instance accessor for the <tt>QueryDispatcher</tt>.
 	 *
@@ -142,12 +146,12 @@ public final class QueryDispatcher implements Runnable {
                 if(qh.getReplyHandler() == handler)
                     toRemove.add(qh);
             }
-            //TODO: ask adam if toRemove will ever have more than 1 element.  i
-            //don't know the code that well....
+
+
             iter = toRemove.iterator();
             while (iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
-                map.remove(new GUID(qh.getGUID()));
+                map.remove(qh.getGUID());
             }
         }     
     }
@@ -180,7 +184,7 @@ public final class QueryDispatcher implements Runnable {
                 Iterator iter = NEW_QUERIES.iterator();
                 while (iter.hasNext()) {
                     QueryHandler qh = (QueryHandler) iter.next();
-                    QUERIES.put(new GUID(qh.getGUID()), qh);
+                    QUERIES.put(qh.getGUID(), qh);
                 }
             }
 			NEW_QUERIES.clear();
@@ -193,7 +197,14 @@ public final class QueryDispatcher implements Runnable {
             while(iter.hasNext()) {
                 QueryHandler handler = 
                     (QueryHandler)((Map.Entry)iter.next()).getValue();
-                handler.sendQuery();
+                
+                if(_toRemove.contains(handler.getGUID())) {
+                    _toRemove.remove(handler.getGUID());
+                    expiredQueries.add(handler);
+                }
+                else
+                    handler.sendQuery();
+
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
                 }
@@ -203,11 +214,19 @@ public final class QueryDispatcher implements Runnable {
             iter = expiredQueries.iterator();
             while (iter.hasNext()) {
                 QueryHandler qh = (QueryHandler) iter.next();
-                QUERIES.remove(new GUID(qh.getGUID()));
+                QUERIES.remove(qh.getGUID());
             }
         }
         _done = true;
 	}
+
+    
+    public void addToRemove(GUID g) {
+        _toRemove.add(g);
+    }
+    
+    
+
 }
 
 

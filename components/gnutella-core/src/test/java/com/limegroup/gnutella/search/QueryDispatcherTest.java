@@ -49,7 +49,6 @@ public class QueryDispatcherTest extends BaseTestCase {
         qd.addQuery(handler);
         qd.addQuery(handler);
         Thread.sleep(3000);
-        
         assertEquals("unexpected queries size", 1, queries.size());
         qd.removeReplyHandler(rh);
         assertEquals("should not be any queries", 0, queries.size());
@@ -87,6 +86,49 @@ public class QueryDispatcherTest extends BaseTestCase {
         assertEquals("should not be any queries", 0, queries.size());
     }
 
+    /**
+     * tests that user stopped queries via _toRemove set are stopped and 
+     * removed correctly
+     */
+    public void testRemoveStoppedQuery() throws Exception {
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        QueryDispatcher qd = QueryDispatcher.instance();
+        qd.start();
+        
+        Set toR = (Set)PrivilegedAccessor.getValue(qd, "_toRemove");
+        Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
+        
+        assertEquals("_toRemove should be empty", 0, toR.size());
+        
+        QueryRequest qr = QueryRequest.createQuery("test");
+        ReplyHandler rh = new TestReplyHandler();
+        QueryHandler qhand = 
+            QueryHandler.createHandlerForNewLeaf(qr, rh,
+                                                 new TestResultCounter(0));
+
+        QueryRequest qr2 = QueryRequest.createQuery("test2");
+        QueryHandler qhand2 = 
+            QueryHandler.createHandlerForNewLeaf(qr2, rh,
+                                                 new TestResultCounter(0));
+        
+        qd.addQuery(qhand);
+        qd.addQuery(qhand2);
+        Thread.sleep(3000);
+        assertEquals("there should be 2 queries", 2, queries.size());
+        
+        qd.addToRemove(qhand.getGUID());
+        Thread.sleep(1000);
+        
+        assertEquals("there should now be only 1 query", 1, queries.size());
+        //now make sure the right query got deleted
+        Iterator iter = queries.values().iterator();
+        assertEquals("the wrong query got removed", 
+                     qhand2.getGUID(),
+                     ((QueryHandler)iter.next()).getGUID());
+        //also make sure the removed GUID was deleted from the
+        //_toRemove set
+        assertEquals("_toRemove should be empty", 0, toR.size());
+    }
 
     private static final class TestReplyHandler extends ReplyHandlerStub {
         
@@ -95,3 +137,13 @@ public class QueryDispatcherTest extends BaseTestCase {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+

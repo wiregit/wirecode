@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import org.xml.sax.*;
@@ -310,7 +311,8 @@ public class LimeXMLReplyCollection {
             for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
-                final String value = (String)entry.getValue();
+                final String value = 
+                    I18NConvert.instance().getNorm((String)entry.getValue());
                 Trie trie = (Trie)trieMap.get(name);
                 // if no lookup table created yet, create one & insert.
                 if(trie == null) {
@@ -338,11 +340,14 @@ public class LimeXMLReplyCollection {
             for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
-                final String value = (String)entry.getValue();
+                
                 Trie trie = (Trie)trieMap.get(name);
                 // if no trie, ignore.
                 if(trie == null)
                     continue;
+                    
+                final String value = 
+                    I18NConvert.instance().getNorm((String)entry.getValue());
                 List allDocs = (List)trie.get(value);
                 // if no list, ignore.
                 if( allDocs == null )
@@ -454,9 +459,12 @@ public class LimeXMLReplyCollection {
                 // No matching trie?.. Ignore.
                 if(trie == null)
                     continue;
+
                 // Get the value of that field being queried for.    
                 final String value = (String)entry.getValue();
                 // Get our shared XML docs that match this value.
+                // This query is from the network, and is therefore already
+                // normalized -- SHOULD NOT NORMALIZE AGAIN!!
                 Iterator /* of List */ iter = trie.getPrefixedBy(value);
                 // If some matches and 'matching' not allocated yet,
                 // allocate a new Set for storing matches

@@ -844,7 +844,7 @@ public final class CommonUtils {
         } else if ( o2 == null ) {
             retval = 1;
         } else if ( o1.getClass() == String.class ) {
-            retval = StringUtils.compareIgnoreCase( (String)o1, (String)o2 );
+            retval = StringUtils.compareFullPrimary( (String)o1, (String)o2 );
         } else if( o1 instanceof com.sun.java.util.collections.Comparable ) {
             retval =
                 ((com.sun.java.util.collections.Comparable)o1).compareTo(o2);

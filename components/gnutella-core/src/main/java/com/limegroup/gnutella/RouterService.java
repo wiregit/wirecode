@@ -835,9 +835,13 @@ public class RouterService {
                 // delivery of results.  bad things may happen in this case but 
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery);
+                qr = QueryRequest.createOutOfBandQuery(guid, 
+                                                       query, 
+                                                       richQuery);
             else
-                qr = QueryRequest.createQuery(guid, query, richQuery);
+                qr = QueryRequest.createQuery(guid, 
+                                              query, 
+                                              richQuery);
 			verifier.record(qr, type);
             RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
 			router.sendDynamicQuery(qr);
@@ -865,6 +869,8 @@ public class RouterService {
         QueryUnicaster.instance().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
         router.queryKilled(guid);
+        if(RouterService.isSupernode())
+            QueryDispatcher.instance().addToRemove(guid);
     }
 
     /** 

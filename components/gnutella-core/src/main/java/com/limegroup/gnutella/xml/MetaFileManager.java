@@ -106,6 +106,7 @@ public class MetaFileManager extends FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
+        _needRebuild = true;
         return addFileIfShared(f, xmlDocs);
     }        
     
@@ -136,6 +137,7 @@ public class MetaFileManager extends FileManager {
             if( col != null )
                 col.removeDoc( fd );
         }
+        _needRebuild = true;
         return fd;
     }
 
@@ -188,9 +190,11 @@ public class MetaFileManager extends FileManager {
                 if( ID3Reader.isCorrupted(currDoc) )
                     currDoc = ID3Reader.fixCorruption(currDoc);
                 collection.addReplyWithCommit(file, fd, currDoc);
+                
             }
+            
         }
-        
+        _needRebuild = true;
         return fd;
     }
 
@@ -270,14 +274,28 @@ public class MetaFileManager extends FileManager {
     }
 
     /**
+     * build the  QRT table
+     * call to super.buildQRT and add XML specific Strings
+     * to QRT
+     */
+    protected void buildQRT() {
+        super.buildQRT();
+        Iterator iter = getXMLKeyWords().iterator();
+        while(iter.hasNext())
+            _queryRouteTable.add((String)iter.next());
+        
+        iter = getXMLIndivisibleKeyWords().iterator();
+        while(iter.hasNext())
+            _queryRouteTable.addIndivisible((String)iter.next());
+    }
+
+    /**
      * Returns a list of all the words in the annotations - leaves out
      * numbers. The list also includes the set of words that is contained
      * in the names of the files.
      */
-    public List getKeyWords(){
-        List words = super.getKeyWords();
-        if (words == null)
-            words = new ArrayList();
+    private List getXMLKeyWords(){
+        ArrayList words = new ArrayList();
         //Now get a list of keywords from each of the ReplyCollections
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
@@ -297,10 +315,8 @@ public class MetaFileManager extends FileManager {
     /** @return A List of KeyWords from the FS that one does NOT want broken
      *  upon hashing into a QRT.  Initially being used for schema uri hashing.
      */
-    public List getIndivisibleKeyWords() {
-        List words = super.getIndivisibleKeyWords();
-        if (words == null)
-            words = new ArrayList();
+    private List getXMLIndivisibleKeyWords() {
+        ArrayList words = new ArrayList();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
         for (int i = 0; i < schemas.length; i++) 
@@ -352,3 +368,4 @@ public class MetaFileManager extends FileManager {
 }
 
         
+
