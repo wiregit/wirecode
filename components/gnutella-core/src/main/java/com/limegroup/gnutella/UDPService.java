@@ -111,12 +111,10 @@ public final class UDPService implements Runnable {
      * UDP sending and receiving.
 	 */
 	void setListeningSocket(DatagramSocket datagramSocket) {
-        if (!SettingsManager.instance().getGuessEnabled()) {
-            if (datagramSocket != null)
-                datagramSocket.close();
-            return;
-        }
-        else if (!_udpThread.isAlive())
+        // we used to check if we were GUESS capable according to the
+        // SettingsManager.  but in general we want to have the SERVER side of
+        // GUESS active always.  the client side should be shut off from MessageRouter.
+        if (!_udpThread.isAlive())
             _udpThread.start();
 
         //a) Close old socket (if non-null) to alert lock holders...
@@ -250,17 +248,17 @@ public final class UDPService implements Runnable {
 	 * @param port the <tt>port</tt> to send to
 	 */
     public synchronized void send(Message msg, InetAddress ip, int port) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			msg.write(baos);
-		} catch(IOException e) {
-			e.printStackTrace();
-			// can't send the hit, so return
-			return;
-		}
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            msg.write(baos);
+        } catch(IOException e) {
+            e.printStackTrace();
+            // can't send the hit, so return
+            return;
+        }
 
-		byte[] data = baos.toByteArray();
-		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
+        byte[] data = baos.toByteArray();
+        DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
         synchronized (_sendLock) {
             if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
                                 // thread this, we will wait...
