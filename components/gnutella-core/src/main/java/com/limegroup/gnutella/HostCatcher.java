@@ -158,9 +158,9 @@ public class HostCatcher {
     }
 
     /**
-     * @modifies manager
-     * @effects returns a new outgoing connection to some host in this,
-     *  adds the connection to manager, and removes it from this (atomically).
+     * @modifies this
+     * @effects returns a new outgoing connection to some host in this
+     *  and removes it from this (atomically).  Does not modify manager.
      *  If no such host can be found, throws NoSuchElementException.  This
      *  method <i>is</i> thread-safe, but it can be run in parallel with
      *  itself.
@@ -184,7 +184,8 @@ public class HostCatcher {
 	    //   can write to disk and try later.
 	    try {
 		manager.tryingToConnect(e.hostname,e.port, false);
-		Connection ret=new Connection(manager,e.hostname,e.port);
+		Connection ret=new Connection(e.hostname,e.port);
+		ret.connect();
 		synchronized(elected) {
 		    elected.add(e);
 		}
