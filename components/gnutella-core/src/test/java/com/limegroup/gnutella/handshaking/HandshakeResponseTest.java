@@ -8,6 +8,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PingReply;
@@ -60,6 +61,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
                 new UltrapeerHeaders("45.67.89.54"));
         LEAF_HEADERS =
             HandshakeResponse.createResponse(new LeafHeaders("45.67.89.54"));
+        RouterService.getHostCatcher().clear();
     }
 
     public void testLeafRejectIncoming() throws Exception {
@@ -85,6 +87,24 @@ public final class HandshakeResponseTest extends BaseTestCase {
                 new Class[]{HandshakeResponse.class, 
                 Properties.class});
         
+        // First, check to make sure that we add connected hosts when we don't
+        // have any hosts in the host catcher.
+        RouterService.getHostCatcher().clear();
+        assertEquals(0, RouterService.getHostCatcher().getNumHosts());
+        List ipPorts = new LinkedList();
+        ipPorts.add(new Endpoint("24.67.85.4", 6346));
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+            "_initializedConnections", ipPorts);
+        
+        Object[] params = new Object[2];
+        params[0] = ULTRAPEER_HEADERS;
+        params[1] = new Properties();
+        Properties props = 
+            (Properties)m.invoke(HandshakeResponse.class, params);
+        HandshakeResponse hr = HandshakeResponse.createResponse(props);
+        String xTry = hr.getXTryUltrapeers().trim();
+        assertEquals("unexpected header", "24.67.85.4:6346", xTry);
+        
         // Add a bunch of hosts to the host catcher to look for later.
         HostCatcher hc = RouterService.getHostCatcher();
         int limit = 30;
@@ -109,7 +129,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
 
         // Check that the appropriate hosts are returned to a request from
         // an ultrapeer.
-        HandshakeResponse hr = HandshakeResponse.createResponse(headers);
+        hr = HandshakeResponse.createResponse(headers);
         
         // Get the ultrapeers
         String hostAddresses = hr.getXTryUltrapeers();
