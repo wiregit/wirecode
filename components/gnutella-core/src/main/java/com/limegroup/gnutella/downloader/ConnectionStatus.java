@@ -14,7 +14,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
  *   PartialData (the server has other data to use)
  *   ThexResponse (the server just gave us a HashTree)
  */
-class ConnectionStatus {
+public class ConnectionStatus {
     
     static final int TYPE_NO_FILE = 0;
     static final int TYPE_QUEUED = 1;
@@ -195,7 +195,7 @@ class ConnectionStatus {
     /**
      * Determines if this is a ThexResponse ConnectionStatus.
      */
-    boolean isThexResponse() {
+    public boolean isThexResponse() {
         return STATUS == TYPE_THEX_RESPONSE;
     }
     
@@ -223,7 +223,7 @@ class ConnectionStatus {
      * Returns the HashTree.
      * Throws IllegalStateException if called when the status is not ThexResponse.
      */
-    HashTree getHashTree() {
+    public HashTree getHashTree() {
         if(!isThexResponse())
             throw new IllegalStateException();
         return HASH_TREE;

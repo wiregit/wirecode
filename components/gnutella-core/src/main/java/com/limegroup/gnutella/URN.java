@@ -395,7 +395,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
 	 */
 	private static boolean isValidUrnHttpRequest(final String requestLine) {
-		return (URN.isValidLength(requestLine) &&
+	    return (URN.isValidLength(requestLine) &&
 				URN.isValidUriRes(requestLine) &&
 				URN.isValidResolutionProtocol(requestLine) && 
 				URN.isValidHTTPSpecifier(requestLine));				

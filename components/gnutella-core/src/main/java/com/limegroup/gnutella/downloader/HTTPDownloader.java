@@ -467,6 +467,8 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         try {
             String line = _byteReader.readLine();
+            if(line == null)
+                throw new IOException("disconnected");
             int code = parseHTTPCode(line, _rfd);
             if(code < 200 || code >= 300) {
                 if(LOG.isDebugEnabled())
