@@ -207,8 +207,22 @@ public class ManagedDownloader implements Downloader, Serializable {
      * attempt to download other.
      */
     public boolean conflicts(RemoteFileDesc other) {
-        //Because of the magic of IncompleteFileManager, there are never any
-        //conflicts.  TODO: maybe we should take this method out.
+        synchronized (this) {
+            File otherFile=incompleteFileManager.getFile(other);
+            //These iterators include any download in progress.
+            for (Iterator iter=files.iterator(); iter.hasNext(); ) {
+                RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+                File thisFile=incompleteFileManager.getFile(rfd);
+                if (thisFile.equals(otherFile))
+                    return true;
+            }
+            for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
+                RFDPushPair pair=(RFDPushPair)iter.next();
+                File thisFile=incompleteFileManager.getFile(pair.rfd);
+                if (thisFile.equals(otherFile))
+                    return true;
+            }
+        }
         return false;
     }
 
@@ -226,20 +240,38 @@ public class ManagedDownloader implements Downloader, Serializable {
             String file, Socket socket, int index, byte[] clientGUID)
             throws IOException {
         //Authentication: check if we requested file from this host via push.
-        //This ignores timestamps.  So First we clear out very old entries.
+        //This ignores timestamps.  So first we clear out very old entries.
+        RemoteFileDesc rfd=null;   //The original rfd.  See below.
         PushRequestedFile prf=new PushRequestedFile(clientGUID, file, index);
         synchronized (this) {
             purgeOldPushRequests();
             if (! requested.contains(prf))
                 return false;
+
+            //Get original RemoteFileDesc to get file size to find temporary
+            //file.  Unfortunately the size is NOT available from the GIV line.
+            //(That's sort of a flaw of the Gnutella protocol.)  So we search
+            //through the list of files in this, comparing file index numbers
+            //and client GUID's.  We also check filenames, though this is not
+            //strictly needed.
+            for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
+                rfd=((RFDPushPair)iter.next()).rfd;
+                if (rfd.getIndex()==index 
+                        && rfd.getFileName().equals(file)
+                        && (new GUID(rfd.getClientGUID())).
+                            equals(new GUID(clientGUID)))
+                    break;
+            }
+            Assert.that(rfd!=null, "No match for supposedly requested file");
         }
 
         //Authentication ok.  Make and queue downloader.  Notify downloader
         //thread to consume this downloader.  If downloader isn't waiting, this
         //may not be serviced for some time.
         HTTPDownloader downloader=new HTTPDownloader(
-            file, socket, index, clientGUID,
-            incompleteFileManager.getFile(file, index, clientGUID));
+            socket, rfd, incompleteFileManager.getFile(rfd));
+            
+            
         synchronized (this) {
             //If stopped or stopping, don't add this or it may not be cleaned
             //up.
@@ -276,6 +308,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //hurt.
         if (! (state==WAITING_FOR_RETRY || state==GAVE_UP))
             return;
+        //Sometimes a resume can cause a conflict.  So we check.
+        if (this.manager.conflicts(allFiles, this)!=null)
+            return;      //TODO: we should really convey this in the GUI.
 
         if (stopped) {
             //This stopped because all hosts were tried.  (Note that this
@@ -519,10 +554,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //afterwards since creating a downloader MAY be blocking
             //depending if SocketOpener is used.
             HTTPDownloader dloader2=new HTTPDownloader(
-                     rfd.getFileName(), rfd.getHost(), rfd.getPort(),
-                     rfd.getIndex(), rfd.getClientGUID(),
-                     rfd.getSize(), true, CONNECT_TIME,
-                     incompleteFileManager.getFile(rfd));
+                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd));
             synchronized (ManagedDownloader.this) {
                 if (stopped) {
                     dloader2.stop();
