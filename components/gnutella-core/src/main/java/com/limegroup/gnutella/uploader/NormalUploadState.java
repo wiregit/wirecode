@@ -228,9 +228,7 @@ public class NormalUploadState implements UploadState {
 	 * mime type of a file fill in the details of 
 	 * this later. assume binary for now */
 	private String getMimeType() {
-		String mimetype;                
-        mimetype = "application/binary"; 
-        return mimetype;                  
+        return "application/binary";                  
 	}
 
 	/**
