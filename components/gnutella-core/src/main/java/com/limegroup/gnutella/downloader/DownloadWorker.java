@@ -61,6 +61,24 @@ public class DownloadWorker implements Runnable {
                             assignWhite/assignGrey
                                       |
                            HTTPDownloader.connectHTTP
+                           
+      For push downloads, the acceptDownload(file, Socket,index,clientGUI) 
+      method of ManagedDownloader is called from the Acceptor instance. This
+      method needs to notify the appropriate downloader so that it can use
+      the socket. 
+      
+      When establishConnection() realizes that it needs to do a push, it puts  
+      into miniRFDToLock, asks the DownloadManager to send a push and 
+      then waits on the same lock.
+       
+      Eventually acceptDownload will be called. 
+      acceptDownload uses the file, index and clientGUID to look up the map and
+      notifies the DownloadWorker that its socket has arrived.
+      
+      Note: The establishConnection thread waits for a limited amount of time 
+      (about 9 seconds) and then checks the map for the socket anyway, if 
+      there is no entry, it assumes the push failed and terminates.
+
     */
     private static final Log LOG = LogFactory.getLog(DownloadWorker.class);
     

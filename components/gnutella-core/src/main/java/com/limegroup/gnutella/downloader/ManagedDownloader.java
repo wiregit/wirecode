@@ -73,7 +73,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating
- * to HTTPDownloader objects.  Does retries and resumes automatically.
+ * to DownloadWorker threads.  Does retries and resumes automatically.
  * Reports all changes to a DownloadManager.  This class is thread safe.<p>
  *
  * Smart downloads can use many policies, and these policies are free to change
@@ -116,39 +116,30 @@ public class ManagedDownloader implements Downloader, Serializable {
       but not yet completed.  White regions have not been assigned to a
       downloader.
       
-      LimeWire uses the following algorithm for swarming:
-
-      While the file has not been downloaded, and we have not given up
-      try to increasing parallelism, to our maximum capacity...
+      ManagedDownloader delegates to multiple DownloadWorker instances, one for
+      each HTTP connection.  They use a shared VerifyingFile object that keeps
+      track of which blocks have been written to disk.  
       
-
-     ManagedDownloader delegates to multiple DownloadWorker instances, one for
-     each HTTP connection.  HTTPDownloader uses Java's RandomAccessFile class,
-     which allows multiple threads to write to different parts of a file at the
-     same time.  The IncompleteFileManager class maintains a list of which
-     blocks have been written to disk.  It is also indirectly responsible for
-     identifying duplicate files.
-
-     ManagedDownloader uses one thread to control the smart downloads plus one
-     thread per HTTPDownloader instance.  The call graph of ManagedDownloader's
-     "master" thread is as follows:
+      ManagedDownloader uses one thread to control the smart downloads plus one
+      thread per DownloadWorker instance.  The call flow of ManagedDownloader's
+      "master" thread is as follows:
 
        performDownload:
            initializeDownload    
            fireDownloadWorkers (asynchronously start workers)    
            verifyAndSave
 
+      The core downloading loop is done by fireDownloadWorkers.Currently the 
+      desired parallelism is fixed at 2 for modem users, 6 for cable/T1/DSL, 
+      and 8 for T3 and above.
+      
       DownloadManager notifies a ManagedDownloader when it should start
-      tryAllDownloads.  An inactive download (waiting for a busy host,
+      performDownload.  An inactive download (waiting for a busy host,
       waiting for a user to requery, waiting for GUESS responses, etc..)
       is essentially a state-machine, pumped forward by DownloadManager.
       The 'master thread' of a ManagedDownloader is recreated every time
       DownloadManager moves the download from inactive to active.
       
-      The core downloading loop is done by fireDownloadWorkers.
-      connectAndDownload (which is started asynchronously in fireDownloadWorkers),
-      does the three step ennumerated above.
-            
       All downloads start QUEUED.
       From there, it will stay queued until a slot is available.
       
@@ -182,40 +173,35 @@ public class ManagedDownloader implements Downloader, Serializable {
       The download can finish in one of the following states:
           h) COMPLETE (download completed just fine)
           i) ABORTED  (user pressed stopped at some point)
-          j) COULDNT_MOVE_TO_LIBRARY (limewire couldn't the file)
+          j) DISK_PROBLEM (limewire couldn't the file)
           k) CORRUPT_FILE (the file was corrupt)
 
      There are a few intermediary states:
           l) HASHING
           m) SAVING
-          n) IDENTIFY_CORRUPTION
-          o) RECOVERY_FAILED
      HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
      to let the user know what is currently happening in the closing states of
-     the download.  IDENTIFY_CORRUPTION is used if SHA1 hash checks failed
-     and a TigerTree exists, to identify precisely which parts of the file are
-     corrupt.  RECOVERY_FAILED is used as an indicator that we no longer want
+     the download.  RECOVERY_FAILED is used as an indicator that we no longer want
      to retry the download, because we've tried and recovered from corruption
      too many times.
-
-      Currently the desired parallelism is fixed at 2 for modem users, 6
-      for cable/T1/DSL, and 8 for T3 and above.
-
-      For push downloads, the acceptDownload(file, Socket,index,clientGUI) 
-      method of ManagedDownloader is called from the Acceptor instance. This
-      method needs to notify the appropriate downloader so that it can use
-      the socket. The logic for this operation is a little complicated. When 
-      establishConnection() realizes that it needs to do a push, it puts an 
-      entry into miniRFDToLock, asks the DownloadManager to send a push and 
-      then waits on the same lock. Evetually acceptDownload will be called. 
-      acceptDownload uses the file, index and clientGUID to look up the map,
-      and puts an entry into threadLockToSocket, and notifies the lock.
-      At this point, the establishConnection thread wakes up, and is able to
-      get a handle to the socket. Note: The establishConnection thread waits for
-      a limited amount of time (about 9 seconds) and then checks the map for the
-      socket anyway, if there is no entry, it assumes the push failed and 
-      terminates.
-      
+     
+     How corruption is handled:
+     There are two general cases where corruption can be discovered - during a download
+     or after the download has finished.
+     
+     During the download, each worker thread checks periodically whether the amount of 
+     data lost to corruption exceeds 10% of the completed file size.  Whenever that 
+     happens, the worker thread asks the user whether the download should be terminated.
+     If the user chooses to delete the file, the downloader is stopped asynchronously and
+     _corruptState is set to CORRUPT_STOP_STATE.  The master download thread is interrupted,
+     it checks _corruptState and either discards or removes the file.
+     
+     After the download, if the sha1 does not match the expected, the master download thread
+     propmts the user whether they want to keep the file or discard it.  If we did not have a
+     tree during the download we remove the file from partial sharing, otherwise we keep it
+     until the user asnswers the prompt (which may take a very long time for overnight downloads).
+     The tree itself is purged.
+     
     */
     
     private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
@@ -398,14 +384,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         connecting threads when it is done.        
     */
     private Map miniRFDToLock;
-    /** Object -> Socket
-        When the acceptor thread has consumed the information in miniRDFToLock
-        it adds values to this map before notifying the connecting thread. 
-        The connecting thread consumes data from this map.
-    */
-    private Map threadLockToSocket;
-
-
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -463,7 +441,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * LOCKING: obtain corruptStateLock
      * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
      */
-    private int corruptState;
+    private volatile int corruptState;
     private Object corruptStateLock;
 
     /**
@@ -630,7 +608,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         paused = false;
         setState(QUEUED);
         miniRFDToLock = Collections.synchronizedMap(new HashMap());
-        threadLockToSocket=Collections.synchronizedMap(new HashMap());
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
@@ -709,7 +686,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     receivedNewSources = false;
                     performDownload();
                     completeDownload();
-                } catch(Throwable t) {t.printStackTrace();
+                } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
                     ManagedDownloader.this.stop();
@@ -923,7 +900,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         case HASHING:
         case SAVING:
         case IDENTIFY_CORRUPTION:
-        case RECOVERY_FAILED:
             return true;
         }
         return false;
@@ -1794,11 +1770,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
             } catch (InterruptedException e) {
                 
-            // nothing should interrupt except for a stop
-            if (!stopped && !paused)
-                ErrorService.error(e);
-            else
-                status = GAVE_UP;
+                // nothing should interrupt except for a stop
+                if (!stopped && !paused)
+                    ErrorService.error(e);
+                else
+                    status = GAVE_UP;
+                
+                // if we were stopped due to corrupt download, cleanup
+                if (corruptState == CORRUPT_STOP_STATE) {
+                    cleanupCorrupt(incompleteFile, completeFile.getName());
+                    status = CORRUPT_FILE;
+                }
             }
         }
         
@@ -1900,15 +1882,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     private int verifyAndSave() throws InterruptedException{
         
-        // if the user hasn't answered our corrupt question yet, wait.
-        waitForCorruptResponse();
-        // if they really wanted to stop, do that instead of anything else
-        if (corruptState == CORRUPT_STOP_STATE) {
-            cleanupCorrupt(incompleteFile, completeFile.getName());
-            return CORRUPT_FILE;
-        }            
-        
-        //3. Find out the hash of the file and verify that its the same
+        // Find out the hash of the file and verify that its the same
         // as our hash.
         URN fileHash = scanForCorruption();
         if (corruptState == CORRUPT_STOP_STATE) {
@@ -1916,12 +1890,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             return CORRUPT_FILE;
         }
         
-        // 4. Save the file to disk.
+        // Save the file to disk.
         return saveFile(fileHash);
     }
     
     /**
-     * Waits indefinitely for a response to the corrupt message prompt.
+     * Waits indefinitely for a response to the corrupt message prompt, if
+     * such was displayed.
      */
     private void waitForCorruptResponse() {
         if(corruptState != NOT_CORRUPT_STATE) {
@@ -1961,19 +1936,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(downloadSHA1.equals(fileHash))
             return fileHash;
         
-        if(LOG.isWarnEnabled())
+        if(LOG.isWarnEnabled()) {
             LOG.warn("hash verification problem, fileHash="+
                            fileHash+", ourHash="+downloadSHA1);
-
-        synchronized(corruptStateLock) {
-            // immediately set as corrupt,
-            // will change to non-corrupt later if user ignores
-            setState(CORRUPT_FILE);
-            // Note that no prompting or waiting will be done if hashTree
-            // is null, but we still want to use promptAboutCorruptDownload
-            // because it removes the file from being shared.
-			treeRecoveryFailed(downloadSHA1);
         }
+
+        // unshare the file if we didn't have a tree
+        // otherwise we will have shared only the parts that verified
+        if (getHashTree() == null) 
+            fileManager.removeFileIfShared(incompleteFile);
+        
+        // purge the tree
+        TigerTreeCache.instance().purgeTree(downloadSHA1);
+        synchronized(hashTreeLock) {
+            hashTree = null;
+        }
+
+        // ask what to do next 
+        promptAboutCorruptDownload();
+        waitForCorruptResponse();
         
         return fileHash;        
     }
@@ -2021,20 +2002,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
     }
 	
-    /**
-     * Recovering from the TigerTree has failed, notify the user about
-     * corruption.
-     */
-    private void treeRecoveryFailed(URN hash) {
-        TigerTreeCache.instance().purgeTree(hash);
-        synchronized(hashTreeLock) {
-            hashTree = null;
-        }
-        promptAboutCorruptDownload();
-        waitForCorruptResponse();
-        setState(RECOVERY_FAILED);
-    }
-    
     /**
      * Saves the file to disk.
      */
@@ -2554,16 +2521,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Asks the user if we should continue or discard this download.
-     * Will only prompt if we have not received a HashTree that we
-     * can use to rebuild the download and we haven't already
-     * asked the user.
      */
     void promptAboutCorruptDownload() {
         synchronized(corruptStateLock) {
-            //If we are corrupt, we want to stop sharing the incomplete file,
-            //as it is not going to generate the same SHA1 anymore.
-            RouterService.getFileManager().removeFileIfShared(incompleteFile);
-            if(corruptState == NOT_CORRUPT_STATE && getHashTree() == null) {
+            if(corruptState == NOT_CORRUPT_STATE) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
                 //when the user has made a decision. Until then the corruptState
