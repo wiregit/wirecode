@@ -120,6 +120,11 @@ public class ResumeDownloader extends ManagedDownloader
             return false; 
     }
  
+    protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
+        // we shoudl only initialize alt locs when we are started from the
+        // library, not when we are resumed from startup.
+        return !deserializedFromDisk;
+    }
 
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */

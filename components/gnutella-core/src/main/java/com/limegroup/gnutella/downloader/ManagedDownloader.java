@@ -666,6 +666,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retVal;
     }
 
+    /** Subclasses should override this method when necessary.
+     *  If you return false, then AltLocs are not initialized from the
+     *  incomplete file upon invocation of tryAllDownloads.
+     *  The true case can be used when the partial file is being shared
+     *  through PFS and we've learned about AltLocs we want to use.
+     */
+    protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
+        return false;
+    }
+
+
     /** Returns the URNs for requery, i.e., the union of all requeries 
      *  (within reason).
      *  @return a Set of URN */
@@ -1156,13 +1167,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
-            // if this was read from the disk, read the alternate locations
-            // that may be stored in the IncompleteFileDesc.
-            // This call is necessary now to allow buckets to be built up
-            // correctly, as the RFDs built from alternate locations are not
-            // added to allFiles, so the RFDGrouper won't add them into
-            // buckets.
-            if(deserializedFromDisk) {
+            if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
             }
         }

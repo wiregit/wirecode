@@ -417,7 +417,7 @@ public class DownloadManager implements BandwidthTracker {
             throw new CantResumeException(incompleteFile.getName());
         }
         
-        startDownload(downloader, true);
+        startDownload(downloader, false);
         return downloader;
     }
 
