@@ -228,7 +228,7 @@ public final class FileDesc implements AlternateLocationCollector {
     private static Set calculateUrns(File file) {
 		try {
 			Set set = new HashSet();
-			set.add(URNFactory.createSHA1Urn(file));
+			set.add(URN.createSHA1Urn(file));
 			return set;
 		} catch(IOException e) {
 			// the urn just does not get added

@@ -43,16 +43,16 @@ public final class AlternateLocationTest extends TestCase {
 	public void testUrlUrnConstructor() {
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-				URN urn = URNFactory.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
+				URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
 				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
-								   URNFactory.createHttpUrnServiceRequest(HugeTestUtils.URNS[i]));
+								   "/uri-res/N2R?"+HugeTestUtils.URNS[i].httpStringValue());
 				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], "/test.htm");
 				AlternateLocation al1 = new AlternateLocation(url1);
 				AlternateLocation al2 = new AlternateLocation(url2);
 				Date date = new Date();
 				AlternateLocation al3 = 
 				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + ":6346"+
-										  URNFactory.createHttpUrnServiceRequest(urn)+
+										  "/uri-res/N2R?"+urn.httpStringValue()+
 										  " "+AlternateLocation.convertDateToString(date));
 				AlternateLocation al4 = 
 				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + "/test.htm"+

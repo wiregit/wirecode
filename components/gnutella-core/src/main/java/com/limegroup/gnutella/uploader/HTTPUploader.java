@@ -607,7 +607,7 @@ public class HTTPUploader implements Uploader {
 		// return null if the header value could not be extracted
 		if(urnStr == null) return null;
 		try {
-			return URNFactory.createSHA1Urn(urnStr);
+			return URN.createSHA1Urn(urnStr);
 		} catch(IOException e) {
 			// this will be thrown if the URN string was invalid for any
 			// reason -- just return null

@@ -197,7 +197,7 @@ final class HugeTestUtils {
 	private HugeTestUtils() {
 		for(int i=0; i<VALID_URN_STRINGS.length; i++) {
 			try {
-				URN urn = URNFactory.createSHA1Urn(VALID_URN_STRINGS[i]);
+				URN urn = URN.createSHA1Urn(VALID_URN_STRINGS[i]);
 				URNS[i] = urn;
 				URN_TYPES[i] = urn.getUrnType();
 				Set urnSet = new HashSet();

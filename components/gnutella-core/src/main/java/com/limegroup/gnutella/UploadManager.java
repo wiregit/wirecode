@@ -738,7 +738,7 @@ public class UploadManager implements BandwidthTracker {
 	 */
 	private GETLine parseURNGet(final String requestLine) 
 		throws IOException {
-		URN urn = URNFactory.createSHA1UrnFromHttpRequest(requestLine);
+		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");

@@ -212,7 +212,8 @@ public final class UrnHttpRequestTest extends TestCase {
 				} else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(curString)) {
 					URN curUrn = null;
 					try {
-						curUrn = URNFactory.createUrnFromContentUrnHttpHeader(curString);
+						String tmpString = HTTPUtils.extractHeaderValue(curString);
+						curUrn = URN.createSHA1Urn(tmpString);
 					} catch(IOException e) {
 						assertTrue("unexpected exception: "+e, false);
 					}
