@@ -28,7 +28,8 @@ public class UpdateMessageVerifier {
         //get the public key
         PublicKey pubKey = null;
         try {
-            FileInputStream fis = new FileInputStream("lib\\public.key");
+            File file = new File(CommonUtils.getUserSettingsDir(),"public.key");
+            FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
             pubKey = (PublicKey)ois.readObject();
         } catch (ClassNotFoundException cnfx) {
@@ -81,7 +82,7 @@ public class UpdateMessageVerifier {
     public static void main(String[] args) {
         try {
         RandomAccessFile f=new RandomAccessFile(
-                                   new File("lib\\update.xml"),"r");
+                  new File(new File("lib"),"update.xml"),"r");
         byte[] content = new byte[(int)f.length()];
         f.readFully(content);
         f.close();

@@ -54,7 +54,9 @@ public class LazyProperties extends Properties
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
 		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
         UpdateManager u = UpdateManager.instance();
-        props.put(ConnectionHandshakeHeaders.X_VERSION, u.getVersion());
+        String latestVersion = u.getVersion();
+        if(!latestVersion.equals("@version@"))//don't send header for @version@
+           props.put(ConnectionHandshakeHeaders.X_VERSION, latestVersion);
     }
     
 }

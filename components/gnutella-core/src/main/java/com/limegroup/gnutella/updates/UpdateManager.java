@@ -41,7 +41,7 @@ public class UpdateManager {
      */
     private UpdateManager() {
         try {
-            File file = new File("lib\\update.xml");
+            File file = new File(CommonUtils.getUserSettingsDir(),"update.xml");
             RandomAccessFile f=new RandomAccessFile(file,"r");
             byte[] content = new byte[(int)f.length()];
             f.readFully(content);
@@ -80,9 +80,8 @@ public class UpdateManager {
      */
     public void postGuiInit(ActivityCallback gui) {
         String myVersion = CommonUtils.getLimeWireVersion();
-        if(myVersion.equalsIgnoreCase(latestVersion))//equal version
-            return;
-        if(isGreaterVersion(myVersion))
+
+        if(isGreaterVersion(myVersion,latestVersion))
             return;
         //OK. myVersion < latestVersion
         String guiMessage = latestVersion+". "+message;
@@ -92,7 +91,7 @@ public class UpdateManager {
     public void checkAndUpdate(Connection connection) {
         String nv=connection.getProperty(ConnectionHandshakeHeaders.X_VERSION);
         debug("myVersion:"+latestVersion+" theirs: "+nv);
-        if(!isGreaterVersion(nv))
+        if(!isGreaterVersion(nv,latestVersion))
             return;        
         final Connection c = connection;
         Thread checker = new Thread() {
@@ -148,12 +147,22 @@ public class UpdateManager {
                     String newVersion = parser.getVersion();
                     if(newVersion==null)
                         return;
-                    if(isGreaterVersion(newVersion)) {
+                    if(isGreaterVersion(newVersion,latestVersion)) {
                         synchronized(UpdateManager.this) {
                             commitVersionFile(data);//could throw an exception
                             //committed file, update the value of latestVersion
                             latestVersion = newVersion;
                         }
+                        //Note: At this point, the connections that are already
+                        //established, still think the latest version is the
+                        //what it was when it was established. But that not 
+                        //such a big deal - the handshaking has 
+                        //already been done.
+                        //Newer connections will send out the right value.
+                        //Further if a client does get a update file of a 
+                        //differnt version than advertised in the handshaking, 
+                        //its not a problem - the client always does its own
+                        //verification.
                     }
                 } catch(Exception e ) {
                     //MalformedURLException - while creating URL
@@ -167,27 +176,45 @@ public class UpdateManager {
     }
 
     /**
-     * compares this.latestVersion with version. and returns true if version 
-     * is a newer version. 
+     * compares newVer with oldVer. and returns true iff newVer is a newer 
+     * version, false if neVer <= older.
+     * <p>
+     * <pre>
+     * treats @version@ as the highest version possible. The danger is that 
+     * we may try to get updates from all files that have  @version@ in the 
+     * field. This is undesirable. So if we think the latest version is 
+     * @version@ we do not put an X-Version header in the handshaking.
+     * </pre>
      */
-    private boolean isGreaterVersion(String version) {
-        if(version==null) //no version? latestVersion is newer
+    public static boolean isGreaterVersion(String newVer, String oldVer) {
+        if(newVer==null && oldVer==null)
             return false;
-        int l1, l2 = -1;
-        int v1, v2 = -1;
+        if(newVer==null)//old is newer
+            return false;
+        if(oldVer==null) //new is newer
+            return true;
+        if(newVer.equals(oldVer))//same
+            return false;
+        if(newVer.equals("@version@")) //new is newer
+            return true;
+        if(oldVer.equals("@version@")) //old is newer
+            return false;
+        //OK. Now lets look at numbers
+        int o1, o2 = -1;
+        int n1, n2 = -1;
         try {
-            StringTokenizer tokenizer = new StringTokenizer(latestVersion,".");
-            l1 = (new Integer(tokenizer.nextToken())).intValue();
-            l2 = (new Integer(tokenizer.nextToken())).intValue();
-            tokenizer = new StringTokenizer(version,".");
-            v1 = (new Integer(tokenizer.nextToken())).intValue();
-            v2 = (new Integer(tokenizer.nextToken())).intValue();
+            StringTokenizer tokenizer = new StringTokenizer(oldVer,".");
+            o1 = (new Integer(tokenizer.nextToken())).intValue();
+            o2 = (new Integer(tokenizer.nextToken())).intValue();
+            tokenizer = new StringTokenizer(newVer,".");
+            n1 = (new Integer(tokenizer.nextToken())).intValue();
+            n2 = (new Integer(tokenizer.nextToken())).intValue();
         } catch (Exception e) {//numberFormat or NoSuchElementException
             return false;
         }
-        if(v1>l1)
+        if(n1>o1)
             return true;
-        else if(v1==l1 && v2>l2)
+        else if(n1==o1 && n2>o2)
             return true;        
         return false;
     }
@@ -196,8 +223,8 @@ public class UpdateManager {
      *  writes data to signed_updateFile
      */ 
     private void commitVersionFile(byte[] data) throws IOException {
-        File f = new File("lib\\update.xml");
-        File nf = new File("lib\\update.new");
+        File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
+        File nf = new File(CommonUtils.getUserSettingsDir(),"update.new");
         RandomAccessFile raf = new RandomAccessFile(nf,"rw");
         raf.write(data);
         boolean deleted = nf.renameTo(f);
@@ -211,5 +238,5 @@ public class UpdateManager {
         if(debug)
             System.out.println(str);
     }
-    
+   
 }
