@@ -581,11 +581,10 @@ public final class AlternateLocation
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
-	 * @return new <tt>RemoteFileDesc</tt> based off of this.
+	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
+	 *  <tt>null</tt> if it could not be created
 	 */
 	public RemoteFileDesc createRemoteFileDesc(int size, Set urns) {
-		RemoteFileDesc ret = null;
-
 		// Determine if this is a classic Gnutella location 
 		// and if yes, handle it by parsing the index and filename
 		// otherwise, we can't currently handle
@@ -603,12 +602,15 @@ public final class AlternateLocation
 					return null;
 				}
 				fname = fname.substring(dloc+1);
-		        ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
-				  index, fname, size,  GUID.makeGuid(), 1000,
-				  true, 3, false, null, urns);
+				return new RemoteFileDesc(URL.getHost(), 
+										  URL.getPort(),
+										  index, fname, size,  
+										  GUID.makeGuid(), 
+										  1000, true, 3, false, 
+										  null, urns, URL);
 			}
 		}
-		return ret;
+		return null;
 	}
 
 	/**
