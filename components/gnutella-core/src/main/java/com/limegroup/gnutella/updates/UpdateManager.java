@@ -20,6 +20,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.settings.UpdateSettings;
 
@@ -90,12 +91,15 @@ public class UpdateManager {
             usesLocale = parser.usesLocale();
             isValid = true;
         } catch(SAXException sax) {
+            LOG.error("invalid update xml", sax);
             latestVersion = CommonUtils.getLimeWireVersion();
             isValid = false;
         } catch(IOException iox) {
+            LOG.error("iox updating", iox);
             latestVersion = CommonUtils.getLimeWireVersion();
             isValid = false;
         } catch(VerifyError error) {
+            LOG.error("verification problem", error);
             // report the bug, but still allow things to continue.
             // otherwise LimeWire is rendered completely useless
             // (it won't connect to anyone because it can't build the
@@ -199,9 +203,11 @@ public class UpdateManager {
                         }
                     }
                 } catch(IOException iox) {
+                    LOG.warn("iox on network, on disk, who knows??", iox);
                     //IOException - reading from socket, writing to disk etc.
                     return;
                 } catch(SAXException sx) {
+                    LOG.error("invalid xml", sx);
                     //SAXException - parsing the xml
                     return; //We can't continue...forget it.
                 } catch(Throwable t) {
@@ -268,32 +274,8 @@ public class UpdateManager {
      *  writes data to signed_updateFile
      */ 
     private void commitVersionFile(byte[] data) throws IOException {
-        File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
-        File nf = new File(CommonUtils.getUserSettingsDir(),"update.new");
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(nf,"rw");
-            raf.write(data);
-        } finally {
-            if(raf != null) {
-                try {
-                    raf.close();
-                } catch(IOException ignored) {}
-            }
-        }
-        boolean deleteOld = f.delete();
-        if(deleteOld) {
-            boolean renamed = nf.renameTo(f);//dont update latestVersion
-            if(!renamed) {
-                isValid = false;
-                nf.delete();
-                throw new IOException();
-            } else 
-                isValid = true; //everything went a-okay, we have a valid file.
-        } 
-        else { //delete the file. The .ver file will be unpacked
-            nf.delete();
-            throw new IOException();//dont update latestVersion
-        }
+        boolean ret = FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), "update.xml", data);
+        if(!ret)
+            throw new IOException("couldn't safely save!");
     }
 }
