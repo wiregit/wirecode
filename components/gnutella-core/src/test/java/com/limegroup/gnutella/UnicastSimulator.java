@@ -18,8 +18,9 @@ public class UnicastSimulator {
 
 	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
 
-    PingReply[] _pongs;
-    Thread[] _unicasters;
+    private PingReply[] _pongs;
+    private Thread[] _unicasters;
+    private byte[] _localAddress;
 
     public UnicastSimulator() throws Exception {
         // create pings to return...
@@ -32,10 +33,10 @@ public class UnicastSimulator {
 
     private void createPongs() throws Exception {
         _pongs = new PingReply[NUM_LISTENERS];
-        byte[] localAddress = InetAddress.getLocalHost().getAddress();
+        _localAddress = InetAddress.getLocalHost().getAddress();
         for (int i = 0; i < NUM_LISTENERS; i++)
             _pongs[i] = new PingReply(GUID.makeGuid(), (byte) 5, 
-                                      PORT_RANGE_BEGIN+i, localAddress, 
+                                      PORT_RANGE_BEGIN+i, _localAddress, 
                                       10, 100, true);
     }
 
@@ -94,6 +95,17 @@ public class UnicastSimulator {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);		
                     if(message == null) continue;
+                    if (message instanceof QueryRequest) {
+                        String query = ((QueryRequest)message).getQuery();
+                        byte[] inGUID = ((QueryRequest)message).getGUID();
+                        Response[] resps = new Response[1];
+                        resps[0] = new Response(port, 200, query);
+                        QueryReply qr = new QueryReply(inGUID, (byte) 5,
+                                                       port, _localAddress,
+                                                       0, resps, 
+                                                       GUID.makeGuid());
+                        // send the QR...
+                    }
                 } catch(BadPacketException e) {
                     continue;
                 }
