@@ -7,7 +7,7 @@ import java.awt.event.*;
 
 /**
  * This class determines whether or not this node has all of the necessary
- * characteristics for it to become a supernode if necessary.  The criteria
+ * characteristics for it to become a ultrapeer if necessary.  The criteria
  * uses include the node's upload and download bandwidth, the operating
  * system, the node's firewalled status, the average uptime, the current 
  * uptime, etc. <p>
@@ -28,19 +28,19 @@ public final class SupernodeAssigner {
 
 	/**
 	 * Constant for the minimum number of upstream kbytes per second that 
-	 * a node must be able to transfer in order to qualify as a supernode.
+	 * a node must be able to transfer in order to qualify as a ultrapeer.
 	 */
 	private static final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 15;
 
 	/**
 	 * Constant for the minimum number of downlstream kbytes per second that 
-	 * a node must be able to transfer in order to qualify as a supernode.
+	 * a node must be able to transfer in order to qualify as a ultrapeer.
 	 */
 	private static final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 20;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
-	 * have to qualify for supernode status.
+	 * have to qualify for ultrapeer status.
 	 */
 	private static final int MINIMUM_AVERAGE_UPTIME = 60 * 60; //1 hr
 
@@ -60,7 +60,7 @@ public final class SupernodeAssigner {
 	 * Constant value for whether or not the operating system qualifies
 	 * this node for Ultrapeer status.
 	 */
-	private static final boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
+	private static final boolean ULTRAPEER_OS = CommonUtils.isUltrapeerOS();
 	
 	/**
 	 * Constant for the number of milliseconds between the timer's calls
@@ -111,10 +111,10 @@ public final class SupernodeAssigner {
         SETTINGS.getMaxDownstreamBytesPerSec();
     
     /**
-     * True, if the last time we evaluated the node for supernode capability, 
-     * it came out as supernode capable. False, otherwise
+     * True, if the last time we evaluated the node for ultrapeer capability, 
+     * it came out as ultrapeer capable. False, otherwise
      */
-    private static volatile boolean _wasSupernodeCapable;
+    private static volatile boolean _wasUltrapeerCapable;
 
 	/**
 	 * Variable for whether or not this node has such good values that it is too
@@ -139,7 +139,7 @@ public final class SupernodeAssigner {
 	private static final int RETRY_TIME = 90*60*1000; // 90 minutes
 
     /** 
-	 * Creates a new <tt>SupernodeAssigner</tt>. 
+	 * Creates a new <tt>UltrapeerAssigner</tt>. 
 	 *
 	 * @param uploadTracker the <tt>BandwidthTracker</tt> instance for 
 	 *                      tracking bandwidth used for uploads
@@ -153,7 +153,7 @@ public final class SupernodeAssigner {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
         _manager = manager;
-        _wasSupernodeCapable = _manager.isSupernode();
+        _wasUltrapeerCapable = _manager.isSupernode();
     }
     
 	/**
@@ -175,20 +175,20 @@ public final class SupernodeAssigner {
     }
 
 	/**
-	 * Sets EVER_SUPERNODE_CAPABLE to true if this has the necessary
-	 * requirements for becoming a supernode if needed, based on 
+	 * Sets EVER_ULTRAPEER_CAPABLE to true if this has the necessary
+	 * requirements for becoming a ultrapeer if needed, based on 
 	 * the node's bandwidth, operating system, firewalled status, 
 	 * uptime, etc.  Does not modify the property if the capabilities
-     * are not met.  If the user has disabled supernode support, 
-     * sets EVER_SUPERNODE_CAPABLE to false.
+     * are not met.  If the user has disabled ultrapeer support, 
+     * sets EVER_ULTRAPEER_CAPABLE to false.
 	 */
-	private static void setSupernodeCapable() {
+	private static void setUltrapeerCapable() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
 
-        boolean isSupernodeCapable = 
+        boolean isUltrapeerCapable = 
             //Is upstream OR downstream high enough?
             (_maxUpstreamBytesPerSec >= 
                     MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND ||
@@ -204,18 +204,18 @@ public final class SupernodeAssigner {
             //AND I have accepted incoming messages over UDP
             //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
-			SUPERNODE_OS;
+			ULTRAPEER_OS;
 
 		long curTime = System.currentTimeMillis();
 
 		// check if this node has such good values that we simply can't pass
 		// it up as an Ultrapeer -- it will just get forced to be one
-		_isTooGoodToPassUp = isSupernodeCapable &&
+		_isTooGoodToPassUp = isUltrapeerCapable &&
 			(curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
 			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 2);
 
-        // if this is supernode capable, make sure we record it
-        if(isSupernodeCapable) {
+        // if this is ultrapeer capable, make sure we record it
+        if(isUltrapeerCapable) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		}
 
@@ -301,8 +301,8 @@ public final class SupernodeAssigner {
   			SETTINGS.setMaxDownstreamBytesPerSec(_maxDownstreamBytesPerSec);
   		}
     
-        //check if became supernode capable
-        setSupernodeCapable();
+        //check if became ultrapeer capable
+        setUltrapeerCapable();
         
 	}
 

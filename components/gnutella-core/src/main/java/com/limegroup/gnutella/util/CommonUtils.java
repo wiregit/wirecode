@@ -353,12 +353,12 @@ public final class CommonUtils {
 		
 	/**
 	 * Returns whether or not this operating system is considered
-	 * capable of meeting the requirements of a supernode.
+	 * capable of meeting the requirements of a ultrapeer.
 	 *
-	 * @return <tt>true</tt> if this os meets supernode requirements,
+	 * @return <tt>true</tt> if this os meets ultrapeer requirements,
 	 *         <tt>false</tt> otherwise
 	 */
-	public static boolean isSupernodeOS() {
+	public static boolean isUltrapeerOS() {
 		if(_isWindows98 || _isWindows95 || _isWindowsMe || _isMacClassic ||
 		   _isWindowsNT) {
 			return false;
