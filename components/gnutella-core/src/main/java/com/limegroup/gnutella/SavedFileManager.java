@@ -125,7 +125,7 @@ public final class SavedFileManager implements Runnable {
         for(int i = 0; i < saved.length; i++) {
             String name = saved[i];
             File file = new File(saveDirectory, name);
-            if(!file.isFile())
+            if(!file.isFile() || !file.exists())
                 continue;
             if(LOG.isTraceEnabled())
                 LOG.trace("Loading: " + file);

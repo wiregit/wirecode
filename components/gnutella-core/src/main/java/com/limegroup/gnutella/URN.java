@@ -428,7 +428,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static final boolean isValidUriRes(final String requestLine) {
 		int firstSlash = requestLine.indexOf(SLASH);
-		if(firstSlash == -1) {
+		if(firstSlash == -1 || firstSlash == requestLine.length()) {
 			return false;
 		}
 		int secondSlash = requestLine.indexOf(SLASH, firstSlash+1);

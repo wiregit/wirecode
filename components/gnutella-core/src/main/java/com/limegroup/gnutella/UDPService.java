@@ -408,6 +408,8 @@ public final class UDPService implements Runnable {
                 }
                 try {
                     _socket.send(_dp);
+                } catch(ConnectException ce) {
+                    // oh well, can't connect, ignore it...
                 } catch(BindException be) {
                     // oh well, if we can't bind our socket, ignore it.. 
                 } catch(NoRouteToHostException nrthe) {
@@ -449,61 +451,67 @@ public final class UDPService implements Runnable {
 
             // For easier comparison, make everything lowercase
             final String msg = message.toLowerCase();
-            
+
+            if(scan(msg, 1784, "the supplied user buffer is not valid for the requested operation"))
+                return true;
+            if(scan(msg, 10004, "interrupted function call"))
+                return true;            
             if(scan(msg, 10013, "permission denied"))
                 return true;
+            // propogate 10014 / Bad address
+            if(scan(msg, 10022, "invalid argument"))
+                return true;
+            // propogate 10024 / Too many open files
+            if(scan(msg, 10035, "resource temporarily unavailable"))
+                return true;
+            // propogate 10036 / Operation now in progress
+            // propogate 10037 / Operation already in progress
+            if(scan(msg, 10038, "socket operation on nonsocket"))
+                return true;
+            // propogate 10039 / Destination address required
+            // propogate 10040 / Message too long
+            // propogate 10041 / Protocol wrong type for socket
+            // propogate 10042 / Bad protocol option
+            // propogate 10043 / Protocol not supported
+            // propogate 10044 / Socket type not supported
+            // propogate 10045 / Operation not supported
+            // propogate 10046 / Protocl family not supported
+            // propogate 10047 / Address family not supported by protocol family
             // propogate 10048 / Address already in use
             if(scan(msg, 10049, "cannot assign requested address"))
                 return true;
-            // propogate 10047 / Address family not supported by protocol family
-            // propogate 10037 / Operation already in progress
+            if(scan(msg, 10050, "network is down"))
+                return true;
+            if(scan(msg, 10051, "network is unreachable"))
+                return true;
+            if(scan(msg, 10052, "network dropped connection on reset"))
+                return true;
             if(scan(msg, 10053, "software caused connection abort"))
                 return true;
             if(scan(msg, 10054, "connection reset by peer"))
                 return true;
+            if(scan(msg, 10055, "no buffer space available"))
+                return true;
+            // propogate 10056 / Socket is already connected
+            // propogate 10057 / Socket is not connected
+            // propogate 10058 / Cannot send after socket shutdown
+            if(scan(msg, 10060, "connection timed out"))
+                return true;
             if(scan(msg, 10061, "connection refused"))
                 return true;
-            // propogate 10039 / Destination address required
-            // propogate 10014 / Bad address
             if(scan(msg, 10064, "host is down"))
                 return true;
             if(scan(msg, 10065, "no route to host"))
                 return true;
-            // propogate 10036 / Operation now in progress
-            if(scan(msg, 10004, "interrupted function call"))
-                return true;
-            // propogate 10022 / Invalid Argument
-            // propogate 10056 / Socket is already connected
-            // propogate 10024 / Too many open files
-            // propogate 10040 / Message too long
-            if(scan(msg, 10050, "network is down"))
-                return true;
-            if(scan(msg, 10052, "network dropped connection on reset"))
-                return true;
-            if(scan(msg, 10051, "network is unreachable"))
-                return true;
-            if(scan(msg, 10055, "no buffer space available"))
-                return true;
-            // propogate 10042 / Bad protocol option
-            // propogate 10057 / Socket is not connected
-            // propogate 10038 / Socket operation on non-socket
-            // propogate 10045 / Operation not supported
-            // propogate 10046 / Protocl family not supported
             // propogate 10067 / Too many processes
-            // propogate 10043 / Protocol not supported
-            // propogate 10041 / Protocol wrong type for socket
-            // propogate 10058 / Cannot send after socket shutdown
-            // propogate 10044 / Socket type not supported
-            if(scan(msg, 10060, "connection timed out"))
-                return true;
-            if(scan(msg, 10035, "resource temporarily unavailable"))
-                return true;
-            if(scan(msg, 11001, "host not found"))
-                return true;
             if(scan(msg, 10091, "network subsystem is unavailable"))
                 return true;
             if(scan(msg, 10107, null))
                 return true;
+            if(scan(msg, 11001, "host not found"))
+                return true;
+
+            // unknown codes.
             if(scan(msg, -1,  "option unsupported by protocol"))
                 return true;
             if(scan(msg, -1, "descriptor not a socket"))
@@ -511,6 +519,10 @@ public final class UDPService implements Runnable {
             if(scan(msg, -1, "icmp port unreachable"))
                 return true;
             if(scan(msg, -1, "network subsystem has failed"))
+                return true;
+            if(scan(msg, -1, "already connected"))
+                return true;
+            if(scan(msg, -1, "already connected"))
                 return true;
                 
             // General invalid error on Linux

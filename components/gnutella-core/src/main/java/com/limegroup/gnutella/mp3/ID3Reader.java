@@ -309,7 +309,8 @@ public final class ID3Reader {
                 // from id3v1) are referenced with values enclosed by braces and
                 // with optional refinements which I didn't implement here.
                 // http://www.id3.org/id3v2.3.0.html#TCON
-                if(startIndex > -1 && endIndex > -1) { 
+                if(startIndex > -1 && endIndex > -1 &&
+                   startIndex < frameContent.length()) { 
                     //we have braces check if it's valid
                     String genreByte = 
                     frameContent.substring(startIndex+1, endIndex);
