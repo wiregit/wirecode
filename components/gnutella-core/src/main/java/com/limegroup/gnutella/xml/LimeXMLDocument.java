@@ -6,8 +6,9 @@ import java.util.Locale;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
-import com.limegroup.gnutella.mp3.AudioMetaData;
-import com.limegroup.gnutella.mp3.MP3MetaData;
+
+import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MP3MetaData;
 
 import org.xml.sax.*;
 import org.w3c.dom.*;

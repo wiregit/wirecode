@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.metadata.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.I18NConvert;

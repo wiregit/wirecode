@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.IOException;
 
 /**
- * InputStream that counts the number of bytes succesfully read.
+ * InputStream that counts the number of bytes succesfully read or skipped.
  */
 public final class CountingInputStream extends FilterInputStream {
     
@@ -33,6 +33,12 @@ public final class CountingInputStream extends FilterInputStream {
     
     public int getAmountRead() {
         return _count;
+    }
+    
+    public long skip(long n) throws IOException {
+    	long skipped = in.skip(n);
+    	_count+=skipped;
+    	return skipped;
     }
     
 } // class

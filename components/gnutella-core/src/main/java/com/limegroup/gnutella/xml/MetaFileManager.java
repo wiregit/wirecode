@@ -3,7 +3,8 @@ package com.limegroup.gnutella.xml;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.metadata.*;
+
 import java.io.*;
 import com.sun.java.util.collections.*;
 
