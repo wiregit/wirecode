@@ -3,7 +3,9 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.*;
 import java.util.StringTokenizer;
+import java.math.BigInteger;
 
 /**
  * A Gnutella query request method.  In addition to a query string, queries can
@@ -22,6 +24,11 @@ public class QueryRequest extends Message implements Serializable{
      *  LOCKING: obtain this' lock. */
     private final String query;
     private final String richQuery;
+
+    /** The GGEP block before GEM blocks.  Cached to avoid allocations.  Null
+     *  if the GGEP data has not been parsed, this has no GGEP data, or the GGEP
+     *  data is corrupt.  LOCKING: obtain this' monitor. */
+    private volatile GGEP ggep;
 
     // HUGE v0.93 fields
     /** 
@@ -149,16 +156,35 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			tempQueryUrns = new HashSet();
 		}
-			
+
+        if ((host != null) && (port != null)) {
+            try {
+                // get the GGEP ready....
+                ggep = new GGEP(false);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                BigInteger big = new BigInteger(port.toString());
+                baos.write(host.getAddress());
+                baos.write(big.toByteArray());
+                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT,
+                         baos.toByteArray());
+            }
+            catch (NumberFormatException ignored) {}
+            catch (IOException noGGEP) {}
+        }
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
             baos.write(query.getBytes());              // write query
             baos.write(0);                             // null
+            
+            // write any GGEP extension(s) necessary....
+            if (ggep != null)
+                ggep.write(baos);
+            
             // now write any & all HUGE v0.93 General Extension Mechanism 
-			// extensions
-            boolean addDelimiterBefore = false;
+            // extensions
+            boolean addDelimiterBefore = (ggep != null);
 			
 			// add the rich query
             addDelimiterBefore = 
@@ -215,9 +241,24 @@ public class QueryRequest extends Message implements Serializable{
             // handle extensions, which include rich query and URN stuff
             String exts = super.readNullTerminatedString(bais);
             StringTokenizer stok = new StringTokenizer(exts,"\u001c");
+            boolean firstIter = true;
             while (stok.hasMoreElements()) {
 				String curExtStr = stok.nextToken();
-				if(URN.isUrn(curExtStr)) {
+                
+                // ggep stuff is before the urn stuff, so check for it....
+                // it will only be in the first string since we only put it in
+                // beginning....
+                if (firstIter) {
+                    try {
+                        int[] endOffset = new int[1];
+                        ggep = new GGEP(curExtStr.getBytes(),
+                                        0, endOffset);
+                        curExtStr = curExtStr.substring(endOffset[0]);
+                    }
+                    catch (BadGGEPBlockException ignored) {}
+                    firstIter = false;
+                }
+ 				if(URN.isUrn(curExtStr)) {
 					// it's an URN to match, of form "urn:namespace:etc"
 					URN urn = null;
 					try {
@@ -332,7 +373,8 @@ public class QueryRequest extends Message implements Serializable{
     /** @return Whether or not this QueryRequest supports the unicast protocol.
      */
     public boolean supportsUnicast() {
-        return false;
+        return ((ggep != null) && 
+                (ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT)));
     }
 
 
@@ -340,15 +382,56 @@ public class QueryRequest extends Message implements Serializable{
      *  contact for unicast replies.  May return null.
      */
     public InetAddress getUDPAddress() {
-        return null;
+        InetAddress retAddr = null;
+        if (supportsUnicast()) {
+            try {
+                byte[] ggepBytes = 
+                ggep.getBytes(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+                String hostString = 
+                Message.ip2string(splitUDPBytes(ggepBytes, true));
+                retAddr = InetAddress.getByName(hostString);
+            }
+            catch (UnknownHostException ignored) {}
+            catch (BadGGEPPropertyException ignored) {}
+        }
+        return retAddr;
     }
 
 
     /** @return Given supportsUnicast(), this will return the port to
      *  contact for unicast replies.  May return null.
      */
-    public Integer getPort() {
-        return null;
+    public Integer getUDPPort() {
+        Integer retInt = null;
+        if (supportsUnicast()) {
+            try {
+                byte[] ggepBytes = 
+                ggep.getBytes(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+                BigInteger big = new BigInteger(splitUDPBytes(ggepBytes,
+                                                              false));
+                retInt = new Integer(big.intValue());
+            }
+            catch (NumberFormatException ignored) {}
+            catch (BadGGEPPropertyException ignored) {}
+        }
+        return retInt;
+    }
+
+
+    private byte[] splitUDPBytes(byte[] bytes, boolean host) {
+        byte[] retBytes = null;
+        if (host) {
+            retBytes = new byte[4];
+            for (int i = 0; i < retBytes.length; i++)
+                retBytes[i] = bytes[i];
+        }
+        else {
+            int j = 0;
+            retBytes = new byte[bytes.length - 4];
+            for (int i = 4; i < bytes.length; i++)
+                retBytes[j++] = bytes[i];
+        }        
+        return retBytes;
     }
 
 
