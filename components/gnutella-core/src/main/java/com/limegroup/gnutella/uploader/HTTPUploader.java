@@ -1122,7 +1122,7 @@ public final class HTTPUploader implements Uploader {
                 // continuations.
                 AlternateLocation al = 
                 AlternateLocation.create(st.nextToken().trim(),
-                                         _fileDesc.getSHA1Urn());
+                                         _fileDesc.getSHA1Urn(),_fileName);
                 
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {
