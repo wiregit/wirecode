@@ -300,7 +300,7 @@ public abstract class Message
                 if (length<26) break;
                 return new QueryReply(guid,ttl,hops,payload);
             case F_PUSH:
-                return new PushRequest(guid,ttl,hops,payload);
+                return new PushRequest(guid,ttl,hops,payload, network);
             case F_ROUTE_TABLE_UPDATE:
                 //The exact subclass of RouteTableMessage returned depends on
                 //the variant stored within the payload.  So leave it to the

@@ -352,8 +352,8 @@ public abstract class MessageRouter {
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
     
-//        Assert.that(msg.isMulticast(),
- //           "non multicast message in handleMulticastMessage");
+        Assert.that(msg.isMulticast(),
+           "non multicast message in handleMulticastMessage: " + msg);
     
         // no multicast messages should ever have been
         // set with a TTL greater than 1.

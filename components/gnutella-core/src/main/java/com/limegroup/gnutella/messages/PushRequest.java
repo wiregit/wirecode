@@ -23,8 +23,8 @@ public class PushRequest extends Message implements Serializable {
      * @exception BadPacketException the payload length is wrong
      */
     public PushRequest(byte[] guid, byte ttl, byte hops,
-             byte[] payload) throws BadPacketException {
-        super(guid, Message.F_PUSH, ttl, hops, payload.length);
+             byte[] payload, int network) throws BadPacketException {
+        super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException("Payload too small: "+payload.length);
         this.payload=payload;
@@ -107,7 +107,7 @@ public class PushRequest extends Message implements Serializable {
                          STANDARD_PAYLOAD_SIZE);
         try {
             return new PushRequest(this.getGUID(), this.getTTL(), this.getHops(),
-                                   newPayload);
+                                   newPayload, this.getNetwork());
         } catch (BadPacketException e) {
             Assert.that(false, "Standard packet length not allowed!");
             return null;
