@@ -60,6 +60,11 @@ public class Buffer {
         return increment(tail)==head;
     }
 
+    /** Same as getSize(). */
+    public final int size() {
+        return getSize();
+    }
+
     /** Returns the number of elements in this.  Note that this never
      *  exceeds the value returned by getCapacity. */
     public int getSize() {
@@ -194,6 +199,61 @@ public class Buffer {
         tail=decrement(tail);
         return buf[tail];
     }
+
+    /**
+     * @modifies this
+     * @effects Removes and returns the i'th element of this, or
+     *  throws IndexOutOfBoundsException if i is not a valid index
+     *  of this.  In the worst case, this runs in linear time with
+     *  respect to size().
+     */ 
+    public Object remove(int i) throws IndexOutOfBoundsException {
+        Object ret=get(i);
+        //Shift all elements to left.  This could be micro-optimized.
+        for (int j=index(i); j!=tail; j=increment(j)) {
+            buf[j]=buf[increment(j)];
+        }
+        //Adjust tail pointer accordingly.
+        tail=decrement(tail);
+        return ret;
+    }
+
+    /**
+     * @modifies this
+     * @effects removes the first occurrence of x in this,
+     *  if any, as determined by .equals.  Returns true if any 
+     *  elements were removed.  In the worst case, this runs in linear 
+     *  time with respect to size().
+     */
+    public boolean remove(Object x) {
+        for (int i=0; i<getSize(); i++) {
+            if (x.equals(get(i))) {
+                remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @modifies this
+     * @effects removes all occurrences of x in this,
+     *  if any, as determined by .equals.  Returns true if any 
+     *  elements were removed.   In the worst case, this runs in linear 
+     *  time with respect to size().
+     */
+    public boolean removeAll(Object x) {
+        boolean ret=false;
+        for (int i=0; i<getSize(); i++) {
+            if (x.equals(get(i))) {
+                remove(i);
+                i--;
+                ret=true;
+            }
+        }
+        return ret;
+    }
+
 
     /**
      * @modifies this
@@ -379,6 +439,89 @@ public class Buffer {
         Assert.that(buf.get(2).equals("d"));
         buf.set(2,"bb");
         Assert.that(buf.get(2).equals("bb"));        
+
+        //4. Tests of remove and removeAll methods.
+        buf=new Buffer(4);
+        buf.addLast("a");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");
+        try {
+            buf.remove(-1);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) { }
+        Assert.that(("a").equals(buf.remove(0)));
+        Assert.that(buf.size()==3);
+        Assert.that(buf.get(0).equals("b"));
+        Assert.that(buf.get(1).equals("c"));
+        Assert.that(buf.get(2).equals("d")); 
+
+        buf=new Buffer(4);
+        buf.addLast("x");
+        buf.addLast("y");
+        buf.addLast("a");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");
+        try {
+            buf.remove(5);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) { }
+        Assert.that(("a").equals(buf.remove(0)));
+        Assert.that(buf.size()==3);
+        Assert.that(buf.get(0).equals("b"));
+        Assert.that(buf.get(1).equals("c"));
+        Assert.that(buf.get(2).equals("d"));  
+
+        buf=new Buffer(4);
+        buf.addLast("a");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");
+        try {
+            buf.remove(5);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) { }
+        Assert.that(("d").equals(buf.remove(3)));
+        Assert.that(buf.size()==3);
+        Assert.that(buf.get(0).equals("a"));
+        Assert.that(buf.get(1).equals("b"));
+        Assert.that(buf.get(2).equals("c"));  
+
+        buf=new Buffer(4);
+        buf.addLast("a");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");
+        try {
+            buf.remove(5);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) { }
+        Assert.that(("b").equals(buf.remove(1)));
+        Assert.that(buf.size()==3);
+        Assert.that(buf.get(0).equals("a"));
+        Assert.that(buf.get(1).equals("c"));
+        Assert.that(buf.get(2).equals("d")); 
+
+        buf=new Buffer(4);
+        buf.addLast("b");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");
+        Assert.that(buf.remove("d")==true);
+        Assert.that(buf.remove("b")==true);
+        Assert.that(buf.size()==2);
+        Assert.that(buf.get(0).equals("b"));
+        Assert.that(buf.get(1).equals("c"));
+
+        buf=new Buffer(4);
+        buf.addLast("b");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("b");
+        Assert.that(buf.removeAll("b")==true);
+        Assert.that(buf.size()==1);
+        Assert.that(buf.get(0).equals("c"));
     }
-    */
+    */  
 }
