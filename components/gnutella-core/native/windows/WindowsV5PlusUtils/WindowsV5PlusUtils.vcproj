@@ -115,6 +115,9 @@
 		<File
 			RelativePath=".\WindowsV5PlusUtils.cpp">
 		</File>
+		<File
+			RelativePath=".\WindowsV5PlusUtils.h">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -4,16 +4,12 @@
 //*****************************************************************************
 #define NEW_CODE		//	Turns on the new WinXP ICF firewall detection code
 //*****************************************************************************
-//	NOTE: As of Tuesday, 25th January 2005, this file won't compile under GCC.
-//		Lots of errors in the Windows include files cause problems.  This file 
-//		should probably be compiled under MS VC++ to a DLL.  I will work on this
-//		more tomorrow, to get a clean build made.
-//*****************************************************************************
 
 #include <jni.h>
 #include <assert.h>
 
-#define _WIN32_WINNT 0x0500	//	Required windows version: Win2K or better
+#define _WIN32_WINNT	0x0500		//	Required windows version: Win2K or better
+#define MIN_ICF_VER		0x00050102	//	WinXP SP2 (5.1.2) 
 #include <windows.h>
 
 /**
@@ -40,6 +36,11 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(
 //	and may still be.
 //*****************************************************************************
 #ifdef NEW_CODE
+
+#ifndef __WINDOWSV5PLUSUTILS__
+#include "WindowsV5PlusUtils.h"
+#endif
+
 #include <netfw.h>
 #include <objbase.h>
 #include <oleauto.h>
@@ -52,7 +53,7 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(
 
 //*****************************************************************************
 
-HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile)
+HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile, unsigned short *nReturn)
 {
     HRESULT hr = S_OK;
     INetFwMgr* fwMgr = NULL;
@@ -72,7 +73,8 @@ HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile)
             );
     if (FAILED(hr))
     {
-        printf("CoCreateInstance failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrCoCreateInstance;
+        //printf("CoCreateInstance failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -80,7 +82,8 @@ HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile)
     hr = fwMgr->get_LocalPolicy(&fwPolicy);
     if (FAILED(hr))
     {
-        printf("get_LocalPolicy failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrGetLocalPolicy;
+        //printf("get_LocalPolicy failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -88,7 +91,8 @@ HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile)
     hr = fwPolicy->get_CurrentProfile(fwProfile);
     if (FAILED(hr))
     {
-        printf("get_CurrentProfile failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrGetCurProfile;
+        //printf("get_CurrentProfile failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -122,7 +126,7 @@ void WindowsFirewallCleanup(IN INetFwProfile* fwProfile)
 
 //-----------------------------------------------------------------------------
 
-HRESULT WindowsFirewallIsOn(IN INetFwProfile* fwProfile, OUT BOOL* fwOn)
+HRESULT WindowsFirewallIsOn(IN INetFwProfile* fwProfile, OUT BOOL* fwOn, unsigned short *nReturn)
 {
     HRESULT hr = S_OK;
     VARIANT_BOOL fwEnabled;
@@ -136,7 +140,8 @@ HRESULT WindowsFirewallIsOn(IN INetFwProfile* fwProfile, OUT BOOL* fwOn)
     hr = fwProfile->get_FirewallEnabled(&fwEnabled);
     if (FAILED(hr))
     {
-        printf("get_FirewallEnabled failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrGetFwEnabled;
+        //printf("get_FirewallEnabled failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -144,11 +149,13 @@ HRESULT WindowsFirewallIsOn(IN INetFwProfile* fwProfile, OUT BOOL* fwOn)
     if (fwEnabled != VARIANT_FALSE)
     {
         *fwOn = TRUE;
-        printf("The firewall is on.\n");
+		*nReturn|= ICF::eFirewallEnabled;
+        //printf("The firewall is on.\n");
     }
     else
     {
-        printf("The firewall is off.\n");
+		*nReturn&=~ICF::eFirewallEnabled;
+        //printf("The firewall is off.\n");
     }
 
 error:
@@ -158,7 +165,7 @@ error:
 
 //-----------------------------------------------------------------------------
 
-HRESULT WindowsFirewallTurnOn(IN INetFwProfile* fwProfile)
+HRESULT WindowsFirewallTurnOn(IN INetFwProfile* fwProfile,unsigned short *nReturn)
 {
     HRESULT hr = S_OK;
     BOOL fwOn;
@@ -166,7 +173,7 @@ HRESULT WindowsFirewallTurnOn(IN INetFwProfile* fwProfile)
     _ASSERT(fwProfile != NULL);
 
     // Check to see if the firewall is off.
-    hr = WindowsFirewallIsOn(fwProfile, &fwOn);
+    hr = WindowsFirewallIsOn(fwProfile, &fwOn, nReturn);
     if (FAILED(hr))
     {
         printf("WindowsFirewallIsOn failed: 0x%08lx\n", hr);
@@ -194,7 +201,7 @@ error:
 
 //-----------------------------------------------------------------------------
 
-HRESULT WindowsFirewallTurnOff(IN INetFwProfile* fwProfile)
+HRESULT WindowsFirewallTurnOff(IN INetFwProfile* fwProfile, unsigned short *nReturn)
 {
     HRESULT hr = S_OK;
     BOOL fwOn;
@@ -202,7 +209,7 @@ HRESULT WindowsFirewallTurnOff(IN INetFwProfile* fwProfile)
     _ASSERT(fwProfile != NULL);
 
     // Check to see if the firewall is on.
-    hr = WindowsFirewallIsOn(fwProfile, &fwOn);
+    hr = WindowsFirewallIsOn(fwProfile, &fwOn, nReturn);
     if (FAILED(hr))
     {
         printf("WindowsFirewallIsOn failed: 0x%08lx\n", hr);
@@ -231,10 +238,10 @@ error:
 //-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallAppIsEnabled(
-            IN INetFwProfile* fwProfile,
-            IN const wchar_t* fwProcessImageFileName,
-            OUT BOOL* fwAppEnabled
-            )
+    IN INetFwProfile* fwProfile,
+    IN const wchar_t* fwProcessImageFileName,
+    OUT BOOL* fwAppEnabled,
+	unsigned short *nReturn )
 {
     HRESULT hr = S_OK;
     BSTR fwBstrProcessImageFileName = NULL;
@@ -252,7 +259,8 @@ HRESULT WindowsFirewallAppIsEnabled(
     hr = fwProfile->get_AuthorizedApplications(&fwApps);
     if (FAILED(hr))
     {
-        printf("get_AuthorizedApplications failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrGetAuthApps;
+        //printf("get_AuthorizedApplications failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -261,7 +269,8 @@ HRESULT WindowsFirewallAppIsEnabled(
     if (SysStringLen(fwBstrProcessImageFileName) == 0)
     {
         hr = E_OUTOFMEMORY;
-        printf("SysAllocString failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrAllocation;
+        //printf("SysAllocString failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -273,7 +282,8 @@ HRESULT WindowsFirewallAppIsEnabled(
         hr = fwApp->get_Enabled(&fwEnabled);
         if (FAILED(hr))
         {
-            printf("get_Enabled failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrGetEnabled;
+            //printf("get_Enabled failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -281,18 +291,23 @@ HRESULT WindowsFirewallAppIsEnabled(
         {
             // The authorized application is enabled.
             *fwAppEnabled = TRUE;
-
+			*nReturn|= ICF::eProcessEnabled;
+			/*
             printf(
                 "Authorized application %lS is enabled in the firewall.\n",
                 fwProcessImageFileName
                 );
+			*/
         }
         else
         {
+			*nReturn&=~ICF::eProcessEnabled;
+			/*
             printf(
                 "Authorized application %lS is disabled in the firewall.\n",
                 fwProcessImageFileName
                 );
+			*/
         }
     }
     else
@@ -300,10 +315,13 @@ HRESULT WindowsFirewallAppIsEnabled(
         // The authorized application was not in the collection.
         hr = S_OK;
 
+		*nReturn&=~ICF::eProcessEnabled;
+		/*
         printf(
             "Authorized application %lS is disabled in the firewall.\n",
             fwProcessImageFileName
             );
+		*/
     }
 
 error:
@@ -329,10 +347,10 @@ error:
 //-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallAddApp(
-            IN INetFwProfile* fwProfile,
-            IN const wchar_t* fwProcessImageFileName,
-            IN const wchar_t* fwName
-            )
+    IN INetFwProfile* fwProfile,
+    IN const wchar_t* fwProcessImageFileName,
+    IN const wchar_t* fwName,
+	unsigned short *nReturn )
 {
     HRESULT hr = S_OK;
     BOOL fwAppEnabled;
@@ -347,13 +365,15 @@ HRESULT WindowsFirewallAddApp(
 
     // First check to see if the application is already authorized.
     hr = WindowsFirewallAppIsEnabled(
-            fwProfile,
-            fwProcessImageFileName,
-            &fwAppEnabled
-            );
+		 fwProfile,
+		 fwProcessImageFileName,
+        &fwAppEnabled,
+		 nReturn );
+
     if (FAILED(hr))
     {
-        printf("WindowsFirewallAppIsEnabled failed: 0x%08lx\n", hr);
+#pragma message( __FILE__ ":DAVE should we add an error code here?" )
+        //printf("WindowsFirewallAppIsEnabled failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -364,7 +384,8 @@ HRESULT WindowsFirewallAddApp(
         hr = fwProfile->get_AuthorizedApplications(&fwApps);
         if (FAILED(hr))
         {
-            printf("get_AuthorizedApplications failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrGetAuthApps;
+            //printf("get_AuthorizedApplications failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -378,7 +399,8 @@ HRESULT WindowsFirewallAddApp(
                 );
         if (FAILED(hr))
         {
-            printf("CoCreateInstance failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrCoCreateInstance;
+            //printf("CoCreateInstance failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -387,7 +409,8 @@ HRESULT WindowsFirewallAddApp(
         if (SysStringLen(fwBstrProcessImageFileName) == 0)
         {
             hr = E_OUTOFMEMORY;
-            printf("SysAllocString failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrAllocation;
+            //printf("SysAllocString failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -395,7 +418,8 @@ HRESULT WindowsFirewallAddApp(
         hr = fwApp->put_ProcessImageFileName(fwBstrProcessImageFileName);
         if (FAILED(hr))
         {
-            printf("put_ProcessImageFileName failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrPut;
+            //printf("put_ProcessImageFileName failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -404,7 +428,8 @@ HRESULT WindowsFirewallAddApp(
         if (SysStringLen(fwBstrName) == 0)
         {
             hr = E_OUTOFMEMORY;
-            printf("SysAllocString failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrAllocation;
+            //printf("SysAllocString failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -412,7 +437,8 @@ HRESULT WindowsFirewallAddApp(
         hr = fwApp->put_Name(fwBstrName);
         if (FAILED(hr))
         {
-            printf("put_Name failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrPut;
+            //printf("put_Name failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -420,14 +446,16 @@ HRESULT WindowsFirewallAddApp(
         hr = fwApps->Add(fwApp);
         if (FAILED(hr))
         {
-            printf("Add failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrAdd;
+            //printf("Add failed: 0x%08lx\n", hr);
             goto error;
         }
-
+/*
         printf(
             "Authorized application %lS is now enabled in the firewall.\n",
             fwProcessImageFileName
             );
+*/
     }
 
 error:
@@ -457,8 +485,8 @@ HRESULT WindowsFirewallPortIsEnabled(
             IN INetFwProfile* fwProfile,
             IN LONG portNumber,
             IN NET_FW_IP_PROTOCOL ipProtocol,
-            OUT BOOL* fwPortEnabled
-            )
+            OUT BOOL* fwPortEnabled,
+			unsigned short *nReturn )
 {
     HRESULT hr = S_OK;
     VARIANT_BOOL fwEnabled;
@@ -474,7 +502,8 @@ HRESULT WindowsFirewallPortIsEnabled(
     hr = fwProfile->get_GloballyOpenPorts(&fwOpenPorts);
     if (FAILED(hr))
     {
-        printf("get_GloballyOpenPorts failed: 0x%08lx\n", hr);
+		*nReturn|=ICF::eErrGetGlobalPorts;
+        //printf("get_GloballyOpenPorts failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -486,7 +515,8 @@ HRESULT WindowsFirewallPortIsEnabled(
         hr = fwOpenPort->get_Enabled(&fwEnabled);
         if (FAILED(hr))
         {
-            printf("get_Enabled failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrGetEnabled;
+            //printf("get_Enabled failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -494,18 +524,21 @@ HRESULT WindowsFirewallPortIsEnabled(
         {
             // The globally open port is enabled.
             *fwPortEnabled = TRUE;
+			*nReturn|= ICF::ePortEnabled;
 
-            printf("Port %ld is open in the firewall.\n", portNumber);
+            //printf("Port %ld is open in the firewall.\n", portNumber);
         }
         else
         {
-            printf("Port %ld is not open in the firewall.\n", portNumber);
+			*nReturn&=~ICF::ePortEnabled;
+            //printf("Port %ld is not open in the firewall.\n", portNumber);
         }
     }
     else
     {
         // The globally open port was not in the collection.
         hr = S_OK;
+		*nReturn&=~ICF::ePortEnabled;
 
         printf("Port %ld is not open in the firewall.\n", portNumber);
     }
@@ -533,8 +566,8 @@ HRESULT WindowsFirewallPortAdd(
             IN INetFwProfile* fwProfile,
             IN LONG portNumber,
             IN NET_FW_IP_PROTOCOL ipProtocol,
-            IN const wchar_t* name
-            )
+            IN const wchar_t* name,
+			unsigned short *nReturn )
 {
     HRESULT hr = S_OK;
     BOOL fwPortEnabled;
@@ -547,14 +580,15 @@ HRESULT WindowsFirewallPortAdd(
 
     // First check to see if the port is already added.
     hr = WindowsFirewallPortIsEnabled(
-            fwProfile,
-            portNumber,
-            ipProtocol,
-            &fwPortEnabled
-            );
+         fwProfile,
+         portNumber,
+         ipProtocol,
+        &fwPortEnabled,
+		 nReturn );
     if (FAILED(hr))
     {
-        printf("WindowsFirewallPortIsEnabled failed: 0x%08lx\n", hr);
+#pragma message( __FILE__ ":DAVE should we add an error code here?" )
+        //printf("WindowsFirewallPortIsEnabled failed: 0x%08lx\n", hr);
         goto error;
     }
 
@@ -565,7 +599,8 @@ HRESULT WindowsFirewallPortAdd(
         hr = fwProfile->get_GloballyOpenPorts(&fwOpenPorts);
         if (FAILED(hr))
         {
-            printf("get_GloballyOpenPorts failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrGetGlobalPorts;
+            //printf("get_GloballyOpenPorts failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -579,7 +614,8 @@ HRESULT WindowsFirewallPortAdd(
                 );
         if (FAILED(hr))
         {
-            printf("CoCreateInstance failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrCoCreateInstance;
+            //printf("CoCreateInstance failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -587,7 +623,8 @@ HRESULT WindowsFirewallPortAdd(
         hr = fwOpenPort->put_Port(portNumber);
         if (FAILED(hr))
         {
-            printf("put_Port failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrPut;
+            //printf("put_Port failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -595,7 +632,8 @@ HRESULT WindowsFirewallPortAdd(
         hr = fwOpenPort->put_Protocol(ipProtocol);
         if (FAILED(hr))
         {
-            printf("put_Protocol failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrPut;
+            //printf("put_Protocol failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -604,7 +642,9 @@ HRESULT WindowsFirewallPortAdd(
         if (SysStringLen(fwBstrName) == 0)
         {
             hr = E_OUTOFMEMORY;
-            printf("SysAllocString failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrAllocation;
+
+            //printf("SysAllocString failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -612,7 +652,8 @@ HRESULT WindowsFirewallPortAdd(
         hr = fwOpenPort->put_Name(fwBstrName);
         if (FAILED(hr))
         {
-            printf("put_Name failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrPut;
+            //printf("put_Name failed: 0x%08lx\n", hr);
             goto error;
         }
 
@@ -620,11 +661,13 @@ HRESULT WindowsFirewallPortAdd(
         hr = fwOpenPorts->Add(fwOpenPort);
         if (FAILED(hr))
         {
-            printf("Add failed: 0x%08lx\n", hr);
+			*nReturn|=ICF::eErrAdd;
+            //printf("Add failed: 0x%08lx\n", hr);
             goto error;
         }
 
-        printf("Port %ld is now open in the firewall.\n", portNumber);
+		*nReturn|=ICF::ePortEnabled;
+        //printf("Port %ld is now open in the firewall.\n", portNumber);
     }
 
 error:
@@ -654,9 +697,9 @@ error:
  *		WinXP SP2 and above
  */
 
-bool CheckFirewallWarningImminent( const wchar_t * szProcessFileName )
+unsigned short CheckFirewallWarningImminent( const wchar_t * szProcessFileName )
 {
-	bool bReturn=false;
+	unsigned short nReturn=ICF::eNone;
 
 
 	//	Here is the native WinXP SP2 COM code to open an INetFwPolicy interface
@@ -680,16 +723,18 @@ bool CheckFirewallWarningImminent( const wchar_t * szProcessFileName )
 				hr = comInit;
 				if (FAILED(hr))
 				{
-					printf("CoInitializeEx failed: 0x%08lx\n", hr);
+					nReturn|=ICF::eErrComInit;
+					//printf("CoInitializeEx failed: 0x%08lx\n", hr);
 					goto error;
 				}
 		}
 
 		// Retrieve the firewall profile currently in effect.
-		hr = WindowsFirewallInitialize(&fwProfile);
+		hr = WindowsFirewallInitialize(&fwProfile,&nReturn);
 		if (FAILED(hr))
 		{
-			printf("WindowsFirewallInitialize failed: 0x%08lx\n", hr);
+#pragma message( __FILE__ ":DAVE should we add an error code here?" )
+			//printf("WindowsFirewallInitialize failed: 0x%08lx\n", hr);
 			goto error;
 		}
 
@@ -702,24 +747,38 @@ bool CheckFirewallWarningImminent( const wchar_t * szProcessFileName )
 			BOOL bTurnedOn=FALSE;
 			hr=WindowsFirewallIsOn(
 				 fwProfile,
-				&bTurnedOn );
+				&bTurnedOn,
+				&nReturn );
 
 			if( SUCCEEDED(hr) && bTurnedOn==TRUE )
 			{
 				BOOL bEnabled=FALSE;
 
 				hr=WindowsFirewallAppIsEnabled(
-					fwProfile,
-					szProcessFileName,
-					&bEnabled );
+					 fwProfile,
+					 szProcessFileName,
+					&bEnabled,
+					&nReturn );
 
 				if( SUCCEEDED(hr) )
-					bReturn=( (bEnabled==FALSE) ? true : false );
+				{
+					if( bEnabled==FALSE )
+						nReturn&=~ICF::eProcessEnabled;
+					else
+						nReturn|= ICF::eProcessEnabled;
+				}
+				else
+				{
+					goto error;
+				}
 			}
 			else
 			{
+#pragma message( __FILE__ ":DAVE should we really set ePortEnabled and eProcessEnabled here?" )
 				//	Win XP SP2 ICF is disabled
-				bReturn=false;
+				nReturn&=~ICF::eFirewallEnabled;
+				nReturn|= ICF::ePortEnabled;
+				nReturn|= ICF::eProcessEnabled;
 			}
 		}
 
@@ -735,30 +794,94 @@ error:
 		}		
 	}
 
-	return bReturn;
+	return nReturn;
 }
 
 //*****************************************************************************
 
 extern "C"
-JNIEXPORT jboolean JNICALL 
+JNIEXPORT jshort JNICALL 
 Java_com_limegroup_gnutella_util_SystemUtils_isFirewallWarningImminent(
 	JNIEnv		*	env, 
 	jclass			clazz,
 	jstring         appPath ) 
 {
-#pragma message( __FILE__ ":### DAVE Finish using the passed in appPath instead of APP_NAME" )
+	jshort nRet=ICF::eNone;
 
-	jboolean bRet=( (CheckFirewallWarningImminent(APP_NAME)) ? (JNI_TRUE) : (JNI_FALSE) );
-	return bRet;
+	bool bWinXpSP2=false;
+
+	{
+		OSVERSIONINFOEX osv;
+		osv.dwOSVersionInfoSize=sizeof(osv);
+
+		if( GetVersionEx( (LPOSVERSIONINFO)&osv ) )
+		{
+			if(  osv.dwMajorVersion		>=(MIN_ICF_VER&0x00FF0000)>>0x10 
+			  && osv.dwMinorVersion		>=(MIN_ICF_VER&0x0000FF00)>>0x08
+			  && osv.wServicePackMajor	>=(MIN_ICF_VER&0x000000FF)>>0x00 )
+				bWinXpSP2=true;
+		}
+	}
+
+	if( bWinXpSP2 )
+	{
+		wchar_t wcBuf[MAX_PATH];
+		const char * szAppPath = env->GetStringUTFChars( appPath, NULL );
+		assert( szAppPath );
+
+		size_t nChars = mbstowcs( &wcBuf[0], szAppPath, strlen(szAppPath)+1 );
+	    
+		nRet=(jshort)(CheckFirewallWarningImminent(APP_NAME));
+		env->ReleaseStringUTFChars(appPath,szAppPath);
+	}
+	else
+		nRet|=ICF::eErrUnsupportedOperation;
+
+	if(  (nRet&ICF::eFirewallEnabled)
+	  &&!(nRet&ICF::eProcessEnabled) )
+		nRet |=ICF::ePopupImminent;
+
+	return nRet;
 }
 
 //-----------------------------------------------------------------------------
 
-extern "C" __declspec(dllexport) bool IsFirewallWarningImminent( 
-	const wchar_t		*	szAppName )
+extern "C" __declspec(dllexport) unsigned short IsFirewallWarningImminent( 
+	const char	*	szAppPath )
 {
-	return CheckFirewallWarningImminent(szAppName);
+	wchar_t wcBuf[MAX_PATH];
+	jshort nRet=ICF::eNone;
+
+	assert( szAppPath );
+
+	bool bWinXpSP2=false;
+
+	{
+		OSVERSIONINFOEX osv;
+		osv.dwOSVersionInfoSize=sizeof(osv);
+
+		if( GetVersionEx( (LPOSVERSIONINFO)&osv ) )
+		{
+			if(  osv.dwMajorVersion		>=(MIN_ICF_VER&0x00FF0000)>>0x10 
+			  && osv.dwMinorVersion		>=(MIN_ICF_VER&0x0000FF00)>>0x08
+			  && osv.wServicePackMajor	>=(MIN_ICF_VER&0x000000FF)>>0x00 )
+				bWinXpSP2=true;
+		}
+	}
+
+	if( bWinXpSP2 )
+	{
+		size_t nChars = mbstowcs( &wcBuf[0], szAppPath, strlen(szAppPath)+1 );
+		nRet=CheckFirewallWarningImminent(&wcBuf[0]);
+	}
+	else
+		nRet|=ICF::eErrUnsupportedOperation;
+
+	if(  (nRet&ICF::eFirewallEnabled)
+	  &&!(nRet&ICF::eProcessEnabled) )
+		nRet |=ICF::ePopupImminent;
+
+	return nRet;
 }
 
 //*****************************************************************************

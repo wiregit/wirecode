@@ -1,11 +1,42 @@
 package com.limegroup.gnutella.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+
 /**
  * A collection of core-related systems utilities,
  * most of which will require native code to do correctly.
  */
 public class SystemUtils {
     
+	private static final Log LOG = LogFactory.getLog(SystemUtils.class);
+	
+	public static final int ST_NONE					=	0x0000;
+	
+	//	FW STATUS
+	public static final int ST_FIREWALL_ENABLED		=	0x0001;
+	public static final int ST_PROCESS_ENABLED		=	0x0002;
+	public static final int ST_PORT_ENABLED			=	0x0004;
+	
+	//	FW POPUP STATUS
+	public static final int ST_POPUP_IMMINENT		=	0x0008;
+	
+	//	ERRORS
+	public static final int ST_UNSUPPORTED_OPERATION=	0x0010;		//	Attempted to call under WinVer < WinXP SP2
+	public static final int ST_ERR_GET_GLOBAL_PORTS	=	0x0020;
+	public static final int ST_ERR_ADD				=	0x0040;		//	Used for adding Process and Port
+	public static final int ST_ERR_PUT				=	0x0080;		//	Used for Filename; Friendly name; Port; & Protocol
+	public static final int ST_ERR_GET_ENABLED		=	0x0100;		//	Used for both "Process GetEnabled" and "Port GetEnabled"
+	public static final int ST_ERR_ALLOCATION		=	0x0200;		//	Out of memory
+	public static final int ST_ERR_GET_AUTH_APPS	=	0x0400;
+	public static final int ST_ERR_GET_FW_ENABLED	=	0x0800;
+	public static final int ST_ERR_GET_CUR_PROFILE	=	0x1000;
+	public static final int ST_ERR_GET_LOCAL_POLICY	=	0x2000;
+	public static final int ST_ERR_CO_CREATE_INST	=	0x4000;		//	Used for all COM creation calls
+	public static final int ST_ERR_COM_INIT			=	0x8000;
+		
     /**
      * Whether or not the native libraries could be loaded.
      */
@@ -25,6 +56,7 @@ public class SystemUtils {
             }
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
+        	LOG.error( "Couldn't load system library", noGo );
             canLoad = false;
         }
         isLoaded = canLoad;
@@ -63,6 +95,29 @@ public class SystemUtils {
         return false;
     }
     
+    
+    /**
+     * 
+     * @return a bitfield indicating the status 
+     */
+     public static int getWinICFStatus(String appPath){
+    	if(supportsWinICFStatus())
+    		return isFirewallWarningImminent(appPath);
+   	
+    	return 0;
+    }
+ 
+    /**
+     * @return true if WinXP ICF status support exists
+     */
+    public static boolean supportsWinICFStatus(){
+    	if(isLoaded){
+    		if(CommonUtils.isWindowsXP())
+    			return true;
+    	}
+    	return false;
+    }
+    
     /**
      * Sets the number of open files, if supported.
      */
@@ -81,9 +136,18 @@ public class SystemUtils {
         if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
             setFileWriteable(fileName);
     }
+    
+    public static void main(String[] args) {
+    	System.out.println("I AM RUNNING.");
+    	
+    	char c=isFirewallWarningImminent("c:\\Program Files\\LimeWire\\LimeWire.exe");
+    	System.out.println("Imminent: " + ( (c&0x0008)>0?("true"):("false") ) );
+    	System.out.println("Return Value: " + (short)c );
+    }
             
     
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
+    private static final native char isFirewallWarningImminent(String appPath);
 }
