@@ -57,11 +57,12 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
@@ -231,6 +232,13 @@ public class DownloadTest extends BaseTestCase {
         uploader5.stopThread();
 
         deleteAllFiles();
+        
+        try {
+            Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+            m.clear();
+        }catch(Exception e){
+            ErrorService.error(e);
+        }
     }
     
     private static void deleteAllFiles() {
@@ -327,7 +335,7 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("-Testing non-swarmed push download");
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),true);
         
         RemoteFileDesc rfd = pushLoc.createRemoteFileDesc(TestFile.length());
         
@@ -377,7 +385,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),true);
         RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
         
         uploader1.setRate(500);
@@ -1102,7 +1110,7 @@ public class DownloadTest extends BaseTestCase {
         pusher.setRate(RATE);
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),true);
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1139,11 +1147,13 @@ public class DownloadTest extends BaseTestCase {
         second.stopAfter(500000);
         second.setInterestedInFalts(true);
         
+        GUID guid2 = new GUID(GUID.makeGuid());
+        
         AlternateLocation firstLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),true);
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+                guid2.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),true);
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1197,7 +1207,7 @@ public class DownloadTest extends BaseTestCase {
         
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),true);
         
         RemoteFileDesc pushRFD = newRFDPush(PPORT_1,2);
         
@@ -1263,10 +1273,20 @@ public class DownloadTest extends BaseTestCase {
         pusher2.setProxiesString("1.2.3.4:5,6.7.8.9:10");
         pusher2.setInterestedInFalts(true);
         
-        AlternateLocation pushLocFWT = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+        // create a set of the expected proxies and keep a ref to it
+        PushEndpoint updatedLoc = PushEndpoint.updateProxies
+    		(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10",true);
         
-        PushEndpoint updatedLoc = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
+        Set expectedProxies = updatedLoc.getProxies();
+        
+        // then purge the entry in the map
+        PushEndpoint.overwriteProxies(guid.toHexString());
+        
+        assertTrue(updatedLoc.getProxies().isEmpty());
+        
+        AlternateLocation pushLocFWT = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),true);
+        
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
@@ -1292,7 +1312,11 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
         assertTrue(readRFD.supportsFWTransfer());
         
-        assertEquals(updatedLoc,pushLoc.getPushAddress());
+        assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
+        
+        expectedProxies.retainAll(readRFD.getPushProxies());
+        
+        assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
         
     }
     
@@ -1312,7 +1336,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2.stopAfter(550000);
         
         AlternateLocation badPushLoc=AlternateLocation.create(
-                guid.toHexString()+";1.2.3.4:5",TestFile.hash());
+                guid.toHexString()+";1.2.3.4:5",TestFile.hash(),true);
         
         AlternateLocationCollection alc = 
             AlternateLocationCollection.create(TestFile.hash());
@@ -1349,7 +1373,7 @@ public class DownloadTest extends BaseTestCase {
         
         assertTrue(current instanceof PushAltLoc);
         
-        assertTrue(current.getDemoted());
+        assertTrue(current.isDemoted());
         
     }
     
@@ -1452,7 +1476,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
         //uploader 2 dies after it uploades 1 bytes less than a chunk, so it
         //does only one round of http handshakes. so it never receives alternate
@@ -1465,7 +1489,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
         //Test Downloader has correct alts: the downloader should have
         //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
@@ -1477,7 +1501,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
     }    
 
@@ -2430,8 +2454,8 @@ public class DownloadTest extends BaseTestCase {
 
     private static RemoteFileDesc newRFDWithURN(int port, int speed, 
                                                 String urn) {
-        com.sun.java.util.collections.Set set = 
-			new com.sun.java.util.collections.HashSet();
+        java.util.Set set = 
+			new java.util.HashSet();
         try {
             // for convenience, don't require that they pass the urn.
             // assume a null one is the TestFile's hash.
@@ -2451,7 +2475,7 @@ public class DownloadTest extends BaseTestCase {
     
     private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{
         PushAltLoc al = (PushAltLoc)AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+port,TestFile.hash());
+                guid.toHexString()+";127.0.0.1:"+port,TestFile.hash(),true);
         
         Set urns = new HashSet();
         urns.add(TestFile.hash());

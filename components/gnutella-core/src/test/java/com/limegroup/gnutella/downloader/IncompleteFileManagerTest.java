@@ -19,9 +19,9 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;

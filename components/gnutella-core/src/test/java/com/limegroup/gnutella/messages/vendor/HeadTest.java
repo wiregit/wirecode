@@ -12,7 +12,7 @@ import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.util.Random;
 
@@ -380,9 +380,8 @@ public class HeadTest extends BaseTestCase {
 		assertNotNull(pong1.getPushLocs());
 		
 		RemoteFileDesc dummy = 
-			new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
-							   HugeTestUtils.URNS[1].httpStringValue(), 10, 
-							   GUID.makeGuid(), 10, true, 2, true, null, 
+			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
+			        		10, GUID.makeGuid(), 10, true, 2, true, null, 
 							   HugeTestUtils.URN_SETS[1],
                                false,false,"",0,null, -1);
 		
@@ -441,14 +440,14 @@ public class HeadTest extends BaseTestCase {
         _pushCollection=AlternateLocationCollection.create(_havePartial);
 		
 		for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull,true);
 			_alCollectionComplete.add(al);
 		}
         assertEquals("failed to set test up",10,
         		_alCollectionComplete.getAltLocsSize());
         
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial,true);
 			_alCollectionIncomplete.add(al);
 		}
         assertEquals("failed to set test up",10,
@@ -461,7 +460,7 @@ public class HeadTest extends BaseTestCase {
         GUID guid = new GUID(GUID.makeGuid());
 		
 		AlternateLocation firewalled = AlternateLocation.create(guid.toHexString()+
-				";1.2.3.4:5",_havePartial);
+				";1.2.3.4:5",_havePartial,true);
 		pe = ((PushAltLoc)firewalled).getPushAddress();
 		_pushCollection=AlternateLocationCollection.create(_havePartial);
 		_pushCollection.add(firewalled);

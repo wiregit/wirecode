@@ -6,10 +6,10 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.sun.java.util.collections.Collection;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Helper class that supplies the list of connections for searching.

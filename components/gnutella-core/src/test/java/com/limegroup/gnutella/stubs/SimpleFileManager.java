@@ -7,7 +7,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.sun.java.util.collections.List;
+import java.util.List;
 
 /**
  * A file manager that behaves exactly like FileManager would if

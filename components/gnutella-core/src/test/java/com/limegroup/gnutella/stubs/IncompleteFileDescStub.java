@@ -10,8 +10,8 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,

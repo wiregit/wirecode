@@ -21,9 +21,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This test makes sure that pong caching is working correctly between

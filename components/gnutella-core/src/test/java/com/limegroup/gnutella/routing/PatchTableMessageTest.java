@@ -8,7 +8,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 /**
  * Unit tests for PatchTableMessage

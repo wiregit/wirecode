@@ -2,7 +2,6 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -15,7 +14,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 
 /**
@@ -168,7 +167,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 			String str = st.nextToken();
 			str = str.trim();
 			AlternateLocation al=
-			        AlternateLocation.create(str, _alCollection.getSHA1Urn());
+			        AlternateLocation.create(str, _alCollection.getSHA1Urn(),true);
 
 			assertTrue(_alCollection.contains(al));
 		}
@@ -185,7 +184,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for( ; iter.hasNext() ; ) {
             AlternateLocation al=(AlternateLocation)iter.next();
             i++;
-            assertFalse("location already demoted "+al,al.getDemoted());
+            assertFalse("location already demoted "+al,al.isDemoted());
             boolean removed = _alCollection.remove(al);//demoted
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there
@@ -209,7 +208,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for( ; iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next(); 
             i++;
-            assertFalse("location already demoted "+al,al.getDemoted());
+            assertFalse("location already demoted "+al,al.isDemoted());
             boolean removed = _alCollection.remove(al);//demoted
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there
@@ -217,7 +216,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
                                             al,_alCollection.contains(al));
             //add it back
             _alCollection.add(al);
-            assertFalse("location not promoted after add  "+al,al.getDemoted());
+            assertFalse("location not promoted after add  "+al,al.isDemoted());
             removed = _alCollection.remove(al);//demoted again
             assertFalse("location removed without demoting ",removed);
             //make sure it's still there

@@ -11,10 +11,10 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.NameValue;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /** Unit test for LimeXMLReplyCollection.
  * Should run in the tests/xml directory (ie where this file is located).

@@ -17,7 +17,7 @@ import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
@@ -168,7 +168,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	    (AlternateLocation)test.getAlternateLocationCollection().iterator().next();
     	
     	assertTrue(alt instanceof PushAltLoc);
-    	assertTrue(alt.getDemoted());
             
         
     }

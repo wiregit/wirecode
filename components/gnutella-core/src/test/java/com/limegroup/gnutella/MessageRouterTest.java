@@ -16,9 +16,9 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.xml.MetaFileManager;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class tests the <tt>MessageRouter</tt>.

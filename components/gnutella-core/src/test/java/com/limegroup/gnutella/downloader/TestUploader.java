@@ -30,7 +30,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.RoundRobinQueue;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.AssertComparisons;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 public class TestUploader extends AssertComparisons {    
     
@@ -584,10 +584,10 @@ public class TestUploader extends AssertComparisons {
             
             if(HTTPHeaderName.NALTS.matchesStartOfString(line) ||
                     HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(line))
-                badLocs=readAlternateLocations(line);
+                badLocs=readAlternateLocations(line,false);
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line) ||
 			        HTTPHeaderName.FALT_LOCATION.matchesStartOfString(line))
-			    goodLocs=readAlternateLocations(line);
+			    goodLocs=readAlternateLocations(line,true);
 			    
 
             int i=line.indexOf("Range:");
@@ -932,7 +932,7 @@ public class TestUploader extends AssertComparisons {
 	 *  locations should be added to
 	 */
 	private AlternateLocationCollection readAlternateLocations
-                                                     (final String altHeader) {
+                                                     (final String altHeader,boolean good) {
         AlternateLocationCollection alc=null;
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
@@ -950,7 +950,7 @@ public class TestUploader extends AssertComparisons {
 				// continuations.
 				AlternateLocation al = 
 				    AlternateLocation.create(
-				        st.nextToken().trim(), _sha1);
+				        st.nextToken().trim(), _sha1,good);
 				alc.add(al);
 			} catch(IOException e) {
 				// just return without adding it.

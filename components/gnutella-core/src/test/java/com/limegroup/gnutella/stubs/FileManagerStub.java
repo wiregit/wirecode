@@ -8,7 +8,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.io.IOException;
 

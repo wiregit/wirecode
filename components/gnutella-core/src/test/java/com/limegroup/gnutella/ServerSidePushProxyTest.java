@@ -30,10 +30,10 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For

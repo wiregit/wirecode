@@ -6,7 +6,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * tests the PushEndpoint class.
@@ -136,8 +136,9 @@ public class PushEndpointTest extends BaseTestCase {
     	
     	String httpString = one.httpStringValue();
     	
+    	flushMap();
+    	PushEndpoint one_prim = PushEndpoint.updateProxies(httpString,true);
     	
-    	PushEndpoint one_prim = new PushEndpoint(httpString);
     	
     	assertEquals(one.hashCode(),one_prim.hashCode());
     	assertEquals(one,one_prim);
@@ -146,7 +147,10 @@ public class PushEndpointTest extends BaseTestCase {
        	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2);
     	httpString = six.httpStringValue();
     	
-    	PushEndpoint four = new PushEndpoint(httpString);
+    	flushMap();
+    	PushEndpoint four = PushEndpoint.updateProxies(httpString,true);
+    	
+    	
     	assertNotEquals(six,four);
     	assertEquals(2,four.supportsFWTVersion());
     	
@@ -155,24 +159,32 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(four.getProxies().size(),sent.size());
     	
     	//now an endpoint with a feature we do not understand
-    	PushEndpoint unknown = new PushEndpoint(
-    			"2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
+    	flushMap();
+    	PushEndpoint unknown = PushEndpoint.updateProxies(
+    			"2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235",true);
+    	
     	
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	//now an endpoint with the fwt header moved elsewhere
-    	
-    	unknown = new PushEndpoint(
-    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235");
+    	flushMap();
+    	unknown = PushEndpoint.updateProxies(
+    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235",true);
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(1,unknown.supportsFWTVersion());
     	
     	//now an endpoint only with the guid
-    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500");
+    	flushMap();
+    	unknown = PushEndpoint.updateProxies("2A8CA57F43E6E0B7FF823F0CC7880500",true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	
+    }
+    
+    private void flushMap() throws Exception{
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        m.clear();
     }
 }

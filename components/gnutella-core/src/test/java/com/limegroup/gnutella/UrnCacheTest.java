@@ -6,9 +6,9 @@ import java.io.FileFilter;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Tests the public methods of the UrnCache class.

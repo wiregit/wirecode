@@ -16,7 +16,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.IpPort;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

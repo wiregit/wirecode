@@ -6,8 +6,8 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
-import com.sun.java.util.collections.Comparator;
-import com.sun.java.util.collections.Iterator;
+import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  * Unit tests for ExtendedEndpoint.

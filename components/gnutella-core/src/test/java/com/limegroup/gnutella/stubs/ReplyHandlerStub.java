@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.net.*;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -14,7 +14,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 /**
  * Stub for the <tt>ReplyHandler</tt> interface.

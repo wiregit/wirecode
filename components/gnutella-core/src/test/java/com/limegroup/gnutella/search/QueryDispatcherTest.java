@@ -10,9 +10,9 @@ import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestResultCounter;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class tests the dispatching of dynamic queries for ourselves 

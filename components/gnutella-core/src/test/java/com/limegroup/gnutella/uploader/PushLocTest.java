@@ -25,12 +25,12 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.http.*;
 
 
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * tests the handling of Firewalled alternate locations on the uploader side.
@@ -412,13 +412,14 @@ public class PushLocTest extends BaseTestCase {
 		
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
 		
 		
 		fd.add(direct);
@@ -475,13 +476,14 @@ public class PushLocTest extends BaseTestCase {
 		
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
 		
 		
 		fd.add(direct);
@@ -555,13 +557,14 @@ public class PushLocTest extends BaseTestCase {
 		
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
 		
 		
 		fd.add(direct);
@@ -640,13 +643,14 @@ public class PushLocTest extends BaseTestCase {
 		
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
 		
 		
 		
@@ -749,7 +753,7 @@ public class PushLocTest extends BaseTestCase {
                 // continuations.
                 AlternateLocation al = 
                 AlternateLocation.create(st.nextToken().trim(),
-                                         alc.getSHA1Urn());
+                                         alc.getSHA1Urn(),true);
                 
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {

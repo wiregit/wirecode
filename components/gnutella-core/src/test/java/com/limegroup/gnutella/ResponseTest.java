@@ -12,8 +12,8 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class tests the Response class.

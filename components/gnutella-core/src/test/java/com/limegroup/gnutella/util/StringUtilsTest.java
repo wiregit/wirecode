@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 /**
  * Tests StringUtils.

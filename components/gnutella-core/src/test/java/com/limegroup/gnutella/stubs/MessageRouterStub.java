@@ -9,8 +9,8 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.GUID;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
+import java.util.LinkedList;
+import java.util.List;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {

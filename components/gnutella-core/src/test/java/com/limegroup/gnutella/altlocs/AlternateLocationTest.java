@@ -10,7 +10,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import com.limegroup.gnutella.messages.*;
 
@@ -326,7 +326,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	    // First test with old-style locs.
 		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 			AlternateLocation al = AlternateLocation.create(
-			    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+			    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn,true);
 		}
 		
 		// Now make sure that the URN-mismatch works
@@ -334,7 +334,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 			try {
 				AlternateLocation al = AlternateLocation.create(
-				    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+				    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn,true);
                 fail("IOException expected");
 			} catch(IOException expected) {}
 		}
@@ -342,7 +342,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		// Now try the new-style values
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        DirectAltLoc al = (DirectAltLoc) AlternateLocation.create(ip + ":50", urn);
+	        DirectAltLoc al = (DirectAltLoc) AlternateLocation.create(ip + ":50", urn,true);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(50, ep.getPort());
@@ -352,7 +352,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         // Try without a port.
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        DirectAltLoc al = (DirectAltLoc)AlternateLocation.create(ip, urn);
+	        DirectAltLoc al = (DirectAltLoc)AlternateLocation.create(ip, urn,true);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(6346, ep.getPort());
@@ -364,23 +364,23 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		    try {
 	            String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100)+".1";
 	            AlternateLocation al =
-	                AlternateLocation.create(ip + ":50", urn);
+	                AlternateLocation.create(ip + ":50", urn,true);
                 fail("IOException expected");
             } catch(IOException expected) {}
         }
         
         try {
-            AlternateLocation.create("0.1.2.3", urn);
+            AlternateLocation.create("0.1.2.3", urn,true);
             fail("IOException expected");
         } catch(IllegalArgumentException expected) {}
 
         try {
-            AlternateLocation.create("1.2.3.4/25", urn);
+            AlternateLocation.create("1.2.3.4/25", urn,true);
             fail("IOException expected");
         } catch(IOException expected) {}
 
         try {
-            AlternateLocation.create("limewire.org", urn);
+            AlternateLocation.create("limewire.org", urn,true);
             fail("IOException expected");
         } catch(IOException expected) {}
         
@@ -389,7 +389,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         String httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
         
         PushAltLoc pal = (PushAltLoc)AlternateLocation.create(
-        		httpString,urn);
+        		httpString,urn,true);
         
         assertTrue(Arrays.equals(
         		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
@@ -397,7 +397,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         
         
         //try some valid push proxies, some invalid ones
-        pal = (PushAltLoc) AlternateLocation.create(httpString+";0.1.2.3:100000;1.2.3.6:17",urn);
+        clientGUID = new GUID(GUID.makeGuid());
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";0.1.2.3:100000;1.2.3.6:17",urn,true);
     	
         assertTrue(Arrays.equals(
         		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
@@ -410,39 +411,40 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         assertNotEquals(-1,pal.httpStringValue().indexOf("1.2.3.5:16"));
         
         //try some valid push proxies and an empty one
-        pal = (PushAltLoc) AlternateLocation.create(httpString+";;1.2.3.6:17",urn);
+        clientGUID = new GUID(GUID.makeGuid());
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";;1.2.3.6:17",urn,true);
     	
         assertTrue(Arrays.equals(
         		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
         assertEquals(3,pal.getPushAddress().getProxies().size());
         
         
-        
         //try an altloc with no push proxies
+        clientGUID = new GUID(GUID.makeGuid());
         try{
-        	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn);
+        	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn,true);
         	fail("created a push altloc without any proxies");
         }catch(IOException expected ){}
         
         //try some invalid ones
         try {
-        	pal = (PushAltLoc) AlternateLocation.create("asdf2345dgalshlh",urn);
+        	pal = (PushAltLoc) AlternateLocation.create("asdf2345dgalshlh",urn,true);
         	fail("created altloc from garbage");
         }catch(IOException expected) {}
         
         try {
-        	pal = (PushAltLoc) AlternateLocation.create("",urn);
+        	pal = (PushAltLoc) AlternateLocation.create("",urn,true);
         	fail("created altloc from empty string");
         }catch(IOException expected) {}
         
         try {
-        	pal = (PushAltLoc) AlternateLocation.create(null,urn);
+        	pal = (PushAltLoc) AlternateLocation.create(null,urn,true);
         	fail("created altloc from null string");
         }catch(IOException expected) {}
         
         try {
         	pal = (PushAltLoc) AlternateLocation.create(
-        			clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn);
+        			clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn,true);
         	fail("created altloc from invalid address string");
         }catch(IOException expected) {}
         

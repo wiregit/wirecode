@@ -12,8 +12,8 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import java.util.Iterator;
+import java.util.Set;
 
 public class HostCatcherTest extends BaseTestCase {  
     private HostCatcher hc;

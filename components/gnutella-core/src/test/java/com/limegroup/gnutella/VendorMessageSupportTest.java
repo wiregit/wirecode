@@ -25,8 +25,8 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
+import java.util.Arrays;
+import java.util.Iterator;
 
 
 public class VendorMessageSupportTest extends BaseTestCase {

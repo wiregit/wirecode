@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Set;
+import java.util.Arrays;
+import java.util.Set;
 
 public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
     public GGEPTest(String name) {

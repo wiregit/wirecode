@@ -37,11 +37,11 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Random;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Map;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  Tests that an Ultrapeer correctly proxies for a Leaf.

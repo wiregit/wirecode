@@ -6,7 +6,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.

@@ -27,11 +27,11 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This test makes sure that LimeWire does the following things:

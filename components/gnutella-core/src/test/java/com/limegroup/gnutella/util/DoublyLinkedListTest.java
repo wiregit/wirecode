@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.DoublyLinkedList.ListElement;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 /**
  * Unit tests for DoublyLinkedList

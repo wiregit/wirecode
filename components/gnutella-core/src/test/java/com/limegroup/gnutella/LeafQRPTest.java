@@ -30,7 +30,7 @@ import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

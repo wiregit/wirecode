@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 
-import com.sun.java.util.collections.HashMap;
+import java.util.HashMap;
 
 import junit.framework.Test;
 

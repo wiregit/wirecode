@@ -12,7 +12,7 @@ import com.limegroup.gnutella.routing.*;
 
 import junit.framework.*;
 import java.util.Properties;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 

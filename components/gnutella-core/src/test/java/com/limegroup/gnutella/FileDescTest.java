@@ -9,10 +9,10 @@ import junit.framework.Test;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
@@ -161,17 +161,18 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		Set urns = FileDesc.calculateAndCacheURN(file);
 		FileDesc fd = new FileDesc(file, urns, 0);
 		URN sha1 = fd.getSHA1Urn();
-		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID1 = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
 
 		//create some direct altlocs
-		AlternateLocation d1 = AlternateLocation.create("1.1.1.1:1",sha1);
-		AlternateLocation d2 = AlternateLocation.create("2.2.2.2:2",sha1);
+		AlternateLocation d1 = AlternateLocation.create("1.1.1.1:1",sha1,true);
+		AlternateLocation d2 = AlternateLocation.create("2.2.2.2:2",sha1,true);
 		
 		//and some push ones.
 		AlternateLocation p1 = 
-			AlternateLocation.create(clientGUID.toHexString()+";1.1.1.1:1",sha1);
+			AlternateLocation.create(clientGUID1.toHexString()+";1.1.1.1:1",sha1,true);
 		AlternateLocation p2 = 
-			AlternateLocation.create(clientGUID.toHexString()+";2.2.2.2:2",sha1);
+			AlternateLocation.create(clientGUID2.toHexString()+";2.2.2.2:2",sha1,true);
 		
 		assertEquals(0,fd.getAltLocsSize());
 		
