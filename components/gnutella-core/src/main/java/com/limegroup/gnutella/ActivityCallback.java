@@ -79,15 +79,22 @@ public interface ActivityCallback
     public void error(int errorCode);
 
     /**
-     * @requires errorCode is a number matching up with one of the
-     * predefined error messages, e.g., "15" to show GUIStyles.E_15.
-     *
-     * @effects displays one the predefined error message
-     *  corresponding to errorCode.  If t!=null, also displays the
-     *  stack trace of t; in this case, the associated error message
-     *  should explain the stack trace to the user.
+	 * Displays an error message to the user.
+	 *
+	 * @param errorCode  The int specifying the error message to diaplay
+	 *
+	 * @param t          The <code>Throwable</code> instance containing the
+	 *                   stack trace to display
      */
     public void error(int errorCode, Throwable t);
+
+    /**
+	 * Displays an error stack trace to the user with a generic message.
+	 *
+	 * @param t  The <code>Throwable</code> instance containing the
+	 *           stack trace to display
+     */
+    public void error(Throwable t);
 
 
     /** error on port */
