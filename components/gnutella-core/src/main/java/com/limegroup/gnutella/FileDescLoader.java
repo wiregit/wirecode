@@ -48,7 +48,9 @@ public final class FileDescLoader implements Runnable {
 	public FileDesc createFileDesc(File file, int fileIndex) {
 		Collection urns = UrnCache.instance().getUrns(file);
 		FileDesc fileDesc = new FileDesc(file, fileIndex, urns);
-		this.loadFileDesc(fileDesc);
+		if(!fileDesc.hasSHA1Urn()) {
+			loadFileDesc(fileDesc);
+		}
 		return fileDesc;
 	}
 
@@ -64,7 +66,7 @@ public final class FileDescLoader implements Runnable {
 	public void loadFileDesc(FileDesc fileDesc) {
 		
 		// if the FileDesc has an up to date urn index, don't recalculate
-		if(fileDesc.shouldCalculateUrns()) {
+		if(fileDesc.hasSHA1Urn()) {
 			return;
 		}
 		// put the file on the queue for processing
