@@ -202,6 +202,13 @@ public abstract class MessageRouter {
     private final int CANDIDATE_PROPAGATION_INTERVAL=15*60*1000; // 15 minutes
     
     /**
+     * the endpoint of either the requestor or the candidate for promotion
+     * LOCKING: obtain _promotionLock
+     */
+    private Endpoint _promotionPartner;
+    private Object _promotionLock = new Object();
+    
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -539,6 +546,12 @@ public abstract class MessageRouter {
         	if(RECORD_STATS)
         		;
         	//handleUPListVendorMessage((UPListVendorMessage)msg, handler);
+        }
+        else if (msg instanceof PromotionACKVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	handlePromotionACKVendorMessage(
+        			(PromotionACKVendorMessage)msg,handler,datagram);
         }
         notifyMessageListener(msg);
     }
@@ -2774,15 +2787,16 @@ public abstract class MessageRouter {
      */
     private void initiatePromotion(PromotionRequestVendorMessage msg) {
     	
-    	//register a new ACK handler 
-    	GUID guid = new GUID(msg.getGUID());
-    	registerMessageListener(
-    			guid, 
-				new PromotionACKer(
-    					msg.getRequestor().getAddress(),msg.getRequestor().getPort(),true));
+    	//set the promotion partner
+    	synchronized(_promotionLock) {
+    		_promotionPartner = new Endpoint (
+    				msg.getRequestor().getAddress(),
+					msg.getRequestor().getPort());
+    	}
     	
     	//ping the original requestor
-    	LimeACKVendorMessage ping = new LimeACKVendorMessage(guid,0);
+    	System.out.println("pinging the original requestor");
+    	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
     	UDPService.instance().send( ping,
     		msg.getRequestor().getInetAddress(),msg.getRequestor().getPort());
     }
@@ -2851,6 +2865,45 @@ public abstract class MessageRouter {
 				//sending failed.  not much we can do.
 			}
 		
+    }
+    
+    /**
+     * handles an ACK for a promotion request message.
+     * 
+     */
+    private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
+    			ReplyHandler handler, DatagramPacket datagram) {
+    	
+    	//first see if anyone is indeed a promotion partner
+    	Endpoint partner = null;
+    	synchronized(_promotionLock) {
+    		if (_promotionPartner == null)
+    			return;
+    		
+    		//check if we received the ACK from the right person
+    		if (!datagram.getAddress().equals(_promotionPartner.getInetAddress()) ||
+    				datagram.getPort() != _promotionPartner.getPort())
+					return;
+    		
+    		//set the promotion partner to null if that's the case
+    		partner = _promotionPartner;
+    		_promotionPartner = null;
+    	}
+    	
+    	//we know we have received a proper ACK.  Proceed as appropriate.
+    	
+    	//if we are a leaf, start the promotion process
+    	if (!RouterService.isSupernode()) {
+    		Thread promoter = new ManagedThread(
+    				new Promoter(datagram.getAddress().getHostAddress(),datagram.getPort()));
+    		promoter.setDaemon(true);
+    		promoter.start();
+    	} 
+    	else {
+    		//we are the originally requesting UP, ACK back.
+    		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
+    		UDPService.instance().send(pong, datagram.getAddress(),datagram.getPort());
+    	}
     }
 
 
