@@ -384,7 +384,6 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        //_router.countMessage();
 		
         return m;
     }
@@ -405,7 +404,6 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        //_router.countMessage();
         return m;
     }
 
@@ -432,7 +430,6 @@ public class ManagedConnection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-        //_router.countMessage();
         int priority=calculatePriority(m);        
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
