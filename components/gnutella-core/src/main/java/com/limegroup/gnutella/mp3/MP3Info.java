@@ -199,6 +199,8 @@ public final class MP3Info {
 
 		try {
 			fis = new FileInputStream(_file);
+			if( c < -1 )
+			    throw new IOException("early EOF, empty file?");			
 			
 			//initially check the first few bytes
 			c = fis.read(buf, 0, buf.length); 
