@@ -1,15 +1,3 @@
-/**
- * file: VersionUpdate.java
- * auth: rsoule
- * desc: This class will establish an HTTP connection to the 
- *       limewire server, and look for a file called "Version".
- *       That file will contain the current version number, and
- *       if the user's version is older than the version in the 
- *       file, it will update (or ask the user if they want to
- *       update).
- */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-
 package com.limegroup.gnutella;
 
 import java.util.*;
@@ -21,10 +9,22 @@ import com.limegroup.gnutella.gui.Main;
 import com.limegroup.gnutella.gui.Utilities;
 import com.limegroup.gnutella.gui.UpdateHandler;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.util.URLOpener;
 
+/**
+ * Checks if a newer version of LimeWire is available for download,
+ * and downloads the JAR file if prompted by the user.<p>
+ *
+ * This class will establish an HTTP connection to the limewire server, and look
+ * for a file called "Version".  That file will contain the current version
+ * number, and if the user's version is older than the version in the file, it
+ * will update (or ask the user if they want to update).  
+ */
 public class VersionUpdate
 {
 	private static final VersionUpdate _updater = new VersionUpdate();	
+    /** The max time to wait when looking for a new version, in msecs. */
+    private static final int CONNECT_TIMEOUT=1500;
 	private String _latest;
 	private String _newVersion;
 	private String _currentDirectory;
@@ -32,15 +32,12 @@ public class VersionUpdate
 	private int    _updateSize;
 	private UpdateHandler _updateHandler;
 	private SettingsManager _settings;
-	private Timer _updateTimer;
-	private boolean _timedOut;
 
 	// private constructor for singleton
 	private VersionUpdate() 
 	{
 		_settings = SettingsManager.instance();
 		_latest = _settings.getLastVersionChecked();
-		_timedOut = false;
 	}
 
 	// static method for getting an instance of VersionUpdate
@@ -49,13 +46,12 @@ public class VersionUpdate
 		return _updater;
 	}
 		
-	/** check for available updates and prompt the user
-	 *  if we find an update available. */
-	public void check() throws UpdateTimedOutException 
+	/** Checks for available updates.  If one is found, prompts the user
+	 *  if they'd like to update.  If they say yes, actually does the update.
+     *  If it is successful, exits the JVM via System.exit(0).  Otherwise
+     *  just returns. */
+	public void checkPromptAndUpdate() 
 	{
-		_updateTimer = new Timer(1500, new UpdateTimerListener());		
-		_updateTimer.setRepeats(false);
-		_updateTimer.start();
 		_currentDirectory = System.getProperty("user.dir");
 		if(!_currentDirectory.endsWith(File.separator))
 			_currentDirectory += File.separator;	
@@ -82,8 +78,7 @@ public class VersionUpdate
 			// the file with the version number in it.
 			URL url = new URL("http", "www.limewire.com", 
 							  "/version.txt");
-			URLConnection conn = url.openConnection();
-			conn.connect();
+			URLConnection conn = (new URLOpener(url)).connect(CONNECT_TIMEOUT);
             //The try-catch below works around JDK bug 4091706.
 			InputStream input = conn.getInputStream();
 			br = new ByteReader(input);
@@ -92,49 +87,46 @@ public class VersionUpdate
 		} catch(IOException ioe) {
 			return;
 		}
-		_updateTimer.stop();
-		if(_timedOut) {
-			throw new UpdateTimedOutException();
-		}
-		else {
-			// read in the version number
-			while (true) {
-				String str = " ";
-				try {
-					str = br.readLine();
-					// this should get us the version number
-					if (str != null) {
-						latest = str;
-					}
-				} catch (Exception e) {
-					br.close();
-					return;
-				}			
-				//EOF?
-				if (str==null || str.equals(""))
-					break;
-			}
 
-			String current = _settings.getCurrentVersion(); 
-			int version = compare(current, latest);
+
+        // read in the version number
+        while (true) {
+            String str = " ";
+            try {
+                str = br.readLine();
+                // this should get us the version number
+                if (str != null) {
+                    latest = str;
+                }
+            } catch (Exception e) {
+                br.close();
+                return;
+            }			
+            //EOF?
+            if (str==null || str.equals(""))
+                break;
+        }
+
+        String current = _settings.getCurrentVersion(); 
+        int version = compare(current, latest);
 			
-			if (version == -1) {
-				// the current version is not the newest
+        if (version == -1) {
+            // the current version is not the newest
 				
-				String lastChecked;
-				lastChecked = _settings.getLastVersionChecked();
-				checkAgain = _settings.getCheckAgain();
+            String lastChecked;
+            lastChecked = _settings.getLastVersionChecked();
+            checkAgain = _settings.getCheckAgain();
 				
-				if( (compare(lastChecked, latest) == 0) ) {
-					// dont ask 
-				}
-				else {
-					// otherwise ask...
-					_newVersion = latest;
-					askUpdate(current, latest);
-				}
-			}
-		}
+            if( (compare(lastChecked, latest) == 0) ) {
+                // dont ask 
+            }
+            else {
+                // otherwise ask...
+                _newVersion = latest;
+                promptAndUpdate(current, latest);
+            }
+        }
+
 		br.close();
 	}
 
@@ -246,22 +238,30 @@ public class VersionUpdate
 
 	} 
 
-	/** send a message to the gui to ask the user if they
-	 *  want to update to the latest version.  if they do, 
-	 *  return true. */
-	public void askUpdate(String oldV, String newV) 
+	/** If the CHECK_AGAIN property is false, returns.  Otherwise asks the user
+     *  if they want to update from version oldV to newV.  If the user chooses
+     *  yes, does the update, notifying the GUI of progress.  */
+	private void promptAndUpdate(String oldV, String newV) 
 	{		
 		if (!_settings.getCheckAgain())
 			return;
 		_updateHandler = new UpdateHandler();
-		_updateHandler.showUpdatePrompt();
+		boolean update=_updateHandler.showUpdatePrompt();
+        if (update) {
+            try {
+                update();
+            } catch (CantConnectException e) {
+                _updateHandler.showCouldntUpdate();
+            }
+        }
 	}
 
-	/** this method attempts to perform an update -- 
-	 *  getting the new jar file from the server,
-	 *  replacing it, and making the call to change
-	 *  the launch anywhere "LAX" file. */
-	public void update() throws CantConnectException
+	/** Attempts to perform an update -- getting the new jar file from the
+	 *  server, replacing it, and making the call to change the launch anywhere
+	 *  "LAX" file.  If the update is succesful, terminates the JVM.  Throws
+	 *  CantConnectException if the update failed.  Note that this method
+     *  should never return without an exception.  */
+	private void update() throws CantConnectException
 	{			
 		StringBuffer newFileBuf = new StringBuffer("LimeWire");
 		StringTokenizer fileTok = new StringTokenizer(_newVersion,".");
@@ -284,8 +284,7 @@ public class VersionUpdate
 			String pathName = "/"+newFileName;
 			URL url = new URL("http", "www.limewire.com", 
 							  pathName);
-			URLConnection conn = url.openConnection();
-			conn.connect();
+			URLConnection conn = (new URLOpener(url)).connect(CONNECT_TIMEOUT);
 			_updateSize = conn.getContentLength();
 			if(_updateSize == -1) {
 				cancelUpdate("finding the new file on the server.");
@@ -331,8 +330,8 @@ public class VersionUpdate
 				}
 			}
 			
-		} catch(MalformedURLException mue) {
 		} catch(IOException ioe) {
+            throw new CantConnectException();
 		}
 	}
 
@@ -446,15 +445,5 @@ public class VersionUpdate
 	private void resetSettings() {
 		_settings.setDeleteOldJAR(false);
 		_settings.setOldJARName("");
-	}
-
-	/** private timer class that tells the program to continue
-	 *  loading if the update has timed out. */
-	private class UpdateTimerListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			_timedOut = true;
-			Main.initialize();
-			resetSettings();
-		}	  	  
 	}
 }
