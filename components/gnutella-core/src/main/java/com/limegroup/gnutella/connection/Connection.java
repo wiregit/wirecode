@@ -585,16 +585,16 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // exception was thrown, the connection will be removed anyway.
         RESPONSE_HEADERS = null;
         
+        // create the output queues for messages
+        _messageWriter = new MessageWriterProxy(this); 
+        _messageReader = new MessageReaderProxy(this);
+        
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
             _socket.getChannel().configureBlocking(false);
             NIODispatcher.instance().addReader(this);     
         }
-        // create the output queues for messages
-        _messageWriter = new MessageWriterProxy(this); 
-        _messageReader = new MessageReaderProxy(this);
          
-        //NIODispatcher.instance().addReader(this);
         // check for updates from this host  
         UpdateManager.instance().checkAndUpdate(this);          
     }
