@@ -222,4 +222,138 @@ public final class HandshakeResponseTest extends BaseTestCase {
             return ultrapeers.iterator();            
         }
     }
+
+    /**
+     * Test to make sure that Ultrapeer headers are created correctly.
+     */
+    public void testUltrapeerHeaders() {
+        HandshakeResponse hr = 
+            HandshakeResponse.createRejectResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
+
+        hr = HandshakeResponse.createAcceptResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
+    }
+
+    
+    /**
+     * Test to make sure that leaf headers are created correctly.
+     */
+    public void testLeafHeaders() {
+        HandshakeResponse hr = 
+            HandshakeResponse.createRejectResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
+
+        hr = HandshakeResponse.createAcceptResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
+    }
+
+    /**
+     * Tests that the give <tt>HandshakeResponse</tt> has all of the headers
+     * that it should as a leaf.
+     *
+     * @param hr the headers to test
+     */
+    private static void runLeafHeadersTest(HandshakeResponse hr) {
+        runCommonHeadersTest(hr);
+        assertTrue("should not be an Ultrapeer connection", 
+                   !hr.isUltrapeer());
+        assertTrue("should be a leaf connection", hr.isLeaf());
+        assertTrue("should not be a GUESS Ultrapeer", !hr.isGUESSUltrapeer()); 
+    }
+
+    /**
+     * Tests that the give <tt>HandshakeResponse</tt> has all of the headers
+     * that it should as an Ultrapeer.
+     *
+     * @param hr the headers to test
+     */
+    private static void runUltrapeerHeadersTest(HandshakeResponse hr) {
+        runCommonHeadersTest(hr);
+        assertTrue("should be an Ultrapeer connection", hr.isUltrapeer());
+        assertTrue("should not be a leaf connection", !hr.isLeaf());
+        assertTrue("should be a GUESS Ultrapeer", hr.isGUESSUltrapeer());        
+    }
+    
+    /**
+     * Tests to make sure that all of the common headers are present, with the
+     * expected values.  This tests headers that are sent by both leaves and
+     * Ultrapeers.  If new common headers are added, they should be added to 
+     * this list.
+     *
+     * @param hr the <tt>HandshakeResponse</tt> containing the headers to
+     *  check
+     */
+    private static void runCommonHeadersTest(HandshakeResponse hr) {
+        assertTrue("query routing should be enabled", hr.isQueryRoutingEnabled());
+        assertTrue("Ultrapeer query routing should be enabled",
+                   hr.isUltrapeerQueryRoutingConnection());
+        assertEquals("unexpected user agent", 
+                     CommonUtils.getHttpServer(), hr.getUserAgent());
+
+        assertTrue("should be a high-degree connection", hr.isHighDegreeConnection());
+        assertEquals("unexpected max ttl", 4, hr.getMaxTTL());
+        assertEquals("unexpected degree", 15, hr.getNumIntraUltrapeerConnections());
+        assertTrue("should be GUESS capable", hr.isGUESSCapable());
+        assertTrue("should support GGEP", hr.supportsGGEP());
+        assertTrue("should support vendor messages", hr.supportsVendorMessages());
+        assertTrue("should use dynamic querying", hr.usesDynamicQuerying());
+    }
+
+    /**
+     * Tests to make sure that the ultrapeer needed header is interpretted
+     * correctly.
+     */
+    public void testUltrapeerNeeded() {
+        Properties headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
+        HandshakeResponse hr = HandshakeResponse.createAcceptResponse(headers);
+        assertTrue("should need an Ultrapeer", hr.ultrapeerNeeded());
+
+        headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
+        hr = HandshakeResponse.createAcceptResponse(headers);
+        assertTrue("should not need an Ultrapeer", !hr.ultrapeerNeeded());
+
+        hr = HandshakeResponse.createAcceptResponse(new Properties());
+        assertTrue("should not need an Ultrapeer", !hr.ultrapeerNeeded());
+    }
+
+    /**
+     * Tests the header utility method that checks if a the version for a 
+     * given header is greater than or equal to specific values.
+     */
+    public void testIsVersionOrHigher() throws Exception {
+        Properties headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, "0.1");
+
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "isVersionOrHigher",
+                                         new Class[]{Properties.class,
+                                                     String.class, 
+                                                     Float.TYPE});
+
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = HeaderNames.X_ULTRAPEER_QUERY_ROUTING;
+
+        
+        params[2] = new Float(0.1);
+        Boolean correctVersion = (Boolean)m.invoke(null, params); 
+        assertTrue("should have been the correct version", 
+                   correctVersion.booleanValue());
+
+        params[2] = new Float(0.2);
+        correctVersion = (Boolean)m.invoke(null, params); 
+        assertFalse("should not have been the correct version", 
+                    correctVersion.booleanValue());
+
+        params[2] = new Float(0.3);
+        correctVersion = (Boolean)m.invoke(null, params); 
+        assertFalse("should not have been the correct version", 
+                    correctVersion.booleanValue());
+    }
+
+
 }
