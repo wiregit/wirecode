@@ -25,7 +25,7 @@ public class SettingsManager implements SettingsInterface
 
 	/** lastVersionChecked is the most recent version number checked.  Also,
 	 * there is a boolean for don't check again. */
-    private static final String CURRENT_VERSION="0.4e";
+    private static final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
 	private String lastVersionChecked_;
 	private boolean checkAgain_;
 

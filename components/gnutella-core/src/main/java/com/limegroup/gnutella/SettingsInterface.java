@@ -298,7 +298,7 @@ public interface SettingsInterface
 	
 	// RJS - ADDING 3 NEW PROPERTIES
 	
-    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.4a";
+    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.5";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
 
     public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
