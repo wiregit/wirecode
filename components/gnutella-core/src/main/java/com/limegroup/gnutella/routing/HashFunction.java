@@ -9,9 +9,10 @@ import com.limegroup.gnutella.FileManager;
  * not is it secure in any sense.
  */
 public class HashFunction {
-    static final double A=(Math.sqrt(5.0)-1.0)/2.0;
-    static final long TWO_31=0x80000000l;
-    static final int A_INT=(int)(A*TWO_31);
+    private static final double A=(Math.sqrt(5.0)-1.0)/2.0;
+    private static final long TWO_31=0x80000000l;
+    private static final int A_INT=(int)(A*TWO_31);
+    
     
     /**
      * Returns the n-bit hash of x, where n="bits".  That is, the returned value

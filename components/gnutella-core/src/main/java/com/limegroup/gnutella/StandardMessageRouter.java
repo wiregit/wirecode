@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
+import java.io.*;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 
 public class StandardMessageRouter
     extends MessageRouter
@@ -209,6 +210,12 @@ public class StandardMessageRouter
 
     }
 
+    /** @see MessageRouter.addQueryRoutingEntries */
+    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
+        File[] files = FileManager.instance().getSharedFiles(null);
+        for (int i=0; i<files.length; i++)
+            qrt.add(files[i].getAbsolutePath());
+    }
 
     /**
      * Handles the QueryReply by starting applying the personal filter and then

@@ -364,7 +364,8 @@ public class ConnectionManager {
      * Sends the initial ping request to a newly initialized connection.  The ttl
      * of the PingRequest will be 1 if we don't need any connections and there
      * is enough hosts in the reserve cache (HostCatcher).  Otherwise, the ttl
-     * of the PingRequest = max ttl for refreshing the PingReplyCache.
+     * of the PingRequest = max ttl for refreshing the PingReplyCache.  Also sends
+     * any other messages necessary, e.g., query route table updates.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
@@ -374,6 +375,7 @@ public class ConnectionManager {
         else
             pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
         connection.send(pr);
+        _router.forwardQueryRouteTables();
     }
 
     /**

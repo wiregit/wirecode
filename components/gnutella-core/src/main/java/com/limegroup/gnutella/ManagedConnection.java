@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.routing.RouteTableMessage;
 
 /**
  * A Connection managed by a connection managed.  Includes a loopForMessages
@@ -385,6 +386,8 @@ public class ManagedConnection
                 _router.handleQueryReply((QueryReply)m, this);
             else if (m instanceof PushRequest)
                 _router.handlePushRequest((PushRequest)m, this);
+            else if (m instanceof RouteTableMessage)
+                _router.handleRouteTableMessage((RouteTableMessage)m, this);
         }
     }
 
