@@ -5,7 +5,6 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
 import java.net.*;
 
 /**
