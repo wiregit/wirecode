@@ -375,6 +375,73 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
     }
 
 
+    // Change the type of 'what is' query and make sure it doesn't get to leaf
+    public void testUnsupportedQueryForwardedCorrectly() throws Exception {
+        drainAll();
+
+        // send the query
+        final int actualValue = QueryRequest.WHAT_IS_NEW_GGEP_VALUE;
+        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = 2;
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        ULTRAPEER_2.send(whatIsNewQuery);
+        ULTRAPEER_2.flush();
+
+        // give time to process
+        Thread.sleep(4000);
+
+        // the Leaf should NOT get this query
+        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+                                                            QueryRequest.class);
+        assertNull(rQuery);
+        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = actualValue;
+
+        // Ultrapeer 1 should get it though
+        rQuery = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+                                                         QueryRequest.class);
+        assertNotNull(rQuery);
+        assertEquals(new GUID(rQuery.getGUID()), 
+                     new GUID(whatIsNewQuery.getGUID()));
+    }
+
+
+    // Change the type of 'what is' query and make sure it doesn't get to leaf.
+    // the query is last hop so make sure it gets to the Ultrapeer
+    public void testLastHopUnsupportedQueryForwardedCorrectly() 
+        throws Exception {
+        drainAll();
+
+        // send the query
+        final int actualValue = QueryRequest.WHAT_IS_NEW_GGEP_VALUE;
+        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = 2;
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        ULTRAPEER_2.send(whatIsNewQuery);
+        ULTRAPEER_2.flush();
+
+        // give time to process
+        Thread.sleep(4000);
+
+        // the Leaf should NOT get this query
+        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+                                                            QueryRequest.class);
+        assertNull(rQuery);
+        QueryRequest.WHAT_IS_NEW_GGEP_VALUE = actualValue;
+
+        // Ultrapeer 1 should get it though
+        rQuery = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+                                                         QueryRequest.class);
+        assertNotNull(rQuery);
+        assertEquals(new GUID(rQuery.getGUID()), 
+                     new GUID(whatIsNewQuery.getGUID()));
+    }
+
     // ------------------------------------------------------
 
 }

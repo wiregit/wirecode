@@ -33,6 +33,8 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
 
     public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNew";
+    // kept public, non-final for testing sake
+    public static int WHAT_IS_NEW_GGEP_VALUE = 1;
 
     /**
      * The payload for the query -- includes the query string, the
@@ -863,7 +865,7 @@ public class QueryRequest extends Message implements Serializable{
 
             // add the What Is header
             if (isWhatIsNewRequest)
-                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, 1);
+                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, WHAT_IS_NEW_GGEP_VALUE);
 
             // if there are GGEP headers, write them out...
             if ((this.QUERY_KEY != null) || isWhatIsNewRequest) {
