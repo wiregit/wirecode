@@ -457,7 +457,7 @@ public final class SettingsManager {
     private volatile String   _clientID;
     private volatile File     _saveDirectory;
     private volatile File     _incompleteDirectory;
-    private volatile File[]   _directories;
+    private volatile File[]   _directories = new File[0];
     private volatile int      _incompletePurgeTime;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
