@@ -25,9 +25,8 @@ import com.limegroup.gnutella.Assert;
 * <li><b>This class is not thread safe.</b>  Synchronize externally if needed.
 * </ul>
 * 
-* Note that some methods of this are unimplemented.  Also note that this does
-* not extend HashMap, unlike ForgetfulHashMap; ForgetfulHashMap does, but it 
-* never should have.
+* Note that <b>some methods of this are unimplemented</b>.  Also note that this
+* implements Map but does not extend HashMap, unlike ForgetfulHashMap.
 *  
 * @author Anurag Singla -- initial version
 * @author Christopher Rohrs -- cleaned up and added unit tests 
@@ -73,6 +72,46 @@ public class FixedsizeForgetfulHashMap implements Map
      * current number of elements in the underlying hashMap
      */
     private int currentSize;
+
+
+    /**
+     * class to store the value to be stored in the hashMap
+     * It keeps both the actual value (that user wanted to insert), and the 
+     * entry in the removeList that corresponds to this mapping.
+     * This information is required so that when we overwrite the mapping (same key,
+     * but different value), we should update the removeList entries accordingly.
+     */
+    private static class ValueElement
+    {
+        /** The element in the remove list that corresponds to this mapping */
+        DoublyLinkedList.ListElement listElement;    
+        /** The actual value (that user wanted to store in the hash map) */
+        Object value;
+    
+        /**
+         * Creates a new instance with specified values
+         * @param value The actual value (that user wanted to store in the hash map)
+         * @param listElement The element in the remove list that corresponds 
+         * to this mapping
+         */
+        public ValueElement(Object value,
+                            DoublyLinkedList.ListElement listElement) {
+            //update the member fields
+            this.value = value;
+            this.listElement = listElement;
+        }
+    
+        /** Returns the element in the remove list that corresponds to this
+         *  mapping thats stored in this instance */
+        public DoublyLinkedList.ListElement getListElement() {
+            return listElement;
+        }
+    
+        /** Returns the value stored */
+        public Object getValue() {
+            return value;
+        }
+    }
 
     /**
      * Create a new instance that holds only the last "size" entries.
@@ -176,7 +215,7 @@ public class FixedsizeForgetfulHashMap implements Map
         {
             //get an element from the remove list to remove
             DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
-        
+
             //remove it from the hashMap
             map.remove(toRemove.getKey());
         
@@ -216,9 +255,7 @@ public class FixedsizeForgetfulHashMap implements Map
      *
      * @param key key whose mapping is to be removed from the map.
      * @return previous value associated with specified key, or <tt>null</tt>
-     *	       if there was no mapping for key.  A <tt>null</tt> return can
-     *	       also indicate that the map previously associated <tt>null</tt>
-     *	       with the specified key.
+     *	       if there was no mapping for key.
      */
     public Object remove(Object key) 
     {
@@ -274,9 +311,6 @@ public class FixedsizeForgetfulHashMap implements Map
         return map.isEmpty();
     }
 
-    public Set keySet() {
-        return map.keySet();
-    }
 
     public int size() {
         return map.size();
@@ -284,78 +318,61 @@ public class FixedsizeForgetfulHashMap implements Map
 
     /////////////////////////// Unimplemented Map Methods //////////////
 
-    /** <b>Not implemented; throws an exception</b> */
-    public boolean containsValue(Object value) {
-        Assert.that(false, "Not implemented");
-        return false;
+    /** <b>Partially implemented.</b>  
+     *  Only keySet().iterator() is well defined. */
+    public Set keySet() {
+        return new KeySet(map.keySet());
+    }    
+    class KeySet extends AbstractSet {
+        Set real;
+        KeySet(Set real) {
+            this.real=real;
+        }
+        public Iterator iterator() {
+            return new KeyIterator(real.iterator());
+        }        
+        public int size() {
+            return FixedsizeForgetfulHashMap.this.size();
+        }
+    }
+    class KeyIterator implements Iterator {
+        Iterator real;
+        Object lastYielded=null;
+        KeyIterator(Iterator real) {
+            this.real=real;
+        }
+        public Object next() {
+            Object ret=real.next();
+            lastYielded=ret;
+            return ret;
+        }
+        public boolean hasNext() {
+            return real.hasNext();
+        }
+        public void remove() {
+            if (lastYielded==null)
+                return;
+            real.remove();
+            //Cleanup entry in removeList.  That's the whole point of this mess!
+            FixedsizeForgetfulHashMap.this.remove(lastYielded); 
+        }
     }
 
-    /** <b>Not implemented; throws an exception</b> */
-    public Set entrySet() {
-        Assert.that(false, "Not implemented");
-        return null;
-    }
-
-    /** <b>Not implemented; throws an exception</b> */
+    /** <b>Not implemented; behavior undefined</b> */
     public Collection values() {
-       Assert.that(false, "Not implemented");
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    /** <b>Not implemented; behavior undefined</b> */
+    public boolean containsValue(Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** <b>Not implemented; behavior undefined</b> */
+    public Set entrySet() {
+        throw new UnsupportedOperationException();
     }
  
-
-    /**
-     * class to store the value to be stored in the hashMap
-     * It keeps both the actual value (that user wanted to insert), and the 
-     * entry in the removeList that corresponds to this mapping.
-     * This information is required so that when we overwrite the mapping (same key,
-     * but different value), we should update the removeList entries accordingly.
-     */
-    private static class ValueElement
-    {
-        /**
-         * The element in the remove list that corresponds to this mapping
-         */
-        DoublyLinkedList.ListElement listElement;
-    
-        /**
-         * The actual value (that user wanted to store in the hash map)
-         */
-        Object value;
-    
-        /**
-         * Creates a new instance with specified values
-         * @param value The actual value (that user wanted to store in the hash map)
-         * @param listElement The element in the remove list that corresponds 
-         * to this mapping
-         */
-        public ValueElement(Object value, DoublyLinkedList.ListElement listElement)
-        {
-            //update the member fields
-            this.value = value;
-            this.listElement = listElement;
-        }
-    
-        /**
-         * Returns the element in the remove list that corresponds to this mapping
-         * thats stored in this instance
-         * @return the element in the remove list that corresponds to this mapping
-         * thats stored in this instance
-         */
-        public DoublyLinkedList.ListElement getListElement()
-        {
-            return listElement;
-        }
-    
-        /**
-         * Returns the value stored
-         * @return the value stored
-         */
-        public Object getValue()
-        {
-            return value;
-        }
-    }
-
 
     /** Unit test */
     /*
@@ -449,6 +466,39 @@ public class FixedsizeForgetfulHashMap implements Map
         rt.putAll(m);
         Assert.that(rt.get(g1)==c1);
         Assert.that(rt.get(g2)==c2);
+
+        //4. keySet().iterator() methods.  (Other methods are incomplete.)
+        Iterator iter=null;
+        rt=new FixedsizeForgetfulHashMap(3);
+        rt.put(g1, c1);
+        rt.put(g2, c2);
+        rt.put(g3, c3);
+        iter=rt.keySet().iterator();
+        Assert.that(iter.hasNext());
+        Object a1=iter.next();
+        Assert.that(a1==g1 || a1==g2 || a1==g3);
+        Assert.that(iter.hasNext());
+        Object a2=iter.next();
+        iter.remove();               //remove a2
+        Assert.that(a2==g1 || a2==g2 || a2==g3);
+        Assert.that(a1!=a2);
+        Assert.that(iter.hasNext());
+        Object a3=iter.next();
+        Assert.that(a3==g1 || a3==g2 || a3==g3);
+        Assert.that(a3!=a2);
+        Assert.that(a3!=a1);
+        Assert.that(! iter.hasNext());
+        
+        iter=rt.keySet().iterator();
+        Assert.that(rt.containsKey(a1));
+        Assert.that(! rt.containsKey(a2));
+        Assert.that(rt.containsKey(a3));
+        Object a4=iter.next();
+        Assert.that(a4==a1 || a4==a3);  //NOT a2
+        Object a5=iter.next();
+        Assert.that(a5==a1 || a5==a3);  //NOT a2
+        Assert.that(a5!=a4);
+        Assert.that(! iter.hasNext());
     }
     */
 }
