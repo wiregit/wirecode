@@ -931,9 +931,9 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     public void testLowHopOutOfBandRequest() throws Exception {
         drainAll();
 
+        byte[] meIP = {(byte)127,(byte)0,(byte)0,(byte)1};
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("susheel",
-                                              UDP_ACCESS.getLocalAddress().getAddress(),
+            QueryRequest.createOutOfBandQuery("susheel", meIP, 
                                               UDP_ACCESS.getLocalPort());
         ULTRAPEER_2.send(query);
         ULTRAPEER_2.flush();
