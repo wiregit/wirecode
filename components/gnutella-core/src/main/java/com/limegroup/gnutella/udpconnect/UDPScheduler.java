@@ -195,7 +195,11 @@ public class UDPScheduler extends ManagedThread {
                     _listRegister.clear();
                 }
 
-                //first add any events
+                //first remove any events
+                for (Iterator iter = localListUnregister.iterator();iter.hasNext();)
+                	unregisterPriv((UDPTimerEvent)iter.next());
+                
+                //then add any events
                 for (Iterator iter = localListRegister.iterator();iter.hasNext();)
                 	registerPriv((UDPTimerEvent)iter.next());
                 
@@ -205,9 +209,6 @@ public class UDPScheduler extends ManagedThread {
                     updateSchedule(evt);
                 }
                 
-                //then remove any events
-                for (Iterator iter = localListUnregister.iterator();iter.hasNext();)
-                	unregisterPriv((UDPTimerEvent)iter.next());
                 
 
 
