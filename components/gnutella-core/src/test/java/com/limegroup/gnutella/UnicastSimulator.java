@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 /** Simulates a 'network' of unicast enabled clients.  The clients don't search,
  *  but they always respond to queries.
@@ -25,6 +26,8 @@ public class UnicastSimulator {
     private Thread _tcpListener;
 
     private boolean _shouldRun = true;
+
+    private Random rand = new Random();
 
     public UnicastSimulator() throws Exception {
         // create pings to return...
@@ -166,12 +169,15 @@ public class UnicastSimulator {
                         String query = ((QueryRequest)message).getQuery();
                         byte[] inGUID = ((QueryRequest)message).getGUID();
                         Response[] resps = new Response[1];
-                        resps[0] = new Response(port, 200, query);
+                        resps[0] = new Response(port, 200, 
+                                                query + " " + rand.nextInt());
                         QueryReply qr = new QueryReply(inGUID, (byte) 5,
                                                        port, _localAddress,
                                                        0, resps, 
                                                        GUID.makeGuid());
                         // send the QR...
+                        send(socket, qr, datagram.getAddress(),
+                             datagram.getPort());
                     }
                 } catch(BadPacketException e) {
                     continue;
@@ -188,6 +194,29 @@ public class UnicastSimulator {
               port);
 		socket.close();
     }
+
+
+    private void send(DatagramSocket socket, Message msg, 
+                      InetAddress ip, int port) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			msg.write(baos);
+		} catch(IOException e) {
+			e.printStackTrace();
+			// can't send the hit, so return
+			return;
+		}
+
+		byte[] data = baos.toByteArray();
+		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port); 
+		try {
+            socket.send(dg);
+		} catch(IOException e) {
+			e.printStackTrace();
+			// not sure what to do here -- try again??
+		}
+	}
+    
 
 
     private final static boolean debugOn = false;
