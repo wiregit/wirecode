@@ -150,6 +150,9 @@ public class UDPConnectionProcessor {
     /** The last time that a message was sent to other host */
     private long              _lastSendTime;
 
+    /** The last time that data was sent to other host */
+    private long              _lastDataSendTime;
+
     /** The last time that a message was received from the other host */
 	private long              _lastReceivedTime;
 
@@ -173,6 +176,7 @@ public class UDPConnectionProcessor {
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
 		_connectionState         = PRECONNECT_STATE;
 		_lastSendTime            = 0l;
+        _lastDataSendTime        = 0l;
     	_chunkLimit              = DATA_WINDOW_SIZE;// TODO:This varies based 
 											        // on Window fullness
     	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
@@ -331,8 +335,9 @@ public class UDPConnectionProcessor {
 		if ( _waitingForDataAvailable ) {
 			_waitingForDataAvailable = false;
 
-			// Schedule immediately
-			scheduleWriteDataEvent(0);
+			// Schedule at a reasonable time
+            long rto = (long)_sendWindow.getRTO();
+			scheduleWriteDataEvent( _lastDataSendTime + (rto/2) );
 		}
 	}
 
@@ -500,9 +505,12 @@ log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
             DataMessage dm = new DataMessage(_theirConnectionID, 
 			  _sequenceNumber, chunk.data, chunk.length);
             send(dm);
-			DataRecord drec = _sendWindow.addData(dm);  
-            drec.sentTime = System.currentTimeMillis();
+			DataRecord drec   = _sendWindow.addData(dm);  
+            drec.sentTime     = _lastSendTime;
 			drec.sends++;
+
+            // Record when data was sent for future scheduling
+            _lastDataSendTime = _lastSendTime;
 
             // Update the chunk limit for fast (nonlocking) access
             _chunkLimit = _sendWindow.getWindowSpace();
