@@ -388,14 +388,14 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         // Ensure that one removal doesn't stop it.
         FD.remove(al);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Add a second one, so we can check to make sure
@@ -405,14 +405,14 @@ public class UploadTest extends BaseTestCase {
         FD.add(al2);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc2 + ", " + loc );
+                          "X-Alt: 2.2.2.2:2, 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Remove the first guy again, should only have loc2 left.
         FD.remove(al);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc2 );
+                          "X-Alt: 2.2.2.2:2");
         assertTrue("alt failed", passed);
     }
     
@@ -427,7 +427,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         // Add a header that gives a new location.
@@ -436,7 +436,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + sendLoc,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
         assertEquals("wrong # locs", 2, FD.getAltLocsSize());
@@ -450,14 +450,14 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + sendLoc + ", " + loc);
+                          "X-Alt: 2.2.2.2:2, 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Demote the location (don't remove)
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: " + sendLoc,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Should still have it.
         assertEquals("wrong # locs", 2, FD.getAltLocsSize());
@@ -471,7 +471,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: " + sendLoc,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Now is removed.
         assertEquals("wrong # locs", 1, FD.getAltLocsSize());
@@ -489,7 +489,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         // Add a header that gives a new location.
@@ -498,7 +498,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: 2.2.2.2:2",
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
         assertEquals("wrong # locs", 2, FD.getAltLocsSize());
@@ -512,14 +512,14 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + sendLoc + ", " + loc);
+                          "X-Alt: 2.2.2.2:2, 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Demote the location (don't remove)
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: 2.2.2.2:2",
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Should still have it.
         assertEquals("wrong # locs", 2, FD.getAltLocsSize());
@@ -533,7 +533,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: " + sendLoc,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Now is removed.
         assertEquals("wrong # locs", 1, FD.getAltLocsSize());
@@ -545,7 +545,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: 2.3.4.5",
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
         assertEquals("wrong # locs", 2, FD.getAltLocsSize());
@@ -568,7 +568,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         // Add a header that gives a new location.
@@ -581,7 +581,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + send1 + ", " + send2 + ", 1.2.3.4",
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
         assertEquals("wrong # locs", 4, FD.getAltLocsSize());
@@ -626,7 +626,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         // Add an invalid alt
@@ -634,7 +634,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + invalidAddr,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
@@ -644,7 +644,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + invalidAddr,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
@@ -655,7 +655,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + invalidPort,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
@@ -665,7 +665,7 @@ public class UploadTest extends BaseTestCase {
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + invalidPort,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc);
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
@@ -682,7 +682,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         for(int i = 0; i < 20; i++) {
@@ -691,8 +691,8 @@ public class UploadTest extends BaseTestCase {
         }
         assertEquals(21, alc.getAltLocsSize());
     
-        String pre = "http://1.1.1.";
-        String post = ":6346/uri-res/N2R?" + hash;
+        String pre = "1.1.1.";
+        String post = "";
         String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.
@@ -706,7 +706,7 @@ public class UploadTest extends BaseTestCase {
                            pre + 14 + post + comma +
                            pre + 11 + post + comma +
                            pre + 0 + post + comma +
-                           pre + "1:1/uri-res/N2R?" + hash;
+                           pre + "1:1";
         
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -724,7 +724,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         for(int i = 0; i < 20; i++) {
@@ -741,8 +741,8 @@ public class UploadTest extends BaseTestCase {
             s.getOutputStream()));
             
         String reqFile = "/uri-res/N2R?" + hash;
-        String pre = "http://1.1.1.";
-        String post = ":6346/uri-res/N2R?" + hash;
+        String pre = "1.1.1.";
+        String post = "";
         String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.
@@ -758,7 +758,7 @@ public class UploadTest extends BaseTestCase {
                    pre + 14 + post + comma +
                    pre + 11 + post + comma +
                    pre + 0 + post + comma +
-                   pre + "1:1/uri-res/N2R?" + hash;
+                   pre + "1:1";
         downloadInternal11(reqFile,
                          "Range: bytes=0-1",
                          out, in,
@@ -810,7 +810,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
-                          "X-Alt: " + loc );
+                          "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // get rid of it.
         FD.remove(al);
@@ -859,8 +859,8 @@ public class UploadTest extends BaseTestCase {
             s.getOutputStream()));
             
         String reqFile = "/uri-res/N2R?" + hash;
-        String pre = "http://1.1.1.";
-        String post = ":6346/uri-res/N2R?" + hash;
+        String pre = "1.1.1.";
+        String post = "";
         String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.

@@ -161,19 +161,9 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 			String str = st.nextToken();
 			str = str.trim();
 			AlternateLocation al = 
-			    AlternateLocation.create(str);
+			    AlternateLocation.create(str, _alCollection.getSHA1Urn());
 			alc1.add(al);
 		}
-
-		//assertTrue("AlternateLocationCollections should be equal:\r\n"+_alCollection+
-        //         "\r\n"+alc1, 
-        //         _alCollection.equals(alc1));
-
-		//AlternateLocationCollection alc2 = new AlternateLocationCollection();
-		//alc2.addAll(alc1);
-		//assertTrue("AlternateLocationCollections should be equal", 
-		//	   _alCollection.equals(alc2));
-		
 	}
 	
 	/**

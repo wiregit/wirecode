@@ -564,7 +564,8 @@ public class TestUploader {
 				// sequences that may be used if the sender is using
 				// continuations.
 				AlternateLocation al = 
-				    AlternateLocation.create(st.nextToken().trim());
+				    AlternateLocation.create(
+				        st.nextToken().trim(), _sha1);
 				alc.add(al);
 			} catch(IOException e) {
                 e.printStackTrace();
