@@ -5,6 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
+import de.vdheide.mp3.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -181,22 +182,32 @@ public final class ID3Reader {
         return new LimeXMLDocument(nameValList, schemaURI);
     }
 
-    /** @return a Object[] with the following order: title, artist, album, year,
-       track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
-       Strings.  Indices 4 and 6 are Shorts.  Indices 7 and 8 are Integers.  
+    /**
+     * @return a Object[] with the following order: title, artist, album, year,
+     * track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
+     * Strings.  Indices 4 and 6 are Shorts.  Indices 7 and 8 are Integers.  
+     * <p>
+     * LimeWire would prefer to use ID3V2 tags, so we try to parse the ID3V2
+     * tags first, and if we were not able to find some tags using v2 we get it
+     * using v1 if possible 
      */
     private static Object[] parseFile(File file) throws IOException {
         Object[] retObjs = new Object[9];
-
+        
+        String nonValueString = "";
+        Short nonValueShort = new Short((short)-1);
         // default vals...
-        retObjs[0] = "";
-        retObjs[1] = "";
-        retObjs[2] = "";
-        retObjs[3] = "";
-        retObjs[5] = "";
-        retObjs[4] = new Short((short)-1);
-        retObjs[6] = new Short((short)-1);
+        retObjs[0] = nonValueString; //title
+        retObjs[1] = nonValueString; //artist
+        retObjs[2] = nonValueString; //album
+        retObjs[3] = nonValueString; //year
+        retObjs[5] = nonValueString; //comment
+        retObjs[4] = nonValueShort; //track
+        retObjs[6] = nonValueShort; //genre        
 
+        if(parseID3v2Data(file, retObjs) )
+            return retObjs;
+        
         RandomAccessFile randomAccessFile = null;
         
         try {
@@ -219,22 +230,26 @@ public final class ID3Reader {
                     // We have an ID3 Tag, now get the parts
                     // Title
                     randomAccessFile.readFully(buffer, 0, 30);
-                    retObjs[0] = new String(buffer, 0, 
+                    if(nonValueString.equals(retObjs[0]))
+                        retObjs[0] = new String(buffer, 0, 
                                                getTrimmedLength(buffer, 30));
                     
                     // Artist
                     randomAccessFile.readFully(buffer, 0, 30);
+                    if(nonValueString.equals(retObjs[1]))
                     retObjs[1] = new String(buffer, 0, 
                                                getTrimmedLength(buffer, 30));
                     
                     // Album
                     randomAccessFile.readFully(buffer, 0, 30);
-                    retObjs[2] = new String(buffer, 0, 
+                    if(nonValueString.equals(retObjs[2]))
+                        retObjs[2] = new String(buffer, 0, 
                                                getTrimmedLength(buffer, 30));
                     
                     // Year
                     randomAccessFile.readFully(buffer, 0, 4);
-                    retObjs[3] = new String(buffer, 0, 
+                    if(nonValueString.equals(retObjs[3]))
+                        retObjs[3] = new String(buffer, 0, 
                                                getTrimmedLength(buffer, 4));
                     
                     // Comment and track
@@ -242,21 +257,25 @@ public final class ID3Reader {
                     int commentLength;
                     if(buffer[28] == 0)
                     {
-                        retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
+                        if(nonValueShort.equals(retObjs[4]))
+                            retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
                         commentLength = 28;
                     }
                     else
                     {
-                        retObjs[4] = new Short((short)0);
+                        if(nonValueShort.equals(retObjs[4]))
+                            retObjs[4] = new Short((short)0);
                         commentLength = 3;
                     }
-                    retObjs[5] = new String(buffer, 0,
+                    if(nonValueString.equals(retObjs[5]))
+                        retObjs[5] = new String(buffer, 0,
                                                getTrimmedLength(buffer, 
                                                                 commentLength));
                     
                     // Genre
                     randomAccessFile.readFully(buffer, 0, 1);
-                    retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
+                    if(nonValueShort.equals(retObjs[6]))
+                        retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
                 }
             }
     
@@ -272,6 +291,87 @@ public final class ID3Reader {
         return retObjs;
     }
 
+    /**
+     * @param audioTags this array emulates pass by reference
+     * @return true if all the tags were read, false otherwise
+     */
+    private static boolean parseID3v2Data(File file, Object[] audioTags) {
+        boolean ret = true;
+        MP3File mp3File = null;
+        try {
+            mp3File = new MP3File(file.getParentFile(), file.getName());
+        } catch (ID3v2Exception idvx) { //can't go on
+            return false;
+        } catch (NoMP3FrameException nmfx) {//can't go on
+            return false;
+        } catch (IOException iox) {
+            return false;
+        }
+        //keep track of how many fields we have populated
+        int fieldCount = 0;
+        //1. title 
+        String str = "";
+        try {
+            str = mp3File.getTitle().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[0] = str;
+        }
+        //2. artist 
+        try {
+            str = mp3File.getArtist().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[1] = str;
+        }
+        //3. album
+        try {
+            str = mp3File.getAlbum().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[2] = str;
+        }
+        //4. year
+        try {
+            str = mp3File.getYear().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[3] = str;
+        }
+        //5. comment
+        try {
+            str = mp3File.getComments().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[5] = str;
+        }
+        //6. artist 
+        try {
+            str = mp3File.getTrack().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[4] = new Short(str);
+        }
+        //7. genre
+        //Note: The ID3V2 reader returns a string for the genre, whereas id3v1
+        //tags read a byte which we convert to a string. there is no guarantee
+        //that these strings are the same set. So we will stick with the v1
+        //version for now, by trying to convert the string to the byte value
+        try {
+            str = mp3File.getTrack().getTextContent();
+        } catch(FrameDamagedException ignored) {}
+        if(! "".equals(str)) {
+            fieldCount++;
+            audioTags[6] = new Short((short)getGenreByte(str));
+        }
+        return fieldCount == 7;
+    }
 
     private static void appendStrings(String key, String value,StringBuffer appendTo) {
         appendTo.append(key);
@@ -430,4 +530,137 @@ public final class ID3Reader {
         default: return "";
         }
     }
+
+    
+    private static byte getGenreByte(String genre) {
+        if(genre==null) return -1;
+        else if(genre.equals("Blues")) return 0;
+        else if(genre.equals("Classic Rock")) return 1;
+        else if(genre.equals("Country")) return 2;
+        else if(genre.equals("Dance")) return 3;
+        else if(genre.equals("Disco")) return 4;
+        else if(genre.equals("Funk")) return 5;
+        else if(genre.equals("Grunge")) return 6;
+        else if(genre.equals("Hop")) return 7;
+        else if(genre.equals("Jazz")) return 8;
+        else if(genre.equals("Metal")) return 9;
+        else if (genre.equals("New Age")) return 10;
+        else if(genre.equals("Oldies")) return 11;
+        else if(genre.equals("Other")) return 12;
+        else if(genre.equals("Pop")) return 13;
+        else if (genre.equals("R &amp; B")) return 14;
+        else if(genre.equals("Rap")) return 15;
+        else if(genre.equals("Reggae")) return 16;
+        else if(genre.equals("Rock")) return 17;
+        else if(genre.equals("Techno")) return 17;
+        else if(genre.equals("Industrial")) return 19;
+        else if(genre.equals("Alternative")) return 20;
+        else if(genre.equals("Ska")) return 21;
+        else if(genre.equals("Metal")) return 22;
+        else if(genre.equals("Pranks")) return 23;
+        else if(genre.equals("Soundtrack")) return 24;
+        else if(genre.equals("Euro-Techno")) return 25;
+        else if(genre.equals("Ambient")) return 26;
+        else if(genre.equals("Trip-Hop")) return 27;
+        else if(genre.equals("Vocal")) return 28;
+        else if (genre.equals("Jazz+Funk")) return 29;
+        else if(genre.equals("Fusion")) return 30;
+        else if(genre.equals("Trance")) return 31;
+        else if(genre.equals("Classical")) return 32;
+        else if(genre.equals("Instrumental")) return 33;
+        else if(genre.equals("Acid")) return 34;
+        else if(genre.equals("House")) return 35;
+        else if(genre.equals("Game")) return 36;
+        else if(genre.equals("Sound Clip")) return 37;
+        else if(genre.equals("Gospel")) return 38;
+        else if(genre.equals("Noise")) return 39;
+        else if(genre.equals("AlternRock")) return 40;
+        else if(genre.equals("Bass")) return 41;
+        else if(genre.equals("Soul")) return 42;
+        else if(genre.equals("Punk")) return 43;
+        else if(genre.equals("Space")) return 44;
+        else if(genre.equals("Meditative")) return 45;
+        else if(genre.equals("Instrumental Pop")) return 46;
+        else if(genre.equals("Instrumental Rock")) return 47;
+        else if(genre.equals("Ethnic")) return 48;
+        else if(genre.equals("Gothic")) return 49;
+        else if(genre.equals("Darkwave")) return 50;
+        else if(genre.equals("Techno-Industrial")) return 51;
+        else if(genre.equals("Electronic")) return 52;
+        else if(genre.equals("Pop-Folk")) return 53;
+        else if(genre.equals("Eurodance")) return 54;
+        else if(genre.equals("Dream")) return 55;
+        else if(genre.equals("Southern Rock")) return 56;
+        else if(genre.equals("Comedy")) return 57;
+        else if(genre.equals("Cult")) return 58;
+        else if(genre.equals("Gangsta")) return 59;
+        else if(genre.equals("Top 40")) return 60;
+        else if(genre.equals("Christian Rap")) return 61;
+        else if(genre.equals("Pop/Funk")) return 62;
+        else if(genre.equals("Jungle")) return 63;
+        else if(genre.equals("Native American")) return 64;
+        else if(genre.equals("Cabaret")) return 65;
+        else if(genre.equals("New Wave")) return 66;
+        else if(genre.equals("Psychadelic")) return 67;
+        else if(genre.equals("Rave")) return 68;
+        else if(genre.equals("Showtunes")) return 69;
+        else if(genre.equals("Trailer")) return 70;
+        else if(genre.equals("Lo-Fi")) return 71;
+        else if(genre.equals("Tribal")) return 72;
+        else if(genre.equals("Acid Punk")) return 73;
+        else if(genre.equals("Acid Jazz")) return 74;
+        else if(genre.equals("Polka")) return 75;
+        else if(genre.equals("Retro")) return 76;
+        else if(genre.equals("Musical")) return 77;
+        else if(genre.equals("Rock &amp; Roll")) return 78;
+        else if(genre.equals("Hard Rock")) return 79;
+        else if(genre.equals("Folk")) return 80;
+        else if(genre.equals("Folk-Rock")) return 81;
+        else if(genre.equals("National Folk")) return 82;
+        else if(genre.equals("Swing")) return 83;
+        else if(genre.equals("Fast Fusion")) return 84;
+        else if(genre.equals("Bebob")) return 85;
+        else if(genre.equals("Latin")) return 86;
+        else if(genre.equals("Revival")) return 87;
+        else if(genre.equals("Celtic")) return 88;
+        else if(genre.equals("Bluegrass")) return 89;
+        else if(genre.equals("Avantgarde")) return 90;
+        else if(genre.equals("Gothic Rock")) return 91;
+        else if(genre.equals("Progressive Rock")) return 92;
+        else if(genre.equals("Psychedelic Rock")) return 93;
+        else if(genre.equals("Symphonic Rock")) return 94;
+        else if(genre.equals("Slow Rock")) return 95;
+        else if(genre.equals("Big Band")) return 96;
+        else if(genre.equals("Chorus")) return 97;
+        else if(genre.equals("Easy Listening")) return 98;
+        else if(genre.equals("Acoustic")) return 99;
+        else if(genre.equals("Humour")) return 100;
+        else if(genre.equals("Speech")) return 101;
+        else if(genre.equals("Chanson")) return 102;
+        else if(genre.equals("Opera")) return 103;
+        else if(genre.equals("Chamber Music")) return 104;
+        else if(genre.equals("Sonata")) return 105;
+        else if(genre.equals("Symphony")) return 106;
+        else if(genre.equals("Booty Bass")) return 107;
+        else if(genre.equals("Primus")) return 108;
+        else if(genre.equals("Porn Groove")) return 109;
+        else if(genre.equals("Satire")) return 110;
+        else if(genre.equals("Slow Jam")) return 111;
+        else if(genre.equals("Club")) return 112;
+        else if(genre.equals("Tango")) return 113;
+        else if(genre.equals("Samba")) return 114;
+        else if(genre.equals("Folklore")) return 115;
+        else if(genre.equals("Ballad")) return 116;
+        else if(genre.equals("Power Ballad")) return 117;
+        else if(genre.equals("Rhythmic Soul")) return 118;
+        else if(genre.equals("Freestyle")) return 119;
+        else if(genre.equals("Duet")) return 120;
+        else if(genre.equals("Punk Rock")) return 121;
+        else if(genre.equals("Drum Solo")) return 122;
+        else if(genre.equals("A capella")) return 123;
+        else if(genre.equals("Euro-House")) return 124;
+        else if(genre.equals("Dance Hall")) return 125;
+        else return -1;
+    }
+
 }
