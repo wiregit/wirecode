@@ -58,6 +58,13 @@ public abstract class AbstractStatistic implements Statistic {
 	private final Object BUFFER_LOCK = new Object(); 
 
 	/**
+	 * The file name to write stat data to.  If this is null or the empty
+	 * string, we attempt to derive the appropriate file name via
+	 * reflection.
+	 */
+	protected String _fileName;
+
+	/**
 	 * Constructs a new <tt>Statistic</tt> instance.
 	 */
 	protected AbstractStatistic() {}
@@ -124,39 +131,41 @@ public abstract class AbstractStatistic implements Statistic {
 
 	// inherit doc comment
 	public synchronized void setWriteStatToFile(boolean write) {
-		if(write) {
+		if(write) {			
 			_numWriters++;
 			_writeStat = true;
 			if(_numWriters == 1) {
 				try {
-					Class superclass = getClass().getSuperclass();
-					Class declaringClass = getClass().getDeclaringClass();
-					List fieldsList = new LinkedList();
-					if(superclass != null) {
-						fieldsList.addAll(Arrays.asList(superclass.getFields()));
-					}
-					if(declaringClass != null) {
-						fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
-					}
-					fieldsList.addAll(Arrays.asList(getClass().getFields()));
-					Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
-					String name = "";
-					for(int i=0; i<fields.length; i++) {
-						try {
-							Object fieldObject = fields[i].get(null);
-							if(fieldObject.equals(this)) {
-								StringTokenizer st = 
-							        new StringTokenizer(fields[i].toString());
-								while(st.hasMoreTokens()) {
-									name = st.nextToken();
-								}
-								name = name.substring(34);
-							}
-						} catch(IllegalAccessException e) {
-							continue;
+					if(_fileName == null || _fileName.equals("")) {
+						Class superclass = getClass().getSuperclass();
+						Class declaringClass = getClass().getDeclaringClass();
+						List fieldsList = new LinkedList();
+						if(superclass != null) {
+							fieldsList.addAll(Arrays.asList(superclass.getFields()));
 						}
-					}
-					_writer = new FileWriter(name, false);
+						if(declaringClass != null) {
+							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
+						}
+						fieldsList.addAll(Arrays.asList(getClass().getFields()));
+						Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
+						for(int i=0; i<fields.length; i++) {
+							try {
+								Object fieldObject = fields[i].get(null);
+								if(fieldObject.equals(this)) {
+									StringTokenizer st = 
+										new StringTokenizer(fields[i].toString());
+									while(st.hasMoreTokens()) {
+										_fileName = st.nextToken();
+									}
+									_fileName = _fileName.substring(34);
+								}
+							} catch(IllegalAccessException e) {
+								continue;
+							}
+						}
+					}					 
+					_writer = new FileWriter(_fileName, false);
+					
 				} catch(IOException e) {
 					e.printStackTrace();
 				}
