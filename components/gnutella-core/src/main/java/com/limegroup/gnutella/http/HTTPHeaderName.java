@@ -65,8 +65,18 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName SERVER =
 		new HTTPHeaderName("Server");
 
+    /**
+     * Custom header for upload queues.
+     */
     public static final HTTPHeaderName QUEUE_HEADER = 
         new HTTPHeaderName("X-Queue");
+
+    /**
+     * Header for specifying whether the connection should be kept alive or
+     * closed when using HTTP 1.1.
+     */
+    public static final HTTPHeaderName CONNECTION =
+        new HTTPHeaderName("Connection");
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
