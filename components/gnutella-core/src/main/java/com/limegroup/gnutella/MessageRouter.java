@@ -983,9 +983,6 @@ public abstract class MessageRouter {
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
-        // only allow other UPs to send you this message....
-        if (!source.isSupernodeSupernodeConnection()) return;
-
         final int portToContact = tcp.getConnectBackPort();
         final String addrToContact;
         try {
@@ -994,11 +991,6 @@ public abstract class MessageRouter {
         catch (IllegalStateException ise) {
             return;
         }
-
-        // only connect back if you aren't connected to the host - that is the
-        // whole point of redirect after all....
-        Endpoint endPoint = new Endpoint(addrToContact, portToContact);
-        if (_manager.isConnectedTo(endPoint)) return;
 
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
@@ -1030,10 +1022,16 @@ public abstract class MessageRouter {
      */
     protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
                                                 Connection source) {
+        // only allow other UPs to send you this message....
         if (!source.isSupernodeSupernodeConnection()) return;
 
         final int portToContact = tcp.getConnectBackPort();
         final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
+
+        // only connect back if you aren't connected to the host - that is the
+        // whole point of redirect after all....
+        Endpoint endPoint = new Endpoint(addrToContact, portToContact);
+        if (_manager.isConnectedTo(endPoint)) return;
 
         // TODO
         // keep track of who you tried connecting back too, don't do it too

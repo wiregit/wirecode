@@ -179,6 +179,7 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 		ULTRAPEER_2.close();
 		sleep();
         UDP_ACCESS.close();
+        TCP_ACCESS.close();
 	}
 
 	private static void sleep() {
@@ -370,6 +371,26 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 
     }
 
+    public void testTCPConnectBackAlreadyConnected() throws Exception {
+        drainAll();
+
+        System.out.println(""+LEAF.getSocket().getInetAddress());
+        TCPConnectBackRedirect tcp = 
+            new TCPConnectBackRedirect(LEAF.getSocket().getInetAddress(),
+                                       TCP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_1.send(tcp);
+        ULTRAPEER_1.flush();
+
+        // we should NOT get an incoming connection
+        TCP_ACCESS.setSoTimeout(1000);
+        try {
+            TCP_ACCESS.accept();
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+    }
 
 
 
