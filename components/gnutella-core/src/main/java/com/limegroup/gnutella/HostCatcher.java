@@ -391,18 +391,19 @@ public class HostCatcher {
     /**
      * Adds a ping reply to the reserve cache.
      */
-    private void addToReserveCache(PingReply pr, 
+    private void addToReserveCache(Endpoint e,
                                    ManagedConnection receivingConnection) {
-        Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
-                                pr.getFiles(), pr.getKbytes());
-
         //Skip if this would connect us to our listening port.
         if (Acceptor.isMe(e.getHostname(), e.getPort()))
             return;
 
-        //Skip if this is a router(e.g., router.limewire.com).
-        if (isARouter(pr.getIPBytes())) 
-            return;
+        try {
+            //Skip if this is a router(e.g., router.limewire.com).
+            if (isARouter(e.getHostBytes())) 
+                return;
+        } catch (java.net.UnknownHostException exc) {
+            //Will never happen.
+        }
 
         //Current policy: "new clients" connections are the best.  After that, 
         //"Pong cache" connections are considered good.  Private addresses are 
@@ -642,13 +643,37 @@ public class HostCatcher {
         //if received from an old client or from a router, place the PingReply
         //in the reserve cache (i.e., hostcatcher).
         if (receivingConnection.isOldClient()) {
-            addToReserveCache(pr, receivingConnection);
+            Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
+                                    pr.getFiles(), pr.getKbytes());            
+            addToReserveCache(e, receivingConnection);
             return false; //always return false when adding to reserve cache.
         }
         else
             return addToMainCache(pr, receivingConnection);
 
     }
+
+    /** 
+     * Adds the pongs in receivingConnection's old-pongs header, if any, to the
+     * reserve cache of this.
+     */
+    public void addOldPongs(ManagedConnection receivingConnection) {
+        String pongs=receivingConnection.getProperty("Old-Pongs");
+        if (pongs==null)
+            return;
+        String[] pongsA=StringUtils.split(pongs, ",");
+        for (int i=0; i<pongsA.length; i++) {
+            try {
+                //The Endpoint(String) constructor may be removed at some point,
+                //but we'll use it for now.
+                Endpoint e=new Endpoint(pongsA[i]);
+                addToReserveCache(e, receivingConnection);
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+        }
+    }
+
 
     /**
      *  Blocks until an address is available, and then returns that address.
@@ -740,12 +765,7 @@ public class HostCatcher {
 //                         bogus);
 //          }
 //          for (int i=0; i<4; i++) {
-//              hc.addToReserveCache(new PingReply(GUID.makeGuid(),
-//                                       (byte)2,
-//                                       6346,
-//                                       new byte[] {(byte)2, (byte)2, (byte)2, (byte)i},
-//                                       0l, 0l),
-//                         bogus);
+//              hc.addToReserveCache(new Endpoint("2.2.2."+i, 6346), bogus);
 //          }
 //          //Fetch "new" pongs, making sure each is unique
 //          List /* of Endpoint */ fetched=new ArrayList();

@@ -756,6 +756,11 @@ public class ManagedConnection
         Properties ret=new Properties();
         ret.setProperty("Query-Routing", "0.1");
         ret.setProperty("Pong-Caching",  "0.1");
+        //TODO3: only use for router connections, i.e., if _isRouter==true.  For
+        //now we always send it so it's easier to test.  Also, if this code is
+        //moved, we could afford to send the My-Address header, eliminating the
+        //need for group pings.
+        ret.setProperty("Want-Old-Pongs", "true");
         return ret;
     }
 
@@ -764,7 +769,10 @@ public class ManagedConnection
     private static HandshakeResponder createNewResponder() {
         return new HandshakeResponder() {
             public Properties respond(Properties read) {
-                return createNewProperties();
+                Properties ret=new Properties();
+                ret.setProperty("Query-Routing", "0.1");
+                ret.setProperty("Pong-Caching",  "0.1");
+                return ret;
             }
         };
     }

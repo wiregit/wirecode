@@ -749,6 +749,8 @@ public class ConnectionManager {
                     //on num of connections and reserve cache size.
                     sendInitialPingRequest(_connection);
                 }
+                // Add any pongs sent in Old-Pongs header.
+                _catcher.addOldPongs(_connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
