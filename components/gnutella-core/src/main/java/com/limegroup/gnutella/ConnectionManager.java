@@ -24,9 +24,12 @@ public class ConnectionManager implements Runnable {
     private int port;
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
     public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
-    private List /* of Connection */ connections=Collections.synchronizedList(
-						      new ArrayList());
+
+    /** List of all connections.  This is <i>not</i> synchronized, so you must
+     * always hold this' monitor before modifying it. */
+    private List /* of Connection */ connections=new ArrayList();
     public  HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
+
     private int keepAlive=0;
     private ActivityCallback callback;
     private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
@@ -97,6 +100,7 @@ public class ConnectionManager implements Runnable {
      */
     public synchronized void sendToAllExcept(Message m, Connection c) 
 	throws IOException {
+	//TODO2: use reader/writer lock to allow parallelism.  Avoid iterator.
 	Assert.that(m!=null);
 	Assert.that(c!=null);
 
@@ -119,6 +123,7 @@ public class ConnectionManager implements Runnable {
      */
     public synchronized void sendToAll(Message m) 
 	throws IOException {
+	//TODO2: use reader/writer lock to allow parallelism.  Avoid iterator.
 	Assert.that(m!=null);
 
 	//to forward to, especially on searches.
@@ -170,7 +175,6 @@ public class ConnectionManager implements Runnable {
 		//Accept an incoming connection, make it into a Connection
 		//object, handshake, and give it a thread to service it.
 		Socket client=sock.accept();
-		System.out.println("In the CManager.. soc was accepted");
 		try {
 		    tryingToConnect(
                       getHostName(client.getInetAddress()), 
@@ -214,6 +218,8 @@ public class ConnectionManager implements Runnable {
      *  @effects adds c to this
      */
     public synchronized void add(Connection c) {
+	Assert.that(!connections.contains(c));
+	
 	connections.add(c);
 	//Don't record incoming connections, since the foreign host's
 	//port is ephemeral.
@@ -298,7 +304,7 @@ public class ConnectionManager implements Runnable {
     /**
      *  Returns the number of connections 
      */
-    public int getNumConnections() {
+    public synchronized int getNumConnections() {
 	return connections.size();
     }
 
@@ -317,11 +323,16 @@ public class ConnectionManager implements Runnable {
 	return false;
     }
     
-    /** Returns an unmodifiable iterator of this' connections.
-     *  The iterator yields items in any order.
+    /** Returns an unmodifiable iterator of a clone of this' connections.
+     *  The iterator yields items in any order.  It <i>is</i> permissible
+     *  to modify this while iterating through the elements of this, but
+     *  the modifications will not be visible during the iteration.
      */
-    public Iterator connections() {
-	return new UnmodifiableIterator(connections.iterator());
+    public synchronized Iterator connections() {
+	//Iterator cannot be modified after it is returned.
+	List clone=new ArrayList();	
+	clone.addAll(connections);
+	return new UnmodifiableIterator(clone.iterator());
     }
 
     /**
@@ -344,6 +355,30 @@ public class ConnectionManager implements Runnable {
 	    catcher.write(Const.HOSTLIST);
 	} catch (IOException e) { }
     }
+
+//      public static void main(String args[]) {
+//  	try {
+//  	    //Tests ConnectionManager.connections()
+//  	    Const.KEEP_ALIVE=0;
+//  	    ConnectionManager cm=new ConnectionManager();
+//  	    Thread t=new Thread(cm);
+//  	    t.setDaemon(true);
+//  	    t.start();
+//  	    ConnectionManager cm2=new ConnectionManager(6349);
+//  	    Thread t2=new Thread(cm);
+//  	    t2.setDaemon(true);
+//  	    t2.start();
+
+//  	    Connection c1=new Connection(cm2, "localhost", 6346);
+//  	    Iterator iter=cm2.connections();	    
+//  	    Connection c2=new Connection(cm2, "localhost", 6346);
+//  	    Assert.that(iter.next()==c1);
+//  	    Assert.that(! iter.hasNext());
+//  	} catch (IOException e) {
+//  	    e.printStackTrace();
+//  	    Assert.that(false);
+//  	}
+//      }
 }
 
 /** Asynchronously fetches new connections from hostcatcher.  */
