@@ -89,7 +89,8 @@
  <target name="test all">
     <antcall target="batchunit">
         <param name="unit" value="**/*Test.class"/>
-        <param name="halt" value="no"/>
+        <param name="haltonfailure" value="no"/>
+        <param name="haltonerror" value="no"/>
     </antcall>
     <antcall target="html"/>
  </target>
