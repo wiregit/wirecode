@@ -1263,6 +1263,11 @@ public class RouterService {
         for(int i = 0; i < fds.length; i++)
             fds[i].addUrnsForSelf();
 
+        // reset the last connect back time so the next time the TCP/UDP
+        // validators run they try to connect back.
+        acceptor.resetLastConnectBackTime();
+        udpService.resetLastConnectBackTime();
+
         return true;
     }
     

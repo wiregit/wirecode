@@ -84,6 +84,11 @@ public final class UDPService implements Runnable {
     /** The last time we sent a UDP Connect Back.
      */
     private long _lastConnectBackTime = System.currentTimeMillis();
+    void resetLastConnectBackTime() {
+        _lastConnectBackTime = 
+             System.currentTimeMillis() - Acceptor.INCOMING_EXPIRE_TIME;
+    }
+
 
 	/**
 	 * The thread for listening of incoming messages.

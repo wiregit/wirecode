@@ -94,6 +94,10 @@ public class Acceptor implements Runnable {
      * we start up since we try once when we start up.
      */
     private volatile long _lastConnectBackTime = System.currentTimeMillis();
+    void resetLastConnectBackTime() {
+        _lastConnectBackTime = 
+             System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
+    }
 
 	/**
 	 * Whether or not to record stats.
