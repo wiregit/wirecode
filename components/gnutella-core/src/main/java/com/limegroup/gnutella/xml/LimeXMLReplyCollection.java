@@ -27,10 +27,10 @@ public class LimeXMLReplyCollection{
     private List replyDocs=null;
     private File dataFile = null;//flat file where all data is stored.
     private int count;
-    private HashMap outMap = null;
+    private Hashtable outMap = null;
     private String changedHash = null;
     private MetaFileManager metaFileManager=null;
-
+    private Object mainMapLock = new Object();
     /**
      * Special audio constructor. The signature is the same as the other
      * constructor, except the boolean. This is a hack. The order is different
@@ -121,14 +121,20 @@ public class LimeXMLReplyCollection{
             while(iter.hasNext()){
                 File file  = (File)iter.next();
                 String hash=metaFileManager.readFromMap(file,mp3);
-                LimeXMLDocument doc = (LimeXMLDocument)mainMap.get(hash);
+                LimeXMLDocument doc;
+                synchronized(mainMapLock){
+                    doc = (LimeXMLDocument)mainMap.get(hash);
+                }
                 if(doc==null)//File in current round has no docs of this schema
                     continue;
                 String actualName = null;
                 try {
                     actualName = file.getCanonicalPath();
                 }catch (IOException ioe) {
-                    mainMap.remove(hash);//File don't exist - remove meta-data
+                    synchronized(mainMapLock){
+                        mainMap.remove(hash);
+                        //File don't exist - remove meta-data
+                    }
                     //Assert.that(false,"Cannot find actual file name.");
                 }
                 String identifier = doc.getIdentifier();
@@ -174,7 +180,9 @@ public class LimeXMLReplyCollection{
     }
 
     public void addReply(String hash,LimeXMLDocument replyDoc){
-        mainMap.put(hash,replyDoc);
+        synchronized(mainMapLock){
+            mainMap.put(hash,replyDoc);
+        }
         replyDocs=null;//things have changed
         count++;
     }
@@ -187,18 +195,22 @@ public class LimeXMLReplyCollection{
      * may return null if the hash is not found
      */
     public LimeXMLDocument getDocForHash(String hash){
-        return (LimeXMLDocument)mainMap.get(hash);
+        synchronized(mainMapLock){
+            return (LimeXMLDocument)mainMap.get(hash);
+        }
     }
 
     public List getCollectionList(){
         if (replyDocs !=null)
             return replyDocs;
         replyDocs = new ArrayList();
-        Iterator iter = mainMap.keySet().iterator();
-        while(iter.hasNext()){
-            Object hash = iter.next();
-            Object doc = mainMap.get(hash);
-            replyDocs.add(doc);
+        synchronized(mainMapLock){
+            Iterator iter = mainMap.keySet().iterator();
+            while(iter.hasNext()){
+                Object hash = iter.next();
+                Object doc = mainMap.get(hash);
+                replyDocs.add(doc);
+            }
         }
         return replyDocs;
     }
@@ -208,15 +220,19 @@ public class LimeXMLReplyCollection{
      * that correspond to the same schema as the query.
      */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
-        Iterator iter = mainMap.keySet().iterator();
-        List matchingReplyDocs = new ArrayList();
-        while(iter.hasNext()){
-            Object hash = iter.next();
-            LimeXMLDocument currReplyDoc = (LimeXMLDocument)mainMap.get(hash); 
-            boolean match = LimeXMLUtils.match(currReplyDoc, queryDoc);
-            if(match){
-                matchingReplyDocs.add(currReplyDoc);
-                match = false;//reset
+        List matchingReplyDocs;
+        synchronized(mainMapLock){
+            Iterator iter = mainMap.keySet().iterator();
+            matchingReplyDocs = new ArrayList();
+            while(iter.hasNext()){
+                Object hash = iter.next();
+                LimeXMLDocument currReplyDoc=
+                                      (LimeXMLDocument)mainMap.get(hash); 
+                boolean match = LimeXMLUtils.match(currReplyDoc, queryDoc);
+                if(match){
+                    matchingReplyDocs.add(currReplyDoc);
+                    match = false;//reset
+                }
             }
         }
         return matchingReplyDocs;
@@ -224,27 +240,36 @@ public class LimeXMLReplyCollection{
 
     
     public void replaceDoc(Object hash, LimeXMLDocument newDoc){
-        mainMap.put(hash,newDoc);
+        synchronized(mainMapLock){
+            mainMap.put(hash,newDoc);
+        }
         replyDocs=null;//things have changed
     }
 
     public boolean removeDoc(String hash){
         replyDocs=null;//things will change
-        Object val = mainMap.remove(hash);
-        boolean found = val==null?false:true;
-        if(mainMap.size() == 0){//if there are no more replies.
-            removeFromRepository();//remove this collection from map
-            //Note: this follows the convention of the MetaFileManager
-            //of not adding a ReplyCollection to the map if there are
-            //no docs in it.
+        boolean found;
+        Object val;
+        synchronized(mainMapLock){
+            val = mainMap.remove(hash);
+            found = val==null?false:true;
+            if(mainMap.size() == 0){//if there are no more replies.
+                removeFromRepository();//remove this collection from map
+                //Note: this follows the convention of the MetaFileManager
+                //of not adding a ReplyCollection to the map if there are
+                //no docs in it.
+            }
         }
         boolean written = false;
         if(found){
             //ID3Editor editor = null;
             written = toDisk("");//no file modified...just del meta
         }
-        if(!written && found)//put it back to maintin consistency
-            mainMap.put(hash,val);
+        if(!written && found){//put it back to maintin consistency
+            synchronized(mainMapLock){
+                mainMap.put(hash,val);
+            }
+        }
         else if(found && written)
             return true;
         return false;
@@ -262,33 +287,37 @@ public class LimeXMLReplyCollection{
      */
     public boolean toDisk(String modifiedFile){
         this.replyDocs=null;//things are about to be changed.
-        Iterator iter = mainMap.keySet().iterator();
-        this.outMap = new HashMap();
-        while(iter.hasNext()){
-            String hash = (String)iter.next();            
-            LimeXMLDocument currDoc=(LimeXMLDocument)mainMap.get(hash);
-            String xml = "";
-            try {
-                xml = currDoc.getXMLStringWithIdentifier();
-            }
-            catch (SchemaNotFoundException snfe) {
-                continue;
-            }
-            if(audio){
-                String fName = currDoc.getIdentifier();
-                ID3Editor e = new ID3Editor();
-                boolean mp3Doc = fName.endsWith("mp3");
-                if(mp3Doc){//remove the ID3 tags only if doc corresponds to mp3
-                    xml = e.removeID3Tags(xml);
-                    if(fName.equals(modifiedFile)){//if mp3Doc and our file 
-                        this.editor = e;
-                        this.changedHash = hash;
+        synchronized(mainMapLock){
+            Iterator iter = mainMap.keySet().iterator();
+            this.outMap = new Hashtable();
+            while(iter.hasNext()){
+                String hash = (String)iter.next();            
+                LimeXMLDocument currDoc=(LimeXMLDocument)mainMap.get(hash);
+                String xml = "";
+                try {
+                    xml = currDoc.getXMLStringWithIdentifier();
+                }
+                catch (SchemaNotFoundException snfe) {
+                    continue;
+                }
+                if(audio){
+                    String fName = currDoc.getIdentifier();
+                    ID3Editor e = new ID3Editor();
+                    boolean mp3Doc = fName.endsWith("mp3");
+                    if(mp3Doc){
+                        //remove the ID3 tags only if doc corresponds to mp3
+                        xml = e.removeID3Tags(xml);
+                        if(fName.equals(modifiedFile)){
+                            //if mp3Doc and our file 
+                            this.editor = e;
+                            this.changedHash = hash;
+                        }
                     }
                 }
-            }
-            outMap.put(hash,xml);
-            //System.out.println("Sumeet: outging XML String=\n"+xml);
-        }//OK...all the docs have been converted to XML strings
+                outMap.put(hash,xml);
+                //System.out.println("Sumeet: outging XML String=\n"+xml);
+            }//OK...all the docs have been converted to XML strings
+        }
         if(!audio)//if not audio or (audio and nonmp3)
             return write();
         else//go back to mp3ToDisk()//audio and mp3
@@ -335,8 +364,10 @@ public class LimeXMLReplyCollection{
             }catch (Exception e){
                 return false;
             }
-            Object mainValue = mainMap.remove(changedHash);
-            mainMap.put(newHash,mainValue);
+            synchronized(mainMapLock){
+                Object mainValue = mainMap.remove(changedHash);
+                mainMap.put(newHash,mainValue);
+            }
             //MetaFileManager manager=(MetaFileManager)FileManager.instance();
             //Object metaValue = manager.mp3HashToFiles.remove(changedHash);
             //replace the old hashValue
@@ -369,7 +400,7 @@ public class LimeXMLReplyCollection{
         
         /** underlying map for hashmap access.
          */
-        private HashMap _hashMap;
+        private Hashtable _hashMap;
 
         /** @param whereToStore The name of the file to serialize from / 
          *  deserialize to.  
@@ -382,7 +413,7 @@ public class LimeXMLReplyCollection{
             else if (_backingStoreFile.exists())
                 deserializeFromFile();
             else
-                _hashMap = new HashMap();
+                _hashMap = new Hashtable();
         }
 
 
@@ -391,7 +422,7 @@ public class LimeXMLReplyCollection{
          *  @param storage A HashMap that you want to serialize / deserialize.
          *  @exception Exception Thrown if input file whereToStore is invalid.
          */
-        public MapSerializer(File whereToStore, HashMap storage) 
+        public MapSerializer(File whereToStore, Hashtable storage) 
         throws Exception {
             _backingStoreFile = whereToStore;
             _hashMap = storage;
@@ -403,7 +434,7 @@ public class LimeXMLReplyCollection{
         private void deserializeFromFile() throws Exception {            
             FileInputStream istream = new FileInputStream(_backingStoreFile);
             ObjectInputStream objStream = new ObjectInputStream(istream);
-            _hashMap = (HashMap) objStream.readObject();
+            _hashMap = (Hashtable) objStream.readObject();
             istream.close();
         }
 
