@@ -59,7 +59,12 @@ public final class LimeXMLDocumentHelper{
             for(int i=0;i<z;i++){
                 Node currNode = (Node)children.get(i);
                 String cIndex = getAttributeValue(currNode,"index");
-                int currIndex= Integer.parseInt(cIndex);
+                int currIndex;
+                try {
+                    currIndex = Integer.parseInt(cIndex);
+                } catch(NumberFormatException nfe) {
+                    continue; // bad data, ignore.
+                }
                 LimeXMLDocument currDoc=null;
                 try {
                     currDoc = new LimeXMLDocument(currNode,rootElement);
