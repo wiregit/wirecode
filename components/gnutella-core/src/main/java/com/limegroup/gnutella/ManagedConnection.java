@@ -555,6 +555,7 @@ public class ManagedConnection extends Connection
     private void send(Message m, int priority) {
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
+
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time....
         if ((softMaxHops > -1) &&
@@ -564,7 +565,6 @@ public class ManagedConnection extends Connection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             _outputQueue[priority].add(m);

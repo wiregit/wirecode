@@ -128,13 +128,6 @@ public class PingReply extends Message implements Serializable, IpPort {
                       Statistics.instance().calculateDailyUptime(),
                       UDPService.instance().isGUESSCapable());
         */
-
-        GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
-                            RouterService.isSupernode(),
-                            UDPService.instance().isGUESSCapable());
-        //add locale
-        ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
-                 ApplicationSettings.LANGUAGE.getValue());
         
         return create(guid,
                       ttl,
@@ -143,7 +136,11 @@ public class PingReply extends Message implements Serializable, IpPort {
                       (long)RouterService.getNumSharedFiles(),
                       (long)RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
-                      ggep);
+                      newGGEPWithLocale
+                      (Statistics.instance().calculateDailyUptime(),
+                       RouterService.isSupernode(),
+                       UDPService.instance().isGUESSCapable(),
+                       ApplicationSettings.LANGUAGE.getValue()));
     }
 
     /**
@@ -331,6 +328,25 @@ public class PingReply extends Message implements Serializable, IpPort {
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
+    
+    /**
+     * create method with a specified locale
+     */
+    public static PingReply
+        create(byte[] guid, byte ttl,
+               int port, byte[] ip, long files, long kbytes,
+               boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
+               String locale) {
+        return create(guid,
+                      ttl,
+                      port,
+                      ip,
+                      files,
+                      kbytes,
+                      isUltrapeer,
+                      newGGEPWithLocale(dailyUptime, isUltrapeer, 
+                                        isGuessCapable, locale));
+    }
 
     /**
      * Returns a new <tt>PingReply</tt> instance with all the same data
@@ -341,11 +357,19 @@ public class PingReply extends Message implements Serializable, IpPort {
      *  and all of the data from this <tt>PingReply</tt>
      */
     public PingReply mutateGUID(byte[] guid) {
-        return PingReply.create(guid, 
-                                getTTL(), getPort(),
-                                getIPBytes(), getFiles(), getKbytes(),
-                                isUltrapeer(), getDailyUptime(),
-                                supportsUnicast());        
+        if(CLIENT_LOCALE != null && !"".equals(CLIENT_LOCALE))
+            return PingReply.create(guid,
+                                    getTTL(), getPort(),
+                                    getIPBytes(), getFiles(), getKbytes(),
+                                    isUltrapeer(), getDailyUptime(),
+                                    supportsUnicast(),
+                                    getClientLocale());
+        else 
+            return PingReply.create(guid, 
+                                    getTTL(), getPort(),
+                                    getIPBytes(), getFiles(), getKbytes(),
+                                    isUltrapeer(), getDailyUptime(),
+                                    supportsUnicast());        
     }
 
     /**
@@ -656,6 +680,20 @@ public class PingReply extends Message implements Serializable, IpPort {
             Assert.that(false, "Couldn't encode QueryKey" + queryKey);
             return null;
         }
+    }
+
+    
+    private static GGEP 
+        newGGEPWithLocale(int dailyUptime, boolean isUltrapeer, 
+                          boolean isGuessCapable, String locale) {
+        
+        GGEP g = newGGEP(dailyUptime,
+                         isUltrapeer,
+                         isGuessCapable);
+        g.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
+              locale);
+        
+        return g;
     }
 
     /**

@@ -35,6 +35,11 @@ public final class PongCacher {
     public static final int EXPIRE_TIME = 6000;
 
     /**
+     * Constant for expiring locale specific pongs
+     */
+    public static final int EXPIRE_TIME_LOC = 2*EXPIRE_TIME;
+
+    /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
     private static final Map PONGS = new HashMap();
@@ -61,12 +66,11 @@ public final class PongCacher {
      * @return the <tt>List</tt> of cached pongs -- continually updated
      */
     public List getBestPongs(String loc) {
-        synchronized(PONGS) {
+        synchronized(PONGS) { 
             List pongs = new LinkedList();
             long curTime = System.currentTimeMillis();
             List removeList = 
                 addBestPongs(loc, pongs, curTime, 0);
-            
             removePongs(loc, removeList);
             
             if(!ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc)
@@ -90,6 +94,11 @@ public final class PongCacher {
      */
     private List addBestPongs(String loc, List pongs, 
                               long curTime, int i) {
+        int exp_time = 
+            (ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc))?
+            EXPIRE_TIME :
+            EXPIRE_TIME_LOC;
+        
         List remove = null;
         if(PONGS.containsKey(loc)) { 
             BucketQueue bq = (BucketQueue)PONGS.get(loc);
@@ -97,7 +106,7 @@ public final class PongCacher {
             for(;iter.hasNext() && i < NUM_HOPS; i++) {
                 PingReply pr = (PingReply)iter.next();
                 
-                if(curTime - pr.getCreationTime() > EXPIRE_TIME) {
+                if(curTime - pr.getCreationTime() > exp_time) {
                     if(remove == null) 
                         remove = new LinkedList();
                     remove.add(pr);
@@ -130,7 +139,6 @@ public final class PongCacher {
      * @param pr the <tt>PingReply</tt> to add
      */
     public void addPong(PingReply pr) {
-        
         // if we're not an Ultrapeer, we don't care about caching the pong
         if(!RouterService.isSupernode()) return;
 
