@@ -25,7 +25,7 @@ public class UpdateFileParser {
 
     public UpdateFileParser(String xml) throws SAXException, IOException {
         if(xml==null || xml.equals(""))
-            throw new SAXException(new Exception());
+            throw new SAXException("xml is null or empty string");
         InputSource inputSource = new InputSource(new StringReader(xml));
         Document d = null;
         synchronized(this.parser) {
@@ -33,7 +33,7 @@ public class UpdateFileParser {
             d = parser.getDocument();
         }
         if(d==null)//problems parsing?
-            throw new SAXException(new Exception());
+            throw new SAXException("document is null");
         populateValues(d);
     }
     
