@@ -254,7 +254,7 @@ public final class NormalUploadState implements HTTPMessage {
                 * uSpeed / 100.f
                 // reduced upload speed if we are an ultrapeer
                 - RouterService.getConnectionManager()
-                .getMeasuredUpstreamBandwidth()*1.25f, 1.f )
+                .getMeasuredUpstreamBandwidth()*1.f, 1.f )
 	        // we need bytes per second
 	        * 1024;
 	    return ret;
