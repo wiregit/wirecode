@@ -19,7 +19,7 @@ public class PromotionManager {
 	 * not final so that tests won't take forever.
 	 */
 	private FixedSizeExpiringSet _UDPListRequestors 
-		= new FixedSizeExpiringSet(200, 5 * 1000);
+		= new FixedSizeExpiringSet(2000, 30 * 1000);
 	
 	/**
 	 * whether the reply handler should receive a reply.  

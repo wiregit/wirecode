@@ -36,15 +36,15 @@ public class UDPCrawlerPing extends VendorMessage {
 	 */
 	private byte _format;
 	
-	public static final byte PLAIN = 0;
+	public static final byte PLAIN = 0x0;
 	
-	public static final byte CONNECTION_TIME = 1;
-	public static final byte LOCALE_INFO = 2;
-	public static final byte NEW_ONLY = 4;
-	//public static final byte SAMPLE_FEATURE = 8; //its a bitmask, so the next feature would be 16, etc.
+	public static final byte CONNECTION_TIME = 0x1;
+	public static final byte LOCALE_INFO = 0x2;
+	public static final byte NEW_ONLY = 0x4;
+	//public static final byte SAMPLE_FEATURE = 0x8; //its a bitmask, so the next feature would be 0x16, etc.
 	
 	//all features OR'd.
-	public static final byte FEATURE_MASK = 7; 
+	public static final byte FEATURE_MASK = 0x7; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
