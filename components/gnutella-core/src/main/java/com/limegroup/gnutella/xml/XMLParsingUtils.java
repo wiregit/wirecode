@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.xml;
 
+// This class only works with our simplified schema
+
 import com.limegroup.gnutella.util.Comparators;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -52,8 +55,21 @@ public class XMLParsingUtils {
     }
     public static List split(String aggregatedXmlDocuments) {
         List results = new ArrayList();
-        String[] split = aggregatedXmlDocuments.split("<\\?xml");
-        for(int i=1; i<split.length; i++) results.add("<?xml" + split[i]);
+        //Java 1.4 code
+        //String[] split = aggregatedXmlDocuments.split("<\\?xml");
+        //for(int i=1; i<split.length; i++) results.add("<?xml" + split[i]);
+        int begin=aggregatedXmlDocuments.indexOf("<?xml");
+        if(begin==-1) return Collections.EMPTY_LIST;
+        int end=aggregatedXmlDocuments.indexOf("<?xml",begin+1);
+        while(true) {
+            if(end==-1) {
+                results.add(aggregatedXmlDocuments.substring(begin));
+                break;
+            }
+            results.add(aggregatedXmlDocuments.substring(begin,end));
+            begin = end;
+            end = aggregatedXmlDocuments.indexOf("<?xml",begin+1);
+        }
         return results;
     }
     //implementation
@@ -61,19 +77,19 @@ public class XMLParsingUtils {
         if(type.endsWith("y")) return type.substring(0,type.length()-1)+"ies";
         return type+"s";
     }
-//     public static void main(String[] args) throws Exception {
-//         String xml = "<?xml version=\"1.0\"?>"+
-//             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\">"+
-//             "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
-//             "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
-//             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
-//         Result r = parse(xml);
-//         System.out.println("Schema URI: " + r.schemaURI);
-//         System.out.println("Type: " + r.type);
-//         System.out.println(r.canonicalAttributeMaps);
-//         System.out.println(plural("property"));
-//         System.out.println(plural("book"));
-//         List split = split(xml+xml+xml);
-//         System.out.println(split);
-//     }
+    public static void main(String[] args) throws Exception {
+        String xml = "<?xml version=\"1.0\"?>"+
+            "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\">"+
+            "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+            "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
+            "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
+        Result r = parse(xml);
+        System.out.println("Schema URI: " + r.schemaURI);
+        System.out.println("Type: " + r.type);
+        System.out.println(r.canonicalAttributeMaps);
+        System.out.println(plural("property"));
+        System.out.println(plural("book"));
+        List split = split(xml+xml+xml);
+        System.out.println(split);
+    }
 }
