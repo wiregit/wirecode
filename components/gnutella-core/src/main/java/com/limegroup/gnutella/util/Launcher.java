@@ -85,14 +85,27 @@ public class Launcher {
 	 *  http://www.whatevername.com
 	 * @effects launches the passed-in file on the current platform. */
 	public static void launch(String path) throws IOException {
-		if(Utilities.isWindows()) {
-			launchFileWindows(path);
-		}	   
-		else if(Utilities.isMac()) {
-			launchFileMac(path);
+		String s = path.toLowerCase();
+		if(!path.endsWith(".exe") &&
+		   !path.endsWith(".vbs") &&
+		   !path.endsWith(".lnk") &&
+		   !path.endsWith(".bat") &&
+		   !path.endsWith(".sys") &&
+		   !path.endsWith(".com")) {
+			if(Utilities.isWindows()) {
+				launchFileWindows(path);
+			}	   
+			else if(Utilities.isMac()) {
+				launchFileMac(path);
+			}
+			else if(Utilities.isUnix()) {
+				launchFileUnix(path);
+			}
 		}
-		else if(Utilities.isUnix()) {
-			launchFileUnix(path);
+		else {
+			String msg = "LimeWire will not launch the specified "+
+			"file for security reasons.";
+			Utilities.showError(msg);
 		}
 	}
 
