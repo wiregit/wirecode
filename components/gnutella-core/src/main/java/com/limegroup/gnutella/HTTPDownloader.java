@@ -562,8 +562,13 @@ public class HTTPDownloader implements Runnable {
 	// if an error condition was somehow reached.
 	private void errorClose() {
 		try {
-			_br.close();
-			_fos.close();
+
+			if (_br != null) // i dont think this should ever happen
+				_br.close();
+			
+			if (_fos != null)
+				_fos.close();
+
 		} catch(IOException e) {
 			return;
 		}
