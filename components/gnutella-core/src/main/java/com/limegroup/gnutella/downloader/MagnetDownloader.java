@@ -133,7 +133,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 urns.add(urn);
             
             return new URLRemoteFileDesc(
-                url.getHost(),  //TODO: can this be null?
+                url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
                 filename(filename, url),
