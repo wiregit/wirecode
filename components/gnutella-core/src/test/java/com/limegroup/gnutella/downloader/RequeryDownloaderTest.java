@@ -30,7 +30,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 	public void testLegacy() throws Exception {
         //Test serialization.
         AutoDownloadDetails details=new AutoDownloadDetails(
-            "test", "", new byte[16], new MediaType("", "", "", new String[0]));
+            "test", "", new byte[16], new MediaType("", "", new String[0]));
         IncompleteFileManager ifm=new IncompleteFileManager();
         VerifyingFile vf = new VerifyingFile(true, 100);
         vf.addInterval(new Interval(10,20));
