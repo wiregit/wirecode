@@ -118,6 +118,13 @@ public class UDPService implements Runnable {
      * LOCKING: this
      */
     private boolean _tcpAddressInitialized;
+    
+    
+    /**
+     * Whether we have received a Pong carrying our address.
+     * LOCKING: this
+     */
+    private boolean _receivedIPPong;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -332,6 +339,8 @@ public class UDPService implements Runnable {
                                 byte [] newAddr = r.getMyInetAddress().getAddress();
                                 
                                 synchronized(this){ 
+                                    
+                                    _receivedIPPong=true;
                                     
                                     // we may receive a late pong after the isp has
                                     // changed our address.  We should not let that pong
@@ -656,7 +665,8 @@ public class UDPService implements Runnable {
 	/**
 	 * 
 	 * @return whether this node can do Firewall-to-firewall transfers.
-	 * If we are not connected, see if we ever disabled fwt in the past.
+	 * If we are not connected, or haven't received a pong yet,
+	 * see if we ever disabled fwt in the past.
 	 * If we are, the criteria are:
 	 *   - we can accept solicited udp
 	 *   - our port does not change and is the same as our tcp port
@@ -664,7 +674,7 @@ public class UDPService implements Runnable {
 	 *   connections.
 	 */
 	public boolean canDoFWT(){
-	    if (!RouterService.isConnected())
+	    if (!RouterService.isConnected() || !_receivedIPPong)
 	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
 	    
 	    boolean ret = true;
