@@ -166,8 +166,9 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
+                                DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0);
 
@@ -1284,10 +1285,67 @@ public class QueryRequest extends Message implements Serializable{
         return QUERY_KEY;
     }
 
+    /** @return true if the query has no constraints on the type of results
+     *  it wants back.
+     */
+    public boolean desiresAll() {
+        return (_metaMask == null);
+    }
+
+    /** @return true if the query desires 'Audio' results back.
+     */
+    public boolean desiresAudio() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresAudio(_metaMask.byteValue());
+        return true;
+    }
+    
+    /** @return true if the query desires 'Video' results back.
+     */
+    public boolean desiresVideo() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresVideo(_metaMask.byteValue());
+        return true;
+    }
+    
+    /** @return true if the query desires 'Document' results back.
+     */
+    public boolean desiresDocuments() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresDocuments(_metaMask.byteValue());
+        return true;
+    }
+    
+    /** @return true if the query desires 'Image' results back.
+     */
+    public boolean desiresImages() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresImages(_metaMask.byteValue());
+        return true;
+    }
+    
+    /** @return true if the query desires 'Programs/Packages' for Windows
+     *  results back.
+     */
+    public boolean desiresWindowsPrograms() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresWindowsPrograms(_metaMask.byteValue());
+        return true;
+    }
+    
+    /** @return true if the query desires 'Programs/Packages' for Linux/OSX
+     *  results back.
+     */
+    public boolean desiresLinuxOSXPrograms() {
+        if (_metaMask != null) 
+            return MetaTypeParser.desiresLinuxOSXPrograms(_metaMask.byteValue());
+        return true;
+    }
+
 	// inherit doc comment
 	public void recordDrop() {
 		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);	   
+			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 		}
 	}
 
@@ -1337,6 +1395,43 @@ public class QueryRequest extends Message implements Serializable{
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
+
+    
+    private static final class MetaTypeParser {
+        public static final int AUDIO_MASK  = 0x0004;
+        public static final int VIDEO_MASK  = 0x0008; 
+        public static final int DOC_MASK  = 0x0010;
+        public static final int IMAGE_MASK  = 0x0020;
+        public static final int WIN_PROG_MASK  = 0x0040;
+        public static final int LIN_PROG_MASK  = 0x0080;
+       
+        public static boolean desiresAudio(byte b) {
+            return (b & AUDIO_MASK) > 0;
+        }
+        
+        public static boolean desiresVideo(byte b) {
+            return (b & VIDEO_MASK) > 0;
+        }
+        
+        public static boolean desiresDocuments(byte b) {
+            return (b & DOC_MASK) > 0;
+        }
+        
+        public static boolean desiresImages(byte b) {
+            return (b & IMAGE_MASK) > 0;
+        }
+        
+        public static boolean desiresWindowsPrograms(byte b) {
+            return (b & WIN_PROG_MASK) > 0;
+        }
+        
+        public static boolean desiresLinuxOSXPrograms(byte b) {
+            return (b & LIN_PROG_MASK) > 0;
+        }
+        
+
+    }
+
 }
 
 
