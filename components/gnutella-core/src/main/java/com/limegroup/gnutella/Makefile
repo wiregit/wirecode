@@ -36,6 +36,10 @@ util:
 filters:
 	$(MAKE) -C filters
 
+# to remove all class files
+clean: 
+	rm -rf *.class; rm -rf */*.class
+
 
 # .PHONY: doc
 # doc:
