@@ -15,6 +15,7 @@ import java.io.*;
 public class UpdateManager {
     
     private String latestVersion;
+    private String message = "";
     private static UpdateManager INSTANCE=null;
     
 
@@ -35,6 +36,7 @@ public class UpdateManager {
             String xml = new String(verifier.getMessageBytes(),"UTF-8");
             UpdateFileParser parser = new UpdateFileParser(xml);
             latestVersion = parser.getVersion();
+            message = parser.getMessage();
         } catch(Exception e) {//TODO2: Deal w/ each exception separately
             latestVersion = CommonUtils.getLimeWireVersion();
         }
@@ -62,7 +64,9 @@ public class UpdateManager {
         if(isGreaterVersion(myVersion))
             return;
         //OK. myVersion < latestVersion
-        gui.notifyUserAboutUpdate(latestVersion);
+        //TODO: get international string for first part
+        String guiMessage = "Please upgrade to "+latestVersion+". "+message;
+        gui.notifyUserAboutUpdate(guiMessage, CommonUtils.isPro());
     }
 
     public void checkAndUpdate(Connection connection) {
@@ -89,13 +93,14 @@ public class UpdateManager {
                 connection.setRequestProperty("User-Agent",
                                               CommonUtils.getHttpServer());
                 connection.setRequestProperty(  /*no persistence*/
-                HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+                    HTTPHeaderName.CONNECTION.httpStringValue(), "close");
                 connection.setRequestProperty("accept","text/html");//??
                 
                 InputStream in = connection.getInputStream();
                 int len = connection.getContentLength();
                 data = new byte[len];
                 for(int i=0; i<len; i++) {
+                    //TODO2: more efficient if I read a chunk at a time
                     int a = in.read();
                     if(a==-1)
                          break;

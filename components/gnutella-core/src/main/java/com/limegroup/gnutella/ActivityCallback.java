@@ -90,7 +90,7 @@ public interface ActivityCallback
     /**
      * A new version of LimeWire is available, notify user.
      */
-    public void notifyUserAboutUpdate(String version);
+    public void notifyUserAboutUpdate(String message, boolean isPro);
 
 
     /**

@@ -17,6 +17,8 @@ public class UpdateFileParser {
      * hashmap, and add getter and setter methods.
      */
     private String newVersion=null;
+    
+    private String updateMessage=null;
 
     public UpdateFileParser(String xml) throws SAXException, IOException {
         if(xml==null || xml.equals(""))
@@ -44,6 +46,8 @@ public class UpdateFileParser {
             String name = node.getNodeName().toLowerCase().trim();
             if(name.equals("version")) 
                 newVersion = LimeXMLUtils.getText(node.getChildNodes());
+            else if(name.equals("message"))
+                updateMessage = LimeXMLUtils.getText(node.getChildNodes());
         }
     }
     
@@ -52,5 +56,9 @@ public class UpdateFileParser {
      */ 
     public String getVersion() {
         return newVersion;
+    }
+    
+    public String getMessage() {
+        return updateMessage;
     }
 }
