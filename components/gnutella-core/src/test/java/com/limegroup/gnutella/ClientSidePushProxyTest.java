@@ -237,10 +237,12 @@ public class ClientSidePushProxyTest
         assertNotNull(reply.getPushProxies());
 
         // check out PushProxy info
-        PushProxyInterface[] proxies = reply.getPushProxies();
-        assertEquals(proxies.length, 1);
-        assertEquals(proxies[0].getPushProxyPort(), 6355);
-        assertTrue(proxies[0].getPushProxyAddress().getHostAddress().startsWith("127"));
+        Set proxies = reply.getPushProxies();
+        assertEquals(1, proxies.size());
+        Iterator iter = proxies.iterator();
+        PushProxyInterface ppi = (PushProxyInterface)iter.next();
+        assertEquals(ppi.getPushProxyPort(), 6355);
+        assertTrue(ppi.getPushProxyAddress().getHostAddress().startsWith("127"));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
@@ -299,8 +301,9 @@ public class ClientSidePushProxyTest
         ss.setSoTimeout(4*TIMEOUT);
 
         // send a reply with some PushProxy info
-        PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
-        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
+        Set proxies = new HashSet();
+        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
@@ -447,9 +450,10 @@ public class ClientSidePushProxyTest
         ss.setSoTimeout(4*TIMEOUT);
 
         // send a reply with some BAD PushProxy info
-        PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
-        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
-        proxies[1] = new QueryReply.PushProxyContainer("127.0.0.1", 8000);
+        //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
+        Set proxies = new HashSet();
+        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 8000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "berkeley.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 

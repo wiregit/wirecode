@@ -380,7 +380,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         byte[] bytes=out.toByteArray();
         int ggepLen = _ggepUtil.getQRGGEP(true, false, 
-                                          new PushProxyInterface[0]).length;
+                                          new HashSet()).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
@@ -424,7 +424,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         bytes=out.toByteArray();
         ggepLen = _ggepUtil.getQRGGEP(true, false, 
-                                      new PushProxyInterface[0]).length;
+                                      new HashSet()).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals(
@@ -517,7 +517,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             // this shouldn't even work....
             testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false,
-                                                    new PushProxyInterface[0]), 
+                                                    new HashSet()), 
                                 0, null);
             assertTrue(false);
         }
@@ -525,7 +525,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test just BH GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, 
-                                                new PushProxyInterface[0]), 
+                                                new HashSet()), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -533,7 +533,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test just multicast GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, 
-                                                new PushProxyInterface[0]), 
+                                                new HashSet()), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -541,7 +541,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test combo GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true,
-                                                new PushProxyInterface[0]),
+                                                new HashSet()),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -558,18 +558,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
     public void basicTest(final boolean browseHost, 
                           final boolean multicast) throws Exception {
-        GGEP testGGEP = null;
         int numHeaders = 1;
 
         // first take input of proxies
         String[] hosts = {"www.limewire.com", "www.limewire.org",
                           "www.susheeldaswani.com", "www.stanford.edu"};
-        PushProxyInterface[] proxies = new PushProxyInterface[hosts.length];
-        for (int i = 0; i < proxies.length; i++)
-            proxies[i] = new QueryReply.PushProxyContainer(hosts[i], 6346);
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                proxies), 
-                            0, null);
+        Set proxies = new HashSet();
+        for (int i = 0; i < hosts.length; i++)
+            proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
+        GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
+                                                     proxies), 
+                                 0, null);
         if (browseHost) {
             numHeaders++;
             assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -580,11 +579,25 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         }
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
         assertEquals(numHeaders, testGGEP.getHeaders().size());
-        PushProxyInterface[] retProxies = 
+        Set retProxies = 
             _ggepUtil.getPushProxies(new GGEP[] { testGGEP });
-        assertTrue(retProxies.length == 3);
-        for (int i = 0; i < retProxies.length; i++)
-            assertTrue(retProxies[i].equals(proxies[i]));
+        assertEquals(4, retProxies.size());
+
+        PushProxyInterface[] array1 = 
+            (PushProxyInterface[])retProxies.toArray(new QueryReply.PushProxyContainer[0]);
+        PushProxyInterface[] array2 = 
+            (PushProxyInterface[])proxies.toArray(new QueryReply.PushProxyContainer[0]);
+
+        assertEquals(retProxies, proxies);
+        //for(int i=0; i<array1.length; i++) {
+        //  assertEquals(array1[i], array2[i]);
+        //}
+        //Iterator iter1 = retProxies.iterator();
+        //Iterator iter2 = proxies.iterator();
+        //while(iter1.hasNext() && iter2.hasNext()) {
+        //  assertEquals((PushProxyInterface)iter1.next(), 
+        //               (PushProxyInterface)iter2.next());
+        //}
         
     }
 
@@ -611,7 +624,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         badBytes[4] = (byte) 3;
         badBytes[5] = (byte) 4;
         ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-        assertTrue(_ggepUtil.getPushProxies(ggep) == null);
+        assertTrue(_ggepUtil.getPushProxies(ggep).isEmpty());
 
         // test a bad port
 
@@ -631,23 +644,34 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         badBytes[4] = (byte) 0;
         badBytes[5] = (byte) 0;
         ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-        assertTrue(_ggepUtil.getPushProxies(ggep) != null);
+        assertNotNull(_ggepUtil.getPushProxies(ggep));
 
 
         // try to get proxies when the lengths are wrong
         for (int i = 0; i < 100; i++) {
             badBytes = new byte[i];
             // just put some filler in here....
-            for (int j = 0; j < badBytes.length; j++)
-                badBytes[j] = (byte)i;
+            for (int j = 0; j < badBytes.length; j++) {
+                // make sure each one is unique, as the returned
+                // Set from getPushProxies will filter duplicates
+                if(j%6 == 0) {
+                    badBytes[j] = (byte)j;
+                }
+                else{
+                    badBytes[j] = (byte)i;
+                }
+            }
             ggep[0] = new GGEP();
             ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
             if (i == 0)
-                assertTrue(_ggepUtil.getPushProxies(ggep) == null);
+                assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
             else if (i < 6) 
-                assertTrue(_ggepUtil.getPushProxies(ggep) == null);
-            else // length is fine
-                assertEquals(_ggepUtil.getPushProxies(ggep).length, (i / 6));
+                assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
+            else  {// length is fine
+                assertEquals((i / 6), 
+                             _ggepUtil.getPushProxies(ggep).size());
+                
+            }
         }
 
     }
@@ -668,24 +692,43 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             ggep[0] = new GGEP();
             ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, bytes);
 
-            PushProxyInterface[] proxies = _ggepUtil.getPushProxies(ggep);
-            assertTrue(proxies != null);
+            Set proxies = _ggepUtil.getPushProxies(ggep);
+            assertNotNull(proxies);
 
-            for (int j = 0; j < proxies.length; j++) {
+            Iterator iter = proxies.iterator();
+            int j = 0;
+            while(iter.hasNext()) {
                 final int inIndex = 6*j;
-                InetAddress addr = proxies[j].getPushProxyAddress();
-                int port = proxies[j].getPushProxyPort();
+                PushProxyInterface ppi = (PushProxyInterface)iter.next();
+                InetAddress addr = ppi.getPushProxyAddress();
+                byte[] tempAddr = new byte[4];
+                System.arraycopy(bytes, inIndex, tempAddr, 0, 4);
+
+                InetAddress addr2 = InetAddress.getByAddress(tempAddr);
+                String address = addr2.getHostAddress();
+                
+                int curPort = ByteOrder.leb2int(bytes, inIndex+4, 2);
+                PushProxyInterface ppi2 = 
+                    new QueryReply.PushProxyContainer(address, curPort);
+
+                assertTrue(proxies.contains(ppi2));
+                //assertEquals(addr, addr2);
+                //int port = ppi.getPushProxyPort();
+                /*
+                final int inIndex = 6*j;
                 
                 byte[] addrBytes = addr.getAddress();
                 byte[] portBytes = new byte[2];
                 ByteOrder.short2leb((short)port, portBytes, 0);
                 
-                assertTrue(addrBytes[0] == bytes[inIndex]);
-                assertTrue(addrBytes[1] == bytes[inIndex+1]);
-                assertTrue(addrBytes[2] == bytes[inIndex+2]);
-                assertTrue(addrBytes[3] == bytes[inIndex+3]);
-                assertTrue(portBytes[0] == bytes[inIndex+4]);
-                assertTrue(portBytes[1] == bytes[inIndex+5]);
+                assertEquals(addrBytes[0], bytes[inIndex]);
+                assertEquals(addrBytes[1], bytes[inIndex+1]);
+                assertEquals(addrBytes[2], bytes[inIndex+2]);
+                assertEquals(addrBytes[3], bytes[inIndex+3]);
+                assertEquals(portBytes[0], bytes[inIndex+4]);
+                assertEquals(portBytes[1], bytes[inIndex+5]);
+                */
+                j++;
             }
         }
 
@@ -698,9 +741,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           "www.susheeldaswani.com", "www.berkeley.edu"};
 
         for (int outer = 0; outer < hosts.length; outer++) {
-            PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
-            for (int i = 0; i < proxies.length; i++)
-                proxies[i] = new QueryReply.PushProxyContainer(hosts[i], 6346);
+            //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
+            Set proxies = new HashSet();
+            for (int i = 0; i < hosts.length; i++)
+                proxies.add(
+                    new QueryReply.PushProxyContainer(hosts[i], 6346));
             
             QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
                                            6346, new byte[4], 0, new Response[0],
@@ -715,18 +760,30 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             QueryReply readQR = (QueryReply) Message.read(bais);
 
             // test read from network            
-            PushProxyInterface[] retProxies = readQR.getPushProxies();
+            Set retProxies = readQR.getPushProxies();
             assertTrue(retProxies != null);
             assertTrue(retProxies != proxies);
-            for (int i = 0; i < retProxies.length; i++)
-                assertTrue(retProxies[i].equals(proxies[i]));
+            Iterator iter1 = retProxies.iterator();
+            Iterator iter2 = proxies.iterator();
+            while(iter1.hasNext() && iter2.hasNext()) {
+                assertEquals((PushProxyInterface)iter1.next(), 
+                             (PushProxyInterface)iter2.next());
+            }
+            //for (int i = 0; i < retProxies.length; i++)
+            //  assertTrue(retProxies[i].equals(proxies[i]));
 
             // test simple accessor
             retProxies = qr.getPushProxies();
             assertTrue(retProxies != null);
             assertTrue(retProxies != proxies);
-            for (int i = 0; i < retProxies.length; i++)
-                assertTrue(retProxies[i].equals(proxies[i]));
+            iter1 = retProxies.iterator();
+            iter2 = proxies.iterator();
+            while(iter1.hasNext() && iter2.hasNext()) {
+                assertEquals((PushProxyInterface)iter1.next(), 
+                             (PushProxyInterface)iter2.next());
+            }
+            //for (int i = 0; i < retProxies.length; i++)
+            //  assertTrue(retProxies[i].equals(proxies[i]));
 
         }
     }
