@@ -21,7 +21,7 @@ import com.limegroup.gnutella.browser.ExternalControl;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public class Acceptor extends Thread {
+public class Acceptor implements Runnable {
     /**
      * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
@@ -91,10 +91,10 @@ public class Acceptor extends Thread {
     /**
      * Launches the port monitoring thread.
      */
-	public void initialize() { 
-        setName("Acceptor");
-        setDaemon(true);
-        start();
+	public void start() { 
+		Thread at = new Thread(this, "Acceptor");
+		at.setDaemon(true);
+		at.start();
 	}
 
     /**
@@ -212,7 +212,6 @@ public class Acceptor extends Thread {
             UDPService.instance().setListeningSocket(udpServiceSocket);
 
             debug("Acceptor.setListeningPort(): listening UDP/TCP on " + _port);
-            return;
         }
     }
 
@@ -367,9 +366,9 @@ public class Acceptor extends Thread {
          * as Gnutella, HTTP, or MAGNET.
          */
         public void run() {
-			ConnectionManager cm      = RouterService.getConnectionManager();
-			UploadManager um          = RouterService.getUploadManager();
-			DownloadManager dm        = RouterService.getDownloadManager();
+			ConnectionManager cm = RouterService.getConnectionManager();
+			UploadManager um     = RouterService.getUploadManager();
+			DownloadManager dm   = RouterService.getDownloadManager();
             try {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
