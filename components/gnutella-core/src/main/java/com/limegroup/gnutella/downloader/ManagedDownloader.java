@@ -349,7 +349,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {
                 int success=tryAllDownloads();
                 synchronized (this) {
-                    //Move busy locations to normal
+                    //Move busy locations to normal 
                     files.addAll(busy);
                     busy.clear();
                 }
