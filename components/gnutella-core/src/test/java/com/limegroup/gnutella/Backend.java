@@ -430,7 +430,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 		SettingsManager settings = SettingsManager.instance();
 		settings.setPort(port);
 		settings.setExtensions(SHARED_EXTENSION);
-		ConnectionSettings.KEEP_ALIVE.setValue(10);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(10);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);

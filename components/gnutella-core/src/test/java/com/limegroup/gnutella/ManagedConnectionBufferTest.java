@@ -39,7 +39,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 	public void setUp() throws Exception {
 		setStandardSettings();
 		
-		ConnectionSettings.KEEP_ALIVE.setValue(2);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(2);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(true);
 		ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
 

@@ -59,7 +59,7 @@ public class RequeryDownloadTest
 
     public void setUp() throws Exception {
         ManagedDownloader.NO_DELAY = true;
-		ConnectionSettings.KEEP_ALIVE.setValue(0);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         SettingsManager.instance().setPort(6346);

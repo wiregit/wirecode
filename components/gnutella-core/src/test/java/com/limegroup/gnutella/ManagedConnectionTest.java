@@ -44,7 +44,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 
         // we start a router service so that all classes have correct

@@ -59,7 +59,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-		ConnectionSettings.KEEP_ALIVE.setValue(0);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }        
     

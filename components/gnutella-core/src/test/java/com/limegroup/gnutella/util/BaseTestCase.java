@@ -322,7 +322,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         SettingsManager settings = SettingsManager.instance();
         AbstractSettings.revertToDefault();
 		settings.setExtensions("tmp");
-		ConnectionSettings.KEEP_ALIVE.setValue(4);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(4);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);

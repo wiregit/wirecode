@@ -39,7 +39,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(HandshakeResponder properties, int port) {
-		//ConnectionSettings.KEEP_ALIVE.setValue(3);
+		//ConnectionSettings.NUM_CONNECTIONS.setValue(3);
         this.properties=properties;
         this.port=port;
         Thread runner=new Thread(this);
