@@ -9,7 +9,7 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -282,8 +282,8 @@ public class Connection {
             // Set the Acceptors IP address
             Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
             
-            _in = new ChannelInputStream(_socket.getChannel());
-            _out = new ChannelOutputStream(_socket.getChannel());
+            _in = _socket.getInputStream();
+            _out = _socket.getOutputStream();           
             if (_in==null || _out==null) throw new IOException();
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
@@ -671,6 +671,16 @@ public class Connection {
             if (line==null)
                 throw new IOException();
             return line;
+        } catch (CancelledKeyException e) {
+            //There appears to be a bug in Java 1.4.1-beta on Windows where this
+            //can be thrown if a connection is closed by the client while the
+            //read is in progress.
+            throw new IOException();
+        } catch (NullPointerException e) {
+            //There appears to be a bug in Java 1.4.1-beta on Windows where this
+            //can be thrown if a connection is closed by the client while the
+            //read is in progress.
+            throw new IOException();
         } finally {
             //Restore socket timeout.
             _socket.setSoTimeout(oldTimeout);

@@ -108,7 +108,6 @@ public class ConnectionDriver implements ConnectionListener {
      */
     private void loopForMessages() {
         //TODO: factor this
-        //TODO: ChannelClosedException in register
 
         while (true) {
             try {
@@ -128,7 +127,11 @@ public class ConnectionDriver implements ConnectionListener {
                 _selector.select();
             } catch (IOException e) {
                 //It's really not clear why this can happen, but it does
-                //occasionally.  Ignore
+                //occasionally.  Ignore.
+            } catch (NullPointerException e) {
+                //There appears to be a bug in Java 1.4.1-beta on Windows where
+                //this can be thrown if a connection is closed by the client.
+                //Ignore.
             }
 
             //Handle all reads.  This generates event to listener (this), which
