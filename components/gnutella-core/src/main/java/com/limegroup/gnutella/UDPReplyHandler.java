@@ -285,7 +285,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
 	 */
-	public void handleUPListVM(UPListVendorMessage m) {
+	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		UDPService.instance().send(m, IP, PORT);
 	}
 	/* (non-Javadoc)

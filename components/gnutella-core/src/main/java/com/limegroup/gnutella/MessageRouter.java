@@ -526,12 +526,12 @@ public abstract class MessageRouter {
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         } 
-        else if(msg instanceof GiveUPVendorMessage) {
+        else if(msg instanceof UDPCrawlerPing) {
         	if(RECORD_STATS)
         		ReceivedMessageStatHandler.UDP_CRAWLER_PING.addMessage(msg);
-        	handleGiveUPVendorMessage((GiveUPVendorMessage)msg, handler);
+        	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
-        else if(msg instanceof UPListVendorMessage) {
+        else if(msg instanceof UDPCrawlerPong) {
         	if(RECORD_STATS)
         		;
         	//handleUPListVendorMessage((UPListVendorMessage)msg, handler);
@@ -2642,15 +2642,15 @@ public abstract class MessageRouter {
      * @param msg the request message
      * @param handler the UDPHandler to send it to.
      */
-    private void handleGiveUPVendorMessage(GiveUPVendorMessage msg, ReplyHandler handler){
+    private void handleUDPCrawlerPing(UDPCrawlerPing msg, ReplyHandler handler){
     	
     	//make sure the same person doesn't request too often
     	//note: this should only happen on the UDP receiver thread, that's why
     	//I'm not locking it.
     	if (!_promotionManager.getUDPListRequestors().add(handler.getInetAddress())) 
     		return; //this also takes care of multiple instances running on the same ip address.
-    	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
-    	handler.handleUPListVM(newMsg);
+    	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
+    	handler.handleUDPCrawlerPong(newMsg);
     }
     
     /**

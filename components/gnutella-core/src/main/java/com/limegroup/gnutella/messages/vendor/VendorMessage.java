@@ -332,11 +332,11 @@ public abstract class VendorMessage extends Message {
 
         if ((selector == F_GIVE_ULTRAPEER) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new GiveUPVendorMessage(guid,ttl,hops,version,restOf);
+        	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);
         
         if ((selector == F_ULTRAPEER_LIST) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UPListVendorMessage(guid,ttl,hops,version,restOf);
+        	return new UDPCrawlerPong(guid,ttl,hops,version,restOf);
         
         if ((selector == F_BEST_CANDIDATE) &&
         		(Arrays.equals(vendorID,F_LIME_VENDOR_ID)))

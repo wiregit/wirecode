@@ -166,7 +166,7 @@ public interface ReplyHandler {
     /**
      * Handles the UDP analog of "Crawler:" header
      */
-    public void handleUPListVM(UPListVendorMessage m);
+    public void handleUDPCrawlerPong(UDPCrawlerPong m);
     
     /**
      * Whether it supports unsolicited UDP

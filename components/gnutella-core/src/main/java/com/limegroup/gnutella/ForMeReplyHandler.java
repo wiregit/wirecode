@@ -289,7 +289,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
 	 */
-	public void handleUPListVM(UPListVendorMessage m) {
+	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		// Auto-generated method stub
 		
 	}

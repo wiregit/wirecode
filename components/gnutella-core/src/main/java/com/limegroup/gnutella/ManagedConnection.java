@@ -1696,7 +1696,7 @@ public class ManagedConnection extends Connection
 	/** 
 	 * this should not arrive through TCP.
 	 */
-	public void handleUPListVM(UPListVendorMessage m) {
+	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		
 	}
 
