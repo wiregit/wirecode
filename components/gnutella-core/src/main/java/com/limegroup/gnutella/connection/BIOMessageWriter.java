@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.Deflater;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
@@ -31,13 +33,30 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * Handle to the message queue that keeps track of priorities for messages
      * to be sent.
      */
-    private CompositeQueue QUEUE;
+    private final CompositeQueue QUEUE;
+    
+    /**
+     * Constant for the <tt>OutputStream</tt> to write to.
+     */
+    private final OutputStream OUTPUT_STREAM;
+    
+    /**
+     * Constant for the compressor for this connection.
+     */
+    private final Deflater DEFLATER;
+    
+    /**
+     * Cache the 'connection closed' exception, so we have to allocate
+     * one for every closed connection.
+     */
+    private static final IOException CONNECTION_CLOSED =
+        new IOException("connection closed");
     
     /**
      * Creates a new <tt>MessageWriter</tt> instance for the specified 
      * connection.
      * 
-     * @param conn the <tt>ManagedConnection</tt> containing this writer
+     * @param conn the <tt>Connection</tt> containing this writer
      * @return a new <tt>MessageWriter</tt> instance
      */
     public static MessageWriter createWriter(Connection conn) {
@@ -51,7 +70,10 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      */
     private BIOMessageWriter(Connection conn) {
         CONNECTION = conn;  
-        QUEUE = CompositeQueue.createQueue(CONNECTION, OUTPUT_QUEUE_LOCK);     
+        QUEUE = CompositeQueue.createQueue(CONNECTION, OUTPUT_QUEUE_LOCK); 
+        
+        OUTPUT_STREAM = conn.getOutputStream();
+        DEFLATER = conn.getDeflater();    
         Thread blockingWriter = new Thread(this, "blocking message writer");
         blockingWriter.setDaemon(true);
         blockingWriter.start(); 
@@ -75,13 +97,13 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.        
         try {
-            if ( CONNECTION.isWriteDeflated() ) {
-                priorUncompressed = _deflater.getTotalIn();
-                priorCompressed = _deflater.getTotalOut();
+            if ( CONNECTION.isWriteDeflated() ) {                
+                priorUncompressed = DEFLATER.getTotalIn();
+                priorCompressed = DEFLATER.getTotalOut();
             }
             
             try {
-                msg.write(_out);
+                msg.write(OUTPUT_STREAM);
             } catch(IOException ioe) {
                 close(); // make sure we close.
                 throw ioe;
@@ -89,6 +111,39 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
 
             updateWriteStatistics(msg, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
+            throw CONNECTION_CLOSED;
+        }
+    }
+    
+    /**
+     * Flushes any buffered messages sent through the send method.
+     */
+    public void flush() throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        
+        // The try/catch block is necessary for two reasons...
+        // See the notes in Connection.close above the calls
+        // to end() on the Inflater/Deflater and close()
+        // on the Input/OutputStreams for the details.
+        try {            
+            if (CONNECTION.isWriteDeflated()) {
+                priorUncompressed = DEFLATER.getTotalIn();
+                priorCompressed = DEFLATER.getTotalOut();
+            }
+
+            try {
+                OUTPUT_STREAM.flush();
+            } catch(IOException ioe) {
+                close();
+                throw ioe;
+            }
+
+            // we must update the write statistics again,
+            // because flushing forces the deflater to deflate.
+            updateWriteStatistics(null, priorUncompressed, priorCompressed);
+        } catch(NullPointerException npe) {
             throw CONNECTION_CLOSED;
         }
     }
@@ -103,12 +158,12 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         if( m != null )
             CONNECTION.stats().addBytesSent(m.getTotalLength());
         if(CONNECTION.isWriteDeflated()) {
-            CONNECTION.stats().addCompressedBytesSent(_deflater.getTotalOut());
+            CONNECTION.stats().addCompressedBytesSent(DEFLATER.getTotalOut());
             if(!CommonUtils.isJava118()) {
                 CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalIn() - pUn));
+                    (int)(DEFLATER.getTotalIn() - pUn));
                 CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalOut() - pComp));
+                    (int)(DEFLATER.getTotalOut() - pComp));
             }
         }
     }     
