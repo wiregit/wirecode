@@ -120,26 +120,4 @@ public final class HeaderNames {
 	 * to the crawler.
 	 */
 	public static final String PEERS = "Peers";
-
-    /** 
-     * The true/false values for some headers.  Note that these are not the only
-     * legal values--case doesn't matter--and LimeWire does not always use these
-     * constants.  Hopefully it will in the future.  
-     */
-    public static final String TRUE = "true";
-    public static final String FALSE = "false";
-
-    /**
-     * Returns true if v.toLowerCase().equals("true").
-     */
-    public static boolean isTrue(String v) {
-        return v!=null && v.toLowerCase().equals("true");
-    }
-
-    /**
-     * Returns true if v.toLowerCase().equals("false").
-     */
-    public static boolean isFalse(String v) {
-        return v!=null && v.toLowerCase().equals("false");
-    }
 }
