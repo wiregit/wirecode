@@ -17,6 +17,11 @@ public class MessageReaderProxy implements MessageReader {
 
     private final MessageReader DELEGATE;
     
+    /**
+     * Creates a new <tt>MessageReaderProxy</tt> for the specified connection.
+     * 
+     * @param conn the <tt>Connection</tt> this proxy will read messages for
+     */
     public MessageReaderProxy(Connection conn) {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
@@ -26,29 +31,23 @@ public class MessageReaderProxy implements MessageReader {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#createMessageFromTCP(java.nio.channels.SelectionKey)
-     */
+    // inherit doc comment
     public Message createMessageFromTCP(SelectionKey key) 
         throws BadPacketException, IOException {
         return DELEGATE.createMessageFromTCP(key);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#startReading()
-     */
+    // inherit doc comment
     public void startReading() throws IOException {
         DELEGATE.startReading();
     }
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#read()
-     */
+    
+    // inherit doc comment
     public Message read() throws IOException, BadPacketException {
         return DELEGATE.read();
     }
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#read(int)
-     */
+    
+    // inherit doc comment
     public Message read(int i) throws IOException, BadPacketException, 
         InterruptedIOException {
         return DELEGATE.read(i);
@@ -56,6 +55,11 @@ public class MessageReaderProxy implements MessageReader {
 
     public void routeMessage(Message msg) {
         DELEGATE.routeMessage(msg);
+    }
+
+    // inherit doc comment
+    public void handleMessage(SelectionKey key) {
+        DELEGATE.handleMessage(key);
     }
 }
 
