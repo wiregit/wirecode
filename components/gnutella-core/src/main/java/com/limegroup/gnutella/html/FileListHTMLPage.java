@@ -11,13 +11,17 @@ import java.net.URLEncoder;
 public class FileListHTMLPage {
 
     public static final String htmlBegin =
-        "<html>\r\n<head>\r\n<title>Download Page</title>\r\n<style type=\"text/css\"><!--\r\np {\r\nfont-family: Verdana, Arial, Helvetica, sans-serif;\r\nfont-size: 10px;\r\ncolor: #666666;\r\nfont-weight: bold;\r\n}\r\n-->\r\n</style>\r\n</head>\r\n<body link=\"#000000\" vlink=\"#000000\" alink=\"#339900\" marginwidth=\"0\"\r\nmarginheight=\"0\" leftmargin=\"0\" topmargin=\"0\">\r\n<br>\r\n<br>\r\n<p align=\"center\"><img src=\""+UploadManager.FV_GIF_GET+"\" alt=\"\"></p>\r\n<p align=\"center\">File Listing for ";
+        "<html>\r\n<head>\r\n<title>" + 
+        MessageResourceService.getHTMLPageTitle() + 
+        "</title>\r\n<style type=\"text/css\"><!--\r\np {\r\nfont-family: Verdana, Arial, Helvetica, sans-serif;\r\nfont-size: 10px;\r\ncolor: #666666;\r\nfont-weight: bold;\r\n}\r\n-->\r\n</style>\r\n</head>\r\n<body link=\"#000000\" vlink=\"#000000\" alink=\"#339900\" marginwidth=\"0\"\r\nmarginheight=\"0\" leftmargin=\"0\" topmargin=\"0\">\r\n<br>\r\n<br>\r\n<p align=\"center\"><img src=\""+UploadManager.FV_GIF_GET+"\" alt=\"\"></p>\r\n<p align=\"center\">" + 
+        MessageResourceService.getHTMLPageListingHeader();
 
     public static final String htmlMiddle = 
         "<br>\r\n</p>\r\n<p align=\"center\">\r\n";
 
     public static final String htmlMagnet =
-        "</p>\r\n<br>\r\n<p align=\"center\">Magnet Links for Fast Downloads (if you have LimeWire installed)<br>";
+        "</p>\r\n<br>\r\n<p align=\"center\">" +
+        MessageResourceService.getHTMLPageMagnetHeader() + "<br>";
 
     public static final String htmlEnd = "</p>\r\n<br>\r\n</body>\r\n</html>";
 
