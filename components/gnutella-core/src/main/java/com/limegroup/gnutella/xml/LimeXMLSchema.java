@@ -108,7 +108,8 @@ public class LimeXMLSchema
 //        printNode(root);
         
         //get the fields
-        _canonicalizedFields = LimeXMLSchemaFieldExtractor.getFields(document);
+        _canonicalizedFields = 
+            (new LimeXMLSchemaFieldExtractor()).getFields(document);
         
         //also get the schema URI
         _schemaURI = retrieveSchemaURI(document);
