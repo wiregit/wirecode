@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.*;
 
 /**
@@ -12,6 +15,8 @@ import com.limegroup.gnutella.*;
  */
 public class OutOfBandThroughputStat extends BasicStatistic {
 
+	private static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
+	
     public static int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
@@ -24,9 +29,15 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         final int thirtyMins = 30 * 60 * 1000;
         Runnable adjuster = new Runnable() {
                 public void run() {
+                	if (LOG.isDebugEnabled())
+                		LOG.debug("current success rate "+ getSuccessRate()+
+                				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
+								" measurements with a min sample size "+MIN_SAMPLE_SIZE);
                     if (!isSuccessRateGreat() &&
-                        !isSuccessRateTerrible())
+                        !isSuccessRateTerrible()) {
+                    	LOG.debug("boosting sample size by 500");
                         MIN_SAMPLE_SIZE += 500;
+                    }
                 }
             };
         RouterService.schedule(adjuster, thirtyMins, thirtyMins);
