@@ -7,6 +7,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import junit.framework.*;
 
 /**
@@ -40,12 +41,6 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             broadcasts.add(query);
             super.sendDynamicQuery(query); //add GUID to route table
         }
-
-        protected void handleQueryReplyForMe(
-                QueryReply queryReply, ManagedConnection receivingConnection) {
-            //Copied from StandardMessageRouter.
-            mgr.handleQueryReply(queryReply);
-        }
     }
 
 
@@ -61,34 +56,28 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
     public void setUp() throws Exception {
-        ManagedDownloader.NO_DELAY = true;	
-        (new File(filename)).delete();
+        ManagedDownloader.NO_DELAY = true;
 		ConnectionSettings.KEEP_ALIVE.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        //SettingsManager.instance().setKeepAlive(0);
-        //SettingsManager.instance().setConnectOnStartup(false);
-        //SettingsManager.instance().setLocalIsPrivate(false);
         SettingsManager.instance().setPort(6346);
-        try {
-            SettingsManager.instance().setSaveDirectory(new File("."));
-        } catch (IOException e) {
-            fail("Couldn't create saved directory", e);
-        }
-        createSnapshot();
+        
         router=new TestMessageRouter();
-        RouterService rs=new RouterService(new ActivityCallbackStub(), router);
-        try {
-            rs.setListeningPort(SettingsManager.instance().getPort());
-        } catch (IOException e) {
-            fail ("Couldn't set listening port", e);
-        }
+        new RouterService(new ActivityCallbackStub(), router);        
+        RouterService.setListeningPort(SettingsManager.instance().getPort());
+        PrivilegedAccessor.setValue(
+            RouterService.class, "manager", new ConnectionManagerStub());
+        router.initialize();
 
-        mgr=rs.getDownloadManager();
+        createSnapshot();
+        mgr=RouterService.getDownloadManager();
+        mgr.initialize();
         boolean ok=mgr.readSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         uploader=new TestUploader("uploader 6666", 6666);
         uploader.setRate(Integer.MAX_VALUE);
+        
+        new File( getSaveDirectory(), filename).delete();
     }    
 
     /** Creates a downloads.dat file named SNAPSHOT with a faked up
@@ -99,9 +88,11 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             //Make IncompleteFileManager with appropriate entries...
             IncompleteFileManager ifm=createIncompleteFile();
             //...and write it to downloads.dat.
-            snapshot=File.createTempFile("ResumeByHashTest", ".dat");
-            ObjectOutputStream out=new ObjectOutputStream(
-                new FileOutputStream(snapshot));
+            snapshot = File.createTempFile(
+                "ResumeByHashTest", ".dat"
+            );
+            ObjectOutputStream out = 
+                new ObjectOutputStream(new FileOutputStream(snapshot));
             out.writeObject(new ArrayList());   //downloads
             out.writeObject(ifm);
             out.close();
@@ -144,26 +135,28 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
        
     public void tearDown() {
         uploader.stopThread();
-        incompleteFile.delete();
+        if ( incompleteFile != null )
+            incompleteFile.delete();
         if (snapshot!=null)
            snapshot.delete();
+        new File(getSaveDirectory(), filename).delete();           
     }
 
 
     /////////////////////////// Actual Tests /////////////////////////////
 
     /** Gets response with exact match, starts downloading. */
-    public void testExactMatch() {
+    public void testExactMatch() throws Exception {
         doTest(filename, hash, true);
     }
 
     /** Gets response with same hash, different name, starts downloading. */
-    public void testHashMatch() {
+    public void testHashMatch() throws Exception {
         doTest("different name.txt", hash, true);
     }
 
     /** Gets a response that doesn't match--can't download. */
-    public void testNoMatch() {
+    public void testNoMatch() throws Exception {
         doTest("some other file.txt", null, false);
     }
 
@@ -176,40 +169,41 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
      */     
     private void doTest(String responseName, 
                         URN responseURN,
-                        boolean shouldDownload) {        
+                        boolean shouldDownload) throws Exception {        
         //Start a download for the given incomplete file.  Give the thread time
         //to start up and send its requery.
         Downloader downloader=null;
-        try {
-            downloader=mgr.download(incompleteFile);
-        } catch (AlreadyDownloadingException e) {
-            fail("Already downloading.");
-        } catch (CantResumeException e) {
-            fail("Invalid incomplete file.");
-        }                                
+        downloader=mgr.download(incompleteFile);
+        
 		// Make sure that you are through the QUEUED state.
         while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
 			if ( downloader.getState() != Downloader.QUEUED )
                 assertEquals(Downloader.WAITING_FOR_RESULTS, 
 				  downloader.getState());
-            try { Thread.sleep(200); } catch (InterruptedException e) { }
+            Thread.sleep(200);
 		}
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals("downloader isn't waiting for results", 
+            Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Check that we can get query of right type.
         //TODO: try resume without URN
-        assertEquals(1, router.broadcasts.size());
+        assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
         Object m=router.broadcasts.get(0);
-        assertTrue(m instanceof QueryRequest);
+        assertTrue("m should be a query request", m instanceof QueryRequest);
         QueryRequest qr=(QueryRequest)m;
+        // First query is not a requery
         //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals(filename, qr.getQuery());
-        assertTrue(qr.getRequestedUrnTypes()==null
-                   || qr.getRequestedUrnTypes().size()==0);
+        assertEquals("should have queried for filename", filename, qr.getQuery());
+        assertNotNull("should have some requested urn types", 
+            qr.getRequestedUrnTypes() );
+        assertEquals("unexpected amount of requested urn types",
+            1, qr.getRequestedUrnTypes().size() );
         Set urns=qr.getQueryUrns();
-        assertTrue(urns!=null);
-        assertEquals(1, urns.size());
-        assertTrue(urns.contains(hash));
+        assertNotNull("urns shouldn't be null", urns);
+        assertEquals("should have sent with no urn", 0, urns.size());
+        // Since first query needs filename, it doesn't send the hash.
+        //assertEquals("should only have one urn", 1, urns.size());
+        //assertTrue("urns should contain the hash", urns.contains(hash));
 
         //Send a response to the query.
         Set responseURNs=null;
@@ -230,11 +224,11 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response....
-        ManagedConnection stubConnection=new ManagedConnectionStub();
-        router.handleQueryReply(reply, stubConnection);
+        //ManagedConnection stubConnection=new ManagedConnectionStub();
+        router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
 
         //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(1000); } catch (InterruptedException e) { }
+        Thread.sleep(1000);
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
             while (downloader.getState()!=Downloader.COMPLETE) {            
@@ -243,11 +237,12 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 			         downloader.getState() != Downloader.HASHING &&
 			         downloader.getState() != Downloader.DOWNLOADING )
                     assertEquals(Downloader.DOWNLOADING, downloader.getState());
-                try { Thread.sleep(200); } catch (InterruptedException e) { }
+                Thread.sleep(200);
             }
         } else {
             //b) No match: keep waiting for results
-            assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+            assertEquals("downloader isn't waiting for results", 
+                Downloader.WAITING_FOR_RESULTS, downloader.getState());
             downloader.stop();
         }
     }    
@@ -268,23 +263,28 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
                                 null, 
                                 GUID.makeGuid(),
                                 null);
-        try { Thread.sleep(200); } catch (InterruptedException e) { }  
-        assertEquals(0, router.broadcasts.size());
+        Thread.sleep(200);
+        assertEquals("nothing should have been sent to start", 
+            0, router.broadcasts.size());
 
         //Now wait a few seconds and make sure a requery of right type was sent.
-        try { Thread.sleep(6*1000); } catch (InterruptedException e) { }
-        assertEquals(1, router.broadcasts.size());
+        Thread.sleep(6*1000);
+        assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
         Object m=router.broadcasts.get(0);
-        assertTrue(m instanceof QueryRequest);
+        assertTrue("m not a queryrequest", m instanceof QueryRequest);
         QueryRequest qr=(QueryRequest)m;
 		// First query is not counted as requery
         //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("file name", qr.getQuery());
-        assertTrue(qr.getRequestedUrnTypes()==null
-                   || qr.getRequestedUrnTypes().size()==0);
-        assertTrue(qr.getQueryUrns()==null
-                   || qr.getQueryUrns().size()==0);
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals("unexpected query", "file name", qr.getQuery());
+        assertNotNull("expected any type of urn", qr.getRequestedUrnTypes());
+        assertEquals("only one (any) urn type expected",
+            1, qr.getRequestedUrnTypes().size());
+        assertNotNull("should have sent atleast an empty length urn set",
+            qr.getQueryUrns() );
+        assertEquals("shouldn't have sent urn on first attempt",
+            0, qr.getQueryUrns().size() );
+        assertEquals("downloader should be waiting for results", 
+            Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
@@ -298,10 +298,10 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        ManagedConnection stubConnection=new ManagedConnectionStub();
-        router.handleQueryReply(reply, stubConnection);
-        try { Thread.sleep(400); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        Thread.sleep(400);
+        assertEquals("downloader should still be waiting for results",
+            Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Send a good response to the query.
         response=new Response(0l,   //index
@@ -316,19 +316,24 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        router.handleQueryReply(reply, stubConnection);
+        router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
 
         //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(400); } catch (InterruptedException e) { }
-        while (downloader.getState()!=Downloader.COMPLETE) {            
+        Thread.sleep(400);
+        while (downloader.getState()!=Downloader.COMPLETE &&
+               downloader.getState()!=Downloader.CORRUPT_FILE ) {
 			if ( downloader.getState() != Downloader.CONNECTING &&
 			     downloader.getState() != Downloader.WAITING_FOR_RESULTS &&
 			     downloader.getState() != Downloader.HASHING &&
 			     downloader.getState() != Downloader.SAVING &&
 			     downloader.getState() != Downloader.DOWNLOADING )
-                assertEquals(Downloader.DOWNLOADING, downloader.getState());
-            try { Thread.sleep(200); } catch (InterruptedException e) { }
+                assertEquals("downloader should only be downloading",
+                    Downloader.DOWNLOADING, downloader.getState());
+            Thread.sleep(200);
         }
+        
+        assertEquals("download should be complete",
+            Downloader.COMPLETE, downloader.getState() );
     }
     
     /** Tests that requeries are sent fairly and at appropriate rate. */
@@ -346,11 +351,11 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         //Got right number of requeries?
 		// Note that the first query will kick off immediately now
         List broadcasts=router.broadcasts;
-        try { Thread.sleep(8000); } catch (InterruptedException e) { }
+        Thread.sleep(8000);
 		downloader1.stop();
 		downloader2.stop();
-        assertTrue(broadcasts.size()>=7);    //should be 8, plus fudge factor
-        assertTrue(broadcasts.size()<=9);
+        assertTrue("unexpected # of broadcasts: " + broadcasts.size(),
+            broadcasts.size()>=7 && broadcasts.size()<=9);    //should be 8, plus fudge factor
         //Are they balanced?  Check for approximate fairness.
         int xCount=0;
         int yCount=0;
@@ -366,7 +371,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 		// This test is looser than it use to be.  There is no delay on the 
 		// first requery now so it is possible that xxxxx can get 2 extra 
 		// queries in before yyyyy does.
-        assertTrue("Unbalanced: "+xCount+"/"+yCount, 
+        assertTrue("Unbalanced x/y count: "+xCount+"/"+yCount, 
                    Math.abs(xCount-yCount)<=2);
     }
 }
