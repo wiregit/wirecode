@@ -58,9 +58,9 @@ public final class UploadManager implements BandwidthTracker {
     
     private final int QUEUE_CAPACITY = 10;
 
-    private final int MIN_POLL_TIME = 45000; //same as Shareaza
+    public static final int MIN_POLL_TIME = 45000; //same as Shareaza
 
-    private final int MAX_POLL_TIME = 120000; //same as Shareaza
+    public static final int MAX_POLL_TIME = 120000; //same as Shareaza
     
 
 	/** set to true when an upload has been succesfully completed. */
@@ -151,7 +151,7 @@ public final class UploadManager implements BandwidthTracker {
                 boolean queued = false;
                 try {
                     //do the upload
-                    queued = doSingleUpload(uploader, socket, 
+                    queued = doSingleUpload(uploader, socket,
                     socket.getInetAddress().getHostAddress(), line._index);
                 }   catch (IOException ioe) {
                     //A queued uploader was too early in responding...drop it
@@ -193,7 +193,7 @@ public final class UploadManager implements BandwidthTracker {
      * @param uploader This method assumes that uploader is connected.
      * @exception IOException thrown if insertAndTest throws an IOException
      */
-    private boolean doSingleUpload(Uploader uploader, Socket socket,
+    private boolean doSingleUpload(Uploader uploader, Socket socket, 
                                    String host, int index) throws IOException {
         long startTime=-1;
 
@@ -202,14 +202,28 @@ public final class UploadManager implements BandwidthTracker {
 
         // check if it complies with the restrictions.
         // and set the uploader state accordingly
-        boolean queued = false;
+        int queued = -1;
+        boolean ret = false;
         if(!isBHUploader) { //testing and book-keeping only if !browse host
-            queued = insertAndTest(uploader, socket, host); 
-            //We are going to notify the gui about the new upload, and let it 
-            //decide what to do with it - will act depending on it's state
+            queued = insertAndTest(uploader, host);//can throw IOEx
+            Assert.that(queued!=-1);
+            //We are going to notify the gui about the new upload, and let
+            //it decide what to do with it - will act depending on it's
+            //state
             _callback.addUpload(uploader);
         }
         
+        if(queued == 1) { //we were queued
+            socket.setSoTimeout(MAX_POLL_TIME);
+            uploader.setState(Uploader.QUEUED);
+            ret = true;
+        }
+        else if(queued == 2) { // we have been given a slot
+            synchronized (this) {
+                uploader.setState(Uploader.UPLOADING);
+                _activeUploadList.add(uploader);
+            }
+        }
         //Note: We do not call connect() anymore. That's because connect would
         //never do anything in the case of a normal upload  - becasue the
         //HTTPUploader already have a socket. connect() would only be executed
@@ -239,7 +253,7 @@ public final class UploadManager implements BandwidthTracker {
             removeFromList(uploader);
             if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
                 _callback.removeUpload(uploader);
-            return queued;
+            return ret;
         }
     }
 
@@ -371,87 +385,55 @@ public final class UploadManager implements BandwidthTracker {
      *      @modifies uploader, _callback 
      * @exception if an uploader gets a request too soon, we are going to throw
      * an IOException, which will cause the socket to be closed. 
-     * @return true if the Uploader has been queued
+     * @return 0 if rejected, 1 if queued, 2 if given a slot
      */
-	private synchronized boolean insertAndTest(Uploader uploader, Socket socket,
-                                               String host) throws IOException {
+	private synchronized int insertAndTest(Uploader uploader, String host) 
+                                                          throws IOException {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(uploader);//-1 if not in queue
         boolean wontAccept = size >= QUEUE_CAPACITY;
-        boolean hasQueue = size > 0;
-        boolean iAmBusy = this.isBusy();
+        int ret = -1;
+
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
         
         if(posInQueue == -1) {//this uploader is not in the queue already
             if(limitReached || wontAccept) { 
                 uploader.setState(Uploader.LIMIT_REACHED);
-                return false; //we did not queue this uploader
+                return 0; //we rejected this uploader
             }
+            addToQueue(uploader);
+            posInQueue = size;//the index of the uploader in the queue
+            ret = 1;//we have queued it now
         }
-        //we are already in queue || (we are not &&  there is space)
-        if(!hasQueue && !iAmBusy) {//no queue, and I am not busy
-            _activeUploadList.add(uploader);
-            return false; //gave the slot, did not queue
+        else {//we are alreacy in queue, update it
+            KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
+            Long prev=(Long)kv.getValue();
+            if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
+                _queuedUploads.remove(posInQueue);
+                throw new IOException();
+            }
+            kv.setValue(new Long(System.currentTimeMillis()));
+            ret = 1;//queued
         }
-        else if(!hasQueue && iAmBusy) {//Empty queue and  we are busy
-            addToQueue(uploader,socket);//add to the queue
-            return true;
+        //If uploader can and should be in queue, it is at this point.
+        if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
+            ret = 2;
+            //remove this uploader from queue, and get its time
+            _queuedUploads.remove(0);
         }
-        else if(hasQueue && !iAmBusy) {
-            if(posInQueue == -1) { //put uploader at the tail of the queue
-                addToQueue(uploader,socket);
-                return true;
-            }
-            else if(posInQueue == 0) { //we are not busy, and its my turn
-                Long prev=
-                (Long)((KeyValue)_queuedUploads.get(posInQueue)).getValue();
-                if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis())
-                    throw new IOException();
-                _queuedUploads.remove(0);//
-                uploader.setState(Uploader.UPLOADING);
-                _activeUploadList.add(uploader);
-                return false;
-            }
-            else {//this uploader is somewhere else in the queue
-                Long prev=
-                (Long)((KeyValue)_queuedUploads.get(posInQueue)).getValue();
-                if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis())
-                    throw new IOException();
-                socket.setSoTimeout(MAX_POLL_TIME);
-                return true;
-            }
-        }
-        else {//hasQueue && iAmBusy
-            if(posInQueue == -1) { // we know the limit has not been reached
-                addToQueue(uploader,socket);
-                return true;
-            }
-            else {//this uploader is somewhere in the queue
-                Long prev=
-                (Long)((KeyValue)_queuedUploads.get(posInQueue)).getValue();
-                if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis())
-                    throw new IOException();
-                socket.setSoTimeout(MAX_POLL_TIME);
-                return true;
-            }
-        }
-	}
+        return ret;
+    }
 
-
-    private synchronized void addToQueue(Uploader uploader, Socket sock)
-                                                         throws IOException {
+    private synchronized void addToQueue(Uploader uploader) {
         Long t = new Long(System.currentTimeMillis());
         _queuedUploads.add(new KeyValue(uploader,t));
-        //TODO2: So timeout = avg wait time*quePos + MAXPOLLTIME
-        sock.setSoTimeout(MAX_POLL_TIME);
-        uploader.setState(Uploader.QUEUED);
     }
 
     /**
      * @return the index of the uploader in the queue, -1 if not in queue
      */
-    private synchronized int positionInQueue(Uploader uploader) {
+    public synchronized int positionInQueue(Uploader uploader) {
         int i = 0;
         Iterator iter = _queuedUploads.iterator();
         while(iter.hasNext()) {

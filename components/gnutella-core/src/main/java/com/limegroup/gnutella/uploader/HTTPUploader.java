@@ -316,7 +316,7 @@ public class HTTPUploader implements Uploader {
 			_state = new NormalUploadState(this);
 			break;
         case QUEUED:
-            _state = new QueuedUploadState(_manager, this);
+            _state = new QueuedUploadState(_manager,this,_fileDesc);
 		case LIMIT_REACHED:
 			_state = new LimitReachedUploadState(_fileDesc);
 			break;
