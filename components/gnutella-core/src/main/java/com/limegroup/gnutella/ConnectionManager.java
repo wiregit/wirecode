@@ -8,7 +8,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.statistics.*;
