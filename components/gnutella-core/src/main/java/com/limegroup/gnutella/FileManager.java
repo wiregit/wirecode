@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.I18NConvert; 
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Comparator;
@@ -847,7 +848,8 @@ public abstract class FileManager {
             RouterService.getCallback().addSharedFile(fileDesc, parent);
 		
             //Index the filename.  For each keyword...
-            String[] keywords=StringUtils.split(fileDesc.getPath(), DELIMETERS);
+            String[] keywords=
+                StringUtils.split(I18NConvert.instance().getNorm(fileDesc.getPath()), DELIMETERS); 
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 //Ensure there _index has a set of indices associated with

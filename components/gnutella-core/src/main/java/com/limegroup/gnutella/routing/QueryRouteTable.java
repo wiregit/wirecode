@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.zip.*;
@@ -231,7 +232,8 @@ public class QueryRouteTable {
 
 
     private void addBTInternal(String filename) {
-        String[] words=HashFunction.keywords(filename);
+        String[] words= 
+            HashFunction.keywords(I18NConvert.instance().getNorm(filename));
         String[] keywords=HashFunction.getPrefixes(words);
 		byte log2 = Utilities.log2(bitTableLength);
         for (int i=0; i<keywords.length; i++) {

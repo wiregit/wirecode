@@ -37,6 +37,10 @@ public final class QueryDispatcher implements Runnable {
 	private static final QueryDispatcher INSTANCE = 
 		new QueryDispatcher();
 	
+
+    //list of user kileed searches
+    private final List _toRemove = 
+        Collections.synchronizedList(new LinkedList());
 	
 	/**
 	 * Instance accessor for the <tt>QueryDispatcher</tt>.
@@ -97,6 +101,10 @@ public final class QueryDispatcher implements Runnable {
         }
     }
 
+    
+    public void addToRemove(GUID g) {
+        _toRemove.add(g);
+    }
 
     /**
      * Removes the specified <tt>ReplyHandler</tt> from the specified
@@ -193,7 +201,14 @@ public final class QueryDispatcher implements Runnable {
             while(iter.hasNext()) {
                 QueryHandler handler = 
                     (QueryHandler)((Map.Entry)iter.next()).getValue();
-                handler.sendQuery();
+
+                if(_toRemove.contains(handler.getGUID())) {
+                    _toRemove.remove(handler.getGUID());
+                    expiredQueries.add(handler);
+                }
+                else
+                    handler.sendQuery();
+
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
                 }

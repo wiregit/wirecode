@@ -4,9 +4,22 @@ import com.limegroup.gnutella.Constants;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import java.util.Locale;
+import java.text.Collator;
 
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
+
+    private static Collator _col;
+    static {
+        _col = Collator.getInstance
+            (new Locale(ApplicationSettings.LANGUAGE.getValue(),
+                        ApplicationSettings.COUNTRY.getValue(),
+                        ApplicationSettings.LOCALE_VARIANT.getValue()));
+        _col.setDecomposition(Collator.FULL_DECOMPOSITION);
+        _col.setStrength(Collator.PRIMARY);
+    }
     
     /** Returns true if input contains the given pattern, which may contain the
      *  wildcard character '*'.  TODO: need more formal definition.  Examples:
@@ -246,6 +259,7 @@ public class StringUtils {
         //some characters have two distinct associated upper or lower cases
         //or exist in title case (such as "Dz").  We start by comparing the
         //upper case conversion because duplicate uppercases occur less often.
+        /*
         final int n1 = s1.length(), n2 = s2.length();
         final int lim = Math.min(n1, n2);
         for (int k = 0; k < lim; k++) {
@@ -264,6 +278,8 @@ public class StringUtils {
             }
         }
         return n1 - n2;
+        */
+        return _col.compare(s1, s2);
     }
 
     /** 

@@ -815,7 +815,7 @@ public class QueryRequest extends Message implements Serializable{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ByteOrder.short2leb((short)MIN_SPEED,baos); // write minspeed
-            baos.write(QUERY.getBytes());              // write query
+            baos.write(QUERY.getBytes("UTF-8"));        // write query 
             baos.write(0);                             // null
 
 			
@@ -890,6 +890,10 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param network the network that this query came from.
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
+
+    //yn: no need for normalization here since we assume a query coming in
+    //yn: from the network is already in proper format
+    
     private QueryRequest(
       byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
 		throws BadPacketException {
@@ -908,7 +912,7 @@ public class QueryRequest extends Message implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ubytes2int(sp);
-            tempQuery = new String(super.readNullTerminatedBytes(bais));
+            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8"); 
             // handle extensions, which include rich query and URN stuff
             byte[] extsBytes = super.readNullTerminatedBytes(bais);
             int currIndex = 0;
