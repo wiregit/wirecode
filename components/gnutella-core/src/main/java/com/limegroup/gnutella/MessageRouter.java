@@ -100,7 +100,14 @@ public abstract class MessageRouter {
 	 */
 	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
-
+	/**
+	 * Constant for the <tt>DynamicQueryHandler</tt> that handles dynamically
+	 * generated queries that adjust to the number of results received, the
+	 * number of connections, etc.
+	 */
+	private final DynamicQuerier DYNAMIC_QUERIER =
+		DynamicQuerier.instance();
+	
 	/**
 	 * Constant for whether or not to record stats.
 	 */
@@ -120,6 +127,7 @@ public abstract class MessageRouter {
         }
         _secretKey = QueryKey.generateSecretKey();
         _secretPad = QueryKey.generateSecretPad();
+		DYNAMIC_QUERIER.start();
     }
 
     /**
@@ -580,51 +588,35 @@ public abstract class MessageRouter {
 	 * dynamically adjust the TTL based on the number of results received, 
 	 * the number of remaining connections, etc.
 	 *
-	 * @param factory the <tt>QueryFactory</tt> instance that generates
+	 * @param factory the <tt>QueryHandler</tt> instance that generates
 	 *  queries for this dynamic query
+	 * @throws <tt>NullPointerException</tt> if the <tt>RouteTableEntry</tt>
+	 *  for the guid cannot be found -- this should never happen
 	 */
-	public void sendDynamicQuery(QueryFactory factory) {
-		SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
-		GUID guid = factory.getGUID();
-		resultHandler.addGuid(guid);
-		_queryRouteTable.routeReply(guid.bytes(), FOR_ME_REPLY_HANDLER);
-		
+	public void sendDynamicQuery(QueryHandler qh) {
+		if(qh == null) {
+			throw new NullPointerException("null QueryHandler");
+		}
+		byte[] guid = qh.getGUID().bytes();
+
+		// get the RouteTableEntry so we can track the number of results
+		RouteTable.RouteTableEntry rte = 
+			_queryRouteTable.routeReply(guid, FOR_ME_REPLY_HANDLER);
+
+		if(rte == null) {
+			// this should never, ever, happen
+			throw new NullPointerException("null route table entry");
+		}
+
+		qh.setRouteTableEntry(rte);
+
 		// create a query to send to leaves
-		QueryRequest query = factory.createQuery((byte)1);
+		QueryRequest query = qh.createQuery((byte)1);
 		if(RouterService.isSupernode()) {
 			forwardQueryRequestToLeaves(query, null);
 		}
 
-		List list = _manager.getInitializedConnections2();
-		int length = list.size();
-		for(int i=0; i<length; i++) {
-			int results = resultHandler.getNumResults(guid);
-			if(results >= 100) return;
-			ManagedConnection mc = (ManagedConnection)list.get(i);			
-			query = createQuery(i,factory, length-i, results);
-			sendQueryRequest(query, mc, null);
-		}
-	}
-
-	/**
-	 * Creates a new <tt>QueryRequest</tt> instsnce, dynamically setting the
-	 * TTL based on a variety of factors.  
-	 */
-	private QueryRequest createQuery(int index, QueryFactory factory, 
-									 int remainingConnections, int results) {
-		System.out.println("MessageRouter::createQuery::results: "+results); 
-		System.out.println("MessageRouter::createQuery::remaining connections: "+
-						   remainingConnections); 
-		System.out.println(); 
-		if(index != 0) {
-			try {
-				int sleepTime = 16000/index;
-				Thread.sleep(sleepTime);
-			} catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		return factory.createQuery((byte)2);		
+		DYNAMIC_QUERIER.addQuery(qh);
 	}
 
     /**
@@ -744,9 +736,9 @@ public abstract class MessageRouter {
      * @param handler The connection on which we originally
      * received the query
      */
-    protected void sendQueryRequest(QueryRequest request, 
-									ManagedConnection sendConnection, 
-									ReplyHandler handler) {
+    public void sendQueryRequest(QueryRequest request, 
+								 ManagedConnection sendConnection, 
+								 ReplyHandler handler) {
         //send the query over this connection only if any of the following
         //is true:
         //1. The query originated from our node (receiving connection 
