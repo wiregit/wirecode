@@ -2,7 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import java.io.*;
-import java.util.List;
+import java.util.*;
 
 /** A special meta-enabled Message router.  Inherits much from 
  *  StandardMessageRouter, just given extra functionality when
@@ -100,32 +100,75 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
             (new LimeXMLDocumentHelper()).getAggregateString(res);
             if (xmlCollectionString == null)
                 xmlCollectionString = "";
-            debug("xmlCollectionString.length(): " + 
-                  xmlCollectionString.length() + 
-                  "\nvalue = " + xmlCollectionString);
 
-
-            // create the new queryReply
-            try {
-                byte[] xmlCompressed = LimeXMLUtils.compress(xmlCollectionString.getBytes());
-                queryReply = new QueryReply(guid, ttl, port, ip,
-                                            speed, res, clientGUID, 
-                                            xmlCompressed,
-                                            !incoming, busy, uploaded, 
-                                            measuredSpeed);
+            // it may be too big....
+            if (xmlCollectionString.length() > QueryReply.XML_MAX_SIZE) {
+                // ok, need to partition responses up once again and send out
+                // multiple query replies.....
+                List splitResps = new LinkedList();
+                splitAndAddResponses(splitResps, res);
+                while (!splitResps.isEmpty()) {
+                    Response[] currResps = (Response[]) splitResps.remove(0);
+                    String currXML = 
+                    (new LimeXMLDocumentHelper()).getAggregateString(currResps);
+                    if ((currXML.length() > QueryReply.XML_MAX_SIZE) &&
+                        (currResps.length > 1)) 
+                        splitAndAddResponses(splitResps, currResps);
+                    else {
+                        // create the new queryReply
+                        try {
+                            debug("MetaEnabledMessageRouter.sendResponses(): " +
+                                  " currXML = " + currXML);
+                            byte[] xmlCompressed = 
+                            LimeXMLUtils.compress(currXML.getBytes());
+                            queryReply = new QueryReply(guid, ttl, 
+                                                        port, ip,
+                                                        speed, currResps, 
+                                                        clientGUID, 
+                                                        xmlCompressed,
+                                                        !incoming, 
+                                                        busy, 
+                                                        uploaded, 
+                                                        measuredSpeed);
+                        }
+                        catch (Exception e) {
+                            continue;  // this can only happen VERY rarely...
+                        }
+                        
+                        // try to send the new queryReply
+                        try {
+                            sendQueryReply(queryReply);
+                        } 
+                        catch (IOException e) {
+                            // if there is an error, do nothing..
+                        }        
+                    }
+                }
             }
-            catch (Exception e) {
-                // if i couldn't construct it, do nothing....
-                e.printStackTrace();
-                return;
-            }
-
-            // try to send the new queryReply
-            try {
-                sendQueryReply(queryReply);
-            } 
-            catch (IOException e) {
-                // if there is an error, do nothing..
+            else {  // xml is small enough, no problem.....
+                // create the new queryReply
+                try {
+                    byte[] xmlCompressed = 
+                    LimeXMLUtils.compress(xmlCollectionString.getBytes());
+                    queryReply = new QueryReply(guid, ttl, port, ip,
+                                                speed, res, 
+                                                clientGUID, 
+                                                xmlCompressed,
+                                                !incoming, busy, 
+                                                uploaded, 
+                                                measuredSpeed);
+                }
+                catch (Exception e) {
+                    return; // never expect this....
+                }
+                
+                // try to send the new queryReply
+                try {
+                    sendQueryReply(queryReply);
+                } 
+                catch (IOException e) {
+                    // if there is an error, do nothing..
+                }        
             }
 
             // we only want to send multiple queryReplies
@@ -139,6 +182,27 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
         debug("MetaEnabledMessageRouter.sendResponses(): returning.");
     }
 
+    
+    /** @return Simply splits the input array into two (almost) equally sized
+     *  arrays.
+     */
+    private Response[][] splitResponses(Response[] in) {
+        int middle = in.length/2;
+        Response[][] retResps = new Response[2][];
+        retResps[0] = new Response[middle];
+        retResps[1] = new Response[in.length-middle];
+        for (int i = 0; i < middle; i++)
+            retResps[0][i] = in[i];
+        for (int i = 0; i < (in.length-middle); i++)
+            retResps[1][i] = in[i+middle];
+        return retResps;
+    }
+
+    private void splitAndAddResponses(List addTo, Response[] toSplit) {
+        Response[][] splits = splitResponses(toSplit);
+        addTo.add(splits[0]);
+        addTo.add(splits[1]);
+    }
 
 }
 
