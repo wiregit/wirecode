@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.mp3.ID3Reader;
+import com.limegroup.gnutella.mp3.MetaDataReader;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.NameValue;
@@ -411,9 +411,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         LimeXMLDocument doc = null;
         LimeXMLReplyCollection.MapSerializer ms = null;
         // make audio.collection
-        doc = ID3Reader.readDocument(test1);
+        doc = MetaDataReader.readDocument(test1);
         map.put(getHash(test1), doc);
-        doc = ID3Reader.readDocument(test2);
+        doc = MetaDataReader.readDocument(test2);
         map.put(getHash(test2), doc);
         File marker = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
         marker = marker.getParentFile();

@@ -46,11 +46,12 @@ public class ID3V2WritingTest extends BaseTestCase {
      * Tests that the ID3v2 tags are read correctly
      */
     public void testID3v2TagsWriting() throws Exception {
-        ID3Reader.ID3Data data = null;
+        AudioMetaData data = null;
         
         //1. Test that the values we read initially were correct.
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+        /*data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });*/
+        data = (AudioMetaData)MetaData.parse(TEST_FILE);
         
         assertFalse(data.toString(), data.isComplete());
         assertEquals(data.toString(), "Title 2", data.getTitle());
@@ -70,8 +71,7 @@ public class ID3V2WritingTest extends BaseTestCase {
         int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
         //3. Test if the data was written correctly
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+        data = (AudioMetaData)MetaData.parse(TEST_FILE);
 
         assertFalse(data.toString(), data.isComplete());
         assertEquals("Title not written", "New Title", data.getTitle());
