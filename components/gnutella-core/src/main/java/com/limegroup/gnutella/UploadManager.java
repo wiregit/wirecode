@@ -292,17 +292,21 @@ public class UploadManager implements BandwidthTracker {
 	 * if a push request takes a long time to respond.  
      */
 	private boolean testTotalUploadLimit() {
-        //Allow another upload if (a) we currently have fewer than MAX_UPLOADS
-        //uploads or (b) some upload has more than MINIMUM_UPLOAD_SPEED KB/s.
+        //Allow another upload if (a) we currently have fewer than
+        //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
+        //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
         //
         //In other words, we continue to allow uploads until everyone's
         //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
         //uploads, the probability that all just happen to have low capacity
         //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
         //expensive of quality, making swarmed downloads work better.        
-		int max = SettingsManager.instance().getMaxUploads();
+
 		int current = uploadsInProgress();
-		if (current < max) {
+        SettingsManager settings=SettingsManager.instance();
+		if (current >= settings.getMaxUploads()) {
+            return false;
+        } else if (current < settings.getSoftMaxUploads()) {
             return true;
         } else {
             float fastest=0.0f;

@@ -118,7 +118,8 @@ public class SettingsManager {
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     /** Default for whether user should be prompted before downloading exe's. */
     private final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
-    private final int     DEFAULT_MAX_UPLOADS      = 8;
+    private final int     DEFAULT_MAX_UPLOADS      = 20;
+    private final int     DEFAULT_SOFT_MAX_UPLOADS = 5;
     private final boolean DEFAULT_CLEAR_UPLOAD     = true;
     private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final String  DEFAULT_CONNECT_STRING    
@@ -269,6 +270,7 @@ public class SettingsManager {
     private final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
     private final String PROMPT_EXE_DOWNLOAD   = "PROMPT_EXE_DOWNLOAD";
     private final String MAX_UPLOADS           = "MAX_UPLOADS";
+    private final String SOFT_MAX_UPLOADS      = "SOFT_MAX_UPLOADS";
     private final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
     private final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
 
@@ -412,6 +414,7 @@ public class SettingsManager {
     private volatile int      _maxSimDownload;
     private volatile boolean  _promptExeDownload;
     private volatile int      _maxUploads;
+    private volatile int      _softMaxUploads;
     private volatile int      _uploadsPerPerson;
 
 	private volatile boolean  _chatEnabled;          
@@ -568,6 +571,9 @@ public class SettingsManager {
                 }
                 else if(key.equals(MAX_UPLOADS)) {
                     setMaxUploads(Integer.parseInt(p));
+                }
+                else if(key.equals(SOFT_MAX_UPLOADS)) {
+                    setSoftMaxUploads(Integer.parseInt(p));
                 }
                 else if(key.equals(CLEAR_DOWNLOAD)) {
                     boolean bs;
@@ -946,6 +952,7 @@ public class SettingsManager {
         setMaxSimDownload(DEFAULT_MAX_SIM_DOWNLOAD);
         setPromptExeDownload(DEFAULT_PROMPT_EXE_DOWNLOAD);
         setMaxUploads(DEFAULT_MAX_UPLOADS);
+        setSoftMaxUploads(DEFAULT_SOFT_MAX_UPLOADS);
         setConnectString(DEFAULT_CONNECT_STRING);
         setConnectOkString(DEFAULT_CONNECT_OK_STRING);
 
@@ -1322,7 +1329,15 @@ public class SettingsManager {
      * @return the maximum number of simultaneous uploads to allow
      */
     public int getMaxUploads(){return _maxUploads;}
-    
+        
+    /**
+     * Returns the "soft maximum number" of simultaneous uploads to allow.
+     *
+     * @return the maximum number of simultaneous uploads to allow
+     * @see setSoftMaxUploads
+     */
+    public int getSoftMaxUploads(){return _softMaxUploads;}
+
     /**
      * Returns a <tt>boolean</tt> specifying whether or not completed uploads
      * should automatically be cleared from the upload window.
@@ -2328,6 +2343,19 @@ public class SettingsManager {
 		_maxUploads = max;
 		String s = String.valueOf(max);
 		PROPS.put(MAX_UPLOADS, s);
+    }
+
+	/**
+	 * Sets the "soft" maximum number of simultaneous uploads to allow,
+     * i.e., the minimum number of people to allow before determining
+     * whether to allow more uploads.
+	 *
+	 * @param max the soft maximum number of simultaneous uploads
+	 */
+    public void setSoftMaxUploads(int max) {
+		_softMaxUploads = max;
+		String s = String.valueOf(max);
+		PROPS.put(SOFT_MAX_UPLOADS, s);
     }
 
     public void setClearCompletedUpload(boolean b) {
