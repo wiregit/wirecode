@@ -5,6 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
+import de.ueberdosis.mp3info.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -204,58 +205,16 @@ public final class ID3Reader {
             // short circuit to bitrate if not ID3 tag can be properly read...
             // We need to read at least 128 bytes
             if(length >= 128) {
-    
-                randomAccessFile.seek(length - 128);
-                byte[] buffer = new byte[30];
+                ID3Tag id3 = de.ueberdosis.mp3info.ID3Reader.readTag(randomAccessFile);
                 
-                // Read ID3 Tag, return null if not present
-                randomAccessFile.readFully(buffer, 0, 3);
-                String tag = new String(buffer, 0, 3);
-                
-                if (tag.equals("TAG")) {
-                
-                    // We have an ID3 Tag, now get the parts
-                    // Title
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    retObjs[0] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Artist
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    retObjs[1] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Album
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    retObjs[2] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Year
-                    randomAccessFile.readFully(buffer, 0, 4);
-                    retObjs[3] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 4));
-                    
-                    // Comment and track
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    int commentLength;
-                    if(buffer[28] == 0)
-                    {
-                        retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
-                        commentLength = 28;
-                    }
-                    else
-                    {
-                        retObjs[4] = new Short((short)0);
-                        commentLength = 3;
-                    }
-                    retObjs[5] = new String(buffer, 0,
-                                               getTrimmedLength(buffer, 
-                                                                commentLength));
-                    
-                    // Genre
-                    randomAccessFile.readFully(buffer, 0, 1);
-                    retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
-                }
+                // We have an ID3 Tag, now get the parts
+                retObjs[0] = id3.getTitle();
+                retObjs[1] = id3.getArtist();
+                retObjs[2] = id3.getAlbum();
+                retObjs[3] = id3.getYear();
+                retObjs[4] = new Short(id3.getTrack());
+                retObjs[5] = id3.getComment();
+                retObjs[6] = new Short(id3.getGenre());
             }
     
             MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
