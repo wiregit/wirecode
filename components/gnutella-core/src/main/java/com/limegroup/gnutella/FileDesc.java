@@ -46,7 +46,11 @@ public final class FileDesc {
 	 */
     private final Collection /* of URNS */ URNS; 
 
-	private Map /* of AlternateLocations */ _alternateLocations;
+	/**
+	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances, keyed by
+	 * <tt>AlternateLocation</tt>s.
+	 */
+	private Map/*AlternateLocation->AlternateLocation*/_alternateLocations;
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -87,19 +91,42 @@ public final class FileDesc {
 		if(_alternateLocations == null) {
 			// we use a TreeMap to both filter duplicates and provide
 			// ordering based on the timestamp
-			_alternateLocations = new TreeMap();
+			_alternateLocations = 
+			    new TreeMap(AlternateLocation.createComparator());
 		}
-		Date timestamp = al.getTimestamp();
-		if(timestamp != null) {
-			_alternateLocations.put(timestamp, al);
+
+		// note that alternate locations without a timestamp are placed
+		// at the end of the map because they have the oldest possible
+		// date according to the date class, namely:
+		// January 1, 1970, 00:00:00 GMT.
+		_alternateLocations.put(al, al);
+	}
+
+	/**
+	 * Writes the alternate locations to the specified output stream as
+	 * an HTTP header, as specified in the format specified in HUGE v0.93.
+	 *
+	 * @param os the <tt>OutputStream</tt> instance to write to
+	 * @exception <tt>IOException</tt> if we could not write to the
+	 *  output stream
+	 */
+	public synchronized void writeAlternateLocationsTo(OutputStream os) 
+		throws IOException {
+		// if there are no alternate locations, simply return
+		if(_alternateLocations == null) return;
+
+		Iterator iter = _alternateLocations.values().iterator();	   
+		StringBuffer writeBuffer = new StringBuffer();
+		writeBuffer.append(HTTPConstants.ALTERNATE_LOCATION_HEADER+" ");
+		//os.write(writeStr.getBytes());
+		while(iter.hasNext()) {
+			writeBuffer.append(((AlternateLocation)iter.next()).toString());
+			if(iter.hasNext()) {
+				writeBuffer.append(", ");
+			}
 		}
-		else {
-			// this means that the alternate location has no date 
-			// specified, so we consider it as old as it can possibly
-			// be for the date class (0 milliseconds since 
-			// January 1, 1970, 00:00:00 GMT).
-			_alternateLocations.put(new Date(0), al);
-		}
+		writeBuffer.append(HTTPConstants.CRLF);		
+		os.write(writeBuffer.toString().getBytes());
 	}
 
 	/**
@@ -264,6 +291,35 @@ public final class FileDesc {
         System.out.println("URNs: " + URNS);
         System.out.println(" ");
     }
+
+	/*
+	public static void main(String[] args) {
+		FileDesc fd = new FileDesc(new File("FileDesc.java"), 0, 
+								   new HashSet());
+		String[] validDistinctLocations = {
+			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg "+
+			"2002-04-09T20:32:33Z",
+			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+			"lime%20capital%20management%2001.mpg"
+		};
+
+		OutputStream os = new ByteArrayOutputStream();	   
+		try {
+			for(int i=0; i<validDistinctLocations.length; i++) {
+				AlternateLocation al = 
+				    new AlternateLocation(validDistinctLocations[i]);
+				fd.addAlternateLocation(al);
+			}
+			fd.writeAlternateLocationsTo(os);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("FILE DESC ALT LOCATIONS:");
+		System.out.println(); 
+		System.out.println(os); 		
+	}
+	*/
 
 }
 
