@@ -24,16 +24,18 @@ JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWrite
 	struct stat fileStat;
 	cFileName = (*env)->GetStringUTFChars(env, fileName, JNI_FALSE);
 	retVal = stat(cFileName, &fileStat);
+	
 //	printf("attempting to set [%s], current flags: [%i], mode: [%i]\n", cFileName, fileStat.st_flags, fileStat.st_mode);
 	if(retVal == 0) {
+		int oldPerms = fileStat.st_mode & 07777;
 		int mask = S_IRUSR | S_IWUSR;
 		// OSX bases directory write permissions on the 'x' flag, not the 'w' one.
 		if((fileStat.st_mode & S_IFDIR) == S_IFDIR) {
 //			printf("marking [%s] with x flag too.\n", cFileName);
 			mask |= S_IXUSR;
 		}
-//		printf("chmoding [%s] with mask [%i]\n", cFileName, mask);
-		retVal = chmod(cFileName, fileStat.st_flags | mask);
+//		printf("chmoding [%s] with mask [%i], oldPerms [%i]\n", cFileName, mask, oldPerms);
+		retVal = chmod(cFileName, oldPerms | mask);
 	}
 	// free the memory for the string
 	(*env)->ReleaseStringUTFChars(env, fileName, cFileName);
