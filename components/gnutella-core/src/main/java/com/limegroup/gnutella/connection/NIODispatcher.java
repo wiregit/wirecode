@@ -205,7 +205,7 @@ public final class NIODispatcher implements Runnable {
 		}  
     }
 
-	 /**
+	/**
      * Registers any new connections that should be registered for
 	 * write events.
      */
@@ -228,6 +228,7 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
+        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
