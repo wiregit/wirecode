@@ -94,6 +94,32 @@ public class MetaFileManager extends FileManager {
         return added;
     }
 
+    public synchronized boolean renameFileIfShared(File oldFile, File newFile) {
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] uris = rep.getAvailableSchemaURIs();
+        ArrayList l = new ArrayList();
+        for(int i=0; i< uris.length; i++) {
+            LimeXMLDocument d = getDocument(uris[i],oldFile);
+            if(d!=null)
+                l.add(d);
+        }
+        LimeXMLDocument[] docs = new LimeXMLDocument[l.size()];
+        l.toArray(docs);
+        //OK. We have all the information we need.
+        ActivityCallback savedCallback = _callback;
+        _callback = null;
+        try {
+            boolean removed = removeFileIfShared(oldFile);
+            if(!removed)
+                return false;
+            boolean added = addFileIfShared(newFile, docs);
+            if(!added)//This is probably inadequate, we should roll back. 
+                return false; //But FM does it like this.
+            return true;
+        } finally {
+            _callback=savedCallback;
+        }
+    }
 
     private void addAudioMetadata(Response[] responses){
         if (responses == null)//responses may be null
