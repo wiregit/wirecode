@@ -103,7 +103,7 @@
   </target>
   
   <target name="clover.prepare">
-    <mkdir dir="{cloverdir}"/>
+    <mkdir dir="${cloverdir}"/>
   </target>
   
   <target name="clover.clean">
