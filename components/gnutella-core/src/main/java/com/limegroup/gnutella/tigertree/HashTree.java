@@ -431,8 +431,18 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             }
             // node hashed, add the hash to our internal List.
             ret.add(tt.digest());
-            // if read == -1 && offset != fileSize there is something wrong
-            if(!(read == -1) == (offset == fileSize)) {
+            if(offset == fileSize) {
+                // if read isn't already -1, assert that the next read will
+                // be -1.
+                if(read != -1) {
+                    read = is.read();
+                    if(read != -1) {
+                        LOG.warn("More data than fileSize!");
+                        throw new IOException("unknown file size.");
+                    }
+                }
+                break;
+            } else if(read == -1 && offset != fileSize) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("couldn't hash whole file. " +
                              "read: " + read + 

@@ -223,6 +223,7 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void writeResponse() throws IOException {
+        _ostream.setIsCounting(_stateNum == THEX_REQUEST);
 		try {
 			_method.writeHttpResponse(_state, _ostream);
 		} catch (IOException e) {
@@ -275,7 +276,6 @@ public final class HTTPUploader implements Uploader {
 	 */
 	public void setState(int state) {
 		_stateNum = state;
-		_ostream.setIsCounting(false);
 		switch (state) {
 		case UPLOADING:
 			_state = new NormalUploadState(this, STALLED_WATCHDOG);
@@ -312,7 +312,6 @@ public final class HTTPUploader implements Uploader {
         	_state = new BannedUploadState();
         	break;
         case THEX_REQUEST:
-            _ostream.setIsCounting(true);
         	_state = new THEXUploadState(this, STALLED_WATCHDOG);
         	break;
 		case COMPLETE:
