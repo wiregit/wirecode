@@ -654,9 +654,7 @@ public abstract class FileManager {
                 StringUtils.split(
                     SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
             
-            for (int i=0; 
-                 (i<extensions.length) && !loadThreadInterrupted();
-                 i++)
+            for(int i = 0; i < extensions.length && !loadThreadInterrupted(); i++)
                 _extensions.add(extensions[i].toLowerCase());
 
             //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
@@ -669,28 +667,26 @@ public abstract class FileManager {
             
             // add 'NetworkShare' as an always shared subdirectory.
             File[] tmpDirs = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
-            File[] directories = new File[tmpDirs.length + 1];
+            tempDirVar = new File[tmpDirs.length + 1];
             for(int i = 0; i < tmpDirs.length; i++)
-                directories[i] = tmpDirs[i];
-            directories[tmpDirs.length] = FORCED_SHARE;
+                tempDirVar[i] = tmpDirs[i];
+            tempDirVar[tmpDirs.length] = FORCED_SHARE;
 
-            Arrays.sort(directories, new Comparator() {
+            Arrays.sort(tempDirVar, new Comparator() {
                 public int compare(Object a, Object b) {
                     return (a.toString()).length()-(b.toString()).length();
                 }
             });
-                
-            tempDirVar = directories;
         }
 
-        //clear this, list of directories retreived
+        //clear this, list of directories retrieved
         final File[] directories = tempDirVar;
         if (notifyOnClear) 
             RouterService.getCallback().clearSharedFiles();
         
         //Load the shared directories and their files.
         //Duplicates in the directories list will be ignored.  Note that the
-        //runner thread only obtain this' monitor when adding individual
+        //runner thread only obtain this's monitor when adding individual
         //files.
         {
             // Add each directory as long as we're not interrupted.
@@ -750,7 +746,7 @@ public abstract class FileManager {
         // don't share the incomplete directory ... 
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return Collections.EMPTY_LIST;
-            
+
         boolean isForcedShare = directory.equals(FORCED_SHARE);
         
         //STEP 1:
@@ -780,14 +776,27 @@ public abstract class FileManager {
                 
             _numPendingFiles += numShareable;
         }
+        List added = new LinkedList();
+        added.add(new KeyValue(directory, file_list));
         
         //STEP 3:
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.
-        List added = new LinkedList();
-        added.add(new KeyValue(directory, file_list));
-        if(!isForcedShare) { // don't share subdirectories of the forcibly shared dir.
+        // Do not share subdirectories if this directory is on the
+        // directories-to-share-non-recursively list.
+        List noShare = Arrays.asList(SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.getValue());
+        for(Iterator it = noShare.iterator(); it.hasNext(); ) {
+            try {
+                if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
+                    return added;
+                }
+            } catch(IOException ioe) {
+                continue;
+            }
+        }
+        // Do not share subdirectories of the forcibly shared dir.
+        if(!isForcedShare) { 
             for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
                 added.addAll(updateDirectories(dir_list[i], directory));
             }

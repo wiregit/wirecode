@@ -159,6 +159,12 @@ public class SharingSettings extends LimeProps {
         FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
     
     /**
+     * Shared directories that should not be shared recursively.
+     * */
+    public static final FileArraySetting DIRECTORIES_TO_SHARE_NON_RECURSIVELY =
+        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
+    
+    /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
