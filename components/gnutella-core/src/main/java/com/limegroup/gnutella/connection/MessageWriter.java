@@ -13,7 +13,6 @@ import com.limegroup.gnutella.messages.Message;
  */
 public interface MessageWriter {
 
-    
     /**
      * Writes pending messages to the network.
      * 
@@ -41,4 +40,9 @@ public interface MessageWriter {
      *  <tt>false</tt>
      */
     boolean hasPendingMessage();
+
+    /**
+     * Closes this writer -- called when the socket is closed.
+     */
+    void close();
 }
