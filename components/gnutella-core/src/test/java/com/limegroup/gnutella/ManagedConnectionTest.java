@@ -346,23 +346,12 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 
     private static ManagedConnection newConnection(String host, int port) {
         ManagedConnection mc = new ManagedConnection(host, port);
-		setStubs(mc, new ConnectionManagerStub());
 		return mc;
     }
 
     private static ManagedConnection newConnection(String host, int port,
                                                    ConnectionManager cm) {
         ManagedConnection mc = new ManagedConnection(host, port);
-		setStubs(mc, cm);
 		return mc;
     }
-
-	private static void setStubs(ManagedConnection mc, ConnectionManager cm) {
-       /* try {
-            PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
-            PrivilegedAccessor.setValue(mc, "_manager", cm);
-        } catch(Exception e) {
-            fail("could not initialize test", e);
-        } */		
-	}
 }
