@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.upelection.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -392,6 +393,11 @@ public abstract class MessageRouter {
                 ;//TODO: add the statistics recording code
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
+        }
+        else if (msg instanceof BestCandidatesVendorMessage) {
+        	//TODO: add statistics recording code
+        	handleBestCandidatesMessage(
+        					(BestCandidatesVendorMessage)msg, receivingConnection);
         }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -2556,6 +2562,24 @@ public abstract class MessageRouter {
                 ErrorService.error(t);
             }
         }
+    }
+    
+    /**
+     * processes and updates the list of the best candidates based on a received message
+     * @param msg
+     * @param advertiser
+     */
+    private void handleBestCandidatesMessage(BestCandidatesVendorMessage msg, ReplyHandler advertiser) {
+    	
+    	//first, add a ref of the advertiser to each candidate
+    	Candidate [] candidates = msg.getBestCandidates();
+    	
+    	for (int i = 0;i<candidates.length;i++) 
+    		if (candidates[i]!=null)
+    			candidates[i].setAdvertiser(advertiser);
+    		
+    	//then update our lists
+    	BestCandidates.update(candidates);
     }
 
 

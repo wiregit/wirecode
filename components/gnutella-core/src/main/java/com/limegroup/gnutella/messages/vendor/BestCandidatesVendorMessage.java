@@ -8,6 +8,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.upelection.*;
 
 import java.io.*;
 import java.text.ParseException;
@@ -17,7 +18,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	
 	public static final int VERSION = 1;
 	
-	private ExtendedEndpoint [] _bestCandidates;
+	private Candidate [] _bestCandidates;
 	
 	/**
 	 * creates a new message containing the best candidate ultrapeers at 0 1 hops
@@ -26,13 +27,13 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 * @param bestCandidates an array of ExtendedEndpoints.  If we only have data about our
 	 * own best leaf, make the second element null.
 	 */
-	public BestCandidatesVendorMessage(ExtendedEndpoint []bestCandidates) {
+	public BestCandidatesVendorMessage(Candidate []bestCandidates) {
 		super(F_LIME_VENDOR_ID, F_BEST_CANDIDATE, VERSION, derivePayload(bestCandidates));
 		_bestCandidates = bestCandidates;
 	}
 	
 	
-	private static byte [] derivePayload(ExtendedEndpoint []bestCandidates){
+	private static byte [] derivePayload(Candidate []bestCandidates){
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		
@@ -68,10 +69,11 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 */
 	private void parseCandidates(byte [] payload) throws BadPacketException {
 		
+		//get the Ultrapeer that advertised us
 		if (payload==null || payload.length==0)
 			throw new BadPacketException();
 		
-		_bestCandidates = new ExtendedEndpoint[2];
+		_bestCandidates = new Candidate[2];
 		
 		//split the payload in two lines
 		String both = new String(payload);
@@ -82,7 +84,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		if (both.indexOf("\n")==both.lastIndexOf("\n")) {
 			//seems like we either have an invalid packet or the other side knows of only one peer.
 			try{
-				_bestCandidates[0] = ExtendedEndpoint.read(both);
+				_bestCandidates[0] = new Candidate(both);
 				_bestCandidates[1] = null;
 			} catch (ParseException pex){
 				//invalid packet
@@ -95,8 +97,8 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 			String ttl1 = both.substring(both.indexOf("\n")+1,both.length());
 		
 			try {
-				_bestCandidates[0] = ExtendedEndpoint.read(ttl0);
-				_bestCandidates[1] = ExtendedEndpoint.read(ttl1);
+				_bestCandidates[0] = new Candidate(ttl0);
+				_bestCandidates[1] = new Candidate(ttl1);
 			}catch(ParseException pex) {
 				throw new BadPacketException();
 			}
@@ -105,7 +107,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	/**
 	 * @return Returns the _bestCandidates.
 	 */
-	public ExtendedEndpoint[] getBestCandidates() {
+	public Candidate[] getBestCandidates() {
 		return _bestCandidates;
 	}
 }

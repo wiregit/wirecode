@@ -19,18 +19,19 @@ public class BestCandidates {
 	//index 0 is our best leaf,
 	//index 1 is the best leaf at ttl 1 excluding our leaf
 	//index 2 the best leaf at ttl 2 excluding ttl 1 and our leaf
-	ExtendedEndpoint [] _best;
+	Candidate [] _best;
+	
 	
 	private static BestCandidates instance = new BestCandidates();
 	
 	private BestCandidates() {
-		_best = new ExtendedEndpoint[3];
+		_best = new Candidate[3];
 	}
 	
 	/**
 	 * @return the list of the three candidates.
 	 */
-	public static ExtendedEndpoint [] getCandidates() {
+	public static Candidate [] getCandidates() {
 		synchronized(instance) {
 			return instance._best;
 		}
@@ -40,12 +41,12 @@ public class BestCandidates {
 	/**
 	 * @return the absolutely best candidate at all hops
 	 */
-	public static ExtendedEndpoint getBest() {
+	public static Candidate getBest() {
 		SortedSet s = new TreeSet(ExtendedEndpoint.priorityComparator());
 		synchronized(instance) {
 			s.addAll(Arrays.asList(instance._best));
 		}
-		return (ExtendedEndpoint) s.last();  //higher = better
+		return (Candidate) s.last();  //higher = better
 		
 	}
 	
@@ -54,7 +55,7 @@ public class BestCandidates {
 	 * @param newCandidates the list of candidates received from some other
 	 * node.  Null values means we don't have values for that ttl.
 	 */
-	public static void update(ExtendedEndpoint [] newCandidates) {
+	public static void update(Candidate [] newCandidates) {
 		Comparator comp = ExtendedEndpoint.priorityComparator();
 		
 		//if the other guy doesn't have a beast leaf, he shouldn't
@@ -87,7 +88,7 @@ public class BestCandidates {
 	 * changes.
 	 * @param myLeaf an ExtendedEndpoint representation of my new best leaf
 	 */
-	public static void update(ExtendedEndpoint myLeaf) {
+	public static void update(Candidate myLeaf) {
 		//no need to compare, just update
 		//or maybe put some update flag here?
 		synchronized(instance) {
