@@ -272,7 +272,17 @@ public class Sockets {
 						}
 					}
                 } catch(Throwable t) {
-					ErrorService.error(t);
+                    //We actively call Thread.interrupt() on this thread,
+                    //and we've received reports of the Socket constructor
+                    //throwing InterruptedException.
+                    //(See: http://www9.limewire.com:82/dev/exceptions/3.4.4/
+                    //         java.lang.InterruptedException/Socket.19534.txt)
+                    //However, nothing declares it to be thrown, so we can't
+                    //catch and discard seperately.
+                    //As a workaround, we only error if t is not an
+                    //instanceof InterruptedException.
+                    if(!(t instanceof InterruptedException))
+                        ErrorService.error(t);
 				}
 			}
 		}
