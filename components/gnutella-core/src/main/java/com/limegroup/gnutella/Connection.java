@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -779,6 +780,8 @@ public class Connection {
      * got from socket
      */
     void setOrigPort(int port){
+        if (!CommonUtils.isValidPort(port))
+            throw new IllegalArgumentException();
         this._port = port;
     }
 
