@@ -12,7 +12,7 @@ import junit.extensions.*;
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
  */
-public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class QueryRequestTest extends BaseTestCase {
 	
 	/**
 	 * Constructs a new test instance for query requests.
@@ -39,36 +39,110 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 	public void testEmptyQueryNotAccepted() {
 		QueryRequest qr = null;
 		try {
-			qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "", false,
-								  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
-								  false);
+			qr = QueryRequest.createQuery("");
 			fail("exception should have been thrown");
-		} catch(IllegalArgumentException e) {
-		}		
+		} catch(IllegalArgumentException e) {}		
+
+		try {
+			qr = QueryRequest.createRequery("");
+			fail("exception should have been thrown");
+		} catch(IllegalArgumentException e) {}		
+		try {
+			qr = QueryRequest.createQuery((String)null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}		
+		try {
+			qr = QueryRequest.createRequery((String)null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}		
+
+		try {
+			qr = QueryRequest.createRequery((URN)null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}		
+		try {
+			qr = QueryRequest.createRequery(null, (byte)3);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
+
+		try {
+			qr = QueryRequest.createQuery(null, "", "");
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
+		try {
+			qr = QueryRequest.createQuery(new byte[16], null, "");
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
+		try {
+			qr = QueryRequest.createQuery(new byte[16], "", null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
+		try {
+			qr = QueryRequest.createQuery(new byte[16], "", "");
+			fail("exception should have been thrown");
+		} catch(IllegalArgumentException e) {}	
+			
+		try {
+			qr = QueryRequest.createQuery(new byte[15], "test", "");
+			fail("exception should have been thrown");
+		} catch(IllegalArgumentException e) {}				
+
+		try {
+			qr = QueryRequest.createQuery("test", null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
+
 		try {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
-			//payload[2]=(byte)65;
 			qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
 		}
 	}
 
+	/**
+	 * Tests to make sure that invalid TTL arguments are not accepted,
+	 * and that valid ones are.
+	 */
+	public void testTTLParameters() {
+		QueryRequest qr = null;
+		try {
+			qr = QueryRequest.createQuery("test", (byte)-1);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+		try {
+			qr = QueryRequest.createQuery("test", (byte)8);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+
+		try {
+			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+		try {
+			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+
+		qr = QueryRequest.createQuery("test", (byte)1);
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
+		qr = QueryRequest.createQuery("test", (byte)3);
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
+
+	}
+
 	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
 		QueryRequest qr = null;
-		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "blah", "", false,
-							  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
-							  false);
+		qr = QueryRequest.createQuery("blah");
+		qr = QueryRequest.createQuery("","blah");
 
-		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "blah", false,
-							  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
-							  false);
-
-		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "", false,
-							  CommonUtils.EMPTY_SET, 
-							  HugeTestUtils.URN_SETS[0], 
-							  false);
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1);
 
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
