@@ -359,7 +359,7 @@ public class UDPConnectionProcessor {
 
         // Register for a full cleanup after a slight delay
         _closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
-           System.currentTimeMillis() + SHUTDOWN_DELAY_TIME);
+           System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
         _scheduler.register(_closedCleanupEvent);
 	}
 
@@ -418,7 +418,7 @@ public class UDPConnectionProcessor {
 
         // Precreate the event for rescheduling writing to allow 
         // thread safety and faster writing 
-        _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE);
+        _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE,this);
         _scheduler.register(_safeWriteWakeup);
 
 		// Keep chunkLimit in sync with window space
@@ -435,7 +435,7 @@ public class UDPConnectionProcessor {
     private synchronized void scheduleKeepAlive() {
         // Create event with initial time
         _keepaliveEvent  = 
-          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_WAIT_TIME);
+          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_WAIT_TIME,this);
 
         // Register keepalive event for future event callbacks
         _scheduler.register(_keepaliveEvent);
@@ -451,7 +451,7 @@ public class UDPConnectionProcessor {
         if ( isConnected() ) {
             if ( _writeDataEvent == null ) {
                 _writeDataEvent  = 
-                    new WriteDataTimerEvent(time);
+                    new WriteDataTimerEvent(time,this);
 
                 // Register writeData event for future use
                 _scheduler.register(_writeDataEvent);
@@ -509,7 +509,7 @@ public class UDPConnectionProcessor {
         if ( isConnected() ) {
             if ( _ackTimeoutEvent == null ) {
                 _ackTimeoutEvent  = 
-                    new AckTimeoutTimerEvent(time);
+                    new AckTimeoutTimerEvent(time,this);
 
                 // Register ackTimout event for future use
                 _scheduler.register(_ackTimeoutEvent);
@@ -1270,45 +1270,56 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when a keepalive timer fires.
      */
-    class KeepAliveTimerEvent extends UDPTimerEvent {
-        public KeepAliveTimerEvent(long time) {
-            super(time);
-        }
+    static class KeepAliveTimerEvent extends UDPTimerEvent {
+        
+    	public KeepAliveTimerEvent(long time,UDPConnectionProcessor proc) {
+    		super(time,proc);
+    	}
 
         public void handleEvent() {
+
+            
+            UDPConnectionProcessor udpCon = 
+            	(UDPConnectionProcessor)_udpCon.get();
+            
+        	if (unregisterIfNull())
+        		return;
+
             long time = System.currentTimeMillis();
+            
             if(LOG.isDebugEnabled())  
                 LOG.debug("keepalive: "+ time);
 
             // If connection closed, then make sure that keepalives have ended
-            if (isClosed() ) {
-                _scheduler.unregister(_keepaliveEvent);
+
+            if (udpCon.isClosed() ) {
+                udpCon._scheduler.unregister(udpCon._keepaliveEvent);
             }
 
 			// Make sure that some messages are received within timeframe
-			if ( isConnected() && 
-				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+			if ( udpCon.isConnected() && 
+				 udpCon._lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
 
                 LOG.debug("Keepalive generated shutdown");
 
 				// If no incoming messages for very long time then 
 				// close connection
-                closeAndCleanup(FinMessage.REASON_TIMEOUT);
+                udpCon.closeAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
             
             // If reevaluation of the time still requires a keepalive then send
-            if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
-                if ( isConnected() ) {
-                    sendKeepAlive();
+            if ( time+1 >= (udpCon._lastSendTime + KEEPALIVE_WAIT_TIME) ) {
+                if ( udpCon.isConnected() ) {
+                    udpCon.sendKeepAlive();
                 } else {
                     return;
                 }
             }
 
             // Reschedule keepalive timer
-            _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
-            _scheduler.scheduleEvent(this);
+            _eventTime = udpCon._lastSendTime + KEEPALIVE_WAIT_TIME;
+            udpCon._scheduler.scheduleEvent(this);
             if(LOG.isDebugEnabled())  
                 LOG.debug("end keepalive: "+ System.currentTimeMillis());
         }
@@ -1316,28 +1327,35 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when a WriteData timer event fires.
      */
-    class WriteDataTimerEvent extends UDPTimerEvent {
-        public WriteDataTimerEvent(long time) {
-            super(time);
+    static class WriteDataTimerEvent extends UDPTimerEvent {
+        public WriteDataTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,proc);
         }
 
         public void handleEvent() {
+        	
+        	UDPConnectionProcessor udpCon = 
+        		(UDPConnectionProcessor) _udpCon.get();
+        	
+        	if (unregisterIfNull())
+        		return;
+        	
             if(LOG.isDebugEnabled())  
                 LOG.debug("data timeout :"+ System.currentTimeMillis());
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
-			if ( isConnected() && 
-				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+			if ( udpCon.isConnected() && 
+				 udpCon._lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
 				// If no incoming messages for very long time then 
 				// close connection
-                closeAndCleanup(FinMessage.REASON_TIMEOUT);
+                udpCon.closeAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
 
 			// If still connected then handle then try to write some data
-            if ( isConnected() ) {
-                writeData();
+            if ( udpCon.isConnected() ) {
+                udpCon.writeData();
             }
             if(LOG.isDebugEnabled())  
                 LOG.debug("end data timeout: "+ System.currentTimeMillis());
@@ -1347,17 +1365,24 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when an ack timeout occurs
      */
-    class AckTimeoutTimerEvent extends UDPTimerEvent {
+    static class AckTimeoutTimerEvent extends UDPTimerEvent {
 
-        public AckTimeoutTimerEvent(long time) {
-            super(time);
+        public AckTimeoutTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,proc);
         }
 
         public void handleEvent() {
+        	
+        	UDPConnectionProcessor udpCon = 
+        		(UDPConnectionProcessor) _udpCon.get();
+        	
+        	if (unregisterIfNull())
+        		return;
+        	
             if(LOG.isDebugEnabled())  
                 LOG.debug("ack timeout: "+ System.currentTimeMillis());
-            if ( isConnected() ) {
-                validateAckedData();
+            if ( udpCon.isConnected() ) {
+                udpCon.validateAckedData();
             }
             if(LOG.isDebugEnabled())  
                 LOG.debug("end ack timeout: "+ System.currentTimeMillis());
@@ -1367,20 +1392,27 @@ public class UDPConnectionProcessor {
     /** 
      *  This is an event that wakes up writing with a given delay
      */
-    class SafeWriteWakeupTimerEvent extends UDPTimerEvent {
+    static class SafeWriteWakeupTimerEvent extends UDPTimerEvent {
 
-        public SafeWriteWakeupTimerEvent(long time) {
-            super(time);
+        public SafeWriteWakeupTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,proc);
         }
 
         public void handleEvent() {
+        	
+        	UDPConnectionProcessor udpCon = 
+        		(UDPConnectionProcessor) _udpCon.get();
+        	
+        	if (unregisterIfNull())
+        		return;
+        	
             if(LOG.isDebugEnabled())  
                 LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
-            if ( isConnected() ) {
-                writeDataActivation();
+            if ( udpCon.isConnected() ) {
+                udpCon.writeDataActivation();
             }
             _eventTime = Long.MAX_VALUE;
-            _scheduler.scheduleEvent(this);
+            udpCon._scheduler.scheduleEvent(this);
             if(LOG.isDebugEnabled())  
                 LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
         }
@@ -1389,18 +1421,24 @@ public class UDPConnectionProcessor {
     /** 
      *  Do final cleanup and shutdown after connection is closed.
      */
-    class ClosedConnectionCleanupTimerEvent extends UDPTimerEvent {
+    static class ClosedConnectionCleanupTimerEvent extends UDPTimerEvent {
 
-        public ClosedConnectionCleanupTimerEvent(long time) {
-            super(time);
+        public ClosedConnectionCleanupTimerEvent(long time, UDPConnectionProcessor proc) {
+            super(time,proc );
         }
 
         public void handleEvent() {
+        	UDPConnectionProcessor udpCon = 
+        		(UDPConnectionProcessor) _udpCon.get();
+        	
+        	if (unregisterIfNull())
+        		return;
+        	
             if(LOG.isDebugEnabled())  
                 LOG.debug("Closed connection timeout: "+ 
                   System.currentTimeMillis());
 
-            finalClose();
+            udpCon.finalClose();
 
 
             if(LOG.isDebugEnabled())  

@@ -329,7 +329,7 @@ public class UDPScheduler extends ManagedThread {
 
 	static class NoEvent extends UDPTimerEvent {
 		public NoEvent(long time) {
-			super(time);
+			super(time,null);
 		}
 
 		public void handleEvent() {
