@@ -2919,12 +2919,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(biggest == null)
                     biggest = h;
                 // Otherwise, steal only if what's left is
-                // larger.
+                // larger and there's stuff left.
                 else {
                     int hLeft = h.getAmountToRead() - h.getAmountRead();
                     int bLeft = biggest.getAmountToRead() - 
                                 biggest.getAmountRead();
-                    if( hLeft > bLeft )
+                    if( hLeft > 0 && hLeft > bLeft )
                         biggest = h;
                 }
             }                
@@ -2976,6 +2976,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 int start = biggest.getInitialReadingPoint() + amountRead;
                 int stop = biggest.getInitialReadingPoint() + 
                            biggest.getAmountToRead();
+                // If we happened to finish off the download, throw NSEX
+                // and so we don't download any more.
+                if(stop <= start)
+                    throw new NoSuchElementException();
                 //Note: we are not interested in being queued at this point this
                 //line could throw a bunch of exceptions (not queuedException)
                 dloader.connectHTTP(getOverlapOffset(start), stop, false);
@@ -3012,6 +3016,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             int stop = biggest.getInitialReadingPoint() + 
                        biggest.getAmountToRead();
+            // If we happened to finish off the dl, don't download any more
+            if(stop <= start)
+                throw new NoSuchElementException();
             //this line could throw a bunch of exceptions
             dloader.connectHTTP(getOverlapOffset(start), stop, true);
             int newLow = dloader.getInitialReadingPoint();
