@@ -69,14 +69,8 @@ public class UDPConnectionProcessor {
     private static final long MAX_CONNECT_WAIT_TIME   = 20*1000;
 
 	/** Define the maximum wait time before sending a message in order to
-        keep the connection alive (and firewalls open).  
- 		Note: in an idle state, this affects data writing if the 
-		receivers window is full. */
-	//private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
-
-    /** Schedule the keepalive in such a way that it can do some other 
-        work when it kicks in. */
-	private static final long KEEPALIVE_WAIT_TIME = (200);
+        keep the connection alive (and firewalls open).  */
+	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
@@ -147,12 +141,11 @@ public class UDPConnectionProcessor {
     /** Flag that the writeEvent is shutdown waiting for data to write */
 	private boolean 		  _waitingForDataAvailable;
 
-    /** Flag that can cause the writeEvent to wakeup */
-    private boolean           _wakeupWriteEvent;
-
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
 
+    /** Adhoc event for waking up the writing of data */
+    private SafeWriteWakeupTimerEvent _safeWriteWakeup;
 
     /** The current sequence number of messages originated here */
 	private long              _sequenceNumber;
@@ -196,7 +189,6 @@ public class UDPConnectionProcessor {
     	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
         _waitingForDataSpace     = false;
         _waitingForDataAvailable = false;
-        _wakeupWriteEvent        = false;
         _skipADataWrite          = false;
         _ackResendCount          = 0;
 
@@ -258,6 +250,11 @@ public class UDPConnectionProcessor {
 	}
 
 	public void close() throws IOException {
+
+        // If closed then done
+        if ( _connectionState == FIN_STATE ) 
+            return;
+
         // Shutdown keepalive event callbacks
         if ( _keepaliveEvent  != null ) 
         	_scheduler.unregister(_keepaliveEvent);
@@ -269,6 +266,10 @@ public class UDPConnectionProcessor {
         // Shutdown ack timeout event callbacks
         if ( _ackTimeoutEvent != null ) 
             _scheduler.unregister(_ackTimeoutEvent);
+
+        // Unregister the safeWriteWakeup handler
+        if ( _safeWriteWakeup != null ) 
+            _scheduler.unregister(_safeWriteWakeup);
 
 		// Register that the connection is closed
         _connectionState = FIN_STATE;
@@ -294,6 +295,11 @@ public class UDPConnectionProcessor {
         // Create the delayed connection components
         _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
         _writeRegulator  = new WriteRegulator(_sendWindow); 
+
+        // Precreate the event for rescheduling writing to allow 
+        // thread safety and faster writing 
+        _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE);
+        _scheduler.register(_safeWriteWakeup);
 
 		// TODO: keep up to date
         _chunkLimit      = _sendWindow.getWindowSpace();  
@@ -354,23 +360,20 @@ public class UDPConnectionProcessor {
      *  Activate writing if we were waiting for data to write
      */
     public synchronized void writeDataActivation() {
-		if ( _waitingForDataAvailable ) {
-			_waitingForDataAvailable = false;
-
-			// Schedule at a reasonable time
-            long rto = (long)_sendWindow.getRTO();
-			scheduleWriteDataEvent( _lastDataSendTime + (rto/2) );
-		}
+        // Schedule at a reasonable time
+        long rto = (long)_sendWindow.getRTO();
+        scheduleWriteDataEvent( _lastDataSendTime + (rto/4) );
 	}
 
-    // TODO: This can likely be converted to a direct reschedule safely.
-    //       That would take the slow dependency off of keepalive (and allow
-    //       it to go back to the full wait time). 
     /**
-     *  Set a flag that will eventually restart the writeEvent
+     *  Hand off the wakeup of data writing to the scheduler
      */
     public void wakeupWriteEvent() {
-        _wakeupWriteEvent = true;
+        if ( _waitingForDataAvailable ) {
+            _waitingForDataAvailable = false;
+            _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
+            _scheduler.scheduleEvent(_safeWriteWakeup);
+        }
     }
 
     /**
@@ -991,14 +994,6 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             long time = System.currentTimeMillis();
 //log2("keepalive: "+ time);
 
-            // If write event went to sleep and it is needed then
-            // wakeup writing
-            if ( _wakeupWriteEvent ) {
-                writeDataActivation();
-                _wakeupWriteEvent = true;
-            }
-
-		
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
@@ -1069,6 +1064,24 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
                 validateAckedData();
             }
 //log2("end ack timeout: "+ System.currentTimeMillis());
+        }
+    }
+
+    /** 
+     *  This is an event that wakes up writing with a given delay
+     */
+    class  SafeWriteWakeupTimerEvent extends UDPTimerEvent {
+
+        public SafeWriteWakeupTimerEvent(long time) {
+            super(time);
+        }
+
+        public void handleEvent() {
+//log2("write wakeup timeout: "+ System.currentTimeMillis());
+            if ( isConnected() ) {
+                writeDataActivation();
+            }
+//log2("write wakeup timeout: "+ System.currentTimeMillis());
         }
     }
     //
