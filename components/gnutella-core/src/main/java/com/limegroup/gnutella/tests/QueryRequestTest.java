@@ -41,7 +41,7 @@ public final class QueryRequestTest extends TestCase {
 		assertEquals("min speeds should be equal", u2, qr.getMinSpeed());
 		assertEquals("queries should be equal", "", qr.getQuery());
 
-        qr=new QueryRequest((byte)3,(byte)1,"ZZZ");		
+        qr=new QueryRequest((byte)3, 1,"ZZZ");		
 		assertEquals("min speeds should be equal", (byte)1, qr.getMinSpeed());
 		assertEquals("queries should be equal", "ZZZ", qr.getQuery());
 
