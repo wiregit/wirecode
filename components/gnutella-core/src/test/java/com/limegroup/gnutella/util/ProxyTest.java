@@ -5,8 +5,12 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
+import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.methods.*;
+
 
 public class ProxyTest extends BaseTestCase {
     
@@ -15,7 +19,7 @@ public class ProxyTest extends BaseTestCase {
     private final static String  HTTP_STR = "CONNECT";
     
     private static final int PROXY_PORT = 9990;
-    private static final int DEST_PORT = 9999;
+    static final int DEST_PORT = 9999;
 
     final static int SOCKS4 = 0;
     final static int SOCKS5 = 1;
@@ -29,7 +33,7 @@ public class ProxyTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        return buildTestSuite(ProxyTest.class);//,"testSOCKS4Connection");
+        return buildTestSuite(ProxyTest.class);//, "testHTTPClientWithSocks4");
     }
     
     public static void main(String[] args) {
@@ -163,12 +167,72 @@ public class ProxyTest extends BaseTestCase {
         s.close();
     }
       
+    /**
+     * Tests that HTTP proxies are used correctly
+     */ 
+    public void testHTTPProxy() throws Exception {
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                               ConnectionSettings.C_HTTP_PROXY);
+        
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(HTTP);
+        Socket s = Sockets.connect("localhost",DEST_PORT,0);
+        s.close();
+    }
 
+    public void testHTTPProxyWithError() throws Exception {
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                               ConnectionSettings.C_HTTP_PROXY);
+        
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(HTTP);
+        fps.setMakeError(true);
+        try {
+            Socket s = Sockets.connect("localhost",DEST_PORT,0);
+            fail("ProxyServer didn't return good socket we should have failed");
+        } catch(IOException iox) {
+            //Good -- expected behaviour
+        }
+    }
 
-    //connect with HTTP
+    public void testHTTPClentWithProxyOff() throws Exception {
+        ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(false);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                               ConnectionSettings.C_NO_PROXY);
+        fps.setProxyOn(false);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(NONE);
+        fps.setHttpRequest(true);
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        client.executeMethod(get);
+        byte[] resp = get.getResponseBody();
+    }
 
-    //connect sock sock4 with auth
-
+    public void testHTTPClientProxies() throws Exception {
+        ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        //ConnectionSettings.CONNECTION_METHOD.setValue(
+        //                                   ConnectionSettings.C_HTTP_PROXY);
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        //fps.setProxyVersion(HTTP);
+        fps.setHttpRequest(true);
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile2.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        client.executeMethod(get);
+        byte[] resp = get.getResponseBody(); 
+    }
+    
     //connect using httpclient with socks4
 
     //connect using httpclient with socks4 with auth

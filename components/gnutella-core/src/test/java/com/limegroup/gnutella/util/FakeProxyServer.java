@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.net.*;
 import com.limegroup.gnutella.*;
 import java.io.*;
+import java.util.StringTokenizer;
 
 public class FakeProxyServer {
 
@@ -23,6 +24,8 @@ public class FakeProxyServer {
     private boolean _authentication;
 
     private boolean _makeError = false;
+    
+    private boolean _isHTTPRequest = false;
     
     final static String USER = "Sumeet";
     
@@ -78,11 +81,17 @@ public class FakeProxyServer {
                 else if(_proxyVersion == ProxyTest.SOCKS5)
                     checkSOCKS5(is, os);
                 else if(_proxyVersion == ProxyTest.HTTP)
-                    checkHTTP(is);
+                    checkHTTP(is, os);
                 else
-                    Assert.that(false, 
+                    Assert.that(_isHTTPRequest, 
                          "test not set up correctly, incorrect proxy version");
                 int a = 0;
+                if(_isHTTPRequest) {
+                    writeHTTPBack(os);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException x) { }
+                }
                 while(a != -1) 
                     a = is.read();
                 if(!incomingProxy.isClosed())
@@ -90,7 +99,6 @@ public class FakeProxyServer {
             }
         } catch(IOException iox) {
             ErrorService.error(iox);
-            //killServers();
         }
     }
 
@@ -185,8 +193,22 @@ public class FakeProxyServer {
     }
 
     
-    private void checkHTTP(InputStream is) {
-        //TODO1: implement
+    private void checkHTTP(InputStream is, OutputStream os) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line = reader.readLine();
+        StringTokenizer tok = new StringTokenizer(line, " :");
+        Assert.that(tok.nextToken().equals("CONNECT"),
+                                                  "connect string not sent");
+        Assert.that(tok.nextToken().equals("localhost"), "LW sent wrong host");
+        Assert.that(tok.nextToken().equals(""+ProxyTest.DEST_PORT),
+                                                     "LW sent wrong port");
+        Assert.that(tok.nextToken().equals("HTTP/1.0"), 
+                                                 "LW didn't send http string");
+        if(_makeError)
+            os.write("503 Busy\r\n\r\n".getBytes());
+        else
+            os.write("200 OK\r\n\r\n".getBytes());
+        
     }
 
     private void destLoop() {
@@ -197,12 +219,28 @@ public class FakeProxyServer {
                 if(_proxyOn)
                     Assert.that(false, 
                            "Limewire connected to desination instead of proxy");
+                if(_isHTTPRequest) {
+                    writeHTTPBack(incomingDest.getOutputStream());
+                    try {
+                        Thread.sleep(1000);
+                    } catch(InterruptedException e) {}
+                }
                 if(!incomingDest.isClosed())
                     incomingDest.close();
             }
         } catch(IOException iox) {
             ErrorService.error(iox);
         }
+    }
+
+
+    private void writeHTTPBack(OutputStream os) throws IOException {
+        os.write("HTTP/1.1 200 OK \r\n".getBytes());
+        os.write("Server: limewire \r\n".getBytes());
+        os.write("Content-Type: txt/html \r\n".getBytes());
+        os.write("Content-Length: 5 \r\n".getBytes());
+        os.write("\r\n".getBytes());
+        os.write("hello".getBytes());
     }
 
     void killServers() {
@@ -228,5 +266,9 @@ public class FakeProxyServer {
     
     void setMakeError(boolean b) {
         _makeError = b;
+    }
+
+    void setHttpRequest(boolean b) {
+        _isHTTPRequest = b;
     }
 }
