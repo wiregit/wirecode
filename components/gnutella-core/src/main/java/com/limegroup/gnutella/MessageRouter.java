@@ -1284,7 +1284,6 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
-        System.out.println("MessageRouter::sendQueryRequest");
 		if(request == null) {
 			throw new NullPointerException("null query");
 		}
@@ -1307,7 +1306,6 @@ public abstract class MessageRouter {
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
-            System.out.println("MessageRouter::sendQueryRequest::sending");
             sendConnection.send(request);
 		}		
     }
