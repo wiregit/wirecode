@@ -15,10 +15,10 @@ public class UDPConnectionProcessor {
     public static final int   DATA_CHUNK_SIZE         = 512;
 
     /** Handle to the output stream that is the input to this connection */
-    private UDPBufferedOutputStream  _input;
+    private UDPBufferedOutputStream  _inputFromOutputStream;
 
     /** Handle to the input stream that is the output of this connection */
-    private UDPBufferedInputStream   _output;
+    private UDPBufferedInputStream   _outputToInputStream;
 
     /** A leftover chunk of data from an incoming data message.  These will 
         always be present with a data message because the first data chunk 
@@ -227,8 +227,8 @@ public class UDPConnectionProcessor {
     }
 
 	public InputStream getInputStream() throws IOException {
-        _output = new UDPBufferedInputStream(this);
-        return _output;
+        _outputToInputStream = new UDPBufferedInputStream(this);
+        return _outputToInputStream;
 	}
 
     /**
@@ -241,9 +241,9 @@ public class UDPConnectionProcessor {
 		// some data before we can do anything.
 		scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
 
-        _input = new UDPBufferedOutputStream(this);
+        _inputFromOutputStream = new UDPBufferedOutputStream(this);
 
-        return _input;
+        return _inputFromOutputStream;
 	}
 
     /**
@@ -855,8 +855,8 @@ log2("Received block num too far ahead: "+ seqNo);
 				drec.acks++;
 
 				// Notify InputStream that data is available for reading
-				if ( _output != null )
-					_output.wakeup();
+				if ( _outputToInputStream != null )
+					_outputToInputStream.wakeup();
             } else {
 log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             }
@@ -897,7 +897,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         while (true) {
             // If the input has not been started then wait again
-            if ( _input == null ) {
+            if ( _inputFromOutputStream == null ) {
                 scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
                 return;
             }
@@ -915,7 +915,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // If there is room to send something then send data if available
             if ( getChunkLimit() > 0 ) {
                 // Get data and send it
-                Chunk chunk = _input.getChunk();
+                Chunk chunk = _inputFromOutputStream.getChunk();
                 if ( chunk != null )
                     sendData(chunk);
             } else {
@@ -926,8 +926,8 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
             // Don't wait for next write if there is no chunk available.
             // Writes will get rescheduled if a chunk becomes available.
-            synchronized(_input) {
-                if ( _input.getPendingChunks() == 0 ) {
+            synchronized(_inputFromOutputStream) {
+                if ( _inputFromOutputStream.getPendingChunks() == 0 ) {
                     scheduleWriteDataEvent(Long.MAX_VALUE);
                     _waitingForDataAvailable = true;
                     return;
