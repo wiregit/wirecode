@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
@@ -954,6 +955,8 @@ public class Response {
                         if(!NetworkUtils.isValidPort(port))
                             continue;
                         if(!NetworkUtils.isValidAddress(host))
+                            continue;
+                        if(!IPFilter.instance().allow(host))
                             continue;
                         locations.add(new Endpoint(host, port));
                     }
