@@ -186,12 +186,19 @@ public class PingRequest extends Message {
         try {
 
             // Since existing clients are hard-coded to expect the locale GGEP
-            // at offset 0, we sneak the ping request GGEP after it.
+            // at offset 0, we add the request to that block
             
-            if (payload!=null && payload[payload.length-1]==0)
-                baos.write(payload,0,payload.length-1);
+            GGEP ggep= null;
+            if (payload!=null)
+                try{
+                    ggep = new GGEP(payload,0,null);
+                }catch(BadGGEPBlockException bad) {
+                    //we created this message ourselves - and now it has a bad block!
+                    ErrorService.error(bad);
+                }
+            else
+                ggep = new GGEP(false);
             
-            GGEP ggep = new GGEP(false);
             ggep.put(GGEP.GGEP_HEADER_IPPORT);
             ggep.write(baos);
             baos.write(0);
