@@ -26,7 +26,7 @@ public class PromotionManager {
 	static UDPService _udpService = UDPService.instance();
 	
 	/**
-	 * LOCKS _promotionPartner
+	 * LOCKS _promotionPartner, _guid
 	 */
 	private Object _promotionLock = new Object();
 	
@@ -35,6 +35,12 @@ public class PromotionManager {
 	 * LOCKING: obtain _promotionLock
 	 */
 	private IpPort _promotionPartner;
+	
+	/**
+	 * the GUID of the promotion request message and the ack's
+	 * LOCKING: obtain _promotionLock
+	 */
+	private GUID _guid;
 	
 	/**
 	 * keeps a list of the people who have requested our connection lists. 
@@ -75,10 +81,13 @@ public class PromotionManager {
     	IpPortPair requestor = new IpPortPair (
 				msg.getRequestor().getAddress(),
 				msg.getRequestor().getPort());
+    	 
     	
     	synchronized(_promotionLock) {
-    		if (_promotionPartner == null)
-    			_promotionPartner = requestor; 
+    		if (_promotionPartner == null) {
+    			_promotionPartner = requestor;
+    			_guid = new GUID(msg.getGUID());
+    		}
     		else
     			//_requestors.add(requestor);
     			return; //just drop the promotion request for now.
@@ -125,7 +134,7 @@ public class PromotionManager {
 		}
 	}
 	
-	public void handleACK(IpPort sender) {
+	public void handleACK(IpPort sender, GUID guid) {
 		//cache the current status
 		boolean isSupernode = RouterService.isSupernode();
 		
@@ -135,7 +144,8 @@ public class PromotionManager {
     	synchronized(_promotionLock) {
     		//check if we received the ACK from the right person
     		//also allow for loopback addresses for testing 
-    		if (!sender.isSame(_promotionPartner)) //&& 
+    		if (!sender.isSame(_promotionPartner) ||
+    				!guid.equals(_guid)) //&& 
     				//!sender.getInetAddress().isLoopbackAddress())
     			return;
     	}
@@ -170,6 +180,8 @@ public class PromotionManager {
 	 */
 	public void requestPromotion() {
 		
+		PromotionRequestVendorMessage msg;
+		
 		synchronized(_promotionLock) {
 			//check if we are already requesting promotion and if so,
 			if (_promotionPartner!=null)
@@ -180,13 +192,15 @@ public class PromotionManager {
 			
 			//start a resetting thread
 			_expirer = new Expirer(UP_REQUEST_TIMEOUT);
+			
+			msg = 
+				new PromotionRequestVendorMessage((Candidate)_promotionPartner);
+			
+			_guid = new GUID(msg.getGUID());
 		}
 		
 		//*******
-		//send a PromotionRequestVM to the appropriate route
-		PromotionRequestVendorMessage msg = 
-			new PromotionRequestVendorMessage((Candidate)_promotionPartner);
-		
+		//send a PromotionRequestVM to the appropriate route	
 		RouterService.getMessageRouter().forwardPromotionRequest(msg);	
 		
 	}
@@ -222,6 +236,7 @@ public class PromotionManager {
 			if (!_cancelled)
 				synchronized(_promotionLock) {
 					_promotionPartner=null;
+					_guid=null;
 				}
 		}
 	}

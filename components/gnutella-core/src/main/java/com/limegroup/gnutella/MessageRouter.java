@@ -526,7 +526,7 @@ public abstract class MessageRouter {
         else if (msg instanceof PromotionACKVendorMessage) {
         	if(RECORD_STATS)
         		;//TODO: add the statistics recording code
-        	handlePromotionACKVendorMessage(datagram);
+        	handlePromotionACKVendorMessage(datagram, msg);
         }
         notifyMessageListener(msg);
     }
@@ -2633,11 +2633,12 @@ public abstract class MessageRouter {
      * delegates the call to promotion manager.
      * 
      */
-    private void handlePromotionACKVendorMessage(DatagramPacket datagram) {
+    private void handlePromotionACKVendorMessage(DatagramPacket datagram, Message msg) {
     	
     	_promotionManager.handleACK(
     			new IpPortPair(datagram.getAddress().getHostAddress(),
-    					datagram.getPort()));
+    					datagram.getPort()),
+						new GUID(msg.getGUID()));
     	
     }
     
