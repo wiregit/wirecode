@@ -294,6 +294,21 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 	
+	/**
+	 * Stores the alternate location for this upload in the associated 
+	 * <tt>FileDesc</tt> instance.
+	 */
+	public void storeAlternateLocation() {
+		// ignore if this is a push upload
+		if(_socket == null) return;
+		try {
+			AlternateLocation al = new AlternateLocation(new URL(_hostName));
+			_fileDesc.addAlternateLocation(al);
+		} catch(MalformedURLException e) {
+			// if the url is invalid, it simply will not be added to the list
+			// of alternate locations
+		}		
+	}
 
 	/****************** accessor methods *****************/
 
