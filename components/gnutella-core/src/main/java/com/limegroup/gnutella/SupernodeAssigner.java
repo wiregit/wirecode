@@ -21,12 +21,6 @@ import com.limegroup.gnutella.statistics.*;
 public final class SupernodeAssigner {
 
 	/**
-	 * Constant handle to the <tt>SettingsManager</tt> for accessing
-	 * various properties.
-	 */
-	//private static final SettingsManager SETTINGS = SettingsManager.instance();
-
-	/**
 	 * Constant for the minimum number of upstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a ultrapeer.
 	 */
