@@ -174,16 +174,12 @@ public final class NormalUploadState implements HTTPMessage {
             //dont upload more than asked
             if( c > (_amountRequested - _amountWritten))
                 c = _amountRequested - _amountWritten;
-            try {
-                _stalledChecker.activate(ostream);
-                ostream.write(buf, 0, c);
-    			// we do not need to check the return value because
-    			// if it was stalled, an IOException would have been thrown
-    			// causing us to fall out to the catch clause
-    			_stalledChecker.deactivate();
-            } catch (java.net.SocketException e) {
-                throw new IOException("socketexception");
-            }
+            _stalledChecker.activate(ostream);
+            ostream.write(buf, 0, c);
+			// we do not need to check the return value because
+			// if it was stalled, an IOException would have been thrown
+			// causing us to exit immediately.
+			_stalledChecker.deactivate();
             
             _amountWritten += c;
             _uploader.setAmountUploaded(_amountWritten);
