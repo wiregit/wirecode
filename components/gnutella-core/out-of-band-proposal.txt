@@ -1,0 +1,36 @@
+
+                           Out-of-Band-Replies
+                           -------------------
+
+
+This proposal describes a mechanism that will allow for Gnutella Query
+Replies (aka Query Hits) to be delivered to interested parties
+'out-of-band' - specifically, servents would deliver Query Replies
+directly to the originator of the query as opposed to placing them on the
+Gnutella net for eventual delivery to the originator.  Fundamentally,
+servents would open a direct (TCP) connection to the Query originator and
+dump the Query Replies in the originator's lap.
+
+Some may raise the objection that this goes against the grain of the
+Gnutella model - each Gnutella servent maintains a routing table (from
+GUIDs to links) to specifically route traffic appropriately.  Some of this
+maintenance would be unnecessary if all Query Replies are delivered
+'out-of-band'.  Here are a few reasons why 'out-of-band' delivery of Query
+Replies is a good idea:
+
+  * QueryReply traffic is taking up a larger percentage of Gnutella
+    traffic as the popularity of Gnutella grows.  Reducing some of this
+    traffic would free up resources for other vital messaging necessary
+    for a healthy Gnutella net.
+
+  * Sending Query Replies 'out-of-band' is a purely optional enhancement.
+    Clients that support 'out-of-band' delivery may choose how to send
+    back any Replies (ie if the cost of an 'out-of-band' transaction is
+    too high at the moment, then the servent can use the traditional
+    mechanism).  This flexibility is a strength and is enforced by the use
+    of the GGEP scheme to advertise 'out-of-band' support.
+
+  * The 'out-of-band' scheme is fault-tolerant in the face of network
+    topology changes.  If the originator loses vital links during the
+    processing of a Query, Query Replies that are routed directly to the
+    originator will still reach the desired destination.
