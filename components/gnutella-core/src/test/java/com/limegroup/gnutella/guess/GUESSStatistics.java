@@ -27,8 +27,14 @@ public class GUESSStatistics {
                                           String searchKey) {
         float numAttempted = 0, numReceived = 0;
         GUESSTester tester = new GUESSTester("whatever");
+        int size = searchKey.length();
+        int chop = 0;
         while (numAttempted < 20) {
-            QueryRequest qr = new QueryRequest((byte)1, 0, searchKey);
+            QueryRequest qr = new QueryRequest((byte)1, 0, 
+                                               searchKey.substring(0,
+                                                                   size-chop));
+            if (++chop > 3)
+                chop = 0;
             try {
                 if (tester.testQuery(host, port, qr) != null)
                     numReceived++;
