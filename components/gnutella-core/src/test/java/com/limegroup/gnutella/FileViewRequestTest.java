@@ -13,7 +13,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.uploader.FileViewUploadState;
+import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.html.FileListHTMLPage;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
@@ -46,7 +46,7 @@ public class FileViewRequestTest extends ClientSideTestCase {
         
         URL url = new URL("http", "localhost", SERVER_PORT,
                           UploadManager.FV_REQ_BEGIN);
-        URLConnection conn = url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         assertEquals(BAD_PASS.length, conn.getContentLength());
         InputStream is = conn.getInputStream();
         byte[] bytes = new byte[BAD_PASS.length];
@@ -59,25 +59,41 @@ public class FileViewRequestTest extends ClientSideTestCase {
         URL url = new URL("http", "localhost", SERVER_PORT,
                           UploadManager.FV_REQ_BEGIN + "/" +
                           UploadManager.FV_PASS);
-        URLConnection conn = url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         InputStream is = conn.getInputStream();
-        assertGreaterThan(FileListHTMLPage.htmlBegin.length() +
-                          FileListHTMLPage.htmlMiddle.length() +
-                          FileListHTMLPage.htmlEnd.length(),
-                          conn.getContentLength());
-        byte[] bytes = new byte[FileListHTMLPage.htmlBegin.length()];
+        final String output = FileListHTMLPage.instance().getSharedFilePage();
+        assertEquals(output.length(), conn.getContentLength());
+        byte[] bytes = new byte[output.length()];
         is.read(bytes);
-        assertEquals(FileListHTMLPage.htmlBegin.getBytes(), bytes);
-        byte[] restOf = new byte[conn.getContentLength() - bytes.length];
-        is.read(restOf);
-        String restOfString = new String(restOf);
-        assertNotEquals(-1, restOfString.indexOf("href"));
-        assertNotEquals(-1, restOfString.indexOf("href",
-                                                 restOfString.indexOf("href")+4));
-        assertEquals(-1, 
-                     restOfString.indexOf("href",
-                                          restOfString.indexOf("href",
-                                                               restOfString.indexOf("href")+4)+4));
+        assertEquals(bytes, output.getBytes());
+    }
+
+    public void testHammeringNotAllowed() throws Exception {
+
+        final String output = FileListHTMLPage.instance().getSharedFilePage();
+        // open a bunch of connections
+        for (int i = 0; i < 25; i++) {
+            URL url = new URL("http", "localhost", SERVER_PORT,
+                              UploadManager.FV_REQ_BEGIN + "/" +
+                              UploadManager.FV_PASS);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            InputStream is = conn.getInputStream();
+            assertEquals(output.length(), conn.getContentLength());
+            Thread.sleep(1*1000);
+        }
+
+        // wait a while
+        Thread.sleep(25*1000);
+
+        final byte[] error = BannedUploadState.ERROR_MESSAGE;
+        // next request should be denied
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        assertTrue((conn.getResponseCode() >= 400) &&
+                   (conn.getResponseCode() < 500));
+        
     }
 
     //////////////////////////////////////////////////////////////////
