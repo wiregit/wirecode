@@ -15,13 +15,19 @@ import org.w3c.dom.*;
  * Names of fields to the values as per a XML document.
  */
 public class LimeXMLDocument implements Serializable {
+
+	/**
+	 * Cached hash code for this instance.
+	 */
+	private volatile int hashCode = 0;
+
     /** For backwards compatibility with downloads.dat. */
     static final long serialVersionUID = 7396170507085078485L;
 
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    private Map fieldToValue = new TreeMap(new StringComparator());
+    private final Map fieldToValue = new TreeMap(new StringComparator());
     protected String schemaUri;
     //protected String XMLString;//this is what is sent back on the wire.
     /** 
@@ -259,9 +265,9 @@ public class LimeXMLDocument implements Serializable {
      * Sets the schema URI for this document
      * @param schemaURI schema URI to be set
      */
-    public void setSchemaURI(String schemaURI){
-        this.schemaUri = schemaURI;
-    }
+    //public void setSchemaURI(String schemaURI){
+	//  this.schemaUri = schemaURI;
+    //}
     
     
     /**
@@ -551,6 +557,44 @@ public class LimeXMLDocument implements Serializable {
         }
         return retValue;
     }
-    
+
+	/**
+	 * Overrides equals to check for equality of all xml document fields.
+	 *
+	 * @param o the object to compare
+	 * @return <tt>true</tt> if the objects are equal, <tt>false</tt>
+	 *  otherwise
+	 */
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof LimeXMLDocument)) return false;
+		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
+		return ((fieldToValue == null ? xmlDoc.fieldToValue == null : 
+				 fieldToValue.equals(xmlDoc.fieldToValue))  &&
+				(schemaUri == null ? xmlDoc.schemaUri == null :
+				 schemaUri.equals(xmlDoc.schemaUri)) &&
+				(identifier == null ? xmlDoc.identifier == null :
+				 identifier.equals(xmlDoc.identifier)) &&
+				(action == null ? xmlDoc.action == null :
+				 action.equals(xmlDoc.action)));
+	}
+
+	/**
+	 * Overrides <tt>Object.hashCode</tt> to satisfy the contract for
+	 * hashCode, given that we're overriding equals.
+	 *
+	 * @return a hashcode for this object for use in hash-based collections
+	 */
+	public int hashCode() {
+		if(hashCode == 0) {
+			int result = 17;
+			result = 37*result + fieldToValue.hashCode();
+			result = 37*result + schemaUri.hashCode();
+			result = 37*result + identifier.hashCode();
+			result = 37*result + action.hashCode();
+			hashCode = result;
+		} 
+		return hashCode;
+	}
 }
 
