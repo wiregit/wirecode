@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -689,7 +689,7 @@ public abstract class FileManager {
         //runner thread only obtain this's monitor when adding individual
         //files.
         {
-            Set added = new HashSet();
+            Set added = new LinkedHashSet();
 
             // Add contents of each directory as long as we're not interrupted.
             for(int i = 0; i < directories.length && !loadThreadInterrupted(); i++) {
@@ -738,7 +738,7 @@ public abstract class FileManager {
      *           children, and parent is directory's shared parent or null if
      *           directory's parent is not shared.
      * @modifies this
-     * @return A Set of Files that were added.
+     * @return A Set of Files to add.
      */
     private Set updateDirectories(File directory, File parent) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
@@ -782,7 +782,7 @@ public abstract class FileManager {
                 
             _numPendingFiles += numShareable;
         }
-        Set added = new HashSet();
+        Set added = new LinkedHashSet();
         added.addAll(Arrays.asList(file_list));
         
         //STEP 3:
