@@ -57,6 +57,9 @@ public class QueryReply extends Message implements Serializable{
     private volatile int measuredSpeedFlag=UNDEFINED;
     /** If parsed, one of TRUE (client supports chat), FALSE, or UNDEFINED. */
     private volatile int supportsChat=UNDEFINED;
+     /** If parsed, one of TRUE (client supports browse host), 
+      * FALSE, or UNDEFINED. */
+    private volatile int supportsBrowseHost=FALSE;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
@@ -71,6 +74,12 @@ public class QueryReply extends Message implements Serializable{
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
 
+    /** The mask for extracting the chat flag from the QHD private area. */
+    private static final byte CHAT_MASK=(byte)0x01;
+    /** The mask for extracting the browse host flag 
+     * from the QHD private area. */
+    private static final byte BROWSE_HOST_MASK=(byte)0x02;
+    
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = new byte[0];
 
@@ -233,8 +242,10 @@ public class QueryReply extends Message implements Serializable{
             ByteOrder.short2leb(((short) xmlSize), payload, i);
             i += 2;
 
-            //e) private area: one flag that says whether we support chat
-            payload[i++]=(byte)(supportsChat ? 0x1 : 0);
+            //e) private area: one byte with flags 
+            //for chat and browse-host support
+            payload[i++]=(byte)((supportsChat ? CHAT_MASK : 0)
+                | BROWSE_HOST_MASK);
 
             //f) actual xml.
             System.arraycopy(xmlBytes, 0, 
@@ -499,6 +510,32 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
+    /** 
+     * Returns true iff the client supports browse host feature.
+     * @return true, if the client supports browse host feature,
+     * false otherwise
+     * @exception Throws BadPacketException if
+     * the flag couldn't be extracted, either because it is missing or
+     * corrupted.  Typically this exception is treated the same way as returning
+     * false. 
+     */
+    public boolean getSupportsBrowseHost() throws BadPacketException {
+        parseResults();
+
+        switch (supportsBrowseHost) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for supportsBrowseHost: "
+                + supportsBrowseHost);
+            return false;
+        }
+    }
+    
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
      *    Tries to extract metadata and store in vendor and pushFlagSet.
@@ -628,8 +665,9 @@ public class QueryReply extends Message implements Serializable{
             int busyFlagT=UNDEFINED;
             int uploadedFlagT=UNDEFINED;
             int measuredSpeedFlagT=UNDEFINED;
-            int supportsChatT=UNDEFINED;
-
+            int supportsChatT=FALSE;
+            int supportsBrowseHostT=FALSE;
+            
             //a) extract vendor code
             try {
                 //Must use ISO encoding since characters are more than two
@@ -694,10 +732,10 @@ public class QueryReply extends Message implements Serializable{
             //whose LSB is 0x1 if we support chat, or 0x0 if we do.
             int privateLength=payload.length-i;
             if (privateLength>0 && vendorT.equals("LIME")) {
-                if (payload[i]==(byte)0x1)
-                    supportsChatT=TRUE;
-                else if (payload[i]==(byte)0x0)
-                    supportsChatT=FALSE;
+                byte privateFlags = payload[i];
+                supportsChatT = (privateFlags&CHAT_MASK)!=0 ? TRUE : FALSE;
+                supportsBrowseHostT 
+                    = (privateFlags&BROWSE_HOST_MASK)!=0 ? TRUE : FALSE;
             }
 
             if (i>payload.length-16)
@@ -712,6 +750,7 @@ public class QueryReply extends Message implements Serializable{
             this.uploadedFlag=uploadedFlagT;
             this.measuredSpeedFlag=measuredSpeedFlagT;
             this.supportsChat=supportsChatT;
+            this.supportsBrowseHost=supportsBrowseHostT;
 
             debug("QR.parseResults2(): returning w/o exception.");
 
@@ -1164,6 +1203,5 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
         } catch (BadPacketException e) { }
     } //end unit test
-
-} //end QueryReply
     
+} //end QueryReply
