@@ -109,9 +109,6 @@ public class InstantMessenger implements Chatter {
 			_out.close();
 			_socket.close();
 		} catch (IOException e) {
-			
-		} catch (NullPointerException e) {
-
 		}
 	}
 
@@ -126,8 +123,8 @@ public class InstantMessenger implements Chatter {
 			_out.write(message+"\n");
 			_out.flush();
 		} catch (IOException e) {
-		} catch (NullPointerException e) {
-
+		    // TODO: shouldn't we perform some cleanup here??  Shouldn't we 
+            // remove this instant messenger from the current chat sessions??
 		}
 	}
 
