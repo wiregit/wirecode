@@ -17,13 +17,13 @@ public class UrnType implements Serializable {
 	/**
 	 * Constant for specifying SHA1 URNs in replies.
 	 */
-	public static final Set SHA1_SET =
+	public static transient final Set SHA1_SET =
 		Collections.unmodifiableSet(new HashSet());	;	
 
 	/**
 	 * Constant for specifying any type of URN for replies.
 	 */
-	public static final Set ANY_TYPE_SET = 
+	public static transient final Set ANY_TYPE_SET = 
 		Collections.unmodifiableSet(new HashSet());	
 
 	/**
