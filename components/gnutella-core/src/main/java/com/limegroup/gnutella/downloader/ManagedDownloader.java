@@ -492,8 +492,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns true if 'other' could conflict with one of the files in this. 
      * This is a much less strict version compared to conflicts().
-     * WARNING-THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
-     * STATE!!!  Ideally used when WAITING_FOR_RESULTS....
      */
     public boolean conflictsLAX(RemoteFileDesc other) {
 
