@@ -161,8 +161,10 @@ public class UploadManager {
 		// add to the Map
 		insertIntoMap(host);
 
-		if ( (! testPerHostLimit(host) ) || 
-			 ( ! testTotalUploadLimit() ) )
+		if (! testPerHostLimit(host) ) 
+			 uploader.setState(Uploader.LIMIT_REACHED);
+			 
+		if ( ! testTotalUploadLimit() ) 
 			uploader.setState(Uploader.LIMIT_REACHED);
 
 		_callback.addUpload(uploader);		
@@ -209,8 +211,8 @@ public class UploadManager {
 		
 	private boolean testTotalUploadLimit() {
 		int max = SettingsManager.instance().getMaxUploads();
-		int current = _uploadsInProgress.size();
-		if (current > max)
+		int current = uploadsInProgress();
+		if (current >= max)
 			return false;
 		return true;
 	}

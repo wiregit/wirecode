@@ -260,6 +260,7 @@ public class HTTPUploader implements Uploader {
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
 		case COMPLETE:
+		case INTERRUPTED:
 			break;
 		}
 	}
