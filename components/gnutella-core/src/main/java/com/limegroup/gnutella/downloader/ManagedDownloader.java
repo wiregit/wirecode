@@ -2059,7 +2059,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-    private static RemoteFileDesc removeBest(List filesLeft) {
+    private synchronized RemoteFileDesc removeBest(List filesLeft) {
         //Lock is needed here because filesLeft can be modified by
         //tryOneDownload in worker thread.
         Iterator iter=filesLeft.iterator();
