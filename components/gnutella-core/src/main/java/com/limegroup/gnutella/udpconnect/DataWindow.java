@@ -219,6 +219,13 @@ public class DataWindow
     }
 
     /** 
+     *  Return the rttvar which is a measure of the range of rtt values
+     */
+    public float getRTTVar() {
+        return rttvar;
+    }
+
+    /** 
      *  Return the current measure of average round trip time.
      */
     public int averageRoundTripTime() {

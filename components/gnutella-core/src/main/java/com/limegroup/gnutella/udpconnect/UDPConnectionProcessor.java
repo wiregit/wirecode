@@ -46,9 +46,6 @@ public class UDPConnectionProcessor {
     private static final IOException CONNECTION_TIMEOUT = 
       new IOException("Connection timed out");
 
-    /** Define the max sequence number before rollover */
-    private static final int  MAX_SEQUENCE_NUMBER     = 0xffff;
-
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
 
@@ -280,6 +277,10 @@ public class UDPConnectionProcessor {
     	safeSendFin();
 
 		// TODO: should I wait for ack. Communicate state to streams.
+        // There should likely be a shutdown event that resends the FIN
+        // a few times if the ack doesn't come back.  As it is, something
+        // is occasionally generating multiple FINs - probably from closing
+        // repeatedly.
 	}
 
     /**
@@ -505,10 +506,10 @@ public class UDPConnectionProcessor {
     private void sendKeepAlive() {
         KeepAliveMessage keepalive = null;
         try {  
-              keepalive = 
-                new KeepAliveMessage(_theirConnectionID, 
-                  _receiveWindow.getWindowStart(), 
-                  _receiveWindow.getWindowSpace());
+            keepalive = 
+              new KeepAliveMessage(_theirConnectionID, 
+                _receiveWindow.getWindowStart(), 
+                _receiveWindow.getWindowSpace());
             send(keepalive);
         } catch (BadPacketException bpe) {
             // This would not be good.   TODO: ????
