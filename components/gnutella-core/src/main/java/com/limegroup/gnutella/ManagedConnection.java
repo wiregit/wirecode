@@ -61,10 +61,9 @@ public class ManagedConnection
     /**
      * Reference to ManagedConnectionPingInfo for this connection.  This 
      * reference contains the last GUID, whether to throttle an incoming ping, 
-     * the needed pongs to return, etc .  It's initially set to null and then
-     * instantianted when the first ping is received.
+     * the needed pongs to return, etc .  
      */
-    private ManagedConnectionPingInfo pingInfo = null;
+    private ManagedConnectionPingInfo pingInfo = new ManagedConnectionPingInfo();
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
@@ -536,13 +535,6 @@ public class ManagedConnection
 
     public int[] getNeededPongsList() {
         return pingInfo.getNeededPingReplies();
-    }
-
-    /**
-     * Returns whether ManagedConnectionPingInfo is instantiated or not.
-     */
-    public boolean receivedFirstPing() {
-        return (pingInfo != null);
     }
     //end -- Interface
 
