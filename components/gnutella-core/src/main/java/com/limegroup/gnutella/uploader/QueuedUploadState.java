@@ -8,10 +8,9 @@ import java.io.*;
 
 public class QueuedUploadState implements HTTPMessage {
 
-    private UploadManager uploadManager;
-    private Uploader uploader;
     private boolean closeConnection = false;
-    private final FileDesc FILE_DESC;
+    private FileDesc FILE_DESC;
+    private int position;
 
 	/**
 	 * The error message to send in the message body.
@@ -19,20 +18,18 @@ public class QueuedUploadState implements HTTPMessage {
 	private final byte[] ERROR_MESSAGE = 
 		"Server busy.  Too many active uploads.".getBytes();
 
-    public QueuedUploadState(UploadManager manager, Uploader uploader, 
-                             FileDesc desc) {
-        this.uploadManager = manager;
-        this.uploader = uploader;
+    public QueuedUploadState(int pos, FileDesc desc) {
+        this.position = pos;
         this.FILE_DESC= desc;
     }
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
         String str;
-        int pos = uploadManager.positionInQueue(uploader);
-        Assert.that(pos!=-1);//if not queued, this should never be the state
+        //if not queued, this should never be the state
+        Assert.that(position!=-1);
         str = "HTTP/1.1 503 Service Unavailable\r\n";
         ostream.write(str.getBytes());
-        str = "X-Queue: position="+pos+
+        str = "X-Queue: position="+position+
         ", pollMin="+(UploadManager.MIN_POLL_TIME/1000)+/*mS to S*/
         ", pollMax="+(UploadManager.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
         ostream.write(str.getBytes());

@@ -53,10 +53,11 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private List /* of Uploaders */ _activeUploadList = new LinkedList();
 
-    private List /*of KeyValue (Uploader,Long) */ _queuedUploads = 
+    private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
         new LinkedList();
     
-    private final int QUEUE_CAPACITY = 10;
+    private final int QUEUE_CAPACITY = 
+        SettingsManager.instance().getUploadQueueSize();
 
     public static final int MIN_POLL_TIME = 45000; //same as Shareaza
 
@@ -128,7 +129,7 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
     public void acceptUpload(HTTPRequestMethod method, Socket socket) {
-        HTTPUploader uploader = null;
+        debug("accepting upload");
 		try {
             //do uploads
             while(true) {
@@ -142,11 +143,12 @@ public final class UploadManager implements BandwidthTracker {
 					// client request
 					return;
 				}
+                debug("successfully parsed request");
 
-                //create an uploader if it's null (first iteration)
-                if(uploader==null)
-                    uploader = new HTTPUploader(method, line._fileName, 
+                HTTPUploader uploader=new HTTPUploader(method, line._fileName, 
                               socket, line._index, this, _fileManager, _router);
+
+                debug("HTTPUploader created");
 
                 boolean queued = false;
                 try {
@@ -164,6 +166,7 @@ public final class UploadManager implements BandwidthTracker {
                     return;
                 //read the first word of the next request
                 //and proceed only if "GET" or "HEAD" request
+                debug("waiting for next request");
                 try {
                     int oldTimeout = socket.getSoTimeout();
                     if(!queued) {
@@ -173,6 +176,7 @@ public final class UploadManager implements BandwidthTracker {
                     //dont read a word of size more than 3 
                     //as we will handle only the next "GET" request
                     String word=IOUtils.readWord(socket.getInputStream(),3);
+                    debug("next request arrived");
                     socket.setSoTimeout(oldTimeout);
                     if(!word.equalsIgnoreCase("GET") &&
                        !word.equalsIgnoreCase("HEAD")) {
@@ -196,7 +200,7 @@ public final class UploadManager implements BandwidthTracker {
     private boolean doSingleUpload(Uploader uploader, Socket socket, 
                                    String host, int index) throws IOException {
         long startTime=-1;
-
+        debug("starting single upload");
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
@@ -205,7 +209,8 @@ public final class UploadManager implements BandwidthTracker {
         int queued = -1;
         boolean ret = false;
         if(!isBHUploader) { //testing and book-keeping only if !browse host
-            queued = insertAndTest(uploader, host);//can throw IOEx
+            queued = insertAndTest(uploader, host, socket);//can throw IOEx
+            debug("insert and test returned "+queued);
             Assert.that(queued!=-1);
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
@@ -235,6 +240,7 @@ public final class UploadManager implements BandwidthTracker {
         // way to handle it?
         startTime=System.currentTimeMillis();
         uploader.writeResponse();
+        debug("Uploader wrote response");
         // check the state of the upload once the
         // start method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE)
@@ -387,58 +393,65 @@ public final class UploadManager implements BandwidthTracker {
      * an IOException, which will cause the socket to be closed. 
      * @return 0 if rejected, 1 if queued, 2 if given a slot
      */
-	private synchronized int insertAndTest(Uploader uploader, String host) 
-                                                          throws IOException {
+	private synchronized int insertAndTest(Uploader uploader, String host,
+                                           Socket socket) throws IOException {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
-        int posInQueue = positionInQueue(uploader);//-1 if not in queue
+        int posInQueue = positionInQueue(socket);//-1 if not in queue
         boolean wontAccept = size >= QUEUE_CAPACITY;
         int ret = -1;
 
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
         
         if(posInQueue == -1) {//this uploader is not in the queue already
+            debug("Uploader not in queue");
             if(limitReached || wontAccept) { 
+                debug("limited? "+limitReached+" wontAccept? "+wontAccept);
                 uploader.setState(Uploader.LIMIT_REACHED);
                 return 0; //we rejected this uploader
             }
-            addToQueue(uploader);
+            addToQueue(socket);
             posInQueue = size;//the index of the uploader in the queue
             ret = 1;//we have queued it now
+            debug("new uploader added to queue");
         }
         else {//we are alreacy in queue, update it
             KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
             Long prev=(Long)kv.getValue();
             if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
                 _queuedUploads.remove(posInQueue);
+                debug("queued uploader flooding - throwing exception");
                 throw new IOException();
             }
             kv.setValue(new Long(System.currentTimeMillis()));
+            debug("updated queued uploader");
             ret = 1;//queued
         }
+        debug("checking if given uploader is can be accomodated ");
         //If uploader can and should be in queue, it is at this point.
         if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
             ret = 2;
+            debug("accepting upload");
             //remove this uploader from queue, and get its time
             _queuedUploads.remove(0);
         }
         return ret;
     }
 
-    private synchronized void addToQueue(Uploader uploader) {
+    private synchronized void addToQueue(Socket socket) {
         Long t = new Long(System.currentTimeMillis());
-        _queuedUploads.add(new KeyValue(uploader,t));
+        _queuedUploads.add(new KeyValue(socket,t));
     }
 
     /**
      * @return the index of the uploader in the queue, -1 if not in queue
      */
-    public synchronized int positionInQueue(Uploader uploader) {
+    public synchronized int positionInQueue(Socket socket) {
         int i = 0;
         Iterator iter = _queuedUploads.iterator();
         while(iter.hasNext()) {
             Object curr = ((KeyValue)iter.next()).getKey();
-            if(curr==uploader)
+            if(curr==socket)
                 return i;
             i++;
         }
@@ -476,7 +489,7 @@ public final class UploadManager implements BandwidthTracker {
             if(u.getHost().equals(host))
                 i++;
         }
-        return i<max;
+        return i>=max;
 	}
 
 	/**
@@ -908,6 +921,32 @@ public final class UploadManager implements BandwidthTracker {
 		}
         return sum;
 	}
+    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
+    PrintWriter writer = null;
+    private final void debug(String out) {
+        if (debugOn) {
+            if(log) {
+                if(writer== null) {
+                    try {
+                        writer=new 
+                        PrintWriter(new FileOutputStream("UploadLog.log",true));
+                    }catch (IOException ioe) {
+                        System.out.println("could not create log file");
+                    }
+                }
+                writer.println(out);
+                writer.flush();
+            }
+            else
+                System.out.println(out);
+        }
+    }
+    private final void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
+    }
 
     static void tBandwidthTracker(UploadManager upman) {
         System.out.print("-Testing bandwidth tracker...");
