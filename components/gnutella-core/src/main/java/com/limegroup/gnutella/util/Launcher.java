@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
+import com.limegroup.gnutella.gui.Utilities;
+
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
  * be redistributed or modified in any form without restrictions as long as the 
@@ -26,62 +28,85 @@ import java.lang.String;
  * @author Eric Albert, Adam Fisk
  */
 public class Launcher {
-	/** Caches whether any classes, methods, etc
-	 *  are not part of the JDK and need to be dynamically 
-	 *  loaded at runtime loaded successfully. <p>
-	 *  Note that if this is <code>false</code>, 
-	 *  <code>openURL()</code> will always return an
-	 *  IOException. */
+	/** 
+	 * Caches whether any classes, methods, etc
+	 * are not part of the JDK and need to be dynamically 
+	 * loaded at runtime loaded successfully. <p>
+	 * Note that if this is <code>false</code>, 
+	 * <code>openURL()</code> will always return an
+	 * IOException. 
+	 */
 	private static boolean _macLoadedWithoutErrors;
 
-	/** The com.apple.mrj.MRJFileUtils class */
+	/** 
+	 * The com.apple.mrj.MRJFileUtils class 
+	 */
 	private static Class _mrjFileUtilsClass;
 
-	/** The com.apple.mrj.MRJOSType class */
+	/** 
+	 * The com.apple.mrj.MRJOSType class 
+	 */
 	private static Class _mrjOSTypeClass;
 	
-	/** The findFolder method of com.apple.mrj.MRJFileUtils */
+	/** 
+	 * The findFolder method of com.apple.mrj.MRJFileUtils 
+	 */
 	private static Method _findFolder;
 
-	/** The getFileType method of com.apple.mrj.MRJOSType */
+	/** 
+	 * The getFileType method of com.apple.mrj.MRJOSType 
+	 */
 	private static Method _getFileType;
 		
-	/** Actually an MRJOSType pointing to the System Folder 
-	 *  on a Macintosh */
+	/** 
+	 * Actually an MRJOSType pointing to the System Folder 
+	 * on a Macintosh 
+	 */
 	private static Object _kSystemFolderType;
 
-	/** The file type of the Finder on a Macintosh.  
-	 *  Hardcoding "Finder" would keep non-U.S. 
-	 *  English systems from working properly. */
+	/** 
+	 * The file type of the Finder on a Macintosh.  
+	 * Hardcoding "Finder" would keep non-U.S. 
+	 * English systems from working properly. 
+	 */
 	private static final String FINDER_TYPE = "FNDR";
 
-	/** The shell parameters for Netscape that opens a given URL in 
-	 *  an already-open copy of Netscape on many command-line systems. */
+	/** 
+	 * The shell parameters for Netscape that opens a given URL in 
+	 * an already-open copy of Netscape on many command-line systems. 
+	 */
 	private static final String NETSCAPE_REMOTE_PARAMETER = "-remote";
 	private static final String NETSCAPE_OPEN_PARAMETER_START = "openURL(";
 	private static final String NETSCAPE_OPEN_PARAMETER_END = ")";
 	
-	/** The message from any exception thrown throughout 
-	 *  the initialization process. */
+	/** 
+	 * The message from any exception thrown throughout 
+	 * the initialization process. 
+	 */
 	private static String _errorMessage;
 
 
-	/** initialization block that determines the operating 
-	 *  system and loads the necessary runtime data. */
+	/** 
+	 * initialization block that determines the operating 
+	 * system and loads the necessary runtime data. 
+	 */
 	static {		
 		if(CommonUtils.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
 
-	/** This class should be never be instantiated; this just ensures so. */
+	/** 
+	 * This class should be never be instantiated; this just ensures so. 
+	 */
 	private Launcher() {}
 	
-	/** 
+	/**
+	 * launches the passed-in file on the current platform. 
 	 * @requires the path String must either be a valid path name
 	 *  for the operating system, or it must be a URL of the form
 	 *  http://www.whatevername.com
-	 * @effects launches the passed-in file on the current platform. */
+	 */
 	public static int launch(String path) throws IOException {
 		String s = path.toLowerCase();
 		if(!path.endsWith(".exe") &&
@@ -101,9 +126,9 @@ public class Launcher {
 			}
 		}
 		else {
-			//String msg = "LimeWire will not launch the specified "+
-			//"file for security reasons.";
-			//Utilities.showError(msg);
+			String msg = "LimeWire will not launch the specified "+
+			"file for security reasons.";
+			Utilities.showError(msg);
 		}
 		return -1;
 	}
@@ -128,6 +153,7 @@ public class Launcher {
 			}
 		}
 	}
+
 	/**
 	 * attempts to launch the given file on Unix
 	 * @requires that we are running on a Unix system
@@ -156,8 +182,8 @@ public class Launcher {
 	}
 
 	/**  
+	 * returns the String specifying the "finder" on the mac.
 	 * @requires must be running on a mac 
-	 * @effects returns the String specifying the "finder" on the mac.
 	 */
 	private static String getMacFinder() {
 		File systemFolder;
@@ -204,10 +230,10 @@ public class Launcher {
 	}
 
 	/** 
-	 *  @effects loads specialized classes for the Mac needed to launch files
-	 *  @requires that we are running on a Mac
-	 *  @return <code>true</code>  if initialization succeeded
-	 *			<code>false</code> if initialization failed
+	 * loads specialized classes for the Mac needed to launch files
+	 * @requires that we are running on a Mac
+	 * @return <code>true</code>  if initialization succeeded
+	 *	   	<code>false</code> if initialization failed
 	 */
 	private static boolean loadMacClasses() {
 		try {
