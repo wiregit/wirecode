@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.mp3;
 
 import java.io.*;
-import com.limegroup.gnutella.ByteOrder;
+import java.net.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
+import java.util.StringTokenizer;
+import de.vdheide.mp3.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -38,6 +42,8 @@ public final class ID3Reader {
     private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
         
+    private static final String LICENSE_RDF_OPEN = "<license rdf:resource=\"";
+
     /**
      * This class should never be constructed.
      */
@@ -180,6 +186,131 @@ public final class ID3Reader {
 
         return new LimeXMLDocument(nameValList, schemaURI);
     }
+
+    /**
+     * @return true if the mp3 file has license information in its ID3v2 TCOP
+     * tag.
+     * @param filename The name of the file to verify.
+     * @param hash The string representation of the hash for filename.
+     */
+    public static boolean hasVerifiedLicense(final String filename,
+                                             final String hash) 
+        throws IOException {
+
+        // 1. see if the mp3 file has a TCOP v2 Frame with a 'verify at' and
+        //    a reference url and remember the license
+        // 2. connect to the reference url and get its content
+        // 3. verify that the rdf has the same license as the TCOP frame did 
+        try {
+
+            // 1
+            // get the TCOP frame            
+            MP3File mp3 = new MP3File(filename);
+            TagContent content = mp3.getCopyrightText();
+            String textContent = content.getTextContent();
+            if (textContent == null)
+                return false;
+
+            // parse the TCOP frame and record the license and see if 
+            // there is someplace to verify the file at
+            StringTokenizer st = new StringTokenizer(textContent);
+            boolean seenVerify = false;
+            String license = null;
+            while (!seenVerify && st.hasMoreTokens()) {
+                String currToken = st.nextToken();
+                if (currToken.startsWith("http") && (license == null))
+                    license = currToken;
+                if (currToken.equalsIgnoreCase("verify")) 
+                    seenVerify = true;
+            }
+            if (!seenVerify)
+                return false;
+            if (license == null)
+                return false;
+
+            // if there is someplace to verify the file at, verify the RDF
+            if (st.nextToken().equalsIgnoreCase("at")) {
+                // 2
+                // connect to the verification URL
+                String urlString = st.nextToken();
+                URL url = new URL(urlString);
+
+                HttpURLConnection http = 
+                    (HttpURLConnection) url.openConnection();
+                http.setInstanceFollowRedirects(true);
+                http.setUseCaches(false);
+                http.setRequestProperty("User-Agent",
+                                        CommonUtils.getHttpServer());
+                http.setRequestProperty(  /*no persistence*/
+                    HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+                http.setRequestProperty("accept","text/html");//??
+
+                // make sure you can get the content and get it
+                if ((http.getResponseCode() < 200) || 
+                    (http.getResponseCode() >= 300))
+                    return false;
+                
+                Object urlContent = http.getContent();
+                if (!(urlContent instanceof InputStream))
+                    return false;
+
+                InputStream is = (InputStream) urlContent;
+                StringBuffer sb = new StringBuffer();
+                BufferedReader br = 
+                    new BufferedReader(new InputStreamReader(is));
+                String currLine = null;
+                do {
+                    currLine = br.readLine();
+                    sb.append(" " + currLine);
+                } while (currLine != null);
+                
+                // 3
+                // search content for matching license
+                String htmlContent = sb.toString();
+                File f = new File(filename);
+                if (!f.exists())
+                    return false;
+                
+                int index = htmlContent.indexOf(hash);
+                if (index < 0)
+                    return false;
+
+                htmlContent = htmlContent.substring(index);
+                index = htmlContent.indexOf(LICENSE_RDF_OPEN);
+                if (index < 0)
+                    return false;
+
+                htmlContent = 
+                    htmlContent.substring(index + LICENSE_RDF_OPEN.length());
+                index = htmlContent.indexOf("\"");
+                String retrievedLicense = htmlContent.substring(0, index);
+                if (retrievedLicense == null)
+                    return false;
+
+                http.disconnect();
+                return retrievedLicense.equals(license);
+            }
+            else
+                return false;
+
+        }
+        catch (ConnectException possible) {
+            return false;
+        }
+        catch (MalformedURLException possible) {
+            return false;
+        }
+        catch (NoMP3FrameException why) {
+            throw new IOException();
+        }
+        catch (FrameDamagedException thatsucks) {
+            throw new IOException();
+        }
+        catch (ID3v2Exception suckypoo) {
+            throw new IOException();
+        }
+    }
+
 
     /** @return a Object[] with the following order: title, artist, album, year,
        track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
