@@ -114,19 +114,19 @@ public class HTTPDownloader implements Runnable {
 	    _br = new ByteReader(_istream);
   	}
 	catch (NoRouteToHostException e) {
-	    System.out.println("No route to host");
+	//      System.out.println("No route to host");
 	    _callback.error(ActivityCallback.ERROR_13);
 	    return;
 	}
   	catch (IOException e) {
-  	    e.printStackTrace();
+  	//      e.printStackTrace();
   	    sendPushRequest(host, index, port, guid);
   	    return;
 
   	}
 	catch (Exception e) {
-	    System.out.println("There was an exception:");
-  	    e.printStackTrace();
+//  	    System.out.println("There was an exception:");
+//    	    e.printStackTrace();
 	    return;
 	}
 	_okay = true;
@@ -213,15 +213,15 @@ public class HTTPDownloader implements Runnable {
 	
 	String pathname = _downloadDir + _filename;
 	
-	System.out.println(pathname);
+	//	System.out.println(pathname);
 	try {
 	    _fos = new FileOutputStream(pathname);
 	}
 	catch (FileNotFoundException e) {
-  	    System.out.println("THere is an error with the fos");
+	    //  	    System.out.println("THere is an error with the fos");
   	}
 	catch (Exception e) {
-	    System.out.println("THere was an exception with the fos");
+	    //	    System.out.println("THere was an exception with the fos");
 	    e.printStackTrace();
 	}
 	
@@ -241,7 +241,7 @@ public class HTTPDownloader implements Runnable {
 		// System.out.print(c); 
 	    }
 	    catch (Exception e) {
-		System.out.println("THere is a problem with read");
+		// System.out.println("THere is a problem with read");
 		return;
 	    }
 
@@ -253,21 +253,21 @@ public class HTTPDownloader implements Runnable {
 		// _fos.write(c);
 	    }
 	    catch (Exception e) {
-		System.out.println("***********************************");
-		System.out.println("* There is a problem with write");
-		System.out.println("***********************************");
-		e.printStackTrace();
+		//  System.out.println("***********************************");
+//  		System.out.println("* There is a problem with write");
+//  		System.out.println("***********************************");
+//  		e.printStackTrace();
 		return;
 	    }
 
 	    _amountRead+=c;
 	    // _amountRead++;
 	    
-	    System.out.println("The amount read: " + _amountRead);
-	    System.out.println("The size of the file: " + _sizeOfFile);	    
-	    double percent = _amountRead / _sizeOfFile;
-	    System.out.println("The percent read: " + percent);
-	    System.out.println("");
+	//      System.out.println("The amount read: " + _amountRead);
+//  	    System.out.println("The size of the file: " + _sizeOfFile);	    
+//  	    double percent = _amountRead / _sizeOfFile;
+//  	    System.out.println("The percent read: " + percent);
+//  	    System.out.println("");
 	    
 
 	}
@@ -303,8 +303,8 @@ public class HTTPDownloader implements Runnable {
 
 		sub.trim();
 		
-		System.out.println(":" + str + ":");
-		System.out.println(":" + sub + ":");
+	//  	System.out.println(":" + str + ":");
+//  		System.out.println(":" + sub + ":");
 
 		
 		
@@ -312,7 +312,7 @@ public class HTTPDownloader implements Runnable {
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 		}
 		catch (NumberFormatException e) {
-		    System.out.println("Number Format Exception");
+		//      System.out.println("Number Format Exception");
 		    return;
 		}
 		flag = 1;
@@ -332,9 +332,9 @@ public class HTTPDownloader implements Runnable {
 
 	if (flag == 0) {
 	    
-	    System.out.println("***********************************");
-	    System.out.println("DID NOT READ THE LENGTH");
-	    System.out.println("***********************************");
+	  //    System.out.println("***********************************");
+//  	    System.out.println("DID NOT READ THE LENGTH");
+//  	    System.out.println("***********************************");
 
 	}
 
