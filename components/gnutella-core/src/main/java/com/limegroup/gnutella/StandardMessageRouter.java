@@ -36,40 +36,44 @@ public class StandardMessageRouter extends MessageRouter {
         if (   (hops+ttl > 2) 
             && !_manager.allowAnyConnection())
             return;
-
-        //SPECIAL CASE: for crawler ping
-        // TODO:: this means that we can never send TTL=2 pings without
-        // them being interpreted as from the crawler!!
-        if(hops ==1 && ttl==1) {
-            handleCrawlerPing(ping, handler);
-            return;
-            //Note that the while handling crawler ping, we dont send our own
-            //pong, as that is unnecessary, since crawler already has our
-            //address.
-        }
-
-        // handle heartbeat pings specially -- bypass pong caching code
-        if(hops == 1 && ttl == 0) {
-            PingReply pr = 
-                PingReply.create(ping.getGUID(), (byte)1);
-           
-            sendPingReply(pr, handler);
-            return;
-        }
-
-        //send its own ping in all the cases
-        int newTTL = hops+1;
-        if ( (hops+ttl) <=2)
-            newTTL = 1;        
-
-        // send our own pong if we have free slots or if our average
-        // daily uptime is more than 1/2 hour
-        if(RouterService.getConnectionManager().hasFreeSlots()  ||
-           Statistics.instance().calculateDailyUptime() > 60*30) {
-            PingReply pr = 
-                PingReply.create(ping.getGUID(), (byte)newTTL);
             
-            sendPingReply(pr, handler);
+        // Only send pongs for ourself if we have a valid address & port.
+        if(NetworkUtils.isValidAddress(RouterService.getAddress()) &&
+           NetworkUtils.isValidPort(RouterService.getPort())) {    
+            //SPECIAL CASE: for crawler ping
+            // TODO:: this means that we can never send TTL=2 pings without
+            // them being interpreted as from the crawler!!
+            if(hops ==1 && ttl==1) {
+                handleCrawlerPing(ping, handler);
+                return;
+                //Note that the while handling crawler ping, we dont send our
+                //own pong, as that is unnecessary, since crawler already has
+                //our address.
+            }
+    
+            // handle heartbeat pings specially -- bypass pong caching code
+            if(hops == 1 && ttl == 0) {
+                PingReply pr = 
+                    PingReply.create(ping.getGUID(), (byte)1);
+               
+                sendPingReply(pr, handler);
+                return;
+            }
+    
+            //send its own ping in all the cases
+            int newTTL = hops+1;
+            if ( (hops+ttl) <=2)
+                newTTL = 1;        
+    
+            // send our own pong if we have free slots or if our average
+            // daily uptime is more than 1/2 hour
+            if(RouterService.getConnectionManager().hasFreeSlots()  ||
+               Statistics.instance().calculateDailyUptime() > 60*30) {
+                PingReply pr = 
+                    PingReply.create(ping.getGUID(), (byte)newTTL);
+                
+                sendPingReply(pr, handler);
+            }
         }
 
         List pongs = PongCacher.instance().getBestPongs();

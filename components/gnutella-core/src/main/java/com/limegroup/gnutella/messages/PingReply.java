@@ -327,7 +327,8 @@ public class PingReply extends Message implements Serializable {
  		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);
         if(!NetworkUtils.isValidAddress(ip))
-            throw new IllegalArgumentException("invalid address");			
+            throw new IllegalArgumentException("invalid address: " +
+                    NetworkUtils.ip2string(ip));			
         
         byte[] extensions = null;
         if(ggep != null) {
