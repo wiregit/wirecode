@@ -56,12 +56,15 @@ public class StandardMessageRouter
         int num_files = _fileManager.getNumFiles();
         int kilobytes = _fileManager.getSize()/1024;
 
+        //We mark our ping replies if currently in the supernode state.
+        boolean markPong=_manager.isSupernode();
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
                                             acceptor.getPort(),
                                             acceptor.getAddress(),
                                             num_files,
-                                            kilobytes);
+                                            kilobytes,
+                                            markPong);
 
         try
         {
