@@ -1257,16 +1257,6 @@ public class ConnectionManager {
             // of the lock??
             processConnectionHeaders(conn);
         }
-        
-        // if we're using NIO, we'll be notified when to handle connection
-        // initialization
-        //if(ConnectionSettings.USE_NIO.getValue()) return;
-        
-        // Otherwise, the handshake is complete and we should finish 
-        // initialization
-        //handleConnectionInitialization(conn);
-        
-        //completeConnectionInitialization(conn);
     }
 
     /** 
@@ -1565,16 +1555,11 @@ public class ConnectionManager {
 				if(_doInitialization) {
 					initializeExternallyGeneratedConnection(_connection);
 				}
-				//startConnection(_connection);
             } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
             }
-            //finally{
-              //  if (_connection.isClientSupernodeConnection())
-                //    lostShieldedClientSupernodeConnection();
-            //}
         }
     }
 
