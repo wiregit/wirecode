@@ -319,6 +319,60 @@ public class ServerSideWhatIsNewTest
         assertFalse(iter.hasNext());
     }
 
+    // make sure that a what is new query meta query is answered correctly
+    public void testWhatIsNewQueryMeta() throws Exception {
+        drain(testUP);
+
+        {
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE,
+                             0 | QueryRequest.AUDIO_MASK);
+        whatIsNewQuery.hop();
+        testUP.send(whatIsNewQuery);
+        testUP.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        QueryReply reply = 
+            (QueryReply) getFirstInstanceOfMessageType(testUP,
+                                                       QueryReply.class);
+        assertNull(reply);
+        }
+
+        {
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE,
+                             0 | QueryRequest.DOC_MASK);
+        whatIsNewQuery.hop();
+        testUP.send(whatIsNewQuery);
+        testUP.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        QueryReply reply = 
+            (QueryReply) getFirstInstanceOfMessageType(testUP,
+                                                       QueryReply.class);
+        assertNotNull(reply);
+        assertEquals(2, reply.getResultCount());
+        Iterator iter = reply.getResults();
+        Response currResp = (Response) iter.next();
+        assertTrue(currResp.getName().equals("berkeley.txt") ||
+                   currResp.getName().equals("susheel.txt"));
+        currResp = (Response) iter.next();
+        assertTrue(currResp.getName().equals("berkeley.txt") ||
+                   currResp.getName().equals("susheel.txt"));
+        assertFalse(iter.hasNext());
+        }
+    }
+
 
     // test that the creation time cache handles the additional sharing of files
     // fine
