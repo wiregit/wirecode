@@ -130,6 +130,25 @@ public class UploadStat extends AdvancedStatistic {
         new UploadStat();
         
     /**
+     * Statistic for the number of push proxy requests we successfully process.
+     */
+    public static final Statistic PUSH_PROXY_REQ_SUCCESS =
+        new UploadStat();
+        
+    /**
+     * Statistic for the number of push proxy requests that are malformed.
+     */
+    public static final Statistic PUSH_PROXY_REQ_BAD =
+        new UploadStat();
+        
+    /**
+     * Statistic for the number of push proxy requests that failed (leaf was
+     * gone).
+     */
+    public static final Statistic PUSH_PROXY_REQ_FAILED =
+        new UploadStat();
+        
+    /**
      * Statistic for the number of update file requests we receive.
      */
     public static final Statistic UPDATE_FILE =

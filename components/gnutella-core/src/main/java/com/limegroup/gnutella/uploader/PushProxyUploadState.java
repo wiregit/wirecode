@@ -8,6 +8,7 @@ import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.Base32;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * An implementaiton of the UploadState interface
@@ -37,6 +38,7 @@ public final class PushProxyUploadState implements HTTPMessage {
             ostream.write(str.getBytes());
             ostream.flush();
             debug("PPUS.doUpload(): unknown host.");
+            UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
             return;
         }
 
@@ -54,12 +56,12 @@ public final class PushProxyUploadState implements HTTPMessage {
             ostream.flush();
             debug("PPUS.doUpload(): push failed.");
             debug(ioe);
+            UploadStat.PUSH_PROXY_REQ_FAILED.incrementStat();
             return;
         }
         
+        UploadStat.PUSH_PROXY_REQ_SUCCESS.incrementStat();
 
-        // first see if the MessageRouter is still connected to this guy....
-     
         String str;
 		str = "HTTP/1.1 202 PushProxy:Message Sent\r\n";
 		ostream.write(str.getBytes());
