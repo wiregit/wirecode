@@ -358,9 +358,14 @@ public class Acceptor implements Runnable {
                     continue;
                 }
 				
-				// we have accepted an incoming socket.
-				_acceptedIncoming = true;
-				ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
+				// we have accepted an incoming socket -- only record
+                // that we've accepted incoming if it's definitely
+                // not from our local subnet
+                if(!NetworkUtils.isCloseIP(address.getAddress(), 
+                                           getAddress(false))) {
+                    _acceptedIncoming = true;
+                    ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
+                }
 
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
