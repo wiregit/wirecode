@@ -375,6 +375,13 @@ public class UDataFileCreator {
         }
     }
 
+    /**
+     * Reads through the NormalizationTest file provided by unicode.org
+     * to get the full decomposition of codepoints.  UnicodeData file
+     * doesn't provide the full decomposition but its used to get
+     * the codepoints and combining classes... see NormalizationTest
+     * file for more info.
+     */
     private void readNTestPopKD(Map c, Map kc) 
         throws IOException {
         //c - codepoints that weren't excluded...
