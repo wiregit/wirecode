@@ -15,8 +15,7 @@ public class I18NSendReceiveTest
     extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static Connection CONN_1;
-    private static final int PORT = 6667;
-    private static final int TIMEOUT = 5*1000;
+    private static final int TEST_PORT = 6667;
     private static RouterService ROUTER_SERVICE;
 
     //test file names that should be in the shared dir and returned as
@@ -39,7 +38,9 @@ public class I18NSendReceiveTest
         "\uff2d\uff25\uff34\uff21\u60c5\u5831\u30c6\u30b9\u30c8.mpg";
 
     //array of file names, used in the setup stage
-    private static final String[] FILES = {FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, META_FILE_2};
+    private static final String[] FILES = {
+        FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, 
+        META_FILE_2};
 
     public I18NSendReceiveTest(String name) {
         super(name);
@@ -51,7 +52,7 @@ public class I18NSendReceiveTest
 
     
     private static void doSettings() throws Exception {
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(TEST_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
@@ -88,43 +89,37 @@ public class I18NSendReceiveTest
         doSettings();
         ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ROUTER_SERVICE.start();
-        ROUTER_SERVICE.connect();
+        RouterService.connect();
         connect();
     }
 
     public static void globalTearDown() throws Exception {
         drain(CONN_1);
         CONN_1.close();
-        ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
     }
 
 
     private static void connect() throws Exception {
-        CONN_1 = new Connection("localhost", PORT,
+        CONN_1 = new Connection("localhost", TEST_PORT,
                                 new UltrapeerHeaders("localhost"),
                                 new EmptyResponder());
         CONN_1.initialize();
         drain(CONN_1);
     }
 
-	private void sleep() {
-		try {Thread.sleep(5000);}catch(InterruptedException e) {}
-	}
 
     /**
      * tests that we get a query reply from a file with the normalized
      * name and also that we receive the actual file name in the queryreply
      */
     public void testSendReceive() throws Exception {        
-
-        QueryRequest qr;
-        QueryReply rp;
         //test random query 
-        qr = QueryRequest.createQuery("asdfadf", (byte)2);
+        QueryRequest qr = QueryRequest.createQuery("asdfadf", (byte)2);
         CONN_1.send(qr);
         CONN_1.flush();
         
-        rp = getFirstQueryReply(CONN_1);
+        getFirstQueryReply(CONN_1);
         assertTrue("should not have received a QueryReply", !drain(CONN_1));
         drain(CONN_1);
 
