@@ -796,6 +796,7 @@ public class ManagedConnection
     /**
      * Returns string representing addresses of other hosts that may
      * be connected thru gnutella.
+     * @param properties The properties instance to which to add host addresses
      * @param manager Reference to the connection manager from whom 
      * to retrieve the addressses
      * @return Returns string representing addresses of other hosts that may
@@ -805,7 +806,8 @@ public class ManagedConnection
      * <p> IP Address:Port [; IPAddress:Port]* 
      * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347
      */
-    private static String getHostAddresses(ConnectionManager manager){
+    private static void addHostAddresses(Properties properties, 
+        ConnectionManager manager){
         StringBuffer hostString = new StringBuffer();
         boolean isFirstHost = true;
         //get the connected supernodes and pass them
@@ -825,10 +827,21 @@ public class ManagedConnection
             hostString.append(":");
             hostString.append(endpoint.getPort());
         }
+        //set the property
+        properties.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+            hostString.toString());
 
-        //get hosts from the connection manager (in turn hostcatcher)
-        for(Iterator iter = 
-            manager.getConnectedSupernodeEndpoints().iterator();
+        //Also add neighbouring supernodes
+        Set connectedSupernodeEndpoints 
+            = manager.getConnectedSupernodeEndpoints();
+        //if nothing to add, return
+        if(connectedSupernodeEndpoints.size() < 0)
+            return;
+        
+        //else add the supernodes
+        hostString = new StringBuffer();
+        isFirstHost = true;
+        for(Iterator iter = connectedSupernodeEndpoints.iterator();
             iter.hasNext();){
             //get the next endpoint
             Endpoint endpoint =(Endpoint)iter.next();
@@ -845,8 +858,9 @@ public class ManagedConnection
             hostString.append(":");
             hostString.append(endpoint.getPort());
         }
-        //return the hosts in string representation
-        return hostString.toString();
+        //set the property
+        properties.setProperty(ConnectionHandshakeHeaders.X_TRY_SUPERNODES
+            , hostString.toString());
     }
     
     private static class LazyProperties extends Properties {
@@ -944,10 +958,11 @@ public class ManagedConnection
                     
                 
                 //also add some host addresses in the response 
-                String hostAddresses = getHostAddresses(_manager);
-                //set the property
-                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
-                    hostAddresses);
+                addHostAddresses(ret, _manager);
+//                String hostAddresses = getHostAddresses(_manager);
+//                //set the property
+//                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+//                    hostAddresses);
             }
             return new HandshakeResponse(ret);
         }
@@ -982,10 +997,11 @@ public class ManagedConnection
                 message = "I am a shielded client";
                 
                 //also add some host addresses in the response
-                String hostAddresses = getHostAddresses(_manager);
-                //set the property
-                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
-                    hostAddresses);
+                addHostAddresses(ret, _manager);
+//                String hostAddresses = getHostAddresses(_manager);
+//                //set the property
+//                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+//                    hostAddresses);
             }
             
             return new HandshakeResponse(code, message, ret);
