@@ -1,10 +1,8 @@
-javac=javac -g
+javac=javac -O
 
-classes = StressTester.class \
-	RouteClient.class RouteServer.class FakeConnection.class \
-	SpamTester.class \
-	BadClient.class BadServer.class \
-	MessageTimeouts.class RoutingTester.class
+classes = Client.class Server.class \
+          BadClient.class BadServer.class \
+	      RoutingTester.class
 
 all : $(classes)
 
