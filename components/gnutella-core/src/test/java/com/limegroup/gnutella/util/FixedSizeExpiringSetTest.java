@@ -2,14 +2,17 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Collection;
+import com.sun.java.util.collections.*;
 import com.sun.java.util.collections.ArrayList;
 
 /**
- * Unit tests for FixedsizeForgetfulHashMap
+ * Unit tests for FixedSizeExpiringSetTest
  */
-public class FixedSizeExpiringSetTest extends BaseTestCase {
+public class FixedSizeExpiringSetTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+	int MAX_SIZE, EXPIRE_TIME;
+	FixedSizeExpiringSet set, set2, set3;
+	
     public FixedSizeExpiringSetTest(String name) {
         super(name);
     }
@@ -22,19 +25,45 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    protected void setUp(){
+    	MAX_SIZE=8;
+    	EXPIRE_TIME=10*1000;  // 10 seconds
+    	set = new FixedSizeExpiringSet(MAX_SIZE, EXPIRE_TIME);
+    	set2 = new FixedSizeExpiringSet(); //test the default constructor
+    	set3 = new FixedSizeExpiringSet(MAX_SIZE); //test 3rd constructor
+    }
+    
     public void testSet() throws Exception {
-        final int MAX_SIZE = 8;
-        final long EXPIRE_TIME = 10 * 1000; // 10 seconds
-
-        FixedSizeExpiringSet set =
-            new FixedSizeExpiringSet(MAX_SIZE, EXPIRE_TIME);
+            
+            
 
         // initialize a couple of objects
         String[] obj = new String[10];
         for (int i = 0; i < 10; i++) {
             obj[i] = "obj" + i;
         }
+        
+        //also two null objects
+        Object null1 = null;
+        Object null2 = null;
+        
+        //and their timestamps
+        long timeNull1, timeNull2;
+        
+        //in a collection (vector so that it will keep both
+        Collection col1 = new Vector();
+        col1.add(null1);
+        col1.add(null2);
+        
+        //an empty collection
+        Collection emptyCol = new Vector();
+        
+        
 
+        //add first null object, timestamp it
+        set.add(null1);
+        timeNull1=System.currentTimeMillis();
+        
         // remember the times I added the objects
         long[] timeExpiring = new long[10];
 
