@@ -10,8 +10,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
  */
 public class PushEndpointForSelf extends PushEndpoint {
     
-    private static final PushEndpointForSelf INSTANCE = 
-        new PushEndpointForSelf();
+    private static PushEndpointForSelf _instance;
     /**
      * create an empty set of push proxies
      */
@@ -23,8 +22,10 @@ public class PushEndpointForSelf extends PushEndpoint {
     
     }
     
-    public static PushEndpointForSelf instance() {
-        return INSTANCE;
+    public synchronized static PushEndpointForSelf instance() {
+        if (_instance == null)
+            _instance = new PushEndpointForSelf();
+        return _instance;
     }
     
     /**
