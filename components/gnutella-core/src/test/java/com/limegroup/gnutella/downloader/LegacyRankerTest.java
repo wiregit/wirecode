@@ -31,15 +31,6 @@ public class LegacyRankerTest extends BaseTestCase {
     }
     
     /**
-     * The legacy ranker accepts only RFDs. 
-     */
-    public void testAcceptsOnlyRFDs() throws Exception {
-        assertFalse(ranker.hasMore());
-        ranker.addToPool(new IpPortImpl("1.2.3.4",5));
-        assertFalse(ranker.hasMore());
-    }
-    
-    /**
      * Tests that rfds that have urns are prefered to rfds without.
      */
     public void testPrefersRFDWithURN() throws Exception {

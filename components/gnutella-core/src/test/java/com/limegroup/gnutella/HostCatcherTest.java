@@ -705,6 +705,10 @@ public class HostCatcherTest extends BaseTestCase {
         private String host = "143.123.234.132";
         private boolean expired = false;
         
+        public StubUDPBootstrapper() {
+            super(new UDPPinger());
+        }
+        
         public boolean fetchHosts() {
             if(expired)
                 return false;

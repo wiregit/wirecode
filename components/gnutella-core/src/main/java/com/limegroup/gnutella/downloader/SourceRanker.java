@@ -3,8 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.IpPort;
 
 /**
  * A class that ranks sources for a download. 
@@ -21,16 +21,16 @@ public abstract class SourceRanker {
     
     public void addToPool(Collection hosts) {
         for (Iterator iter = hosts.iterator(); iter.hasNext();) {
-            IpPort host = (IpPort) iter.next();
+            RemoteFileDesc host = (RemoteFileDesc) iter.next();
             addToPool(host);
         }
     }
     
-    public abstract void addToPool(IpPort host);
+    public abstract void addToPool(RemoteFileDesc host);
 	
 	public abstract boolean hasMore();
     
-    public abstract IpPort getBest();
+    public abstract RemoteFileDesc getBest();
     
     /**
      * @return a ranker appropriate for our system's capabilities.
@@ -43,8 +43,8 @@ public abstract class SourceRanker {
     }
     
     private static class EmptyRanker extends SourceRanker {
-        public void addToPool(IpPort host){}
-        public IpPort getBest() {
+        public void addToPool(RemoteFileDesc host){}
+        public RemoteFileDesc getBest() {
             return null;
         }
 		public boolean hasMore(){return false;}

@@ -22,9 +22,7 @@ public class LegacyRanker extends SourceRanker {
 		rfds = new HashSet();
 	}
 	
-	public synchronized void addToPool(IpPort host) {
-		if (! (host instanceof RemoteFileDesc))
-			return;
+	public synchronized void addToPool(RemoteFileDesc host) {
 		rfds.add(host);
 	}
 
@@ -39,7 +37,7 @@ public class LegacyRanker extends SourceRanker {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-	public synchronized IpPort getBest() {
+	public synchronized RemoteFileDesc getBest() {
 		Iterator iter=rfds.iterator();
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();

@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.Cancellable;
 
-public class PingRanker extends SourceRanker implements MessageListener {
+public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
     public PingRanker() {
         this(new UDPPinger());
@@ -14,9 +15,9 @@ public class PingRanker extends SourceRanker implements MessageListener {
     
     PingRanker(UDPPinger pinger){}
     
-    public void addToPool(IpPort host){}
+    public void addToPool(RemoteFileDesc host){}
     
-    public IpPort getBest(){return null;}
+    public RemoteFileDesc getBest(){return null;}
     
     public boolean hasMore() {return false;}
     
@@ -34,5 +35,7 @@ public class PingRanker extends SourceRanker implements MessageListener {
         // TODO Auto-generated method stub
         
     }
+    
+    public boolean isCancelled(){return false;}
 
 }

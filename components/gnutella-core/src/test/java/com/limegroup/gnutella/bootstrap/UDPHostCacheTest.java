@@ -22,6 +22,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -469,7 +470,7 @@ public class UDPHostCacheTest extends BaseTestCase {
         private boolean doRealDecrement = false;
         
         public StubCache() {
-            super(EXPIRY_TIME);
+            super(EXPIRY_TIME,new UniqueHostPinger());
         }
         
         protected boolean fetch(Collection hosts) {
