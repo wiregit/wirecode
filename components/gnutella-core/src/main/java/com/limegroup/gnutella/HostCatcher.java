@@ -53,16 +53,19 @@ public class HostCatcher {
     static final int GOOD_SIZE=1000;
     /** The number of normal pongs to store. */
     static final int NORMAL_SIZE=400;
-    /** The number of private IP pongs to store. */
-    static final int BAD_SIZE=15;
-
 
     /** The number of permanent locations to store in gnutella.net */
     static final int PERMANENT_SIZE=GOOD_SIZE;
 
-    static final int GOOD_PRIORITY=2;
-    static final int NORMAL_PRIORITY=1;
-    static final int BAD_PRIORITY=0;
+    /**
+     * Constant for the index of good priority hosts (Ultrapeers)
+     */
+    static final int GOOD_PRIORITY=1;
+
+    /**
+     * Constant for the index of non-Ultrapeer hosts.
+     */
+    static final int NORMAL_PRIORITY=0;
 
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
@@ -76,7 +79,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = //queue =
-        new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
+        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE});
     private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
 
 
@@ -198,7 +201,7 @@ public class HostCatcher {
             //Is it a normal endpoint?
             try {
                 ExtendedEndpoint e=ExtendedEndpoint.read(line);
-                add(e, priority(e));
+                add(e, NORMAL_PRIORITY);
             } catch (ParseException pe) {
                 continue;
             }
@@ -283,7 +286,7 @@ public class HostCatcher {
         if (pr.isUltrapeer())
             return add(endpoint, GOOD_PRIORITY);
         else
-            return add(endpoint, priority(endpoint));
+            return add(endpoint, NORMAL_PRIORITY);
     }
 
     /**
@@ -302,7 +305,7 @@ public class HostCatcher {
         if (forceHighPriority)
             return add(ee, GOOD_PRIORITY);
         else
-            return add(ee, priority(ee));
+            return add(ee, NORMAL_PRIORITY);
     }
 
     /**
@@ -314,7 +317,7 @@ public class HostCatcher {
      *
      * @param e Endpoint to be added
      * @param priority the priority to use for e, one of GOOD_PRIORITY 
-     *  (ultrapeer), NORMAL_PRIORITY, or BAD_PRIORITY (private address)
+     *  (ultrapeer) or NORMAL_PRIORITY
      * @param uptime the host's uptime (or our best guess)
      *
      * @return true iff e was actually added 
@@ -418,11 +421,6 @@ public class HostCatcher {
         Assert.that(removed1==removed2,
                     "Queue "+removed1+" but set "+removed2);
         return removed1;
-    }
-
-    /** Returns BAD_PRIORITY if e private, NORMAL_PRIORITY otherwise. */
-    private static int priority(Endpoint e) {
-        return e.isPrivateAddress() ? BAD_PRIORITY : NORMAL_PRIORITY;        
     }
 
 
@@ -538,13 +536,6 @@ public class HostCatcher {
      */
     public int getNumUltrapeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
-    }
-
-    /**
-     * Returns the number of non-marked private hosts.
-     */
-    int getNumPrivateHosts() {
-        return ENDPOINT_QUEUE.size(BAD_PRIORITY);
     }
 
     /**
