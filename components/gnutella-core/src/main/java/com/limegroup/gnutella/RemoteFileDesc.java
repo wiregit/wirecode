@@ -103,26 +103,26 @@ public class RemoteFileDesc implements Serializable {
      * but with a different remote host.
      *
      * It is okay to use the same internal structures
-     * for URNs they are immutable.
+     * for URNs because the Set is immutable.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
-        this( ep.getHostname(),
-              ep.getPort(),
-              0,
-              rfd.getFileName(),
-              rfd.getSize(),
-              DataUtils.EMPTY_GUID,
-              0,
-              false,
-              2,
-              false,
-              rfd.getXMLDoc(),
-              rfd.getUrns(),
-              false,
-              false,
-              AlternateLocation.ALT_VENDOR,
-              System.currentTimeMillis(),
-              DataUtils.EMPTY_SET );
+        this( ep.getHostname(),             // host
+              ep.getPort(),                 // port
+              0,                            // index (unknown)
+              rfd.getFileName(),            // filename
+              rfd.getSize(),                // filesize
+              DataUtils.EMPTY_GUID,         // client GUID
+              0,                            // speed
+              false,                        // chat capable
+              2,                            // quality
+              false,                        // browse hostable
+              rfd.getXMLDoc(),              // xml doc
+              rfd.getUrns(),                // urns
+              false,                        // reply to MCast
+              false,                        // is firewalled
+              AlternateLocation.ALT_VENDOR, // vendor
+              System.currentTimeMillis(),   // timestamp
+              DataUtils.EMPTY_SET );        // push proxies
     }
 
 	/** 

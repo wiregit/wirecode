@@ -39,7 +39,7 @@ public class PushRequest extends Message implements Serializable {
 		if(!NetworkUtils.isValidAddress(ip)) {
 		    if( RECORD_STATS )
 		        ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
-		    throw new BadPacketException("invalid address");
+		    throw new BadPacketException("invalid address: " + ip);
 		}
     }
 
@@ -63,7 +63,7 @@ public class PushRequest extends Message implements Serializable {
 			throw new IllegalArgumentException("invalid ip length: "+
 											   ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
-            throw new IllegalArgumentException("invalid ip.");
+            throw new IllegalArgumentException("invalid ip");
 		} else if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		}

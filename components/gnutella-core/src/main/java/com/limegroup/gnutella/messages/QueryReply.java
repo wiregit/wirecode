@@ -302,7 +302,8 @@ public class QueryReply extends Message implements Serializable{
 		} else if(ip.length != 4) {
 			throw new IllegalArgumentException("invalid ip length: "+ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
-            throw new IllegalArgumentException("invalid address.");
+            throw new IllegalArgumentException("invalid address: " + 
+                    NetworkUtils.ip2string(ip));
 		} else if((speed & 0xFFFFFFFF00000000l) != 0) {
 			throw new IllegalArgumentException("invalid speed: "+speed);
 		} else if(n >= 256) {
