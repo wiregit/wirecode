@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
-
+import java.util.StringTokenizer;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as possible.
@@ -205,14 +205,72 @@ public class HTTPDownloader {
 		// str, we need to correct the possible errors
 		// that we are looking for
 
-  		if ( str.indexOf("503") > 0 ) 
-    			throw new TryAgainLaterException();
-		else if ( str.indexOf("404") > 0 ) 
-			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
-        else if ( str.indexOf("410") > 0 )
-            throw new com.limegroup.gnutella.downloader.NotSharingException();
-		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
+  		//  if ( str.indexOf("503") > 0 ) 
+//      			throw new TryAgainLaterException();
+//  		else if ( str.indexOf("404") > 0 ) 
+//  			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
+//          else if ( str.indexOf("410") > 0 )
+//              throw new com.limegroup.gnutella.downloader.NotSharingException();
+//  		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
+//  			throw new NoHTTPOKException();
+
+
+		// str should be some sort of HTTP connect string.
+		// The string should look like:	
+		// str = "HTTP 200 OK \r\n";
+		// We will accept and 2xx's, but reject other codes.
+		
+		// create a new String tokenizer with the space as the 
+		// delimeter.
+		StringTokenizer tokenizer = new StringTokenizer(str, " ");
+		
+		String token;
+
+		// just a safety
+		if (! tokenizer.hasMoreTokens() )
 			throw new NoHTTPOKException();
+
+		token = tokenizer.nextToken();
+		
+		// the first token should contain HTTP
+		if (token.toUpperCase().indexOf("HTTP") < 0 )
+			throw new NoHTTPOKException();
+		
+		// the next token should be a number
+		// just a safety
+		if (! tokenizer.hasMoreTokens() )
+			throw new NoHTTPOKException();
+
+		token = tokenizer.nextToken();
+		
+		String num = token.trim();
+		int code;
+		try {
+			code = java.lang.Integer.parseInt(num);
+		} catch (NumberFormatException e) {
+			throw new ProblemReadingHeaderException();
+		}
+
+		// accept anything that is 2xx
+		if ( (code < 200) || (code > 300) ) {
+			if (code == 404)
+				throw new com.limegroup.gnutella.downloader.FileNotFoundException();
+			else if (code == 410)
+				throw new com.limegroup.gnutella.downloader.NotSharingException();
+			else if (code == 503)
+				throw new TryAgainLaterException();
+			// a general catch for 4xx and 5xx's
+			// should maybe be a different exception?
+			// else if ( (code >= 400) && (code < 600) ) 
+			else 
+				throw new IOException();
+			
+		}
+
+		// if we've gotten this far, then we can assume that we should
+		// be alright to prodeed.
+
+		str = _byteReader.readLine();
 	
 		while (true) {
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
