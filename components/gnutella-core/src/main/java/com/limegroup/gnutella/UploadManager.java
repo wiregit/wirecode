@@ -12,6 +12,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1355,19 +1356,19 @@ public final class UploadManager implements BandwidthTracker {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
 		Map params = new HashMap();
 		
-		// parse the service identifier, whether N2R, N2X or something
-		// we cannot satisfy.
-		if (requestLine.toUpperCase().indexOf(HTTPConstants.NAME_TO_THEX) > 0)
-			params.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
-		else if (requestLine.toUpperCase().indexOf(
-                                           HTTPConstants.NAME_TO_RESOURCE) > 0)
-			params.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
-		else {
+        // Parse the service identifier, whether N2R, N2X or something
+        // we cannot satisfy.  URI scheme names are not case-sensitive.
+        String requestUpper = requestLine.toUpperCase(Locale.US);
+        if (requestUpper.indexOf(HTTPConstants.NAME_TO_THEX) > 0)
+            params.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
+        else if (requestUpper.indexOf(HTTPConstants.NAME_TO_RESOURCE) > 0)
+            params.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
+        else {
             if(LOG.isWarnEnabled())
 			    LOG.warn("Invalid URN query: " + requestLine);
 			return new HttpRequestLine(BAD_URN_QUERY_INDEX,
 				"Invalid URN query", isHTTP11Request(requestLine));
-		}
+        }
 		
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
