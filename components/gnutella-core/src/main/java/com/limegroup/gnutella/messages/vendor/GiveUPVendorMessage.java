@@ -57,7 +57,7 @@ public class GiveUPVendorMessage extends VendorMessage {
 	      setGUID(guid);
 	      _numberUP = numberUP;
 	      _numberLeaves = numberLeaves;
-	      _format = (byte)features;
+	      _format = (byte) (features & FEATURE_MASK);
 	}
 	
 	

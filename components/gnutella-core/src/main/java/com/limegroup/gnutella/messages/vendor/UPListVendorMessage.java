@@ -28,6 +28,10 @@ public class UPListVendorMessage extends VendorMessage {
 	private final byte _format;
 	
 
+	/**
+	 * for testing purposes
+	 */
+	private static long MINUTE = 60*1000;
 	
 	//this message is sent only as a reply to a request message, so when 
 	//constructing it we need the object representing the request message
@@ -128,13 +132,14 @@ public class UPListVendorMessage extends VendorMessage {
 			//represent it as a short with the # of minutes
 			if (request.asks4ConnectionTime()) {
 				long uptime = now - c.getConnectionTime();
-				short packed = (short) ( uptime / (60*1000));
+				short packed = (short) ( uptime / MINUTE);
 				ByteOrder.short2leb(packed, result, index);
 				index+=2;
 			}
 				
 			if (request.asks4LocaleInfo()){
 				//TODO: when locale pref gets merged put the 2-byte language code here
+				index+=2;
 			}
 			
 		}
