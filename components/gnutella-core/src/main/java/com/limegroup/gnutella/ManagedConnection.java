@@ -111,22 +111,7 @@ public class ManagedConnection
     private static final int PRIORITY_PING_REPLY=4;
     private static final int PRIORITY_PING=5;
     private static final int PRIORITY_OTHER=6;       
-    {
-        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, true);
-        _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING_REPLY] 
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING]       
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
-    }                                                             
+                                                            
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
@@ -350,6 +335,24 @@ public class ManagedConnection
         else
             super.initialize(CONNECT_TIMEOUT);
 
+        //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
+        //save a fair bit of memory by not using buffering at all.  But this
+        //requires the CompositeMessageQueue class from nio-branch.
+        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, true);
+        _outputQueue[PRIORITY_PUSH]
+            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_QUERY_REPLY]
+            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_QUERY]      
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_PING_REPLY] 
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_PING]       
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
+
         //Start the thread to empty the output queue
         new OutputRunner();
     }
@@ -426,8 +429,9 @@ public class ManagedConnection
             m=m.stripExtendedPayload();
 
         repOk();
+        Assert.that(_outputQueue!=null, "Connection not initialized");
         _router.countMessage();
-        int priority=calculatePriority(m);
+        int priority=calculatePriority(m);        
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             _outputQueue[priority].add(m);
