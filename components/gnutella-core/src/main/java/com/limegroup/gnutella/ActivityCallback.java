@@ -175,17 +175,17 @@ public interface ActivityCallback
 
 
     /** Could not establish a listening port. */
-	public static final int PORT_ERROR = 0;
+	public static final int PORT_ERROR = 10;
 
     /** Security error accepting incoming connection.  (Should never happen.) */
-	public static final int SOCKET_ERROR = 1;
+	public static final int SOCKET_ERROR = 11;
 
     /** Internal error. */
-	public static final int INTERNAL_ERROR = 2;
+	public static final int INTERNAL_ERROR = 12;
 
     /** 
 	 * Internal error caused by an assertion failure.
 	 */
-	public static final int ASSERT_ERROR = 3;
+	public static final int ASSERT_ERROR = 13;
 
 }
