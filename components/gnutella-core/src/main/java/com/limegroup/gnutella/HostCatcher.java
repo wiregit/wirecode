@@ -813,6 +813,7 @@ public class HostCatcher {
         readHostsFile();
         PROBATION_HOSTS.clear();
         EXPIRED_HOSTS.clear();
+        _hitCaches = false;
     }
 
     /**
