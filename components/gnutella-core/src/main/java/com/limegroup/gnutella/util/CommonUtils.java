@@ -1092,6 +1092,8 @@ public final class CommonUtils {
      */
     public static String convertFileName(String name) {
 		
+        name = I18NConvert.instance().compose(name);
+
 		// if the name is too long, reduce it.  We don't go all the way
 		// up to 256 because we don't know how long the directory name is
 		// We want to keep the extension, though.
@@ -1118,6 +1120,7 @@ public final class CommonUtils {
             for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
         }
+        
         return name;
     }
 

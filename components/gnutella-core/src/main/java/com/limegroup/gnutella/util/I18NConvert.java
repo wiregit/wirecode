@@ -67,6 +67,13 @@ public class I18NConvert {
     public String getNorm(String s) {
         return _convertDelegator.getNorm(s);
     }
+    
+    /**
+     * Simple composition.
+     */
+    public String compose(String s) {
+        return _convertDelegator.compose(s);
+    }
 
 }
 

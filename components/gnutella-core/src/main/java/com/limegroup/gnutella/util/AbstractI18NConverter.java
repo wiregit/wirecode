@@ -16,6 +16,11 @@ abstract class AbstractI18NConverter {
      * @return the converted string
      */
     public abstract String getNorm(String s);
+    
+    /**
+     * Simple composition of a string.
+     */
+    public abstract String compose(String s);
 
     /**
      * Returns a string split according to the unicode blocks.  A

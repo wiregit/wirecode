@@ -63,6 +63,12 @@ final class I18NConvertICU extends AbstractI18NConverter {
         return convert(s);
     } 
     
+    /**
+     * Simple composition of a String.
+     */
+    public String compose(String s) {
+        return Normalizer.compose(s, false);
+    }
     
     /**
      * convert the string into NFKC + removal of accents, symbols, etc.

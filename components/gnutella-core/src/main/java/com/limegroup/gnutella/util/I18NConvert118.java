@@ -50,6 +50,12 @@ final class I18NConvert118 extends AbstractI18NConverter {
         return blockSplit(kmp(dekmp(s)));
     }
 
+    /**
+     * Simple composition of a String.
+     */
+    public String compose(String s) {
+        return kmp(s);
+    }
 
     /**
      * Return the decomposed form of parameter s. For each char
