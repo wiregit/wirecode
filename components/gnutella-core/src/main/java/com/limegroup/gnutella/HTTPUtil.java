@@ -51,6 +51,36 @@ public class HTTPUtil {
 
     }
 
+    public static String[] split(String str, String delimeter) {
+	
+	StringTokenizer tokenizer = new StringTokenizer(str, delimeter);
+
+	Vector buf = new Vector();
+	
+	String s;
+	
+	while (true) {
+
+	    try {
+		s = tokenizer.nextToken();
+	    }
+	    catch (NoSuchElementException e) {
+		break;
+	    }
+	    
+	    buf.add(s);
+	}
+	
+	int size = buf.size();
+	
+	String[] ret = new String[size];
+	
+	for(int i= 0; i < size; i++) 
+	    ret[i] = (String)buf.get(i);
+	
+	return ret;
+	
+    } 
   
 
 }
