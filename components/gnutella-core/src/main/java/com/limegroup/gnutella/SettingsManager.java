@@ -708,8 +708,10 @@ public class SettingsManager implements SettingsInterface
      *************  START OF MUTATOR METHODS **************
      ******************************************************/
 
-	/** updates all of the uptime settings based on the
-	 *  passed in time value for the most recent session. */
+	/** 
+	 * updates all of the uptime settings based on the
+	 * passed in time value for the most recent session. 
+	 */
 	public void updateUptime(int currentTime) {
 		totalUptime_ += currentTime;
 		averageUptime_ = totalUptime_/sessions_;
@@ -744,7 +746,9 @@ public class SettingsManager implements SettingsInterface
 		props_.put(TOTAL_UPTIME, s);
 	}
 
-    /** sets the maximum length of packets (spam protection)*/
+    /** 
+	 * sets the maximum length of packets (spam protection)
+	 */
     public synchronized void setMaxLength(int maxLength)
         throws IllegalArgumentException {
         if(false)
@@ -756,7 +760,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the timeout */
+    /** 
+	 * sets the timeout 
+	 */
     public synchronized void setTimeout(int timeout)
         throws IllegalArgumentException {
         if(false)
@@ -815,8 +821,10 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Returns the maximum number of connections for the given connection
-     *  speed.  */
+    /** 
+	 * Returns the maximum number of connections for the given connection
+     * speed.  
+	 */
     private int maxConnections() {
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
@@ -832,9 +840,11 @@ public class SettingsManager implements SettingsInterface
     }
 
 
-    /** sets the limit for the number of searches
-     *  throws an exception on negative limits
-     *  and limits of 10,000 or more */
+    /** 
+	 * sets the limit for the number of searches
+     * throws an exception on negative limits
+     * and limits of 10,000 or more 
+	 */
     public synchronized void setSearchLimit(byte limit) {
         if(limit < 0 || limit > 10000)
             throw new IllegalArgumentException();
@@ -904,7 +914,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the hard maximum time to live */
+    /** 
+	 * sets the hard maximum time to live 
+	 */
     public synchronized void setMaxTTL(byte maxttl)
         throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -916,10 +928,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the default save directory for when the user
-     *  presses the "use default" button in the config
-     *  window.  this method should only get called at
-     *  install time, and is therefore not synchronized */
+    /** 
+	 * sets the default save directory for when the user
+     * presses the "use default" button in the config
+     * window.  this method should only get called at
+     * install time, and is therefore not synchronized. 
+	 */
     public void setSaveDefault(String dir) {
         File f = new File(dir);
         boolean b = f.isDirectory();
@@ -960,14 +974,18 @@ public class SettingsManager implements SettingsInterface
      *********  START OF CONFIGURATION SETTINGS ***********
      ******************************************************/
 
-    /** set the directory for saving files */
+    /** 
+	 * set the directory for saving files 
+	 */
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
 		File incFile  = null;
 		String tempPath = "";
 		try {
 			tempPath = saveFile.getCanonicalPath();
-			tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
+			tempPath = saveFile.getParent();
+			tempPath += File.separator;
+			//tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
 			tempPath += "Incomplete";
 			incFile = new File(tempPath);
 		} catch(IOException ioe) {
@@ -994,13 +1012,15 @@ public class SettingsManager implements SettingsInterface
 		}
     }
 
-    /* set the directories to search.  this is synchronized
-     *  because some gui elements may want to make this call
-     *  in separate threads. this method will also filter
-     *  out any duplicate or invalid directories in the string.
-     *  note, however, that it does not currently filter out
-     *  listing subdirectories that have parent directories
-     *  also in the string.  this should change at some point.*/
+    /** 
+	 * set the directories to search.  this is synchronized
+     * because some gui elements may want to make this call
+     * in separate threads. this method will also filter
+     * out any duplicate or invalid directories in the string.
+     * note, however, that it does not currently filter out
+     * listing subdirectories that have parent directories
+     * also in the string.  this should change at some point.
+	 */
     public synchronized void setDirectories(String dir) {
         boolean dirsModified = false;
         directories_ = dir;
@@ -1054,8 +1074,10 @@ public class SettingsManager implements SettingsInterface
         props_.put(DIRECTORIES, directories_);
     }
 
-    /* adds one directory to the directory string (if
-     * it is a directory and is not already listed. */
+    /** 
+	 * adds one directory to the directory string (if
+     * it is a directory and is not already listed. 
+	 */
     public synchronized boolean addDirectory(String dir) {
         File f = new File(dir);
         if(f.isDirectory()) {
@@ -1085,13 +1107,17 @@ public class SettingsManager implements SettingsInterface
         return false;
     }
 
-    /** set the extensions to search for */
+    /** 
+	 * set the extensions to search for 
+	 */
     public void setExtensions(String ext) {
         extensions_ = ext;
         props_.put(EXTENSIONS, ext);
     }
 
-    /** sets the time to live */
+    /** 
+	 * sets the time to live 
+	 */
     public void setTTL(byte ttl)
         throws IllegalArgumentException {
         if (ttl < 1 || ttl > 14)
@@ -1103,7 +1129,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the soft maximum time to live */
+    /** 
+	 * sets the soft maximum time to live 
+	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
             throw new IllegalArgumentException();
@@ -1114,7 +1142,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the port to connect on */
+    /** 
+	 * sets the port to connect on 
+	 */
     public synchronized void setPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
@@ -1127,10 +1157,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the connection speed.  throws an
-     *  exception if you try to set the speed
-     *  far faster than a T3 line or less than
-     *  0.*/
+    /** 
+	 * sets the connection speed.  throws an
+     * exception if you try to set the speed
+     * far faster than a T3 line or less than
+     * 0.
+	 */
     public void setConnectionSpeed(int speed) {
         if(speed < 0 || speed > 20000)
             throw new IllegalArgumentException();
@@ -1141,10 +1173,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Sets the percentage of total bandwidth (as given by
-     *  CONNECTION_SPEED) to use for uploads.  This is shared
-     *  equally among all uploads.  Throws IllegalArgumentException
-     *  if speed<0 or speed>100. */
+    /** 
+	 * Sets the percentage of total bandwidth (as given by
+     * CONNECTION_SPEED) to use for uploads.  This is shared
+     * equally among all uploads.  Throws IllegalArgumentException
+     * if speed<0 or speed>100. 
+	 */
     public synchronized void setUploadSpeed(int speed) {
         if (speed<0 || speed>100)
             throw new IllegalArgumentException();
