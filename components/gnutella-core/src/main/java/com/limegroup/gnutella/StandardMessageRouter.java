@@ -149,15 +149,11 @@ public final class StandardMessageRouter
         FileDesc desc;
         try
         {
-            desc = (FileDesc)FileManager.getFileManager()._files.get(index);
+            desc = FileManager.getFileManager().get(index);
         }
-        catch (Exception e)
+        catch (IndexOutOfBoundsException e)
         {
-            //I'm catching Exception because I don't know
-            //exactly which IndexOutOfBoundsException is
-            //thrown: from normal util package or com.sun...
-
-            //TODO?: You could connect and send 404 file
+            //You could connect and send 404 file
             //not found....but why bother?
             return;
         }

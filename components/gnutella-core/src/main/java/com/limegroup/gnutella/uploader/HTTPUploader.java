@@ -280,7 +280,7 @@ public class HTTPUploader implements Runnable {
         //TODO: this used to have a special case for
         //zero-length files.  Does it still work ok?
         try {                            /* look for the file */
-            _fdesc = (FileDesc)_fmanager._files.get(_index);
+            _fdesc = _fmanager.get(_index);
         }                                /* if its not found... */
         catch (IndexOutOfBoundsException e) {
             throw new FileNotFoundException();
