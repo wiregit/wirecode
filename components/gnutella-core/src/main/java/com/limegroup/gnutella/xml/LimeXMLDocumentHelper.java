@@ -25,6 +25,7 @@ public final class LimeXMLDocumentHelper{
     public static List getDocuments(String aggregrateXMLStr, 
                                                  int totalResponseCount){
         ArrayList retList = new ArrayList();
+        DOMParser parser = new DOMParser();
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
             return retList;
         int startIndex=aggregrateXMLStr.indexOf
@@ -46,7 +47,7 @@ public final class LimeXMLDocumentHelper{
                 chunk = aggregrateXMLStr.substring(startIndex);        
             
             LimeXMLDocument[] docs = new LimeXMLDocument[totalResponseCount];
-            Element rootElement = getDOMTree(chunk);
+            Element rootElement = getDOMTree(parser, chunk);
             if(rootElement==null){
                 retList.add(null);
                 continue;
@@ -84,7 +85,7 @@ public final class LimeXMLDocumentHelper{
         String aggregrateXMLStr)
     {
         //get the root element of the aggregate string
-        Element rootElement = getDOMTree(aggregrateXMLStr);
+        Element rootElement = getDOMTree(new DOMParser(), aggregrateXMLStr);
 
         //return null, if the passed xml couldnt be parsed
         if(rootElement==null)
@@ -179,7 +180,8 @@ public final class LimeXMLDocumentHelper{
 
     private static String internalGetAggregateString(Response[] responses){ 
         HashMap urisToLists = new HashMap();
-        
+        DOMParser parser = new DOMParser();
+
         final int len = responses.length;
 
         // since responses may have disparate xml, i need to group them while
@@ -189,7 +191,7 @@ public final class LimeXMLDocumentHelper{
             String currXML = currResp.getMetadata();
             Element currTree = null;
             if ((currXML != null) && !currXML.equals(""))
-                currTree = getDOMTree(currXML);
+                currTree = getDOMTree(parser, currXML);
             if (currTree != null) {
                 addIndex(currTree, i);
                 String schemaURI = getSchemaURI(currXML);
@@ -295,9 +297,9 @@ public final class LimeXMLDocumentHelper{
      }
     
         
-    private static Element getDOMTree(String aggrigateXMLStr){
+    private static Element getDOMTree(DOMParser parser, 
+                                      String aggrigateXMLStr){
         InputSource source=new InputSource(new StringReader(aggrigateXMLStr));
-        DOMParser parser = new DOMParser();
         Document root = null;
         try{            
             parser.parse(source);
