@@ -356,8 +356,7 @@ public abstract class MessageRouter {
      *      handling framework and just customize responses.
      */
     protected void handlePingRequest(PingRequest pingRequest,
-                                     ReplyHandler receivingConnection)
-    {
+                                     ReplyHandler receivingConnection) {
         if(pingRequest.getTTL() > 0)
             broadcastPingRequest(pingRequest, receivingConnection,
                                  _manager);
@@ -382,8 +381,7 @@ public abstract class MessageRouter {
      *      handling framework and just customize responses.
      */
     protected void handleUDPPingRequest(PingRequest pingRequest,
-										ReplyHandler handler)
-    {
+										ReplyHandler handler) {
         respondToUDPPingRequest(pingRequest);
     }
     
@@ -429,8 +427,7 @@ public abstract class MessageRouter {
      *      handling framework and just customize responses.
      */
     protected void handleQueryRequest(QueryRequest request,
-									  ReplyHandler handler)
-    {
+									  ReplyHandler handler) {
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
 		//if(handler.isSupernodeClientConnection() && 
@@ -512,8 +509,7 @@ public abstract class MessageRouter {
         //nodes), but DON'T forward any ping not originating from me (i.e.,
         //receivingConnection!=null) along leaf to ultrapeer connections.
         List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++)
-        {
+        for(int i=0; i<list.size(); i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
@@ -529,7 +525,7 @@ public abstract class MessageRouter {
 	 * @param request the query to forward
 	 * @param handler the <tt>ReplyHandler</tt> that responds to the
 	 *  request appropriately
-	 * @param manager the <tt>ConnectionManager</tt> that provides
+s	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
 	 */
 	protected void forwardQueryRequestToLeaves(QueryRequest request,
@@ -584,8 +580,7 @@ public abstract class MessageRouter {
      * requests originating here).
      */
     protected void broadcastQueryRequest(QueryRequest queryRequest,
-										 ReplyHandler handler)
-    {
+										 ReplyHandler handler) {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
 		
@@ -615,8 +610,7 @@ public abstract class MessageRouter {
      */
     protected void sendQueryRequest(QueryRequest request, 
 									ManagedConnection sendConnection, 
-									ReplyHandler handler)
-    {
+									ReplyHandler handler) {
         //send the query over this connection only if any of the following
         //is true:
         //1. The query originated from our node (receiving connection 
@@ -642,8 +636,7 @@ public abstract class MessageRouter {
      * @return true if the passed set of domains contains only
      * default unauthenticated domain, false otherwise
      */
-    private static boolean containsDefaultUnauthenticatedDomainOnly(Set domains)
-    {
+    private static boolean containsDefaultUnauthenticatedDomainOnly(Set domains) {
         //check if the set contains only one entry, and that entry is the
         //default unauthenticated domain 
         if((domains.size() == 1) && domains.contains(
@@ -766,11 +759,14 @@ public abstract class MessageRouter {
             //connections if we've already routed too many replies for this
             //GUID.  Note that replies destined for me all always delivered to
             //the GUI.
-            //if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
-            // rrp.getReplyHandler()==_forMeReplyHandler) {
+
+			// TODO: What happens if we get a TTL=0 query that's not intended
+			// for us?  At first glance, it looks like we keep forwarding it!
+            if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
+			   rrp.getReplyHandler()==_forMeReplyHandler) {
             
-            if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
-                rrp.getReplyHandler()==_forMeReplyHandler) {
+				//if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
+                //rrp.getReplyHandler()==_forMeReplyHandler) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
                                                        handler);
                 // also add to the QueryUnicaster for accounting - basically,
@@ -795,25 +791,23 @@ public abstract class MessageRouter {
      * Checks if the <tt>QueryReply</tt> should be dropped based on per-TTL
      * hard limits for the number of bytes routed for the given reply guid.
      * This algorithm favors replies that don't have as far to go on the 
-     * network -- i.e., low TTL hits have more liberal limits that high TTL
+     * network -- i.e., low TTL hits have more liberal limits than high TTL
      * hits.  This ensures that hits that are closer to the query originator
      * -- hits for which we've already done most of the work, are not 
      * dropped unless we've routed a really large number of bytes for that
-     * guid.<p>
-     *
-     * Note that we increment the hops and decrement the TTL as soon as any
-     * message arrives, 
+     * guid.
      */
     private static boolean shouldDropReply(int bytesRouted, int ttl) {
-        // send replies coming in with ttl above 4 if we've routed under 50K 
-        if(ttl > 3 && bytesRouted < 50   * 1024) return true;
-        // send replies coming in with ttl 1 if we've routed under 3000K 
-        if(ttl == 0 && bytesRouted < 3000 * 1024) return true;
-        // send replies coming in with ttl 2 if we've routed under 1000K 
+        // send replies with ttl above 3 if we've routed under 50K 
+        if(ttl > 3 && bytesRouted < 50    * 1024) return true;
+        // send replies with ttl 0 if we've routed under 50K, as this 
+		// shouldn't happen 
+        if(ttl == 0 && bytesRouted < 50   * 1024) return true;
+        // send replies with ttl 1 if we've routed under 1000K 
         if(ttl == 1 && bytesRouted < 1000 * 1024) return true;
-        // send replies coming in with ttl 3 if we've routed under 333K 
+        // send replies with ttl 2 if we've routed under 333K 
         if(ttl == 2 && bytesRouted < 333  * 1024) return true;
-        // send replies coming in with ttl 4 if we've routed under 111K 
+        // send replies with ttl 3 if we've routed under 111K 
         if(ttl == 3 && bytesRouted < 111  * 1024) return true;
 
         // if none of the above conditions holds true, drop the reply
@@ -853,8 +847,7 @@ public abstract class MessageRouter {
      * @throws IOException if no appropriate route exists.
      */
     public void sendPingReply(PingReply pingReply)
-        throws IOException
-    {
+        throws IOException {
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(pingReply.getGUID());
 
@@ -871,8 +864,7 @@ public abstract class MessageRouter {
      * @throws IOException if no appropriate route exists.
      */
     public void sendQueryReply(QueryReply queryReply)
-        throws IOException
-    {
+        throws IOException {
  
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
@@ -881,8 +873,7 @@ public abstract class MessageRouter {
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength());
 
-        if(rrp != null)
-        {
+        if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
@@ -902,8 +893,7 @@ public abstract class MessageRouter {
      * @throws IOException if no appropriate route exists.
      */
     public void sendPushRequest(PushRequest pushRequest)
-        throws IOException
-    {
+        throws IOException {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
