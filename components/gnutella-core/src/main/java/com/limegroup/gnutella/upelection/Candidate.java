@@ -165,4 +165,9 @@ public class Candidate implements Comparable{
 	public QueryReply.IPPortCombo getAddress() {
 		return _address;
 	}
+	
+	public static int getBytesForVersion(int version) {
+		//change this when changing versions.
+			return 8;
+	}
 }

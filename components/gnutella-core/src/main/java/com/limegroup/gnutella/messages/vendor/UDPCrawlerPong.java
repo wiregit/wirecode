@@ -41,9 +41,9 @@ public class UDPCrawlerPong extends VendorMessage {
 		super(F_LIME_VENDOR_ID,F_ULTRAPEER_LIST, VERSION, derivePayload(request));
 		setGUID(new GUID(request.getGUID()));
 		_format = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
-		_localeInfo = request.asks4LocaleInfo();
-		_connectionTime = request.asks4ConnectionTime();
-		_newOnly = request.asks4NewOnly();
+		_localeInfo = request.hasLocaleInfo();
+		_connectionTime = request.hasConnectionTime();
+		_newOnly = request.hasNewOnly();
 	}
 	
 	private static byte [] derivePayload(UDPCrawlerPing request) {
@@ -60,7 +60,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		//add only good ultrapeers or just those who support UDP pinging
 		//(they also support BEST_CANDIDATE message)
-		boolean newOnly = request.asks4NewOnly();
+		boolean newOnly = request.hasNewOnly();
 		
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
@@ -87,7 +87,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		//preference any locale.  In reality we will probably have only connections only to 
 		//this host's pref'd locale so they will end up in the pong.
 		
-		if (!request.asks4LocaleInfo()) {
+		if (!request.hasLocaleInfo()) {
 		//do a randomized trim.
 			if (request.getNumberUP() != request.ALL && 
 				request.getNumberUP() < endpointsUP.size()) {
@@ -133,9 +133,9 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		//serialize the Endpoints to a byte []
 		int bytesPerResult = 6;
-		if (request.asks4ConnectionTime())
+		if (request.hasConnectionTime())
 			bytesPerResult+=2;
-		if (request.asks4LocaleInfo())
+		if (request.hasLocaleInfo())
 			bytesPerResult+=2;
 		byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*
 								  bytesPerResult+3];
@@ -165,14 +165,14 @@ public class UDPCrawlerPong extends VendorMessage {
 			index+=6;
 			//add connection time if asked for
 			//represent it as a short with the # of minutes
-			if (request.asks4ConnectionTime()) {
+			if (request.hasConnectionTime()) {
 				long uptime = now - c.getConnectionTime();
 				short packed = (short) ( uptime / MINUTE);
 				ByteOrder.short2leb(packed, result, index);
 				index+=2;
 			}
 				
-			if (request.asks4LocaleInfo()){
+			if (request.hasLocaleInfo()){
 				//I'm assuming the language code is always 2 bytes, no?
 				System.arraycopy(c.getLocalePref().getBytes(),0,result,index,2);
 				index+=2;

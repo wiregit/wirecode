@@ -142,7 +142,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * 
 	 * @return whether the ping is requesting connection uptimes.
 	 */
-	public boolean asks4ConnectionTime() {
+	public boolean hasConnectionTime() {
 		return (byte)(CONNECTION_TIME & _format) == CONNECTION_TIME;
 	}
 	
@@ -150,7 +150,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * 
 	 * @return whether the ping is requesting locale info
 	 */
-	public boolean asks4LocaleInfo() {
+	public boolean hasLocaleInfo() {
 		return (byte)(LOCALE_INFO & _format) == LOCALE_INFO;
 	}
 	
@@ -159,7 +159,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * @return whether the ping wants to receive only connections which
 	 * support UDP pinging (useful for crawling)
 	 */
-	public boolean asks4NewOnly() {
+	public boolean hasNewOnly() {
 		return (byte)(NEW_ONLY & _format) == NEW_ONLY;
 	}
 	
@@ -168,7 +168,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * @param featureId the byte id of the feature
 	 * @return whether the ping is asking for it
 	 */
-	public boolean asks4Feature(byte featureId) {
+	public boolean hasFeature(byte featureId) {
 		return (byte)(featureId & _format) == featureId;
 	}
 	

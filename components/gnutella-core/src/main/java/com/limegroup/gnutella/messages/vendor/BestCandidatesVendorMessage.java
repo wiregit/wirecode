@@ -69,18 +69,24 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	private void parseCandidates(byte [] payload) throws BadPacketException {
 		
 		//check if the message has the proper size payload
-		if (payload==null || 
+		if (payload==null)
+			throw new BadPacketException("empty payload");
+		
+		if (getVersion() == VERSION &&
 				!(payload.length==8 || payload.length==16))
-			throw new BadPacketException("invalid length payload for message with GUID "+new String(getGUID()));
+			throw new BadPacketException("invalid length payload");
 		
 		_bestCandidates = new Candidate[2];
 		
-		//we have at least one candidate
+		//we have at least one candidate, it should start at offset 0
 		_bestCandidates[0] = new Candidate(payload,0);
 		
-		//if the size of the payload is 16 we have two candidates
-		if (payload.length==16) 
-			_bestCandidates[1]= new Candidate(payload,8);
+		//get the size of the candidates based on version
+		int candidateSize = Candidate.getBytesForVersion(getVersion());
+		
+		//if the size is more than one candidate, try to parse the second one
+		if (payload.length > candidateSize) 
+			_bestCandidates[1]= new Candidate(payload,candidateSize);
 		else //otherwise the other peer advertised just a single candidate
 			_bestCandidates[1]=null;
 		

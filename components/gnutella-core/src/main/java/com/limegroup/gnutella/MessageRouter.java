@@ -2679,8 +2679,8 @@ public abstract class MessageRouter {
     	if(!RouterService.isSupernode()) {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
-    				RouterService.getExternalAddress()) ||
-					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) 
+    				RouterService.getAddress()) ||
+					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
     			//for testing purposes allows requests from localhost
     			_promotionManager.initiatePromotion(msg);
     		return; 

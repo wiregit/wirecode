@@ -96,7 +96,6 @@ public class PromotionManager {
     	_expirer.start();
     	
     	//ping the original requestor
-    	
     	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
     	UDPService.instance().send( ping, _promotionPartner);
     }
