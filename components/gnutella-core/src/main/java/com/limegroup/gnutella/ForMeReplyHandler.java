@@ -56,6 +56,18 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
 		if(handler.isPersonalSpam(reply)) return;
+		
+		// Drop if it's a reply to mcast and conditions aren't met ...
+		try {
+            if( reply.isReplyToMulticastQuery() ) {
+                if( reply.isTCP() )
+                    return; // shouldn't be on TCP.
+                if( reply.getHops() != 1 || reply.getTTL() != 0 )
+                    return; // should only have hopped once.
+            }
+        } catch(BadPacketException bpe) {
+            return;
+        }        
 			
 		//ActivityCallback callback = RouterService.getCallback();
 		//callback.handleQueryReply(reply);

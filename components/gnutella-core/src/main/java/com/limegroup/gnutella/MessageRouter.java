@@ -224,14 +224,7 @@ public abstract class MessageRouter {
             // if someone sent a TCP QueryReply with the MCAST header,
             // that's bad, so ignore it.
             QueryReply qmsg = (QueryReply)msg;
-            boolean repToMCast;            
-            try {
-                repToMCast = qmsg.isReplyToMulticastQuery();
-            } catch(BadPacketException bpe) {
-                repToMCast = false;
-            }
-            if( !repToMCast )
-                handleQueryReply(qmsg, receivingConnection);            
+            handleQueryReply(qmsg, receivingConnection);            
 		} else if (msg instanceof PushRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
@@ -1531,17 +1524,9 @@ public abstract class MessageRouter {
      * been sent for this GUID.  If this number is greater than a specified
      * limit, we simply drop the reply.
      *
-     * Reason 2) The reply contained the "MCAST" header, but was not meant
-     * for.  This is necessary because we now forward
-     * QueryRequests to the local subnet, and pass on replies.  Newer LimeWires
-     * (3.0+) will correctly not set the MCAST GGEP header for multicasted
-     * query requests that have been forwarded from the network.  Older
-     * LimeWires (2.9.10, 2.9.11) blindly respond to all multicast query
-     * requests with replies containing the MCAST header.
+     * Reason 2) The reply was meant for me -- DO NOT DROP.
      *
-     * Reason 3) The reply was meant for me -- DO NOT DROP.
-     *
-     * Reason 4) The TTL is 0, drop.
+     * Reason 3) The TTL is 0, drop.
      *
      * @param rrp the <tt>ReplyRoutePair</tt> containing data about what's 
      *  been routed for this GUID
@@ -1553,21 +1538,11 @@ public abstract class MessageRouter {
                                     QueryReply qr) {
         int ttl = qr.getTTL();
                                            
-        // Reason 3 --  The reply is meant for me, do not drop it.
+        // Reason 2 --  The reply is meant for me, do not drop it.
         if( rh == FOR_ME_REPLY_HANDLER ) return false;
         
-        // Reason 4 -- drop if TTL is 0.
-        if( ttl == 0 ) return true;
-        
-        // Reason 2 -- reply to multicast query that wasn't meant for me.
-        try {
-            if( qr.isReplyToMulticastQuery() )
-                return true;
-        } catch(BadPacketException bpe) {
-            // Bad packet, drop.
-            return true;
-        }
-                
+        // Reason 3 -- drop if TTL is 0.
+        if( ttl == 0 ) return true;                
 
         // Reason 1 ...
         
