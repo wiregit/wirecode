@@ -15,6 +15,12 @@ import java.net.InetAddress;
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
  */
 public final class QueryRequestTest extends BaseTestCase {
+    
+    private final String XML_STRING =
+           "<?xml version=\"1.0\"?>" +
+            "<audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\">" +
+            "<audio title=\"xml\" artist=\"bloat\"></audio></audios>";
 	
 	/**
 	 * Constructs a new test instance for query requests.
@@ -441,19 +447,20 @@ public final class QueryRequestTest extends BaseTestCase {
 	/**
 	 * Tests constructor that only takes a string and a TTL.
 	 */
- 	public void testStringXMLConstructor() {
- 		QueryRequest qr = QueryRequest.createQuery("tests", "<?xml");
- 		runStandardChecks(qr, "tests", "<?xml");
+ 	public void testStringXMLConstructor() throws Exception {
+ 		QueryRequest qr = QueryRequest.createQuery("tests", XML_STRING);
+ 		runStandardChecks(qr, "tests", XML_STRING);
  		runNonRequeryChecks(qr);
  	}
 
 	/**
 	 * Tests constructor that only takes a string and a TTL and a GUID.
 	 */
-	public void testGUIDStringXMLConstructor() {
+	public void testGUIDStringXMLConstructor() throws Exception {
 		QueryRequest qr = 
-			QueryRequest.createQuery(QueryRequest.newQueryGUID(false), "tests", "<?xml");
-		runStandardChecks(qr, "tests", "<?xml");
+			QueryRequest.createQuery(QueryRequest.newQueryGUID(false),
+			    "tests", XML_STRING);
+		runStandardChecks(qr, "tests", XML_STRING);
 		runNonRequeryChecks(qr);
 	}
 
@@ -468,7 +475,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		runStandardChecks(qr, false, UrnType.ANY_TYPE_SET, 
 						  Collections.EMPTY_SET, key);		
 		assertEquals("unexpected query", "test", qr.getQuery());
-		assertEquals("unexpected xml query", "", qr.getRichQuery());
+		assertNull("unexpected xml query", qr.getRichQuery());
 	}
 
 	/**
@@ -488,7 +495,7 @@ public final class QueryRequestTest extends BaseTestCase {
 	 */
 	private void runRequeryChecks(QueryRequest qr) {
 		assertEquals("unexpected query", "\\", qr.getQuery());
-		assertEquals("xml should be empty", "", qr.getRichQuery());
+		assertNull("xml should be empty", qr.getRichQuery());
 		assertTrue("should have URNs", qr.hasQueryUrns());
 		assertEquals("unexpected requested URN types", UrnType.SHA1_SET, 
 					 qr.getRequestedUrnTypes());
@@ -497,7 +504,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
 	private void runStringRequeryChecks(QueryRequest qr, String query) {
 		assertEquals("unexpected query", query, qr.getQuery());
-		assertEquals("xml should be empty", "", qr.getRichQuery());
+		assertNull("xml should be null", qr.getRichQuery());
 		assertTrue("should not have URNs", !qr.hasQueryUrns());
 		assertEquals("unexpected requested URN types", UrnType.ANY_TYPE_SET, 
 					 qr.getRequestedUrnTypes());
@@ -574,8 +581,13 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * @param qr the query to check
 	 * @param query the query string
 	 */
-	private void runStandardChecks(QueryRequest qr, String query, String xml) {
-		assertEquals("xml queries should be equal", xml, qr.getRichQuery());
+	private void runStandardChecks(QueryRequest qr, String query, String xml)
+	  throws Exception {
+	    if( xml == null || xml.equals("") )
+	        assertNull("should not have xml", qr.getRichQuery());
+	    else
+		    assertEquals("xml queries should be equal", 
+		        xml, qr.getRichQuery().getXMLString());
 		runStandardChecks(qr);
 	}
 
