@@ -1,14 +1,23 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.MessageSettings;
-
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.IOException;
+import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 
 /**
  * Reads Gnutella messages from a SocketChannel, instantiating subclasses of
@@ -65,11 +74,11 @@ public final class MessageReader {
      //private static final ByteBuffer HEADER = 
     	//ByteBuffer.allocate(HEADER_SIZE);
 
-
-
-	//private static MessageReader INSTANCE = 
-		//new MessageReader();
 		
+	/**
+	 * Constant for the hard max TTL for incoming messages.  If the TTL+hops of 
+	 * incoming messages exceeds this value, the message is dropped.
+	 */
 	private static final byte HARD_MAX = (byte)14;
 	
 	/**
@@ -77,9 +86,6 @@ public final class MessageReader {
 	 */
 	private MessageReader() {}
 		
-	static  {
-		//HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-	}
 	
 	/**
 	 * Creates a new <tt>Message</tt> that came in over TCP.
@@ -111,17 +117,21 @@ public final class MessageReader {
 	 */
 	private static Message createMessage(SelectionKey key, int network) 
 		throws IOException, BadPacketException {
-		
+
 		ByteBuffer HEADER = 
-			ByteBuffer.allocate(HEADER_SIZE);
+				ByteBuffer.allocate(HEADER_SIZE);
 		HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 		SocketChannel channel = (SocketChannel)key.channel();
 		int n = channel.read(HEADER);
 		if(n < 0) {
-	        throw new IOException("connection closed reading header");    
+			HEADER.clear();
+            MessageReadErrorStat.CONNECTION_CLOSED_READING_HEADER.incrementStat();
+			return null; 
 		}
 		if(HEADER.hasRemaining()) {
-			throw new IOException("invalid header");
+			HEADER.clear();
+            MessageReadErrorStat.INVALID_HEADER.incrementStat();
+			return null;
 		}
 		
 		int length = HEADER.getInt(LENGTH_OFFSET);  //little endian
@@ -130,7 +140,8 @@ public final class MessageReader {
 		//to be closed.  Note we don't bother checking other fields here.
 		if (length<0 || 
 			length > MessageSettings.MAX_LENGTH.getValue())  {
-			throw new IOException("Unreasonable message length: "+length);
+            MessageReadErrorStat.BAD_MESSAGE_LENGTH.incrementStat();
+			return null;
 		}
 		
 		//Allocate enough space for payload.  TODO2: avoid allocating
@@ -139,111 +150,121 @@ public final class MessageReader {
 		ByteBuffer payload = ByteBuffer.allocate(length);            
 		n = channel.read(payload);
 		if (n<0) {
-			throw new IOException("connection closed reading payload");
+            MessageReadErrorStat.CONNECTION_CLOSED_READING_PAYLOAD.incrementStat();
+			return null;
 		}
 
 		if(payload.hasRemaining()) {
-			throw new IOException("invalid payload");
+            MessageReadErrorStat.INVALID_PAYLOAD.incrementStat();
+			return null;
 		}
-		
+			
 		try {
 			return createMessage(HEADER, payload, (Connection)key.attachment(), network);
 		}  finally {                
-			// be sure to execute even if bad packet.
+			// be sure that the ByteBuffer for the header is cleared every time before the next
+			// message is read
 			HEADER.clear();
 		}
    }
    
-   private static Message 
+	private static Message 
    		createMessage(ByteBuffer header, ByteBuffer payloadBuffer, Connection conn, 
    									 int network) 
-        throws IOException, BadPacketException {
-        	System.out.println("MessageReader::createMessage");
-			header.flip();
-			byte[] guid = new byte[GUID_SIZE];
-			header.get(guid);
-			int length = payloadBuffer.capacity();
-			byte func  = header.get(OPCODE_OFFSET);
-			byte ttl       = header.get(TTL_OFFSET);
-			byte hops = header.get(HOPS_OFFSET);
+        throws BadPacketException {
+    	//System.out.println("MessageReader::createMessage");
+		header.flip();
+		byte[] guid = new byte[GUID_SIZE];
+		header.get(guid);
+		int length = payloadBuffer.capacity();
+		byte func  = header.get(OPCODE_OFFSET);
+		byte ttl       = header.get(TTL_OFFSET);
+		byte hops = header.get(HOPS_OFFSET);
+		
+		//  Check values. 
+		byte softMax = conn.getSoftMax();
+		if (hops<0) {
+            MessageReadErrorStat.NEGATIVE_HOPS.incrementStat();
+			return null;
+		} else if (ttl<0) {
+            MessageReadErrorStat.NEGATIVE_TTL.incrementStat();
+			return null;
+		} else if ((hops >= softMax) && 
+				 (func != F_QUERY_REPLY) &&
+				 (func != F_PING_REPLY)) {
 			
-			//  Check values. 
-			byte softMax = conn.getSoftMax();
-			if (hops<0) {
-				throw new BadPacketException("Negative (or very large) hops");
-			} else if (ttl<0) {
-				throw new BadPacketException("Negative (or very large) TTL");
-			} else if ((hops >= softMax) && 
-					 (func != F_QUERY_REPLY) &&
-					 (func != F_PING_REPLY)) {
-				throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
-			}
-			else if (ttl+hops > HARD_MAX)
-				throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
-			else if ((ttl+hops > softMax) && 
-					 (func != F_QUERY_REPLY) &&
-					 (func != F_PING_REPLY)) {
-				ttl=(byte)(softMax - hops);  //overzealous client;
-											 //readjust accordingly
-				Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
-										 //new ttl>=0
-			}
-			
-			//Dispatch based on opcode.
-			payloadBuffer.flip();     
-			byte[] payload = new byte[payloadBuffer.capacity()];
-			payloadBuffer.get(payload, 0, payload.length);
-			Message msg = createMessage(guid, func, ttl, hops, length, payload, network);
-			System.out.println("MessageReader::createMessage:::::CREATED MESSAGE!!!!!!!!!");
-			return msg;
-			//return createMessage(guid, func, ttl, hops, length, payload, network);
-        }
+            MessageReadErrorStat.HOPS_OVER_SOFT_MAX.incrementStat();
+			return null;
+		}
+		else if (ttl+hops > HARD_MAX) {
+            
+            MessageReadErrorStat.HOPS_PLUS_TTL_OVER_HARD_MAX.incrementStat();
+			return null;
+		} else if ((ttl+hops > softMax) && 
+				 (func != F_QUERY_REPLY) &&
+				 (func != F_PING_REPLY)) {
+                     
+            // overzealous client, bump down the TTL           
+			ttl = (byte)(softMax - hops);
+			Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
+									 //new ttl>=0
+		}
+		
+		// dispatch based on opcode.
+		payloadBuffer.flip();     
+		byte[] payload = new byte[payloadBuffer.capacity()];
+		payloadBuffer.get(payload, 0, payload.length);
+		Message msg = createMessage(guid, func, ttl, hops, length, payload, network);
+		//System.out.println("MessageReader::createMessage:::::CREATED MESSAGE!!!!!!!!!::"+msg);
+		return msg;
+		//return createMessage(guid, func, ttl, hops, length, payload, network);
+	}
         
-        private static Message createMessage(byte[] guid, byte func, byte ttl, 
-        																		 byte hops, int length, byte[] payload,
-        																		 int network) throws BadPacketException  {
-			switch (func) {
-				//TODO: all the length checks should be encapsulated in the various
-				//constructors; Message shouldn't know anything about the various
-			   //messages except for their function codes.  I've started this
-			   //refactoring with PushRequest and PingReply.
-			   case F_PING:
-				   if (length>0) { //Big ping
-					   return new PingRequest(guid,ttl,hops,payload);
-				   }
-				   return new PingRequest(guid,ttl,hops);
+    private static Message createMessage(byte[] guid, byte func, byte ttl, 
+    																		 byte hops, int length, byte[] payload,
+    																		 int network) throws BadPacketException  {
+		switch (func) {
+			//TODO: all the length checks should be encapsulated in the various
+			//constructors; Message shouldn't know anything about the various
+		   //messages except for their function codes.  I've started this
+		   //refactoring with PushRequest and PingReply.
+		   case F_PING:
+			   if (length>0) { //Big ping
+				   return new PingRequest(guid,ttl,hops,payload);
+			   }
+			   return new PingRequest(guid,ttl,hops);
 
-			   case F_PING_REPLY:
-				   return PingReply.createFromNetwork(guid, ttl, hops, payload);
-			   case F_QUERY:
-				   if (length<3) break;
-				   return QueryRequest.createNetworkQuery(
-					   guid, ttl, hops, payload, network);
-			   case F_QUERY_REPLY:
-				   if (length<26) break;
-				   return new QueryReply(guid,ttl,hops,payload);
-			   case F_PUSH:
-				   return new PushRequest(guid,ttl,hops,payload, network);
-			   case F_ROUTE_TABLE_UPDATE:
-				   //The exact subclass of RouteTableMessage returned depends on
-				   //the variant stored within the payload.  So leave it to the
-				   //static read(..) method of RouteTableMessage to actually call
-				   //the right constructor.
-				   return RouteTableMessage.read(guid, ttl, hops, payload);
-			   case F_VENDOR_MESSAGE:
-				   if ((ttl != 1) || (hops != 0))
-					   throw new BadPacketException("VM with bad ttl/hops: " +
-													ttl + "/" + hops);
-				   return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
-															payload);
-			   case F_VENDOR_MESSAGE_STABLE:
-				   if ((ttl != 1) || (hops != 0))
-					   throw new BadPacketException("VM with bad ttl/hops: " +
-													ttl + "/" + hops);
-				   return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
-															payload);
-		   }
-				  
-			 throw new BadPacketException("Unrecognized function code: "+func);
+		   case F_PING_REPLY:
+			   return PingReply.createFromNetwork(guid, ttl, hops, payload);
+		   case F_QUERY:
+			   if (length<3) break;
+			   return QueryRequest.createNetworkQuery(
+				   guid, ttl, hops, payload, network);
+		   case F_QUERY_REPLY:
+			   if (length<26) break;
+			   return new QueryReply(guid,ttl,hops,payload);
+		   case F_PUSH:
+			   return new PushRequest(guid,ttl,hops,payload, network);
+		   case F_ROUTE_TABLE_UPDATE:
+			   //The exact subclass of RouteTableMessage returned depends on
+			   //the variant stored within the payload.  So leave it to the
+			   //static read(..) method of RouteTableMessage to actually call
+			   //the right constructor.
+			   return RouteTableMessage.read(guid, ttl, hops, payload);
+		   case F_VENDOR_MESSAGE:
+			   if ((ttl != 1) || (hops != 0))
+				   throw new BadPacketException("VM with bad ttl/hops: " +
+												ttl + "/" + hops);
+			   return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+														payload);
+		   case F_VENDOR_MESSAGE_STABLE:
+			   if ((ttl != 1) || (hops != 0))
+				   throw new BadPacketException("VM with bad ttl/hops: " +
+												ttl + "/" + hops);
+			   return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+														payload);
+	   }
+			  
+		 throw new BadPacketException("Unrecognized function code: "+func);
 	}
 }
