@@ -1034,6 +1034,12 @@ public class QueryReply extends Message implements Serializable{
 			}
 		}
 
+        /* Push Proxy availability? */
+        boolean hasPushProxies = false;
+        if ((this.getPushProxies() != null) && 
+            (this.getPushProxies().size() > 1))
+            hasPushProxies = true;
+            
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
          * this method, take a look at isFirewalledQuality! */
@@ -1053,10 +1059,10 @@ public class QueryReply extends Message implements Serializable{
                 return 1;   //**   busy, direct connect
         } else if (busy==NO) {
             Assert.that(heFirewalled==NO || !iFirewalled);
-            if (heFirewalled==YES)
-                return 2;   //***  not busy, push
+            if (heFirewalled==YES && !hasPushProxies)
+                return 2;   //***  not busy, no/not many proxies, old push
             else
-                return 3;   //**** not busy, direct connect
+                return 3;   //**** not busy, has proxies or direct connect
         } else {
             Assert.that(false, "Unexpected case!");
             return -1;

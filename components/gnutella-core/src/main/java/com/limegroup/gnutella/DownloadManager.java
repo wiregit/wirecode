@@ -744,6 +744,20 @@ public class DownloadManager implements BandwidthTracker {
      */
     public boolean sendPush(RemoteFileDesc file) {
         debug("DM.sendPush(): entered.");
+        
+        // Send as multicast if it's multicast.
+        if( file.isReplyToMulticast() ) {
+            PushRequest pr = new PushRequest(GUID.makeGuid(),
+                                     (byte)1, //ttl
+                                     file.getClientGUID(),
+                                     file.getIndex(),
+                                     RouterService.getNonForcedAddress(),
+                                     RouterService.getNonForcedPort() );
+            router.sendMulticastPushRequest(pr);
+            return true;
+        }
+        
+        // If it wasn't multicast, try sending to the proxies if it had them.
         Set proxies = file.getPushProxies();
         if (!proxies.isEmpty()) {
             //TODO: investigate not sending a HTTP request to a proxy
@@ -791,40 +805,21 @@ public class DownloadManager implements BandwidthTracker {
                 return requestSuccessful;
             // else just send a PushRequest as normal
         }
-
-        // handle multicast replies specially...
-        boolean multicast = file.isReplyToMulticast();
         
-        // multicast push requests must have a TTL of 1
-        byte ttl = multicast ? 
-            1 : ConnectionSettings.TTL.getValue();
-            
-        // make sure we don't use the forced ip address and port if 
-        // we received the reply via UDP (in response to a 
-        // multicasted query)
-        byte[] address = multicast ? 
-            RouterService.getNonForcedAddress() :
-            RouterService.getAddress();
-
-        int port = multicast ?
-            RouterService.getNonForcedPort() : 
-            RouterService.getPort(); 
         PushRequest pr = 
             new PushRequest(GUID.makeGuid(),
-                            ttl,
+                            ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
-                            address,
-                            port);
+                            RouterService.getAddress(),
+                            RouterService.getPort());
 
         try {
-            if( file.isReplyToMulticast() )
-                router.sendMulticastPushRequest(pr);
-            else
-                router.sendPushRequest(pr);
+            router.sendPushRequest(pr);
         } catch (IOException e) {
             return false;
         }
+
         return true;
     }
 
