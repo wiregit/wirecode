@@ -25,6 +25,11 @@ class AutoDownloadDetails {
     private static ApproximateMatcher matcher = 
         new ApproximateMatcher(MATCHER_BUF_SIZE);
     
+    /** the precision that the matcher uses for comparing candidates to RFDs
+     *  that have already been accepted for download....
+     */
+    private float MATCH_PRECISION_DL = 0.5f;
+
     static {
         matcher.setIgnoreCase(true);
         matcher.setIgnoreWhitespace(true);
@@ -65,10 +70,34 @@ class AutoDownloadDetails {
      * @return Whether or not the add was successful. 
      */
     public synchronized boolean addDownload(RemoteFileDesc toAdd) {
+        // this is used not only as a return value but to control processing.
+        // if it every turns false we just stop processing....
         boolean retVal = true;
         
-        if (!expired())
-            dlList.add(toAdd);
+        // if this hasn't become expired....
+        if (!expired()) {
+
+            // see if it compares to any other file already being DLed....
+            if (dlList.size() > 0) {
+                final String inputFileName = toAdd.getFileName();
+                for (int i = 0; i < dlList.size(); i++) {
+                    RemoteFileDesc currRFD = (RemoteFileDesc) dlList.get(i);
+                    String currFileName = currRFD.getFileName();
+                    synchronized (matcher) {
+                        if (matcher.matches(inputFileName, currFileName,
+                                            MATCH_PRECISION_DL))
+                            retVal = false;
+                    }
+                    // oops, we have already accepted that file for DL, don't
+                    // add it and break out of this costly loop....
+                    if (!retVal)
+                        break;
+                }
+            }
+
+            if (retVal)
+                dlList.add(toAdd);
+        }
         else 
             retVal = false;
         
