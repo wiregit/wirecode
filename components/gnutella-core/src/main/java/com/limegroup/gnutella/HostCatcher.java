@@ -118,6 +118,11 @@ public class HostCatcher {
      */
     private boolean alwaysNotifyKnownHost=false;
 
+	/**
+	 * Constant for the <tt>QueryUnicaster</tt> instance.
+	 */
+	private final QueryUnicaster UNICASTER = QueryUnicaster.instance();
+
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
      * connect is not specified in the SettingsManager, loads the hosts in the
@@ -224,22 +229,34 @@ public class HostCatcher {
      */
     public boolean add(PingReply pr, ReplyHandler receivingConnection) {
         //Convert to endpoint
-        ExtendedEndpoint e;
+        ExtendedEndpoint endpoint;
         try {
-            e=new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
-                                   pr.getDailyUptime(), pr.supportsUnicast());
+			boolean supportsUnicast = pr.supportsUnicast();
+            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
+											pr.getDailyUptime(), 
+											supportsUnicast);
+			if(supportsUnicast) {
+				try {
+					UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
+												 pr.getPort());
+				} catch(UnknownHostException e) {
+					// nothing we can do if the host is not recognized -- this
+					// should never happen for raw IP addresses, as there is
+					// no DNS lookup anyway after Java 1.1 (1.1.8 does NOT
+					// do a DNS lookup).
+				}
+			}
         } catch (BadPacketException bpe) {
-            e=new ExtendedEndpoint(pr.getIP(), pr.getPort());
+            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
         //supernode.  Also feed to unicaster....
         if (pr.isMarked()) {
-            QueryUnicaster.instance().addUnicastEndpoint(e);
-            return add(e, GOOD_PRIORITY);
+            return add(endpoint, GOOD_PRIORITY);
         }
         else
-            return add(e, priority(e));
+            return add(endpoint, priority(endpoint));
     }
 
     /**
