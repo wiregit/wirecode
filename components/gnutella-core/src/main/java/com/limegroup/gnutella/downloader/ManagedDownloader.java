@@ -985,7 +985,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // we should try to connect to about twice (I am guessing) 
             //as many as we are allowed to swarm from. 
             int size = files.size();//capture the size, it wil change
-            for(int i=0; i< size; i++) {
+            for(int i=0; i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
                     public void run() {
@@ -999,9 +999,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //System.out.println("Sumeet: waiting");
             synchronized(this) {
                 try {
-                    this.wait();
+                    this.wait(4000);//if no workers notify in 4 secs, iterate
                 } catch (Exception ee ) {
-                    ee.printStackTrace();
+                    //ee.printStackTrace();
                 }
             }
             //System.out.println("Sumeet: finished waiting");
@@ -1033,6 +1033,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             files.add(rfd);//we can try this rfd again later
             return;
         } catch (NoSuchElementException nsex) {
+            //System.out.println("Sumeet: files size "+files.size());
             ;//ignored...we have already handled it all
         } catch (Exception e) {
             debug ("connectAndStartDownload : other exception thrown");
@@ -1053,8 +1054,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                dloader.getAmountToRead());
         int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
         int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
-        Interval in = new Interval(low,high);
-        needed.add(in);
+        if( (high-low) > 0) {
+            Interval in = new Interval(low,high);
+            needed.add(in);
+        }
     }
     
     /** Returns true if another downloader is allowed. */
@@ -1173,11 +1176,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         //variable.
         int amountRead=biggest.getAmountRead();
         int left=biggest.getAmountToRead()-amountRead;
+        //System.out.println("Sumeet left, downloader "+left+", "+dloader);
         if (left < MIN_SPLIT_SIZE) { 
             float bandwidth = -1;//initialize
             try {
                 bandwidth = biggest.getMeasuredBandwidth();
             } catch (InsufficientDataException ide) {
+                //System.out.println("Sumeet: insufficientdataException ");
                 files.add(dloader.getRemoteFileDesc());//RFD may still be used
                 throw new NoSuchElementException();
             }
