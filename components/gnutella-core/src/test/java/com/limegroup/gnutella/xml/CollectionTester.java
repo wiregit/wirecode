@@ -11,7 +11,7 @@ import junit.framework.*;
  */
 public class CollectionTester extends TestCase {
 
-    final Set files = new HashSet();
+    final Map files = new HashMap();
     final String fileLocation = "com/limegroup/gnutella/xml/";
     final File mason = new File(fileLocation + "nullfile.null");
     final File vader = new File(fileLocation + "vader.mp3");
@@ -52,9 +52,9 @@ public class CollectionTester extends TestCase {
                           vader.exists());
         Assert.assertTrue("Necessary file swing.mp3 cannot be found!",
                           swing.exists());
-        files.add(mason);
-        files.add(vader);
-        files.add(swing);
+        files.put(mason, mfm.readFromMap(mason));
+        files.put(vader, mfm.readFromMap(vader));
+        files.put(swing, mfm.readFromMap(swing));
     }
 
     public void testAudio() {
