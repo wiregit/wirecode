@@ -778,7 +778,8 @@ public class UDPService implements Runnable {
                                              (byte)1, (byte)0);
             
             // unless we know for sure we cannot do FWT, request a test
-            if (canDoFWT())
+            if (!RouterService.acceptedIncomingConnection() &&
+                    canDoFWT())
                 pr.addIPRequest();
             
             send(pr, ep.getAddress(), ep.getPort());
