@@ -8,6 +8,7 @@ public class Assert {
     public static void that(boolean ok, String msg) {
         if (!ok) {
             System.err.println("Assertion failed: "+msg);
+            Thread.dumpStack();
 			RuntimeException re = new AssertFailure(msg);
 			ActivityCallback callback = RouterService.getCallback();
 			if(callback != null) {
