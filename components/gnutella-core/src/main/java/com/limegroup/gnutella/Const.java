@@ -12,9 +12,9 @@ public class Const {
 
     /** 
      * Maximum allowed payload length.  This is usually less than
-     * the Gnutella-defined value to avoid spamming.  Currently 2kb.
+     * the Gnutella-defined value to avoid spamming.  Currently 64kb.
      */
-    public static int MAX_LENGTH=2048;
+    public static int MAX_LENGTH=65536;
 
     /**
      * The time to wait for handshake response when establishing outgoing connections,
