@@ -1070,12 +1070,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         }                 
     }
 
+    static boolean NO_DELAY	= false; // For testing
 
-	private static final int MIN_NUM_CONNECTIONS      = 2;
-	private static final int MIN_CONNECTION_MESSAGES  = 6;
-	private static final int MIN_TOTAL_MESSAGES       = 45;
-	private static final int CONNECTION_DELAY         = 500;
-	        static boolean   NO_DELAY				  = false; // For testing
     /**
      *  Try to wait for good, stable, connections with some amount of reach
 	 *  or message flow.
@@ -1085,18 +1081,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 		if ( NO_DELAY )  return;  // For Testing without network connection
 
-		// TODO: Note that on a private network, these conditions might
-		//       be too strict.
-
-		// Wait till your connections are stable enough to get the minimum 
-		// number of messages
-		while 
-		( (RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
-			  < MIN_NUM_CONNECTIONS) &&
-		  (RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES) 
-        ) {
-			Thread.sleep(CONNECTION_DELAY); 
-		}
+        RouterService.waitForStableConnections();
     }
 
 
