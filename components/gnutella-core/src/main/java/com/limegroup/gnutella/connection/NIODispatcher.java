@@ -10,9 +10,6 @@ import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
