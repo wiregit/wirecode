@@ -964,7 +964,10 @@ public final class CommonUtils {
 		// return quickly if the file is already there, no copy necessary
 		if( !forceOverwrite && newFile.exists() ) return;
 		String parentString = newFile.getParent();
-        if(parentString == null) return;
+        if(parentString == null) {
+            System.out.println("Parent is null, exiting early.");
+            return;
+        }
 		File parentFile = new File(parentString);
 		if(!parentFile.isDirectory()) {
 			parentFile.mkdirs();
@@ -977,10 +980,15 @@ public final class CommonUtils {
 		try {
 			//load resource using my class loader or system class loader
 			//Can happen if Launcher loaded by system class loader
-			InputStream is =  
-				cl != null
-				?  cl.getResource(fileName).openStream()
-				:  ClassLoader.getSystemResource(fileName).openStream();
+            URL resource = cl != null
+				?  cl.getResource(fileName)
+				:  ClassLoader.getSystemResource(fileName);
+                
+            if(resource == null)
+                throw new NullPointerException("resource: " + fileName +
+                                               " doesn't exist.");
+            
+            InputStream is = resource.openStream();
 			
 			//buffer the streams to improve I/O performance
 			final int bufferSize = 2048;
@@ -993,8 +1001,8 @@ public final class CommonUtils {
 			
 			do { //read and write in chunks of buffer size until EOF reached
 				c = bis.read(buffer, 0, bufferSize);
-                                if (c > 0)
-                                    bos.write(buffer, 0, c);
+                if (c > 0)
+                    bos.write(buffer, 0, c);
 			}
 			while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
 			
@@ -1002,10 +1010,16 @@ public final class CommonUtils {
 			//if there is any error, delete any portion of file that did write
 			newFile.delete();
 		} finally {
-			try {
-				if(bis != null) bis.close();
-				if(bos != null) bos.close();
-			} catch(IOException ioe) {}	// all we can do is try to close the streams
+            if(bis != null) {
+                try {
+                    bis.close();
+                } catch(IOException ignored) {}
+            }
+            if(bos != null) {
+                try {
+                    bos.close();
+                } catch(IOException ignored) {}
+            }
 		} 
 	}
 
