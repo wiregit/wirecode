@@ -82,7 +82,7 @@ public class LimeXMLDocumentHelper{
         }
         retString = retString +">";//closed root
         //add the child of the firstTree
-        Node child = firstTree.getFirstChild();//only child
+        Node child = getFirstNonTextChild(firstTree);//only child
         retString = retString+getNodeString(child);
         for(int i=initIndex+1;i<len;i++){//look at the rest of the responses
             String xmlStr = responses[i].getMetadata();
@@ -91,7 +91,7 @@ public class LimeXMLDocumentHelper{
                currTree = getDOMTree(xmlStr);
             if(currTree!=null){
                 addIndex(currTree,i);
-                Node currChild = currTree.getFirstChild();//only child
+                Node currChild = getFirstNonTextChild(currTree);//only child
                 retString = retString+getNodeString(currChild);
             }
         }
@@ -132,15 +132,28 @@ public class LimeXMLDocumentHelper{
         //TODO2:review and test
     }
         
-    private void  addIndex(Node node, int childIndex){
+    private void addIndex(Node node, int childIndex){
         //find the only child of node - called newLeaf
-        Element newLeaf = (Element)node.getFirstChild();
+        Element newLeaf = getFirstNonTextChild(node);
         //then  add the index as the attribute of newLeaf
+        if(newLeaf == null)
+            return;
         String ind = ""+childIndex;//cast it!
         newLeaf.setAttribute("index", ind);
         //then add newLeaf as a child of parent.
     }
 
+     private Element getFirstNonTextChild(Node node){
+           List children = LimeXMLUtils.getElements(node.getChildNodes());
+           int z = children.size();
+           for (int i=0;i<z;i++){
+                Node n = (Node)children.get(i);
+                if(n.getNodeType() == Node.ELEMENT_NODE)
+                      return (Element)n;
+           }
+           return null;
+     }
+    
     private int getFirstRichResponse (int initIndex,Response[] responses){
         Response res=null;
         int len = responses.length;
