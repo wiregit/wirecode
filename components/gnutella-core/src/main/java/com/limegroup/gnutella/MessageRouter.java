@@ -101,7 +101,7 @@ public abstract class MessageRouter {
      * Keeps track of potential sources of content.  Comprised of Sets of GUESS
      * Endpoints.  Kept tidy when searches/downloads are killed.
      */
-    private final Map _bypassedResults = new Hashtable();
+    private final Map _bypassedResults = new HashMap();
 
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -202,31 +202,35 @@ public abstract class MessageRouter {
                                10 * CLEAR_TIME);
     }
 
-    //TODO: small issue with queryKilled and downloadFinished.  if the timing
-    //of things is such that a download is finishing just as a query is killed,
-    //then _bypassedResults may never clear.  likelihood seems small, and i
-    //think synchronization is not enough to solve the problem.
-
     /** Call this to inform us that a query has been killed by a user or
-     *  whatever.  Useful for purging unneeded info.
+     *  whatever.  Useful for purging unneeded info.<br>
+     *  Callers of this should make sure that they have purged the guid from
+     *  their tables.
      *  @throws IllegalArgumentException if the guid is null
      */
     public void queryKilled(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
+        synchronized (_bypassedResults) {
         if (!RouterService.getDownloadManager().guidForQueryIsDownloading(guid))
             _bypassedResults.remove(guid);
+        }
     }
 
     /** Call this to inform us that a download is finished or whatever.  Useful
-     *  for purging unneeded info.
+     *  for purging unneeded info.<br>
+     *  If the caller is a Downloader, please be sure to clear yourself from the
+     *  active and waiting lists in DownloadManager.
      *  @throws IllegalArgumentException if the guid is null
      */
     public void downloadFinished(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        if (!_callback.queryIsAlive(guid))
+        synchronized (_bypassedResults) {
+        if (!_callback.queryIsAlive(guid) && 
+            !RouterService.getDownloadManager().guidForQueryIsDownloading(guid))
             _bypassedResults.remove(guid);
+        }
     }
     
     /** @returns a Set with GUESSEndpoints that had matches for the
