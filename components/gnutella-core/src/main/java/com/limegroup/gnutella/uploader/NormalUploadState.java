@@ -180,7 +180,8 @@ public final class NormalUploadState implements HTTPMessage {
             //finish uploading if the desired amount has been uploaded
             if(_amountRead >= _uploadEnd)
                 break;
-        }}
+        }
+    }
 	
     
     /**
@@ -215,7 +216,7 @@ public final class NormalUploadState implements HTTPMessage {
                 //finish uploading if the desired amount 
                 //has been uploaded
                 if(_amountRead >= _uploadEnd)
-                    break;
+                    return;
             }
 
             // Date stop=new Date();
