@@ -1212,7 +1212,7 @@ public class DownloadManager implements BandwidthTracker {
 					proceed = true;
 					files.remove(_file.getFileName());
 					if (files.isEmpty())
-						_udpFailover.remove(files);
+						_udpFailover.remove(key);
 				}
 			}
 			
