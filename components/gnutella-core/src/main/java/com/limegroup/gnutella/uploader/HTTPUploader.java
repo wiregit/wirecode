@@ -96,9 +96,6 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
-		//FileDesc desc;
-		boolean indexOut = false;
-		boolean ioexcept = false;
 
 		try {
 			// This line can't be moved, or FileNotFoundUploadState
@@ -107,21 +104,16 @@ public class HTTPUploader implements Uploader {
 			_fileDesc = _fileManager.get(_index);
 			_fileSize = _fileDesc._size;
 			_urn = _fileDesc.getSHA1Urn();
+			setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
 			// some reason the index is no longer valid.
-			indexOut = true;
+			setState(FILE_NOT_FOUND);
 		} catch (IOException e) {
 			// FileManager.get() throws an IOException if
 			// the file has been deleted
-			ioexcept = true;
-		}
-		if (indexOut)
-			setState(FILE_NOT_FOUND);
-		else if (ioexcept) 
 			setState(INTERRUPTED);
-		else 
-			setState(CONNECTING);
+		}
 	}
 		
 
@@ -137,7 +129,6 @@ public class HTTPUploader implements Uploader {
 		_guid = guid;
 		_port = port;
         _fileManager = fm;
-		//FileDesc desc;
 		try {
 			_fileDesc = _fileManager.get(_index);
 			_fileSize = _fileDesc._size;
@@ -346,6 +337,15 @@ public class HTTPUploader implements Uploader {
 	 * @return the requested <tt>URN</tt>
 	 */
 	public URN getRequestedUrn() {return _requestedURN;}
+
+	/**
+	 * Returns the <tt>FileDesc</tt> instance for this uploader.
+	 *
+	 * @return the <tt>FileDesc</tt> instance for this uploader, or
+	 *  <tt>null</tt> if the <tt>FileDesc</tt> could not be assigned
+	 *  from the shared files
+	 */
+	public FileDesc getFileDesc() {return _fileDesc;}
 	/****************** private methods *******************/
 
 
