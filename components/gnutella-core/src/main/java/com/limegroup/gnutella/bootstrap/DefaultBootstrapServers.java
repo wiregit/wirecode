@@ -203,7 +203,6 @@ public class DefaultBootstrapServers {
         "http://www.rigolade.free.fr/gnut/gcache.php",
         "http://zero-g.net/gcache/gcache.php",
         "http://i.nadjar.free.fr/gwebcache/gcache.php",
-        "http://icewolf.homeip.net/webcache/gcache",
         "http://icewolf.homeip.net/webcache/gcache.php",
         //"http://im1ru12.org/GWebCache/",
         "http://im1ru12.org/GWebCache/index.php",
@@ -234,7 +233,6 @@ public class DefaultBootstrapServers {
         //"http://freedomcause.org/gwebcache/cache5/gcache.php",
         "http://members.lycos.co.uk/gcache/index.php",
         "http://members.lycos.nl/killerarnold/gcache.php",
-        "http://membres.lycos.fr/jalb/gnetcache",
         "http://mitglied.lycos.de/danacho/gwebcache/gcache.php",
         "http://mitglied.lycos.de/godfire/gnucache/gcache.php",
         "http://mitglied.lycos.de/kleiner86/gwebcache/gcache.php",
@@ -245,7 +243,6 @@ public class DefaultBootstrapServers {
         "http://members.lycos.nl/silvermaster59/gcache.php",
         "http://membres.lycos.fr/waryde/gnuc/gcache.php",
         "http://abilgisayarcs.host.sk/gnutella/",
-        "http://membres.lycos.fr/jalb/gnetcache/",
         "http://membres.lycos.fr/jalb/gnetcache/index.php",
         "http://mitglied.lycos.de/versus167/gnetcache/",
         //"http://www.freax-alliance.org/gcache.php",
@@ -260,6 +257,7 @@ public class DefaultBootstrapServers {
         //"http://www.gouder.com/gnetcache/index.php",
         "http://www.waddell.ch/cache/",
         //"http://user1.7host.com/gcache/lynn.asp",
-        "http://www.php50.com/gwebcache/index.php"
+        "http://www.php50.com/gwebcache/index.php",
+        "http://www.rodage.net/gnetcache/index.php"
     };
 }
