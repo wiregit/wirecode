@@ -2,6 +2,7 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;
 
@@ -72,7 +73,10 @@ public class PatchTableMessage extends RouteTableMessage {
         buf[2]=(byte)compressor;
         buf[3]=(byte)entryBits;
         System.arraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
-        out.write(buf);   
+        out.write(buf);  
+		if(RECORD_STATS) {
+			SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
+		} 
     }
 
     
@@ -133,6 +137,13 @@ public class PatchTableMessage extends RouteTableMessage {
     public byte[] getData() {
         return data;
     }
+
+	// inherit doc comment
+	public void recordDrop() {
+		if(RECORD_STATS) {
+			DroppedSentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);	   
+		}
+	}
 
     public String toString() {
         StringBuffer buf=new StringBuffer();
