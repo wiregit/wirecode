@@ -140,6 +140,13 @@ public class RemoteFileDesc implements Serializable {
      * Whether this RFD arrived as an OOB response from a firewalled host. 
      */
     private transient boolean _isOOBFirewalled;
+    
+    /**
+     * if this RFD arrived through udp, this is the host and port
+     * as reported by the UDP Datagram.
+     */
+    private transient Endpoint _OOBAddress;
+    
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
      * but with a different remote host.
@@ -605,6 +612,13 @@ public class RemoteFileDesc implements Serializable {
     }
 
     /**
+     * @return the address that sent the datagram containing this rfd
+     */
+    public Endpoint getOOBAddress() {
+    	return _OOBAddress;
+    }
+    
+    /**
      * @return true if I am not (firewalled, multicast host, have private IP)
      *         and i do have a valid port & address.
      */
@@ -684,9 +698,10 @@ public class RemoteFileDesc implements Serializable {
      * tells this RFD it points to a host behind firewall.
      * @param receivedTime when the reply arrived
      */
-    public void setOOBStatus(long receivedTime) {
+    public void setOOBStatus(long receivedTime, Endpoint address) {
     	_arrivalTime = receivedTime;
     	_isOOBFirewalled=true;
+    	_OOBAddress=address;
     }
 
 	/**

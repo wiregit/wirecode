@@ -104,6 +104,13 @@ public class QueryReply extends Message implements Serializable{
      * Only set if this QueryReply is parsed.
      */
     private HostData _hostData;
+    
+    /**
+     * if this reply came through udp, this stores the address
+     * as reported by the datagram.
+     */
+    private Endpoint _OOBAddress;
+    
 
     /** Our static and final instance of the GGEPUtil helper class.
      */
@@ -444,6 +451,21 @@ public class QueryReply extends Message implements Serializable{
      */
     public void setBrowseHostReply(boolean isBH) {
         _browseHostReply = isBH;
+    }
+    
+    /**
+     * Sets the OOB reply address.
+     */
+    public void setOOBAddress(String addr, int port) {
+    	_OOBAddress = new Endpoint(addr,port);
+    }
+    
+    /**
+     * @return the address that sent the datagram that contained
+     * this QueryReply.  null if it came through tcp.
+     */
+    public Endpoint getOOBAddress() {
+    	return _OOBAddress;
     }
     
     /**

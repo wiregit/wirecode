@@ -220,7 +220,7 @@ public final class SearchResultHandler {
         if (qr.getNetwork() == Message.N_UDP)
         	try{
         		OOBFirewalled = _firewalledOOBHosts.contains(
-        				InetAddress.getByName(data.getIP()));
+        				InetAddress.getByName(qr.getOOBAddress().getAddress()));
         	}catch(UnknownHostException tough) {
         		OOBFirewalled=false;
         	}
@@ -248,7 +248,7 @@ public final class SearchResultHandler {
             
             //set the status in the RFDs
             if (OOBFirewalled)
-            	rfd.setOOBStatus(now);
+            	rfd.setOOBStatus(now,qr.getOOBAddress());
             
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);

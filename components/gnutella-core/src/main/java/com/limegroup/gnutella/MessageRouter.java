@@ -463,7 +463,11 @@ public abstract class MessageRouter {
                     return;
                 }
             }
+			
+			qr.setOOBAddress(datagram.getAddress().getHostAddress(),datagram.getPort());
+			
             handleQueryReply(qr, handler);
+            
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
@@ -2096,6 +2100,8 @@ public abstract class MessageRouter {
         if(push == null) {
             throw new NullPointerException("null push");
         }
+        
+
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(push.getClientGUID());

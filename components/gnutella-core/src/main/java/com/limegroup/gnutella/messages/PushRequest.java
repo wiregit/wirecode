@@ -77,6 +77,43 @@ public class PushRequest extends Message implements Serializable {
         payload[23]=ip[3];
         ByteOrder.short2leb((short)port,payload,24); //downcast ok
     }
+    
+    /**
+     * Creates a new PushRequest from scratch.  Allows the caller to 
+     * specify the network.
+     *
+     * @requires clientGUID.length==16,
+     *           0 < index < 2^32 (i.e., can fit in 4 unsigned bytes),
+     *           ip.length==4 and ip is in <i>BIG-endian</i> byte order,
+     *           0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
+     */
+    public PushRequest(byte[] guid, byte ttl,
+            byte[] clientGUID, long index, byte[] ip, int port, int network) {
+    	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
+    	
+    	if(clientGUID.length != 16) {
+			throw new IllegalArgumentException("invalid guid length: "+
+											   clientGUID.length);
+		} else if((index&0xFFFFFFFF00000000l)!=0) {
+			throw new IllegalArgumentException("invalid index: "+index);
+		} else if(ip.length!=4) {
+			throw new IllegalArgumentException("invalid ip length: "+
+											   ip.length);
+        } else if(!NetworkUtils.isValidAddress(ip)) {
+            throw new IllegalArgumentException("invalid ip");
+		} else if(!NetworkUtils.isValidPort(port)) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		}
+
+        payload=new byte[STANDARD_PAYLOAD_SIZE];
+        System.arraycopy(clientGUID, 0, payload, 0, 16);
+        ByteOrder.int2leb((int)index,payload,16); //downcast ok
+        payload[20]=ip[0]; //big endian
+        payload[21]=ip[1];
+        payload[22]=ip[2];
+        payload[23]=ip[3];
+        ByteOrder.short2leb((short)port,payload,24); //downcast ok
+    }
 
 
     protected void writePayload(OutputStream out) throws IOException {

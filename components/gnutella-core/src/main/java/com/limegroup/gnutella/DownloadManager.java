@@ -915,7 +915,7 @@ public class DownloadManager implements BandwidthTracker {
         
         // If it wasn't multicast, try sending to the proxies if it had them.
         Set proxies = file.getPushProxies();
-        if (!proxies.isEmpty()) {
+        if (!proxies.isEmpty() && !file.canPushUDP()) {
             //TODO: investigate not sending a HTTP request to a proxy
             //you are directly connected to.  How much of a problem is this?
             //Probably not much of one at all.  Classic example of code
@@ -971,8 +971,20 @@ public class DownloadManager implements BandwidthTracker {
             // else just send a PushRequest as normal
         }
         
-        PushRequest pr = 
-            new PushRequest(GUID.makeGuid(),
+        //if we can send the push through udp, do so.
+        PushRequest pr;
+        if (!proxies.isEmpty() && file.canPushUDP()) 
+        	pr = 
+                new PushRequest(GUID.makeGuid(),
+                                ConnectionSettings.TTL.getValue(),
+                                file.getClientGUID(),
+                                file.getIndex(),
+                                addr,
+                                port,
+								Message.N_UDP);
+        else 
+        	pr = 
+        		new PushRequest(GUID.makeGuid(),
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
@@ -980,13 +992,18 @@ public class DownloadManager implements BandwidthTracker {
                             port);
 
         if(LOG.isInfoEnabled())
-            LOG.info("Sending push request through Gnutella: " + pr);
-
-        try {
-            router.sendPushRequest(pr);
-        } catch (IOException e) {
-            return false;
+            LOG.info("Sending push request through "+ 
+            		(pr.getNetwork()== Message.N_UDP ? "UDP: " : "Gnutella: ") + pr);
+        
+        if (pr.getNetwork()==Message.N_UDP) {
+        	UDPService.instance().send(pr,file.getOOBAddress());
         }
+        else
+        	try {
+        		router.sendPushRequest(pr);
+        	} catch (IOException e) {
+        		return false;
+        	}
 
         return true;
     }
