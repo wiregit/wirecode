@@ -503,7 +503,7 @@ public class HTTPUploader implements Uploader {
         _fileSize = fdesc._size;
 
 		// get the fileInputStream
-		_fis = _fileManager.getInputStream(fdesc);
+		_fis = fdesc.getInputStream();
 
 	}
   
