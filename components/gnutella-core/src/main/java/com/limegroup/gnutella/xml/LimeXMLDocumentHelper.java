@@ -8,7 +8,13 @@ import org.w3c.dom.*;
 import com.limegroup.gnutella.*;
 
 
-public class LimeXMLDocumentHelper{
+public final class LimeXMLDocumentHelper{
+
+	/**
+	 * Private constructor to ensure that this class can never be
+	 * instantiated.
+	 */
+	private LimeXMLDocumentHelper() {}
 
     /**
      * TO be used when a Query Reply comes with a chunk of meta-data
