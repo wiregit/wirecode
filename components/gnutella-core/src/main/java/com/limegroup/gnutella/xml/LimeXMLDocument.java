@@ -120,17 +120,18 @@ public class LimeXMLDocument{
         nodeValue = nodeValue.trim();
         if (nodeValue != null && !nodeValue.equals(""))
             fieldToValue.put(currTag, nodeValue);
-        //We only want 
-        //add the attributes
-        List attributes = LimeXMLUtils.getAttributes(currNode.getAttributes());
-        int size = attributes.size();
-        for(int i=0; i< size; i++){
-            Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName();
-            String attString = 
-            currTag+XMLStringUtils.DELIMITER+attName+XMLStringUtils.DELIMITER;
-            String attValue = att.getNodeValue();
-            fieldToValue.put(attString,attValue);
+        //add the attributes only if its not the first level
+        if(!parentName.equals("")){
+            List attribs=LimeXMLUtils.getAttributes(currNode.getAttributes());
+            int size = attribs.size();
+            for(int i=0; i< size; i++){
+                Node att = (Node)attribs.get(i);
+                String attName = att.getNodeName();
+                String attString=currTag+XMLStringUtils.DELIMITER
+                         +attName+XMLStringUtils.DELIMITER;
+                String attValue = att.getNodeValue();
+                fieldToValue.put(attString,attValue);
+            }
         }
         return currTag;
     }
