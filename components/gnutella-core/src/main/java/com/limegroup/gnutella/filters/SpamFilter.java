@@ -81,8 +81,8 @@ public abstract class SpamFilter {
             buf.add(new GreedyQueryFilter());
 
         //4. BearShare high-bit queries.
-        if (settings.getFilterBearShareQueries())
-            buf.add(new BearShareFilter());
+        // if (settings.getFilterBearShareQueries())
+        //     buf.add(new BearShareFilter());
 
         return compose(buf);
     }
