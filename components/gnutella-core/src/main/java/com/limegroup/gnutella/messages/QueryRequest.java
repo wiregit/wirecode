@@ -1051,6 +1051,26 @@ public class QueryRequest extends Message implements Serializable{
 			throw new IllegalArgumentException("cannot create empty query");
 		}		
 
+		if((query == null || query.length() == 0) &&
+		   (richQuery == null || richQuery.length() == 0) &&
+		   (queryUrns == null || queryUrns.size() == 0)) {
+			throw new IllegalArgumentException("empty query");
+		}       
+        if(query != null && query.length() > MAX_QUERY_LENGTH) {
+            throw new IllegalArgumentException("query too big: " + query);
+        }        
+
+        if(richQuery != null && richQuery.length() > MAX_XML_QUERY_LENGTH) {
+            throw new IllegalArgumentException("xml too big: " + richQuery);
+        }
+
+        if(query != null && 
+          !(queryUrns != null && queryUrns.size() > 0 &&
+            query.equals(DEFAULT_URN_QUERY))
+           && hasIllegalChars(query)) {
+            throw new IllegalArgumentException("illegal chars: " + query);
+        }
+
         if (featureSelector < 0)
             throw new IllegalArgumentException("Bad feature = " +
                                                featureSelector);
