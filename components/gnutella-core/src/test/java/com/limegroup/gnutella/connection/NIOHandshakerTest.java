@@ -19,6 +19,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Arrays;
@@ -58,7 +59,15 @@ public final class NIOHandshakerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    /**
+     * Test to make sure that non-blocking handshaking is working properly for
+     * both incoming and outgoing connections.
+     * 
+     * @throws Exception if anything goes wrong
+     */
     public void testHandshaking() throws Exception {
+        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.USE_NIO.setValue(true);
         ServerSocket ss = null;
 
         ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -87,22 +96,57 @@ public final class NIOHandshakerTest extends BaseTestCase {
         
         Socket socket = ss.accept();
         ss.close();
-         
+        
+        socket.getChannel().configureBlocking(false); 
         socket.setSoTimeout(3000);
         
         HandshakeResponder responder = new UltrapeerResponder();
 
-        //Connection conn = new Connection(socket, responder);
-        //NIOHeaderReader reader = NIOHeaderReader.createReader(conn);
-        
-        //SocketChannel channel = socket.getChannel();
-        //String word = reader.readConnect();
-        //System.out.println("NIOHandshakerTest::read: "+word);
-        //if (! word.equals("GNUTELLA"))
-          //  throw new IOException("Bad word: "+word);
+        final Connection incomingConnection = new Connection(socket, responder);
          
 
-        //conn.initialize();        
+        Thread incomingInitializer = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    incomingConnection.initialize();
+                } catch (NoGnutellaOkException e) {
+                    fail(e);
+                } catch (BadHandshakeException e) {
+                    fail(e);
+                } catch (IOException e) {
+                    fail(e);
+                }
+            }}, "incoming connection intializer");
+        
+        incomingInitializer.setDaemon(true);
+        incomingInitializer.start();
+        
+        while(!incomingConnection.isInitialized()) {
+            Thread.sleep(100);
+        }    
+        
+        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);  
+        
+        
+        assertTrue("should be connected", incomingConnection.isInitialized()); 
+        assertTrue("should be connected", outgoingConnection.isInitialized()); 
+        
+        // check to make sure the connection headers have the expected values
+        HandshakeResponse incomingHeaders = incomingConnection.headers();
+        HandshakeResponse outgoingHeaders = outgoingConnection.headers();
+        
+        assertTrue("should be high degree", 
+            incomingHeaders.isHighDegreeConnection()); 
+        assertTrue("should be high degree", 
+            outgoingHeaders.isHighDegreeConnection()); 
+        assertTrue("should be dynamic query connection", 
+            incomingHeaders.isDynamicQueryConnection()); 
+        assertTrue("should be dynamic query connection", 
+            outgoingHeaders.isDynamicQueryConnection()); 
+        assertTrue("should be qrp enabled", 
+            incomingHeaders.isQueryRoutingEnabled()); 
+        assertTrue("should be qrp enabled", 
+            outgoingHeaders.isQueryRoutingEnabled()); 
     }
     
     private static class UltrapeerResponder implements HandshakeResponder {
