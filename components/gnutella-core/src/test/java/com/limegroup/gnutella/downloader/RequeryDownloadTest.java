@@ -108,6 +108,8 @@ public class RequeryDownloadTest
         _uploader=new TestUploader("uploader 6666", 6666);
         _uploader.setRate(Integer.MAX_VALUE);
         
+        RouterService.getDownloadManager().clearAllDownloads();
+        
         new File( getSaveDirectory(), _filename).delete();
     }    
 
