@@ -224,14 +224,28 @@ public final class HandshakeResponseTest extends BaseTestCase {
     }
 
     /**
+     * Tests the various factory constructors.
+     */
+    public void testFactoryConstructors() {
+        Properties props = new Properties();
+        HandshakeResponse hr = HandshakeResponse.createAcceptOutgoingResponse(props);
+        assertTrue("should be accepted", hr.isAccepted());
+        assertEquals("should not have any properties", 0, hr.props().size());
+    }
+
+    /**
      * Test to make sure that Ultrapeer headers are created correctly.
      */
     public void testUltrapeerHeaders() {
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectResponse(new UltrapeerHeaders("32.9.8.9"));
+            HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptResponse(new UltrapeerHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
+
+        hr = HandshakeResponse.createAcceptOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createRejectOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
     }
 
@@ -241,10 +255,16 @@ public final class HandshakeResponseTest extends BaseTestCase {
      */
     public void testLeafHeaders() {
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectResponse(new LeafHeaders("32.9.8.9"));
+            HandshakeResponse.createRejectIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptResponse(new LeafHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
+
+        hr = HandshakeResponse.createRejectOutgoingResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
+
+        hr = HandshakeResponse.createAcceptOutgoingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
     }
 
@@ -304,19 +324,19 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * Tests to make sure that the ultrapeer needed header is interpretted
      * correctly.
      */
-    public void testUltrapeerNeeded() {
+    public void testLeafGuidance() {
         Properties headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
-        HandshakeResponse hr = HandshakeResponse.createAcceptResponse(headers);
-        assertTrue("should need an Ultrapeer", hr.ultrapeerNeeded());
+        HandshakeResponse hr = 
+            HandshakeResponse.createAcceptIncomingResponse(headers);
+        assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
 
-        headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
-        hr = HandshakeResponse.createAcceptResponse(headers);
-        assertTrue("should not need an Ultrapeer", !hr.ultrapeerNeeded());
+        hr = HandshakeResponse.createAcceptIncomingResponse(headers);
+        assertTrue("should include leaf guidance", hr.hasLeafGuidance());
 
-        hr = HandshakeResponse.createAcceptResponse(new Properties());
-        assertTrue("should not need an Ultrapeer", !hr.ultrapeerNeeded());
+        hr = HandshakeResponse.createAcceptIncomingResponse(new Properties());
+        assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
     }
 
     /**
