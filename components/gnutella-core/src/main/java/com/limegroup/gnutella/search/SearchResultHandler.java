@@ -194,12 +194,9 @@ public final class SearchResultHandler {
             if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
                 continue;
             
-            LimeXMLDocument doc = null;
             // If there was no XML in the response itself, try to create
             // a doc from the EQHD.
             if(xmlCollectionString!=null && !xmlCollectionString.equals("")) {
-                // The RFD is only going to use one doc, so only
-                // take one.
                 LimeXMLDocument[] metaDocs;
                 for(int schema = 0; schema < allDocsArray.size(); schema++) {
                     metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
@@ -208,13 +205,13 @@ public final class SearchResultHandler {
                         continue;
                     // If this schema had a document for this response, use it.
                     if(metaDocs[currentResponse] != null) {
-                        doc = metaDocs[currentResponse];
+                        response.setDocument(metaDocs[currentResponse]);
                         break; // we only need one, so break out.
                     }
-                }    
+                }
             }
             
-            RemoteFileDesc rfd = response.toRemoteFileDesc(data, doc);
+            RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
 

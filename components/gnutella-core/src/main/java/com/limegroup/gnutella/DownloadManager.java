@@ -576,7 +576,7 @@ public class DownloadManager implements BandwidthTracker {
         for(Iterator i = responses.iterator(); i.hasNext(); ) {
             Response r = (Response)i.next();
             // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(data, null);
+            RemoteFileDesc rfd = r.toRemoteFileDesc(data);
             for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
                 ManagedDownloader currD = (ManagedDownloader)j.next();
                 // If we were able to add this specific rfd,

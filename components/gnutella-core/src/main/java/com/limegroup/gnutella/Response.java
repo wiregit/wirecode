@@ -760,7 +760,7 @@ public class Response {
     public LimeXMLDocument getDocument() {
 		if (document != null) 
 			return document;
-		else if (metadata != null) {
+		else if (metadata != null && !metadata.equals("")) {
 			try {
 			    document = new LimeXMLDocument(metadata);
 			    return document;
@@ -801,13 +801,9 @@ public class Response {
     }
     
     /**
-     * Returns this Response as a RemoteFileDesc array.
-     * Uses information from HostData and LimeXMLDocument if needed
+     * Returns this Response as a RemoteFileDesc.
      */
-    public RemoteFileDesc toRemoteFileDesc(HostData data, LimeXMLDocument doc){
-        // try to create the document from QHD if we weren't given one.
-        if( doc == null )
-            doc = getDocument();
+    public RemoteFileDesc toRemoteFileDesc(HostData data){
         return new RemoteFileDesc(
              data.getIP(),
              data.getPort(),
@@ -819,7 +815,7 @@ public class Response {
              data.isChatEnabled(),
              data.getQuality(),
              data.isBrowseHostEnabled(),
-             doc,
+             getDocument(),
              getUrns(),
              data.isReplyToMulticastQuery(),
              data.isFirewalled(), 
