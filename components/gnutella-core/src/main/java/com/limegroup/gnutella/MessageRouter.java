@@ -568,9 +568,9 @@ public abstract class MessageRouter {
      */
     protected void handlePingRequest(PingRequest pingRequest,
                                      ReplyHandler receivingConnection) {
-        if(pingRequest.getTTL() > 0)
-            broadcastPingRequest(pingRequest, receivingConnection,
-                                 _manager);
+        //if(pingRequest.getTTL() > 0)
+        //  broadcastPingRequest(pingRequest, receivingConnection,
+        //                       _manager);
 
         respondToPingRequest(pingRequest);
     }
@@ -1272,6 +1272,10 @@ public abstract class MessageRouter {
         boolean newAddress = 
 		    RouterService.getHostCatcher().add(reply, handler);
 
+        if(newAddress) {
+            PongCacher.instance().addPong(reply);
+        }
+
         //First route to originator in usual manner.
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(reply.getGUID());
@@ -1293,7 +1297,7 @@ public abstract class MessageRouter {
         //pong as they have no routing entry.  Note that if Ultrapeers are very
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
-        if (newAddress && (reply.isMarked() || supportsUnicast)) {
+        if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
