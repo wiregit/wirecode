@@ -540,10 +540,9 @@ public class ConnectionManager {
                     connection.getInetAddress().getAddress(),
                     connection.getOrigPort()));
         }
-        //add the best few endpoints from the hostcatcher.  TODO: limit this
-        //to N entries?
-        Iterator iterator=_catcher.getBestHosts();
-        for (int i=0; iterator.hasNext() && i<MAX_SUPERNODE_ENDPOINTS; i++) {
+        //add the best few endpoints from the hostcatcher.
+        Iterator iterator=_catcher.getUltrapeerHosts(MAX_SUPERNODE_ENDPOINTS);
+        while (iterator.hasNext()) {
             Endpoint e=(Endpoint)iterator.next();
             retSet.add(e);
         }
@@ -1278,13 +1277,15 @@ public class ConnectionManager {
     
     /**
      * @requires n>0
-     * @effects returns an iterator that yields up the best n endpoints of this.
-     *  It's not guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     *  observed.  
+     * @effects returns an iterator that yields up the best n non-ultrapeer
+     *  endpoints of this.  It's not guaranteed that these are reachable. This
+     *  can be modified while iterating through the result, but the modifications
+     *  will not be observed.  
      */
-    public synchronized Iterator getBestHosts(int n) {
-        return _catcher.getBestHosts(n);
+    public synchronized Iterator getNormalHosts(int n) {
+        //TODO: this method doesn't really belong here.  It's used because parts
+        //of ManagedConnection have a reference to this but not the HostCatcher.
+        return _catcher.getNormalHosts(n);
     }
     
 

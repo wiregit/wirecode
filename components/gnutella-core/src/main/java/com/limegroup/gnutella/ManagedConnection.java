@@ -514,7 +514,7 @@ public class ManagedConnection
                 // this is the only kind of message we will deal with
                 // in Reject Connection
                 // If any other kind of message comes in we drop
-                Iterator iter = catcher.getBestHosts(10);
+                Iterator iter = catcher.getNormalHosts(10);
                  // we are going to send rejected host the top ten
                  // connections
                 while(iter.hasNext()) {
@@ -1016,8 +1016,8 @@ public class ManagedConnection
         ConnectionManager manager){
         StringBuffer hostString = new StringBuffer();
         boolean isFirstHost = true;
-        //get the connected supernodes and pass them
-        for(Iterator iter = manager.getBestHosts(10);iter.hasNext();){
+        //1. et the non supernode hosts and pass them
+        for(Iterator iter = manager.getNormalHosts(10);iter.hasNext();){
             //get the next endpoint
             Endpoint endpoint =(Endpoint)iter.next();
             //if the first endpoint that we are adding
@@ -1037,13 +1037,12 @@ public class ManagedConnection
         properties.put(ConnectionHandshakeHeaders.X_TRY, 
             hostString.toString());
 
-        //Also add neighbouring supernodes
+        //2. Also add neighbouring supernodes, and supernode pongs.
         Set connectedSupernodeEndpoints 
             = manager.getSupernodeEndpoints();
         //if nothing to add, return
         if(connectedSupernodeEndpoints.size() < 0)
-            return;
-        
+            return;        
         //else add the supernodes
         hostString = new StringBuffer();
         isFirstHost = true;
