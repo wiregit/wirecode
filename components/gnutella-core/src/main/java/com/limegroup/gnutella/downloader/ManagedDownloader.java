@@ -140,6 +140,7 @@ public class ManagedDownloader implements Downloader, Serializable {
           a) DOWNLOADING (actively downloading)
           b) WAITING_FOR_RETRY (busy hosts)
           c) ABORTED (user manually stopped the download)
+          c2) PAUSED (user paused the download)
           d) REMOTE_QUEUED (the remote host queued us)
       
       If no hosts existed for connecting, or we exhausted our attempts
@@ -363,6 +364,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     private Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
     private volatile boolean stopped;
+    /** True iff this has been paused.  */
+    private volatile boolean paused;
 
     
     /** The connections we're using for the current attempts. */    
@@ -636,6 +639,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         browseList=new DownloadBrowseHostList();
         stealLock = new Object();
         stopped=false;
+        paused = false;
         setState(QUEUED);
         miniRFDToLock = Collections.synchronizedMap(new HashMap());
         threadLockToSocket=Collections.synchronizedMap(new HashMap());
@@ -759,6 +763,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         // if this is all completed, nothing else to do.
         if(complete)
             ; // all done.
+            
+        // if this is paused, nothing else to do also.
+        else if(getState() == PAUSED)
+            ; // all done for now.
 
         // Try iterative GUESSing...
         // If that sent some queries, don't do anything else.
@@ -851,6 +859,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         case WAITING_FOR_USER:
         case GAVE_UP:
         case QUEUED:
+        case PAUSED:
             // If we're waiting for the user to do something,
             // have given up, or are queued, there's nothing to do.
             break;
@@ -934,6 +943,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_RETRY:
+        case PAUSED:
             return true;
         }
         return false;
@@ -1328,7 +1338,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * time we went inactive.
      */
     public boolean hasNewSources() {
-        return receivedNewSources;
+        return !paused && receivedNewSources;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1363,13 +1373,41 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean isCancelled() {
         return stopped;
     }
+    
+    /**
+     * Pauses this download.
+     */
+    public synchronized void pause() {
+        // do not pause if already stopped.
+        if(!stopped) {
+            stop();
+            stopped = false;
+            paused = true;
+            // if we're already inactive, mark us as paused immediately.
+            if(isInactive())
+                setState(PAUSED);
+        }
+    }
+    
+    /**
+     * Determines if this download is paused.
+     *
+     * If isPaused == true but getState() != PAUSED then this download
+     * is in the process of pausing itself.
+     */
+    public boolean isPaused() {
+        return paused == true;
+    }
 
+    /**
+     * Stops this download.
+     */
     public void stop() {
         // make redundant calls to stop() fast
         // this change is pretty safe because stopped is only set in two
         // places - initialized and here.  so long as this is true, we know
         // this is safe.
-        if (stopped)
+        if (stopped || paused)
             return;
 
         LOG.debug("STOPPING ManagedDownloader");
@@ -1519,6 +1557,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // since the user really wants to resume right now.
         for(Iterator i = files.iterator(); i.hasNext(); )
             ((RemoteFileDesc)i.next()).setRetryAfter(0);
+
+        if(paused) {
+            paused = false;
+            stopped = false;
+        }
             
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
@@ -1634,7 +1677,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             status = tryAllDownloads2();
         } catch (InterruptedException e) {
             // nothing should interrupt except for a stop
-            if (!stopped)
+            if (!stopped && !paused)
                 ErrorService.error(e);
         }
         
@@ -1645,21 +1688,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Otherwise...
         // If we manually stopped then set to ABORTED, else set to the 
         // appropriate state (either a busy host or no hosts to try).
-        switch(status) {
-        case COMPLETE:
-        case COULDNT_MOVE_TO_LIBRARY:
-        case CORRUPT_FILE:
-            setState(status);
-            return;
-        case WAITING_FOR_RETRY:
-        case GAVE_UP:
-            if(stopped)
-                setState(ABORTED);
-            else
+        synchronized(this) {
+            switch(status) {
+            case COMPLETE:
+            case COULDNT_MOVE_TO_LIBRARY:
+            case CORRUPT_FILE:
                 setState(status);
-            return;
-        default:
-            Assert.that(false, "Bad status from tad2: "+status);
+                return;
+            case WAITING_FOR_RETRY:
+            case GAVE_UP:
+                if(stopped)
+                    setState(ABORTED);
+                else if(paused)
+                    setState(PAUSED);
+                else
+                    setState(status);
+                return;
+            default:
+                Assert.that(false, "Bad status from tad2: "+status);
+            }
         }
     }
 
@@ -2175,8 +2222,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //While there is still an unfinished region of the file...
         while (true) {
-            if (stopped) {
-                LOG.warn("MANAGER: terminating because of stop");
+            if (stopped || paused) {
+                LOG.warn("MANAGER: terminating because of stop|pause");
                 throw new InterruptedException();
             } 
             
@@ -2543,7 +2590,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (rfd == null) //bad rfd, discard it and return null
             return null; // throw new NoSuchElementException();
         
-        if (stopped) {//this rfd may still be useful remember it
+        if (stopped || paused) {//this rfd may still be useful remember it
             synchronized(this){
                 files.add(rfd);
             }
@@ -2794,7 +2841,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
             synchronized(this) {
                 if(dloaders.size()==0) {
-                    if(stopped || Thread.currentThread().isInterrupted())
+                    if(stopped || paused ||  Thread.currentThread().isInterrupted())
                         return ConnectionStatus.getNoData(); // we were signalled to stop.
                     setState(REMOTE_QUEUED);
                 }
@@ -2870,7 +2917,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         rfd.resetFailedCount();
 
         synchronized(this) {
-            if (stopped || Thread.currentThread().isInterrupted()) {
+            if (stopped || paused || Thread.currentThread().isInterrupted()) {
                 LOG.trace("Stopped in assignAndRequest");
                 files.add(rfd);
                 return ConnectionStatus.getNoData();

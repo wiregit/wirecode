@@ -10,34 +10,45 @@ import java.io.File;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
 public interface Downloader extends BandwidthTracker {
-    public static final int QUEUED            = 0;
-    public static final int CONNECTING        = 1;
-    public static final int DOWNLOADING       = 2;
-    public static final int WAITING_FOR_RETRY = 3;
-    public static final int COMPLETE          = 4;
-    public static final int ABORTED           = 5;
+    public static final int QUEUED                  = 0;
+    public static final int CONNECTING              = 1;
+    public static final int DOWNLOADING             = 2;
+    public static final int WAITING_FOR_RETRY       = 3;
+    public static final int COMPLETE                = 4;
+    public static final int ABORTED                 = 5;
     /** When a downloader is in the GAVE_UP state, it can still try downloading
      *  if matching results pour in.  So you should 'stop' downloaders that are
      *  in the GAVE_UP state.
      */
-    public static final int GAVE_UP           = 6;
+    public static final int GAVE_UP                 = 6;
     public static final int COULDNT_MOVE_TO_LIBRARY = 7;
-    public static final int WAITING_FOR_RESULTS = 8;
-    public static final int CORRUPT_FILE      = 9;
-    public static final int REMOTE_QUEUED     = 10;
-    public static final int HASHING           = 11;
-    public static final int SAVING            = 12;
-    public static final int WAITING_FOR_USER  = 13;
+    public static final int WAITING_FOR_RESULTS     = 8;
+    public static final int CORRUPT_FILE            = 9;
+    public static final int REMOTE_QUEUED           = 10;
+    public static final int HASHING                 = 11;
+    public static final int SAVING                  = 12;
+    public static final int WAITING_FOR_USER        = 13;
     public static final int WAITING_FOR_CONNECTIONS = 14;
-    public static final int ITERATIVE_GUESSING = 15;
-    public static final int IDENTIFY_CORRUPTION = 16;
-    public static final int RECOVERY_FAILED = 17;
+    public static final int ITERATIVE_GUESSING      = 15;
+    public static final int IDENTIFY_CORRUPTION     = 16;
+    public static final int RECOVERY_FAILED         = 17;
+    public static final int PAUSED                  = 18;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
      *     @modifies this
      */
     public void stop();
+    
+    /**
+     * Pauses this download.  If the download is already paused or stopped, does nothing.
+     */
+    public void pause();
+    
+    /**
+     * Determines if this download is paused or not.
+     */
+    public boolean isPaused();
     
     /**
      * Determines if this downloader is in an inactive state that can be resumed
