@@ -924,10 +924,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, when we add it to buckets, we have to make sure
         // it didn't already exist in the specified bucket.
-        for (int i=0; i<allFiles.length; i++) {
-            if (rfd.equals(allFiles[i])) {
-                cache = false; // do not store in allFiles.
-                break;
+        // If cache is already false, there is no need to look.
+        if (cache) {
+            for (int i=0; i<allFiles.length; i++) {
+                if (rfd.equals(allFiles[i])) {
+                    cache = false; // do not store in allFiles.
+                    break;
+                }
             }
         }
         
