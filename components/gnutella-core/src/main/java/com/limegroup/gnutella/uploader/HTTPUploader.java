@@ -263,6 +263,10 @@ public class HTTPUploader implements Uploader {
 
 
 	private void readHeader() throws IOException {
+
+		// NOTE : There are exceptions that couldcould be caught here
+		// IndexOutOfBounds and NumberFormat and turn them into IO
+
         String str = " ";
         _uploadBegin = 0;
         _uploadEnd = 0;

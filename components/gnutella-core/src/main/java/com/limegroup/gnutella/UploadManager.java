@@ -121,19 +121,15 @@ public class UploadManager {
 
 		Uploader uploader;
 		uploader = new HTTPUploader(file, host, port, index, guid, this);
-		// check to see if the file is in the attempted pushes
-		// or if the upload limits have been reached for some 
-		// reason.
-
-		insertAndTest(uploader, host);
-
-		if (! testAttemptedPush(host) )
+		// testing if we are either currently attempting a push, 
+		// or we have unsuccessfully attempted a push with this host in the
+		// past.
+		if ( (! testAttemptedPush(host) )  ||
+			 (! testFailedPush(host) ) )
 			return;
 
+		insertAndTest(uploader, host);
 		insertAttemptedPush(host);
-
-		if (! testFailedPush(host) )
-			uploader.setState(Uploader.PUSH_FAILED);
 
 		UploadRunner runner = new UploadRunner(uploader, host);
 		Thread upThread = new Thread(runner);
@@ -259,6 +255,7 @@ public class UploadManager {
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
 			pfile = (PushedFile)iter.next();
+			// NOTE : this should be iter.remove ???
 			if ( pf.equals(pfile) ) 
 				_attemptingPushes.remove(host);
 		}
