@@ -508,10 +508,14 @@ public class HostCatcher {
      *  observed.  
      */
     public synchronized Iterator getUltrapeerHosts(int n) {
-        //TODO2: do we really need to clone this?!
-        BucketQueue clone=new BucketQueue(queue);
-        return clone.iterator(GOOD_PRIORITY,
-                              Math.min(n, clone.size(GOOD_PRIORITY)));
+        //Make n the # of hosts to return--never more than the # of ultrapeers.
+        n=Math.min(n, queue.size(GOOD_PRIORITY));
+        //Copy n best hosts into temporary buffer.
+        ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
+        for (Iterator iter=queue.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
+            buf.add(iter.next());
+        //And return iterator of contents.
+        return buf.iterator();
     }
 
     /**
@@ -521,9 +525,12 @@ public class HostCatcher {
      *  not be observed.  
      */
     public synchronized Iterator getNormalHosts(int n) {
-        //TODO2: do we really need to clone this?!
-        BucketQueue clone=new BucketQueue(queue);
-        return clone.iterator(NORMAL_PRIORITY, n);
+        //Copy n best hosts into temporary buffer.
+        ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
+        for (Iterator iter=queue.iterator(NORMAL_PRIORITY, n); iter.hasNext(); )
+            buf.add(iter.next());
+        //And return iterator of contents.
+        return buf.iterator();
     }
 
     /**
