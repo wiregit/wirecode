@@ -41,6 +41,10 @@ public class LimeXMLDocument{
     public LimeXMLDocument(Node node, Node rootElement){        
         try{
             grabDocInfo(rootElement,true);
+        }catch(SchemaNotFoundException e){
+            //not the fault of the grabDocInfo method
+        }
+        try{
             grabDocInfo(node,false);
         }catch(SchemaNotFoundException e){
             //not the fault of the grabDocInfo method
@@ -229,7 +233,7 @@ public class LimeXMLDocument{
 
     /**
      * Sets the schema URI for this document
-     * @param the schema URI to be set
+     * @param schemaURI schema URI to be set
      */
     public void setSchemaURI(String schemaURI){
         this.schemaUri = schemaURI;
@@ -288,6 +292,38 @@ public class LimeXMLDocument{
         return retList;
     }
 
+
+    /** This method is only guaranteed to work if getSchemaURI() returns a 
+     *  non-null value.
+     *  @return a List <NameValue>, where each name-value corresponds to a 
+     *  canonicalized field name (placeholder), and its corresponding value in
+     *  the XML Document.  This list is ORDERED according to the schema URI of
+     *  this document.  
+     */
+    public List getOrderedNameValueList() {
+        List retList = new LinkedList();
+
+        if (schemaUri != null) {
+            LimeXMLSchemaRepository schemaDB = 
+            LimeXMLSchemaRepository.instance();
+            LimeXMLSchema schema = schemaDB.getSchema(schemaUri);
+
+            if (schema != null) {
+                String[] fNames = schema.getCanonicalizedFieldNames();        
+                
+                for (int i = 0; i < fNames.length; i++) {
+                    Object retObj = fieldToValue.get(fNames[i].trim());
+                    if (retObj != null)
+                        retList.add(new NameValue(fNames[i].trim(),
+                                                  retObj));
+                }
+            }
+        }
+            
+        return retList;
+    }
+
+
     public String getValue(String fieldName){
 
         fieldName = fieldName.trim();
@@ -301,12 +337,12 @@ public class LimeXMLDocument{
 
     public String getXMLString() {        
         //return XMLString;
-        String ret = constructXML(getNameValueList(),schemaUri);
+        String ret = constructXML(getOrderedNameValueList(),schemaUri);
         return ret;
     }
     
     public String getXMLStringWithIdentifier(){
-        String ret = constructXML(getNameValueList(),schemaUri);
+        String ret = constructXML(getOrderedNameValueList(),schemaUri);
         //Insert the identifier name in the xmlString
         int index = ret.indexOf(">");//end of the header string
         if (index < 0)
