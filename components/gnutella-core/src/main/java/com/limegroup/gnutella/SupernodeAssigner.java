@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
-import javax.swing.Timer;
 import java.awt.event.*;
 
 /**
@@ -57,21 +56,15 @@ public final class SupernodeAssigner {
 	
 	/**
 	 * Constant for the number of milliseconds between the timer's calls
-	 * to its <tt>ActionListener</tt>s.
+	 * to its <tt>Runnable</tt>s.
 	 */
 	private final int TIMER_DELAY = 1000;
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
-	 * to its <tt>ActionListener</tt>s.
+	 * to its <tt>Runnable</tt>s.
 	 */
 	private final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
-
-	/** 
-	 * Constant handle to the <tt>Timer</tt> instance that handles
-	 * data collection for upload and bandwidth data.
-	 */
-	private Timer _bandwidthTimer;
 
     /**
 	 * A <tt>BandwidthTracker</tt> instance for keeping track of the 
@@ -131,20 +124,20 @@ public final class SupernodeAssigner {
 		_downloadTracker = downloadTracker;  
         this._manager = manager;
         _wasSupernodeCapable = _manager.isSupernode();
-		ActionListener timerListener = new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				collectBandwidthData();
-			}
-		};
-		_bandwidthTimer = new Timer(TIMER_DELAY, timerListener);
     }
     
 	/**
-	 * Starts the <tt>Timer</tt> that continually updates the upload and
-	 * download bandwidth used.  Non-blocking.
+	 * Schedules a timer event to continually updates the upload and download
+	 * bandwidth used.  Non-blocking.
+     * @param router provides the schedule(..) method for the timing
      */
-    public void start() {
-		_bandwidthTimer.start();
+    public void start(RouterService router) {
+        Runnable task=new Runnable() {
+            public void run() {
+                collectBandwidthData();
+            }
+        };            
+        router.schedule(task, 0, TIMER_DELAY);
     }
 
 	/**

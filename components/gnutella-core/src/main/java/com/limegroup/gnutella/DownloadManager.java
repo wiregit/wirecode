@@ -24,6 +24,11 @@ import com.limegroup.gnutella.util.URLDecoder;
  * downloads.  Downloads in the COULDNT_DOWNLOAD state are not serialized.  
  */
 public class DownloadManager implements BandwidthTracker {
+    /** The time in milliseconds between checkpointing downloads.dat.  The more
+     * often this is written, the less the lost data during a crash, but the
+     * greater the chance that downloads.dat itself is corrupt.  */
+    private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
+
     /** The callback for notifying the GUI of major changes. */
     private ActivityCallback callback;
     /** The message router to use for pushes. */
@@ -56,15 +61,26 @@ public class DownloadManager implements BandwidthTracker {
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
      *     @param fileManager used to check if files exist
+     *     @param backend provides the schedule(..) method for checkpointing 
+     *      downloads.dat
      */
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor,
-                           FileManager fileManager) {
+                           FileManager fileManager,
+                           RouterService backend) {
         this.callback=callback;
         this.router=router;
         this.acceptor=acceptor;
         this.fileManager=fileManager;
+
+        Runnable checkpointer=new Runnable() {
+            public void run() {
+                if (downloadsInProgress()>0) //optimization
+                    writeSnapshot();
+            }
+        };
+        backend.schedule(checkpointer, 0, SNAPSHOT_CHECKPOINT_TIME);
     }
 
     public synchronized int downloadsInProgress() {

@@ -9,6 +9,7 @@ import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
+import com.limegroup.gnutella.util.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -58,6 +59,8 @@ public class RouterService
     private UploadManager uploadManager;
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
+    private SimpleTimer timer;
+
     
     /**
      * For authenticating users
@@ -87,6 +90,7 @@ public class RouterService
   		this.router = router;
         this.fileManager = fManager;
         this.authenticator = authenticator;
+        this.timer = new SimpleTimer(true, activityCallback);
 		Assert.setCallback(this.callback);
         
         me = this;
@@ -130,12 +134,12 @@ public class RouterService
         //HostCatcher.connectUntilPong to be restarted.       
 
 		this.downloader.initialize(callback, router, acceptor,
-                                   fileManager);
+                                   fileManager, this);
 		
 		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
                                                    downloader, 
                                                    manager);
-		sa.start();
+		sa.start(this);
 
 		if(settings.getConnectOnStartup()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
@@ -184,6 +188,21 @@ public class RouterService
         return downloader;
     }
 
+    /**
+     * Schedules the given task for repeated fixed-delay execution on this'
+     * backend thread.  <b>The task must not block for too long</b>, as 
+     * a single thread is shared among all the backend.
+     *
+     * @param task the task to run repeatedly
+     * @param delay the initial delay, in milliseconds
+     * @param period the delay between executions, in milliseconds
+     * @exception IllegalStateException this is cancelled
+     * @exception IllegalArgumentException delay or period negative
+     * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
+     */
+    void schedule(Runnable task, long delay, long period) {
+        timer.schedule(task, delay, period);
+    }
 
     /** Kicks off expensive backend tasks (like file loading) that should
      *  only be done after GUI is loaded. */
