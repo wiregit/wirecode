@@ -14,6 +14,7 @@ public class OutOfBandThroughputStat extends BasicStatistic {
 
     public static final int MIN_SAMPLE_SIZE = 275;
     public static final int MIN_SUCCESS_RATE = 60;
+    public static final int PROXY_SUCCESS_RATE = 80;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
@@ -61,6 +62,16 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
         return (getSuccessRate() > MIN_SUCCESS_RATE);
+    }
+
+    /**
+     * @return whether or not the success rate is good enough for proxying.
+     */
+    public static boolean isSuccessRateGreat() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return true;
+        return (getSuccessRate() > PROXY_SUCCESS_RATE);
     }
 
 }
