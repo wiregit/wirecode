@@ -417,21 +417,29 @@ public class SettingsManager implements SettingsInterface
     }
 
     /**
-     *
+     *  Sets the pathname String for the file that 
+     *  lists the default hosts
      */
     public void setHostList(String hostList)
 	throws IllegalArgumentException
     {
-	System.out.println("SettingsManager::setHostList::file: " + hostList);
-	String home = System.getProperty("user.home");
-	System.out.println(home);
+	//System.out.println("SettingsManager::setHostList::file: " + hostList);
+	//String home = System.getProperty("user.home");
+	//System.out.println(home);
 	//String fileName;
-	File f = new File(hostList);
-	//File test = new File("e:\cookie");
-	System.out.println("line separator: " + System.getProperty("line.separator"));
-	if(f.isFile() == true)
-	    hostList_ = hostList;
+	
+	//int l = hostList.length();
+	//int counter = 0;
+	//char[] c = hostList.toCharArray();
+	//while(counter < l)
+	    //{
+		//System.out.println("char: " + c[counter]);
+		//counter++;
+		//}
 
+	File f = new File(hostList);
+	if(f.exists() == true)
+	    hostList_ = hostList;
 	else
 	    {
 		String fileName = System.getProperty("user.home");
@@ -449,7 +457,7 @@ public class SettingsManager implements SettingsInterface
 		    }		
 	    }
 
-	props_.setProperty(SettingsInterface.HOST_LIST, home);//hostList_);
+	props_.setProperty(SettingsInterface.HOST_LIST, hostList_);//hostList_);
 	writeProperties();		
     }
 
