@@ -545,32 +545,21 @@ public class FileManager {
         return _extensions.contains(ext);
     }
 
-    /** Same as f.getParentFile() in JDK1.3. */
+    /** 
+	 * Same as f.getParentFile() in JDK1.3. 
+	 * @requires the File parameter must be a File object constructed
+	 *  with the canonical path.
+	 */
     public static File getParentFile(File f) {
-        //Strip off any trailing "\"'s to work around limitations in JDK1.1.8.
-        //This isn't actually needed in this file, because f is always
-        //canonicalized if a directory, but it can't hurt.f
-//  		while (true) {
-//              String name=f.getAbsolutePath();
-//              if (! name.endsWith(File.separator))
-//                  break;
-//              f=new File(name.substring(0, name.length()-1));
-//          }
-
-
 		// slight changes to get around getParent bug on Mac
 		String name=f.getParent();
-  		File canonicalFile=new File(name);
+		if(name == null) return null;
 		try {
-			canonicalFile = getCanonicalFile(canonicalFile);
+			return getCanonicalFile(new File(name));
 		} catch(IOException ioe) {
   			//if the exception occurs, simply return null
   			return null;
   		}
-        if (name==null)
-            return null;
-        else 
-			return canonicalFile;
     }
     
     /** Same as the f.listFiles() in JDK1.3. */
