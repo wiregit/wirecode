@@ -84,6 +84,11 @@ public final class HostData {
      */
     private final Set PROXIES;
 
+    /**
+     * Constant for the Firewalled Transfer status of this badboy.
+     */
+    private final boolean CAN_DO_FWTRANSFER;
+
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
@@ -152,7 +157,8 @@ public final class HostData {
 		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
         QUALITY = reply.calculateQualityOfService(ifirewalled);
         PROXIES = reply.getPushProxies();
-        
+        CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
+
         if ( multicast )
             SPEED = Integer.MAX_VALUE;
         else
@@ -292,6 +298,14 @@ public final class HostData {
      */
     public Set getPushProxies() {
         return PROXIES;
+    }
+
+    /**
+     * Returns whether or not this Host can do Firewalled Transfer.
+     *
+     */
+    public boolean supportsFWTransfer() {
+        return CAN_DO_FWTRANSFER;
     }
 
 }

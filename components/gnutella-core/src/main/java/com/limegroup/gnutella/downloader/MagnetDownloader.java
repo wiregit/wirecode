@@ -164,7 +164,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 false,          //not a reply to a multicast query
                 false,"",0l, //not firewalled, no vendor, timestamp=0 (OK?)
                 url,            //url for GET request
-                null);          //no push proxies
+                null,           //no push proxies
+                false);         //assume no firewall transfer
         } catch (IOException e) {
             if(LOG.isWarnEnabled())
                 LOG.warn("IOException while processing magnet URL: " + url, e);

@@ -658,33 +658,69 @@ public final class QueryRequestTest extends BaseTestCase {
         payload[2] = (byte) 65;
         payload[1] = (byte) 0;
 
-        // not firewalled and not wanting rich, just 10000000
+        // not firewalled, not wanting rich, and can't do FWTrans, just 10000000
         payload[0] = (byte) 0x80;
         qr = QueryRequest.createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
+        assertTrue(!qr.canDoFirewalledTransfer());
 
-        // firewalled and not wanting rich, just 11000000
+        // firewalled, not wanting rich, and can't do FWTrans, just 11000000
         payload[0] = (byte) 0xC0;
         qr = QueryRequest.createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+        assertTrue(!qr.canDoFirewalledTransfer());
 
-        // not firewalled and wanting rich, just 10100000
+        // not firewalled, wanting rich, can't do FWTrans, just 10100000
         payload[0] = (byte) 0xA0;
         qr = QueryRequest.createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
+        assertTrue(!qr.canDoFirewalledTransfer());
 
-        // firewalled and wanting rich, just 11100000
+        // firewalled, wanting rich, can't do FWTrans, just 11100000
         payload[0] = (byte) 0xE0;
         qr = QueryRequest.createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+        assertTrue(!qr.canDoFirewalledTransfer());
+
+        // not firewalled, not wanting rich, and can do FWTrans, just 10000010
+        payload[0] = (byte) 0x82;
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(qr.canDoFirewalledTransfer());
+
+        // firewalled, not wanting rich, and can do FWTrans, just 11000010
+        payload[0] = (byte) 0xC2;
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(qr.canDoFirewalledTransfer());
+
+        // not firewalled, wanting rich, can do FWTrans, just 10100010
+        payload[0] = (byte) 0xA2;
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(qr.canDoFirewalledTransfer());
+
+        // firewalled, wanting rich, can do FWTrans, just 11100010
+        payload[0] = (byte) 0xE2;
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(qr.canDoFirewalledTransfer());
 
         // now test out-of-band stuff
         // ---------------------------------------------------------
@@ -692,39 +728,106 @@ public final class QueryRequestTest extends BaseTestCase {
         byte[] stanfordGuid = GUID.makeAddressEncodedGuid(stanford.getAddress(),
                                                           6346);
 
-        // firewalled, wanting rich, desiring out-of-band - though as policy 
-        // we never allow this - 11100100
+        // firewalled, wanting rich, desiring out-of-band, can't do firewalled
+        // transfer
         payload[0] = (byte) 0xE4;
         qr = QueryRequest.createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(!qr.canDoFirewalledTransfer());
         assertEquals("IP's not equal!", stanford.getHostAddress(), 
                      qr.getReplyAddress());
         assertEquals("Port's not equal!", 6346, qr.getReplyPort());
 
-        // firewalled, not wanting rich, desiring out-of-band - this can never
-        // really happen because if you are firewalled how can you accept
-        // out-of-band? - 11000100
+        // firewalled, not wanting rich, desiring out-of-band, can't do
+        // firewalled transfer
         payload[0] = (byte) 0xC4;
         qr = QueryRequest.createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(!qr.canDoFirewalledTransfer());
         assertEquals("IP's not equal!", stanford.getHostAddress(), 
                      qr.getReplyAddress());
         assertEquals("Port's not equal!", 6346, qr.getReplyPort());
 
-        // not firewalled, not wanting rich, desiring out-of-band - the only
-        // case we care about. - 10000100
+        // not firewalled, wanting rich, desiring out-of-band, can't do
+        // firewalled transfer
+        payload[0] = (byte) 0xA4;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(!qr.canDoFirewalledTransfer());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // not firewalled, not wanting rich, desiring out-of-band, can't do
+        // firewalled transfer
         payload[0] = (byte) 0x84;
         qr = QueryRequest.createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(!qr.canDoFirewalledTransfer());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // firewalled, wanting rich, desiring out-of-band, can do firewalled
+        // transfer
+        payload[0] = (byte) 0xE6;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(qr.canDoFirewalledTransfer());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // firewalled, not wanting rich, desiring out-of-band, can do
+        // firewalled transfer
+        payload[0] = (byte) 0xC6;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(qr.canDoFirewalledTransfer());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // not firewalled, wanting rich, desiring out-of-band, can do
+        // firewalled transfer
+        payload[0] = (byte) 0xA6;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(qr.canDoFirewalledTransfer());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // not firewalled, not wanting rich, desiring out-of-band, can do
+        // firewalled transfer
+        payload[0] = (byte) 0x86;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertTrue(qr.canDoFirewalledTransfer());
         assertEquals("IP's not equal!", stanford.getHostAddress(), 
                      qr.getReplyAddress());
         assertEquals("Port's not equal!", 6346, qr.getReplyPort());

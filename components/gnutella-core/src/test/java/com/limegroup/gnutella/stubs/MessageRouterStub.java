@@ -36,7 +36,8 @@ public class MessageRouterStub extends MessageRouter {
                                     byte[] clientGUID, 
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
-                                    boolean isFromMcast) {
+                                    boolean isFromMcast,
+                                    boolean canDoFWTransfer) {
         return new LinkedList();
     }    
 }

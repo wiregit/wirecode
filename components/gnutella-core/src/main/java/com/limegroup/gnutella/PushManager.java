@@ -58,23 +58,20 @@ public final class PushManager {
      * socket it created.
      * Essentially, this is a reverse-Acceptor.
      * <p>
-	 * @param file the fully qualified pathname of the file to upload
+     * No file and index are needed since the GET/HEAD will include that
+     * information.  Just put in our first file and filename to create a
+     * well-formed.
 	 * @param host the ip address of the host to upload to
 	 * @param port the port over which the transfer will occur
-	 * @param index the index of the file in <tt>FileManager</tt>
 	 * @param guid the unique identifying client guid of the uploading client
      * @param forceAllow whether or not to force the UploadManager to send
      *  accept this request when it comes back.
 	 */
-	public void acceptPushUpload(final String file, 
-    							 final String host, 
+	public void acceptPushUpload(final String host, 
                                  final int port, 
-    							 final int index, 
                                  final String guid,
                                  final boolean forceAllow) {
                                     
-        if( file == null )
-            throw new NullPointerException("null file");
         if( host == null )
             throw new NullPointerException("null host");
         if( !NetworkUtils.isValidPort(port) )
@@ -83,19 +80,9 @@ public final class PushManager {
             throw new NullPointerException("null guid");
                                     
         // First validate the information.     
+        if (RouterService.getNumSharedFiles() < 1) return;
         FileManager fm = RouterService.getFileManager();
-        FileDesc fd = null;
-        if(fm.isValidIndex(index)) {
-            fd = fm.get(index);
-        } 
-        // If invalid fd, just exit...
-        if(fd == null) {
-            return;
-        }
-        // If our filename isn't the same as what they wanted, exit.
-        if(!file.equals(fd.getName())) {
-            return;
-        }
+        final int index = 0;
 
         // Test if we are either currently attempting a push, or we have
         // unsuccessfully attempted a push with this host in the past.
@@ -116,8 +103,7 @@ public final class PushManager {
         			s = Sockets.connect(host, port, CONNECT_TIMEOUT);
         			// open a stream for writing to the socket
         			OutputStream ostream = s.getOutputStream();        
-        			String giv = "GIV " + index + ":" + guid + "/" + 
-        			             file + "\n\n";
+        			String giv = "GIV 0:" + guid + "/file\n\n";
         			ostream.write(giv.getBytes());
         			ostream.flush();
 

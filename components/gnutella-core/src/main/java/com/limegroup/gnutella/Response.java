@@ -840,24 +840,25 @@ public class Response {
             return cachedRFD;
         else {
             RemoteFileDesc rfd = new RemoteFileDesc(
-                 data.getIP(),
-                 data.getPort(),
-                 getIndex(),
-                 getName(),
-                 (int)getSize(),
-                 data.getClientGUID(),
-                 data.getSpeed(),
-                 data.isChatEnabled(),
-                 data.getQuality(),
-                 data.isBrowseHostEnabled(),
-                 getDocument(),
-                 getUrns(),
-                 data.isReplyToMulticastQuery(),
-                 data.isFirewalled(), 
-                 data.getVendorCode(),
-                 System.currentTimeMillis(),
-                 data.getPushProxies()
-                );
+             data.getIP(),
+             data.getPort(),
+             getIndex(),
+             getName(),
+             (int)getSize(),
+             data.getClientGUID(),
+             data.getSpeed(),
+             data.isChatEnabled(),
+             data.getQuality(),
+             data.isBrowseHostEnabled(),
+             getDocument(),
+             getUrns(),
+             data.isReplyToMulticastQuery(),
+             data.isFirewalled(), 
+             data.getVendorCode(),
+             System.currentTimeMillis(),
+             data.getPushProxies(),
+             data.supportsFWTransfer()
+             );
             cachedRFD = rfd;
             return rfd;
         }

@@ -89,6 +89,13 @@ public class RemoteFileDesc implements Serializable {
     private transient Set _proxies;
 		
     /**
+     * Whether or not the guy can do Firewalled Transfers.  This is transient
+     * since _proxies is transient - we can't do Firewalled Transfers without
+     * PushProxies
+     */
+    private transient boolean _supportsFirewalledTransfers = false;
+
+    /**
      * The list of available ranges.
      * This is NOT SERIALIZED.
      */
@@ -149,7 +156,8 @@ public class RemoteFileDesc implements Serializable {
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
               System.currentTimeMillis(),   // timestamp
-              DataUtils.EMPTY_SET );        // push proxies
+              DataUtils.EMPTY_SET,          // push proxies
+              false);                       // firewalled transfer
     }
 
 	/** 
@@ -184,6 +192,43 @@ public class RemoteFileDesc implements Serializable {
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, long timestamp,
                           Set proxies) {
+        this(host, port, index, filename, size, clientGUID, speed, chat,
+             quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
+             vendor, timestamp, proxies, false);
+    }
+
+	/** 
+     * Constructs a new RemoteFileDesc with metadata.
+     *
+	 * @param host the host's ip
+	 * @param port the host's port
+	 * @param index the index of the file that the client sent
+	 * @param filename the name of the file
+	 * @param clientGUID the unique identifier of the client
+	 * @param speed the speed of the connection
+     * @param chat true if the location is chattable
+     * @param quality the quality of the connection, where 0 is the
+     *  worst and 3 is the best.  (This is the same system as in the
+     *  GUI but on a 0 to N-1 scale.)
+     * @param xmlDocs the array of XML documents pertaining to this file
+	 * @param browseHost specifies whether or not the remote host supports
+	 *  browse host
+	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
+	 * @param replyToMulticast true if its from a reply to a multicast query
+	 *
+	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
+	 *  not valid
+     * @throws <tt>NullPointerException</tt> if the host argument is 
+     *  <tt>null</tt> or if the file name is <tt>null</tt>
+	 */
+	public RemoteFileDesc(String host, int port, long index, String filename,
+						  int size, byte[] clientGUID, int speed, 
+						  boolean chat, int quality, boolean browseHost, 
+						  LimeXMLDocument xmlDoc, Set urns,
+						  boolean replyToMulticast, boolean firewalled, 
+                          String vendor, long timestamp,
+                          Set proxies, boolean canDoFWTransfer) {
 		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -235,6 +280,7 @@ public class RemoteFileDesc implements Serializable {
 			_urns = Collections.unmodifiableSet(urns);
 		}
         _http11 = ( !_urns.isEmpty() );
+        _supportsFirewalledTransfers = canDoFWTransfer;
 	}
 
     private void readObject(ObjectInputStream stream) 
@@ -544,6 +590,10 @@ public class RemoteFileDesc implements Serializable {
      */
     public final Set getPushProxies() {
         return _proxies;
+    }
+
+    public final boolean supportsFWTransfer() {
+        return _supportsFirewalledTransfers;
     }
 
     /**
