@@ -68,6 +68,22 @@ public final class ThemeSettings extends AbstractSettings {
 		if(!themesJar.isFile()) {
 			themesJar = new File(new File("lib"), "themes.jar");
 		}
+
+        // workaround for when the jar file is only in your classpath --
+        // this uses the default theme instead of the jar to check
+        // the timestamp -- added by Jens-Uwe Mager
+		if(!themesJar.isFile()) {
+			String url = 
+                ThemeSettings.class.getClassLoader().
+                    getResource(DEFAULT_THEME_NAME).toString();
+			if (url != null && url.startsWith("jar:file:")) {
+				url = url.substring("jar:file:".length(), url.length());
+				url = 
+                    url.substring(0, url.length()-
+                                  DEFAULT_THEME_NAME.length()-"!/".length());
+				themesJar = new File(url);
+			}
+		}
 		if(themesJar.isFile()) {
 			long jarMod = themesJar.lastModified();
 			for(int i=0; i<THEMES.length; i++) { 
