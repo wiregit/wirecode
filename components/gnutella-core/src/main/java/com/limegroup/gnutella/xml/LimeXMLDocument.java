@@ -364,6 +364,8 @@ public class LimeXMLDocument implements Serializable {
      * Returns the name of the file that the data in this XML document 
      * corresponds to. If the meta-data does not correspond to any file
      * in the file system, this method will rerurn a null.
+     * 
+     * TODO: this should return a File object.
      */
     public String getIdentifier(){
         return identifier;
