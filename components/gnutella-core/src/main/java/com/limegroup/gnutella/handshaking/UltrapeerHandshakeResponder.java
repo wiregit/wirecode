@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
-import java.util.Properties;
 import java.io.IOException;
+import java.util.Properties;
+
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A very simple responder to be used by ultrapeers during the
