@@ -40,7 +40,7 @@ public abstract class MessageRouter
     /** 
      * The time to wait between route table updates, in milliseconds. 
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*15;  //15 seconds for testing 
+    private long QUERY_ROUTE_UPDATE_TIME=1000*60; //60 seconds
 
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
