@@ -143,6 +143,8 @@ public class Acceptor implements Runnable {
 	 * is the same as what remote peers believe it is.
 	 */
 	public boolean isAddressExternal() {
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            return true;
 	    synchronized(Acceptor.class) {
 	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }

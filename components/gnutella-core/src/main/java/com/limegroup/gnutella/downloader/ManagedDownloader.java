@@ -474,11 +474,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * The GUID of the original query.  may be null.
-     * This variable should not be serialized.  The transient keyword
-     * technically is not needed since we do our own serialization but it
-     * doesn't hurt to be clear/redundant.
      */
-    private final transient GUID originalQueryGUID;
+    private final GUID originalQueryGUID;
 
 
     /**
@@ -1494,17 +1491,25 @@ public class ManagedDownloader implements Downloader, Serializable {
                         triedLocatingSources = true;
                         boolean areThereNewResults = false;
                         URN bestURN = getBestURN();
-                        for (Iterator i = guessLocs.iterator();
-                             i.hasNext() && !areThereNewResults; ) {
+                        for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
                             // send a guess query
                             GUESSEndpoint ep = (GUESSEndpoint) i.next();
                             OnDemandUnicaster.query(ep, bestURN);
                             // wait a while for a result
-                            areThereNewResults = reqLock.lock(750);
+                            if (!areThereNewResults)
+                                areThereNewResults = reqLock.lock(750);
+                            // else don't wait at all, we want to process that
+                            // new result(s) ASAP
                         }
                         if (areThereNewResults)
                             continue;
                     }
+                }
+
+                if (stopped) {
+                    setState(ABORTED);
+                    manager.remove(this, false);
+                    return;
                 }
 
                 final long currTime = System.currentTimeMillis();
