@@ -537,34 +537,30 @@ public class UploadManager implements BandwidthTracker {
             uploader.setState(Uploader.MALFORMED_REQUEST);
             return;
         case RESOURCE_INDEX:
-            uploader.setState(Uploader.RESOURCE_GET);
+            try {
+                uploader.setFileDesc(null);
+                uploader.setState(Uploader.RESOURCE_GET);
+            } catch(IOException ioe) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader + " could not create file stream");
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+            }
+            return;
         default:
         
             // This is the normal case ...
             FileManager fm = RouterService.getFileManager();
+            int index = uploader.getIndex();
             FileDesc fd = null;
             
-            boolean pureResource = false;
-            if(uploader.getIndex() == RESOURCE_INDEX) {
-                if(uploader.getFileName().toLowerCase().startsWith("urn:")) {
-                    try {
-                        fd = RouterService.getFileManager().getFileDescForUrn(URN.createSHA1Urn(uploader.getFileName()));
-                    } catch(IOException ieo) {}
-                } else {
-                    pureResource = true;
-                }
-            } else {
-                // First verify the file index
-                synchronized(fm) {
-                    int index = uploader.getIndex();
-                    if(fm.isValidIndex(index)) {
-                        fd = fm.get(index);
-                    } 
-                }
+            // First verify the file index
+            synchronized(fm) {
+                if(fm.isValidIndex(index))
+                    fd = fm.get(index);
             }
 
             // If the index was invalid or the file was unshared, FNF.
-            if(!pureResource && fd == null) {
+            if(fd == null) {
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " fd is null");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
@@ -572,9 +568,9 @@ public class UploadManager implements BandwidthTracker {
             }
 
             // If the name they want isn't the name we have, FNF.
-            if(uploader.getIndex() != RESOURCE_INDEX && !uploader.getFileName().equals(fd.getName())) {
+            if(!uploader.getFileName().equals(fd.getName())) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug(uploader + " wrong file name");
+                    LOG.debug("wrong name.  wanted: " + uploader.getFileName() + ", was: " + fd.getName());
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -588,8 +584,7 @@ public class UploadManager implements BandwidthTracker {
                 return;
             }
 
-            if(uploader.getIndex() != RESOURCE_INDEX)
-                assertAsConnecting( uploader.getState() );
+            assertAsConnecting( uploader.getState() );
         }
     }
     

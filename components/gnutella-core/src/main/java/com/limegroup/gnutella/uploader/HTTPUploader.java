@@ -193,6 +193,7 @@ public final class HTTPUploader implements Uploader {
 	    File file;
 	    if(fd == null) {
 	        file = CommonUtils.getResourceFile(getFileName());
+	        _fileName = file.getName();
 	        if(file != null) {
 	            _fis = new BufferedInputStream(new FileInputStream(file));
 	            _fileSize = (int)file.length();
@@ -203,7 +204,6 @@ public final class HTTPUploader implements Uploader {
     	    _fileDesc = fd;
     	    file = fd.getFile();
     	    _fileSize = (int)fd.getSize();
-    	    _fileName = fd.getName();
     	    // initializd here because we'll only write locs if a FileDesc exists
     	    // only initialize once, so we don't write out previously written locs
     	    if( _writtenLocs == null )
@@ -216,7 +216,7 @@ public final class HTTPUploader implements Uploader {
             String tw = (String)_parameters.get("thumbw");
             String th = (String)_parameters.get("thumbh");
             if(tw != null || th != null) {
-                _fileName = StringUtils.ripExtension(_fileName) + " (Preview).jpg";
+              //  _fileName = StringUtils.ripExtension(_fileName) + " (Preview).jpg";
                 byte[] data = thumbnail(file, tw, th);
                 _fileSize = data.length;
                 _fis = new ByteArrayInputStream(data);
