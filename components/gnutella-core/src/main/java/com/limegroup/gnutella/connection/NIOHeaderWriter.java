@@ -44,7 +44,6 @@ public final class NIOHeaderWriter implements HeaderWriter {
      */
     private NIOHeaderWriter(Connection conn) {
         CONNECTION = conn;
-        System.out.println("NIOHeaderWriter::NIOHeaderWriter::about to get socket");
         CHANNEL = conn.getSocket().getChannel();        
     }
 
