@@ -96,7 +96,7 @@ public class UDPConnectionProcessor {
     private static final long SMALL_SEND_WINDOW       = 4;
 
     /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_WINDOW_MULTIPLE   = 6;
+    private static final long SMALL_WINDOW_MULTIPLE   = 3;
 
     // Define Connection states
     //
