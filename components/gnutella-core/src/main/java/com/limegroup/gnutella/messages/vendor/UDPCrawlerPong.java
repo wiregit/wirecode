@@ -382,8 +382,8 @@ public class UDPCrawlerPong extends VendorMessage {
 				dais.readFully(agents);
 				
 				_agents = new String(agents);
-			}catch(IOException impossible ) {
-				ErrorService.error(impossible);
+			}catch(IOException bad ) {
+				throw new BadPacketException("invalid compressed agent data");
 			}
 		}
 		
