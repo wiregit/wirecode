@@ -151,10 +151,7 @@ public class HttpClientManager {
                 methid.setPath(newLocation.getEscapedPath());
                 methid.setQueryString(newLocation.getEscapedQuery());
                 methid.removeRequestHeader(HttpAuthenticator.WWW_AUTH_RESP);
-                // Release the existing connection... we know it is not
-                // the same host/port/protocol, because if it was,
-                // it would be handled internally by HttpClient.
-                methid.releaseConnection();
+
                 // Loop around and try the method again.
                 break;
             default:

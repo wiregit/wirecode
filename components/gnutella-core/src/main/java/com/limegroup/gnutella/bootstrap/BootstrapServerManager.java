@@ -354,7 +354,7 @@ public class BootstrapServerManager {
             if(get.getStatusCode() < 200 || get.getStatusCode() >= 300) {
                 if(LOG.isWarnEnabled())
                     LOG.warn("Invalid status code: " + get.getStatusCode());
-                throw new IOException("no 200 ok.");
+                throw new IOException("no 2XX ok.");
             }
 
             //For each line of data (excludes HTTP headers)...
