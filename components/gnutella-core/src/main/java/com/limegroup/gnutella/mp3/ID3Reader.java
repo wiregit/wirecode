@@ -42,7 +42,6 @@ public final class ID3Reader {
     private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
         
-    private static List frameIDs = null;
 
     /**
      * This class should never be constructed.
@@ -226,11 +225,6 @@ public final class ID3Reader {
     private static ID3Data parseID3v2Data(File file) {
         ID3Data data = new ID3Data();
         
-        if(frameIDs==null) {
-            makeFrameIDs();
-            ID3v2.setFramesToCheck(frameIDs);
-        }
-
         ID3v2 id3v2Parser = null;
         try {
             id3v2Parser = new ID3v2(file);
@@ -334,17 +328,6 @@ public final class ID3Reader {
             }
         }
         return data;
-    }
-
-    private static void makeFrameIDs() {
-        frameIDs= new ArrayList();
-        frameIDs.add(ID3Editor.TITLE_ID);
-        frameIDs.add(ID3Editor.ARTIST_ID);
-        frameIDs.add(ID3Editor.ALBUM_ID);
-        frameIDs.add(ID3Editor.YEAR_ID);
-        frameIDs.add(ID3Editor.TRACK_ID);
-        frameIDs.add(ID3Editor.COMMENT_ID);
-        frameIDs.add(ID3Editor.GENRE_ID);
     }
 
 
