@@ -1029,7 +1029,7 @@ public class Connection {
      * then.
      */
     public float getSentSavedFromCompression() {
-        if( !isWriteDeflated() ) return 0;
+        if( !isWriteDeflated() || _bytesSent == 0 ) return 0;
         return 1-((float)_compressedBytesSent/(float)_bytesSent);
     }
     
@@ -1037,7 +1037,7 @@ public class Connection {
      * Returns the percentage saved from having the incoming data compressed.
      */
     public float getReadSavedFromCompression() {
-        if( !isReadDeflated() ) return 0;
+        if( !isReadDeflated() || _bytesReceived == 0 ) return 0;
         return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
     }
 
