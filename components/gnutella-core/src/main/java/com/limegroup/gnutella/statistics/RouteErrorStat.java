@@ -63,6 +63,19 @@ public class RouteErrorStat extends AdvancedStatistic {
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
+     * hard kilobyte limit.
+	 */
+	public static final Statistic HARD_LIMIT_QUERY_REPLY_TTL[] = 
+        new QueryReplyRouteErrorStat[6];
+
+    static {
+        for (int i = 0; i < HARD_LIMIT_QUERY_REPLY_TTL.length; i++)
+            HARD_LIMIT_QUERY_REPLY_TTL[i] = new QueryReplyRouteErrorStat();
+    }
+    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
      * not finding a route.
 	 */
 	public static final Statistic NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS = 

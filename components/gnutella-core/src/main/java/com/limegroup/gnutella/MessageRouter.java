@@ -1868,8 +1868,14 @@ public abstract class MessageRouter {
                 UNICASTER.handleQueryReply(queryReply);
 
             } else {
-				if(RECORD_STATS) 
+				if(RECORD_STATS) {
 					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+                    final byte ttl = queryReply.getTTL();
+                    if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
+					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
+                    else
+					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
+                }                    
                 handler.countDroppedMessage();
             }
         }
