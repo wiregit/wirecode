@@ -98,15 +98,23 @@ public class SettingsManager implements SettingsInterface
      *  Set up the manager instance to follow the
      *  singleton pattern.
      */
-    private static SettingsManager instance_=new SettingsManager();
+    private static SettingsManager instance_ = new SettingsManager();
 
-    /** a string for the file separator */
-    private String fileSep_;
 
     private String home_;
     private String fileName_;
     private String ndFileName_;
     private String saveShareDir_;
+
+
+	/* this blank method simply ensures that the 
+	 * instance_ field will be initialized as
+	 * early as possible in the class loading.
+	 *
+	 * @see The Java Language Specification page 223
+	 */
+	public static void init() {
+	}
 
     /**
      * This method provides the only access
