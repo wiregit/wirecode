@@ -86,7 +86,9 @@ public class UnicastSimulator {
             // create a ServerSocket to listen for Gnutellas....
             servSock = new ServerSocket(port);
             debug("UnicastSimulator.tcpLoop(): listening on port " +
-                  port);            
+                  port);
+            System.out.println("LISTENING FOR GNUTELLA CONNECTIONS ON PORT " +
+                               port);
         }
         catch (Exception noWork) {
             debug("UnicastSimulator.tcpLoop(): couldn't listen on port " +
@@ -168,9 +170,12 @@ public class UnicastSimulator {
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();
                         byte[] inGUID = ((QueryRequest)message).getGUID();
-                        Response[] resps = new Response[1];
-                        resps[0] = new Response(port, 200, 
-                                                query + " " + rand.nextInt());
+                        Response[] resps = new Response[rand.nextInt(15)];
+                        for (int i = 0; i < resps.length; i++) {
+                            resps[i] = new Response(port, 200, 
+                                                    query + " - " + 
+                                                    rand.nextInt(250));
+                        }
                         QueryReply qr = new QueryReply(inGUID, (byte) 5,
                                                        port, _localAddress,
                                                        0, resps, 
