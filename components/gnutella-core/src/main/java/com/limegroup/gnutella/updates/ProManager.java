@@ -3,6 +3,7 @@ package com.limegroup.gnutella.updates;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.sun.net.ssl.SSLContext;
+import com.bitzi.util.*;
 import com.sun.net.ssl.TrustManagerFactory;
 import com.sun.net.ssl.TrustManager;
 import javax.net.ssl.*;
@@ -43,6 +44,8 @@ public class ProManager {
      * @exception IOException if unable to read the ProFile. This means the
      * file exists, but we are not able to read if for some reason. 
      * How should we deal with this? 
+     * TODO1: Make sure IOEx is not thrown for character encoding reasons
+     * TODO1: Make sure the locale is converted to us_en before we work on this
      */
     public boolean isPro() throws IOException, UnsupportedEncodingException {
         MacAddressFinder maf = new MacAddressFinder();
@@ -65,21 +68,23 @@ public class ProManager {
             file.delete(); 
             return false;
         }
-        byte[] signature = str.substring(0,index).getBytes("UTF-8");
+        byte[] signature = Base32.decode(str.substring(0,index));
         String startDate = str.substring(index);//includes the separator
         byte[] plainText = (this.macAddress+startDate).getBytes("UTF-8");
         UpdateMessageVerifier verifier = 
                                 new UpdateMessageVerifier(signature,plainText);
-        if(!verifier.verifySource())//not verified
+        if(!verifier.verifySource()) //not verified
             return false;
         //OK. The File is verified. Check if its still time to be PRO
-        long expiryTime = Long.parseLong(startDate) + EXPIRY;
+        long expiryTime = Long.parseLong(startDate.substring(1)) + EXPIRY;
         return System.currentTimeMillis() <= expiryTime;
     }
 
     /**
      * @exception IOException is thrown if the file the server sent back
      * could not be written
+     * TODO1: Make sure IOEx is not thrown for character encoding reasons
+     * TODO1: Make sure the locale is converted to us_en before we work on this
      */
     public boolean buyPro(String name, String address, String city, 
                           String state, String zip, String country, 
@@ -119,7 +124,8 @@ public class ProManager {
             int a = 0;
             while(a!=-1) {
                 a = is.read();
-                fos.write(a);
+                if(a!=-1)
+                    fos.write(a);
             }
             return true;
         } catch (Exception e) {           
@@ -144,7 +150,9 @@ public class ProManager {
         Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
         //get the certificate disctibuted with LimeWire. 
         CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-        FileInputStream fis = new FileInputStream("core/lib/limecert.cert");
+        File file = new File(CommonUtils.getUserSettingsDir(),"limecert.cert");
+        FileInputStream fis = new FileInputStream(file);
+
         Certificate cert = certFact.generateCertificate(fis);
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null,null);
