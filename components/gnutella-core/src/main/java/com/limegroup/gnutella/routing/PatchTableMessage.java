@@ -25,7 +25,7 @@ public class PatchTableMessage extends RouteTableMessage {
     private byte[] data;
 
     public static final byte COMPRESSOR_NONE=0x0;
-    public static final byte COMPRESSOR_GZIP=0x1;
+    public static final byte COMPRESSOR_DEFLATE=0x1;
     
 
     /////////////////////////////// Encoding //////////////////////////////
@@ -35,7 +35,7 @@ public class PatchTableMessage extends RouteTableMessage {
      * copied from dataSrc[datSrcStart...dataSrcStop-1], inclusive.  
      * 
      * @requires sequenceNumber and sequenceSize can fit in one unsigned byte
-     *           compressor one of COMPRESSOR_NONE or COMPRESSOR_GZIP
+     *           compressor one of COMPRESSOR_NONE or COMPRESSOR_DEFLATE
      *           entryBits less than 1
      *           dataSrcStart>dataSrcStop
      *           dataSrcStart or dataSrcStop not valid indices fof dataSrc
@@ -95,7 +95,7 @@ public class PatchTableMessage extends RouteTableMessage {
         this.sequenceNumber=(short)ByteOrder.ubyte2int(payload[1]);
         this.sequenceSize=(short)ByteOrder.ubyte2int(payload[2]);
         this.compressor=payload[3];
-        if (! (compressor==COMPRESSOR_NONE || compressor==COMPRESSOR_GZIP))
+        if (! (compressor==COMPRESSOR_NONE || compressor==COMPRESSOR_DEFLATE))
             throw new BadPacketException("Bad compressor: "+compressor);
         this.entryBits=payload[4];
         if (entryBits<0)
@@ -180,7 +180,7 @@ public class PatchTableMessage extends RouteTableMessage {
         message[23+0]=(byte)RouteTableMessage.PATCH_VARIANT; //patch variant
         message[23+1]=(byte)1;                               //sequence 1...
         message[23+2]=(byte)0xFF;                            //...of 255
-        message[23+3]=COMPRESSOR_GZIP;                       //comrpessor
+        message[23+3]=COMPRESSOR_DEFLATE;                       //comrpessor
         message[23+4]=(byte)2;                               //entry bits
         message[23+5]=(byte)0xAB;                            //data
         message[23+6]=(byte)0xCD;
@@ -189,7 +189,7 @@ public class PatchTableMessage extends RouteTableMessage {
         Assert.that(m.getTTL()==(byte)1);
         Assert.that(m.getSequenceNumber()==1);
         Assert.that(m.getSequenceSize()==255, "Got: "+m.getSequenceSize());
-        Assert.that(m.getCompressor()==COMPRESSOR_GZIP);
+        Assert.that(m.getCompressor()==COMPRESSOR_DEFLATE);
         Assert.that(m.getEntryBits()==2);
         Assert.that(m.getData().length==2);
         Assert.that(m.getData()[0]==(byte)0xAB);
