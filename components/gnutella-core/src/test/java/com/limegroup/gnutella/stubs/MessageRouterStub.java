@@ -9,8 +9,9 @@ import com.sun.java.util.collections.*;
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
 
-    protected  void respondToQueryRequest(QueryRequest queryRequest,
+    protected boolean respondToQueryRequest(QueryRequest queryRequest,
 										  byte[] clientGUID) {
+        return false;
     }
 
     
