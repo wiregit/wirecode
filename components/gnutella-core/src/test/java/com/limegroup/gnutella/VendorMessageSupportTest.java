@@ -9,14 +9,13 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 
 
 public class VendorMessageSupportTest extends BaseTestCase {
     
     private String _remoteHost = "localhost";
-    private int _remotePort = Backend.PORT;
+    private int _remotePort = Backend.BACKEND_PORT;
     private static final int TIMEOUT = 2*500;
     private boolean _localTest = true;
 
