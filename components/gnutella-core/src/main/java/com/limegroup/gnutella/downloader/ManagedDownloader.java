@@ -1961,9 +1961,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
             hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
             
-            // if we have a valid tree, update our chunk size
-            if (hashTree != null && hashTree.isDepthGoodEnough()) 
+            // if we have a valid tree, update our chunk size and disable overlap checking
+            if (hashTree != null && hashTree.isDepthGoodEnough()) {
                 _chunkSize = hashTree.getNodeSize();
+                commonOutFile.setCheckOverlap(false);
+            }
         }
         
         URN fileHash;
@@ -2527,6 +2529,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                             
                             // update our chunk size with this new, better tree
                             _chunkSize = hashTree.getNodeSize();
+                            commonOutFile.setCheckOverlap(false);
                             
                             // persist the hashTree in the TigerTreeCache
                             // because we won't save it in ManagedDownloader
@@ -3393,30 +3396,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range
      * for downloading.
+     * If we have a valid hashTree we do not request overlaps.
      */
     private int getOverlapOffset(int i) {
-        return Math.max(0, i-OVERLAP_BYTES);
+        return hashTree == null ? Math.max(0, i-OVERLAP_BYTES) : i;
     }
     
-    /**
-     * Ensures that the given internal is still valid after overlap bytes
-     * are subtract from it.  This is necessary because of the structure
-     * of ManagedDownloader, as it always subtracts OVERLAP_BYTES from the
-     * 'low' range of the interval when it requests data.
-     * To ensure that we can correctly use partial file sources, we must
-     * create a new interval that is offset by the bytes that will be
-     * removed later.
-     *
-     * @return a new Interval whose low value is incremented by OVERLAP_BYTES
-     *         if the increment does not exceed the high value.
-     *         Otherwise( in.low + OVERLAP_BYTES >= in.high ), null.
-     */
-    private Interval addOverlap (Interval in) {
-    	if ( in.low + OVERLAP_BYTES < in.high )
-	        return new Interval (in.low + OVERLAP_BYTES, in.high);
-    	else return null;
-    }    
-
     /**
      * Attempts to run downloader.doDownload, notifying manager of termination
      * via downloaders.notify(). 
@@ -3877,6 +3862,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         return averageBandwidth;
 	}	    
 
+	public int getChunkSize() {
+	    return _chunkSize;
+	}
+	
     /**
      * @return true if the table we remembered from previous sessions, contains
      * Takes into consideration when the download is taking place - ie the

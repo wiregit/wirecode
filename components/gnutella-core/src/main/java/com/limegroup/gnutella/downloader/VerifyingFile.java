@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,7 +43,7 @@ public class VerifyingFile {
     /**
      * Whether or not we're doing overlap checking.
      */
-    private final boolean checkOverlap;
+    private boolean checkOverlap;
     
     /**
      * Whether or not we've detected corruption in the file.
@@ -75,6 +76,13 @@ public class VerifyingFile {
     private IntervalSet leasedBlocks;
     
     /**
+     * Ranges which are written and pending verification.  
+     * INVARIANT: pendingBlocks is a subset of leasedBlocks, no blocks can be in 
+     * written blocks and pendingBlocks at the same time.
+     */
+    private IntervalSet pendingBlocks;
+    
+    /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
      * Useful for tests.
@@ -92,6 +100,7 @@ public class VerifyingFile {
         this.checkOverlap = checkOverlap;
         writtenBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
+        pendingBlocks = new IntervalSet();
     }
     
     /**
@@ -117,6 +126,12 @@ public class VerifyingFile {
         leasedBlocks = new IntervalSet();
     }
 
+    /**
+     * enable/disable overlap checking
+     */
+    public synchronized void setCheckOverlap(boolean yes) {
+        checkOverlap = yes;
+    }
     /**
      * used to add blocks direcly. WARNING: the intervals added using this 
      * method are not checked for overlaps, incorrect use of this method, may 
@@ -164,17 +179,54 @@ public class VerifyingFile {
                     }
                 }
             }
-        }
+        } 
+        
         //Got this far? Either no need to check, or it checks out OK. 
         //2. get the fp back to the position we want to write to.
         fos.seek(currPos);
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
         //4. add this interval
-        writtenBlocks.add(intvl);
-        releaseBlock(intvl);
+        pendingBlocks.add(intvl);
+        
+        //5. see if writing this block allows us to verify any full chunks
+        verifyAnyPendingBlocks();
     }
 
+    private void verifyAnyPendingBlocks() {
+        List verifiable = new ArrayList();
+        List pending = pendingBlocks.getAllIntervalsAsList();
+        int chunkSize = managedDownloader.getChunkSize();
+        for (int i =0;i < pending.size();i++) {
+            Interval current = (Interval)pending.get(0);
+            
+            // find the beginning of the first chunk offset
+            int lowChunkOffset = current.low - current.low % chunkSize;
+            if (current.low % chunkSize != 0)
+                lowChunkOffset += chunkSize;
+            while (current.high >= lowChunkOffset+chunkSize-1) {
+                verifiable.add(new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1));
+                lowChunkOffset += chunkSize;
+            }
+        }
+        
+        for (Iterator iter = verifiable.iterator();iter.hasNext();) {
+            Interval i = (Interval)iter.next();
+            if (verifyChunk(i)) 
+                writtenBlocks.add(i);
+            releaseBlock(i);
+            pendingBlocks.delete(i);
+        }
+    }
+    
+    /**
+     * @return whether this chunk is corrupt according to our hash tree
+     */
+    private boolean verifyChunk(Interval i) {
+        //TODO: stub for now
+        return true;
+    }
+    
     /**
      * Returns the first full block of data that needs to be written.
      */
@@ -193,7 +245,7 @@ public class VerifyingFile {
     public synchronized Interval leaseWhite(int chunkSize) 
       throws NoSuchElementException {
         Interval temp = leaseWhite();
-        return fixIntervalForChunk(temp, chunkSize);
+        return allignInterval(temp, chunkSize);
     }
     
     /**
@@ -226,7 +278,7 @@ public class VerifyingFile {
     public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize)
       throws NoSuchElementException {
         Interval temp = leaseWhite(ranges);
-        return fixIntervalForChunk(temp, chunkSize);
+        return allignInterval(temp, chunkSize);
     }
 
     /**
@@ -239,7 +291,7 @@ public class VerifyingFile {
     }
     
     /**
-     * Returns all written blocks with an Iterator.
+     * Returns all verified blocks with an Iterator.
      */
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
@@ -366,16 +418,16 @@ public class VerifyingFile {
     }
     
     /**
-     * Returns a new chunk that is less than chunkSize.
-     * This reduces the high value of the interval.
-     * removes what was cut from leasedBlocks.
+     * Fits an interval inside a chunk.  This ensures that the interval is never larger
+     * than chunksize and finishes at exact chunk offset.
      *
      * @return a new (smaller) interval up to chunkSize.
      */
-    private synchronized Interval fixIntervalForChunk(Interval temp, int chunkSize) {
+    private synchronized Interval allignInterval(Interval temp, int chunkSize) {
         Interval interval;
-        if((temp.high-temp.low+1) > chunkSize) {
-            int max = temp.low+chunkSize-1;
+        int overlap = temp.high % chunkSize;
+        if(overlap != chunkSize - 1) {
+            int max = temp.high - overlap;
             interval = new Interval(temp.low, max);
             temp = new Interval(max+1,temp.high);
             releaseBlock(temp);
