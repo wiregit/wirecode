@@ -28,6 +28,8 @@ public class FileManager{
     private PatternCompiler compiler = new Perl5Compiler();
     private Pattern pattern;
     private PatternMatcherInput input;
+    // For our enhancements of RegEx.
+    private final String EscapeChars = "./(){}\"\\";
 
 
     private static FileManager _myFileManager;
@@ -148,33 +150,45 @@ public class FileManager{
 	}
     }
     /** subclasses must override this method */
-    protected ArrayList search(String query) {
+    protected ArrayList search(String q) {
 	ArrayList response_list = new ArrayList();
-	try{
-	    try{
-		pattern = compiler.compile(query);}
-	    catch(MalformedPatternException e){
-		//If we catch and expression we seacrh without regular expressions
-		for(int i=0; i < _numFiles; i++) {
-		    FileDesc desc = (FileDesc)_files.get(i);
-		    //System.out.println("Rob:"+query);
-		    String file_name = desc._name;
-		    if (file_name.indexOf(query) != -1) 
-			response_list.add(_files.get(i));
+	StringBuffer sb = new StringBuffer();
+	for(int i=0; i<q.length();i++){
+	    if (EscapeChars.indexOf(q.charAt(i)) < 0){
+		//the particular char is an normal except for *
+		if(q.charAt(i)=='*'||q.charAt(i)=='+'){ //special cases
+		    sb = sb.append(".");
+		    sb = sb.append("*"); //+ and * replaced with .*
 		}
-		return response_list;
+		else //normal character
+		    sb = sb.append(q.charAt(i));
 	    }
-	    for(int i=0; i < _numFiles; i++){
-		FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
-		//System.out.println("Sumeet: "+query);
+	    else{//escape character
+		sb = sb.append("\\");
+		sb = sb.append(q.charAt(i));
+	    }
+	}//for
+	String query = sb.toString();
+	try{
+	    pattern = compiler.compile(query);}
+	catch(MalformedPatternException e){
+	    // use search w/o regEx in this case
+	    for(int i=0; i < _numFiles; i++) {
+		FileDesc desc = (FileDesc)_files.get(i);
+		//System.out.println("Rob:"+query);
 		String file_name = desc._name;
-		input = new PatternMatcherInput(file_name);
-		if (matcher.contains(input,pattern))
+		if (file_name.indexOf(query) != -1) 
 		    response_list.add(_files.get(i));
 	    }
+	    return response_list;
 	}
-	catch (Exception e){
-	    e.printStackTrace();
+	for(int i=0; i < _numFiles; i++){
+	    FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
+	    //System.out.println("Sumeet: "+query);
+	    String file_name = desc._name;
+	    input = new PatternMatcherInput(file_name);
+	    if (matcher.contains(input,pattern))
+		response_list.add(_files.get(i));
 	}
 	return response_list;
     }    
