@@ -3,6 +3,7 @@ package com.limegroup.gnutella.http;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.*;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -279,6 +280,12 @@ public final class HTTPUtils {
         features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
         if (ChatSettings.CHAT_ENABLED.getValue())
             features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+        
+        //TODO: after fw2fw transfer gets ipmlemented, add appropriate
+        //header here.
+        if (RouterService.acceptedIncomingConnection())
+        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+        
         return features;
     }        
     

@@ -47,7 +47,7 @@ public class HTTPHeaderName {
 	 * Header for bad alternate locations behind firewalls.
 	 */
 	public static final HTTPHeaderName BFALT_LOCATION =
-		new HTTPHeaderName("X-BFalt");
+		new HTTPHeaderName("X-NFalt");
 	
     /**
      * Header that used to be used for alternate locations,

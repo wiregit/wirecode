@@ -137,6 +137,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private Set _goodPushLocs;
     
+    
     /**
      * The bad firewalled locations to send to uploaders that are interested
      */
@@ -208,6 +209,12 @@ public class HTTPDownloader implements BandwidthTracker {
      * whether the other side wants to receive firewalled altlocs
      */
     private boolean _wantsFalts = false;
+    
+    /**
+     * whether the other side wants to receive only fwt altlocs.
+     * INVARIANT: if this is set, _wantsFalts must be set too.
+     */
+    private boolean _wantsFWTFalts = false;
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -457,6 +464,11 @@ public class HTTPDownloader implements BandwidthTracker {
             out.write("X-Queue: 0.1\r\n"); //we support remote queueing
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
+        
+        //if I'm not firewalled, send out fawt feature.
+        //TODO: after FWT gets implemented, add conditional for fwawt.
+        if (RouterService.acceptedIncomingConnection())
+        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
 
         // Add ourselves to the mesh if the partial file is valid
         if( isPartialFileValid() ) {
@@ -509,20 +521,17 @@ public class HTTPDownloader implements BandwidthTracker {
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
         
-        //write push alts.  However, if the other side has
-        // not indicated whether they want Push Locs, only 
-        //send a header indicating we are intersted.
-        
-        if (!_wantsFalts) 
-        	HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,"",out);
-        else {
+        //if the other side indicated they want firewalled altlocs, send some
+        if (_wantsFalts) {
         	writeClone = null;
         	synchronized(_goodPushLocs) {
         		if(_goodPushLocs.size() > 0) {
         			writeClone = new HashSet();
         			Iterator iter = _goodPushLocs.iterator();
         			while(iter.hasNext()) {
-        				Object next = iter.next();
+        				PushAltLoc next = (PushAltLoc)iter.next();
+        				if (_wantsFWTFalts && !next.supportsF2FTransfers())
+        					continue;
         				writeClone.add(next);
         				_writtenPushLocs.add(next);
         			}
@@ -540,7 +549,9 @@ public class HTTPDownloader implements BandwidthTracker {
                     writeClone = new HashSet();
                     Iterator iter = _badPushLocs.iterator();
                     while(iter.hasNext()) {
-                        Object next = iter.next();
+                        PushAltLoc next = (PushAltLoc)iter.next();
+                        if (_wantsFWTFalts && !next.supportsF2FTransfers())
+        					continue;
                         writeClone.add(next);
                         _writtenBadPushLocs.add(next);
                     }
@@ -1378,6 +1389,13 @@ public class HTTPDownloader implements BandwidthTracker {
                 _chatEnabled = true;
             else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
                 _browseEnabled = true;
+            else if (protocol.equals(HTTPConstants.PUSH_LOCS))
+            	_wantsFalts=true;
+            else if (protocol.equals(HTTPConstants.FWT_PUSH_LOCS)){
+            	_wantsFalts=true;
+            	_wantsFWTFalts=true;
+            }
+            	
         }
     }
 

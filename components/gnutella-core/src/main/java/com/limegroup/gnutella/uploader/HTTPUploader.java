@@ -68,6 +68,12 @@ public final class HTTPUploader implements Uploader {
      * firewalled altlocs.
      */
     private boolean _wantsFalts = false;
+    
+    /**
+     * whether the remote side wants only altlocs that support f2f transfers.
+     * INVARIANT: if this is set, _wantsFalts is set too.
+     */
+    private boolean _wantsFWTFalts = false;
 
     /**
      * The Watchdog that will kill this uploader if it takes too long.
@@ -545,9 +551,13 @@ public final class HTTPUploader implements Uploader {
         		//AlternateLocationCollections concurrently, but one of them is a
         		//local variable, so we are OK.            
         		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-        			AlternateLocation al = (AlternateLocation)iter.next();
+        			PushAltLoc al = (PushAltLoc)iter.next();
         			if(_writtenPushLocs.contains(al))
         				continue;
+        			
+        			if (_wantsFWTFalts && !al.supportsF2FTransfers())
+        				continue;
+        			
         			_writtenPushLocs.add(al);
         			if(ret == null) ret = new HashSet();
         			ret.add(al);
@@ -1027,6 +1037,12 @@ public final class HTTPUploader implements Uploader {
 				_browseEnabled = true;
 			else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
 				_supportsQueueing = true;
+			else if (protocol.equals(HTTPConstants.PUSH_LOCS))
+            	_wantsFalts=true;
+            else if (protocol.equals(HTTPConstants.FWT_PUSH_LOCS)){
+            	_wantsFalts=true;
+            	_wantsFWTFalts=true;
+            }
 			
 		}
 		return true;
@@ -1123,6 +1139,10 @@ public final class HTTPUploader implements Uploader {
     
     public boolean wantsFAlts() {
     	return _wantsFalts;
+    }
+    
+    public boolean wantsFWTAlts() {
+    	return _wantsFWTFalts;
     }
     
     private final boolean debugOn = false;

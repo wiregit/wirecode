@@ -4,6 +4,7 @@ import java.io.*;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
@@ -313,7 +314,25 @@ public class HeadPong extends VendorMessage {
 		
 		
 		//if we have any altlocs and enough room in the packet, add them.
-		AlternateLocationCollection altlocs = desc.getPushAlternateLocationCollection();
+		
+		//first add any firewalled altlocs, if they were requested.
+		//this operates on a copy of the alternate location collection
+		//since it may need to remove any PushLocs that do not support
+		//FW2FW transfer.
+		AlternateLocationCollection altlocs = 
+			AlternateLocationCollection.create(desc.getSHA1Urn());
+		
+		altlocs.addAll(desc.getPushAlternateLocationCollection());
+		
+		boolean FWTonly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
+			HeadPing.FWT_PUSH_ALTLOCS;
+		
+		if (FWTonly) 
+			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
+				PushAltLoc current = (PushAltLoc)iter.next();
+				if (!current.supportsF2FTransfers())
+					iter.remove();
+			}
 		
 		if (altlocs !=null && altlocs.hasAlternateLocations() &&
 			ping.requestsPushLocs()) {

@@ -37,16 +37,14 @@ public class HeadPing extends VendorMessage {
 	public static final int INTERVALS = 0x1;
 	public static final int ALT_LOCS = 0x2;
 	public static final int PUSH_ALTLOCS=0x8;
+	public static final int FWT_PUSH_ALTLOCS=0x10;
 	
-	//0x4 was used for an obsoleted flag FIREWALL_REDIRECT in 4.1.1
-	//It can be safely reused in the future if the payload 
-	// becomes greater than 48 bytes.
 	
 	
 	/**
 	 * the feature mask.
 	 */
-	public static final int FEATURE_MASK=0xB;
+	public static final int FEATURE_MASK=0x1B;
 	
 	private final URN _urn;
 	
@@ -155,6 +153,10 @@ public class HeadPing extends VendorMessage {
 	
 	public boolean requestsPushLocs() {
 		return (_features & PUSH_ALTLOCS) == PUSH_ALTLOCS;
+	}
+	
+	public boolean requestsFWTPushLocs() {
+		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
 	}
 	
 	public byte getFeatures() {

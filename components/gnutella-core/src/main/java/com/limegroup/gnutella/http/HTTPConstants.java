@@ -64,9 +64,13 @@ public final class HTTPConstants {
 	public static final String BROWSE_PROTOCOL = "browse";
 	public static final String QUEUE_PROTOCOL  = "queue";
 	public static final String G2_PROTOCOL = "g2";
+	public static final String PUSH_LOCS="fawt";
+	public static final String FWT_PUSH_LOCS="fwawt";
     
 	public static final double CHAT_VERSION = 0.1;
 	public static final double BROWSE_VERSION = 1.0;
 	public static final double QUEUE_VERSION  = 0.1;
 	public static final double G2_VERSION = 1.0;
+	public static final double PUSH_LOCS_VERSION=0.1;
+	public static final double FWT_PUSH_LOCS_VERSION=0.1;
 }

@@ -85,6 +85,13 @@ public class PushAltLoc extends AlternateLocation {
     public PushEndpoint getPushAddress() {
     	return _pushAddress;
     }
+    
+    /**
+     * @return whether this altloc supports Firewall to Firewall transfers.
+     */
+    public boolean supportsF2FTransfers() {
+    	return _pushAddress.supportsFWTransfers();
+    }
 	
 	public boolean equals(Object o) {
 		if (o==null || !(o instanceof PushAltLoc))

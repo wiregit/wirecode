@@ -28,6 +28,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
 	public static final int PROXY_SIZE=6; //ip:port
 	
+	public static final int PLAIN=0x0; //no features for this PE
+	public static final int F2F_TRANSFER=0x8; //whether the PE supports F2F transfers.
+	
 	private static final int SIZE_MASK=0x7;
 	private static final int FEATURES_MASK=0xF8;
 	/**
@@ -60,13 +63,20 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	private final String _httpString;
 	
+	/**
+	 * the various features this PE supports.
+	 */
+	private final int _features;
+	
 
 	/**
 	 * 
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
-	public PushEndpoint(byte [] guid, Set proxies) {
+	public PushEndpoint(byte [] guid, Set proxies,int features) {
+		
+		_features = features;
 		
 		_clientGUID=guid;
 		_guid = new GUID(guid);
@@ -80,6 +90,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 		
 		//create the http string representation
+		//TODO: once the http format for f2f PEs gets finalized, 
+		//mark the http string.
 		String httpString = _guid.toHexString()+";";
 		
 		//also calculate the hashcode in the constructor
@@ -100,6 +112,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		_httpString = httpString;
 		_hashcode = hashcode;
+		
+		
+	}
+	
+	public PushEndpoint(byte [] guid, Set proxies) {
+		this(guid,proxies,PLAIN);
 	}
 	
 	/**
@@ -112,8 +130,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	/**
 	 * creates a PushEndpoint from a String passed in http header exchange.
+	 * 
 	 */
 	public PushEndpoint(String httpString) throws IOException{
+		
+		//TODO: once the format for marking F2F-enabled falts gets finalized,
+		//mark the _features header.
+		_features = PLAIN;
+		
 		_httpString=httpString;
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
@@ -197,7 +221,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
-		where[offset] = (byte)(Math.min(4,_proxies.size()));
+		where[offset] = (byte)(Math.min(4,_proxies.size()) | _features);
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,offset+1,16);
@@ -237,6 +261,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		//get the number of push proxies
 		int number = data[offset] & SIZE_MASK;
+		int features = data[offset] & FEATURES_MASK;
 		
 		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
 			throw new BadPacketException("not a valid PushEndpoint");
@@ -250,7 +275,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			proxies.add(new QueryReply.PushProxyContainer(tmp));
 		}
 		
-		return new PushEndpoint(guid,proxies);
+		return new PushEndpoint(guid,proxies,features);
 	}
 	
 	public byte [] getClientGUID() {
@@ -267,6 +292,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public int getSizeBytes() {
 		return _size;
+	}
+	
+	/**
+	 * @return whether this PE supports F2F transfers.
+	 */
+	public boolean supportsFWTransfers() {
+		return (_features & F2F_TRANSFER) == F2F_TRANSFER;
 	}
 	
 	public int hashCode() {
@@ -297,7 +329,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public String toString() {
-		String ret = "PE [GUID:"+_guid+", proxies:{ "; 
+		String ret = "PE [FEATURES:"+_features+", GUID:"+_guid+", proxies:{ "; 
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
 			PushProxyInterface ppi = (PushProxyInterface)iter.next();
 			ret = ret+ppi.getPushProxyAddress()+":"+ppi.getPushProxyPort()+" ";

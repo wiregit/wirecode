@@ -80,4 +80,15 @@ public class ConstantHTTPHeaderValue implements HTTPHeaderValue {
         new ConstantHTTPHeaderValue(
             HTTPConstants.G2_PROTOCOL + "/" + HTTPConstants.G2_VERSION
         );
+    
+    public static final HTTPHeaderValue PUSH_LOCS_FEATURE =
+    	new ConstantHTTPHeaderValue(
+    			HTTPConstants.PUSH_LOCS + "/" + HTTPConstants.PUSH_LOCS_VERSION
+        );
+    
+    public static final HTTPHeaderValue FWT_PUSH_LOCS_FEATURE =
+    	new ConstantHTTPHeaderValue(
+    			HTTPConstants.FWT_PUSH_LOCS + "/" + HTTPConstants.FWT_PUSH_LOCS_VERSION
+        );
+    			
 }
