@@ -28,12 +28,13 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testLegacy() throws Exception {
-        doTest("downloads_233.dat");
+        doTest("downloads_30.dat","mpg4_golem160x90first120.avi",2777638);
+        doTest("downloads_233.dat", "Test1.mp3", 1922612);
         //doTest("downloads_224.dat");  //Has XML serialization problem
         //doTest("downloads_202.dat");  //Has XML serialization problem
     }
 
-    private void doTest(String file) throws Exception {
+    private void doTest(String file,String name,int size) throws Exception {
         DownloadTest.debug("-Trying to read downloads.dat from \""+file+"\"");
 
         //Build part of backend 
@@ -50,9 +51,9 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
              1, callback.downloaders.size());
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);
         assertEquals("unexpected filename",
-             "Test1.mp3", md.getFileName());
+             name, md.getFileName());
         assertEquals("unexpected content length!",
-             1922612, md.getContentLength());
+             size, md.getContentLength());
     }
     
     /**
