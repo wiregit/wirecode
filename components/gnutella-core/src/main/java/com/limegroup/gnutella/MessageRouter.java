@@ -17,6 +17,9 @@ import java.net.*;
  */
 public abstract class MessageRouter
 {
+
+    public static final boolean UNICAST_MODE = false;
+
     protected ConnectionManager _manager;
     protected Acceptor _acceptor;
 
@@ -420,7 +423,7 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest queryRequest)
     {
         _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        boolean shouldUnicastRequest = _manager.isSupernode() && false;
+        boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
         if (shouldUnicastRequest) 
             unicastQueryRequest(queryRequest);
         else
@@ -529,19 +532,25 @@ public abstract class MessageRouter
 										 ReplyHandler receivingConnection,
 										 ConnectionManager manager)
     {
-        // Note the use of initializedConnections only.
-        // Note that we have zero allocations here.
-        
-        //Broadcast the query to other connected nodes (supernodes or older
-        //nodes), but DON'T forward any queries not originating from me (i.e.,
-        //receivingConnection!=null) along leaf to ultrapeer connections.
-        List list=_manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++){
-            ManagedConnection c = (ManagedConnection)list.get(i);
-            if (   receivingConnection==null   //came from me
-                || (c!=receivingConnection
-                     && !c.isClientSupernodeConnection())) {
-                sendQueryRequest(queryRequest, c, receivingConnection);
+
+        boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
+        if (shouldUnicastRequest) 
+            unicastQueryRequest(queryRequest);
+        else {
+            // Note the use of initializedConnections only.
+            // Note that we have zero allocations here.
+            
+            //Broadcast the query to other connected nodes (supernodes or older
+            //nodes), but DON'T forward any queries not originating from me (i.e.,
+            //receivingConnection!=null) along leaf to ultrapeer connections.
+            List list=_manager.getInitializedConnections2();
+            for(int i=0; i<list.size(); i++){
+                ManagedConnection c = (ManagedConnection)list.get(i);
+                if (   receivingConnection==null   //came from me
+                       || (c!=receivingConnection
+                           && !c.isClientSupernodeConnection())) {
+                    sendQueryRequest(queryRequest, c, receivingConnection);
+                }
             }
         }
 	}
