@@ -46,7 +46,6 @@ public class MulticastTest extends BaseTestCase {
         settings.setBannedIps(new String[] {"*.*.*.*"});
         // Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
-        // TODO: make this work for people not in 10.254.x.x
         settings.setAllowedIps(new String[] {ip});
         settings.setPort(PORT);
         settings.setExtensions("mp3;");
