@@ -197,7 +197,7 @@ public final class SearchResultHandler {
             LimeXMLDocument doc = null;
             // If there was no XML in the response itself, try to create
             // a doc from the EQHD.
-            if(xmlCollectionString!=null && xmlCollectionString.equals("")) {
+            if(xmlCollectionString!=null && !xmlCollectionString.equals("")) {
                 // The RFD is only going to use one doc, so only
                 // take one.
                 LimeXMLDocument[] metaDocs;
