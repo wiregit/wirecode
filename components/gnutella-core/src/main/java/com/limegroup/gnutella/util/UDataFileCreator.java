@@ -134,7 +134,7 @@ public class UDataFileCreator {
                                 java.util.BitSet replaceWithSpace) {
         String[] parts = StringUtils.splitNoCoalesce(line, ";");
         if(parts[0].equals("FFEE")) return false;
-        if(parts[2].charAt(0) == 'P') {
+        if(parts[2].charAt(0) == 'P' || parts[2].equals("Zs")) {
             //puctuations should be mostly be replaces with \u0020 (space).
             //except for apostraphes
             if(excludedPClass(parts[0])) {
