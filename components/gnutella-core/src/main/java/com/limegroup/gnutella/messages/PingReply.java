@@ -30,6 +30,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
@@ -1228,9 +1229,9 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Unzips data about UDP host caches & returns a list of'm.
      */
     private List unzipAndListCaches(byte[] data) {
+        GZIPInputStream in = null;
         try {
-            GZIPInputStream in = new GZIPInputStream(
-                                    new ByteArrayInputStream(data));
+            in = new GZIPInputStream(new ByteArrayInputStream(data));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[64];
             while(true) {
@@ -1272,7 +1273,10 @@ public class PingReply extends Message implements Serializable, IpPort {
                 }
             }
             return Collections.unmodifiableList(theCaches);
-        } catch(IOException ioe) { }
+        } catch(IOException ioe) {
+        } finally {
+            IOUtils.close(in);
+        }
         return Collections.EMPTY_LIST;
     }
 

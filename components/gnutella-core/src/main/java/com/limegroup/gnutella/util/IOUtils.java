@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.limegroup.gnutella.MessageService;
 
@@ -114,6 +115,22 @@ public class IOUtils {
     	        skipped += current;
     	}
     	return skipped;
+    }
+    
+    public static void close(InputStream in) {
+        if(in != null) {
+            try {
+                in.close();
+            } catch(IOException ignored) {}
+        }
+    }
+    
+    public static void close(OutputStream out) {
+        if(out != null) {
+            try {
+                out.close();
+            } catch(IOException ignored) {}
+        }
     }
 
 
