@@ -64,7 +64,8 @@ public abstract class DefaultHeaders extends Properties {
         props.put(HeaderNames.X_PONG_CACHING, "0.1");
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
-        if(!latestVersion.equals("@version@"))//don't send header for @version@
+        // don't send null versions or @version@ versions.
+        if(latestVersion != null && !latestVersion.equals("@version@"))
             props.put(HeaderNames.X_VERSION, latestVersion);
     }
     

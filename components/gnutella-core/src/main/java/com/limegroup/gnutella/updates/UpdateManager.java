@@ -49,12 +49,13 @@ public class UpdateManager {
      * safe for the constructor to set these two values for the whole session.
      */
     private UpdateManager() {
+        RandomAccessFile raf = null;
         try {
-            File file = new File(CommonUtils.getUserSettingsDir(),"update.xml");
-            RandomAccessFile f=new RandomAccessFile(file,"r");
-            byte[] content = new byte[(int)f.length()];
-            f.readFully(content);
-            f.close();
+            File file =
+                new File(CommonUtils.getUserSettingsDir(),"update.xml");
+            raf = new RandomAccessFile(file,"r");
+            byte[] content = new byte[(int)raf.length()];
+            raf.readFully(content);
             //we dont really need to verify, but we may as well...so here goes.
             UpdateMessageVerifier verifier = new UpdateMessageVerifier(content);
             boolean verified = verifier.verifySource();
@@ -71,7 +72,13 @@ public class UpdateManager {
             latestVersion = CommonUtils.getLimeWireVersion();
         } catch(IOException iox) {
             latestVersion = CommonUtils.getLimeWireVersion();
-        } 
+        } finally {
+            if(raf != null) {
+                try {
+                    raf.close();
+                } catch(IOException ignored) {}
+            }
+        }
     }
     
     public static synchronized UpdateManager instance() {
@@ -232,12 +239,16 @@ public class UpdateManager {
         int n1, n2 = -1;
         try {
             StringTokenizer tokenizer = new StringTokenizer(oldVer,".");
+            if(tokenizer.countTokens() < 2)
+                return false;
             o1 = (new Integer(tokenizer.nextToken())).intValue();
             o2 = (new Integer(tokenizer.nextToken())).intValue();
             tokenizer = new StringTokenizer(newVer,".");
+            if(tokenizer.countTokens() < 2)
+                return false;
             n1 = (new Integer(tokenizer.nextToken())).intValue();
             n2 = (new Integer(tokenizer.nextToken())).intValue();
-        } catch (Exception e) {//numberFormat or NoSuchElementException
+        } catch(NumberFormatException nfe) {
             return false;
         }
         if(n1>o1)
@@ -253,9 +264,17 @@ public class UpdateManager {
     private void commitVersionFile(byte[] data) throws IOException {
         File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
         File nf = new File(CommonUtils.getUserSettingsDir(),"update.new");
-        RandomAccessFile raf = new RandomAccessFile(nf,"rw");
-        raf.write(data);
-        raf.close();
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(nf,"rw");
+            raf.write(data);
+        } finally {
+            if(raf != null) {
+                try {
+                    raf.close();
+                } catch(IOException ignored) {}
+            }
+        }
         boolean deleteOld = f.delete();
         if(deleteOld) {
             boolean renamed = nf.renameTo(f);//dont update latestVersion
