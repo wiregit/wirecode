@@ -369,6 +369,33 @@ public class MetaFileManager extends FileManager {
                 words.add(schemas[i]);        
         return words;
     }
+    
+    /**
+     * returns the document corresponding to the schame and the file
+     * passed as parametere. 
+     * <p>
+     * Returns null if the document is not found in the schema
+     */
+    public LimeXMLDocument getDocument(String schemaURI, File f){
+        String hash = null;
+        hash = readFromMap(f,true);//try mp3 first
+        if(hash == null){//not mp3...try non mp3
+            //System.out.println("Sumeet hashNot found with mp3");
+            hash = readFromMap(f, false);
+        }
+        if (hash==null){//still null? return null
+            //System.out.println("Sumeet hashNot found...returning");
+            return null;
+        }
+        //OK we have the hash now
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        LimeXMLReplyCollection coll = map.getReplyCollection(schemaURI);
+        if(coll==null){//lets be defensive
+            //System.out.println("Collection is null...returning");
+            return null;
+        }
+        return coll.getDocForHash(hash);
+    }
 
 
     /**
