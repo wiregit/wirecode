@@ -11,49 +11,49 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * This class manages the property settings.  It maintains default 
- * settings for values not set in the saved settings files and 
- * updates those settings based on user input, checking for errors 
- * where appropriate.  It also saves the settings file to disk when 
- * the session terminates.  Any properties that should persist between 
+ * This class manages the property settings.  It maintains default
+ * settings for values not set in the saved settings files and
+ * updates those settings based on user input, checking for errors
+ * where appropriate.  It also saves the settings file to disk when
+ * the session terminates.  Any properties that should persist between
  * user sessions should be added here.<p>
  *
  * Adding a new property is a bit cumbersome at first, but it's not so bad
- * once you get used to it.  Below are the steps that were necessary to 
- * add the property for whether or not to automatically connect to the 
+ * once you get used to it.  Below are the steps that were necessary to
+ * add the property for whether or not to automatically connect to the
  * network on startup. This should be used as a general outline for adding
  * more properties.<p>
  *
- * <ol> 
- *      <li>Add a default value for the property using the general naming 
- *          convention of DEFAULT_MY_PROPERTY_NAME for the constant, as 
+ * <ol>
+ *      <li>Add a default value for the property using the general naming
+ *          convention of DEFAULT_MY_PROPERTY_NAME for the constant, as
  *          illustrated below:<p>
  *
  *          private final boolean DEFAULT_CONNECT_ON_STARTUP = true;<p>
  *
- *      <li>Once this is added, the properties file also needs a key name to 
+ *      <li>Once this is added, the properties file also needs a key name to
  *          identify this property in the limewire.props file, as in:<p>
- * 
+ *
  *          private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";<p>
- *   
- *          Using human readable keys is useful if you want to allow developers 
+ *
+ *          Using human readable keys is useful if you want to allow developers
  *          (or savvy users) to easily modify the properties file.<p>
  *
  *      <li>The next step is to add accessors and mutator methods for the
  *          property.  This requires accessing the "PROPS" constant for the
  *          <tt>Properties</tt> class that loads the limewire.props file on
  *          startup.  While the <tt>Properties</tt> class is one of the most
- *          notoriously poorly designed clases in the JRE (it extends  
- *          Hashtable -- that can't be good!), we don't have a lot of other  
- *          options (ok, theres the preferences package in 1.4, but an 8MB 
- *          download?).  You will notice that we use the deprecated put() 
- *          method of the <tt>Properties</tt> class as well, but we only do 
- *          this to remain compatible with the 1.1.8 JRE available on the  
+ *          notoriously poorly designed clases in the JRE (it extends
+ *          Hashtable -- that can't be good!), we don't have a lot of other
+ *          options (ok, theres the preferences package in 1.4, but an 8MB
+ *          download?).  You will notice that we use the deprecated put()
+ *          method of the <tt>Properties</tt> class as well, but we only do
+ *          this to remain compatible with the 1.1.8 JRE available on the
  *          Mac.<p>
- *          
- *          So, getting back to our example, for our "connect on startup" 
+ *
+ *          So, getting back to our example, for our "connect on startup"
  *          property, we simply added the accessor:<p>
- *  
+ *
  *          public boolean getConnectOnStartup() {
  * 		        return getBooleanValue(CONNECT_ON_STARTUP);
  *          }<p>
@@ -66,8 +66,8 @@ import com.limegroup.gnutella.util.CommonUtils;
  *
  *          Notice that this is where the constant key for the property
  *          gets put to good use (CONNECT_ON_STARTUP).<p>
- *      
- *      <li>The final step is to handle loading the property on startup.  
+ *
+ *      <li>The final step is to handle loading the property on startup.
  *          This is done in two private methods.  First, the "loadDefaults"
  *          method loads all of the default values for the properties.  For
  *          our example property, we simply added the line:<p>
@@ -77,17 +77,17 @@ import com.limegroup.gnutella.util.CommonUtils;
  *          to the end of the loadDefaults() method.  Finally, we need to add
  *          the call to set the property from the file (which will overwrite
  *          the default if the property exists in limewire.props).  This
- *          is done in the "validateFile()" method.  In this example, we 
+ *          is done in the "validateFile()" method.  In this example, we
  *          added the lines:<p>
  *
  *          else if(key.equals(CONNECT_ON_STARTUP)) {
  *              setConnectOnStartup((new Boolean(p)).booleanValue());
  *			}
  *
- *          Once you've done this, you're done.  Now that was, ahh, easy right?                    
+ *          Once you've done this, you're done.  Now that was, ahh, easy right?
  * </ol><p>
  *
- * The one major exception to the above set of rules is the case where you 
+ * The one major exception to the above set of rules is the case where you
  * are adding a property that will be accessed extremely frequently.  In this
  * case, you probably want to cache the value in a local variable instead of
  * looking it up in the PROPS constant each time.  There are many examples
@@ -107,24 +107,24 @@ public final class SettingsManager {
 	/**
 	 * Name of the host list file.
 	 */
-	private final String HOST_LIST_NAME = "gnutella.net";	
+	private final String HOST_LIST_NAME = "gnutella.net";
 
-    /** 
-	 * Default name for the properties file 
+    /**
+	 * Default name for the properties file
 	 */
     private final String PROPS_NAME = "limewire.props";
 
-    /** 
-	 * Default name for the network discovery properties 
+    /**
+	 * Default name for the network discovery properties
 	 */
     private final String ND_PROPS_NAME  = "nd.props";
-    
+
     /**
      * Constant <tt>File</tt> instance for the properties file
      */
-    private final File PROPS_FILE = 
+    private final File PROPS_FILE =
         new File(CommonUtils.getUserSettingsDir(), PROPS_NAME);
-        
+
     /**
      * Time interval, after which the accumulated information expires
      */
@@ -158,7 +158,7 @@ public final class SettingsManager {
     private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default time to expire incomplete files, in days. */
     private final int     DEFAULT_INCOMPLETE_PURGE_TIME = 7;
-    
+
     private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
     private final String SERVANT_TYPE          = "SERVANT_TYPE";
 
@@ -179,10 +179,10 @@ public final class SettingsManager {
     /** Use quick connect hosts instead of gnutella.net? */
     private final boolean DEFAULT_USE_QUICK_CONNECT = true;
 	/** This is limewire's public pong cache */
-    public static final String  DEFAULT_LIMEWIRE_ROUTER = 
+    public static final String  DEFAULT_LIMEWIRE_ROUTER =
 	  "router.limewire.com";
 	/** This is limewire's dedicated pong cache */
-    public static final String DEDICATED_LIMEWIRE_ROUTER = 
+    public static final String DEDICATED_LIMEWIRE_ROUTER =
 	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
     /** List of hosts to try on quick connect */
     private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
@@ -201,9 +201,9 @@ public final class SettingsManager {
     private final int     DEFAULT_SOFT_MAX_UPLOADS = 5;
     private final boolean DEFAULT_CLEAR_UPLOAD     = true;
     private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
-    public static final String  DEFAULT_CONNECT_STRING    
+    public static final String  DEFAULT_CONNECT_STRING
 		= "GNUTELLA CONNECT/0.4";
-    private final String  DEFAULT_CONNECT_OK_STRING 
+    private final String  DEFAULT_CONNECT_OK_STRING
 		= "GNUTELLA OK";
     private final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     private final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
@@ -220,10 +220,10 @@ public final class SettingsManager {
 	 * set at 20 minutes.
 	 */
 	private final long    DEFAULT_AVERAGE_UPTIME      = 20*60;
-	
+
 	/**
 	 * Default total amount of time the application has been run,
-	 * set at 20 minutes to begin with, based on the default 
+	 * set at 20 minutes to begin with, based on the default
 	 * setting of having been run for one session for the
 	 * average number of seconds.
 	 */
@@ -243,41 +243,41 @@ public final class SettingsManager {
 	 * Default value for whether or not the application is minimized
 	 * to the SystemTray when the user exits.  This flag is initialized
 	 * to true only if the user platform supports the SystemTray, making
-	 * minimize to tray the default shutdown behavior on tray enabled 
-	 * systems.  DEFAULT_MINIMIZE_TO_TRAY is the logical complement of 
-	 * DEFAULT_SHUTDOWN_AFTER_TRANSFERS insuring that only one default 
+	 * minimize to tray the default shutdown behavior on tray enabled
+	 * systems.  DEFAULT_MINIMIZE_TO_TRAY is the logical complement of
+	 * DEFAULT_SHUTDOWN_AFTER_TRANSFERS insuring that only one default
 	 * shutdown operation is set.
-	 */ 
-	private final boolean DEFAULT_MINIMIZE_TO_TRAY = 
+	 */
+	private final boolean DEFAULT_MINIMIZE_TO_TRAY =
 		CommonUtils.supportsTray();
-	
+
 	/**
 	 * Default value for whether or not the application waits until
-	 * transfers in progress are complete before shutting down.  This 
-	 * flag is initialized to true only if the user platform does not 
-	 * support the system tray, making shutdown after transfers the 
-	 * default shutdown behavior on systems which DO NOT support the 
-	 * SystemTray.  DEFAULT_SHUTDOWN_AFTER_TRANSFERS is the logical 
-	 * complement of DEFAULT_MINIMIZE_TO_TRAY insuring that only one 
+	 * transfers in progress are complete before shutting down.  This
+	 * flag is initialized to true only if the user platform does not
+	 * support the system tray, making shutdown after transfers the
+	 * default shutdown behavior on systems which DO NOT support the
+	 * SystemTray.  DEFAULT_SHUTDOWN_AFTER_TRANSFERS is the logical
+	 * complement of DEFAULT_MINIMIZE_TO_TRAY insuring that only one
 	 * default shutdown operation is set.
-	 */ 
-	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
+	 */
+	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS =
 		!DEFAULT_MINIMIZE_TO_TRAY;
-        
-	public static final String  DEFAULT_CLASSPATH           
-		= "LimeWire.jar" + File.pathSeparator + 
-		"collections.jar" + File.pathSeparator + 
-		"xerces.jar" + File.pathSeparator + 
+
+	public static final String  DEFAULT_CLASSPATH
+		= "LimeWire.jar" + File.pathSeparator +
+		"collections.jar" + File.pathSeparator +
+		"xerces.jar" + File.pathSeparator +
 		"jl011.jar";
-	private final String  DEFAULT_MAIN_CLASS           
+	private final String  DEFAULT_MAIN_CLASS
 		= "com.limegroup.gnutella.gui.Main";
-	
+
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
 	private final String DEFAULT_COUNTRY              = "";
-	
+
     private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
     private final boolean DEFAULT_CONNECTION_VIEW_ENABLED = false;
     private final boolean DEFAULT_LIBRARY_VIEW_ENABLED = true;
@@ -287,26 +287,26 @@ public final class SettingsManager {
 	 * has ever been established.
 	 */
 	private final boolean DEFAULT_EVER_ACCEPTED_INCOMING = false;
-    
+
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
-    
+
     //authentication settings
-    private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
+    private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY
         = false;
-    private final String DEFAULT_COOKIES_FILE 
+    private final String DEFAULT_COOKIES_FILE
         = "lib" + File.separator + "Cookies.dat";
-    
+
     /** Specifies if the node is acting as server */
-    private final boolean DEFAULT_SERVER = false;  
+    private final boolean DEFAULT_SERVER = false;
 
 	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
 	 */
 	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 2;
-	
+
 	/**
 	 * Value for the default minimum speed to allow in search results.
 	 */
@@ -317,7 +317,7 @@ public final class SettingsManager {
 	 * per second upstream.
 	 */
 	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
-    
+
     /**
      * Constant default value for whether or not this node has ever been
      * considered "supernode capable," meaning that it has met all of the
@@ -348,14 +348,14 @@ public final class SettingsManager {
 	 * network on startup.
 	 */
 	private final boolean DEFAULT_CONNECT_ON_STARTUP = true;
-    
+
     /**
      * The time when we last expired accumulated information
      */
     private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
 
 	/**
-	 * Constant for the default status of whether or not Cydoor 
+	 * Constant for the default status of whether or not Cydoor
 	 * is installed on this machine.
 	 */
 	private final boolean DEFAULT_CYDOOR_INSTALLER_CALLED = false;
@@ -364,20 +364,26 @@ public final class SettingsManager {
 	 * Constant for the default ads version.
 	 */
 	private final String DEFAULT_AD_VERSION = "1.0";
-	
+
 	/**
 	 * Constant for the default save directory.
 	 */
-	private final File DEFAULT_SAVE_DIRECTORY = 
+	private final File DEFAULT_SAVE_DIRECTORY =
 	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
-	    
-	/** 
-	 * Default directories for file searching. 
+
+	/**
+	 * Constant for the skin theme pack
 	 */
-    private final String  DEFAULT_DIRECTORIES = 
+	private final String DEFAULT_SKIN_THEME = "";
+
+
+	/**
+	 * Default directories for file searching.
+	 */
+    private final String  DEFAULT_DIRECTORIES =
         DEFAULT_SAVE_DIRECTORY.getAbsolutePath();
-    
-    /** 
+
+    /**
      * Default file extensions.
      */
     private final String  DEFAULT_EXTENSIONS =
@@ -385,7 +391,7 @@ public final class SettingsManager {
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
 		"bin;dmg;jve";
-    
+
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
     private final String TTL                   = "TTL";
@@ -401,16 +407,16 @@ public final class SettingsManager {
     private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
     private final String SEARCH_LIMIT          = "SEARCH_LIMIT";
     private final String CLIENT_ID             = "CLIENT_ID";
-    private final String MAX_INCOMING_CONNECTIONS 
+    private final String MAX_INCOMING_CONNECTIONS
 		= "MAX_INCOMING_CONNECTIONS";
-    private final String SAVE_DIRECTORY 
+    private final String SAVE_DIRECTORY
 		= "DIRECTORY_FOR_SAVING_FILES";
     private final String INCOMPLETE_PURGE_TIME = "INCOMPLETE_PURGE_TIME";
     private final String DIRECTORIES
 		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
-    private final String EXTENSIONS            
+    private final String EXTENSIONS
 		= "EXTENSIONS_TO_SEARCH_FOR";
-    private final String BANNED_IPS            
+    private final String BANNED_IPS
 		= "BLACK_LISTED_IP_ADDRESSES";
     private final String BANNED_WORDS          = "BANNED_WORDS";
     private final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
@@ -418,7 +424,7 @@ public final class SettingsManager {
     private final String FILTER_HTML           = "FILTER_HTML";
     private final String FILTER_VBS            = "FILTER_VBS";
     private final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
-    private final String FILTER_BEARSHARE_QUERIES 
+    private final String FILTER_BEARSHARE_QUERIES
 		= "FILTER_HIGHBIT_QUERIES";
     private final String USE_QUICK_CONNECT     = "USE_QUICK_CONNECT";
     private final String QUICK_CONNECT_HOSTS   = "QUICK_CONNECT_HOSTS";
@@ -497,27 +503,27 @@ public final class SettingsManager {
 	 * Constant key for the country.
 	 */
 	private final String COUNTRY = "COUNTRY";
-    
+
     //settings for Supernode implementation
-    private final String MAX_SHIELDED_CLIENT_CONNECTIONS 
+    private final String MAX_SHIELDED_CLIENT_CONNECTIONS
        = "MAX_SHIELDED_CLIENT_CONNECTIONS";
-    private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
+    private final String MIN_SHIELDED_CLIENT_CONNECTIONS
        = "MIN_SHIELDED_CLIENT_CONNECTIONS";
 
-    
+
     //authentication settings
     private final String ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY
         = "ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY";
-    
+
     /**
-     * The property that denotes the file that stores the 
+     * The property that denotes the file that stores the
      * Schema Transformation DataMap
      */
     private final String COOKIES_FILE = "COOKIES_FILE";
-    
+
     /** Specifies if the node is acting as server */
     private final String SERVER = "SERVER";
-    
+
 	/**
 	 * Constant key for the minimum quality to allow in search results.
 	 */
@@ -534,23 +540,23 @@ public final class SettingsManager {
 	 * Constant key for the whether or not an incoming connection has
 	 * ever been accepted accross all sessions.
 	 */
-	private final String EVER_ACCEPTED_INCOMING = 
+	private final String EVER_ACCEPTED_INCOMING =
 		"EVER_ACCEPTED_INCOMING";
-	
+
 	/**
 	 * Constant key for the maximum number of bytes per second ever passed
 	 * upstream.
 	 */
-	private final String MAX_UPSTREAM_BYTES_PER_SEC = 
+	private final String MAX_UPSTREAM_BYTES_PER_SEC =
 		"MAX_UPLOAD_BYTES_PER_SEC";
 
 	/**
 	 * Constant key for the maximum number of bytes per second ever passed
 	 * downstream.
 	 */
-	private final String MAX_DOWNSTREAM_BYTES_PER_SEC = 
+	private final String MAX_DOWNSTREAM_BYTES_PER_SEC =
 		"MAX_DOWNLOAD_BYTES_PER_SEC";
-    
+
     /**
      * Constant key for whether or not this node has ever been considered
      * "supernode capable" across all sessions.
@@ -567,7 +573,7 @@ public final class SettingsManager {
 	 * Constant key for whether or not to connect on startup.
 	 */
 	private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";
-    
+
     /**
      * Property that denotes the time when we last expired accumulated
      * information
@@ -579,11 +585,17 @@ public final class SettingsManager {
 	 * machine.
 	 */
 	private final String CYDOOR_INSTALLER_CALLED = "CYDOOR_INSTALLER_CALLED";
- 
+
 	/**
 	 * Constant for the key for the current ads version.
 	 */
-	private final String AD_VERSION = "AD_VERSION"; 
+	private final String AD_VERSION = "AD_VERSION";
+
+	/**
+	 * Constant for the key for the current ads version.
+	 */
+	private final String SKIN_THEME = "SKIN_THEME";
+
 
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -627,8 +639,8 @@ public final class SettingsManager {
     private volatile int      _softMaxUploads;
     private volatile int      _uploadsPerPerson;
 
-	private volatile boolean  _chatEnabled;          
-	private volatile boolean  _playerEnabled;          
+	private volatile boolean  _chatEnabled;
+	private volatile boolean  _playerEnabled;
 
     private volatile boolean  _monitorViewEnabled;
     private volatile boolean  _connectionViewEnabled;
@@ -636,7 +648,7 @@ public final class SettingsManager {
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
-     *  INVARIANT: connectString_=connectStringFirstWord_+" 
+     *  INVARIANT: connectString_=connectStringFirstWord_+"
      *             "+connectStringRemainder_
      *             connectString!=""
      *             connectStringFirstWord does not contain spaces
@@ -652,7 +664,7 @@ public final class SettingsManager {
 	private volatile long     _averageUptime;
 	private volatile long     _totalUptime;
 	private volatile int      _sessions;
-	
+
 	private volatile boolean  _installed;
 	private volatile boolean  _acceptedIncoming = false;
 
@@ -668,16 +680,16 @@ public final class SettingsManager {
 
     /** Specifies if the node is acting as server */
     private volatile boolean _server;
-   
-    /** 
+
+    /**
 	 * Constant member variable for the main <tt>Properties</tt> instance.
 	 */
     private final Properties PROPS = new Properties();
 
-    /** 
+    /**
 	 * Specialized constant properties file for the network discoverer.
      */
-    private final Properties ND_PROPS = new Properties();;    
+    private final Properties ND_PROPS = new Properties();;
 
     /**
      * Set up the manager instance to follow the singleton pattern.
@@ -693,12 +705,12 @@ public final class SettingsManager {
         return INSTANCE;
     }
 
-    /** 
-	 * Private constructor to ensure that this can only be constructed 
+    /**
+	 * Private constructor to ensure that this can only be constructed
 	 * from inside this class.
      */
-    private SettingsManager() {	
-        // load the specialized property file for network discovery	
+    private SettingsManager() {
+        // load the specialized property file for network discovery
         FileInputStream ndfis;
         try {
             ndfis = new FileInputStream(new File(ND_PROPS_NAME));
@@ -707,7 +719,7 @@ public final class SettingsManager {
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
-        
+
         // load the main application properties file
         Properties tempProps = new Properties();
         FileInputStream fis;
@@ -720,15 +732,15 @@ public final class SettingsManager {
                     fis.close();
                     validateFile(tempProps);
                 } catch(IOException e) {
-			        // error closing the file, so continue using the 
+			        // error closing the file, so continue using the
 			        // defaults.
 				}
             } catch(IOException e){loadDefaults();}
         }
         catch(FileNotFoundException fnfe){loadDefaults();}
         catch(SecurityException se){loadDefaults();}
-        
-        
+
+
         //reset the values that have expired
         resetExpiredValues();
     }
@@ -740,7 +752,7 @@ public final class SettingsManager {
         //if hasnt expired, return
         if(System.currentTimeMillis() - getLastExpireTime() < EXPIRY_INTERVAL)
             return;
-        
+
         //change the last expired time
         setLastExpireTime(System.currentTimeMillis());
         //reset the expired values;
@@ -750,8 +762,8 @@ public final class SettingsManager {
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
         setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
     }
-    
-    /** 
+
+    /**
 	 * Sets all of the properties manually to ensure that each
 	 * property is valid.
 	 *
@@ -771,7 +783,7 @@ public final class SettingsManager {
                     setTTL(Byte.parseByte(p));
                 }
 				else if(key.equals(ALLOW_BROWSER)) {
-					boolean bs;  
+					boolean bs;
 					if (p.equals("true"))
                         bs=true;
                     else if (p.equals("false"))
@@ -794,7 +806,7 @@ public final class SettingsManager {
                 }
                 else if(key.equals(MAX_SIM_DOWNLOAD)) {
                     setMaxSimDownload(Integer.parseInt(p));
-                } 
+                }
                 else if(key.equals(PROMPT_EXE_DOWNLOAD)) {
                     boolean bs;
                     if (p.equals("true"))
@@ -926,7 +938,7 @@ public final class SettingsManager {
                 else if(key.equals(INCOMPLETE_PURGE_TIME)) {
                     setIncompletePurgeTime(Integer.parseInt(p));
                 }
-                
+
                 else if(key.equals(DIRECTORIES)) {
                     setDirectories(p);
                 }
@@ -1095,7 +1107,7 @@ public final class SettingsManager {
 				else if(key.equals(WINDOW_Y)) {
 					setWindowY(Integer.parseInt(p));
 				}
-                
+
 				else if(key.equals(MINIMIZE_TO_TRAY)) {
 					Boolean minimize = new Boolean(p);
 					setMinimizeToTray(minimize.booleanValue());
@@ -1174,6 +1186,10 @@ public final class SettingsManager {
 				else if(key.equals(AD_VERSION)) {
 					setAdVersion(p);
 				}
+				else if(key.equals(SKIN_THEME)) {
+					setSkinTheme(p);
+				}
+
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -1181,8 +1197,8 @@ public final class SettingsManager {
 		}
 	}
 
-    /** 
-	 * Load in the default values.  Any properties written to the real 
+    /**
+	 * Load in the default values.  Any properties written to the real
      * properties file will overwrite these. This method ensures that some
      * reasonable values are always loaded even in the case of any
      * failure in loading the properties file from disk.
@@ -1273,7 +1289,7 @@ public final class SettingsManager {
         setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
         setDisableSupernodeMode(DEFAULT_DISABLE_SUPERNODE_MODE);
 		setForceSupernodeMode(DEFAULT_FORCE_SUPERNODE_MODE);
-        
+
         //settings for Supernode implementation
         setMaxShieldedClientConnections(
             DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
@@ -1284,19 +1300,21 @@ public final class SettingsManager {
         setAcceptAuthenticatedConnectionsOnly(
             DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY);
         setCookiesFile(DEFAULT_COOKIES_FILE);
-        
+
         setServer(DEFAULT_SERVER);
 
-		setSessions(DEFAULT_SESSIONS);		
+		setSessions(DEFAULT_SESSIONS);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
-		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
+		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 
 		setCydoorInstalled(DEFAULT_CYDOOR_INSTALLER_CALLED);
 		setAdVersion(DEFAULT_AD_VERSION);
-		
+
+		setSkinTheme(DEFAULT_SKIN_THEME);
+
 		try {
 		    setSaveDirectory(DEFAULT_SAVE_DIRECTORY);
 		} catch(IOException e) {
@@ -1308,7 +1326,7 @@ public final class SettingsManager {
     /**
 	 * Returns whether or not uploads to browsers should be allowed.
 	 *
-	 * @return <tt>true</tt> is uploads to browsers should be allowed, 
+	 * @return <tt>true</tt> is uploads to browsers should be allowed,
 	 *         <tt>false</tt> otherwise
 	 */
 	public boolean getAllowBrowser() {return _allowBroswer;}
@@ -1327,18 +1345,18 @@ public final class SettingsManager {
 
     /** Returns the timeout value*/
     public int getTimeout(){return _timeout;}
-    
+
     /** Returns the timeout value for persistent HTTP connections*/
     public int getPersistentHTTPConnectionTimeout(){
         return _persistentHTTPConnectionTimeout;
     }
 
-    /** 
-	 * Returns a string specifying the full pathname of the file listing 
-     * the hosts 
+    /**
+	 * Returns a string specifying the full pathname of the file listing
+     * the hosts
 	 */
     public String getHostList() {
-		return new File(HOST_LIST_NAME).getAbsolutePath();		
+		return new File(HOST_LIST_NAME).getAbsolutePath();
 	}
 
     /** Returns the keep alive value */
@@ -1362,7 +1380,7 @@ public final class SettingsManager {
 	/** Returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
-    /** 
+    /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving files.
 	 *
@@ -1370,13 +1388,13 @@ public final class SettingsManager {
 	 *          pathname of the save directory.
 	 *
 	 * @throws  <tt>FileNotFoundException</tt>
-	 *          If the incomplete directory is <tt>null</tt>.      
+	 *          If the incomplete directory is <tt>null</tt>.
 	 */
     public File getSaveDirectory() throws FileNotFoundException {
 		if(_saveDirectory == null) throw new FileNotFoundException();
 		return _saveDirectory;
 	}
-	
+
 	/**
 	 * Returns the <tt>File</tt> instance denoting the abstract pathname
 	 * of the default save directory.
@@ -1386,6 +1404,14 @@ public final class SettingsManager {
 	 */
 	public File getSaveDefault() {
 	    return DEFAULT_SAVE_DIRECTORY;
+	}
+
+	/**
+	 * Returns the path to the current theme, or the empty string if there
+	 * is no theme currently set.
+	 */
+	public String getSkinTheme() {
+		return getStringValue(SKIN_THEME);
 	}
 
 	/** Returns true if the chat is enabled */
@@ -1424,7 +1450,7 @@ public final class SettingsManager {
     }
 
 
-    /** 
+    /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving incomplete files.
 	 *
@@ -1432,7 +1458,7 @@ public final class SettingsManager {
 	 *          pathname of the directory for saving incomplete files.
 	 *
 	 * @throws  <tt>FileNotFoundException</tt>
-	 *          If the incomplete directory is <tt>null</tt>.      
+	 *          If the incomplete directory is <tt>null</tt>.
 	 */
     public File getIncompleteDirectory() throws FileNotFoundException {
 		if(_incompleteDirectory == null) throw new FileNotFoundException();
@@ -1445,7 +1471,7 @@ public final class SettingsManager {
         return _incompletePurgeTime;
     }
 
-    /** 
+    /**
 	 * Returns the directories to search as an array of <tt>File</tt>
 	 * instances.
 	 *
@@ -1458,7 +1484,7 @@ public final class SettingsManager {
 
 	/**
 	 * Returns an array of Strings of directory path names.  these are the
-	 * pathnames of the shared directories as well as the pathname of 
+	 * pathnames of the shared directories as well as the pathname of
 	 * the Incomplete directory.
      *
      * @return the array of <tt>File</tt> instances denoting the abstract
@@ -1478,13 +1504,13 @@ public final class SettingsManager {
             for(int i=0; i<_directories.length; i++) {
                 newFiles[i] = _directories[i];
             }
-		} catch(FileNotFoundException fnfe) {	
+		} catch(FileNotFoundException fnfe) {
             return _directories;
 		}
 		return newFiles;
 	}
-    
-    /** 
+
+    /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the file with a snapshot of current downloading files.
 	 *
@@ -1518,27 +1544,27 @@ public final class SettingsManager {
     /**
      * Returns an array of strings denoting the ip addresses that the
      * user has banned.
-     *  
+     *
      * @return an array of strings denoting banned ip addresses
      */
     public String[] getBannedIps(){return _bannedIps;}
-    
+
     /**
      * Returns an array of strings denoting words that the user has banned.
-     *  
+     *
      * @return an array of strings that the user has banned
      */
     public String[] getBannedWords(){return _bannedWords;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not "adult
      * content" should be filtered from search results.
      *
-     * @return <tt>true</tt> if adult content should be filtered out, 
+     * @return <tt>true</tt> if adult content should be filtered out,
      *         <tt>false</tt> otherwise
      */
     public boolean getFilterAdult(){return _filterAdult;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not duplicate
      * search results should be filtered out.
@@ -1547,7 +1573,7 @@ public final class SettingsManager {
      *         otherwise
      */
     public boolean getFilterDuplicates(){return _filterDuplicates;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not html search
      * results should be filtered out.
@@ -1556,7 +1582,7 @@ public final class SettingsManager {
      *         otherwise
      */
     public boolean getFilterHtml(){return _filterHtml;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not vbs search
      * results should be filtered out.
@@ -1565,59 +1591,59 @@ public final class SettingsManager {
      *         otherwise
      */
     public boolean getFilterVbs(){return _filterVbs;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not "greedy"
      * queries, such as "mp3," should be filtered out.
      *
-     * @return <tt>true</tt> if greedy queries should be filtered, 
+     * @return <tt>true</tt> if greedy queries should be filtered,
      *         <tt>false</tt> otherwise
      */
     public boolean getFilterGreedyQueries() {return _filterGreedyQueries;}
-    
+
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not "bearshare"
      * queries should be filtered out.
      *
-     * @return <tt>true</tt> if bearshare queries should be filtered, 
+     * @return <tt>true</tt> if bearshare queries should be filtered,
      *         <tt>false</tt> otherwise
      */
     public boolean getFilterBearShareQueries() { return _filterBearShare; }
 
     /**
      * Returns a <tt>boolean</tt> value indicating whether or not automatic
-     * connection to the network via "quick connect" servers should be 
+     * connection to the network via "quick connect" servers should be
      * enables at startup.
      *
      * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
      *         otherwise
      */
     public boolean getUseQuickConnect(){return true;}
-    
+
     /**
      * Returns an array of servers to automatically connect to via "quick
      * connect" on startup.
-     * 
+     *
      * @return an array of servers to use for quickly connecting
      */
     public String[] getQuickConnectHosts(){return _quickConnectHosts;}
-    
+
     /**
      * Returns the number of simultaneous searches to allow before the oldest
      * search panes start getting dropped.
-     * 
+     *
      * @return the number of simultaneous searches to allow before the oldest
      *         search panes start getting dropped
      */
     public int getParallelSearchMax(){return _parallelSearchMax;}
-    
+
     /**
      * Returns the maximum number of simultaneous downloads to allow.
      *
      * @return the maximum number of simultaneous downloads to allow
      */
     public int getMaxSimDownload(){return _maxSimDownload;}
-    
+
     /**
      * Returns a <tt>boolean</tt> specifying whether or not the user should
      * be prompted prior to downloading an exe file.
@@ -1626,14 +1652,14 @@ public final class SettingsManager {
      *         otherwise
      */
     public boolean getPromptExeDownload(){return _promptExeDownload;}
-    
+
     /**
      * Returns the maximum number of simultaneous uploads to allow.
      *
      * @return the maximum number of simultaneous uploads to allow
      */
     public int getMaxUploads(){return _maxUploads;}
-        
+
     /**
      * Returns the "soft maximum number" of simultaneous uploads to allow.
      *
@@ -1646,45 +1672,45 @@ public final class SettingsManager {
      * Returns a <tt>boolean</tt> specifying whether or not completed uploads
      * should automatically be cleared from the upload window.
      *
-     * @return <tt>true</tt> if completed uploads should automatically be 
+     * @return <tt>true</tt> if completed uploads should automatically be
      *         cleared, <tt>false</tt> otherwise
      */
     public boolean getClearCompletedUpload(){return _clearCompletedUpload;}
-    
+
     /**
      * Returns a <tt>boolean</tt> specifying whether or not completed downloads
      * should automatically be cleared from the download window.
      *
-     * @return <tt>true</tt> if completed downloads should automatically be 
+     * @return <tt>true</tt> if completed downloads should automatically be
      *         cleared, <tt>false</tt> otherwise
      */
     public boolean getClearCompletedDownload(){return _clearCompletedDownload;}
 
     /**
-     * Returns the connect <tt>String</tt> to use when making Gnutella 
+     * Returns the connect <tt>String</tt> to use when making Gnutella
      * connections.
      *
-     * @return the connect <tt>String</tt> to use when making Gnutella 
+     * @return the connect <tt>String</tt> to use when making Gnutella
      * connections
      */
-    public String getConnectString() { 
-        return _connectString; 
+    public String getConnectString() {
+        return _connectString;
     }
-    
+
     /** Returns the first word of the connect string.
      *  This is solely a convenience routine. */
-    public String getConnectStringFirstWord() { 
-        return _connectStringFirstWord; 
+    public String getConnectStringFirstWord() {
+        return _connectStringFirstWord;
     }
-    
-    /** 
+
+    /**
      * Returns the remaining words of the connect string, without the leading
-     * space.  This is solely a convenience routine. 
+     * space.  This is solely a convenience routine.
      */
-    public String getConnectStringRemainder() { 
-        return _connectStringRemainder; 
+    public String getConnectStringRemainder() {
+        return _connectStringRemainder;
     }
-    
+
 	/**
 	 * Returns the string used for verifying a Gnutella connection.
 	 *
@@ -1697,8 +1723,8 @@ public final class SettingsManager {
     /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ND_PROPS;}
 
-    /** 
-	 * Returns the path of the properties and host list files. 
+    /**
+	 * Returns the path of the properties and host list files.
 	 */
     public String getPath() {
 		return CURRENT_DIRECTORY + File.separator;
@@ -1712,22 +1738,22 @@ public final class SettingsManager {
 		return _advancedQueryInfo;
 	}
 
-    /** 
-	 * Returns true iff this should force its IP address. 
+    /**
+	 * Returns true iff this should force its IP address.
 	 */
     public boolean getForceIPAddress() {
         return _forceIPAddress;
     }
 
-    /** 
-	 * Returns the forced IP address as an array of bytes. 
+    /**
+	 * Returns the forced IP address as an array of bytes.
 	 */
     public byte[] getForcedIPAddress() {
         return _forcedIPAddress;
     }
 
-    /** 
-	 * Returns the forced IP address in dotted-quad format. 
+    /**
+	 * Returns the forced IP address in dotted-quad format.
 	 */
     public String getForcedIPAddressString() {
         return Message.ip2string(_forcedIPAddress);
@@ -1765,7 +1791,7 @@ public final class SettingsManager {
 
 	/**
      * Returns the probability (expressed as a percentage) that an incoming
-     * freeloader will be accepted.  
+     * freeloader will be accepted.
 	 *
 	 * @return the probability (expressed as a percentage) that an incoming
      * freeloader will be accepted
@@ -1785,10 +1811,10 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Returns the total amount of time that this user has run 
+	 * Returns the total amount of time that this user has run
 	 * the application.
 	 *
-	 * @return the total amount of time that the user has run the 
+	 * @return the total amount of time that the user has run the
 	 *         the application over all sessions
 	 */
 	public long getTotalUptime() {
@@ -1804,9 +1830,9 @@ public final class SettingsManager {
 		return _sessions;
 	}
 
-	/** 
-	 * Returns a boolean indicating whether or not the program 
-	 * has been "installed," with the properties set correctly. 
+	/**
+	 * Returns a boolean indicating whether or not the program
+	 * has been "installed," with the properties set correctly.
 	 *
 	 * @return <tt>true</tt> if the application has been installed in some
 	 *         manner, either throw an installer or through our own
@@ -1833,7 +1859,7 @@ public final class SettingsManager {
 	public int getAppHeight() {
 		return Integer.parseInt(PROPS.getProperty(APP_HEIGHT));
 	}
-    
+
     /**
      * Returns the type of the servant: client, xml-client, server etc
      */
@@ -1842,7 +1868,7 @@ public final class SettingsManager {
     }
 
 	/**
-	 * Returns a <tt>boolean</tt> specifying whether or not the 
+	 * Returns a <tt>boolean</tt> specifying whether or not the
 	 * application has been run one time or not.
 	 *
 	 * @return <tt>true</tt> if the application has been run once before
@@ -1876,7 +1902,7 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Returns a boolean specifying whether or not to minimize 
+	 * Returns a boolean specifying whether or not to minimize
 	 * the application to the system tray.
 	 *
 	 * @return <tt>true</tt> if the application should be minimized to the
@@ -1902,7 +1928,7 @@ public final class SettingsManager {
 	 * Returns true is an incoming connection has ever been established
 	 * during this session.
 	 *
-	 * @return <tt>true</tt> if an incoming connection has been 
+	 * @return <tt>true</tt> if an incoming connection has been
 	 *         established during this session, <tt>false</tt> otherwise
 	 */
 	public boolean getAcceptedIncoming() {return _acceptedIncoming;}
@@ -1911,13 +1937,13 @@ public final class SettingsManager {
 	 * Returns whether or not an incoming connection has ever been accepted
 	 * over all sessions.
 	 *
-	 * @return <tt>true</tt> if an incoming connection has ever been 
+	 * @return <tt>true</tt> if an incoming connection has ever been
 	 *         established, <tt>false</tt> otherwise
 	 */
 	public boolean getEverAcceptedIncoming() {
 		return getBooleanValue(EVER_ACCEPTED_INCOMING);
 	}
-  
+
 	/**
 	 * Returns the classpath string used for loading jar files on startup.
 	 *
@@ -1927,7 +1953,7 @@ public final class SettingsManager {
 	public String getClassPath() {
 		return PROPS.getProperty(CLASSPATH);
 	}
-	
+
 	/**
 	 * Returns the main class to load on startup.
 	 *
@@ -1937,12 +1963,12 @@ public final class SettingsManager {
 	public String getMainClass() {
 		return PROPS.getProperty(MAIN_CLASS);
 	}
-	
+
 	/**
 	 * Returns a <tt>String</tt> instance specifying the language to use
 	 * for the application.
 	 *
-	 * @return a <tt>String</tt> specifying the language to use for the 
+	 * @return a <tt>String</tt> specifying the language to use for the
 	 *         application
 	 */
 	public String getLanguage() {
@@ -1953,7 +1979,7 @@ public final class SettingsManager {
 	 * Returns a <tt>String</tt> instance specifying the country to use
 	 * for the application.
 	 *
-	 * @return a <tt>String</tt> specifying the country to use for the 
+	 * @return a <tt>String</tt> specifying the country to use for the
 	 *         application
 	 */
 	public String getCountry() {
@@ -1979,7 +2005,7 @@ public final class SettingsManager {
 	public int getMinimumSearchSpeed() {
 		return getIntValue(MINIMUM_SEARCH_SPEED);
 	}
-	
+
 	/**
 	 * Returns the maximum number of upstream bytes per second ever
 	 * passed by this node.
@@ -2001,7 +2027,7 @@ public final class SettingsManager {
 	public int getMaxDownstreamBytesPerSec() {
 		return getIntValue(MAX_DOWNSTREAM_BYTES_PER_SEC);
 	}
-    
+
     //settings for Supernode implementation
     /**
      * Returns the maximum number of shielded connections to be supported by
@@ -2010,7 +2036,7 @@ public final class SettingsManager {
     public int getMaxShieldedClientConnections() {
         return _maxShieldedClientConnections;
     }
-    
+
     /**
      * Returns the minimum number of shielded connections to be supported by
      * the supernode
@@ -2020,7 +2046,7 @@ public final class SettingsManager {
     }
 
     /**
-     * Returns whether or not this node has ever met the requirements of 
+     * Returns whether or not this node has ever met the requirements of
      * a supernode, regardless of whether or not it actually acted as one.
      *
      * @return <tt>true</tt> if this node has ever met supernode requirements,
@@ -2029,7 +2055,7 @@ public final class SettingsManager {
     public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
     }
-    
+
     /** Returns true iff the user has disabled supernode mode. */
     public boolean getDisableSupernodeMode() {
         return getBooleanValue(DISABLE_SUPERNODE_MODE);
@@ -2050,7 +2076,7 @@ public final class SettingsManager {
 	public boolean getConnectOnStartup() {
 		return getBooleanValue(CONNECT_ON_STARTUP);
 	}
-    
+
 	/**
      * Returns The time when we last expired accumulated information
 	 * @return The time when we last expired accumulated information
@@ -2068,7 +2094,7 @@ public final class SettingsManager {
         return Boolean.valueOf(PROPS.getProperty(
             ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)).booleanValue();
     }
-    
+
     /**
      * Returns the name of the file that stores cookies
      * @return The name of the cookies file
@@ -2076,7 +2102,7 @@ public final class SettingsManager {
     public String getCookiesFile() {
         return PROPS.getProperty(COOKIES_FILE);
     }
-    
+
     /**
      * Tells whether the node is gonna be a supernode or not
      * @return true, if supernode, false otherwise
@@ -2084,7 +2110,7 @@ public final class SettingsManager {
     public boolean isServer() {
         return _server;
     }
-    
+
 	/**
 	 * Returns the version of the ads LimeWire is currently displaying.
 	 *
@@ -2094,7 +2120,7 @@ public final class SettingsManager {
 		return getStringValue(AD_VERSION);
 	}
 
-	/** 
+	/**
 	 * Updates the average, total, and current update settings based on
 	 * previous settings and the <tt>newTime</tt> argument for the number
 	 * of seconds that have passed since the last update.
@@ -2110,9 +2136,9 @@ public final class SettingsManager {
 		setAverageUptime(_averageUptime);
 	}
 
-	/**  
-	 * Sets the total number of times the application  has been run -- 
-	 * used in calculating the average amount of time this user 
+	/**
+	 * Sets the total number of times the application  has been run --
+	 * used in calculating the average amount of time this user
 	 * leaves the application on.
 	 *
 	 * @param sessions the total number of sessions that the application
@@ -2123,10 +2149,10 @@ public final class SettingsManager {
 		PROPS.put(SESSIONS, Integer.toString(_sessions));
 	}
 
-	/** 
+	/**
 	 * Sets the average time this user leaves the application running.
 	 *
-	 * @param averageUptime the average time this user leaves the 
+	 * @param averageUptime the average time this user leaves the
 	 *                      application running
 	 */
 	private void setAverageUptime(long averageUptime) {
@@ -2134,7 +2160,7 @@ public final class SettingsManager {
 		PROPS.put(AVERAGE_UPTIME, Long.toString(averageUptime));
 	}
 
-	/** 
+	/**
 	 * Sets the total time this user has used the application.
 	 *
 	 * @param totalUptime the total time the application has been run
@@ -2145,25 +2171,25 @@ public final class SettingsManager {
 		PROPS.put(TOTAL_UPTIME, s);
 	}
 
-    /** 
+    /**
 	 * Sets the maximum length of packets (spam protection)
 	 */
     public void setMaxLength(int maxLength) {
 		_maxLength = maxLength;
 		String s = Integer.toString(_maxLength);
-		PROPS.put(MAX_LENGTH, s);        
+		PROPS.put(MAX_LENGTH, s);
     }
 
-    /** 
-	 * Sets the timeout 
+    /**
+	 * Sets the timeout
 	 */
     public void setTimeout(int timeout) {
 		_timeout = timeout;
 		String s = Integer.toString(_timeout);
-		PROPS.put(TIMEOUT, s);        
+		PROPS.put(TIMEOUT, s);
     }
-    
-    /** 
+
+    /**
 	 * Sets the timeout value for persistent HTTP connections
      * @param timeout The timeout (in milliseconds) to be set
 	 */
@@ -2188,9 +2214,9 @@ public final class SettingsManager {
         }
     }
 
-    /** 
+    /**
 	 * Returns the maximum number of connections for the given connection
-     * speed.  
+     * speed.
 	 */
     public int maxConnections() {
         int speed=getConnectionSpeed();
@@ -2207,10 +2233,10 @@ public final class SettingsManager {
     }
 
 
-    /** 
+    /**
 	 * Sets the limit for the number of searches
      * throws an exception on negative limits
-     * and limits of 10,000 or more. 
+     * and limits of 10,000 or more.
 	 */
     public void setSearchLimit(byte limit) {
         if(limit < 0 || limit > 10000)
@@ -2228,8 +2254,8 @@ public final class SettingsManager {
 		PROPS.put(CLIENT_ID, _clientID);
     }
 
-    /** 
-	 * Sets the hard maximum time to live. 
+    /**
+	 * Sets the hard maximum time to live.
 	 */
     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -2266,20 +2292,20 @@ public final class SettingsManager {
         PROPS.put(ADVANCED_QUERY_INFO, s);
     }
 
-    /** 
-	 * Sets the directory for saving files. 
+    /**
+	 * Sets the directory for saving files.
 	 *
-	 * @param   saveDir  A <tt>File</tt> instance denoting the 
+	 * @param   saveDir  A <tt>File</tt> instance denoting the
 	 *                   abstract pathname of the directory for
-	 *                   saving files.  
+	 *                   saving files.
 	 *
-	 * @throws  <tt>IOException</tt> 
+	 * @throws  <tt>IOException</tt>
 	 *          If the directory denoted by the directory pathname
 	 *          String parameter did not exist prior to this method
 	 *          call and could not be created, or if the canonical
 	 *          path could not be retrieved from the file system.
-	 * 
-	 * @throws  <tt>NullPointerException</tt> 
+	 *
+	 * @throws  <tt>NullPointerException</tt>
 	 *          If the "dir" parameter is null.
 	 */
     public void setSaveDirectory(File saveDir) throws IOException {
@@ -2301,14 +2327,14 @@ public final class SettingsManager {
 		}
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
-		
+
 		PROPS.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
 
 	/**
 	 * This method sets the shared directories based on the
-	 * string of semi-colon delimited directories stored in 
+	 * string of semi-colon delimited directories stored in
 	 * the props file.
 	 *
 	 * @param dirs the string of directories
@@ -2331,25 +2357,25 @@ public final class SettingsManager {
         PROPS.put(INCOMPLETE_PURGE_TIME, Integer.toString(days));
     }
 
-    /** 
+    /**
 	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
      * Note, however, that it does not currently filter out
      * listing subdirectories that have parent directories
-     * also in the string. 
+     * also in the string.
 	 *
 	 * @param dirs an array of <tt>File</tt> instances denoting
 	 *  the abstract pathnames of the shared directories
 	 */
 	public void setDirectories(final File[] dirArray) {
-		
+
 		// ok, let's prune out any duplicates if they're there
 		HashMap directories = new HashMap();
 		for(int i=0; i<dirArray.length; i++) {
 			if(dirArray[i].isDirectory())
 				directories.put(dirArray[i], "");
 		}
-		
+
 		Set fileSet = directories.keySet();
 
 		Object[] prunedFiles = fileSet.toArray();
@@ -2367,15 +2393,15 @@ public final class SettingsManager {
         PROPS.put(DIRECTORIES, sb.toString());
 	}
 
-    /** 
+    /**
 	 * Adds one directory to the directory string only if
-     * it is a directory and is not already listed. 
+     * it is a directory and is not already listed.
 	 *
-	 * @param dir  a <tt>File</tt> instance denoting the 
-	 *             abstract pathname of the new directory 
+	 * @param dir  a <tt>File</tt> instance denoting the
+	 *             abstract pathname of the new directory
 	 *             to add
 	 *
-	 * @throws  IOException 
+	 * @throws  IOException
 	 *          if the directory denoted by the directory pathname
 	 *          String parameter did not exist prior to this method
 	 *          call and could not be created, or if the canonical
@@ -2391,17 +2417,17 @@ public final class SettingsManager {
 		else {
 			int newLength = _directories.length + 1;
 			File[] newFiles = new File[newLength];
-			
+
 			for(int i=0; i<_directories.length; i++) {
 				newFiles[i] = _directories[i];
 			}
 			newFiles[_directories.length] = dir;
 			// this will prune it out if it's a duplicate and add it too
-			setDirectories(newFiles);			
+			setDirectories(newFiles);
 		}
 	}
 
-    /** 
+    /**
 	 * Sets the file extensions that are shared.
 	 *
 	 * @param ext the semi-colon delimited string of shared file extensions
@@ -2411,8 +2437,8 @@ public final class SettingsManager {
         PROPS.put(EXTENSIONS, ext);
     }
 
-    /** 
-	 * Sets the time to live. 
+    /**
+	 * Sets the time to live.
 	 */
     public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
@@ -2424,8 +2450,8 @@ public final class SettingsManager {
         }
     }
 
-    /** 
-	 * Sets the soft maximum time to live. 
+    /**
+	 * Sets the soft maximum time to live.
 	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
@@ -2437,8 +2463,8 @@ public final class SettingsManager {
         }
     }
 
-    /** 
-	 * Sets the port to connect on 
+    /**
+	 * Sets the port to connect on
 	 */
     public void setPort(int port) {
         // if the entered port is outside accepted
@@ -2452,8 +2478,8 @@ public final class SettingsManager {
         }
     }
 
-    /** 
-	 * Sets the connection speed.  throws an exception if you 
+    /**
+	 * Sets the connection speed.  throws an exception if you
 	 * try to set the speed far faster than a T3 line or less than
      * 0.
 	 */
@@ -2467,11 +2493,11 @@ public final class SettingsManager {
         }
     }
 
-    /** 
+    /**
 	 * Sets the percentage of total bandwidth (as given by
      * CONNECTION_SPEED) to use for uploads.  This is shared
      * equally among all uploads.  Throws IllegalArgumentException
-     * if speed<0 or speed>100. 
+     * if speed<0 or speed>100.
 	 */
     public void setUploadSpeed(int speed) {
         if (speed<0 || speed>100)
@@ -2563,7 +2589,7 @@ public final class SettingsManager {
 	 * @param prompt specifies whether or not the application should prompt
 	 *               the user before downloading exe files
 	 */
-    public void setPromptExeDownload(boolean prompt) {        
+    public void setPromptExeDownload(boolean prompt) {
         _promptExeDownload = prompt;
         String s = String.valueOf(prompt);
         PROPS.put(PROMPT_EXE_DOWNLOAD, s);
@@ -2642,7 +2668,7 @@ public final class SettingsManager {
     public void setMaxSimDownload(int max) {
 		_maxSimDownload = max;
 		String s = String.valueOf(max);
-		PROPS.put(MAX_SIM_DOWNLOAD, s);        
+		PROPS.put(MAX_SIM_DOWNLOAD, s);
     }
 
 	/**
@@ -2679,7 +2705,7 @@ public final class SettingsManager {
 	 * Sets whether or not completed downloads should be automatically
 	 * cleared or not.
 	 *
-	 * @param clear specifies whether or not they should be 
+	 * @param clear specifies whether or not they should be
 	 * automatically cleared
 	 */
 	public void setClearCompletedDownload(boolean clear) {
@@ -2720,9 +2746,9 @@ public final class SettingsManager {
         PROPS.put(ALLOW_BROWSER, c);
     }
 
-    /** 
+    /**
      * Sets the force IP address to the given address.
-     * If address is in symbolic form, blocks while 
+     * If address is in symbolic form, blocks while
      * resolving it.
      *
      * @param address an IP address in dotted quad (e.g., 1.2.3.4)
@@ -2730,7 +2756,7 @@ public final class SettingsManager {
      * @exception IllegalArgumentException address wasn't
      *   in a valid format.
      */
-    public void setForcedIPAddressString(String address) 
+    public void setForcedIPAddressString(String address)
             throws IllegalArgumentException {
         try {
 			if(address.equals(DEFAULT_FORCED_IP_ADDRESS_STRING)) {
@@ -2740,7 +2766,7 @@ public final class SettingsManager {
 				_forcedIPAddress[2] = 0;
 				_forcedIPAddress[3] = 0;
 			} else {
-				InetAddress ia = InetAddress.getByName(address); 
+				InetAddress ia = InetAddress.getByName(address);
 				_forcedIPAddress = ia.getAddress();
 			}
             PROPS.put(FORCED_IP_ADDRESS_STRING, address);
@@ -2751,7 +2777,7 @@ public final class SettingsManager {
 
     /**
      * Sets the port to use when forcing the ip address.
-     * 
+     *
      * @param port the port to use for forcing the ip address
      */
     public void setForcedPort(int port) {
@@ -2765,15 +2791,15 @@ public final class SettingsManager {
             PROPS.put(FORCED_PORT, s);
         }
     }
-	
-	/** 
+
+	/**
 	 * Sets whether or not the program has been installed, either by
 	 * a third-party installer, or by our own.
 	 *
 	 * @param installed specifies whether or not the application has
 	 *                  been installed
 	 */
-	public void setInstalled(boolean installed) {        
+	public void setInstalled(boolean installed) {
         _installed = installed;
         String s = String.valueOf(installed);
         PROPS.put(INSTALLED, s);
@@ -2800,7 +2826,7 @@ public final class SettingsManager {
 	 *
 	 * @param bannedIps the array of words that the user has banned from
 	 *                  appearing in search results
-	 */	
+	 */
     public void setBannedWords(String[] bannedWords) {
         if(bannedWords == null)
             throw new IllegalArgumentException();
@@ -2861,9 +2887,9 @@ public final class SettingsManager {
         String s = b.toString();
         PROPS.put(FILTER_BEARSHARE_QUERIES, s);
     }
-	
+
 	/**
-	 * Specifies whether or not quick connect hosts should be used for 
+	 * Specifies whether or not quick connect hosts should be used for
 	 * connecting to the network on startup.
 	 *
 	 * @param useQuickConnect specifies whether or not quick connect hosts
@@ -2896,7 +2922,7 @@ public final class SettingsManager {
      * incoming connections are accepted.  Throws IllegalArgumentException if
      * allowed<0 or allowed>100.
      */
-    public void setFreeloaderAllowed(int allowed) 
+    public void setFreeloaderAllowed(int allowed)
 		throws IllegalArgumentException {
         if (allowed>100 || allowed<0)
             throw new IllegalArgumentException();
@@ -2906,11 +2932,11 @@ public final class SettingsManager {
     }
 
     /**
-     * Sets minimum the number of files a host must share to not be considered 
+     * Sets minimum the number of files a host must share to not be considered
      * a freeloader.  For example, if files==0, no host is considered a
      * freeloader.  Throws IllegalArgumentException if files<0.
      */
-    public void setFreeloaderFiles(final int files) 
+    public void setFreeloaderFiles(final int files)
 		throws IllegalArgumentException {
         if (files<0)
             throw new IllegalArgumentException();
@@ -2919,10 +2945,10 @@ public final class SettingsManager {
         PROPS.put(FREELOADER_FILES, s);
     }
 
-	
+
 	/**
 	 * Sets the boolean for whether or not we should check again for an update.
-	 * 
+	 *
 	 * @param check <tt>boolean</tt> value specifying whether or not to check
 	 *              again for updates
 	 */
@@ -2951,7 +2977,7 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Sets the flag for whether or not the application has been run one 
+	 * Sets the flag for whether or not the application has been run one
 	 * time before this.
 	 *
 	 * @param runOnce <tt>boolean</tt> for whether or not the application has
@@ -2963,7 +2989,7 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Set the x position of the window for the next time the application 
+	 * Set the x position of the window for the next time the application
 	 * is started.
 	 *
 	 * @param x the x position of the main application window
@@ -2973,7 +2999,7 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Set the y position of the window for the next time the application 
+	 * Set the y position of the window for the next time the application
 	 * is started.
 	 *
 	 * @param y the y position of the main application window
@@ -2983,15 +3009,15 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Sets the flag for whether or not the application should be minimized 
+	 * Sets the flag for whether or not the application should be minimized
 	 * to the system tray on windows.
 	 *
 	 * @param minimize <tt>boolean</tt> for whether or not the application
-	 *                 should be minimized to the tray 
+	 *                 should be minimized to the tray
 	 */
 	public void setMinimizeToTray(final boolean minimize) {
 		setBooleanValue(MINIMIZE_TO_TRAY, minimize);
-	}	
+	}
 
 	/**
 	 * Sets the flag for whether or not the application should shutdown
@@ -3003,7 +3029,7 @@ public final class SettingsManager {
 	public void setShutdownAfterTransfers(final boolean whenReady) {
 		setBooleanValue(SHUTDOWN_AFTER_TRANSFERS, whenReady);
 	}
-	
+
 	/**
 	 * Sets whether or not the application has accepted an incoming
 	 * connection during this session.
@@ -3017,7 +3043,7 @@ public final class SettingsManager {
     }
 
 	/**
-	 * Sets whether or not this client has ever accepted an incoming 
+	 * Sets whether or not this client has ever accepted an incoming
 	 * connection during any session.
 	 *
 	 * @param acceptedIncoming <tt>boolean</tt> specifying whether or not this
@@ -3026,7 +3052,7 @@ public final class SettingsManager {
 	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
 		setBooleanValue(EVER_ACCEPTED_INCOMING, acceptedIncoming);
 	}
-    
+
     /**
      * Sets the classpath for loading files at startup.
 	 *
@@ -3035,7 +3061,7 @@ public final class SettingsManager {
     public void setClassPath(final String classpath) {
         PROPS.put(CLASSPATH, classpath);
     }
-    
+
     /**
      * Sets the type of the servant: client, xml-client, server etc
      */
@@ -3100,7 +3126,7 @@ public final class SettingsManager {
 	 * Sets the maximum number of upstream bytes per second ever passed by
 	 * this node.
 	 *
-	 * @param bytes the maximum number of upstream bytes per second ever 
+	 * @param bytes the maximum number of upstream bytes per second ever
 	 *              passed by this node
 	 */
 	public void setMaxUpstreamBytesPerSec(final int bytes) {
@@ -3112,7 +3138,7 @@ public final class SettingsManager {
 	 * Sets the maximum number of downstream bytes per second ever passed by
 	 * this node.
 	 *
-	 * @param bytes the maximum number of downstream bytes per second ever 
+	 * @param bytes the maximum number of downstream bytes per second ever
 	 *              passed by this node
 	 */
 	public void setMaxDownstreamBytesPerSec(final int bytes) {
@@ -3120,15 +3146,15 @@ public final class SettingsManager {
 	}
 
 
-    //settings for Supernode implementation    
+    //settings for Supernode implementation
 
     /**
-     * Sets whether or not this node has ever met all of the requirements 
+     * Sets whether or not this node has ever met all of the requirements
      * necessary to become a supernode, reqardless of whether or not it
      * actually acted as one.
      *
-     * @param supernodeCapable <tt>boolean</tt> indicating whether or not 
-     *  this node has ever met all of the necessary requirements to be 
+     * @param supernodeCapable <tt>boolean</tt> indicating whether or not
+     *  this node has ever met all of the necessary requirements to be
      *  considered a supernode
      */
     public void setEverSupernodeCapable(final boolean supernodeCapable) {
@@ -3136,22 +3162,22 @@ public final class SettingsManager {
         PROPS.put(EVER_SUPERNODE_CAPABLE, b.toString());
     }
 
-    /** 
-     * Sets whether supernode mode is disabled. 
+    /**
+     * Sets whether supernode mode is disabled.
      * @param disable true iff supernode mode should be disabled
      */
     public void setDisableSupernodeMode(boolean disable) {
         setBooleanValue(DISABLE_SUPERNODE_MODE, disable);
     }
 
-	/** 
-     * Sets whether supernode mode is forced. 
+	/**
+     * Sets whether supernode mode is forced.
      * @param force true iff supernode mode should be forced
      */
     public void setForceSupernodeMode(boolean force) {
         setBooleanValue(FORCE_SUPERNODE_MODE, force);
     }
-    
+
     /**
      * Sets the maximum number of shielded connections to be supported by
      * the supernode
@@ -3159,23 +3185,23 @@ public final class SettingsManager {
     public void setMaxShieldedClientConnections(
         int maxShieldedClientConnections) {
         this._maxShieldedClientConnections = maxShieldedClientConnections;
-        PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
+        PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS,
             Integer.toString(maxShieldedClientConnections));
     }
-    
+
     /**
      * Sets the minimum number of shielded connections to be supported by
      * the supernode. If the minimum number of connections are not received
-     * over a period of time, then the node may change its status from 
+     * over a period of time, then the node may change its status from
      * supernode to client-node.
      */
     public void setMinShieldedClientConnections(
         int minShieldedClientConnections) {
         this._minShieldedClientConnections = minShieldedClientConnections;
-        PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
+        PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS,
             Integer.toString(minShieldedClientConnections));
     }
-    
+
 	/**
 	 * Sets whether or not to connect to the Gnutella network when the
 	 * application starts up.
@@ -3185,7 +3211,7 @@ public final class SettingsManager {
 	public void setConnectOnStartup(boolean connect) {
 		setBooleanValue(CONNECT_ON_STARTUP, connect);
 	}
-    
+
     /**
      * Returns The time when we last expired accumulated information
       * @return The time when we last expired accumulated information
@@ -3196,14 +3222,14 @@ public final class SettingsManager {
 
 	/**
 	 * Sets whether or not Cydoor is installed on the client system.
-	 * 
+	 *
 	 * @param INSTALLED specifies whether or not Cydoor has been installed
 	 *  on the target system
 	 */
 	private void setCydoorInstalled(final boolean INSTALLED) {
 		setBooleanValue(CYDOOR_INSTALLER_CALLED, INSTALLED);
 	}
-    
+
 	/**
 	 * Sets the ad version in use -- only read in from the props file.
 	 *
@@ -3212,6 +3238,16 @@ public final class SettingsManager {
 	public void setAdVersion(final String VERSION) {
 		setStringValue(AD_VERSION, VERSION);
 	}
+
+	/**
+	 * Sets the used skin theme
+	 *
+	 * @param SKIN_THEME the skin theme to use
+	 */
+	public void setSkinTheme(final String THEME) {
+		setStringValue(SKIN_THEME, THEME);
+	}
+
 
 	/**
 	 * Sets the <tt>boolean</tt> value for the specified key as a
@@ -3223,7 +3259,7 @@ public final class SettingsManager {
 	private void setBooleanValue(final String KEY, final boolean BOOL) {
 		PROPS.put(KEY, String.valueOf(BOOL));
 	}
-    
+
     /**
 	 * Sets the <tt>long</tt> value for the specified key as a
 	 * <tt>String</tt> entry.
@@ -3256,12 +3292,12 @@ public final class SettingsManager {
 		PROPS.put(KEY, STR);
 	}
 
-	
+
 
 	/**
 	 * Returns the <tt>boolean</tt> value for the specified
 	 * key.
-	 * 
+	 *
 	 * @param KEY the key for the desired value
 	 * @return the <tt>boolean</tt> value associated with the
 	 *  specified key
@@ -3269,11 +3305,11 @@ public final class SettingsManager {
 	private boolean getBooleanValue(final String KEY) {
 		return Boolean.valueOf(PROPS.getProperty(KEY)).booleanValue();
 	}
-    
+
     /**
 	 * Returns the <tt>long</tt> value for the specified
 	 * key.
-	 * 
+	 *
 	 * @param KEY the key for the desired value
 	 * @return the <tt>long</tt> value associated with the
 	 *  specified key
@@ -3281,7 +3317,7 @@ public final class SettingsManager {
 	private long getLongValue(final String KEY) {
 		return Long.valueOf(PROPS.getProperty(KEY)).longValue();
 	}
-	
+
 	/**
 	 * Returns the <tt>String</tt> value associated with the
 	 * specified key.
@@ -3313,10 +3349,10 @@ public final class SettingsManager {
      */
     public void setAcceptAuthenticatedConnectionsOnly(
         final boolean flag) {
-        PROPS.put(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY, 
+        PROPS.put(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY,
             (new Boolean(flag)).toString());
     }
-    
+
     /**
      * Sets the name of the file that stores cookies
      * @param filename The file name to be set
@@ -3324,19 +3360,19 @@ public final class SettingsManager {
     public void setCookiesFile(final String filename) {
         PROPS.put(COOKIES_FILE, filename);
     }
-    
+
     /**
      * Sets whether the node is a server or not
      * @param isServer true, if the node is server, false otherwise
      */
     public void setServer(boolean isServer){
         this._server = isServer;
-        PROPS.put(SERVER, 
+        PROPS.put(SERVER,
             (new Boolean(isServer)).toString());
     }
-    
 
-    /** 
+
+    /**
 	 * Writes out the properties file to with the specified
      * name in the user's install directory.  This should only
 	 * get called once when the program shuts down.
@@ -3383,7 +3419,7 @@ public final class SettingsManager {
         buf.copyInto(ret);
         return ret;
     }
-    
+
 	// unit tests
 //  	public static void main(String args[]) {
 //  		SettingsManager settings = SettingsManager.instance();
@@ -3396,13 +3432,13 @@ public final class SettingsManager {
 //  		File saveDefaultFile = new File(saveDefaultDir);
 //  		System.out.println("incDir:         "+incDir);
 //  		System.out.println("saveDir:        "+saveDir);
-//  		System.out.println("saveDefaultDir: "+saveDefaultDir);		
+//  		System.out.println("saveDefaultDir: "+saveDefaultDir);
 //  		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
 //  		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
 //  		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
 //  		System.out.println("host list path: " + settings.getHostList());
 //  	}
-	
+
 //  	// test verifying that the limewire.lax file is actually a Java Properties file.
 //  	public static void main(String[] args) {
 //  		Properties props = new Properties();
@@ -3423,15 +3459,15 @@ public final class SettingsManager {
 //  		} catch(SecurityException se) {
 //  		} catch(IOException ioe) {
 //  		}
-		
+
 //  	}
-	
+
 //  	public static void main(String args[]) {
 //          boolean installed = true;
 //          String s = String.valueOf(installed);
 //  		System.out.println("string: "+s);
 
-		
+
 //  		Boolean b = new Boolean(s);
 //  		System.out.println("boolean: "+b.booleanValue());
 //          //PROPS.put(INSTALLED, s);
