@@ -212,47 +212,15 @@ public class FileManager {
      * If directory is null, returns all shared files.
      */
     public /* synchronized */ File[] getSharedFiles(File directory) {
-         /*
-        if(directory!=null){
-            // a. Remove case, trailing separators, etc.
-            try {
-                directory=getCanonicalFile(directory);
-            } catch (IOException e) {
-                return null;
-            }
-            
-            //Lookup indices of files in the given directory...
-            IntSet indices=(IntSet)_sharedDirectories.get(directory);
-            if (indices==null)
-                return null;
-            //...and pack them into an array.
-            File[] ret=new File[indices.size()];
-            IntSet.IntSetIterator iter=indices.iterator(); 
-            for (int i=0; iter.hasNext(); i++) {
-                FileDesc fd=(FileDesc)_files.get(iter.next());
-                Assert.that(fd!=null, "Directory has null entry");
-                ret[i]=fd.getFile();
-            }
-            return ret;
-        } else {
-            // b. Filter out unshared entries.
-            ArrayList buf=new ArrayList(_files.size());
-            for (int i=0; i<_files.size(); i++) {
-                FileDesc fd=(FileDesc)_files.get(i);
-                if (fd!=null)
-                    buf.add(fd.getFile());                
-            }
-            File[] ret=new File[buf.size()];
-            Object[] out=buf.toArray(ret);
-            Assert.that(out==ret, "Couldn't fit list in returned value");
-            return ret;
-        } */
         // Yes, this is slightly annoying -- having to locate all the file descriptors
         // and then also having to recurse through them to just get the files
         // But, it's the cleanest way.
         // Alternately, you could just re-implement the exact same routine
         // as in getSharedFileDescriptors, but store Files instead
         FileDesc[] fds = getSharedFileDescriptors(directory);
+        if (fds==null)
+            return null;
+
         File[] files = new File[fds.length];
         for( int i = 0; i < fds.length; i++ ) {
             files[i] = fds[i].getFile();
