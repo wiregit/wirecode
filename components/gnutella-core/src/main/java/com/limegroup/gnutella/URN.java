@@ -110,7 +110,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
 		throws IOException {
 		if(!URN.isValidUrnHttpRequest(requestLine)) {
-			throw new IOException("INVALID URN HTTP REQUEST");
+			throw new IOException("IVVALID URN HTTP REQUEST");
 		}
 		String urnString = URN.extractUrnFromHttpRequest(requestLine);
 		if(urnString == null) {
@@ -130,9 +130,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private static URN createSHA1UrnFromString(String urnString) 
 		throws IOException {
 		if(!URN.isValidUrn(urnString)) {
-			throw new IOException("INVALID URN STRING: "+urnString);
+			throw new IOException("invalid urn string: "+urnString);
 		}
 		String typeString = URN.getTypeString(urnString);
+		if(!UrnType.isSupportedUrnType(typeString)) {
+			throw new IOException("urn type not recognized: "+urnString);
+		}
 		UrnType type = UrnType.createUrnType(typeString);
 		return new URN(urnString, type);
 	}
@@ -448,14 +451,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// get the last colon -- this should separate the <NID>
 		// from the <NIS>
 		int colon2Index = urnString.indexOf(":", colon1Index+1);
-		
-		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(UrnType.URN_NAMESPACE_ID) ||
-		   !UrnType.isSupportedUrnNamespace(urnString.substring(colon1Index+1,
-																colon2Index)) ||
+		if(colon2Index == -1) return false;
+		String urnType = urnString.substring(0, colon2Index+1);
+		if(!UrnType.isSupportedUrnType(urnType) ||
 		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
 			return false;
-		}		
+		}
 		return true;
 	}
 
