@@ -891,7 +891,8 @@ public final class UploadManager implements BandwidthTracker {
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        boolean wontAccept = size >= maxQueueSize;
+        boolean wontAccept = size >= maxQueueSize || 
+			rqc.isDupe(uploader.getFileDesc().getSHA1Urn());
         int ret = -1;
 
         // if this uploader is greedy and at least on other client is queued
@@ -979,7 +980,7 @@ public final class UploadManager implements BandwidthTracker {
         }
         
         //register the uploader in the dupe table
-        if (ret == ACCEPTED  || ret == QUEUED)
+        if (ret == ACCEPTED)
         	rqc.startedUpload(uploader.getFileDesc().getSHA1Urn());
         return ret;
     }
@@ -1013,15 +1014,19 @@ public final class UploadManager implements BandwidthTracker {
 	 * of active uploads.
 	 */
   	private synchronized void removeFromList(Uploader uploader) {
-		_activeUploadList.remove(uploader);//no effect is not in
+  		//if the uploader is not in the active list, we should not
+  		//try remove the urn from the map of unique uploaded files for that host.
+  		
+		if (_activeUploadList.remove(uploader)) {
 		
-		//at this point it is safe to allow other uploads from the same host
-        RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
+			//at this point it is safe to allow other uploads from the same host
+			RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
 
-        //check for nulls so that unit tests pass
-        if (rcq!=null && uploader!=null && uploader.getFileDesc()!=null) 
-        	rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
-        
+			//check for nulls so that unit tests pass
+        	if (rcq!=null && uploader!=null && uploader.getFileDesc()!=null) 
+        		rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
+		}
+		
 		// Enable auto shutdown
 		if( _activeUploadList.size()== 0)
 			RouterService.getCallback().uploadsComplete();
@@ -1602,7 +1607,7 @@ public final class UploadManager implements BandwidthTracker {
 		 */
 		private final Set /* of SHA1 (URN) */ REQUESTS;
 		
-		private final Set /* of SHA1 (URN) -> Integer*/ ACTIVE_UPLOADS; 
+		private final Set /* of SHA1 (URN) */ ACTIVE_UPLOADS; 
 		
 		/**
 		 * The number of requests we've seen from this host so far.
