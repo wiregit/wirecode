@@ -571,7 +571,11 @@ public class FileManager {
                 return false;
             _size += n;
             int fileIndex = _files.size();
-            FileDesc fileDesc = new FileDesc(fileIndex, name, path,  (int)n);
+
+            long modTime = (new File(path)).lastModified();
+			HashSet urns = UrnCache.instance().getUrns(path, modTime);
+            FileDesc fileDesc = new FileDesc(fileIndex, name, path, (int)n,
+			  modTime, urns);
             _files.add(fileDesc);
             _numFiles++;
 
@@ -651,6 +655,8 @@ public class FileManager {
                             FileDesc fd = (FileDesc)pendingFileDescs.elementAt(0);
                             pendingFileDescs.removeElementAt(0);
                             fd.calculateUrns();
+						    UrnCache.instance().
+							  persistUrns(fd._path,fd._modTime,fd._urns);	
                             updateUrnIndex(fd);
                         }
                     }

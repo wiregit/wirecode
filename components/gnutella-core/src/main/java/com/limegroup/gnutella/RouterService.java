@@ -427,7 +427,7 @@ public class RouterService
         Cookies.instance().save();
         
         //persist urn cache
-        FileDesc.persistCache();
+        UrnCache.instance().persistCache();
     }
 
     /**

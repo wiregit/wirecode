@@ -14,7 +14,6 @@ import java.security.*;
 import java.util.Enumeration;
 
 public class FileDesc {
-    static public Hashtable /* String -> String */ UrnCache;
     
     public int _index;
     public String _path;
@@ -32,12 +31,14 @@ public class FileDesc {
      *  files are currently limited to Integer.MAX_VALUE bytes
      *  length, i.e., 2048MB.)
      */
-    public FileDesc(int i, String n, String p, int s) {
+    public FileDesc(int i, String n, String p, int s, 
+      long modTime, HashSet urns) {
         _index = i;
         _name = n;
         _path = p;
         _size = s;
-        fillUrnsFromCache();
+        _modTime = modTime;
+        _urns = urns;
         // if(shouldCalculateUrns()) calculateUrns();
     }
 
@@ -90,27 +91,6 @@ public class FileDesc {
     //
     
     /**
-     * adds any URNs remembered from a previous session;
-     */
-    public void fillUrnsFromCache() {
-        if (UrnCache==null) {
-            FileDesc.initCache();
-        }
-        _modTime = (new File(_path)).lastModified();
-        if (_modTime==0L) return; // don't trust failed mod times
-        
-        HashSet cachedUrns = (HashSet)UrnCache.get(_modTime+" "+_path);
-        if(cachedUrns!=null) {
-            if(_urns==null) _urns = new HashSet();
-            Iterator iter = cachedUrns.iterator();
-            while(iter.hasNext()){
-                String urn = (String)iter.next();
-                _urns.add(urn);
-            }
-        } // else just leave _urns empty for now
-    }
-    
-    /**
      * would calling the calculation method add useful URNs?
      */
     public boolean shouldCalculateUrns() {
@@ -148,7 +128,6 @@ public class FileDesc {
             // note that all URNs are case-insensitive for the "urn:<type>:" part,
             // but some MAY be case-sensitive thereafter (SHA1/Base32 is case insensitive)
             _urns.add("urn:sha1:"+Base32.encode(sha1));
-            persistUrns();
         } catch (IOException e) {
             // relatively harmless to not have URN
         } catch (NoSuchAlgorithmException e) {
@@ -197,59 +176,6 @@ public class FileDesc {
     }
 
 
-    /**
-     * remember URNs in UrnCache
-     */
-    private void persistUrns() {
-        if (_urns==null) return;
-        UrnCache.put(_modTime+" "+_path,_urns);
-    }
-    
-    //
-    // UrnCache Management
-    //
-    
-    /**
-     * load values from cache file, if available
-     */
-    static private void initCache() {
-        try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("fileurns.cache"));
-            UrnCache = (Hashtable)ois.readObject();
-            ois.close();
-        } catch (Exception e) {
-            // lack of cache is non-fatal
-        } 
-        if (UrnCache == null) {
-            UrnCache = new Hashtable();
-            return;
-        }
-        // discard outdated info
-        Iterator iter = UrnCache.keySet().iterator();
-        while (iter.hasNext()) {
-            String key = (String)iter.next();
-            long modTime=Long.parseLong(key.substring(0,key.indexOf(' ')));
-            String path=key.substring(key.indexOf(' ')+1);
-            // check to see if file still exists unmodified
-            File f = new File(path);
-            if (!f.exists()||f.lastModified()!=modTime) {
-                iter.remove();
-            }
-        }
-    }
-    
-    /**
-     * write cache to disk to save recalc time later
-     */
-    static public void persistCache() {
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("fileurns.cache"));
-            oos.writeObject(UrnCache);
-            oos.close();
-        } catch (Exception e) {
-            // no great loss
-        }
-    }
 }
 
 
