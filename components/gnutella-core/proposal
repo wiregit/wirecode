@@ -71,7 +71,9 @@ file size. It is recommended that all implementations use the
 implement "text/html" reception (to be compatible with older
 BearShare's).  Minimally, all implementation must support the 
 "application/x-gnutella-messages" media type for output while being
-browsed.
+browsed.  The GUID of the query replies sent back for a 
+"application/x-gnutella-messages" Browse Host request can be
+determined arbritrarily by the Server.
 
 Other media types will be followed by different responses, as
 necessary.
