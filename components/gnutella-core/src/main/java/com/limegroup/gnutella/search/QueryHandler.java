@@ -1,3 +1,4 @@
+
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.messages.*;
@@ -66,7 +67,7 @@ public final class QueryHandler {
     /**
      * TTL of the probe query.
      */
-    private static byte PROBE_TTL = SearchSettings.PROBE_TTL.getValue();
+    private static byte PROBE_TTL = (byte)2;
 
 	/**
 	 * Variable for the number of hosts that have been queried.
@@ -84,10 +85,10 @@ public final class QueryHandler {
 	private int _theoreticalHostsQueried = 1;
 
 	/**
-	 * Variable for the <tt>ResultCounter</tt> for this query -- used
+	 * Constant for the <tt>ResultCounter</tt> for this query -- used
 	 * to access the number of replies returned.
 	 */
-	private ResultCounter _resultCounter;
+	private final ResultCounter RESULT_COUNTER;
 
 	/**
 	 * Constant set of send handlers that have already been queried.
@@ -132,8 +133,11 @@ public final class QueryHandler {
 	 *  it's a query for a specific hash, in which case we try to get
 	 *  far fewer matches, ignoring this parameter
 	 * @param handler the <tt>ReplyHandler</tt> for routing replies
+     * @param counter the <tt>ResultCounter</tt> that keeps track of how
+     *  many results have been returned for this query
 	 */
-	private QueryHandler(QueryRequest query, int results, ReplyHandler handler) {
+	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
+                         ResultCounter counter) {
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		QUERY = query;
 		if(isHashQuery) {
@@ -143,6 +147,7 @@ public final class QueryHandler {
 		}
 
 		REPLY_HANDLER = handler;
+        RESULT_COUNTER = counter;
 	}
 
 
@@ -153,11 +158,14 @@ public final class QueryHandler {
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
 	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+     * @param counter the <tt>ResultCounter</tt> that keeps track of how
+     *  many results have been returned for this query
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandler(QueryRequest query, 
-											 ReplyHandler handler) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS, handler);
+											 ReplyHandler handler,
+                                             ResultCounter counter) {	
+		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
 	}
 
 	/**
@@ -167,11 +175,14 @@ public final class QueryHandler {
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
 	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+     * @param counter the <tt>ResultCounter</tt> that keeps track of how
+     *  many results have been returned for this query
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
-													   ReplyHandler handler) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS, handler);
+													   ReplyHandler handler,
+                                                       ResultCounter counter) {	
+		return new QueryHandler(query, OLD_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
@@ -181,11 +192,14 @@ public final class QueryHandler {
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
 	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+     * @param counter the <tt>ResultCounter</tt> that keeps track of how
+     *  many results have been returned for this query
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
-													   ReplyHandler handler) {		
-		return new QueryHandler(query, NEW_LEAF_RESULTS, handler);
+													   ReplyHandler handler,
+                                                       ResultCounter counter) {		
+		return new QueryHandler(query, NEW_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
@@ -221,17 +235,6 @@ public final class QueryHandler {
 	}
 
 
-	/**
-	 * Sets the <tt>ResultCounter</tt> for this query.
-	 *
-	 * @param entry the <tt>ResultCounter</tt> to add
-	 */
-	public void setResultCounter(ResultCounter entry) {
-		if(entry == null) {
-			throw new NullPointerException("null route table entry");
-		}
-		_resultCounter = entry;
-	}
 	
 	/**
 	 * Sends the query to the current connections.  If the query is not
@@ -241,10 +244,6 @@ public final class QueryHandler {
 	 *  is <tt>null</tt>
 	 */
 	public void sendQuery() {
-		// do not allow the route table entry to be null
-		if(_resultCounter == null) {
-			throw new NullPointerException("null route table entry");
-		}
 		if(hasEnoughResults()) return;
 
 		_curTime = System.currentTimeMillis();
@@ -309,7 +308,7 @@ public final class QueryHandler {
 			int remainingConnections = length - hostsQueried - 4;
 			remainingConnections = Math.max(remainingConnections, 1);
 			
-			int results = handler._resultCounter.getNumResults();
+			int results = handler.RESULT_COUNTER.getNumResults();
 			double resultsPerHost = 
 				(double)results/(double)handler._theoreticalHostsQueried;
 			
@@ -333,16 +332,165 @@ public final class QueryHandler {
 
  
 			// send out the query on the network
-			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
-                                                              handler.REPLY_HANDLER);
+            sendQueryToHost(query, mc, handler);
+
+			//RouterService.getMessageRouter().sendQueryRequest(query, mc, 
+            //                                                 handler.REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
-			handler.QUERIED_HANDLERS.add(mc);
+			//handler.QUERIED_HANDLERS.add(mc);
             newHosts = calculateNewHosts(mc, ttl);
             break;
 		}
         return newHosts;
 	}
+    
+    /**
+     * Helper class the holds a <tt>ManagedConnection</tt> and a TTL for sending
+     * a query to that handler.
+     */
+    private static class ConnectionTTLPair {
+        
+        /**
+         * Constant for the <tt>ManagedConnection</tt>.
+         */
+        private final ManagedConnection MC;
+
+        /**
+         * Constant for the TTL.
+         */
+        private final byte TTL;
+
+        /**
+         * Creates a new <tt>ConnectionTTLPair</tt> with the specified 
+         * <tt>Connection</tt> and TTL.
+         *
+         * @param mc the <tt>RequestHandler</tt> that the request should be sent
+         *  to
+         * @param ttl the time to live for the query to send
+         */
+        ConnectionTTLPair(ManagedConnection mc, byte ttl) {
+            MC = mc;
+            TTL = ttl;
+        }
+    }
+
+    /**
+     * Helper method that creates the list of nodes to query for the probe.
+     * This list will vary in size depending on how popular the content appears
+     * to be.
+     */
+    private static List[] createProbeLists(List connections, QueryRequest query) {
+        Iterator iter = connections.iterator();
+        
+        LinkedList goodConnections = new LinkedList();
+        LinkedList badConnections  = new LinkedList();
+        LinkedList hitConnections  = new LinkedList();
+        while(iter.hasNext()) {
+            ManagedConnection mc = (ManagedConnection)iter.next();
+            
+            if(mc.isGoodUltrapeer() &&
+               mc.getQueryRouteState() != null) {
+                goodConnections.add(mc);
+            } else {
+                badConnections.add(mc);
+            }
+            
+            ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+
+            if(qi.lastReceived.contains(query)) { 
+                hitConnections.add(mc);
+            }
+        }
+
+        // final list of connections to query
+        List[] returnLists = new List[2];
+        List ttl1List = new LinkedList();
+        List ttl2List = new LinkedList();
+        returnLists[0] = ttl1List;
+        returnLists[1] = ttl2List;        
+
+        // do we have adequate data to determine some measure of the file's popularity?
+        boolean adequateData = goodConnections.size() > 8;
+
+        // if we don't have enough data from QRP tables, just send out a traditional probe
+        // also, if we don't have an adequate number of QRP tables to access the 
+        // popularity of the file, just send out an old-style probe at TTL=2
+        if(hitConnections.size() == 0 || !adequateData) {
+            return createAggressiveProbe(badConnections, goodConnections, 
+                                         hitConnections, returnLists);
+        } 
+
+
+        double popularity = 
+            (double)((double)hitConnections.size()/(double)goodConnections.size());
+
+        // if there were no matches, then it's almost definitely a fairly
+        // rare file, so send out a more aggressive probe
+        if(popularity == 0.0) {
+            return createAggressiveProbe(badConnections, goodConnections, 
+                                         hitConnections, returnLists);
+            
+        }
+        
+        // if the file appears to be very popular, send it to only one host
+        if(popularity == 1.0) {
+            ttl1List.add(hitConnections.getFirst());
+            return returnLists;
+        }
+        
+        // scale the number of hosts to send the query to based on the
+        // file's apparent abundance
+        int connectionsToUse = (int)((double)hitConnections.size()/popularity);
+        
+        if(popularity > 0.5) {
+            
+            // send the query to 4 connections at TTL=1
+            ttl1List.addAll(hitConnections.subList(0, 5));
+            return returnLists;
+        }
+                    
+        
+        return returnLists;        
+    }
+
+    /**
+     * Helper method that creates lists of TTL=1 and TTL=2 connections to query
+     * for an aggressive probe.  This is desired, for example, when the desired
+     * file appears to be rare or when there is not enough data to determine
+     * the file's popularity.
+     *
+     * @param badConnections the <tt>List</tt> of old-style connections
+     * @param goodConnections the <tt>List</tt> of new connections
+     * @param hitConnections the <tt>List</tt> of connections with hits
+     * @param returnLists the array of TTL=1 and TTL=2 connections to query
+     */
+    private static List[] 
+        createAggressiveProbe(List badConnections, List goodConnections,
+                              List hitConnections, List[] returnLists) {
+
+        if(badConnections.size() < 3) {
+            returnLists[1].addAll(badConnections);            
+            int listSize = returnLists[0].size() + returnLists[1].size();
+
+            // if we still don't have enough connections, take some from
+            // the good list
+            if(listSize < 3) {
+                int maxIndex = Math.min((3 - listSize), goodConnections.size());
+                if(!goodConnections.isEmpty()) {
+                    returnLists[1].add(goodConnections.subList(0, maxIndex));
+                }
+            }
+        } else {
+            returnLists[1].addAll(badConnections.subList(0, 4));            
+        }
+
+        // add any hits there are to the TTL=1 list
+        int maxIndex = Math.min(4, hitConnections.size());
+        returnLists[0].addAll(hitConnections.subList(0, maxIndex));
+
+        return returnLists;        
+    }
 
 	/**
 	 * Send the initial "probe" query to get an idea of how widely distributed
@@ -357,6 +505,11 @@ public final class QueryHandler {
         // QRP tables, running one at a time with pauses.
         
         QueryRequest query = createQuery(handler.QUERY, (byte)1);
+
+        RouterService.getMessageRouter().forwardQueryRequestToLeaves(query, handler.REPLY_HANDLER);
+
+        List[] probeLists = createProbeLists(list, query);
+        List probeList = probeLists[0];
         Iterator iter = list.iterator();
         int connectionsUsed = 0;
         
@@ -371,8 +524,7 @@ public final class QueryHandler {
             // this could be more fine-grained, since the connection
             // only really needs to support intra-Ultrapeer QRP and
             // to forward TTL=1 probe queries, but this is fine
-            if(!mc.isGoodConnection()) continue;
-            if(!mc.supportsProbeQueries()) continue;
+            if(!mc.isGoodUltrapeer()) continue;
 
             ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
             if (qi.lastReceived == null) continue;
@@ -381,8 +533,7 @@ public final class QueryHandler {
             // until we know it has a QRP table
             qrConnections++;
             if(qi.lastReceived.contains(query)) {
-                RouterService.getMessageRouter().sendQueryRequest(query, mc, 
-                    handler.REPLY_HANDLER);
+                sendQueryToHost(query, mc, handler);
                 qrConnectionsUsed++;
             }
         }
@@ -403,22 +554,34 @@ public final class QueryHandler {
                 continue;
             }
 
-			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
-                                                              handler.REPLY_HANDLER);
-
-			// add the reply handler to the list of queried hosts
-			handler.QUERIED_HANDLERS.add(mc);
+            sendQueryToHost(query, mc, handler);
 
 			newHosts += calculateNewHosts(mc, PROBE_TTL);
 
             hostsQueried++;
             i++;
 		}
-        if(hostsQueried == 3) {
+        if(hostsQueried >= 3) {
             handler._probeCompleted = true;
         }
         return newHosts;
 	}
+
+    /**
+     * Sends a query to the specified host.
+     *
+     * @param query the <tt>QueryRequest</tt> to send
+     * @param mc the <tt>ManagedConnection</tt> to send the query to
+     * @param handler the <tt>QueryHandler</tt> 
+     */
+    private static void sendQueryToHost(QueryRequest query, ManagedConnection mc, 
+                                        QueryHandler handler) {
+        RouterService.getMessageRouter().sendQueryRequest(query, mc, 
+                                                          handler.REPLY_HANDLER);
+        
+        // add the reply handler to the list of queried hosts
+        handler.QUERIED_HANDLERS.add(mc);
+    }
 
 	/**
 	 * Calculates the new TTL to use based on the number of hosts per connection
@@ -486,7 +649,7 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-		if(_resultCounter.getNumResults() >= RESULTS) return true;
+		if(RESULT_COUNTER.getNumResults() >= RESULTS) return true;
 	 
         // if our theoretical horizon has gotten too high, consider
         // it enough results
