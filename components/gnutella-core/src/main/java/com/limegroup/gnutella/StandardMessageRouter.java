@@ -163,14 +163,13 @@ public class StandardMessageRouter extends MessageRouter {
         // Run the local query
         Response[] responses = _fileManager.query(queryRequest);
 
-        sendResponses(queryRequest, responses, queryRequest, clientGUID);
+        sendResponses(responses, queryRequest, clientGUID);
         
     }
 
-    private void sendResponses(QueryRequest query, 
-                              Response[] responses, 
-							  QueryRequest queryRequest,
-							  byte[] clientGUID) {
+    private void sendResponses(Response[] responses, 
+                               QueryRequest queryRequest,
+                               byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -195,7 +194,7 @@ public class StandardMessageRouter extends MessageRouter {
         try {
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
-                sendQueryReply(query, queryReply);
+                sendQueryReply(queryRequest, queryReply);
             }
         } 
         catch (IOException e) {
