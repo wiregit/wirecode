@@ -19,7 +19,7 @@ public class ManagedDownloader implements Downloader {
     /** The files to get. */
     private RemoteFileDesc[] files;
     
-
+    ///////////////////////// Policy Controls ///////////////////////////
     /** The number of tries to make */
     private static final int TRIES=5;
     /** The amount of time to wait before retrying in milliseconds, This is also
@@ -30,36 +30,38 @@ public class ManagedDownloader implements Downloader {
     private static final int WAIT_TIME=30000;     //30 seconds
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=10000;  //8 seconds
-    
+    /** The maximum time, in SECONDS, allowed between a push request and an
+     *  incoming push connection. */
+    private final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
 
-    /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
-      *  etc.   Should be modified only through setState. */
-    private int state;
-    /** The time as returned by Date.getTime() that this entered the current
-        state.  Should be modified only through setState. */        
-    private long stateTime;
+
+    ////////////////////////// Core Variables ////////////////////////////
     /** If started, the thread trying to do the downloads.  Otherwise null. */
     private Thread dloaderThread=null;
     /** The connection we're using for the current attempt, or last attempt if
      *  we aren't actively downloading.  Or null if we've never attempted a
      *  download. */
     private HTTPDownloader dloader=null;
-    /** The current address we're trying, or last address if waiting, or null
-     *  if unknown. */
-    private String lastAddress=null;
     /** True iff this has been forcibly stopped. */
     private boolean stopped=false;
     /** A queue of incoming HTTPDownloaders from push downloads.  Call wait()
      *  and notify() on this if it changes.  Add to tail, remove from head. */
     private List /* of HTTPDownloader */ pushQueue=new LinkedList();
-
-
     /** The list of all files we've requested via push messages.  Only files
      * matching this description may be accepted from incoming connections. */
     private List /* of PushRequestedFile */ requested=new LinkedList();
-    /** The maximum time, in SECONDS, allowed between a push request and an
-     *  incoming push connection. */
-    private final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
+
+
+    ///////////////////////// Variables for GUI Display  /////////////////
+    /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
+      *  etc.   Should be modified only through setState. */
+    private int state;
+    /** The time as returned by Date.getTime() that this entered the current
+        state.  Should be modified only through setState. */        
+    private long stateTime;
+    /** The current address we're trying, or last address if waiting, or null
+     *  if unknown. */
+    private String lastAddress=null;
 
     
     /** 
@@ -183,11 +185,16 @@ public class ManagedDownloader implements Downloader {
                 //remove.
                 return;
             } finally {
-                //Clean up any queued push downloads.
+                //Clean up any queued push downloads.  Also clean up dloader if
+                //still existing.  This isn't needed if an IOException thrown by
+                //Downloader.start means stop need not be called.  But better to
+                //be safe.
                 synchronized (ManagedDownloader.this) {
                     stopped=true;
                     for (Iterator iter=pushQueue.iterator(); iter.hasNext(); ) 
                         ((HTTPDownloader)iter.next()).stop();
+                    if (dloader!=null)
+                        dloader.stop();
                 }
             }           
         }
@@ -299,14 +306,15 @@ public class ManagedDownloader implements Downloader {
                     setState(DOWNLOADING,
                              dloader.getInetAddress().getHostAddress());
                     dloader.start();
+                    setState(COMPLETE);
+                    return true;
+                } catch (IOException e) {
+                    //Was this forcibly closed?  Or was it a normal IO problem?
+                    //TODO2: if this is interrupted, retry same file.
                     synchronized (ManagedDownloader.this) {
                         if (stopped)
                             throw new InterruptedException();
-                        setState(COMPLETE);
                     }
-                    return true;
-                } catch (IOException e) {
-                    //Oh well.  Wait and try some more.
                 } finally {
                     manager.yieldSlot(ManagedDownloader.this); 
                 }
