@@ -180,13 +180,17 @@ public final class AlternateLocation implements
 	 *
 	 * @param urn the <tt>URN</tt> of the locally stored file
 	 */
-	public static AlternateLocation create(URN urn) throws IOException {
+	public static AlternateLocation create(URN urn) {
 		if(urn == null) throw new NullPointerException("null sha1");
-		URL url = 
-			new URL("http", 
-					NetworkUtils.ip2string(RouterService.getAddress()), 
-					RouterService.getPort(), 
-					HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+		URL url = null;
+        try {
+			url = new URL("http", 
+                          NetworkUtils.ip2string(RouterService.getAddress()), 
+                          RouterService.getPort(), 
+                          HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+        } catch(MalformedURLException e) {
+            ErrorService.error(e);
+        }
 		return new AlternateLocation(url, urn);
 	}
 

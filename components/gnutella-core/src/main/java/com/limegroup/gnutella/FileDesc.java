@@ -130,6 +130,8 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("no SHA1 URN");
 		}
         ALT_LOCS = AlternateLocationCollection.create(SHA1_URN);
+        //add myself to the collection.
+        ALT_LOCS.add(AlternateLocation.create(SHA1_URN));//SHA1_URN is not null
         _hits = 0; // Starts off with 0 hits
     }		
 
@@ -313,36 +315,14 @@ public class FileDesc implements AlternateLocationCollector {
     }
 
 	/**
-	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
-	 * <tt>FileDesc</tt>.  The collection will always have this location
-	 * added to it.
-	 *
 	 * @return the <tt>AlternateLocationCollection</tt> for this 
 	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
 	 *  if it is not initialized
 	 */
 	public AlternateLocationCollection getAlternateLocationCollection() {
-        // always renew entry for self before giving out alternate locations
-		try {
-			ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
-		} catch (IOException e) {
-			// not much we can do -- also should never happen
-		}
 		return ALT_LOCS;
 	}
 	
-	/**
-	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
-	 * <tt>FileDesc</tt>.  The collection could be empty.
-	 *
-	 * @return the <tt>AlternateLocationCollection</tt> for this 
-	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
-	 *  if it is not initialized
-	 */
-	public AlternateLocationCollection
-	  getAlternateLocationCollectionWithoutSelf() {
-		return ALT_LOCS;
-	}	
 
 	/** 
 	 * Implements <tt>AlternateLocationCollector</tt> interface.
