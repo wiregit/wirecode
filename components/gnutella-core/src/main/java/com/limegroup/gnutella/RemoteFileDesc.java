@@ -110,6 +110,8 @@ public class RemoteFileDesc implements Serializable {
      * The earliest time to retry this host in milliseconds since 01-01-1970
      */
     private transient long _earliestRetryTime = 0;
+
+    private transient int _hashcode = 0;
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -560,7 +562,17 @@ public class RemoteFileDesc implements Serializable {
         return one == null ? two == null : Arrays.equals(one, two);
     }
 
-	//TODO:: ADD HASHCODE OVERRIDE
+    public int hashCode() {
+        if(_hashcode == 0) {
+            int result = 17;
+            result = (37* result)+_host.hashCode();
+            result = (37* result)+_port;
+			result = (37* result)+_size;
+            result = (37* result)+_urns.hashCode();
+            _hashcode = result;
+        }
+		return _hashcode;
+	}
 
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
