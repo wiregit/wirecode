@@ -160,7 +160,7 @@ public final class SettingsManager {
 		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg";
+		"bin;dmg;jve";
 
     private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
     private final String SERVANT_TYPE          = "SERVANT_TYPE";

@@ -85,7 +85,7 @@ public class MediaType {
 		MediaType video=new MediaType("Video", 
 									  new String[] {"mpg", "mpeg", "asf", "qt", 
 													"mov", "avi", "mpe", "swf", "dcr",
-									                "rm", "ram"});
+									                "rm", "ram", "jve"});
 		MediaType images=new MediaType("Images",
 									   new String[] {"gif", "jpg", "jpeg", "jpe",
 													 "png", "tif", "tiff"});	
