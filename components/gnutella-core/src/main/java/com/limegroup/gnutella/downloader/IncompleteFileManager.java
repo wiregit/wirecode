@@ -401,9 +401,13 @@ public class IncompleteFileManager implements Serializable {
      * Notifies file manager about a single incomplete file.
      */
     private synchronized void registerIncompleteFile(File incompleteFile) {
+        // Only register if it has a SHA1 -- otherwise we can't share.
+        Set hashes = getAllCompletedHashes(incompleteFile);
+        if( hashes.size() == 0 ) return;
+        
         RouterService.getFileManager().addIncompleteFile(
             incompleteFile,
-            getAllCompletedHashes(incompleteFile),
+            hashes,
             getCompletedName(incompleteFile),
             (int)getCompletedSize(incompleteFile),
             getEntry(incompleteFile)

@@ -26,69 +26,112 @@ public class FileManager {
      * is _loadThread, which is controlled by _loadThreadLock.
      **********************************************************************/
 
-    /** the total size of all files, in bytes.
-     *  INVARIANT: _size=sum of all size of the elements of _files */
+    /**
+     * The total size of all files, in bytes.
+     * INVARIANT: _size=sum of all size of the elements of _files,
+     *   except IncompleteFileDescs, which may change size at any time.
+     */
     private long _size;
-    /** the total number of files.  INVARIANT: _numFiles==number of
-     *  elements of _files that are not null. */
+    
+    /**
+     * The total number of files.  INVARIANT: _numFiles==number of
+     * elements of _files that are not null and not IncompleteFileDescs.
+     */
     private int _numFiles;
-    /** the total number of files that are pending sharing.
+    
+    /** 
+     * The total number of files that are pending sharing.
      *  (ie: awaiting caching or being added)
      */
     private int _numPendingFiles;
-    /** the list of shareable files.  An entry is null if it is no longer
-     *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in a shared directory with a shareable extension. */
+    
+    /**
+     * The total number of incomplete shared files.
+     * INVARIANT: _numFiles + _numIncompleteFiles == the number of
+     *  elements of _files that are not null.
+     */
+    private int _numIncompleteFiles;
+    
+    /** 
+     * The list of shareable files.  An entry is null if it is no longer
+     *  shared.
+     * INVARIANT: for all i, f[i]==null, or f[i].index==i and
+     *  f[i]._path is in a shared directory with a shareable extension or
+     *  f[i]._path is the incomplete directory if f is an IncompleteFileDesc.
+     */
     private List /* of FileDesc */ _files;
 
-    /** an index mapping keywords in file names to the indices in _files.  A
+    /**
+     * An index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
-     * without a character from DELIMETERS.  INVARIANT: For all keys k in
-     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
-     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
-     * contains i. */
+     * without a character from DELIMETERS.  IncompleteFile keywords
+     * are NOT stored in this index.  Retrieval is of IncompleteFiles are only
+     * allowed by hash.
+     *
+     * INVARIANT: For all keys k in _index, for all i in _index.get(k), 
+     * _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path where _files[i]
+     * is not an IncompleteFileDesc, _index.get(k) contains i.
+     */
     private Trie /* String -> IntSet  */ _index;
-    /** an index mapping appropriately case-normalized URN strings to the
-     * indices in _files.  Used to make query-by-hash faster.  INVARIANT: for
-     * all keys k in _urnIndex, for all i in _urnIndex.get(k),
+    
+    /**
+     * An index mapping appropriately case-normalized URN strings to the
+     * indices in _files.  Used to make query-by-hash faster.
+     * INVARIANT: for all keys k in _urnIndex, for all i in _urnIndex.get(k),
      * _files[i].containsUrn(k).  Likewise for all i, for all k in
-     * _files[i].getUrns(),  _urnIndex.get(k) contains i.  */
+     * _files[i].getUrns(),  _urnIndex.get(k) contains i.
+     */
     private Map /* URN -> IntSet  */ _urnIndex;
     
-    /** The set of extensions to share, sorted by StringComparator. 
-     *  INVARIANT: all extensions are lower case. */
+    /**
+     * The set of extensions to share, sorted by StringComparator. 
+     * INVARIANT: all extensions are lower case.
+     */
     private static Set /* of String */ _extensions;
-    /** The list of shared directories and their contents.  More formally, a
-     *  mapping whose keys are shared directories and any subdirectories
-     *  reachable through those directories.  The value for any key is the set
-     *  of indices of all shared files in that directory.  INVARIANT: for any
-     *  key k with value v in _sharedDirectories, for all i in v,
+    
+    /**
+     * The list of shared directories and their contents.  More formally, a
+     * mapping whose keys are shared directories and any subdirectories
+     * reachable through those directories.  The value for any key is the set
+     * of indices of all shared files in that directory.
+     * INVARIANT: for any key k with value v in _sharedDirectories, 
+     * for all i in v,
      *       _files[i]._path==k+_files[i]._name.
      *  Likewise, for all i s.t. _files[i]!=null,
      *       _sharedDirectories.get(
      *            _files[i]._path-_files[i]._name).contains(i).
      * Here "==" is shorthand for file path comparison and "a-b" is short for
      * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
-     * canonicalized files, sorted by a FileComparator. */
+     * canonicalized files, sorted by a FileComparator.
+     */
     private Map /* of File -> IntSet */ _sharedDirectories;
 
-    /** The thread responsisble for adding contents of _sharedDirectories to
+    /**
+     *  The thread responsisble for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
      *  because indexing files can be slow.  Interrupt this thread to stop the
      *  loading; it will periodically check its interrupted status. 
      *  LOCKING: obtain _loadThreadLock before modifying and before obtaining
-     *  this (to prevent deadlock). */
+     *  this (to prevent deadlock).
+     */
     private Thread _loadThread;
-    /** True if _loadThread.interrupt() was called.  This is needed because
+    /**
+     *  True if _loadThread.interrupt() was called.  This is needed because
      *  _loadThread.isInterrupted() does not behave as expected.  See
-     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html */
-    private boolean _loadThreadInterrupted=false;   
-    /** The lock for _loadThread.  Necessary to prevent deadlocks in
-     *  loadSettings. */
+     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html
+     */
+    private boolean _loadThreadInterrupted=false;
+    
+    /**
+     * The lock for _loadThread.  Necessary to prevent deadlocks in
+     * loadSettings.
+     */
     private Object _loadThreadLock=new Object();
     
     /** The callback for adding shared directories and files, or null
-     *  if this has no callback.  */
+     *  if this has no callback.
+     */
     protected static ActivityCallback _callback;
     
     /**
@@ -104,8 +147,10 @@ public class FileManager {
         
     
 
-    /** Characters used to tokenize queries and file names. */
-    public static final String DELIMETERS=" -._+/*()\\";
+    /**
+     * Characters used to tokenize queries and file names.
+     */
+    public static final String DELIMETERS=" -._+/*()\\";    
     private static final boolean isDelimeter(char c) {
         switch (c) {
         case ' ':
@@ -134,6 +179,7 @@ public class FileManager {
         // overwrite all these variables
         _size = 0;
         _numFiles = 0;
+        _numIncompleteFiles = 0;
         _numPendingFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
@@ -154,16 +200,31 @@ public class FileManager {
     ////////////////////////////// Accessors ///////////////////////////////
 
     
-    /** Returns the size of all files, in <b>bytes</b>.  Note that the largest
+    /**
+     * Returns the size of all files, in <b>bytes</b>.  Note that the largest
      *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
-     *  bytes are being shared, returns this value. */
+     *  bytes are being shared, returns this value.
+     */
     public int getSize() {return ByteOrder.long2int(_size);}
 
-    /** Returns the number of files. */
+    /**
+     * Returns the number of files.
+     */
     public int getNumFiles() {return _numFiles;}
     
-    /** Returns the number of pending files. */
-    public int getNumPendingFiles() { return _numPendingFiles; }
+    /**
+     * Returns the number of shared incomplete files.
+     */
+    public int getNumIncompleteFiles() {
+        return _numIncompleteFiles;
+    }
+    
+    /**
+     * Returns the number of pending files.
+     */
+    public int getNumPendingFiles() {
+        return _numPendingFiles;
+    }
 
 
     /**
@@ -499,6 +560,7 @@ public class FileManager {
             // Reset the file list info
             _size = 0;
             _numFiles = 0;
+            _numIncompleteFiles = 0;
             _numPendingFiles = 0;
             _files=new ArrayList();
             _index=new Trie(true);   //maintain invariant
@@ -817,6 +879,7 @@ public class FileManager {
                 incompleteFile, urns, fileIndex, name, size, vf);            
             _files.add(ifd);
             this.updateUrnIndex(ifd);
+            _numIncompleteFiles++;
         }
     }
 
@@ -874,6 +937,7 @@ public class FileManager {
                 // "shared" to begin with.
                 if (fd instanceof IncompleteFileDesc) {
                     this.removeUrnIndex(fd);
+                    _numIncompleteFiles--;
                     repOk();
                     return false;
                 }
@@ -1092,6 +1156,8 @@ public class FileManager {
      * Returns an array of all responses matching the given request.  If there
      * are no matches, the array will be empty (zero size).
      *
+     * Incomplete Files are NOT returned in responses to queries.
+     *
      * Design note: returning an empty array requires no extra allocations,
      * as empty arrays are immutable.
      */
@@ -1105,9 +1171,13 @@ public class FileManager {
         //before they ever reach this point.
         if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
             //Special case: if no shared files, return null
+            // This works even if incomplete files are shared, because
+            // they are added to _numIncompleteFiles and not _numFiles.
             if (_numFiles==0)
                 return EMPTY_RESPONSES;
             //Extract responses for all non-null (i.e., not deleted) files.
+            //Because we ignore all incomplete files, _numFiles continues
+            //to work as the expected size of ret.
             Response[] ret=new Response[_numFiles];
             int j=0;
             for (int i=0; i<_files.size(); i++) {

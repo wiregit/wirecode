@@ -231,7 +231,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0,TestFile.length(),true);
-        downloader.doDownload(vf,false);
+        downloader.doDownload(vf);
 
         long elapsed1=System.currentTimeMillis()-start1;
         
@@ -248,7 +248,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0, TestFile.length(),true);
-        downloader.doDownload(vf, false);
+        downloader.doDownload(vf);
 
         long elapsed2=System.currentTimeMillis()-start2;
         debug("  No check="+elapsed2+", check="+elapsed1 +"\n");
