@@ -61,7 +61,11 @@ public class ManagedConnection
     /** The producer's queues, one priority per mesage type. 
      *  INVARIANT: _outputQueue.length==PRIORITIES
      *  LOCKING: obtain _outputQueueLock. */
-    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];     
+    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];
+    /** The number of queued messages.  Maintained for performance.
+     *  INVARIANT: _queued==sum of _outputQueue[i].size() 
+     *  LOCKING: obtain _outputQueueLock */
+    private int _queued=0;
     /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
@@ -354,14 +358,17 @@ public class ManagedConnection
      *  is already closed.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) {
+        repOk();
         _router.countMessage();
         int priority=calculatePriority(m);
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             int dropped=_outputQueue[priority].add(m);
             _numSentMessagesDropped+=dropped;
+            _queued+=1-dropped;
             _outputQueueLock.notify();
         }
+        repOk();
     }
  
     /** 
@@ -410,6 +417,7 @@ public class ManagedConnection
         /** While the connection is not closed, sends all data delay. */
         public void run() {
             while (isOpen()) {
+                repOk();
                 try {
                     waitForQueued();
                 } catch (InterruptedException e) {
@@ -426,38 +434,40 @@ public class ManagedConnection
                 } catch (IOException e) {
                     _manager.remove(ManagedConnection.this);
                 }
+                repOk();
             }
         }
 
         /** Wait until the queue is (probably) non-empty. */
-        private void waitForQueued() throws InterruptedException {
+        private final void waitForQueued() throws InterruptedException {
             //The synchronized statement is outside the while loop because
             //queued() is not thread-safe.
             if (isInterrupted()) {
                 throw new InterruptedException();
             }
             synchronized (_outputQueueLock) {
-                while (queued() <= 0) {                    
+                while (_queued == 0) {                    
                     _outputQueueLock.wait();
                 }
             }
         }   
 
         /** Send several queued message of each type. */
-        private void sendQueued() throws IOException {  
+        private final void sendQueued() throws IOException {  
             //1. For each priority send as many messages as desired for that
             //type.  IMPORTANT: we only obtain _outputQueueLock while touching
             //the queue, not while actually sending (which can block).
-            for (int priority=0; priority<PRIORITIES; priority++) { 
-                _outputQueue[priority].resetCycle();
-
+            for (int priority=0; priority<PRIORITIES; priority++) {     
+                MessageQueue queue=_outputQueue[priority];
+                queue.resetCycle();
                 while (true) {
                     Message m=null;
                     synchronized (_outputQueueLock) {
-                        m=(Message)_outputQueue[priority].removeNext(); 
+                        m=(Message)queue.removeNext(); 
+                        if (m==null)
+                            break;
+                        _queued--;
                     }
-                    if (m==null)
-                        break;
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
@@ -471,15 +481,6 @@ public class ManagedConnection
         }
     }
 
-    /** Returns the number of queued messages in this. 
-     *  @requires caller holds _outputQueueLock */
-    private int queued() {
-        int sum=0;
-        for (int i=0; i<_outputQueue.length; i++) 
-            sum+=_outputQueue[i].size();
-        return sum;
-    }
-
     /** 
      * For debugging only: prints to stdout the number of queued messages in
      * this, by type.
@@ -489,8 +490,7 @@ public class ManagedConnection
             for (int i=0; i<PRIORITIES; i++) {
                 System.out.println(i+" "+_outputQueue[i].size());
             }
-            System.out.println("* "+queued()+"\n");
-            System.out.println(_outputQueue[PRIORITY_QUERY_REPLY]);
+            System.out.println("* "+_queued+"\n");
         }
     }
 
@@ -1174,6 +1174,22 @@ public class ManagedConnection
     void setQueryRouteState(ManagedConnectionQueryInfo qi) {
         this.queryInfo=qi;
     } 
+
+    /** 
+     * Tests representation invariants.  For performance reasons, this is
+     * private and final.  Make protected if ManagedConnection is subclassed.
+     */
+    private final void repOk() {
+        /*
+        //Check _queued invariant.
+        synchronized (_outputQueueLock) {
+            int sum=0;
+            for (int i=0; i<_outputQueue.length; i++) 
+                sum+=_outputQueue[i].size();
+            Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
+        }
+        */
+    }
     
     /** Unit test. */
     /*
