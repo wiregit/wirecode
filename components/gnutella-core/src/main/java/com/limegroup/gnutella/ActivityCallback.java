@@ -12,6 +12,7 @@ import com.sun.java.util.collections.*;
  *  <ul>
  *  <li>Query replies (for displaying results) and query strings 
  *     (for the monitor)
+ *  <li>Update in shared file statistics
  *  <li>Change of connection state
  *  <li>New or dead uploads or downloads
  *  <li>New chat requests and chat messages
@@ -103,11 +104,18 @@ public interface ActivityCallback
      * called exactly once per file per change to the shared directory and
      * extension settings.
      *
-     * @param directory MUST be a directory
+     * @param file MUST be a file descriptor for the file.
      * @param parent MUST be the parent of directory, or null if no parent
      *  exists. 
      */
-    public void addSharedFile(final File file, final File parent);
+    public void addSharedFile(final FileDesc file, final File parent);
+
+    /**
+     * Notifies the GUI that the given shared file has new information.
+     *
+     * @param file The File that needs updating
+     */    
+    public void handleSharedFileUpdate(File file);
 
 	/**
 	 * The list of shared files has been emptied.

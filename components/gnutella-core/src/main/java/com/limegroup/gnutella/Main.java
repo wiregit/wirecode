@@ -233,7 +233,9 @@ public class Main implements ActivityCallback {
 
 	public void addSharedDirectory(File file, File parent) {}
 
-	public void addSharedFile(File file, File parent) {}
+	public void addSharedFile(FileDesc file, File parent) {}
+	
+	public void handleSharedFileUpdate(File file) {}
 
 	public void clearSharedFiles() {}
 

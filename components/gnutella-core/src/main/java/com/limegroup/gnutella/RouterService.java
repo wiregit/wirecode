@@ -856,9 +856,22 @@ public class RouterService
     }
 
     /**
-     * Returns a list of all shared files in the given directory.
-     * All the files returned have already been passed to the gui
-     * via ActivityCallback.addSharedFile.  Note that if a file
+     * Returns a list of all shared file descriptors in the given directory.
+     * All the file descriptors returned have already been passed to the gui
+     * via ActivityCallback.addSharedFile.  Note that if a file descriptor
+     * is added to the given directory after this method completes, 
+     * addSharedFile will be called for that file descriptor.<p>
+     *
+     * If directory is not a shared directory, returns null.
+     */
+    public FileDesc[] getSharedFileDescriptors(File directory) {
+        return fileManager.getSharedFileDescriptors(directory);
+    }
+    
+    /**
+     * Returns a list of all shared file in the given directory.
+     * All the file returned have already been passed to the gui
+     * via ActivityCallback.addSharedFile.  Note that if a file 
      * is added to the given directory after this method completes, 
      * addSharedFile will be called for that file.<p>
      *
@@ -867,6 +880,7 @@ public class RouterService
     public File[] getSharedFiles(File directory) {
         return fileManager.getSharedFiles(directory);
     }
+        
     
 
     /** 

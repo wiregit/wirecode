@@ -220,6 +220,11 @@ public final class AlternateLocationCollection
 		}
 		return _alternateLocations.size();
 	}
+	
+	/**
+	 *  Implements AlternateLocationCollector interface
+	 */
+	public int numberOfAlternateLocations() { return size(); }
 
 	/**
 	 * Overrides Object.toString to print out all of the alternate locations

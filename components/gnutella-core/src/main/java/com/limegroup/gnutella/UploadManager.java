@@ -202,10 +202,14 @@ public final class UploadManager implements BandwidthTracker {
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
         // don't want to show browse host status in gui...
-        if (!isBHUploader)
+        if (!isBHUploader) {
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
             _callback.addUpload(uploader);
+            FileDesc fd = _fileManager.get(uploader.getIndex());
+            fd.incrementAttemptedUploads();
+            _callback.handleSharedFileUpdate(fd.getFile());
+        }
 
         
         //Note: We do not call connect() anymore. That's because connect would
@@ -226,9 +230,16 @@ public final class UploadManager implements BandwidthTracker {
         uploader.writeResponse();
         // check the state of the upload once the
         // start method has finished.  if it is complete...
-        if (uploader.getState() == Uploader.COMPLETE)
+        if (uploader.getState() == Uploader.COMPLETE) {
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
+            // is this necessary? -- i'm pretty sure it is.
+            if ( !isBHUploader ) {
+                FileDesc fd = _fileManager.get(uploader.getIndex());
+                fd.incrementCompletedUploads();
+                _callback.handleSharedFileUpdate(fd.getFile());            
+            }
+        }
 
         //clean up
         long finishTime=System.currentTimeMillis();

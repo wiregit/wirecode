@@ -211,7 +211,8 @@ public class FileManager {
      * <p>
      * If directory is null, returns all shared files.
      */
-    public synchronized File[] getSharedFiles(File directory) {
+    public /* synchronized */ File[] getSharedFiles(File directory) {
+         /*
         if(directory!=null){
             // a. Remove case, trailing separators, etc.
             try {
@@ -245,8 +246,66 @@ public class FileManager {
             Object[] out=buf.toArray(ret);
             Assert.that(out==ret, "Couldn't fit list in returned value");
             return ret;
+        } */
+        // Yes, this is slightly annoying -- having to locate all the file descriptors
+        // and then also having to recurse through them to just get the files
+        // But, it's the cleanest way.
+        // Alternately, you could just re-implement the exact same routine
+        // as in getSharedFileDescriptors, but store Files instead
+        FileDesc[] fds = getSharedFileDescriptors(directory);
+        File[] files = new File[fds.length];
+        for( int i = 0; i < fds.length; i++ ) {
+            files[i] = fds[i].getFile();
+        }
+        return files;
+    }
+    
+    /**
+     * Returns a list of all shared file descriptors in the given directory, in any order.
+     * Returns null if directory is not shared, or a zero-length array if it is
+     * shared but contains no files.  This method is not recursive; files in 
+     * any of the directory's children are not returned.   
+     * <p>
+     * If directory is null, returns all shared file descriptors.
+     */
+    public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
+        if(directory!=null){
+            // a. Remove case, trailing separators, etc.
+            try {
+                directory=getCanonicalFile(directory);
+            } catch (IOException e) {
+                return null;
+            }
+            
+            //Lookup indices of files in the given directory...
+            IntSet indices=(IntSet)_sharedDirectories.get(directory);
+            if (indices==null)
+                return null;
+            //...and pack them into an array.
+            FileDesc[] ret=new FileDesc[indices.size()];
+            IntSet.IntSetIterator iter=indices.iterator(); 
+            for (int i=0; iter.hasNext(); i++) {
+                FileDesc fd=(FileDesc)_files.get(iter.next());
+                Assert.that(fd!=null, "Directory has null entry");
+                ret[i]=fd;
+            }
+            return ret;
+        } else {
+            // b. Filter out unshared entries.
+            ArrayList buf=new ArrayList(_files.size());
+            for (int i=0; i<_files.size(); i++) {
+                FileDesc fd=(FileDesc)_files.get(i);
+                if (fd!=null)
+                    buf.add(fd);                
+            }
+            FileDesc[] ret=new FileDesc[buf.size()];
+            Object[] out=buf.toArray(ret);
+            Assert.that(out==ret, "Couldn't fit list in returned value");
+            return ret;
         }
     }
+    
+        
 
     /**
      * @param directory Gets all files under this directory RECURSIVELY.
@@ -613,7 +672,7 @@ public class FileManager {
             boolean added=siblings.add(fileIndex);
             Assert.that(added, "File "+fileIndex+" already found in "+siblings);
             if (_callback!=null)
-                _callback.addSharedFile(file, parent);
+                _callback.addSharedFile(fileDesc, parent);
 		
             String path = file.getAbsolutePath();
             //Index the filename.  For each keyword...
@@ -909,6 +968,9 @@ public class FileManager {
                  j++) {            
             int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
+            desc.incrementHitCount();
+            if ( _callback != null )
+                _callback.handleSharedFileUpdate(desc.getFile());
             response[j] = new Response(desc);
         }
         return response;

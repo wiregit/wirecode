@@ -1064,6 +1064,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// in their original headers
 			if (fileDesc != null) {
 				fileDesc.addAlternateLocationCollection(totalAlternateLocations);
+				//tell the library we have alternate locations
+				callback.handleSharedFileUpdate(completeFile);
 				HeadRequester requester = 
 			        new HeadRequester(files, fileHash, 
 									  fileDesc, totalAlternateLocations);

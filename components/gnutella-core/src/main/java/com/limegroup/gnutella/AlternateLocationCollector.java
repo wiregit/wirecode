@@ -29,4 +29,10 @@ public interface AlternateLocationCollector {
 	 *  has 1 or more alternate locations, <tt>false</tt> otherwise
 	 */
 	public boolean hasAlternateLocations();
+	
+	/**
+	 * Number of alternate locations this collector is holding
+	 *
+	 */
+	public int numberOfAlternateLocations();
 }

@@ -63,6 +63,21 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * The collection of alternate locations for the file.
 	 */
 	private AlternateLocationCollection _altLocs;
+	
+	/**
+	 * The number of hits this file has recieved.
+	 */
+	private int _hits;	
+	
+	/** 
+	 * The number of times this file has had attempted uploads
+	 */
+	private int _attemptedUploads;
+	
+	/** 
+	 * The number of times this file has had completed uploads
+	 */
+	private int _completedUploads;	
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -105,6 +120,7 @@ public final class FileDesc implements AlternateLocationCollector {
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
         URNS = urns;
+        _hits = 0; // Starts off with 0 hits
     }		
 
     /** 
@@ -252,6 +268,12 @@ public final class FileDesc implements AlternateLocationCollector {
 		if(_altLocs == null) return false;
 		return _altLocs.hasAlternateLocations();
 	}
+	
+	// implements AlternateLocationCollector interface
+	public int numberOfAlternateLocations() {
+	    createAlternateLocations();
+	    return _altLocs.numberOfAlternateLocations();
+	}
 
 	/**
 	 * Constructs the alternate location collection instance if it's null.
@@ -304,6 +326,51 @@ public final class FileDesc implements AlternateLocationCollector {
         // no match
         return false;
     }
+    
+    /**
+     * Increase & return the new hit count.
+     * @return the new hit count
+     */    
+    public int incrementHitCount() {
+        return ++_hits;
+    }
+    
+    /** 
+     * @return the current hit count 
+     */
+    public int getHitCount() {
+        return _hits;
+    }
+    
+    /**
+     * Increase & return the new attempted uploads
+     * @return the new attempted upload count
+     */    
+    public int incrementAttemptedUploads() {
+        return ++_attemptedUploads;
+    }
+    
+    /** 
+     * @return the current attempted uploads
+     */
+    public int getAttemptedUploads() {
+        return _attemptedUploads;
+    }
+    
+    /**
+     * Increase & return the new completed uploads
+     * @return the new completed upload count
+     */    
+    public int incrementCompletedUploads() {
+        return ++_completedUploads;
+    }
+    
+    /** 
+     * @return the current completed uploads
+     */
+    public int getCompletedUploads() {
+        return _completedUploads;
+    }       
     
     /**
      * Opens an input stream to the <tt>File</tt> instance for this
