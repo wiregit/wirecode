@@ -55,6 +55,12 @@ public class Stat implements Runnable{
 		//pr.println("Total size : " + man.totalSize );
 		pr.println("-------------------------------------------------" );
 		pr.flush();
+		//reset all values
+		man.PReqCount=0;
+		man.PRepCount=0;
+		man.QRepCount=0;
+		man.QReqCount=0;
+		man.total =0;
 	    }
 	    catch (Exception e) {
 	    ActivityCallback callback=man.getCallback();
