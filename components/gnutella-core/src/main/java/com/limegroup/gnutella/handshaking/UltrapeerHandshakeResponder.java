@@ -79,6 +79,12 @@ public class UltrapeerHandshakeResponder
 	 * @param response the headers read from the connection
 	 */
 	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
+ 		
+		// if this is a connections from the crawler, return the special crawler response
+		if(response.isCrawler()) {
+			return HandshakeResponse.createCrawlerResponse();
+		}
+
 		//Incoming connection....
 		Properties ret = new UltrapeerHeaders(getRemoteIP());
 		
@@ -91,11 +97,9 @@ public class UltrapeerHandshakeResponder
 				NetworkUtils.ip2string(RouterService.getAddress())+":"
 				+ RouterService.getPort());
 		
-		
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.
 
-		// TODO::add special cases for the type of client we're connecting to
 		if (reject(response)) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
@@ -115,7 +119,7 @@ public class UltrapeerHandshakeResponder
 	}
 
 
-	/**
+    /**
 	 * Returns whether or not the set of connection headers denotes that the
 	 * connecting host is a BearShare.  Since BearShare does not allow
 	 * non-BearShare leaves, we ignore it's attempt to demote us to
