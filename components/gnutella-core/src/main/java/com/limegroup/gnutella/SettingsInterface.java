@@ -200,9 +200,12 @@ public interface SettingsInterface
     /** Default directories for file searching */
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
-    public static final String  DEFAULT_EXTENSIONS     = "mp3;"+
-	"mp2;mp1;mpg;vqf;avi;mpeg;wav;mod;voc;it;xm;s3m;stm;"+
-	"wma;mov;asf;zip;rar";
+    public static final String  DEFAULT_EXTENSIONS     = 
+	"html;htm;xml;txt;pdf;ps;rtf;doc;tex;"+
+	"mp3;wav;au;aif;aiff;ra;ram;"+
+	"mpg;mpeg;asf;qt;mov;avi;mpe;"+
+	"gif;jpg;jpeg;jpe;png;tif;tiff;"+
+	"exe;zip;gz;gzip;hqx;tar;tgz;z";
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
     public static final String[] DEFAULT_BANNED_WORDS   = {};
