@@ -341,6 +341,12 @@ public final class SettingsManager {
      * The time when we last expired accumulated information
      */
     private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
+
+	/**
+	 * Constant for the default status of whether or not Cydoor 
+	 * is installed on this machine.
+	 */
+	private final boolean DEFAULT_CYDOOR_INSTALLER_CALLED = false;
     
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -490,6 +496,12 @@ public final class SettingsManager {
      * information
      */
     private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
+
+	/**
+	 * Constant key for whether or not the Cydoor installer was called on this
+	 * machine.
+	 */
+	private final String CYDOOR_INSTALLER_CALLED = "CYDOOR_INSTALLER_CALLED";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -1028,6 +1040,9 @@ public final class SettingsManager {
                 else if(key.equals(LAST_EXPIRE_TIME)){
                     setLastExpireTime((new Long(p)).longValue());
                 }
+				else if(key.equals(CYDOOR_INSTALLER_CALLED)) {
+					setCydoorInstalled((new Boolean(p)).booleanValue());
+				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -1138,6 +1153,8 @@ public final class SettingsManager {
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
+
+		setCydoorInstalled(DEFAULT_CYDOOR_INSTALLER_CALLED);
     }
 
     /**
@@ -2976,6 +2993,16 @@ public final class SettingsManager {
     public void setLastExpireTime(long lastExpireTime){
         setLongValue(LAST_EXPIRE_TIME, lastExpireTime);
     }
+
+	/**
+	 * Sets whether or not Cydoor is installed on the client system.
+	 * 
+	 * @param INSTALLED specifies whether or not Cydoor has been installed
+	 *  on the target system
+	 */
+	private void setCydoorInstalled(final boolean INSTALLED) {
+		setBooleanValue(CYDOOR_INSTALLER_CALLED, INSTALLED);
+	}
     
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
