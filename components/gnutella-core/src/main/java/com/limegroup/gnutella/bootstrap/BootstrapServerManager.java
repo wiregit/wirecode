@@ -377,9 +377,15 @@ public class BootstrapServerManager {
         HttpClient client = HttpClientManager.getNewClient();
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
-            in = new BufferedReader(
-                    new InputStreamReader(
-                        get.getResponseBodyAsStream()));
+            InputStream is = get.getResponseBodyAsStream();
+            
+            if(is == null) {
+                LOG.warn("Invalid server: "+server);
+                // invalid uri? begone.
+                request.handleError(server);
+                return;
+            }
+            in = new BufferedReader(new InputStreamReader(is));
                         
             if(get.getStatusCode() < 200 || get.getStatusCode() >= 300) {
                 if(LOG.isWarnEnabled())
