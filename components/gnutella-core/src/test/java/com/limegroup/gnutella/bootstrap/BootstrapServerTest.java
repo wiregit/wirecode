@@ -19,7 +19,7 @@ public class BootstrapServerTest extends TestCase {
 
     public void testConstructorSimple() {        
         try {
-            String s1="http://server.com/dir/script.php";
+            String s1="HTTP://server.com/dir/script.php";
             BootstrapServer e1=new BootstrapServer(s1);
             assertEquals(s1, e1.getURL().toString());
         } catch (ParseException e) {

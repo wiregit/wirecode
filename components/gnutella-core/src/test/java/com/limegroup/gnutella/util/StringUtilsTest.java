@@ -161,5 +161,17 @@ public class StringUtilsTest extends TestCase {
                    ==StringUtils.compareIgnoreCase(a, b));
         assertTrue(b.compareToIgnoreCase(a)
                    ==StringUtils.compareIgnoreCase(b, a));
-    }  
+    }
+
+    public void testStartsWithIgnoreCase() {
+        assertTrue(StringUtils.startsWithIgnoreCase("abcd", "a"));
+        assertTrue(StringUtils.startsWithIgnoreCase("aBcd", "Ab"));
+        assertTrue(StringUtils.startsWithIgnoreCase("abcd", ""));
+        assertTrue(StringUtils.startsWithIgnoreCase("a", ""));
+        assertTrue(StringUtils.startsWithIgnoreCase("", ""));
+
+        assertTrue(! StringUtils.startsWithIgnoreCase("abcd", "x"));
+        assertTrue(! StringUtils.startsWithIgnoreCase("a", "ab"));
+        assertTrue(! StringUtils.startsWithIgnoreCase("", "a"));
+    }
 }

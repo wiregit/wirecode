@@ -216,7 +216,7 @@ public class BootstrapServerManagerTest extends TestCase {
         bman.fetchEndpointsAsync();
         sleep();
         
-        s2.setResponseData("OK\r\n");
+        s2.setResponseData("Ok\r\n");   //Test funny case; not required by spec
         bman.sendUpdatesAsync(new Endpoint("18.239.0.145", 6348));
         sleep();
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS

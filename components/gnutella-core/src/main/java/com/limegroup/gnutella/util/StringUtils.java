@@ -253,6 +253,22 @@ public class StringUtils {
         return a.length()-b.length();
     }
 
+    /** 
+     * Returns true iff s starts with prefix, ignoring case.
+     * @return true iff s.toUpperCase().startsWith(prefix.toUpperCase())
+     */
+    public static boolean startsWithIgnoreCase(String s, String prefix) {
+        if (s.length() < prefix.length())
+            return false;
+        for (int i=0; i<prefix.length(); i++) {
+            char sc=Character.toUpperCase(s.charAt(i));
+            char pc=Character.toUpperCase(prefix.charAt(i));
+            if (sc!=pc)
+                return false;
+        }
+        return true;
+    }
+    
     /**
      * Returns the entries in the set in a string form, that can be used
      * in HTTP headers (among other purposes)

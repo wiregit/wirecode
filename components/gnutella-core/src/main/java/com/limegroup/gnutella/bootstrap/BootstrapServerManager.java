@@ -6,7 +6,7 @@ import java.util.Random;
 import java.text.ParseException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -245,7 +245,7 @@ public class BootstrapServerManager {
             }
         }
         public void handleResponseData(BootstrapServer server, String line) {
-            if (line.startsWith("OK"))      //TODO: ignore case
+            if (StringUtils.startsWithIgnoreCase(line, "OK"))
                 gotResponse=true;
         }
         public boolean needsMoreData() {
@@ -305,6 +305,7 @@ public class BootstrapServerManager {
                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                 +"&"+request.parameters());
             URLConnection connection=url.openConnection();
+            connection.setUseCaches(false);
             in=new BufferedReader(
                    new InputStreamReader(connection.getInputStream()));
 
@@ -316,7 +317,7 @@ public class BootstrapServerManager {
                 if (line==null)
                     break;
 
-                if (firstLine && line.startsWith("ERROR")) { //TODO: ignore case
+                if (firstLine&& StringUtils.startsWithIgnoreCase(line,"ERROR")){
                     request.handleError(server);
                     errors=true;
                 } else {

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.bootstrap;
 
 import java.net.*;
 import java.text.ParseException;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * A URL for a GWebCache endpoint, plus some additional connection
@@ -37,7 +38,7 @@ public class BootstrapServer {
      *  either format.  The offset is not necessarily set.
      */
     public BootstrapServer(String s) throws ParseException {
-        if (!s.startsWith("http"))       //TODO: ignore case
+        if (!StringUtils.startsWithIgnoreCase(s, "http"))
             throw new ParseException(s, 0);
         try {
             int i=s.indexOf(",");        //TODO: relies on s being URL encoded
