@@ -1045,7 +1045,7 @@ public final class CommonUtils {
     public static String convertFileName(String name) {
 		
 		// if the name is too long, reduce it.  We don't go all the way
-		// up to 256 because we don't know how long the directory 
+		// up to 256 because we don't know how long the directory name is
 		if(name.length() > 180) {
 			name = name.substring(0, 180);
 		}
