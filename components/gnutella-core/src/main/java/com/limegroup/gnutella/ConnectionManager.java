@@ -75,7 +75,7 @@ public class ConnectionManager {
     
     /* Sister backend classes. */
     private MessageRouter _router;
-    private HostCatcher _catcher;
+    private volatile HostCatcher _catcher;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 
@@ -118,6 +118,7 @@ public class ConnectionManager {
      *   message broadcasting, though it makes adding/removing connections
      *   much slower.  
      */
+    //TODO:: why not use sets here??
     private volatile List /* of ManagedConnection */ 
         _connections = new ArrayList();
     private volatile List /* of ManagedConnection */ 
@@ -831,7 +832,7 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=ConnectionSettings.KEEP_ALIVE.getValue();//settings.getKeepAlive();
+        int oldKeepAlive=ConnectionSettings.KEEP_ALIVE.getValue();
 
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
@@ -1068,35 +1069,36 @@ public class ConnectionManager {
      *  the connection during handshaking, etc. 
      * @see com.limegroup.gnutella.Connection#initialize(int)
      */
-    private void initializeFetchedConnection(ManagedConnection c,
+    private void initializeFetchedConnection(ManagedConnection mc,
                                              ConnectionFetcher fetcher)
             throws NoGnutellaOkException, BadHandshakeException, IOException {
         synchronized(this) {
-            if(fetcher.isInterrupted())
+            if(fetcher.isInterrupted()) {
                 // Externally generated interrupt.
                 // The interrupting thread has recorded the
                 // death of the fetcher, so throw IOException.
                 // (This prevents fetcher from continuing!)
-                throw new IOException();
+                throw new IOException("connection fetcher");
+            }
 
-            _initializingFetchedConnections.add(c);
+            _initializingFetchedConnections.add(mc);
             _fetchers.remove(fetcher);
-            connectionInitializing(c);
+            connectionInitializing(mc);
             // No need to adjust connection fetchers here.  We haven't changed
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
-		}
-        RouterService.getCallback().connectionInitializing(c);
+        if(!CommonUtils.isJava118()) {
+            ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+        }
+        RouterService.getCallback().connectionInitializing(mc);
 
         try {
-            c.initialize();
+            mc.initialize();
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
-                _initializingFetchedConnections.remove(c);
-                removeInternal(c);
+                _initializingFetchedConnections.remove(mc);
+                removeInternal(mc);
                 // We've removed a connection, so the need for connections went
                 // up.  We may need to launch a fetcher.
                 adjustConnectionFetchers();
@@ -1106,28 +1108,27 @@ public class ConnectionManager {
         finally{
             //if the connection received headers, process the headers to
             //take steps based on the headers
-            processConnectionHeaders(c);
+            processConnectionHeaders(mc);
         }
         
         boolean connectionOpen = false;
         synchronized(this) {
-            _initializingFetchedConnections.remove(c);
+            _initializingFetchedConnections.remove(mc);
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            if(_connections.contains(c)) {
-                connectionInitialized(c);
+            if(_connections.contains(mc)) {
+                connectionInitialized(mc);
                 connectionOpen = true;
             }
         }
-        if(connectionOpen)
-        {
-            RouterService.getCallback().connectionInitialized(c);
+        if(connectionOpen) {
+            RouterService.getCallback().connectionInitialized(mc);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(c.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection(c);
+            if(mc.isClientSupernodeConnection()) {
+                gotShieldedClientSupernodeConnection(mc);
             }
         }
     }
