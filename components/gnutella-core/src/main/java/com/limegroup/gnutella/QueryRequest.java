@@ -56,12 +56,6 @@ public class QueryRequest extends Message implements Serializable{
 	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /**
-     * Keep this around for efficiency sake
-     */
-    private final static String GGEP_BLOCK_HEADER = 
-        "" + GGEP.GGEP_PREFIX_MAGIC_NUMBER;
-
-    /**
      * Builds a new query from scratch, with metadata, using the given GUID.
      * Whether or not this is a repeat query is encoded in guid.  GUID must have
      * been created via newQueryGUID; this allows the caller to match up
@@ -286,7 +280,8 @@ public class QueryRequest extends Message implements Serializable{
 				} else if (curExtStr.startsWith("<?xml")) {
 					// rich query
 					tempRichQuery = curExtStr;
-				} else if (curExtStr.startsWith(GGEP_BLOCK_HEADER))
+				} else if ((curExtStr.getBytes())[0] == 
+                           GGEP.GGEP_PREFIX_MAGIC_NUMBER)
                     tempQueryKey = parseGGEP(curExtStr);
             }
         } catch (IOException ioe) {
