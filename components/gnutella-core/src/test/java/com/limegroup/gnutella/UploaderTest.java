@@ -324,6 +324,11 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         
+        for(int i = 0;i<5;i++)
+        	fm.get(i).getHashTree();
+        
+        Thread.sleep(5000);
+        
         HTTPDownloader d3 = null;
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -344,7 +349,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.uploadsInProgress());
             
         // should queue next guy, but 'cause its thex we wont.
-        HTTPDownloader d4 = addUploader(upManager,defaultRfd,"1.1.1.4",true);
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
         ConnectionStatus status = connectThex(d4, true);
         assertTrue(status.isThexResponse());
         
@@ -376,7 +381,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         Thread.sleep((UploadManager.MIN_POLL_TIME+
                       UploadManager.MAX_POLL_TIME)/2);
         try {
-            connectDloader(d5, false, defaultRfd, true);
+            connectDloader(d5, false, rfd2, true);
             fail("should have been queued");
         } catch(QueuedException qx) {
             assertEquals(2, qx.getQueuePosition());
@@ -1052,10 +1057,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     private static void addThexHeader(HTTPDownloader dl) throws Exception {
-    	FileDesc fd = fm.get((int)dl.getIndex());
-    	HashTree tree = fd.getHashTree();
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader",
-                "X-Thex-URI: " + fm.get(2).getHashTree().httpStringValue());
+                "X-Thex-URI: " + fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
     }
     
     private static void kill(HTTPDownloader downloader) {
