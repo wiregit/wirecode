@@ -25,7 +25,7 @@ public class RequeryTester {
         RouterService rs=new RouterService(null, null, null, null);
         ActivityCallback acs = new ActivityCallbackStub();
         dm.initialize(acs, new RequeryMessageRouter(), 
-                      new Acceptor(1627,acs), new FileManagerStub(), rs);
+                      new Acceptor(1627,acs), new FileManagerStub());
 
         SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
