@@ -209,7 +209,6 @@ public class Sockets {
 		public synchronized Socket connect(int timeout) 
             throws IOException {
 			//Asynchronously establish socket.
-			Runnable runner = new SocketOpenerThread();
 			Thread t = new Thread(new SocketOpenerThread(), "SocketOpener");
 			t.setDaemon(true);
 			Assert.that(socket==null, "Socket already established w.o. lock.");
