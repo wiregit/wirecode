@@ -1,26 +1,33 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.BucketQueue;
-import com.limegroup.gnutella.util.UnmodifiableIterator;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.Date;
 
 /**
- * The host catcher. It caches address in ping replies in two distinct caches.
+ * The host catcher.   Caches address of other clients from ping replies.
+ * These addresses are used for fetching outgoing connections, for
+ * responding to pings (pong-caching), and for implementing 
+ * "reject connections".<p>
  * 
- * 1) A main pong cache, which continously caches pongs sent from different
- *    connections.  It expires every few seconds and refills itself in between
- *    expiration times.  It is used to return pongs when receiving a ping request
- *    rather than broadcasting the request every time.
- * 
- * 2) A reserve cache for stores address in pongs from router connections (e.g.,
- *    router.limewire.com) or from older clients (i.e., not implementing the
- *    the pong-caching scheme).  It only expires (or clears out) when the 
- *    user disconnects from the network.  It is an essence, a "backup cache" in
- *    case all connections die and there is nothing in the main cache.  Hence, 
- *    the name, reserve cache.
+ * This version of HostCatcher segregates pongs from "new" clients (those
+ * supporting query routing and pong caching) from "old" clients (those who
+ * don't).  Note that the getAnEndpoint method takes a boolean parameter.  This
+ * makes it easier for clients to implement separate new and old connection
+ * fetchers.<p>
+ *
+ * Pongs from new clients ("main cache") are further divided into "fresh" (those
+ * arriving in the last CACHE_EXPIRE_TIME seconds) and "expired".  The former is
+ * used to answer ping requets, rather than broadcasting the request every time.
+ * Both fresh and expired new pongs are used for connection fetching, but they
+ * are treated differently; getAnEndpoint(true) marks fresh pongs as "fetched"--
+ * without removing them from the cache--while it actually removes expired 
+ * pongs.<p>
+ *
+ * The old pongs ("reserve cache") only empties when the user disconnects from
+ * the network.  getAnEndpoint(false) removes old pongs from the HostCatcher. 
  */
 public class HostCatcher {
     /**
@@ -52,44 +59,33 @@ public class HostCatcher {
      * that we receive from different connections.
      * LOCKING: obtain cacheLock
      */
-    private ArrayList[] mainCache;
+    private ArrayList[] /* of MainCacheEntry */ mainCache;
+    private Buffer /* of Endpoint */ mainCacheExpired;
     private Object cacheLock = new Object();
 
     //used for returning random PingReplies from the main cache.
     private Random random;
     
-    /** 
-     * Number of sufficent pongs needed in the reserve cache before a Ping 
-     * doesnt'have to be broadcasted across the network when creating a new 
-     * connection.  Also, used when determing whether create a connection
-     * to router or not.
-     */
-    private static final int  RESERVE_CACHE_SUFFICIENT_CAPACITY = 50;
 
-    /** The number of router pongs to store in the reserve cache. */
-    private static final int ROUTER_SIZE=30;
     /** The number of old client pongs to store in the reserve cache. */
-    private static final int OLD_CLIENT_SIZE=20;
+    private static final int NORMAL_SIZE=100;
     /** The number of new client pongs to store in the reserve cache. */
-    private static final int NEW_CLIENT_SIZE=60;
+    private static final int ROUTER_SIZE=40;
     /** The number of private IP pongs to store in the reserve cache. */
     private static final int BAD_SIZE=10;
-    private static final int SIZE=ROUTER_SIZE+OLD_CLIENT_SIZE+
-        NEW_CLIENT_SIZE+BAD_SIZE;
+    private static final int SIZE=BAD_SIZE+ROUTER_SIZE+NORMAL_SIZE;
 
     /** Priorities for endpoints in reserve cache. */
-    private static final int BEST_PRIORITY=3; //new client pongs
-    private static final int GOOD_PRIORITY=2; //router pongs
-    private static final int NORMAL_PRIORITY=1; //old client pongs
-    private static final int BAD_PRIORITY=0; //private IP pongs
+    private static final int NORMAL_PRIORITY=2;   //old client pongs
+    private static final int ROUTER_PRIORITY=1; //router pongs
+    private static final int BAD_PRIORITY=0;    //private IP pongs
 
     /* reserve cache consists of a queue bounded in size.  The elements at the
      * END of the queue have the highest priority. 
      *
      * LOCKING: obtain cacheLock before modifying reserve cache.  */
     private BucketQueue /* of Endpoint */ reserveCacheQueue=
-        new BucketQueue(new int[] {BAD_SIZE, OLD_CLIENT_SIZE, 
-            ROUTER_SIZE, NEW_CLIENT_SIZE});
+        new BucketQueue(new int[] {BAD_SIZE, ROUTER_SIZE, NORMAL_SIZE});
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -120,11 +116,12 @@ public class HostCatcher {
 
         //array of 0 .. MAX_TTL_FOR_CACHE_REFRESH ArrayLists
         mainCache = new ArrayList[MessageRouter.MAX_TTL_FOR_CACHE_REFRESH];
-
         for (int i = 0; i < mainCache.length; i++)
         {
             mainCache[i] = new ArrayList();
         }
+        mainCacheExpired=new Buffer(NORMAL_SIZE);
+        
 
         random = new Random();
         mainCacheExpireTime = System.currentTimeMillis() + CACHE_EXPIRE_TIME;
@@ -227,7 +224,7 @@ public class HostCatcher {
         
         //2.) Write out the connections in the main cache if any
         if (cacheSize() > 0) {
-            for (Iterator iter=getCachedHosts(null, mainCache.length); 
+            for (Iterator iter=getCachedHosts(null, mainCache.length, false); 
                  iter.hasNext(); ) {
                 PingReply pr = (PingReply)iter.next();
                 Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
@@ -272,6 +269,8 @@ public class HostCatcher {
         int hops = (int)pr.getHops();
         if (hops >= mainCache.length)
             return false; //if greater than Max Hops allowed, do nothing.
+        if (hops==0)
+            hops=1;
 
         //if private IP address, ignore.
         Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort());
@@ -297,7 +296,7 @@ public class HostCatcher {
      */
     public synchronized void clearCache() {
         //first copy contents of main cache into reserve cache.
-        //copyCacheContents();
+        copyCacheContents();
         
         //next clear the main cache.
         for (int i = 0; i < mainCache.length; i++) 
@@ -361,9 +360,12 @@ public class HostCatcher {
 
     /**
      * Returns an unmodifiable iterator to access all the pongs in the main
-     * cache.  However, only returns pongs which are at most maxHops away.
+     * cache.  However, only returns pongs which are at most maxHops away.  If
+     * filterFetched is true, pongs already returned by getAnEndpoint() are not
+     * returned. 
      */
-    private Iterator getCachedHosts(Connection conn, int maxHops) {
+    private Iterator getCachedHosts(Connection conn, int maxHops,
+                                    boolean filterFetched) {
         ArrayList[] mainCacheClone = new ArrayList[maxHops];
         synchronized(cacheLock) {
             for (int i = 0; i < mainCacheClone.length; i++) {
@@ -371,6 +373,8 @@ public class HostCatcher {
                 Iterator iter = mainCache[i].iterator();
                 while (iter.hasNext()) {
                     MainCacheEntry entry = (MainCacheEntry)iter.next();
+                    if (filterFetched && entry.wasPreviouslyReturned())
+                        continue;
                     //only copy ping replies not from the Connection passed in
                     if (entry.getManagedConnection() != conn) 
                         mainCacheClone[i].add(entry.getPingReply());
@@ -410,10 +414,7 @@ public class HostCatcher {
             e.setWeight(BAD_PRIORITY);
         else if (receivingConnection != null 
                  && receivingConnection.isRouterConnection())
-            e.setWeight(GOOD_PRIORITY);
-        else if (receivingConnection != null && 
-                     !receivingConnection.isOldClient())
-            e.setWeight(BEST_PRIORITY);                
+            e.setWeight(ROUTER_PRIORITY);
         else
             e.setWeight(NORMAL_PRIORITY);
 
@@ -424,7 +425,7 @@ public class HostCatcher {
 
         //notify router thread that a pong was received from the router (if 
         //router connection)
-        if (e.getWeight() == GOOD_PRIORITY) {
+        if (e.getWeight() == ROUTER_PRIORITY) {
             synchronized(gotRouterPongLock) {
                 gotRouterPong = true;
                 gotRouterPongLock.notify();
@@ -432,29 +433,27 @@ public class HostCatcher {
         }
     }
 
-//      /**
-//       * Copies the contents of the main cache into the reserve cache (both
-//       * the set and queue).
-//       */ 
-//      private void copyCacheContents() {
-//          for (Iterator iter = getCachedHosts(null, mainCache.length); 
-//               iter.hasNext(); ) {
-//              //all addresses from the main cache are considered the "best"
-//              //endpoints in the reserve cache.
-//              PingReply pr = (PingReply)iter.next();
-//              Endpoint e = new Endpoint(pr.getIP(), pr.getPort(), 
-//                  pr.getFiles(), pr.getKbytes());
+    /**
+     * Copies the contents of mainCache into mainCacheExpired.
+     * Note that mainCache is not modified.
+     */ 
+    private void copyCacheContents() {
+        for (Iterator iter = getCachedHosts(null, mainCache.length, true); 
+             iter.hasNext(); ) {
+            //all addresses from the main cache are considered the "best"
+            //endpoints in the reserve cache.
+            PingReply pr = (PingReply)iter.next();
+            Endpoint e = new Endpoint(pr.getIP(), pr.getPort(), 
+                pr.getFiles(), pr.getKbytes());
 
-//              //don't add the host if the address and port would connect us to 
-//              //ourselves
-//              if (Acceptor.isMe(e.getHostname(), e.getPort()))
-//                  continue;
+            //don't add the host if the address and port would connect us to 
+            //ourselves
+            if (Acceptor.isMe(e.getHostname(), e.getPort()))
+                continue;
 
-//              e.setWeight(BEST_PRIORITY);
-//              reserveCacheSet.add(e);
-//              reserveCacheQueue.insert(e);
-//          }
-//      }
+            mainCacheExpired.add(e);
+        }
+    }
 
     /**
      * @modifies reserve cache
@@ -529,22 +528,43 @@ public class HostCatcher {
     } //end RouterConnectorThread
 
     /**
-     * returns the highest priority endpoint in reserve cache.  Throws 
-     * NoSuchElementException if reserve cache is empty.
+     * Returns and removes the highest priority endpoint in reserve cache.
+     * The caller MUST hold cacheLock before calling this.
+     * @exception NoSuchElementException if reserve cache is empty.  
      */
-    private Endpoint getAnEndpointInternal()
-        throws NoSuchElementException {   
-        if (! reserveCacheQueue.isEmpty()) {
-            //            System.out.println("    GAEI: From "+set+",");
-            //pop e from queue and remove from set.
-            Endpoint e;
-            synchronized (cacheLock) {
-                e=(Endpoint)reserveCacheQueue.extractMax();
-            }
-            return e;
-        } else
-            throw new NoSuchElementException();
+    private Endpoint getAnEndpointOld() throws NoSuchElementException {   
+        return (Endpoint)reserveCacheQueue.extractMax();
     }
+
+    /**
+     * Returns the highest priority endpoint in main cache, ensuring it won't be
+     * returned again.  The caller MUST hold cacheLock before calling this.
+     * @exception NoSuchElementException if reserve cache is empty.  
+     */
+    private Endpoint getAnEndpointNew() throws NoSuchElementException {
+        //1. First check mainCache for an unexpired endpoint
+        for (int hops=MessageRouter.MAX_TTL_FOR_CACHE_REFRESH-1;
+             hops>=0; hops--) {
+            for (int i=0; i<mainCache[hops].size(); i++) {
+                MainCacheEntry entry=(MainCacheEntry)mainCache[hops].get(i);
+                if (entry != null) {
+                    //make sure we didn't return this host previously during
+                    //this cache cyle.  TODO: synchronize!
+                    if (entry.wasPreviouslyReturned())
+                        continue;
+                    PingReply pr = entry.getPingReply();
+                    entry.markPreviouslyReturned();
+                    return new Endpoint(pr.getIP(), pr.getPort());
+                }
+            }
+        }
+        
+        //2. If that failed, check mainCacheExpired for a new but stale
+        //endpoint.  Because these are only used for connection fetchers, it's
+        //ok to remove the address.
+        return (Endpoint)mainCacheExpired.removeFirst();        
+    }
+
 
     /** Returns true iff ip is the ip address of router.limewire.com or 
      *  gnutellahosts.com
@@ -632,51 +652,25 @@ public class HostCatcher {
 
     /**
      *  Blocks until an address is available, and then returns that address.
-     *  getAnEndpoint will (almost) never return the same address twice.  Throws
-     *  InterruptedException if the calling thread is interrupted while waiting.
-     *  If newOnly is true, will only return the address of a new host.
-     *  Otherwise, will try to return the address of an old host, though there
-     *  is a low probability that the address could actually be a new host. 
+     *  getAnEndpoint will (almost) never return the same address twice. 
+     *
+     *  @param newOnly true if this should return a (possibly stale) address of 
+     *   a "new" host, or false if this should return an address of an "old" host. 
+     *  @exception InterruptedException if the calling thread is interrupted
+     *   while waiting
      */
     public Endpoint getAnEndpoint(boolean newOnly) throws InterruptedException {
         Endpoint endpoint = null;
         while (true) {
-            //a) try the main cache two times, in case a null is returned the
-            //first time
-            if (newOnly && cacheSize()>0) { 
-                int hops;
-                for (int i = 0; i < 2; i++) {
-                    hops = 
-                        random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    MainCacheEntry entry = getCacheEntry(hops+1);
-                    if (entry != null) {
-                        //make sure we didn't return this host previously during
-                        //this cache cyle.
-                        if (entry.wasPreviouslyReturned())
-                            continue;
-                        PingReply pr = entry.getPingReply();
-                        //don't return if this would connect us to ourselves
-                        //if (Acceptor.isMe(pr.getIP(), pr.getPort()))
-                        //    continue;
-                        entry.markPreviouslyReturned();
-                        endpoint = new Endpoint(pr.getIP(), pr.getPort());
-                        return endpoint;
-                    }
-                }
-            }
-            //b) try the reserve cache.  TODO: this includes stale new addresses.
-            if (!newOnly) {
+            synchronized (cacheLock) {
+                //Try grabbing a new or old endpoint.
                 try {
-                    endpoint = getAnEndpointInternal();
-                    return endpoint;
-                } catch(NoSuchElementException e) { }
-            }
-
-            //Wait for addresses (new or old) to come in.  TODO3: could use
-            //finer-grained locking.
-            synchronized(cacheLock) {
-                //wait for a host in either the main cache or the reserve 
-                //cache
+                    return newOnly ? getAnEndpointNew() : getAnEndpointOld();
+                } catch (NoSuchElementException e) { }
+                
+                
+                //Wait for addresses (new or old) to come in.  TODO3: could use
+                //finer-grained locking.
                 cacheLock.wait(); 
             }
         }
@@ -707,7 +701,7 @@ public class HostCatcher {
         //if not enough pongs in the cache, return all of them, except for the
         //pongs received from the connection passed in.
         if (n >= cacheSize())  
-            return getCachedHosts(conn, mainCache.length);
+            return getCachedHosts(conn, mainCache.length, false);
         else {
             ArrayList[] cacheClone = 
                 createMainCacheClone(conn, n, mainCache.length);
@@ -725,22 +719,78 @@ public class HostCatcher {
         //if not enough pongs in the cache, return all of them, except for the
         //pongs received from the connection passed in.
         if (n >= cacheSize())
-            return getCachedHosts(conn, maxHops);
+            return getCachedHosts(conn, maxHops, false);
         else {
             ArrayList[] cacheClone = createMainCacheClone(conn, n, maxHops);
             return new MainCacheIterator(cacheClone);
         }
     }
 
-
-//      /** Unit test: just calls tests.HostCatcherTest, since it
-//       *  is too large and complicated for this.
-//       */
+//      /** Unit tests */
 //      public static void main(String args[]) {
-//          String newArgs[]={String.valueOf(STALE_TIME),
-//                            String.valueOf(RETRY_TIME),
-//                            String.valueOf(CONNECT_TIME)};
-//          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
+//          //Populate hc with "new" and "old" pongs
+//          HostCatcher hc=new HostCatcher(new Main());
+//          ManagedConnection bogus=new ManagedConnection("fake.limewire.com", 6346, null);
+//          for (int i=0; i<4; i++) {
+//              hc.addToMainCache(new PingReply(GUID.makeGuid(),
+//                                       (byte)2,
+//                                       6346,
+//                                       new byte[] {(byte)1, (byte)1, (byte)1, (byte)i},
+//                                       0l, 0l),
+//                         bogus);
+//          }
+//          for (int i=0; i<4; i++) {
+//              hc.addToReserveCache(new PingReply(GUID.makeGuid(),
+//                                       (byte)2,
+//                                       6346,
+//                                       new byte[] {(byte)2, (byte)2, (byte)2, (byte)i},
+//                                       0l, 0l),
+//                         bogus);
+//          }
+//          //Fetch "new" pongs, making sure each is unique
+//          List /* of Endpoint */ fetched=new ArrayList();
+//          for (int i=0; i<2; i++) {
+//              try {
+//                  Endpoint e=hc.getAnEndpoint(true);
+//                  Assert.that(e.getHostname().startsWith("1.1.1."));
+//                  Assert.that(! fetched.contains(e));
+//                  fetched.add(e);                
+//              } catch (NoSuchElementException e) { 
+//                  break;
+//              } catch (InterruptedException e) {
+//                  Assert.that(false);
+//              }
+//          }
+//          //Expire new cache, then fetch stale "new" pongs, making sure each is unique
+//          hc.clearCache();
+//          Assert.that(hc.cacheSize()==0);
+//          Assert.that(hc.mainCacheExpired.size()==2, "Size: "+hc.mainCacheExpired.size());
+//          for (int i=0; i<2; i++) {
+//              try {
+//                  Endpoint e=hc.getAnEndpoint(true);
+//                  Assert.that(e.getHostname().startsWith("1.1.1."));
+//                  Assert.that(! fetched.contains(e));
+//                  fetched.add(e);      
+//              } catch (NoSuchElementException e) { 
+//                  break;
+//              } catch (InterruptedException e) {
+//                  Assert.that(false);
+//              }
+//          }
+//          Assert.that(hc.mainCacheExpired.size()==0);
+//          //Fetch "old" pongs
+//          for (int i=0; i<4; i++) {
+//              try {
+//                  Endpoint e=hc.getAnEndpoint(false);
+//                  Assert.that(e.getHostname().startsWith("2.2.2."));
+//                  Assert.that(! fetched.contains(e));
+//                  fetched.add(e);      
+//              } catch (NoSuchElementException e) { 
+//                  break;
+//              } catch (InterruptedException e) {
+//                  Assert.that(false);
+//              }
+//          }
 //      }
 }
 
