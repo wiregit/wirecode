@@ -316,6 +316,11 @@ public class QueryRequest extends Message implements Serializable{
         return minSpeed;
     }
 
+    /** Returns this, because it's always safe to send big queries. */
+    public Message stripExtendedPayload() {
+        return this;
+    }
+
     public String toString() {
 		return "QueryRequest:\r\n"+ 
 		       "query:             "+getQuery()+"\r\n"+

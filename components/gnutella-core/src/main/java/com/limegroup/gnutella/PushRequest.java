@@ -8,20 +8,22 @@ import com.sun.java.util.collections.Arrays;
  */
 
 public class PushRequest extends Message implements Serializable {
+    private static final int STANDARD_PAYLOAD_SIZE=26;
+    
     /** The unparsed payload--because I don't care what's inside.
-    NOTE: IP address is BIG-endian.
+     *  NOTE: IP address is BIG-endian.
      */
     private byte[] payload;
 
     /**
      * Wraps a PushRequest around stuff snatched from the network.
-     *
-     * @requires payload.length==26
+     * @exception BadPacketException the payload length is wrong
      */
     public PushRequest(byte[] guid, byte ttl, byte hops,
-             byte[] payload) {
-        super(guid, Message.F_PUSH, ttl, hops, 26);
-        Assert.that(payload.length==26);
+             byte[] payload) throws BadPacketException {
+        super(guid, Message.F_PUSH, ttl, hops, payload.length);
+        if (payload.length < STANDARD_PAYLOAD_SIZE)
+            throw new BadPacketException("Payload too small: "+payload.length);
         this.payload=payload;
     }
 
@@ -35,13 +37,13 @@ public class PushRequest extends Message implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl,
                byte[] clientGUID, long index, byte[] ip, int port) {
-        super(guid, Message.F_PUSH, ttl, (byte)0, 26);
+        super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE);
         Assert.that(clientGUID.length==16);
         Assert.that((index&0xFFFFFFFF00000000l)==0);
         Assert.that(ip.length==4);
         Assert.that((port&0xFFFF0000)==0);
 
-        payload=new byte[26];
+        payload=new byte[STANDARD_PAYLOAD_SIZE];
         System.arraycopy(clientGUID, 0, payload, 0, 16);
         ByteOrder.int2leb((int)index,payload,16); //downcast ok
         payload[20]=ip[0]; //big endian
@@ -82,32 +84,26 @@ public class PushRequest extends Message implements Serializable {
         return ByteOrder.ubytes2int(ByteOrder.leb2short(payload, 24));
     }
 
+    public Message stripExtendedPayload() {
+        //TODO: if this is too slow, we can alias parts of this, as as the
+        //payload.  In fact we could even return a subclass of PushRequest that
+        //simply delegates to this.
+        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
+        System.arraycopy(payload, 0,
+                         newPayload, 0,
+                         STANDARD_PAYLOAD_SIZE);
+        try {
+            return new PushRequest(this.getGUID(), this.getTTL(), this.getHops(),
+                                   newPayload);
+        } catch (BadPacketException e) {
+            Assert.that(false, "Standard packet length not allowed!");
+            return null;
+        }
+    }
+
     public String toString() {
         return "PushRequest("+super.toString()+")";
     }
 
-//      /** Unit tests */
-//      public static void main(String args[]) {
-//      byte[] guid=new byte[16];
-//      byte[] clientGUID=new byte[16]; clientGUID[0]=(byte)0xFF;
-//          clientGUID[15]=(byte)0xF1;
-//      long index=2343;
-//      byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)1};
-//      int port=6346;
-
-//      PushRequest pr=new PushRequest(guid, (byte)0,
-//                         clientGUID, index, ip, port);
-//      Assert.that(Arrays.equals(pr.getClientGUID(), clientGUID));
-//      Assert.that(pr.getIndex()==index);
-//      Assert.that(Arrays.equals(pr.getIP(), ip));
-//      Assert.that(pr.getPort()==port);
-
-//      //Test some maximum values
-//      long u4=0x00000000FFFFFFFFl;
-//      int u2=0x0000FFFF;
-//      pr=new PushRequest(guid, (byte)0,
-//                 clientGUID, u4, ip, u2);
-//      Assert.that(pr.getIndex()==u4);
-//      Assert.that(pr.getPort()==u2);
-//      }
+    //Unit tests: tests/com/limegroup/gnutella/messages/PushRequestTest
 }

@@ -9,6 +9,10 @@ public class GGEPTest extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(GGEPTest.class);
+    }
+
     public void testStringKeys() {
         try {
             GGEP temp = new GGEP();
@@ -389,13 +393,4 @@ public class GGEPTest extends TestCase {
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
-
-    public static Test suite() {
-        TestSuite suite =  new TestSuite("GGEP Unit Tests");
-        suite.addTest(new TestSuite(GGEPTest.class));
-        return suite;
-    }
-
-
-
 }

@@ -348,7 +348,6 @@ public class QueryReply extends Message implements Serializable{
         out.write(payload);
     }
 
-
     /** Return the associated xml metadata string if the queryreply
      *  contained one.
      */
@@ -779,6 +778,11 @@ public class QueryReply extends Message implements Serializable{
         int length=super.getLength();
         System.arraycopy(payload, length-16, result, 0, 16);
         return result;
+    }
+
+    /** Returns this, because it's always safe to send big replies. */
+    public Message stripExtendedPayload() {
+        return this;
     }
 
     public String toString() {

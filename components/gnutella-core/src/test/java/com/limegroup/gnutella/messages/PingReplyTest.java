@@ -10,6 +10,10 @@ public class PingReplyTest extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(PingReplyTest.class);
+    }
+
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
@@ -178,7 +182,7 @@ public class PingReplyTest extends TestCase {
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
         PingReply pr1=new PingReply(guid, (byte)3, 6349, ip,
                                     13l, 14l, false, 4321);           
-        PingReply pr2=pr1.stripGGEP();
+        PingReply pr2=(PingReply)pr1.stripExtendedPayload();
         assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
         assertEquals(pr1.getHops(), pr2.getHops());
         assertEquals(pr1.getTTL(), pr2.getTTL());

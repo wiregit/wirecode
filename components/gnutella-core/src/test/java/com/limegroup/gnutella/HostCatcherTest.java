@@ -12,6 +12,10 @@ public class HostCatcherTest extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(HostCatcherTest.class);
+    }
+
     /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {

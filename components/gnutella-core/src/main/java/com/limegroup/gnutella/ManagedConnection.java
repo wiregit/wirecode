@@ -9,6 +9,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
+import com.limegroup.gnutella.tests.stubs.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -88,8 +89,8 @@ public class ManagedConnection
     /** The priority of the last message added to _outputQueue. This is an
      *  optimization to keep OutputRunner from iterating through all priorities.
      *  This value is only a hint and can be legally set to any priority.  Hence
-     *  no locking is necessary. */
-    private int _lastPriority=0;
+     *  no locking is necessary.  Package-access for testing purposes only. */
+    int _lastPriority=0;
     /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
@@ -97,8 +98,8 @@ public class ManagedConnection
      *  milliseconds. */
     private static int BIG_QUEUE_TIME=10*1000;
     /** The max time to keep queries, pings, and pongs in the queues, in
-     *  milliseconds. */
-    private static int QUEUE_TIME=5*1000;
+     *  milliseconds.  Package-access for testing purposes only! */
+    static int QUEUE_TIME=5*1000;
     /** The number of different priority levels. */
     private static final int PRIORITIES=7;
     /** Names for each priority. "Other" includes QRP messages and is NOT
@@ -200,7 +201,7 @@ public class ManagedConnection
      **************************************************************************/
     private boolean _horizonEnabled=true;
     /** The approximate time to expire pongs, in milliseconds. */
-    private static long HORIZON_UPDATE_TIME=10*60*1000; //10 minutes
+    static long HORIZON_UPDATE_TIME=10*60*1000; //10 minutes
     /** The last time refreshHorizonStats was called. */
     private long _lastRefreshHorizonTime=System.currentTimeMillis();
     /** True iff refreshHorizonStats has been called. */
@@ -254,6 +255,8 @@ public class ManagedConnection
     private Boolean _isSupernodeClientConnection=null;
     /** if I am a leaf connected to a supernode  */
     private Boolean _isClientSupernodeConnection=null;
+    /** is the GGEP header set?  (null if not yet known) */
+    private Boolean _supportsGGEP=null;
 
     /**
      * The domain to which this connection is authenticated
@@ -407,9 +410,11 @@ public class ManagedConnection
 
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
-     * are dropped if the socket gets backed up.  It also does MessageRouter
-     * stats.
-     * This overrides IS thread safe.  Multiple threads can be in a send call
+     * are dropped if the socket gets backed up.  Will remove any extended
+     * payloads if the receiving connection does not support GGGEP.   Also
+     * updates MessageRouter stats.<p>
+     *
+     * This methodIS thread safe.  Multiple threads can be in a send call
      * at the same time for a given connection.
      *
      * @requires this is fully constructed
@@ -418,6 +423,9 @@ public class ManagedConnection
      *  is already closed.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) {
+        if (! supportsGGEP())
+            m=m.stripExtendedPayload();
+
         repOk();
         _router.countMessage();
         int priority=calculatePriority(m);
@@ -929,8 +937,18 @@ public class ManagedConnection
     // Begin statistics accessors
     //
 
+    /** Returns the number of bytes sent on this connection. */
+    public long getBytesSent() {
+        return _bytesSent;
+    }
+    
+    /** Returns the number of bytes received on this connection. */
+    public long getBytesReceived() {
+        return _bytesReceived;
+    }
+
     /** Returns the number of messages sent on this connection */
-    public int getNumMessagesSent() {
+    public long getNumMessagesSent() {
         return _numMessagesSent;
     }
 
@@ -1226,6 +1244,21 @@ public class ManagedConnection
         return isQueryRoutingEnabled();
     }
 
+    /** Returns true if this supports GGEP'ed messages.  GGEP'ed messages (e.g.,
+     *  big pongs) should only be sent along connections for which
+     *  supportsGGEP()==true. */
+    public boolean supportsGGEP() {
+        if (_supportsGGEP==null)
+            _supportsGGEP=new Boolean(supportsGGEP2());
+        return _supportsGGEP.booleanValue();
+    }
+
+    private boolean supportsGGEP2() {
+        String value=getProperty(ConnectionHandshakeHeaders.GGEP);
+        //Currently we don't care about the version number.
+        return value!=null;
+    }
+
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-supernode relationships. */
     boolean isQueryRoutingEnabled() {
@@ -1283,8 +1316,9 @@ public class ManagedConnection
         this.queryInfo=qi;
     } 
 
-    /** Maps router.limewire.com to router4.limewire.com. */
-    private static String translateHost(String hostname) {
+    /** Maps router.limewire.com to router4.limewire.com. 
+     *  Package-access for testing purposes only. */
+    static String translateHost(String hostname) {
         if (hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER))
             return SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
         else
@@ -1326,63 +1360,29 @@ public class ManagedConnection
         */
     }
     
-    /** Unit test. */
-    /*
-    public static void main(String args[]) {        
-        testClose();
+    /***************************************************************************
+     * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
+     **************************************************************************/
 
-        try {
-            System.out.println("-Testing initialize");
-            //Create loopback connection.  Uncomment the MiniAcceptor class in
-            //Connection to get this to work.
-            com.limegroup.gnutella.tests.MiniAcceptor acceptor=
-                new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            QUEUE_TIME=1000;
-            ManagedConnection out=new ManagedConnection("localhost", 6346);
-            out.initialize();
-            Connection in=acceptor.accept();      
-            testSendFlush(out, in);
-            testReorderBuffer(out, in);
-            testBufferTimeout(out, in);
-            testDropBuffer(out, in);
-            testPriorityHint(out, in);
-            in.close();
-            out.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected IO problem");
-        } catch (BadPacketException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected bad packet");
-        }
-
-        testHorizonStatistics();
-        testIsRouter();
+    /** STUB FOR TESTING PURPOSES ONLY! */
+    ManagedConnection() {
+        super("", 0);
     }
 
-    private static void testSendFlush(ManagedConnection out, Connection in) 
-            throws IOException, BadPacketException {
-        PingRequest pr=null;
-        long start=0;
-        long elapsed=0;
-
-        System.out.println("-Testing send without flush");
-        Assert.that(out.getNumMessagesSent()==0); 
-        Assert.that(out._bytesSent==0);
-        pr=new PingRequest((byte)4);
-        out.send(pr);
-        start=System.currentTimeMillis();        
-        pr=(PingRequest)in.receive();
-        elapsed=System.currentTimeMillis()-start;
-        Assert.that(out.getNumMessagesSent()==1);
-        Assert.that(out._bytesSent==pr.getTotalLength());
-        Assert.that(elapsed<300, "Unreasonably long send time: "+elapsed);
-        Assert.that(pr.getHops()==0);
-        Assert.that(pr.getTTL()==4);
+    /** STUB FOR TESTING PURPOSES ONLY! */
+    ManagedConnection(String address, int port, ConnectionManager manager) {
+        super(address, port);
+        this._router=new com.limegroup.gnutella.tests.MessageRouterStub();
+        this._manager=manager;
     }
 
-    private void stopOutputRunner() {
+    /** STUB FOR TESTING PURPOSES ONLY! */
+    ManagedConnection(String address, int port) {
+        this(address, port, null);
+    }
+
+    /** FOR TESTING PURPOSES ONLY! */
+    void stopOutputRunner() {
         //Ensure OutputRunner terminates.
         synchronized (_outputQueueLock) {
             super._closed=true;  //doesn't close socket
@@ -1397,443 +1397,13 @@ public class ManagedConnection
         super._closed=false;
     }
 
-    private void startOutputRunner() {
+    /** FOR TESTING PURPOSES ONLY! */
+    void startOutputRunner() {
         new OutputRunner();
     }
 
-    private static void testReorderBuffer(ManagedConnection out, Connection in) 
-            throws IOException, BadPacketException {
-        System.out.println("-Testing reorder buffer");
-        //This is the most important test in our suite. TODO: simplify this by
-        //breaking it into subparts, e.g., to test that twice as many replies as
-        //queries are sent, that replies are ordered by GUID volume, that
-        //queries with the same hops are LIFO, etc.
-
-        //1. Buffer tons of messages.  By killing the old thread and restarting
-        //later, we simulate a stall in the network.
-        out.stopOutputRunner();
-        Message m=null;
-        out.send(new QueryRequest((byte)5, 0, "test"));
-        m=new PingRequest((byte)5);
-        m.hop();
-        out.send(m);
-        m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
-                         new Response[0], new byte[16]);
-        m.setPriority(30000);
-        out.send(m);
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6340));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6341));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6342));
-        m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
-                         new Response[0], new byte[16]);
-        out.send(m);
-        m=new PingReply(new byte[16], (byte)5, 6343, new byte[4], 0, 0);
-        m.hop();  m.hop();  m.hop();
-        out.send(m);
-        out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new PingReply(new byte[16], (byte)1, 6342, new byte[4], 0, 0));
-        m=new PingReply(new byte[16], (byte)3, 6340, new byte[4], 0, 0);
-        m.hop();
-        m.hop();
-        out.send(m);
-        m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
-                         new Response[0], new byte[16]);
-        m.setPriority(1000);
-        out.send(m);
-        out.send(new PatchTableMessage((short)1, (short)2, 
-                                       PatchTableMessage.COMPRESSOR_NONE,
-                                       (byte)8, new byte[10], 0, 5));
-        out.send(new PingRequest((byte)2));
-        out.send(new PatchTableMessage((short)2, (short)2, 
-                                       PatchTableMessage.COMPRESSOR_NONE,
-                                       (byte)8, new byte[10], 5, 9));
-        out.send(new QueryRequest((byte)5, 0, "test2"));
-        m=new QueryRequest((byte)5, 0, "test far");
-        m.hop();
-        out.send(m);
-               
-        //2. Now we let the messages pass through, as if the receiver's window
-        //became non-zero.  Buffers look this before emptying:
-        //  WATCHDOG: pong/6342 ping
-        //  PUSH: x/6340 x/6341 x/6342
-        //  QUERY_REPLY: 6340/3 6342/1000 6341/0 (highest priority)
-        //  QUERY: "test far"/1, "test"/0, "test2"/0
-        //  PING_REPLY: x/6340 x/6343
-        //  PING: x
-        //  OTHER: reset patch1 patch2
-        out._lastPriority=0;  //cheating to make old tests work
-        out.startOutputRunner();
-
-        //3. Read them...now in different order!
-        m=in.receive(); //watchdog ping
-        Assert.that(m instanceof PingRequest, "Unexpected message: "+m);
-        Assert.that(m.getHops()==0, "Unexpected message: "+m);  
-
-        m=in.receive(); //push        
-        Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
-        Assert.that(((PushRequest)m).getPort()==6342);
-
-        m=in.receive(); //push
-        Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
-        Assert.that(((PushRequest)m).getPort()==6341);
-
-        m=in.receive(); //push
-        Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
-        Assert.that(((PushRequest)m).getPort()==6340);
-
-        m=in.receive(); //reply/6341 (high priority)
-        Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6341, 
-                    ((QueryReply)m).getPort()+" "+m.getPriority());
-
-        m=in.receive(); //reply/6342 (medium priority)
-        Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6342);
-
-        
-        m=in.receive(); //query "test2"/0
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("test2"), "Got: "+m);
-
-        m=in.receive(); //reply 6343
-        Assert.that(m instanceof PingReply);
-        Assert.that(((PingReply)m).getPort()==6343);
-
-        m=in.receive(); //ping
-        Assert.that(m instanceof PingRequest);
-        Assert.that(m.getHops()>0);
-
-        m=in.receive(); //QRP reset
-        Assert.that(m instanceof ResetTableMessage);
-
-        
-
-        m=in.receive(); //watchdog pong/6342
-        Assert.that(m instanceof PingReply);
-        Assert.that(((PingReply)m).getPort()==6342);
-        Assert.that(m.getHops()==0);  //watchdog response pong
-
-        m=in.receive(); //reply/6340
-        Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6340);
-
-        m=in.receive(); //query "test"/0
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("test"));
-
-        m=in.receive(); //reply 6340
-        Assert.that(m instanceof PingReply);
-        Assert.that(((PingReply)m).getPort()==6340, m.toString());
-
-        m=in.receive(); //QRP patch1
-        Assert.that(m instanceof PatchTableMessage);
-        Assert.that(((PatchTableMessage)m).getSequenceNumber()==1);
-
-
-        m=in.receive(); //query "test"/0
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("test far"));
-
-        m=in.receive(); //QRP patch2
-        Assert.that(m instanceof PatchTableMessage);
-        Assert.that(((PatchTableMessage)m).getSequenceNumber()==2);
+    /** FOR TESTING PURPOSES ONLY! */
+    boolean runnerDied() {
+        return _runnerDied;
     }
-
-    private static void testBufferTimeout(ManagedConnection out, Connection in) 
-            throws IOException, BadPacketException {
-        System.out.println("-Testing buffered message timeout");
-        Assert.that(QUEUE_TIME==1000);
-        
-        //Drop one message
-        out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0"));   
-        sleep(1200);
-        out.send(new QueryRequest((byte)3, 0, "1200"));        
-        out.startOutputRunner();
-        Message m=(QueryRequest)in.receive(500);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("1200"));
-        try {
-            m=in.receive(200);
-            Assert.that(false, m.toString());
-        } catch (InterruptedIOException e) {
-        }
-        Assert.that(out.getNumSentMessagesDropped()==1);
-
-        //Drop many messages
-        out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0"));   
-        sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "300"));        
-        sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "600"));        
-        sleep(500);
-        out.send(new QueryRequest((byte)3, 0, "1100"));
-        sleep(900);
-        out.send(new QueryRequest((byte)3, 0, "2000"));
-        out.startOutputRunner();
-        m=in.receive(500);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("2000"));
-        m=in.receive(500);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("1100"));
-        try {
-            m=in.receive(200);
-            Assert.that(false, m.toString());
-        } catch (InterruptedIOException e) {
-        }
-        Assert.that(out.getNumSentMessagesDropped()==(1+3));
-    }
-
-
-    private static void testPriorityHint(ManagedConnection out, Connection in) 
-            throws IOException, BadPacketException {
-        //Tests wrap-around loop of sendQueuedMessages
-        System.out.println("-Testing priority hint optimization");
-        Message m=null;
-
-        // head...tail
-        out.stopOutputRunner(); 
-        out.send(hopped(new PingRequest((byte)4)));
-        out.send(new QueryRequest((byte)3, 0, "a"));
-        out.startOutputRunner();
-        Assert.that(in.receive() instanceof QueryRequest);
-        Assert.that(in.receive() instanceof PingRequest);
-
-        //tail...<wrap>...head
-        out.stopOutputRunner(); 
-        out.send(new QueryRequest((byte)3, 0, "a"));
-        out.send(hopped(new PingRequest((byte)5)));
-        out.startOutputRunner();
-        Assert.that(in.receive() instanceof PingRequest);
-        Assert.that(in.receive() instanceof QueryRequest);
-
-        //tail...<wrap>...head
-        //  WATCHDOG: ping
-        //  PUSH:
-        //  QUERY_REPLY: reply
-        //  QUERY: query
-        //  PING_REPLY: 
-        //  PING: 
-        //  OTHER: reset
-        out.stopOutputRunner(); 
-        out.send(new PingRequest((byte)1));
-        out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
-                                new Response[0], new byte[16]));
-        out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new QueryRequest((byte)3, 0, "a"));
-        out.startOutputRunner();
-        m=in.receive();
-        Assert.that(m instanceof QueryRequest, "Got: "+m);
-        m=in.receive();
-        Assert.that(m instanceof ResetTableMessage, "Got: "+m);
-        m=in.receive();
-        Assert.that(m instanceof PingRequest, "Got: "+m);
-        m=in.receive();
-        Assert.that(m instanceof QueryReply, "Got: "+m);
-    }
-
-    private static Message hopped(Message m) {
-        m.hop();
-        return m;
-    }
-
-    private static void sleep(long msecs) {
-        try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
-    }
-
-    private static void testDropBuffer(ManagedConnection out, Connection in) 
-            throws IOException, BadPacketException {
-        //Send tons of messages...but don't read them
-        int total=20000;
-
-        int initialDropped=out.getNumSentMessagesDropped();
-        System.out.println("-Testing drop functionality");
-        for (int i=0; i<total; i++) {
-            out.send(new QueryRequest((byte)4, i, "Some reaaaaaalllllly big query"));
-        }
-        int dropped=out.getNumSentMessagesDropped()-initialDropped;
-        //System.out.println("Dropped messages: "+dropped);
-        Assert.that(dropped>0);
-        Assert.that(out.getPercentSentDropped()>0);
-
-        int read=0;
-        int bytesRead=0;
-        while (true) {
-            try {
-                Message m=in.receive(1000);
-                read++;
-                bytesRead+=m.getTotalLength();
-            } catch (InterruptedIOException e) {
-                break;
-            }
-        }
-        //System.out.println("Read messages/bytes: "+read+"/"+bytesRead);
-        Assert.that(read<total);
-        Assert.that(dropped+read==total);
-    }
-
-    private static void testClose() {
-        System.out.println("-Testing close");
-        try {
-            ManagedConnection out=null;
-            Connection in=null;
-            com.limegroup.gnutella.tests.MiniAcceptor acceptor=null;                
-            //When receive() or sendQueued() gets IOException, it calls
-            //ConnectionManager.remove().  This in turn calls
-            //ManagedConnection.close().  Our stub does this.
-            ConnectionManager manager=
-                new com.limegroup.gnutella.tests.stubs.ConnectionManagerStub();
-
-            //1. Locally closed
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346);
-            out.initialize();            
-            in=acceptor.accept(); 
-            Assert.that(out.isOpen());
-            Assert.that(! out._runnerDied);
-            out.close();
-            sleep(100);
-            Assert.that(! out.isOpen());
-            Assert.that(out._runnerDied);
-            try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            in.close(); //needed to ensure connect below works
-
-            //2. Remote close: discovered on read
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346, manager);
-            out.initialize();            
-            in=acceptor.accept(); 
-            Assert.that(out.isOpen());
-            Assert.that(! out._runnerDied);
-            in.close();
-            try {
-                out.receive();
-                Assert.that(false);
-            } catch (BadPacketException e) {
-                Assert.that(false);
-            } catch (IOException e) { }            
-            sleep(100);
-            Assert.that(! out.isOpen());
-            Assert.that(out._runnerDied);
-
-            //3. Remote close: discovered on write.  Because of TCP's half-close
-            //semantics, we need TWO writes to discover this.  (See unit tests
-            //for Connection.)
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346, manager);
-            out.initialize();            
-            in=acceptor.accept(); 
-            Assert.that(out.isOpen());
-            Assert.that(! out._runnerDied);
-            in.close();
-            out.send(new PingRequest((byte)3));
-            out.send(new PingRequest((byte)3));
-            sleep(100);
-            Assert.that(! out.isOpen());
-            Assert.that(out._runnerDied);
-
-        } catch (IOException e) {
-            System.out.println("Unexpected exception:");
-            e.printStackTrace();
-        }
-    }
-
-    //Stub for testing send
-    private ManagedConnection(String address, int port, ConnectionManager manager) {
-        super(address, port);
-        this._router=new com.limegroup.gnutella.tests.MessageRouterStub();
-        this._manager=manager;
-    }
-
-    private ManagedConnection(String address, int port) {
-        this(address, port, null);
-    }
-
-    private static void testHorizonStatistics() {
-        System.out.println("-Testing horizon statistics");        
-        ManagedConnection mc=new ManagedConnection();
-        //For testing.  Make HORIZON_UPDATE_TIME non-final to compile.
-        mc.HORIZON_UPDATE_TIME=1*1000;   
-        PingReply pr1=new PingReply(GUID.makeGuid(), (byte)3, 6346,
-                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                                    1, 10);
-        PingReply pr2=new PingReply(GUID.makeGuid(), (byte)3, 6347,
-                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                                    2, 20);
-        PingReply pr3=new PingReply(GUID.makeGuid(), (byte)3, 6346,
-                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-                                    3, 30);
-
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);
-
-        mc.updateHorizonStats(pr1);
-        mc.updateHorizonStats(pr1);  //check duplicates
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-
-        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }
-            
-        mc.refreshHorizonStats();    
-        mc.updateHorizonStats(pr1);  //should be ignored for now
-        mc.updateHorizonStats(pr2);
-        mc.updateHorizonStats(pr3);
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-        mc.refreshHorizonStats();    //should be ignored
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-
-        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }            
-
-        mc.refreshHorizonStats();    //update stats
-        Assert.that(mc.getNumFiles()==(1+2+3));
-        Assert.that(mc.getNumHosts()==3);
-        Assert.that(mc.getTotalFileSize()==(10+20+30));
-
-        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }       
-
-        mc.refreshHorizonStats();
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);                
-    }
-    
-    private static void testIsRouter() {
-        System.out.println("-Testing isRouter helper methods");
-        Assert.that(! isRouter("127.0.0.1"));
-        Assert.that(! isRouter("18.239.0.1"));
-        Assert.that(isRouter("64.61.25.171"));
-        Assert.that(isRouter("64.61.25.139"));
-        Assert.that(isRouter("64.61.25.143"));
-        Assert.that(! isRouter("64.61.25.138"));
-        Assert.that(! isRouter("64.61.25.170"));
-        Assert.that(! isRouter("www.limewire.com"));
-        Assert.that(! isRouter("public.bearshare.net"));
-        Assert.that(isRouter("router.limewire.com"));
-        Assert.that(isRouter("router4.limewire.com"));
-        Assert.that(isRouter("router2.limewire.com"));
-        Assert.that(translateHost("router.limewire.com").equals(
-            "router4.limewire.com"));
-        Assert.that(translateHost("router4.limewire.com").equals(
-            "router4.limewire.com"));
-     }
-
-    // Stub for testing statistics
-    private ManagedConnection() {
-        super("", 0);
-    }
-    */
 }

@@ -225,10 +225,7 @@ public class PingReply extends Message implements Serializable {
         } catch (BadGGEPBlockException e) { }
     }
 
-    /** 
-     * Returns a version of this with 
-     */
-    public PingReply stripGGEP() {
+    public Message stripExtendedPayload() {
         //TODO: if this is too slow, we can alias parts of this, as as the
         //payload.  In fact we could even return a subclass of PingReply that
         //simply delegates to this.

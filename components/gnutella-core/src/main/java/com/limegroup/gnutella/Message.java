@@ -192,7 +192,6 @@ public abstract class Message
                 if (length<26) break;
                 return new QueryReply(guid,ttl,hops,payload);
             case F_PUSH:
-                if (length!=26) break;
                 return new PushRequest(guid,ttl,hops,payload);
             case F_ROUTE_TABLE_UPDATE:
                 //The exact subclass of RouteTableMessage returned depends on
@@ -383,6 +382,19 @@ public abstract class Message
     }
 
     /** 
+     * Returns a message identical to this but without any extended (typically
+     * GGEP) data.  Since Message's are mostly immutable, the returned message
+     * may alias parts of this; in fact the returned message could even be this.
+     * The caveat is that the hops and TTL field of Message can be mutated for
+     * efficiency reasons.  Hence you must not call hop() on either this or the
+     * returned value.  Typically this is not a problem, as hop() is called
+     * before forwarding/broadcasting a message.  
+     *
+     * @return an instance of this without any dangerous extended payload
+     */
+    public abstract Message stripExtendedPayload();
+
+    /** 
      * Returns a negative value if this is of lesser priority than message,
      * positive value if of higher priority, or zero if of same priority.
      * Remember that lower priority numbers mean HIGHER priority.
@@ -403,6 +415,9 @@ public abstract class Message
     /** Unit test. */
     /*
     public static void main(String args[]) {
+        //Note: some of Message's code is covered by subclass tests, e.g.,
+        //PushRequestTest.
+    
         byte[] buf=new byte[10];
         buf[3]=(byte)192;
         buf[4]=(byte)168;
