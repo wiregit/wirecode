@@ -45,7 +45,7 @@ public class CountPercent {
     private final NumberFormat pc;
     private final Map/*<String code, LanguageInfo li>*/ langs;
     private final Set/*<String key>*/ basicKeys, advancedKeys;
-    private final int total;
+    private final int basicTotal;
 
     CountPercent(int action) throws java.io.IOException {
         df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
@@ -66,24 +66,24 @@ public class CountPercent {
         advancedKeys = getAdvancedKeys();
         defaultProps.keySet().removeAll(advancedKeys);
         basicKeys = defaultProps.keySet();
-        total = defaultProps.size();
+        basicTotal = basicKeys.size();
 
         switch (action) {
         case ACTION_CHECK:
             loadLanguages();
-            checkLanguages();
+            checkBadKeys();
             break;
         case ACTION_STATISTICS:
             loadLanguages();
-            retainBasicKeys(basicKeys);
             extendVariantLanguages();
+            retainBasicKeys(basicKeys);
             pc.setMinimumIntegerDigits(3);
             printStatistics();
             break;
         case ACTION_HTML:
             loadLanguages();
-            retainBasicKeys(basicKeys);
             extendVariantLanguages();
+            retainBasicKeys(basicKeys);
             rc.setMinimumIntegerDigits(1);
             printHTML();
             break;
@@ -208,16 +208,25 @@ public class CountPercent {
     }
     
     /**
-     * Keep only resources with a basic set of valid keys.
+     * Check and list extra or badly names names found in resources.
+     * Use the default (English) basic and extended resource keys.
      */
-    private void retainBasicKeys(Set basicKeys) {
-        /* Extends missing resources with those from the base language */
+    private void checkBadKeys() {
+        System.out.println("List of extra or badly named resource keys:");
+        System.out.println("-------------------------------------------");
+        
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
             final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
-            props.keySet().retainAll(basicKeys);
+            props.keySet().removeAll(basicKeys);
+            props.keySet().removeAll(advancedKeys);
+            if (props.size() != 0) {
+                System.out.println("(" + code + ") " + li.getName() + ": " + li.getFileName());
+                props.list(System.out);
+                System.out.println("-------------------------------------------");
+            }
         }
     }
     
@@ -247,30 +256,21 @@ public class CountPercent {
     }
     
     /**
-     * Check and list extra or badly names names found in resources.
-     * Use the default (English) basic and extended resource keys.
+     * Keep only resources with a basic set of valid keys.
      */
-    private void checkLanguages() {
-        System.out.println("List of extra or badly named resource keys:");
-        System.out.println("-------------------------------------------");
-        
+    private void retainBasicKeys(Set basicKeys) {
+        /* Extends missing resources with those from the base language */
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
             final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
-            props.keySet().removeAll(basicKeys);
-            props.keySet().removeAll(advancedKeys);
-            if (props.size() != 0) {
-                System.out.println("(" + code + ") " + li.getName() + ": " + li.getFileName());
-                props.list(System.out);
-                System.out.println("-------------------------------------------");
-            }
+            props.keySet().retainAll(basicKeys);
         }
     }
     
     private void printStatistics() {
-        System.out.println("Total Number of Resources: " + total);
+        System.out.println("Total Number of Resources: " + basicTotal);
         System.out.println("---------------------------------");
         System.out.println();
         
@@ -280,7 +280,7 @@ public class CountPercent {
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             final int count = props.size();
-            final double percentage = (double)count / (double)total;
+            final double percentage = (double)count / (double)basicTotal;
             System.out.print(
                 "(" + code + ") " +
                 pc.format(percentage) +
@@ -308,11 +308,11 @@ public class CountPercent {
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             final int count = props.size();
-            final double percentage = (double)count / (double)total;
+            final double percentage = (double)count / (double)basicTotal;
             li.setPercentage(percentage);
-            if (percentage >= 0.70)
+            if (percentage >= 0.75)
                 completed.add(li);
-            else if (percentage >= 0.40)
+            else if (percentage >= 0.50)
                 midway.add(li);
             else
                 started.add(li);
