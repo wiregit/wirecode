@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.*;
 import java.io.*;
@@ -71,7 +72,7 @@ public class SpamReplyFilterTest extends BaseTestCase {
             _replyBytes[_indexOfVendor+i] = vendorBytes[i];
         
         QueryReply qr = 
-            (QueryReply) Message.read(new ByteArrayInputStream(_replyBytes));
+            (QueryReply)BIOMessageReader.read(new ByteArrayInputStream(_replyBytes));
         return _filter.allow(qr);
     }
 

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
-import com.limegroup.gnutella.*;
+
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -49,7 +50,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read big push
-        PushRequest pr=(PushRequest)Message.read(in);     
+        PushRequest pr = (PushRequest)BIOMessageReader.read(in);     
         assertEquals("unexpected push index", 3, pr.getIndex());
         assertEquals("unexpected total length", bytes.length,
             pr.getTotalLength() );
@@ -94,7 +95,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[23+16]=(byte)3;  //index
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            Message.read(in);
+            BIOMessageReader.read(in);
             fail("No exception thrown");
         } catch (BadPacketException pass) { 
             //Pass!

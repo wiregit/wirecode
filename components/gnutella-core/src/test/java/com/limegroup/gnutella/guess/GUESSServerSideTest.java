@@ -4,6 +4,8 @@ import junit.framework.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
@@ -25,11 +27,8 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
         return _shouldRun;
     }
 
-    private Backend _backend;
     private DatagramSocket _socket = null;
 
-    // produces should add(), consumers should firstElement()
-    private Vector _messages = new Vector();
     
     public GUESSServerSideTest(String name) {
         super(name);
@@ -174,10 +173,9 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
                                                      BUFFER_SIZE);
         _socket.receive(datagram);
         byte[] data = datagram.getData();
-        int length = datagram.getLength();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = Message.read(in);		
+        Message message = BIOMessageReader.read(in);		
         return message;
     }
 

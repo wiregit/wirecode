@@ -2,13 +2,12 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.guess.*; 
 import com.limegroup.gnutella.settings.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.util.StringTokenizer;
 import junit.framework.*;
-import junit.extensions.*;
 import java.net.InetAddress;
 
 /**
@@ -63,7 +62,6 @@ public final class QueryRequestTest extends BaseTestCase {
                 GGEP ggepBlock = new GGEP(false); // do COBS
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
-                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(baos[i]);
                 baos[i].write(0x1c);
 				baos[i].write(0);
@@ -82,7 +80,6 @@ public final class QueryRequestTest extends BaseTestCase {
 				Set queryUrns = qr.getQueryUrns();
                 assertEquals("should not have any URNs", 0, queryUrns.size());
 
-                Set curUrnTypeSet = qr.getRequestedUrnTypes();
                 assertEquals("query keys should be equal",
                              qk, qr.getQueryKey());
 			}		   
@@ -180,29 +177,29 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * and that valid ones are.
 	 */
 	public void testTTLParameters() {
-		QueryRequest qr = null;
 		try {
-			qr = QueryRequest.createQuery("test", (byte)-1);
+			QueryRequest.createQuery("test", (byte)-1);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 		try {
-			qr = QueryRequest.createQuery("test", (byte)8);
-			fail("should have rejected query");
-		} catch(IllegalArgumentException e) {}
-
-		try {
-			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
-			fail("should have rejected query");
-		} catch(IllegalArgumentException e) {}
-		try {
-			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			QueryRequest.createQuery("test", (byte)8);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 
-		qr = QueryRequest.createQuery("test", (byte)1);
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
-		qr = QueryRequest.createQuery("test", (byte)3);
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
+		try {
+			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+		try {
+			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+    
+        // these should all go through without any exceptions
+		QueryRequest.createQuery("test", (byte)1);
+		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
+		QueryRequest.createQuery("test", (byte)3);
+		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
 
 	}
 
@@ -212,12 +209,10 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * XML vs. no XML, URN vs. no URN, etc.
 	 */
 	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
-		QueryRequest qr = null;
-
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
-		qr = QueryRequest.createNetworkQuery(
+		QueryRequest.createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 
 		
@@ -231,7 +226,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
-		qr = QueryRequest.createNetworkQuery(
+		QueryRequest.createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 	}
 
@@ -379,8 +374,7 @@ public final class QueryRequestTest extends BaseTestCase {
 			baos[i].write(0);
 			baos[i].write(0);
             try {
-                QueryRequest qr = 
-                    QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     baos[i].toByteArray(), 
                                                     Message.N_UNKNOWN);
                 
@@ -614,7 +608,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
 		QueryRequest qrTest = null;
 		try {
-			qrTest = (QueryRequest)Message.read(bais);
+			qrTest = (QueryRequest)BIOMessageReader.read(bais);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);

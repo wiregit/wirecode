@@ -4,6 +4,7 @@ import junit.framework.*;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
@@ -324,7 +325,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais =
                 new ByteArrayInputStream(dp.getData());
-            pr = (PingRequest) Message.read(bais);
+            pr = (PingRequest) BIOMessageReader.read(bais);
         }
         catch (Exception broken) {
             fail("Did not recieve UDP ConnectBack!!", broken);

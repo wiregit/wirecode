@@ -3,8 +3,9 @@ package com.limegroup.gnutella.guess;
 import java.io.*;
 import java.net.*;
 import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*; 
+
+import com.limegroup.gnutella.connection.BIOMessageReader;
+import com.limegroup.gnutella.messages.*;
 
 /** Provides primitives for contacting GUESS nodes on the network.
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
@@ -62,11 +63,10 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
             try {				
                 _socket.receive(datagram);
                 byte[] data = datagram.getData();
-                int length = datagram.getLength();
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = BIOMessageReader.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {
                         synchronized (_qrLock) {

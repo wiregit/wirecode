@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*; 
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.guess.*; 
 import com.limegroup.gnutella.util.*;
@@ -174,7 +175,7 @@ public class UnicastSimulator {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = BIOMessageReader.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -30,7 +30,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         pr.write(baos);
         ByteArrayInputStream bais = 
         new ByteArrayInputStream(baos.toByteArray());
-        PingRequest prRead = (PingRequest) Message.read(bais);
+        PingRequest prRead = (PingRequest) BIOMessageReader.read(bais);
         prRead.hop();
         assertTrue(prRead.isQueryKeyRequest());
 
@@ -74,7 +74,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         //OK, ggep ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        m = Message.read(stream);
+        m = BIOMessageReader.read(stream);
         PingRequest pr = null;
         pr = (PingRequest)m;
         assertTrue(!pr.isQueryKeyRequest());
@@ -116,7 +116,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         //OK, Big ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        m = Message.read(stream);
+        m = BIOMessageReader.read(stream);
         PingRequest pr = null;
         pr = (PingRequest)m;
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.guess.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -61,8 +62,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // make sure we reject invalid payload sizes
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted payload size");
         } catch(BadPacketException e) {
@@ -72,8 +72,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // make sure we reject null guids
         payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(null, (byte)4, (byte)3,
+            PingReply.createFromNetwork(null, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted null guid");
         } catch(NullPointerException e) {
@@ -82,8 +81,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // make sure we reject null payloads
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             null);
             fail("should have not accepted null payload");
         } catch(NullPointerException e) {
@@ -110,8 +108,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                          payload, PingReply.STANDARD_PAYLOAD_SIZE, 
                          extensions.length);
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted bad GGEP in payload");
         } catch(BadPacketException e) {
@@ -123,8 +120,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload[0] = 1;
 
         // this one should go through
-        PingReply pong = 
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+        PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                         payload);
     }
 
@@ -268,7 +264,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] bytes=baos.toByteArray(); 
 
         //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
+        Message m=BIOMessageReader.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
@@ -348,7 +344,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
         //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
+        Message m=BIOMessageReader.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
@@ -420,7 +416,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
         //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
+        Message m = BIOMessageReader.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
@@ -470,7 +466,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[19]=(byte)13;    //payload length
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            Message.read(in);
+            BIOMessageReader.read(in);
             fail("No exception thrown");
         } catch (BadPacketException pass) { 
             //Pass!
@@ -493,7 +489,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         pr.write(baos);
         ByteArrayInputStream bais = 
              new ByteArrayInputStream(baos.toByteArray());
-        PingReply prStreamed = (PingReply) Message.read(bais);
+        PingReply prStreamed = (PingReply) BIOMessageReader.read(bais);
         assertTrue(prStreamed.getQueryKey().equals(qk));
             
     }
