@@ -457,6 +457,15 @@ public abstract class MessageRouter {
 
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
+        try {
+            if (reply.getQueryKey() != null) {
+                // this is a PingReply in reply to my QueryKey Request - 
+                //consume the Pong and return, don't process as usual....
+                UNICASTER.handleQueryKeyPong(reply);
+                return;
+            }
+        }
+        catch (BadPacketException ignored) {}
 
         // also add the sender of the pong if different from the host
         // described in the reply...
