@@ -1268,8 +1268,9 @@ public class ConnectionManager {
         // Reset the disconnect time to be a long time ago.
         _disconnectTime = 0;
         
-        // Ignore this call if we're already connected.
-        if(isConnected()) {
+        // Ignore this call if we're already connected
+        // or not initialized yet.
+        if(isConnected() || _catcher == null) {
             return;
         }
         
