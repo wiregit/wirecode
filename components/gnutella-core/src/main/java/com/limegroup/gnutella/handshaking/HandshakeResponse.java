@@ -350,7 +350,8 @@ public final class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're rejecting
      */
-    static HandshakeResponse createRejectIncomingResponse(Properties headers) {
+    static HandshakeResponse createRejectIncomingResponse() {
+        Properties headers = new Properties();
         addConnectedUltrapeers(RouterService.getConnectionManager(), headers);
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -364,10 +365,10 @@ public final class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're rejecting
      */
-    static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
+    static HandshakeResponse createRejectOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
-                                     headers);        
+                                     new Properties());        
     }
 
     /**
@@ -382,7 +383,8 @@ public final class HandshakeResponse {
      * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
      *  connection and with the specified connection headers
      */
-    static HandshakeResponse createLeafRejectIncomingResponse(Properties headers) {
+    static HandshakeResponse createLeafRejectIncomingResponse() {
+        Properties headers = new Properties();
         addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SHIELDED_MESSAGE,

@@ -53,7 +53,7 @@ public class UltrapeerHandshakeResponder
 		//"second chance" like in the reject(..) method.
 
 		if(!_manager.allowConnection(response)) {			
-            return HandshakeResponse.createRejectOutgoingResponse(new Properties());
+            return HandshakeResponse.createRejectOutgoingResponse();
 		}
 
 		Properties ret = new Properties();
@@ -103,7 +103,7 @@ public class UltrapeerHandshakeResponder
 		if (reject(response)) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
-            return HandshakeResponse.createRejectIncomingResponse(ret);
+            return HandshakeResponse.createRejectIncomingResponse();
 		}
 		
 		//We do this last, to prevent reject connections from being deflated,
