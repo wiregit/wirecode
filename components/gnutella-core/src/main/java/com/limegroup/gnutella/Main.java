@@ -26,7 +26,7 @@ public class Main implements ActivityCallback {
                               (new StandardMessageRouter(callback,fm)),fm);
     
     service.initialize();
-        
+    service.postGuiInit();    
     //}
 
 
