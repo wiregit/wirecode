@@ -95,9 +95,6 @@ public final class PushProxyAcknowledgement extends VendorMessage {
             ErrorService.error(uhe);
             throw new BadPacketException("Bad host - should never happen!!!");
         }
-        catch (IllegalArgumentException iae) {
-            throw new BadPacketException("Input parameters are bad!!!");
-        }
     }
 
     /** Overridden purely for stats handling.
