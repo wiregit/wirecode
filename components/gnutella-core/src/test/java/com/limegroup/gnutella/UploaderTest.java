@@ -144,8 +144,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         kill(d3);
         kill(d4);
-    }       
-
+    }
+        
     /**
      * Tests that:
      * - uploads upto maxUploads get slots
@@ -153,6 +153,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - uploads beyond that get try again later
      * - when an uploade with slot terminates first uploader gets slot
      * - when an uploader with slot terminates, everyone in queue advances.
+     * - uploads not in slot one, but uploader has available for all get slot
      */
     public void testNormalQueueing() throws Exception {
         UploadSettings.MAX_UPLOADS.setValue(2);
@@ -259,11 +260,63 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
-        //System.out.println("Passed");
+            
+        //Add another queued guy
+        try { //queued at 2nd position
+            d5 = addUploader(upManager,rfd5,"1.1.1.5",true);
+            connectDloader(d5,true,rfd5,true);
+            fail("uploader should have been queued, but was given slot");
+        } catch(QueuedException qx) {
+            assertEquals(2,qx.getQueuePosition());
+        } catch (Exception ioe) {
+            fail("not queued", ioe);
+        }
+        
+        assertEquals("should have 2 queued uploads",
+            2, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());
+
+        // Now kill both uploads in progress and see if
+        // the second queued guy can get his slot before
+        // the first one polls (he should).
+        // D4 & D5 are queued
+        // D3 & D2 are active
+        kill(d3);
+        kill(d2);
+        
+        assertEquals("should have 2 queued uploads",
+            2, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+            
+        // Sleep so we don't hammer with requests.
+        Thread.sleep((UploadManager.MIN_POLL_TIME+
+                      UploadManager.MAX_POLL_TIME)/2);            
+        
+        //test that second uploader is given a slot.
+        try {
+            connectDloader(d5,false,rfd5,true);
+        } catch (QueuedException e) {
+            fail("downloader should have got slot, but was queued at: "
+                + e.getQueuePosition(), e);
+        }
+
+        //test that the first uploader is also given a slot.        
+        try {
+            connectDloader(d4,false,rfd4,true);
+        } catch (QueuedException e) {
+            fail("downloader should have got slot, but was queued at: "
+                + e.getQueuePosition(), e);
+        }
+        
+        assertEquals("should have 0 queued uploads",
+            0, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());                
+
     }
-        
-        
-    
+
     /**
      * Makes sure that if downloaders reconnect too soon they are dropped
      * also if uploaders respond too late they should be dropped. Downloader
