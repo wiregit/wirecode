@@ -156,11 +156,6 @@ public class HTTPDownloader implements BandwidthTracker {
         URN urn = rfd.getSHA1Urn();
         _altLocsReceived = urn==null ? null:
             AlternateLocationCollection.create(urn);
-        //Sumeet:TODO1: 1. add methods to allow other HTTPDownloaders to add
-        //altlocs to this collection.  
-        //2. Change this to be an
-        //AltLocCollectionManager so we can send alts and well as n-alts.
-        //3. chate the altLocsReceived to a SimpleAlternateLocationCollection
         AlternateLocationCollection s = AlternateLocationCollection.create(urn);
         AlternateLocationCollection f = AlternateLocationCollection.create(urn);
         _sendLocsManager = new AltLocCollectionsManager(s,f);
@@ -186,11 +181,7 @@ public class HTTPDownloader implements BandwidthTracker {
     AlternateLocationCollection getAltLocsReceived() { 
 	    return _altLocsReceived;
     }
-    
-    void clearReceivedLocs() {
-        synchronized(_altLocsReceived) { _altLocsReceived.clear();}
-    }
-    
+        
     void addSuccessfulAltLoc(AlternateLocation loc) {
         _sendLocsManager.addLocation(loc);
     }

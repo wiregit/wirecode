@@ -236,11 +236,9 @@ public final class AlternateLocationCollection
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		boolean wrote = false;
-        //Sumeet:TODO2: send all for n-alts
         synchronized(this) {
-	        Iterator iter = LOCATIONS.iterator();            
-            // then write out the next 10.
-            for(int i = 0; i < 10 && iter.hasNext(); i++) {
+	        Iterator iter = LOCATIONS.iterator();
+            while(iter.hasNext()) {
 			    writeBuffer.append((
                            (HTTPHeaderValue)iter.next()).httpStringValue());
 			    writeBuffer.append(commaSpace);
