@@ -390,7 +390,7 @@ public class FileManager {
 	 * @param notifyOnClear if true, callback is notified via clearSharedFiles
      *  when the previous load settings thread has been killed.
      */
-    public void loadSettings(boolean notifyOnClear) {
+    public void loadSettings(boolean notifyOnClear) {		
         synchronized (_loadThreadLock) {
             //If settings are already being loaded, interrupt and wait for them
             //to complete.  Note that we cannot hold this' monitor when calling
@@ -505,6 +505,9 @@ public class FileManager {
             if (! _loadThread.isInterrupted())
                 trim();                    
         }
+
+		// write out the cache of URNs
+		UrnCache.instance().persistCache();
     }
 
 
