@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.uploader;
 
 /**
  * auth: rsoule
@@ -12,6 +12,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.*;
+
 
 public class HTTPUploader implements Uploader {
 

@@ -6,9 +6,9 @@
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;

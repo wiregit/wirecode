@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.uploader;
 
 import java.io.*;
 

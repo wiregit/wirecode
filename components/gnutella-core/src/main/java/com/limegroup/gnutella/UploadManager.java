@@ -1,4 +1,6 @@
 package com.limegroup.gnutella;
+
+import com.limegroup.gnutella.uploader.*;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
