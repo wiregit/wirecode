@@ -51,10 +51,9 @@ public class SupernodeHandshakeResponder
 		//"second chance" like in the reject(..) method.
 
 		if(!_manager.allowConnection(response)) {			
-			return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-										 HandshakeResponse.SLOTS_FULL_MESSAGE,
-										 new Properties());
+            return HandshakeResponse.createRejectResponse(new Properties());
 		}
+
 		//Did the server request we become a leaf?
 		String neededS = response.getHeaders().
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
@@ -68,7 +67,9 @@ public class SupernodeHandshakeResponder
 			ret.put(ConnectionHandshakeHeaders.X_SUPERNODE,
 					"False");
 		}
-		return new HandshakeResponse(ret);
+        
+        // accept the response
+        return HandshakeResponse.createAcceptResponse(ret);
 	}
 
 	/**
@@ -89,20 +90,20 @@ public class SupernodeHandshakeResponder
 				Message.ip2string(RouterService.getAddress())+":"
 				+ RouterService.getPort());
 		
-		//also add some host addresses in the response
-		addHostAddresses(ret, _manager);
 		
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.
 
 		// TODO::add special cases for the type of client we're connecting to
 		if (reject(response)) {
-			return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-										 HandshakeResponse.SLOTS_FULL_MESSAGE,
-										 ret);
+            // reject the connection, and let the other node know about 
+            // any Ultrapeers we're connected to
+            return HandshakeResponse.createRejectResponse(ret);
 		}
 		
-		return new HandshakeResponse(ret);
+        // accept the connection, and let the Ultrapeer know about Ultrapeers
+        // that are as many hops away as possible, to avoid cycles.
+        return HandshakeResponse.createAcceptResponse(ret);
 	}
 
 
