@@ -38,6 +38,9 @@ public final class HeaderNames {
     public static final String REMOTE_IP            = "Remote-IP";
 
     public static final String GGEP                 = "GGEP";
+    
+    /** Requerying exclamation. */
+   public static final String X_REQUERIES = "X-Requeries";
 
 	/**
 	 * Header name for the GUESS version.

@@ -131,18 +131,9 @@ public class ConnectionManager {
      */
     private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
 
-	/**
-	 * The number of leaf connections reserved for "good" clients.  As
-	 * described above, the definition of good constantly changes with
-	 * advances in search architecture.
-	 */
-    public static final int RESERVED_GOOD_LEAF_CONNECTIONS =
-        UltrapeerSettings.MAX_LEAVES.getValue() - 15;
-
     /**
      * The number of leaf connections reserved for non LimeWire clients.
      * This is done to ensure that the network is not solely LimeWire centric.
-     * This number MUST BE LESS THAN RESERVED_GOOD_LEAF_CONNECTIONS.
      */
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
 
@@ -832,30 +823,18 @@ public class ConnectionManager {
                 if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
                     nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
                     return true;
-                } else {
-                    // If the reserved non-LimeWire slots are full, don't allow
-                    // more.
-                    return false;
                 }
             }
+            
+            // Only allow good guys.
+            if(!hr.isGoodLeaf())
+                return false;
 
-            // Reserve RESERVED_GOOD_LEAF_CONNECTIONS slots to ensure
-            // that the majority of clients on the network are properly
-            // behaved.  We must add the leftover quota of reserved
-            // non-limewire leaves to ensure we reserve the correct amount.
-            if(hr.isGoodLeaf()) {
+            // if it's good, allow it.
+            if(hr.isGoodLeaf())
                 return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
                         nonLimeWireLeaves)) <
                           UltrapeerSettings.MAX_LEAVES.getValue();
-            }
-
-            // Otherwise, if:
-            //  It was a LimeWire that was not a 'good leaf'
-            // Then allow it only if we have enough space for the 'good'
-            // leaves.
-            return leaves <
-                 (UltrapeerSettings.MAX_LEAVES.getValue() -
-                  RESERVED_GOOD_LEAF_CONNECTIONS);
 
         } else if (hr.isUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
@@ -923,11 +902,15 @@ public class ConnectionManager {
      * @return <tt>true</tt> if the connection should be allowed, otherwise
      *  <tt>false</tt>
      */
-    private static boolean
-        allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+    private static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
-        if(userAgent == null) return false;
-        if(userAgent.startsWith("Morpheus")) return false;
+        if(userAgent == null)
+            return false;
+        userAgent = userAgent.toLowerCase();
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
+        for(int i = 0; i < bad.length; i++)
+            if(userAgent.indexOf(bad[i]) != -1)
+                return false;
         return true;
     }
 
@@ -942,8 +925,13 @@ public class ConnectionManager {
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
-        if(userAgent == null) return false;
-        if(userAgent.startsWith("Morpheus")) return false;
+        if(userAgent == null)
+            return false;
+        userAgent = userAgent.toLowerCase();
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
+        for(int i = 0; i < bad.length; i++)
+            if(userAgent.indexOf(bad[i]) != -1)
+                return false;
         return true;
     }
 

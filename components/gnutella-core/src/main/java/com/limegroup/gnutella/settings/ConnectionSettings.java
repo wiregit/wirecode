@@ -319,6 +319,13 @@ public final class ConnectionSettings extends LimeProps {
                                             
     
     /**
+     * Lowercase hosts that are evil.
+     */
+    public static final StringArraySetting EVIL_HOSTS =
+        FACTORY.createSettableStringArraySetting("EVIL_HOSTS", new String[0], "evil_hosts");
+    
+    
+    /**
      * Helper method left from Settings Manager
      *
 	 * Returns the maximum number of connections for the given connection

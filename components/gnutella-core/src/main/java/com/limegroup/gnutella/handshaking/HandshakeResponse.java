@@ -217,7 +217,11 @@ public final class HandshakeResponse {
      * Constant for whether or nor this node is an older limewire. 
      */
     private final boolean IS_OLD_LIMEWIRE;
-
+    
+    /**
+     * Constant for whether or not the client claims to do no requerying.
+     */
+    private final boolean NO_REQUERYING;
     
     /**
      * Locale 
@@ -272,11 +276,18 @@ public final class HandshakeResponse {
             isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
         PROBE_QUERIES = 
             isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
+        NO_REQUERYING = isFalseValue(HEADERS, HeaderNames.X_REQUERIES);
+
+        IS_LIMEWIRE =
+            extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
+                toLowerCase().startsWith("limewire");
+
         
         GOOD_LEAF = isHighDegreeConnection() &&
             isUltrapeerQueryRoutingConnection() &&
             (getMaxTTL() < 5) &&
-            isDynamicQueryConnection();
+            isDynamicQueryConnection() &&
+            (IS_LIMEWIRE || NO_REQUERYING);
         
         GOOD_ULTRAPEER = isGoodLeaf(); // && supportsProbeQueries();        
         
@@ -290,9 +301,6 @@ public final class HandshakeResponse {
             isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
         IS_CRAWLER = 
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
-        IS_LIMEWIRE =
-            extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
-                toLowerCase().startsWith("limewire");
         IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
         oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
 
