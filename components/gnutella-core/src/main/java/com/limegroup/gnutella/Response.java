@@ -11,13 +11,13 @@ import com.sun.java.util.collections.*;
 public class Response {
     /** Both index and size must fit into 4 unsigned bytes; see
      *  constructor for details. */
-    private long index;
-    private long size;
-    private byte[]  nameBytes;
+    private final long index;
+    private final long size;
+    private final byte[]  nameBytes;
     /** The name of the file matching the search.  This does NOT
      *  include the double null terminator.
      */
-    private String name;
+    private final String name;
 
 	/** The meta variable is a string of meta information that
 	 *  will be added per response (as opposed to per QueryReply
@@ -28,34 +28,89 @@ public class Response {
 
     /** Per HUGE v0.93 proposal, urns includes returned urn-values
      */
-    private Set urns;
+    private final Set urns;
 
     // HUGE v.093 GeneralExtensionMechanism between-the-null extensions
-    private byte[] extBytes;
-    
+    private final byte[] extBytes;
+
+	
+	/**
+	 * Static constant for the beginning of the xml audios schema so
+	 * that we don't have to generate new strings each time.
+	 */
+ 	private static final String AUDIOS_NAMESPACE =
+		"<audios xsi:noNamespaceSchemaLocation="+
+		"\"http://www.limewire.com/schemas/audio.xsd\">";
+
+	/**
+	 * Constant for the XML audio title key.
+	 */
+	private static final String AUDIO_TITLE =
+		"<audio title=\"";
+	
+	/**
+	 * Constant for the XML audio bitrate key.
+	 */
+	private static final String AUDIO_BITRATE = 
+		"bitrate=\"";
+
+	/**
+	 * Constant for the XML audio seconds key.
+	 */
+	private static final String AUDIO_SECONDS =
+		"seconds=\"";
+
+	/**
+	 * Constant for the string that ends the audios xml.
+	 */
+	private static final String AUDIOS_CLOSE =
+		"</audio></audios>";				
+
+	/**
+	 * Constant for a quote followed by a space, used in XML.
+	 */
+	private static final String QUOTE_SPACE ="\" ";
+
+	/**
+	 * Constant for a quote followed by the XML close tag.
+	 */
+	private static final String CLOSE_TAG = "\">";
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
      *  0 <= index, size < 2^32
      */
     public Response(long index, long size, String name) {
-        Assert.that((index & 0xFFFFFFFF00000000l)==0,
-                "Response constructor: index "+index+" too big!");
-        Assert.that((size &  0xFFFFFFFF00000000l)==0,
-                "Response constructor: size "+size+" too big!");
-
-        this.index=index;
-        this.size=size;
-        this.name=name;
-        this.nameBytes = name.getBytes();
-		metadata = "";
-        this.metaBytes = metadata.getBytes();
+		this(index, size, name, "", null);
     }
 
     /**Overloaded constructor that allows the creation of Responses with
      * meta-data
      */
-    public Response(long index, long size, String name,String metadata) {
+    public Response(long index, long size, String name,
+					String metadata) {
+		this(index, size, name, metadata, null);
+	}
+
+	/**
+	 * Constructs a new <tt>Response</tt> instance from the data in the
+	 * specified <tt>FileDesc</tt>.  
+	 *
+	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
+	 *  this <tt>Response</tt>
+	 */
+	public Response(FileDesc fd) {
+		this(fd.getIndex(), fd.getFile().length(), fd.getFile().getName(), 
+			 "", fd.getUrns());
+	}
+
+    /**
+	 * Overloaded constructor that allows the creation of Responses with
+     * meta-data and a <tt>Set</tt> of <tt>URN</tt> instances.
+     */
+    private Response(long index, long size, String name,
+					 String metadata, Set urns) {
         Assert.that((index & 0xFFFFFFFF00000000l)==0,
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
@@ -67,109 +122,82 @@ public class Response {
         this.nameBytes = name.getBytes();
 		this.metadata = metadata;
         this.metaBytes = metadata.getBytes();
+		if(urns == null) {
+			this.urns = Collections.EMPTY_SET;
+		}
+		else {
+			this.urns = Collections.unmodifiableSet(urns);
+		}
+		extBytes = createExtBytes(this.urns);
     }
-
-    /**
-     * Overloaded constructor that picks up data from between the  nulls
-     * That data is then made into a nice xml string that can 
-     * be converted into a LimeXMLDocument
-     */
-    public Response(String betweenNulls, long index, long size, String name){
-        this(index,size,name,""); // reuse standard constructor
-
-        //now handle between-the-nulls
-		// \u001c is the HUGE v0.93 GEM delimiter
-        StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); 
-        while(stok.hasMoreTokens()) {
-            this.handleLegacyOrGemExtensionString(stok.nextToken());
-        }
-    }
+    
 
 	/**
-	 * Constructs a new <tt>Response</tt> instance from the data in the
-	 * specified <tt>FileDesc</tt> instance.
+	 * Constructs an xml string from the given extension sting.
 	 *
-	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
-	 *  this <tt>Response</tt>
+	 * @param name the name of the file to construct the string for
+	 * @param ext an individual between-the-nulls string (note that there
+	 *  can be multiple between-the-nulls extension strings with HUGE)
+	 * @return the xml formatted string, or the empty string if the
+	 *  xml could not be parsed
 	 */
-	public Response(FileDesc fd) {
-		this(fd.getIndex(), fd.getFile().length(), fd.getFile().getName());
-		urns = fd.getUrns();
+	private static String createXmlString(String name, String ext) {
+		StringTokenizer tok = new StringTokenizer(ext);
+		if(tok.countTokens() < 3) {
+			// if there aren't the expected number of tokens, simply
+			// return the empty string
+			return "";
+		}
+		String first  = tok.nextToken();
+		String second = tok.nextToken();
+		String length="";
+		String bitrate="";
+		boolean bearShare1 = false;        
+		boolean bearShare2 = false;
+		boolean gnotella = false;
+		if(second.startsWith("kbps"))
+			bearShare1 = true;
+		else if (first.endsWith("kbps"))
+			bearShare2 = true;
+		if(bearShare1){
+			bitrate = first;
+		}
+		else if (bearShare2){
+			int j = first.indexOf("kbps");
+			bitrate = first.substring(0,j);
+		}
+		if(bearShare1 || bearShare2){
+			while(tok.hasMoreTokens())
+				length=tok.nextToken();
+			//OK we have the bitrate and the length
+		}
+		else if (ext.endsWith("kHz")){//Gnotella
+			gnotella = true;
+			length=first;
+			//extract the bitrate from second
+			int i=second.indexOf("kbps");
+			if(i>-1)//see if we can find the bitrate                
+				bitrate = second.substring(0,i);
+			else//not gnotella, after all...some other format we do not know
+				gnotella=false;
+		}
+		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
+			StringBuffer sb = new StringBuffer();
+			sb.append(AUDIOS_NAMESPACE);
+			sb.append(AUDIO_TITLE);
+			sb.append(name);
+			sb.append(QUOTE_SPACE);
+			sb.append(AUDIO_BITRATE);
+			sb.append(bitrate);
+			sb.append(QUOTE_SPACE);
+			sb.append(AUDIO_SECONDS);
+			sb.append(length);
+			sb.append(CLOSE_TAG);
+			sb.append(AUDIOS_CLOSE);
+			return sb.toString();
+		}
+		return "";
 	}
-    
-    private void handleLegacyOrGemExtensionString(String ext) {      
-		if(URN.isUrn(ext)) {
-			// it's a HUGE v0.93 URN name for the same files
-			try {
-				URN urn = URNFactory.createUrn(ext);
-				if (urns == null) urns = new HashSet();
-				urns.add(urn);
-			} catch(IOException e) {
-				// there was an error creating the URN, so return
-				return;
-			}
-        } else {
-            // it's legacy between-the-nulls gump
-            //create an XML string out of the data between the nulls
-            String length="";
-            String bitrate="";
-            String first="";
-            String second="";
-            StringTokenizer tok = new StringTokenizer(ext);
-            try{
-                first = tok.nextToken();
-                second = tok.nextToken();
-            }catch(Exception e){//If I catch an exception, all bets are off.
-                first="";
-                second="";
-            }
-            boolean bearShare1 = false;        
-            boolean bearShare2 = false;
-            boolean gnotella = false;
-            if(second.startsWith("kbps"))
-                bearShare1 = true;
-            else if (first.endsWith("kbps"))
-                bearShare2 = true;
-            if(bearShare1){
-                bitrate = first;
-            }
-            else if (bearShare2){
-                int j = first.indexOf("kbps");
-                bitrate = first.substring(0,j);
-            }
-            if(bearShare1 || bearShare2){
-                while(tok.hasMoreTokens())
-                    length=tok.nextToken();
-                //OK we have the bitrate and the length
-            }
-            else if (ext.endsWith("kHz")){//Gnotella
-                gnotella = true;
-                length=first;
-                //extract the bitrate from second
-                int i=second.indexOf("kbps");
-                if(i>-1)//see if we can find the bitrate                
-                    bitrate = second.substring(0,i);
-                else//not gnotella, after all...some other format we do not know
-                    gnotella=false;
-            }
-            if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
-                this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
-                     "\"http://www.limewire.com/schemas/audio.xsd\">"+
-                     "<audio title=\""+name+"\" bitrate=\""+bitrate+
-                     "\" seconds=\""+length+"\">"+
-                     "</audio></audios>";
-                this.metaBytes=metadata.getBytes();
-            }
-            else{
-                this.metadata= "";
-                this.metaBytes = metadata.getBytes();
-            }
-            this.index=index;
-            this.size=size;
-            this.name=name;
-            this.nameBytes = name.getBytes(); 
-        }
-    }
 
     /**
      * write as if inside a QueryReply
@@ -184,45 +212,54 @@ public class Response {
         array[i++]=(byte)0;
         // write HUGE v0.93 General Extension Mechanism extensions
         // (currently just URNs)
-        if (urns != null) {
-            updateExtBytes();
-            System.arraycopy(extBytes, 0, array, i, extBytes.length);
-            i+=extBytes.length;
-        }
+		System.arraycopy(extBytes, 0, array, i, extBytes.length);
+		i+=extBytes.length;
         //add the second null terminator
         array[i++]=(byte)0;
         return i;
     }
     
-    private void updateExtBytes() {
-        if (extBytes != null) {
-            // already up-to-date
-            return;
-        }
+	/**
+	 * Static zero-length array that can be used for any <tt>Response</tt>
+	 * instance that doesn't have urns.
+	 */
+	private final static byte[] NULL_EXT_ARRAY = new byte[0];
+
+	/**
+	 * Helper method that creates an array of bytes for the specified
+	 * <tt>Set</tt> of <tt>URN</tt> instances.  The bytes are written
+	 * as specified in HUGE v 0.94.
+	 *
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
+	 *  constructing the byte array
+	 */
+	private static byte[] createExtBytes(Set urns) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (urns != null ) {
-                Iterator iter = urns.iterator();
-                while (iter.hasNext()) {
-                    URN urn = (URN)iter.next();
-                    baos.write(urn.stringValue().getBytes());
-                    if (iter.hasNext()) {
-                        baos.write(0x1c);
-                    }
-                }
-            }
-            extBytes = baos.toByteArray();
+			if(urns == null) {
+				return NULL_EXT_ARRAY;
+			}
+
+			Iterator iter = urns.iterator();
+			while (iter.hasNext()) {
+				URN urn = (URN)iter.next();
+				baos.write(urn.stringValue().getBytes());
+				if (iter.hasNext()) {
+					baos.write(0x1c);
+				}
+			}
+            return baos.toByteArray();
         } catch (IOException ioe) {
-            System.out.println("Response.updateExtBytes() IOException");
-            extBytes = new byte[0];
+			// simply do not store any bytes for extensions if there
+			// was a problem
+			return NULL_EXT_ARRAY;
         }
-    }
+	}
     
     /**
      */
     public int getLength() {
         // must match same number of bytes writeToArray() will write
-		updateExtBytes();
 		return 8 +                   // index and size
 		nameBytes.length +
 		1 +                   // null
@@ -231,9 +268,15 @@ public class Response {
     }
     
     /**
-     * utility function for instantiating individual responses from inputstream
+     * Factory method for instantiating individual responses from an
+	 * <tt>InputStream</tt> instance.
+	 * 
+	 * @param is the <tt>InputStream</tt> to read from
+	 * @throws <tt>IOException</tt> if there are any problems reading from
+	 *  or writing to the stream
      */
-    public static Response createFromStream(InputStream is) throws IOException {
+    public static Response createFromStream(InputStream is) 
+		throws IOException {
         // extract file index & size
         long index=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
         long size=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
@@ -264,7 +307,30 @@ public class Response {
         if(betweenNulls==null || betweenNulls.equals("")) {
             return new Response(index,size,name);
         } else {
-            return new Response(betweenNulls,index,size,name);
+			// now handle between-the-nulls
+			// \u001c is the HUGE v0.93 GEM delimiter
+			StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); 
+			Set urns = null;
+			String metaString = null;
+			while(stok.hasMoreTokens()) {
+				String ext = stok.nextToken();
+				if(URN.isUrn(ext)) {
+					// it's a HUGE v0.93 URN name for the same files
+					try {
+						URN urn = URNFactory.createUrn(ext);
+						if (urns == null) urns = new HashSet();
+						urns.add(urn);
+					} catch(IOException e) {
+						// there was an error creating the URN, so go to the
+						// next one
+						continue;
+					}
+				} else {
+					metaString = createXmlString(name, ext);
+				}
+			}			
+            //return new Response(betweenNulls,index,size,name);
+			return new Response(index, size, name, metaString, urns);
         }
     }
     
@@ -321,11 +387,20 @@ public class Response {
 		return metadata;
 	}
 
+	/**
+	 * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * this <tt>Response</tt>.
+	 *
+	 * @return an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * this <tt>Response</tt>
+	 */
     public Set getUrns() {
-		return new HashSet(urns);
+		return Collections.unmodifiableSet(urns);
     }
 
+	// TODO: do we care that this does not compare all of the elements?
     public boolean equals(Object o) {
+		if(o == this) return true;
         if (! (o instanceof Response))
             return false;
         Response r=(Response)o;
@@ -341,6 +416,7 @@ public class Response {
 
     //Unit Test Code 
     //(Added when bytes stuff was added here 3/2/2001 by Sumeet Thadani)
+	/*
     public static void main(String args[]){
         Response r = new Response(3,4096,"A.mp3");
         int nameSize = r.getNameBytesSize();
@@ -374,6 +450,7 @@ public class Response {
             String len = d.getValue("audios__audio__seconds__");
             Assert.that(len.equals("b"));
         }
-    } 
+    }
+	*/
 }
 
