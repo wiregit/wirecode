@@ -711,10 +711,9 @@ public final class RouterService {
                     Set reqUrns = new HashSet();
                     reqUrns.add(UrnType.ANY_TYPE);
                     
-                    QueryRequest qr = 
-                        new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
-                                         query, richQuery, false, reqUrns, null,
-                                         !acceptedIncomingConnection());
+                    QueryRequest qr = new QueryRequest(guid, SETTINGS.getTTL(),
+                                                       minSpeed, query, richQuery, 
+                                                       false, reqUrns, null);
                     verifier.record(qr, type);
                     router.broadcastQueryRequest(qr);
                 } catch(Throwable t) {

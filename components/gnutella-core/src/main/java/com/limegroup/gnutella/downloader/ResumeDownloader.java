@@ -115,7 +115,6 @@ public class ResumeDownloader extends ManagedDownloader
                                 null,              //metadata
                                 true,              //is requery
                                 null,              //requested types
-                                queryUrns,         //requested urns (if any)
-                                !RouterService.acceptedIncomingConnection());
+                                queryUrns);        //requested urns (if any)
     }
 }

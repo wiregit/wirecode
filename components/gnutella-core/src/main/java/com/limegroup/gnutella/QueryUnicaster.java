@@ -543,7 +543,7 @@ public final class QueryUnicaster {
         return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
                                 qr.getQuery(), qr.getRichQuery(), false,
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                qk, qr.isFirewalledSource());
+                                qk);
     }
 
 
