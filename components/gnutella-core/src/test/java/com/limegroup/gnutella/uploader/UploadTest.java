@@ -16,9 +16,13 @@ import com.limegroup.gnutella.stubs.*;
 public class UploadTest extends TestCase {
     private static String address;
     private static int port;
+    /** The file name, plain and encoded. */
     private static String file="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
+    /** The file contents. */
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
+    /** The hash of the file contents. */
+    private static final String hash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     private static final int index=0;
     /** Our listening port for pushes. */
     private static int callbackPort=6671;
@@ -213,6 +217,7 @@ public class UploadTest extends TestCase {
             assertTrue("piplining with push download",passed);
          
             tMixedPersistentRequests();
+            tPersistentURIRequests();
 
             System.out.println("passed");
         } catch (IOException e) {
@@ -465,6 +470,8 @@ public class UploadTest extends TestCase {
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
+     * @param file a partially qualified name, e.g. "file.txt".  The 
+     * "/get/<index>" is automatically appended
      */
     private static String downloadInternal1(String file,
 											String header,
@@ -472,12 +479,13 @@ public class UploadTest extends TestCase {
 											BufferedReader in,
 											int expectedSize) 
                                             throws IOException {
-        return downloadInternal1("GET", file, header, out, in, expectedSize);
+        return downloadInternal1("GET", "/get/"+index+"/"+file, header, 
+                                 out, in, expectedSize);
     }
 
     /** 
-     * Same as downloadInternal1(file, header, out, in, expectedSize), but
-     * uses the given request type.
+     * Sends an arbitrary request, returning the result.
+     * @param file the full filename, e.g., "/get/0/file.txt"     
      * @param request an HTTP request such as "GET" or "HEAD"
      */
     private static String downloadInternal1(String request,
@@ -489,7 +497,7 @@ public class UploadTest extends TestCase {
         throws IOException {
         //Assert.that(out!=null && in!=null,"socket closed my server");
         //1. Send request
-        out.write(request+" /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write(request+" "+file+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection: Keep-Alive\r\n");
@@ -643,10 +651,39 @@ public class UploadTest extends TestCase {
                                                           s.getOutputStream()));
             //2. Send HEAD request
             assertEquals("",
-                downloadInternal1("HEAD", encodedFile, null, out, in, 0));
+                downloadInternal1("HEAD", "/get/"+index+"/"+encodedFile, 
+                                  null, out, in, 0));
             //3. Send GET request, make sure data ok.
             assertEquals(alphabet,
                 downloadInternal1(encodedFile, null, out, in, alphabet.length()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail ("Mysterious IO problem: "+e);
+        } finally {
+            if (s!=null)
+                try { s.close(); } catch (IOException ignore) { }
+        }
+    }
+
+    /** Tests persistent connections with URI requests.  (Raphael Manfredi claimed this
+     *  was broken.)  */
+    public void tPersistentURIRequests() {
+        Socket s = null;
+        try {
+            //1. Establish connection.
+            s = new Socket(address, port);
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                          s.getInputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                                                          s.getOutputStream()));
+            //2. Send GET request in URI form
+            assertEquals(alphabet,
+                         downloadInternal1("GET", "/uri-res/N2R?"+hash,
+                                           null, out, in, alphabet.length()));
+            //3. Send another GET request in URI form
+            assertEquals(alphabet,
+                         downloadInternal1("GET", "/uri-res/N2R?"+hash,
+                                           null, out, in, alphabet.length()));
         } catch (IOException e) {
             e.printStackTrace();
             fail ("Mysterious IO problem: "+e);
