@@ -19,7 +19,7 @@ import java.net.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-    private static final String EXTENSION = "XYZ";
+    protected static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
     
     private File f1 = null;
@@ -28,8 +28,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private File f4 = null;
     private File f5 = null;
     private File f6 = null;
-    private FileManager fman = null;
-    private Object loaded = new Object();
+    //changed to protected so that MetaFileManagerTest can
+    //use these varaiables as well.
+    protected FileManager fman = null;
+    protected Object loaded = new Object();
     private Response[] responses;
     private FileDesc[] files;
 
@@ -527,7 +529,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
     }	
-
     
     /**
      * tests for the QRP thats kept by the FileManager 
@@ -539,7 +540,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f1 = createNewNamedTestFile(10, "hello");
         f2 = createNewNamedTestFile(10, "\u5bae\u672c\u6b66\u8535\u69d8");
         f3 = createNewNamedTestFile(10, "\u00e2cc\u00e8nts");
-        waitForLoad();
+        waitForLoad(); 
 
         //get the QRT from the filemanager
         QueryRouteTable qrt = fman.getQRT();
@@ -596,15 +597,16 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertFalse("query should not be in qrt", qrt.contains(qr));
     }
 
-    //helper method to create queryrequest with I18N
+    //helper function to create queryrequest with I18N
     private QueryRequest get_qr(File f) {
         return 
             QueryRequest.createQuery
             (I18NConvert.instance().getNorm(f.getName()));
     }
-                                      
 
-    File createNewNamedTestFile(int size, String name) throws Exception {
+    //helper function to create a new temporary file with passed in name
+    protected File createNewNamedTestFile(int size, String name) 
+        throws Exception {
 		File file = File.createTempFile(name, 
                                         "." + EXTENSION , _sharedDir);
 		file.deleteOnExit();
@@ -669,7 +671,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
-    File createNewTestFile(int size) throws Exception {
+    protected File createNewTestFile(int size) throws Exception {
 		File file = File.createTempFile("FileManager_unit_test", 
 		    "." + EXTENSION , _sharedDir);
 		file.deleteOnExit();
@@ -701,15 +703,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
-    private class FManCallback extends ActivityCallbackStub {
+    public class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized(loaded) {
                 loaded.notify();
             }
         }
     }
-    
-    private void waitForLoad() {
+
+    protected void waitForLoad() {
         synchronized(loaded) {
             try {
                 fman.loadSettings(false); // true won't matter either                
