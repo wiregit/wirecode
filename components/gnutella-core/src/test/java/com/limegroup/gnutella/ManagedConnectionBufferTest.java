@@ -65,7 +65,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
         CompositeQueue.QUEUE_TIME=1000;
 		out = new Connection("localhost", BUFFER_PORT);
-        out.buildAndStartQueues();
     }
     
     public void tearDown() throws Exception {
@@ -81,6 +80,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
 		
 		out.initialize();
+        out.buildAndStartQueues();
 		in = acceptor.accept();
 		assertTrue("out.write should be deflated", out.isWriteDeflated());
 		assertTrue("out.read should be deflated", out.isReadDeflated());
@@ -97,6 +97,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
 		
 		out.initialize();
+        out.buildAndStartQueues();
 		in = acceptor.accept();
 		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
 		assertTrue("out.read should be !deflated", !out.isReadDeflated());
@@ -686,7 +687,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         }
         
         int dropped=out.stats().getNumSentMessagesDropped()-initialDropped;
-        
         assertGreaterThan("dropped msg cnt > 0", 0, dropped);
         assertGreaterThan("drop prct > 0", 0, out.stats().getPercentSentDropped());
         assertLessThan("read cnt < total", total, read);
