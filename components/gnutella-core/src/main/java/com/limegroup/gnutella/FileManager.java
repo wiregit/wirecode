@@ -1152,9 +1152,9 @@ public abstract class FileManager {
      */
     public List getKeyWords(){
         FileDesc[] fds = getAllSharedFileDescriptors();
-        ArrayList retList = new ArrayList();
+        List retList = new ArrayList();
         for(int i=0;i<fds.length;i++)
-            retList.add(fds[i].getFile().getAbsolutePath());
+            retList.add(fds[i].getPath());
         return retList;
     }
     
