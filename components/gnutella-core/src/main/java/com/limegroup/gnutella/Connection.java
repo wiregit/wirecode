@@ -294,7 +294,8 @@ public class Connection {
         if (i<0)
             return false;
         try {
-            float f=Float.parseFloat(line.substring(i+CONNECT.length()));
+            Float F = new Float(line.substring(i+CONNECT.length()));
+            float f= F.floatValue();
             return f>=0.6f;
         } catch (NumberFormatException e) {
             return false;
@@ -338,7 +339,7 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
-            _propertiesRead.setProperty(key, value);
+            _propertiesRead.put(key, value);
         }
     }
 
