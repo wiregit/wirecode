@@ -44,9 +44,7 @@ public final class ThemeSettings {
 			themeDir.mkdirs();
 			
 			try {
-				ZipFile zf = 
-					new ZipFile(themeFile, ZipFile.OPEN_READ);		
-
+				ZipFile zf = new ZipFile(themeFile);		
 				
 				Enumeration list = zf.entries();
 				while (list.hasMoreElements()) {
