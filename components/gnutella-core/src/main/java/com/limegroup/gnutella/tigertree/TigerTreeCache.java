@@ -53,7 +53,7 @@ public final class TigerTreeCache implements Serializable {
      * File where the Mapping SHA1->TIGERTREE is stored
      */
     private static final File CACHE_FILE =
-        new File(CommonUtils.getUserSettingsDir(), "tigertree.cache");
+        new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
 
     /**
      * Returns the <tt>TigerTreeCache</tt> instance.
