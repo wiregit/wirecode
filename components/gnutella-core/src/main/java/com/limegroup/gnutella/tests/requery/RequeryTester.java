@@ -72,7 +72,7 @@ public class RequeryTester {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, name,
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4);
+                                  speed, false, 4, false, null, null);
     }
 
 
