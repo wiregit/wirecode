@@ -895,14 +895,6 @@ public class RouterService {
     }
 
     /**
-     * Returns an iterator of the hosts in the host catcher, each
-     * an Endpoint.
-     */
-    public static Iterator getHosts() {
-        return catcher.getHosts();
-    }
-
-    /**
      *  Returns the number of messaging connections.
      */
     public static int getNumConnections() {
