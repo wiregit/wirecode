@@ -658,8 +658,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
         recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
-        initializeFiles();
         synchronized (this) {
+            initializeFiles();
+
             if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
             }
@@ -708,8 +709,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Starts the download.
      */
     public void startDownload() {
-        dloaderManagerThread = new ManagedThread("ManagedDownload") {
-            public void managedRun() {
+        dloaderManagerThread = new ManagedThread(new Runnable() {
+            public void run() {
                 try {
                     receivedNewSources = false;
                     tryAllDownloads();
@@ -717,13 +718,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
+                    ManagedDownloader.this.stop();
+                    setState(ABORTED);
                     manager.remove(ManagedDownloader.this, true);
+                    
                     ErrorService.error(t);
                 } finally {
                     dloaderManagerThread = null;
                 }
             }
-        };
+        }, "ManagedDownload");
         dloaderManagerThread.setDaemon(true);
         dloaderManagerThread.start();       
     }
@@ -740,6 +744,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         long now = System.currentTimeMillis();
 
         // Notify the manager that this download is done.
+        // This MUST be done outside of this' lock, else
+        // dead could occur.
         manager.remove(this, complete);
 
         if(LOG.isTraceEnabled())
@@ -1299,6 +1305,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  not offer rfd to another ManagedDownloaders.
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
+        // never add to a stopped download.
+        if(stopped)
+            return false;
+        
         if(!hostIsAllowed(rfd))
             return false;
         
@@ -1436,6 +1446,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (stopped)
             return;
 
+        LOG.debug("STOPPING ManagedDownloader");
+
         //This method is tricky.  Look carefully at run.  The most important
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
@@ -1454,7 +1466,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //downloads will not start because of the flag above. Note that this
             //does not kill downloaders that are queued...
             for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
-                ((HTTPDownloader)iter.next()).stop();			
+                ((HTTPDownloader)iter.next()).stop();
     
             //...so we interrupt all threads - see connectAndDownload.
             //This is safe because worker threads can be waiting for a push 
@@ -1465,6 +1477,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
             if(dloaderManagerThread != null)
                 dloaderManagerThread.interrupt();
+            else
+                LOG.warn("MANAGER: no thread to interrupt");
         }
     }
 
@@ -1697,6 +1711,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (!stopped)
                 ErrorService.error(e);
         }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("MANAGER: TAD2 returned: " + status);
                    
         // If TAD2 gave a completed state, set the state correctly & exit.
         // Otherwise...
@@ -2117,6 +2134,85 @@ public class ManagedDownloader implements Downloader, Serializable {
             this.corruptFile=null;
         }
     }
+    
+    /**
+     * Initializes the verifiying file.
+     */
+    private synchronized boolean initializeVerifyingFile() {
+        Assert.that(incompleteFile != null);
+
+        int completedSize = 
+           (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+
+        synchronized (incompleteFileManager) {
+            if( commonOutFile != null )
+                commonOutFile.clearManagedDownloader();
+            //get VerifyingFile
+            commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+        }
+
+        if(commonOutFile==null) {//no entry in incompleteFM
+            LOG.trace("creating a verifying file");
+            commonOutFile = new VerifyingFile(true, completedSize);
+            try {
+                //we must add an entry in IncompleteFileManager
+                incompleteFileManager.
+                           addEntry(incompleteFile,commonOutFile);
+            } catch(IOException ioe) {
+                ErrorService.error(ioe, "file: " + incompleteFile);
+                return false;
+            }
+        }
+        //need to get the VerifyingFile ready to write
+        try {
+            commonOutFile.open(incompleteFile,this);
+        } catch(IOException e) {
+            if(!IOUtils.handleException(e, "DOWNLOAD"))
+                ErrorService.error(e);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Starts a new Worker thread for the given RFD.
+     */
+    private synchronized void startWorker(final RemoteFileDesc rfd) {
+        Thread connectCreator = new ManagedThread("DownloadWorker") {
+            public void managedRun() {
+                boolean iterate = false;
+                try {
+                    iterate = connectAndDownload(rfd);
+                } catch (Throwable e) {
+                    iterate = true;
+                     // Ignore InterruptedException -- the JVM throws
+                     // them for some reason at odd times, even though
+                     // we've caught and handled all of them
+                     // appropriately.
+                    if(!(e instanceof InterruptedException)) {
+                        //This is a "firewall" for reporting unhandled
+                        //errors.  We don't really try to recover at
+                        //this point, but we do attempt to display the
+                        //error in the GUI for debugging purposes.
+                        ErrorService.error(e);
+                    }
+                } finally {
+                    synchronized (ManagedDownloader.this) {
+                        currentRFDs.remove(rfd);
+                        threads.remove(this); 
+                        if(iterate) 
+                            ManagedDownloader.this.notifyAll();
+                    }
+                }
+            }//end of run
+        };
+
+        threads.add(connectCreator);
+        currentRFDs.add(rfd);
+
+        connectCreator.start();
+    }        
 
 
     /** 
@@ -2137,43 +2233,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  a corruption was detected and they chose to kill and discard the
      *  download.  Calls to resume() do not result in InterruptedException.
      */
-    private int tryAllDownloads3() throws InterruptedException {
+    private synchronized int tryAllDownloads3() throws InterruptedException {
         LOG.trace("MANAGER: entered tryAllDownloads3");
 
-        int completedSize = -1;
-        synchronized(this) {
-            Assert.that(incompleteFile != null);
-            completedSize =
-               (int)IncompleteFileManager.getCompletedSize(incompleteFile);
-
-            synchronized (incompleteFileManager) {
-                if( commonOutFile != null )
-                    commonOutFile.clearManagedDownloader();
-                //get VerifyingFile
-                commonOutFile= incompleteFileManager.getEntry(incompleteFile);
-            }
-            if(commonOutFile==null) {//no entry in incompleteFM
-                LOG.trace("creating a verifying file");
-                commonOutFile = new VerifyingFile(true, completedSize);
-                try {
-                    //we must add an entry in IncompleteFileManager
-                    incompleteFileManager.
-                               addEntry(incompleteFile,commonOutFile);
-                } catch(IOException ioe) {
-                    ErrorService.error(ioe, "file: " + incompleteFile);
-                    return COULDNT_MOVE_TO_LIBRARY;
-                }
-            }
-            //need to get the VerifyingFile ready to write
-            try {
-                commonOutFile.open(incompleteFile,this);
-            } catch(IOException e) {
-                if(!IOUtils.handleException(e, "DOWNLOAD"))
-                    ErrorService.error(e);
-                return COULDNT_MOVE_TO_LIBRARY;
-            }
-       
-        }
+        if(!initializeVerifyingFile())
+            return COULDNT_MOVE_TO_LIBRARY;
 
         //The current RFDs that are being connected to.
         currentRFDs = new LinkedList();
@@ -2185,48 +2249,49 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //While there is still an unfinished region of the file...
         while (true) {
-            synchronized(this) {
-                if (stopped) {
-                    LOG.warn("MANAGER: terminating because of stop");
-                    throw new InterruptedException();
-                } 
-                
-                if (dloaders.size()==0 && commonOutFile.isComplete()) {
-                    // Verify the commonOutFile is all done.
-                    int doneSize =
-                        (int)IncompleteFileManager.getCompletedSize(
-                            incompleteFile);
-                    Assert.that( completedSize == doneSize,
-                        "incomplete files (or size!) changed!");
-
-                    //Finished. Interrupt all worker threads
-                    for(int i=threads.size();i>0;i--) {
-                        Thread t = (Thread)threads.get(i-1);
-                        t.interrupt();
-                    }
-                
-                    LOG.trace("MANAGER: terminating because of completion");
-                    return COMPLETE;
-                } 
-        
-                if (threads.size() == 0) {                        
-                    //No downloaders worth living for.
-                    if ( files.size() > 0 && calculateWaitTime() > 0) {
-                        LOG.trace("MANAGER: terminating with busy");
-                        return WAITING_FOR_RETRY;
-                    } else if( files.size() == 0 ) {
-                        LOG.trace("MANAGER: terminating w/o hope");
-                        return GAVE_UP;
-                    }
-                    // else (files.size() > 0 && calculateWaitTime() == 0)
-                    // fallthrough ...
-                }
-
-                size = files.size();
-                connectTo = getNumAllowedDownloads();
-                dloadsCount = dloaders.size();
-            }
+            if (stopped) {
+                LOG.warn("MANAGER: terminating because of stop");
+                throw new InterruptedException();
+            } 
             
+            // Finished.
+            if (commonOutFile.isComplete()) {
+                // Kill any leftover downloaders.
+                for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
+                    ((HTTPDownloader)iter.next()).stop();		                
+                
+                //Interrupt all worker threads
+                for(int i=threads.size();i>0;i--) {
+                    Thread t = (Thread)threads.get(i-1);
+                    t.interrupt();
+                }
+            
+                LOG.trace("MANAGER: terminating because of completion");
+                return COMPLETE;
+            } 
+    
+            if (threads.size() == 0) {                        
+                //No downloaders worth living for.
+                if ( files.size() > 0 && calculateWaitTime() > 0) {
+                    LOG.trace("MANAGER: terminating with busy");
+                    return WAITING_FOR_RETRY;
+                } else if( files.size() == 0 ) {
+                    LOG.trace("MANAGER: terminating w/o hope");
+                    return GAVE_UP;
+                }
+                // else (files.size() > 0 && calculateWaitTime() == 0)
+                // fallthrough ...
+            }
+
+            size = files.size();
+            connectTo = getNumAllowedDownloads();
+            dloadsCount = dloaders.size();
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("MANAGER: kicking off workers, size: " + size + 
+                          ", connect: " + connectTo + ", dloadsCount: " + 
+                          dloadsCount + ", threads: " + threads.size());
+                
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
             //limit, which if successfully starts downloading or gets a better
@@ -2234,60 +2299,24 @@ public class ManagedDownloader implements Downloader, Serializable {
             //remote queue.
             for(int i=0; i< (connectTo+1) && i<size && 
                               dloadsCount < getSwarmCapacity(); i++) {
-                final RemoteFileDesc rfd;
-                synchronized(this) {
-                    rfd = removeBest();
-                    // If the rfd was busy, that means all possible RFDs
-                    // are busy, so just put it back in files and exit.
-                    if( rfd.isBusy() ) {
-                        files.add(rfd);
-                        break;
-                    }
-                    // else...
-                    currentRFDs.add(rfd);
+                RemoteFileDesc rfd = removeBest();
+                // If the rfd was busy, that means all possible RFDs
+                // are busy, so just put it back in files and exit.
+                if( rfd.isBusy() ) {
+                    files.add(rfd);
+                    break;
                 }
-                Thread connectCreator = new ManagedThread("DownloadWorker") {
-                    public void managedRun() {
-                        boolean iterate = false;
-                        try {
-                            iterate = connectAndDownload(rfd);
-                        } catch (Throwable e) {
-                            iterate = true;
-                             // Ignore InterruptedException -- the JVM throws
-                             // them for some reason at odd times, even though
-                             // we've caught and handled all of them
-                             // appropriately.
-                            if(!(e instanceof InterruptedException)) {
-                                //This is a "firewall" for reporting unhandled
-                                //errors.  We don't really try to recover at
-                                //this point, but we do attempt to display the
-                                //error in the GUI for debugging purposes.
-                                ErrorService.error(e);
-                            }
-                        } finally {
-                            synchronized (ManagedDownloader.this) {
-                                currentRFDs.remove(rfd);
-                                threads.remove(this); 
-                                if(iterate) 
-                                    ManagedDownloader.this.notifyAll();
-                            }
-                        }
-                    }//end of run
-                };
-                synchronized (this) { threads.add(connectCreator); }
-                connectCreator.start();
+                // else...
+                startWorker(rfd);
             }//end of for 
+                
             //wait for a notification before we continue.
-            synchronized(this) {
-                try {
-                    //if no workers notify in 4 secs, iterate. This is a problem
-                    //for stalled downloaders which will never notify. So if we
-                    //wait without a timeout, we could wait forever.
-                    this.wait(4000);
-                } catch (InterruptedException ee ) {
-                    //ee.printStackTrace();
-                }
-            }
+            try {
+                //if no workers notify in 4 secs, iterate. This is a problem
+                //for stalled downloaders which will never notify. So if we
+                //wait without a timeout, we could wait forever.
+                this.wait(4000); // note that this relinquishes the lock
+            } catch (InterruptedException ignored) {}
         }//end of while
     }
     
@@ -2838,7 +2867,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
             synchronized(this) {
                 if(dloaders.size()==0) {
-                    if(Thread.currentThread().isInterrupted())
+                    if(stopped || Thread.currentThread().isInterrupted())
                         return ConnectionStatus.getNoData(); // we were signalled to stop.
                     setState(REMOTE_QUEUED);
                 }
@@ -2913,27 +2942,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         rfd.resetFailedCount();
 
-        if (stopped) {
-            LOG.trace("Stopped in assignAndRequest");
-            synchronized(this) {
+        synchronized(this) {
+            if (stopped || Thread.currentThread().isInterrupted()) {
+                LOG.trace("Stopped in assignAndRequest");
                 files.add(rfd);
+                return ConnectionStatus.getNoData();
             }
-            return ConnectionStatus.getNoData();
-        }
-        
-        synchronized(this) {
-            if(Thread.currentThread().isInterrupted())
-                return ConnectionStatus.getNoData(); // we were signalled to stop.
+            
             setState(DOWNLOADING);
-        }
-        
-        synchronized(this) {
+
             // only add if not already added.
             if(!dloaders.contains(dloader))
                 dloaders.add(dloader);
             chatList.addHost(dloader);
             browseList.addHost(dloader);
         }
+
         DownloadStat.RESPONSE_OK.incrementStat();            
         return ConnectionStatus.getConnected();
     }
@@ -3360,7 +3384,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         Iterator iter=files.iterator();
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
-        
+
         //Find max of each (remaining) element, storing in max.
         //Follows the following logic:
         //1) Find a non-busy host (make connections)
@@ -3394,7 +3418,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
             
-        files.remove(ret);
+        boolean removed = files.remove(ret);
+        Assert.that(removed == true, "unable to remove RFD.");
         return ret;
     }
 
