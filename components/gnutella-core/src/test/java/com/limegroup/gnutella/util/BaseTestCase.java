@@ -26,7 +26,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
 	/**
 	 * Unassigned port for tests to use.
 	 */
-	protected static final int PORT = 49000;
+	protected static final int TEST_PORT = 49000;
     
     /* Flag indicate that we have launched the backend process and should
      * shut it down when we are finished.
@@ -142,7 +142,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * Launch backend server if it is not running already
      * @throws IOException if attempt to launch backend server fails
      */
-    public static void launchBackend(int port) throws IOException {
+    private static void launchBackend(int port) throws IOException {
         
         /* If we've already launched the backend, don't try it again */
         int index = (port == Backend.REJECT_PORT ? 1 : 0);
@@ -158,7 +158,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * (Which implicitly means that shutdownBackend[] must
      *  stay static also.)
      */
-    static void shutdownBackends() {
+    private static void shutdownBackends() {
         for (int ii = 0; ii < 2; ii++) {
             if (shutdownBackend[ii]) Backend.shutdown(ii == 1);
         }
