@@ -207,7 +207,8 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		for (int i = 0; i < numBlocks; i++) {
 			ostream.write(bdata, 0, 512);
 			if ( (i % 8) == 0 ) 
-				log2("Write status: "+i*512);
+				log2("Write status: "+i*512+
+                  " time:"+System.currentTimeMillis());
 		}
 		log("Done write");
 		
@@ -249,7 +250,8 @@ public class UTest implements ActivityCallback, ErrorCallback {
 							return;
 						} 
 						if ( (i+j) > printTarget ) { 
-							log2("Read status: "+i);
+							log2("Read status: "+i+
+                              " time:"+System.currentTimeMillis());
                             printTarget = i+j+1024;
                         }
 					}
@@ -288,7 +290,8 @@ public class UTest implements ActivityCallback, ErrorCallback {
 						return false;
 					} 
 					if ( ((i+j) % 1024) == 0 ) 
-						log2("Echo status: "+i);
+						log2("Echo status: "+i+
+                          " time:"+System.currentTimeMillis());
 				}
                 ostream.write(bdata, 0, len);
 			}
