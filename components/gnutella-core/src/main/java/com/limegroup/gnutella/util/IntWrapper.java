@@ -9,6 +9,10 @@ package com.limegroup.gnutella.util;
 public final class IntWrapper {
     private int x;
     
+    public synchronized String toString() {
+        return new Integer(x).toString();
+    }
+
     public synchronized int getInt() { return x; }
     public synchronized void setInt(int x) { this.x = x; }
     public synchronized int addInt(int x) { return this.x += x; }
