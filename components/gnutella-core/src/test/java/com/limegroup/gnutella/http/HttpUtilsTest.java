@@ -30,6 +30,41 @@ public final class HttpUtilsTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+    
+    /**
+     * Tests the method for writing the date header to a <tt>Writer</tt> 
+     * instance. 
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteDateHeaderToWriter() throws Exception {
+        StringWriter writer = new StringWriter();
+        HTTPUtils.writeDate(writer);
+        String header = writer.toString();
+        assertTrue("should start with Date", header.startsWith("Date"));
+        
+        assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
+        
+        // The date header should always be the same length.
+        assertEquals("unexpected length", 36, header.length());
+    }
+    
+    /**
+     * Tests the method for writing the date header to a stream.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteDateHeaderToStream() throws Exception {
+        OutputStream stream = new ByteArrayOutputStream();
+        HTTPUtils.writeDate(stream);
+        String header = stream.toString();
+        assertTrue("should start with Date", header.startsWith("Date"));
+        
+        assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
+        
+        // The date header should always be the same length.
+        assertEquals("unexpected length", 36, header.length());
+    }
 
     /**
      * Tests the method for writing an HTTP header with an integer value to a
