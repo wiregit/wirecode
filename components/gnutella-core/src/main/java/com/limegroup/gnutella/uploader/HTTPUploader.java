@@ -570,7 +570,7 @@ public class HTTPUploader implements Uploader {
 					setState(FILE_NOT_FOUND);
 				} 		
 				if(_fileDesc != null) {
-					if(!_fileDesc.equals(_fileManager.getFileDescForUrn(requestedURN))) {
+					if(!_fileDesc.containsUrn(requestedURN)) {
 						setState(FILE_NOT_FOUND);
 					}
 				}
