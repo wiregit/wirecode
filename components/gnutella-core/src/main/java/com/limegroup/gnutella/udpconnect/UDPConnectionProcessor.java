@@ -175,6 +175,17 @@ public class UDPConnectionProcessor {
     /** Skip a Data Write if this flag is true */
     private boolean           _skipADataWrite;
 
+
+	/** Allow a testing stub version of UDPService to be used */
+	private static UDPService _testingUDPService;
+
+    /**
+     *  For testing only, allow UDPService to be overridden
+     */
+    public static void setUDPServiceForTesting(UDPService udpService) {
+		_testingUDPService = udpService;
+	}
+
     /**
      *  Try to kickoff a reliable udp connection. This method blocks until it 
 	 *  either sucessfully establishes a connection or it times out and throws
@@ -198,7 +209,11 @@ public class UDPConnectionProcessor {
         _skipADataWrite          = false;
         _ackResendCount          = 0;
 
-		_udpService        = UDPService.instance();
+		// Allow UDPService to be overridden for testing
+		if ( _testingUDPService == null )
+			_udpService = UDPService.instance();
+		else
+			_udpService = _testingUDPService;
 
 		// If UDP is not running or not workable, barf
 		if ( !_udpService.isListening() || 
@@ -227,6 +242,7 @@ public class UDPConnectionProcessor {
         // which means each side can send/receive a SYN and ACK
 		tryToConnect();
     }
+
 
 	public InputStream getInputStream() throws IOException {
         _outputToInputStream = new UDPBufferedInputStream(this);
@@ -639,7 +655,7 @@ public class UDPConnectionProcessor {
 		_lastSendTime = System.currentTimeMillis();
         if(LOG.isDebugEnabled())  
             LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
-              _lastReceivedTime);
+              _lastSendTime);
 		_udpService.send(msg, _ip, _port);  
 	}
 
