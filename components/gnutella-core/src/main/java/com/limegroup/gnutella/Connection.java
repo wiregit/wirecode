@@ -72,6 +72,7 @@ public class Connection {
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
+    public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
     /** End of line for Gnutella 0.4 */
@@ -269,7 +270,7 @@ public class Connection {
             //If the user requested properties, we can't send them.
             _propertiesWrittenP=null;
             _propertiesWrittenR=null;
-        } else if (GNUTELLA_CONNECT_06.endsWith(line)) {
+        } else if (notLessThan06(line)) {
             //b) New style
             _propertiesRead=new Properties();
             //1. Read GNUTELLA CONNECT
@@ -286,6 +287,20 @@ public class Connection {
             readHeaders();
         } else {
             throw new IOException("Unexpected connect string");
+        }
+    }
+
+    /** Returns true iff line ends with "CONNECT/N", where N
+     *  is a number greater than or equal "0.6". */
+    private static boolean notLessThan06(String line) {
+        int i=line.indexOf(CONNECT);
+        if (i<0)
+            return false;
+        try {
+            float f=Float.parseFloat(line.substring(i+CONNECT.length()));
+            return f>=0.6f;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -533,8 +548,16 @@ public class Connection {
     
     /////////////////////////// Unit Tests  ///////////////////////////////////
     
-    /** Unit test */
+//      /** Unit test */
 //      public static void main(String args[]) {
+//          Assert.that(! notLessThan06("CONNECT"));
+//          Assert.that(! notLessThan06("CONNECT/0.4"));
+//          Assert.that(! notLessThan06("CONNECT/0.599"));
+//          Assert.that(! notLessThan06("CONNECT/XP"));
+//          Assert.that(notLessThan06("CONNECT/0.6"));
+//          Assert.that(notLessThan06("CONNECT/0.7"));
+//          Assert.that(notLessThan06("GNUTELLA CONNECT/1.0"));
+
 //          final Properties props=new Properties();
 //          props.setProperty("Query-Routing", "0.3");        
 //          HandshakeResponder standardResponder=new HandshakeResponder() {
