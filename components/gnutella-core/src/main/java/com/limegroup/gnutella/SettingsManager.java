@@ -1208,14 +1208,6 @@ public final class SettingsManager {
 		return _directories;
 	}
 
-	/** Returns the shared directories as an array of pathname strings. */
-    //public String[] getDirectoriesAsArray() {
-		//if(_directories == null) return new String[0];		
-        //_directories.trim();
-        //return StringUtils.split(_directories, ';');
-	//return new String[1];
-    //}
-
 	/**
 	 * Returns an array of Strings of directory path names.  these are the
 	 * pathnames of the shared directories as well as the pathname of 
@@ -1430,13 +1422,18 @@ public final class SettingsManager {
     }
     
     /** 
-     * Returns the remaing words of the connect string, without the leading
+     * Returns the remaining words of the connect string, without the leading
      * space.  This is solely a convenience routine. 
      */
     public String getConnectStringRemainder() { 
         return _connectStringRemainder; 
     }
     
+	/**
+	 * Returns the string used for verifying a Gnutella connection.
+	 *
+	 * @return the string used for verifying a Gnutella connection
+	 */
     public String getConnectOkString(){ return _connectOkString; }
 
 
@@ -1444,24 +1441,38 @@ public final class SettingsManager {
     /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ND_PROPS;}
 
-    /** Returns the path of the properties and host list files */
-    public String getPath() {return CURRENT_DIRECTORY + File.separator;}
+    /** 
+	 * Returns the path of the properties and host list files. 
+	 */
+    public String getPath() {
+		return CURRENT_DIRECTORY + File.separator;
+	}
 
-    public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
+    public int getBasicInfoSizeForQuery() {
+		return _basicQueryInfo;
+	}
 
-    public int getAdvancedInfoSizeForQuery() {return _advancedQueryInfo;}
+    public int getAdvancedInfoSizeForQuery() {
+		return _advancedQueryInfo;
+	}
 
-    /** Returns true iff this should force its IP address. */
+    /** 
+	 * Returns true iff this should force its IP address. 
+	 */
     public boolean getForceIPAddress() {
         return _forceIPAddress;
     }
 
-    /** Returns the forced IP address as an array of bytes. */
+    /** 
+	 * Returns the forced IP address as an array of bytes. 
+	 */
     public byte[] getForcedIPAddress() {
         return _forcedIPAddress;
     }
 
-    /** Returns the forced IP address in dotted-quad format. */
+    /** 
+	 * Returns the forced IP address in dotted-quad format. 
+	 */
     public String getForcedIPAddressString() {
         return Message.ip2string(_forcedIPAddress);
     }
@@ -2178,17 +2189,22 @@ public final class SettingsManager {
 	 */
     public void addDirectory(File dir) throws IOException {
 		if(!dir.isDirectory()) throw new IOException();
-		
-		int newLength = _directories.length + 1;
-		File[] newFiles = new File[newLength];
-		
-		for(int i=0; i<_directories.length; i++) {
-			newFiles[i] = _directories[i];
-		}
-		newFiles[_directories.length] = dir;
 
-		// this will prune it out if it's a duplicate and add it too
-		setDirectories(newFiles);
+		if(_directories == null) {
+			_directories = new File[1];
+			_directories[0] = dir;
+		}
+		else {
+			int newLength = _directories.length + 1;
+			File[] newFiles = new File[newLength];
+			
+			for(int i=0; i<_directories.length; i++) {
+				newFiles[i] = _directories[i];
+			}
+			newFiles[_directories.length] = dir;
+			// this will prune it out if it's a duplicate and add it too
+			setDirectories(newFiles);			
+		}
 	}
 
     /** 
@@ -2202,7 +2218,7 @@ public final class SettingsManager {
     }
 
     /** 
-	 * Sets the time to live 
+	 * Sets the time to live. 
 	 */
     public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
@@ -2215,7 +2231,7 @@ public final class SettingsManager {
     }
 
     /** 
-	 * Sets the soft maximum time to live 
+	 * Sets the soft maximum time to live. 
 	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
