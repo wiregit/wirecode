@@ -151,8 +151,19 @@ public class FileUtils
      *  <tt>true</tt> 
      */
     public static boolean setWriteable(File f) {
-        if( f.canWrite() || !f.exists() )
+        if(!f.exists())
             return true;
+
+        // non Windows-based systems return the wrong value
+        // for canWrite when the argument is a directory --
+        // writing is based on the 'x' attribute, not the 'w'
+        // attribute for directories.
+        if(f.canWrite()) {
+            if(CommonUtils.isWindows())
+                return true;
+            else if(!f.isDirectory())
+                return true;
+        }
             
         String fName;
         try {
@@ -169,8 +180,12 @@ public class FileUtils
             SystemUtils.setWriteable(fName);
         else if ( CommonUtils.isMacClassic() )
             cmds = null; // TODO: fill in.
-        else
-            cmds = new String[] { "chmod", "u+w", fName};
+        else {
+            if(f.isDirectory())
+                cmds = new String[] { "chmod", "u+w+x", fName };
+            else
+                cmds = new String[] { "chmod", "u+w", fName};
+        }
         
         if( cmds != null ) {
             try { 
