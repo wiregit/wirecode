@@ -73,17 +73,10 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
-        if(QUERY_HANDLER.QUERY.getHops() == 0) {
-            System.out.println("ProbeQuery::sendProbe::"+
-                               QUERY_HANDLER.QUERY); 
-        }
         Iterator iter = TTL_1_PROBES.iterator();
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
         while(iter.hasNext()) {
-            if(QUERY_HANDLER.QUERY.getHops() == 0) {
-                System.out.println("ProbeQuery::sendProbe::TTL=1"); 
-            }
 
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
@@ -94,9 +87,6 @@ final class ProbeQuery {
         query = QUERY_HANDLER.createQuery((byte)2);
         iter = TTL_2_PROBES.iterator();
         while(iter.hasNext()) {
-            if(QUERY_HANDLER.QUERY.getHops() == 0) {
-                System.out.println("ProbeQuery::sendProbe::TTL=2"); 
-            }
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
                 QueryHandler.sendQueryToHost(query, 
@@ -136,12 +126,7 @@ final class ProbeQuery {
                 oldConnections.add(mc);
             }
         }
-        if(query.getHops() == 0) {
-            System.out.println(query.getQuery()+
-                               " hitConnections:  "+hitConnections.size()+
-                               " missConnections: "+missConnections.size()+
-                               " oldConnections:  "+oldConnections.size()); 
-        }
+
         // final list of connections to query
         LinkedList[] returnLists = new LinkedList[2];
         LinkedList ttl1List = new LinkedList();
@@ -209,11 +194,6 @@ final class ProbeQuery {
             }
         }
 
-        //System.out.println("popularity: "+popularity); 
-        //System.out.println("idealTTL1ConnectionsToHit: "+idealTTL1ConnectionsToHit); 
-        //System.out.println("extra nodes needed: "+extraNodesNeeded); 
-        //System.out.println("ttl1ConnectionsToUse: "+ttl1ConnectionsToUse); 
-        
         return returnLists;        
     }
 
