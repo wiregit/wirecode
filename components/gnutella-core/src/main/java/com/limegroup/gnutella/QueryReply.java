@@ -859,14 +859,14 @@ public class QueryReply extends Message implements Serializable{
      *    RemoteFileDescriptors.
      *   @exception java.lang.Exception Thrown if attempt fails.
      */
-    public RemoteFileDesc[] toRemoteFileDescArray() throws Exception {
+    public RemoteFileDesc[] toRemoteFileDescArray() throws BadPacketException {
         List responses = null;
         try { // get the responses, some data from them is needed...
             responses = getResultsAsList();
         }
         catch (BadPacketException bpe) {
             debug(bpe);
-            throw new Exception();
+            throw bpe;
         }
     
         RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
