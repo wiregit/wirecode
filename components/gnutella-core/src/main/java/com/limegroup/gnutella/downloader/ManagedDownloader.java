@@ -1105,12 +1105,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Returns the canonicalized non-trivial search keywords in fileName. */
     private static final Set keywords(String fileName) {
         //Remove extension
-        fileName=ripExtension(fileName);
+        fileName = ripExtension(fileName);
         
         //Separate by whitespace and _, etc.
         Set ret=new HashSet();
-        StringTokenizer st = new StringTokenizer(fileName, 
-                                                 FileManager.DELIMETERS);
+        String delim = FileManager.DELIMETERS;
+        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
+        sb.append(FileManager.DELIMETERS);
+        sb.append(illegal);
+        StringTokenizer st = new StringTokenizer(fileName, sb.toString());
         while (st.hasMoreTokens()) {
             final String currToken = st.nextToken().toLowerCase();
             try {                
