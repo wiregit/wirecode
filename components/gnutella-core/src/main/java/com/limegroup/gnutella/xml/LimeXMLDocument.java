@@ -97,13 +97,21 @@ public class LimeXMLDocument implements Serializable {
         this.schemaUri = schemaURI;
                 
         //iterate over the passed list of fieldnames & values
-        for(Iterator iterator = nameValueList.iterator();
-            iterator.hasNext();){
-            //get the next pair
-            NameValue nameValue = (NameValue)iterator.next();
-            
+        for(Iterator i = nameValueList.iterator(); i.hasNext(); ) {
+            String name;
+            Object value;
+            Object next = i.next();
+            if( next instanceof NameValue ) {
+                name = ((NameValue)next).getName();
+                value = ((NameValue)next).getValue();
+            } else if( next instanceof Map.Entry ) {
+                name = (String)((Map.Entry)next).getKey();
+                value = ((Map.Entry)next).getValue();
+            } else {
+                throw new IllegalArgumentException("Invalid Collection");
+            }
             //update the field to value map
-            fieldToValue.put(nameValue.getName().trim(), nameValue.getValue());
+            fieldToValue.put(name.trim(), value);
         }
     }
     
