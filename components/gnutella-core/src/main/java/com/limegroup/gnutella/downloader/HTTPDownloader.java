@@ -474,7 +474,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //if I am firewalled, send the version of the FWT protocol I support.
         // (which implies that I want only altlocs that support FWT)
         features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
-        if (!RouterService.acceptedIncomingConnection())
+        if (!RouterService.acceptedIncomingConnection() && UDPService.instance().canDoFWT())
         	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
 
         // Add ourselves to the mesh if the partial file is valid
@@ -961,67 +961,42 @@ public class HTTPDownloader implements BandwidthTracker {
 	 */
 	private void readAlternateLocations(final String altHeader) {
 		final String altStr = HTTPUtils.extractHeaderValue(altHeader);
-		if(altStr == null) return;
-		StringTokenizer st = new StringTokenizer(altStr, ",");
+		if(altStr == null)
+		    return;
 
+        final URN sha1 = _rfd.getSHA1Urn();
+        if(sha1 == null)
+            return;
+            
+		StringTokenizer st = new StringTokenizer(altStr, ",");
 		while(st.hasMoreTokens()) {
 			try {
-				AlternateLocation al=(AlternateLocation ) 
-					AlternateLocation.create(
-							st.nextToken().trim(), _rfd.getSHA1Urn(),true);
-                URN alSha1 = al.getSHA1Urn();
-                if(alSha1 == null) {
-                    continue;
-                }
-                
+				AlternateLocation al =
+					AlternateLocation.create(st.nextToken().trim(), sha1);
+                Assert.that(al.getSHA1Urn().equals(sha1));
                 
                 //if this is a direct altloc, add it to the appropriate collection
-                
                 if (al instanceof DirectAltLoc) {
                 	DirectAltLoc dal = (DirectAltLoc)al;
-                 
-
-                	// in general, most alternate locations will already
-                	// be in ip format -- but we do the lookup anyway
-                	// just incase they aren't.
-                	String ipString = NetworkUtils.ip2string(
-                		dal.getHost().getHostBytes());
-                	if(!IPFilter.instance().allow(ipString))
+                	// filter banned hosts.
+                	if(!IPFilter.instance().allow(dal.getHost().getHostBytes()))
                 		continue;
-                
                 
                 	if(_altLocsReceived == null)
                 		_altLocsReceived = 
-                			AlternateLocationCollection.create(alSha1);
+                			AlternateLocationCollection.create(sha1);
                 
-                	boolean added = false;
-                
-                	if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
-                		synchronized(_altLocsReceived) {
-                			added = _altLocsReceived.add(al);
-                		}
-                		if(added) 
-                			DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-                	}
-                }
-                
-                //this is a Push location.  add it to the other collection.
-                else {
+                	boolean added = _altLocsReceived.add(al);
+                    if(added) 
+                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+                } else { // if(al instanceof PushAltLoc)
                 	if(_pushAltLocsReceived == null)
                 		_pushAltLocsReceived = 
-                			AlternateLocationCollection.create(alSha1);
+                			AlternateLocationCollection.create(sha1);
                 
-                	boolean added = false;
-                
-
-                	if(alSha1.equals(_pushAltLocsReceived.getSHA1Urn())) {
-                		synchronized(_pushAltLocsReceived) {
-                			added = _pushAltLocsReceived.add(al);
-                		}
-                		if(added) 
-                			DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
-                	}
-
+                	boolean added = _pushAltLocsReceived.add(al);
+                	if(added) 
+                        DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
                 }
 			} catch(IOException e) {
 				// continue without adding it.

@@ -141,9 +141,7 @@ public final class AlternateLocationCollection
             if(alt==null) {//it was not in collections.
                 ret = true;
                 LOCATIONS.add(al);
-
-            }
-            else {
+            } else {
                 LOCATIONS.remove(alt);
 
                 alt.increment();
@@ -173,8 +171,7 @@ public final class AlternateLocationCollection
             if(loc.isDemoted()) {//if its demoted remove it
                 LOCATIONS.remove(loc);
                 return true;         
-            }   
-            else {
+            } else {
                 LOCATIONS.remove(loc);
 
                 loc.demote(); //one more strike and you are out...
@@ -234,9 +231,6 @@ public final class AlternateLocationCollection
         
 	/**
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
-	 *
-	 * This adds randomness to the order in which alternate locations are
-	 * reported and only reports 10 non-firewalled locations.
 	 *
 	 * @return an HTTP-compliant string of alternate locations, delimited
 	 *  by commas, or the empty string if there are no alternate locations

@@ -47,7 +47,7 @@ public class PushAltLoc extends AlternateLocation {
 		super(sha1);
 		_pushAddress = PushEndpointForSelf.instance();
 	}
-	
+		
 	protected String generateHTTPString() {
 		return _pushAddress.httpStringValue();
 	}
@@ -83,6 +83,12 @@ public class PushAltLoc extends AlternateLocation {
         return ret;
     }
 	
+	/**
+	 * Updates the proxies in this PushEndpoint.
+	 */
+	public void updateProxies(boolean isGood) {
+	    _pushAddress.updateProxies(isGood);
+	}
 	
     /**
      * @return the PushAddress. 
@@ -99,13 +105,18 @@ public class PushAltLoc extends AlternateLocation {
     	return _pushAddress.supportsFWTVersion();
     }
     
+    // stubbed out -- no demotion or promotion for push locs.
+    void promote() {}
+    // stutbed out -- no demotion or promotion for push locs.
+    void demote() {}
+    
     /**
-     * PushLocs are always demoted, so the first call to remove() will
-     * take them out of the collection.  This does not affect ordering
-     * since they are always compared to other demoted PushLocs.
+     * PushLocs are considered demoted once all their proxies are empty.
+     * This ensures that the PE will stay alive until it has exhausted
+     * all possible proxies.
      */
     public boolean isDemoted() {
-        return true;
+        return _pushAddress.getProxies().isEmpty();
     }
 
 	public boolean equals(Object o) {

@@ -284,8 +284,7 @@ public final class HTTPUtils {
         
        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
        	
-       	//TODO: make this check also UDPService.canDoFWT() when merged
-       	if (!RouterService.acceptedIncomingConnection())
+       	if (!RouterService.acceptedIncomingConnection() && UDPService.instance().canDoFWT())
        	    features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
         
         return features;

@@ -117,14 +117,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 *  the new instance.
 	 */
 	public static AlternateLocation create(final String location,
-	                                       final URN urn,
-	                                       boolean good) throws IOException {
+	                                       final URN urn) throws IOException {
 	    if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
             throw new IOException("null URN.");
          
-        // Case 1.   
+        // Case 1. Old-Style direct alt loc.
         if(location.toLowerCase().startsWith("http")) {
             URL url = createUrl(location);
             URN sha1 = URN.createSHA1UrnFromURL(url);
@@ -141,7 +140,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         }
         
         //Case 3. Push Alt loc
-        PushEndpoint pe = PushEndpoint.updateProxies(location,good);
+        PushEndpoint pe = new PushEndpoint(location);
         return new PushAltLoc(pe,urn);
     }
 	

@@ -1137,22 +1137,17 @@ public final class HTTPUploader implements Uploader {
                 // continuations.
                 AlternateLocation al = 
                 AlternateLocation.create(st.nextToken().trim(),
-                                         _fileDesc.getSHA1Urn(),isGood);
+                                         _fileDesc.getSHA1Urn());
                 
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {
+                    if(al instanceof PushAltLoc)
+                        ((PushAltLoc)al).updateProxies(isGood);
+                    
                     if(isGood) 
                         alc.add(al);
-                    else {
-                        // we only remove PushLocs if they have no proxies left.
-                        if (al instanceof DirectAltLoc)
-                            alc.remove(al);
-                        else {
-                            PushAltLoc pal = (PushAltLoc)al;
-                            if (pal.getPushAddress().getProxies().isEmpty())
-                                alc.remove(pal);
-                        }
-                    }
+                    else
+                        alc.remove(al);
                         
                     if (al instanceof DirectAltLoc)
                     	_writtenLocs.add(al);

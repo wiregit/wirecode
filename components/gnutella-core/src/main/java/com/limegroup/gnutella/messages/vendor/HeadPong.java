@@ -149,58 +149,52 @@ public class HeadPong extends VendorMessage {
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
-			
-		
-		DataInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
-		
-		//read and mask the features
-		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
-		
-		//read the response code
-		byte code = dais.readByte();
-		
-		//if the other host doesn't have the file, stop parsing
-		if (code == FILE_NOT_FOUND) 
-			return;
-		else
-			_fileFound=true;
-		
-		//is the other host firewalled?
-		if ((code & FIREWALLED) == FIREWALLED)
-			_isFirewalled=true;
-		
-		//read the vendor id
-		_vendorId = new byte[4];
-		dais.readFully(_vendorId);
-		
-		//read the queue status
-		_queueStatus = dais.readByte();
-		
-		
-		//if we have a partial file and the pong carries ranges, parse their list
-		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
-			_completeFile=true;
-		else {
-			//also check if the host is downloading the file
-			if ( (code & DOWNLOADING) == DOWNLOADING)
-				_isDownloading=true;
-			
-			if ( (_features & HeadPing.INTERVALS) == 
-				HeadPing.INTERVALS)
-				_ranges = readRanges(dais);
-		}
-		
-		//parse any included firewalled altlocs
-		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
-			_pushLocs=readPushLocs(dais);
-		
-			
-		//parse any included altlocs
-		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
-			_altLocs=readLocs(dais);
-		
-		
-		}catch(IOException oops) {
+    		DataInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
+    		
+    		//read and mask the features
+    		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
+    		
+    		//read the response code
+    		byte code = dais.readByte();
+    		
+    		//if the other host doesn't have the file, stop parsing
+    		if (code == FILE_NOT_FOUND) 
+    			return;
+    		else
+    			_fileFound=true;
+    		
+    		//is the other host firewalled?
+    		if ((code & FIREWALLED) == FIREWALLED)
+    			_isFirewalled=true;
+    		
+    		//read the vendor id
+    		_vendorId = new byte[4];
+    		dais.readFully(_vendorId);
+    		
+    		//read the queue status
+    		_queueStatus = dais.readByte();
+    		
+    		//if we have a partial file and the pong carries ranges, parse their list
+    		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
+    			_completeFile=true;
+    		else {
+    			//also check if the host is downloading the file
+    			if ((code & DOWNLOADING) == DOWNLOADING)
+    				_isDownloading=true;
+    			
+    			if ((_features & HeadPing.INTERVALS) == HeadPing.INTERVALS)
+    				_ranges = readRanges(dais);
+    		}
+    		
+    		//parse any included firewalled altlocs
+    		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
+    			_pushLocs=readPushLocs(dais);
+    		
+    			
+    		//parse any included altlocs
+    		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
+    			_altLocs=readLocs(dais);
+		} catch(IOException oops) {
 			throw new BadPacketException(oops.getMessage());
 		}
 	}
@@ -221,106 +215,90 @@ public class HeadPong extends VendorMessage {
 	 * @param ping the original UDP head ping to respond to
 	 */
 	private static byte [] derivePayload(HeadPing ping)  {
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		CountingOutputStream caos = new CountingOutputStream(baos);
 		DataOutputStream daos = new DataOutputStream(caos);
-		
 		byte retCode=0;
 		byte queueStatus;
-		
-		
 		URN urn = ping.getUrn();
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
-		
 		boolean didNotSendAltLocs=false;
 		boolean didNotSendPushAltLocs = false;
 		boolean didNotSendRanges = false;
 		
-		try{
+		try {
+    		byte features = ping.getFeatures();
+    		daos.write(features);
+    		if (LOG.isDebugEnabled())
+    			LOG.debug("writing features "+features);
+    		
+    		//if we don't have the file..
+    		if (desc == null) {
+    			LOG.debug("we do not have the file");
+    			daos.write(FILE_NOT_FOUND);
+    			return baos.toByteArray();
+    		}
+    		
+    		//if we can't receive unsolicited tcp...
+    		if (!RouterService.acceptedIncomingConnection())
+    			retCode = FIREWALLED;
+    		
+    		//we have the file... is it complete or not?
+    		if (desc instanceof IncompleteFileDesc) {
+    			retCode = (byte) (retCode | PARTIAL_FILE);
+    			
+    			//also check if the file is currently being downloaded 
+    			//or is waiting for sources.  This does not care for queued downloads.
+    			IncompleteFileDesc idesc = (IncompleteFileDesc)desc;
+    			if (idesc.isActivelyDownloading())
+    				retCode = (byte) (retCode | DOWNLOADING);
+    		}
+    		else 
+    			retCode = (byte) (retCode | COMPLETE_FILE);
+    		
+    		daos.write(retCode);
+    		
+    		if(LOG.isDebugEnabled())
+    			LOG.debug("our return code is "+retCode);
+    		
+    		//write the vendor id
+    		daos.write(F_LIME_VENDOR_ID);
+    		
+    		//get our queue status.
+    		int queueSize = _uploadManager.getNumQueuedUploads();
+    		
+    		if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
+    			queueStatus = BUSY;
+    		else if (queueSize > 0) 
+    			queueStatus = (byte) queueSize;
+    		 else 	
+    			//optimistic value
+    			queueStatus =  (byte)
+    				(_uploadManager.uploadsInProgress() - 
+    						UploadSettings.HARD_MAX_UPLOADS.getValue() );
+    		
+    		//write out the return code and the queue status
+    		daos.writeByte(queueStatus);
+    		
+    		if (LOG.isDebugEnabled())
+    			LOG.debug("our queue status is "+queueStatus);
+    		
+    		//if we sent partial file and the remote asked for ranges, send them 
+    		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
+    			didNotSendRanges=!writeRanges(caos,desc);
+    		
+    		//if we have any firewalled altlocs and enough room in the packet, add them.
+    		if (ping.requestsPushLocs()){
+    			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
+    				HeadPing.FWT_PUSH_ALTLOCS;
+    			didNotSendPushAltLocs = !writePushLocs(caos,desc, FWTOnly);
+    		}
+    		
+    		//now add any non-firewalled altlocs in case they were requested. 
+    		if (ping.requestsAltlocs()) 
+    			didNotSendAltLocs=!writeLocs(caos,desc);
 			
-		byte features = ping.getFeatures();
-		
-		daos.write(features);
-		if (LOG.isDebugEnabled())
-			LOG.debug("writing features "+features);
-		
-		//if we don't have the file..
-		if (desc == null) {
-			LOG.debug("we do not have the file");
-			daos.write(FILE_NOT_FOUND);
-			return baos.toByteArray();
-		}
-		
-		//if we can't receive unsolicited tcp...
-		if (!RouterService.acceptedIncomingConnection())
-			retCode = FIREWALLED;
-		
-		//we have the file... is it complete or not?
-		if (desc instanceof IncompleteFileDesc) {
-			retCode = (byte) (retCode | PARTIAL_FILE);
-			
-			//also check if the file is currently being downloaded 
-			//or is waiting for sources.  This does not care for queued downloads.
-			IncompleteFileDesc idesc = (IncompleteFileDesc)desc;
-			if (idesc.isActivelyDownloading())
-				retCode = (byte) (retCode | DOWNLOADING);
-		}
-		else 
-			retCode = (byte) (retCode | COMPLETE_FILE);
-		
-		daos.write(retCode);
-		
-		if(LOG.isDebugEnabled())
-			LOG.debug("our return code is "+retCode);
-		
-		//write the vendor id
-		daos.write(F_LIME_VENDOR_ID);
-		
-		//get our queue status.
-		int queueSize = _uploadManager.getNumQueuedUploads();
-		
-		if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
-			queueStatus = BUSY;
-		else if (queueSize > 0) 
-			queueStatus = (byte) queueSize;
-		 else 	
-			//optimistic value
-			queueStatus =  (byte)
-				(_uploadManager.uploadsInProgress() - 
-						UploadSettings.HARD_MAX_UPLOADS.getValue() );
-		
-		
-		//write out the return code and the queue status
-		daos.writeByte(queueStatus);
-		
-		if (LOG.isDebugEnabled())
-			LOG.debug("our queue status is "+queueStatus);
-		
-		
-		
-		//if we sent partial file and the remote asked for ranges, send them 
-		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
-			didNotSendRanges=!writeRanges(caos,desc);
-			
-		
-		
-		//if we have any firewalled altlocs and enough room in the packet, add them.		
-		if (ping.requestsPushLocs()){
-			
-			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
-				HeadPing.FWT_PUSH_ALTLOCS;
-			
-			didNotSendPushAltLocs = !writePushLocs(caos,desc,
-					FWTOnly);
-		}
-		
-		//now add any non-firewalled altlocs in case they were requested. 
-		if (ping.requestsAltlocs()) 
-			didNotSendAltLocs=!writeLocs(caos,desc);
-			
-			
-		}catch(IOException impossible) {
+		} catch(IOException impossible) {
 			ErrorService.error(impossible);
 		}
 		

@@ -66,7 +66,28 @@ public class PushEndpoint implements HTTPHeaderValue{
 	//because we may pass on the altloc to someone who does.
 	private static final int FEATURES_MASK=0xE0;   //1110 0000
 	
-	
+
+    /**
+     * A mapping from GUID to a GUIDSetWrapper.  This is used to ensure
+     * that all PE's will have access to the same PushProxies, even if
+     * multiple PE's exist for a single GUID.  Because access to the proxies
+     * is referenced from this GUID_PROXY_MAP, the PE will always receive the
+     * most up-to-date set of proxies.
+     *
+     * Insertion to this map must be manually performed, to allow for temporary
+     * PE objects that are used to update pre-existing ones.
+     *
+     * There is no explicit removal from the map -- the Weak nature of it will
+     * automatically remove the key/value pairs when the key is garbage
+     * collected.  For this reason, all PEs must reference the exact GUID
+     * object that is stored in the map -- to ensure that the map will not GC
+     * the GUID while it is still in use by a PE.
+     *
+     * The value is a GUIDSetWrapper (containing a WeakReference to the
+     * GUID key as well as the Set of proxies) so that subsequent PEs can 
+     * reference the true key object.  A WeakReference is used to allow
+     * GC'ing to still work and the map to ultimately remove unused keys.
+     */
 	private static final Map GUID_PROXY_MAP = 
 	    Collections.synchronizedMap(new WeakHashMap());
 	
@@ -77,17 +98,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	/**
 	 * the guid as an object to avoid recreating
-	 * If there are other PushEnpoint objects, they all point
-	 * to the same GUID object.  This ensures that as long as
+	 * If there are other PushEnpoint objects, they all will ultimately
+	 * point to the same GUID object.  This ensures that as long as
 	 * there is at least one PE object for a remote host, the set of
 	 * proxies will not be gc-ed.
 	 */
 	private GUID _guid;
-	
-	/**
-	 * the string representation as sent in headers.
-	 */
-	private String _httpString;
 	
 	/**
 	 * the various features this PE supports.
@@ -113,20 +129,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @param proxies the push proxies for that host
 	 */
 	public PushEndpoint(byte [] guid, Set proxies,int features,int version) {
-		
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
-		
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
-		
-		
 		if (proxies!=null)
 		    _proxies = proxies;
 		else 
 		    _proxies = new HashSet();
-			
-		
 	}
 	
 	
@@ -145,11 +155,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	/**
 	 * creates a PushEndpoint from a String passed in http header exchange.
-	 * 
 	 */
-	private PushEndpoint(String httpString) throws IOException{
-		
-
+	public PushEndpoint(String httpString) throws IOException {
 	    if (httpString.length() < 32 ||
 	            httpString.indexOf(";") > 32)
 	        throw new IOException("http string does not contain valid guid");
@@ -185,17 +192,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 			}catch(IOException ohWell) {
 			    continue;
 			}
-			
 		}
 		
 		_proxies = proxies;
-		
 		_fwtVersion=fwtVersion;
-		
 		// its ok to use the _proxies and _size fields directly since altlocs created
 		// from http string do not need to change
 		_features = proxies.size() | (_fwtVersion << 3);
-		
 	}
 	
 	/**
@@ -279,7 +282,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		/** this adds the read set to the existing proxies */
 		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version);
-		updateProxies(pe,true);
+		pe.updateProxies(true);
 		return pe;
 	}
 	
@@ -292,10 +295,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return a view of the current set of proxies.
 	 */
 	public Set getProxies() {
-
 	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
+	    Set proxies = _proxies;
+	    if(current != null)
+	        proxies = current.getProxies();
 	    
-		return current.getProxies();
+	    Assert.that(proxies != null);	    
+		return proxies;
 	}
 	
 	/**
@@ -303,8 +309,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return how many bytes a PE will use when serialized.
 	 */
 	public static int getSizeBytes(Set proxies) {
-			return HEADER_SIZE+
-				Math.min(proxies.size(),4) * PROXY_SIZE;
+		return HEADER_SIZE + Math.min(proxies.size(),4) * PROXY_SIZE;
 	}
 	
 	/**
@@ -377,51 +382,74 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
-	 * Updates the known push proxies for the host specified in the http string  
-	 * with the set contained in the http string.
-	 * @param good whether these proxies were successfull or not (X-FAlt vs X-NFAlt)
-	 * @return a PushEndpoint object with updated proxies
+	 * Updates either the PushEndpoint or the GUID_PROXY_MAP to ensure
+	 * that GUID_PROXY_MAP has a reference to all live PE GUIDs and
+	 * all live PE's reference the same GUID object as in GUID_PROXY_MAP.
 	 */
-	public static PushEndpoint updateProxies(String httpString,boolean good) 
-		throws IOException{
-	    PushEndpoint pe = new PushEndpoint(httpString);
-	    updateProxies(pe,good);
-	    return pe;
-	}
-	
-	private static void updateProxies(PushEndpoint pe,boolean good){
-	    
+	public void updateProxies(boolean good) {
 	    GuidSetWrapper existing;
-	    	    
+
 	    synchronized(GUID_PROXY_MAP) {
-	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(pe._guid);
+	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 	        
 	        // if we do not have a mapping for this guid, add a
 	        // new one atomically
 	        if (existing == null){ 
-	            existing = new GuidSetWrapper(pe._guid);
+	            existing = new GuidSetWrapper(_guid);
 	            if (good)
-	                existing.updateProxies(pe._proxies,true);
+	                existing.updateProxies(_proxies,true);
 	            else
 	                existing.updateProxies(Collections.EMPTY_SET,true);
 	            
-	            GUID_PROXY_MAP.put(pe._guid,existing);
+	            GUID_PROXY_MAP.put(_guid,existing);
 	            
 	            // clear the reference
-	            pe._proxies=null;
+	            _proxies=null;
 	            return;
 	        }
 	    }
 	    
 	    // if we got here, means we did have a mapping.  no need to
 	    // hold the map mutex when updating just the set
-	    existing.updateProxies(pe._proxies,good);
+	    existing.updateProxies(_proxies,good);
 	    
 	    // make sure the PE points to the actual key guid
-	    pe._guid=existing.getGuid();
-	    pe._proxies=null;
-	}
+	    _guid = existing.getGuid();
+	    Assert.that(_guid != null);
+	    _proxies = null;
+	}	
 	
+	/**
+	 * Overwrites the current known push proxies for the host specified
+	 * in the httpString with the set contained in the httpString.
+	 * 
+	 * @param guid the guid whose proxies to overwrite
+	 * @param httpString comma-separated list of proxies
+	 * @throws IOException if parsing of the http fails.
+	 */
+	public static void overwriteProxies(byte [] guid, String httpString) 
+		throws IOException {
+	    Set newSet = new HashSet();
+	    StringTokenizer tok = new StringTokenizer(httpString,",");
+	    while(tok.hasMoreTokens()) {
+	        String proxy = tok.nextToken().trim();
+	        try {
+	            newSet.add(parseIpPort(proxy));
+	        }catch(IOException ohWell){}
+	    }
+
+	    GUID g = new GUID(guid);
+	    GuidSetWrapper wrapper;
+	    synchronized(GUID_PROXY_MAP) {
+	        wrapper = (GuidSetWrapper)GUID_PROXY_MAP.get(g);
+	        if (wrapper==null) {
+	            wrapper = new GuidSetWrapper(g);
+	            GUID_PROXY_MAP.put(g, wrapper);
+            }
+	        wrapper.overwriteProxies(newSet);
+        }
+	}
+
 	/**
 	 * 
 	 * @param http a string representing an ip and port
@@ -447,6 +475,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		try {
 			int port = Integer.parseInt(portS);
+			if(!NetworkUtils.isValidPort(port))
+			    throw new IOException();
 			
 			QueryReply.PushProxyContainer ppc = 
 				new QueryReply.PushProxyContainer(host, port);
@@ -457,39 +487,11 @@ public class PushEndpoint implements HTTPHeaderValue{
 		}
 	}
 	
-	/**
-	 * Overwrites the current known push proxies for the host specified
-	 * in the httpString with the set contained in the httpString.
-	 * 
-	 * @param guid the guid whose proxies to overwrite
-	 * @param httpString comma-separated list of proxies
-	 * @throws IOException if parsing of the http fails.
-	 */
-	public static void overwriteProxies(byte [] guid, String httpString) 
-		throws IOException{
-	    GUID g = new GUID(guid);
-	    GuidSetWrapper wrapper = (GuidSetWrapper)GUID_PROXY_MAP.get(g);
-	    
-	    Set newSet = new HashSet();
-	    StringTokenizer tok = new StringTokenizer(httpString,",");
-	    while(tok.hasMoreTokens()) {
-	        String proxy = tok.nextToken().trim();
-	        try {
-	            newSet.add(parseIpPort(proxy));
-	        }catch(IOException ohWell){}
-	    }
-	    
-	    if (wrapper==null)
-	        wrapper = new GuidSetWrapper(g); 
-	    wrapper.overwriteProxies(newSet);
-	    GUID_PROXY_MAP.put(wrapper.getGuid(),wrapper);
-	}
-	
 	private static class GuidSetWrapper {
-	    final WeakReference _guid;
+	    private final WeakReference _guidRef;
 	    private Set _proxies;
 	    GuidSetWrapper(GUID guid) {
-	        _guid = new WeakReference(guid);
+	        _guidRef = new WeakReference(guid);
 	    }
 	    
 	    synchronized void updateProxies(Set s, boolean add){
@@ -506,18 +508,16 @@ public class PushEndpoint implements HTTPHeaderValue{
 	        overwriteProxies(existing);
 	    }
 	    
-	    synchronized void overwriteProxies(Set s){
+	    synchronized void overwriteProxies(Set s) {
 	        _proxies = Collections.unmodifiableSet(s);
 	    }
 	    
 	    synchronized Set getProxies() {
-	        
-	        return _proxies != null ? _proxies :
-	            Collections.EMPTY_SET;
+	        return _proxies != null ? _proxies : Collections.EMPTY_SET;
 	    }
 	    
 	    GUID getGuid() {
-	        return (GUID) _guid.get();
+	        return (GUID) _guidRef.get();
 	    }
 	}
 	

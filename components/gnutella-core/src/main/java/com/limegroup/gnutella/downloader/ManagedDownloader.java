@@ -1010,31 +1010,44 @@ public class ManagedDownloader implements Downloader, Serializable {
             if( fd != null ) {
                 //create validAlts
                 validAlts = AlternateLocationCollection.create(hash);
-                // Retrieve the alternate locations (without adding ourself)
-                AlternateLocationCollection coll = 
-                                            fd.getAlternateLocationCollection();
-                synchronized(coll) {
-                    Iterator iter = coll.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation loc = (AlternateLocation)iter.next();
-                        addDownload(loc.createRemoteFileDesc((int)size),false);
-                    }
+                addLocationsToDownload(fd.getAlternateLocationCollection(),
+                                       fd.getPushAlternateLocationCollection(),
+                                       (int)size);
+            }
+        }
+    }
+    
+    /**
+     * Adds the alternate locations from the collections as possible
+     * download sources.
+     */
+    private void addLocationsToDownload(AlternateLocationCollection direct,
+                                        AlternateLocationCollection push,
+                                        int size) {
+        // always add the direct alt locs.
+        if(direct != null) {
+            synchronized(direct) {
+                Iterator iter = direct.iterator();
+                while(iter.hasNext()) {
+                    AlternateLocation loc = (AlternateLocation)iter.next();
+                    addDownload(loc.createRemoteFileDesc((int)size), false);
                 }
+            }
+        }
                 
-                //also adds any existing firewalled locations.
-                //If I'm firewalled, only those that support FWT are added.
-                //this assumes that FWT will always be backwards compatible
-                boolean open = RouterService.acceptedIncomingConnection();
-                coll = fd.getPushAlternateLocationCollection();
-                synchronized(coll) {
-                	Iterator iter = coll.iterator();
-                	while(iter.hasNext()) {
-                		PushAltLoc loc = (PushAltLoc)iter.next();
-                		if (open || loc.supportsFWTVersion()>0)
-                		    addDownload(loc.createRemoteFileDesc((int)size),false);
-                	}
-                }
-                
+        //also adds any existing firewalled locations.
+        //If I'm firewalled, only those that support FWT are added.
+        //this assumes that FWT will always be backwards compatible
+        if(push != null) {
+            boolean open = RouterService.acceptedIncomingConnection();
+            boolean fwt = UDPService.instance().canDoFWT();
+            synchronized(push) {
+            	Iterator iter = push.iterator();
+            	while(iter.hasNext()) {
+            		PushAltLoc loc = (PushAltLoc)iter.next();
+            		if (open || (fwt && loc.supportsFWTVersion() > 0))
+            		    addDownload(loc.createRemoteFileDesc((int)size), false);
+            	}
             }
         }
     }
@@ -1514,14 +1527,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             
             //no need to send push altlocs to older uploaders
-            if (loc instanceof DirectAltLoc || 
-            		httpDloader.wantsFalts())
+            if (loc instanceof DirectAltLoc || httpDloader.wantsFalts()) {
             	if (good)
             		httpDloader.addSuccessfulAltLoc(loc);
             	else
             		httpDloader.addFailedAltLoc(loc);
-            
-           	
+            }
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
@@ -2943,38 +2954,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 informMesh(rfd, false);         
             return ConnectionStatus.getNoFile();
         } finally {
-            //add alternate locations, which we could have gotten from 
-            //the downloader
-            AlternateLocationCollection c = dloader.getAltLocsReceived();
-            if(c!=null) {
-                synchronized(c) { 
-                    Iterator iter = c.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation al=(AlternateLocation)iter.next();
-                        RemoteFileDesc rfd1 =
-                            al.createRemoteFileDesc(rfd.getSize());
-                        addDownload(rfd1, false);//don't cache
-                    }
-                }
-            }
-            
-            //we also want to try the firewalled push locs
-            //if we are firewalled, try only those that support FWT 
-            c = dloader.getPushLocsReceived();
-            boolean open = RouterService.acceptedIncomingConnection();
-            if(c!=null ) {
-                synchronized(c) { 
-                    Iterator iter = c.iterator();
-                    while(iter.hasNext()) {
-                        PushAltLoc al=(PushAltLoc)iter.next();
-                        if (open || al.supportsFWTVersion() > 0) {
-                            RemoteFileDesc rfd1 =
-                                al.createRemoteFileDesc(rfd.getSize());
-                            addDownload(rfd1, false);//don't cache
-                        }
-                    }
-                }
-            }
+            addLocationsToDownload(dloader.getAltLocsReceived(),
+                                   dloader.getPushLocsReceived(),
+                                   rfd.getSize());
         }
         
         //did not throw exception? OK. we are downloading
