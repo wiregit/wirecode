@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
 
 public class SettingsManager implements SettingsInterface
 {
+	private static boolean forceIPAdress_;
+	private static String forcedIPAdress_;
+	private static int forcedPort_;
 
 	/** lastVersionChecked is the most recent version number checked.  Also,
 	 * there is a boolean for don't check again. */
@@ -141,17 +144,6 @@ public class SettingsManager implements SettingsInterface
 	 * private methods to handle versioning 
 	 * control information
 	 */
-	public String getCurrentVersion() {
-        //This is intentionally hard-coded in.
-		return CURRENT_VERSION;
-	}
-	public String getLastVersionChecked() {
-		return lastVersionChecked_;
-	}
-	public boolean getCheckAgain() {
-		return checkAgain_;
-	}
-	
 	public void setLastVersionChecked(String last) {
 		lastVersionChecked_ = last;
 		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
@@ -496,6 +488,28 @@ public class SettingsManager implements SettingsInterface
 					i = Integer.parseInt(p);
                     setAdvancedInfoForQuery(i);
                 }
+                else if(key.equals(SettingsInterface.FORCE_IP_ADDRESS)){  
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try {setForceIPAddress(bs);}
+                    catch (IllegalArgumentException ie){}
+				}
+                else if(key.equals(SettingsInterface.FORCED_IP_ADDRESS)){
+					try {setForcedIPAddress(p);}
+                    catch (IllegalArgumentException ie){}
+				}
+                else if(key.equals(SettingsInterface.FORCED_PORT)){
+					try {
+						i = Integer.parseInt(p);
+						setForcedPort(i);
+					}
+                    catch (IllegalArgumentException ie){}
+				}
             }
             catch(ClassCastException cce){}
         }
@@ -562,7 +576,11 @@ public class SettingsManager implements SettingsInterface
 		setCheckAgain(SettingsInterface.DEFAULT_CHECK_AGAIN);
 		setBasicInfoForQuery(SettingsInterface.DEFAULT_BASIC_INFO_FOR_QUERY);
 		setAdvancedInfoForQuery(SettingsInterface.DEFAULT_ADVANCED_INFO_FOR_QUERY);
-        write_ = true;
+		setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
+		setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
+		setForcedPort(DEFAULT_FORCED_PORT);
+
+		write_ = true;
         writeProperties();
     }
 
@@ -696,6 +714,33 @@ public class SettingsManager implements SettingsInterface
 	public int getBasicInfoSizeForQuery() {return basicQueryInfo_;}
 
 	public int getAdvancedInfoSizeForQuery() {return advancedQueryInfo_;}
+	
+	public boolean getForceIPAddress() {
+		return forceIPAdress_;
+	}
+
+	public String getForcedIPAddress() {
+		return forcedIPAdress_;
+	}
+
+	public int getForcedPort() {
+		return forcedPort_;
+	}
+
+	/**
+	 * private methods to handle versioning 
+	 * control information
+	 */
+	public String getCurrentVersion() {
+        //This is intentionally hard-coded in.
+		return CURRENT_VERSION;
+	}
+	public String getLastVersionChecked() {
+		return lastVersionChecked_;
+	}
+	public boolean getCheckAgain() {
+		return checkAgain_;
+	}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1224,7 +1269,54 @@ public class SettingsManager implements SettingsInterface
             props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
         }
     }
+	
+	public void setForceIPAddress(boolean force) {
+		//  if (force == null)
+//  			throw new IllegalArgumentException();
+		String c;
+		if (force == true)
+			c = "true";
+		else 
+			c = "false";
+		forceIPAdress_ = force;
+		props_.put(SettingsInterface.FORCE_IP_ADDRESS, c);
+		writeProperties();
+	}
 
+	public void setForcedIPAddress(String address) {
+		if (address == null)
+			throw new IllegalArgumentException();
+		forcedIPAdress_ = address;
+		props_.put(SettingsInterface.FORCED_IP_ADDRESS, address);
+		writeProperties();
+	}
+
+	public void setForcedPort(String int) {
+		//  if (port == null)
+//  			throw new IllegalArgumentException();
+		forcedPort_ = port;
+		String s = Integer.toString(forcedPort_);
+		props_.put(SettingsInterface.FORCED_PORT, s);
+		writeProperties();
+	}
+	
+	public void setLastVersionChecked(String last) {
+		lastVersionChecked_ = last;
+		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
+		writeProperties();
+	}
+	
+	public void setCheckAgain(boolean check) {
+		checkAgain_ = check;
+		String c;
+		if (check == true)
+			c = "true";
+		else 
+			c = "false";
+		props_.put(SettingsInterface.CHECK_AGAIN, c);
+        writeProperties();
+
+	}
     /******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
      ******************************************************/

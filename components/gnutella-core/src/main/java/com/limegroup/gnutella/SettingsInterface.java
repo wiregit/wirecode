@@ -58,6 +58,16 @@ public interface SettingsInterface
     public String     getConnectString();
     public String     getConnectOkString();
 
+   /** The current version of LimeWire.  This is read-only. */
+	public String getCurrentVersion();
+	public String getLastVersionChecked();
+	public boolean getCheckAgain();
+
+	/* For Forced IP and Port */
+	public boolean getForceIPAddress();
+	public String getForcedIPAddress();
+	public int getForcedPort();
+
     /** writes out the properties to disk */
     public void writeProperties();
 
@@ -178,6 +188,15 @@ public interface SettingsInterface
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
+	
+	public void setForceIPAddress(boolean force)
+		throws IllegalArgumentException;
+	public void setForcedIPAddress(String address)
+		throws IllegalArgumentException;
+	public void setForcedPort(int port)
+		throws IllegalArgumentException;
+	public void setLastVersionChecked(String last);
+	public void setCheckAgain(boolean check);
 
     /** specialized method for writing the
      *  properties file for the network discoverer
@@ -258,6 +277,12 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;	
 
+    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.5";
+    public static final boolean DEFAULT_CHECK_AGAIN = true;
+	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
+	public static final String DEFAULT_FORCED_IP_ADDRESS = "";
+	public static final int DEFAULT_FORCED_PORT = 6346;
+
     // The property key name constants
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
@@ -295,26 +320,12 @@ public interface SettingsInterface
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-	
-	// RJS - ADDING 3 NEW PROPERTIES
-	
-    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.5";
-    public static final boolean DEFAULT_CHECK_AGAIN = true;
-
-    public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
+	public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
 	public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
 	public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
-
-    /** The current version of LimeWire.  This is read-only. */
-	public String getCurrentVersion();
-	public String getLastVersionChecked();
-	public boolean getCheckAgain();
-
-	public void setLastVersionChecked(String last);
-	public void setCheckAgain(boolean check);
-
-
-	// END OF RJS ADDED
+	public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
+	public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
+	public static final String FORCED_PORT = "FORCED_PORT";
 
 }
