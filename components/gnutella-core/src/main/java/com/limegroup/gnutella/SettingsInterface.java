@@ -289,6 +289,9 @@ public interface SettingsInterface
     public static final int     DEFAULT_FORCED_PORT = 6346;
     public static final int     DEFAULT_FREELOADER_FILES = 1;
     public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
+	public static final long    DEFAULT_AVERAGE_UPTIME = 200;
+	public static final long    DEFAULT_TOTAL_UPTIME = 0;
+	public static final int     DEFAULT_SESSIONS = 1;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
@@ -342,5 +345,7 @@ public interface SettingsInterface
     public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
 
     public static final String UPLOADS_PER_PERSON = "UPLOADS_PER_PERSON";
-
+    public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
+    public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
+    public static final String SESSIONS           = "SESSIONS";
 }
