@@ -5,7 +5,6 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
-import org.xml.sax.*;
 import java.net.*;
 
 /**
