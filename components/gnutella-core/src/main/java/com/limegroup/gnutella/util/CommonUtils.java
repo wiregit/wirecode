@@ -68,7 +68,7 @@ public class CommonUtils {
 	/**
 	 * returns the current version of LimeWire.
 	 */
-	public static String getCurrentLimeWireVersion() {
+	public static String getLimeWireVersion() {
 		return LIMEWIRE_VERSION;
 	}
 
