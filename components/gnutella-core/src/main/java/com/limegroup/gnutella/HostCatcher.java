@@ -171,10 +171,15 @@ public class HostCatcher {
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache = 
         BootstrapServerManager.instance();
+    
+    /**
+     * The pinger that will send the messages
+     */
+    private UniqueHostPinger pinger = new UniqueHostPinger();
         
     /** The UDPHostCache bootstrap system. */
     private UDPHostCache udpHostCache =
-        new UDPHostCache();
+        new UDPHostCache(pinger);
     
 	/**
 	 * Constant for the host file to read from and write to.
@@ -255,11 +260,6 @@ public class HostCatcher {
      * Stop ranking if we have this many connections.
      */
     private static final int MAX_CONNECTIONS = 5;
-    
-    /**
-     * The pinger that will send the messages
-     */
-    private UniqueHostPinger pinger = new UniqueHostPinger();
     
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.IpPort;
 
 /**
@@ -35,10 +36,10 @@ public abstract class SourceRanker {
      * @return a ranker appropriate for our system's capabilities.
      */
     public static SourceRanker getAppropriateRanker() {
-        // for example, if we can't receive solicited UDP we'd use a 
-        // ranker that uses the current logic in ManagedDownloader.removeBest
-        // which would be implemented in ClassicRanker or similar.
-        return new LegacyRanker();
+        if (RouterService.canReceiveSolicited())
+            return new PingRanker();
+        else 
+            return new LegacyRanker();
     }
     
     private static class EmptyRanker extends SourceRanker {

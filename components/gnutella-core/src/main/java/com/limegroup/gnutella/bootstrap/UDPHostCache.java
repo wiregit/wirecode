@@ -64,6 +64,8 @@ public class UDPHostCache {
         new ArrayList(PERMANENT_SIZE);
     private final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
     
+    private final UDPPinger pinger;
+    
     /**
      * A set of hosts who we've recently contacted, so we don't contact them
      * again.
@@ -79,16 +81,17 @@ public class UDPHostCache {
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    public UDPHostCache() {
-        this(10 * 60 * 1000);
+    public UDPHostCache(UDPPinger pinger) {
+        this(10 * 60 * 1000,pinger);
     }
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for
      * the given amount of time, in msecs.
      */
-    public UDPHostCache(long expiryTime) {
+    public UDPHostCache(long expiryTime,UDPPinger pinger) {
         attemptedHosts = new FixedSizeExpiringSet(PERMANENT_SIZE, expiryTime);
+        this.pinger = pinger;
     }
     
     /**
@@ -187,7 +190,7 @@ public class UDPHostCache {
         if(LOG.isDebugEnabled())
             LOG.debug("Fetching endpoints from " + hosts + " host caches");
 
-        RouterService.getHostCatcher().getPinger().rank(
+        pinger.rank(
             hosts,
             new HostExpirer(hosts),
             // cancel when connected -- don't send out any more pings

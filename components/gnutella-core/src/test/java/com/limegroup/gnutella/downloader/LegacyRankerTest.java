@@ -51,7 +51,7 @@ public class LegacyRankerTest extends BaseTestCase {
     }
     
     /**
-     * tests that the ranker does not recommend the same rfd twice
+     * tests that the ranker exhausts the list of rfds to try
      */
     public void testExhaustsRFDs() throws Exception {
         ranker.addToPool(newRFD("1.2.3.4",3));
@@ -64,7 +64,7 @@ public class LegacyRankerTest extends BaseTestCase {
     }
     
     /**
-     * tests that the ranker does allow duplicate rfds
+     * tests that the ranker does not allow duplicate rfds
      */
     public void testDisallowsDuplicates() throws Exception {
         RemoteFileDesc rfd1, rfd2;
@@ -79,6 +79,8 @@ public class LegacyRankerTest extends BaseTestCase {
         ranker.getBest();
         assertFalse(ranker.hasMore());
     }
+    
+    // TODO: add more tests, although this ranker will be used rarely. 
     
     private static RemoteFileDesc newRFD(String host, int speed){
         return new RemoteFileDesc(host, 1,
