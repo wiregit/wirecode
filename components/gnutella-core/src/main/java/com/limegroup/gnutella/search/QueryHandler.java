@@ -359,11 +359,15 @@ public final class QueryHandler {
         int i = 0;
         while(hostsQueried<3 && i<list.size()) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(!mc.isStable()) {
+
+            // if we've already queried this host, go to the next one,
+            // or if it's not yet stable
+            if(!mc.isStable() || handler.QUERIED_HANDLERS.contains(mc)) {
                 // count the index
                 i++;
                 continue;
             }
+
 			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
                                                               handler.REPLY_HANDLER);
 
