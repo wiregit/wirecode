@@ -61,7 +61,12 @@ import com.limegroup.gnutella.statistics.*;
 public class Connection {
 	
 	/**
-	 * Lock for maintaining accurate data for pong forwarding.
+	 * Lock for maintaining accurate data for when to allow ping forwarding.
+     */
+	private final Object PING_LOCK = new Object();
+
+    /**
+	 * Lock for maintaining accurate data for when to allow pong forwarding.
 	 */
     private final Object PONG_LOCK = new Object();
     
@@ -1378,17 +1383,16 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     public boolean allowNewPings() {
-        long curTime = System.currentTimeMillis();
-        if(curTime < _nextPingTime) {
-            return false;
-        } 
-        return true;
+    	synchronized(PING_LOCK) {
+	        long curTime = System.currentTimeMillis();
+	        if(curTime < _nextPingTime) {
+	            return false;
+	        } 
+			_nextPingTime = System.currentTimeMillis() + 1600;
+	        return true;
+    	}
     }
 
-    // inherit doc comment
-    public void updatePingTime() {
-        _nextPingTime = System.currentTimeMillis() + 1600;
-    }
 
     /**
      * Returns whether or not we should allow new pongs on this connection.  If
