@@ -94,16 +94,25 @@ class RejectConnection extends Connection{
             {
                 System.out.println("Endpoint[" + i + "]=" + endpoints[i]);
                 // make a pong with this host info, set the TTL to 1
-                PingReply pr = new PingReply(guid,(byte)1,endpoints[i].getPort(),
-                                             endpoints[i].getHostBytes(), endpoints[i].getFiles(),
-                                             endpoints[i].getKbytes());
-                //send the pong (ping reply)
-                send(pr);
+                
+                try
+                {
+                    PingReply pr = new PingReply(guid,(byte)1,endpoints[i].getPort(),
+                                                 endpoints[i].getHostBytes(), endpoints[i].getFiles(),
+                                                 endpoints[i].getKbytes());
+                    //send the pong (ping reply)
+                    send(pr);
+                }
+                catch(UnknownHostException uhe)
+                {
+                    //dont need to do anything
+                    //it will go to the next endpoint
+                }
             }
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
             //doesnt matter if we r not able to send pongs
         }
     }
