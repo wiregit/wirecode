@@ -180,7 +180,7 @@ public final class LimeXMLDocumentHelper{
             String str = null;
             try {
                 str = doc.getXMLString();
-            }catch(Exception e) {  
+            } catch(SchemaNotFoundException e) {  
                 return;//dont do anything to the map, just return
             }
             if(str==null || str.equals("")) 
@@ -220,7 +220,7 @@ public final class LimeXMLDocumentHelper{
             String str = null;
             try{
                 str = doc.getXMLString();
-            } catch(Exception e) {
+            } catch(SchemaNotFoundException e) {
                 return;//dont modify the string in the hashmap. just return
             }
             int begin = str.indexOf("<");//index of header
@@ -254,11 +254,13 @@ public final class LimeXMLDocumentHelper{
                                       String aggrigateXMLStr){
         InputSource source=new InputSource(new StringReader(aggrigateXMLStr));
         Document root = null;
-        try{            
+        try {            
             parser.parse(source);
-        }catch(Exception e){
+        } catch(SAXException e){
             //could not parse XML well
             return null;
+        } catch(IOException e) {
+            return null; // problem reading.
         }
         root = parser.getDocument();
         //get the schemaURI
