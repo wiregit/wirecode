@@ -71,8 +71,12 @@ public class BestCandidates {
 		synchronized(instance) {
 			
 			//compare my ttl 1 best with the other guy's ttl 0 best
-			if (instance._best[1]==null ||
-			 comp.compare(instance._best[1], newCandidates[0]) < 0)
+			//if mine is null, take his candidate
+			//do the same if his candidate is better
+			//or he is changing his mind about his best candidate
+			if (instance._best[1]==null || 
+					comp.compare(instance._best[1], newCandidates[0]) < 0 ||  
+							instance._best[1].getAdvertiser().equals(newCandidates[0].getAdvertiser()))  
 				instance._best[1] = newCandidates[0];
 			
 			
@@ -82,8 +86,9 @@ public class BestCandidates {
 				return; //he doesn't have one, retain mine
 			
 			if (instance._best[2]==null ||
-			 comp.compare(instance._best[2], newCandidates[1]) < 0)
-				instance._best[2] = newCandidates[1];
+			 comp.compare(instance._best[2], newCandidates[1]) < 0 ||
+			 	newCandidates[1].getAdvertiser().equals(instance._best[2].getAdvertiser()))
+					instance._best[2] = newCandidates[1];
 		}
 	}
 	
