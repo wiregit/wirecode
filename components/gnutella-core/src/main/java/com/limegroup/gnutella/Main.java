@@ -147,8 +147,6 @@ public class Main implements ActivityCallback {
     public void handleQueryString( String query ) {
     }
 
-    /* alerts the front end of a new file being downloaded*/
-    public void addDownload(){}
 
     public void error(String message) {
 	System.out.println("Error: "+message);
@@ -190,11 +188,14 @@ public class Main implements ActivityCallback {
 
 
     /*******************************/
-    
-    public void removeDownload() {}
 
-    public void addUpload() {}
+    public void addDownload(HTTPServerMgr mgr) {}
 
-    public void removeUpload() {}
+    public void removeDownload(HTTPServerMgr mgr) {}
+
+    public void addUpload(HTTPClientMgr mgr) {}
+
+    public void removeUpload(HTTPClientMgr mgr) {}
 
 }
+
