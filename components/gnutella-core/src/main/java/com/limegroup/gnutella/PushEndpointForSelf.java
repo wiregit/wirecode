@@ -95,7 +95,9 @@ public class PushEndpointForSelf extends PushEndpoint {
     protected IpPort getValidExternalAddress() {
         try {
             String addr = getAddress();
-            if (addr.equals(RemoteFileDesc.BOGUS_IP))
+            int port = getPort();
+            if (addr.equals(RemoteFileDesc.BOGUS_IP) || 
+                    !NetworkUtils.isValidPort(port))
                 return null;
             return new IpPortImpl(addr,getPort());
             
