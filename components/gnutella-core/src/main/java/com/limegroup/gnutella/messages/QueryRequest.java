@@ -20,15 +20,30 @@ import java.util.StringTokenizer;
  * that allow us to identify them as requeries.
  */
 public class QueryRequest extends Message implements Serializable{
-    /** The minimum speed and query request, including the null terminator.
-     *  We extract the minimum speed and String lazily. */
+
+    /**
+     * The payload for the query -- includes the query string, the
+     * XML query, any URNs, GGEP, etc.
+     */
     private final byte[] PAYLOAD;
+
+    /**
+     * The "min speed" field.  This was originally used to specify
+     * a minimum speed for returned results, but it was never really
+     * used this way.  As of LimeWire 3.0 (02/2003), the bits of 
+     * this field were changed to specify things like the firewall
+     * status of the querier.
+     */
     private final int MIN_SPEED;
-    /** The query string, if we've already extracted it.  Null otherwise. 
-     *  LOCKING: obtain this' lock. */
+
+    /**
+     * The query string.
+     */
     private final String QUERY;
 
-	/** The XML query string. */
+	/** 
+     * The XML query string. 
+     */
     private final String XML_QUERY;
 
     // HUGE v0.93 fields
@@ -60,6 +75,11 @@ public class QueryRequest extends Message implements Serializable{
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 
+    /**
+     * Constant for the default query TTL.
+     */
+    private static final byte DEFAULT_TTL = 6;
+
 	/**
 	 * Creates a new requery for the specified SHA1 value.
 	 *
@@ -74,7 +94,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(true), (byte)6, "\\", "", 
+        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								false);
@@ -95,7 +115,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(false), (byte)6, "\\", "", 
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								false);
@@ -410,7 +430,7 @@ public class QueryRequest extends Message implements Serializable{
      * been created via newQueryGUID; this allows the caller to match up results
      */
     private QueryRequest(byte[] guid, String query) {
-        this(guid, (byte)6, query, "");
+        this(guid, query, "");
     }
 
     /**
@@ -428,7 +448,7 @@ public class QueryRequest extends Message implements Serializable{
      * been created via newQueryGUID; this allows the caller to match up results
      */
     private QueryRequest(byte[] guid, String query, String xmlQuery) {
-        this(guid, (byte)6, query, xmlQuery);
+        this(guid, DEFAULT_TTL, query, xmlQuery);
     }
 
     /**
