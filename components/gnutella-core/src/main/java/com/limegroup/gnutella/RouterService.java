@@ -146,6 +146,13 @@ public class RouterService
   	}
 
     /**
+     * Returns the ActivityCallback passed to this' constructor.
+     */ 
+    public ActivityCallback getActivityCallback() {
+        return callback;
+    }
+
+    /**
      * Returns a new instance of RouterService. Its a Factory Method.
      */
     protected ConnectionManager createConnectionManager() {
