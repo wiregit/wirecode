@@ -943,9 +943,16 @@ public class ConnectionManager {
         if(supernodeNeededStr != null){
             boolean supernodeNeeded 
                 = (new Boolean(supernodeNeededStr)).booleanValue();
-            //take appropriate action
-            gotSupernodeNeededGuidance(supernodeNeeded, 
-                headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS));
+            //get the remote address
+            String remoteHost;
+            if(connection.isOutgoing())
+                remoteHost = connection.getOrigHost() + ":" + 
+                    connection.getOrigPort();
+            else
+                remoteHost = headers.getProperty(
+                    ConnectionHandshakeHeaders.X_MY_ADDRESS);
+            //take appropriate action       
+            gotSupernodeNeededGuidance(supernodeNeeded, remoteHost);
         }
     }
    
