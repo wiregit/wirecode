@@ -85,7 +85,8 @@ public class ConnectionManager {
     private static final int MAX_SUPERNODE_ENDPOINTS=10;
 	
 	/** The maximum number of leaves to allow -- also the preferred number.*/		
-	private static final int MAX_LEAVES = 50;
+	private static final int MAX_LEAVES = 
+		UltrapeerSettings.MAX_LEAVES.getValue();
 
     
     private MessageRouter _router;
