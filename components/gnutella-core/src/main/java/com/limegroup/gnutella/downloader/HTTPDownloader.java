@@ -396,17 +396,23 @@ public class HTTPDownloader implements BandwidthTracker {
             while(tokenizer.hasMoreTokens()) {
                 token = tokenizer.nextToken();
                 String value;
-                if(token.equals("pollMin")) {
-                    value = tokenizer.nextToken();
-                    minPollTime = Integer.parseInt(value);
-                }
-                else if(token.equals("pollMax")) {
-                    value = tokenizer.nextToken();
-                    maxPollTime = Integer.parseInt(value);
-                }
-                else if(token.equals("position")) {
-                    value = tokenizer.nextToken();
-                    position = Integer.parseInt(value);
+                try {
+                    if(token.equals("pollMin")) {
+                        value = tokenizer.nextToken();
+                        minPollTime = Integer.parseInt(value);
+                    }
+                    else if(token.equals("pollMax")) {
+                        value = tokenizer.nextToken();
+                        maxPollTime = Integer.parseInt(value);
+                    }
+                    else if(token.equals("position")) {
+                        value = tokenizer.nextToken();
+                        position = Integer.parseInt(value);
+                    }
+                } catch(NumberFormatException nfx) {
+                    throw new IOException();
+                } catch(NoSuchElementException nsex) {
+                    throw new IOException();
                 }
             } //end of inner while - done parsing this line.
             str = _byteReader.readLine();//could throw exception

@@ -1555,12 +1555,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
+     * @param refSleepTime this parameter is used for pass by reference, this
+     * method puts the minPollTime as the 0th element of this array.
      * @return 0 if
      * NoSuchElement, TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
      */
-    private int assignAndRequest(HTTPDownloader dloader,int[] referenceArray)  {
+    private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime) {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
@@ -1596,7 +1598,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             } catch (QueuedException qx) { 
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
                 //The extra time to sleep can be tuned. For now it's 1 S.
-                referenceArray[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
+                refSleepTime[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
                 synchronized(this) {
                     if(dloaders.size()==0) {
                         setState(REMOTE_QUEUED);
