@@ -196,5 +196,32 @@ public class XMLStringUtils
         }
     }
     
+    /**
+     * The separator used in URIs to separate different parts
+     */
+    private static final char URI_PATH_SEPARATOR = '/';
+    
+    /**
+     * Returns the domain name part from the passed schemaURI
+     * @param schemaURI The schema URI whose corresponding domain name
+     * to be returned
+     * @return the domain name part from the passed schemaURI. e.g.
+     * if passed schemaURI is "http://www.limewire.com/schemas/book.xsd",
+     * the return value is "book.xsd". If the passed string is "book.xsd",
+     * the return value is "book.xsd"
+     */
+    public static String getDomainName(String schemaURI)
+    {
+        //get the last index of url path separator
+        int lastSeparatorIndex = schemaURI.indexOf(URI_PATH_SEPARATOR);
+        
+        //if valid index, return the part after the last separator
+        //else return the complete schemaURI, as specified in the method
+        //contract
+        if(lastSeparatorIndex != -1)
+            return schemaURI.substring(lastSeparatorIndex + 1);
+        else
+            return schemaURI;
+    }
     
 }
