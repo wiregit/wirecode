@@ -553,6 +553,36 @@ public class QueryRequest extends Message implements Serializable{
     }
 
 
+    /**
+     * Creates a new query with the specified query key for use in 
+     * GUESS-style UDP queries.
+     *
+     * @param sha1 the URN
+     * @param key the query key
+	 * @return a new <tt>QueryRequest</tt> instance with the specified 
+	 *  URN request and query key
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+     */
+    public static QueryRequest 
+        createQueryKeyQuery(URN sha1, QueryKey key) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        }
+        if(key == null) {
+            throw new NullPointerException("null query key");
+        }
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
+                                "", UrnType.SHA1_SET, sha1Set, key,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false);
+    }
+
+
 	/**
 	 * Creates a new <tt>QueryRequest</tt> instance for multicast queries.	 
 	 * This is necessary due to the unique properties of multicast queries,
