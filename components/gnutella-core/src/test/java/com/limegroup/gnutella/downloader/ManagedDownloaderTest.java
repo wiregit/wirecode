@@ -280,7 +280,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    qr.getQuery().equals("daswani susheel neil") ||
                    qr.getQuery().equals("susheel neil daswani") ||
                    qr.getQuery().equals("susheel daswani neil"));
-        assertEquals(224, qr.getMinSpeed());
+        // SPECIAL_MINSPEED_MASK | SPECIAL_XML_MASK = A0 = 160
+        assertEquals(160, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
