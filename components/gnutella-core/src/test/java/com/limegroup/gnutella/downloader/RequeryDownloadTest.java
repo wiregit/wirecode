@@ -337,9 +337,9 @@ public class RequeryDownloadTest extends TestCase {
         Downloader downloader=null;
         try {
             downloader=mgr.download(null,           //no SHA1
-                                    "text query",   //requery string
-                                    "filename.txt", //display name
-                                    "http://127.0.0.1:6666/path/file.txt");
+                "text query",                       //requery string
+                "filename.txt",                     //display name
+                new String[] {"http://127.0.0.1:6666/path/file.txt"});
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {
@@ -488,7 +488,7 @@ public class RequeryDownloadTest extends TestCase {
         Downloader downloader2=null;
         try {
             downloader1=mgr.download(new File("T-1232-some crap.txt"));
-            downloader2=mgr.download(null, "text query", null, (String)null); 
+            downloader2=mgr.download(null, "text query", null, (String[])null); 
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {
@@ -522,7 +522,7 @@ public class RequeryDownloadTest extends TestCase {
         Downloader downloader=null;
         try {
             downloader=mgr.download(null, "text query", null, 
-                                     "http://resolve.this.address.com");
+                new String[] {"http://resolve.this.address.com"});
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {

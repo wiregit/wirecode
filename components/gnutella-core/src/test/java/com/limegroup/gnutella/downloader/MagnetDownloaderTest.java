@@ -33,7 +33,7 @@ public class MagnetDownloaderTest extends TestCase {
              new FileManagerStub(), 
              new IncompleteFileManager(), 
              new ActivityCallbackStub(),
-             hash, textQuery, filename, defaultURL);
+             hash, textQuery, filename, new String[] {defaultURL});
     }
 
     private static RemoteFileDesc newRFD(String name) {
