@@ -477,6 +477,7 @@ public class HostCatcher {
         for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            ep.setUDPHostCache(true);
             if(isValidHost(ep))
                 addUDPHostCache(ep);
         }

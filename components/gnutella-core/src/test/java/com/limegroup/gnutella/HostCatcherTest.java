@@ -5,6 +5,9 @@ import java.io.FileWriter;
 import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.zip.GZIPOutputStream;
 
 import junit.framework.Test;
 
@@ -625,6 +628,43 @@ public class HostCatcherTest extends BaseTestCase {
         hc.add(pr);
         assertEquals(4, hc.getNumHosts());
         assertEquals(1, uhc.getSize());
+    }
+    
+    public void testPackedHostCachesAreStored() throws Exception {
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
+        assertEquals(0, uhc.getSize());
+        
+        GGEP ggep = new GGEP(true);
+        List addrs = new LinkedList();
+        addrs.add("1.2.3.4:81");
+        addrs.add("www.limewire.com:6379");
+        addrs.add("www.eff.org");
+        addrs.add("www.test.org:1");
+        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, zip(addrs));
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+            0, 0, false, ggep);
+        
+        hc.add(pr);
+        assertEquals(1, hc.getNumHosts());
+        assertEquals(4, uhc.getSize());
+    }                        
+        
+        
+    private final byte[] zip(List l) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        for(Iterator i = l.iterator(); i.hasNext(); ) {
+            sb.append(i.next().toString());
+            if(i.hasNext())
+                sb.append("\n");
+        }
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        GZIPOutputStream gz = new GZIPOutputStream(bo);
+        gz.write(sb.toString().getBytes("UTF-8"));
+        gz.flush();
+        gz.close();
+        return bo.toByteArray();
     }
         
 

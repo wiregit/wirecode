@@ -845,7 +845,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 byte[] data = null;
                 try {
-                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
                 } catch(BadGGEPPropertyException bad) {}
                 if(data != null)
                     packedCaches = unzipAndListCaches(data);
@@ -1244,14 +1244,16 @@ public class PingReply extends Message implements Serializable, IpPort {
                     continue;
                 } else if(i != -1) {
                     try {
-                        port = Integer.valueOf(next.substring(i)).intValue();
+                        port = Integer.valueOf(next.substring(i+1)).intValue();
                     } catch(NumberFormatException invalid) {
                         continue;
                     }
+                } else {
+                    i = next.length(); // setup for i-1 below.
                 }
                 if(!NetworkUtils.isValidPort(port))
                     continue;
-                String host = next.substring(0, i-1);
+                String host = next.substring(0, i);
                 try {
                     theCaches.add(new IpPortImpl(host, port));
                 } catch(UnknownHostException invalid) {
@@ -1259,7 +1261,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 }
             }
             return Collections.unmodifiableList(theCaches);
-        } catch(IOException ioe) {}
+        } catch(IOException ioe) { }
         return Collections.EMPTY_LIST;
     }
 

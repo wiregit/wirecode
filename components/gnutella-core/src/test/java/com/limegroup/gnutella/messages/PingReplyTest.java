@@ -6,7 +6,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.zip.GZIPOutputStream;
 
 import junit.framework.Test;
 
@@ -18,6 +23,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 
 public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     
@@ -745,6 +751,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(4, ipp.getPort());
         
         // Try with one of the constructors.
+        l = new LinkedList(l);
         l.add(new Endpoint("1.5.3.5", 5));
         pr = PingReply.create(GUID.makeGuid(), (byte)1, l);
         l = pr.getPackedIPPorts();
@@ -766,7 +773,83 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         ipp = (IpPort)l.get(4);
         assertEquals("1.5.3.5", ipp.getAddress());
         assertEquals(5, ipp.getPort());
-    }   
+    }
+    
+    public void testPackedHostCachesInPong() throws Exception {
+        GGEP ggep = new GGEP(true);
+        List addrs = new LinkedList();
+        addrs.add("1.2.3.4:81");
+        addrs.add("www.limewire.com:6379");
+        addrs.add("www.eff.org");
+        addrs.add("www.test.org:1");
+        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, zip(addrs));
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+
+        Set s = new TreeSet(IpPort.COMPARATOR);
+        s.addAll(pr.getPackedUDPHostCaches());
+        assertEquals(4, s.size());
+        IpPort ipp = new IpPortImpl("1.2.3.4", 81);
+        assertContains(s, ipp);
+        s.remove(ipp);
+        ipp = new IpPortImpl("www.limewire.com", 6379);
+        assertContains(s, ipp);
+        s.remove(ipp);
+        ipp = new IpPortImpl("www.eff.org", 6346);
+        assertContains(s, ipp);
+        s.remove(ipp);
+        ipp = new IpPortImpl("www.test.org", 1);
+        assertContains(s, ipp);
+        s.remove(ipp);
+        assertEquals(0, s.size());
+        
+        ggep = new GGEP(true);
+        addrs.clear();
+        addrs.add("1.2.3.4:");
+        addrs.add("3.4.2.3");
+        addrs.add("5.4.3.2:1:1");
+        addrs.add("13.13.1.1:notanumber");
+        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, zip(addrs));
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        s.addAll(pr.getPackedUDPHostCaches());
+        assertEquals(1, s.size());
+        ipp = new IpPortImpl("3.4.2.3", 6346);
+        assertContains(s, ipp);
+        s.remove(ipp);
+        assertEquals(0, s.size());
+        
+        ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[0]);
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        assertEquals(0, pr.getPackedUDPHostCaches().size());
+        
+        ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[] { 1, 1, 1, 1 } );
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        assertEquals(0, pr.getPackedUDPHostCaches().size());
+    }
+    
+    private final byte[] zip(List l) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        for(Iterator i = l.iterator(); i.hasNext(); ) {
+            sb.append(i.next().toString());
+            if(i.hasNext())
+                sb.append("\n");
+        }
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        GZIPOutputStream gz = new GZIPOutputStream(bo);
+        gz.write(sb.toString().getBytes("UTF-8"));
+        gz.flush();
+        gz.close();
+        return bo.toByteArray();
+    }
     
     private final void addIP(byte[] payload) {
         // fill up the ip so its not blank.

@@ -233,7 +233,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
-        assertEquals(0x0, data[0] & 0x0);
+        assertEquals(0x0, data[0] & 0x1);
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         pr = PingRequest.createUDPPing();
