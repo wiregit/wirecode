@@ -36,12 +36,18 @@ public class BrowseHostUploadState implements UploadState
     public void doUpload(HTTPUploader uploader) throws IOException
     {
         //GUARD CLAUSE
-        //dont do anything if the client cant accept Queryreplies in the 
-        //response
-        if(!uploader.getClientAcceptsXGnutellaQueryreplies())
-            throw new IOException(
-                "Client can not accept QueryReplies in HTTP Response");
-        
+        // we can only handle query replies, so reply back with a 406 if they
+        // don't accept them...
+        if(!uploader.getClientAcceptsXGnutellaQueryreplies()) {
+            // send back a 406...
+            String str;
+            _ostream = uploader.getOutputStream();
+            str = "HTTP/1.1 406 Not Acceptable\r\n";
+            _ostream.write(str.getBytes());
+            _ostream.flush();
+            return;
+        }        
+
         _uploader = uploader;
         _ostream = uploader.getOutputStream();
         
