@@ -559,8 +559,10 @@ public class UploaderTest extends TestCase {
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
-        HTTPDownloader downloader=new HTTPDownloader(sb, rfd, tmp, 
-                                          new AlternateLocationCollection());
+		AlternateLocationCollection collection =
+			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
+        HTTPDownloader downloader = 
+			new HTTPDownloader(sb, rfd, tmp, collection);
         tmp.delete();
         return downloader;
     }
