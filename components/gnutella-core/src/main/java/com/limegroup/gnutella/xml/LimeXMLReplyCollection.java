@@ -512,10 +512,10 @@ public class LimeXMLReplyCollection {
      * Replaces the document in the map with a newer LimeXMLDocument.
      * @return the older document, which is being replaced. Can be null.
      */
-    public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc){
+    public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc) {
         LimeXMLDocument oldDoc = null;
         URN hash = fd.getSHA1Urn();
-        synchronized(mainMap){
+        synchronized(mainMap) {
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
             removeKeywords(oldDoc);
             addKeywords(newDoc);
@@ -633,7 +633,7 @@ public class LimeXMLReplyCollection {
             newXML = doc.getXMLStringWithIdentifier();
         } catch(SchemaNotFoundException snfe) {
             return null;
-        }       
+        }
         newValues.removeID3Tags(newXML);
         
         // Now see if the file already has the same info ...

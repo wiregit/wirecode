@@ -3,6 +3,7 @@ package com.limegroup.gnutella.mp3;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.FileUtils;
 import de.vdheide.mp3.*;
 
@@ -232,12 +233,14 @@ public class ID3Editor {
 
 
     public int writeID3DataToDisk(String filename) {
-       if(! LimeXMLUtils.isMP3File(filename))
+        System.out.println("Roanne 0");
+        if(! LimeXMLUtils.isMP3File(filename))
             return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         File f= null;
         RandomAccessFile file = null;        
         try {
-            try{
+            try {
+                System.out.println("Roanne: 0b");
                 f = new File(filename);
                 FileUtils.setWriteable(f);
                 file = new RandomAccessFile(f,"rw");
@@ -256,10 +259,15 @@ public class ID3Editor {
             //1. Try to write out the ID3v2 data first
             int ret = -1;
             try {
+                System.out.println("Roanne: 1 Writing id2 v2");
                 ret = writeID3V2DataToDisk(f);
+                System.out.println("Roanne: 2");
             }  catch (IOException iox ) {
+                iox.printStackTrace();
                 return LimeXMLReplyCollection.RW_ERROR;  
             } catch (ID3v2Exception e) { //catches both ID3v2 related exceptions
+                e.printStackTrace();
+                System.out.println("Roanne: 3");
                 ret = writeID3V1DataToDisk(file);
             } 
             return ret;
@@ -279,8 +287,35 @@ public class ID3Editor {
      */
     private int writeID3V2DataToDisk(File file) throws 
                                                    IOException, ID3v2Exception {
-        ID3v2 id3Handler = new ID3v2(file);
-        Vector frames = id3Handler.getFrames();
+        ID3v2 id3Handler = new ID3v2(file);        
+        Vector frames = null;
+        boolean updateAllv2Tags = false;
+        try {
+            frames = id3Handler.getFrames();
+        } catch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
+            updateAllv2Tags = true;
+        }
+        if(updateAllv2Tags) {
+            System.out.println("Ruch1");
+            List updateFrames = new ArrayList();
+            addAllNeededFrames(updateFrames);
+            System.out.println("Ruch2");
+            if(updateFrames.size() > 0) {
+                System.out.println("Ruch3");
+                for(Iterator iter=updateFrames.iterator(); iter.hasNext() ; ) {
+                    ID3v2Frame frame = (ID3v2Frame)iter.next();
+                    id3Handler.addFrame(frame);
+                    System.out.println("Ruch4:adding"+frame.getID());
+                }
+                System.out.println("Ruch5");
+                id3Handler.update();               
+                System.out.println("Ruch6");
+            }
+            //no exception? we are home
+           return LimeXMLReplyCollection.NORMAL;
+        }
+
+        //OK. Not all tags are new some need to be updated.
         Map updateFrames = new HashMap();
         for(Iterator iter = frames.iterator(); iter.hasNext() ;) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
@@ -292,6 +327,8 @@ public class ID3Editor {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String val = (String)updateFrames.get(frame);
             val = val==null?"":val;
+            System.out.println("Sumeet: adding frame:"+frame.getID()+", value:"+
+                               val);
             ID3v2Frame repFrame = new ID3v2Frame(frame.getID(),
                                              val.getBytes(),
                                              frame.getTagAlterPreservation(),
@@ -312,6 +349,71 @@ public class ID3Editor {
         //No exceptions? We are home
         return LimeXMLReplyCollection.NORMAL;
     }
+    
+
+    private void addAllNeededFrames(List updateList) {
+        ID3v2Frame frame = null; 
+
+        if(title_ != null && !title_.equals("")) {
+            frame = makeFrame("TIT2",title_);
+            if(frame!=null)
+                updateList.add(frame);
+        }
+        if (artist_!=null && !artist_.equals("")) {
+            frame = null;
+            frame = makeFrame("TPE1",artist_);
+            if(frame != null) 
+                updateList.add(frame);
+
+        }
+        if(album_ != null && !album_.equals("")) {
+            frame = null;
+            frame = makeFrame("TABL",title_);
+            if(frame != null) 
+                updateList.add(frame);
+        }
+        if (year_!=null && !year_.equals("")) { 
+            frame = null;
+            frame = makeFrame("TYER",artist_);
+            if(frame != null) 
+                updateList.add(frame);
+        }
+        if(track_ != null && !track_.equals("")) {
+            frame = null;
+            frame = makeFrame("TRCK",title_);
+            if(frame !=  null)
+                updateList.add(frame);
+        }
+        if (comment_!=null && !comment_.equals("")) {
+            frame = null;
+            frame = makeFrame("COMM",artist_);
+            if(frame != null) 
+                updateList.add(frame);
+        }
+        if(genre_ != null && !genre_.equals("")) {
+            frame = null;
+            frame = makeFrame("TCON",title_);
+            if(frame != null) 
+                updateList.add(frame);
+        }
+    }
+
+    private ID3v2Frame makeFrame(String frameID, String value) {
+        try {
+            return new ID3v2Frame(frameID, 
+                              value.getBytes(), 
+                              true, //discard tag if it's altered/unrecognized
+                              true, //discard tag if file altered/unrecognized
+                              false,//read/write
+                              ID3v2Frame.NO_COMPRESSION, //no compression
+                              (byte)0,//no encryption
+                              (byte)0 //no Group
+                              );//no
+        } catch(ID3v2DecompressionException cx) {
+            return null;
+        }
+    }
+
 
     /**
      *  Checks if the current frame needs to be updated, and if it does, the
