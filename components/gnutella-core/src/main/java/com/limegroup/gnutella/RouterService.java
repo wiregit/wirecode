@@ -243,5 +243,12 @@ System.out.println("RouterService init");
 	return( manager.getNumConnections() );
     }
 
+    /**
+     *  Return the number searches made locally ( QReq )
+     */
+    public int getNumLocalSearches() {
+	return( manager.QReqCount );
+    }
+
 }
 
