@@ -18,6 +18,12 @@ public final class CommonUtils {
 	private static final String LIMEWIRE_VERSION = "@version@";
 
     /**
+     * Variable used for testing only, it's value is set to whatever the test
+     * needs, and getVersion method retuns this value if it's not null
+     */
+    private static String testVersion = null;
+
+    /**
      * The cached value of the major revision number.
      */
     private static final int _majorVersionNumber = 
@@ -251,7 +257,9 @@ public final class CommonUtils {
      * a string, e.g., "1.4".
 	 */
 	public static String getLimeWireVersion() {
-		return LIMEWIRE_VERSION;
+        if(testVersion==null)//Always the case, except when update tests are run
+            return LIMEWIRE_VERSION;
+        return testVersion;
 	}
 
     /** Gets the major version of LimeWire.
@@ -659,7 +667,6 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public synchronized static File getUserSettingsDir() {
-        
         if ( SETTINGS_DIRECTORY != null ) return SETTINGS_DIRECTORY;
         
         File settingsDir = new File(getUserHomeDir(), 
