@@ -100,7 +100,15 @@ public class UDPPushTest extends BaseTestCase {
 				false,true,
 				"LIME",now,
 				proxies,now);
+		
+		Acceptor acc = RouterService.getAcceptor();
+		try{
+			PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
+		}catch(Exception bad) {
+			ErrorService.error(bad);
+		}
 
+		assertTrue(RouterService.acceptedIncomingConnection());
 	}
 	
 	
