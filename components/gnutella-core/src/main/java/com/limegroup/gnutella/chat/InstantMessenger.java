@@ -1,4 +1,10 @@
 package com.limegroup.gnutella.chat;
+
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
+import java.net.*;
+import java.io.*;
+
 /**
  * this class is a subclass of Chat, also implementing
  * Chatter interface.  it is a one-to-one instant message
@@ -6,12 +12,6 @@ package com.limegroup.gnutella.chat;
  * 
  *@author rsoule
  */
-
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import java.net.*;
-import java.io.*;
-
 public class InstantMessenger implements Chatter {
 
 	// Attributes

@@ -1,4 +1,10 @@
 package com.limegroup.gnutella.chat;
+
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.*;
+import java.net.*;
+import java.io.*;
+
 /**
  * a class that establishes a connection for a chat, either
  * incoming or outgoing, and also maintains a list of all the 
@@ -6,12 +12,6 @@ package com.limegroup.gnutella.chat;
  *
  *@author rsoule
  */
-
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import java.net.*;
-import java.io.*;
-
 public class ChatManager {
 
 	// Attributes
