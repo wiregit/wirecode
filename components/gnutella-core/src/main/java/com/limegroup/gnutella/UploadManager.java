@@ -177,7 +177,8 @@ public final class UploadManager implements BandwidthTracker {
                 if(startedNewFile) {
                     // reset the queued status, so pipelined
                     // requests go through the queue again.
-                    queued = -1;
+                    if(queued!=QUEUED)
+                        queued = -1;
                     debug(uploader + " starting new file");
                     if (uploader != null) {
                         cleanupFinishedUploader(uploader, startTime);
@@ -254,7 +255,6 @@ public final class UploadManager implements BandwidthTracker {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             debug(uploader + " IOE thrown, closing socket");
-
         } catch(ArrayIndexOutOfBoundsException ae) {
             debug(uploader + " AIOOBE thrown, closing socket");
         } finally {
@@ -668,7 +668,9 @@ public final class UploadManager implements BandwidthTracker {
         boolean queue = uploader.supportsQueueing();
 
         Assert.that(maxQueueSize>0,"queue size 0, cannot use");
-        Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
+        Assert.that(uploader.getState()==Uploader.CONNECTING,
+                    "Bad state: "+uploader.getState());
+        Assert.that(uploader.getMethod()==HTTPRequestMethod.GET);
 
         if(posInQueue == -1) {//this uploader is not in the queue already
             debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");

@@ -327,13 +327,6 @@ public final class HTTPUploader implements Uploader {
 			if(_ostream != null) {
 				_method.writeHttpResponse(_state, _ostream);
 			}
-		} catch (FreeloaderUploadingException e) { 
-			setState(FREELOADER);
-			try {
-				if(_ostream != null) {
-					_method.writeHttpResponse(_state, _ostream);
-				}
-			} catch (IOException e2) {};
 		} catch (IOException e) {
             // set it to be completed if they read what they wanted
             // regardless of interruption
