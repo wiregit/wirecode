@@ -59,7 +59,7 @@ public class ManagedDownloader implements Downloader {
 
     ///////////////////////// Policy Controls ///////////////////////////
     /** The number of tries to make */
-    private static final int TRIES=100;
+    private static final int TRIES=300;
     /** The number of successive resumes to try. (So if the server kills
      *  you RESUME_TRIES+1 times, you'll give up.*/
     private static final int RESUME_TRIES=0; //2; TODO1: for testing only!
@@ -78,11 +78,13 @@ public class ManagedDownloader implements Downloader {
      *  the first try.  */
     private long calculateWaitTime() {
         if (tries<5)
-            return 30*1000l;     //30 seconds first 5 times
+            return 20*1000l;     //20 seconds first 5 times
         else if (tries<15)
-            return 5*60*1000l;   //5 minutes next 10 tries
+            return 40*1000l;     //40 seconds next 10 tries
+        else if (tries<30)
+            return 90*1000l;     //1.5 minutes next 15 tries
         else
-            return 60*60*1000l;  //hourly after that
+            return 5*60*1000l;   //5 minutes after that
     }
 
 
