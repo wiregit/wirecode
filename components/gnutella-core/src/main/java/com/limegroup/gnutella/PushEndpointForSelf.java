@@ -22,7 +22,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     
     }
     
-    public synchronized static PushEndpointForSelf instance() {
+    public static PushEndpointForSelf instance() {
         if (_instance == null)
             _instance = new PushEndpointForSelf();
         return _instance;
