@@ -38,7 +38,6 @@ public final class NIOHeaderReader implements HeaderReader {
      * @return a new <tt>NIOHeaderReader</tt> for the specified connection
      */
     public static NIOHeaderReader createReader(Connection conn) {
-        // TODO Auto-generated method stub
         return new NIOHeaderReader(conn);
     }
         
