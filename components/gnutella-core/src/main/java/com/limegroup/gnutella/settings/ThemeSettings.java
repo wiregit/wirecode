@@ -1,373 +1,118 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
+import java.util.*;
 import java.io.*;
-import java.util.Properties;
-import java.util.Enumeration;
-import java.util.zip.*;
-import java.awt.*;
 
 /**
- * This class contains key/value pairs for the current "theme."  The
- * theme defines values for the colors, fonts, etc, of the application.
+ * Class for handling all LimeWire settings that are stored to disk.  To
+ * add a new setting, simply add a new public static member to the list
+ * of settings.  Construct settings using the <tt>FACTORY</tt> instance
+ * from the <tt>AbstractSettings</tt> superclass.  Each setting factory 
+ * constructor takes the name of the key and the default value, and all 
+ * settings are typed.  Choose the correct <tt>Setting</tt> factory constructor 
+ * for your setting type.  It is also important to choose a unique string key 
+ * for your setting name -- otherwise there will be conflicts, and a runtime
+ * exception will be thrown.
  */
-public final class ThemeSettings {
+public final class ThemeSettings extends AbstractSettings {
 
-	private static final Properties DEFAULT_PROPS = new Properties();
-
-	/**
-	 * Handle to the <tt>SettingsFactory</tt> for theme settings.
-	 */
-	private static SettingsFactory FACTORY;
-
-	static {
-		reload();
-	}
+    static final File THEME_DIR_FILE =
+		new File(CommonUtils.getUserSettingsDir(), "themes");
 
 	/**
-	 * Reloads the file from disk to read values from.
+	 * The default name of the theme file for all operating systems other than
+	 * OS X.
 	 */
-	public static void reload() {
-		File themeFile = Settings.THEME_FILE.getValue();
-		String dirName = themeFile.getName();
-		dirName = dirName.substring(0, dirName.length()-4);
-		File themeDir = 
-			new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
-					 dirName);
-
-		final File THEME_PROPS = new File(themeDir, "theme.txt");
-
-		// unpack the zip if we haven't already
-		if(!themeDir.isDirectory() ||
-		   (themeDir.lastModified() < themeFile.lastModified()) ||
-		   !THEME_PROPS.isFile()) {
-
-			themeDir.mkdirs();
-            try {
-                Expand.expandFile(themeFile, themeDir);
-            } catch(IOException e) {
-				// this should never really happen, so report it
-				RouterService.error(e);						
-            }
-		} 
-		handleFactory(THEME_PROPS);		
-		Settings.THEME_DIR.setValue(themeDir);
-	}
+	private static final String DEFAULT_THEME_NAME = 
+		"default_theme.zip";
 
 	/**
-	 * Either creates the factory or reloads it as needed.
+	 * The default name of the theme file name for OS X.
 	 */
-	private static void handleFactory(File file) {
-		if(FACTORY == null) {
-			FACTORY = SettingsFactory.createFromFile(file, DEFAULT_PROPS);				
-		} else {
-			FACTORY.reload(file);
-		}
-	}
+	private static final String DEFAULT_OSX_THEME_NAME = 
+		"default_osx_theme.zip";
 
-	/////////////////// FONTS //////////////////////
-	/**
-	 * Setting for the control text font name.
-	 */
-	public static final StringSetting CONTROL_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("CONTROL_TEXT_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the control text font style.
-	 */
-	public static final IntSetting CONTROL_TEXT_FONT_STYLE =
-		FACTORY.createIntSetting("CONTROL_TEXT_FONT_STYLE", 1);
-
-	/**
-	 * Setting for the control text font size.
-	 */
-	public static final IntSetting CONTROL_TEXT_FONT_SIZE =
-		FACTORY.createIntSetting("CONTROL_TEXT_FONT_SIZE", 11);
-
-	/**
-	 * Setting for the system text font name.
-	 */
-	public static final StringSetting SYSTEM_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("SYSTEM_TEXT_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the system text font style.
-	 */
-	public static final IntSetting SYSTEM_TEXT_FONT_STYLE =
-		FACTORY.createIntSetting("SYSTEM_TEXT_FONT_STYLE", 0);
-
-	/**
-	 * Setting for the system text font size.
-	 */
-	public static final IntSetting SYSTEM_TEXT_FONT_SIZE =
-		FACTORY.createIntSetting("SYSTEM_TEXT_FONT_SIZE", 11);	
-
-	/**
-	 * Setting for the user text font name.
-	 */
-	public static final StringSetting USER_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("USER_TEXT_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the user text font style.
-	 */
-	public static final IntSetting USER_TEXT_FONT_STYLE =
-		FACTORY.createIntSetting("USER_TEXT_FONT_STYLE", 0);
-
-	/**
-	 * Setting for the user text font size.
-	 */
-	public static final IntSetting USER_TEXT_FONT_SIZE =
-		FACTORY.createIntSetting("USER_TEXT_FONT_SIZE", 11);	
-
-	/**
-	 * Setting for the menu text font name.
-	 */
-	public static final StringSetting MENU_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("MENU_TEXT_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the menu text font style.
-	 */
-	public static final IntSetting MENU_TEXT_FONT_STYLE =
-		FACTORY.createIntSetting("MENU_TEXT_FONT_STYLE", 1);
-
-	/**
-	 * Setting for the menu text font size.
-	 */
-	public static final IntSetting MENU_TEXT_FONT_SIZE =
-		FACTORY.createIntSetting("MENU_TEXT_FONT_SIZE", 11);	
-
-	/**
-	 * Setting for the window title font name.
-	 */
-	public static final StringSetting WINDOW_TITLE_FONT_NAME =
-		FACTORY.createStringSetting("WINDOW_TITLE_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the window title font style.
-	 */
-	public static final IntSetting WINDOW_TITLE_FONT_STYLE =
-		FACTORY.createIntSetting("WINDOW_TITLE_FONT_STYLE", 1);
-
-	/**
-	 * Setting for the window title font size.
-	 */
-	public static final IntSetting WINDOW_TITLE_FONT_SIZE =
-		FACTORY.createIntSetting("WINDOW_TITLE_FONT_SIZE", 11);	
-
-	/**
-	 * Setting for the sub text font name.
-	 */
-	public static final StringSetting SUB_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("SUB_TEXT_FONT_NAME", "dialog");
-
-	/**
-	 * Setting for the sub text font style.
-	 */
-	public static final IntSetting SUB_TEXT_FONT_STYLE =
-		FACTORY.createIntSetting("SUB_TEXT_FONT_STYLE", 0);
-
-	/**
-	 * Setting for the sub text font size.
-	 */
-	public static final IntSetting SUB_TEXT_FONT_SIZE =
-		FACTORY.createIntSetting("SUB_TEXT_FONT_SIZE", 10);
-
-	/////////////////// END FONTS //////////////////////
-
-	/**
-	 * Setting for the primary 1 color.
-	 */
-	public static final ColorSetting PRIMARY1_COLOR = 
-		FACTORY.createColorSetting("PRIMARY1_COLOR", 
-								   new Color(74,110,188));
-
-	/**
-	 * Setting for the primary 2 color.
-	 */
-	public static final ColorSetting PRIMARY2_COLOR = 
-		FACTORY.createColorSetting("PRIMARY2_COLOR", 
-								   new Color(135,145,170));
-
-	/**
-	 * Setting for the primary 3 color.
-	 */
-	public static final ColorSetting PRIMARY3_COLOR = 
-		FACTORY.createColorSetting("PRIMARY3_COLOR", 
-								   new Color(216,225,244));
-
-	/**
-	 * Setting for the secondary 1 color.
-	 */
-	public static final ColorSetting SECONDARY1_COLOR =
-		FACTORY.createColorSetting("SECONDARY1_COLOR", 
-								   new Color(50,68,107));
-
-	/**
-	 * Setting for the secondary 2 color.
-	 */
-	public static final ColorSetting SECONDARY2_COLOR =
-		FACTORY.createColorSetting("SECONDARY2_COLOR", 
-								   new Color(167,173,190));
-
-	/**
-	 * Setting for the secondary 3 color.
-	 */
-	public static final ColorSetting SECONDARY3_COLOR =
-		FACTORY.createColorSetting("SECONDARY3_COLOR", 
-								   new Color(199,201,209));
-
-	/**
-	 * Setting for the window 1 color.
-	 */
-	public static final ColorSetting WINDOW1_COLOR =
-		FACTORY.createColorSetting("WINDOW1_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 2 color.
-	 */
-	public static final ColorSetting WINDOW2_COLOR =
-		FACTORY.createColorSetting("WINDOW2_COLOR", 
-								   new Color(199,201,209));
-
-	/**
-	 * Setting for the window 3 color.
-	 */
-	public static final ColorSetting WINDOW3_COLOR =
-		FACTORY.createColorSetting("WINDOW3_COLOR", 
-								   new Color(199,201,209));
-
-	/**
-	 * Setting for the window 4 color.
-	 */
-	public static final ColorSetting WINDOW4_COLOR =
-		FACTORY.createColorSetting("WINDOW4_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 5 color.
-	 */
-	public static final ColorSetting WINDOW5_COLOR =
-		FACTORY.createColorSetting("WINDOW5_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 6 color.
-	 */
-	public static final ColorSetting WINDOW6_COLOR =
-		FACTORY.createColorSetting("WINDOW6_COLOR", 
-								   new Color(255,255,255));
-
-	/**
-	 * Setting for the window 7 color.
-	 */
-	public static final ColorSetting WINDOW7_COLOR =
-		FACTORY.createColorSetting("WINDOW7_COLOR", 
-								   new Color(255,255,255));
-
-	/**
-	 * Setting for the window 8 color.
-	 */
-	public static final ColorSetting WINDOW8_COLOR =
-		FACTORY.createColorSetting("WINDOW8_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 9 color.
-	 */
-	public static final ColorSetting WINDOW9_COLOR =
-		FACTORY.createColorSetting("WINDOW9_COLOR", 
-								   new Color(0,0,0));	
-
-	/**
-	 * Setting for the window 10 color.
-	 */
-	public static final ColorSetting WINDOW10_COLOR =
-		FACTORY.createColorSetting("WINDOW10_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 11 color.
-	 */
-	public static final ColorSetting WINDOW11_COLOR =
-		FACTORY.createColorSetting("WINDOW11_COLOR", 
-								   new Color(0,0,0));
-
-	/**
-	 * Setting for the window 12 color.
-	 */
-	public static final ColorSetting WINDOW12_COLOR =
-		FACTORY.createColorSetting("WINDOW12_COLOR", 
-								   new Color(199,201,209));							
-
-	/**
-	 * Setting for the table header background color.
-	 */
-	public static final ColorSetting TABLE_HEADER_BACKGROUND_COLOR =
-		FACTORY.createColorSetting("TABLE_HEADER_BACKGROUND_COLOR",
-								   new Color(117, 142, 197));
-
-	/**
-	 * Setting for the table background color.
-	 */
-	public static final ColorSetting TABLE_BACKGROUND_COLOR =
-		FACTORY.createColorSetting("TABLE_BACKGROUND_COLOR", 
-								   new Color(255,255,255));
-
-	/**
-	 * Setting for the not sharing label color.
-	 */
-	public static final ColorSetting NOT_SHARING_LABEL_COLOR =
-		FACTORY.createColorSetting("NOT_SHARING_LABEL_COLOR", 
-								   new Color(208, 0, 5));
 	
 	/**
-	 * Setting for the search fade color.
+	 * The full path to the default theme file.
 	 */
-	public static final ColorSetting SEARCH_FADE_COLOR =
-		FACTORY.createColorSetting("SEARCH_FADE_COLOR", 
-								   new Color(135,146,185));
+	static final File DEFAULT_THEME_FILE = 
+		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
 
 	/**
-	 * Setting for the search button color.
+	 * The full path to the default theme file on OS X.
 	 */
-	public static final ColorSetting SEARCH_BUTTON_COLOR =
-		FACTORY.createColorSetting("SEARCH_BUTTON_COLOR", 
-								   new Color(255,255,255));
+	static final File DEFAULT_OSX_THEME_FILE = 
+		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
+
 
 	/**
-	 * Setting for the search result speed color.
+	 * The array of all theme files that should be copied by default
+	 * from the themes jar file.
 	 */
-	public static final ColorSetting SEARCH_RESULT_SPEED_COLOR =
-		FACTORY.createColorSetting("SEARCH_RESULT_SPEED_COLOR", 
-								   new Color(7,170,0));
+	private static final String[] THEMES = {
+		DEFAULT_THEME_NAME,
+		DEFAULT_OSX_THEME_NAME,
+		"black_theme.zip",
+	}; 
+	
+	/**
+	 * Statically expand any zip files in our jar if they're newer than the
+	 * ones on disk.
+	 */
+	
+	static {
+		File themesJar = new File("themes.jar");
+		if(!themesJar.isFile()) {
+			themesJar = new File(new File("lib"), "themes.jar");
+		}
+		if(themesJar.isFile()) {
+			long jarMod = themesJar.lastModified();
+			for(int i=0; i<THEMES.length; i++) { 
+				File zipFile = new File(THEME_DIR_FILE, THEMES[i]);
+				if(zipFile.isFile()) {
+					long zipMod = zipFile.lastModified();
+					if(jarMod > zipMod) {
+						CommonUtils.copyResourceFile(THEMES[i], 
+													 new File(THEME_DIR_FILE, 
+															  THEMES[i]), true);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Setting for the default theme file to use for LimeWire display.
+	 */
+	public static final FileSetting THEME_DEFAULT = 
+		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ? 
+								  DEFAULT_OSX_THEME_FILE : 
+								  DEFAULT_THEME_FILE); 
 
 	/**
-	 * Setting for the playlist "playing song" color.
+	 * Setting for the default theme directory to use in LimeWire display.
 	 */
-	public static final ColorSetting PLAYING_SONG_COLOR =
-		FACTORY.createColorSetting("PLAYING_SONG_COLOR", 
-								   new Color(7,170,0));
-	/**
-	 * Setting for the search ip address color.
-	 */
-	public static final ColorSetting SEARCH_IP_COLOR =
-		FACTORY.createColorSetting("SEARCH_IP_COLOR", 
-								   new Color(0,0,0));
+	public static final FileSetting THEME_DEFAULT_DIR = 
+		FACTORY.createFileSetting("THEME_DEFAULT_DIR", CommonUtils.isMacOSX() ?
+								  new File(THEME_DIR_FILE, 
+										   "default_osx_theme") :
+								  new File(THEME_DIR_FILE, 
+										   "default_theme"));
 
 	/**
-	 * Setting for the search ip private address color.
+	 * Setting for the file name of the theme file.
 	 */
-	public static final ColorSetting SEARCH_PRIVATE_IP_COLOR =
-		FACTORY.createColorSetting("SEARCH_PRIVATE_IP_COLOR", 
-								   new Color(255, 0, 0));
+	public static final FileSetting THEME_FILE =
+		FACTORY.createFileSetting("THEME_FILE", 
+								  THEME_DEFAULT.getValue());
 
-	/*
-	public static void main(String[] args) {
-		ThemeSettings.reload();
-	}	
-	*/
+	/**
+	 * Setting for the file name of the theme directory.
+	 */
+	public static final FileSetting THEME_DIR =
+		FACTORY.createFileSetting("THEME_DIR", 
+								  THEME_DEFAULT_DIR.getValue());
 }
