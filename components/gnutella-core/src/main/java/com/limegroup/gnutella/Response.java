@@ -360,8 +360,7 @@ public class Response {
             baos.write(c);
         }
         byte[] rawMeta = baos.toByteArray();
-        String betweenNulls = new String(rawMeta);
-        if(betweenNulls==null || betweenNulls.equals("")) {
+        if(rawMeta == null || rawMeta.length == 0) {
 			if(is.available() < 16) {
 				throw new IOException("not enough room for the GUID");
 			}
