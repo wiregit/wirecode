@@ -77,14 +77,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                          bucket   tryAllDownloads2
                                     |
                                   tryAllDownloads3
-                                  /      \
-                     startBestDownload    wait
-                     /               \
-                findConnectable      (asynchronously)
-               /    |                  \
-       removeBest   HTTPDownloader.    tryOneDownload
-                        connect              |
-                                       HTTPDownloader.doDownload
+                                    | 
+                               (asynchronously)
+                                    |
+                              connectAndDownload
+                          /           |             \
+        establishConnection     assignDownload       doDownload
+             |                        |                        \
+       HTTPDownloader.connectTCP  assignWhite/assignGrey        \
+                                      |           HTTPDownlaoder.doDownload
+                               HTTPDownloader.connectHTTP
 
       tryAllDownloads does the bucketing of files, as well as waiting for
       retries.  The core downloading loop is done by tryAllDownloads3.
@@ -181,13 +183,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         this map. The acceptor threads consumes these values and notifies the
         connecting threads when it is done.        
     */
-    private Map miniRFDToLock = new Hashtable();
+    private Map miniRFDToLock = Collections.synchronizedMap(new HashMap());
     /** Object -> Socket
         When the acceptor thread has consumed the information in miniRDFToLock
         it adds values to this map before notifying the connecting thread. 
         The connecting thread consumes data from this map.
     */
-    private Map threadLockToSocket = new Hashtable();
+    private Map threadLockToSocket=Collections.synchronizedMap(new HashMap());
     
     /** List of intervals within the file which have not been allocated to
      * any downloader yet. The set of these intervals represents the "white"
