@@ -16,7 +16,7 @@ import com.sun.java.util.collections.Iterator;
  *
  * BinaryHeap now contains a constructor to allow dynamic resizing as well.
  */
-public class BinaryHeap
+public class BinaryHeap implements Cloneable
 {
     /**
      * number of elements currently present in the heap
@@ -64,6 +64,18 @@ public class BinaryHeap
         currentSize = 0;
         this.maxSize = maxSize;
         array = new Comparable[maxSize + 1];
+    }
+
+    /**
+     * Copy constructor.  Creates a shallow copy of other.
+     */
+    public BinaryHeap(BinaryHeap other)
+    {
+        this.currentSize=other.currentSize;
+        this.array=new Comparable[other.array.length];
+        System.arraycopy(other.array, 0, this.array, 0, other.array.length);
+        this.maxSize=other.maxSize;
+        this.resizable=other.resizable;   
     }
 
     /**
@@ -319,6 +331,11 @@ public class BinaryHeap
         return currentSize==0;
     }
 
+    public Object clone() 
+    {
+        return new BinaryHeap(this);
+    }
+
     public String toString()
     {
         StringBuffer ret=new StringBuffer("[");
@@ -391,7 +408,7 @@ public class BinaryHeap
         //try inserting when overfilled
         q=new BinaryHeap(4);
         Assert.that(q.insert(one)==null);
-        Assert.that(q.addR(four)==0);
+        Assert.that(q.insert(four)==null);
         Assert.that(q.insert(three)==null);
         Assert.that(! q.isFull());
         Assert.that(q.insert(two)==null);
@@ -401,7 +418,7 @@ public class BinaryHeap
         System.out.println("(The spec does not say that the smallest"
                            +" element is removed on overflow.)");
         Assert.that(q.insert(five)!=null);
-        Assert.that(q.addR(five)==1);
+        Assert.that(q.insert(five)!=null);
         Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(four));
@@ -409,6 +426,7 @@ public class BinaryHeap
         Assert.that(q.isEmpty());
 
         testResize();
+        testClone();
     }
     
     static void testResize() {
@@ -421,7 +439,7 @@ public class BinaryHeap
 
         Assert.that(q.insert(one)==null);
         Assert.that(! q.isFull());
-        Assert.that(q.addR(four)==0);
+        Assert.that(q.insert(four)==null);
         Assert.that(q.capacity()==2);
         Assert.that(q.isFull());
 
@@ -449,6 +467,20 @@ public class BinaryHeap
         Assert.that(q.extractMax()==one);
         Assert.that(q.isEmpty());
         Assert.that(q.capacity()==8);
+    }
+    
+    private static void testClone() {
+        BinaryHeap h1=new BinaryHeap(100);
+        h1.insert(new MyInteger(3));
+        h1.insert(new MyInteger(5));
+        h1.insert(new MyInteger(2));
+        BinaryHeap h2=new BinaryHeap(h1);
+        Assert.that(h1.size()==h2.size());
+        Assert.that(h1.capacity()==h2.capacity());
+        Assert.that(h1.extractMax()==h2.extractMax());  //not .equals!
+        Assert.that(h1.extractMax()==h2.extractMax());  //not .equals!
+        Assert.that(h1.extractMax()==h2.extractMax());  //not .equals!
+        Assert.that(h2.isEmpty());
     }
 
     //For testing with Java 1.1.8
