@@ -148,6 +148,8 @@ public class MetaFileManager extends FileManager {
             LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
             if (collection != null && !schemasAddedTo.contains(uri)) {
                 schemasAddedTo.add(uri);
+                if( ID3Reader.isCorrupted(currDoc) )
+                    currDoc = ID3Reader.fixCorruption(currDoc);
                 collection.addReplyWithCommit(file, fd, currDoc);
             }
         }
