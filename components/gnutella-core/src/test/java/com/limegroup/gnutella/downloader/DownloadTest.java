@@ -761,8 +761,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.create(rfd4.getSHA1Urn());
 
-        AlternateLocation al4 =
-			AlternateLocation.create(rfd4);
+        AlternateLocation al4 = AlternateLocation.create(rfd4);
         ualt.add(al4);
 
         uploader1.setAlternateLocations(ualt);
@@ -1193,16 +1192,71 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }    
     
-    public void testDownloadAtCapacityReplaceQueued() throws Exception {
-        //TODO: add test for replacing a queued thread with a better queued
-        //thread.  
-        
-        //TODO: add test to make sure that the queuedThreads gets updated
-        //properly when a queued downloader get's promoted.
 
-        //TODO: add test to make sure that if two downloads are swarming, adding
-        //a third will not cause any of the others to drop
+    /**
+     * Tests that if the downloader has two sources, adding a third does not
+     * cause it to drop either of the others -- important to test since we have
+     * added logic that tries to knock off queued download and replace with good
+     * downloaders
+     */
+    public void testFullSwarmDownloadsNotDropped() throws Exception {
+        debug("-testing that a good source does not dislodge other good ones"+
+              " when swarming at capacity");
+       int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
+                                            SpeedConstants.MODEM_SPEED_INT);
+        final int RATE = 200;
+        final int FUDGE_FACTOR = RATE*1024;
+        uploader1.setRate(RATE);
+        uploader3.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
+        RemoteFileDesc rfd3 = newRFD(PORT_3, 100);
+        
+        ManagedDownloader downloader = null;        
+        downloader=(ManagedDownloader)RouterService.download(rfds, false);
+        Thread.sleep(1000);
+        int swarm = downloader.getNumDownloaders();
+        int queued = downloader.getQueuedHostCount();
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 2 not queued ",0, queued);
+
+        //try to add a third
+        downloader.addDownload(rfd3, true);
+        Thread.sleep(1000);
+        
+        //make sure we killed the queued
+        swarm = downloader.getNumDownloaders();
+        queued = downloader.getQueuedHostCount();
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 2 not replaced ",0, queued);
+
+        waitForComplete(false);
+        if(isComplete())
+            debug("pass \n");
+        else
+            fail("FAILED: complete corrupt");
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+
+        assertLessThan("u1 did too much", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did too much", TestFile.length()/2+FUDGE_FACTOR, u2);
+        assertEquals("u3 replaced a good downloader",0,u3);
+
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
+    }
+
+    /**
+     * Tests that an uploader offering the file, replaces a queued uploader
+     * when even at swarm capacity
+     */
+    public void testDownloadAtCapacityReplaceQueued() throws Exception {
+        debug("-testing that if max threads are queued or downloading, and a "+
+              "good location comes along, the queued downloader is dislodged");
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
@@ -1253,6 +1307,159 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 
+    /**
+     * Tests that when we have max download threads, and there is a queued
+     * downloader, it does not get replaced by another queued downloader with a
+     * worse position, but does get replaced by a queued downloader that has a
+     * better position
+     */
+    public void testDownloadAtCapacityGetsBetterQueued() throws Exception {
+        debug("-testing that if max threads are queued or downloading, and a "+
+              "queued downloader gets by a queued downloader only if the new "+
+              "one has a better queue position");
+        
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
+                                            SpeedConstants.MODEM_SPEED_INT);
+        final int RATE = 50;
+        final int FUDGE_FACTOR = RATE*1024;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader2.setQueue(true);
+        uploader2.unqueue = false; //never unqueue this uploader.
+        uploader2.queuePos=3;
+
+        uploader3.setRate(RATE);
+        uploader3.setQueue(true);
+        uploader3.unqueue = false; //never unqueue this uploader.
+        uploader3.queuePos=5;
+
+        uploader4.setRate(RATE);
+        uploader4.setQueue(true);
+        uploader4.unqueue = false; //never unqueue this uploader.
+        uploader4.queuePos=1;
+
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd3=newRFD(PORT_3, 100);
+        RemoteFileDesc rfd4=newRFD(PORT_4, 100);
+        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        
+        ManagedDownloader downloader = null;
+        downloader = (ManagedDownloader)RouterService.download(rfds, false);
+        Thread.sleep(1000);
+        int swarm = downloader.getNumDownloaders();
+        int queued = downloader.getQueuedHostCount();
+        int qPos = Integer.parseInt
+        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 2 not queued ",1,queued);
+        assertEquals("incorrect queue pos ",3,qPos);
+
+        //now try adding uploader 3 which is worse, nothing should change
+        downloader.addDownload(rfd3,true);
+        Thread.sleep(1000);
+        swarm = downloader.getNumDownloaders();
+        queued = downloader.getQueuedHostCount();
+        qPos = Integer.parseInt
+        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 2 not queued ",1,queued);
+        assertEquals("incorrect queue pos ",3,qPos);
+
+        //now try adding uploader 4 which is better, we should drop uploader2
+        downloader.addDownload(rfd4,true);
+        Thread.sleep(1000);
+        swarm = downloader.getNumDownloaders();
+        queued = downloader.getQueuedHostCount();
+        qPos = Integer.parseInt
+        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 4 not queued ",1,queued);
+        assertEquals("incorrect queue pos ",1,qPos);        
+
+        waitForComplete(false);
+        if(isComplete())
+            debug("pass \n");
+        else
+            fail("FAILED: complete corrupt");
+
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
+    }
+
+    /**
+     *  Tests that queued downloads advance on the downloader, this is important
+     *  because we use the queue position to decide which downloader to get rid
+     *  off when a good uploader shows up
+     */
+    public void testQueueAdvancementWorks() throws Exception {
+        debug("-testing that if queued downloaders advance we downloaders "+
+              "register that they did, so that the choice of which downloader"+
+              " to replace is made correctly");
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
+                                            SpeedConstants.MODEM_SPEED_INT);
+        final int RATE = 50;
+        final int FUDGE_FACTOR = RATE*1024;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader3.setRate(RATE);
+
+        uploader1.setQueue(true);
+        uploader1.unqueue = false; //never unqueue this uploader.
+        uploader1.queuePos=5;//the worse one
+        uploader2.setQueue(true);
+        uploader2.unqueue = false; //never unqueue this uploader.
+        uploader2.queuePos = 3;//the better one
+        
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd3=newRFD(PORT_3, 100);
+        
+        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        
+        ManagedDownloader downloader = null;
+        downloader = (ManagedDownloader)RouterService.download(rfds,false);
+        Thread.sleep(1000);
+        int swarm = downloader.getNumDownloaders();
+        int queued = downloader.getQueuedHostCount();
+        
+        assertEquals("incorrect swarming ",2,swarm);
+        assertEquals("both uploaders should be queued",2,queued);
+        
+        uploader1.queuePos = 1;//make uploader1 become better
+        //wait for the downloader to make the next requests to uploaders.
+        Thread.sleep(uploader1.MIN_POLL+2000);
+
+        swarm = downloader.getNumDownloaders();
+        queued = downloader.getQueuedHostCount();
+        assertEquals("incorrect swarming ",2,swarm);
+        assertEquals("both uploaders should still be queued",2,queued);
+        
+        downloader.addDownload(rfd3,true);
+        Thread.sleep(1000);
+        //now uploader 2 should have been removed.
+        swarm = downloader.getNumDownloaders();
+        queued = downloader.getQueuedHostCount();
+        int qPos = Integer.parseInt
+        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        
+        assertEquals("incorrect swarming ",2,swarm);
+        assertEquals("queued uploader not dropped",1,queued);
+        assertEquals("wrong uploader removed",1,qPos);
+
+        waitForComplete(false);
+        if(isComplete())
+            debug("pass \n");
+        else
+            fail("FAILED: complete corrupt");
+
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
+    }
+    
     /**
      * This test MUST BE LAST because it leaves a file around.
      * I suppose it could be cleaned up ... but oh well.
@@ -1533,9 +1740,3 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 }
-
-
-
-
-
-

@@ -50,11 +50,12 @@ public class TestUploader {
     private boolean queue = false;
     private long minPollTime = -1;
     private long maxPollTime = -1;
-    private final int MIN_POLL = 45000;
+    final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
     private int partial = 0;
     
     boolean unqueue = true;
+    int queuePos = 1;
 
 
     /**
@@ -126,6 +127,7 @@ public class TestUploader {
         minPollTime = -1;
         maxPollTime = -1;
         unqueue = true;
+        queuePos=1;
     }
 
     public int amountUploaded() {
@@ -363,7 +365,7 @@ public class TestUploader {
 
         if(queue) {
             DownloadTest.debug("UPLOAD QUEUED");
-            String s = "X-Queue: position=1" +
+            String s = "X-Queue: position="+queuePos+
                 ", pollMin=" + MIN_POLL/1000 + 
                 ", pollMax=" + MAX_POLL/1000 +
                 "\r\n";
