@@ -21,8 +21,8 @@ import com.sun.java.util.collections.*;
 public class ManagedConnectionBufferTest extends BaseTestCase {
 	
     public static final int PORT=6666;
-    private ManagedConnection out = null;
-    private Connection in = null;
+    private static ManagedConnection out = null;
+    private static Connection in = null;
 
 	public ManagedConnectionBufferTest(String name) {
 		super(name);
@@ -48,6 +48,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
 		// disable connection removal
 		ConnectionSettings.REMOVE_ENABLED.setValue(false);
+        ConnectionSettings.SOFT_MAX.setValue((byte)4);
 
         RouterService rs = 
 			new RouterService(new ActivityCallbackStub());
@@ -67,15 +68,15 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.close();
     }
 
-    public void testSendFlush() 
-		throws IOException, BadPacketException {
+
+    public void testSendFlush() throws Exception {
         PingRequest pr=null;
         long start=0;
         long elapsed=0;
 
         assertEquals("unexpected # sent messages", 0, out.getNumMessagesSent()); 
         assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
-        pr=new PingRequest((byte)4);
+        pr=new PingRequest((byte)3);
         out.send(pr);
         start=System.currentTimeMillis();        
         pr=(PingRequest)in.receive();
@@ -85,7 +86,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 					 out.getBytesSent(), pr.getTotalLength());
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
-        assertEquals("unexpected ttl", 4, pr.getTTL());
+        assertEquals("unexpected ttl", 3, pr.getTTL());
     }
     
     /**
@@ -98,8 +99,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * hops will BOTH be stored in the queue, because each hop is a different
      * priority, and each priority is a different bucket.
      */
-    public void testReorderBuffer() 
-		throws IOException, BadPacketException {
+    public void testReorderBuffer() throws Exception {
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
         out.stopOutputRunner();
