@@ -1,8 +1,12 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
+
+import junit.framework.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -11,29 +15,61 @@ import java.io.*;
  * Out-of-process test to check whether ultrapeers handle query routing, normal
  * routing, routing of marked pongs, etc.
  */
-public class UltrapeerTester {
-    static final int PORT=6347;
+public class UltrapeerTester extends TestCase {
+    static final int PORT=6667;
     static final int TIMEOUT=500;
     static Connection leaf;
     static Connection ultrapeer;
     static Connection old;
 
-    public static void main(String args[]) {
-        System.out.println(
-            "Please make sure you have an ultrapeer with incoming slots, \n"
-           +"running on port "+PORT+" of localhost, with no connections\n");
-        
+    public UltrapeerTester(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return new TestSuite(UltrapeerTester.class);
+    }    
+   
+
+    public void testLegacy() {
+        //Setup LimeWire backend.  For testing other vendors, you can skip all
+        //this and manually configure a client to listen on port 6667, with
+        //incoming slots and no connections.
+        SettingsManager settings=SettingsManager.instance();
+        settings.setPort(PORT);
+        settings.setDirectories(new File[0]);
+        settings.setUseQuickConnect(false);
+        settings.setQuickConnectHosts(new String[0]);
+        settings.setConnectOnStartup(false);
+        settings.setEverSupernodeCapable(true);
+        settings.setDisableSupernodeMode(false);
+        settings.setForceSupernodeMode(true);
+        settings.setMaxShieldedClientConnections(10);
+        settings.setKeepAlive(6);
+        ActivityCallback callback=new ActivityCallbackStub();
+        FileManager files=new FileManagerStub();
+        MessageRouter router=new MessageRouterStub();
+        RouterService rs=new RouterService(callback,
+                                           router,
+                                           files,
+                                           new DummyAuthenticator());
+        assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
+        rs.initialize();
+        rs.clearHostCatcher();
+        rs.connect();
+
+        //Start actual tests.
         try {
             connect();
-            testBroadcastFromLeaf();  //also tests replies, pushes
-            testBroadcastFromOld();
-            testBroadcastFromOldToLeaf();
-            testPingBroadcast();      //also tests replies
-            testBigPingBroadcast();
-            testMisroutedPong();
-            testUltrapeerPong();
-            testNullQueryURNRequest();
-            testDropAndDuplicate();   //must be last; closes old
+            doBroadcastFromLeaf();  //also tests replies, pushes
+            doBroadcastFromOld();
+            doBroadcastFromOldToLeaf();
+            doPingBroadcast();      //also tests replies
+            doBigPingBroadcast();
+            doMisroutedPong();
+            doUltrapeerPong();
+            doNullQueryURNRequest();
+            doDropAndDuplicate();   //must be last; closes old
             shutdown();
         } catch (IOException e) { 
             System.err.println("Mysterious IOException:");
@@ -43,7 +79,7 @@ public class UltrapeerTester {
             e.printStackTrace();
         }
         
-        System.out.println("Done");
+        //System.out.println("Done");
     }
 
     private static void connect() throws IOException {
@@ -71,10 +107,10 @@ public class UltrapeerTester {
         }
     }
 
-    private static void testBroadcastFromLeaf() 
+    private static void doBroadcastFromLeaf() 
              throws IOException, BadPacketException {
-        System.out.println(
-            "-Testing normal broadcast from leaf, with replies and pushes");
+        //System.out.println(
+        //   "-Testing normal broadcast from leaf, with replies and pushes");
         drain(old);
         drain(ultrapeer);
 
@@ -84,16 +120,16 @@ public class UltrapeerTester {
         leaf.flush();
         
         Message m=old.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)1); //used to be not decremented
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue(m.getHops()==(byte)1); //used to be not decremented
+        assertTrue(m.getTTL()==(byte)6);
       
         m=ultrapeer.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)1); //used to be not decremented
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue(m.getHops()==(byte)1); //used to be not decremented
+        assertTrue(m.getTTL()==(byte)6);
 
         //2. Check that replies are routed back.
         drain(leaf);
@@ -110,7 +146,7 @@ public class UltrapeerTester {
         old.flush();
 
         QueryReply replyRead=(QueryReply)leaf.receive(TIMEOUT);
-        Assert.that(Arrays.equals(guid1, replyRead.getClientGUID()));
+        assertTrue(Arrays.equals(guid1, replyRead.getClientGUID()));
 
         drain(leaf);
         Response response2=new Response(0l, 0l, "response2.txt");
@@ -126,7 +162,7 @@ public class UltrapeerTester {
         ultrapeer.flush();
 
         replyRead=(QueryReply)leaf.receive(TIMEOUT);
-        Assert.that(Arrays.equals(guid2, replyRead.getClientGUID()));
+        assertTrue(Arrays.equals(guid2, replyRead.getClientGUID()));
 
         //3. Check that pushes are routed (not broadcast)
         drain(old);
@@ -139,8 +175,8 @@ public class UltrapeerTester {
         leaf.send(push1);
         leaf.flush();
         PushRequest pushRead=(PushRequest)old.receive(TIMEOUT);
-        Assert.that(pushRead.getIndex()==0);
-        Assert.that(! drain(ultrapeer));
+        assertTrue(pushRead.getIndex()==0);
+        assertTrue(! drain(ultrapeer));
 
         PushRequest push2=new PushRequest(GUID.makeGuid(),
                                           (byte)2,
@@ -150,8 +186,8 @@ public class UltrapeerTester {
         leaf.send(push2);
         leaf.flush();
         pushRead=(PushRequest)ultrapeer.receive(TIMEOUT);
-        Assert.that(pushRead.getIndex()==1);
-        Assert.that(! drain(old));        
+        assertTrue(pushRead.getIndex()==1);
+        assertTrue(! drain(old));        
 
         //4. Check that queries can re-route push routes
         drain(leaf);
@@ -159,7 +195,7 @@ public class UltrapeerTester {
         ultrapeer.send(reply1);
         ultrapeer.flush();
         replyRead=(QueryReply)leaf.receive(TIMEOUT);
-        Assert.that(Arrays.equals(guid1, replyRead.getClientGUID()));
+        assertTrue(Arrays.equals(guid1, replyRead.getClientGUID()));
         PushRequest push3=new PushRequest(GUID.makeGuid(),
                                           (byte)2,
                                           guid1,
@@ -168,17 +204,17 @@ public class UltrapeerTester {
         leaf.send(push3);
         leaf.flush();
         pushRead=(PushRequest)ultrapeer.receive(TIMEOUT);
-        Assert.that(pushRead.getIndex()==3);
-        Assert.that(! drain(old));
+        assertTrue(pushRead.getIndex()==3);
+        assertTrue(! drain(old));
     }
 
     /** This test makes sure that query's with no query string but with
      *  specified urn's get through to leaves, etc.
      */ 
-    private static void testNullQueryURNRequest() 
+    private static void doNullQueryURNRequest() 
         throws IOException, BadPacketException {
-        System.out.println("-Testing null query string with non-null URN" +
-                           " QR routering.");
+        //System.out.println("-Testing null query string with non-null URN" +
+        //                   " QR routing.");
         
         // drain all connections
         drain(ultrapeer);
@@ -216,22 +252,22 @@ public class UltrapeerTester {
 
         // did recv1 get everything a-ok?
         QueryRequest reqRead=(QueryRequest)rcv1.receive(TIMEOUT);
-        Assert.that(Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        Assert.that(reqRead.getQueryUrns() != null);
-        Assert.that(currUrnSet.equals(reqRead.getQueryUrns()));
+        assertTrue(Arrays.equals(guid.bytes(), reqRead.getGUID()));
+        assertTrue(reqRead.getQueryUrns() != null);
+        assertTrue(currUrnSet.equals(reqRead.getQueryUrns()));
 
         // did recv2 get everything a-ok?
         reqRead=(QueryRequest)rcv2.receive(TIMEOUT);
-        Assert.that(Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        Assert.that(reqRead.getQueryUrns() != null);
-        Assert.that(currUrnSet.equals(reqRead.getQueryUrns()));
+        assertTrue(Arrays.equals(guid.bytes(), reqRead.getGUID()));
+        assertTrue(reqRead.getQueryUrns() != null);
+        assertTrue(currUrnSet.equals(reqRead.getQueryUrns()));
     }
 
 
-    private static void testBroadcastFromOld() 
+    private static void doBroadcastFromOld() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing normal broadcast from old connnection"
-                           +", no forwarding to leaf");
+        //System.out.println("-Testing normal broadcast from old connnection"
+        //                   +", no forwarding to leaf");
         drain(ultrapeer);
         drain(leaf);
 
@@ -240,18 +276,18 @@ public class UltrapeerTester {
         old.flush();
               
         Message m=ultrapeer.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
 
-        Assert.that(! drain(leaf));
+        assertTrue(! drain(leaf));
     }
 
-    private static void testBroadcastFromOldToLeaf() 
+    private static void doBroadcastFromOldToLeaf() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing normal broadcast from old connnection"
-                           +", with forwarding to leaf");
+        //System.out.println("-Testing normal broadcast from old connnection"
+        //                   +", with forwarding to leaf");
         drain(ultrapeer);
         drain(leaf);
 
@@ -260,22 +296,22 @@ public class UltrapeerTester {
         old.flush();
               
         Message m=ultrapeer.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("test"));
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("test"));
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
 
         m=leaf.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("test"));
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("test"));
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
     }
 
-    private static void testPingBroadcast() 
+    private static void doPingBroadcast() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing ping broadcast from old connnection"
-                           +", no forwarding to leaf, with reply");
+        //System.out.println("-Testing ping broadcast from old connnection"
+        //                   +", no forwarding to leaf, with reply");
         drain(old);
         drain(leaf);
 
@@ -285,11 +321,11 @@ public class UltrapeerTester {
         ultrapeer.flush();
               
         m=old.receive(TIMEOUT);
-        Assert.that(m instanceof PingRequest);
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof PingRequest);
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
 
-        Assert.that(! drain(leaf));
+        assertTrue(! drain(leaf));
 
         //Send reply
         drain(ultrapeer);        
@@ -305,13 +341,13 @@ public class UltrapeerTester {
             if (pongRead.getPort()==pong.getPort())
                 return;
         }
-        Assert.that(false, "Pong wasn't routed");
+        assertTrue("Pong wasn't routed", false);
     }
 
-    private static void testBigPingBroadcast() 
+    private static void doBigPingBroadcast() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing big ping broadcast from leaf connnection"
-                           +", no payload forwarding to old, with big reply");
+        //System.out.println("-Testing big ping broadcast from leaf connnection"
+        //                   +", no payload forwarding to old, with big reply");
         drain(old);
         drain(ultrapeer);
 
@@ -332,26 +368,26 @@ public class UltrapeerTester {
             ping = (PingRequest)m;
         }catch(ClassCastException cce){
             cce.printStackTrace();
-            Assert.that(false,"Big ping not created properly on old client");
+            assertTrue("Big ping not created properly on old client", false);
         }
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
-        Assert.that(m.getLength()==16);
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
+        assertTrue(m.getLength()==16);
         //lets make sure the payload got there OK
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try{
             ping.write(stream);
         }catch(IOException ioe){
             ioe.printStackTrace();
-            Assert.that(false, "error while writing payload in old client");
+            assertTrue("error while writing payload in old client", false);
         }
         byte[] b = stream.toByteArray();
         //get rid of bytes 0-22(inclusive) ie the header
 
         String out = new String(b,23,b.length-23);
 
-        Assert.that(out.equals
-                    ("ABCDEFGHIJKLMNOP"),"wrong payload in old client "+out);
+        assertTrue("wrong payload in old client "+out,
+                   out.equals("ABCDEFGHIJKLMNOP"));
         
         //1c. Make sure old gets it wihtout payload.
         m=old.receive(TIMEOUT);
@@ -360,11 +396,11 @@ public class UltrapeerTester {
             ping = (PingRequest)m;
         }catch(ClassCastException cce){
             cce.printStackTrace();
-            Assert.that(false,"Big ping not created properly on old client");
+            assertTrue("Big ping not created properly on old client", false);
         }
-        Assert.that(m.getHops()==(byte)1); 
-        Assert.that(m.getTTL()==(byte)6);
-        Assert.that(m.getLength()==0);
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
+        assertTrue(m.getLength()==0);
 
 
         //2a. Send reply from ultrapeer
@@ -410,19 +446,19 @@ public class UltrapeerTester {
                 break;
             }
         }
-        Assert.that(ourPong != null, "Pong wasn't routed");
+        assertTrue("Pong wasn't routed", ourPong != null);
         //Lets check that the pong came back in good shape
-        Assert.that(ourPong.getPort() == 15, "wrong port");
+        assertTrue("wrong port", ourPong.getPort() == 15);
         String ip = ourPong.getIP();
-        Assert.that(ip.equals("16.16.16.16"),"wrong IP");
-        Assert.that(ourPong.getFiles() == 15, "wrong files");
-        Assert.that(ourPong.getKbytes() == 15, "Wrong share size");
+        assertTrue("wrong IP", ip.equals("16.16.16.16"));
+        assertTrue("wrong files", ourPong.getFiles() == 15);
+        assertTrue("Wrong share size", ourPong.getKbytes() == 15);
         stream = new ByteArrayOutputStream();
         try{
             ourPong.write(stream);
         }catch(IOException ioe){
             ioe.printStackTrace();
-            Assert.that(false, "problem with writing out big pong");
+            assertTrue("problem with writing out big pong", false);
         }
         byte[] op = stream.toByteArray();
         byte[] big = new byte[2];
@@ -430,18 +466,17 @@ public class UltrapeerTester {
         big[1] = op[op.length-1];
         out = "";//reset
         out = new String(big);
-        Assert.that(out.equals("AB"), "Big part of pong lost");
-        //come this far means its OK
+        assertTrue("Big part of pong lost", out.equals("AB"));
         //System.out.println("Passed");
     }
 
 
 
 
-    private static void testMisroutedPong() 
+    private static void doMisroutedPong() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing misrouted normal pong"
-                           +", not forwarded to leaf");
+        //System.out.println("-Testing misrouted normal pong"
+        //                   +", not forwarded to leaf");
         drain(old);
         drain(leaf);
 
@@ -451,14 +486,14 @@ public class UltrapeerTester {
         ultrapeer.send(m);
         ultrapeer.flush();
               
-        Assert.that(! drain(old));
-        Assert.that(! drain(leaf));
+        assertTrue(! drain(old));
+        assertTrue(! drain(leaf));
     }
 
-    private static void testUltrapeerPong() 
+    private static void doUltrapeerPong() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing misrouted ultrapeer pong"
-                           +", forwarded to leaf");
+        //System.out.println("-Testing misrouted ultrapeer pong"
+        //                   +", forwarded to leaf");
         drain(old);
         drain(leaf);
 
@@ -470,17 +505,17 @@ public class UltrapeerTester {
         ultrapeer.flush();
               
         m=leaf.receive(TIMEOUT);
-        Assert.that(m instanceof PingReply);
-        Assert.that(((PingReply)m).getPort()==6399);        
+        assertTrue(m instanceof PingReply);
+        assertTrue(((PingReply)m).getPort()==6399);        
 
-        Assert.that(! drain(old));
+        assertTrue(! drain(old));
     }
 
 
-    private static void testDropAndDuplicate() 
+    private static void doDropAndDuplicate() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing that duplicates are dropped "
-                           +"when original connection closed");
+        //System.out.println("-Testing that duplicates are dropped "
+        //                   +"when original connection closed");
         drain(old);
         drain(ultrapeer);
 
@@ -490,10 +525,10 @@ public class UltrapeerTester {
         leaf.flush();
         
         Message m=ultrapeer.receive(TIMEOUT);
-        Assert.that(m instanceof QueryRequest);
-        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)1); //used to be not decremented
-        Assert.that(m.getTTL()==(byte)6);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue(m.getHops()==(byte)1); //used to be not decremented
+        assertTrue(m.getTTL()==(byte)6);
 
         //After closing leaf (give it some time to clean up), make sure
         //duplicate query is dropped.
@@ -502,7 +537,7 @@ public class UltrapeerTester {
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         old.send(qr);
         old.flush();
-        Assert.that(!drain(ultrapeer));
+        assertTrue(!drain(ultrapeer));
     }
 
     /** Tries to receive any outstanding messages on c 
@@ -522,7 +557,7 @@ public class UltrapeerTester {
     }
 
     private static void shutdown() throws IOException {
-        System.out.println("\nShutting down.");
+        //System.out.println("\nShutting down.");
         leaf.close();
         ultrapeer.close();
         old.close();
