@@ -62,11 +62,6 @@ public abstract class MessageRouter {
     private final int MAX_BYPASSED_RESULTS = 150;
 
     /**
-     * The maximum number of PushRequests per expire time.
-     */
-    private final int MAX_PUSH_REQUESTS = 5;
-
-    /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
@@ -137,14 +132,6 @@ public abstract class MessageRouter {
     private static final Set _udpHeadRequests =
     	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
     			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
-
-    
-    /**
-     * Keeps track of what hosts have sent us PushRequests lately.  Only allow
-     * up to MAX_PUSH_REQUESTS per Expire time.
-     */
-    private static final FixedsizeHashMap _pushRequests =
-        new FixedsizeHashMap(200);
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -2020,20 +2007,10 @@ public abstract class MessageRouter {
         ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(request.getClientGUID());
 
-        if(replyHandler != null) {
-            if (replyHandler instanceof ForMeReplyHandler) {
-                // make sure the guy isn't hammering us
-                String ip = NetworkUtils.ip2string(request.getIP());
-                Integer i = (Integer) _pushRequests.get(ip);
-                Integer newI = new Integer((i==null) ? 1 : i.intValue() + 1);
-                _pushRequests.put(ip, newI);
-                if (newI.intValue() > MAX_PUSH_REQUESTS) return;
-            }
+        if(replyHandler != null)
             replyHandler.handlePushRequest(request, handler);
-        }
         else if (Arrays.equals(_clientGUID,request.getClientGUID()))
         	    FOR_ME_REPLY_HANDLER.handlePushRequest(request, handler);
-        
         else {
 			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
@@ -2643,8 +2620,6 @@ public abstract class MessageRouter {
             try {
                 _tcpConnectBacks.clear();
                 _udpConnectBacks.clear();
-                // also expire the number of PushRequest per host
-                _pushRequests.clear();
             } 
             catch(Throwable t) {
                 ErrorService.error(t);
@@ -2656,8 +2631,8 @@ public abstract class MessageRouter {
         /* in case we don't want any queries any more */
         private static final byte BUSY_HOPS_FLOW = 0;
 
-	/* in case we want to reenable queries */
-	private static final byte FREE_HOPS_FLOW = 5;
+    	/* in case we want to reenable queries */
+    	private static final byte FREE_HOPS_FLOW = 5;
 
         /* small optimization:
            send only HopsFlowVendorMessages if the busy state changed */
