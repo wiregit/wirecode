@@ -120,6 +120,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // test one that should go through fine
         payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
+        payload[0] = 1;
 
         // this one should go through
         PingReply pong = 
