@@ -1211,11 +1211,15 @@ public class ManagedConnection extends Connection
         if (_guidMap != null) {
         // ---------------------
         // If we are proxying for a query, map back the guid of the reply
-        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()), 
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()),
                                                   TIMED_GUID_LIFETIME);
         GUID origGUID = (GUID) _guidMap.get(tGuid);
-        if (origGUID != null) queryReply = new QueryReply(origGUID.bytes(),
-                                                          queryReply);
+        if (origGUID != null) { 
+            byte prevHops = queryReply.getHops();
+            queryReply = new QueryReply(origGUID.bytes(), queryReply);
+            queryReply.setTTL((byte)2); // we ttl 1 more than necessary
+            queryReply.setHops(prevHops);
+        }
         // ---------------------
         }
         

@@ -86,7 +86,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     public static void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("berkeley");
+        qrt.add("stanford");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
@@ -95,7 +95,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
 
         qrt = new QueryRouteTable();
-        qrt.add("berkeley");
+        qrt.add("stanford");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[1].send((RouteTableMessage)iter.next());
@@ -104,7 +104,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         qrt = new QueryRouteTable();
         qrt.add("leehsus");
-        qrt.add("berkeley");
+        qrt.add("stanford");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             ULTRAPEER[0].send((RouteTableMessage)iter.next());
 			ULTRAPEER[0].flush();
@@ -131,7 +131,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         sendF(LEAF[1], MessagesSupportedVendorMessage.instance());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = QueryRequest.createQuery("stanford");
         sendF(LEAF[1], query);
         
         Thread.sleep(1000);
@@ -236,7 +236,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = QueryRequest.createQuery("stanford");
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -262,7 +262,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         sendF(LEAF[0], MessagesSupportedVendorMessage.instance());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = QueryRequest.createQuery("stanford");
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -323,7 +323,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         sendF(ULTRAPEER[0], MessagesSupportedVendorMessage.instance());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = QueryRequest.createQuery("stanford");
         sendF(ULTRAPEER[0], query);
         
         Thread.sleep(1000);
@@ -338,8 +338,55 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         // no need shut off query
         }
         //------------------------------
+    }
 
+    // tests that:
+    // 1) routed TCP results are mapped
+    // 2) OOB results are acked and mapped
+    public void testBasicProxy() throws Exception {
+        drainAll();    
 
+        QueryRequest query = QueryRequest.createQuery("stanford");
+        sendF(LEAF[0], query);
+        
+        Thread.sleep(1000);
+
+        // the Ultrapeer should get it and proxy it
+        QueryRequest queryRec = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                                                         QueryRequest.class);
+        assertNotNull(queryRec);
+        assertTrue(queryRec.desiresOutOfBandReplies());
+        byte[] proxiedGuid = new byte[queryRec.getGUID().length];
+        System.arraycopy(queryRec.getGUID(), 0, proxiedGuid, 0, 
+                         proxiedGuid.length);
+        GUID.addressEncodeGuid(proxiedGuid, ROUTER_SERVICE.getAddress(),
+                               ROUTER_SERVICE.getPort());
+        assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
+
+        // 1) route some TCP results back and make sure they are mapped back to
+        // the leaf
+        {
+            Response[] res = new Response[1];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10, 10, "stanford0");
+            Message m = 
+                new QueryReply(proxiedGuid, (byte) 3, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            sendF(ULTRAPEER[0], m);
+            
+            Thread.sleep(1000); // processing wait
+            
+            // leaf should get a reply with the correct guid
+            QueryReply queryRep = 
+            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+                                                       QueryReply.class);
+            assertNotNull(queryRep);
+            assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
+            assertEquals(((Response)queryRep.getResults().next()).getName(),
+                         "stanford0");
+        }
     }
 
     
@@ -347,5 +394,10 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         c.send(m);
         c.flush();
     }
+
+    private static byte[] myIP() {
+        return new byte[] { (byte)127, (byte)0, 0, 1 };
+    }
+
 
 }
