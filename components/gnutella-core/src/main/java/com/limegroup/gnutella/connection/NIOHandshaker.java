@@ -21,10 +21,6 @@ public class NIOHandshaker extends AbstractHandshaker {
 
     private ByteBuffer _requestBuffer;
 
-
-    private boolean _handshakeComplete;
-
-
     private HandshakeResponse _ourResponse;
 
     private HandshakeWriteState _writeState;
@@ -65,6 +61,7 @@ public class NIOHandshaker extends AbstractHandshaker {
             _writeState = new OutgoingRequestWriteState();
             _readState = new OutgoingResponseReadState();
         } else  {
+            //_writeState = new IncomingResponseWriteState();
             
         }
     }
@@ -101,15 +98,27 @@ public class NIOHandshaker extends AbstractHandshaker {
     }
     
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#handshake()
+    /**
+     * Performs a non-blocking handshake.  In the case of an outgoing
+     * handshake, this writes the outgoing connection request.  In the case of
+     * an incoming request, this does nothing since we have to wait for any 
+     * read events to come in.  The handshake does not complete after this call,
+     * with the return value simply indicating whether or not this connectio
+     * should be registered for write events (there was an incomplete write on
+     * the channel do to the upstream TCP buffers being filled).
+     * 
+     * @return <tt>true</tt> if any writes successfully completed, meaning that
+     *  this connection SHOULD NOT be registered for write events, otherwise
+     *  a <tt>false</tt> value indicates that this connection has more data
+     *  to write, and should be notified when space becomes available in the
+     *  TCP buffers
      */
     public boolean handshake() throws IOException, NoGnutellaOkException {
-        // lazily initialize the readers and writers to make sure the sockets
+        if(_headerReader != null)  {
+            throw new IllegalStateException("two calls to handshake!");
+        }
+        // lazily initialize the writer to make sure the sockets
         // and IO streams are initialized        
-        //if(_headerWriter == null) {
-          //  _headerWriter = NIOHeaderWriter.createWriter(CONNECTION); 
-        //}
         if(_headerReader == null)  {
             _headerReader = NIOHeaderReader.createReader(CONNECTION); 
         }
@@ -288,8 +297,23 @@ public class NIOHandshaker extends AbstractHandshaker {
         extends AbstractHandshakeWriteState {
 
 
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.NIOHandshaker.HandshakeWriteState#read()
+        /**
+         * Writes the final connection response and any headers for completing
+         * an outgoing connection handshake.  If we're using authentication,
+         * we may revert back to the read response state and start progressing
+         * through the handshake states again.  
+         * 
+         * Typically, however, this state will typically consist of simply
+         * writing:
+         * 
+         * GNUTELLA/0.6 200 OK
+         * 
+         * If we connected as an Ultrapeer and the remote host has told us to 
+         * become a leaf via leaf-guidance, then we'll also include a header 
+         * indicating our Ultrapeer status after leaf guidance, as in:
+         * 
+         * GNUTELLA/0.6 200 OK
+         * X-Ultrapeer: False
          */
         public HandshakeWriteState write() throws IOException {
             if(_handshakeAttempts > MAX_HANDSHAKE_ATTEMPTS) {
@@ -312,13 +336,21 @@ public class NIOHandshaker extends AbstractHandshaker {
                     // We're all done writing in this case
                     _hasRemaining = false;
                     _handshakeComplete = true;
+                    CONNECTION.handshakeComplete();
                     return null;
                 } else {
                     //b) Continue loop if we wrote "200 AUTHENTICATING".
                     
-                    // this will automatically set the has remaining to false
+                    // set the state to read the response again
                     _readState = new OutgoingResponseReadState();
                     
+                    // We have nothing left to send.  Our _responseBuffer will
+                    // be reset when we read their response in the processing
+                    // of the next read.
+                    _hasRemaining = false;
+                    
+                    // TODO: make sure we set the state correctly to keep 
+                    // looping -- _hasRemaining???
                     return this;
                 }
             } else {                
