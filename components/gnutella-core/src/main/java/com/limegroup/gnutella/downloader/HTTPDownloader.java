@@ -494,10 +494,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		if (token.toUpperCase().indexOf("HTTP") < 0 )
 			throw new NoHTTPOKException();
         // does the server support http 1.1?
-        else if (token.indexOf("1.1") > 0)
-        	rfd.setHTTP11(true);
-		else
-            rfd.setHTTP11(false);
+        else 
+            rfd.setHTTP11( token.indexOf("1.1") > 0 );
 		
 		// the next token should be a number
 		// just a safety
@@ -854,6 +852,16 @@ public class HTTPDownloader implements BandwidthTracker {
     public String toString() {
         return "<"+_host+":"+_port+", "+getFileName()+">";
     }
+    
+	private HTTPDownloader(String str) {
+		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
+		_byteReader = new ByteReader(stream);
+		_alternateLocationsReceived = null;
+		_alternateLocationsToSend = null;
+		_rfd =  new RemoteFileDesc("127.0.0.1", 0,
+                                  0, "a", 0, new byte[16],
+                                  0, false, 0, false, null, null);		
+	}    
 }
 
 
