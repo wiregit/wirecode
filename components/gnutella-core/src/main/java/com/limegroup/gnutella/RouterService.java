@@ -393,7 +393,8 @@ public class RouterService {
             
             LOG.trace("START UpdateManager.instance");
             callback.componentLoading("UPDATE_MANAGER");
-            UpdateManager.instance();//initialize
+            UpdateManager.instance();
+            UpdateHandler.instance();
             LOG.trace("STOP UpdateManager.instance");
 
             LOG.trace("START QueryUnicaster");
@@ -421,8 +422,6 @@ public class RouterService {
             callback.componentLoading("SAVED_FILE_MANAGER");
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
-            
-            UpdateHandler.instance();
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();

@@ -143,8 +143,8 @@ public class UpdateManager {
             return false;
         //OK. myVersion < latestVersion
         String guiMessage = latestVersion + ". " + message;
-        RouterService.getCallback().
-            notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(), usesLocale);
+        //RouterService.getCallback().
+            //notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(), usesLocale);
         return true;
     }
 
@@ -215,50 +215,6 @@ public class UpdateManager {
                                 LOG.trace("commited file. Latest is:" +
                                           latestVersion);
                         }
-                        //Note: At this point, the connections that are already
-                        //established, still think the latest version is the
-                        //what it was when it was established. But that not 
-                        //such a big deal - the handshaking has 
-                        //already been done.
-                        //Newer connections will send out the right value.
-                        //Further if a client does get a update file of a 
-                        //differnt version than advertised in the handshaking, 
-                        //its not a problem - the client always does its own
-                        //verification.
-                        
-                        //Emprically, the LimeWire network finds out about
-                        //updates very rapidly, so the reason to wait until the
-                        //end of the session, is reduced. Further we update
-                        //through the website, so we can tell the user that a
-                        //newer version exits, and tell her to check the website
-                        //without necessarily telling them what the new version
-                        //is. So a small indicator on the GUI will do just fine.
-                        String runningVersion=CommonUtils.getLimeWireVersion();
-                        if(!isGreaterVersion(newVersion, runningVersion))
-                            return; //runningVersion <= newVersion -- no message
-                        
-                        //OK. We don't want to DDOS ourselves so lets sleep 
-                        //for a random amount of time.
-                        //Find the publish time of the update.xml file
-                        long makeTime = parser.getTimestamp();
-                        if(makeTime == -1)//timestammp not in file?? huh??
-                            makeTime = System.currentTimeMillis();
-                        
-                        //if the file has just been released, sleep randomly up
-                        //to seven hours, otherwise if it's been seven hours
-                        //since the file was published, we can show the user and
-                        //update right now.
-                        long delay = UpdateSettings.UPDATE_DELAY.getValue();
-                        if(System.currentTimeMillis() < makeTime+delay) {
-                            Random rand = new Random();
-                            long sleep = rand.nextLong() % delay;
-                            if(sleep<0)
-                                sleep = -1*sleep;
-                            try {
-                                Thread.sleep(sleep);
-                            } catch(InterruptedException ignored) {}
-                        }
-                        RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(IOException iox) {
                     //IOException - reading from socket, writing to disk etc.

@@ -1321,7 +1321,7 @@ public class ManagedConnection extends Connection
             }
             
             // see if there's a new update message.
-            if(capVM.supportsUpdate() > UpdateHandler.instance().getLatestVersion()) {
+            if(capVM.supportsUpdate() > UpdateHandler.instance().getLatestId()) {
                 // request an update message.
                 send(new UpdateRequest());
             }

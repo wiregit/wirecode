@@ -125,7 +125,7 @@ public final class CapabilitiesVM extends VendorMessage {
         hashSet.add(smp);
         
         smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
-                                        UpdateHandler.instance().getLatestVersion());
+                                        UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
     }
 

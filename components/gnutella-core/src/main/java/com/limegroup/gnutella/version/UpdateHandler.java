@@ -2,9 +2,7 @@ package com.limegroup.gnutella.version;
 
 
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -48,23 +46,28 @@ public class UpdateHandler {
     private volatile UpdateInformation _updateInfo;
     
     /**
+     * Whether or not we're allowed to show this update info.
+     */
+    private volatile boolean _updateAvailable;
+    
+    /**
      * The most recent id of the update info.
      */
-    private int _lastId;
+    private volatile int _lastId;
     
     /**
      * The bytes to send on the wire.
      *
      * TODO: Don't store in memory.
      */
-    private byte[] _lastBytes;
+    private volatile byte[] _lastBytes;
     
     /**
      * Initializes data as read from disk.
      */
     private void initialize() {
         LOG.trace("Initializing UpdateHandler");
-        handleDataInternal(readDataFromDisk(), true);
+        handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
     }
     
     /**
@@ -82,11 +85,12 @@ public class UpdateHandler {
     }
     
     /**
-     * Retrieves the latest version available.
+     * Retrieves the latest id available.
      */
-    public int getLatestVersion() {
+    public int getLatestId() {
         return _lastId;
     }
+    
     
     /**
      * Gets the bytes to send on the wire.
@@ -96,16 +100,30 @@ public class UpdateHandler {
     }
     
     /**
+     * Gets the most recent UpdateInfo, if it was decided that we're showing it.
+     */
+    public UpdateInformation getLatestUpdateInfo() {
+        if(_updateAvailable)
+            return _updateInfo;
+        else
+            return null;
+    }
+    
+    /**
      * Handles processing a newly arrived message.
      */
     private void handleDataInternal(byte[] data, boolean fromDisk) {
-        String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
-        if(xml != null) {
-            UpdateCollection uc = UpdateCollection.create(xml);
-            if(uc.getId() > _lastId)
-                storeAndUpdate(data, uc, fromDisk);
+        if(data != null) {
+            String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
+            if(xml != null) {
+                UpdateCollection uc = UpdateCollection.create(xml);
+                if(uc.getId() > _lastId)
+                    storeAndUpdate(data, uc, fromDisk);
+            } else {
+                LOG.warn("Couldn't verify signature on data.");
+            }
         } else {
-            LOG.warn("Couldn't verify signature on data.");
+            LOG.warn("No data to handle.");
         }
     }
     
@@ -159,31 +177,34 @@ public class UpdateHandler {
             LOG.warn("No relevant update info to notify about.");
             return;
         }
-            
-        System.out.println("There is an update available: " + _updateInfo);
-        // TODO: pass this to the GUI in a certain amount of time, if necessary.
+        
+        long now = System.currentTimeMillis();
+        long delay = UpdateSettings.UPDATE_DELAY.getValue();
+        long random = Math.abs(new Random().nextLong() % delay);
+        long then = timestamp + random;
+        final int id = _lastId;
+        if(now < then) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Delaying update for: " + (then-now) + "msecs.");
+
+            RouterService.schedule(new Runnable() {
+                public void run() {
+                    // only run if the ids weren't updated while we waited.
+                    if(id == _lastId)
+                        showUpdate(_updateInfo);
+                }
+            }, then - now, 0);
+        } else {
+            showUpdate(_updateInfo);
+        }
     }
     
     /**
-     * Reads the data from disk.
+     * Sends off an update message to the GUI.
      */
-    private byte[] readDataFromDisk() {
-        RandomAccessFile raf = null;
-        File source = getStoredFile();
-        int length = (int)source.length();
-        if(length <= 0)
-            return null;
-        byte[] data = new byte[length];
-        try {
-            raf = new RandomAccessFile(source, "r");
-            raf.readFully(data);
-        } catch(IOException ioe) {
-            LOG.warn("Unable to read data file.", ioe);
-            return null;
-        } finally {
-            IOUtils.close(raf);
-        }
-        return data;
+    private void showUpdate(UpdateInformation update) {
+        _updateAvailable = true;
+        RouterService.getCallback().updateAvailable(update);
     }
     
     /**
