@@ -36,9 +36,9 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 
     class TestMessageRouter extends MessageRouterStub {
         List /* of QueryMessage */ broadcasts=new LinkedList();
-        public void broadcastQueryRequest(QueryRequest queryRequest) {
-            broadcasts.add(queryRequest);
-            super.broadcastQueryRequest(queryRequest); //add GUID to route table
+		public void sendDynamicQuery(QueryRequest query) {
+            broadcasts.add(query);
+            super.sendDynamicQuery(query); //add GUID to route table
         }
 
         protected void handleQueryReplyForMe(
