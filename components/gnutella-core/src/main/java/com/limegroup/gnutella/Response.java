@@ -95,6 +95,11 @@ public class Response {
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 
+	/**
+	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
+	 */
+	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -134,13 +139,21 @@ public class Response {
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
                 "Response constructor: size too big!");
-        metadata = metadata.trim();      
         this.index=index;
         this.size=size;
-        this.name=name;
+		if(name == null) {
+			this.name = "";
+		} else {
+			this.name = name;
+		}
         this.nameBytes = name.getBytes();
-		this.metadata = metadata;
-        this.metaBytes = metadata.getBytes();
+
+		if(metadata == null) {
+			this.metadata = "";
+		} else {
+			this.metadata = metadata.trim();
+		}
+		this.metaBytes = metadata.getBytes();
 		if(urns == null) {
 			// this is necessary because Collections.EMPTY_SET is not
 			// serializable in collections 1.1
@@ -239,12 +252,6 @@ public class Response {
         array[i++]=(byte)0;
         return i;
     }
-    
-	/**
-	 * Staticc zero-length array that can be used for any <tt>Response</tt>
-	 * instance that doesn't have urns.
-	 */
-	private final static byte[] NULL_EXT_ARRAY = new byte[0];
 
 	/**
 	 * Helper method that creates an array of bytes for the specified
@@ -258,7 +265,7 @@ public class Response {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			if(urns == null) {
-				return NULL_EXT_ARRAY;
+				return EMPTY_BYTE_ARRAY;
 			}
 
 			Iterator iter = urns.iterator();
@@ -273,7 +280,7 @@ public class Response {
         } catch (IOException ioe) {
 			// simply do not store any bytes for extensions if there
 			// was a problem
-			return NULL_EXT_ARRAY;
+			return EMPTY_BYTE_ARRAY;
         }
 	}
     
@@ -365,10 +372,24 @@ public class Response {
 		this.metaBytes = meta.getBytes();
     }
 
+	/**
+	 * Returns the index for the file stored in this <tt>Response</tt>
+	 * instance.
+	 *
+	 * @return the index for the file stored in this <tt>Response</tt>
+	 * instance
+	 */
     public long getIndex() {
         return index;
     }
 
+	/**
+	 * Returns the size of the file for this <tt>Response</tt> instance
+	 * (in bytes).
+	 *
+	 * @return the size of the file for this <tt>Response</tt> instance
+	 * (in bytes)
+	 */
     public long getSize() {
         return size;
     }
@@ -384,26 +405,56 @@ public class Response {
         return nameBytes.length;
     }
 
+	/**
+	 * Accessor fot the length of the array of bytes that stores the meta-
+	 * data.
+	 * 
+	 * @return the length of the array of bytes that stores the meta-data
+	 */
     public int getMetaBytesSize() {
         return metaBytes.length;
     }
 
+	/**
+	 * Returns a copy of the array of bytes for the file name for this 
+	 * <tt>Response</tt> instance.
+	 *
+	 * @return a copy of the array of bytes for the file name for this 
+	 * <tt>Response</tt> instance
+	 */
     public byte[] getNameBytes() {
 		byte[] copy = new byte[nameBytes.length];
 		System.arraycopy(nameBytes, 0, copy, 0, nameBytes.length);
         return copy;
     }
 
+	/**
+	 * Returns a copy of the array of bytes for the meta-data for this
+	 * <tt>Response</tt> instance.
+	 *
+	 * @return a copyt of the array of bytes for the meta-data
+	 */
     public byte[] getMetaBytes() {
 		byte[] copy = new byte[metaBytes.length];
 		System.arraycopy(metaBytes, 0, copy, 0, metaBytes.length);
         return copy;
     }
 
+	/**
+	 * Returns the name of the file for this response.  This is guaranteed
+	 * to be non-null, but it could be the empty string.
+	 *
+	 * @return the name of the file for this response
+	 */
     public String getName() {
         return name;
     }
 
+	/**
+	 * Returns the string of meta-data for this <tt>Response</tt> instance.
+	 *
+	 * @return the string of meta-data for this <tt>Response</tt> instance
+	 */
 	public String getMetadata() {
 		return metadata;
 	}
