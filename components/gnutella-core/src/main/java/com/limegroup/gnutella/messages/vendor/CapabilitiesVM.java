@@ -127,7 +127,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /** @return A CapabilitiesVM with the set of messages 
      *  this client supports.
      */
-    public synchronized static CapabilitiesVM instance() {
+    public static CapabilitiesVM instance() {
         if (_instance == null)
             _instance = new CapabilitiesVM();
         return _instance;
@@ -183,11 +183,9 @@ public final class CapabilitiesVM extends VendorMessage {
                     "Can't decrement simpp message. New version="
                               +newSimppVersion+" old version="+_simppVersion);
         _simppVersion = newSimppVersion;
-        //nullify the older instance so a newer one is created with the correct
-        //simppVersion, a new _capabilitiesSupported will be created
-        synchronized(CapabilitiesVM.class) {
-            _instance = null;
-        }
+        //replace _instance with a newer one, which will be  created with the
+        //correct simppVersion, a new _capabilitiesSupported will be created
+        _instance = new CapabilitiesVM();
     }
 
     
