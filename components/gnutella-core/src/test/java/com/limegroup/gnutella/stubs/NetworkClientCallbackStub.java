@@ -77,6 +77,10 @@ public class NetworkClientCallbackStub implements ActivityCallback {
 		_os = os;
 	}
 	
+	public NetworkClientCallbackStub() {
+		_os=null;
+	}
+	
 	private void write(int code) {
 		try {
 			_os.write(code);
