@@ -399,6 +399,7 @@ public class Connection implements Runnable {
 	}//try
 	catch (IOException e){
 	    ConnectionManager.error("Connection closed: "+sock.toString());
+	    //e.printStackTrace();
 	    manager.remove(this);
 	}
     }//run

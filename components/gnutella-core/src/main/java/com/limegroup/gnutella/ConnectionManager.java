@@ -324,6 +324,7 @@ public class ConnectionManager implements Runnable {
 	    routeTable.remove(c);
 	    pushRouteTable.remove(c);
 	    connections.remove(i);
+	    c.shutdown();//ensure that the connecetion is closed
 	    if (keepAlive!=0) {
 		//Asynchronously fetch a connection to replace c
 		Thread t=new ConnectionFetcher(this,1);
