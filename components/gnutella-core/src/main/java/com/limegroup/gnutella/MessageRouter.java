@@ -1,7 +1,10 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.Utilities;
+
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 import java.io.IOException;
 
 /**
@@ -318,14 +321,21 @@ public abstract class MessageRouter
                                         ManagedConnection receivingConnection,
                                         ConnectionManager manager)
     {
+        //get the domains to which the receiving connection is
+        //authenticated to
+        Set authenticatedDomains = receivingConnection.getDomains();
+        
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         List list=manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != receivingConnection)
-                c.send(queryRequest);
+            if(c != receivingConnection){
+                if(Utilities.hasIntersection(
+                    authenticatedDomains,c.getDomains()))
+                    c.send(queryRequest);
+            }
         }
     }
 
