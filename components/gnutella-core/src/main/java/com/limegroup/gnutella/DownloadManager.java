@@ -109,10 +109,10 @@ public class DownloadManager implements BandwidthTracker {
      * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
      */
     private final Map /* of byte [] guids -> Set of Strings*/ 
-		UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
+        UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
     
     private final ProcessingQueue FAILOVERS 
-		= new ProcessingQueue("udp failovers");
+        = new ProcessingQueue("udp failovers");
     
     /**
      * how long we think should take a host that receives an udp push
@@ -212,8 +212,8 @@ public class DownloadManager implements BandwidthTracker {
             }
         };
         RouterService.schedule(checkpointer, 
-							   SNAPSHOT_CHECKPOINT_TIME, 
-							   SNAPSHOT_CHECKPOINT_TIME);
+                               SNAPSHOT_CHECKPOINT_TIME, 
+                               SNAPSHOT_CHECKPOINT_TIME);
     }
     
     /**
@@ -470,7 +470,7 @@ public class DownloadManager implements BandwidthTracker {
                                             boolean overwrite,
                                             GUID queryGUID) 
             throws FileExistsException, AlreadyDownloadingException, 
-				   java.io.FileNotFoundException {
+                   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.
@@ -791,16 +791,16 @@ public class DownloadManager implements BandwidthTracker {
             byte[] clientGUID=line.clientGUID;
             
             synchronized(UDP_FAILOVER) {
-            	// if the push was sent through udp, make sure we cancel
-            	// the failover push.
-            	byte [] key = clientGUID;
-            	Set files = (Set)UDP_FAILOVER.get(key);
+                // if the push was sent through udp, make sure we cancel
+                // the failover push.
+                byte [] key = clientGUID;
+                Set files = (Set)UDP_FAILOVER.get(key);
             
-            	if (files!=null) {
-            		files.remove(file);
-            		if (files.isEmpty())
-            			UDP_FAILOVER.remove(key);
-            	}
+                if (files!=null) {
+                    files.remove(file);
+                    if (files.isEmpty())
+                        UDP_FAILOVER.remove(key);
+                }
             }
 
             //2. Attempt to give to an existing downloader.
@@ -852,25 +852,38 @@ public class DownloadManager implements BandwidthTracker {
         else
             waiting.add(downloader);
     }
-    
+
     /**
-     * Bumps the priority of an inactive download either up or down.
+     * Bumps the priority of an inactive download either up or down
+     * by amt (if amt==0, bump to start/end of list).
      */
     public synchronized void bumpPriority(Downloader downloader,
-                                          boolean up) {
+                                          boolean up, int amt) {
         int idx = waiting.indexOf(downloader);
         if(idx == -1)
             return;
 
         if(up && idx != 0) {
             waiting.remove(idx);
-            waiting.add(idx - 1, downloader);
+            if (amt > idx)
+                amt = idx;
+            if (amt != 0)
+                waiting.add(idx - amt, downloader);
+            else
+                waiting.add(0, downloader);     //move to top of list
         } else if(!up && idx != waiting.size() - 1) {
             waiting.remove(idx);
-            waiting.add(idx + 1, downloader);
+            if (amt != 0) {
+                amt += idx;
+                if (amt > waiting.size())
+                    amt = waiting.size();
+                waiting.add(amt, downloader);
+            } else {
+                waiting.add(downloader);    //move to bottom of list
+            }
         }
     }
-    
+
     /**
      * Cleans up the given ManagedDownloader after completion.
      *
@@ -942,7 +955,7 @@ public class DownloadManager implements BandwidthTracker {
             LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
         lastRequeryTime = System.currentTimeMillis();
-		router.sendDynamicQuery(query);
+        router.sendDynamicQuery(query);
         return true;
     }
 
@@ -955,7 +968,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     private boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
         // Send as multicast if it's multicast.
-    	if( file.isReplyToMulticast() ) {
+        if( file.isReplyToMulticast() ) {
             byte[] addr = RouterService.getNonForcedAddress();
             int port = RouterService.getNonForcedPort();
             if( NetworkUtils.isValidAddress(addr) &&
@@ -969,11 +982,11 @@ public class DownloadManager implements BandwidthTracker {
                                          Message.N_MULTICAST);
                 router.sendMulticastPushRequest(pr);
                 if (LOG.isInfoEnabled())
-            		LOG.info("Sending push request through multicast " + pr);
+                    LOG.info("Sending push request through multicast " + pr);
                 return true;
             }
         }
-    	return false;
+        return false;
     }
 
     /**
@@ -989,32 +1002,32 @@ public class DownloadManager implements BandwidthTracker {
                                 file.getIndex(),
                                 RouterService.getAddress(),
                                 RouterService.getPort(),
-								Message.N_UDP);
+                                Message.N_UDP);
         if (LOG.isInfoEnabled())
-        		LOG.info("Sending push request through udp " + pr);
-        			
+                LOG.info("Sending push request through udp " + pr);
+                    
         UDPService udpService = UDPService.instance();
         //and send the push to the node 
         try {
-        	InetAddress address = InetAddress.getByName(file.getHost());
-        	
-        	//don't bother sending direct push if the node reported invalid
-        	//address and port.
-        	if (NetworkUtils.isValidAddress(address) &&
-        			NetworkUtils.isValidPort(file.getPort()))
-        		udpService.send(pr, address, file.getPort());
+            InetAddress address = InetAddress.getByName(file.getHost());
+            
+            //don't bother sending direct push if the node reported invalid
+            //address and port.
+            if (NetworkUtils.isValidAddress(address) &&
+                    NetworkUtils.isValidPort(file.getPort()))
+                udpService.send(pr, address, file.getPort());
         } catch(UnknownHostException notCritical) {
-        	//We can't send the push to a host we don't know
-        	//but we can still send it to the proxies.
+            //We can't send the push to a host we don't know
+            //but we can still send it to the proxies.
         } finally {
             IPFilter filter = IPFilter.instance();
-        	//make sure we send it to the proxies, if any
-        	Set proxies = file.getPushProxies();
-        	for (Iterator iter = proxies.iterator();iter.hasNext();) {
-        		PushProxyInterface ppi = (PushProxyInterface)iter.next();
-        		if (filter.allow(ppi.getPushProxyAddress().getAddress()))
-        		    udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
-        	}
+            //make sure we send it to the proxies, if any
+            Set proxies = file.getPushProxies();
+            for (Iterator iter = proxies.iterator();iter.hasNext();) {
+                PushProxyInterface ppi = (PushProxyInterface)iter.next();
+                if (filter.allow(ppi.getPushProxyAddress().getAddress()))
+                    udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
+            }
         }
         return true;
     }
@@ -1031,10 +1044,10 @@ public class DownloadManager implements BandwidthTracker {
                          UDPService.instance().canDoFWT() &&
                         !RouterService.acceptedIncomingConnection();
 
-    	// try sending to push proxies...
-    	if(sendPushThroughProxies(file, guid, shouldDoFWTransfer))
-    	    return true;
-    	    
+        // try sending to push proxies...
+        if(sendPushThroughProxies(file, guid, shouldDoFWTransfer))
+            return true;
+            
         // if push proxies failed, but we need a fw-fw transfer, give up.
         if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
             return false;
@@ -1045,7 +1058,7 @@ public class DownloadManager implements BandwidthTracker {
             return false;
 
         PushRequest pr = 
-        	new PushRequest(guid,
+            new PushRequest(guid,
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
@@ -1053,10 +1066,10 @@ public class DownloadManager implements BandwidthTracker {
         if(LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
         try {
-        	router.sendPushRequest(pr);
+            router.sendPushRequest(pr);
         } catch (IOException e) {
             // this will happen if we have no push route.
-        	return false;
+            return false;
         }
 
         return true;
@@ -1071,10 +1084,10 @@ public class DownloadManager implements BandwidthTracker {
     private boolean sendPushThroughProxies(final RemoteFileDesc file,
                                            final byte[] guid,
                                            boolean shouldDoFWTransfer) {
-    	Set proxies = file.getPushProxies();
-    	if(proxies.isEmpty())
-    	    return false;
-    	    
+        Set proxies = file.getPushProxies();
+        if(proxies.isEmpty())
+            return false;
+            
         byte[] externalAddr = RouterService.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
@@ -1194,7 +1207,7 @@ public class DownloadManager implements BandwidthTracker {
      *  <tt>false</tt>
      */
     public void sendPush(final RemoteFileDesc file, final Object toNotify) {
-    	//Make sure we know our correct address/port.
+        //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
@@ -1206,9 +1219,9 @@ public class DownloadManager implements BandwidthTracker {
         final byte[] guid = GUID.makeGuid();
         
         // If multicast worked, try nothing else.
-    	if (sendPushMulticast(file,guid))
-    		return;
-    	
+        if (sendPushMulticast(file,guid))
+            return;
+        
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
         if(!RouterService.acceptedIncomingConnection()) {
@@ -1219,7 +1232,7 @@ public class DownloadManager implements BandwidthTracker {
             return;
         }
         
-    	// remember that we are waiting a push from this host 
+        // remember that we are waiting a push from this host 
         // for the specific file.
         // do not send tcp pushes to results from alternate locations.
         if (!file.isFromAlternateLocation()) {
@@ -1231,7 +1244,7 @@ public class DownloadManager implements BandwidthTracker {
                 files.add(file.getFileName());
                 UDP_FAILOVER.put(key,files);
             }
-        	
+            
             // schedule the failover tcp pusher, which will run
             // if we don't get a response from the UDP push
             // within the UDP_PUSH_FAILTIME timeframe
@@ -1245,7 +1258,7 @@ public class DownloadManager implements BandwidthTracker {
             }, UDP_PUSH_FAILTIME, 0);
         }
 
-    	sendPushUDP(file,guid);
+        sendPushUDP(file,guid);
     }
 
 
@@ -1325,86 +1338,86 @@ public class DownloadManager implements BandwidthTracker {
         boolean c = false;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
             c = true;
-			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			bt.measureBandwidth();
-			currentTotal += bt.getAverageBandwidth();
-		}
-		if ( c )
-		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-		                    / ++numMeasures;
+            BandwidthTracker bt = (BandwidthTracker)iter.next();
+            bt.measureBandwidth();
+            currentTotal += bt.getAverageBandwidth();
+        }
+        if ( c )
+            averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                            / ++numMeasures;
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
-	public synchronized float getMeasuredBandwidth() {
+    public synchronized float getMeasuredBandwidth() {
         float sum=0;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
-			BandwidthTracker bt = (BandwidthTracker)iter.next();
+            BandwidthTracker bt = (BandwidthTracker)iter.next();
             float curr = 0;
             try{
                 curr = bt.getMeasuredBandwidth();
             } catch(InsufficientDataException ide) {
                 curr = 0;//insufficient data? assume 0
             }
-			sum+=curr;
-		}
+            sum+=curr;
+        }
         return sum;
-	}
-	
-	/**
-	 * returns the summed average of the downloads
-	 */
-	public synchronized float getAverageBandwidth() {
+    }
+    
+    /**
+     * returns the summed average of the downloads
+     */
+    public synchronized float getAverageBandwidth() {
         return averageBandwidth;
-	}
-	
-	/**
-	 * Notifies the given object, if it isn't null.
-	 */
-	private void notify(Object o) {
-	    if(o == null)
-	        return;
-	    synchronized(o) {
-	        o.notify();
-	    }
-	}
-	
-	/**
-	 * sends a tcp push if the udp push has failed.
-	 */
-	private class PushFailoverRequestor implements Runnable {
-		
-		final RemoteFileDesc _file;
-		final byte [] _guid;
-		final Object _toNotify;
-		
-		public PushFailoverRequestor(RemoteFileDesc file,
-		                             byte[] guid,
-		                             Object toNotify) {
-			_file = file;
-			_guid = guid;
-			_toNotify = toNotify;
-		}
-		
-		public void run() {
-			boolean proceed = false;
-			
-			byte[] key =_file.getClientGUID();
+    }
+    
+    /**
+     * Notifies the given object, if it isn't null.
+     */
+    private void notify(Object o) {
+        if(o == null)
+            return;
+        synchronized(o) {
+            o.notify();
+        }
+    }
+    
+    /**
+     * sends a tcp push if the udp push has failed.
+     */
+    private class PushFailoverRequestor implements Runnable {
+        
+        final RemoteFileDesc _file;
+        final byte [] _guid;
+        final Object _toNotify;
+        
+        public PushFailoverRequestor(RemoteFileDesc file,
+                                     byte[] guid,
+                                     Object toNotify) {
+            _file = file;
+            _guid = guid;
+            _toNotify = toNotify;
+        }
+        
+        public void run() {
+            boolean proceed = false;
+            
+            byte[] key =_file.getClientGUID();
 
-			synchronized(UDP_FAILOVER) {
-				Set files = (Set) UDP_FAILOVER.get(key);
-			
-				if (files!=null && files.contains(_file.getFileName())) {
-					proceed = true;
-					files.remove(_file.getFileName());
-					if (files.isEmpty())
-						UDP_FAILOVER.remove(key);
-				}
-			}
-			
-			if (proceed) 
-				if(!sendPushTCP(_file,_guid))
-				    DownloadManager.this.notify(_toNotify);
-		}
-	}
+            synchronized(UDP_FAILOVER) {
+                Set files = (Set) UDP_FAILOVER.get(key);
+            
+                if (files!=null && files.contains(_file.getFileName())) {
+                    proceed = true;
+                    files.remove(_file.getFileName());
+                    if (files.isEmpty())
+                        UDP_FAILOVER.remove(key);
+                }
+            }
+            
+            if (proceed) 
+                if(!sendPushTCP(_file,_guid))
+                    DownloadManager.this.notify(_toNotify);
+        }
+    }
 
 }
