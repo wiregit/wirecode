@@ -276,46 +276,6 @@ public class AutoDownloadDetails implements Serializable {
         if (debugOn)
             e.printStackTrace();
     }
-
-    /*
-    public static void main(String argv[]) {
-        AutoDownloadDetails add = 
-        new AutoDownloadDetails("moxxiffey", null,
-                                GUID.makeGuid(), MediaType.getAudioMediaType());
-        String[] files = {"moxxiffey - fuedehead.mp3"};
-
-        RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
-        for (int i = 0; i < rfds.length; i++)
-            rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
-                                         i, GUID.makeGuid(),
-                                         3, false, 3);
-
-        //Test serialization by writing to disk and rereading.  All the methods
-        //should still work afterwards.
-        try {
-            File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
-            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
-            out.writeObject(add);
-            out.close();
-            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
-            add=(AutoDownloadDetails)in.readObject();
-            in.close();
-            tmp.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected IO problem.");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected class cast problem.");
-        }
-        
-        Assert.that(add.addDownload(rfds[0]));
-        add.commitDownload(rfds[0]);
-
-        // seems like we've committed MAX_DOWNLOADS, should be expired...
-        Assert.that(add.expired());
-    }
-    */
     
 }
 

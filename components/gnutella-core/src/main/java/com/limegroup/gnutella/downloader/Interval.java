@@ -53,34 +53,4 @@ public class Interval implements Serializable {
         return low==other.low && high==other.high;
     }
 
-    /*
-    public static void main(String args[]) {
-        Interval a=new Interval(0,3);
-        Interval b=new Interval(3,5);
-        Interval c=new Interval(1,4);
-        Interval d=new Interval(6,10);
-        Interval e=new Interval(0,10);
-
-        Assert.that(a.overlaps(a));
-        Assert.that(! a.adjacent(a));
-
-        Assert.that(! a.overlaps(b));
-        Assert.that(! b.overlaps(a));
-        Assert.that(a.adjacent(b));
-        Assert.that(b.adjacent(a));
-
-        Assert.that(a.overlaps(c));
-        Assert.that(c.overlaps(a));
-        Assert.that(! a.adjacent(c));
-        Assert.that(! c.adjacent(a));
-        
-        Assert.that(! a.overlaps(d));
-        Assert.that(! d.overlaps(a));
-        Assert.that(! a.adjacent(d));
-        Assert.that(! d.adjacent(a));
-
-        Assert.that(e.overlaps(c));
-        Assert.that(c.overlaps(a));
-    }
-    */
 }

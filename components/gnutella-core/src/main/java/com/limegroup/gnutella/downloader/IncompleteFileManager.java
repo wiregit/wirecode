@@ -224,108 +224,25 @@ public class IncompleteFileManager implements Serializable {
         return buf.toString();
     }
     
-    /*
-    public static void main(String args[]) {
+    /** Package access unitTest - to be called from JUnit. Will never be used
+     *in the regular code
+     */
+    static void unitTest() {
         File file=new File("C:/tmp/test.txt");
         IncompleteFileManager ifm=new IncompleteFileManager();
         Iterator iter=null;
-
+        VerifyingFile vf = new VerifyingFile(true);
         //0 blocks
-        Assert.that(! ifm.getBlocks(file).hasNext());
+        Assert.that(ifm.getEntry(file)==null);
         Assert.that(ifm.getBlockSize(file)==0);
         //1 block
-        ifm.addBlock(file, 0, 10);
-        Assert.that(ifm.getBlockSize(file)==10);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 10)));
-        Assert.that(! iter.hasNext());
-        //2 blocks.  Note that this is stricter than required by the
-        //specification, which does not say anything about order.
-        ifm.addBlock(file, 20, 30);
-        Assert.that(ifm.getBlockSize(file)==20);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 10)));
-        Assert.that(iter.next().equals(new Interval(20, 30)));
-        Assert.that(! iter.hasNext());
-        //Merge from above.  Still two blocks.
-        ifm.addBlock(file, 10, 12);
-        Assert.that(ifm.getBlockSize(file)==22);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(20, 30)));
-        Assert.that(iter.next().equals(new Interval(0, 12)));
-        Assert.that(! iter.hasNext());
-        System.out.println(ifm.toString());
-        //Merge from below.  Still two blocks.
-        ifm.addBlock(file, 18, 20);
-        Assert.that(ifm.getBlockSize(file)==24);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 12)));
-        Assert.that(iter.next().equals(new Interval(18, 30)));
-        Assert.that(! iter.hasNext());
-        //Join outer blocks.  One block.
-        ifm.addBlock(file, 12, 18);
-        Assert.that(ifm.getBlockSize(file)==30);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 30)));
-        Assert.that(! iter.hasNext());
-
-        ifm=new IncompleteFileManager();
-        ifm.addBlock(file, 0, 2);
-        ifm.addBlock(file, 5, 7);
-        ifm.addBlock(file, 10, 12);
-        ifm.addBlock(file, 15, 17);        
-        //Merge, consuming middle blocks
-        ifm.addBlock(file, 1, 17);
-        Assert.that(ifm.getBlockSize(file)==17);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 17)));
-        Assert.that(! iter.hasNext());
-
-        ifm=new IncompleteFileManager();
-        ifm.addBlock(file, 0, 2);
-        ifm.addBlock(file, 5, 7);
-        ifm.addBlock(file, 10, 12);
-        ifm.addBlock(file, 15, 17);        
-        //Merge, consuming middle blocks
-        ifm.addBlock(file, 0, 16);
-        Assert.that(ifm.getBlockSize(file)==17);
-        iter=ifm.getBlocks(file);
-        Assert.that(iter.next().equals(new Interval(0, 17)));
-        Assert.that(! iter.hasNext());
-
-        File file2=new File("C:/tmp/another file.txt");
-        ifm=new IncompleteFileManager();
-        ifm.addBlock(file, 0, 2);
-        ifm.addBlock(file2, 10, 13);
-        Assert.that(ifm.getBlockSize(file)==2);
-        Assert.that(ifm.getBlockSize(file2)==3);
-        System.out.println(ifm.toString());
-
-        ///////////////////// Test inverse block operations /////////////////
-        
-        //No blocks
-        ifm=new IncompleteFileManager();
-        iter=ifm.getFreeBlocks(file, 10);
+        vf.addInterval(new Interval(0,10));
+        ifm.addEntry(file,vf);
+        Assert.that(ifm.getBlockSize(file)==11);//full inclusive now
+        iter=ifm.getEntry(file).getBlocks();
         Assert.that(iter.next().equals(new Interval(0, 10)));
         Assert.that(! iter.hasNext());
         
-        //Not overlapping ends
-        ifm.addBlock(file, 2, 5);
-        ifm.addBlock(file, 8, 10);
-        iter=ifm.getFreeBlocks(file, 12);
-        Assert.that(iter.next().equals(new Interval(0, 2)));
-        Assert.that(iter.next().equals(new Interval(5, 8)));
-        Assert.that(iter.next().equals(new Interval(10, 12)));
-        Assert.that(! iter.hasNext());        
-
-        //Overlapping ends
-        ifm=new IncompleteFileManager();
-        ifm.addBlock(file, 0, 2);
-        ifm.addBlock(file, 8, 10);
-        iter=ifm.getFreeBlocks(file, 10);
-        Assert.that(iter.next().equals(new Interval(2, 8)));
-        Assert.that(! iter.hasNext());   
-
         SettingsManager.instance().setIncompletePurgeTime(26);
         File young=new FakeTimedFile(25);
         File old=new FakeTimedFile(27);
@@ -347,5 +264,4 @@ public class IncompleteFileManager implements Serializable {
             return System.currentTimeMillis()-days*24l*60l*60l*1000l;
         }
     }
-    */
 }

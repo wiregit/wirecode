@@ -1997,19 +1997,29 @@ public class ManagedDownloader implements Downloader, Serializable {
             e.printStackTrace();
     }
 
-    /** Unit test */
-    /*
-    public static void main(String args[]) {
+    /**
+     * Package access Unit tests called from ManagedDownloaderTest. The method 
+     * is never executed in LimeWire, but the tests are run everyday as part 
+     * of JUnit. We had to have the method here because it accesses private
+     * variables.
+     */
+    static void unitTest() {
         //Test removeBest
-        RemoteFileDesc rf1=new RemoteFileDesc(
-            "1.2.3.4", 6346, 0, "some file.txt", 1000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
-        RemoteFileDesc rf4=new RemoteFileDesc(
-            "1.2.3.6", 6346, 0, "some file.txt", 1010, 
-            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
-        RemoteFileDesc rf5=new RemoteFileDesc(
-            "1.2.3.6", 6346, 0, "some file.txt", 1010, 
-            new byte[16], SpeedConstants.T3_SPEED_INT+1, false, 0);
+        RemoteFileDesc rf1=new RemoteFileDesc("1.2.3.4", 6346, 0, 
+                                              "some file.txt", 1000, 
+                                              new byte[16], 
+                                              SpeedConstants.T1_SPEED_INT, 
+                                              false, 3, false, null, null);
+        RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
+                                              "some file.txt", 1010, 
+                                              new byte[16], 
+                                              SpeedConstants.T3_SPEED_INT, 
+                                              false, 0, false, null, null);
+        RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
+                                              "some file.txt", 1010, 
+                                              new byte[16], 
+                                              SpeedConstants.T3_SPEED_INT+1, 
+                                              false, 0, false, null, null);
 
         List list=new LinkedList();
         list.add(rf4);
@@ -2027,33 +2037,37 @@ public class ManagedDownloader implements Downloader, Serializable {
         Assert.that(list.size()==0);
 
         //Test serialization
-        ManagedDownloader downloader=new ManagedDownloader();  //test constructor
-        downloader.allFiles=new RemoteFileDesc[1];
-        downloader.allFiles[0]=new RemoteFileDesc("127.0.0.1", 6346, 0l, "test.txt", 10,
-                                                  new byte[16], 56, true, 2);
-        downloader.incompleteFileManager=new IncompleteFileManager();
-        downloader.incompleteFileManager.addBlock(new File("T-10-test.txt"), 10, 20);
-        try {
-            File tmp=File.createTempFile("ManagedDownloader_test", "dat");
-            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
-            out.writeObject(downloader);
-            out.close();
-            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
-            ManagedDownloader downloader2=(ManagedDownloader)in.readObject();
-            in.close();
-            Assert.that(downloader.allFiles.length==1);   //weak test
-            tmp.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected IO problem.");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected class cast problem.");
-        }
+//          ManagedDownloader downloader=new ManagedDownloader();//test constructor
+//          downloader.allFiles=new RemoteFileDesc[1];
+//          downloader.allFiles[0]=new RemoteFileDesc("127.0.0.1", 6346, 0l, 
+//                                                    "test.txt", 10,
+//                                                    new byte[16], 56, true, 2,
+//                                                    false, null, null);
+//          downloader.incompleteFileManager=new IncompleteFileManager();
+//          downloader.incompleteFileManager.addBlock(new File("T-10-test.txt"), 
+//                                                    10, 20);
+//          try {
+//              File tmp=File.createTempFile("ManagedDownloader_test", "dat");
+//              ObjectOutputStream out=new 
+//                                 ObjectOutputStream(new FileOutputStream(tmp));
+//              out.writeObject(downloader);
+//              out.close();
+//              ObjectInputStream in=
+//                                 new ObjectInputStream(new FileInputStream(tmp));
+//              ManagedDownloader downloader2=(ManagedDownloader)in.readObject();
+//              in.close();
+//              Assert.that(downloader.allFiles.length==1);   //weak test
+//              tmp.delete();
+//          } catch (IOException e) {
+//              e.printStackTrace();
+//              Assert.that(false, "Unexpected IO problem.");
+//          } catch (ClassNotFoundException e) {
+//              e.printStackTrace();
+//              Assert.that(false, "Unexpected class cast problem.");
+//          }
     }
     
     //Stub constructor for above test.
     private ManagedDownloader() {
     }
-    */
 }
