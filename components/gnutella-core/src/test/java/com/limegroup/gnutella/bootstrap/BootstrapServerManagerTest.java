@@ -225,6 +225,16 @@ public class BootstrapServerManagerTest extends TestCase {
         assertEquals(null, s1.getRequest());
     }
 
+    public void testGiveUp() {        
+        bman.MAX_HOSTS_PER_REQUEST=2;
+        s3.setResponseData("");
+        s2.shutdown();
+        bman.fetchEndpointsAsync();
+        sleep();
+        assertEquals(null, s1.getRequest());
+        assertEquals(0, catcher.list.size());
+    }
+
     private void sleep() {
         //Wait 0.5 second--that should be long enough for request to happen.
         try { Thread.sleep(200); } catch (InterruptedException e) { }

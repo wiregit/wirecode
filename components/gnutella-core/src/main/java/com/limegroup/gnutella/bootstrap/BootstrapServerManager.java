@@ -16,10 +16,13 @@ import com.limegroup.gnutella.*;
  * http://zero-g.net/gwebcache/specs.html
  */
 public class BootstrapServerManager {
-    /** The minimum number of endpoints to fetch at a time. */
+    /** The minimum number of endpoints/urls to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
-    /** The maximum number of bootstrap servers. */
+    /** The maximum number of bootstrap servers to retain in memory. */
     private static final int MAX_BOOTSTRAP_SERVERS=200;
+    /** The maximum number of hosts to try per request.  
+     *  (Prevents infinite loops.)  Non-final for testing. */
+    public static int MAX_HOSTS_PER_REQUEST=10;
     /** The amount of time in milliseconds between update requests. 
      *  Public and non-final for testing purposes. */
     public static int UPDATE_DELAY_MSEC=60*60*1000;
@@ -239,9 +242,8 @@ public class BootstrapServerManager {
         runner.start();
     }
 
-    private void requestBlocking(GWebCacheRequest request) {
-        //TODO: prevent infinite loops.  What if nobody has data?
-        while (request.needsMoreData()) {
+    private void requestBlocking(GWebCacheRequest request) {        
+        for (int i=0; request.needsMoreData() && i<MAX_HOSTS_PER_REQUEST; i++) {
             //Pick a random server.  We may visit the same server twice, but
             //that's improbable.  Alternative: shuffle list and remove first.
             BootstrapServer e;
