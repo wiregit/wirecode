@@ -38,7 +38,7 @@ public final class UDPConnectionTest extends BaseTestCase {
      */
     public void testBasics() throws Exception {
 		new RouterService(new ActivityCallbackStub());
-		final int NUM_BYTES = 2000;
+		final int NUM_BYTES = 200000;
 
 		try {
 			// Setup the test to use the UDPServiceStub
@@ -101,7 +101,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
     public void testBlockTransfers() throws Exception {
 		new RouterService(new ActivityCallbackStub());
-		final int NUM_BLOCKS = 10;
+		final int NUM_BLOCKS = 1000;
 
 		try {
 			// Setup the test to use the UDPServiceStub

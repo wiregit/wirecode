@@ -14,7 +14,7 @@ import com.limegroup.gnutella.*;
 public class UTest implements ActivityCallback, ErrorCallback {
 	
 	/** Control some logging of state */
-	private static boolean activeLogging = true;
+	private static boolean activeLogging = false;
 
     public static void main(String args[]) {
 		ActivityCallback callback = new UTest();
