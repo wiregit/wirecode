@@ -48,6 +48,17 @@ public class HandshakeResponse {
      * status message for unauthorized attempt
      */
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
+    
+    /**
+     * Message indicating that we are unable to authenticate
+     */
+    public static final String UNABLE_TO_AUTHENTICATE 
+        = "Unable To Authenticate";
+    
+    /**
+     * Message indicating that we are trying to authenticate
+     */
+    public static final String AUTHENTICATING = "AUTHENTICATING";
 
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
@@ -131,6 +142,14 @@ public class HandshakeResponse {
      */
     public int getStatusCode() {
         return statusCode;
+    }
+    
+    /**
+     * Returns the status message. 
+     * @return the status message (e.g. "OK" , "Service Not Available" etc.)
+     */
+    public String getStatusMessage(){
+        return statusMessage;
     }
     
     /**
