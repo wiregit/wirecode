@@ -263,7 +263,16 @@ public class HTTPUploader implements Uploader {
 	public String getFileName() {return _filename;}
 	public int getFileSize() {return _fileSize;}
 	public InputStream getInputStream() {return _fis;}
-    /** The number of bytes read, including any skipped by the Range header. */
+    /**The number of bytes read. The way we calculate the number of bytes 
+     * read is a little wierd if the range header begins from the middle of 
+     * the file (say from byte x). Then we consider that bytes 0-x have 
+     * already been read. 
+     * <p>
+     * This may lead to some wierd behaviour with chunking. For example if 
+     * a host requests the last 10% of a file, the GUI will display 90%
+     * downloaded. Later if the same host requests from 20% to 30% the 
+     * progress will reduce to 20% onwards. 
+     */
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
     /** The byte offset where we should start the upload. */
