@@ -248,12 +248,9 @@ public class ConnectionManager {
      *
      * @param conn the <tt>Connection</tt> instance to remove
      */
-    public void remove(Connection conn) {
+    public synchronized void remove(Connection conn) {
 		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;    
-        if(conn.isOutgoing() && !conn.isInitialized())   {
-            _initializingFetchedConnections.remove(conn);
-        }  
+		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;     
         removeInternal(conn);
 
         adjustConnectionFetchers();
@@ -1232,7 +1229,13 @@ public class ConnectionManager {
         try {
             conn.initialize();
         } catch(IOException e) {
-            remove(conn);
+            synchronized(ConnectionManager.this) {
+                _initializingFetchedConnections.remove(conn);
+                removeInternal(conn);
+                // We've removed a connection, so the need for connections went
+                // up.  We may need to launch a fetcher.
+                adjustConnectionFetchers();
+            }
             throw e;
         }
         finally {
