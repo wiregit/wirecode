@@ -175,7 +175,6 @@ public class NonBlockingServer implements Runnable {
         try {
             //ssc.configureBlocking(false);
             Socket client = ssc.accept().socket();
-            System.out.println("accepted socket...");
             
             client.getChannel().configureBlocking(false);
             addReader(client);
