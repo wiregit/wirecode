@@ -60,17 +60,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
 
-    /** The number of seconds to wait for results.  
-     */
-    private static final int REQUERY_WAIT_SECONDS = 90; 
-    /** The amount of time to wait before requerying the network.  Should not be
-     *  too small such that it hurts Gnutella.  Also the time to wait for
-     *  replies from a query to return.
-     */
-    private static final int REQUERY_TIMEOUT = REQUERY_WAIT_SECONDS * 1000 ;
     /** The number of times to requery the network.
      */
-    private static final int REQUERY_ATTEMPTS = 5;
+    private static final int REQUERY_ATTEMPTS = 60;
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
     private RequeryLock reqLock = new RequeryLock();
@@ -1261,7 +1253,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Synchronization Primitive for auto-requerying....
      *  Can be underst00d as follows:
      *  -- The tryAllDownloads thread does a lock(), which will cause it to
-     *  wait() for up to REQUERY_TIMEOUT.  it may be woken up earlier if it gets
+     *  wait() for up to waitTime.  it may be woken up earlier if it gets
      *  a requery result.  moreover, it won't wait if it has a result already...
      *  -- The addDownload method, upon getting a result that matches, will
      *  wake up the tryAllDownloads thread with a release().  
