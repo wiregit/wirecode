@@ -688,7 +688,9 @@ public class ConnectionManager {
 	 */
 	private static boolean goodConnection(HandshakeResponse hr) {
 		return (hr.isHighDegreeConnection() && 
-				hr.isUltrapeerQueryRoutingConnection());
+				hr.isUltrapeerQueryRoutingConnection() &&
+                hr.isDynamicQueryConnection() &&
+                hr.isMaxTTLConnection());
 	}
 
 	/**
