@@ -36,6 +36,9 @@ public interface SettingsInterface
     public String     getExtensions();
     public String     getBannedIps();
 
+    /** special method for getting the number of files scanned */
+    public int        getFilesScanned();
+
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
 

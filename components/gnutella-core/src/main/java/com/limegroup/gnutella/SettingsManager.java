@@ -340,6 +340,11 @@ public class SettingsManager implements SettingsInterface
     /** returns the string of file extensions*/
     public String getBannedIps(){return bannedIps_;}
 
+    /** specialized method for getting the number 
+     *  of files scanned */
+    public int getFilesScanned()
+    {return FileManager.getFileManager().getNumFiles();}
+
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ndProps_;}
