@@ -181,8 +181,10 @@ public final class SettingsManager {
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
-	private final String DEFAULT_LANGUAGE             = "";
-	private final String DEFAULT_COUNTRY              = "";
+	private final String DEFAULT_LANGUAGE = 
+        System.getProperty("user.language", "");
+	private final String DEFAULT_COUNTRY = 
+        System.getProperty("user.country", "");
 	private final String DEFAULT_LOCALE_VARIANT       = "";
 	
     private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
