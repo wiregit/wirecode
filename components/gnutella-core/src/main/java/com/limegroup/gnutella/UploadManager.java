@@ -334,7 +334,9 @@ public class UploadManager implements BandwidthTracker {
              uploader.getState() != Uploader.BROWSE_HOST )
             uploader.setState(Uploader.LIMIT_REACHED);
 		
-		_callback.addUpload(uploader);		
+        // don't want to show browse host status in gui...
+        if (uploader.getState() != Uploader.BROWSE_HOST)
+            _callback.addUpload(uploader);		
 
 	}
 
