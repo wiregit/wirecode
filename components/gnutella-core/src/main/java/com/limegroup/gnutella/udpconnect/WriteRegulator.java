@@ -201,13 +201,15 @@ public class WriteRegulator {
 
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
-                sleepTime = (16*rtt) / 7;
+				minTime = lowRTT;
+                //sleepTime = (16*rtt) / 7;
                 if(LOG.isDebugEnabled())  
                     LOG.debug(
                       " -- UP SLEEP "+ 
                       " rtt:"+rtt+ 
                       " mRTT:"+maxRTT+
                       " rRTT:"+realRTT+
+                      " lRTT:"+lowRTT+
                       " sT:"+sleepTime);
             }
         }
