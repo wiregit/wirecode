@@ -61,7 +61,7 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
      * @see Endpoint (String))
      */
     public Endpoint(String hostAndPort, boolean requireNumeric) {
-        this(hostAndPort, requireNumeric, false);
+        this(hostAndPort, requireNumeric, true);
     }
 
     /**
