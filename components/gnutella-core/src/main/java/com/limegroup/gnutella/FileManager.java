@@ -198,7 +198,101 @@ public class FileManager {
         return ret;
     }
 
+    /**
+     * @param directory Gets all files under this directory RECURSIVELY.
+     * @param filter If null, then returns all files.  Else, only returns files
+     * extensions in the filter array.
+     * @return A Array of Files recursively obtained from the directory,
+     * according to the filter.
+     */
+    public static File[] getFilesRecursive(File directory,
+                                           String[] filter) {
+
+        debug("FileManager.getFilesRecursive(): entered.");
+        ArrayList dirs = new ArrayList();
+        // the return array of files...
+        ArrayList retFileArray = new ArrayList();
+        File[] retArray = null;
+
+        // bootstrap the process
+        if (directory.exists() && directory.isDirectory())
+            dirs.add(directory);
+
+        // while i have dirs to process
+        while (dirs.size() > 0) {
+            File currDir = (File) dirs.remove(0);
+            debug("FileManager.getFilesRecursive(): currDir = " +
+                  currDir);
+            File[] listedFiles = currDir.listFiles();
+            for (int i = 0; i < listedFiles.length; i++) {
+
+                File currFile = listedFiles[i];
+                if (currFile.isDirectory()) // to be dealt with later
+                    dirs.add(currFile);
+                else if (currFile.isFile()) { // we have a 'file'....
+
+                    boolean shouldAdd = false;
+                    if (filter == null)
+                        shouldAdd = true;
+                    else {
+                        String ext = getFileExtension(currFile);
+                        for (int j = 0; 
+                             (j < filter.length) && (ext != null); 
+                             j++)
+                            if (ext.equalsIgnoreCase(filter[j]))
+                                shouldAdd = true;
+                    }
+
+                    if (shouldAdd)
+                        retFileArray.add(currFile);
+                }
+            }
+        }        
+
+        if (!retFileArray.isEmpty()) {
+            retArray = new File[retFileArray.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (File) retFileArray.get(i);
+        }
+
+        debug("FileManager.getFilesRecursive(): returning.");
+        return retArray;
+    }
+
+
+    // simply gets whatever is after the "." in a filename, or the first thing
+    // after the first "." in the filename
+    private static String getFileExtension(File f) {
+        String retString = null;
+
+        java.util.StringTokenizer st = 
+        new java.util.StringTokenizer(f.getName(), ".");
+        if (st.countTokens() > 1) {
+            st.nextToken();
+            retString = st.nextToken();
+        }
+        return retString;
+    }
+
     
+    private static boolean debugOn = false;
+    public static void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+
+    /*
+      public static void main(String argv[]) {
+      String[] filter = {"mp3"};
+      File[] toPrint = FileManager.getFilesRecursive(new File(argv[0]), 
+      filter);
+      for (int i = 0; 
+      (toPrint != null) && (i < toPrint.length); 
+      i++)
+      System.out.println(""+toPrint[i]);
+      }
+    */
+
     ///////////////////////////// Mutators ////////////////////////////////////   
 
     /**
