@@ -558,14 +558,11 @@ public final class SettingsManager {
             } catch(IOException e) {}
         }
         
-        try {
-            String language = getLanguage();
-            String country = getCountry();
-            String localeVariant = getLocaleVariant();
-            Locale.setDefault(new Locale(language, country, localeVariant));
-        } catch(Exception e) {
-            System.out.println("Could not set new default locale.");
-        }
+
+        String language = getLanguage();
+        String country = getCountry();
+        String localeVariant = getLocaleVariant();
+        Locale.setDefault(new Locale(language, country, localeVariant));
         
         //reset the values that have expired
         resetExpiredValues();
