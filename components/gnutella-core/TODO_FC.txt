@@ -1,0 +1,31 @@
+                          SACHRIFC Algorithm
+                          ==================
+      (Sergieu and Chris' Flow Control, pronounced "sacrifice")
+
+
+Steps
++don't reorder OTHER
++basic round-robin implementation 
++add ratios
+        -by volume
+        -fractional
+-add timeouts.  Don't forget to increment drop count (see
+-add GUID prioritization (yay heap!)
+-refactor.  
+        -Make OutputRunner smaller.
+        -can we use an array of smart object for each priority level?
+-optimize:
+        -add size INVARIANT (sum of all buffers), changed queued()
+        -avoid inner loop for common case ratio
+-change GUI to eliminate race condition displaying results.
+-cap max througput, using OutputStream
+
+
+Per priority level:
+-LIFO or FIFO
+-buffer size
+-name
+-predicate for matching messages
+-ratio
+-expire time (if any)
+-time or binary heap
