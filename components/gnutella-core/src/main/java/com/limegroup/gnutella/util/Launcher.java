@@ -9,6 +9,8 @@ import java.lang.String;
 
 import com.limegroup.gnutella.gui.Utilities;
 
+import NativeLauncher;
+
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
  * be redistributed or modified in any form without restrictions as long as the 
