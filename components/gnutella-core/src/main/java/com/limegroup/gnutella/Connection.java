@@ -853,7 +853,7 @@ public class Connection {
     public boolean isConnectBackCapable() throws IllegalStateException {
         byte[] local = getLocalAddress().getAddress();
         byte[] remote = getInetAddress().getAddress();
-        return (local[0] == remote[0]);
+        return (local[0] != remote[0]);
     }
 
     /**
