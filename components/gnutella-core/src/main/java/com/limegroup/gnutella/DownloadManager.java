@@ -352,7 +352,7 @@ public class DownloadManager implements BandwidthTracker {
             String filename, String [] defaultURL, boolean overwrite) 
             throws IllegalArgumentException, AlreadyDownloadingException,
                                                        FileExistsException {
-        if (textQuery==null && urn==null)
+        if (textQuery==null && urn==null && filename==null)
             throw new IllegalArgumentException("Need something for requeries");
         
         //if we have a valid filename to check against, and we are not supposed
