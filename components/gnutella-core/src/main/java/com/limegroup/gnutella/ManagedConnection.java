@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.util.Properties;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.routing.*;
@@ -11,13 +12,18 @@ import com.limegroup.gnutella.routing.*;
  * forever (or until an IOException occurs), receiving Gnutella messages and
  * dispatching them to a message router.  Also takes care of automatic buffering
  * and flushing of data, maintaining statistics, filtering bad messages, and
- * maintaining ping and query routing state.
+ * maintaining ping and query routing state.<p>
+ *
+ * ManagedConnection's come in several flavors.  First, they can be marked as
+ * being connected to a dedicated host discovery service, like
+ * router.limewire.com.  Secondly, they can be marked as "new" or "old", where a
+ * new connection typically has query routing and pong caching enabled.<p>
  *
  * This class implements ReplyHandler to route Queries and pushes that originated
  * from it.
  *
  * @author Ron Vogl
- * @author Christopher Rohrs
+ * @author Christopher Rohrs 
  */
 public class ManagedConnection
         extends Connection
@@ -92,19 +98,6 @@ public class ManagedConnection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
 
-    /** 
-     * indicates whether the connection is to an "old Gnutella client" 
-     * (according to the the Protocol Version number in any message GUID).
-     */
-    private volatile boolean _isOldClient = true;
-
-    /**
-     * First Ping is used to determine if this is a connection to an older
-     * client or not.  Then, we can set the accept time for allowing Pings
-     * from this older client.
-     */
-    private boolean _receivedFirstPing = false;
-
     /**
      * This is the pong that the remote side sends after receiving a handshake
      * ping.  It contains the IP address and listening port of the remote side
@@ -120,14 +113,6 @@ public class ManagedConnection
      * received is a handshake pong or not.
      */
     private byte[] _handshakeGUID = null;
-
-    /** Same as ManagedConnection(host, port, router, manager, false); */
-    ManagedConnection(String host,
-                      int port,
-                      MessageRouter router,
-                      ConnectionManager manager) {
-        this(host, port, router, manager, false);
-    }
 
     /**
      * Constructor that is only used for testing purposes.  DO NOT USE THIS
@@ -161,7 +146,7 @@ public class ManagedConnection
 
         new OutputRunner(); //Start the thread to empy the output queue.
     }
-
+    
     /**
      * Creates an outgoing connection.  The connection is considered a special
      * "router connection" iff isRouter==true.  ManagedConnections should only
@@ -171,17 +156,16 @@ public class ManagedConnection
                       int port,
                       MessageRouter router,
                       ConnectionManager manager,
-                      boolean isRouter) {
-        super(host, port);
+                      boolean isRouter,
+                      boolean isNew) { 
+        super(host, port, isNew ? createNewProperties() : null);
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
-
         
-
         new OutputRunner(); // Start the thread to empty the output queue
     }
-
+    
     /**
      * Creates an incoming connection.
      * ManagedConnections should only be constructed within ConnectionManager.
@@ -192,8 +176,9 @@ public class ManagedConnection
      */
     ManagedConnection(Socket socket,
                       MessageRouter router,
-                      ConnectionManager manager) {
-        super(socket);
+                      ConnectionManager manager,
+                      boolean isNew) {
+        super(socket, isNew ? createNewProperties() : null);
         _router = router;
         _manager = manager;
 
@@ -432,31 +417,6 @@ public class ManagedConnection
             _router.handleMessage(m, this);
         }
     }
-        
-    /**
-     * Determines if this connection is to an older client by checking the
-     * Protocol Version (of the GUID of the Message) and sets necessary
-     * flags.  It also makes sure the GUID is a new GUID (based on byte[8]).
-     * Returns true iff m was the first handshake ping.  (You'll need to
-     * call isOldClient to find whether this was new.)
-     */
-    public boolean checkForOlderClient(Message m) {
-        //if already checked once, we don't need to check again
-        if (_receivedFirstPing || m.getHops()!=1) //m.hop() already called
-            return false;
-
-        _receivedFirstPing = true;
-        byte[] guid = m.getGUID();
-
-        //if it is an old GUID or the protocol version is less than 1, 
-        //it's an older client.
-        if ((GUID.isNewGUID(guid)) && 
-             (GUID.getProtocolVersion(guid) >= 
-              GUID.GNUTELLA_VERSION_06) ) 
-            _isOldClient = false;
-        return true;
-    }
-
 
     /**
      * Sets the remote pong to the pong passed in.  This remote pong can later
@@ -540,6 +500,7 @@ public class ManagedConnection
     }
 
     public byte[] getLastPingGUID() {
+        if (pingInfo==null) return null;
         return pingInfo.getLastGUID();
     }
 
@@ -548,15 +509,10 @@ public class ManagedConnection
     }
 
     public int[] getNeededPongsList() {
+        if (pingInfo==null) return null;
         return pingInfo.getNeededPingReplies();
     }
 
-    /**
-     * Returns whether ManagedConnectionPingInfo is instantiated or not.
-     */
-    public boolean receivedFirstPing() {
-        return (pingInfo != null);
-    }
     //end -- Interface
 
     /**
@@ -747,23 +703,32 @@ public class ManagedConnection
     }
 
     /**
-     * Is this an older client (by protocol version number in GUID)
+     * Is this is connected to an older client.  This is determined by looking
+     * at the headers exchanged during handshaking.
      */
     public boolean isOldClient() {
-        return _isOldClient;
+        return getProperty("Query-Routing")==null
+            || getProperty("Pong-Caching")==null;
+    }
+
+    /** Creates the property set for "new" connections. */
+    private static Properties createNewProperties() {
+        Properties ret=new Properties();
+        ret.setProperty("Query-Routing", "0.1");
+        ret.setProperty("Pong-Caching",  "0.1");
+        return ret;
     }
 
     /** Returns the query route state associated with this. */
-    public ManagedConnectionQueryInfo getQueryRouteState() {
+    ManagedConnectionQueryInfo getQueryRouteState() {
         return queryInfo;
     }
 
     /** Associates the given query route state with this.  Typically this method
      *  is called once per connection. */
-    public void setQueryRouteState(ManagedConnectionQueryInfo qi) {
+    void setQueryRouteState(ManagedConnectionQueryInfo qi) {
         this.queryInfo=qi;
-    }
-        
+    }     
 
     /** Unit test.  Only tests statistics methods. */
     /*

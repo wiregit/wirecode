@@ -202,19 +202,7 @@ public abstract class MessageRouter
         m.hop();
 
         if(m instanceof PingRequest) 
-        {
-            boolean isHandshake=receivingConnection.checkForOlderClient(m); 
-            //ConnectionManager can't tell whether an incoming connection is
-            //from a new or old client until we receive the handshake ping.
-            //Hence it is forced to temporarily accept more new or old
-            //connections than it desires.  So we check here.
-            if (isHandshake && !_manager.isStillNeeded(receivingConnection)) {
-                //Connection disallowed; kill it.  TODO: send reject pongs too.
-                _manager.remove(receivingConnection);
-                return;
-            }
             handlePingRequest((PingRequest)m, receivingConnection);
-        }
         else if (m instanceof PingReply) 
             handlePingReply((PingReply)m, receivingConnection);
         else if (m instanceof QueryRequest)
@@ -641,10 +629,10 @@ public abstract class MessageRouter
                 //first make sure that the connection wants some pongs (i.e.,
                 //sent at least one "real" ping request yet, not just a 
                 //handshake ping.
-                if (!c.receivedFirstPing())
-                    continue;
-
+                
                 int[] neededPongs = c.getNeededPongsList();
+                if (neededPongs==null)
+                    continue;
                 if (neededPongs[hops-1] > 0)
                 {
                     byte[] guid = c.getLastPingGUID();

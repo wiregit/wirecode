@@ -638,21 +638,15 @@ public class HostCatcher {
     //--------- public access methods
 
     /**
-     * Tries to add the ping reply to the main cache.  However, if the 
-     * connection that receiving the pong is an old client or from a router
-     * connection, then add it to the reserve cache rather than the main 
-     * cache.  If it was succesfully added to the main cache, then return true,
-     * otherwise, return false.  NOTE: Adding to the reserve cache always returns
-     * false, since we want to somehow indicate that we didn't successfully add
-     * to the main cache because that might generate some unwanted behaviors from 
-     * the calling object.
+     * If receivingConnection is a new connection, tries to add pr to the main
+     * cache.  Otherwise, adds pr to the reserve cache and return false.  TODO:
+     * what the heck is the return value supposed to mean?
      */
     public boolean addToCache(PingReply pr, 
                               ManagedConnection receivingConnection) {
         //if received from an old client or from a router, place the PingReply
         //in the reserve cache (i.e., hostcatcher).
-        if ((receivingConnection.isOldClient()) || 
-            (receivingConnection.isRouterConnection())) {
+        if (receivingConnection.isOldClient()) {
             addToReserveCache(pr, receivingConnection);
             return false; //always return false when adding to reserve cache.
         }

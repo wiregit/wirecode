@@ -2,18 +2,34 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.util.Properties;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * The list of all connections.  Accepts new connections and creates
- * new threads to handle them.<p>
+ * The list of all Gnutella connections.  Because this is the only list of all
+ * connections, it has an important role in message broadcasting.  Provides
+ * factory methods for creating outgoing connnections (createConnectionX), a
+ * method to accept incoming connections from the Acceptor (acceptConnection),
+ * and threads to automatically fetch new connections.  The number of
+ * connections is controlled by the setKeepAlive method, which is typically but
+ * not necessarily the same as the KEEP_ALIVE property.<p>
  *
- * You should call the shutdown() method when you're done to ensure
- * that the gnutella.net file is written to disk.
+ * This particular version of ConnectionManager fetches new and old connections
+ * independently, though both are ultimately added to the same broadcast list.
+ * Here, "new connection" means one supporting query routing.  This enables you
+ * to preference new connections while ensuring connections to the old
+ * network.<p>
+ * 
+ * This class is thread-safe.  
  */
 public class ConnectionManager {
+    private MessageRouter _router;
+    private HostCatcher _catcher;
+    private ActivityCallback _callback;
+	private SettingsManager _settings;
+
     /* List of all connections.  This is implemented with two data structures:
      * a list for fast iteration, and a set for quickly telling what we're
      * connected to.
@@ -37,46 +53,44 @@ public class ConnectionManager {
     private volatile List /* of ManagedConnection */ _connections =
         new ArrayList();
     private volatile Set /* of Endpoint */ _endpoints = new HashSet();
-    private List /* of ConnectionFetcher */ _fetchers =
-        new ArrayList();
-    private List /* of ManagedConnection */ _initializingFetchedConnections =
-        new ArrayList();
+	private ConnectionWatchdog _watchdog;
 
+
+    /***********************************************************************
+     * The remaining data structures come in pairs: one for new connections
+     * and one for old connections.
+     ***********************************************************************/
+
+    private static final int NEW=0;
+    private static final int OLD=1;
     /** 
-     * The number of new connections to keep up.  Initially we will try
+     * The number of connections to keep up.  Initially we will try
      * _keepAlive outgoing connections.  At the same time we will accept up to
      * _keepAlive incoming connections.  As outgoing connections fail, we will
      * not accept any more incoming connections.  Hence we will converge on
      * exactly _keepAlive incoming connections.  
      */
-    private volatile int _keepAlive=0;
-    /**
-     * The number of old connections to keep up.  Same rules as _keepAlive apply.
-     */
-    private volatile int _keepAliveOld=0;
-
-
-    /** The number of incoming connections, including both new and old.  Used to
-     *  avoid the cost of scanning through _initializedConnections when deciding
-     *  whether to accept incoming..
+    private volatile int[] _keepAlive=new int[2];
+    /** The number of incoming connections.  Used to avoid the cost of
+     * scanning through _initializedConnections when deciding whether to accept
+     * incoming..
      *
-     *  INVARIANT: _incomingConnections>=the number of incoming connections in
-     *  _connections.  In the "steady state", i.e., when no incoming connections
-     *  are being initialized, this value is exactly equal to the number of
-     *  incoming connections.
+     * INVARIANT: _incomingConnections>=the number of incoming connections in
+     * _connections.  In the "steady state", i.e., when no incoming connections
+     * are being initialized, this value is exactly equal to the number of
+     * incoming connections.
      *
-     *  LOCKING: obtain _incomingConnectionLock 
+     * LOCKING: obtain _incomingConnectionLock 
      */
-    private volatile int _incomingConnections=0;
+    private volatile int[] _incomingConnections=new int[2];
+    private List[] /* of ConnectionFetcher */ _fetchers=new List[2];
+    private List[] /* of ManagedConnection */ _initializingFetchedConnections
+        = new List[2];
+	private Runnable _ultraFastCheck;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
 
-    private MessageRouter _router;
-    private HostCatcher _catcher;
-    private ActivityCallback _callback;
-	private SettingsManager _settings;
-	private ConnectionWatchdog _watchdog;
-	private Runnable _ultraFastCheck;
+
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -84,6 +98,10 @@ public class ConnectionManager {
     public ConnectionManager(ActivityCallback callback) {
         _callback = callback;		
 		_settings = SettingsManager.instance(); 
+        _fetchers[OLD]=new ArrayList();
+        _fetchers[NEW]=new ArrayList();
+        _initializingFetchedConnections[OLD]=new ArrayList();  
+        _initializingFetchedConnections[NEW]=new ArrayList();
     }
 
     /**
@@ -113,8 +131,9 @@ public class ConnectionManager {
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
+        //TODO: should there be an option to specify new or old or both?
         ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this);
+                                                    this, false, true);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -130,10 +149,11 @@ public class ConnectionManager {
      */
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
-
         // Initialize and loop for messages on another thread.
+        //TODO: should there be an option to specify new or old or both?
         new OutgoingConnectionThread(
-                new ManagedConnection(hostname, portnum, _router, this),
+                new ManagedConnection(hostname, portnum, _router, this,
+                                      false, true),
                 true);
     }
 
@@ -152,8 +172,9 @@ public class ConnectionManager {
 			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
 		}
 
+        //TODO: should there be an option to specify new or old or both?
         ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true);
+		  new ManagedConnection(hostname, portnum, _router, this, true, false);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -171,75 +192,51 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         //Atomically decide whether to accept connection.  Release lock
-         //before actually managing the connection.
-         boolean allowConnection=false;
-         synchronized (_incomingConnectionsLock) {
-             if (_incomingConnections < (_keepAlive+_keepAliveOld)) {
-                 //Yes, we'll tentatively allow it.  There's a chance that we
-                 //may still decide to kill this after discovering whether it's
-                 //new or old.  For now, increment the incoming count NOW even before
-                 //this connection is processed.  The value will be decremented
-                 //in the finally clause below.
-                 _incomingConnections++;
-                 allowConnection=true;
-             }
+         //TODO2: We need to re-enable the reject connection mechanism.  The
+         //catch is that you don't know whether to reject for sure until you've
+         //handshaked.  Basically RejectConnection is no longer sufficient, so I
+         //propose eliminating it; just use a normal ManagedConnection but don't
+         //add it to list of connections, and don't add it to gui.  This
+         //requires some refactoring of that damn initialization code.
+
+         //TODO2: as an optimization, you can check whether
+         //_incomingConnections[i]>_keepAlive[i] for all i.  If so, you can
+         //immediately reject, before initializing the connections.
+
+         //1. Initialize connection.  It's always safe to recommend new headers.
+         ManagedConnection connection=null;
+         try {
+             connection = new ManagedConnection(socket, _router, this, true);
+             initializeExternallyGeneratedConnection(connection);
+         } catch (IOException e) {
+             return;
          }
          
-         if (allowConnection) {
-             //a) Handle normal connection (blocking).
-             ManagedConnection connection = new ManagedConnection(
-                 socket, _router, this);
-             try {                     
-                 initializeExternallyGeneratedConnection(connection);
+         //2. Check if it supports query routing, and decide whether to keep.
+         int isNew=(connection.getProperty("Query-Routing")!=null) ? NEW : OLD;
+         try {   
+             synchronized (_incomingConnectionsLock) {
+                 _incomingConnections[isNew]++;
+             }                  
+
+             //a) Not needed: kill.  TODO: reject as described above.
+             if (_incomingConnections[isNew]>_keepAlive[isNew])
+                 synchronized (this) { removeInternal(connection); }
+             //b) Normal case: accept.
+             else {                     
                  sendInitialPingRequest(connection);
                  connection.loopForMessages();
-             } catch(IOException e) {
-             } catch(Exception e) {
-                 //Internal error!
-                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-             } finally {
-                 synchronized (_incomingConnectionsLock) {
-                     _incomingConnections--;
-                 }
              }
-         } else {
-             //b) Handle reject connection if not on a Mac with OS 9.1 or below.  
-			 //The constructor does the whole deal -- intializing, looking for 
-			 //and responding to a PingRequest.  It's all synchronous, because 
-			 //we have a dedicated thread right here.
-			if(!CommonUtils.isMacClassic()) {
-				new RejectConnection(socket, _catcher);
-			}
-            
-			// Otherwise, we're not on windows.  We did this 
-			// because we know that RejectConnection was causing
-			// problems on the Mac (periodically freezing the
-			// system and leading to a 40% approval rating on
-			// download.com), and we have not been able to test
-			// it on other systems.  Since we know that not using
-			// a reject connection will not cause a problem, then
-			// we might as well just be safe and not use one on 
-			// non-windows systems.
-			else {
-				try {
-					socket.close();
-				}
-				catch(IOException ioe) {}
-			}
+         } catch(IOException e) {
+         } catch(Exception e) {
+             //Internal error!
+             _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+         } finally {
+             synchronized (_incomingConnectionsLock) {
+                 _incomingConnections[isNew]--;
+             }
          }
      }
-
-    public boolean isStillNeeded(ManagedConnection connection) {
-        //Note that the count includes connection. TODO2: replacing
-        //_incomingConnections with _incomingConnectionsNew/Old would make this
-        //much more efficient.  That could be important.
-        boolean isNew=!connection.isOldClient();
-        if (isNew) 
-            return getNumInitializedConnections(isNew)<=_keepAlive;
-        else
-            return getNumInitializedConnections(isNew)<=_keepAliveOld;
-    }
 
     /**
      * @modifies this, route table
@@ -258,15 +255,16 @@ public class ConnectionManager {
      * Get the number of connections wanted to be maintained
      */
     public int getKeepAlive() {
-        return _keepAlive;
+        //TODO: this should take an argument
+        return _keepAlive[NEW];
     }
 
 	/**
 	 * this method reduces the number of connections
 	 */
 	public synchronized void reduceConnections() {
-		setKeepAlive(Math.min(_keepAlive, 2), true);
-        setKeepAlive(Math.min(_keepAlive, 2), false);
+		setKeepAlive(Math.min(_keepAlive[NEW], 2), true);
+        setKeepAlive(Math.min(_keepAlive[OLD], 2), false);
 	}
 
     /**
@@ -277,13 +275,9 @@ public class ConnectionManager {
      * whether to add more threads.  
      */
     public synchronized void setKeepAlive(int n, boolean isNew) {
-        if (isNew)
-            _keepAlive = n;
-        else
-            _keepAliveOld = n;
+        _keepAlive[isNew ? NEW : OLD]=n;
         adjustConnectionFetchers();
     }
-
 
     /**
      * Sets the maximum number of incoming connections.  This does not
@@ -309,6 +303,24 @@ public class ConnectionManager {
         return _connections.size();
     }
 
+   /**
+    * Returns the number of (possibly uninitialized) connections to new (old)
+    * clients.  In either case, the return value is less than or equal to the
+    * number of connections.  
+    */
+    private int getNumConnections(boolean isNew) {
+        //This is always safe to do since the list is never mutated.
+        List _connectionsSnapshot=_connections;
+        int ret=0;
+        for (int i=0; i<_connectionsSnapshot.size(); i++) {
+            ManagedConnection mc=
+                (ManagedConnection)_connectionsSnapshot.get(i);
+            if (mc.isOldClient()!=isNew)
+                ret++;
+        }
+        return ret;
+    }
+
     /**
      * @return the number of initialized connections, which is less than or 
      * equal to the number of connections.
@@ -318,30 +330,11 @@ public class ConnectionManager {
     }
 
     /**
-     * If isNew, returns the number of initialized connections to new clients.
-     * Otherwise, returns the number of initialized connections to old clients,
-     * which may erroneously include some new connections for which we have not
-     * yet received handshake pings.  In either case, the return value is less
-     * than or equal to the number of connections.
-     */
-    public int getNumInitializedConnections(boolean isNew) {
-        //This is always safe to do since the list is never mutated.
-        List _initializedConnectionsSnapshot=_initializedConnections;
-        int ret=0;
-        for (int i=0; i<_initializedConnectionsSnapshot.size(); i++) {
-            ManagedConnection mc=
-                (ManagedConnection)_initializedConnectionsSnapshot.get(i);
-            if (mc.isOldClient()!=isNew)
-                ret++;
-        }
-        return ret;
-    }
-
-    /**
      * @return true if incoming connection slots are still available.
      */
     public boolean hasAvailableIncoming() {
-        return (_incomingConnections < _keepAlive);
+        //TODO: should take a Properties argument!
+        return (_incomingConnections[NEW] < _keepAlive[NEW]);
     }
 
     /**
@@ -559,34 +552,39 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        int need = _keepAlive - getNumConnections() - _fetchers.size();
+        //Adjust for both old and new connections...
+        for (int i=0; i<2; i++) {
+            Assert.that(i==NEW || i==OLD, "Bad value of i: "+i);
+            boolean isNew=(i==NEW) ? true : false;
+            int need=_keepAlive[i]-getNumConnections(isNew)-_fetchers[i].size();
         
-        // Start connection fetchers as necessary
-        while(need > 0) {
-            new ConnectionFetcher(); // This kicks off a thread and registers
-                                     // the fetcher in the list
-            need--;
-        }
+            // Start connection fetchers as necessary
+            while(need > 0) {
+                // This kicks off a thread and register the fetcher in the list
+                new ConnectionFetcher(true); 
+                need--;
+            }
 
-        // Stop ConnectionFetchers as necessary, but it's possible there
-        // aren't enough fetchers to stop.  In this case, close some of the
-        // connections started by ConnectionFetchers.
-        int lastFetcherIndex = _fetchers.size();
+            // Stop ConnectionFetchers as necessary, but it's possible there
+            // aren't enough fetchers to stop.  In this case, close some of the
+            // connections started by ConnectionFetchers.
+            int lastFetcherIndex = _fetchers[i].size();
 
-        while((need < 0) && (lastFetcherIndex > 0)) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)
-                _fetchers.remove(--lastFetcherIndex);
-            fetcher.interrupt();
-            need++;
-        }
-        int lastInitializingConnectionIndex =
-            _initializingFetchedConnections.size();
-        while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = (ManagedConnection)
-                _initializingFetchedConnections.remove(
-                    --lastInitializingConnectionIndex);
-            removeInternal(connection);
-            need++;
+            while((need < 0) && (lastFetcherIndex > 0)) {
+                ConnectionFetcher fetcher = (ConnectionFetcher)
+                    _fetchers[i].remove(--lastFetcherIndex);
+                fetcher.interrupt();
+                need++;
+            }
+            int lastInitializingConnectionIndex =
+                _initializingFetchedConnections[i].size();
+            while((need < 0) && (lastInitializingConnectionIndex > 0)) {
+                ManagedConnection connection = (ManagedConnection)
+                    _initializingFetchedConnections[i].remove(
+                        --lastInitializingConnectionIndex);
+                removeInternal(connection);
+                need++;
+            }
         }
     }
 
@@ -598,6 +596,7 @@ public class ConnectionManager {
     private void initializeFetchedConnection(ManagedConnection c,
                                              ConnectionFetcher fetcher)
             throws IOException {
+        int isNew=fetcher._isNew ? NEW : OLD;
         synchronized(this) {
             if(fetcher.isInterrupted()) 
                 // Externally generated interrupt.
@@ -606,8 +605,8 @@ public class ConnectionManager {
                 // (This prevents fetcher from continuing!)
                 throw new IOException();
 
-            _initializingFetchedConnections.add(c);
-            _fetchers.remove(fetcher);
+            _initializingFetchedConnections[isNew].add(c);
+            _fetchers[isNew].remove(fetcher);
             connectionInitializing(c);
             // No need to adjust connection fetchers here.  We haven't changed
             // the need for connections; we've just replaced a ConnectionFetcher
@@ -619,7 +618,7 @@ public class ConnectionManager {
             c.initialize();
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
-                _initializingFetchedConnections.remove(c);
+                _initializingFetchedConnections[isNew].remove(c);
                 removeInternal(c);
                 // We've removed a connection, so the need for connections went
                 // up.  We may need to launch a fetcher.
@@ -630,7 +629,7 @@ public class ConnectionManager {
 
         boolean connectionOpen = false;
         synchronized(this) {
-            _initializingFetchedConnections.remove(c);
+            _initializingFetchedConnections[isNew].remove(c);
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
             if(_connections.contains(c)) {
@@ -748,8 +747,9 @@ public class ConnectionManager {
     public ManagedConnection createGroupConnectionBlocking(
       String hostname, int portnum, GroupPingRequest specialPing) 
 	  throws IOException {
+        //TODO: make sure server is upgraded so isNew=true works.
         ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true);
+		  new ManagedConnection(hostname, portnum, _router, this, true, true);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -810,15 +810,18 @@ public class ConnectionManager {
      */
     private class ConnectionFetcher
             extends Thread {
+        boolean _isNew;
+
         /**
          * Tries to add a connection.  Should only be called from a thread
          * that has the enclosing ConnectionManager's monitor.  This method
          * is only called from adjustConnectionFetcher's, which has the same
          * locking requirement.
          */
-        public ConnectionFetcher() {
+        public ConnectionFetcher(boolean isNew) {
             // Record the fetcher creation
-            _fetchers.add(this);
+            _fetchers[isNew ? NEW : OLD].add(this);
+            this._isNew=isNew;
 
             // Kick off the thread.
             setDaemon(true);
@@ -832,7 +835,7 @@ public class ConnectionManager {
 
             do {
                 try {
-                    endpoint = _catcher.getAnEndpoint(false);  //TODO: fix
+                    endpoint = _catcher.getAnEndpoint(_isNew);
                 } catch (InterruptedException exc2) {
                     // Externally generated interrupt.
                     // The interrupting thread has recorded the
@@ -847,7 +850,7 @@ public class ConnectionManager {
 
             ManagedConnection connection = new ManagedConnection(
                 endpoint.getHostname(), endpoint.getPort(), _router,
-                ConnectionManager.this);
+                ConnectionManager.this, false, _isNew);
 
             try {
                 initializeFetchedConnection(connection, this);
