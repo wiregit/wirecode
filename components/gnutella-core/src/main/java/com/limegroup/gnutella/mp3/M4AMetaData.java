@@ -102,13 +102,13 @@ public class M4AMetaData extends AudioMetaData {
 		//the title, artist and album tags are in string format.
 		//so we just set them
 		byte []current = (byte []) _metaData.get(new Integer(NAME_ATOM));
-		setTitle(current == null ? "" : new String(current));
+		setTitle(current == null ? "" : new String(current, "UTF-8"));
 		
 		current = (byte []) _metaData.get(new Integer(ARTIST_ATOM));
-		setArtist(current == null ? "" : new String(current));
+		setArtist(current == null ? "" : new String(current, "UTF-8"));
 		
 		current = (byte []) _metaData.get(new Integer(ALBUM_ATOM));
-		setAlbum(current == null ? "" : new String(current));
+		setAlbum(current == null ? "" : new String(current,"UTF-8"));
 		
 		
 		//the genre is byte encoded the same way as with id3 tags
@@ -209,7 +209,7 @@ public class M4AMetaData extends AudioMetaData {
 		}
 		
 		//create a ByteArrayInputStream and read from it.
-		return new DataInputStream(new ByteArrayInputStream(ILST));
+		return ILST==null ? null : new DataInputStream(new ByteArrayInputStream(ILST));
 	}
 	
 	

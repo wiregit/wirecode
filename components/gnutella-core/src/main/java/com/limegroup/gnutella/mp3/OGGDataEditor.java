@@ -69,40 +69,40 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 			
 			
 			tmp = OGGMetaData.TITLE_TAG+"="+(title_!=null ? title_ : "");
-			commentBytes[0]=tmp.getBytes();
-			comment.comment_lengths[0] = tmp.length();
+			commentBytes[0]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[0] = commentBytes[0].length;
 			
 
 			
 			tmp=OGGMetaData.ARTIST_TAG+"="+(artist_!=null ? artist_ : "");
-			commentBytes[1]=tmp.getBytes();
-			comment.comment_lengths[1] = tmp.length();
+			commentBytes[1]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[1] = commentBytes[1].length;
 			
 
 			
 			tmp=OGGMetaData.ALBUM_TAG+"="+(album_!=null ? album_: "");
-			commentBytes[2]=tmp.getBytes();
-			comment.comment_lengths[2] = tmp.length();
+			commentBytes[2]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[2] = commentBytes[2].length;
 			
 
 			tmp=OGGMetaData.COMMENT_TAG+"="+(comment_!=null ? comment_ :"");
-			commentBytes[3]=tmp.getBytes();
-			comment.comment_lengths[3] = tmp.length();
+			commentBytes[3]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[3] = commentBytes[3].length;
 			
 			
 			tmp=OGGMetaData.GENRE_TAG+"="+(genre_!=null ? genre_ : "");
-			commentBytes[4]=tmp.getBytes();
-			comment.comment_lengths[4] = tmp.length();
+			commentBytes[4]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[4] = commentBytes[4].length;
 			
 			
 			tmp=OGGMetaData.TRACK_TAG+"="+(track_ != null ? track_ : "");
 			commentBytes[5]=tmp.getBytes();
-			comment.comment_lengths[5] = tmp.length();
+			comment.comment_lengths[5] = commentBytes[5].length;
 			
 			
 			tmp=OGGMetaData.DATE_TAG+"="+(year_!=null ? year_ :"");
-			commentBytes[6]=tmp.getBytes();
-			comment.comment_lengths[6] = tmp.length();
+			commentBytes[6]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[6] = commentBytes[6].length;
 			
 			
 			comment.user_comments=commentBytes;
