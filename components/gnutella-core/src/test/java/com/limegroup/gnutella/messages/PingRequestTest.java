@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -38,6 +39,71 @@ public class PingRequestTest extends TestCase {
             assertTrue(false);
         }
     }
+
+
+    public void testGGEPPing() {
+        // first make a GGEP block....
+        GGEP ggepBlock = new GGEP(false);
+        ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ggepBlock.write(baos);
+        }
+        catch (IOException uhoh) {
+            assertTrue(false);
+        }
+        byte[] ggepBytes = baos.toByteArray();
+
+        //Headers plus payload(6 bytes)
+        byte[] buffer = new byte[23+ggepBytes.length+1];
+        byte[] guid = GUID.makeGuid();//get a GUID
+        System.arraycopy(guid,0,buffer,0,guid.length);//copy GUID
+        int currByte = guid.length;
+        buffer[currByte] = Message.F_PING;
+        currByte++;
+        buffer[currByte] = 0x0001; // TTL 
+        currByte++;
+        buffer[currByte] = 0x0000;// Hops
+        currByte++;
+        buffer[currByte] = (byte)(ggepBytes.length+1);//1st byte = 6
+        currByte++;
+        buffer[currByte] = 0x0000;//2nd byte = 0
+        currByte++;
+        buffer[currByte] = 0x0000;//3rd byte = 0
+        currByte++;
+        buffer[currByte] = 0x0000;//4th byte = 0 - remember it's little endian
+        currByte++;
+        // stick in GGEP
+        for (int i = 0; i < ggepBytes.length; i++)
+            buffer[currByte++] = ggepBytes[i];
+        buffer[currByte++] = 0; // trailing 0
+        assertTrue(currByte >= buffer.length);
+
+        //OK, ggep ping ready
+        ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
+        Message m = null;
+        try{
+            m = Message.read(stream);
+        }catch(BadPacketException bpe ){
+            bpe.printStackTrace();
+            assertTrue("TEST FAILED : bad packet in test", false);
+        }
+        catch (IOException ioe){
+            ioe.printStackTrace();
+            assertTrue("TEST FAILED : IO Exception", false);
+        }
+        PingRequest pr = null;
+        try{
+            pr = (PingRequest)m;
+        }catch(ClassCastException cce){
+            assertTrue("TEST FAILED : did not create Big ping", false);
+        }
+        assertTrue(!pr.isQueryKeyRequest());
+        pr.hop();
+        assertTrue(pr.isQueryKeyRequest());
+        //Came this far means its all OK
+    }
+
 
     public void testBigPing() {
         byte[] buffer = new byte[23+16];//Headers plus payload(16 bytes)
