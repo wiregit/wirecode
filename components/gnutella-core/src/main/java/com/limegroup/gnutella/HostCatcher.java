@@ -811,9 +811,11 @@ public class HostCatcher {
      * Recovers any hosts that we have put in the set of hosts "pending" 
      * removal from our hosts list.
      */
-    public void recoverHosts() {
+    public synchronized void recoverHosts() {
         LOG.debug("recovering hosts file");
         readHostsFile();
+        PROBATION_HOSTS.clear();
+        EXPIRED_HOSTS.clear();
     }
 
     /**
