@@ -106,7 +106,7 @@ public final class UrnCache {
 		try {
             ObjectInputStream ois = 
 			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
-			return (Hashtable)ois.readObject();
+			return (Map)ois.readObject();
 		} catch(Exception e) {
 			return new HashMap();
 		}
