@@ -157,16 +157,16 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int calculateSpeedPriority() {
 
 		if (isPrivate()) {
-			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
+			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
 				_speed_priority = PRIVATE_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
+			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
 				_speed_priority = PRIVATE_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T1_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
 				_speed_priority = PRIVATE_T1_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T3_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
 				_speed_priority = PRIVATE_T3_PRIORITY;
 			}
 		}
