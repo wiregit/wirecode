@@ -59,7 +59,7 @@ public class Acceptor extends Thread {
 	/**
      * @modifes this
      * @effects sets the IP address to use in pongs and query replies.  If addr
-     *  is localhost (127.0.0.1), this is not modified.  This method must be
+     *  is localhost (127.x.x.x), this is not modified.  This method must be
 	 *  to get around JDK bug #4073539, as well as to try to handle the case 
 	 *  of a computer whose IP address keeps changing.
 	 */
@@ -287,11 +287,16 @@ public class Acceptor extends Thread {
                 }
 
                 //Check if IP address of the incoming socket is in _badHosts
-                if (isBannedIP(
-                        client.getInetAddress().getHostAddress())) {
+				
+				InetAddress address = client.getInetAddress();
+				byte[] addressBytes = address.getAddress();
+                if (isBannedIP(address.getHostAddress()) ||
+					addressBytes[0] == 127) {
                     client.close();
                     continue;
                 }
+
+				
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
