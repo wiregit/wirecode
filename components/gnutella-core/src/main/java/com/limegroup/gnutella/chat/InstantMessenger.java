@@ -35,6 +35,7 @@ public class InstantMessenger extends Chat {
 		_out=new BufferedWriter(osw);
 		InputStream istream = _socket.getInputStream();
 		_reader = new ChatLineReader(istream);
+		readHeader();
 	}
 
 	/** constructor for an outgoing chat request */
@@ -102,6 +103,20 @@ public class InstantMessenger extends Chat {
 	public void blockHost(String host) {
 		_manager.blockHost(host);
 	}
+
+	/** Reads the header information from the chat
+		request.  At the moment, the header information
+		is pretty useless */
+	public void readHeader() {
+		try {
+			for (int i =0; i < 6; i++) { 
+				_reader.readLine();
+			}
+		} catch (IOException e) {
+			return;
+		}
+	}
+
 
 	/**
 	 * a private class that handles the thread for reading
