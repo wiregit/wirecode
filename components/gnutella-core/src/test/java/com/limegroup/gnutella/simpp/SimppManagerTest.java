@@ -235,7 +235,7 @@ public class SimppManagerTest extends BaseTestCase {
         changeSimppFile();
 
         //2. Set up the TestConnection to advertise same version, not expect a
-        //SimppReq, and to send an unsolicited newer SimppResponse
+        //SimppReq, and to send an unsolicited same SimppResponse
         TestConnection conn = null;
         try {
             conn = new TestConnection(MIDDLE,false, true);
@@ -262,7 +262,7 @@ public class SimppManagerTest extends BaseTestCase {
         changeSimppFile();
 
         //2. Set up the TestConnection to advertise same version, not expect a
-        //SimppReq, and to send an unsolicited newer SimppResponse
+        //SimppReq, and to send an unsolicited older SimppResponse
         TestConnection conn = null;
         try {
             conn = new TestConnection(MIDDLE,false, true, OLD);
@@ -315,8 +315,9 @@ public class SimppManagerTest extends BaseTestCase {
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
-        //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire
+        //2. Set up the test connection, to advertise the new version, and to
+        //expect a simpp request from limewire and send a defective signature
+        //msg
         TestConnection conn = null;
         try {
             conn = new TestConnection(DEF_SIGNATURE, true, true, NEW);
@@ -341,8 +342,8 @@ public class SimppManagerTest extends BaseTestCase {
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
-        //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire
+        //2. Set up the test connection, to advertise the new version, and to
+        //expect a simpp request from limewire and send a defective message msg
         TestConnection conn = null;
         try {
             conn = new TestConnection(DEF_MESSAGE, true, true, NEW);
@@ -367,8 +368,8 @@ public class SimppManagerTest extends BaseTestCase {
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
-        //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire
+        //2. Set up the test connection, to advertise the new version, and to
+        //expect a simpp request from limewire and send a bad_xml msg
         TestConnection conn = null;
         try {
             conn = new TestConnection(BAD_XML, true, true, NEW);
@@ -393,8 +394,8 @@ public class SimppManagerTest extends BaseTestCase {
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
-        //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire
+        //2. Set up the test connection, to advertise the new version, and to
+        //expect a simpp request from limewire and send a garbage msg
         TestConnection conn = null;
         try {
             conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
@@ -420,10 +421,11 @@ public class SimppManagerTest extends BaseTestCase {
         changeSimppFile();
 
         //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire
+        //a simpp request from limewire, but then close the connection while
+        //uploading the simpp message
         TestConnection conn = null;
         try {
-            conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
+            conn = new TestConnection(NEW, true, true);
             conn.setCauseError(true);
         } catch(IOException iox) {
             fail("could not set up test connection");
