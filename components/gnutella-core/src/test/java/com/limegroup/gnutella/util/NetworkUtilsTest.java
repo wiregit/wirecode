@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.settings.*;
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import java.util.jar.*;
-import java.io.*;
-import java.net.*;
+import java.net.InetAddress;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Tests certain features of NetworkUtils
@@ -129,6 +128,8 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 	public void testNetworkUtilsPortCheck() {
 		int port = -1;
 		assertTrue("port should not be valid", !NetworkUtils.isValidPort(port));
+        port = 0;
+        assertTrue("port should not be valid", !NetworkUtils.isValidPort(port));
 		port = 99999999;
 		assertTrue("port should not be valid", !NetworkUtils.isValidPort(port));
 		port = 20;
