@@ -24,7 +24,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
      * an empty buffer until stats are actually recorded.
 	 */
-	protected IntBuffer _buffer = new IntBuffer(0);
+	protected IntBuffer _buffer = new IntBuffer(1);
 
 	/**
 	 * Long for the statistic currently being added to.
