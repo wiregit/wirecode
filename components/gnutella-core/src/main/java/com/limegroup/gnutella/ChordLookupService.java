@@ -44,10 +44,15 @@ public class ChordLookupService
 	    // invariably just ONE seednode per chord.
 	    String seedNode=System.getProperty("edu.ucr.cs.chord.SeedNode");
 	    if(seedNode==null || seedNode.equals("")) return;
+	    
+	    int localPort=DEFAULT_CHORD_PORT;
+	    try{
+	       localPort=Integer.parseInt(System.getProperty("edu.ucr.cs.chord.LocalPort"));
+	    }catch(Exception e){}
 
 	    if("true".equals(System.getProperty("edu.ucr.cs.chord.SeedNode")))
 	    {
-	       _lookup=new LocalFileLookupNode(DEFAULT_CHORD_PORT);
+	       _lookup=new LocalFileLookupNode(localPort);
 	       connected=true;
 	    }
 	    else {
@@ -71,8 +76,13 @@ public class ChordLookupService
       {
 	 connecting=true;
 	 try{
+	    int localPort=DEFAULT_CHORD_PORT;
+	    try{
+	       localPort=Integer.parseInt(System.getProperty("edu.ucr.cs.chord.LocalPort"));
+	    }catch(Exception e) {}
+
 	    // TODO: needs to connect to a known server instead of this nonsense.
-	    _lookup=new LocalFileLookupNode(DEFAULT_CHORD_PORT, remotePort, remoteHost);
+	    _lookup=new LocalFileLookupNode(localPort, remotePort, remoteHost);
 	    connected=true;
 	    connecting=false;
 
