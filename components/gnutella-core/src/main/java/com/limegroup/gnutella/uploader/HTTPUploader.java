@@ -168,7 +168,7 @@ public class HTTPUploader implements Uploader {
 	 * this method was previously called "amountRead", but the
 	 * name was changed to make more sense.
 	 */ 
-	public int amountUpoaded() {return 0;}
+	public int amountUploaded() {return 0;}
 
 	/**
 	 * returns the string representation of the IP Address
@@ -176,5 +176,6 @@ public class HTTPUploader implements Uploader {
 	 */
 	public String getHost() {return null;}
 	
+	public int getState() {return 0;}
 
 }
