@@ -11,6 +11,7 @@ import java.net.*;
 /**
  * Out-of-process test to check whether (multi)leaves avoid forwarding messages
  * to ultrapeers, do redirects properly, etc.  This test is interactive; you
+ * must establish connections and initiate a query on your leaf.
  */
 public class LeafTester {
     static final int PORT=6347;
@@ -28,11 +29,15 @@ public class LeafTester {
     public static void main(String args[]) {
         System.out.println(
             "Please make sure you have a leaf running with no connections,\n"
-           +"listening on port 6346, without any connection fetchers\n");
+            +"listening on port "+PORT+", without any connection fetchers,\n"
+            +"an empty host cache, and connection watchdogs disabled\n");
         
         try {
             connect();
+            testLeafBroadcast();
             testRedirect();
+            testBroadcastFromUltrapeer();
+            testNoBroadcastFromOld();
             shutdown();
         } catch (IOException e) { 
             System.err.println("Mysterious IOException:");
@@ -43,84 +48,123 @@ public class LeafTester {
         }
         
         System.out.println("Done");
-    }
+     }
 
-    ////////////////////////// Initialization ////////////////////////
+     ////////////////////////// Initialization ////////////////////////
 
-    private static void connect() throws IOException, BadPacketException {
-        System.out.println("Please establish a connection to localhost:6350\n");
-        ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
-        ultrapeer1.initialize();
-        replyToPing(ultrapeer1, true);
+     private static void connect() throws IOException, BadPacketException {
+         System.out.println("Please establish a connection to localhost:6350\n");
+         ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
+         ultrapeer1.initialize();
+         replyToPing(ultrapeer1, true);
 
-        System.out.println("Please establish a connection to localhost:6351\n");
-        ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
-        ultrapeer2.initialize();
-        replyToPing(ultrapeer2, true);
+         System.out.println("Please establish a connection to localhost:6351\n");
+         ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
+         ultrapeer2.initialize();
+         replyToPing(ultrapeer2, true);
 
-        System.out.println("Please establish a connection to localhost:6352\n");
-        old1=new Connection(accept(6352), new OldResponder());
-        old1.initialize();
-        replyToPing(old1, false);
+         System.out.println("Please establish a connection to localhost:6352\n");
+         old1=new Connection(accept(6352), new OldResponder());
+         old1.initialize();
+         replyToPing(old1, false);
 
-        System.out.println("Please establish a connection to localhost:6353\n");
-        old2=new Connection(accept(6353), new OldResponder());
-        old2.initialize();
-        replyToPing(old2, false);
-    }
+         System.out.println("Please establish a connection to localhost:6353\n");
+         old2=new Connection(accept(6353), new OldResponder());
+         old2.initialize();
+         replyToPing(old2, false);
+     }
 
-    private static Socket accept(int port) throws IOException { 
-        ServerSocket ss=new ServerSocket(port);
-        Socket s=ss.accept();
-        InputStream in=s.getInputStream();
-        String word=readWord(in);
-        if (! word.equals("GNUTELLA"))
-            throw new IOException("Bad word: "+word);
-        return s;
-    }
+     private static Socket accept(int port) throws IOException { 
+         ServerSocket ss=new ServerSocket(port);
+         Socket s=ss.accept();
+         InputStream in=s.getInputStream();
+         String word=readWord(in);
+         if (! word.equals("GNUTELLA"))
+             throw new IOException("Bad word: "+word);
+         return s;
+     }
 
-    /**
-     * Acceptor.readWord
-     *
-     * @modifies sock
-     * @effects Returns the first word (i.e., no whitespace) of less
-     *  than 8 characters read from sock, or throws IOException if none
-     *  found.
-     */
-    private static String readWord(InputStream sock) throws IOException {
-        final int N=9;  //number of characters to look at
-        char[] buf=new char[N];
-        for (int i=0 ; i<N ; i++) {
-            int got=sock.read();
-            if (got==-1)  //EOF
-                throw new IOException();
-            if ((char)got==' ') { //got word.  Exclude space.
-                return new String(buf,0,i);
-            }
-            buf[i]=(char)got;
-        }
-        throw new IOException();
-    }
+     /**
+      * Acceptor.readWord
+      *
+      * @modifies sock
+      * @effects Returns the first word (i.e., no whitespace) of less
+      *  than 8 characters read from sock, or throws IOException if none
+      *  found.
+      */
+     private static String readWord(InputStream sock) throws IOException {
+         final int N=9;  //number of characters to look at
+         char[] buf=new char[N];
+         for (int i=0 ; i<N ; i++) {
+             int got=sock.read();
+             if (got==-1)  //EOF
+                 throw new IOException();
+             if ((char)got==' ') { //got word.  Exclude space.
+                 return new String(buf,0,i);
+             }
+             buf[i]=(char)got;
+         }
+         throw new IOException();
+     }
 
-    private static void replyToPing(Connection c, boolean ultrapeer) 
+     private static void replyToPing(Connection c, boolean ultrapeer) 
+             throws IOException, BadPacketException {
+         Message m=c.receive(500);
+         Assert.that(m instanceof PingRequest);
+         PingRequest pr=(PingRequest)m;
+         byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+         PingReply reply=new PingReply(pr.getGUID(), (byte)7,
+                                       c.getLocalPort(), 
+                                       ultrapeer ? ultrapeerIP : oldIP,
+                                       0, 0, ultrapeer);
+         reply.hop();
+         c.send(reply);
+         c.flush();
+     }
+
+     ///////////////////////// Actual Tests ////////////////////////////
+
+    private static void testLeafBroadcast() 
             throws IOException, BadPacketException {
-        Message m=c.receive(500);
-        Assert.that(m instanceof PingRequest);
-        PingRequest pr=(PingRequest)m;
-        byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-        PingReply reply=new PingReply(pr.getGUID(), (byte)7,
-                                      c.getLocalPort(), 
-                                      ultrapeer ? ultrapeerIP : oldIP,
-                                      0, 0, ultrapeer);
-        reply.hop();
-        c.send(reply);
-        c.flush();
-    }
+        System.out.println("Please send a query for \"crap\" from your leaf\n");
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) { }
+        System.out.println("-Testing broadcast from leaf");
 
-    ///////////////////////// Actual Tests ////////////////////////////
+        while (true) {
+            Message m=ultrapeer1.receive(2000);
+            if (m instanceof QueryRequest) {
+                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                break;
+            }
+        }       
+        while (true) {
+            Message m=ultrapeer2.receive(2000);
+            if (m instanceof QueryRequest) {
+                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                break;
+            }
+        }
+        while (true) {
+            Message m=old1.receive(2000);
+            if (m instanceof QueryRequest) {
+                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                break;
+            }
+        }
+        while (true) {
+            Message m=old2.receive(2000);
+            if (m instanceof QueryRequest) {
+                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                break;
+            }
+        }
+    }
 
     private static void testRedirect() {
-        Connection c=new Connection("127.0.0.1", 6346,
+        System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
+        Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder(),
                                     false);
@@ -129,7 +173,7 @@ public class LeafTester {
             Assert.that(false, "Handshake succeeded!");
         } catch (IOException e) {
             String hosts=c.getProperty(ConnectionHandshakeHeaders.X_TRY);
-            System.out.println("X-Try: "+hosts);
+            //System.out.println("X-Try: "+hosts);
             Assert.that(hosts!=null);
             Set s=list2set(hosts);
             Assert.that(s.size()==2);
@@ -137,8 +181,8 @@ public class LeafTester {
             Assert.that(s.contains(new Endpoint(oldIP, 6353)));
 
             hosts=c.getProperty(
-                ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
-            System.out.println("X-Try-Ultrapeers: "+hosts);
+                                ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
+            //System.out.println("X-Try-Ultrapeers: "+hosts);
             Assert.that(hosts!=null);
             s=list2set(hosts);
             Assert.that(s.size()==4);
@@ -150,6 +194,39 @@ public class LeafTester {
         }
     }
 
+    private static void testBroadcastFromUltrapeer() throws IOException {
+        System.out.println("-Test query from ultrapeer not broadcasted");
+        drain(ultrapeer2);
+        drain(old1);
+        drain(old2);
+
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        ultrapeer1.send(qr);
+        ultrapeer1.flush();
+
+        Assert.that(! drain(ultrapeer2));
+        //We don't care whether this is forwarded to the old connections
+    }
+
+
+    private static void testNoBroadcastFromOld() 
+        throws IOException, BadPacketException {
+        System.out.println("-Test query from old not broadcasted");
+        drain(ultrapeer1);
+        drain(ultrapeer2);
+        drain(old2);
+
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        old1.send(qr);
+        old1.flush();
+
+        Assert.that(! drain(ultrapeer1));
+        Assert.that(! drain(ultrapeer2));
+        Message m=old2.receive(500);
+        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+        Assert.that(m.getHops()==(byte)1);
+        Assert.that(m.getTTL()==(byte)6);         
+    }
 
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
