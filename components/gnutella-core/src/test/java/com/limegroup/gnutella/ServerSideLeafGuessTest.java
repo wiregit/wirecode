@@ -360,50 +360,55 @@ public class ServerSideLeafGuessTest
         }
         assertNotNull(qkToUse);
 
-        // we should be able to send a query
-		QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
-                                                                  qkToUse);
-		byte[] guid = goodQuery.getGUID();
-        send(goodQuery, localHost, PORT);
+        {
+            // we should be able to send a query
+            QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
+                                                                      qkToUse);
+            byte[] guid = goodQuery.getGUID();
+            send(goodQuery, localHost, PORT);
+            
+            // now we should get an ack
+            m = receive();
+            assertTrue(m instanceof PingReply);
+            PingReply pRep = (PingReply) m;
+            assertEquals(new GUID(guid), new GUID(pRep.getGUID()));
+            
+            // followed by a query hit
+            m = receive();
+            assertTrue(m instanceof QueryReply);
+            QueryReply qRep = (QueryReply) m;
+            assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
+        }
 
-        // now we should get an ack
-        m = receive();
-        assertTrue(m instanceof PingReply);
-        PingReply pRep = (PingReply) m;
-        assertEquals(new GUID(guid), new GUID(pRep.getGUID()));
-        
-        // followed by a query hit
-        m = receive();
-        assertTrue(m instanceof QueryReply);
-        QueryReply qRep = (QueryReply) m;
-        assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
-
-        // now send a URN query, make sure that works....
-        File berkeley = 
+        {
+            // now send a URN query, make sure that works....
+            File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
-        URN berkeleyURN = (URN) iter.next();
-
-        // we should be able to send a URN query
-		goodQuery = QueryRequest.createQueryKeyQuery(berkeleyURN, qkToUse);
-		guid = goodQuery.getGUID();
-        send(goodQuery, localHost, PORT);
-
-        // now we should get an ack
-        m = receive();
-        assertTrue(m instanceof PingReply);
-        pRep = (PingReply) m;
-        assertEquals(new GUID(guid), new GUID(pRep.getGUID()));
-        
-        // followed by a query hit with a URN
-        m = receive();
-        assertTrue(m instanceof QueryReply);
-        qRep = (QueryReply) m;
-        assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
-        iter = qRep.getResults();
-        Response first = (Response) iter.next();
-        assertEquals(first.getUrns(),
-                     FileDesc.calculateAndCacheURN(berkeley));
+            Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
+            URN berkeleyURN = (URN) iter.next();
+            
+            // we should be able to send a URN query
+            QueryRequest goodQuery = 
+                QueryRequest.createQueryKeyQuery(berkeleyURN, qkToUse);
+            byte[] guid = goodQuery.getGUID();
+            send(goodQuery, localHost, PORT);
+            
+            // now we should get an ack
+            m = receive();
+            assertTrue(m instanceof PingReply);
+            PingReply pRep = (PingReply) m;
+            assertEquals(new GUID(guid), new GUID(pRep.getGUID()));
+            
+            // followed by a query hit with a URN
+            m = receive();
+            assertTrue(m instanceof QueryReply);
+            QueryReply qRep = (QueryReply) m;
+            assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
+            iter = qRep.getResults();
+            Response first = (Response) iter.next();
+            assertEquals(first.getUrns(),
+                         FileDesc.calculateAndCacheURN(berkeley));
+        }
 
     }
 

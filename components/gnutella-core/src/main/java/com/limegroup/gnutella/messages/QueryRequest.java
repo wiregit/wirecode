@@ -577,7 +577,7 @@ public class QueryRequest extends Message implements Serializable{
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
-                                "", UrnType.SHA1_SET, sha1Set, null,
+                                "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false);
     }
