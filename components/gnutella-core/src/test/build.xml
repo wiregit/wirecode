@@ -5,6 +5,8 @@
   <property name="messages"    value="com/limegroup/gnutella/messages" /> 
   <property name="util"        value="com/limegroup/gnutella/util" /> 
   <property name="lib"         value="../gui/lib/"/>
+  <property name="corelib"     value="../core/lib/"/>
+  <property name="GURL"        value="${lib}GURL.jar"/>
   <property name="collections" value="${lib}collections.jar"/>
   <property name="xerces"      value="${lib}xerces.jar"/>
   <property name="junit"       value="${lib}junit.jar"/>
@@ -12,12 +14,12 @@
   <property name="jl011"       value="${lib}jl011.jar"/>
   <property name="playerlib"   value="${jl011}"/>
   <property name="mp3sp"       value="${lib}mp3sp14.jar"/>
+  <property name="logicrypto"  value="${corelib}logicrypto.jar"/>
   <property name="ui"          value="${lib}ui.jar"/>
   <property name="mrj"         value="${lib}MRJToolkitStubs.jar"/>
   <property name="osx"         value="${lib}MRJ141Stubs.jar"/>
   <property name="mac"         value="${lib}MacStubs.jar"/>
   <property name="quicktime"   value="${lib}QTJava.zip"/>
-  <property name="skins"       value="${lib}skinlf.jar"/>
   <property name="coredir"     value="../core/"/>
   <property name="guidir"      value="../gui/"/>
   <property name="settings"    value="${coredir}com/limegroup/gnutella/settings/"/>
@@ -44,11 +46,10 @@
     <pathelement location="${mrj}" />
     <pathelement location="${osx}" />
 	<pathelement location="${mac}" />
+	<pathelement location="${GURL}" />
 	<pathelement location="${quicktime}"/>
-	<pathelement location="lib/junit.jar"/>
-	<pathelement location="lib/logicrypto.jar"/>
+	<pathelement location="${logicrypto}"/>
 	<pathelement location="${datadir}"/>
-    <pathelement location="lib/GURL.jar" />
   </path>
 
   <!-- Initialization stuff -->
