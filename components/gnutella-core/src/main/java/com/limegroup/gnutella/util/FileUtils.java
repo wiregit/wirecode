@@ -140,7 +140,7 @@ public class FileUtils
      *  be unset.
      */
     public static boolean setWriteable(File f) {
-        if( f.canWrite() )
+        if( f.canWrite() || !f.exists() )
             return true;
             
         String fName;
