@@ -1,8 +1,15 @@
 package com.limegroup.gnutella.simpp;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 import org.xml.sax.SAXException;
 
@@ -10,6 +17,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
@@ -24,6 +32,8 @@ public class SimppManager {
 
     private int _latestVersion;
     
+    private static final String SIMPP_FILE = "simpp.xml";
+    
     /**
      * The smallest version number of Simpp Messages. Any simpp message number
      * less than this will be rejected. It's set to 3 for testing purposes, the
@@ -37,14 +47,14 @@ public class SimppManager {
     private String _propsStream;
 
     private final ProcessingQueue _processingQueue;
-
+    
     private SimppManager() {
         boolean problem = false;
         RandomAccessFile raf = null;
         _processingQueue = new ProcessingQueue("Simpp Handling Queue");
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(), "simpp.xml");
+                new File(CommonUtils.getUserSettingsDir(), SIMPP_FILE);
             raf = new RandomAccessFile(file, "r");
             byte[] content = new byte[(int)raf.length()];
             raf.readFully(content);
@@ -121,11 +131,12 @@ public class SimppManager {
         final int myVersion = _latestVersion;
         Runnable simppHandler = new Runnable() {
             public void run() {
+                
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
-                boolean verified = false;
-                verified = verifier.verifySource();
-                if(!verified) 
+                
+                if (!verifier.verifySource())
                     return;
+                
                 SimppParser parser=null;
                 try {
                     parser = new SimppParser(verifier.getVerifiedData());
@@ -146,12 +157,57 @@ public class SimppManager {
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
                 SimppSettingsManager.instance().updateSimppSettings(props);
-                // 4. Update the capabilities VM with the new version
+                // 4. Save to disk, try 5 times
+                for (int i =0;i < 5; i++) {
+                    if (save())
+                        break;
+                }
+                // 5. Update the capabilities VM with the new version
                 CapabilitiesVM.reconstructInstance();
                 // 5. Send the new CapabilityVM to all our connections. 
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
             }
         };
         _processingQueue.add(simppHandler);
+    }
+    
+    /**
+     * Saves the simpp.xml file to the user settings directory.
+     */
+    public boolean save(){
+        File tmp = new File(SIMPP_FILE+".tmp");
+        File simpp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE);
+        
+        OutputStream simppWriter = null;
+        try {
+            simppWriter = new BufferedOutputStream(new FileOutputStream(tmp));
+            simppWriter.write(_simppBytes);
+            simppWriter.flush();
+        }catch(IOException bad) {
+            return false;
+        } 
+        finally {
+            if (simppWriter!=null)
+                try{simppWriter.close();}catch(IOException ignored){}
+        }
+        
+        //verify that we wrote everything correctly
+        DataInputStream dis = null;
+        byte [] data= new byte[_simppBytes.length];
+        try {
+            dis = new DataInputStream(new BufferedInputStream(new FileInputStream(tmp)));
+            dis.readFully(data);
+            if (!Arrays.equals(data,_simppBytes))
+                return false;
+        }catch(IOException bad) {
+            return false;
+        }
+        finally {
+            if (dis!=null)
+                try{dis.close();}catch(IOException ignored){}
+        }
+        
+        // if we couldn't rename the temp file, try again later.
+        return FileUtils.forceRename(tmp,simpp);
     }
 }
