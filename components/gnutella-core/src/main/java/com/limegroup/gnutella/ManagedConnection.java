@@ -962,10 +962,6 @@ public class ManagedConnection extends Connection
      */
     void loopForMessages() throws IOException {
 		MessageRouter router = RouterService.getMessageRouter();
-		
-		//check the honesty of the peer before we start looping
-		verifyLimeWire();
-	
         final boolean isSupernodeClientConnection=isSupernodeClientConnection();
         while (true) {
             Message m=null;
@@ -1000,27 +996,6 @@ public class ManagedConnection extends Connection
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
-    }
-    
-    /**
-     * if the other side claimed to be LimeWire, see if they support
-     * the messages we support... ;-)
-     *
-     */
-    private void verifyLimeWire() {
-    	String userAgent =  HEADERS_READ.getProperty(HeaderNames.USER_AGENT);
-		if (userAgent!=null && userAgent.startsWith("LimeWire")) {
-			
-			//lose the minor version, i.e. 3.8.4 -> 3.8
-			userAgent = userAgent.substring(0,userAgent.lastIndexOf("."));
-			
-			//only check past version as we may change the behavior in future.
-			if (userAgent.endsWith("3.8") || userAgent.endsWith("3.9") ||
-					userAgent.endsWith("4.0")) 		
-					//register this connection as a suspect.
-					LimeVerifier.registerSuspect(this);
-			
-		}
     }
     
     private QueryRequest tryToProxy(QueryRequest query) {
