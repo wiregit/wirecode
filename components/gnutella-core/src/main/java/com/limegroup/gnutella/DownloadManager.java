@@ -249,13 +249,31 @@ public class DownloadManager implements BandwidthTracker {
         }
         return false;
     }
+    
+    /**
+     * Clears all downloads.
+     */
+    public void clearAllDownloads() {
+        List buf;
+        synchronized(this) {
+            buf = new ArrayList(active.size() + waiting.size());
+            buf.addAll(active);
+            buf.addAll(waiting);
+            active.clear();
+            waiting.clear();
+        }
+        for(Iterator i = buf.iterator(); i.hasNext(); ) {
+            ManagedDownloader md = (ManagedDownloader)i.next();
+            md.stop();
+        }
+    }   
 
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
     synchronized boolean writeSnapshot() {
-        List buf=new ArrayList();
+        List buf=new ArrayList(active.size() + waiting.size());
         buf.addAll(active);
         buf.addAll(waiting);
         

@@ -507,7 +507,10 @@ public class TestUploader extends AssertComparisons {
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
         OutputStream output = socket.getOutputStream();
-        throttle = new BandwidthThrottle(rate*1024);
+        if(rate > 0)
+            throttle = new BandwidthThrottle(rate*1024);
+        else
+            throttle = new BandwidthThrottle(Float.MAX_VALUE);
         int start = 0;
         int stop = TestFile.length();
         boolean firstLine=true;
@@ -733,7 +736,7 @@ public class TestUploader extends AssertComparisons {
             throttle.request(1);
             if(sendCorrupt &&
                i-start >= corruptBoundary &&
-               stop-i >= corruptBoundary )
+               stop-i >= corruptBoundary)
                 out.write(TestFile.getByte(i)+(byte)1);
             else
                 out.write(TestFile.getByte(i));

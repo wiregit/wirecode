@@ -3326,7 +3326,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             //If we are corrupt, we want to stop sharing the incomplete file,
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
-            
             if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
