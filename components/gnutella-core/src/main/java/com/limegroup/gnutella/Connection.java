@@ -605,6 +605,10 @@ public class Connection implements Runnable {
                         if (m.hop()>1) {
                             manager.sendToAllExcept(m,this); //broadcast to other hosts
                         }
+
+						// Increment the Num Local Searches count
+						if ( manager != null )
+						    manager.QReqCount++;
              
                         FileManager fm = FileManager.getFileManager();
                         Response[] responses = fm.query((QueryRequest)m);
