@@ -16,10 +16,15 @@ public class OnDemandUnicaster {
 
     /** Access to UDP traffic.
      */
-    public static final UDPService _udp;
+    private static final UDPService _udp;
     
+    /** Short term store for queries waiting for query keys.
+     */
+    private static final Map _bufferedQueries;
+
     static {
         _queryKeys = new Hashtable(); // need sychronization
+        _bufferedQueries = new Hashtable(); // synchronization handy
         _udp = UDPService.instance();
     }        
 
@@ -55,6 +60,21 @@ public class OnDemandUnicaster {
 
         // store query key
         _queryKeys.put(endpoint, qk);
+
+        // if a buffered query exists, send it...
+        // -----
+        SendLaterBundle bundle = 
+            (SendLaterBundle) _bufferedQueries.remove(endpoint);
+        if (bundle != null) {
+            QueryRequest query = 
+                QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
+            try {
+                _udp.send(query, endpoint.getAddress(), 
+                          endpoint.getPort());
+            }
+            catch (IOException ignored) {}
+        }
+        // -----
     }
 
     /** Sends out a UDP query with the specified URN to the specified host.
@@ -73,8 +93,8 @@ public class OnDemandUnicaster {
         if (queryURN == null)
             throw new IllegalArgumentException("No urn to look for!");
         // ------
-        
-        // see if you have a QueryKey
+
+        // see if you have a QueryKey - if not, request one
         // ------
         QueryKey key = (QueryKey) _queryKeys.get(ep);
         if (key == null) {
@@ -82,26 +102,51 @@ public class OnDemandUnicaster {
             try {
                 _udp.send(pr, ep.getAddress(), ep.getPort());
             }
-            catch (IOException ignored) {}
-            // wait a little, hope to get the query key
-            Thread.sleep(150);
-            key = (QueryKey) _queryKeys.get(ep);
-            // TODO: is this the right thing to do?  i hate it but lets keep it
-            // for now.  a couple of options though:
-            // 1) pre-fetch the query keys when bypassing the result
-            // 2) return status to the caller and have them react
-            if (key == null) return;
+            catch (IOException veryBad) {
+                return;
+            }
         }
         // ------
         
-        // construct a URN Guess query and send it off
+        // if possible send query, else buffer
         // ------
-        QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
-        try {
-            _udp.send(query, ep.getAddress(), ep.getPort());
+        if (key != null) {
+            QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
+            try {
+                _udp.send(query, ep.getAddress(), ep.getPort());
+            }
+            catch (IOException ignored) {}
         }
-        catch (IOException ignored) {}
+        else {
+            // don't want to get a query key before buffering the query - this
+            // still may happen but it seems HIGHLY unlikely
+            synchronized (_bufferedQueries) {
+                GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
+                                                           ep.getPort());
+                SendLaterBundle bundle = new SendLaterBundle(queryURN);
+                _bufferedQueries.put(endpoint, bundle);
+            }
+        }
         // ------
+    }
+
+
+    private static class SendLaterBundle {
+
+        private static final int MAX_LIFETIME = 60 * 1000;
+
+        public final URN _queryURN;
+        private final long _creationTime;
+
+        public SendLaterBundle(URN urn) {
+            _queryURN = urn;
+            _creationTime = System.currentTimeMillis();
+        }
+                               
+        public boolean shouldExpire() {
+            return ((System.currentTimeMillis() - _creationTime) >
+                    MAX_LIFETIME);
+        }
     }
 
 }

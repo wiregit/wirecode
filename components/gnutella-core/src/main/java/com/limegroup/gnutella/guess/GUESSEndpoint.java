@@ -69,4 +69,8 @@ public final class GUESSEndpoint {
         return result;
     }
 
+    public String toString() {
+        return "GUESSEndpoint: " + getAddress() + ":" + getPort();
+    }
+
 }
