@@ -148,6 +148,10 @@ public final class AlternateLocationTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests the constructor that creates an alternate location from a remote
+	 * file desc.
+	 */
 	public void testRemoteFileDescConstructor() {
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
@@ -161,6 +165,19 @@ public final class AlternateLocationTest extends TestCase {
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests the factory method that creates a RemoteFileDesc from an alternate
+	 * location.
+	 */
+	public void testCreateRemoteFileDesc() {
+		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
+			AlternateLocation al = HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
+			RemoteFileDesc rfd = al.createRemoteFileDesc(10);
+			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
+			assertEquals("urls should be equal", al.getUrl(), rfd.getUrl());
 		}
 	}
 
