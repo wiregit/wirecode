@@ -809,29 +809,36 @@ public class UDPConnectionProcessor {
     private synchronized void validateAckedData() {
         long currTime = System.currentTimeMillis();
 
-        if (_sendWindow.acksAppearToBeMissing(currTime, 2)) {
+        if (_sendWindow.acksAppearToBeMissing(currTime, 1)) {
 
             // if the older blocks ack have been missing for a while
             // resend them.
 
-            // Calculate a good time to wait
+            // Calculate a good maximum time to wait
             int rto      = _sendWindow.getRTO();
-            int adjRTO   = (rto * 2);
+            int adjRTO1  = (rto * 3 / 2);  // 150% of RTO
+            int adjRTO2  = (rto * 2);      // 200% of RTO
 
             long start   = _sendWindow.getWindowStart();
 
             if(LOG.isDebugEnabled())  
-              LOG.debug("Soft resend data:"+ start+ " rto:"+rto+
-                " uS:"+_sendWindow.getUsedSpots());
+              LOG.debug("Soft resend check:"+ start+ " rto:"+rto+
+                " uS:"+_sendWindow.getUsedSpots()+" localSeq:"+_sequenceNumber);
 
             DataRecord drec;
+            DataRecord drecNext;
             int        numResent = 0;
 
-            // Resend up to 1
+            // Resend up to 1 packet at a time
             for (int i = 0; i < 1; i++) {
 
                 // Get the oldest unacked block out of storage
-                drec = _sendWindow.getOldestUnackedBlock();
+                drec     = _sendWindow.getOldestUnackedBlock();
+
+                // Check if the next drec is acked
+                boolean nextIsAcked = false;
+                drecNext    = _sendWindow.getBlock(drec.pnum+1);
+                nextIsAcked = (drecNext != null) && (drecNext.acks > 0);
 
                 // The assumption is that this record has not been acked
                 if ( drec == null ) break;
@@ -849,7 +856,10 @@ public class UDPConnectionProcessor {
                 int currentWait = (int)(currTime - drec.sentTime);
 
                 // If it looks like we waited too long then speculatively resend
-                if ( currentWait > adjRTO ) {
+                // Case 1: We waited 150% of RTO and next packet had been acked
+                // Case 2: We waited 200% of RTO 
+                if ( (currentWait > adjRTO1 && nextIsAcked ) ||
+                     (currentWait > adjRTO2)               ) {
                     if(LOG.isDebugEnabled())  
                         LOG.debug("Soft resending message:"+
                           drec.msg.getSequenceNumber());
