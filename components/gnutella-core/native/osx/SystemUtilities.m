@@ -7,8 +7,26 @@
 #include <sys/resource.h>
 #include <JavaVM/jni.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 extern double CGSSecondsSinceLastInputEvent(unsigned long envType);
+
+JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable
+  (JNIEnv *env, jclass clazz, jstring fileName) {
+	const char* cFileName;
+	int retVal;
+	struct stat fileStat;
+	cFileName = (*env)->GetStringUTFChars(env, fileName, JNI_FALSE);
+	retVal = stat(cFileName, &fileStat);
+	if(retVal == 0)
+		retVal = chmod(cFileName, fileStat.st_flags | 0600);
+	// free the memory for the string
+	(*env)->ReleaseStringUTFChars(env, fileName, cFileName);
+	return retVal;
+}
+
 
 JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime
   (JNIEnv *env, jclass clazz) {

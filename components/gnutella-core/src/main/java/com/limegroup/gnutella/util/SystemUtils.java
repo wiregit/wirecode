@@ -78,7 +78,7 @@ public class SystemUtils {
      * the filename given should ideally be a canonicalized filename.
      */
     static void setWriteable(String fileName) {
-        if(isLoaded && CommonUtils.isWindows())
+        if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
             setFileWriteable(fileName);
     }
             
