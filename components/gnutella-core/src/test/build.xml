@@ -64,6 +64,11 @@
     <delete dir="${reports}"/>
   </target>
   
+  <!-- clean stray dirs -->
+  <target name="clean dirs">
+    <delete dir="testData"/>
+  </target>
+  
   <!-- PREPARE -->
   <target name="prepare">
     <mkdir dir="${builddir}"/>

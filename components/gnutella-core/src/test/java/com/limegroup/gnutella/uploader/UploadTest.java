@@ -72,7 +72,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
 		ConnectionSettings.KEEP_ALIVE.setValue(8);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
