@@ -848,8 +848,8 @@ public abstract class FileManager {
             RouterService.getCallback().addSharedFile(fileDesc, parent);
 		
             //Index the filename.  For each keyword...
-            String[] keywords=
-                StringUtils.split(I18NConvert.instance().getNorm(fileDesc.getPath()), DELIMETERS);
+            String[] keywords = extractKeywords(fileDesc);
+            
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 //Ensure there _index has a set of indices associated with
@@ -1025,9 +1025,8 @@ public abstract class FileManager {
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        //Remove references to this from index.
-        String[] keywords=StringUtils.split(fd.getPath(),
-                                            DELIMETERS);
+        //Remove references to this from index.                                            
+        String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
             IntSet indices=(IntSet)_index.get(keyword);
@@ -1043,6 +1042,20 @@ public abstract class FileManager {
 
         repOk();
         return fd;
+    }
+    
+    /**
+     * Utility method to perform standardized keyword extraction for the given
+     * <tt>FileDesc</tt>.  This handles extracting keyword according to 
+     * locale-specific rules.
+     * 
+     * @param fd the <tt>FileDesc</tt> containing a file system path with 
+     *  keywords to extact
+     * @return an array of keyword strings for the given file
+     */
+    private static String[] extractKeywords(FileDesc fd) {
+        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
+            DELIMETERS);
     }
 
     /** Removes any URN index information for desc */
