@@ -341,7 +341,6 @@ public class DataWindow
 				drec.acks++;
 				// Create a fake ackTime since we don't know when it should be
 				drec.ackTime = drec.sentTime + (int)rto;
-System.out.println("Successful pseudoAck of: "+i);
 			}
 		}
 	}
