@@ -68,6 +68,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                     }
                 };
             udpLoopers[i].start();
+            Thread.yield(); // let it run.
         }
 
         // add these endpoints....
@@ -158,6 +159,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                     }
                 };
             udpLoopers[i].start();
+            Thread.yield(); // let it run.
         }
 
         // add a Query
