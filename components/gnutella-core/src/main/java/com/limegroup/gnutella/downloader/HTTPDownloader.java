@@ -543,7 +543,7 @@ public class HTTPDownloader implements Runnable {
 	        String pname = _downloadDir + _filename;
 	        myFile.renameTo(new File(pname));
 		    _state = COMPLETE;
-		    FileManager.getFileManager().addFile(pname);
+		    FileManager.getFileManager().addFileIfShared(pname);
 	    }
 
         else
