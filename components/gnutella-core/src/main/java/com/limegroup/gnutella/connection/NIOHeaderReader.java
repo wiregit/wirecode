@@ -142,10 +142,14 @@ public final class NIOHeaderReader implements HeaderReader {
             throw new IOException("socket closed by remote host");
         }
     
+        // flip the buffer for reading
         _headerByteBuffer.flip();
         String header = read(_headerByteBuffer);
     
         if(header == null)  {  
+            // TODO: do we not need to reset the position and everything of the
+            // buffer since we've flipped it at this point?  Make sure we're
+            // handling partial reads correctly -- add test!!!
             // continue reading on the next pass
             return null;
         }
