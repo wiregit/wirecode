@@ -46,14 +46,14 @@ public class InstantMessenger extends Chat {
         _out.write("CHAT /chat/" + " HTTP/1.0\r\n");
         _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         _out.write("\r\n");
-        _out.flush();
+		_out.flush();
 		InputStream istream = _socket.getInputStream();
 		_reader = new ChatLineReader(istream);
 	}
 
 	/** starts the chatting */
 	public void start() {
-
+		System.out.println("starting..");
 		MessageReader messageReader = new MessageReader();
 		Thread upThread = new Thread(messageReader);
 		upThread.setDaemon(true);
@@ -89,8 +89,9 @@ public class InstantMessenger extends Chat {
 	private class MessageReader implements Runnable {
 
 		public void run() {
+			System.out.println("reading..");
 			while (true){
-				System.out.println("reading..");
+				// System.out.println("reading..");
 
 				String str;
 				try {
@@ -99,15 +100,19 @@ public class InstantMessenger extends Chat {
 					// reached. then alert the gui to 
 					// write to the screen.
 					str = _reader.readLine();
-					_activityCallback.recieveMessage(str);
+					if ( str != null )
+						System.out.println("'" + str + "'");
+						// _activityCallback.recieveMessage(str);
 				} catch (IOException e) {
 					// if an exception was thrown, then 
 					// the socket was closed, and the chat
 					// was terminated.
-					return;
+					// return;
+					break;
 				}
 
 			}
+			System.out.println("done reading..");
 		}
 		
 	}

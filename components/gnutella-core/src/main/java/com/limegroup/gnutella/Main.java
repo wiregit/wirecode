@@ -210,9 +210,9 @@ public class Main implements ActivityCallback {
 
 	public void clearSharedFiles() {}
 
-	public Chatter acceptChat() {return null;}
+	public void acceptChat(Chatter chat) {}
 
-	public Chatter recieveMessage() {return null;}
+	public void recieveMessage(String msg) {}
 	
 }
 

@@ -65,7 +65,8 @@ public class ChatLineReader {
             c = _istream.read();
 
             if (c == -1) 
-				throw new IOException();
+				// throw new IOException();
+				break;
                 // return null;
         
             if( ( c == _creturn[0] ) || 

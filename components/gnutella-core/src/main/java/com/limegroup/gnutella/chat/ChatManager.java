@@ -43,7 +43,8 @@ public class ChatManager {
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-			
+			System.out.println("error in accept: ");
+			e.printStackTrace();
 		}
 
 	}
@@ -59,6 +60,8 @@ public class ChatManager {
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
+			System.out.println("error in request: ");
+			e.printStackTrace();
 		}
 		return im;
 	}
