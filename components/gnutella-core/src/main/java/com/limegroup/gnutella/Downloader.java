@@ -27,6 +27,8 @@ public interface Downloader extends BandwidthTracker {
     public static final int REMOTE_QUEUED     = 10;
     public static final int HASHING           = 11;
     public static final int SAVING            = 12;
+    public static final int WAITING_FOR_USER  = 13;
+    public static final int WAITING_FOR_CONNECTIONS = 14;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
@@ -38,8 +40,8 @@ public interface Downloader extends BandwidthTracker {
      * Resumes this.  If the download is GAVE_UP, tries all locations again and
      * returns true.  If WAITING_FOR_RETRY, forces the retry immediately and
      * returns true.  If some other downloader is currently downloading the
-     * file, throws AlreadyDowloadingException.  Otherwise does nothing and
-     * returns false. 
+     * file, throws AlreadyDowloadingException.  If WAITING_FOR_USER, then
+     * launches another query.  Otherwise does nothing and returns false. 
      *     @modifies this 
      */
     public boolean resume() throws AlreadyDownloadingException;

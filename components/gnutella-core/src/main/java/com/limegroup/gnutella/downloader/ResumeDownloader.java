@@ -96,23 +96,34 @@ public class ResumeDownloader extends ManagedDownloader
         return _size;
     }
 
-    /** 
-     * Overrides ManagedDownloader to ensure that the first requery happens as
-     * soon as necessary.
-     */
-    protected long nextRequeryTime(int requeries) {
-        if (requeries==0)
-            return System.currentTimeMillis();   //now!
-        else
-            return super.nextRequeryTime(requeries);        
-    }
-
     /**
      * Overrides ManagedDownloader to display a reasonable file name even
      * when no locations have been found.
      */
     public synchronized String getFileName() {
         return _name;
+    }
+
+    /*
+     * @param numRequeries The number of requeries sent so far.
+     */
+    protected boolean pauseForRequery(int numRequeries, 
+                                      boolean deserializedFromDisk) 
+        throws InterruptedException {
+        // if i've sent a query already or i was respawned from disk, act like
+        // a ManagedDownloader
+        if (numRequeries > 0 || deserializedFromDisk)
+            return super.pauseForRequery(numRequeries, deserializedFromDisk);
+        else
+            // don't wait the first time!!  we want to immediately start a new
+            // query
+            return false; 
+    }
+ 
+    protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
+        // we shoudl only initialize alt locs when we are started from the
+        // library, not when we are resumed from startup.
+        return !deserializedFromDisk;
     }
 
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
@@ -126,17 +137,21 @@ public class ResumeDownloader extends ManagedDownloader
         //TODO: we always include the file name since HUGE specifies that
         //results should be sent if the name OR the hashes match.  But
         //ultrapeers may insist that all keywords are in the QRP tables.
-        boolean isRequery=numRequeries!=0;
-		if(isRequery) {
-		    if (_hash != null)
-		        return QueryRequest.createRequery(_hash);
-		    else
-		        return QueryRequest.createRequery(getFileName());
-		} else {
-		    if (_hash != null)
-		        return QueryRequest.createQuery(_hash);
-		    else
-		        return QueryRequest.createQuery(getFileName());
-	    }
+        //we have to substring the filename because we don't accept queries
+        //that have big search strings
+        if (_hash != null)
+            // TODO: we should be sending the URN with the query, but
+            // we don't because URN queries are summarily dropped, though
+            // this may change
+            return QueryRequest.createQuery(truncate(getFileName(), 30));
+        else
+            return QueryRequest.createQuery(truncate(getFileName(), 30));
     }
+
+    
+    private String truncate(String string, int maxLen) {
+        int max = string.length() > maxLen ? maxLen : string.length();
+        return string.substring(0, max);
+    }
+
 }
