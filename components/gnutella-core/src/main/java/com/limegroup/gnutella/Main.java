@@ -49,8 +49,14 @@ public class Main implements ActivityCallback {
             service.updateHorizon();
         //Print hostcatcher
         else if (command.equals("catcher")) {
-            for (Iterator iter=service.getHosts(); iter.hasNext(); )
+            for (Iterator iter=service.getReserveHosts(); iter.hasNext(); )
             System.out.println(iter.next().toString());
+        }
+        //Print pong cache
+        else if (command.equals("pong cache")) {
+            for (Iterator iter=service.getCachedHosts(); iter.hasNext(); )
+            System.out.println(((PingReplyCacheEntry)iter.next()).
+                getPingReply().toString());
         }
         String[] commands=split(command);
         //Connect to remote host (establish outgoing connection)
