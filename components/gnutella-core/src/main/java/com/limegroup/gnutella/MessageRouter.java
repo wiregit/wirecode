@@ -2051,11 +2051,13 @@ public abstract class MessageRouter {
         if(simppReq.getVersion() > SimppRequestVM.VERSION)
             return; //we are not going to deal with these types of requests. 
         byte[] simppBytes = SimppManager.instance().getSimppBytes();
-        SimppVM simppVM = new SimppVM(simppBytes);
-        try {
-            handler.handleSimppVM(simppVM);
-        } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
-            return;
+        if(simppBytes != null) {
+            SimppVM simppVM = new SimppVM(simppBytes);
+            try {
+                handler.handleSimppVM(simppVM);
+            } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+                return;
+            }
         }
     }
     
@@ -2078,8 +2080,10 @@ public abstract class MessageRouter {
             return; //we are not going to deal with these types of requests. 
 
         byte[] data = UpdateHandler.instance().getLatestBytes();
-        UpdateResponse msg = new UpdateResponse(data);
-        handler.reply(msg);
+        if(data != null) {
+            UpdateResponse msg = new UpdateResponse(data);
+            handler.reply(msg);
+        }
     }
     
 

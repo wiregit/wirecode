@@ -35,7 +35,7 @@ class UpdateCollection {
     /**
      * The id of this UpdateCollection.
      */
-    private int collectionId = -1;
+    private int collectionId = Integer.MIN_VALUE;
     
     /**
      * The timestamp of this collection.
