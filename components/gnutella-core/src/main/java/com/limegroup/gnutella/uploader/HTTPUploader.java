@@ -246,22 +246,26 @@ public final class HTTPUploader implements Uploader {
                 //simultaneously. This may seem like a festering ground for
                 //deadlocks, but this is not dangerous because the locks for
                 //goodLoc and badLocs cannot be held by more than one thread.
-                synchronized(_badLocs) {
-                    Iterator iter = _badLocs.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation loc =
-                        ((AlternateLocation)iter.next()).createClone();
-                        Assert.that(loc!=null,"problem cloning AltLoc");
-                        _fileDesc.remove(loc);
+                if(_badLocs!=null) { //locs not initialized for FileNotFound etc
+                    synchronized(_badLocs) {
+                        Iterator iter = _badLocs.iterator();
+                        while(iter.hasNext()) {
+                            AlternateLocation loc =
+                            ((AlternateLocation)iter.next()).createClone();
+                            Assert.that(loc!=null,"problem cloning AltLoc");
+                            _fileDesc.remove(loc);
+                        }
                     }
                 }
-                synchronized(_goodLocs) {
-                    Iterator iter = _goodLocs.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation loc = 
-                        ((AlternateLocation)iter.next()).createClone();
-                        Assert.that(loc!=null,"problem cloning AltLoc");
-                        _fileDesc.add(loc);
+                if(_goodLocs!=null) {//locs not initialized for FileNotFound etc
+                    synchronized(_goodLocs) {
+                        Iterator iter = _goodLocs.iterator();
+                        while(iter.hasNext()) {
+                            AlternateLocation loc = 
+                            ((AlternateLocation)iter.next()).createClone();
+                            Assert.that(loc!=null,"problem cloning AltLoc");
+                            _fileDesc.add(loc);
+                        }
                     }
                 }
             }
