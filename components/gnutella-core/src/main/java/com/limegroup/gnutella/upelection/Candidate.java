@@ -1,7 +1,6 @@
 /*
  * an ExtendedEndpoint which keeps a ref to the Ultrapeer Connection which advertised it.
- * Decorator pattern to allow parsing.  When comparing, make sure you use the Comparator provided
- * by ExtendedEndpoint!
+ * Decorator pattern to allow parsing.  When comparing, make sure you use the provided Comparator.
  */
 package com.limegroup.gnutella.upelection;
 
@@ -11,7 +10,9 @@ import java.net.InetAddress;
 import java.text.ParseException;
 
 import com.limegroup.gnutella.*;
+import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Comparator;
 
 
 public class Candidate implements Comparable{
@@ -132,4 +133,38 @@ public class Candidate implements Comparable{
 	public void write(Writer out) throws IOException {
 		_endpoint.write(out);
 	}
+	
+	/**
+	 * delegate to ExtendedEndpoint
+	 * @return
+	 */
+	private int connectScore() {
+		return _endpoint.connectScore();
+	}
+	
+	
+	/**
+	 * returns comparator identical to the one for 
+	 * ExtendedEndpoints.
+	 * @return
+	 */
+	public static Comparator priorityComparator() {
+		return new CandidatePriorityComparator();
+	}
+	
+	/**
+	 * the comparator needs to be overriden too because of 
+	 * decorator.
+	 */
+	static class CandidatePriorityComparator implements Comparator {
+        public int compare(Object extEndpoint1, Object extEndpoint2) {
+            Candidate a=(Candidate)extEndpoint1;
+            Candidate b=(Candidate)extEndpoint2;
+            int ret=a.connectScore()-b.connectScore();
+            if (ret!=0) 
+                return ret;
+            else
+                return a.getDailyUptime() - b.getDailyUptime();
+        }
+    }
 }

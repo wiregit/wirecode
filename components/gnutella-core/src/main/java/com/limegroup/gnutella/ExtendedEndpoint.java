@@ -315,7 +315,7 @@ public class ExtendedEndpoint extends Endpoint {
     
     /** Returns +1 (last connection attempt was a success), 0 (no connection
      *  attempts), or -1 (last connection attempt was a failure). */
-    private int connectScore() {
+    public int connectScore() {
         if (connectSuccesses.isEmpty() && connectFailures.isEmpty())
             return 0;   //no attempts
         else if (connectSuccesses.isEmpty())
