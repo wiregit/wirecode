@@ -495,6 +495,37 @@ public class FileManager {
             return ret;
     }
 
+    /** Checks this' rep. invariants.  VERY expensive. */
+    /*
+    protected synchronized void repOk() {
+        //Get the set of indices in the _index.
+        IntSet indices=new IntSet();
+        for (Iterator iter=_index.getPrefixedBy(""); iter.hasNext(); ) {
+            IntSet set=(IntSet)iter.next();
+            indices.addAll(set);
+        }
+        //Make sure all indices are in _files. 
+        //(Note that we don't check filenames.)
+        for (IntSet.IntSetIterator iter=indices.iterator(); iter.hasNext(); ) {
+            int i=iter.next();
+            FileDesc desc=(FileDesc)_files.get(i);
+            Assert.that(desc!=null,
+                        "Null entry for index value "+i);
+        }
+        //Make sure all non-null files have right index and are in index.
+        //(Note we don't check filenames.)
+        for (int i=0; i<_files.size(); i++) {
+            if (_files.get(i)==null)
+                continue;
+            FileDesc desc=(FileDesc)_files.get(i);
+            Assert.that(desc._index==i,
+                        "Bad index value.  Got "+desc._index+" not "+i);
+            Assert.that(indices.contains(i),
+                        "Index does not contain entry for "+i);
+        }            
+    }
+    */
+
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
     /*
     public static void main(String args[]) {
