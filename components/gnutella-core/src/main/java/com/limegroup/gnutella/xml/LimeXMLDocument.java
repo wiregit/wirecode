@@ -72,7 +72,7 @@ public class LimeXMLDocument implements Serializable {
             throw new SAXException("null or empty string");
         InputSource doc = new InputSource(new StringReader(XMLStr));
         initialize(doc);
-        this.xmlString = ripIdentifier(XMLStr);
+        this.xmlString = ripIdentifier(XMLStr.trim());
         if(xmlString.equals(""))
             throw new SAXException("empty after identifier ripped");
     }
@@ -128,7 +128,7 @@ public class LimeXMLDocument implements Serializable {
             if(getXMLString().equals(""))
                 throw new IllegalArgumentException("invalid collection data.");
         } catch(SchemaNotFoundException snfe) {
-            throw new IllegalArgumentException("invalid schema.");
+            throw new IllegalArgumentException(snfe.getMessage());
         }
     }
     
@@ -147,6 +147,9 @@ public class LimeXMLDocument implements Serializable {
         throws IOException, ClassNotFoundException {
         // we may want to do special stuff in the future....
         in.defaultReadObject();
+        // make sure any spaces are removed.
+        if(xmlString != null)
+            xmlString = xmlString.trim();
     }
  
 
@@ -418,27 +421,23 @@ public class LimeXMLDocument implements Serializable {
      */
     public List getOrderedNameValueList() throws SchemaNotFoundException {
         List retList = new LinkedList();
+        
+        if( schemaUri == null )
+            throw new SchemaNotFoundException("no schema given.");
+            
+        LimeXMLSchema schema =
+            LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+        
+        if( schema == null )
+            throw new SchemaNotFoundException("invalid schema: " + schemaUri);
 
-        if (schemaUri != null) {
-            LimeXMLSchemaRepository schemaDB = 
-            LimeXMLSchemaRepository.instance();
-            LimeXMLSchema schema = schemaDB.getSchema(schemaUri);
-
-            if (schema != null) {
-                String[] fNames = schema.getCanonicalizedFieldNames();        
-                
-                for (int i = 0; i < fNames.length; i++) {
-                    Object retObj = fieldToValue.get(fNames[i].trim());
-                    if (retObj != null)
-                        retList.add(new NameValue(fNames[i].trim(),
-                                                  retObj));
-                }
-            }
-            else
-                throw new SchemaNotFoundException();
+        String[] fNames = schema.getCanonicalizedFieldNames();
+        for (int i = 0; i < fNames.length; i++) {
+            Object retObj = fieldToValue.get(fNames[i].trim());
+            if (retObj != null)
+                retList.add(new NameValue(fNames[i].trim(),
+                                          retObj));
         }
-        else
-            throw new SchemaNotFoundException();
             
         return retList;
     }
@@ -478,6 +477,7 @@ public class LimeXMLDocument implements Serializable {
         if (xmlString == null || xmlString.equals("")) {
             // derive xml...
             xmlString = constructXML(getOrderedNameValueList(),schemaUri);
+            xmlString = xmlString.trim();
         }
         return xmlString;
     }
