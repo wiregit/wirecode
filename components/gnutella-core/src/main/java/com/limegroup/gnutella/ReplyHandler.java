@@ -5,6 +5,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import java.io.*;
 import java.net.*;
+import com.limegroup.gnutella.util.*;
 
 /**
  * An interface for those things that handle replies and thus are placed
@@ -12,7 +13,7 @@ import java.net.*;
  * This interface is implemented by ManagedConnection and by
  * MessageRouter.ForMeReplyHandler.
  */
-public interface ReplyHandler {
+public interface ReplyHandler extends IpPort {
 
     /**
      * Handle the PingReply, failing silently

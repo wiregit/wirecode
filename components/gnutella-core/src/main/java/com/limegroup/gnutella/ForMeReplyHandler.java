@@ -343,6 +343,14 @@ public final class ForMeReplyHandler implements ReplyHandler {
         }
     }
     
+    public String getAddress() {
+        return NetworkUtils.ip2string(RouterService.getAddress());
+    }
+    
+    public int getPort() {
+        return RouterService.getPort();
+    }
+    
     public void handleStatisticVM(StatisticVendorMessage vm) {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
