@@ -565,7 +565,7 @@ public class TestUploader extends AssertComparisons {
         AlternateLocationCollection goodLocs = null;
         boolean thexReq = false;
         while (true) {
-            String line=input.readLine();
+            String line=input.readLine();LOG.debug("read "+line);
             if (firstLine) {
                 if(line != null && !line.equals("")) {
                     requestsReceived++;
@@ -935,7 +935,7 @@ public class TestUploader extends AssertComparisons {
                                                      (final String altHeader,boolean good) {
         AlternateLocationCollection alc=null;
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-
+		
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return null;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
@@ -951,7 +951,8 @@ public class TestUploader extends AssertComparisons {
 				AlternateLocation al = 
 				    AlternateLocation.create(
 				        st.nextToken().trim(), _sha1,good);
-				alc.add(al);
+				if (good)
+				    alc.add(al);
 			} catch(IOException e) {
 				// just return without adding it.
 				continue;
@@ -992,7 +993,6 @@ public class TestUploader extends AssertComparisons {
 	    public void run() {  
 	        LOG.debug(name+" starting to upload.. ");
             try {
-                rr.enqueue(this);
                 while(http11 && !stopped) {
 
                     handleRequest(mySocket);
@@ -1003,18 +1003,6 @@ public class TestUploader extends AssertComparisons {
                         handleRequest(mySocket);
                     }
                     mySocket.setSoTimeout(8000);
-                    
-                  /*  synchronized(this) {
-                        if (rr.size() > 1) {
-                            Object next = rr.next();
-                            if (next!=this) {
-                                synchronized(next){
-                                    next.notify();
-                                }
-                                wait();
-                            }
-                        }
-                    }*/
                 }
             } catch (IOException e) {
                 if(totalUploaded < totalAmountToUpload)

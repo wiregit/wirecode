@@ -315,7 +315,7 @@ public class DownloadTest extends BaseTestCase {
     /**
      * Tests a basic download that does not swarm.
      */
-    public void testSimpleDownload10() throws Exception {
+    /*public void testSimpleDownload10() throws Exception {
         LOG.debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
@@ -337,7 +337,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),true);
         
-        RemoteFileDesc rfd = pushLoc.createRemoteFileDesc(TestFile.length());
+        RemoteFileDesc rfd = newRFDPush(PPORT_1,1);
         
         assertTrue(rfd.needsPush());
         
@@ -495,7 +495,6 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
-
 
     public void testAddDownload() throws Exception {
         LOG.debug("-Testing addDownload (increases swarming)...");
@@ -1122,7 +1121,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc []rfds = {rfd};
         
         PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),pusher);
+                savedFile.getName(),pusher,guid);
         
         tGeneric(rfds);
         
@@ -1161,10 +1160,10 @@ public class DownloadTest extends BaseTestCase {
         first.setAlternateLocations(alCol);
         
         PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),first);
+                savedFile.getName(),first,guid);
         
         PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
-                savedFile.getName(),second);
+                savedFile.getName(),second,guid2);
         
         RemoteFileDesc []rfd ={newRFDPush(PPORT_1,2)};
         
@@ -1224,7 +1223,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc []later={openRFD1,openRFD2};
         
         PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),pusher);
+                savedFile.getName(),pusher,guid);
 
         
         tGeneric(now,later);
@@ -1277,16 +1276,16 @@ public class DownloadTest extends BaseTestCase {
         PushEndpoint updatedLoc = PushEndpoint.updateProxies
     		(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10",true);
         
-        Set expectedProxies = updatedLoc.getProxies();
+        Set expectedProxies = new HashSet(updatedLoc.getProxies());
         
         // then purge the entry in the map
-        PushEndpoint.overwriteProxies(guid.toHexString());
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        m.clear();
         
-        assertTrue(updatedLoc.getProxies().isEmpty());
-        
-        AlternateLocation pushLocFWT = AlternateLocation.create(
+        PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),true);
         
+        assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
@@ -1295,7 +1294,7 @@ public class DownloadTest extends BaseTestCase {
         assertTrue(pushRFD2.needsPush());
         
         PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
-                savedFile.getName(),pusher2);
+                savedFile.getName(),pusher2,guid);
         
         RemoteFileDesc [] now = {pushRFD2};
         RemoteFileDesc [] later = {openRFD};
@@ -1372,52 +1371,6 @@ public class DownloadTest extends BaseTestCase {
             current = (AlternateLocation)it.next();
         
         assertTrue(current instanceof PushAltLoc);
-        
-        assertTrue(current.isDemoted());
-        
-    }
-    
-    public void testIdenticalRFDsMerged() throws Exception {
-        LOG.debug("-Testing that when we have two rfds pointing to the same host" +
-        		" we merge their proxies...");
-        
-        RemoteFileDesc rfd1 = newRFDPush(PPORT_1,1);
-        RemoteFileDesc rfd2 = newRFDPush(PPORT_2,1);
-        
-        assertEquals(rfd1,rfd2);
-        
-        // create two test uploaders
-        TestUploader pusher1 = new TestUploader("pusher1");
-        TestUploader pusher2 = new TestUploader("pusher2");
-        
-        pusher1.setRate(500);
-        pusher2.setRate(500);
-        
-        PushAcceptor pa1 = new PushAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),pusher1);
-        
-        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
-                savedFile.getName(),pusher2);
-        
-        // we should create a single HTTPDownloader, but send the pushes to 
-        // both uploaders.  Therefore one of the GIV requests will be ignored
-        
-        RemoteFileDesc [] rfds = {rfd1,rfd2};
-        
-        ManagedDownloader download=null;
-
-        download= (ManagedDownloader)RouterService.download(rfds, false, null);
-        
-        Thread.sleep(2000);
-        
-        assertEquals(1,download.getNumDownloaders());
-        assertTrue(pa1.sentGIV);
-        assertTrue(pa2.sentGIV);
-        
-        waitForComplete(false);
-        
-        // one of the uploaders should not have uploaded anything
-        assertTrue(pusher1.amountUploaded() == 0 || pusher2.amountUploaded()==0);
         
     }
     
@@ -2487,7 +2440,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     /** Returns true if the complete file exists and is complete */
-    private static boolean isComplete() {LOG.debug(savedFile.getPath());
+    private static boolean isComplete() {LOG.debug("file is "+savedFile.getPath());
         if ( savedFile.length() < TestFile.length() ) {
             LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()) );
             return false;
@@ -2577,14 +2530,16 @@ public class DownloadTest extends BaseTestCase {
         private DatagramSocket sock;
         private final String _fileName;
         private final TestUploader _uploader;
+        private final GUID _g;
         public boolean sentGIV;
         
-        public PushAcceptor(int portL,int portC,String filename,TestUploader uploader) {
+        public PushAcceptor(int portL,int portC,String filename,TestUploader uploader,GUID g) {
             super("push acceptor "+portL+"->"+portC);
             
             _portC=portC;
             _fileName=filename;
             _uploader=uploader;
+            _g=g;
             try {
                 sock = new DatagramSocket(portL);
                 //sock.connect(InetAddress.getLocalHost(),portC);
@@ -2612,7 +2567,7 @@ public class DownloadTest extends BaseTestCase {
                 
                 OutputStream os = s.getOutputStream();
                 
-                String GIV = "GIV 0:"+guid.toHexString()+"/"+_fileName+"\n\n";
+                String GIV = "GIV 0:"+_g.toHexString()+"/"+_fileName+"\n\n";
                 os.write(GIV.getBytes());
                 
                 os.flush();

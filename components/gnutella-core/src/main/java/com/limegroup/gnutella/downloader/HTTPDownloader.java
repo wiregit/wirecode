@@ -1480,21 +1480,8 @@ public class HTTPDownloader implements BandwidthTracker {
         if (_rfd.getPushAddr()==null || str==null || str.length()<12) 
             return;
         
-        // cheat - replace the proxies part in the current 
-        // http representation 
-        str = StringUtils.replace(str,",",";");
-        
-        PushEndpoint current = _rfd.getPushAddr();
-        PushEndpoint stripped = 
-            new PushEndpoint(current.getClientGUID(),
-                    null,
-                    current.getFeatures(),
-                    current.supportsFWTVersion());
-        
-        String updatedString = stripped.httpStringValue()+";"+str;
-        
         try {
-            PushEndpoint.overwriteProxies(updatedString);
+            PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
         }catch(IOException tooBad) {
             // invalid header - ignore it.
         }

@@ -160,16 +160,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	assertTrue(fakeDownloader._addedFailed);
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
-    	//make sure the file was added to the file descriptor
+    	//make sure the file was removed from the file descriptor
     	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
-    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	assertEquals(0,test.getAlternateLocationCollection().getAltLocsSize());
     	
-    	AlternateLocation alt = 
-    	    (AlternateLocation)test.getAlternateLocationCollection().iterator().next();
-    	
-    	assertTrue(alt instanceof PushAltLoc);
-            
-        
     }
     
     public void testLegacy() throws Exception {
@@ -456,6 +450,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		Set ppis = new HashSet();ppis.add(ppi);
 		
     	PushEndpoint pe = new PushEndpoint(guid,ppis);   
+    	GUID g = (GUID)PrivilegedAccessor.getValue(pe,"_guid");
+    	Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+    	m.put(g,ppis);
     	
     	return new RemoteFileDesc(newRFD(name,hash),pe);
 	}
