@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.*;
+import java.io.IOException;
 
 /**
  *  This class sets up an interface for the SettingsManager

@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.util.*;
+//import java.io.IOException;
 import java.lang.IllegalArgumentException;
+import com.limegroup.gnutella.gui.Backend;
 
 /** 
  *  This class manages the property settings.  It maintains
@@ -432,7 +434,8 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the port to connect on */
-    public void setPort(int port)
+    public void setPort(int port) 
+	throws IllegalArgumentException
     {
 	// if the entered port is outside accepted 
 	// port numbers, throw the exception
@@ -440,10 +443,16 @@ public class SettingsManager implements SettingsInterface
 	    throw new IllegalArgumentException();
 	else
 	    {
+		//try{
+		//Backend.instance().setPort(port);
 		port_ = port;
 		String s = Integer.toString(port_);
 		props_.setProperty(SettingsInterface.PORT, s);
-		writeProperties();
+		writeProperties();		    
+		//}
+		//catch(IOException ioe) {		    
+		    //throw new IOException();
+		//}
 	    }
     }
 
