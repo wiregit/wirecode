@@ -1,10 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
-/**
- * Read data from disk and write to the net.
- *
- */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
+
 
 import java.io.*;
 import java.net.*;
@@ -14,7 +10,21 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
-
+/**
+ * There are two constructors that are necessary.  The 
+ * first is to handle the case where there is a regular
+ * upload.  in that case, the manager class has already
+ * processed a message that looks like: 
+ * GET /get/0/sample.txt HTTP/1.0
+ * and already given a socket connection.  all that we
+ * need to do is actually upload the file to the socket.
+ *
+ * In the second case, we have recieved a push request,
+ * so we are going to need to establish the connection
+ * on this end.  We do this by creating the socket, and
+ * then writing out the GIV 0:99999999/sample.txt
+ * and then wait for the GET to come back.
+ */
 public class HTTPUploader implements Uploader {
     //See accessors for documentation
 	protected OutputStream _ostream;
@@ -41,24 +51,15 @@ public class HTTPUploader implements Uploader {
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
-	/****************** Constructors ***********************/
-	/**
-	 * There are two constructors that are necessary.  The 
-	 * first is to handle the case where there is a regular
-	 * upload.  in that case, the manager class has already
-	 * processed a message that looks like: 
-	 * GET /get/0/sample.txt HTTP/1.0
-	 * and already given a socket connection.  all that we
-	 * need to do is actually upload the file to the socket.
-	 *
-	 * In the second case, we have recieved a push request,
-	 * so we are going to need to establish the connection
-	 * on this end.  We do this by creating the socket, and
-	 * then writing out the GIV 0:99999999/sample.txt
-	 * and then wait for the GET to come back.
-	 */
+    //constructors
 
-	// Regular upload
+	/**
+     * The constructor used for normal uploads, takes the incoming socket as 
+     * a parameter
+     * @param file the file to be uploaded
+     * @param s the socket on which to upload the file.
+     * @param index index of file to upload
+     */
 	public HTTPUploader(String file, Socket s, int index, UploadManager m,
                         FileManager fm) {
 		_socket = s;
@@ -96,6 +97,16 @@ public class HTTPUploader implements Uploader {
 	}
 		
 	// Push requested Upload
+    /**
+     * The other constructor that is used for push uploads. This constructor
+     * does not take a socket. An uploader created with this constructor 
+     * must eventually connect to the downloader using the connect method of 
+     * this class
+     * @param file The name of the file to be uploaded
+     * @param host The downloaders ip address
+     * @param port The port at which the downloader is listneing 
+     * @param index index of file to be uploaded
+     */
 	public HTTPUploader(String file, String host, int port, int index,
 						String guid, UploadManager m, FileManager fm) {
 		_filename = file;
@@ -117,14 +128,20 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 
-	// This method must be called in the case of a push.
-	public void connect() throws IOException {
-
-		// the socket should not be null if this is a non-push
-		// connect.  in case connect is called after a non-push,
-		// we just return.
+	/**
+     * This method is called in the case of a push only.
+     * <p>
+     * The method creates the socket, and send the GIV message.
+     * When this method returns the socket, is in the same state as a 
+     * socket created as a result of a normal upload - ready to receive GET
+     * <p>
+     * @return The returned socket is used for a normal upload.
+     */
+	public Socket connect() throws IOException {
+        // This method is only called from acceptPushUpload() now. 
+        // So this will never happen...but lets just leave it in there.
 		if (_socket != null)
-			return;
+			return _socket;
 
 		try {
 			// try to create the socket.
@@ -142,46 +159,8 @@ public class HTTPUploader implements Uploader {
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 			
-			// Wait to recieve the GET
-			InputStream istream = _socket.getInputStream(); 
-			ByteReader in = new ByteReader(istream);
-			// set a time out for how long to wait for the push
-			int time = SettingsManager.instance().getTimeout();
-			_socket.setSoTimeout(time);
-			
-			// read directly from the socket
-			String str;
-			str = in.readLine();
-			// not sure why we set this to zero, if we set it above
-			_socket.setSoTimeout(0);
-			
-			// check the line, to see what was read.
-			if (str == null)
-				throw new IOException();
-			// check for the 'GET'
-			if (! str.startsWith("GET"))
-				throw new IOException();
-			String command = str.substring(4, str.length());
-			// using this utility method, a bit hackey
-			String parse[] = StringUtils.split(command, '/');
-			// do some safety checks
-			if (parse.length != 4) 
-				throw new IOException();
-			if (! parse[0].equals("get"))
-				throw new IOException();
-			
-			//Check that the filename matches what we sent
-			//in the GIV request.  I guess it doesn't need
-			//to match technically, but we check to be safe.
-			int end = parse[2].lastIndexOf("HTTP") - 1;
-			String filename = URLDecoder.decode(parse[2].substring(0, end));
-			// some safety checks - make sure name and index match.
-			if (! filename.equals(_filename))
-				throw new IOException();
-			int pindex = java.lang.Integer.parseInt(parse[1]);
-			if (pindex!= _index)
-				throw new IOException();
-			// catch any of the possible exceptions
+            //OK. We conneced and sent the GIV, now just return the socket
+            return _socket;
 		} catch (SecurityException e) {
 			this.setState(Uploader.PUSH_FAILED);
 			throw new IOException();
@@ -282,7 +261,16 @@ public class HTTPUploader implements Uploader {
 	public String getFileName() {return _filename;}
 	public int getFileSize() {return _fileSize;}
 	public InputStream getInputStream() {return _fis;}
-    /** The number of bytes read, including any skipped by the Range header. */
+    /**The number of bytes read. The way we calculate the number of bytes 
+     * read is a little wierd if the range header begins from the middle of 
+     * the file (say from byte x). Then we consider that bytes 0-x have 
+     * already been read. 
+     * <p>
+     * This may lead to some wierd behaviour with chunking. For example if 
+     * a host requests the last 10% of a file, the GUI will display 90%
+     * downloaded. Later if the same host requests from 20% to 30% the 
+     * progress will reduce to 20% onwards. 
+     */
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
     /** The byte offset where we should start the upload. */
