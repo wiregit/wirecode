@@ -16,7 +16,6 @@ import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
 
 import com.limegroup.gnutella.licenses.CCConstants;
-import com.limegroup.gnutella.licenses.CreativeCommonsLicense;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -248,6 +247,7 @@ public class MP3MetaData extends AudioMetaData {
                     if (currToken.startsWith("http"))
                         license = currToken;
                 }
+                setCCLicense(license);
             }
         }
         

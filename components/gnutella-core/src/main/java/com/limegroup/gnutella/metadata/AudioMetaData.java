@@ -19,7 +19,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
-import com.limegroup.gnutella.licenses.CreativeCommonsLicense;
 import com.limegroup.gnutella.licenses.CCConstants;
 
 /**
@@ -39,7 +38,7 @@ public abstract class AudioMetaData extends MetaData {
     private short totalTracks =-1;
     private short disk=-1;
     private short totalDisks=-1;
-    private CreativeCommonsLicense ccLicense = null;
+    private String ccLicense = null;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
@@ -108,7 +107,7 @@ public abstract class AudioMetaData extends MetaData {
     public String getGenre() { return genre; }
     public int getBitrate() { return bitrate; }
     public int getLength() { return length; }
-    public CreativeCommonsLicense getCCLicense() { return ccLicense; }
+    public String getCCLicense() { return ccLicense; }
     
     void setTitle(String title) {
         this.title = title;
@@ -158,7 +157,7 @@ public abstract class AudioMetaData extends MetaData {
         this.length = length;
     }
     
-    void setCCLicense(CreativeCommonsLicense license) {
+    void setCCLicense(String license) {
         this.ccLicense = license;
     }
     
@@ -216,6 +215,7 @@ public abstract class AudioMetaData extends MetaData {
         add(list, genre, GENRE_KEY);
         add(list, bitrate, BITRATE_KEY);
         add(list, length, SECONDS_KEY);
+        add(list, ccLicense, LICENSE_KEY);
         return list;
     }
     
