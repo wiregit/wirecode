@@ -12,6 +12,7 @@ public class AllTests {
         suite.addTest(StringUtilsTest.suite());
         suite.addTest(BandwidthThrottleTest.suite());
         suite.addTest(BufferTest.suite());
+        suite.addTest(COBSUtilTest.suite());
         return suite;
     }
 

@@ -13,6 +13,35 @@ public class GGEPTest extends TestCase {
         return new TestSuite(GGEPTest.class);
     }
 
+
+    public void testCOBS() {
+        byte[] nulls = new byte[10];
+        for (int i = 0; i < nulls.length; i++)
+            nulls[i] = (byte)(i % 2);
+        String someNulls = "Hello" + new String(nulls);
+        try {
+            GGEP one = new GGEP(true);
+            one.put("Susheel", nulls);
+            one.put("Daswani", someNulls);
+            one.put("Number", 10);
+            ByteArrayOutputStream oStream = new ByteArrayOutputStream();
+            one.write(oStream);
+            GGEP two = new GGEP(oStream.toByteArray(), 0, null);
+            assertTrue(two.hasKey("Susheel"));
+            byte[] shouldBeNulls = two.getBytes("Susheel");
+            assertTrue(Arrays.equals(nulls, shouldBeNulls));
+            assertTrue(someNulls.equals(two.getString("Daswani")));
+            assertTrue(10 == two.getInt("Number"));
+        }
+        catch (IllegalArgumentException illegal) {
+            assertTrue("The .put method failed!! ", false);
+        }
+        catch (Exception ignored) {
+            ignored.printStackTrace();
+            assertTrue("Unexpected Exception = " + ignored, false);
+        }
+    }
+
     public void testStringKeys() {
         try {
             GGEP temp = new GGEP(true);
@@ -100,8 +129,8 @@ public class GGEPTest extends TestCase {
         }
     }
 
-    /** Null bytes disallowed, e.g., in query replies.  
-     *  TODO: ultimately this will enable COBS encoding. */
+    /** Null bytes are always allowed now.
+     */
     public void testValueContainsIllegalNull() {
         byte[] bytes = new byte[2];
         bytes[0] = (byte)'S';
@@ -111,8 +140,9 @@ public class GGEPTest extends TestCase {
         try {
             GGEP temp = new GGEP(false);
             temp.put("WHATEVER", hasANull);
-            fail("No IllegalArgumentException.");
-        } catch (IllegalArgumentException pass) { }
+        } catch (IllegalArgumentException fail) { 
+            fail("IllegalArgumentException.");
+        }
     }
 
     public void testEquals() {
@@ -281,7 +311,7 @@ public class GGEPTest extends TestCase {
 
 
     // tests abnormal behavior of the byte[] constructor - tries to give
-    // compressed data, COBS encoded data, a 0 header length, and a data length
+    // compressed data, a 0 header length, and a data length
     // which is stored in more than 3 bytes...
     public void testByteArrayConstructor2() {
         byte[] bytes = new byte[24];
@@ -293,7 +323,7 @@ public class GGEPTest extends TestCase {
         bytes[5] = (byte)'S';
         bytes[6] = (byte)'T';
         bytes[7] = (byte)0x40;
-        bytes[8] = (byte)0xC7; // encoded
+        bytes[8] = (byte)0x87; 
         bytes[9] =  (byte)'S';
         bytes[10] = (byte)'U';
         bytes[11] = (byte)'S';
@@ -309,14 +339,6 @@ public class GGEPTest extends TestCase {
         bytes[21] = (byte)'A';
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
-        try {
-            GGEP temp = new GGEP(bytes,0,null);
-            Set headers = temp.getHeaders();
-            Assert.assertTrue("Test 6 - ENCODED!", !headers.contains("SUSHEEL"));
-        }
-        catch (BadGGEPBlockException hopefullyNot) {
-            Assert.assertTrue("Test 6 Constructor Failed!", false);
-        }
 
         bytes[8] = (byte)0xA5; // compressed
         try {
