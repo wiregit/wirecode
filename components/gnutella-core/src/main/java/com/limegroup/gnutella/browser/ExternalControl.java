@@ -25,6 +25,19 @@ public class ExternalControl {
 		return arg;
 	}
 
+    /**
+     * Uses the magnet infrastructure to check if LimeWire is running.
+     * If it is, it is restored and this instance exits.
+     * Note that the already-running LimeWire is not checked
+     * for 'allow multiple instances' -- only the instance that was just
+     * started.
+     */
+	public static void checkForActiveLimeWire() {
+	    if( testForLimeWire(null) ) {
+		    System.exit(0);	
+		}
+	}
+
 	public static void checkForActiveLimeWire(String arg) {
 	    if(  CommonUtils.isWindows() && testForLimeWire(arg) ) {
 		    System.exit(0);	
@@ -112,7 +125,7 @@ public class ExternalControl {
 
 			BufferedOutputStream out =
 			  new BufferedOutputStream(socket.getOutputStream());
-			String s = "true\n\r";
+			String s = CommonUtils.getUserName() + "\n\r";
 			byte[] bytes=s.getBytes();
 			out.write(bytes);
 			out.flush();
@@ -154,7 +167,7 @@ public class ExternalControl {
 		    out.write("\n\r");
 		    out.flush();
 		    String str = byteReader.readLine();
-		    return(str != null && str.startsWith("true"));
+		    return(str != null && str.startsWith(CommonUtils.getUserName()));
 		} catch (IOException e2) {
 		}
 	    return false;

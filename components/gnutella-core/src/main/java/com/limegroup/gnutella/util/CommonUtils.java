@@ -560,6 +560,15 @@ public final class CommonUtils {
     }
     
     /**
+     * Return the user's name.
+     *
+     * @return the <tt>String</tt> denoting the user's name.
+     */
+    public static String getUserName() {
+        return PROPS.getProperty("user.name");
+    }
+    
+    /**
      * Returns the directory where all user settings should be stored.  This
      * is where all application data should be stored.  If the directory does
      * does not already exist, this attempts to create the directory, although
