@@ -39,7 +39,8 @@ public class ID3Editor{
     }
 
 
-    /* @return object[0] = (Integer) index just before beginning of tag=value, 
+    /** 
+     * @return object[0] = (Integer) index just before beginning of tag=value, 
      * object[1] = (Integer) index just after end of tag=value, object[2] =
      * (String) value of tag.
      * @exception Throw if rip failed.
@@ -50,7 +51,7 @@ public class ID3Editor{
 
         int begin = source.indexOf(tagToRip);
         if (begin < 0)
-            throw new Exception();
+            throw new IOException("tag not found");
 
         if (begin != 0)            
             retObjs[0] = new Integer(begin-1);
@@ -220,7 +221,9 @@ public class ID3Editor{
         try{
             file.readFully(buffer,0,3);
             tag = new String(buffer,0,3);
-        }catch (Exception e){
+        } catch(EOFException e) {
+            return LimeXMLReplyCollection.RW_ERROR;
+        } catch(IOException e) {
             return LimeXMLReplyCollection.RW_ERROR;
         }
         //We are sure this is an MP3 file.Otherwise this method would never be 
@@ -231,7 +234,7 @@ public class ID3Editor{
                 byte[] tagBytes = "TAG".getBytes();//has to be len 3
                 file.seek(length-128);//reset the file-pointer
                 file.write(tagBytes,0,3);//write these three bytes into the File
-            }catch(Exception eee){
+            } catch(Exception eee) {
                 return LimeXMLReplyCollection.BAD_ID3;
             }
         }
@@ -272,13 +275,13 @@ public class ID3Editor{
             return LimeXMLReplyCollection.RW_ERROR;
         }
         
-        try{
-            //genre
-            byte genreByte= getGenreByte();
-            file.write(genreByte);
-        }catch(Exception e){
+        //genre
+        byte genreByte= getGenreByte();
+        if(genreByte == -1) {
             return LimeXMLReplyCollection.FAILED_GENRE;
         }
+        file.write(genreByte);
+
         try{
             file.close();
         }catch(IOException ioe){
