@@ -1374,7 +1374,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Add to the list of RFDs to connect to.
         if (!isRFDAlreadyStored(rfd))
             added = files.add(rfd);
-        
+
         //Append to allFiles for resume purposes if caching...
         if(cache) {
             RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
@@ -1507,6 +1507,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      */
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+        
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -1540,8 +1541,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
-            if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
-                continue;//no need to tell uploader about itself
+            
+            // no need to tell uploader about itself and since many firewalled
+            // downloads may have the same port and host, we also check their
+            // push endpoints
+            if(!r.needsPush() ? 
+                    (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
+                    r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
+                continue;
+            
             
             
             //no need to send push altlocs to older uploaders
@@ -1551,6 +1559,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             		httpDloader.addSuccessfulAltLoc(loc);
             	else
             		httpDloader.addFailedAltLoc(loc);
+            
            	
         }
 

@@ -330,6 +330,7 @@ public class HTTPDownloader implements BandwidthTracker {
     		synchronized(_goodPushLocs) {
     			if(!_writtenPushLocs.contains(loc)) //not written earlier
     				_goodPushLocs.add(loc); //duplicates make no difference
+    				
     		}
     	}
     }
