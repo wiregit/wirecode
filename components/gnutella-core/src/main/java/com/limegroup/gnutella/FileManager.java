@@ -226,22 +226,10 @@ public class FileManager {
      * If directory is null, returns all shared files.
      */
     public /* synchronized */ File[] getSharedFiles(File directory) {
-        // Yes, this is slightly annoying -- having to locate all the file descriptors
-        // and then also having to recurse through them to just get the files
-        // But, it's the cleanest way.
-        // Alternately, you could just re-implement the exact same routine
-        // as in getSharedFileDescriptors, but store Files instead
-        FileDesc[] fds = getSharedFileDescriptors(directory);
-        if (fds==null)
-            return null;
-
-        File[] files = new File[fds.length];
-        for( int i = 0; i < fds.length; i++ ) {
-            files[i] = fds[i].getFile();
-        }
-        return files;
+        File[] files = new File[0];
+         return (File[])getSharedFilesImpl(false, files, directory);
     }
-    
+
     /**
      * Returns a list of all shared file descriptors in the given directory, in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
@@ -249,8 +237,23 @@ public class FileManager {
      * any of the directory's children are not returned.   
      * <p>
      * If directory is null, returns all shared file descriptors.
+     */    
+    public FileDesc[] getSharedFileDescriptors(File directory) {
+        FileDesc[] fds = new FileDesc[0];
+        return (FileDesc[])getSharedFilesImpl(true, fds, directory);
+    }
+    
+    /**
+     * The implementation of the code to scan through files.
+     * Returns true if the directory was shared, false otherwise.
+     * @param descs If true, type will be filled with FileDescs.
+     *    If false, with files.
+     * @param type The array you want to fill up with shared objects.
+     * @param directory The directory you want to search shared files for.
      */
-    public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
+    private synchronized Object[] getSharedFilesImpl(boolean descs,
+                                                 Object[] type,
+                                                 File directory) {
         if(directory!=null){
             // a. Remove case, trailing separators, etc.
             try {
@@ -261,28 +264,39 @@ public class FileManager {
             
             //Lookup indices of files in the given directory...
             IntSet indices=(IntSet)_sharedDirectories.get(directory);
-            if (indices==null)
+            if (indices==null) {
                 return null;
+            }
             //...and pack them into an array.
-            FileDesc[] ret=new FileDesc[indices.size()];
+            if (type.length < indices.size())
+                type = (Object[])java.lang.reflect.Array.newInstance(
+                                type.getClass().getComponentType(), 
+                                indices.size());
             IntSet.IntSetIterator iter=indices.iterator(); 
             for (int i=0; iter.hasNext(); i++) {
                 FileDesc fd=(FileDesc)_files.get(iter.next());
                 Assert.that(fd!=null, "Directory has null entry");
-                ret[i]=fd;
+                if (descs)
+                    type[i]=fd;
+                else
+                    type[i]=fd.getFile();
             }
-            return ret;
+            return type;
         } else {
             // b. Filter out unshared entries.
             ArrayList buf=new ArrayList(_files.size());
             for (int i=0; i<_files.size(); i++) {
                 FileDesc fd=(FileDesc)_files.get(i);
-                if (fd!=null)
-                    buf.add(fd);                
+                if (fd!=null) {
+                    if ( descs )
+                        buf.add(fd);                
+                    else
+                        buf.add(fd.getFile());
+                }
             }
-            FileDesc[] ret=new FileDesc[buf.size()];
-            Object[] out=buf.toArray(ret);
-            Assert.that(out==ret, "Couldn't fit list in returned value");
+            Object[] ret = buf.toArray(type);
+            Assert.that(ret.length==buf.size(), 
+                "Couldn't fit list in returned value");
             return ret;
         }
     }        
@@ -427,6 +441,7 @@ public class FileManager {
                 public void run() {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
+						_callback.fileManagerLoaded();
 					} catch(Throwable t) {
 						ErrorService.error(t);
 					}

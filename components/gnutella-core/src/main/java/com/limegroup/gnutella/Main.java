@@ -249,7 +249,9 @@ public class Main implements ActivityCallback, ErrorCallback {
 
 	public void chatErrorMessage(Chatter chatter, String st) {}
         
-    public void downloadsComplete() {}        
+    public void downloadsComplete() {}    
+    
+    public void fileManagerLoaded() {}    
     
     public User getUserAuthenticationInfo(String host){
         return null;

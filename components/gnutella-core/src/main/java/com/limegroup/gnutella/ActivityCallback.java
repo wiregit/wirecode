@@ -97,6 +97,11 @@ public interface ActivityCallback
      * A new version of LimeWire is available, notify user.
      */
     public void notifyUserAboutUpdate(String message, boolean isPro, boolean l);
+    
+    /**
+     * Notifies a user that the filemanager has completely loaded.
+     */
+    public void fileManagerLoaded();
 
 
     /**
