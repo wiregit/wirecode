@@ -1126,8 +1126,7 @@ public class HTTPDownloader implements BandwidthTracker {
         Iterator iter = availableRanges.getAllIntervals();        
         while(iter.hasNext()) {
             Interval next = (Interval)iter.next();
-            if(next.isSubrange(_requestedInterval) || 
-                                        _requestedInterval.isSubrange(next))
+            if(_requestedInterval.isSubrange(next))
                 throw new ProblemReadingHeaderException("Bad ranges sent");
         }
 
