@@ -68,6 +68,16 @@ public class FileViewRequestTest extends ClientSideTestCase {
         byte[] bytes = new byte[FileListHTMLPage.htmlBegin.length()];
         is.read(bytes);
         assertEquals(FileListHTMLPage.htmlBegin.getBytes(), bytes);
+        byte[] restOf = new byte[conn.getContentLength() - bytes.length];
+        is.read(restOf);
+        String restOfString = new String(restOf);
+        assertNotEquals(-1, restOfString.indexOf("href"));
+        assertNotEquals(-1, restOfString.indexOf("href",
+                                                 restOfString.indexOf("href")+4));
+        assertEquals(-1, 
+                     restOfString.indexOf("href",
+                                          restOfString.indexOf("href",
+                                                               restOfString.indexOf("href")+4)+4));
     }
 
     //////////////////////////////////////////////////////////////////
