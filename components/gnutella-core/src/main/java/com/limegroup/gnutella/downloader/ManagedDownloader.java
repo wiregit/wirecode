@@ -2015,6 +2015,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
                 debug("rnae thrown in assignAndRequest"+dloader);
+                informMesh(dloader.getRemoteFileDesc(), true);
                 return 4; //no need to add to files or busy we keep iterating
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
@@ -2471,6 +2472,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     } catch (Exception e) {}
                     if(loc!=null) {
                         informMesh(rfd,true);
+                        FileDesc[] descs = 
+                        fileManager.getIncompleteFileDescriptors();
+                        //Sumeet:TODO1:get from FileManager rather than iterate
+                        for(int i=0; i<descs.length; i++) {
+                            if(this.incompleteFile.equals(descs[i].getFile()))
+                                descs[i].add(loc);
+                        }
+                        //Sumeet:TODO1:IncompleteFileDesc and this should share
+                        //a AlternateLocationCollection
                         addAlternateLocation(loc);
                     }
                 }
