@@ -136,13 +136,13 @@ public class Launcher {
 	 *  http://www.whatevername.com
 	 */
 	public static int launch(String path) throws IOException {
-		path = path.toLowerCase();
-		if(!path.endsWith(".exe") &&
-		   !path.endsWith(".vbs") &&
-		   !path.endsWith(".lnk") &&
-		   !path.endsWith(".bat") &&
-		   !path.endsWith(".sys") &&
-		   !path.endsWith(".com")) {
+		String extCheckString = path.toLowerCase();
+		if(!extCheckString.endsWith(".exe") &&
+		   !extCheckString.endsWith(".vbs") &&
+		   !extCheckString.endsWith(".lnk") &&
+		   !extCheckString.endsWith(".bat") &&
+		   !extCheckString.endsWith(".sys") &&
+		   !extCheckString.endsWith(".com")) {
 			if(CommonUtils.isWindows()) {
 				return launchFileWindows(path);
 			}	   
