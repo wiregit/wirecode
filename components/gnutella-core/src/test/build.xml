@@ -4,41 +4,17 @@
   <property name="builddir"        value="build"/>
   <property name="guidir"          value="../gui"/>
   <property name="coredir"         value="../core"/>
-  <property name="messages"        value="com/limegroup/gnutella/messages" /> 
-  <property name="util"            value="com/limegroup/gnutella/util" /> 
-  <property name="lib"             value="${guidir}/lib/"/>
-  <property name="corelib"         value="${coredir}/lib/"/>
-  <property name="GURL"            value="${lib}GURL.jar"/>
-  <property name="collections"     value="${lib}collections.jar"/>
-  <property name="xerces"          value="${lib}xerces.jar"/>
-  <property name="junit"           value="${lib}junit.jar"/>
-  <property name="jl020"           value="${lib}jl020.jar"/>
-  <property name="jl011"           value="${lib}jl011.jar"/>
-  <property name="playerlib"       value="${jl011}"/>
-  <property name="mp3sp"           value="${lib}mp3sp14.jar"/>
-  <property name="logicrypto"      value="${corelib}logicrypto.jar"/>
-  <property name="ui"              value="${lib}ui.jar"/>
-  <property name="mrj"             value="${lib}MRJToolkitStubs.jar"/>
-  <property name="osx"             value="${lib}MRJ141Stubs.jar"/>
-  <property name="mac"             value="${lib}MacStubs.jar"/>
-  <property name="quicktime"       value="${lib}QTJava.zip"/>
-  <property name="settings"        value="${coredir}com/limegroup/gnutella/settings/"/>
-  <property name="tests"           value="com/limegroup/gnutella/tests/"/>
+  <property name="libdir"          value="../lib"/>
+  <property name="jars"            value="${libdir}/jars"/>
+  <property name="messagebundles"  value="${libdir}/messagebundles"/>
+  <property name="native"          value="${libdir}/native"/>  
+  <property name="testslib"        value="lib"/>
   <property name="reports"         value="reports"/>
   <property name="datadir"         value="${basedir}"/>
   <property name="cloverdir"       value="clover"/>
-  <property name="pmd"             value="lib/pmd.jar"/>
-  <property name="jaxen"           value="lib/jaxen-core-1.0-fcs.jar"/>
-  <property name="saxpath"         value="lib/saxpath-1.0-fcs.jar"/>
   <property name="cloverjar"       value="lib/clover.jar"/>
   <property name="log.properties"  value="jdk14.logging.properties"/>
-  <property name="cocoaStubs"      value="${corelib}cocoaFoundation.jar"/>
-  <property name="corebin"         value="${coredir}/bin"/>
-  <property name="httpclient"      value="${corelib}/commons-httpclient.jar"/>
-  <property name="logging"         value="${corelib}/commons-logging.jar"/>
-  <property name="i18njar"   value="${corelib}i18n.jar"/>
-  <property name="xmljar"   value="${lib}xml.jar"/>
-  <property name="icu4jjar" value="${corelib}icu4j.jar"/>
+
 
 
   <!-- constants --> 
@@ -50,31 +26,10 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
-    <pathelement location="${lib}" />
+    <fileset dir="${jars}" includes="*.jar, *.zip"/>
+    <fileset dir="${testslib}" includes="*.jar"/>
+    <pathelement location="${messagebundles}" />
     <pathelement location="${builddir}" />
-    <pathelement location="${coredir}" />
-    <pathelement location="${collections}" />
-    <pathelement location="${xerces}" />
-    <pathelement location="${playerlib}" />
-    <pathelement location="${mp3sp}" />
-	<pathelement location="${ui}" />
-    <pathelement location="${mrj}" />
-    <pathelement location="${osx}" />
-	<pathelement location="${mac}" />
-	<pathelement location="${GURL}" />
-	<pathelement location="${quicktime}"/>
-	<pathelement location="${logicrypto}"/>
-	<pathelement location="${datadir}"/>
-	<pathelement location="${pmd}"/>
-	<pathelement location="${jaxen}"/>
-	<pathelement location="${saxpath}"/>
-	<pathelement location="${cloverjar}"/>
-    <pathelement location="${cocoaStubs}"/>
-    <pathelement location="${httpclient}"/>
-    <pathelement location="${logging}"/>
-	<pathelement location="${i18njar}"/>
-	<pathelement location="${xmljar}"/>
-	<pathelement location="${icu4jjar}"/>
   </path>
   
   <!-- CLOVER SETUP TASKS -->
@@ -250,7 +205,7 @@
                fork="on"
         >
         
-            <jvmarg value="-Djava.library.path=${corebin}"/>
+            <jvmarg value="-Djava.library.path=${native}"/>
             <jvmarg value="-Djava.util.logging.config.file=${log.properties}"/>
             <classpath refid="default.classpath" />
             

@@ -2,7 +2,8 @@
 
 <!-- set global properties for this basedir -->
 <property name="basedir" value="."/>
-<property name="tests" value="com/limegroup/gnutella/tests"/>
+<property name="lib" value="../lib"/>
+<property name="jars" value="${lib}/jars"/>
 
 
 <!-- constants -->
@@ -14,7 +15,7 @@
 <!-- default classpath for javac.  it is set as the user's CLASSPATH
      environment with the jar files necessary for compilation appended. -->
 <path id="default.classpath" >
-  <fileset dir="lib" includes="*.jar"/>
+  <fileset dir="${jars}" includes="*.jar"/>
   <pathelement location="../chord" />
 </path>
 
@@ -44,7 +45,6 @@
 		   srcdir="${basedir}" 
            destdir="${basedir}"
            nowarn="${NOWARN}"
-           excludes="${tests}/**"
            target="1.1"
     >
     <classpath refid="default.classpath" />
