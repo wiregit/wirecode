@@ -773,7 +773,7 @@ public abstract class MessageRouter {
         if (reply.getQueryKey() != null) {
             // this is a PingReply in reply to my QueryKey Request - 
             //consume the Pong and return, don't process as usual....
-            UNICASTER.handleQueryKeyPong(reply);
+            OnDemandUnicaster.handleQueryKeyPong(reply);
             return;
         }
 
