@@ -22,10 +22,7 @@ public class HostCatcherTest extends TestCase {
                       new ConnectionManager(null, null));
     }
 
-    public void testAdd() {
-        //Requires private data
-        //System.out.println("-Testing add method");
-
+    public void testAddPriorities() {
         //Endpoints.
         setUp();
         hc.add(new Endpoint("192.168.0.1"), false);
@@ -77,8 +74,6 @@ public class HostCatcherTest extends TestCase {
 
     public void testBootstraps() {
         try {
-            //TODO: factor the new HostCatcher code into a setUp() method.
-            //System.out.println("-Testing bootstrap servers");
             SettingsManager.instance().setQuickConnectHosts(
                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
             hc.expire();
@@ -186,8 +181,14 @@ public class HostCatcherTest extends TestCase {
         try {
             //1. Create HC, add entries, write to disk.
             hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=486
-            hc.addPermanent(new Endpoint("18.239.0.142", 6342), 1000);
-            hc.addPermanent(new Endpoint("18.239.0.143", 6343), 30);
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
+                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                          0l, 0l, false, 1000),
+                   null);
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                          0l, 0l, false, 30),
+                   null);
             File tmp=File.createTempFile("hc_test", ".net" );
             hc.write(tmp.getAbsolutePath());
 

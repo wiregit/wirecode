@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
 
+
 /**
  * The host catcher.  This peeks at pong messages coming on the
  * network and snatches IP addresses of other Gnutella peers.  IP
@@ -175,7 +176,7 @@ public class HostCatcher {
                 }
             }
             Endpoint e = new Endpoint(host, port);
-            int uptime=expectedUptime(e, false);
+            int uptime=expectedUptime(e);
             if (linea.length>=3) {
                 try {
                     uptime=Integer.parseInt(linea[2]);
@@ -242,12 +243,19 @@ public class HostCatcher {
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
 
+        int uptime;
+        try {
+            uptime=pr.getDailyUptime();
+        } catch (BadPacketException bpe) {
+            uptime=expectedUptime(e);
+        }
+
         //Add the endpoint, forcing it to be high priority if marked pong from a
         //supernode.  TODO: if uptime set, use that instead of estimate.
         if (pr.isMarked())
-            return add(e, GOOD_PRIORITY, expectedUptime(e, true));
+            return add(e, GOOD_PRIORITY, uptime);
         else
-            return add(e, priority(e), expectedUptime(e, false));
+            return add(e, priority(e), uptime);
     }
 
     /**
@@ -263,27 +271,10 @@ public class HostCatcher {
     public boolean add(Endpoint e, boolean forceHighPriority) {
         //See preamble for a discussion of priorities
         if (forceHighPriority)
-            return add(e, GOOD_PRIORITY, expectedUptime(e, true));
+            return add(e, GOOD_PRIORITY, expectedUptime(e));
         else
-            return add(e, priority(e), expectedUptime(e, false));
+            return add(e, priority(e), expectedUptime(e));
     }
-
-//      /**
-//       * Adds an address to the permanent list of this without marking it for
-//       * immediate fetching.  This method is when connecting to a host and reading
-//       * its Uptime header.
-//       *
-//       * @param pr the pong containing the address/port to add.  MODIFIES:
-//       *  e.getWeight().  Caller should not modify this afterwards.
-//       * @param uptimeSeconds the time this has been up, in seconds.
-//       * @return true iff e was actually added 
-//       */
-//      public synchronized boolean addPermanent(Endpoint e, int uptimeSeconds) {
-//          //TODO: should we check that e does not exist in permanentHosts with a
-//          //different key?
-//          e.setWeight(uptimeSeconds);
-//          return permanentHosts.insert(e)!=e;  //was element other than e rejected?
-//      }
 
     /**
      * Adds the passed endpoint to the set of hosts maintained, temporary and
@@ -359,13 +350,30 @@ public class HostCatcher {
         return ret;
     }
 
+    /**
+     * Adds an address to the permanent list of this without marking it for
+     * immediate fetching.  This method is when connecting to a host and reading
+     * its Uptime header.
+     *
+     * @param pr the pong containing the address/port to add.  MODIFIES:
+     *  e.getWeight().  Caller should not modify this afterwards.
+     * @param uptimeSeconds the time this has been up, in seconds.
+     * @return true iff e was actually added 
+     */
+    private synchronized boolean addPermanent(Endpoint e, int uptimeSeconds) {
+        //TODO: should we check that e does not exist in permanentHosts with a
+        //different key?
+        e.setWeight(uptimeSeconds);
+        return permanentHosts.insert(e)!=e;  //was element other than e rejected?
+    }
+    
     /** Returns BAD_PRIORITY if e private, NORMAL_PRIORITY otherwise. */
     private static int priority(Endpoint e) {
         return e.isPrivateAddress() ? BAD_PRIORITY : NORMAL_PRIORITY;        
     }
 
     /** Returns the expected average daily uptime of the given node. */
-    private static int expectedUptime(Endpoint e, boolean ultrapeer) {
+    private static int expectedUptime(Endpoint e) {
         //By looking at version logs, we find that the average session uptime
         //for a host is about 8.1 minutes.  A study of connection uptimes
         //(http://www.limewire.com/developer/lifetimes/) confirms this.  Why not
