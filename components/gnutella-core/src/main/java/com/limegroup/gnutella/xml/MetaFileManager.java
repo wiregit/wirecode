@@ -99,7 +99,7 @@ public class MetaFileManager extends FileManager {
         int z = responses.length;
         for(int i=0;i<z;i++){
             FileDesc f = get((int)responses[i].getIndex());
-            File file = new File(f._path);
+			File file = f.getFile();
             String hash=readFromMap(file);
             if(hash==null)//not an mp3 file
                 hash = readFromMap(file);

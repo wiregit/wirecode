@@ -88,9 +88,9 @@ public class RichQueryHandler{
             else { //meta-data about a specific file
                 fd = fManager.file2index(subjectFile);
                 if (fd != null){//we found a file with the right name
-					index = fd._index;
-					name =  fd._name;//need not send whole path; just name + index
-					size =  fd._size;
+					index = fd.getIndex();
+					name =  fd.getName();//need not send whole path; just name + index
+					size =  fd.getSize();
                 }
                 else{//meaning fd == null 
                     //this is a bad case: 
