@@ -71,7 +71,7 @@ public class Connection {
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
-	private HandshakeResponse HEADERS;
+	private HandshakeResponse HEADERS = HandshakeResponse.createEmptyResponse();
 
     /** For outgoing Gnutella 0.6 connections, the properties written
      *  after "GNUTELLA CONNECT".  Null otherwise. */
