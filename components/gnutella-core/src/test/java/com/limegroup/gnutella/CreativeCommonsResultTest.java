@@ -39,6 +39,7 @@ public class CreativeCommonsResultTest extends ClientSideTestCase {
     
 
     private static void doSettings() {
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3");
         // get the resource file for com/limegroup/gnutella
         File cc1 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/ccverifytest0.mp3");
