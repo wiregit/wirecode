@@ -55,6 +55,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  filterVbs_;
     private static boolean  filterHtml_;
     private static boolean  filterGreedyQueries_;
+    private static boolean  filterBearShare_;
     private static boolean  useQuickConnect_;
     private static String[] quickConnectHosts_;
     private static int      parallelSearchMax_;
@@ -444,6 +445,17 @@ public class SettingsManager implements SettingsInterface
                     try {setFilterGreedyQueries(bs);}
                     catch (IllegalArgumentException ie){}
                 }
+                else if(key.equals(SettingsInterface.FILTER_BEARSHARE_QUERIES)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try {setFilterBearShareQueries(bs);}
+                    catch (IllegalArgumentException ie){}
+                }
                 else if(key.equals(SettingsInterface.USE_QUICK_CONNECT)) {
                     boolean bs;
                     if (p.equals("true"))
@@ -515,6 +527,7 @@ public class SettingsManager implements SettingsInterface
         setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(
                     SettingsInterface.DEFAULT_FILTER_GREEDY_QUERIES);
+        setFilterBearShareQueries(SettingsInterface.DEFAULT_FILTER_BEARSHARE_QUERIES);
         setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
         setDirectories(home_);
         setSaveDirectory(home_);
@@ -625,6 +638,7 @@ public class SettingsManager implements SettingsInterface
     public boolean getFilterHtml(){return filterHtml_;}
     public boolean getFilterVbs(){return filterVbs_;}
     public boolean getFilterGreedyQueries() { return filterGreedyQueries_; }
+    public boolean getFilterBearShareQueries() { return filterBearShare_; }
 
     public boolean getUseQuickConnect(){return useQuickConnect_;}
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}
@@ -1133,6 +1147,14 @@ public class SettingsManager implements SettingsInterface
         Boolean b = new Boolean(yes);
         String s = b.toString();
         props_.put(SettingsInterface.FILTER_GREEDY_QUERIES, s);
+        writeProperties();
+    }
+
+    public synchronized void setFilterBearShareQueries(boolean yes) {
+        filterBearShare_ = yes;
+        Boolean b = new Boolean(yes);
+        String s = b.toString();
+        props_.put(SettingsInterface.FILTER_BEARSHARE_QUERIES, s);
         writeProperties();
     }
 
