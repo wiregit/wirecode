@@ -8,6 +8,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
 
@@ -93,28 +94,12 @@ public final class UploadManager implements BandwidthTracker {
      *  KB/s.  See testTotalUploadLimit. */
     private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
-    private FileManager _fileManager;
-    
     /** 
      * The file index used in this structure to indicate a browse host
      * request
      */
     public static final int BROWSE_HOST_FILE_INDEX = -1;
-
-
-	//////////////////////// Main Public Interface /////////////////////////
-	
-	/**
-	 * Constructs a new <tt>UploadManager</tt> instance, establishing its
-	 * invariants.
-	 *
-	 * @param fileManager the file manager for accessing data about uploading
-	 *  files
-	 */
-	public UploadManager(FileManager fileManager) {
-        _fileManager = fileManager;
-	}
-                
+	                
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
 	 * if it successfully parses the HTTP request.  BLOCKING.
@@ -141,7 +126,8 @@ public final class UploadManager implements BandwidthTracker {
                 //create an uploader
                 HTTPUploader uploader = new HTTPUploader(method, line._fileName, 
                     socket, line._index, this, 
-					_fileManager, RouterService.getMessageRouter());
+					RouterService.getFileManager(), 
+					RouterService.getMessageRouter());
 
                 //do the upload
                 doSingleUpload(uploader, 
@@ -160,7 +146,7 @@ public final class UploadManager implements BandwidthTracker {
                         ).getPersistentHTTPConnectionTimeout());
                     //dont read a word of size more than 3 
                     //as we will handle only the next "GET" request
-                    String word=IOUtils.readWord(socket.getInputStream(), 3);
+                    String word=IOUtils.readWord(socket.getInputStream(), 4);
                     socket.setSoTimeout(oldTimeout);
                     //TODO: how could this possibly equal 'HEAD' if we only read 3 characters?
                     if(!word.equalsIgnoreCase("GET") &&				   
@@ -309,7 +295,8 @@ public final class UploadManager implements BandwidthTracker {
 											  final int index, 
                                               final String guid) { 
 		final HTTPUploader GIVuploader = new HTTPUploader
-                         (file, host, port, index, guid, this, _fileManager,
+                         (file, host, port, index, guid, this, 
+						  RouterService.getFileManager(),
                           RouterService.getMessageRouter());
         //Note: GIVuploader is just used to connect, and while connecting, 
         //the GIVuploader uploads the GIV message.
@@ -777,7 +764,7 @@ public final class UploadManager implements BandwidthTracker {
 	private HttpRequestLine parseURNGet(final String requestLine) 
 		throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
-		FileDesc desc = _fileManager.getFileDescForUrn(urn);
+		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");
 		}		
