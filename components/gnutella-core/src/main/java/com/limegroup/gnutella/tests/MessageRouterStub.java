@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.routing.*;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
@@ -30,5 +31,9 @@ public class MessageRouterStub extends MessageRouter {
         PushRequest pushRequest,
         ManagedConnection receivingConnection) {
     }
+    
+    protected void addQueryRoutingEntries(QueryRouteTable qrt)
+    {
+    }    
 
 }

@@ -5,6 +5,7 @@ import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
+import com.limegroup.gnutella.routing.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -179,6 +180,13 @@ public class ManagedConnection
     private long _nextNumHorizonHosts=0;
     
 
+    /**
+     * The query routing state for each "new client" connection, or null if the
+     * connection doesn't support QRP.  Helps you decide when to send queries.
+     * (Compare with _querySourceTable of MessageRouter, which helps filter
+     * duplicate queries and decide where to send responses.)  
+     */
+    private volatile ManagedConnectionQueryInfo queryInfo = null;
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
@@ -962,7 +970,19 @@ public class ManagedConnection
         
     }
     
-    
+    /** Returns the query route state associated with this, or null if no
+     *  such state. 
+     */
+    public ManagedConnectionQueryInfo getQueryRouteState() {
+        return queryInfo;
+    }
+
+    /** Associates the given query route state with this.  Typically this method
+     *  is called once per connection. 
+     */
+    void setQueryRouteState(ManagedConnectionQueryInfo qi) {
+        this.queryInfo=qi;
+    } 
     
     /** Unit test.  Only tests statistics methods. */
     /*

@@ -662,7 +662,7 @@ public class ConnectionManager {
             //local information (e.g. addresses of other hosts)
             processConnectionHeaders(c);
         }
-
+        
         boolean connectionOpen = false;
         synchronized(this) {
             _initializingFetchedConnections.remove(c);
@@ -674,7 +674,17 @@ public class ConnectionManager {
             }
         }
         if(connectionOpen)
+        {
             _callback.connectionInitialized(c);
+            //check if we are a client node, and now opened a connection 
+            //to supernode. In this case, we will drop all other connections
+            //and just keep this one
+            //check for shieldedclient-supernode connection
+            if(!SettingsManager.instance().isSupernode() && 
+                c.isSupernodeConnection()){
+            gotShieldedClientSupernodeConnection(c);
+            }
+        }
     }
 
     //anu TODO
@@ -731,10 +741,17 @@ public class ConnectionManager {
         updateHostCache(headers.getProperty(ConnectionHandshakeHeaders.X_TRY),
             connection);
         
-        //check for shieldedclient-supernode connection
-        if(!SettingsManager.instance().isSupernode() && Boolean.getBoolean(
-            headers.getProperty(ConnectionHandshakeHeaders.SUPERNODE))){
-            gotShieldedClientSupernodeConnection(connection);
+        //set client/supernode flag for the connection
+        String supernodeStr = headers.getProperty(
+            ConnectionHandshakeHeaders.SUPERNODE);
+        
+        if(supernodeStr != null)
+        {
+            boolean isSupernode = Boolean.getBoolean(supernodeStr);
+            if(isSupernode)
+                connection.setSupernodeConnectionFlag(true);
+            else
+                connection.setClientConnectionFlag(true);
         }
     }
    

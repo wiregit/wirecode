@@ -67,6 +67,11 @@ public class Connection {
      */
     private boolean _isClientConnection = false;
     
+    /**
+     * Indicates whether the connection is to a supernode 
+     */
+    private boolean _isSupernodeConnection = false;
+    
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
@@ -193,6 +198,23 @@ public class Connection {
         return _isClientConnection;
     }
 
+    /**
+     * Sets the flag indicating whether the connection is to a supernode
+     * @param flag The flag value to be set
+     */
+    public void setSupernodeConnectionFlag(boolean flag){
+        _isSupernodeConnection = flag;
+    }
+    
+    /**
+     * Indicates whether the connection is to a supernode
+     * @return true, if the connection is to a shielded client, false
+     * otherwise
+     */
+    public boolean isSupernodeConnection(){
+        return _isSupernodeConnection;
+    }
+    
     private static class BadHandshakeException extends IOException { }
 
     /*

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.Random;
 import java.io.*;
+import com.limegroup.gnutella.routing.RouteTableMessage;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -19,6 +20,7 @@ public abstract class Message implements Serializable{
     public static final byte F_PUSH=(byte)0x40;
     public static final byte F_QUERY=(byte)0x80;
     public static final byte F_QUERY_REPLY=(byte)0x81;
+    public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x20;
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
@@ -165,7 +167,6 @@ public abstract class Message implements Serializable{
 
         //Dispatch based on opcode.
         switch (func) {
-
             case F_PING:
                 if (length>=15) {
 				    // Build a GroupPingRequest
@@ -186,6 +187,12 @@ public abstract class Message implements Serializable{
             case F_PUSH:
                 if (length!=26) break;
                 return new PushRequest(guid,ttl,hops,payload);
+            case F_ROUTE_TABLE_UPDATE:
+                //The exact subclass of RouteTableMessage returned depends on
+                //the variant stored within the payload.  So leave it to the
+                //static read(..) method of RouteTableMessage to actually call
+                //the right constructor.
+                return RouteTableMessage.read(guid, ttl, hops, payload);            
         }
         throw new BadPacketException("Unrecognized function code: "+func);
     }
