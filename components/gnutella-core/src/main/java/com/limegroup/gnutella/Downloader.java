@@ -20,6 +20,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int ABORTED           = 5;
     public static final int GAVE_UP           = 6;
     public static final int COULDNT_MOVE_TO_LIBRARY = 7;
+    public static final int REQUERYING_NETWORK = 8;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
