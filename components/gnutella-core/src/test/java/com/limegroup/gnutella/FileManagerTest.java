@@ -20,25 +20,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private Object loaded = new Object();
     private Response[] responses;
     private File[] files;
-    
-    private class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized(loaded) {
-                loaded.notify();
-            }
-        }
-    }
-    
-    private void waitForLoad() {
-        fman.loadSettings(false); // true won't matter either
-        synchronized(loaded) {
-            try {
-                loaded.wait();
-            } catch (InterruptedException e) {
-                //good.
-            }
-        }
-    }
 
     public FileManagerTest(String name) {
         super(name);
@@ -279,4 +260,23 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             return length;
         }
     }
+    
+    private class FManCallback extends ActivityCallbackStub {
+        public void fileManagerLoaded() {
+            synchronized(loaded) {
+                loaded.notify();
+            }
+        }
+    }
+    
+    private void waitForLoad() {
+        synchronized(loaded) {
+            try {
+                fman.loadSettings(false); // true won't matter either                
+                loaded.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+    }    
 }
