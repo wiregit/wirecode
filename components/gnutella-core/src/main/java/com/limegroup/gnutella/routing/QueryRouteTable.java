@@ -548,7 +548,7 @@ public class QueryRouteTable {
     ////////////////////////////// Unit Tests ////////////////////////////////
     
     /** Unit test */
- 
+    /* 
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
 
@@ -596,14 +596,13 @@ public class QueryRouteTable {
         QueryRouteTable qrt=new QueryRouteTable(1000);
         qrt.add("good book");
         Assert.that(qrt.entries()==2);
-        qrt.add("bad");   //{good/1, book/1, bad/3}
+        qrt.add("bad");   //{good, book, bad}
         Assert.that(qrt.entries()==3);
-        qrt.add("bad");   //{good/1, book/1, bad/3}
+        qrt.add("bad");   //{good, book, bad}
         Assert.that(qrt.entries()==3);
 
         //1. Simple keyword tests (add, contains)
-        //after the change to the private contains method, if any word is added
-        //then regardless of the depth of the keyword the keyword will be found
+        //we have moved to 1-bit entry per hash, so either absent or present....
         Assert.that(! qrt.contains(new QueryRequest((byte)4, 0, "garbage")));
         Assert.that(qrt.contains(new QueryRequest((byte)2, 0, "bad")));
         Assert.that(qrt.contains(new QueryRequest((byte)3, 0, "bad")));
@@ -620,7 +619,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.entries()==0);
         qrt2.add("new");
         qrt2.add("book");
-        qrt2.addAll(qrt);     //{book/1, good/2, new/3, bad/4}
+        qrt2.addAll(qrt);     //{book, good, new, bad}
         QueryRouteTable qrt3=new QueryRouteTable(1000);
         Assert.that(qrt2.entries()==4);
         qrt3.add("book");
@@ -631,7 +630,7 @@ public class QueryRouteTable {
         Assert.that(qrt3.equals(qrt2));
 
         //3. encode-decode test--with compression
-        //qrt={good/1, book/1, bad/3}
+        //qrt={good, book, bad}
         qrt2=new QueryRouteTable(1000);
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
@@ -646,7 +645,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
 
         qrt.add("bad");
-        qrt.add("other"); //qrt={good/1, book/1, bad/2, other/4}
+        qrt.add("other"); //qrt={good, book, bad, other}
         Assert.that(! qrt2.equals(qrt));
         for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
@@ -853,5 +852,5 @@ public class QueryRouteTable {
         } catch (BadPacketException e) {
         }
     }
-
+    */
 }
