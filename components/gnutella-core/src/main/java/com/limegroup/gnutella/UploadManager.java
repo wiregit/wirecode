@@ -114,7 +114,6 @@ public final class UploadManager implements BandwidthTracker {
 	 *
      * @param callback the UI callback to notify of download changes
      * @param router the message router to use for sending push requests
-     * @param acceptor used to get my IP address and port for pushes	 
 	 * @param fileManager the file manager for accessing data about uploading
 	 *  files
 	 */
