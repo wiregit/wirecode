@@ -447,7 +447,8 @@ public class StringUtils {
         Set intersection = keywords(name);
 
         if (intersection.size() < 1) { // nothing to extract!
-            retString = StringUtils.truncate(name, MAX_LEN);
+            retString = StringUtils.removeIllegalChars(name);
+            retString = StringUtils.truncate(retString, MAX_LEN);
         } else {
             StringBuffer sb = new StringBuffer();
             int numWritten = 0;
@@ -494,6 +495,22 @@ public class StringUtils {
 
         return retString;
     }
+    
+    /**
+     * Removes illegal characters from the name, inserting spaces instead.
+     */
+    public static final String removeIllegalChars(String name) {
+        String ret = "";
+        
+        String delim = FileManager.DELIMETERS;
+        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
+        sb.append(illegal).append(FileManager.DELIMETERS);
+        StringTokenizer st = new StringTokenizer(name, sb.toString());        
+        while(st.hasMoreTokens())
+            ret += st.nextToken().trim() + " ";
+        return ret.trim();
+    }   
 
     /**
      * Gets the keywords in this filename, seperated by delimeters & illegal

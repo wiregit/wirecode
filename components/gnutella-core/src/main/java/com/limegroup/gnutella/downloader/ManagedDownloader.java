@@ -1063,10 +1063,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    
 		String name = allFiles[0].getFileName();
 		    
-		if(allFiles[0].getSHA1Urn() == null)
-			return QueryRequest.createQuery(StringUtils.createQueryString(name));
-        else // this is where a SHA1 query would be sent, if desired
-            return QueryRequest.createQuery(StringUtils.createQueryString(name));
+        String queryString = StringUtils.createQueryString(name);
+        if(queryString == null || queryString.equals(""))
+            throw new CantResumeException(name);
+        else
+            return QueryRequest.createQuery(queryString);
+            
+        // if desired, we can create a SHA1 query also
     }
 
 

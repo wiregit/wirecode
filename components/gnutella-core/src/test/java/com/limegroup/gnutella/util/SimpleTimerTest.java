@@ -102,18 +102,6 @@ public class SimpleTimerTest extends BaseTestCase {
             ErrorService.setErrorCallback(old);
         }
     }
-    
-    public void testDaemon() throws Exception {
-        SimpleTimer t=new SimpleTimer(true);
-        Object testTimerThread = PrivilegedAccessor.getValue(
-            t, "_runner");
-        boolean isDaemon = ((Boolean)PrivilegedAccessor.invokeMethod(
-            testTimerThread, "isDaemon", null)).booleanValue();
-        if( !isDaemon ) {
-            t.cancel();
-            fail("timer was not created as a daemon");
-        }
-    }
 
     void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }

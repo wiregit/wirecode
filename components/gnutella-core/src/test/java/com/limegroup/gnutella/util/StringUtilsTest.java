@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
 
+import com.limegroup.gnutella.messages.QueryRequest;
+
 /**
  * Tests StringUtils.
  */
@@ -278,18 +280,32 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testCreateQueryString() {
+        QueryRequest qr;
+        
         String query = StringUtils.createQueryString("file and 42-name_minus #numbers");
         containsAll("file name minus numbers", query);
         
         query = StringUtils.createQueryString("reallylongfilenamethatisgoingtotruncate");
         assertEquals("reallylongfilenamethatisgoingt", query);
+        // verify that we can create local & network queries out of the query string
+        qr = QueryRequest.createQuery(query);
+        QueryRequest.createMulticastQuery(qr);
         
         //such query will fit any 2 out of 3 words in it.
         query = StringUtils.createQueryString("short one, reallylongotherfilename");
         assertEquals(2,query.split(" ").length);
+        qr = QueryRequest.createQuery(query);
+        QueryRequest.createMulticastQuery(qr);
         
         query = StringUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
         containsAll("but short others", query);
+        qr = QueryRequest.createQuery(query);
+        QueryRequest.createMulticastQuery(qr);
+        
+        query = StringUtils.createQueryString("(5).jpg");
+        assertEquals("5 jpg", query);
+        qr = QueryRequest.createQuery(query);
+        QueryRequest.createMulticastQuery(qr);
     }
     
     private void containsAll(String match, String query) {
