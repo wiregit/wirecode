@@ -168,6 +168,15 @@ public class RouterService
         return fileManager;
     }
 
+    /** 
+     * Accessor for the <tt>DownloadManager</tt> instance in use.
+     *
+     * @return the <tt>DownloadManager</tt> in use
+     */
+    public DownloadManager getDownloadManager() {
+        return downloader;
+    }
+
 
     /** Kicks off expensive backend tasks (like file loading) that should
      *  only be done after GUI is loaded. */
@@ -884,12 +893,6 @@ public class RouterService
     public boolean hasClientSupernodeConnection() {
         return manager.hasClientSupernodeConnection();
     }
-
-    void sendQRToDownloadManager(QueryReply qr) {
-        if (downloader != null)
-            downloader.handleQueryReply(qr);
-    }
-    
 
 
 }
