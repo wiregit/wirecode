@@ -562,10 +562,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Find any matching file-desc for this URN.
             FileDesc fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
+                //create validAlts
+                validAlts = AlternateLocationCollection.create(hash);
                 // Retrieve the alternate locations (without adding ourself)
-                validAlts = fd.getAlternateLocationCollection();
-                Iterator iter = validAlts.iterator();
-                synchronized(validAlts) {
+                AlternateLocationCollection coll = 
+                                            fd.getAlternateLocationCollection();
+                Iterator iter = coll.iterator();
+                synchronized(coll) {
                     while(iter.hasNext()) {
                         AlternateLocation loc = (AlternateLocation)iter.next();
                         addDownload(loc.createRemoteFileDesc((int)size),false);
@@ -1084,6 +1087,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         IncompleteFileDesc ifd = null;
         if( fd != null && fd instanceof IncompleteFileDesc)
             ifd = (IncompleteFileDesc)fd;
+
+        if(validAlts==null) 
+            validAlts = AlternateLocationCollection.create(loc.getSHA1Urn());
         
         if(good) {
             //check if validAlts contains loc to avoid duplicate stats, and
@@ -1527,19 +1533,22 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
         }
 
-		boolean firstSHA1RFD = true;
-		RemoteFileDesc tempRFD;
-		
+		URN sha1 = null;
 		// Create a new AlternateLocationCollection (if needed).
 		// The resulting collection's SHA1 is based off the
 		// the SHA1 of the first RFD that has a SHA1.
 		// If an AlternateLocationCollection already existed with that
 		// SHA1, it reuses it.  Otherwise, it creates it new.
         synchronized (this) {
-            tempRFD = (RemoteFileDesc)files.get(0);
-        }        
-        URN sha1 = tempRFD.getSHA1Urn();
-        
+            Iterator iter = files.iterator();
+            while(iter.hasNext()) {
+                RemoteFileDesc tempRFD = (RemoteFileDesc)iter.next();
+                sha1 = tempRFD.getSHA1Urn();
+                if(sha1!= null) //pick first RFD with hash
+                    break;
+            }
+        }    
+                
         // If no alternate location collection existed already, or one existed
         // but this is the first new RFD, and current SHA1 is different than it,
         // create a new collection.
@@ -2990,6 +2999,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             needed.clear();
         busy = null;
         files = null;
+        validAlts=null;
     }    
 
     /////////////////////////////Display Variables////////////////////////////
