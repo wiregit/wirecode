@@ -812,9 +812,6 @@ public class UDPConnectionProcessor {
               LOG.debug("Soft resend data:"+ start+ " rto:"+rto+
                 " uS:"+_sendWindow.getUsedSpots());
 
-            // Scale back on the writing speed if you are hitting limits
-            _writeRegulator.hitResendTimeout();
-
             DataRecord drec;
             int        numResent = 0;
 
@@ -845,7 +842,11 @@ public class UDPConnectionProcessor {
                         LOG.debug("Soft resending message:"+
                           drec.msg.getSequenceNumber());
                     safeSend(drec.msg);
+
+                    // Scale back on the writing speed if you are hitting limits
                     _writeRegulator.addMessageFailure();
+                    _writeRegulator.hitResendTimeout();
+
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
                     drec.sends++;

@@ -13,17 +13,24 @@ public class WriteRegulator {
       LogFactory.getLog(WriteRegulator.class);
 
     /** Don't adjust the skipping of sleeps until the window has initialized */
-    private static final int MIN_START_WINDOW = 40;
+    private static final int   MIN_START_WINDOW     = 40;
 
     /** When the window space hits this size, it is low */
-    private static final int LOW_WINDOW_SPACE = 6;
+    private static final int   LOW_WINDOW_SPACE     = 6;
+
+    /** Cap the quick sending of blocks at this number */
+    private static final int   MAX_SKIP_LIMIT       = 14;
+
+    /** The expected failure rate at optimal throughput */
+    private static final float TARGET_FAILURE_RATE  = 3f / 100f;
+
 
     private DataWindow _sendWindow;
     private int        _skipCount  = 0;
     private int        _skipLimit  = 2;
     private boolean    _limitHit   = false;
     private int        _limitCount = 0;
-    private int        _limitReset = 400;
+    private int        _limitReset = 200;  
     private int        _zeroCount  = 0;
 
 
@@ -38,10 +45,12 @@ public class WriteRegulator {
     }
 
     /** 
-     *  When a resend is required, scale down activity.
+     *  When a resend is required and the failure rate is too high, 
+     *  scale down activity.
      */
     public void hitResendTimeout() {
-        if ( !_limitHit || _limitCount >= 2 ) { 
+        if ( (!_limitHit || _limitCount >= 6) &&
+              _tracker.failureRate() > TARGET_FAILURE_RATE ) {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
@@ -50,14 +59,17 @@ System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
     }
 
     /** 
-     *  When a resend is required, scale down activity.
+     *  When the send window keeps getting hit, slow down activity.
      */
     public void hitZeroWindow() {
         _zeroCount++;
-        if ( (!_limitHit || _limitCount >= 2) && _zeroCount > 4) { 
-            _limitHit = true;
-            _skipLimit /= 2;
-            _limitCount = 0;
+        if ( (!_limitHit || _limitCount >= 6) && _zeroCount > 4) { 
+            // Doing nothing for now since this is irrelevent to the skipping
+            //
+
+            //_limitHit = true;
+            //_skipLimit /= 2;
+            //_limitCount = 0;
             _zeroCount = 0;
 System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
         }
@@ -184,17 +196,20 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
         if ( _skipLimit < 1 )
             _skipLimit = 1;
         _skipCount = (_skipCount + 1) % _skipLimit;
+
         if ( !_limitHit ) {
             // Bump up the skipLimit occasionally to see if we can handle it
-            if (_skipLimit < 50 &&
-                windowStart%windowSize == 0  &&
-                windowStart > MIN_START_WINDOW) {
+            if (_skipLimit < MAX_SKIP_LIMIT    &&
+                windowStart%windowSize == 0    &&
+                windowStart > MIN_START_WINDOW &&
+                _tracker.failureRate() < TARGET_FAILURE_RATE ) {
 System.out.println("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
                 LOG.debug(" -- UPP sL:"+_skipLimit);
             }
         } else {
+            // Wait before trying to be aggressive again
             _limitCount++;
             if (_limitCount >= _limitReset) {
                 if(LOG.isDebugEnabled())  
