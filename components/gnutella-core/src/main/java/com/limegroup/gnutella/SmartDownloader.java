@@ -42,6 +42,10 @@ public class SmartDownloader extends HTTPDownloader {
 		_stateString = "";
 		_smartDownload = true;
 		_keepTrying = true;
+
+		Arrays.sort(_remoteFiles, 
+					new RemoteFileDesc.RemoteFileDescComparator());
+
 	}
 
 	public void run() {
