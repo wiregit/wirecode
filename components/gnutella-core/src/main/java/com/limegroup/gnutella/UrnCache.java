@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -21,7 +22,8 @@ public final class UrnCache {
     /**
      * File where urns (currently SHA1 urns) for files are stored.
      */
-    private static final File URN_CACHE_FILE = new File("fileurns.cache");
+    private static final File URN_CACHE_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.cache");
 
     /**
      * UrnCache instance variable.  LOCKING: obtain UrnCache.class.
