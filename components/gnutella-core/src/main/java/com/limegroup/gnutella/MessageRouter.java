@@ -294,7 +294,7 @@ public abstract class MessageRouter {
      *  port of the client node.
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
-		System.out.println("MessageRouter::handleMulticastMessage: "+msg); 
+		//System.out.println("MessageRouter::handleMulticastMessage: "+msg); 
         // Increment hops and decrement TTL.
         msg.hop();
 
@@ -304,7 +304,7 @@ public abstract class MessageRouter {
         if (CommonUtils.isLocalAddress(address))
             return;
 
-		System.out.println("MessageRouter::handleMulticastMessage"); 
+		//System.out.println("MessageRouter::handleMulticastMessage"); 
 		
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
@@ -437,7 +437,7 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-		System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
+		//System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
@@ -466,7 +466,7 @@ public abstract class MessageRouter {
 	 */
 	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-		System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
+		//System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
@@ -610,7 +610,7 @@ public abstract class MessageRouter {
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter) {
-		System.out.println("MessageRouter::handleQueryRequest"); 
+		//System.out.println("MessageRouter::handleQueryRequest"); 
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -645,7 +645,7 @@ public abstract class MessageRouter {
 		forwardQueryRequestToLeaves(request, handler);
 		
         // if I'm not firewalled and the source isn't firewalled THEN reply....
-		System.out.println("MessageRouter::about to respond to request"); 
+		//System.out.println("MessageRouter::about to respond to request"); 
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
             return;
