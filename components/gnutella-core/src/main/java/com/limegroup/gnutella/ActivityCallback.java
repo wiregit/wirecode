@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
+
 /**
  *  Interface for connection events to be fed from the router into the
  *  visual world.
@@ -47,7 +49,29 @@ public interface ActivityCallback
 
     /** Temp function until we rewrite HTTPManager for counting connections */
     public int getNumUploads();
+    
 
+    /**
+     * Notifies the GUI that the given directory has been shared.  This method
+     * is called exactly once per directory per change to the shared directory
+     * and extension settings.  Note that the files in directory are not
+     * necessarily yet indexed at the time of this call.
+     *
+     * @requires "directory" is a directory and "parent" is the parent
+	 *  directory of that directory, or null if no parent exists. 
+     */
+    public void addSharedDirectory(final File directory, final File parent);
+
+    /**
+     * Notifies the GUI that the given file has been shared.  This method is
+     * called exactly once per file per change to the shared directory and
+     * extension settings.
+     *
+     * @requires f is a file, addSharedDirectory has been called with parent 
+     *  as an argument, and parent contains f 
+     */
+    public void addSharedFile(final File file, final File parent);
+           
 
     /**
      * Equivalent to error(errorCode, t).

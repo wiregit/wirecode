@@ -199,5 +199,9 @@ public class Main implements ActivityCallback {
 
     public int getNumUploads(){ return 0; }
 
+	public void addSharedDirectory(File file, File parent) {}
+
+	public void addSharedFile(File file, File parent) {}
+
 }
 

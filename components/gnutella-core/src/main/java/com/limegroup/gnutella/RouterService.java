@@ -21,7 +21,9 @@ public class RouterService
     private UploadManager uploadManager;
 
     /**
-     * Create a RouterService accepting connections on the default port
+     * Create a RouterService accepting connections on the default port.
+     * Some parts of the backend will not be started until postGuiInit()
+     * is called.
      */
     public RouterService(ActivityCallback activityCallback,
                          MessageRouter router) {
@@ -31,7 +33,9 @@ public class RouterService
     }
 
     /**
-     * Create a RouterService accepting connections on the specified port
+     * Create a RouterService accepting connections on the specified port.
+     * Some parts of the backend will not be started until postGuiInit()
+     * is called.
      */
     public RouterService(int port,
                          ActivityCallback activityCallback,
@@ -62,7 +66,14 @@ public class RouterService
 		if ( outgoing > 0 )
 		    connect();
     }
-
+    
+    /** Kicks off expensive backend tasks (like file loading) that should
+     *  only be done after GUI is loaded. */
+    public void postGuiInit() {
+        // Asynchronously load files now that the GUI is up, notifying
+        // callback.
+        FileManager.instance().initialize(callback);
+    }
 
     /**
      * Dump the ping and query routing tables
@@ -588,6 +599,20 @@ public class RouterService
     public int getNumSharedFiles( ) {
         return( FileManager.instance().getNumFiles() );
     }
+
+    /**
+     * Returns a list of all shared files in the given directory.
+     * All the files returned have already been passed to the gui
+     * via ActivityCallback.addSharedFile.  Note that if a file
+     * is added to the given directory after this method completes, 
+     * addSharedFile will be called for that file.<p>
+     *
+     * If directory is not a shared directory, returns null.
+     */
+    public File[] getSharedFiles(File directory) {
+        return FileManager.instance().getSharedFiles(directory);
+    }
+    
 
     /** 
      * Tries to "smart download" any of the given files.<p>  
