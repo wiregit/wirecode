@@ -749,6 +749,18 @@ public class HostCatcher {
      *  HostCatcherTest. */
     static boolean DEBUG=false;
 
+    /**
+     * Constant for the size of the set of hosts put on probation.  Non-final
+     * for testing.
+     */
+    private int PROBATION_HOSTS_SIZE;
+
+    /**
+     * Constant for the size of the set of expired hosts.  Non-final for
+     * testing.
+     */
+    private int EXPIRED_HOSTS_SIZE;
+
     
     /** Checks invariants. Very slow; method body should be enabled for testing
      *  purposes only. */
@@ -826,7 +838,7 @@ public class HostCatcher {
      */
     public synchronized void putHostOnProbation(Endpoint host) {
         PROBATION_HOSTS.add(host);
-        if(PROBATION_HOSTS.size() > 500) {
+        if(PROBATION_HOSTS.size() > PROBATION_HOSTS_SIZE) {
             PROBATION_HOSTS.remove(PROBATION_HOSTS.iterator().next());
         }
     }
@@ -840,7 +852,7 @@ public class HostCatcher {
      */
     public synchronized void expireHost(Endpoint host) {
         EXPIRED_HOSTS.add(host);
-        if(EXPIRED_HOSTS.size() > 500) {
+        if(EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
             EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
         }       
     }
