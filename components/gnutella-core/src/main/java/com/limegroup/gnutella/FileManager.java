@@ -194,9 +194,14 @@ public abstract class FileManager {
     public static FilenameFilter DIRECTORY_FILTER = new DirectoryFilter();
         
     /**
-     * qrt
+     * The QueryRouteTable kept by this.  The QueryRouteTable will be 
+     * lazily rebuilt when necessary 
      */
     protected static QueryRouteTable _queryRouteTable;
+    
+    /**
+     * boolean for checking if the QRT needs to be rebuilt
+     */
     protected static volatile boolean _needRebuild = true;
 
     /**
@@ -1142,7 +1147,12 @@ public abstract class FileManager {
         }        
         return true;
     }
-    
+
+    /**
+     * returns the QRTable.  
+     * if the shared files had changed, then it will rebuilt the
+     * qrt.
+     */
     public QueryRouteTable getQRT() {
         if(_needRebuild) {
             buildQRT();
