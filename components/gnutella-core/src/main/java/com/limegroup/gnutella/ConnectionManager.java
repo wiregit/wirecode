@@ -790,7 +790,7 @@ public class ConnectionManager {
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
 		    if(!hr.isGoodUltrapeer() || 
-		      Sockets.getAttempts() < limeAttempts && !hr.isLimeWire()) {
+		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
 		    } else if (_shieldedConnections < _preferredConnections) {
