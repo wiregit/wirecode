@@ -23,6 +23,10 @@ public class UDPConnectionProcessor {
     /** Define the chunk size used for data bytes */
     public static final int   DATA_CHUNK_SIZE         = 512;
 
+    /** Define the maximum chunk size read for data bytes
+        before we will blow out the connection */
+    public static final int   MAX_DATA_SIZE           = 4096;
+
     /** Handle to the output stream that is the input to this connection */
     private UDPBufferedOutputStream  _inputFromOutputStream;
 
@@ -199,6 +203,9 @@ public class UDPConnectionProcessor {
     /** Skip a Data Write if this flag is true */
     private boolean           _skipADataWrite;
 
+    /** Keep track of the reason for shutting down */
+    private byte              _closeReasonCode;
+
 
 	/** Allow a testing stub version of UDPService to be used */
 	private static UDPService _testingUDPService;
@@ -237,6 +244,7 @@ public class UDPConnectionProcessor {
         _waitingForFinAck        = false;  
         _skipADataWrite          = false;
         _ackResendCount          = 0;
+        _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
 
 		// Allow UDPService to be overridden for testing
 		if ( _testingUDPService == null )
@@ -715,7 +723,8 @@ public class UDPConnectionProcessor {
             _finSeqNo = _sequenceNumber;
 
             // Send the FinMessage
-            fin = new FinMessage(_theirConnectionID, _sequenceNumber);
+            fin = new FinMessage(_theirConnectionID, _sequenceNumber,
+              _closeReasonCode);
             send(fin);
         } catch (BadPacketException bpe) {
             // This would not be good.   
@@ -829,7 +838,7 @@ public class UDPConnectionProcessor {
                     if(LOG.isDebugEnabled())  
                         LOG.debug("Tried too many send on:"+
                           drec.msg.getSequenceNumber());
-					closeAndCleanup();
+					closeAndCleanup(FinMessage.REASON_TOO_MANY_RESENDS);
 					return;
 				}
 
@@ -859,7 +868,8 @@ public class UDPConnectionProcessor {
     /**
      *  Close and cleanup by unregistering this connection and sending a Fin.
      */
-    private synchronized void closeAndCleanup() {
+    private synchronized void closeAndCleanup(byte reasonCode) {
+        _closeReasonCode = reasonCode;
 		try {
 			close();
 		} catch (IOException ioe) {
@@ -986,6 +996,14 @@ public class UDPConnectionProcessor {
                 // then throw it away
                 long seqNo     = dmsg.getSequenceNumber();
                 long baseSeqNo = _receiveWindow.getWindowStart();
+
+                // If data is too large then blow out the connection
+                // before any damage is done
+                if (dmsg.getDataLength() > MAX_DATA_SIZE) {
+                    closeAndCleanup(FinMessage.REASON_LARGE_PACKET);
+                    return;
+                }
+
                 if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
                     if(LOG.isDebugEnabled())  
                         LOG.debug("Received block num too far ahead: "+ seqNo);
@@ -1053,7 +1071,8 @@ public class UDPConnectionProcessor {
                 safeSendAck(msg);
 
                 // If a fin message is received then close connection
-                closeAndCleanup();
+                if ( !isClosed() )
+                    closeAndCleanup(FinMessage.REASON_YOU_CLOSED);
             }
         }
 
@@ -1176,7 +1195,7 @@ public class UDPConnectionProcessor {
 
 				// If no incoming messages for very long time then 
 				// close connection
-				closeAndCleanup();
+                closeAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
             
@@ -1214,7 +1233,7 @@ public class UDPConnectionProcessor {
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
 				// If no incoming messages for very long time then 
 				// close connection
-				closeAndCleanup();
+                closeAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
 

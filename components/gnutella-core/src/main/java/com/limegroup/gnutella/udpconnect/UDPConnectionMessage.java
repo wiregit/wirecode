@@ -249,7 +249,7 @@ public abstract class UDPConnectionMessage extends Message {
     /** 
      *  Return the length of data stored in this message.
      */
-    protected int getDataLength() {
+    public int getDataLength() {
         return _data1Length + getLength();
     }
 

@@ -6,19 +6,28 @@ import com.limegroup.gnutella.messages.BadPacketException;
  */
 public class FinMessage extends UDPConnectionMessage {
 
+    public static final byte REASON_NORMAL_CLOSE     = 0x0;
+    public static final byte REASON_YOU_CLOSED       = 0x1;
+    public static final byte REASON_TIMEOUT          = 0x2;
+    public static final byte REASON_LARGE_PACKET     = 0x3;
+    public static final byte REASON_TOO_MANY_RESENDS = 0x4;
+
+    private byte _reasonCode;
+
     /**
      * Construct a new FinMessage with the specified settings.
      */
-    public FinMessage(byte connectionID, long sequenceNumber) 
+    public FinMessage(byte connectionID, long sequenceNumber, byte reasonCode) 
       throws BadPacketException {
 
         super(
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_FIN, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* no data in a fin packet    */ emptyByteArray,
-          /* data length of zero        */ 0
+          /* Put reasonCode in the data */ buildByteArray(reasonCode),
+          /* data length of one         */ 1
           );
+          _reasonCode = reasonCode;
     }
 
     /**
@@ -29,9 +38,10 @@ public class FinMessage extends UDPConnectionMessage {
       throws BadPacketException {
 
       	super(guid, ttl, hops, payload);
+        _reasonCode = guid[GUID_DATA_START]; 
     }
 
 	public String toString() {
-		return "FinMessage DestID:"+getConnectionID();
+		return "FinMessage DestID:"+getConnectionID()+" reasonCode:"+_reasonCode;
 	}
 }

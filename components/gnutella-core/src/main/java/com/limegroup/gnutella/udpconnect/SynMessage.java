@@ -21,7 +21,7 @@ public class SynMessage extends UDPConnectionMessage {
           /* sequenceNumber             */ 0, 
           /* my data is my connectionID and the protocol version number */ 
           buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
-          /* data length                */ 1
+          /* data length                */ 3
           );
 		  _senderConnectionID    = connectionID;
           _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
