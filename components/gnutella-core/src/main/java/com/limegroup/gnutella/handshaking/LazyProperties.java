@@ -52,6 +52,8 @@ public class LazyProperties extends Properties
 				  CommonUtils.getHttpServer());       
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
 		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
+        UpdateManager u = UpdateManager.instance();
+        props.put(ConnectionHandshakeHeaders.X_VERSION, u.getVersion());
     }
     
 }
