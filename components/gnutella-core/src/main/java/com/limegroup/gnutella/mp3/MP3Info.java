@@ -13,7 +13,7 @@ import com.limegroup.gnutella.ByteOrder;
  * @see #getHeaderBitRate 	-> constant bit rates(CBR) (128, 256, etc) kps
  * @see com.limegroup.gnutella.ByteOrder
  *
- * @author  cHANCE mOORE, ctmoore@gottapee.com - 30 July 2002
+ * @author  cHANCE mOORE, ctmoore [at] gottapee [dot] com - 30 July 2002
  *			One of the Sindhis (both?), limewire team
  *			Gustav "Grim Reaper" Munkby, grd@swipnet.se
  *
