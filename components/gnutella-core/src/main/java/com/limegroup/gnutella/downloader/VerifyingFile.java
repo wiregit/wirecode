@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  *   
  * In order to maintain these constraints, the only possible operations are:
  *   Lease a block - find an area which is available for download and claim it
- *   Write a block - report that the specified block has been received from the network.
+ *   Write a block - report that the specified block has been read from the network.
  *   Release a block - report that the specified block will not be downloaded.
  */
 public class VerifyingFile {
@@ -173,7 +173,7 @@ public class VerifyingFile {
 		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
 		/// some stuff to help debugging ///
-		if (!leasedBlocks.contains(intvl)) { 
+		if (!leasedBlocks.contains(intvl)) {
 			Assert.silent(false, "trying to write an interval "+intvl+
                     " that wasn't leased "+dumpState());
         }

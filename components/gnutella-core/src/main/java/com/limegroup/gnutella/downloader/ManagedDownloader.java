@@ -1408,6 +1408,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean isPaused() {
         return paused == true;
     }
+    
+    public boolean isStopped() {
+        return stopped;
+    }
 
     /**
      * Stops this download.
@@ -1647,14 +1651,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             return completeFile;
         else
             return incompleteFile;
-    }
-    
-    File getIncompleteFile() {
-        return incompleteFile;
-    }
-    
-    File getCompleteFile() {
-        return completeFile;
     }
     
     VerifyingFile getVerifyingFile() {
@@ -2056,6 +2052,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Notify the SavedFileManager that there is a new saved
             // file.
             SavedFileManager.instance().addSavedFile(file, urns);
+            
+            // save the trees!
+            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && hashTree != null) {
+                TigerTreeCache.instance(); 
+                TigerTreeCache.addHashTree(downloadSHA1,hashTree);
+            }
         }
 
         FileDesc fileDesc = 
@@ -2192,7 +2194,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Starts a new Worker thread for the given RFD.
      */
     private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = new DownloadWorker(this,rfd);
+        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
         Thread connectCreator = new ManagedThread(worker);
         
         // if we'll be debugging, we want to distinguish the different workers
@@ -2759,10 +2761,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         return _activeWorkers;
     }
     
-    synchronized void removeQueuedWorker(DownloadWorker unQueued) {
-        Map m = new HashMap(getQueuedWorkers());
-        m.remove(unQueued);
-        queuedWorkers = Collections.unmodifiableMap(m);
+    void removeQueuedWorker(DownloadWorker unQueued) {
+        if (getQueuedWorkers().containsKey(unQueued)) {
+            synchronized(this) {
+                Map m = new HashMap(getQueuedWorkers());
+                m.remove(unQueued);
+                queuedWorkers = Collections.unmodifiableMap(m);
+            }
+        }
     }
     
     synchronized void addQueuedWorker(DownloadWorker queued, int position) {
@@ -2780,6 +2786,64 @@ public class ManagedDownloader implements Downloader, Serializable {
         return i == null ? -1 : i.intValue();
     }
     
+    /**
+     * Interrupts a remotely queued thread if we this status is connected,
+     * or if the status is queued and our queue position is better than
+     * an existing queued status.
+     *
+     * @param status The ConnectionStatus of this downloader.
+     *
+     * @return true if this thread should be kept around, false otherwise --
+     * explicitly, there is no need to kill any threads, or if the currentThread
+     * is already in the queuedWorkers, or if we did kill a thread worse than
+     * this thread.  
+     */
+    synchronized boolean killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
+        //Either I am queued or downloading, find the highest queued thread
+        DownloadWorker doomed = null;
+        
+        // No replacement required?...
+        if(getNumDownloaders() <= getSwarmCapacity()) {
+            if(queuePos > -1)
+                addQueuedWorker(worker, queuePos);
+            return true;
+        }
+
+        // Already Queued?...
+        if(queuedWorkers.containsKey(worker) && queuePos > -1) {
+            // update position
+            if(queuePos > -1)
+                addQueuedWorker(worker,queuePos);
+            return true;
+        }
+            
+        // Search for the queued thread with a slot worse than ours.
+        int highest = queuePos; // -1 if we aren't queued.            
+        for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry current = (Map.Entry)i.next();
+            int currQueue = ((Integer)current.getValue()).intValue();
+            if(currQueue > highest) {
+                doomed = (DownloadWorker)current.getKey();
+                highest = currQueue;
+            }
+        }
+
+        // No one worse than us?... kill us.
+        if(doomed == null)
+            return false;
+        
+        //OK. let's kill this guy 
+        doomed.interrupt();
+        
+        //OK. I should add myself to queuedWorkers if I am queued
+        if(queuePos > -1)
+            addQueuedWorker(worker, queuePos);
+        
+        return true;
+                
+    }
+    
+    
     public HashTree getHashTree() {
         synchronized(hashTreeLock) {
             return hashTree;
@@ -2796,10 +2860,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
     
-    public synchronized Object getStealLock() {
-        return stealLock;
-    }
-
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();
         for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {

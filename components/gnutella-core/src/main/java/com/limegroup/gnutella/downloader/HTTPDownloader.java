@@ -160,8 +160,6 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private int _initialWritingPoint;
     
-	private boolean _shouldRelease;
-	
 	/**
 	 * The content-length of the output, useful only for when we
 	 * want to read & discard the body of the HTTP message.
@@ -177,7 +175,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
 	private OutputStream _output;
 	private InputStream _input;
-    private File _incompleteFile;
+    private final VerifyingFile _incompleteFile;
     
 	/**
 	 * The new alternate locations we've received for this file.
@@ -280,7 +278,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  the file
      * @param stop the last byte to read+1
      */
-	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile) {
+	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile) {
         //Dirty secret: this is implemented with the push constructor!
         this(null, rfd, incompleteFile);
         _isPush=false;
@@ -299,7 +297,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  not exist.
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
-                                                          File incompleteFile) {
+                                                          VerifyingFile incompleteFile) {
         if(rfd == null) {
             throw new NullPointerException("null rfd");
         }
@@ -501,6 +499,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _contentLength = 0;
         }
 		
+        
 		// features to be sent with the X-Features header
         Set features = new HashSet();
 		
@@ -1090,10 +1089,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *  - Our port and IP address are valid 
 	 */
 	private boolean isPartialFileValid() {
-        VerifyingFile vf = RouterService.getDownloadManager().
-            getIncompleteFileManager().getEntry(_incompleteFile);
 	    return _rfd.getSHA1Urn() != null && 
-               vf.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
+               _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                NetworkUtils.isValidPort(RouterService.getPort()) &&
                NetworkUtils.isValidAddress(RouterService.getAddress()); 
@@ -1546,7 +1543,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(VerifyingFile commonOutFile) 
+	public void doDownload() 
         throws DiskException, IOException {
         _socket.setSoTimeout(10*60*1000);//downloading, can stall upto 10 mins
         long currPos = _initialReadingPoint;
@@ -1556,12 +1553,9 @@ public class HTTPDownloader implements BandwidthTracker {
             byte[] buf = new byte[BUF_LENGTH];
             
             while (true) {
-                //1. Read from network.  It's possible that we've read more than
-                //requested because of a call to setAmountToRead from another
-                //thread.  This used to be an error resulting in
-                //FileTooLargeException.  Now we just return silently.  Note that
-                //we capture _amountToRead in a local variable to prevent race
-                //conditions; presumably Java can't de-optimize this.
+                //Read from network.  It's possible that we've read more than
+                //requested because of a call to setAmountToRead() or stopAt() from another
+                //thread.  We check for that before we write to disk.
                 int atr,ar;
                 synchronized(this) {
                     atr=_amountToRead;
@@ -1586,14 +1580,13 @@ public class HTTPDownloader implements BandwidthTracker {
 				synchronized(this) {
 				    if (_isActive) {
                         
-                        _amountRead += c;
-                        
                         // skip until we reach the initial writing point
                         int skipped = 0;
                         while (_initialWritingPoint > currPos && c > 0) {
                             skipped++;
                             currPos++;
                             c--;
+                            _amountRead++;
                         }
                         
                         // if we're still not there, continue
@@ -1604,9 +1597,11 @@ public class HTTPDownloader implements BandwidthTracker {
                             continue;
                         }
                         
-                        // if are there, but we had to skip some bytes, trim the buffer
+                        // if are past our initial writing point, but we had to skip some bytes 
+                        // or were told to stop sooner, trim the buffer
                         byte [] toWrite;
-                        if (skipped > 0) {
+                        if (skipped > 0 || _amountRead+c >= _amountToRead) {
+                            c = Math.min(c,_amountToRead - _amountRead);
                             if (LOG.isDebugEnabled())
                                 LOG.debug("got to the writing point, trimming buffer by "+
                                         skipped +" to "+c+" bytes");
@@ -1616,8 +1611,9 @@ public class HTTPDownloader implements BandwidthTracker {
                         } else
                             toWrite = buf;
                         
+                        _amountRead+=c;
                         // write to disk
-				        commonOutFile.writeBlock(currPos,c,toWrite);
+				        _incompleteFile.writeBlock(currPos,c,toWrite);
 				        
 				        currPos += c;//update the currPos for next iteration
 				        
@@ -1630,10 +1626,9 @@ public class HTTPDownloader implements BandwidthTracker {
 				} 
                 
                 // if we got too corrupted, notify the user
-                commonOutFile.promptIfHopeless();
+                _incompleteFile.promptIfHopeless();
             }  // end of while loop
 
-            //It's OK to have read too much; see comment (1) above.
             synchronized(this) {
                 if ( _amountRead < _amountToRead ) { 
                     throw new FileIncompleteException();  
@@ -1692,15 +1687,6 @@ public class HTTPDownloader implements BandwidthTracker {
         }
     }
     
-    public synchronized void setVictim() {
-        _shouldRelease = false;
-        stop();
-    }
-	
-	public synchronized void shouldRelease(boolean shouldIt) {
-		_shouldRelease = shouldIt;
-	}
-	
     ///////////////////////////// Accessors ///////////////////////////////////
 
     public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
@@ -1709,7 +1695,6 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}
 	public boolean isActive() { return _isActive; }
-	public synchronized boolean shouldRelease() {return _shouldRelease;}
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
@@ -1830,6 +1815,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                   0, "a", 0, new byte[16],
                                   0, false, 0, false, null, null,
                                   false, false, "", 0, null, -1, 0);
+        _incompleteFile = null;
 	}    
 }
 
