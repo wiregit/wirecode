@@ -142,7 +142,7 @@ public class SimppManager {
                 // 3. Update the props in "updatable props manager"
                 SimppSettingsManager.instance().updateSimppSettings(props);
                 // 4. Update the capabilities VM with the new version
-                CapabilitiesVM.updateSimppVersion(version);
+                CapabilitiesVM.reconstructInstance();
                 // 5. Send the new CapabilityVM to all our connections. 
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
             }

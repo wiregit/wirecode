@@ -28,16 +28,20 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
                                                           (byte)77, (byte)80};
-
+    
     /**
-     * The version of the latest simpp version this node knows about. 
+     * The current version of this message.
      */
-    private static int _simppVersion;
-
     public static final int VERSION = 0;
 
+    /**
+     * The capabilities supported.
+     */
     private final Set _capabilitiesSupported = new HashSet();
 
+    /**
+     * The current instance of this CVM that this node will forward to others
+     */
     private static CapabilitiesVM _instance;
 
     /**
@@ -68,7 +72,6 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private CapabilitiesVM() {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload());
-        _simppVersion = SimppManager.instance().getVersion();
         addSupportedMessages(_capabilitiesSupported);
     }
 
@@ -104,7 +107,8 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
                                         FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
-        smp=new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES, _simppVersion);
+        smp = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
+                                        SimppManager.instance().getVersion());
         hashSet.add(smp);
     }
 
@@ -154,22 +158,24 @@ public final class CapabilitiesVM extends VendorMessage {
 
     // override super
     public boolean equals(Object other) {
-        // basically two of these messages are the same if the support the same
-        // messages
+        if(other == this)
+            return true;
+        
+        // two of these messages are the same if the support the same messages
         if (other instanceof CapabilitiesVM) {
-            CapabilitiesVM vmp = 
-                (CapabilitiesVM) other;
-            return (_capabilitiesSupported.equals(vmp._capabilitiesSupported));
+            CapabilitiesVM vmp = (CapabilitiesVM) other;
+            return _capabilitiesSupported.equals(vmp._capabilitiesSupported);
         }
+
         return false;
     }
     
-    public static void updateSimppVersion(int newSimppVersion) {
-        Assert.that(newSimppVersion > _simppVersion,
-                    "Can't decrement simpp message. New version="
-                              +newSimppVersion+" old version="+_simppVersion);
-        _simppVersion = newSimppVersion;
-        //replace _instance with a newer one, which will be  created with the
+    /**
+     * Constructs a new instance for this node to advertise,
+     * using the latest version numbers of supported messages.
+     */
+    public static void reconstructInstance() {
+        //replace _instance with a newer one, which will be created with the
         //correct simppVersion, a new _capabilitiesSupported will be created
         _instance = new CapabilitiesVM();
     }
@@ -187,6 +193,10 @@ public final class CapabilitiesVM extends VendorMessage {
         final byte[] _capabilityName;
         final int _version;
         final int _hashCode;
+        
+        public String toString() {
+            return new String(_capabilityName) + "/" + _version;
+        }
 
         public SupportedMessageBlock(byte[] capabilityName, int version) {
             _capabilityName = capabilityName;
@@ -210,6 +220,7 @@ public final class CapabilitiesVM extends VendorMessage {
 
             _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
             _hashCode = computeHashCode(_capabilityName, _version);
+
         }
         
         /**
@@ -267,7 +278,7 @@ public final class CapabilitiesVM extends VendorMessage {
     }
 
     public String toString() {
-        return "{CapabilitiesVM:"+super.toString()+"}";
+        return "{CapabilitiesVM:"+super.toString()+"; supporting: " + _capabilitiesSupported + "}";
     }
 
 }
