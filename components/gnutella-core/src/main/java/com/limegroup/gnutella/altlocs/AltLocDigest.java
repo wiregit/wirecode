@@ -37,12 +37,6 @@ import com.limegroup.gnutella.util.HashFunction;
 public class AltLocDigest implements BloomFilter {
 
     /**
-     * constants for which hasing function this digest uses.
-     */
-    private final HashFunction DIRECT = new DirectLocHasher();
-    private final HashFunction PUSH = new PushLocHasher();
-    
-    /**
      * default size for each element.
      */
     private static final int DEFAULT_ELEMENT_SIZE = 12;
@@ -77,18 +71,24 @@ public class AltLocDigest implements BloomFilter {
     private int _elementSize;
     
     /**
-     * the mask to use by the hash functions
+     * the mask to use by the hash functions - ensures the range stays within reasonable bounds
      */
     private int _mask;
+    
+    /**
+     * if we want to use custom hash function, put it here.
+     */
+    private HashFunction _hasher;
     
     public void add(Object o) {
         if (! (o instanceof AlternateLocation))
             throw new IllegalArgumentException ("trying to add a non-altloc to an altloc digest");
         AlternateLocation loc = (AlternateLocation)o;
-        if (loc instanceof DirectAltLoc)
-            _values.set(DIRECT.hash(loc));
+        
+        if (_hasher != null)
+            _values.set(_hasher.hash(loc) & _mask);
         else
-            _values.set(PUSH.hash(loc));
+            _values.set(loc.hashCode() & _mask);
     }
 
     /* (non-Javadoc)
@@ -107,10 +107,10 @@ public class AltLocDigest implements BloomFilter {
             return false;
         AlternateLocation loc = (AlternateLocation)o;
         
-        if (loc instanceof DirectAltLoc)
-            return _values.get(DIRECT.hash(loc));
+        if (_hasher != null)
+            return _values.get(_hasher.hash(loc) & _mask);
         else
-            return _values.get(PUSH.hash(loc));
+            return _values.get(loc.hashCode() & _mask);
     }
 
     /* (non-Javadoc)
@@ -243,39 +243,6 @@ public class AltLocDigest implements BloomFilter {
         
         return parseDigest(digest,0,digest.length);
     }
-    
-    private final class DirectLocHasher implements HashFunction {
-        /**
-         * hashes a direct altloc. It takes as many bits as possible from the tail
-         * of the ip address.
-         */
-       public int hash(Object o) {
-           DirectAltLoc loc = (DirectAltLoc)o;
-           int full =0;
-           try {
-               byte [] addr = loc.getHost().getHostBytes();
-               full = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-           }catch (UnknownHostException hmm) {
-               ErrorService.error(hmm);
-           }
-           return full & _mask;
-       }
-    }
-    
-    private final class PushLocHasher implements HashFunction {
-        /**
-         * hashes a pushloc.  Takes as many bits as possible from the guid
-         */
-        public int hash(Object o) {
-            PushAltLoc push = (PushAltLoc)o;
-            byte [] guid = push.getPushAddress().getClientGUID();
-            
-            int full = (guid[3] << 24) | (guid[2] << 16) | (guid[1]) << 8 | guid[0];
-            
-            return full & _mask;
-        }
-     }
-
     
     public void and(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
