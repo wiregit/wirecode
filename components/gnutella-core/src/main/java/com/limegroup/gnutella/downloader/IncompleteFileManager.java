@@ -4,6 +4,7 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.FileComparator;
 
@@ -104,7 +105,7 @@ public class IncompleteFileManager implements Serializable {
                 RouterService.getFileManager().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
-            }                
+            }
         }
 
         //Remove any hashes for which the file doesn't exist.  Only do this once
@@ -182,6 +183,12 @@ public class IncompleteFileManager implements Serializable {
      * <pre>
      *      similar(rfd_i, rfd_j) <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
      * </pre>
+     *
+     * It is imperative that the files are compared as in their canonical
+     * formats to preserve the integrity of the filesystem.  Otherwise,
+     * multiple downloads could be downloading to "FILE A", and "file a",
+     * although only "file a" exists on disk and is being written to by
+     * both.
      */
     public synchronized File getFile(RemoteFileDesc rfd) {
 	    File incDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
@@ -202,7 +209,11 @@ public class IncompleteFileManager implements Serializable {
                 //the value set of HASHES.  Because we allow risky resumes,
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
-                    file=new File(incDir, tempName(convertedName, rfd.getSize(), i));
+                    file = new File(incDir, 
+                            tempName(convertedName, rfd.getSize(), i));
+                    try {
+                        file = FileUtils.getCanonicalFile(file);
+                    } catch(IOException ignored) {}
                     if (! hashes.values().contains(file))
                         break;
                 }
@@ -212,7 +223,12 @@ public class IncompleteFileManager implements Serializable {
             }
         } else {
             //No hash.
-            return new File(incDir, tempName(convertedName, rfd.getSize(), 0));
+            File f = new File(incDir, 
+                        tempName(convertedName, rfd.getSize(), 0));
+            try {
+                f = FileUtils.getCanonicalFile(f);
+            } catch(IOException ignored) {}
+            return f;
         }
     }
     
@@ -250,7 +266,7 @@ public class IncompleteFileManager implements Serializable {
             String extension=filename.substring(i); //e.g., ".txt"
             return "T-"+size+"-"+noExtension+" ("+suffix+")"+extension;
         }            
-    }   
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     
@@ -263,6 +279,10 @@ public class IncompleteFileManager implements Serializable {
         //Convert blocks from interval lists to VerifyingFile.
         //See serialization note above.
         blocks=transform(blocks);
+        //Ensure that all information in hashes is canonicalized.  This must be
+        //done because older LimeWires did not canonicalize the files before
+        //adding them.
+        hashes = verifyHashes();
         //Notify FileManager about the new incomplete files.
         registerAllIncompleteFiles();
     }
@@ -279,7 +299,37 @@ public class IncompleteFileManager implements Serializable {
             blocks=blocksSave;
         }
     }
-        
+    
+    /**
+     * Ensures that that integrity of the hashes HashMap is valid.
+     * This must be done to ensure that older version of LimeWire
+     * are started with a valid hashes map.  Previously,
+     * entries added to the map were not canonicalized, resulting
+     * in multiple downloads thinking they're going to seperate files,
+     * but actually going to the same file.
+     */
+    private Map verifyHashes() {
+        Map retMap = new HashMap();
+
+        for(Iterator i = hashes.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            if(entry.getKey() instanceof URN && 
+               entry.getValue() instanceof File) {
+                URN urn = (URN)entry.getKey();
+                File f = (File)entry.getValue();
+                try {
+                    f = FileUtils.getCanonicalFile(f);
+                } catch(IOException ioe) {}
+                // We must purge old entries that had mapped
+                // multiple URNs to uncanonicalized files.
+                // This is done by ensuring that we only add
+                // this entry to the map if no other URN points to it.
+                if(!retMap.values().contains(f))
+                    retMap.put(urn, f);
+            }
+        }
+        return retMap;
+    }   
 
     /** Takes a map of File->List<Interval> and returns a new equivalent Map
      *  of File->VerifyingFile*/
@@ -304,7 +354,15 @@ public class IncompleteFileManager implements Serializable {
                     if(interval.high >= interval.low)
                         vf.addInterval(interval);
                 }
-                retMap.put(incompleteFile,vf);
+                //Canonicalize the file to fix older LimeWires that allowed
+                //non-canonicalized files to be inserted into the table.
+                if( incompleteFile instanceof File ) {
+                    File f = (File)incompleteFile;
+                    try {
+                        f = FileUtils.getCanonicalFile(f);
+                    } catch(IOException ignored) {}
+                    retMap.put(f, vf);
+                }
             }
         }//end of for
         return retMap;
@@ -361,6 +419,11 @@ public class IncompleteFileManager implements Serializable {
      * Notifies FileManager about a new Incomplete File.
      */
     public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
+        // We must canonicalize the file.
+        try {
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+        } catch(IOException ignored) {}
+
         blocks.put(incompleteFile,vf);
         
         registerIncompleteFile(incompleteFile);
