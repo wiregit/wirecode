@@ -17,7 +17,6 @@ class IP {
     private long addr;
     private long mask;
     private static final long DEFAULT_MASK = 0xffffffffL; //255.255.255.255
-    private static final short IP_V = 4; 
 
     // Constructors
     IP (String ip_str) {
@@ -45,65 +44,83 @@ class IP {
 
     /**
      * Convert String containing an ip_address to IP-object
-     * @param String of the format "0.0.0.0" or "0.0.0.0/0.0.0.0" 
+     * @param String of the format "0.0.0.0" or "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
      *  representing ip_address/subnetmask
-     * @return IP containing ip_address and subnetmask converted to long-variables
+     * @return IP containing ip_address and subnetmask converted to 
+     * long-variables
      */
     private static IP stringToIP (String ip_str) {
         StringTokenizer tokenizer = new StringTokenizer (ip_str, "/");
-        String[] _ips = new String [tokenizer.countTokens()];
-        for (int i = 0; i < _ips.length; i++) 
-            _ips[i] = tokenizer.nextToken();
-        
-        if (_ips.length != 2 && _ips.length != 1)
+        if ( tokenizer.countTokens() == 1)  //assume a simple IP "0.0.0.0"
+            return new IP ( stringToLong(ip_str.replace('*', '0')),
+                            parseForWildChars(ip_str));
+        // maybe an IP of the form "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
+        else if (tokenizer.countTokens() == 2) { 
+            String[] ip = { tokenizer.nextToken(), tokenizer.nextToken() };
+            return stringToIP ( ip );
+        } else 
             throw new IllegalArgumentException();
-
-        if (_ips.length == 1) 
-            return new IP ( stringToLong(_ips[0].replace('*', '0')),
-                            parseForWildChars(_ips[0]));
-        
-        else 
-            return new IP ( stringToLong(_ips[0].replace('*', '0')), 
-                            stringToLong(_ips[1]) & parseForWildChars(_ips[0]));
-        
     }
 
     /**
      * Convert String[] containing an ip_address to IP-object
      * @param String[] of the format {"0.0.0.0", "0.0.0.0"} representing
      *  {ip_address, subnetmask}
-     * @return IP containing ip_address and subnetmask converted to long-variables
+     * @return IP containing ip_address and subnetmask converted to 
+     * long-variables
      */
     private static IP stringToIP (String[] ip_str) {
         if (ip_str.length != 2)
             throw new IllegalArgumentException();
-        else 
-            return new IP(stringToLong (ip_str[0]), stringToLong (ip_str[1]));
+        else {
+            // probably an IP with subnet mask "0.0.0.0/0.0.0.0"
+            if (ip_str[1].indexOf('.') != -1) 
+                return new IP ( stringToLong(ip_str[0].replace('*', '0')), 
+                                stringToLong(ip_str[1]) & 
+                                parseForWildChars(ip_str[0]));
+            else {// try an IP with simplified subnetmask "0.0.0.0/0" 
+                long mask = 0;
+                try {
+                    int i = 0;
+                    for (; i < Integer.parseInt(ip_str[1]); i++ ) {
+                        mask ++;
+                        mask = mask << 1;
+                    }
+                    mask = mask << (31 - i);
+                } catch (NumberFormatException e) {
+                    //drop exception, simply ignore the mask.
+                } 
+                return new IP ( stringToLong(ip_str[0].replace('*', '0')), 
+                                mask );
+            }    
+        }
     }        
-
+    
     /**
      * Convert String containing an ip_address or subnetmask to long
-     * @param String of the format "0.0.0.0" presenting ip_address or subnetmask
+     * @param String of the format "0.0.0..." presenting ip_address or 
+     * subnetmask
      * @return long 
      */
     private static long stringToLong (String ip_str) {
         StringTokenizer tokenizer = new StringTokenizer(ip_str, ".");
-        if (tokenizer.countTokens() != IP_V)
-            throw new IllegalArgumentException();
-
+        
         long ip = 0;
         // convert String to a Long variable
-        for (int i = 0; i < IP_V; i++) {
+        for (int i = 0; i < 4; i++) {
             try {
                 ip = ip << 8;
-                ip += Short.parseShort(tokenizer.nextToken());
+                // if number of tokens !=4, either use
+                if (tokenizer.hasMoreTokens()) 
+                    // the first four tokens or add "0"-tokens
+            	    ip += Short.parseShort(tokenizer.nextToken());
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException();
             }
         }
         return ip;
     }
-
+    
     /**
      * Create new subnet mask from IP-address of the format 0.*.*.0
      * @param String of the format W.X.Y.Z, W, X, Y and Z can be numbers or '*'
@@ -111,19 +128,17 @@ class IP {
      */
     private static long parseForWildChars (String s) {
         StringTokenizer tokenizer = new StringTokenizer(s, ".");
-        if (tokenizer.countTokens() != IP_V)
-            throw new IllegalArgumentException();
-        
         long _mask = 0;
         
-        for (int i = 0; i < IP_V; i++) {
+        for (int i = 0; i < 4; i++) {
             _mask = _mask << 8;
-            if (!tokenizer.nextToken().equalsIgnoreCase("*"))
+            if (tokenizer.hasMoreTokens() && 
+                !tokenizer.nextToken().equalsIgnoreCase("*"))
                 _mask += 0xff;
         }
         return _mask;
     }
-
+    
     /**
      * @return ip address
      */
@@ -137,14 +152,14 @@ class IP {
     long getMask () {
         return this.mask;
     }
-
+    
     /**
      * @return long variable containing the ip_address with the applied mask
      */
     public long getMaskedAddr () {
         return (mask & addr);
     }
-
+    
     /**
      * @return long variable containing the inverted ip_address with the applied
      *  mask 
@@ -152,7 +167,7 @@ class IP {
     public long getIMaskedAddr () {
         return (mask & ~addr & DEFAULT_MASK);
     }
-
+    
     /**
      * Returns if ip is contained in this.
      * @param ip a singleton IP set, e.g., one representing a single address
@@ -164,7 +179,7 @@ class IP {
         //      => this.addr&this.mask=1.1.1.0
         return ((ip.addr & this.mask) == (this.addr & this.mask));
     }
-
+    
     /**
      * Returns true if other is an IP with the same address and mask.  Note that
      * "1.1.1.1/255.255.255.255" does not equal "2.2.2.2/255.255.255.255", even
@@ -183,29 +198,4 @@ class IP {
         return (int)(addr^mask);
     }
     
-    /*
-    public static void main(String args[]) {
-        //More tests in IPList and IPFilter!
-
-        IP a=new IP("1.1.1.*");
-        IP b=new IP("1.1.1.2");
-        IP c=new IP("1.1.2.1");
-        Assert.that(a.contains(b));
-        Assert.that(! b.contains(a));
-        Assert.that(! a.contains(c));
-        Assert.that(! c.contains(a));
-
-        Assert.that(! a.equals(c));
-        Assert.that(! a.equals(b));
-        Assert.that(! b.equals(a));
-        Assert.that(! b.equals(c));
-        Assert.that(a.equals(a));
-        Assert.that(b.equals(b));
-        Assert.that(! a.equals("asdf"));
-        IP d=new IP("1.1.1.0/255.255.255.0");
-        Assert.that(a.equals(d));
-        Assert.that(d.equals(a));
-        Assert.that(a.hashCode()==d.hashCode());
-    } 
-    */
 }
