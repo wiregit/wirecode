@@ -293,6 +293,9 @@ public class ConnectionManager {
      *  this one.
      */
     public synchronized void remove(ManagedConnection c) {
+		
+		// removal may be disabled for tests
+		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
         removeInternal(c);
         adjustConnectionFetchers();
     }
@@ -574,7 +577,11 @@ public class ConnectionManager {
      *  it was not written
      * @return true if a connection of the given type is allowed
      */
-    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {		
+		// preferencing may not be active for testing purposes --
+		// just return if it's not
+		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
