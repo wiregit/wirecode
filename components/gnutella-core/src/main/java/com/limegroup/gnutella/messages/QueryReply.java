@@ -245,6 +245,13 @@ public class QueryReply extends Message implements Serializable{
 		} 		
 		
 		setAddress();
+		
+		if(!NetworkUtils.isValidAddress(getIPBytes())) {
+		    if( RECORD_STATS )
+		        ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
+		    throw new BadPacketException("invalid address");
+		}
+		
         //repOk();                               
     }
 
@@ -294,6 +301,8 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid port: "+port);
 		} else if(ip.length != 4) {
 			throw new IllegalArgumentException("invalid ip length: "+ip.length);
+        } else if(!NetworkUtils.isValidAddress(ip)) {
+            throw new IllegalArgumentException("invalid address.");
 		} else if((speed & 0xFFFFFFFF00000000l) != 0) {
 			throw new IllegalArgumentException("invalid speed: "+speed);
 		} else if(n >= 256) {
@@ -1335,12 +1344,12 @@ public class QueryReply extends Message implements Serializable{
 
         public IPPortCombo(String hostAddress, int port) 
             throws UnknownHostException, IllegalArgumentException  {
-            if (hostAddress.equals("0.0.0.0"))
-                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
-            _addr = InetAddress.getByName(hostAddress);
             if (!NetworkUtils.isValidPort(port))
-                throw new IllegalArgumentException("Bad Port");
+                throw new IllegalArgumentException("Bad Port: " + port);
             _port = port;
+            _addr = InetAddress.getByName(hostAddress);
+            if (!NetworkUtils.isValidAddress(_addr))
+                throw new IllegalArgumentException("invalid addr: " + _addr);
         }
 
         public int getPort() {

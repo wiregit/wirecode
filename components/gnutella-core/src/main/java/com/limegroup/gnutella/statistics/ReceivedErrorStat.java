@@ -185,6 +185,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
      */
     public static final Statistic REPLY_INVALID_PORT =
         new QueryReplyErrorStat();
+        
+    /**
+     * Statistic for failure due to invalid address in QueryReply.
+     */
+    public static final Statistic REPLY_INVALID_ADDRESS =
+        new QueryReplyErrorStat();
     
     /**
      * Statistic for failure due to invalid speed in QueryReply.
