@@ -136,8 +136,11 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * Whether or not this HTTPDownloader is currently attempting to read
      * information from the network.
+     *
+     * Volatile because it is read from multiple threads, although it
+     * it set in only one thread.
      */
-    private boolean _isActive = false;
+    private volatile boolean _isActive = false;
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
