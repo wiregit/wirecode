@@ -68,7 +68,8 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 				new RemoteCandidate("127.0.0.1",8000,(short)10),
 				2);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(32);
-		PrivilegedAccessor.setValue(PromotionManager.class,"REQUEST_TIMEOUT",new Long(500));
+		PrivilegedAccessor.setValue(PromotionManager.class,"UP_REQUEST_TIMEOUT",new Long(500));
+		PrivilegedAccessor.setValue(PromotionManager.class,"LEAF_REQUEST_TIMEOUT",new Long(500));
 		
 	}
 	
@@ -149,7 +150,8 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 		
 		
 		//create the remote response
-		PromotionACKVendorMessage response = new PromotionACKVendorMessage();
+		PromotionACKVendorMessage response = 
+			new PromotionACKVendorMessage(new GUID(challenge.getGUID()));
 		
 		//at this point, if we want to timeout, wait some time.
 		
