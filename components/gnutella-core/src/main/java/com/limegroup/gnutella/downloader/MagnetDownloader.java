@@ -266,4 +266,19 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         else
             return super.getFileName();
     }
+
+    /**
+     * Overrides ManagedDownloader to display a reasonable file name 
+     * when neither it or we have an idea of what the filename is.
+     */
+    public synchronized String getFileNameHint() {        
+        if ( _urn != null )
+			return _urn.toString();
+        else if ( _textQuery != null )
+            return _textQuery;
+        else if ( _defaultURL != null )
+            return _defaultURL;
+		else
+			return "";
+    }
 }

@@ -2061,20 +2061,37 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized String getFileName() {        
         //If we're not actually downloading, we just pick some random value.
         if (dloaders.size()==0)
-            return allFiles[0].getFileName();
+			if (allFiles.length > 0)
+                return allFiles[0].getFileName();
+			else
+				return getFileNameHint();
         else 
             //Could also use currentFileName, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
     }
 
+    /**
+     * This is a secondary backup filename to display.  If subclasses 
+     * don't know the name and we don't know the name, then 
+     * subclasses can give a default temporary name until the 
+     * situation changes.  Once we know the name, this will stop being
+     * used.
+     */
+    public synchronized String getFileNameHint() {        
+		return "";
+    }
+
     public synchronized int getContentLength() {
         //If we're not actually downloading, we just pick some random value.
         //TODO: this can also mean we've FINISHED the download.  Luckily it
         //doesn't really matter.
-        if (dloaders.size()==0)
-            return allFiles[0].getSize();
-        else 
+        if (dloaders.size()==0) {
+			if (allFiles.length > 0)
+                return allFiles[0].getSize();
+			else 
+				return -1;
+        } else 
             //Could also use currentFileSize, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getSize();
