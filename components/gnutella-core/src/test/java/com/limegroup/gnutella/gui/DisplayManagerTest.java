@@ -2,11 +2,11 @@ package com.limegroup.gnutella.gui;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.gui.ResourceManager;
 import com.limegroup.gnutella.gui.search.DisplayManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.naming.internal.ResourceManager;
 
 
 //this is in the com.limegroup.gnutella.gui.search but this calss
@@ -66,15 +66,15 @@ public class DisplayManagerTest extends BaseTestCase {
     }
 
     private void checkJA(DisplayManager dm) {
-        assertEquals("\u4f5c\u540d", 
+        assertEquals("\u984c\u540d", 
                      dm.getDisplayName("videos__video__title__", vxsd));
-        assertEquals("\u76e3\u7763",
+        assertEquals("\u30c7\u30a3\u30ec\u30af\u30bf\u30fc",
                      dm.getDisplayName("videos__video__director__", vxsd));
-        assertEquals("\u88fd\u4f5c/\u30d7\u30ed\u30c7\u30e5\u30b5\u30fc", 
+        assertEquals("\u30d7\u30ed\u30c7\u30e5\u30fc\u30b5\u30fc", 
                      dm.getDisplayName("videos__video__producer__", vxsd));
         assertEquals("\u30b9\u30bf\u30b8\u30aa", 
                      dm.getDisplayName("videos__video__studio__", vxsd));
-        assertEquals("\u4e3b\u6f14", 
+        assertEquals("\u661f", 
                      dm.getDisplayName("videos__video__stars__", vxsd));
     }
 
