@@ -804,6 +804,8 @@ public class QueryRequest extends Message implements Serializable{
      *  requested
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
+     * @param metaFlagMask 0 if no flag, else an OR of 0 and whatever flags you
+     * want
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
 	 *  query string, and the urns are all empty, or if the capability selector
      *  is bad
@@ -827,10 +829,11 @@ public class QueryRequest extends Message implements Serializable{
             throw new IllegalArgumentException("Bad capability = " +
                                                capabilitySelector);
         _capabilitySelector = capabilitySelector;
-        if ((metaFlagMask < 4) || (metaFlagMask > 251))
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 251))
             throw new IllegalArgumentException("Bad Meta Flag = " +
                                                metaFlagMask);
-        _metaMask = new Integer(metaFlagMask);
+        if (metaFlagMask > 0)
+            _metaMask = new Integer(metaFlagMask);
 
 		// the new Min Speed format - looks reversed but
 		// it isn't because of ByteOrder.short2leb

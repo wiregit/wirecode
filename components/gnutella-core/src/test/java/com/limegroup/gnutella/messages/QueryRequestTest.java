@@ -809,6 +809,73 @@ public final class QueryRequestTest extends BaseTestCase {
 
     }
 
+
+    public void testMetaFlagConstructor() throws Exception {
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, 1);
+            assertTrue(false);
+        }
+        catch (IllegalArgumentException yes) {}
+
+        // when no flag is set
+        testMetaFlag(0);
+
+        int[] flags = new int[6];
+        flags[0] = QueryRequest.AUDIO_MASK;
+        flags[1] = QueryRequest.VIDEO_MASK;
+        flags[2] = QueryRequest.DOC_MASK;
+        flags[3] = QueryRequest.IMAGE_MASK;
+        flags[4] = QueryRequest.WIN_PROG_MASK;
+        flags[5] = QueryRequest.LIN_PROG_MASK;
+        for (int i = 0; i < flags.length; i++) {
+            testMetaFlag(0 | flags[i]);
+            for (int j = 0; j < flags.length; j++) {
+                if (j == i) continue;
+                testMetaFlag(0 | flags[i] | flags[j]);
+                for (int k = 0; k < flags.length; k++) {
+                    if (k == j) continue;
+                    testMetaFlag(0 | flags[i] | flags[j] | flags[k]);
+                    for (int l = 0; l < flags.length; l++) {
+                        if (l == k) continue;
+                        testMetaFlag(0 | flags[i] | flags[j] | flags[k] |
+                                     flags[l]);
+                        for (int m = 0; m < flags.length; m++) {
+                            if (m == l) continue;
+                            testMetaFlag(0 | flags[i] | flags[j] | flags[k] |
+                                         flags[l] | flags[m]);
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, 
+                             0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
+                             flags[4] | flags[5]);
+            assertTrue(false);
+        }
+        catch (IllegalArgumentException yes) {}
+
+    }
+
+    private void testMetaFlag(int flag) {
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, 
+                             flag);
+        }
+        catch (IllegalArgumentException no) {
+            assertTrue(false);
+        }
+    }
+
+
     
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();
