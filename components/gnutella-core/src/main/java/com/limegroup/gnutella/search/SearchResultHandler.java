@@ -60,9 +60,9 @@ public final class SearchResultHandler {
 
 
     /** Used to keep track of the number of non-filtered responses per GUID.
+     *  I need synchronization for every call I make, so a Vector is fine.
      */
-    private final FixedsizePriorityQueue GUID_COUNTS = 
-        new FixedsizePriorityQueue(GuidCountComparator.instance(), 15);
+    private final List GUID_COUNTS = new Vector();
     
 
 	/**
@@ -92,6 +92,52 @@ public final class SearchResultHandler {
         }
     }
 
+
+    /**
+     * Adds the Query to the list of queries kept track of.  You should do this
+     * EVERYTIME you start a query so we can leaf guide it when possible.
+     *
+     * @param qr The query that has been started.  We really just acces the guid.
+     */ 
+    public void addQuery(QueryRequest qr) {
+        GuidCount gc = new GuidCount(qr.getGUID());
+        GUID_COUNTS.add(gc);
+    }
+
+    /**
+     * Removes the Query frome the list of queries kept track of.  You should do
+     * this EVERYTIME you stop a query.
+     *
+     * @param guid the guid of the query that has been removed.
+     */ 
+    public void removeQuery(GUID guid) {
+        if (removeQueryInternal(guid) != null) {
+            // shut off the query at the UPs....
+            try {
+                QueryStatusResponse stat = new QueryStatusResponse(guid, 65535);
+                RouterService.getConnectionManager().updateQueryStatus(stat);
+            }
+            catch (BadPacketException terrible) {
+                ErrorService.error(terrible);
+            }
+        }
+    }
+
+    private GuidCount removeQueryInternal(GUID guid) {
+        synchronized (GUID_COUNTS) {
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(guid)) {
+                    iter.remove();  // get rid of this dude
+                    return currGC;  // and return it...
+                }
+            }
+        }
+        return null;
+    }
+
+    
 
 	/**
 	 * Private class for processing replies as they come in -- does some
@@ -247,22 +293,17 @@ public final class SearchResultHandler {
         // around for further use
         if (numSentToBackEnd > 0) {
             // get the correct GuidCount
-            Iterator iter = GUID_COUNTS.iterator();
-            GuidCount gc = null;
-            while (iter.hasNext() && (gc == null)) {
-                GuidCount currGC = (GuidCount) iter.next();
-                if (currGC.getGUID().equals(new GUID(qr.getGUID())))
-                    gc = currGC;
-            }
+            GuidCount gc = removeQueryInternal(new GUID(qr.getGUID()));
             if (gc == null)
-                gc = new GuidCount(qr.getGUID());
-            else
-                GUID_COUNTS.remove(gc);
-
+                // 0. probably just hit lag, or....
+                // 1. we could be under attack - hits not meant for us
+                // 2. programmer error - ejected a query we should not have
+                return;
+            
             // update the object and remember it
             debug("SRH.accountAndUpdateDynamicQueriers(): in(crement/sert)ing.");
             gc.increment(numSentToBackEnd);
-            GUID_COUNTS.insert(gc);
+            GUID_COUNTS.add(gc);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
@@ -315,19 +356,9 @@ public final class SearchResultHandler {
         }
 
         public void increment(int incr) { _numResults += incr; }
-    }
-
-
-    /** Simple interface implementer that adjudicates between GuidCounts.
-     */
-    private static class GuidCountComparator implements Comparator {
-        private static GuidCountComparator instance = new GuidCountComparator();
-
-        public static GuidCountComparator instance() { return instance; }
         
-        public int compare(Object o1, Object o2) {
-            GuidCount gc1 = (GuidCount) o1, gc2 = (GuidCount) o2;
-            return (gc2.getNumResults() - gc1.getNumResults());
+        public String toString() {
+            return "" + _guid + ":" + _numResults + ":" + _nextReportNum;
         }
     }
 

@@ -808,6 +808,7 @@ public class RouterService {
             else
                 qr = QueryRequest.createQuery(guid, query, richQuery);
 			verifier.record(qr, type);
+            RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
 			router.sendDynamicQuery(qr);
 		} catch(Throwable t) {
 			ErrorService.error(t);
@@ -827,10 +828,12 @@ public class RouterService {
 
     /** Will make all attempts to stop a query from executing.  Really only 
      *  applicable to GUESS queries...
+     *  8/20/2003: now it is also applicable to because of leaf guidance.
      *  @param guid The GUID of the query you want to get rid of....
      */
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
+        RESULT_HANDLER.removeQuery(guid);
     }
 
     /** 
