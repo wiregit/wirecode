@@ -143,4 +143,15 @@ public boolean isFull()
     return count >= size ;
 }
 
+
+/**
+* Returns the string representation of the mappings
+* @return the string representation of the mappings
+*/
+public synchronized String toString()
+{
+    return hashMap.toString();
+}
+
+
 }
