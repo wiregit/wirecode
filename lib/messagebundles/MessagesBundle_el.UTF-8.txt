@@ -1,4 +1,4 @@
-﻿################################################################################
+################################################################################
 # Messages Bundle for LimeWire 4.4.6
 # Specialization for: Greek - Greece & Cyprus (Modern)
 # Thanks to Damianos Aronidis
@@ -58,9 +58,9 @@ GENERAL_CLOSE_BUTTON_LABEL=Kλείσιμο
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window.
 GENERAL_CLOSE_BUTTON_TIP=Kλείσιμο Παραθύρου
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
-GENERAL_BACK_BUTTON_LABEL=� Προηγούμενο
+GENERAL_BACK_BUTTON_LABEL=<<Προηγούμενο
 #### GENERAL_NEXT_BUTTON_LABEL=Next >>
-GENERAL_NEXT_BUTTON_LABEL=Eπόμενο �
+GENERAL_NEXT_BUTTON_LABEL=Eπόμενο>>
 #### GENERAL_FINISH_BUTTON_LABEL=Finish
 GENERAL_FINISH_BUTTON_LABEL=Tέλος
 #### GENERAL_DEFAULT_BUTTON_LABEL=Use Default
