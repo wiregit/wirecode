@@ -683,13 +683,16 @@ public class Connection {
 
             //Decide whether to proceed.
             code = ourResponse.getStatusCode();
-            if(code == HandshakeResponse.OK &&
-                theirResponse.getStatusCode() == HandshakeResponse.OK) {
+            if(code == HandshakeResponse.OK) {
+                if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
+                	// if it's the crawler, we throw an exception to make sure we 
+                	// correctly disconnect
                 	if(isCrawler) {
                 		throw new IOException("connection from crawler -- disconnect");
                 	}
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
+                }
             } else {
                 Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
                             "Response code: "+code);
