@@ -192,6 +192,80 @@ public final class PongCacherTest extends BaseTestCase {
     }
     
 
+    /**
+     * Tests the locale preferencing of PongCacher.
+     */
+    public void testLocalePong() throws Exception {
+        // Trick us into thinking we're an Ultrapeer.
+        PrivilegedAccessor.setValue(RouterService.class, "manager",
+                                    new TestManager());
+        
+        // Create a pong with the correct GGEP for our cacher to accept it.
+        PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
+        PrivilegedAccessor.setValue((Object)pr,
+                                    "CLIENT_LOCALE",
+                                    "en");
+        PrivilegedAccessor.setValue((Object)pr,
+                                    "hops",
+                                    new Byte((byte)1));
+        PongCacher.instance().addPong(pr);
+        
+        PingReply prj = MessageTestUtils.createPongWithFreeLeafSlots();
+        PrivilegedAccessor.setValue((Object)prj,
+                                    "CLIENT_LOCALE",
+                                    "ja");
+        PrivilegedAccessor.setValue((Object)prj,
+                                    "hops",
+                                    new Byte((byte)1));
+        PongCacher.instance().addPong(prj);
+        
+        PingReply prj2 = MessageTestUtils.createPongWithFreeLeafSlots();
+        PrivilegedAccessor.setValue((Object)prj2,
+                                    "CLIENT_LOCALE",
+                                    "ja");
+        PrivilegedAccessor.setValue((Object)prj2,
+                                    "hops",
+                                    new Byte((byte)2));
+        PongCacher.instance().addPong(prj2);
+
+        //should only return en (en)
+        List pongs = PongCacher.instance().getBestPongs("en");
+        assertEquals("unexpected size returned from PongCacher when asking for en locale pongs",
+                     1, pongs.size());
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(0)).getClientLocale(),
+                     "en");
+        
+        //should return "ja" pongs in the beggining (ja, ja, en)
+        pongs = PongCacher.instance().getBestPongs("ja");
+        assertEquals("unexpected size returned from PongCacher when asking for ja locale pongs",
+                     3, pongs.size());
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(0)).getClientLocale(),
+                     "ja");
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(1)).getClientLocale(),
+                     "ja");
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(2)).getClientLocale(),
+                     "en");
+
+
+        //expire default locale pong but the "ja" locale pongs should be
+        //around
+        Thread.sleep(PongCacher.EXPIRE_TIME+800);
+        pongs = PongCacher.instance().getBestPongs("ja");
+        assertEquals("unexpected size returned from PongCacher when asking for ja locale pongs",
+                     2, pongs.size());
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(0)).getClientLocale(),
+                     "ja");
+        assertEquals("pong's locale doesn't match",
+                     ((PingReply)pongs.get(1)).getClientLocale(),
+                     "ja");
+        System.out.println("pongs size: " + pongs.size());
+    }
+
     
     private static class TestManager extends ConnectionManager {
         /**
