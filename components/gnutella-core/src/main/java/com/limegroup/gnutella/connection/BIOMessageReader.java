@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.util.zip.Inflater;
 
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -16,7 +15,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -192,7 +190,8 @@ public class BIOMessageReader extends AbstractMessageReader {
                 msg = BIOMessageReader.read(INPUT_STREAM, HEADER_BUF, 
                     Message.N_TCP, SOFT_MAX);
             } catch(IOException e) {
-                RouterService.removeConnection(CONNECTION); // if IOError, make sure we close.
+                // if IOError, make sure we close.
+                RouterService.removeConnection(CONNECTION); 
                 throw e;
             }
             
@@ -202,7 +201,8 @@ public class BIOMessageReader extends AbstractMessageReader {
             // making it appear as if the deflated input
             // was actually larger.
             if(CONNECTION.isReadDeflated() ) {
-                CONNECTION.stats().addCompressedBytesReceived(INFLATER.getTotalIn());
+                CONNECTION.stats().
+                    addCompressedBytesReceived(INFLATER.getTotalIn());
                 CONNECTION.stats().addBytesReceived(INFLATER.getTotalOut());
                 if(!CommonUtils.isJava118()) {
                     CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
@@ -303,8 +303,8 @@ public class BIOMessageReader extends AbstractMessageReader {
      * @requires buf.length==23
      * @effects exactly like Message.read(in), but buf is used as scratch for
      *  reading the header.  This is an optimization that lets you avoid
-     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
-     *  but the contents are not guaranteed to contain any useful data.  
+     *  repeatedly allocating 23-byte arrays.  buf may be used when this 
+     *  returns, but the contents are not guaranteed to contain any useful data.  
      */
     public static Message read(InputStream in, byte[] buf, int network, 
         byte softMax)
