@@ -17,19 +17,28 @@ public class UrnType implements Serializable {
 	/**
 	 * Constant for specifying SHA1 URNs in replies.
 	 */
-	public static final Set SHA1_SET = new HashSet();	
+	public static final Set SHA1_SET =
+		Collections.unmodifiableSet(new HashSet());	;	
+
+	/**
+	 * Constant for specifying any type of URN for replies.
+	 */
+	public static final Set ANY_TYPE_SET = 
+		Collections.unmodifiableSet(new HashSet());	
 
 	/**
 	 * Statically add the SHA1 type to the set. 
 	 */
 	static {
 		SHA1_SET.add(UrnType.SHA1);
+		ANY_TYPE_SET.add(UrnType.ANY_TYPE);
 	}
 
 	/**
 	 * Cached constant for a colon string.
 	 */
 	private static final String COLON = ":";
+
 	/**
 	 * Identifier string for the SHA1 type.
 	 */
