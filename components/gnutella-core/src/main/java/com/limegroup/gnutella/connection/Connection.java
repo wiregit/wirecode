@@ -523,7 +523,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         try {
             
             _in = new BufferedInputStream(_socket.getInputStream());
-            _out = new ThrottledOutputStream(_socket.getOutputStream(), 
+            _out = new ThrottledOutputStream(
+                new BufferedOutputStream(_socket.getOutputStream()), 
                 _throttle);
         } catch (NullPointerException e) {
             //Apparently Socket.getInput/OutputStream throws
