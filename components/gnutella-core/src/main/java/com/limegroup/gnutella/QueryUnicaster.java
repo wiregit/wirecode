@@ -433,13 +433,17 @@ public final class QueryUnicaster {
      *  pre: pr.getQueryKey() != null
      */
     public void handleQueryKeyPong(PingReply pr) {
-        QueryKey qk = null;
+        if(pr == null) {
+            throw new NullPointerException("null pong");
+        }
+        QueryKey qk = pr.getQueryKey();
+        if(qk == null) {
+            throw new IllegalArgumentException("no key in pong");
+        }
         InetAddress address = null;
         try {
-            qk = pr.getQueryKey();
             address = InetAddress.getByName(pr.getIP());
         }
-        catch (BadPacketException ignored) {}
         catch (UnknownHostException damn) {
             // unknown host exception??  weird - well, don't continue....
             return;
