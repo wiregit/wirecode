@@ -1609,7 +1609,7 @@ public class HTTPDownloader implements BandwidthTracker {
                         if (skipped > 0 || _amountRead+c >= _amountToRead) {
                             c = Math.min(c,_amountToRead - _amountRead);
                             if (LOG.isDebugEnabled())
-                                LOG.debug("got to the writing point, trimming buffer by "+
+                                LOG.debug("trimming buffer by "+
                                         skipped +" to "+c+" bytes");
                             
                             toWrite = new byte[c];
@@ -1641,8 +1641,8 @@ public class HTTPDownloader implements BandwidthTracker {
         } finally {
             _bodyConsumed = true;
             _isActive = false;
-            if(!isHTTP11() || _disconnect)
-                _byteReader.close();
+            if(!isHTTP11() || _disconnect) 
+                throw new IOException("stolen from");
         }
 	}
 
