@@ -16,6 +16,30 @@ public final class URNFactory {
 	private URNFactory() {}
 
 	/**
+	 * Cached constant to avoid making unnecessary string allocations
+	 * in validating input.
+	 */
+	private static final String SPACE = " ";
+
+	/**
+	 * Cached constant to avoid making unnecessary string allocations
+	 * in validating input.
+	 */
+	private static final String QUESTION_MARK = "?";
+
+	/**
+	 * Cached constant to avoid making unnecessary string allocations
+	 * in validating input.
+	 */
+	private static final String SLASH = "/";
+
+	/**
+	 * Cached constant to avoid making unnecessary string allocations
+	 * in validating input.
+	 */
+	private static final String TWO = "2";
+
+	/**
 	 * Creates a new <tt>URN</tt> instance with a SHA1 hash.
 	 *
 	 * @param file the <tt>File</tt> instance to use to create a 
@@ -129,8 +153,8 @@ public final class URNFactory {
 	 *  <tt>null</tt> if the request could not be read
 	 */
 	private static String extractUrnFromGetRequest(final String getLine) {
-		int qIndex     = getLine.indexOf("?") + 1;
-		int spaceIndex = getLine.indexOf(" ", qIndex);		
+		int qIndex     = getLine.indexOf(QUESTION_MARK) + 1;
+		int spaceIndex = getLine.indexOf(SPACE, qIndex);		
 		if((qIndex == -1) || (spaceIndex == -1)) {
 			return null;
 		}
@@ -148,7 +172,7 @@ public final class URNFactory {
 	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	 */
 	private static String extractUrnFromServiceRequest(final String urnLine) {
-		int questionIndex = urnLine.indexOf("?");
+		int questionIndex = urnLine.indexOf(QUESTION_MARK);
 		if(questionIndex != 12) return null;
 		return urnLine.substring(questionIndex+1);
 	}
@@ -196,7 +220,7 @@ public final class URNFactory {
 	 *  (case-insensitive), <tt>false</tt> otherwise
 	 */
 	private static final boolean isValidGet(final String getLine) {
-		int firstSpace = getLine.indexOf(" ");
+		int firstSpace = getLine.indexOf(SPACE);
 		if(firstSpace == -1) {
 			return false;
 		}
@@ -216,11 +240,11 @@ public final class URNFactory {
 	 *  (case-insensitive) request, <tt>false</tt> otherwise
 	 */
 	private static final boolean isValidUriRes(final String getLine) {
-		int firstSlash = getLine.indexOf("/");
+		int firstSlash = getLine.indexOf(SLASH);
 		if(firstSlash == -1) {
 			return false;
 		}
-		int secondSlash = getLine.indexOf("/", firstSlash+1);
+		int secondSlash = getLine.indexOf(SLASH, firstSlash+1);
 		if(secondSlash == -1) {
 			return false;
 		}
@@ -241,7 +265,7 @@ public final class URNFactory {
 	 *  otherwise
 	 */
 	private static boolean isValidResolutionProtocol(final String getLine) {
-		int nIndex = getLine.indexOf("2");
+		int nIndex = getLine.indexOf(TWO);
 		if(nIndex == -1) {
 			return false;
 		}
@@ -263,7 +287,7 @@ public final class URNFactory {
 	 *  otherwise
 	 */
 	private static boolean isValidHTTPSpecifier(final String getLine) {
-		int spaceIndex = getLine.lastIndexOf(" ");
+		int spaceIndex = getLine.lastIndexOf(SPACE);
 		if(spaceIndex == -1) {
 			return false;
 		}
