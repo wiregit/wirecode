@@ -31,7 +31,13 @@ public final class NormalUploadState implements HTTPMessage {
     /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
     private int _amountRequested;
-    private static BandwidthThrottle _throttle = null;
+
+    /**
+     * Throttle for the speed of uploads.  The rate will get dynamically
+     * reset during the upload if the rate changes.
+     */
+    private static final BandwidthThrottle THROTTLE = 
+        new BandwidthThrottle(UploadSettings.UPLOAD_SPEED.getValue());        
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
@@ -61,9 +67,6 @@ public final class NormalUploadState implements HTTPMessage {
 		_index = _uploader.getIndex();	
 		_fileName = _uploader.getFileName();
 		_fileSize = _uploader.getFileSize();
-        if (_throttle == null)
-            _throttle = 
-                new BandwidthThrottle(UploadSettings.UPLOAD_SPEED.getValue());
  	}
     
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -162,10 +165,10 @@ public final class NormalUploadState implements HTTPMessage {
      */
     private void upload(OutputStream ostream) throws IOException {        
         while (true) {
-            _throttle.setRate(getUploadSpeed());
+            THROTTLE.setRate(getUploadSpeed());
 
             int c = -1;
-            byte[] buf = new byte[_throttle.request(BLOCK_SIZE)];
+            byte[] buf = new byte[THROTTLE.request(BLOCK_SIZE)];
             int burstSent=0;            
             c = _fis.read(buf);
             if (c == -1)
