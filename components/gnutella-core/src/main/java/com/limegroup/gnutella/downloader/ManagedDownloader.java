@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -249,6 +251,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /** Ensures backwards compatibility. */
     static final long serialVersionUID = 2772570805975885257L;
+    
+    /** Make everything transient */
+    private static final ObjectStreamField[] serialPersistentFields = 
+    	ObjectStreamClass.NO_FIELDS;
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
@@ -500,7 +506,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private File completeFile;
     /**
      * The position of the downloader in the uploadQueue */
-    private transient int queuePosition;
+    private int queuePosition;
     /**
      * The vendor the of downloader we're queued from.
      */
