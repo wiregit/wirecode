@@ -149,7 +149,7 @@ public class FileManager {
      * NoSuchElementException was considered as an alernative, but this can
      * create ambiguity problems between java.util and com.sun.java.util.  
      */
-    public FileDesc get(int i) throws IndexOutOfBoundsException {
+    public synchronized FileDesc get(int i) throws IndexOutOfBoundsException {
         FileDesc ret=(FileDesc)_files.get(i);
         if (ret==null)
             throw new IndexOutOfBoundsException();
@@ -165,19 +165,18 @@ public class FileManager {
 	 * @return the index corresponding to the requested urn, or
 	 *  -1 if not matching index could be found
 	 */
-	public int getFileIndexForUrn(final URN urn) {
-		synchronized(_files) {
-			Iterator iter = _files.iterator();
-			int count = 0;
-			while(iter.hasNext()) {
-				FileDesc candidate = (FileDesc)iter.next();
-				if (candidate==null) continue;
-				if (candidate.containsUrn(urn)) {
-					return count;
-				}
-				count++;
+	public synchronized int getFileIndexForUrn(final URN urn) {
+		Iterator iter = _files.iterator();
+		int count = 0;
+		while(iter.hasNext()) {
+			FileDesc candidate = (FileDesc)iter.next();
+			if (candidate==null) continue;
+			if (candidate.containsUrn(urn)) {
+				return count;
 			}
+			count++;
 		}
+
 		// none found
 		return -1;
 	}
@@ -191,17 +190,16 @@ public class FileManager {
 	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
 	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
 	 */
-	public FileDesc getFileDescForUrn(final URN urn) {
-		synchronized(_files) {
-			Iterator iter = _files.iterator();
-			while(iter.hasNext()) {
-				FileDesc candidate = (FileDesc)iter.next();
-				if (candidate==null) continue;
-				if (candidate.containsUrn(urn)) {
-					return candidate;
-				}
+	public synchronized FileDesc getFileDescForUrn(final URN urn) {
+		Iterator iter = _files.iterator();
+		while(iter.hasNext()) {
+			FileDesc candidate = (FileDesc)iter.next();
+			if (candidate==null) continue;
+			if (candidate.containsUrn(urn)) {
+				return candidate;
 			}
 		}
+
         // none found
         return null;
 	}
@@ -212,16 +210,14 @@ public class FileManager {
      * needed rarely, from library view, because there's no sharing of
      * data structures for local files
      */
-    public FileDesc getFileDescMatching(File file) {
-		synchronized(_files) {
-			// linear probe. thankfully it's rare
-			Iterator iter = _files.iterator();
-			while(iter.hasNext()) {
-				FileDesc candidate = (FileDesc)iter.next();
-				if (candidate==null) continue;
-				if(file.equals(candidate.getFile())) {
-					return candidate;
-				}
+    public synchronized FileDesc getFileDescMatching(File file) {
+		// linear probe. thankfully it's rare
+		Iterator iter = _files.iterator();
+		while(iter.hasNext()) {
+			FileDesc candidate = (FileDesc)iter.next();
+			if (candidate==null) continue;
+			if(file.equals(candidate.getFile())) {
+				return candidate;
 			}
 		}
         // none found
