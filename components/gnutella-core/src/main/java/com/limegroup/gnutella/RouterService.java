@@ -1453,4 +1453,12 @@ public class RouterService {
         return (NetworkUtils.isValidAddress(getAddress()) &&
                 NetworkUtils.isValidPort(getPort()));
     }
+    
+    public static boolean canReceiveSolicited() {
+    	return udpService.canReceiveSolicited();
+    }
+    
+    public static boolean canReceiveUnsolicited() {
+    	return udpService.canReceiveUnsolicited();
+    }
 }

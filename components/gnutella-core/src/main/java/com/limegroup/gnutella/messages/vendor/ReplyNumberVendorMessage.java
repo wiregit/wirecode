@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -24,7 +23,12 @@ import java.io.*;
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
+    
+    /**
+     * whether we can receive unsolicited udp
+     */
+    private static final byte UNSOLICITED=0x1;
 
     /**
      * Constructs a new ReplyNumberVendorMessages with data from the network.
@@ -39,6 +43,9 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
                                          getPayload().length);
         if ((getVersion() == 1) && (getPayload().length != 1))
             throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
+        if ((getVersion() == 2) && (getPayload().length != 2))
+            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
     }
 
@@ -61,6 +68,13 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
     public int getNumResults() {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
+    
+    public boolean canReceiveUnsolicited() {
+    	if (getVersion() ==1) 
+    		return true;
+    	else 
+    		return (getPayload()[1] & UNSOLICITED) == UNSOLICITED;
+    }
 
     /**
      * Constructs the payload from the desired number of results.
@@ -69,10 +83,12 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         if ((numResults < 1) || (numResults > 255))
             throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
-        byte[] payload = new byte[1];
+        byte[] payload = new byte[2];
         byte[] bytes = new byte[2];
         ByteOrder.short2leb((short) numResults, bytes, 0);
         payload[0] = bytes[0];
+        payload[1] = RouterService.canReceiveUnsolicited() ?
+        		UNSOLICITED : 0x0;
         return payload;
     }
 

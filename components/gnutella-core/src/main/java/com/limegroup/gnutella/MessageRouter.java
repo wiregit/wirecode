@@ -992,11 +992,16 @@ public abstract class MessageRouter {
 
         // see if we need more results for this query....
         // if not, remember this location for a future, 'find more sources'
-        // targeted GUESS query.
+        // targeted GUESS query, as long as the other end said they can receive
+        // unsolicited.
         if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
             if (RECORD_STATS)
                 OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
 
+            //if the reply cannot receive unsolicited udp, there is no point storing it.
+            if (!reply.canReceiveUnsolicited())
+            	return;
+            
             DownloadManager dManager = RouterService.getDownloadManager();
             // only store result if it is being shown to the user or if a
             // file with the same guid is being downloaded

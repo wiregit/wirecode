@@ -74,7 +74,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 	}
 
     public static Integer numUPs() {
-        return new Integer(2);
+        return new Integer(3);
     }
 
     public static Integer numLeaves() {
@@ -224,7 +224,92 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
+        assertTrue(reply.canReceiveUnsolicited());
+        
+        //rince and repeat, this time pretend to be firewalled
+        
+        query = 
+            QueryRequest.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+        
+        UDPService service = RouterService.getUdpService();
+        PrivilegedAccessor.setValue(
+        		service,"_acceptedUnsolicitedIncoming",new Boolean(false));
+        
+        assertFalse(RouterService.getUdpService().canReceiveUnsolicited());
+        assertTrue(query.desiresOutOfBandReplies());
 
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER[1].send(query);
+        ULTRAPEER[1].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            message = Message.read(in);
+
+            // we should NOT get a reply to our query
+            assertTrue(!((message instanceof QueryReply) &&
+                         (Arrays.equals(message.getGUID(), query.getGUID()))));
+        }
+
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        reply = (ReplyNumberVendorMessage) message;
+        assertEquals(2, reply.getNumResults());
+        assertFalse(reply.canReceiveUnsolicited());
+        
+        //restore our un-firewalled status and repeat
+        query = 
+            QueryRequest.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+        
+        PrivilegedAccessor.setValue(
+        		service,"_acceptedUnsolicitedIncoming",new Boolean(true));
+        ULTRAPEER[2].send(query);
+        ULTRAPEER[2].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            message = Message.read(in);
+
+            // we should NOT get a reply to our query
+            assertTrue(!((message instanceof QueryReply) &&
+                         (Arrays.equals(message.getGUID(), query.getGUID()))));
+        }
+
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        reply = (ReplyNumberVendorMessage) message;
+        assertEquals(2, reply.getNumResults());
+        assertTrue(reply.canReceiveUnsolicited());
+        
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 

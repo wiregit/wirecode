@@ -7,8 +7,11 @@ import java.net.InetAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -215,8 +218,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
         catch (BadPacketException expected) {};
 
-        // test that it can handle versions other than 1
-        payload = new byte[3];
+        // test that it can handle version2 2
+        payload = new byte[2];
         try {
             vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
                                               (byte) 0, 2, payload);
@@ -225,6 +228,45 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         catch (BadPacketException expected) {
             assertTrue(false);
         }
+        
+        //test that it can handle versions other than 1
+        payload = new byte[3];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 3, payload);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
+        }
+        catch (BadPacketException expected) {
+            assertTrue(false);
+        }
+        
+        //test un/solicited byte
+        UDPService service = RouterService.getUdpService();
+        PrivilegedAccessor.setValue(
+        		service,"_acceptedUnsolicitedIncoming",new Boolean(false));
+        
+        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        assertFalse(vm.canReceiveUnsolicited());
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) Message.read(bais);
+        assertFalse(vm2.canReceiveUnsolicited());
+        
+        PrivilegedAccessor.setValue(
+        		service,"_acceptedUnsolicitedIncoming",new Boolean(true));
+        
+        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        assertTrue(vm.canReceiveUnsolicited());
+        
+        baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        vm2 = (ReplyNumberVendorMessage) Message.read(bais);
+        assertTrue(vm2.canReceiveUnsolicited());
+        
+        
     }
 
 
