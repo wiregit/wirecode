@@ -2,22 +2,16 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import com.oroinc.text.regex.*;
 
 /**
  * Records information about queries so that responses can be
  * validated later.
  */
 public class ResponseVerifier {
-    private PatternMatcher matcher = new Perl5Matcher();
-    private PatternCompiler compiler = new Perl5Compiler();
-
     private static class RequestData {
-        Pattern[] queryWords;
+        String[] queryWords;
         MediaType type;
-        RequestData(Pattern[] queryWords, MediaType type) {
+        RequestData(String[] queryWords, MediaType type) {
             this.queryWords=queryWords;
             this.type=type;
         }
@@ -43,28 +37,9 @@ public class ResponseVerifier {
      *   media type; otherwise, this is assumed to be for any type.
      */
     public synchronized void record(QueryRequest qr, MediaType type){
-        //Copy words in the query to queryWords.  Each word is treated
-        //as an independent regular expression.
-        List /* of Pattern */ buf=new ArrayList();
-        StringTokenizer st = new StringTokenizer(qr.getQuery().toLowerCase(),
-                                                 DELIMITERS);
-        while(st.hasMoreTokens()) {
-            String word=(String)st.nextToken();
-            String regexp=FileManager.wildcard2regexp(word).toLowerCase();
-            try {
-                Pattern pattern=compiler.compile(regexp);
-                buf.add(pattern);
-            } catch (MalformedPatternException e) {
-                //Just ignore.  The alternative is to store patterns
-                //AND strings in ResultData, but that's annoying.
-                continue;
-            }
-
-        }
-        Pattern[] queryWords=new Pattern[buf.size()];
-        buf.toArray(queryWords);
-
         byte[] guid = qr.getGUID();
+        String[] queryWords=StringUtils.split(qr.getQuery().toLowerCase(),
+                                              DELIMITERS);
         mapper.put(new GUID(guid),new RequestData(queryWords, type));
     }
 
@@ -80,7 +55,7 @@ public class ResponseVerifier {
         RequestData request=(RequestData)mapper.get(new GUID(guid));
         if (request == null)
             return 100; // assume 100% match if no corresponding query found.
-        Pattern[] queryWords = request.queryWords;
+        String[] queryWords = request.queryWords;
         int numQueryWords=queryWords.length;
         if (numQueryWords==0)
             return 100; // avoid divide-by-zero errors below
@@ -89,9 +64,8 @@ public class ResponseVerifier {
         //match the result's name.
         String name=resp.getName().toLowerCase();
         for (int i=0; i<numQueryWords; i++) {
-            Pattern pattern=queryWords[i];
-            PatternMatcherInput input = new PatternMatcherInput(name);
-            if (matcher.contains(input,pattern)) {
+            String pattern=queryWords[i];
+            if (StringUtils.contains(name,pattern)) {
                 numMatchingWords++;
                 continue;
             }
