@@ -37,7 +37,7 @@ public final class ConnectionSettings extends AbstractSettings {
      * If this is the case, the TTL is set to SOFT_MAX - hops.
      */
     public static final ByteSetting SOFT_MAX =
-        CFG_FACTORY.createByteSetting("SOFT_MAX", (byte)5);
+        CFG_FACTORY.createByteSetting("SOFT_MAX", (byte)4);
 
 	/**
 	 * Settings for whether or not to local addresses should be considered
