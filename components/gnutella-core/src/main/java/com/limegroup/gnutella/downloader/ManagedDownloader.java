@@ -2911,8 +2911,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( rfd.isReplyToMulticast() )
             return true;
         //Return true if rfd is private or unreachable
-        if (rfd.isPrivate())
-            return true;
+        if (rfd.isPrivate()) {
+            // Don't do a push for magnets in case you are in a private network.
+            // Note to Sam: This doesn't mean that isPrivate should be true.
+            if (rfd instanceof URLRemoteFileDesc) 
+                return false;
+            else  // Otherwise obey push rule for private rfds.
+                return true;
+        }
         else if (!NetworkUtils.isValidPort(rfd.getPort()))
             return true;
         else
