@@ -321,6 +321,7 @@ public class FileManager {
         _size = 0;
         _numFiles = 0;
         _files=new ArrayList();
+        _index=new Trie(true); //maintain invariant
         _sharedDirectories = new HashSet();
 
         // Load the settings info
