@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.9.5
+# Messages Bundle for LimeWire 4.1.6
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -149,7 +149,6 @@ SEARCH_TITLE=بحث
 MONITOR_TITLE=متابعة
 CONNECTIONS_TITLE=اتصالات
 LIBRARY_TITLE=المكتبة
-SHOPPING_TITLE=متجر LimeWire
 OPTIONS_TITLE=خيارات
 STATS_TITLE=إحصائيات
 DOWNLOAD_TITLE=الملفات الجاري تنزيلها
@@ -162,7 +161,6 @@ SEARCH_TIP=بحث وتنزيل ملفات.
 MONITOR_TIP=عرض نتائج البحث والملفات الجاري تحميلها.
 CONNECTIONS_TIP=اتصل مع مستخدمين آخرين.
 LIBRARY_TIP=عرض الملفات المحفوظة.
-SHOPPING_TIP=تسوق مع LimeWire.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -219,12 +217,15 @@ MENU_NAV_CONN_ACCESSIBLE=عرض شاشة الاتصالات.
 MENU_NAV_LIB=(L) المكتبة
 MENU_NAV_LIB_MNEMONIC=L
 MENU_NAV_LIB_ACCESSIBLE=عرض شاشة المكتبة.
-MENU_NAV_SHOPPING=(P) متجر لايم واير
-MENU_NAV_SHOPPING_MNEMONIC=P
-MENU_NAV_SHOPPING_ACCESSIBLE=عرض موقع لايم واير.
 
 MENU_VIEW_TITLE=(V) عرض
 MENU_VIEW_TITLE_MNEMONIC=V
+#??? MENU_VIEW_SMALL_ICONS=(S) Use small icons
+#??? MENU_VIEW_SMALL_ICONS_MNEMONIC=S
+#??? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use small icons.
+#??? MENU_VIEW_TEXT_WITH_ICONS=(T) Show icon text
+#??? MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
+#??? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show text below icons.
 MENU_VIEW_SHOW_HIDE_TITLE=(W) عرض/إخفاء
 MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
 MENU_VIEW_SHOW_HIDE_ACCESSIBLE=(W) عرض أو إخفاء الجداول الفردية.
@@ -237,9 +238,6 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=إظهار نافذة الاتصالات.
 MENU_VIEW_LIBRARY=(L) المكتبة
 MENU_VIEW_LIBRARY_MNEMONIC=L
 MENU_VIEW_LIBRARY_ACCESSIBLE=إظهار نافذة المكتبة.
-MENU_VIEW_SHOPPING=(P) متجر LimeWire
-MENU_VIEW_SHOPPING_MNEMONIC=P
-MENU_VIEW_SHOPPING_ACCESSIBLE=إظهار نافذة التسوق.
 MENU_VIEW_THEMES_TITLE=(T) إضافة السمات
 MENU_VIEW_THEMES_TITLE_MNEMONIC=T
 MENU_VIEW_THEMES_GET_MORE=(G) المزيد من السمات
@@ -254,6 +252,9 @@ MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=استخدم السمة التلقائي
 MENU_VIEW_LANGS_TITLE=(H) تغيير اللغة
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_RESTART_REQUIRED=يجب إعادة تشغيل LimeWire لكي يظهر تأثير اللغة الجديدة.
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=(T) Help translate LimeWire
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language
 MENU_VIEW_SEARCH_TITLE=(S) بحث
 #??? MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 #??? MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
@@ -269,9 +270,6 @@ MENU_RESOURCES_TITLE_MNEMONIC=R
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_ACCESSIBLE=عرض موقع Lime PRO.
-MENU_RESOURCES_LIMESHOP=LimeShop
-MENU_RESOURCES_LIMESHOP_MNEMONIC=L
-MENU_RESOURCES_LIMESHOP_ACCESSIBLE=عرض موقع LimeShop.
 
 MENU_TOOLS_TITLE=(T) أدوات
 MENU_TOOLS_TITLE_MNEMONIC=T
@@ -337,10 +335,11 @@ SEARCH_STOP_BUTTON_TIP=إيقاف تجميع نتائج البحث لعلامة 
 SEARCH_PUBLIC_KILL_STRING=إغلاق البحث
 SEARCH_PUBLIC_LAUNCH_STRING=Launch action
 SEARCH_PUBLIC_STOP_STRING=إيقاف البحث
-SEARCH_PUBLIC_GROUP_STRING=عرض في مجموعات
 SEARCH_PUBLIC_BROWSE_STRING=استعراض المضيف
 SEARCH_PUBLIC_CHAT_STRING=دردشة مع المضيف
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi web lookup...
+#??? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
+#??? SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=إعادة البحث
 SEARCH_PUBLIC_BLOCK_STRING=حظر المضيف
 SEARCH_RESULT_TABLE_LABEL=النتائج
@@ -356,10 +355,17 @@ AUTO_DL_CHECKBOX_STRING=تنزيل تلقائي
 AUTO_DL_CHECKBOX_TOOLTIP=سيقوم LimeWire بتنزيل الملفات لك.
 SEARCH_TYPE_KEYWORD=كلمة مفتاحية
 SEARCH_TYPE_WHATSNEW=مجتمع
-SEARCH_WHATS_NEW_DESCRIPTION=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
-SEARCH_WHATS_NEW_SMALL=جديد
+#??? SEARCH_TYPE_BROWSEHOST=Direct connect
+#??? SEARCH_BROWSEHOST_TITLE=Got friends?
+#??? SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
+#??? SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
+#??? SEARCH_TYPE_BROWSEHOST_BUTTON=Direct connect
+#??? SEARCH_WHATSNEW_HIDE_ADULT=Hide adult content
+#??? SEARCH_WHATSNEW_TITLE_ONE=Don't know
+#??? SEARCH_WHATSNEW_TITLE_TWO=what to look for?
+#??? SEARCH_WHATSNEW_DESC=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
 #??? SEARCH_CURRENT_SEARCH=Current search:
-#??? SEARCH_WHATS_NEW_SMALL=New
+SEARCH_WHATS_NEW_SMALL=جديد
 #??? SEARCH_SELECT_TYPE=Select type:
 #??? SEARCH_FILTER_RESULTS=Filter results:
 #??? SEARCH_BACK_TO_SEARCH=Back to search
@@ -375,6 +381,7 @@ MEDIA_IMAGES=صور
 #ResultPanel Columns for normal view
 RESULT_PANEL_QUALITY=الجودة
 RESULT_PANEL_NAME=الاسم
+RESULT_PANEL_ICON=رمز
 RESULT_PANEL_TYPE=النوع
 RESULT_PANEL_SIZE=الحجم
 RESULT_PANEL_SPEED=السرعة
@@ -382,6 +389,7 @@ RESULT_PANEL_CHAT=دردشة
 RESULT_PANEL_LOCATION=الموقع
 RESULT_PANEL_COUNT=#
 RESULT_PANEL_VENDOR=البائع
+#??? RESULT_PANEL_ADDED=Created
 
 #Filter labels.
 SEARCH_FILTER_ALL=الجميع
@@ -389,6 +397,8 @@ SEARCH_FILTER_OPTION=خيار
 SEARCH_FILTER_OPTIONS=خيارات
 SEARCH_FILTER_MEDIA=الوسائط
 
+#??? DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
+#??? DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the selected download.
 DOWNLOAD_KILL_BUTTON_LABEL=إنهاء التنزيل
 DOWNLOAD_KILL_BUTTON_TIP=أوقف تنزيل الملفات المختارة.
 DOWNLOAD_RESUME_BUTTON_LABEL=إيقاف مؤقت
@@ -459,6 +469,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED=سريع مطور
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=يمكنك تجربة الاتصالات السريعة المطورة مع LimeWire Pro.
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=لديك اتصالا قويا للغاية بالشبكة.
 STATISTICS_CONNECTION_QUALITY=الجودة:
+#??? STATISTICS_CONNECTION_IDLE=Idle
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -567,6 +578,14 @@ T1_SPEED=T1
 T3_SPEED=T3 أو أعلى
 MULTICAST_SPEED=Ethernet
 
+################################################################################
+# HTML Page stuff
+################################################################################
+#??? HTML_PAGE_TITLE=Download page
+# SPACE AT END NEEDS TO BE THERE!!!
+#??? HTML_PAGE_LISTING=File listing for 
+#??? HTML_PAGE_MAGNET=Magnet links for fast downloads (if you have LimeWire installed)
+
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
@@ -582,6 +601,7 @@ CV_COLUMN_VENDOR=الموزع/الإصدارة
 CV_COLUMN_TIME=الوقت
 CV_COLUMN_COMPRESSION=مضغوط (I/O)
 CV_COLUMN_QRP_FULL=QRP (%)
+#??? CV_COLUMN_QRP_USED=QRP Empty
 CV_BUTTON_REMOVE=إزالة
 CV_BUTTON_TOOLTIP_REMOVE=إزالة الاتصالات المختارة
 CV_BUTTON_ADD=إضافة
@@ -589,10 +609,15 @@ CV_BUTTON_TOOLTIP_ADD=إنشاء اتصال خارجي جديد
 CV_LABEL_KEEP_BEGIN=احتفظ تقريبا ب 
 CV_LABEL_KEEP_END=اتصالات مفتوحة.
 CV_TABLE_STRING_CONNECTING=جاري الاتصال...
+#??? CV_TABLE_STRING_CONNECTINGS=Connecting
 CV_TABLE_STRING_LEAF=طرف
+#??? CV_TABLE_STRING_LEAVES=Leaves
 CV_TABLE_STRING_ULTRAPEER=ند فائق
+CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
 #??? CV_TABLE_STRING_PEER=Peer
+#??? CV_TABLE_STRING_PEERS=Peers
 CV_TABLE_STRING_STANDARD=0.6
+CV_TABLE_STRING_STANDARDS=Standard
 CV_TABLE_STRING_INCOMING=الوارد
 CV_TABLE_STRING_OUTGOING=الصادر
 CV_TABLE_STRING_CONNECTED_ON=متصل على
@@ -617,6 +642,8 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=مجلد جديد
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=إيقاف المشاركة
 LIBRARY_TREE_RENAME_FOLDER_LABEL=إعادة تسمية
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=إلى قائمة القراءة
+#??? LIBRARY_TREE_SAVED_DIRECTORY=Saved files
+#??? LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete files
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -725,6 +752,37 @@ VIEW_CHOOSER_CANCEL_BUTTON_LABEL=إلغاء الأمر
 #IndentingPanel
 XML_SEARCH_MORE_OPTIONS_LABEL=المزيد من خيارات البحث
 
+#??? META_EDITOR_INFO_TAB_LABEL=Info
+META_EDITOR_OK_BUTTON_LABEL=موافق
+META_EDITOR_CANCEL_BUTTON_LABEL=إلغاء الأمر
+META_EDITOR_ADVANCED_BUTTON_LABEL=متقدم
+#??? META_EDITOR_RESET_LABEL=Reset
+
+META_EDITOR_AUDIO_LABEL=صوت
+META_EDITOR_TITLE_LABEL=العنوان:
+META_EDITOR_ARTIST_LABEL=الفنان:
+#??? META_EDITOR_ALBUM_LABEL=Album:
+#??? META_EDITOR_GENRE_LABEL=Genre:
+#??? META_EDITOR_YEAR_LABEL=Year:
+META_EDITOR_TYPE_LABEL=النوع:
+#??? META_EDITOR_TRACK_LABEL=Track:
+#??? META_EDITOR_LANGUAGE_LABEL=Language:
+#??? META_EDITOR_SECONDS_LABEL=Length:
+#??? META_EDITOR_BITRATE_LABEL=Bitrate:
+#??? META_EDITOR_COMMENTS_LABEL=Comments:
+#??? META_EDITOR_SHA1_LABEL=SHA1:
+#??? META_EDITOR_PRICE_LABEL=Price:
+#??? META_EDITOR_LINK_LABEL=Link:
+#??? META_EDITOR_ACTION_LABEL=Action:
+#??? META_EDITOR_STARS_LABEL=Stars:
+
+META_EDITOR_SIZE_LABEL=الحجم:
+#??? META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
+#??? META_EDITOR_KIND_LABEL=Kind:
+META_EDITOR_MP3_KIND_LABEL=MPEG-1 صوت Layer 3
+META_EDITOR_MP4_KIND_LABEL=MPEG-4 صوت
+META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
+
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
 ################################################################################
@@ -769,6 +827,7 @@ CHAT_YOU=أنت
 # Key/value pairs for splash screen status text
 ###################################################################
 SPLASH_STATUS_RESOURCE_MANAGER=يتم الآن تحيل الموارد...
+#??? SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
 SPLASH_STATUS_SEARCH_WINDOW=يتم الآن تحميل نافذة البحث...
 SPLASH_STATUS_OPTIONS_WINDOW=يتم الآن تحميل نافذة الخيارات...
 SPLASH_STATUS_USER_SETTINGS =يتم الآن تحميل إعدادات المستخدم...
@@ -783,8 +842,25 @@ SPLASH_STATUS_MONITOR_WINDOW=يتم الآن تحميل نافذة المتاب�
 SPLASH_STATUS_CONNECTION_WINDOW=يتم الآن تحميل نافذة الاتصال...
 SPLASH_STATUS_STATISTICS_WINDOW=يتم الآن تحميل نافذة الإحصائيات...
 SPLASH_STATUS_STATUS_WINDOW=يتم الآن تحميل نافذة إظهار الحالة...
+#??? SPLASH_STATUS_PLAYLIST_WINDOW=Loading playlist window...
 SPLASH_STATUS_MENUS=يتم الآن تحميل القوائم...
 SPLASH_STATUS_MESSAGE_SERVICE=يتم الآن تحميل الرسائل...
+#??? SPLASH_STATUS_ICONS=Loading icons...
+#??? SPLASH_STATUS_I18N=Loading internationalization support...
+#??? SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
+#??? SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading message router...
+#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading connection management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
+#??? SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading shared files...
+#??? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading old downloads...
+#??? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
+#??? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading directed querier...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading MAGNET listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading peer listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading stale connection management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading saved files...
+#??? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading secure settings...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to
@@ -884,6 +960,8 @@ ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire غير قادر على تنزيل ال
 ERROR_LOCKED_BY_PROCESS_GENERIC=لم يتمكن LimeWire من فتح أحد الملفات الضرورية لأن برنامجا آخر يستخدم هذا الملف. قد يؤدي ذلك إلى عمل LimeWire بطريقة غير صحيحة إلى أن يتمكن من فتح هذا الملف.
 ERROR_ACCESS_DENIED_DOWNLOAD=لم يكن LimeWire قادرا على إنشاء أو استكمال كتابة ملف غير كامل للملف المراد تنزيله وذلك لأنك لا تمتلك صلاحية كتابة الملفات في مجلد الملفات الغير تامة. لكي تستكمل استخدام LimeWire اختر مجلدا آخرا للحفظ.
 ERROR_ACCESS_DENIED_GENERIC=لم يتمكن LimeWire من كتابة أحد الملفات الضرورية نتيجة عدم امتلاكك الصلاحيات الضرورية لذلك. قد لا يتم حفظ التفضيلات في المرة القادمة التي تقوم فيها بتشغيل LimeWire.
+#??? ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#??? ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 
 ################################################################################
 # Key/Value pairs for internal error messages
@@ -903,6 +981,9 @@ ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بم�
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
+#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر منفذ آخر.
 ERROR_KEEP_ALIVE=لا يسمح LimeWire بتدعيم هذا العدد من الاتصالات، لأن ذلك يعمل على تقليل كفاءة الشبكة.
 ERROR_TOO_LOW_FOR_ULTRAPEER=الأنداد الفائقون ذووا النقط الطرفية يحتاجون على الأقل إلى ست اتصالات.
@@ -945,6 +1026,7 @@ ERROR_SAVE_META_BAD=تم إدخال هيئة غير مضبوطة. لن يتم ح
 ERROR_REMOVE_LAST_COL=لا يمكنك عدم تفعيل جميع الأعمدة.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
+#??? ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
 ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير موجودة أو غير صالحة. من فضلك قم باختيار ملف آخر أو استخدم السمة الافتراضية.
 #??? ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
 #??? ERROR_THEME_OUT_OF_DATE_TITLE=Invalid skin
@@ -955,6 +1037,9 @@ ERROR_INVALID_URLS_IN_MAGNET=واحدة أو أكثر من وصلات MAGNET غ�
 #??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
 #??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
 #??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
+#??? ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
+#??? ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -974,6 +1059,8 @@ OPTIONS_SHUTDOWN_MAIN_TITLE=إيقاف التشغيل
 OPTIONS_CHAT_MAIN_TITLE=دردشة
 OPTIONS_PLAYER_MAIN_TITLE=المشغل
 OPTIONS_ITUNES_MAIN_TITLE=iTunes
+#??? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
+#??? OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
 OPTIONS_APPS_MAIN_TITLE=التطبيقات المساعدة
 OPTIONS_BUGS_MAIN_TITLE=تقارير الخطأ
 OPTIONS_GUI_MAIN_TITLE=عرض
@@ -1081,6 +1168,15 @@ OPTIONS_DOWNLOAD_CLEAR_LABEL=يمكنك الاختيار بين المسح ال�
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات التي تم تنزيلها
 
 ################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to downloads in the options window
+################################################################################
+#??? OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
+#??? OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to downloads.
+#??? OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
+#??? OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Download Speed:
+
+################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
 # in the options window
 ################################################################################
@@ -1162,6 +1258,20 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=يمكنك استخدام المشغل الدا�
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=تفعيل دعم iTunes:
 OPTIONS_ITUNES_PREFERENCE_TITLE=خيارات iTunes
 OPTIONS_ITUNES_PREFERENCE_LABEL=يمكنك تفعيل دعم iTunes (Mac OS X only).
+
+################################################################################
+# Key/Value pairs for the iTunes/DAAP options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my Music:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability Mode
+
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=كلمة السر:
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -1488,6 +1598,9 @@ STATS_QUERY_REQUEST_HOPS_TITLE=قفزات
 STATS_QUERY_REQUEST_HOPS_LABEL=جميع الاستعلامات المستقبلة، حسب القفزات.
 STATS_QUERY_REQUEST_TTL_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_LABEL=جميع الاستعلامات المستقبلة، حسب زمن الرحيل (TTL).
+# Advanced Gnutella Message special queries
+#??? STATS_SPECIAL_QUERIES_TITLE=Special Queries
+#??? STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
 # Advanced Gnutella Message hops/ttl for query hits
 STATS_QUERY_REPLY_HOPS_TITLE=قفزات
 STATS_QUERY_REPLY_HOPS_LABEL=جميع رسائل الاستعلام التي تم استقبالها، حسب القفزات.
@@ -1698,7 +1811,7 @@ STATS_LIME_SENT_TCP_QUERIES_LABEL=استعلامات TCPالمرسلة من جم
 STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=نتائج الاستعلام
 STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=نتائج استعلام TCP المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=دفعات
-STATS_LIME_SENT_TCP_PUSH_REQUES?S_LABEL=دفعات TCP المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=دفعات TCP المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 # number of messages sent for LimeWire-specific stats -- UDP
 STATS_LIME_SENT_UDP_MESSAGES_TITLE=العدد الكلي
 STATS_LIME_SENT_UDP_MESSAGES_LABEL=العدد الكلي للرسائل التي أرسلها مستخدمو LimeWire الآخرون.
@@ -1748,7 +1861,7 @@ STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=كيلوبايتات ال UDP Pongs المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=استعلامات
 STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=كيلوبايتات استعلامات UDPالمرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
-STATS_LIME_SENT_B?TES_UDP_QUERY_REPLIES_TITLE=نتائج الاستعلام
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=نتائج الاستعلام
 STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=كيلوبايتات نتائج استعلام UDP المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=دفعات
 STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=كيلوبايتات دفعات UDP المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
@@ -2007,6 +2120,9 @@ HOPS7=قفزات 7
 HOPS8=قفزات 8
 HOPS9=قفزات 9
 
+# Special Query labels
+WHAT_IS_NEW_QUERIES=مجتمع?
+
 # TTL labels
 TTL0=TTL 0
 TTL1=TTL 1
@@ -2081,10 +2197,11 @@ DOWNLOAD_CONNECT_DIRECT_SUCCESS=اتصال مباشر ناجح
 DOWNLOAD_CONNECT_DIRECT_FAILURES=فشل الاتصال المباشر
 DOWNLOAD_CONNECT_PUSH_SUCCESS=اتصال دفع ناجح
 DOWNLOAD_PUSH_FAILURE_INTERRUPTED=فشل الدفع (انقطع)
-DOWNLOAD_PUSH_FAILURE_NO_ROUTE=فشل الدفع (لا يوجد مسار)
 DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=فشل الدفع ( لم يتم استقبال GIV)
 DOWNLOAD_PUSH_FAILURE_LOST=فشل الدفع (اتصال مفقود)
 DOWNLOAD_TCP_CONNECT_TIME=وقت اتصال TCP
+#??? DOWNLOAD_FW_FW_SUCCESS=Succesful FW-FW Connection
+#??? DOWNLOAD_FW_FW_FAILURE=Failed FW-FW Connection
 
 # Advanced Upload statistics
 #??? UPLOAD_STAT_THEX=THEX request
@@ -2118,6 +2235,8 @@ UPLOAD_STAT_COMPLETED=الردود التامة
 UPLOAD_STAT_INTERRUPTED=انقطع
 UPLOAD_STAT_STALLED=توقف
 UPLOAD_STAT_COMPLETED_FILE=الملفات التي تم تحويلها
+#??? UPLOAD_FW_FW_SUCCESS=Succesful FW-FW Connection
+#??? UPLOAD_FW_FW_FAILURE=Failed FW-FW Connection
 
 # Advanced Handshaking statistics
 LEAF_OUTGOING_REJECT_LEAF=رفض صادر. (طرف)
