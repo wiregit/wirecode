@@ -95,6 +95,39 @@ public class ManagedConnection
     }
 
     /**
+     * Constructor that is only used for testing purposes.  DO NOT USE THIS
+     * CONSTRUCTOR FOR REAL INSTANCE CREATIONS OF MANAGED CONNECTION.  ONLY
+     * USE THIS FOR TESTING PURPOSES.
+     *
+     * @requires - a test purpose, since _manager is assigned null.
+     */
+    protected ManagedConnection(String host, int port, MessageRouter router)
+    {
+        super(host, port);
+        _router = router;
+        _manager = null;
+        _isRouter = false;
+
+        new OutputRunner(); //Start the thread to empty the output queue
+    }
+
+    /**
+     * Constructor that is only used for testing purposes.  DO NOT USE THIS
+     * CONSTRUCTOR FOR REAL INSTANCE CREATIONS OF MANAGED CONNECTION.  ONLY
+     * USE THIS FOR TESTING PURPOSES.
+     *
+     * @requires - a test purpose, since _manager is assigned null.
+     */
+    protected ManagedConnection(Socket socket, MessageRouter router)
+    {
+        super(socket);
+        _router = router;
+        _manager = null;
+
+        new OutputRunner(); //Start the thread to empy the output queue.
+    }
+
+    /**
      * Creates an outgoing connection.  The connection is considered a special
      * "router connection" iff isRouter==true.  ManagedConnections should only
      * be constructed within ConnectionManager.  
@@ -337,7 +370,7 @@ public class ManagedConnection
      *         or route messages are silently swallowed, allowing the message
      *         loop to continue.
      */
-    void loopForMessages()
+    protected void loopForMessages()
             throws IOException {
         while (true) {
             Message m=null;

@@ -6,7 +6,8 @@ import com.limegroup.gnutella.*;
 public class MessageRouterStub extends MessageRouter {
 
     protected  void respondToPingRequest(PingRequest pingRequest,
-                                                 Acceptor acceptor) { 
+                                                 Acceptor acceptor, 
+                                                 ManagedConnection connection) { 
     }
 
 

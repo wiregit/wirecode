@@ -126,7 +126,7 @@ public class PingReplyCache
      * if the hops is greater than the Max Hops allowed for caching.  If no
      * entries in the cache returns null.
      */
-    public PingReplyCacheEntry getEntry(int hops) 
+    public synchronized PingReplyCacheEntry getEntry(int hops) 
     {
         if (size() <= 0) 
             return null;

@@ -497,7 +497,7 @@ public abstract class MessageRouter
      * Note: This method should only be called when refreshing the PingReply 
      * Cache.
      */
-    private void broadcastPingRequest()
+    protected void broadcastPingRequest()
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
@@ -591,9 +591,9 @@ public abstract class MessageRouter
     /**
      * Forward on the PingReply to all connections except the one that
      * we received the PingReply on.  But only forward the PingReply
-     * if the connection needs a PingReply (for that hops).  
+     * if the connection needs a PingReply (for that hops).
      */
-    private void sendPongToOtherConnections(PingReply pingReply,
+    protected void sendPongToOtherConnections(PingReply pingReply,
                                             ManagedConnection connection)
     {
         //necessary fields for forwarding the PingReply

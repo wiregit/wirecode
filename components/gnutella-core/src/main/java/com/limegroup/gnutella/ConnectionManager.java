@@ -371,7 +371,8 @@ public class ConnectionManager {
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
         //based on the invariant: numConnections + numFetchers >= _keepAlive
-        if (getNumConnections() + _fetchers.size() >= _keepAlive) 
+        if ( (getNumConnections() + _fetchers.size() >= _keepAlive) &&
+             (_catcher.reserveCacheSufficient()))
             pr = new PingRequest((byte)1);
         else
             pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
