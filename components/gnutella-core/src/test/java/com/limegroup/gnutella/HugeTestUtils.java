@@ -4,12 +4,24 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.*;
 
 /**
  * This class provides convenient data and utility functions to
  * huge test classes.
  */
 final class HugeTestUtils {
+
+	static final URL[] BAD_PORT_URLS = new URL[2];
+
+	static {
+		try {
+			BAD_PORT_URLS[0] = new URL("http", "www.limewire.org", -1, "test");
+			BAD_PORT_URLS[1] = new URL("http", "www.limewire.org", 66000, "test");				
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Strings representing invalid URNs.
