@@ -288,7 +288,13 @@ public class HTTPUploader implements Uploader {
 			// which break protocal by not sending the '='
             if ( (indexOfIgnoreCase(str, "Range: bytes=") != -1) ||
 				 (indexOfIgnoreCase(str, "Range: bytes ") != -1) ) {
-                String sub = str.substring(13);
+				String sub;
+				String second;
+				try {
+					sub = str.substring(13);
+				} catch (IndexOutOfBoundsException e) {
+					throw new IOException();
+				}
 				// remove the white space
                 sub = sub.trim();   
                 char c;
@@ -296,21 +302,46 @@ public class HTTPUploader implements Uploader {
                 c = sub.charAt(0);
 				// - n  
                 if (c == '-') {  
-                    String second = sub.substring(1);
+					// String second;
+					try {
+						second = sub.substring(1);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     second = second.trim();
-                    _uploadEnd = java.lang.Integer.parseInt(second);
+					try {
+						_uploadEnd = java.lang.Integer.parseInt(second);
+					} catch (NumberFormatException e) {
+						throw new IOException();
+					}
                 }
                 else {                
 					// m - n or 0 -
                     int dash = sub.indexOf("-");
-                    String first = sub.substring(0, dash);
+					String first;
+					try {
+						first = sub.substring(0, dash);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     first = first.trim();
-                    _uploadBegin = java.lang.Integer.parseInt(first);
-                    String second = sub.substring(dash+1);
+					try {
+						_uploadBegin = java.lang.Integer.parseInt(first);
+					} catch (NumberFormatException e) {
+						throw new IOException();
+					}
+					try {
+						second = sub.substring(dash+1);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     second = second.trim();
                     if (!second.equals("")) 
-                        _uploadEnd = java.lang.Integer.parseInt(second);
-                    
+						try {
+							_uploadEnd = java.lang.Integer.parseInt(second);
+                    } catch (NumberFormatException e) {
+						throw new IOException();
+					}
                 }
             }
 

@@ -83,11 +83,13 @@ public class NormalUploadState implements UploadState {
         outerLoop:
             while (true) {
 
-				int max = _uploader.getManager().calculateBurstSize();
+				// int max = _uploader.getManager().calculateBurstSize();
+				int max = _uploader.getManager().calculateBandwidth();
                 int burstSize=max*cycleTime;
 
                 int burstSent=0;
-                Date start=new Date();
+                // Date start=new Date();
+				long start = System.currentTimeMillis();
                 while (burstSent<burstSize) {
 					c = _fis.read(buf);
                     if (c == -1)
@@ -102,10 +104,12 @@ public class NormalUploadState implements UploadState {
                     burstSent += c;
                 }
 
-                Date stop=new Date();
+                // Date stop=new Date();
+				long stop = System.currentTimeMillis();
 
                 //3.  Pause as needed so as not to exceed maxBandwidth.
-                int elapsed=(int)(stop.getTime()-start.getTime());
+                // int elapsed=(int)(stop.getTime()-start.getTime());
+                int elapsed=(int)(stop-start);
                 int sleepTime=cycleTime-elapsed;
                 if (sleepTime>0) {
                     try {

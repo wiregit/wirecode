@@ -263,7 +263,11 @@ public class UploadManager {
 			pfile = (PushedFile)iter.next();
 			// NOTE : this should be iter.remove ???
 			if ( pf.equals(pfile) ) 
-				_attemptingPushes.remove(host);
+				// _attemptingPushes.remove(host);
+				// calling iter.remove() rather than
+				// remove on the list, since this will be
+				// safer while iterating through the list.
+				iter.remove();
 		}
 	}
 
@@ -290,7 +294,8 @@ public class UploadManager {
 	 * @return burstSize.  if it is the special case, in which 
 	 *         we want to upload as quickly as possible.
 	 */
-	public int calculateBurstSize() {
+	public int calculateBandwidth() {
+		// public int calculateBurstSize() {
 		float totalBandwith = getTotalBandwith();
 		float burstSize = totalBandwith/uploadsInProgress();
 		return (int)burstSize;
