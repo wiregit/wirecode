@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.limegroup.gnutella.altlocs.*;
 import java.util.*;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -343,7 +344,8 @@ public class FileDesc implements AlternateLocationCollector {
 	 * This should be called whenever the address changes.
 	 */
     public void addUrnsForSelf() {
-        ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
+        if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue())
+            ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
     }
 	
 

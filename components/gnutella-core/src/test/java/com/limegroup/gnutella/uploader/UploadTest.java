@@ -126,6 +126,7 @@ public class UploadTest extends BaseTestCase {
     }
 
 	protected void setUp() throws Exception {
+	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
 		    new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -712,7 +713,7 @@ public class UploadTest extends BaseTestCase {
         
         // all proxies should be gone, and bcd should be removed from 
         // the filedesc
-        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 0, FD.getAltLocsSize());
         assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
     }
     
@@ -1397,7 +1398,7 @@ public class UploadTest extends BaseTestCase {
 
         String req = makeRequest(file);
         byte[] ret = getBytes("GET", req, header,
-                             out, in, expheader, false);
+                             out, in, expheader, false, true);
         in.close();
         out.close();
         s.close();
@@ -1564,10 +1565,11 @@ public class UploadTest extends BaseTestCase {
                                             BufferedWriter out,
                                             BufferedReader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response)
       throws IOException {
         return new String(
-          request(requestMethod, file, header, out, in, requiredHeader, http11)
+          request(requestMethod, file, header, out, in, requiredHeader, http11, require11Response)
         );
     }
     
@@ -1577,12 +1579,13 @@ public class UploadTest extends BaseTestCase {
                                  OutputStream out,
                                  InputStream in,
                                  String requiredHeader,
-                                 boolean http11)
+                                 boolean http11,
+                                 boolean require11Response)
      throws IOException {
         int length = readToContent(requestMethod, file, header,
                         new OutputStreamWriter(out),
                         new InputStreamReader(in),
-                        requiredHeader, http11);
+                        requiredHeader, http11, require11Response);
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         
         //3. Read content.  Obviously this is designed for small files.
@@ -1603,11 +1606,12 @@ public class UploadTest extends BaseTestCase {
                                             BufferedWriter out,
                                             BufferedReader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response)
      throws IOException {
         
         int length = readToContent(requestMethod, file, header, 
-                                    out, in, requiredHeader, http11);
+                                    out, in, requiredHeader, http11, require11Response);
 		
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         
@@ -1628,7 +1632,8 @@ public class UploadTest extends BaseTestCase {
                                             Writer out,
                                             Reader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response)
      throws IOException {        
         // send request
         out.write( requestMethod + " " + file + " " + 
@@ -1651,13 +1656,12 @@ public class UploadTest extends BaseTestCase {
         boolean firstLine = true;
         while (true) { 
             String line = readLine(in);
-            if(firstLine && (line == null || !line.startsWith("HTTP/1.1")))
+            if(require11Response && firstLine && (line == null || !line.startsWith("HTTP/1.1")))
                 fail("bad first response line: " + line);
             firstLine = false;
             
             if( line == null)
                 throw new InterruptedIOException("connection closed");
-            System.out.println("<< " + line);
                 
             if (line.equals(""))
                 break;
@@ -1798,7 +1802,7 @@ public class UploadTest extends BaseTestCase {
                                            String requiredHeader) 
             throws IOException {
         return downloadInternal("GET", makeRequest(file), header,
-                                    out, in, requiredHeader, true);
+                                    out, in, requiredHeader, true, true);
 	}
     
     /** 
@@ -1813,7 +1817,7 @@ public class UploadTest extends BaseTestCase {
                                            String requiredHeader) 
             throws IOException {
         return downloadInternal("GET", makeRequest(file), header,
-                                    out, in, requiredHeader, false);
+                                    out, in, requiredHeader, false, true);
 	}
 
     /** 
@@ -2042,17 +2046,17 @@ public class UploadTest extends BaseTestCase {
                                                           s.getOutputStream()));
             //2. Send GET request in URI form
             downloadInternal("GET", file, sendHeader, out, in, 
-                             requiredHeader, http11);
+                             requiredHeader, http11, true);
             
             //3. If the connection should remain open, make sure we
             //   can request again.
             if( repeat ) {
                 downloadInternal("GET", file, sendHeader, out, in,
-                                 requiredHeader, http11);
+                                 requiredHeader, http11, true);
             } else {
                 try {
                     downloadInternal("GET", file, sendHeader, out, in,
-                                     requiredHeader, http11);
+                                     requiredHeader, http11, false);
                     fail("Connection should be closed");
                 } catch(InterruptedIOException good) {
                     // good.
