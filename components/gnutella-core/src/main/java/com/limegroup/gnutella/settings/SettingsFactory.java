@@ -107,7 +107,13 @@ public final class SettingsFactory {
 		FileInputStream fis = null;
         try {
             fis = new FileInputStream(SETTINGS_FILE);
-            PROPS.load(fis);
+            // Loading properties can cause problems if the
+            // file is invalid.  Ignore these invalid values,
+            // as the default properties will be used and that's
+            // a-OK.
+            try {
+                PROPS.load(fis);
+            } catch(IllegalArgumentException ignored) {}
         } catch(IOException e) {
 			ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
