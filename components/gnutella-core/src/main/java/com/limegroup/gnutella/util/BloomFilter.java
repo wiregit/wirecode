@@ -17,8 +17,8 @@ public interface BloomFilter {
     /**
      * various cool stuff we can do with filters
      */
-    public BloomFilter XOR(BloomFilter other);
-    public BloomFilter OR(BloomFilter other);
-    public BloomFilter AND(BloomFilter other);
-    public BloomFilter invert();
+    public void xor(BloomFilter other);
+    public void or(BloomFilter other);
+    public void and(BloomFilter other);
+    public void invert();
 }

@@ -20,6 +20,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests the functionality of the altloc digest.
@@ -76,6 +77,91 @@ public class AltLocDigestTest extends BaseTestCase {
 	}
 	
 	/**
+	 * tests that parsing digests with the standard element size works
+	 */
+	public void testStandardSize() throws Exception {
+	    byte [] digest = new byte[6+3];
+	    digest[0] = 12;
+	    digest[1] = 4;
+	    digest[2] = 0;
+	    for (int i =3;i < 9;i++)
+	        digest[i]=(byte)i;
+	    
+	    AltLocDigest parsed = AltLocDigest.parseDigest(digest,0,9);
+	    
+	    BitSet b = (BitSet)PrivilegedAccessor.getValue(parsed,"_values");
+	    assertEquals(4,b.cardinality());
+	    
+	    int elementSize = ((Integer)PrivilegedAccessor.getValue(parsed,"_elementSize")).intValue();
+	    assertEquals(12,elementSize);
+	    
+	    byte [] digest2 = parsed.toBytes();
+	    assertEquals(digest[0],digest2[0]);
+	    assertEquals(digest[1],digest2[1]);
+	    assertFalse(Arrays.equals(digest,digest2));
+	    
+	    parsed = AltLocDigest.parseDigest(digest2,0,9);
+	    byte [] digest3 = parsed.toBytes();
+	    assertEquals(digest2,digest3);
+	}
+	/**
+	 * tests that reading of a digest with different element size works fine
+	 */
+	public void testParseDifferentSize() throws Exception {
+	    // create a digest with ten values, where each value is 1 byte
+	    byte [] digest = new byte[3+10];
+	    digest[0] = 8;
+	    digest[1] = 10;
+	    digest[2] = 0;
+	    for (int i = 3;i < 13; i++)
+	        digest[i]=(byte)i;
+	    
+	    AltLocDigest parsed = AltLocDigest.parseDigest(digest,0,13);
+	    
+	    BitSet b = (BitSet)PrivilegedAccessor.getValue(parsed,"_values");
+	    assertEquals(10,b.cardinality());
+	    
+	    int elementSize = ((Integer)PrivilegedAccessor.getValue(parsed,"_elementSize")).intValue();
+	    assertEquals(8,elementSize);
+	    
+	    byte [] digest2 = parsed.toBytes();
+	    assertTrue(Arrays.equals(digest,digest2));
+	    
+	    // rince and repeat, claiming that there are eight values, 10 bits each
+	    digest[0] = 10;
+	    digest[1] = 8;
+	    
+	    parsed = AltLocDigest.parseDigest(digest,0,13);
+	    b = (BitSet)PrivilegedAccessor.getValue(parsed,"_values");
+	    assertEquals(8,b.cardinality());
+	    
+	    elementSize = ((Integer)PrivilegedAccessor.getValue(parsed,"_elementSize")).intValue();
+	    assertEquals(10,elementSize);
+	    
+	    // digest 2 will not be the same as digest1, since the numbers were not in increasing order
+	    digest2 = parsed.toBytes();
+	    assertFalse(Arrays.equals(digest,digest2));
+
+	    // but it will be equal to digest3
+	    parsed = AltLocDigest.parseDigest(digest2,0,13);
+	    byte [] digest3 = parsed.toBytes();
+	    assertTrue(Arrays.equals(digest3,digest2));
+	    
+	    // try boundary conditions
+	    digest = new byte[24*8+3];
+	    digest[0]=24;
+	    digest[1]=8;
+	    for (int i = 3;i<24*8;i++)
+	        digest[i]=(byte)i; //wraparound is ok
+	    
+	    parsed = AltLocDigest.parseDigest(digest,0,24*8);
+	    digest2 = parsed.toBytes();
+	    parsed = AltLocDigest.parseDigest(digest2,0,digest2.length);
+	    digest3 = parsed.toBytes();
+	    assertTrue(Arrays.equals(digest3,digest2));
+	}
+	
+	/**
 	 * tests serialization and reading of the digest
 	 */
 	public void testReadAndWrite() throws Exception {
@@ -92,14 +178,13 @@ public class AltLocDigestTest extends BaseTestCase {
 	    
 	    digest = AltLocDigest.parseDigest(toByte,0,toByte.length);
 	    assertTrue(digest.containsAll(_alternateLocations));
-	    
 	}
 	
 	public void testXORing() throws Exception {
 	    
 	    //XORing oneself = 0
 	    AltLocDigest digest = _direct.getDigest();
-	    digest =(AltLocDigest) digest.XOR(digest);
+	    digest.xor(digest);
 	    
 	    for (Iterator iter = _alternateLocations.iterator();iter.hasNext();) {
 	        AlternateLocation loc = (AlternateLocation)iter.next();
@@ -112,7 +197,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    assertTrue(digest.contains(pa));
 	    AltLocDigest digest2 = _push.getPushDigest();
 	    assertTrue(digest2.contains(pa));
-	    digest = (AltLocDigest)digest.XOR(digest2);
+	    digest.xor(digest2);
 	    
 	    assertFalse(digest.contains(pa));
 	}
@@ -120,7 +205,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	public void testANDing() throws Exception {
 	    //anding with empty = empty
 	    AltLocDigest digest = _direct.getDigest();
-	    digest = (AltLocDigest)digest.AND(_direct.getPushDigest());
+	    digest.and(_direct.getPushDigest());
 	    for (Iterator iter = _alternateLocations.iterator();iter.hasNext();) {
 	        AlternateLocation loc = (AlternateLocation)iter.next();
 	        assertFalse(digest.contains(loc));
@@ -132,7 +217,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    AltLocDigest digest2 = _push.getPushDigest();
 	    assertTrue(digest2.contains(pa));
 	    assertTrue(digest2.contains(pa2));
-	    digest = (AltLocDigest)digest.AND(digest2);
+	    digest.and(digest2);
 	    assertTrue(digest.contains(pa));
 	    assertFalse(digest.contains(pa2));
 	}
@@ -140,7 +225,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	public void testORing() throws Exception {
 	    //oring with empty = oneself
 	    AltLocDigest digest = _direct.getDigest();
-	    digest = (AltLocDigest)digest.AND(_direct.getPushDigest());
+	    digest.and(_direct.getPushDigest());
 	    for (Iterator iter = _alternateLocations.iterator();iter.hasNext();) {
 	        AlternateLocation loc = (AlternateLocation)iter.next();
 	        assertTrue(digest.contains(loc));
@@ -152,7 +237,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    AltLocDigest digest2 = _push.getPushDigest();
 	    assertTrue(digest2.contains(pa));
 	    assertTrue(digest2.contains(pa2));
-	    digest = (AltLocDigest)digest.AND(digest2);
+	    digest.and(digest2);
 	    assertTrue(digest.contains(pa));
 	    assertTrue(digest.contains(pa2));
 	}
@@ -160,7 +245,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	public void testNOTing() throws Exception {
 	    
 	    AltLocDigest digest = _direct.getDigest();
-	    digest = (AltLocDigest)digest.invert();
+	    digest.invert();
 	    for (Iterator iter = _alternateLocations.iterator();iter.hasNext();) {
 	        AlternateLocation loc = (AlternateLocation)iter.next();
 	        assertFalse(digest.contains(loc));

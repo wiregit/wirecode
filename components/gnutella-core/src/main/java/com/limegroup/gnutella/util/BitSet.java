@@ -1075,4 +1075,8 @@ public class BitSet implements Cloneable, java.io.Serializable {
 	buffer.append('}');
 	return buffer.toString();
     }
+    
+    public long[] getBits() {
+        return bits;
+    }
 }

@@ -5,12 +5,7 @@ package com.limegroup.gnutella.util;
  * hashCode and equals methods of objects
  */
 
-public interface Hasher {
-
-    /**
-     * @return custom hash code for the given object
-     */
-    public int hash(Object o);
+public interface Hasher extends HashFunction {
 
     /**
      * @return whether two objects are equal based on custom criteria

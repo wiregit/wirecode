@@ -1,15 +1,20 @@
 
 package com.limegroup.gnutella.altlocs;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.BloomFilter;
+import com.limegroup.gnutella.util.HashFunction;
 
 /**
  * A bloom filter factory that can create filters for direct locs and push locs
@@ -19,25 +24,93 @@ import com.limegroup.gnutella.util.BloomFilter;
  * 
  * In memory, those 4096 bits are stored as a BitSet, but on the network they are 
  * represented as list of values - i.e. each 3 bytes carry the hashes of two altlocs.
+ * 
+ * You can store either pushlocs or direct altlocs, or mix them (at your own risk).
+ * 
+ * 
+ * On the wire, the digest is represented as a 3-byte header, and body.
+ * The first byte gives the size of each element, and the next two bytes the number of elements.
+ * The rest of the body is a list of elements, each one packed in size bytes.
+ * Note: Whenever the default size of 12 bits/element is used, the class uses an optimized 
+ * serialization, but it supports reading/writing to elements any size up to 24 bits. 
  */
-public abstract class AltLocDigest implements BloomFilter {
+public class AltLocDigest implements BloomFilter {
 
+    /**
+     * constants for which hasing function this digest uses.
+     */
+    private static final HashFunction DIRECT = new DirectLocHasher();
+    private static final HashFunction PUSH = new PushLocHasher();
+    
+    /**
+     * default size for each element
+     */
+    private static final int DEFAULT_ELEMENT_SIZE = 12;
+    
+    /**
+     * Max number of elements a digest can contain
+     * TODO: simpp this
+     */
+    private static final int MAX_ELEMENTS = 1024;
+    
+    /**
+     * 24 bits = 16MB ram!
+     */
+    private static final int MAX_ELEMENT_SIZE = 24;
+    
+    /**
+     * constructor with default values.
+     */
+    public AltLocDigest(boolean push) {
+        this();
+        _hash = push ? PUSH : DIRECT;
+    }
+    
+    private AltLocDigest() {
+        _values = new BitSet();
+        _elementSize = DEFAULT_ELEMENT_SIZE;
+    }
+    
     /**
      * A BitSet storage for the values of the filter.
      * When we have many entries, or need to do boolean algebra we use
      * this representation.
      */
-    protected BitSet _values;
+    private BitSet _values;
+    
+    /**
+     * How many bits are necessary to represent each element.  This determines the
+     * range of the hash function.
+     */
+    private int _elementSize; 
     
     /**
      * the actual hashing function.  Acts differently on altlocs than pushlocs.
-     * range is 0 < hash < 2^12
+     * range is [0, 2^_elementSize)
      */
-    protected abstract int hash(AlternateLocation altloc);
+    private HashFunction _hash;
     
+    /**
+     * tells this digest to use the hash function for direct altlocs.
+     * takes effect on the next add/check.
+     */
+    public void setDirect() {
+        _hash = DIRECT;
+    }
+
+    /**
+     * tells this digest to use the hash function for push altlocs.
+     * takes effect on the next add/check.
+     */
+    public void setPush() {
+        _hash = PUSH;
+    }
     
     public void add(Object o) {
-        
+        if (! (o instanceof AlternateLocation))
+            throw new IllegalArgumentException ("trying to add a non-altloc to an altloc digest");
+        AlternateLocation loc = (AlternateLocation)o;
+        _values.set(_hash.hash(loc));
     }
 
     /* (non-Javadoc)
@@ -56,7 +129,7 @@ public abstract class AltLocDigest implements BloomFilter {
             return false;
         AlternateLocation loc = (AlternateLocation)o;
         
-        return _values.get(hash(loc));
+        return _values.get(_hash.hash(loc));
     }
 
     /* (non-Javadoc)
@@ -75,27 +148,54 @@ public abstract class AltLocDigest implements BloomFilter {
      * two altlocs.
      */
     public byte [] toBytes() {
-        int size = _values.cardinality() / 3;
-        if (_values.cardinality() % 3 != 0)
+        // create the output array
+        int bitSize = _values.cardinality() * _elementSize;
+        int size = bitSize  / 8;
+        if (bitSize % 8 != 0)
             size++;
+        byte []ret = new byte[size+3];
+        // write the size of each element and the number of elements 
+        ret[0] = (byte)_elementSize;
+        ByteOrder.short2leb((short)_values.cardinality(),ret,1);
         
-        byte []ret = new byte[size];
-        int index = 0;
-        boolean first = true;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        
-        for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1)){
-            if (first) {
-                ret[index++] = (byte)((i & 0xFF0 ) >> 4);
-                ret[index] = (byte)((i & 0xF) << 4);
-                first = false;
-            } else {
-                ret [index++] |= (byte)((i & 0xF00) >> 8);
-                ret [index++] = (byte)(i & 0xFF);
-                first = true;
+        // if the elements are the default size of 12 bits, serialize them the fast way
+        if (_elementSize == DEFAULT_ELEMENT_SIZE ) {
+            int index = 3;
+            boolean first = true;
+            for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1)){
+                if (first) {
+                    ret[index++] = (byte)((i & 0xFF0 ) >> 4);
+                    ret[index] = (byte)((i & 0xF) << 4);
+                    first = false;
+                } else {
+                    ret [index++] |= (byte)((i & 0xF00) >> 8);
+                    ret [index++] = (byte)(i & 0xFF);
+                    first = true;
+                }
+            }
+        } else {
+            // otherwise, the slow way 
+            BitSet tmp = new BitSet((ret.length-3)*8);
+            int offset = 0;
+            int mask = 1 << _elementSize-1;
+            for(int element=_values.nextSetBit(0); element >=0; 
+            	element=_values.nextSetBit(element+1)) {
+                for (int i = 0; i < _elementSize; i++) {
+                    if (((element << i) & mask) == mask) 
+                        tmp.set(offset);
+                    offset++;
+                }
+            }
+            
+            // a LongBuffer -> ByteBuffer conversion would do this much faster...
+            for (int i = 0;i < tmp.length();i++) {
+                if (tmp.get(i)) 
+                    ret[3+i/8] |= (0x80 >>> (i % 8));
             }
         }
+        
         return ret;
+        
     }
     
     public void write(OutputStream out) throws IOException {
@@ -103,20 +203,125 @@ public abstract class AltLocDigest implements BloomFilter {
     }
     
     /**
-     * @param push whether the location contains pushlocs
-     * @return digest of the given location.
+     * parses a digest contained in the given byte array.  The resulting
+     * bloom filter does not have associated hash function with it, so use
+     * setPush or setDirect before using it.
+     * 
+     * @throws IOException if input was invalid.
      */
-    public static AltLocDigest getDigest(AlternateLocationCollection alc, boolean push) {
-        return null;
-    }
-    
     public static AltLocDigest parseDigest(byte []data, int offset, int length) 
     throws IOException {
-        return null;
+        // do some sanity checks
+        if (data.length < offset+length || length < 3)
+            throw new IOException();
+        
+        int elementSize = data[0];
+        if (elementSize > MAX_ELEMENT_SIZE)
+            throw new IOException();
+        
+        int numElements = ByteOrder.ubytes2int(ByteOrder.leb2short(data,1));
+        if (numElements > MAX_ELEMENTS)
+            throw new IOException();
+        if ((length-3) * 8 < elementSize * numElements)
+            throw new IOException();
+        
+        // create the new altloc digest
+        AltLocDigest digest = new AltLocDigest();
+        digest._elementSize = elementSize;
+        
+        // and populate it
+        offset+=24;
+        for (int i = 0; i < numElements; i++) {
+                int element=0;
+                for (int j = 0; j < elementSize; j++) {
+                        int current = data[offset / 8];
+                        int extractedBit = current & (0x80 >>> (offset % 8));
+                        extractedBit >>= (7 - (offset % 8));
+                        element <<= 1;
+                        element |= extractedBit;
+                        offset++;
+                }
+                if (element < 0) element+=256;
+                digest._values.set(element);
+        }
+
+        
+        return digest;
     }
     
+    /**
+     * parses a digest contained in the given InputStream.  The resulting
+     * bloom filter does not have an associated hash function with it, so use
+     * setPush or setDirect before using it.
+     * 
+     * @throws IOException if input was invalid.
+     */
     public static AltLocDigest parseDigest(InputStream in) throws IOException {
-        return null;
+        
+        // read the header, do some sanity checks
+        int elementSize = in.read();
+        if (elementSize > 32)
+            throw new IOException();
+        
+        short snum = ByteOrder.leb2short(in);
+        int num = ByteOrder.ubytes2int(snum);
+        if (num > MAX_ELEMENTS)
+            throw new IOException();
+        
+        int size = (elementSize * num) / 8;
+        if (elementSize % 8 != 0)
+            size++;
+        
+        // read the entire digest in memory before trying to parse
+        byte [] digest = new byte[size+3];
+        digest[0] = (byte)elementSize;
+        ByteOrder.short2leb(snum,digest,1);
+        
+        DataInputStream dais = new DataInputStream(in);
+        dais.readFully(digest,3,size);
+        
+        return parseDigest(digest,0,digest.length);
     }
     
+    private static final class DirectLocHasher implements HashFunction {
+       public int hash(Object o) {
+           return -1;
+       }
+    }
+    
+    private static final class PushLocHasher implements HashFunction {
+        public int hash(Object o) {
+            return -1;
+        }
+     }
+
+    
+    public void and(BloomFilter other) {
+        AltLocDigest digest = (AltLocDigest) other;
+        _values.and(digest._values);
+    }
+    
+    /**
+     * slow - use andNot whenver possible
+     */
+    public void invert() {
+        for (int i = 0;i < _values.size();i++)
+            _values.flip(i);
+    }
+    
+    public void or(BloomFilter other) {
+        AltLocDigest digest = (AltLocDigest) other;
+        _values.or(digest._values);
+    }
+    public void xor(BloomFilter other) {
+        AltLocDigest digest = (AltLocDigest) other;
+        _values.or(digest._values);
+    }
+    
+    /**
+     * efficient AndNot with another AltLocDigest.
+     */
+    public void andNot(AltLocDigest other) {
+        _values.andNot(other._values);
+    }
 }
