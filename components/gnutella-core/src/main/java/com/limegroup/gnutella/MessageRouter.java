@@ -105,7 +105,7 @@ public abstract class MessageRouter
     /**
      * Links the MessageRouter up with the other back end pieces
      */
-    void initialize(Acceptor acceptor, ConnectionManager manager,
+    public void initialize(Acceptor acceptor, ConnectionManager manager,
                     HostCatcher catcher)
     {
         _acceptor = acceptor;
@@ -346,7 +346,7 @@ public abstract class MessageRouter
                                 ManagedConnection receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
-        _catcher.spy(pingReply);
+        _catcher.spy(pingReply, receivingConnection);
 
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(pingReply.getGUID());
