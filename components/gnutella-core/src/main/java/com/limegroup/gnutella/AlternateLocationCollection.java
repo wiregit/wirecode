@@ -43,7 +43,13 @@ public final class AlternateLocationCollection
 	// implements the AlternateLocationCollector interface
 	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
 		createMap();
-		_alternateLocations.putAll(alc.getMap());
+		Map map = alc.getMap();
+		Collection values = map.values();
+		Iterator iter = values.iterator();
+		while(iter.hasNext()) {
+			AlternateLocation curLoc = (AlternateLocation)iter.next();
+			this.addAlternateLocation(curLoc);
+		}
 	}
 
 	// implements the AlternateLocationCollector interface
