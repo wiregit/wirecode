@@ -190,8 +190,11 @@ public final class CompositeQueue {
     /**
      * Retrieves the next message in the queue.
      * 
-     * @return the next message in the queue, or <tt>null</tt> if there are
-     *  no messages left
+     * @return The next message in the queue, or <tt>null</tt> if there are
+     *  no messages left.  Note that there could be have been more messages
+     *  left prior to this call -- that size() could have returned greater than
+     *  zero.  This is because messages could have expired from being too old, 
+     *  causing this to ultimately return null.
      */
     public Message removeNext() {
         // if there are no buffered messages, return null immediately
