@@ -283,7 +283,7 @@ public class ManagedConnection extends Connection
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
      */
-    private int softMaxHops = -1;
+    private volatile int softMaxHops = -1;
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
@@ -614,10 +614,11 @@ public class ManagedConnection extends Connection
             m=m.stripExtendedPayload();
 
         // if Hops Flow is in effect, and this is a QueryRequest, and the
-        // hoppage is too biggage, discardage time....
-        if ((softMaxHops > -1) &&
+        // hoppage is too biggage, discardage time...
+	int smh = softMaxHops;.
+        if ((smh > -1) &&
             (m instanceof QueryRequest) &&
-            (m.getHops() >= softMaxHops))
+            (m.getHops() >= smh))
             return;
 
         repOk();
