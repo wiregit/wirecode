@@ -5,6 +5,7 @@ import java.io.*;
 import com.limegroup.gnutella.simpp.*;
 import com.limegroup.gnutella.*;
 
+import org.apache.commons.logging.*;
 
 public class SimppSettingsManager {
     
@@ -29,6 +30,8 @@ public class SimppSettingsManager {
      *  The instance
      */
     private static SimppSettingsManager INSTANCE;
+
+    private static final Log LOG=LogFactory.getLog(SimppSettingsManager.class);
     
     //constructor
     private SimppSettingsManager() {
@@ -74,7 +77,8 @@ public class SimppSettingsManager {
      * this.simppProps
      */
     public void activateSimppSettings() {
-        System.out.println("activating new settings");
+        if(LOG.isDebugEnabled())
+            LOG.debug("activating new settings");
         if(!_isDefault) //we are already activated...
             return;
         synchronized(_simppProps) {
@@ -89,8 +93,10 @@ public class SimppSettingsManager {
                     //return; //TODO: Error service here?
                 }
                 String simppValue = (String)currEntry.getValue();
-                System.out.println("Sumeet:setting:"+simppSetting);
-                System.out.println("Sumeet:simpp value:"+simppValue);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("setting:"+simppSetting);
+                    LOG.debug("simpp value:"+simppValue);
+                }
                 //get the setting we want based on the name of the setting
                 Setting currSetting = findSettingByName(simppSetting);
                 if(currSetting == null) {
@@ -104,7 +110,8 @@ public class SimppSettingsManager {
                     continue;
                 //get the default/current value and cache it                
                 String defaultValue = (String)currSetting.getValueAsString();
-                System.out.println("current value:"+defaultValue);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("current value:"+defaultValue);
                 _defaults.put(simppSetting, defaultValue);
                 //we never want to write this setting out
                 currSetting.setAlwaysSave(false);
@@ -153,7 +160,8 @@ public class SimppSettingsManager {
      * @param rawSetting has the form SETTING_NAME{setting_key} = setting_value
      */
     private Setting loadSetting(String rawSetting) {
-        System.out.println("Sumeet: loading setting");
+        if(LOG.isDebugEnabled())
+            LOG.debug("loadSetting called");
         String fullname = getSettingsClass(rawSetting);
         if(fullname == null) //simpp messasge badly formatted
             return null;
