@@ -887,14 +887,7 @@ public abstract class FileManager {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
         } catch(IOException ioe) {
-            // file doesn't exist?
-            //If this fails then we are going to have problems later on because
-            //when retrieving the FileDesc we check against the canonicaled 
-            //form, and this has been causing problems on OSX. Now we error 
-            //service in this case, and return, so if we still see the problem 
-            //in ManagedDownloader.informMesh, we know that this is not the
-            //cause of the problem
-            ErrorService.error(ioe);
+            //invalid file?... don't add incomplete file.
             return;
         }
 
