@@ -287,11 +287,14 @@ public final class MP3Info {
 		// @see loadVBRHeeader for VBR format specifics
 		// advance to check where Xing header would be
 		// make sure we have enough data to test/work with
-		// pos= current pos in file, i= pos in buffer
         // 120 is total 'possible' VBR length
         // 36  max bytes to skip
         // 3   is to cover length of VBR header
-        int need = (int)((i + 3) - (120 + 36 + i));
+        int need = buf.length   // total we have.
+                   - i          // where we're currently at
+                   - 3          // VBR header
+                   - 120        // max possible VBR length
+                   - 36;        // max bytes to skip
   		if (need < 0) { //special case, we need more data
 	  		//shift current data left to make room for need data
 			for (i = 0, need = -need; 
@@ -309,7 +312,7 @@ public final class MP3Info {
         }
         else { // mpeg version 2 or 2.5            
             i += (getModeIndex()==3  ?  23  :  21);
-        }		
+        }
 		
         // Doh!! not all VBR files will have correct tags, it's optional
         switch (buf[i+0]) {
