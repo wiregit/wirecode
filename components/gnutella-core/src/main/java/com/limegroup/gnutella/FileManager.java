@@ -225,13 +225,13 @@ public class FileManager {
      * <p>
      * If directory is null, returns all shared files.
      */
-    public /* synchronized */ File[] getSharedFiles(File directory) {
-        File[] files = new File[0];
-         return (File[])getSharedFilesImpl(false, files, directory);
+    public File[] getSharedFiles(File directory) {
+        return (File[])getSharedFilesImpl(false, new File[0], directory);
     }
 
     /**
-     * Returns a list of all shared file descriptors in the given directory, in any order.
+     * Returns a list of all shared file descriptors in the given directory,
+     * in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
      * shared but contains no files.  This method is not recursive; files in 
      * any of the directory's children are not returned.   
@@ -239,17 +239,19 @@ public class FileManager {
      * If directory is null, returns all shared file descriptors.
      */    
     public FileDesc[] getSharedFileDescriptors(File directory) {
-        FileDesc[] fds = new FileDesc[0];
-        return (FileDesc[])getSharedFilesImpl(true, fds, directory);
+        return (FileDesc[])getSharedFilesImpl(true,
+                             new FileDesc[0], directory);
     }
     
     /**
      * The implementation of the code to scan through files.
      * Returns true if the directory was shared, false otherwise.
-     * @param descs If true, type will be filled with FileDescs.
-     *    If false, with files.
-     * @param type The array you want to fill up with shared objects.
+     * @param descs If true, the returned array will be FileDescs,
+     *    If false, the returned array will be Files.
+     * @param type An array whose type should be either FileDesc
+     *    or File, to be filled with the appropriate object.
      * @param directory The directory you want to search shared files for.
+     * @return An array (FileDesc or File) of the shared files.
      */
     private synchronized Object[] getSharedFilesImpl(boolean descs,
                                                  Object[] type,
