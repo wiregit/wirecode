@@ -1111,25 +1111,32 @@ public class DownloadManager implements BandwidthTracker {
         };
         startPushThread.start();
     }
+    
+    /**
+     * Sends a push for the given file.
+     */
+    public void sendPush(RemoteFileDesc file) {
+        sendPush(file, null);
+    }
 
     /**
-     * Sends a push request for the given file.  Returns false iff no push could
-     * be sent, i.e., because no routing entry exists. That generally means you
-     * shouldn't send any more pushes for this file.
+     * Sends a push request for the given file.
      *
      * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
      *  hit, containing data about the host we're pushing to
+     * @param the object to notify if a failover TCP push fails
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(final RemoteFileDesc file) {
+    public void sendPush(final RemoteFileDesc file, final Object toNotify) {
     	//Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
-        if( !NetworkUtils.isValidAddress(addr) || 
-            !NetworkUtils.isValidPort(port) )
+        if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
+            notify(toNotify);
             return;
+        }
         
         final byte[] guid = GUID.makeGuid();
         
@@ -1140,7 +1147,8 @@ public class DownloadManager implements BandwidthTracker {
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
         if(!RouterService.acceptedIncomingConnection()) {
-            sendPushTCP(file, guid);
+            if(!sendPushTCP(file, guid))
+                notify(toNotify);
             return;
         }
         
@@ -1160,8 +1168,12 @@ public class DownloadManager implements BandwidthTracker {
         // within the UDP_PUSH_FAILTIME timeframe
         RouterService.schedule(new Runnable(){
         	public void run() {
-        		FAILOVERS.add(new PushFailoverRequestor(file,guid));
-        	}},UDP_PUSH_FAILTIME,0);
+        	    // Add it to a ProcessingQueue, so the TCP connection 
+        	    // doesn't bog down RouterService's scheduler
+        	    // The FailoverRequestor will thus run in another thread.
+        		FAILOVERS.add(new PushFailoverRequestor(file, guid, toNotify));
+        	}
+        }, UDP_PUSH_FAILTIME, 0);
 
     	sendPushUDP(file,guid);
     }
@@ -1274,13 +1286,17 @@ public class DownloadManager implements BandwidthTracker {
 	public synchronized float getAverageBandwidth() {
         return averageBandwidth;
 	}
-
-    /*
-    public static void main(String argv[]) {
-        DownloadManager dm = new DownloadManager();
-        dm.extractQueryStringUNITTEST();
-    }
-    */
+	
+	/**
+	 * Notifies the given object, if it isn't null.
+	 */
+	private void notify(Object o) {
+	    if(o == null)
+	        return;
+	    synchronized(o) {
+	        o.notify();
+	    }
+	}
 	
 	/**
 	 * sends a tcp push if the udp push has failed.
@@ -1289,10 +1305,14 @@ public class DownloadManager implements BandwidthTracker {
 		
 		final RemoteFileDesc _file;
 		final byte [] _guid;
+		final Object _toNotify;
 		
-		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid) {
+		public PushFailoverRequestor(RemoteFileDesc file,
+		                             byte[] guid,
+		                             Object toNotify) {
 			_file = file;
 			_guid = guid;
+			_toNotify = toNotify;
 		}
 		
 		public void run() {
@@ -1311,8 +1331,9 @@ public class DownloadManager implements BandwidthTracker {
 				}
 			}
 			
-			if (proceed)
-				sendPushTCP(_file,_guid);
+			if (proceed) 
+				if(!sendPushTCP(_file,_guid))
+				    DownloadManager.this.notify(_toNotify);
 		}
 	}
 

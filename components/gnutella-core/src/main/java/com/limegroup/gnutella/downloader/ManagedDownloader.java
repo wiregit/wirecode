@@ -2737,7 +2737,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean pushSent;
         synchronized(threadLock) {
             // only wait if we actually were able to send the push
-            manager.sendPush(rfd);
+            manager.sendPush(rfd, threadLock);
             
             //No loop is actually needed here, assuming spurious
             //notify()'s don't occur.  (They are not allowed by the Java
