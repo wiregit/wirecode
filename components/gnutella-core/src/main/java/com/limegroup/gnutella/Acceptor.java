@@ -489,11 +489,17 @@ public class Acceptor implements Runnable {
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
                     if( RECORD_STATS )
                         HTTPStat.GNUTELLA_REQUESTS.incrementStat();
+                    if(ConnectionSettings.USE_NIO.getValue()) {
+                        _socket.getChannel().configureBlocking(false);
+                    }
                     cm.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {
                     if( RECORD_STATS )
                         HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
+                    if(ConnectionSettings.USE_NIO.getValue()) {
+                        _socket.getChannel().configureBlocking(false);
+                    }
                     cm.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
