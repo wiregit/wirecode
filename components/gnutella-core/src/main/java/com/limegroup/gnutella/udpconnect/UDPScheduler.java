@@ -148,6 +148,7 @@ public class UDPScheduler extends ManagedThread {
                 // Clone list for safe unlocked access
                 synchronized(_list) {
                     localList = (ArrayList) _list.clone();
+                    _list.clear();
                 }
 
                 // Update events in the main event list
