@@ -324,7 +324,7 @@ public class Connection {
             // may come from a leaf, and therefore can have an extra hop.
             // "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
-            if(isGoodConnection()) {
+            if(isGoodUltrapeer()) {
                 _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
             } else {
                 _softMax = ConnectionSettings.SOFT_MAX.getValue();
@@ -983,9 +983,15 @@ public class Connection {
 		return _headers.getUserAgent();
     }
 
+
     // inherit doc comment
-    public boolean isGoodConnection() {
-        return _headers.isGoodConnection();
+    public boolean isGoodUltrapeer() {
+        return _headers.isGoodUltrapeer();
+    }
+
+    // inherit doc comment
+    public boolean isGoodLeaf() {
+        return _headers.isGoodLeaf();
     }
 
 	/**

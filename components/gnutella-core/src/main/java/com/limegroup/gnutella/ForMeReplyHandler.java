@@ -188,7 +188,18 @@ public final class ForMeReplyHandler implements ReplyHandler {
      *
      * @return <tt>false</tt>, as this node is not a real connection
      */
-    public boolean isGoodConnection() {
+    public boolean isGoodUltrapeer() {
+        return false;
+    }
+
+    /**
+     * Returns <tt>false</tt>, as this node is not  a "connection"
+     * in the first place, and so could never have sent the requisite
+     * headers.
+     *
+     * @return <tt>false</tt>, as this node is not a real connection
+     */
+    public boolean isGoodLeaf() {
         return false;
     }
 }
