@@ -185,7 +185,7 @@ public final class CreationTimeCache {
             if(key == null) continue;
 
             // check to see if file still exists
-            FileDesc fd = fileManager.getFileDescForUrn(key);
+            FileDesc fd = fileManager.getAnyFileDescForUrn(key);
             if ((fd == null) || (fd.getFile() == null) || 
                 !fd.getFile().exists())
                 iter.remove();
