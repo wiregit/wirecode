@@ -255,7 +255,12 @@ public class ManagedConnection
 	 * various properties.
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
-    
+
+    /** Use this if a HopsFlowVMP instructs us to stop sending queries below
+     *  this certain hops value....
+     */
+    private int softMaxHops = -1;
+
     /** 
      * Creates an outgoing connection. 
      *
@@ -324,6 +329,7 @@ public class ManagedConnection
         _router = router;
         _manager = manager;
     }
+
 
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
@@ -427,6 +433,12 @@ public class ManagedConnection
     public void send(Message m) {
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time....
+        if ((softMaxHops > -1) &&
+            (m instanceof QueryRequest) &&
+            (m.getHops() >= softMaxHops))
+            return;
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
@@ -926,6 +938,18 @@ public class ManagedConnection
                                   ReplyHandler receivingConnection) {
         send(pushRequest);
     }
+
+
+    protected void handleVendorMessagePayload(VendorMessagePayload vmp) {
+        // let Connection do as needed....
+        super.handleVendorMessagePayload(vmp);
+        // now i can process
+        if (vmp instanceof HopsFlowVMP) {
+            HopsFlowVMP hops = (HopsFlowVMP) vmp;
+            softMaxHops = hops.getHopValue();
+        }
+    }
+
 
     //
     // End reply forwarding calls

@@ -34,11 +34,11 @@ public final class HopsFlowVMP extends VendorMessagePayload {
         _payload[0] = hopVal;
     }
 
-    /** @return a byte reprsenting the upper bound (exclusive) that the
+    /** @return a int representing the upper bound (exclusive) that the
      *  connection you received this on wants to see from you.
      */
-    public byte getHopValue() {
-        return _payload[0];
+    public int getHopValue() {
+        return ByteOrder.ubyte2int(_payload[0]);
     }
 
     protected byte[] getPayload() {

@@ -822,6 +822,7 @@ public class ConnectionManager {
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
             }
+            c.postInit();
         }
     }
 

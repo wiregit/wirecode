@@ -49,6 +49,11 @@ public class Connection {
     private OutputStream _out;
     private boolean _outgoing;
 
+    /** The possibly non-null VendorMessagePayload which describes what
+     *  VendorMessages the guy on the other side of this connection supports.
+     */
+    protected MessagesSupportedVMP _messagesSupported = null;
+    
     /**
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
@@ -170,6 +175,30 @@ public class Connection {
         _outgoing = false;
         _propertiesWrittenR=properties;
     }
+
+
+    /** Call this method when the Connection has been initialized and accepted
+     *  as 'long-lived'.
+     */
+    protected void postInit() {
+        try { // TASK 1 - Send a MessagesSupportedVMP if necessary....
+            String value = 
+                getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
+            if ((value != null) && !value.equals(""))
+                send(MessagesSupportedVMP.instance().getVendorMessage());
+        }
+        catch (IOException ioe) {
+        }
+    }
+
+    /**
+     * Call this method when you want to handle us to handle a VMP.  We may....
+     */
+    protected void handleVendorMessagePayload(VendorMessagePayload vmp) {
+        if (vmp instanceof MessagesSupportedVMP)
+            _messagesSupported = (MessagesSupportedVMP) vmp;
+    }
+
 
     /** 
      * Initializes this without timeout; exactly like initialize(0). 

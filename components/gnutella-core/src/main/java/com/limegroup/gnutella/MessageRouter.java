@@ -158,7 +158,8 @@ public abstract class MessageRouter {
 	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
 	 *  the message was received
      */
-    public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+    public void handleMessage(Message msg, 
+                              ManagedConnection receivingConnection) {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
@@ -189,7 +190,27 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
-		}
+		} else if (msg instanceof VendorMessage) {
+            if (RECORD_STATS)
+                ; // nothing to record to (so far)
+            try {
+                VendorMessagePayload vmp = 
+                    ((VendorMessage)msg).getVendorMessagePayload();
+                if (vmp instanceof MessagesSupportedVMP) 
+                    receivingConnection.handleVendorMessagePayload(vmp);
+                else if (vmp instanceof HopsFlowVMP)
+                    receivingConnection.handleVendorMessagePayload(vmp);
+                else if (vmp instanceof TCPConnectBackVMP)
+                    // do some TCP ConnectBack mumbo jumbo....
+                    ;
+                else if (vmp instanceof UDPConnectBackVMP)
+                    // do some UDP ConnectBack mumbo jumbo....
+                    ;
+            }
+            catch (BadPacketException ohwell) {
+            }
+        }
+        
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
