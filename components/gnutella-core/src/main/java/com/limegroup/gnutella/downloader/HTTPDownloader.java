@@ -22,7 +22,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public class HTTPDownloader {
 
-	private int _index;
+	private long _index;
 	private String _filename; 
 	private byte[] _guid;
 
@@ -50,7 +50,7 @@ public class HTTPDownloader {
 	 * @exception CantConnectException couldn't connect to the host.
 	 */
 	public HTTPDownloader(String file, Socket socket, 
-                          int index, byte[] guid,
+                          long index, byte[] guid,
                           File incompleteFile) 
 		throws IOException {
 		_filename = file;
@@ -86,7 +86,7 @@ public class HTTPDownloader {
      * @exception CantConnectException couldn't connect to the host.
      */
 	public HTTPDownloader(String file, String host, 
-                          int port, int index, byte[] guid, 
+                          int port, long index, byte[] guid, 
                           int size, boolean resume, int timeout,
                           File incompleteFile) 
 		throws IOException {
@@ -119,7 +119,7 @@ public class HTTPDownloader {
 	 */
 
 	private void connect(String host, int port,
-                         String file, int index,
+                         String file, long index,
                          int timeout ) 
 		throws CantConnectException {
         try {
@@ -130,7 +130,7 @@ public class HTTPDownloader {
         }
 	}
 
-	private void connect(Socket s, String file, int index) throws IOException {
+	private void connect(Socket s, String file, long index) throws IOException {
 		_socket = s;
 
         //The try-catch below is a work-around for JDK bug 4091706.
@@ -192,7 +192,7 @@ public class HTTPDownloader {
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
 	/* Construction time variables */
-	public int getIndex() {return _index;}
+	public long getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 

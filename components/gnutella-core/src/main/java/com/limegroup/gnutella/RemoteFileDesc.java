@@ -49,7 +49,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	private String _host;
 	private int _port;
 	private String _filename; 
-	private int _index;
+	private long _index;
 	private byte[] _clientGUID;
 	private int _speed;
 	private int _size;
@@ -68,7 +68,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
 	 */
-	public RemoteFileDesc(String host, int port, int index, String filename,
+	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed) {
 		
 		_numAttempts = 0;
@@ -118,7 +118,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	/* Accessor Methods */
 	public String getHost() {return _host;}
 	public int getPort() {return _port;}
-	public int getIndex() {return _index;}
+	public long getIndex() {return _index;}
 	public int getSize() {return _size;}
 	public String getFileName() {return _filename;}
 	public byte[] getClientGUID() {return _clientGUID;}
@@ -128,7 +128,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 
 	public void setHost(String h) {_host = h;}
 	public void setPost(int p) {_port = p;}
-	public void setIndex(int i) {_index = i;}
+	public void setIndex(long i) {_index = i;}
 	public void setSize(int s) {_size = s;}
 	public void setFileName(String name) {_filename = name;}
 	public void setClientGUID(byte[] b) {_clientGUID = b;}
