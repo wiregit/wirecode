@@ -17,7 +17,16 @@ public class RouterService
      */
     public RouterService(ActivityCallback activityCallback) {
         manager = new ConnectionManager(activityCallback);
-        initManager();
+        //Now if quick connecting, try hosts.
+        if (SettingsManager.instance().getUseQuickConnect()) {
+            Thread t2=new Thread() {
+                public void run() {
+                    quickConnect();
+                }
+            };
+            t2.setDaemon(true);
+            t2.start();
+        }
     }
 
     /**
@@ -25,21 +34,6 @@ public class RouterService
      */
     public RouterService(int port, ActivityCallback activityCallback) {
         manager = new ConnectionManager(port, activityCallback);
-        initManager();
-    }
-
-    /**
-     * Initialize the connection manager
-     */
-    private void initManager() {
-        manager.setKeepAlive(SettingsManager.instance().getKeepAlive());
-        Thread t=new Thread(manager);
-        t.setDaemon(true);
-        t.start();
-        // FileManager.getFileManager().addDirectory("C:/rjs/src");
-        //FileManager.getFileManager().addDirectory("E:/My Music");
-            //new LimeProperties("Neutella.props",true);
-        manager.propertyManager();
         //Now if quick connecting, try hosts.
         if (SettingsManager.instance().getUseQuickConnect()) {
             Thread t2=new Thread() {
@@ -55,27 +49,24 @@ public class RouterService
     /**
      * Dump the routing table
      */
-    public void dumpRouteTable()
-    {
+    public void dumpRouteTable() {
         System.out.println(manager.getRouteTable().toString());
     }
 
     /**
      * Dump the puch routing table
      */
-    public void dumpPushRouteTable()
-    {
+    public void dumpPushRouteTable() {
         System.out.println(manager.getPushRouteTable().toString());
     }
 
     /**
      * Dump the list of connections
      */
-    public void dumpConnections()
-    {
+    public void dumpConnections() {
         Iterator iter=manager.connections();
         while (iter.hasNext())
-        System.out.println(iter.next().toString());
+            System.out.println(iter.next().toString());
     }
 
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
@@ -141,9 +132,9 @@ public class RouterService
 
             //Wait some time.  If we still need more, try others.
             synchronized(this) {
-            try {
-                wait(4000);
-            } catch (InterruptedException exc) { }
+                try {
+                    wait(4000);
+                } catch (InterruptedException exc) { }
             }
             if (manager.getCatcher().getNumHosts()>=settings.getKeepAlive()) {
                 break;
@@ -248,7 +239,7 @@ public class RouterService
      */
     public long getNumHosts() {
         long ret=0;
-        for (Iterator iter=manager.connections(); iter.hasNext() ; )
+        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getNumHosts();
         return ret;
     }
@@ -258,7 +249,7 @@ public class RouterService
      */
     public long getNumFiles() {
         long ret=0;
-        for (Iterator iter=manager.connections(); iter.hasNext() ; )
+        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getNumFiles();
         return ret;
     }
@@ -268,7 +259,7 @@ public class RouterService
      */
     public long getTotalFileSize() {
         long ret=0;
-        for (Iterator iter=manager.connections(); iter.hasNext() ; )
+        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
             ret+=((ManagedConnection)iter.next()).getTotalFileSize();
         return ret;
     }
@@ -284,7 +275,7 @@ public class RouterService
      */
     public void updateHorizon() {
         //Reset statistics first
-        for (Iterator iter=manager.connections(); iter.hasNext() ; )
+        for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
             ((ManagedConnection)iter.next()).clearHorizonStats();
 
         //Send ping to everyone.  Call to fromMe() notes that replies
@@ -377,7 +368,8 @@ public class RouterService
         if (manager.getNumConnections()>manager.getKeepAlive()) {
             ManagedConnection worst=null;
             long files=Long.MAX_VALUE;
-            for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+            for (Iterator iter=manager.connections();
+                 iter.hasNext(); ) {
                 ManagedConnection c2=(ManagedConnection)iter.next();
                 //Don't remove the connection to the host we are browsing.
                 if (c2==c)

@@ -65,8 +65,6 @@ public class Connection {
     private OutputStream _out;
     private boolean _outgoing;
 
-    private ConnectionListener _listener;
-
     /**
      * Trigger an opening connection to shutdown after it opens.  This
      * flag is set in shutdown() and then checked in the constructor
@@ -92,57 +90,52 @@ public class Connection {
     private int _received=0;
 
     /**
-     * A ConnectionListener that does nothing.  Used when no connection
-     * listening is desired.
-     */
-    private static final class NullConnectionListener
-        implements ConnectionListener {
-        private static NullConnectionListener _sInstance;
-        public static NullConnectionListener instance() {
-            // No synchronization necessary here.  It's okay if two
-            // instances are created.
-            if(_sInstance == null)
-                _sInstance = new NullConnectionListener();
-            return _sInstance;
-        }
-
-        private NullConnectionListener() {}
-
-        public void connectionInitializing(Connection c) {}
-        public void connectionInitialized(Connection c) {}
-        public void connectionClosed(Connection c) {}
-    }
-
-    /**
      * A dummy constructor for ConnectionManager.ME_CONNECTION
      */
     public Connection() {}
 
     /**
-     * Creates an outgoing connection with no listener.
-     */
-    public Connection(String host, int port) throws IOException {
-        this(host, port, NullConnectionListener.instance());
-    }
-
-    /**
      * Creates an outgoing connection with the specified listener.
+     * initalize() must be called before anything else.
      */
-    public Connection(String host, int port, ConnectionListener listener)
-            throws IOException {
-        _listener = listener;
-
+    public Connection(String host, int port) {
         _host = host;
         _port = port;
         _outgoing = true;
+    }
 
-        _listener.connectionInitializing(this);
 
-        try {
-            _socket = new Socket(host, port);
-        } catch(IOException e) {
-            _listener.connectionClosed(this);
-            throw e;
+    /**
+     * Creates an incoming connection.
+     * initalize() must be called before anything else.
+     *
+     * @requires the word "GNUTELLA " and nothing else has just been read
+     *  from socket
+     * @effects wraps a connection around socket and does the rest of the Gnutella
+     *  handshake.  Throws IOException if the connection couldn't be established.
+     *  If such an error happens, the socket is properly closed.
+     */
+    public Connection(Socket socket) {
+        _host = socket.getInetAddress().toString();
+        _port = socket.getPort();
+        _outgoing = false;
+    }
+
+    /**
+     * Initialize the connection by doing the handshake.  Subclasses of
+     * connection should override this method and call super.initialize()
+     * in the first line of the override.
+     */
+    public void initialize() throws IOException {
+        SettingsManager settingsManager = SettingsManager.instance();
+        String expectString;
+
+        if(isOutgoing()) {
+            _socket = new Socket(_host, _port);
+            expectString = settingsManager.getConnectString();
+        } else {
+            // "GNUTELLA" was already read off the socket
+            expectString = settingsManager.getConnectStringRemainder();
         }
 
         if (_shutdownCalled) {
@@ -154,74 +147,16 @@ public class Connection {
             _in = new BufferedInputStream(_socket.getInputStream());
             _out = new BufferedOutputStream(_socket.getOutputStream());
 
-            SettingsManager settings=SettingsManager.instance();
-            sendString(settings.getConnectString()+"\n\n");
-            expectString(settings.getConnectOkString()+"\n\n");
-
-            _listener.connectionInitialized(this);
+            sendString(expectString+"\n\n");
+            expectString(settingsManager.getConnectOkString()+"\n\n");
         } catch(IOException e) {
             _socket.close();
-            _listener.connectionClosed(this);
             throw e;
         }
-
-        if (_shutdownCalled) {
-            _socket.close();
-            throw new IOException();
-        }
     }
 
     /**
-     * Creates an incoming connection with no listener.
-     */
-    public Connection(Socket socket) throws IOException {
-        this(socket, NullConnectionListener.instance());
-    }
-
-    /**
-     * Creates an incoming connection with the specified listener.
-     * @requires the word "GNUTELLA " and nothing else has just been read
-     *  from socket
-     * @effects wraps a connection around socket and does the rest of the Gnutella
-     *  handshake.  Throws IOException if the connection couldn't be established.
-     *  If such an error happens, the socket is properly closed.
-     */
-    public Connection(Socket socket, ConnectionListener listener)
-            throws IOException {
-        _listener = listener;
-
-        _host = socket.getInetAddress().toString();
-        _port = socket.getPort();
-        _outgoing = false;
-
-        _listener.connectionInitializing(this);
-
-        try {
-            _socket=socket;
-            _in=new BufferedInputStream(_socket.getInputStream());
-            _out=new BufferedOutputStream(_socket.getOutputStream());
-
-            //Handshake
-            SettingsManager settings=SettingsManager.instance();
-            expectString(settings.getConnectStringRemainder()+"\n\n");
-            sendString(settings.getConnectOkString()+"\n\n");
-
-            _listener.connectionInitialized(this);
-        } catch(IOException e) {
-            _socket.close();
-
-            _listener.connectionClosed(this);
-            throw e;
-        }
-
-        if (_shutdownCalled) {
-            _socket.close();
-            throw new IOException();
-        }
-    }
-
-    /**
-     * Called only from the constructors.
+     * Called only from initialize()
      * @requires _socket is properly set up
      */
     private void sendString(String s) throws IOException {
@@ -378,7 +313,6 @@ public class Connection {
     public void shutdown() {
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
-        _listener.connectionClosed(this);
         _shutdownCalled = true;
         if(_socket != null) {
             try {

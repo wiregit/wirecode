@@ -25,24 +25,9 @@ public class ManagedConnection
      * Creates an outgoing connection.
      * ManagedConnections should only be constructed within ConnectionManager.
      */
-    ManagedConnection(String host, int port, ConnectionManager manager)
-            throws IOException {
-        super(host, port, manager.getCallback());
+    ManagedConnection(String host, int port, ConnectionManager manager) {
+        super(host, port);
         _manager = manager;
-
-        try {
-            //Send initial ping request.  HACK: use routeTable to
-            //designate that replies are for me.  Do this *before*
-            //sending message.
-            PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
-            manager.fromMe(pr);
-            send(pr);
-        } catch (IOException e) {
-            shutdown();
-            throw e;
-        }
-
-        startThread();
     }
 
     /**
@@ -56,18 +41,28 @@ public class ManagedConnection
      */
     ManagedConnection(Socket socket, ConnectionManager manager)
             throws IOException {
-        super(socket, manager.getCallback());
+        super(socket);
         _manager = manager;
-
-        startThread();
     }
 
-    /**
-     * Kicks off a thread to run the connection's socket-listening run
-     * method.
-     * Called only from constructors.
-     */
-    private void startThread() {
+    public void initialize() throws IOException {
+        super.initialize();
+
+        if(isOutgoing()) {
+            try {
+                //Send initial ping request.  HACK: use routeTable to
+                //designate that replies are for me.  Do this *before*
+                //sending message.
+                PingRequest pr=new PingRequest(
+                    SettingsManager.instance().getTTL());
+                _manager.fromMe(pr);
+                send(pr);
+            } catch (IOException e) {
+                shutdown();
+                throw e;
+            }
+        }
+
         Thread t = new Thread(this);
         t.setDaemon(true);
         t.start();
@@ -202,9 +197,9 @@ public class ManagedConnection
                     if (inConnection==null && !isRouteSpam(m)){
 
                         // Feed to the UI Monitor
-                        ActivityCallback ui=_manager.getCallback();
-                        if (ui!=null && _personalFilter.allow(m))
-                            ui.handleQueryString(((QueryRequest)m).getQuery());
+                        if (_personalFilter.allow(m))
+                            _manager.getCallback().handleQueryString(
+                                ((QueryRequest)m).getQuery());
 
                         //reduce TTL,increment hops, If old val of TTL was 0 drop message
                         //NOTE: This is Num Local Searches so always count it
@@ -265,11 +260,11 @@ public class ManagedConnection
                                                          this);
                         //HACK: is the reply for me?
                         if (outConnection.equals(_manager.ME_CONNECTION)) {
-                            //Unpack message and present it to user via ActivityCallback,
-                            //if it is not spam.
-                            ActivityCallback ui=_manager.getCallback();
-                            if (ui!=null && _personalFilter.allow(m))
-                                ui.handleQueryReply((QueryReply)m);
+                            //Unpack message and present it to user via
+                            //ActivityCallback, if it is not spam.
+                            if (_personalFilter.allow(m))
+                                _manager.getCallback().handleQueryReply(
+                                    (QueryReply)m);
                         }
                         else {//message needs to be routed.
                             m.hop(); // It's Ok to route even if TTL is zero since this is a reply
@@ -299,7 +294,7 @@ public class ManagedConnection
                     }
 
                     // This comparison doesn't work:
-                    // // if (_manager.ClientId.equals(DestinationId) ){
+                    // // if (_manager.ClientId.equals(DestinationId) ){}
                     //I am the destination
                     else if (_manager.isClient(req_guid)) {
                         //unpack message
@@ -355,13 +350,8 @@ public class ManagedConnection
             //Internal error!  Cleanup this connection and notify the user
             //of the problem.
             _manager.remove(this);
-            ActivityCallback ui=_manager.getCallback();
-            if (ui!=null) {
-                ui.error(ActivityCallback.ERROR_20, e);
-            }
+            _manager.getCallback().error(ActivityCallback.ERROR_20, e);
         }
-
-
     }//run
 
     /** Clears the statistics about files reachable from me. */
@@ -415,8 +405,7 @@ public class ManagedConnection
      *  most filters are not thread-safe, so they should not be shared
      *  among multiple connections.
      */
-    public void setRouteFilter(SpamFilter filter)
-    {
+    public void setRouteFilter(SpamFilter filter) {
         _routeFilter = filter;
     }
 
@@ -426,8 +415,7 @@ public class ManagedConnection
      *  most filters are not thread-safe, so they should not be shared
      *  among multiple connections.
      */
-    public void setPersonalFilter(SpamFilter filter)
-    {
+    public void setPersonalFilter(SpamFilter filter) {
         _personalFilter = filter;
     }
 }

@@ -27,10 +27,13 @@ class RejectConnection
      * Constructs a temporary connection that waits for a ping and then replies
      * with pongs for the given HostCatcher's ten best hosts.
      */
-    RejectConnection(Socket socket, HostCatcher hostCatcher)
-            throws IOException {
+    RejectConnection(Socket socket, HostCatcher hostCatcher) {
         super(socket);
         _hostCatcher = hostCatcher;
+    }
+
+    public void initialize() throws IOException {
+        super.initialize();
         Thread t = new Thread(this);
         t.setDaemon(true);
         t.start();

@@ -117,7 +117,8 @@ public class HostCatcher {
         //   connections, since the remote host's port is ephemeral.
         Set connections=new HashSet();
         if (manager!=null) {
-            for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+            for (Iterator iter=manager.initializedConnections();
+                 iter.hasNext(); ) {
                 Connection c=(Connection)iter.next();
                 if (! c.isOutgoing()) //ignore incoming
                     continue;
