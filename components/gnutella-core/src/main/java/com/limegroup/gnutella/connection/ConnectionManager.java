@@ -96,7 +96,7 @@ public class ConnectionManager {
      * fast iteration for message broadcast purposes.  Actually we keep a couple
      * of lists: the list of all initialized and uninitialized connections
      * (_connections), the list of all initialized non-leaf connections
-     * (_initializedConnections), and the list of all initialized leaf connections
+     * (_initializedConnections), and the list of initialized leaf connections
      * (_initializedClientConnections).
      * 
      * INVARIANT: neither _connections, _initializedConnections, nor 
@@ -137,8 +137,8 @@ public class ConnectionManager {
 
 	/**
 	 * Variable for the number of times since we attempted to force ourselves 
-	 * to become an Ultrapeer that we were told to become leaves.  If this number
-	 * is too great, we give up and become a leaf.
+	 * to become an Ultrapeer that we were told to become leaves.  If this 
+	 * number is too great, we give up and become a leaf.
 	 */
 	private volatile int _leafTries;
 
@@ -244,12 +244,35 @@ public class ConnectionManager {
      *
      * @param mc the <tt>Connection</tt> instance to remove
      */
-    public synchronized void remove(Connection conn) {
+    private void remove(Connection conn) {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
         removeInternal(conn);
 
         adjustConnectionFetchers();
+    }
+    
+    /**
+     * Removes the specified connection from currently active connections, also
+     * removing this connection from routing tables and modifying active 
+     * connection fetchers accordingly.
+     *
+     * @param mc the <tt>Connection</tt> instance to remove
+     */
+    public synchronized void removeIncoming(Connection conn) {
+        remove(conn);
+    }
+    
+    /**
+     * Removes the specified connection from currently active connections, also
+     * removing this connection from routing tables and modifying active 
+     * connection fetchers accordingly.
+     *
+     * @param mc the <tt>Connection</tt> instance to remove
+     */
+    public synchronized void removeOutgoing(Connection conn) {
+        _initializingFetchedConnections.remove(conn);
+        remove(conn);
     }
 
     /**
@@ -379,8 +402,8 @@ public class ConnectionManager {
     }
     
     /**
-     * @return the number of initialized connections, which is less than or equals
-     *  to the number of connections.
+     * @return the number of initialized connections, which is less than or 
+     *  equals to the number of connections.
      */
     public int getNumInitializedConnections() {
 		return _initializedConnections.size();
@@ -605,7 +628,8 @@ public class ConnectionManager {
 
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
-        if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive <= 0) {
+        if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && 
+            _keepAlive <= 0) {
             return false;
 		} else if (RouterService.isShieldedLeaf()) {
 			// we're a leaf -- don't allow any incoming connections
@@ -847,9 +871,10 @@ public class ConnectionManager {
         }
         //add the best few endpoints from the hostcatcher.
         Iterator iterator =
-			RouterService.getHostCatcher().getUltrapeerHosts(MAX_ULTRAPEER_ENDPOINTS);
+			RouterService.getHostCatcher().
+                getUltrapeerHosts(MAX_ULTRAPEER_ENDPOINTS);
         while (iterator.hasNext()) {
-            Endpoint e=(Endpoint)iterator.next();
+            Endpoint e = (Endpoint)iterator.next();
             retSet.add(e);
         }
         return retSet;
@@ -1032,28 +1057,28 @@ public class ConnectionManager {
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
         if(!c.isSupernodeClientConnection()){
-            int i=_initializedConnections.indexOf(c);
+            int i = _initializedConnections.indexOf(c);
             if (i != -1) {
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections-[c]
-                List newConnections=new ArrayList();
+                List newConnections = new ArrayList();
                 newConnections.addAll(_initializedConnections);
                 newConnections.remove(c);
-                _initializedConnections=newConnections;
+                _initializedConnections = newConnections;
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
                     _shieldedConnections--;                
             }
         }else{
             //check in _initializedClientConnections
-            int i=_initializedClientConnections.indexOf(c);
+            int i = _initializedClientConnections.indexOf(c);
             if (i != -1) {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections-[c]
-                List newConnections=new ArrayList();
+                List newConnections = new ArrayList();
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
-                _initializedClientConnections=newConnections;
+                _initializedClientConnections = newConnections;
             }
         }        
         
@@ -1062,9 +1087,9 @@ public class ConnectionManager {
         int i=_connections.indexOf(c);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
-            List newConnections=new ArrayList(_connections);
+            List newConnections = new ArrayList(_connections);
             newConnections.remove(c);
-            _connections=newConnections;
+            _connections = newConnections;
         }
 
         // 2) Ensure that the connection is closed.  This must be done before
@@ -1106,8 +1131,8 @@ public class ConnectionManager {
         //fragmentation with clients that don't support ultrapeers, we'll give
         //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
         //allowConnection(boolean, boolean) and killExcessConnections().
-        int goodConnections=getNumInitializedConnections();
-        int neededConnections=_keepAlive - goodConnections;
+        int goodConnections = getNumInitializedConnections();
+        int neededConnections =  _keepAlive - goodConnections;
         //Now how many fetchers do we need?  To increase parallelism, we
         //allocate 4 fetchers per connection, but no more than 10 fetchers.
         //(Too much parallelism increases chance of simultaneous connects,
@@ -1222,10 +1247,7 @@ public class ConnectionManager {
         try {
             mc.initialize();
         } catch(IOException e) {
-            synchronized(ConnectionManager.this) {
-                _initializingFetchedConnections.remove(mc);
-                remove(mc);
-            }
+            removeOutgoing(mc);
             throw e;
         }
         finally {
@@ -1246,12 +1268,12 @@ public class ConnectionManager {
         //doing what LimeWire thinks is best and what the user wants.  Ideally
         //we would set the NUM_CONNECTIONS iff the user hasn't recently manually
         //adjusted it.  Because this is a pain to implement, we use a hack; only
-        //adjust the NUM_CONNECTIONS if there is only one shielded leaf-ultrapeer
-        //connection.  Typically this will happen just once, when we enter leaf
-        //mode.  Note that we actually call ultrapeerConnections() instead of a
-        //"clientSupernodeConnections()" method; if this method is called and
-        //ultrapeerConnections()==1, there is exactly one client-ultrapeer
-        //connection.
+        //adjust the NUM_CONNECTIONS if there is only one shielded 
+        //leaf-ultrapeer connection.  Typically this will happen just once, 
+        //when we enter leaf mode.  Note that we actually call 
+        //ultrapeerConnections() instead of a "clientSupernodeConnections()" 
+        //method; if this method is called and ultrapeerConnections()==1, there 
+        //is exactly one client-ultrapeer connection.
         boolean firstShieldedConnection = (ultrapeerConnections()==1) 
             && _keepAlive>0;
         if (firstShieldedConnection)
@@ -1262,8 +1284,7 @@ public class ConnectionManager {
      * Indicates that the node is in client mode and has lost a leaf
      * to ultrapeer connection.
      */
-    private synchronized void lostShieldedClientSupernodeConnection()
-    {
+    private synchronized void lostShieldedClientSupernodeConnection() {
         //Does nothing!  adjustConnectionFetchers takes care of everything now.
         //I'm leaving this method here as a nice place holder in case we
         //need to take action in the future.
@@ -1309,8 +1330,8 @@ public class ConnectionManager {
                 int port =
                     Integer.parseInt(remoteAddress.substring(colonIndex).trim());
                 if(NetworkUtils.isValidPort(port)) {
-                	// for incoming connections, set the port based on what it's connection
-                	// headers say the listening port is
+                	// for incoming connections, set the port based on what it's 
+                    // connection headers say the listening port is
                     connection.setListeningPort(port);
                 }
             } catch(NumberFormatException e){
@@ -1414,7 +1435,8 @@ public class ConnectionManager {
         if (c.isOutgoing()) {
             synchronized(this) {
                 connectionInitializing(c);
-                // We've added a connection, so the need for connections went down.
+                // We've added a connection, so the need for connections went 
+                // down.
                 adjustConnectionFetchers();
             }
             RouterService.getCallback().connectionInitializing(c);
@@ -1424,7 +1446,7 @@ public class ConnectionManager {
             c.initialize();
 
         } catch(IOException e) {
-            remove(c);
+            removeIncoming(c);
             throw e;
         }
         finally {
@@ -1507,7 +1529,7 @@ public class ConnectionManager {
      * Connections created through createConnectionAsynchronously and
      * createConnectionBlocking
      */
-    private class OutgoingConnector implements Runnable {
+    private final class OutgoingConnector implements Runnable {
         private final Connection _connection;
         private final boolean _doInitialization;
 
