@@ -997,7 +997,7 @@ public class FileManager {
     /**
      * Find all files with matching full URNs
      */
-    protected IntSet urnSearch(Iterator urnsIter,IntSet priors) {
+    private IntSet urnSearch(Iterator urnsIter,IntSet priors) {
         IntSet ret = priors;
         while(urnsIter.hasNext()) {
             URN urn = (URN)urnsIter.next();
