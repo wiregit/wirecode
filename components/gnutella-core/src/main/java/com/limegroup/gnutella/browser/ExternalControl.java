@@ -15,6 +15,7 @@ public class ExternalControl {
 
 	private static final String LOCALHOST       = "127.0.0.1"; 
 	private static final String HTTP            = "http://";
+	private static boolean      initialized     = false;
 	private static String       enqueuedRequest = null;
 
 	public static String preprocessArgs(String args[]) {
@@ -45,11 +46,16 @@ public class ExternalControl {
 		}
 	}
 
+
+	public static boolean  isInitialized() {
+		return initialized;
+	}
 	public static void enqueueMagnetRequest(String arg) {
 		enqueuedRequest = arg;
 	}
 
 	public static void runQueuedMagnetRequest() {
+		initialized = true;
 	    if ( enqueuedRequest != null ) {
 			String request   = enqueuedRequest;
 			enqueuedRequest = null;
