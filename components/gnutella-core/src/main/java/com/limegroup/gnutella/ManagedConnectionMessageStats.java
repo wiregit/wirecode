@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 /**
  * Class which stores all the message statistics for a particular Managed 
  * Connection.  It hides the message statistics gathering details from external
- * callers to ManagedConnection.
+ * callers to ManagedConnection. 
  */
 public class ManagedConnectionMessageStats
 {
