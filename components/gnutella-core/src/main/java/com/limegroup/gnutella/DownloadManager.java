@@ -386,7 +386,6 @@ public class DownloadManager implements BandwidthTracker {
         //step isn't really needed.)
         if (incompleteFileManager.purge(true))
             writeSnapshot();
-        buf = new LinkedList(new HashSet(buf));
 
         // Pump the downloaders through a set, to remove duplicate values.
         // This is necessary in case LimeWire got into a state where a
@@ -1162,10 +1161,10 @@ public class DownloadManager implements BandwidthTracker {
     	
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
-    	// TODO: UDPService.canDoFWT() should be added as condition
-    	// when its merged
         if(!RouterService.acceptedIncomingConnection()) {
-            if(!sendPushTCP(file, guid))
+            // if we can't do FWT, or we can and the TCP push failed,
+            // then notify immediately.
+            if(!UDPService.instance().canDoFWT() || !sendPushTCP(file, guid))
                 notify(toNotify);
             return;
         }
