@@ -14,7 +14,7 @@ import java.util.Date;
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-public class UploadManager {
+public class UploadManager implements BandwidthTracker {
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
     /** The message router to use for pushes. */
@@ -45,6 +45,14 @@ public class UploadManager {
         new LinkedList();
     private List /* of PushRequestedFile */ _attemptingPushes=
         new LinkedList();
+
+	/**
+	 * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
+	 * instances (all of the uploads in progress).  
+	 */
+	private List /* of Uploaders */ _activeUploadList =
+		new LinkedList();
+
 	/**
 	 * The number of uploads in progress from each host. If the number
 	 * of uploads by a single user exceeds the SettingsManager's
@@ -109,7 +117,12 @@ public class UploadManager {
 
     }
                 
-
+	/**
+	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
+	 * if it successfully parses the HTTP 'get' header.
+	 *
+	 * @param socket the <tt>Socket</tt> that will be used for the new upload
+	 */
     public synchronized void acceptUpload(Socket socket) {
 
 		HTTPUploader uploader;
@@ -137,6 +150,15 @@ public class UploadManager {
 		upThread.start();
 	}
 
+	/**
+	 * Accepts a new push upload, creating a new <tt>HTTPUploader</tt>.
+	 *
+	 * @param file the fully qualified pathname of the file to upload
+	 * @param host the ip address of the host to upload to
+	 * @param port the port over which the transfer will occur
+	 * @param index the index of the file in <tt>FileManager</tt>
+	 * @param guid the unique identifying client guid of the uploading client
+	 */
 	public synchronized void acceptPushUpload(String file, 
 											  String host, int port, 
 											  int index, String guid) { 
@@ -182,7 +204,7 @@ public class UploadManager {
 
 
 	/**
-	 * Returns true if this has every successfully uploaded a file
+	 * Returns true if this has ever successfully uploaded a file
      * during this session.<p>
      * 
      * This method was added to adopt more of the BearShare QHD
@@ -201,19 +223,19 @@ public class UploadManager {
      *      @modifies _uploadsInProgress, uploader, _callback */
 	private void insertAndTest(Uploader uploader, String host) {
 		// add to the Map
-		insertIntoMap(host);
+		insertIntoMapAndList(uploader, host);
 
 		if ( (! testPerHostLimit(host) ) ||
 			 ( ! testTotalUploadLimit() ) )
 			 uploader.setState(Uploader.LIMIT_REACHED);
-
+		
 		_callback.addUpload(uploader);		
 
 	}
 
     /** Increments the count of uploads in progress for host. 
      *      @modifies _uploadsInProgress */
-	private void insertIntoMap(String host) {
+	private void insertIntoMapAndList(Uploader uploader, String host) {
 		int numUploads = 1;
 		// check to see if the map aleady contains
 		// a reference to this host.  if so, get its
@@ -222,22 +244,32 @@ public class UploadManager {
 			Integer myInteger = (Integer)_uploadsInProgress.get(host);
 			numUploads += myInteger.intValue();
 		}
-		_uploadsInProgress.put(host, new Integer(numUploads));		
+		_uploadsInProgress.put(host, new Integer(numUploads));	
+		_activeUploadList.add(uploader);
 	}
 
-	private void removeFromMap(String host) {
-		if ( _uploadsInProgress.containsKey(host) ) {
-			Integer myInteger = (Integer)_uploadsInProgress.get(host);
-			int numUploads = myInteger.intValue();
-			if (numUploads == 1) 
-				_uploadsInProgress.remove(host);
-			else {
-				--numUploads;
+	/**
+	 * Decrements the number of active uploads for the host specified in
+	 * the <tt>host</tt> argument, removing that host from the <tt>Map</tt>
+	 * if this was the only upload allocated to that host.<p>
+	 *
+	 * This method also removes the <tt>Uploader</tt> from the <tt>List</tt>
+	 * of active uploads.
+	 */
+  	private void removeFromMapAndList(Uploader uploader, String host) {
+  		if ( _uploadsInProgress.containsKey(host) ) {
+  			Integer myInteger = (Integer)_uploadsInProgress.get(host);
+  			int numUploads = myInteger.intValue();
+  			if (numUploads == 1) 
+  				_uploadsInProgress.remove(host);
+  			else {
+  				--numUploads;
 				_uploadsInProgress.put(host, new Integer(numUploads));
-			}
-		}
-	}
-
+  			}
+  		}
+		_activeUploadList.remove(uploader);
+  	}
+	
 	private boolean testPerHostLimit(String host) {
 		if ( _uploadsInProgress.containsKey(host) ) {
 			Integer value = (Integer)_uploadsInProgress.get(host);
@@ -514,7 +546,7 @@ public class UploadManager {
                     if (startTime>0)
                         reportUploadSpeed(finishTime-startTime,
                                           _up.amountUploaded());
-					removeFromMap(_host);
+					removeFromMapAndList(_up, _host);
 					removeAttemptedPush(_host, _index);
 					_callback.removeUpload(_up);		
 				}
@@ -551,6 +583,23 @@ public class UploadManager {
 			return _time.before(time);
 		}
 		
+	}
+
+
+	/**
+	 * Implements the <tt>BandwidthTracker</tt> interface.
+	 * 
+	 * Returns that bandwidth transferred in kilobytes per second since
+	 * the last time this call was made.
+	 */
+	public synchronized int getNewBytesTransferred() {
+		int newBytes = 0;
+		Iterator iter = _activeUploadList.iterator();
+		while(iter.hasNext()) {
+			BandwidthTracker bt = (BandwidthTracker)iter.next();
+			newBytes += bt.getNewBytesTransferred();
+		}
+		return newBytes;
 	}
 
     /** Partial unit test. */

@@ -38,6 +38,12 @@ public class HTTPUploader implements Uploader {
 	private int _chatPort;
     private FileManager _fileManager;
 
+	/**
+	 * Stores the number of bytes read the last time there was a reading
+	 * taken.
+	 */
+	private int _oldAmountRead = 0;
+
 
 	/****************** Constructors ***********************/
 	/**
@@ -491,6 +497,20 @@ public class HTTPUploader implements Uploader {
 
 	}
 
+	/**
+	 * Implements the <tt>BandwidthTracker</tt> interface.
+	 * Returns the number of bytes read since the last time this method
+	 * was called.
+	 *
+	 * @return the number of new bytes read since the last time this method
+	 *         was called
+	 */
+	public synchronized int getNewBytesTransferred() {
+		int newAmountRead = amountUploaded();
+		int newBytesTransferred = newAmountRead - _oldAmountRead;
+		_oldAmountRead = newAmountRead;
+		return newBytesTransferred;
+	}
 }
 
 
