@@ -18,17 +18,6 @@ public class LimeSentMessageStatBytes extends AdvancedKilobytesStatistic {
 
 
 	/**
-	 * Private class for keeping track of filtered messages.
-	 */
-	private static class FilteredLimeSentMessageStat 
-		extends LimeSentMessageStatBytes {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_FILTERED_MESSAGES.incrementStat();
-		}
-	}
-
-	/**
 	 * Private class for keeping track of filtered messages, in bytes.
 	 */
 	private static class FilteredLimeSentMessageStatBytes
