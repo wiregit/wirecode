@@ -84,7 +84,7 @@ public class Launcher {
 	 *  for the operating system, or it must be a URL of the form
 	 *  http://www.whatevername.com
 	 * @effects launches the passed-in file on the current platform. */
-	public static void launch(String path) throws IOException {
+	public static int launch(String path) throws IOException {
 		String s = path.toLowerCase();
 		if(!path.endsWith(".exe") &&
 		   !path.endsWith(".vbs") &&
@@ -93,10 +93,10 @@ public class Launcher {
 		   !path.endsWith(".sys") &&
 		   !path.endsWith(".com")) {
 			if(Utilities.isWindows()) {
-				launchFileWindows(path);
+				return launchFileWindows(path);
 			}	   
 			else if(Utilities.isMacClassic()) {
-				launchFileMac(path);
+				launchFileMacClassic(path);
 			}
 			else if(Utilities.isUnix()) {
 				launchFileUnix(path);
@@ -107,21 +107,22 @@ public class Launcher {
 			"file for security reasons.";
 			Utilities.showError(msg);
 		}
+		return -1;
 	}
 
 	/**
-	 *  @requires that we are running on Windows
-	 *  @effects launches the given file on Windows
+	 * launches the given file on Windows
+	 * @requires that we are running on Windows
 	 */
-	private static void launchFileWindows(String path) {
-		NativeLauncher.launchFileWindows(path);
+	private static int launchFileWindows(String path) {
+		return NativeLauncher.launchFileWindows(path);
 	}
 
 	/** 
-	 *  @requires that we are running on a Mac
-	 *  @effects launches the given file on the Mac
+	 * launches the given file on a Mac with and OS between 8.5 and 9.1
+	 * @requires that we are running on a Mac
 	 */
-	private static void launchFileMac(String path) throws IOException {
+	private static void launchFileMacClassic(String path) throws IOException {
 		if(_macLoadedWithoutErrors) {
 			try {
 				Runtime.getRuntime().exec(new String[] {getMacFinder(),path});
@@ -130,9 +131,9 @@ public class Launcher {
 		}
 	}
 	/**
-	 *  @requires that we are running on a Unix system
-	 *  @effects attempts to launch the given file on Unix
-	 *  NOTE: WE COULD DO THIS ONE BETTER!!
+	 * attempts to launch the given file on Unix
+	 * @requires that we are running on a Unix system
+	 * NOTE: WE COULD DO THIS ONE BETTER!!
 	 */
 	private static void launchFileUnix(String path) throws IOException {
 		// First, attempt to open the file in a 
