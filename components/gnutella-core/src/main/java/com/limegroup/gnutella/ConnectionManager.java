@@ -190,7 +190,18 @@ public class ConnectionManager implements Runnable {
 	    try {
 		//Accept an incoming connection, make it into a Connection
 		//object, handshake, and give it a thread to service it.
-		Socket client=sock.accept();
+
+		try
+		{
+			Socket client=sock.accept();
+		}
+		catch(NullPointerException nfe)
+		{
+			//cant do anything
+			//this is in the ServerSocket class (due to lack of memory maybe)
+			//so just continue and wait for the next conection
+			continue;
+		}
 		try {
 		    InputStream in=client.getInputStream();
 		    String word=readWord(in);
@@ -236,6 +247,7 @@ public class ConnectionManager implements Runnable {
 	    } catch (SecurityException e) {	
 		error("Could not listen to socket for incoming connections; aborting");
 		return;
+	      
 	    }
 	}
     }

@@ -133,6 +133,7 @@ public class StressTester {
 	    System.err.println("Connections terminated; test is not valid.");
 	    System.exit(1);
 	} catch (BadPacketException e) {
+	    e.printStackTrace();
 	    System.err.println("Got bad packet;  test is not valid.");
 	    System.exit(1);
 	}
