@@ -281,6 +281,7 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
+                                            List alts, 
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
@@ -316,6 +317,14 @@ public class DownloadManager implements BandwidthTracker {
 			new ManagedDownloader(files, incompleteFileManager);
 
         startDownload(downloader, false);
+        
+        //Now that the download is started, add the alts.
+        //The RFDs of the ALTs will mimick the first RFD.
+        for(Iterator iter = alts.iterator(); iter.hasNext(); ) {
+            RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+            downloader.addDownload(rfd, false);
+        }
+        
         return downloader;
     }   
     
