@@ -39,48 +39,60 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * This class is thread-safe.
  */
 public abstract class FileManager {
+	
     /** The string used by Clip2 reflectors to index hosts. */
-    public static final String INDEXING_QUERY="    ";
+    public static final String INDEXING_QUERY = "    ";
+    
     /** The string used by LimeWire to browse hosts. */
-    public static final String BROWSE_QUERY="*.*";
+    public static final String BROWSE_QUERY = "*.*";
     
     /** Subdirectory that is always shared */
-    public static final File SUBDIR_SHARE;
+    public static final File FORCED_SHARE;
     
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
-        SUBDIR_SHARE = forceShare;
+        FORCED_SHARE = forceShare;
     }
 
     /**********************************************************************
-     * LOCKING: obtain this' monitor before modifying this. The exception
+     * LOCKING: obtain this's monitor before modifying this. The exception
      * is _loadThread, which is controlled by _loadThreadLock.
      **********************************************************************/
 
-    /**
-     * The total size of all files, in bytes.
-     * INVARIANT: _size=sum of all size of the elements of _files,
-     *   except IncompleteFileDescs, which may change size at any time.
+    /** 
+     * The list of complete and incomplete files.  An entry is null if it
+     *  is no longer shared.
+     * INVARIANT: for all i, _files[i]==null, or _files[i].index==i and either
+     *  _files[i]._path is in a shared directory with a shareable extension or
+     *  _files[i]._path is the incomplete directory if _files[i] is an IncompleteFileDesc.
      */
-    private long _size;
+    private List /* of FileDesc */ _files;
     
     /**
-     * The total number of files.  INVARIANT: _numFiles==number of
-     * elements of _files that are not null and not IncompleteFileDescs.
+     * The total size of all complete files, in bytes.
+     * INVARIANT: _filesSize=sum of all size of the elements of _files,
+     *   except IncompleteFileDescs, whose size may change at any time.
+     */
+    private long _filesSize;
+    
+    /**
+     * The number of complete files.
+     * INVARIANT: _numFiles==number of elements of _files that are not null
+     *  and not IncompleteFileDescs.
      */
     private int _numFiles;
     
     /** 
      * The total number of files that are pending sharing.
-     *  (ie: awaiting caching or being added)
+     *  (ie: awaiting hashing or being added)
      */
     private int _numPendingFiles;
     
     /**
-     * The total number of incomplete shared files.
+     * The total number of incomplete files.
      * INVARIANT: _numFiles + _numIncompleteFiles == the number of
      *  elements of _files that are not null.
      */
@@ -88,75 +100,67 @@ public abstract class FileManager {
     
     /**
      * The number of files that are forcibly shared over the network.
-     * INVARIANT: _numFiles >= _numNetworkShares.
+     * INVARIANT: _numFiles >= _numForcedFiles.
      */
-    private int _numNetworkShares;
-    
-    /** 
-     * The list of shareable files.  An entry is null if it is no longer
-     *  shared.
-     * INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in a shared directory with a shareable extension or
-     *  f[i]._path is the incomplete directory if f is an IncompleteFileDesc.
-     */
-    private List /* of FileDesc */ _files;
+    private int _numForcedFiles;
     
     /**
-     * An index mapping <tt>File</tt>s on disk to the 
-     * <tt>FileDesc</tt> holding it.
+     * An index that maps a <tt>File</tt> on disk to the 
+     *  <tt>FileDesc</tt> holding it.
      *
-     * INVARIANT: For all keys k in _fileIndex, 
-     * _files[_fileIndex.get(k).getIndex()].getFile().equals(k)
+     * INVARIANT: For all keys k in _fileToFileDescMap, 
+     *  _files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
      *
-     * A File keys must be created with a canonical path.
+     * Keys must be canonical <tt>File</tt> instances.
      */
-    private Map /* of File -> FileDesc */ _fileToFileDesc;
+    private Map /* of File -> FileDesc */ _fileToFileDescMap;
 
     /**
-     * An index mapping keywords in file names to the indices in _files.  A
-     * keyword of a filename f is defined to be a maximal sequence of characters
-     * without a character from DELIMITERS.  IncompleteFile keywords
-     * are NOT stored in this index.  Retrieval of IncompleteFiles are only
-     * allowed by hash.
-     *
-     * INVARIANT: For all keys k in _index, for all i in _index.get(k), 
-     * _files[i]._path.substring(k)!=-1.
-     * Likewise for all i, for all k in _files[i]._path where _files[i]
-     * is not an IncompleteFileDesc, _index.get(k) contains i.
+     * A trie mapping keywords in complete filenames to the indices in _files.
+     * Keywords are the tokens when the filename is tokenized with the
+     * characters from DELIMITERS as delimiters.
+     * 
+     * IncompleteFile keywords are NOT stored.
+     * 
+     * INVARIANT: For all keys k in _KeywordTrie, for all i in the IntSet
+     * _KeywordTrie.get(k), _files[i]._path.substring(k)!=-1. Likewise for all
+     * i, for all k in _files[i]._path where _files[i] is not an
+     * IncompleteFileDesc, _KeywordTrie.get(k) contains i.
      */
-    private Trie /* String -> IntSet  */ _index;
+    private Trie /* String -> IntSet  */ _KeywordTrie;
     
     /**
-     * An index mapping appropriately case-normalized URN strings to the
+     * A map of appropriately case-normalized URN strings to the
      * indices in _files.  Used to make query-by-hash faster.
-     * INVARIANT: for all keys k in _urnIndex, for all i in _urnIndex.get(k),
+     * 
+     * INVARIANT: for all keys k in _urnMap, for all i in _urnMap.get(k),
      * _files[i].containsUrn(k).  Likewise for all i, for all k in
-     * _files[i].getUrns(),  _urnIndex.get(k) contains i.
+     * _files[i].getUrns(), _urnMap.get(k) contains i.
      */
-    private Map /* URN -> IntSet  */ _urnIndex;
+    private Map /* URN -> IntSet  */ _urnMap;
     
     /**
-     * The set of extensions to share, sorted by StringComparator. 
+     * The set of file extensions to share, sorted by StringComparator. 
      * INVARIANT: all extensions are lower case.
      */
     private static Set /* of String */ _extensions;
     
     /**
-     * The list of shared directories and their contents.  More formally, a
-     * mapping whose keys are shared directories and any subdirectories
-     * reachable through those directories.  The value for any key is the set
-     * of indices of all shared files in that directory.
-     * INVARIANT: for any key k with value v in _sharedDirectories, 
-     * for all i in v,
-     *       _files[i]._path==k+_files[i]._name.
-     *  Likewise, for all i s.t.
-     *  _files[i]!=null and !(_files[i] instanceof IncompleteFileDesc),
-     *       _sharedDirectories.get(
-     *            _files[i]._path-_files[i]._name).contains(i).
-     * Here "==" is shorthand for file path comparison and "a-b" is short for
-     * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
-     * canonicalized files, sorted by a FileComparator.
-     *
+     * A mapping whose keys are shared directories and any subdirectories
+     * reachable through those directories. The value for any key is the set of
+     * indices of all shared files in that directory.
+     * 
+     * INVARIANT: for any key k with value v in _sharedDirectories, for all i in
+     * v, _files[i]._path == k + _files[i]._name.
+     * 
+     * Likewise, for all j s.t. _files[j] != null and !(_files[j] instanceof
+     * IncompleteFileDesc), _sharedDirectories.get( _files[j]._path -
+     * _files[j]._name).contains(j).  Here "==" is shorthand for file path
+     * comparison and "a-b" is short for string 'a' with suffix 'b' removed.
+     * 
+     * INVARIANT: all keys in this are canonicalized files, sorted by a
+     * FileComparator.
+     * 
      * Incomplete shared files are NOT stored in this data structure, but are
      * instead in the _incompletesShared IntSet.
      */
@@ -173,32 +177,33 @@ public abstract class FileManager {
      *       _incompletesShared.contains(i)
      * 
      * This structure is not strictly needed for correctness, but it allows
-     * others to retrieve all the incomplete-shared files, which is
-     * a relatively useful feature.
+     * others to retrieve all the incomplete shared files, which is
+     * relatively useful.                                                                                                       
      */
     private IntSet _incompletesShared;
 
     /**
      *  The thread responsible for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
-     *  because indexing files can be slow.  Interrupt this thread to stop the
+     *  because file indexing can be slow.  Interrupt this thread to stop the
      *  loading; it will periodically check its interrupted status. 
      *  LOCKING: obtain _loadThreadLock before modifying and before obtaining
      *  this (to prevent deadlock).
      */
     private Thread _loadThread;
-    /**
-     *  True if _loadThread.interrupt() was called.  This is needed because
-     *  _loadThread.isInterrupted() does not behave as expected.  See
-     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html
-     */
-    private boolean _loadThreadInterrupted = false;
     
     /**
      * The lock for _loadThread.  Necessary to prevent deadlocks in
      * loadSettings.
      */
     private Object _loadThreadLock = new Object();
+    
+    /**
+     *  True if _loadThread.interrupt() was called.  This is needed because
+     *  _loadThread.isInterrupted() does not behave as expected.  See
+     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html
+     */
+    private boolean _loadThreadInterrupted = false;
     
     /**
      * Whether or not we are finished loading the files.
@@ -208,22 +213,22 @@ public abstract class FileManager {
     /**
      * The only ShareableFileFilter object that should be used.
      */
-    public static FileFilter SHAREABLE_FILE_FILTER =
+    public static final FileFilter SHAREABLE_FILE_FILTER =
         new ShareableFileFilter();
         
     /**
      * The only DirectoryFilter object that should be used.
      */
-    public static FileFilter DIRECTORY_FILTER = new DirectoryFilter();
+    public static final FileFilter DIRECTORY_FILTER = new DirectoryFilter();
         
     /**
      * The QueryRouteTable kept by this.  The QueryRouteTable will be 
-     * lazily rebuilt when necessary 
+     * lazily rebuilt when necessary.
      */
     protected static QueryRouteTable _queryRouteTable;
     
     /**
-     * boolean for checking if the QRT needs to be rebuilt
+     * Boolean for checking if the QRT needs to be rebuilt.
      */
     protected static volatile boolean _needRebuild = true;
 
@@ -267,18 +272,18 @@ public abstract class FileManager {
      * files are reloaded.
      */
     private void resetVariables()  {
-        _size = 0;
+        _filesSize = 0;
         _numFiles = 0;
         _numIncompleteFiles = 0;
         _numPendingFiles = 0;
-        _numNetworkShares = 0;
+        _numForcedFiles = 0;
         _files = new ArrayList();
-        _index = new Trie(true);  //ignore case
-        _urnIndex = new HashMap();
+        _KeywordTrie = new Trie(true);  //ignore case
+        _urnMap = new HashMap();
         _extensions = new TreeSet(Comparators.stringComparator());
         _sharedDirectories = new TreeMap(Comparators.fileComparator());
         _incompletesShared = new IntSet();
-        _fileToFileDesc = new HashMap();
+        _fileToFileDescMap = new HashMap();
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this's
@@ -297,13 +302,13 @@ public abstract class FileManager {
      *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
      *  bytes are being shared, returns this value.
      */
-    public int getSize() {return ByteOrder.long2int(_size);}
+    public int getSize() {return ByteOrder.long2int(_filesSize);}
 
     /**
      * Returns the number of files.
      * This number does NOT include incomplete files or forcibly shared network files.
      */
-    public int getNumFiles() {return _numFiles - _numNetworkShares;}
+    public int getNumFiles() {return _numFiles - _numForcedFiles;}
     
     /**
      * Returns the number of shared incomplete files.
@@ -320,10 +325,10 @@ public abstract class FileManager {
     }
     
     /**
-     * Returns the number of network-shared files.
+     * Returns the number of forcibly shared files.
      */
-    public int getNumNetworkShares() {
-        return _numNetworkShares;
+    public int getNumForcedFiles() {
+        return _numForcedFiles;
     }
 
     /**
@@ -380,7 +385,7 @@ public abstract class FileManager {
             return null;
         }
 
-        return (FileDesc)_fileToFileDesc.get(f);
+        return (FileDesc)_fileToFileDescMap.get(f);
     }
     
     /**
@@ -402,7 +407,7 @@ public abstract class FileManager {
 	 *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
 	 */
 	public synchronized FileDesc getFileDescForUrn(final URN urn) {
-		IntSet indices = (IntSet)_urnIndex.get(urn);
+		IntSet indices = (IntSet)_urnMap.get(urn);
 		if(indices == null) return null;
 
 		IntSet.IntSetIterator iter = indices.iterator();
@@ -441,11 +446,11 @@ public abstract class FileManager {
      */
     public synchronized FileDesc[] getAllSharedFileDescriptors() {
         // Instead of using _files.toArray, use
-        // _fileToFileDesc.values().toArray.  This is because
+        // _fileToFileDescMap.values().toArray.  This is because
         // _files will still contain null values for removed
-        // shared files, but _fileToFileDesc will not.
-        FileDesc[] fds = new FileDesc[_fileToFileDesc.size()];        
-        fds = (FileDesc[])_fileToFileDesc.values().toArray(fds);
+        // shared files, but _fileToFileDescMap will not.
+        FileDesc[] fds = new FileDesc[_fileToFileDescMap.size()];        
+        fds = (FileDesc[])_fileToFileDescMap.values().toArray(fds);
         return fds;
     }
 
@@ -667,7 +672,7 @@ public abstract class FileManager {
             File[] directories = new File[tmpDirs.length + 1];
             for(int i = 0; i < tmpDirs.length; i++)
                 directories[i] = tmpDirs[i];
-            directories[tmpDirs.length] = SUBDIR_SHARE;
+            directories[tmpDirs.length] = FORCED_SHARE;
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
@@ -746,7 +751,7 @@ public abstract class FileManager {
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return Collections.EMPTY_LIST;
             
-        boolean isNetworkShare = directory.equals(SUBDIR_SHARE);
+        boolean isNetworkShare = directory.equals(FORCED_SHARE);
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
@@ -942,11 +947,11 @@ public abstract class FileManager {
         }
 
         synchronized (this) {
-            _size += fileLength;
+            _filesSize += fileLength;
             int fileIndex = _files.size();
             FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
             _files.add(fileDesc);
-            _fileToFileDesc.put(file, fileDesc);
+            _fileToFileDescMap.put(file, fileDesc);
             _numFiles++;
 		
             //Register this file with its parent directory.
@@ -960,22 +965,22 @@ public abstract class FileManager {
             
             // files that are forcibly shared over the network
             // aren't counted or shown.
-            if(!parent.equals(SUBDIR_SHARE))
+            if(!parent.equals(FORCED_SHARE))
                 RouterService.getCallback().addSharedFile(fileDesc, parent);
             else
-                _numNetworkShares++;
+                _numForcedFiles++;
 		
             //Index the filename.  For each keyword...
             String[] keywords = extractKeywords(fileDesc);
             
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
-                //Ensure there _index has a set of indices associated with
+                //Ensure there _KeywordTrie has a set of indices associated with
                 //keyword.
-                IntSet indices=(IntSet)_index.get(keyword);
+                IntSet indices=(IntSet)_KeywordTrie.get(keyword);
                 if (indices==null) {
                     indices=new IntSet();
-                    _index.add(keyword, indices);
+                    _KeywordTrie.add(keyword, indices);
                 }
                 //Add fileIndex to the set.
                 indices.add(fileIndex);
@@ -1069,7 +1074,7 @@ public abstract class FileManager {
 		Iterator iter = urns.iterator();
 		while (iter.hasNext()) {
             // if there were indices for this URN, exit.
-            IntSet shared = (IntSet)_urnIndex.get(iter.next());
+            IntSet shared = (IntSet)_urnMap.get(iter.next());
             // nothing was shared for this URN, look at another
             if( shared == null )
                 continue;
@@ -1096,7 +1101,7 @@ public abstract class FileManager {
         IncompleteFileDesc ifd = new IncompleteFileDesc(
             incompleteFile, urns, fileIndex, name, size, vf);            
         _files.add(ifd);
-        _fileToFileDesc.put(incompleteFile, ifd);
+        _fileToFileDescMap.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         _needRebuild = true;
@@ -1106,17 +1111,17 @@ public abstract class FileManager {
 
     /**
      * @modifies this
-     * @effects enters the given FileDesc into the _urnIndex under all its 
+     * @effects enters the given FileDesc into the _urnMap under all its 
      * reported URNs
      */
     private synchronized void updateUrnIndex(FileDesc fileDesc) {
 		Iterator iter = fileDesc.getUrns().iterator();
 		while (iter.hasNext()) {
 			URN urn = (URN)iter.next();
-			IntSet indices=(IntSet)_urnIndex.get(urn);
+			IntSet indices=(IntSet)_urnMap.get(urn);
 			if (indices==null) {
 				indices=new IntSet();
-				_urnIndex.put(urn, indices);
+				_urnMap.put(urn, indices);
 			}
 			indices.add(fileDesc.getIndex());
 		}
@@ -1191,7 +1196,7 @@ public abstract class FileManager {
         }        
         
         // Look for matching file ...         
-        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
+        FileDesc fd = (FileDesc)_fileToFileDescMap.get(f);
         if (fd==null)
             return null;
         
@@ -1200,7 +1205,7 @@ public abstract class FileManager {
                     "invariant broken!");
         
         _files.set(i,null);
-        _fileToFileDesc.remove(f);
+        _fileToFileDescMap.remove(f);
         _needRebuild = true;
         
         // If it's an incomplete file, the only reference we 
@@ -1218,7 +1223,7 @@ public abstract class FileManager {
         }
 
         _numFiles--;
-        _size-=fd.getSize();
+        _filesSize-=fd.getSize();
 
         //Remove references to this from directory listing
         File parent=FileUtils.getParentFile(f);
@@ -1230,27 +1235,27 @@ public abstract class FileManager {
 
         // files that are forcibly shared over the network aren't
         // counted.        
-        if(parent.equals(SUBDIR_SHARE)) {
+        if(parent.equals(FORCED_SHARE)) {
             notify = false;
-            _numNetworkShares--;
+            _numForcedFiles--;
         }
 
         //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
-            IntSet indices=(IntSet)_index.get(keyword);
+            IntSet indices=(IntSet)_KeywordTrie.get(keyword);
             if (indices!=null) {
                 indices.remove(i);
                 //TODO2: prune tree if possible.  call
-                //_index.remove(keyword) if indices.size()==0.
+                //_KeywordTrie.remove(keyword) if indices.size()==0.
             }
         }
 
         //Remove hash information.
         this.removeUrnIndex(fd);
         //Remove creation time information
-        if (_urnIndex.get(fd.getSHA1Urn()) == null)
+        if (_urnMap.get(fd.getSHA1Urn()) == null)
             CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         repOk();
@@ -1285,16 +1290,16 @@ public abstract class FileManager {
     private synchronized void removeUrnIndex(FileDesc fileDesc) {
 		Iterator iter = fileDesc.getUrns().iterator();
 		while (iter.hasNext()) {
-            //Lookup each of desc's URN's ind _urnIndex.  
+            //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
 			URN urn = (URN)iter.next();
-            IntSet indices=(IntSet)_urnIndex.get(urn);
+            IntSet indices=(IntSet)_urnMap.get(urn);
             Assert.that(indices!=null, "Invariant broken");
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0)
-                _urnIndex.remove(urn);
+                _urnMap.remove(urn);
 		}
     }
 
@@ -1333,7 +1338,7 @@ public abstract class FileManager {
     /** Ensures that this' index takes the minimum amount of space.  Only
      *  affects performance, not correctness; hence no modifies clause. */
     private synchronized void trim() {
-        _index.trim(new Function() {
+        _KeywordTrie.trim(new Function() {
             public Object apply(Object intSet) {
                 ((IntSet)intSet).trim();
                 return intSet;
@@ -1454,7 +1459,7 @@ public abstract class FileManager {
         //Trie requires that getPrefixedBy(String, int, int) passes
         //an already case-changed string.  Both search & urnSearch
         //do thise kind of match, so we canonicalise the case for them.
-        str = _index.canonicalCase(str);        
+        str = _KeywordTrie.canonicalCase(str);        
         matches = search( str, matches);
         if(request.getQueryUrns().size() > 0) {
             matches = urnSearch(request.getQueryUrns().iterator(),matches);
@@ -1543,7 +1548,7 @@ public abstract class FileManager {
         //Extract responses for all non-null (i.e., not deleted) files.
         //Because we ignore all incomplete files, _numFiles continues
         //to work as the expected size of ret.
-        Response[] ret=new Response[_numFiles-_numNetworkShares];
+        Response[] ret=new Response[_numFiles-_numForcedFiles];
         int j=0;
         for (int i=0; i<_files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
@@ -1610,7 +1615,7 @@ public abstract class FileManager {
 
             //Search for keyword, i.e., keywords[i...j-1].  
             Iterator /* of IntSet */ iter=
-                _index.getPrefixedBy(query, i, j);
+                _KeywordTrie.getPrefixedBy(query, i, j);
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
                 //matches.  As an optimization, if this is the only keyword and
@@ -1659,7 +1664,7 @@ public abstract class FileManager {
             // TODO (eventually): case-normalize URNs as appropriate
             // for now, though, prevalent practice is same as local: 
             // lowercase "urn:<type>:", uppercase Base32 SHA1
-            IntSet hits = (IntSet)_urnIndex.get(urn);
+            IntSet hits = (IntSet)_urnMap.get(urn);
             if(hits!=null) {
                 // double-check hits to be defensive (not strictly needed)
                 IntSet.IntSetIterator iter = hits.iterator();
@@ -1710,7 +1715,7 @@ public abstract class FileManager {
      */
     public static boolean isNetworkShare(File file) {
         File parent = file.getParentFile();
-        return parent != null && parent.equals(SUBDIR_SHARE);
+        return parent != null && parent.equals(FORCED_SHARE);
     }
 
 
@@ -1723,9 +1728,9 @@ public abstract class FileManager {
             return;
         System.err.println("WARNING: running repOk()");
 
-        //Verify index.  Get the set of indices in the _index....
+        //Verify index.  Get the set of indices in the _KeywordTrie....
         IntSet indices=new IntSet();
-        for (Iterator iter=_index.getPrefixedBy(""); iter.hasNext(); ) {
+        for (Iterator iter=_KeywordTrie.getPrefixedBy(""); iter.hasNext(); ) {
             IntSet set=(IntSet)iter.next();
             indices.addAll(set);
         }
@@ -1738,10 +1743,10 @@ public abstract class FileManager {
                         "Null entry for index value "+i);
         }
 
-        //Make sure all FileDesc named in _urnIndex exist.
-        for (Iterator iter=_urnIndex.keySet().iterator(); iter.hasNext(); ) {
+        //Make sure all FileDesc named in _urnMap exist.
+        for (Iterator iter=_urnMap.keySet().iterator(); iter.hasNext(); ) {
             URN urn=(URN)iter.next();
-            IntSet indices2=(IntSet)_urnIndex.get(urn);
+            IntSet indices2=(IntSet)_urnMap.get(urn);
             for (IntSet.IntSetIterator iter2=indices2.iterator(); 
                      iter2.hasNext(); ) {
                 int i=iter2.next();
@@ -1800,15 +1805,15 @@ public abstract class FileManager {
             //d) Ensure URNs listed.
             for (iter=desc.getUrns().iterator(); iter.hasNext(); ) {
                 URN urn=(URN)iter.next();
-                IntSet indices2=(IntSet)_urnIndex.get(urn);
+                IntSet indices2=(IntSet)_urnMap.get(urn);
                 Assert.that(indices2!=null, "Urn not found");
                 Assert.that(indices2.contains(desc.getIndex()));
             }
         }   
         Assert.that(_numFiles==numFilesCount,
                     _numFiles+" should be "+numFilesCount);
-        Assert.that(_size==sizeFilesCount,
-                    _size+" should be "+sizeFilesCount);
+        Assert.that(_filesSize==sizeFilesCount,
+                    _filesSize+" should be "+sizeFilesCount);
     }
 
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java

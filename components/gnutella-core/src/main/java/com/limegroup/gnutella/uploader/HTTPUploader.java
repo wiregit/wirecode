@@ -271,7 +271,7 @@ public final class HTTPUploader implements Uploader {
         
         File parent = _fileDesc.getFile().getParentFile();
         if(parent != null)
-            _isNetworkShare = parent.equals(FileManager.SUBDIR_SHARE);
+            _isNetworkShare = parent.equals(FileManager.FORCED_SHARE);
 	}
 
 	/**

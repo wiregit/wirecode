@@ -24,7 +24,7 @@ import com.limegroup.gnutella.util.SystemUtils;
  * This class represents an individual Uniform Resource Name (URN), as
  * specified in RFC 2141.  This does extensive validation of URNs to 
  * make sure that they are valid, with the factory methods throwing 
- * excpeptions when the arguments do not meet URN syntax.  This does
+ * exceptions when the arguments do not meet URN syntax.  This does
  * not perform rigorous verification of the SHA1 values themselves.
  *
  * This class is immutable.
