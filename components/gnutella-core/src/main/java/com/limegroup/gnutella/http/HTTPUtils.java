@@ -96,15 +96,16 @@ public final class HTTPUtils {
 	 *  header value 
 	 */
 	private static String createHeader(HTTPHeaderName name, 
-	  HTTPHeaderValue value) throws IOException {
+									   HTTPHeaderValue value) 
+		throws IOException {
 		if((name == null) || (value == null)) {
-			throw new NullPointerException("null value in writing http header");
+			throw new NullPointerException("null value in creating http header");
 		}
 		String nameStr  = name.httpStringValue();
 		String valueStr = value.httpStringValue();
 		if((nameStr == null) || (valueStr == null)) {
-			throw new NullPointerException("null value in writing http header");
-		}		
+			throw new NullPointerException("null value in creating http header");
+		}
 		StringBuffer sb = new StringBuffer();
 		sb.append(nameStr);
 		sb.append(COLON_SPACE);
