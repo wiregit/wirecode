@@ -24,6 +24,9 @@ import org.xml.sax.InputSource;
 import java.util.zip.*;
 import com.limegroup.gnutella.Assert;
 
+// for hashing
+import java.security.*;
+
 /**
  * Contains utility methods
  * @author  asingla
@@ -658,6 +661,83 @@ public class LimeXMLUtils
     }
 
 
+    private static final int NUM_BYTES_TO_HASH = 100;
+    private static final int NUM_TOTAL_HASH    = NUM_BYTES_TO_HASH*3;
+    private static final byte[] hashBytes = new byte[NUM_BYTES_TO_HASH];
+    private static void clearHashBytes() {
+        for (int i = 0; i < NUM_BYTES_TO_HASH; i++)
+            hashBytes[i] = (byte)0;
+    }
+
+    /** @return The SHA hash bytes of hte input bytes.
+     *  @exception java.lang.Exception This should never really happen. 
+     *  Thrown if hashing encountered serious flaw.
+     */
+    public static byte[] hashFile(File toHash) throws Exception {
+        byte[] retBytes = null;
+        try {        
+
+            // setup
+            FileInputStream fis = new FileInputStream(toHash);           
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            
+            if (toHash.length() < (NUM_TOTAL_HASH)) {
+                int numRead = 0;
+                do {
+                    clearHashBytes();
+                    numRead = fis.read(hashBytes);
+                    md.update(hashBytes);
+                } while (numRead == NUM_BYTES_TO_HASH);
+            }
+            else { // need to do some mathy stuff.......
+
+                long thirds = toHash.length() / (long) 3;
+
+                // beginning input....
+                clearHashBytes();
+                int numRead = fis.read(hashBytes);
+                md.update(hashBytes);
+                Assert.that(numRead == NUM_BYTES_TO_HASH);
+
+                // middle input...
+                clearHashBytes();
+                fis.skip(thirds - NUM_BYTES_TO_HASH);
+                numRead = fis.read(hashBytes);
+                md.update(hashBytes);
+                Assert.that(numRead == NUM_BYTES_TO_HASH);
+                
+                // ending input....
+                clearHashBytes();
+                fis.skip(toHash.length() - 
+                         (thirds + NUM_BYTES_TO_HASH) -
+                         NUM_BYTES_TO_HASH);
+                numRead = fis.read(hashBytes);
+                md.update(hashBytes);
+                Assert.that(numRead == NUM_BYTES_TO_HASH);
+            }
+                
+            retBytes = md.digest();
+        }
+        catch (Exception e) {
+            throw new Exception(e.toString());
+        }
+        return retBytes;
+    }
+
+    /*
+      public static void main(String argv[]) throws Exception {
+      // TEST FOR hashFile(File)
+        for (int i = 0; i < argv.length; i++) {
+        File currFile = new File(argv[i]);
+        byte[] hash = LimeXMLUtils.hashFile(currFile);
+        Assert.that(MessageDigest.isEqual(hash,
+        LimeXMLUtils.hashFile(currFile)));
+        for (int j = 0; j < hash.length; j++)
+        System.out.print(hash[j]);
+        System.out.println("");
+        }
+        }
+    */
     /*
     public static void main(String argv[]) {
         String dataSource = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\" ><audio album=\"Steve&apos;s ALbum\" artist=\"S. Cho / A. Kim\" bitrate=\"156\" comments=\"Live Concert 10/26/97\" genre=\"Chamber Music\" index=\"0\" title=\"Schumann Fantasiestucke - I.m\" year=\"2001\"/></audios>";
