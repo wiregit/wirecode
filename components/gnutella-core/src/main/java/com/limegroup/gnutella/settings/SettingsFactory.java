@@ -102,11 +102,14 @@ public final class SettingsFactory {
 	 * Reverts all settings to their factory defaults.
 	 */
 	public synchronized void revertToDefault() {
+	    // first revert the settings we have in the factory ...
 	    Iterator ii = settings.iterator();
 	    while( ii.hasNext() ) {
 	        Setting set = (Setting)ii.next();
 	        set.revertToDefault();
 	    }
+	    SettingsManager.instance().loadDefaults();
+	    
 	}
     
     /**
@@ -135,7 +138,7 @@ public final class SettingsFactory {
         String key = null;
         for (Enumeration e = tempProps.keys(); e.hasMoreElements();) {
             key = (String)e.nextElement();
-            if ( SettingsManager.isDefault(key) ) {
+            if ( SettingsManager.instance().isDefault(key) ) {
                 tempProps.remove(key);
             }
         }

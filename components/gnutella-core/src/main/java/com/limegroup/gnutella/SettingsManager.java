@@ -49,7 +49,7 @@ public final class SettingsManager {
     /**
      * Stored default values learned from reflecting upon the class.
      */
-    private static Map defaultValues;    
+    private Map defaultValues;    
 
     /**
      * Time interval, after which the accumulated information expires
@@ -1162,7 +1162,7 @@ public final class SettingsManager {
      * Determine whether or not this key is currently
      * stored as its default value.
      */
-    public static boolean isDefault(String theKey) {
+    public boolean isDefault(String theKey) {
         if ( defaultValues == null || PROPS == null )
             return false;
         String val = PROPS.getProperty(theKey);

@@ -12,7 +12,7 @@ import java.io.*;
  * grouped into subclasses by setting type.  For example, a "DownloadSettings"
  * subclass could contain any settings specifically for downloads.
  */
-abstract class AbstractSettings {
+public abstract class AbstractSettings {
    
 
     /**
