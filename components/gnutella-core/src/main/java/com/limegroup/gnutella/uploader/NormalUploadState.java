@@ -103,9 +103,12 @@ public class NormalUploadState implements HTTPMessage {
 				ostream.write(str.getBytes());
 			}
 			if(_fileDesc != null) {
-				HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
-									  _fileDesc.getSHA1Urn(),
-									  ostream);
+				URN urn = _fileDesc.getSHA1Urn();
+				if(urn != null) {
+					HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
+										  urn,
+										  ostream);
+				}
 				if(_fileDesc.hasAlternateLocations()) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
 										  _fileDesc.getAlternateLocationCollection(),
