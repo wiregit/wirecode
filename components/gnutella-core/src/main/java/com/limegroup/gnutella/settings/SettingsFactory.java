@@ -3,9 +3,10 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.zip.*;
-import java.util.*;
+import java.util.Properties;
 import java.io.*;
 import java.awt.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To
@@ -59,6 +60,7 @@ public final class SettingsFactory {
         try {
             PROPS.load(new FileInputStream(file));
         } catch(IOException e) {
+			e.printStackTrace();
             // the default properties will be used -- this is fine and expected
         }		
 	}
@@ -144,6 +146,6 @@ public final class SettingsFactory {
 	 * @param defaultValue the default value for the setting
 	 */
 	public ColorSetting createColorSetting(String key, Color defaultValue) {
-		return new ColorSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+		return ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
 	}
 }
