@@ -55,10 +55,17 @@ public class HostCatcher {
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
 
-    /** The number of ultrapeer pongs to store. 
-     *  This should be large enough to store all permanent addresses. */
+    /**
+     * The number of ultrapeer pongs to store.
+     */
     static final int GOOD_SIZE=1000;
-    /** The number of normal pongs to store. */
+    
+    /**
+     * The number of normal pongs to store.
+     * This must be large enough to store all permanent addresses, 
+     * as permanent addresses when read from disk are stored as
+     * normal priority.
+     */    
     static final int NORMAL_SIZE=400;
 
     /**
