@@ -7,6 +7,7 @@ import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class manages the property settings.  It maintains default 
@@ -97,8 +98,8 @@ public class SettingsManager {
     public static final String  DEFAULT_LIMEWIRE_ROUTER = 
 	  "router.limewire.com";
 	/** This is limewire's dedicated pong cache */
-    public static final String  DEDICATED_LIMEWIRE_ROUTER = 
-	  "router4.limewire.com";
+    public static final String DEDICATED_LIMEWIRE_ROUTER = 
+	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
     /** List of hosts to try on quick connect */
     private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
 		DEFAULT_LIMEWIRE_ROUTER+":6346",
