@@ -54,7 +54,7 @@ public final class QueryHandler {
      * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
      * milliseconds.
      */
-    static final long TIME_TO_WAIT_PER_HOP = 2500;
+    static final long TIME_TO_WAIT_PER_HOP = 2300;
 
 
 	/**
@@ -303,9 +303,11 @@ public final class QueryHandler {
                                this);
             long timeToWait = pq.getTimeToWait();            
             _theoreticalHostsQueried += pq.sendProbe();
-            System.out.println("QueryHandler::sendQuery:"+
-                               "_theoreticalHostsQueried: "+
-                               QUERY.getQuery()+" "+_theoreticalHostsQueried); 
+            if(QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery:"+
+                                   "_theoreticalHostsQueried: "+
+                                   QUERY.getQuery()+" "+_theoreticalHostsQueried); 
+            }
             _nextQueryTime = 
                 System.currentTimeMillis() + timeToWait;
             _probeQuerySent = true;
@@ -351,6 +353,9 @@ public final class QueryHandler {
         byte ttl = 0;
         ManagedConnection mc = null;
 
+        // add randomization to who we send our queries to
+        Collections.shuffle(list);
+
         // weed out all connections that aren't yet stable
         for(int i=0; i<length; i++) {
 			ManagedConnection curConnection = 
@@ -387,7 +392,7 @@ public final class QueryHandler {
                                resultsNeeded); 
         }
         
-        int hostsToQuery = 20000;
+        int hostsToQuery = 40000;
         if(resultsPerHost != 0) {
             hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
         }
@@ -485,7 +490,7 @@ public final class QueryHandler {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(18.0*calculateNewHosts(degree, i));            
+            int hosts = (int)(16.0*calculateNewHosts(degree, i));            
             if(hosts >= hostsToQueryPerConnection) {
                 return i;
             }
@@ -533,7 +538,14 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-		if(RESULT_COUNTER.getNumResults() >= RESULTS) return true;
+		if(RESULT_COUNTER.getNumResults() >= RESULTS) {
+            if(QUERY.getHops() == 0) {
+                System.out.println(QUERY.getQuery()+
+                                   " received enough results: "+
+                                   RESULT_COUNTER.getNumResults()); 
+            }
+            return true;
+        }
 	 
         // if our theoretical horizon has gotten too high, consider
         // it enough results
@@ -541,14 +553,25 @@ public final class QueryHandler {
         // because, while connection have a specfic degree, the degree of 
         // the connections on subsequent hops cannot be determined
 		if(_theoreticalHostsQueried > 110000) {
-            System.out.println("QueryHandler::hasEnoughResults::max horizon reached"); 
+            if(QUERY.getHops() == 0) {
+                System.out.println(QUERY.getQuery()+
+                                   " max horizon reached: "+
+                                   _theoreticalHostsQueried); 
+            }
             return true;
         }
 
 		// return true if we've been querying for longer than the specified 
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
-		if(queryLength > 100*1000) return true;
+		if(queryLength > 180*1000) {
+            if(QUERY.getHops() == 0) {
+                System.out.println(QUERY.getQuery()+
+                                   " length timed out: "+
+                                   queryLength); 
+            }
+            return true;
+        }
 
 		return false;
 	}
