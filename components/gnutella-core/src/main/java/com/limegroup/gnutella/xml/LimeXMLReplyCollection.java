@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.xml;
 
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.DataUtils;
+import com.sun.java.util.collections.*;
 import java.io.*;
 import org.xml.sax.*;
 
@@ -17,7 +19,7 @@ import org.xml.sax.*;
  * @author Sumeet Thadani
  */
 
-public class LimeXMLReplyCollection{
+public class LimeXMLReplyCollection {
 
     /**
      * The schemaURI of this collection.
@@ -27,8 +29,20 @@ public class LimeXMLReplyCollection{
     /**
      * A map of URN -> LimeXMLDocument for each shared file that contains XML.
      * Each ReplyCollection is written out to one physical file on shutdown.
+     *
+     * SYNCHRONIZATION: Synchronize on mainMap when accessing, 
+     *  adding or removing.
      */
     private final HashMap /* URN -> LimeXMLDocument */ mainMap;
+    
+    /**
+     * An index mapping keywords in the LimeXMLDocuments to the list
+     * of documents that have that keyword.
+     *
+     * SYNCHRONIZATION: Synchronize on mainMap when accessing,
+     *  adding or removing.
+     */
+    private final Trie /* String -> LinkedList */ index;
     
     /**
      * Whether or not this LimeXMLReplyCollection is for audio files.
@@ -74,6 +88,7 @@ public class LimeXMLReplyCollection{
 
         // construct a backing store object (for serialization)
         mainMap = new HashMap();
+        index = new Trie(true); // ignore case.
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXML;
 
@@ -269,6 +284,41 @@ public class LimeXMLReplyCollection{
     public String getSchemaURI(){
         return schemaURI;
     }
+    
+    /**
+     * Adds the keywords of this LimeXMLDocument into the index Trie.
+     */
+    private void addKeywords(LimeXMLDocument doc) {
+        synchronized(mainMap) {
+            for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
+                String value = (String)i.next();
+                List allDocs = (List)index.get(value);
+                if( allDocs == null ) {
+                    allDocs = new LinkedList();
+                    index.add(value, allDocs);
+                }
+                //Add the value to the list of docs
+                allDocs.add(doc);
+            }
+        }
+    }
+    
+    /**
+     * Removes the keywords of this LimeXMLDocument from the Trie.
+     */
+    private void removeKeywords(LimeXMLDocument doc) {
+        synchronized(mainMap) {
+            for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
+                String value = (String)i.next();
+                List allDocs = (List)index.get(value);
+                if (allDocs != null) {
+                    allDocs.remove(doc);
+                    if( allDocs.size() == 0 )
+                        index.remove(value);
+                }
+            }
+        }
+    }
 
     /**
      * Adds a reply into the mainMap of this collection.
@@ -279,6 +329,7 @@ public class LimeXMLReplyCollection{
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
+            addKeywords(replyDoc);
         }
         fd.addLimeXMLDocument(replyDoc);
         try {
@@ -340,19 +391,57 @@ public class LimeXMLReplyCollection{
     /**
      * Returns all documents that match the particular query.
      * If no documents match, this returns an empty list.
+     *
+     * This goes through the following methodology:
+     * 1) Looks in the index trie to determine if ANY
+     *    of the values in the query's document match.
+     *    If they do, adds the document to a set of
+     *    possible matches.  A set is used so the same
+     *    document is not added multiple times.
+     * 2) If no documents matched, returns an empty list.
+     * 3) Iterates through the possible matching documents
+     *    and does a fine-grained matchup, using XML-specific
+     *    matching techniques.
+     * 4) Returns an empty list if nothing matched or
+     *    a list of the matching documents.
      */    
-    public List getMatchingReplies(LimeXMLDocument queryDoc){
-        List matchingReplyDocs;
-        synchronized(mainMap){
-            Iterator iter = mainMap.values().iterator();
-            matchingReplyDocs = new ArrayList();
+    public List getMatchingReplies(LimeXMLDocument queryDoc) {
+        // First get a list of anything that could possibly match.
+        // This uses a set so we don't add the same doc twice ...
+        Set matching = null;
+        for(Iterator i = queryDoc.getValueList().iterator(); i.hasNext(); ) {
+            String val = (String)i.next();
+            Iterator /* of List */ iter = index.getPrefixedBy(val);
             while(iter.hasNext()) {
-                LimeXMLDocument currReplyDoc = (LimeXMLDocument)iter.next();
-                if (LimeXMLUtils.match(currReplyDoc, queryDoc))
-                    matchingReplyDocs.add(currReplyDoc);
+                List matchesVal = (List)iter.next();
+                if( matchesVal != null ) {
+                    if( matching == null )
+                        matching = new HashSet();
+                    matching.addAll(matchesVal);
+                }
             }
         }
-        return matchingReplyDocs;
+        
+        // no matches?... exit.
+        if( matching == null || matching.size() == 0)
+            return DataUtils.EMPTY_LIST;
+        
+        // Now filter that list using the real XML matching tool...
+        List actualMatches = null;
+        for(Iterator i = matching.iterator(); i.hasNext(); ) {
+            LimeXMLDocument currReplyDoc = (LimeXMLDocument)i.next();
+            if (LimeXMLUtils.match(currReplyDoc, queryDoc)) {
+                if( actualMatches == null )
+                    actualMatches = new LinkedList();
+                actualMatches.add(currReplyDoc);
+            }
+        }
+        
+        // No actual matches?... exit.
+        if( actualMatches == null || actualMatches.size() == 0 )
+            return DataUtils.EMPTY_LIST;
+
+        return actualMatches;
     }
     
     /**
@@ -364,6 +453,8 @@ public class LimeXMLReplyCollection{
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
+            removeKeywords(oldDoc);
+            addKeywords(newDoc);
         }
         
         if(oldDoc == null)  {
@@ -381,9 +472,9 @@ public class LimeXMLReplyCollection{
     public boolean removeDoc(FileDesc fd) {
         URN hash = fd.getSHA1Urn();
         boolean found;
-        Object val;
+        LimeXMLDocument val;
         synchronized(mainMap){
-            val = mainMap.remove(hash);
+            val = (LimeXMLDocument)mainMap.remove(hash);
             found = (val != null);
         }
         
@@ -393,6 +484,7 @@ public class LimeXMLReplyCollection{
             written = write();
             if( written ) {
                 fd.removeLimeXMLDocument((LimeXMLDocument)val);
+                removeKeywords(val);
             } else { // put it back to maintain consistency
                 synchronized(mainMap) {
                     mainMap.put(hash,val);
