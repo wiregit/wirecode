@@ -160,7 +160,8 @@ public class PingReplyTest extends TestCase {
                       +2   //data bytes
                       +1   //"UDP" extension flags
                       +udpLength // ID
-                      +1;   //data length
+                      +1   //data length
+                      +1;  //data bytes
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
@@ -172,8 +173,8 @@ public class PingReplyTest extends TestCase {
         assertTrue(bytes[offset+2+idLength+5]==(byte)'D');
         assertTrue(bytes[offset+2+idLength+6]==(byte)'P');
                      //...etc.
-        assertTrue(bytes[bytes.length-2-(2+udpLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(2+udpLength)]==(byte)0x02); //big byte of 523
+        assertTrue(bytes[bytes.length-2-(3+udpLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(3+udpLength)]==(byte)0x02); //big byte of 523
 
 
         //Decode and check contents.
