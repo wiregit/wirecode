@@ -11,34 +11,6 @@ import java.io.*;
 public final class URNFactory {
 
 	/**
-	 * Constant for the beginning "GET" of an HTTP URN get request.
-	 */
-	private static final String GET = "GET";
-
-	/**
-	 * Constant for the HTTP 1.0 specifier at the end of an HTTP URN get
-	 * request.
-	 */
-	private static final String HTTP10 = "HTTP/1.0";
-	
-	/**
-	 * Constant for the HTTP 1.1 specifier at the end of an HTTP URN get
-	 * request.
-	 */
-	private static final String HTTP11 = "HTTP/1.1";
-
-	/**
-	 * Constant for the "uri-res" specifier for an HTTP URN get request.
-	 */
-	private static final String URI_RES = "uri-res";
-
-	/**
-	 * Constant for the "Name to Resource", or "N2R?" resolution 
-	 * specifier, as specified in RFC 2169.
-	 */
-	private static final String NAME_TO_RESOURCE = "N2R?"; 	
-
-	/**
 	 * Creates a new <tt>URN</tt> instance with a SHA1 hash.
 	 *
 	 * @param file the <tt>File</tt> instance to use to create a 
@@ -160,7 +132,7 @@ public final class URNFactory {
 			return false;
 		}
 		String getStr = GET_LINE.substring(0, firstSpace);
-		if(!getStr.equalsIgnoreCase(URNFactory.GET)) {
+		if(!getStr.equalsIgnoreCase(HTTPConstants.GET)) {
 			return false;
 		}
 		return true;
@@ -184,7 +156,7 @@ public final class URNFactory {
 			return false;
 		}
 		String uriStr = GET_LINE.substring(firstSlash+1, secondSlash);
-		if(!uriStr.equalsIgnoreCase(URNFactory.URI_RES)) {
+		if(!uriStr.equalsIgnoreCase(HTTPConstants.URI_RES)) {
 			return false;
 		}
 		return true;
@@ -207,7 +179,7 @@ public final class URNFactory {
 		String n2r = GET_LINE.substring(nIndex-1, nIndex+3);
 
 		// we could add more protocols to this check
-		if(!n2r.equalsIgnoreCase(URNFactory.NAME_TO_RESOURCE)) {
+		if(!n2r.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)) {
 			return false;
 		}
 		return true;
@@ -227,8 +199,8 @@ public final class URNFactory {
 			return false;
 		}
 		String httpStr = GET_LINE.substring(spaceIndex+1);
-		if(!httpStr.equalsIgnoreCase(URNFactory.HTTP10) &&
-		   !httpStr.equalsIgnoreCase(URNFactory.HTTP11)) {
+		if(!httpStr.equalsIgnoreCase(HTTPConstants.HTTP10) &&
+		   !httpStr.equalsIgnoreCase(HTTPConstants.HTTP11)) {
 			return false;
 		}
 		return true;
