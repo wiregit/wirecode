@@ -217,6 +217,10 @@ public final class AlternateLocationCollection
 		return added;
 	}
 
+    public synchronized void clear() {
+        LOCATIONS.clear();
+    }
+
 	// implements the AlternateLocationCollector interface
 	public boolean hasAlternateLocations() {
 		return !LOCATIONS.isEmpty();
@@ -297,10 +301,12 @@ public final class AlternateLocationCollection
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		boolean wrote = false;
+        //Sumeet:TODO2: improve randomization of altlocs
+        //Sumeet:TODO2: send all for n-alts
         synchronized(this) {
 	        Iterator iter = LOCATIONS.keySet().iterator();
             int start = random12.nextInt(LOCATIONS.size());
-            start = Math.max(0, start-10); // start from 0, or 10 before this one.
+            start=Math.max(0, start-10);// start from 0, or 10 before this one.
             
             //traverse blindly through X amount of times.
             for(int i = 0; i < start; i++)
@@ -308,7 +314,8 @@ public final class AlternateLocationCollection
             
             // then write out the next 10.
             for(int i = 0; i < start+10 && iter.hasNext(); i++) {
-			    writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
+			    writeBuffer.append((
+                           (HTTPHeaderValue)iter.next()).httpStringValue());
 			    writeBuffer.append(commaSpace);
 			    wrote = true;
 			}
@@ -373,15 +380,3 @@ public final class AlternateLocationCollection
         return ret;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

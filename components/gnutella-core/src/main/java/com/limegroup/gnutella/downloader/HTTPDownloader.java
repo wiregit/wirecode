@@ -86,8 +86,14 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private final AlternateLocationCollection _altLocsReceived;
-    private final AlternateLocationCollection _altLocsToSend;
+	private AlternateLocationCollection _altLocsReceived;
+
+    /**
+     * Manages hosts that the worker threads in ManagedDownloader have either
+     * succeeded of failed to download from. The collections managed by this
+     * AltLocManager are passed on to the uploader during every HTTP handshake.
+     */
+    private final AltLocCollectionsManager _sendLocsManager;
 
 	private int _port;
 	private String _host;
@@ -129,8 +135,6 @@ public class HTTPDownloader implements BandwidthTracker {
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
-     * @param alts collection of alternate locations we know about for this
-     *  file.  May be null
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
                                                           File incompleteFile) {
@@ -153,10 +157,15 @@ public class HTTPDownloader implements BandwidthTracker {
         _altLocsReceived = urn==null ? null:
             AlternateLocationCollection.createCollection(urn);
         //Sumeet:TODO1: 1. add methods to allow other HTTPDownloaders to add
-        //altlocs to this collection.  2. Change this to be an
+        //altlocs to this collection.  
+        //2. Change this to be an
         //AltLocCollectionManager so we can send alts and well as n-alts.
         //3. chate the altLocsReceived to a SimpleAlternateLocationCollection
-        _altLocsToSend = AlternateLocationCollection.createCollection(urn);
+        AlternateLocationCollection s = 
+                      AlternateLocationCollection.createCollection(urn);
+        AlternateLocationCollection f = 
+                      AlternateLocationCollection.createCollection(urn);
+        _sendLocsManager = new AltLocCollectionsManager(s,f);
         
 		_amountRead = 0;
 		_totalAmountRead = 0;
@@ -166,6 +175,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		    (int)(rfd.getSize() * .25 )); 
     }
 
+    ////////////////////////Alt Locs methods////////////////////////
+    
     /**
      * Accessor for the alternate locations received from the server for 
      * this download attempt.  
@@ -174,10 +185,22 @@ public class HTTPDownloader implements BandwidthTracker {
      *  received locations, can be <tt>null</tt> if we could not create
      *  a collection, or could be empty
      */
-	public AlternateLocationCollection getAlternateLocations() { 
+    AlternateLocationCollection getAltLocsReceived() { 
 	    return _altLocsReceived;
     }
-
+    
+    void clearReceivedLocs() {
+        synchronized(_altLocsReceived) { _altLocsReceived.clear();}
+    }
+    
+    void addSuccessfulAltLoc(AlternateLocation loc) {
+        _sendLocsManager.addLocation(loc);
+    }
+    
+    void addFailedAltLoc(AlternateLocation loc) {
+        _sendLocsManager.removeLocation(loc,true);//it failed
+    }    
+    
     ///////////////////////////////// Connection /////////////////////////////
 
     /** 
@@ -259,7 +282,18 @@ public class HTTPDownloader implements BandwidthTracker {
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
-		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1, out);
+		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,sha1,out);
+
+        //write altLocs and n-alt-locs
+        HTTPUtils.writeHeader
+        (HTTPHeaderName.ALT_LOCATION,_sendLocsManager.getGoodAltLocs(),out);
+        //write-nalts
+        HTTPUtils.writeHeader
+        (HTTPHeaderName.NALTS,_sendLocsManager.getFailedAltLocs(),out);
+        //clear the collections
+        _sendLocsManager.clear();
+
+
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
@@ -331,7 +365,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
 			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
-                readAlternateLocations(str, _altLocsReceived);
+                readAlternateLocations(str);
 			}
             else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) {
                 parseQueueHeaders(str, refQueueInfo);
@@ -388,14 +422,11 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * for a single file.
 	 *
 	 * @param altHeader the full alternate locations header
-	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
-	 *  locations should be added to
 	 */
-	private static void readAlternateLocations(final String altHeader,
-											   AlternateLocationCollector alc) {
-		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-		if(alternateLocations == null) return;
-		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+	private void readAlternateLocations(final String altHeader) {
+		final String altStr = HTTPUtils.extractHeaderValue(altHeader);
+		if(altStr == null) return;
+		StringTokenizer st = new StringTokenizer(altStr, ",");
 
 		while(st.hasMoreTokens()) {
 			try {
@@ -405,12 +436,15 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(alSha1 == null) {
                     continue;
                 }
-                if(alc == null)
-                    alc = AlternateLocationCollection.createCollection(alSha1);
-
-                if(alSha1.equals(alc.getSHA1Urn()))
-                    alc.add(al);
-
+                if(_altLocsReceived == null)
+                    _altLocsReceived = 
+                    AlternateLocationCollection.createCollection(alSha1);
+                
+                if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
+                    synchronized(_altLocsReceived) {
+                        _altLocsReceived.add(al);
+                    }
+                }
 			} catch(IOException e) {
 				// continue without adding it.
 				continue;
@@ -818,7 +852,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 		_byteReader = new ByteReader(stream);
 		_altLocsReceived = null;
-        _altLocsToSend = null;
+        _sendLocsManager = null;
 		_rfd =  new RemoteFileDesc("127.0.0.1", 0,
                                   0, "a", 0, new byte[16],
                                   0, false, 0, false, null, null,

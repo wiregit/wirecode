@@ -63,7 +63,20 @@ public class AltLocCollectionsManager {
         return _validAltLocs.addAll(collection);
     }
     
-    //Sumeet:TODO1: add a diffAlternateLocationCollection method??
+    public AlternateLocationCollection getGoodAltLocs() {
+        return _validAltLocs;
+    }
+
+    public AlternateLocationCollection getFailedAltLocs() {
+        return _failedAltLocs;
+    }
+
+    public void clear() {
+        _validAltLocs.clear();
+        _failedAltLocs.clear();
+    }
+
+        //Sumeet:TODO1: add a diffAlternateLocationCollection method??
     
 }
 

@@ -2040,12 +2040,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
-                Iterator iter = dloader.getAlternateLocations().iterator();
-                while(iter.hasNext()) {
-                    AlternateLocation loc = (AlternateLocation)iter.next();
-                    RemoteFileDesc rfd = loc.createRemoteFileDesc
-                    (dloader.getRemoteFileDesc().getSize());
-                    addDownload(rfd, false);//dont cache
+                AlternateLocationCollection c = dloader.getAltLocsReceived();
+                //Sumeet:TODO1: make sure no deadlock here. 
+                synchronized(c) {
+                    Iterator iter = c.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation loc = (AlternateLocation)iter.next();
+                        RemoteFileDesc rfd = loc.createRemoteFileDesc
+                        (dloader.getRemoteFileDesc().getSize());
+                        addDownload(rfd, false);//dont cache
+                    }
                 }
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
