@@ -210,17 +210,15 @@ public class Backend {
 	protected void makeSharedDirectory() {
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
-		File coreDir = new File( 
-		    Backend.class.getClassLoader().getResource(
-		        "com/limegroup/gnutella"
-		    ).getFile()
-		);
+		File coreDir = CommonUtils.getResourceFile("com/limegroup/gnutella");
 		File[] files = coreDir.listFiles();
 
-		for(int i=0; i<files.length; i++) {
-			if(!files[i].isFile()) continue;
-			copyResourceFile(files[i]);
-		}		
+        if ( files != null ) {
+    		for(int i=0; i<files.length; i++) {
+    			if(!files[i].isFile()) continue;
+    			copyResourceFile(files[i], files[i].getName() + ".tmp");
+    		}		
+        }
 	}
 
 	/**
@@ -232,7 +230,7 @@ public class Backend {
 		settings.setPort(PORT);
 		//settings.setKeepAlive(1);
 		settings.setDirectories(new File[] {TEMP_DIR});
-		settings.setExtensions("class");
+		settings.setExtensions("tmp");
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -288,11 +286,12 @@ public class Backend {
 	 * the jar file. If the file already exists, no copy is performed.
 	 *
 	 * @param fileName the name of the file to copy
+	 * @param newName the new name for the target
 	 */
-	private final void copyResourceFile(final File fileToCopy) {
+	private final void copyResourceFile(final File fileToCopy, String newName) {
 
-		File file = new File(TEMP_DIR, fileToCopy.getName());
-		// return quickly if the dll is already there, no copy necessary
+		File file = new File(TEMP_DIR, newName);
+		// return quickly if the file is already there, no copy necessary
 		if(file.exists() ) return;
 
 		BufferedInputStream bis = null;
