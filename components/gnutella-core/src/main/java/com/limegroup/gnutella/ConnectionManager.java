@@ -721,13 +721,18 @@ public class ConnectionManager {
         //than N-K connections.  With time, this converges on all good
         //connections.
 
+		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
+		
         //Don't allow anything if disconnected.
         if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
             _preferredConnections <=0 ) {
             return false;
 		} else if (RouterService.isShieldedLeaf()) {
+		    
 		    // If it's not good, never allow it.
-		    if(!hr.isGoodUltrapeer()) {
+		    // the first few attempts allow only Limewires.
+		    if(Sockets.getAttempts() < limeAttempts ? 
+		            !hr.isLimeWire() : !hr.isGoodUltrapeer()) {
 		        return false;
 		    // if we have slots, allow it.
 		    } else if (_shieldedConnections < _preferredConnections) {
@@ -801,7 +806,8 @@ public class ConnectionManager {
 
             // Actually, this code is always called when we get our first
             // established connection. Therefore, it is essential that it allows
-            // the first good ultrapeer regardless of locale or vendor.
+            // the first good ultrapeer regardless of locale or vendor.  Although,
+            // for the first few attempts we allow only good Limewires.
             
             // Exception1:  if the user has specified they want ALL their slots to be 
             // preferenced we only allow connection with proper locale;
@@ -810,7 +816,10 @@ public class ConnectionManager {
             // Exception2: if we are idle and have lost our only connection, we
             // accept only Limewire ultrapeers for that one connection.
             
-            if (peers==0 && hr.isGoodUltrapeer()) {
+            if (peers==0 && 
+                    Sockets.getAttempts() < limeAttempts ?
+                    hr.isLimeWire() && hr.isGoodUltrapeer() :
+                    hr.isGoodUltrapeer()) {
                 
                 if (isIdle()) 
                     return hr.isLimeWire();
@@ -1302,6 +1311,8 @@ public class ConnectionManager {
                                           c.getPort()), true, c.getLocalePref());
             }
         }
+        
+        Sockets.clearAttempts();
     }
 
     /**

@@ -248,6 +248,13 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createIntSetting("NUM_LOCALE_PREF", 2);
     
     /**
+     * how many attempts to connect to a remote host must elapse
+     * before we start accepting non-LW vendors as UPs
+     */
+    public static final IntSetting LIME_ATTEMPTS =
+        FACTORY.createIntSetting("LIME_ATTEMPTS",50);
+    
+    /**
      * how long we believe firewalls will let us send solicited udp
      * traffic.  Field tests show at least a minute with most firewalls, so lets
      * try 55 seconds.
