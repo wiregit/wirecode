@@ -4,7 +4,6 @@ import com.limegroup.gnutella.Assert;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
-import com.apple.mrj.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -104,6 +103,8 @@ public final class CommonUtils {
 	 */
 	private static final String HTTP_SERVER;
 
+    private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
+
 	/**
 	 * Make sure the constructor can never be called.
 	 */
@@ -148,8 +149,8 @@ public final class CommonUtils {
 		}
 		else {
 			HTTP_SERVER = ("LimeWire/" + 
-						   LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4) +
-						   " (Pro)");
+                LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4)+
+				" (Pro)");
 		}
 	}
 
@@ -247,6 +248,13 @@ public final class CommonUtils {
 	public static String getOS() {
 		return PROPS.getProperty("os.name");
 	}
+	
+	/**
+	 * Returns the operating system version.
+	 */
+	public static String getOSVersion() {
+		return PROPS.getProperty("os.version");
+	}
 
 	/**
 	 * Returns the user's current working directory as a <tt>File</tt>
@@ -319,6 +327,17 @@ public final class CommonUtils {
 	 */
 	public static boolean isMacOSX() {
 		return _isMacOSX;
+	}
+	
+	/** 
+	 * Returns whether or not the os is Mac OSX 10.2 or above.
+	 *
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *  10.2 or above, <tt>false</tt> otherwise
+	 */
+	public static boolean isJaguarOrAbove() {
+		if(!isMacOSX()) return false;
+		return getOSVersion().startsWith("10.2");
 	}
 
 	/** 
@@ -470,42 +489,64 @@ public final class CommonUtils {
      *  directory for the application, or <tt>null</tt> if that directory 
 	 *  does not exist
      */
-    public static File getUserSettingsDir() {
-        File settingsDir = null;
-		if(CommonUtils.isWindows()) {
-			settingsDir = CommonUtils.getCurrentDirectory();
-		}
+    public synchronized static File getUserSettingsDir() {
+        File settingsDir = new File(getUserHomeDir(), 
+                                    LIMEWIRE_PREFS_DIR_NAME);
+        if(CommonUtils.isMacOSX()) {            
+            File tempSettingsDir = new File(getUserHomeDir(), 
+                                            "Library/Preferences");
+            settingsDir = new File(tempSettingsDir, "LimeWire");
+		} 
 
-		// return the special user preferences directory on OS X.
-		// this may have problems on 10.0.
-		else if(CommonUtils.isMacOSX()) {
-		    File userPrefsDir;
-		    try {
-		        short userDomainCode = -32763;
-		        userPrefsDir = 
-		            MRJFileUtils.findFolder(userDomainCode,
-		    							    new MRJOSType("pref"));
-		        settingsDir = new File(userPrefsDir, ".limewire");
-		    } catch(FileNotFoundException e) {
-		        // this will just continue to return the default
-		        // directory for all oses
-		    } catch(NoSuchMethodError e) {
-				// this means it's probably an older java implementation,
-				// so just return the current directory
-				settingsDir = CommonUtils.getCurrentDirectory();
-			}
-		} else {
-            settingsDir = new File(CommonUtils.getUserHomeDir(), 
-							       ".limewire");
-		}
-		if(settingsDir == null) {
-		    settingsDir = new File(CommonUtils.getUserHomeDir(), 
-							       ".limewire");
-		}
         if(!settingsDir.isDirectory()) {
-            settingsDir.mkdirs();
+            if(!settingsDir.mkdirs()) {
+                String msg = "could not create preferences directory: "+
+                    settingsDir;
+                throw new RuntimeException(msg);
+            }
         }
+        // make sure Windows files are moved
+        moveWindowsFiles(settingsDir);
         return settingsDir;
+    }
+
+    /**
+     * Boolean for whether or not the windows files have been copied.
+     */
+    private static boolean _windowsFilesMoved = false;
+
+    /**
+     * The array of files that should be stored in the user's home 
+     * directory.
+     */
+    private static final String[] USER_FILES = {
+        "limewire.props",
+        "gnutella.net",
+        "fileurns.cache"
+    };
+
+    /**
+     * On Windows, this copies files from the current directory to the
+     * user's LimeWire home directory.  The installer does not have
+     * access to the user's home directory, so these files must be
+     * copied.  Note that they are only copied, however, if existing 
+     * files are not there.  This ensures that the most recent files,
+     * and the files that should be used, should always be saved in 
+     * the user's home LimeWire preferences directory.
+     */
+    private synchronized static void moveWindowsFiles(File settingsDir) {
+        if(!isWindows()) return;
+        if(_windowsFilesMoved) return;
+        File currentDir = CommonUtils.getCurrentDirectory();
+        for(int i=0; i<USER_FILES.length; i++) {
+            File curUserFile = new File(settingsDir, USER_FILES[i]);
+            File curDirFile  = new File(currentDir, USER_FILES[i]);
+            if(curUserFile.isFile()) {
+                continue;
+            }
+            copy(curDirFile, curUserFile);
+        }
+        _windowsFilesMoved = true;
     }
 	
 	/**
