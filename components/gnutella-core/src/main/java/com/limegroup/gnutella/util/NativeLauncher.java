@@ -7,10 +7,14 @@
 
 package com.limegroup.gnutella.util;
 
+import com.limegroup.gnutella.gui.Utilities;
+
 public class NativeLauncher {
-	public NativeLauncher() {
+	static {
 		// load the native libary
-		System.loadLibrary("NativeLauncher");
+		if(Utilities.isWindows()) {
+			System.loadLibrary("NativeLauncher");
+		}
 	}
 
 	/**
@@ -19,10 +23,10 @@ public class NativeLauncher {
 	 *  or a valid URL
 	 * @effects launches the file with it's associated
 	 *  application on Windows. */
-	public void launchFileWindows(String name) {
+	public static void launchFileWindows(String name) {
 		nativeLaunchFileWindows(name);
 	}
 
 	// native method for launching the specific file 
-	private native void nativeLaunchFileWindows(String name);
+	private static native void nativeLaunchFileWindows(String name);
 }
