@@ -6,24 +6,73 @@ import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
 
 /**
- * A Connection managed by a connection managed.  Includes a loopForMessages
+ * A Connection managed by a ConnectionManager.  Includes a loopForMessages
  * method that runs forever (or until an IOException occurs), receiving and
- * replying to Gnutella messages.
+ * replying to Gnutella messages.  ManagedConnection is only instantiated
+ * through a ConnectionManager.<p>
  *
- * This class implements PingReplyHandler to route PingReplies that originated
- * from it.
+ * ManagedConnection provides a sophisticated message buffering mechanism.  When
+ * you call send(Message), the message is not actually delivered to the socket;
+ * instead it buffered in an application-level buffer.  Periodically, a thread
+ * reads messages from the buffer, writes them to the network, and flushes the
+ * socket buffers.  This means that there is no need to manually call flush().
+ * Furthermore, ManagedConnection provides a simple form of flow control.  If
+ * messages are queued faster than they can be written to the network, they are
+ * dropped in the following order: PingRequest, PingReply, QueryRequest, 
+ * QueryReply, and PushRequest.  See the implementation notes below for more
+ * details.<p>
  *
- * @author Ron Vogl
- * @author Christopher Rohrs
+ * All ManagedConnection's have two underlying spam filters: a personal filter
+ * (controls what I see) and a route filter (also controls what I pass along to
+ * others).  See SpamFilter for a description.  These filters are configured by
+ * the properties in the SettingsManager, but you can change them with
+ * setPersonalFilter and setRouteFilter.<p>
+ *
+ * ManagedConnection maintain a large number of statistics, such as the number
+ * of bytes read and written.  On the query-routing3-branch and pong-caching CVS
+ * branches, these statistics have been bundled into a single object, reducing
+ * the complexity of ManagedConnection.  We will likely merge this change into
+ * ManagedConnection in the future, so please bear with this for now.<p>
+ * 
+ * This class implements ReplyHandler to route pongs and query replies that
+ * originated from it.<p> 
  */
 public class ManagedConnection
         extends Connection
         implements ReplyHandler {
     private MessageRouter _router;
     private ConnectionManager _manager;
+
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
+
+    /*  The underlying socket, its address, and input and output
+     *  streams.  sock, in, and out are null iff this is in the
+     *  unconnected state.  For thread synchronization reasons, it is
+     *  important that this only be modified by the send(m) and
+     *  receive() methods.
+     *
+     *  This implementation has two goals:
+     *    1) a slow connection cannot prevent other connections from making
+     *       progress.  Packets must be dropped.
+     *    2) packets should be sent in large batches to the OS, but the
+     *       batches should not be so long as to cause undue latency.
+     *
+     *  Towards this end, we queue sent messages on the front of
+     *  outputQueue.  Whenever outputQueue contains at least
+     *  BATCH_SIZE messages or QUEUE_TIME milliseconds has passed, the
+     *  messages on outputQueue are written to out.  Out is then
+     *  flushed exactly once. outputQueue is fixed size, so if the
+     *  output thread can't keep up with the producer, packets will be
+     *  (intentionally) droppped.  LOCKING: obtain outputQueueLock
+     *  lock before modifying or replacing outputQueue.
+     *
+     *  One problem with this scheme is that IOExceptions from sending
+     *  data happen asynchronously.  When this happens, _connectionClosed
+     *  is set to true.  Then the next time send is called, an IOException
+     *  is thrown.  
+     */
 
     /** The (approximate) max time a packet can be queued, in milliseconds. */
     private static final int QUEUE_TIME=750;

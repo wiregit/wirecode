@@ -15,7 +15,7 @@ import java.util.Enumeration;
  *
  * You will note that the constructors don't actually involve the network and
  * hence never throw exceptions or block. <b>To actual initialize a connection,
- * you must call initialize().</b> While this is somwhat awkward, it is
+ * you must call initialize().</b> While this is somewhat awkward, it is
  * intentional.  It makes it easier, for example, for the GUI to show
  * uninitialized connections.<p>
  *
@@ -26,12 +26,6 @@ import java.util.Enumeration;
  * specified by the remote host.  Outgoing connections can be made at the 0.4
  * level, the 0.6 level, or the best level possible.  Realize that the latter is
  * implemented by reconnecting the socket.<p>
- *
- * All connections have two underlying spam filters: a personal filter (controls
- * what I see) and a route filter (also controls what I pass along to others).
- * See SpamFilter for a description.  These filters are configured by the
- * properties in the SettingsManager, but you can change them with
- * setPersonalFilter and setRouteFilter.<p> 
  */
 public class Connection {
     /** 
