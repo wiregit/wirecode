@@ -318,6 +318,7 @@ public class HTTPUploader implements Uploader {
         case QUEUED:
             int pos = _manager.positionInQueue(_socket);
             _state = new QueuedUploadState(pos,_fileDesc);
+            break;
 		case LIMIT_REACHED:
 			_state = new LimitReachedUploadState(_fileDesc);
 			break;

@@ -55,9 +55,6 @@ public final class UploadManager implements BandwidthTracker {
 
     private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
         new LinkedList();
-    
-    private final int QUEUE_CAPACITY = 
-        SettingsManager.instance().getUploadQueueSize();
 
     public static final int MIN_POLL_TIME = 45000; //same as Shareaza
 
@@ -389,8 +386,6 @@ public final class UploadManager implements BandwidthTracker {
      *  Corollary: wontAccept is true iff hasQueue is true
      *  Corollary: (hasQueue==false) => (wontaccept==false)
      *  Corollary: (hasQueue==false) => posInQueue == -1
-     *  INVARIANT : QUEUE_CAPACITY >= 1, otherwise we cannot use the queue to 
-     *  buffer uploaders before they are picked up even is slots are available
      *      @modifies uploader, _callback 
      * @exception if an uploader gets a request too soon, we are going to throw
      * an IOException, which will cause the socket to be closed. 
@@ -401,13 +396,15 @@ public final class UploadManager implements BandwidthTracker {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
-        boolean wontAccept = size >= QUEUE_CAPACITY;
+        int maxQueueSize = SettingsManager.instance().getUploadQueueSize();
+        boolean wontAccept = size >= maxQueueSize;
         int ret = -1;
 
+        Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
         
         if(posInQueue == -1) {//this uploader is not in the queue already
-            debug(uploader+"Uploader not in que(capacity:"+QUEUE_CAPACITY+")");
+            debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
             if(limitReached || wontAccept) { 
                 debug(uploader+" limited? "+limitReached+" wontAccept? "
                       +wontAccept);

@@ -15,15 +15,15 @@ public class QueuedException extends IOException {
     }
     
     //package access accessor methods
-    int getMinPollTime() {
+    public int getMinPollTime() {
         return minPollTime;
     }
 
-    int getMaxPollTime() {
+    public int getMaxPollTime() {
         return maxPollTime;
     }
     
-    int getQueuePosition() {
+    public int getQueuePosition() {
         return queuePos;
     }
 }
