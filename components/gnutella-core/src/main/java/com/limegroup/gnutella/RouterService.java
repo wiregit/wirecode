@@ -689,7 +689,7 @@ public final class RouterService {
 
 		Thread searcherThread = new Thread() {
 			public void run() {
-				// per HUGE v0.93, ask for URNs on responses
+				// per HUGE v0.94, ask for URNs on responses
 				Set reqUrns = new HashSet();
 				reqUrns.add(UrnType.ANY_TYPE);
 				
