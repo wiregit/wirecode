@@ -1728,19 +1728,11 @@ public class ConnectionManager {
                 // Wait for an endpoint.
                 Endpoint endpoint = null;
                 do {
-                    try {
-                        endpoint = _catcher.getAnEndpoint();
-                    } catch (InterruptedException exc2) {
-                        // Externally generated interrupt.
-                        // The interrupting thread has recorded the
-                        // death of the fetcher, so just return.
-                        return;
-                    }
+                    endpoint = _catcher.getAnEndpoint();
                 } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
                           isConnectedTo(endpoint) );                      
     
                 Assert.that(endpoint != null);
-    
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
@@ -1783,6 +1775,11 @@ public class ConnectionManager {
 
 				startConnection(connection);
             } catch(IOException e) {
+            } catch (InterruptedException e) {
+                // Externally generated interrupt.
+                // The interrupting thread has recorded the
+                // death of the fetcher, so just return.
+                return;
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
