@@ -76,8 +76,7 @@ public class Connection {
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */        
     private boolean _negotiate=false;
-    public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
-    public static final String GNUTELLA_OK_04="GNUTELLA OK";
+
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
@@ -86,8 +85,6 @@ public class Connection {
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
-    /** End of line for Gnutella 0.4 */
-    public static final String LF="\n";
     
     /**
      * Time to wait for inut from user at the remote end. (in milliseconds)
@@ -300,31 +297,25 @@ public class Connection {
      * @exception NoGnutellaOkException one of the participants responded
      *  with an error code other than 200 OK (possibly after several rounds
      *  of 401's)
-     * @exception IOException any other error.  May wish to retry at 0.4
+     * @exception IOException any other error.  
      */
     private void initializeOutgoing() throws IOException {
         //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
         //user.  If the other end doesn't understand it--too bad!  There is an
         //option at higher levels to retry.
 
-		// TODO: I don't think we ultimately accept this 0.4 connection
-		// anyway -- throw an exception if the properties are null??
+        // don't accept connections that don't send headers.
         if (_propertiesWrittenP==null || _propertiesWrittenR==null) {
-            sendString(GNUTELLA_CONNECT_04+LF+LF);
-            if (! readLine().equals(GNUTELLA_OK_04))
-                throw new IOException("Bad connect string"); 
-            if (! readLine().equals(""))  //Get second \n
-                throw new IOException("Bad connect string"); 
+            return;
         }
-        else {
-            //1. Send "GNUTELLA CONNECT/0.6" and headers
-            sendString(GNUTELLA_CONNECT_06+CRLF);
-            sendHeaders(_propertiesWrittenP);   
-            
-            //conclude the handshake (This may involve exchange of 
-            //information multiple times with the host at the other end).
-            concludeOutgoingHandshake();
-        }
+
+        //1. Send "GNUTELLA CONNECT/0.6" and headers
+        sendString(GNUTELLA_CONNECT_06+CRLF);
+        sendHeaders(_propertiesWrittenP);   
+        
+        //conclude the handshake (This may involve exchange of 
+        //information multiple times with the host at the other end).
+        concludeOutgoingHandshake();
     }
     
     /**
@@ -409,20 +400,8 @@ public class Connection {
      */
     private void initializeIncoming() throws IOException {
         //Dispatch based on first line read.  Remember that "GNUTELLA " has
-        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.4"
-        //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
-        //means we will accidentally allow crazy things like "0.4".  Oh well!
-        String line=readLine();  
-        if ( !SETTINGS.acceptAuthenticatedConnectionsOnly()
-            && GNUTELLA_CONNECT_04.endsWith(line)) {
-            //a) Old style
-            if (! readLine().equals(""))  //Get second \n
-                throw new IOException("Bad connect string"); 
-            sendString(GNUTELLA_OK_04+LF+LF);
-            //If the user requested properties, we can't send them.
-            _propertiesWrittenP=null;
-            _propertiesWrittenR=null;
-        } else if (notLessThan06(line)) {
+        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
+        if (notLessThan06(readLine())) {
             //b) New style
             _propertiesRead=new Properties();
             //1. Read headers (connect line has already been read)
@@ -724,8 +703,9 @@ public class Connection {
         _socket.setSoTimeout(timeout);
         try {
             Message m=Message.read(_in);
-            if (m==null)
+            if (m==null) {
                 throw new InterruptedIOException();
+            }
             return m;
         } finally {
             _socket.setSoTimeout(oldTimeout);
