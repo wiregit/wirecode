@@ -195,6 +195,7 @@ public class WMAMetaData extends AudioMetaData {
             // TODO: assign duration based off this??
             if(LOG.isDebugEnabled())
                 LOG.debug("maxBitrate: " + maxBR);
+            setBitrate(maxBR / 1000);
         }
         
         else if(Arrays.equals(id, WMA_STREAM_PROPERTIES_ID)) {
@@ -204,7 +205,8 @@ public class WMAMetaData extends AudioMetaData {
             short channels = ByteOrder.leb2short(ds);
             int sampleRate = ByteOrder.leb2int(ds);
             int byteRate = ByteOrder.leb2int(ds);
-            setBitrate(byteRate * 8 / 1024);
+            if(getBitrate() == -1)
+                setBitrate(byteRate * 8 / 1000);
             if(LOG.isDebugEnabled())
                 LOG.debug("channels: " + channels + ", sampleRate: " + sampleRate + ", byteRate: " + byteRate + ", bitRate: " + getBitrate());
         }
