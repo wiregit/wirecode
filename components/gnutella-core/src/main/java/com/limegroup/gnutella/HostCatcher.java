@@ -560,6 +560,16 @@ public class HostCatcher {
     }
 
     /**
+     *  Returns an iterator of the ultrapeer endpoints of this.  It's not
+     *  guaranteed that these are reachable. This can be modified while
+     *  iterating through the result, but the modifications will not be
+     *  observed.  
+     */
+    public synchronized Iterator getBestHosts() {
+        return getBestHosts(queue.size(GOOD_PRIORITY));
+    }
+
+    /**
      * @requires n>0
      * @effects returns an iterator that yields up the best n endpoints of this.
      *  It's not guaranteed that these are reachable. This can be modified while
@@ -684,5 +694,23 @@ public class HostCatcher {
 //              new byte[] {(byte)64, (byte)61, (byte)25, (byte)138}));
 //          Assert.that(! HostCatcher.isRouter(
 //              new byte[] {(byte)64, (byte)61, (byte)25, (byte)170}));
+//      }
+
+
+//      /** A simpler unit test */
+//      public static void main(String args[]) {
+//          HostCatcher hc=new HostCatcher(new Main());
+//          hc.initialize(new Acceptor(6346, null),
+//                        new ConnectionManager(null));
+
+//          Iterator iter=hc.getBestHosts();
+//          Assert.that(! iter.hasNext());
+
+//          hc.add(new Endpoint("18.239.0.1", 6346), true);
+//          hc.add(new Endpoint("18.239.0.2", 6347), false);
+//          iter=hc.getBestHosts();
+//          Assert.that(iter.hasNext());
+//          Assert.that(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
+//          Assert.that(! iter.hasNext());
 //      }
 }

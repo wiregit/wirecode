@@ -1015,7 +1015,7 @@ public class ManagedConnection
 
         //Also add neighbouring supernodes
         Set connectedSupernodeEndpoints 
-            = manager.getConnectedSupernodeEndpoints();
+            = manager.getSupernodeEndpoints();
         //if nothing to add, return
         if(connectedSupernodeEndpoints.size() < 0)
             return;

@@ -94,6 +94,9 @@ public class ConnectionManager {
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
 
+    /** The maximum number of ultrapeer endpoints to give out from the host
+     *  catcher in X_TRY_SUPERNODES headers. */
+    private int MAX_SUPERNODE_ENDPOINTS=10;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -479,10 +482,11 @@ public class ConnectionManager {
     }
 
     /**
-     * Returns the endpoints it is connected to
+     * Returns the endpoints of the best known ultrapeers.  This include
+     * both ultrapeers we are connected to and marked ultrapeer pongs.
      * @return Returns the endpoints it is connected to. 
      */ 
-    public Set getConnectedSupernodeEndpoints(){
+    public Set getSupernodeEndpoints(){
         Set retSet = new HashSet();
         //get an iterator over _initialized connections, and iterate to
         //fill the retSet with supernode endpoints
@@ -494,6 +498,13 @@ public class ConnectionManager {
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
                     connection.getOrigPort()));
+        }
+        //add the best few endpoints from the hostcatcher.  TODO: limit this
+        //to N entries?
+        Iterator iterator=_catcher.getBestHosts();
+        for (int i=0; iterator.hasNext() && i<MAX_SUPERNODE_ENDPOINTS; i++) {
+            Endpoint e=(Endpoint)iterator.next();
+            retSet.add(e);
         }
         return retSet;
     }
@@ -664,6 +675,7 @@ public class ConnectionManager {
             pr = new PingRequest((byte)1);
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());
+        System.out.println("PR TTL is "+pr.getTTL());
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
@@ -985,12 +997,12 @@ public class ConnectionManager {
      * stricter.  
      */
     public boolean allowClientMode() {
-        //if is a supernode, and have client connections, 
-        //or the supernode status is forced, dont change mode
-        if (_settings.getForceSupernodeMode() 
-            || (isSupernode() && _incomingClientConnections > 0))
-            return false;
-        else
+        //if is a supernode, and have client connections, 
+        //or the supernode status is forced, dont change mode
+        if (_settings.getForceSupernodeMode() 
+            || (isSupernode() && _incomingClientConnections > 0))
+            return false;
+        else
             return true;
     }
     

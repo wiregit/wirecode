@@ -95,6 +95,15 @@ public class BucketQueue implements Cloneable {
         return ret;
     }
 
+    /** 
+     * Returns the number of entries with the given priority. 
+     * @param priority MUST be a valid priority, i.e., non-negative and less
+     *  than the length of the array passed to this' constructor 
+     */
+    public int size(int priority) {
+        return buckets[priority].getSize();
+    }
+
     public boolean isEmpty() {
         return size()==0;
     }
@@ -168,6 +177,18 @@ public class BucketQueue implements Cloneable {
         return new BucketQueue(this);        
     }
 
+    public String toString() {
+        StringBuffer buf=new StringBuffer();
+        buf.append("[");
+        for (int i=buckets.length-1; i>=0; i--) {
+            if (i!=buckets.length-1)
+                buf.append(", ");
+            buf.append(buckets[i].toString());
+        }
+        buf.append("]");
+        return buf.toString();            
+    }
+
     /** Unit test */
     /*
     public static void main(String args[]) {
@@ -183,6 +204,9 @@ public class BucketQueue implements Cloneable {
         Assert.that(q.insert(e2b)==null);
         Assert.that(q.insert(e2a)==null);
         Assert.that(q.size()==4);
+        Assert.that(q.size(4)==1);
+        Assert.that(q.size(2)==2);
+        Assert.that(q.size(3)==0);
         Assert.that(! q.isEmpty());
 
         Iterator iter=q.iterator();
