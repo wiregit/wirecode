@@ -7,6 +7,10 @@ import com.sun.java.util.collections.*;
  * providing type safety for alternate location data.  <p>
  *
  * This class is thread-safe.
+ *
+ * @see AlternateLocation
+ * @see HTTPHeaderValue
+ * @see AlternateLocationCollector
  */
 public final class AlternateLocationCollection 
 	implements HTTPHeaderValue, AlternateLocationCollector {
@@ -15,14 +19,9 @@ public final class AlternateLocationCollection
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
 	 * <tt>AlternateLocation</tt> instances.
 	 */
-	private Map _alternateLocations;
+	private SortedMap _alternateLocations;
 
-	/**
-	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
-	 * of alternate locations for this this file.
-	 *
-	 * @param al the <tt>AlternateLocation</tt> instance to add
-	 */
+	// implements the AlternateLocationCollector interface
 	public void addAlternateLocation(AlternateLocation al) {
 		createMap();
 
@@ -31,30 +30,33 @@ public final class AlternateLocationCollection
 		// date according to the date class, namely:
 		// January 1, 1970, 00:00:00 GMT.
 		_alternateLocations.put(al, al);
+
+		// if the collection of alternate locations is getting too big,
+		// remove the last element (the least desirable alternate location)
+		// from the Map
+		if(_alternateLocations.size() > 10) {
+			_alternateLocations.remove(_alternateLocations.lastKey());
+		}
 	}
 
-	/**
-	 * Add the specified <tt>AlternateLocationCollection</tt> to this
-	 * <tt>AlternateLocationCollection</tt>.
-	 *
-	 * @param alc the <tt>AlternateLocationCollection</tt> instance 
-	 *  containing the collection of alternate locations to add
-	 */
+	// implements the AlternateLocationCollector interface
 	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
 		createMap();
 		_alternateLocations.putAll(alc.getMap());
 	}
 
+	// implements the AlternateLocationCollector interface
 	public boolean hasAlternateLocations() {
-		if(_alternateLocations == null) return true;
-		return _alternateLocations.isEmpty();
+		if(_alternateLocations == null) return false;
+		return !_alternateLocations.isEmpty();
 	}
 
 	/**
 	 * Accessor for the internal <tt>Map</tt> of alternate locations,
 	 * accessible only from this class.
 	 *
-	 * @return the <tt>Map</tt> of <tt>AlternateLocation</tt> instances
+	 * @return the <tt>Map</tt> of <tt>AlternateLocation</tt> instances,
+	 *  which may be <tt>null</tt>
 	 */
 	private Map getMap() {
 		return _alternateLocations;
@@ -69,64 +71,11 @@ public final class AlternateLocationCollection
 			// we use a TreeMap to both filter duplicates and provide
 			// ordering based on the timestamp
 			_alternateLocations = 
-			    Collections.synchronizedMap(
-				    new TreeMap(AlternateLocation.createComparator()));
+			    Collections.synchronizedSortedMap(new TreeMap());
 		}
 	}
 
-	/**
-	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
-	 * of "temporary" alternate locations.  These will not be stored to
-	 * the official alternate locations list until a call to 
-	 * commitTemporaryAlternateLocations is made.  This is to avoid,
-	 * for example, sending back the same alternate location headers
-	 * back to an uploader as they sent in with their upload request,
-	 * as they clearly already know about those locations.
-	 *
-	 * @param al the <tt>AlternateLocation</tt> instance to add to the 
-	 *  temporary list.
-	 */
-	/*
-	public synchronized void addTemporaryAlternateLocation(AlternateLocation al) {
-		if(_temporaryAlternateLocations == null) {
-			// we use a TreeMap to both filter duplicates and provide
-			// ordering based on the timestamp
-			_temporaryAlternateLocations = 
-			    new TreeMap(AlternateLocation.createComparator());
-		}
-
-		// note that alternate locations without a timestamp are placed
-		// at the end of the map because they have the oldest possible
-		// date according to the date class, namely:
-		// January 1, 1970, 00:00:00 GMT.
-		_temporaryAlternateLocations.put(al, al);
-	}
-	*/
-
-	/**
-	 * Moves all temporary alternate locations to the "official" list of
-	 * alternate locations for this file that will be reported in
-	 * HTTP headers.
-	 */
-	/*
-	public synchronized void commitTemporaryAlternateLocations() {
-		// if there are no temporary locations to commit, just return
-		if(_temporaryAlternateLocations == null) {
-			return;
-		}
-		if(_alternateLocations == null) {
-			_alternateLocations =
-			    new TreeMap(AlternateLocation.createComparator());
-		}
-		_alternateLocations.putAll(_temporaryAlternateLocations);
-
-		// clear out all the temporary locations.  we could set this to
-		// null, but there's a good chance that if a file was asigned
-		// temporary alternate locations once, then it will be again
-		_temporaryAlternateLocations.clear();
-	}
-	*/
-
+	// implements the HTTP header value interface
 	public String httpStringValue() {
 		// if there are no alternate locations, simply return
 		if(_alternateLocations == null) return null;
@@ -135,11 +84,65 @@ public final class AlternateLocationCollection
 		StringBuffer writeBuffer = new StringBuffer();
 		writeBuffer.append(HTTPConstants.ALTERNATE_LOCATION_HEADER+" ");
 		while(iter.hasNext()) {
-			writeBuffer.append(((AlternateLocation)iter.next()).toString());
+			writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
 			if(iter.hasNext()) {
 				writeBuffer.append(", ");
 			}
 		}
 		return writeBuffer.toString();
+	}
+
+	/**
+	 * Returns the number of alternate locations stored.
+	 *
+	 * @return the number of alternate locations stored
+	 */
+	public int size() {
+		return _alternateLocations.size();
+	}
+
+	/**
+	 * Overrides Object.equals to more accurately compare 
+	 * <tt>AlternateLocationCollection</tt> instances based on the data.
+	 *
+	 * @return <tt>true</tt> if the specified <tt>Object</tt> is an alternate
+	 *  location collection that has stored exactly the same alterate 
+	 *  locations as this collection
+	 */
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof AlternateLocationCollection)) return false;
+		AlternateLocationCollection alc = (AlternateLocationCollection)o;
+		return _alternateLocations.equals(alc.getMap());
+	}
+
+	/**
+	 * Overrides Object.hashCode to meet the hashCode specification that
+	 * demands that objects that are "equal" according to the equals method
+	 * also have the same hash code.
+	 *
+	 * @return the hash code for this instance
+	 */
+	public int hashCode() {
+		return 37*_alternateLocations.hashCode();
+	}
+
+	/**
+	 * Overrides Object.toString to print out all of the alternate locations
+	 * for this collection of alternate locations.
+	 *
+	 * @return the string representation of all alternate locations in 
+	 *  this collection
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Alternate Locations: ");
+		Iterator iter = _alternateLocations.values().iterator();
+		while(iter.hasNext()) {
+			AlternateLocation curLoc = (AlternateLocation)iter.next();
+			sb.append(curLoc.toString());
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 }
