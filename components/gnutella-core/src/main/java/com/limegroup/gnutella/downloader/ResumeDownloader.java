@@ -78,7 +78,6 @@ public class ResumeDownloader extends ManagedDownloader
                            ActivityCallback callback) {
         if(_hash != null)
             downloadSHA1 = _hash;
-        initializeIncompleteFile(_incompleteFile);
         super.initialize(manager, fileManager, callback);
     }
 

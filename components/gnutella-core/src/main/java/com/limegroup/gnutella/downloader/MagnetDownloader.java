@@ -94,40 +94,46 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             String [] defaultURLs) {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null);
+        super(constructRFDs(defaultURLs,filename,urn), ifm, null);
 
         this._textQuery=textQuery;
         this._urn=urn;
+        downloadSHA1 = urn;
         this._filename=filename;
         this._defaultURLs=defaultURLs;
     }
     
     /**
-     * Overrides ManagedDownloader to ensure that the default location is tried.
+     * wraps the provided URLs into RemoteFileDescs.
      */
-    protected void performDownload() {     
+    private static RemoteFileDesc [] constructRFDs(String []defaultURLs,String fileName, URN urn) {     
 
-		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
+        if (defaultURLs == null)
+            return new RemoteFileDesc[0];
+        
+        Set ret = new HashSet(); 
+		for (int i = 0; defaultURLs != null && i < defaultURLs.length; i++) {
 			//Send HEAD request to default location (if present)to get its size.
 			//This can block, so it must be done here instead of in constructor.
 			//See class overview and ManagedDownloader.tryAllDownloads.
-			RemoteFileDesc defaultRFD = 
-                createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
-			if (defaultRFD!=null) {
+			RemoteFileDesc rfd = 
+                createRemoteFileDesc(defaultURLs[i], fileName, urn);
+			if (rfd!=null) {
 				//Add the faked up location before starting download. Note that 
 				//we must force ManagedDownloader to accept this RFD in case 
 				//it has no hash and a name that doesn't match the search 
 				//keywords.
-				boolean added=super.addDownloadForced(defaultRFD,true);
-				Assert.that(added, "Download rfd not accepted "+defaultRFD);
+                ret.add(rfd);
 			} else {
                 if(LOG.isWarnEnabled())
-                    LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
+                    LOG.warn("Ignoring magnet url: " + defaultURLs[i]);
             }
 		}
+        
+        RemoteFileDesc []array = new RemoteFileDesc[ret.size()];
+        ret.toArray(array);
+        return array;
 
-        //Start the downloads for real.
-        super.performDownload();
     }
 
 

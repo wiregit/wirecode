@@ -928,19 +928,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 rfds.add(allFiles[i]);
     }
 
-    /**
-     *  If incompleteFile has already been set, i.e., because a download is in
-     *  progress, does nothing.  Otherwise sets incompleteFile and
-     *  commonOutFile.  Subclasses may override this to force the initial
-     *  progress to be non-zero.
-     */
-    protected void initializeIncompleteFile(File incFile) {
-        if (this.incompleteFile!=null)
-            return;
-        this.incompleteFile=incFile;
-        this.commonOutFile=incompleteFileManager.getEntry(incFile);
-    }
-    
     private void initializeVerifyingFile() throws IOException {
         Assert.that(incompleteFile != null);
 
