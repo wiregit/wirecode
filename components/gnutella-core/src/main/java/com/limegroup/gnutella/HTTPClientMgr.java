@@ -59,6 +59,10 @@ public class HTTPClientMgr implements Runnable {
 
     }
 
+    public String getFileName() {
+	return _filename;
+    }
+
     public int getContentLength() {
 	return _sizeOfFile;
     }
@@ -150,6 +154,15 @@ public class HTTPClientMgr implements Runnable {
 	catch (Exception e) {
 
 	}
+    }
+
+
+    private void resume() {
+
+    }
+
+    private void abort() {
+
     }
 
 
