@@ -331,19 +331,34 @@ public class LimeXMLUtils
         
         return retVal;
     }
-
-
+    
     public static boolean isM4AFile(File in) {
         boolean retVal = isM4AFile(in.getName());        
         return retVal;
     }
     
+    public static boolean isWMAFile(String in) {
+        boolean retVal = false;
+
+        in = in.toLowerCase(Locale.US);
+        if (in.endsWith(".wma"))
+            retVal = true;
+        
+        return retVal;        
+    }
+
+    public static boolean isWMAFile(File f) {
+        boolean retVal = isWMAFile(f.getName());
+        return retVal;
+    }
+    
+    
     public static boolean isSupportedAudioFormat(File file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file);
+    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file);
     }
 
     public static boolean isSupportedAudioFormat(String file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file);
+    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file);
     }
     
     //stub
