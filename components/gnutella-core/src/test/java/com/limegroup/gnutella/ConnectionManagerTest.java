@@ -80,7 +80,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         // construct peers
         // u ==> i should be ultrapeer
         // l ==> i should be leaf
-        ManagedConnection u1, l1, l2;
+        Connection u1, l1, l2;
         u1 = new SupernodeClient();
         l1 = new ClientSupernode();
         l2 = new ClientSupernode();
@@ -188,18 +188,18 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     
-    private void initializeStart(ManagedConnection c) throws Exception {
+    private void initializeStart(Connection c) throws Exception {
         PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
             "connectionInitializingIncoming",
             new Object[] { c },
-            new Class[] { ManagedConnection.class} );
+            new Class[] { Connection.class} );
     }
     
-    private void initializeDone(ManagedConnection c) throws Exception {
+    private void initializeDone(Connection c) throws Exception {
         PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
             "connectionInitialized",
             new Object[] { c },
-            new Class[] { ManagedConnection.class} );            
+            new Class[] { Connection.class} );            
     }
 
     /**
@@ -238,7 +238,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
 
-    private static class TestManagedConnection extends ManagedConnection {
+    private static class TestManagedConnection extends Connection {
         private boolean isOutgoing;
         private int sent;
         private int received;

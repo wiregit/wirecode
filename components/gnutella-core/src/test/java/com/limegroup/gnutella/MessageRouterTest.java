@@ -80,7 +80,7 @@ public final class MessageRouterTest extends BaseTestCase {
         
         QueryRequest qr = 
             QueryRequest.createQuery(LeafConnection.ALT_LEAF_KEYWORD);
-        ReplyHandler rh = new ManagedConnection("localhost", 6346);
+        ReplyHandler rh = new Connection("localhost", 6346);
         Object[] params = new Object[]  {qr, rh};
         m.invoke(ROUTER, params);
         int numQueries = tcm.getNumLeafQueries();

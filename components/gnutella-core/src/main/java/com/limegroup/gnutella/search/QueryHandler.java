@@ -408,15 +408,15 @@ public final class QueryHandler {
         
 		int length = list.size();
         byte ttl = 0;
-        ManagedConnection mc = null;
+        Connection mc = null;
 
         // add randomization to who we send our queries to
         Collections.shuffle(list);
 
         // weed out all connections that aren't yet stable
         for(int i=0; i<length; i++) {
-			ManagedConnection curConnection = 
-                (ManagedConnection)list.get(i);			
+			Connection curConnection = 
+                (Connection)list.get(i);			
 
 			// if the connection hasn't been up for long, don't use it,
             // as the replies will never make it back to us if the
@@ -444,7 +444,7 @@ public final class QueryHandler {
             // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
             // not have any of the same entries, as this connection
             // will be added to QUERIED_CONNECTIONS
-            mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
+            mc = (Connection)QUERIED_PROBE_CONNECTIONS.remove(0);
             probeConnection = true;
         }
                            
@@ -491,12 +491,12 @@ public final class QueryHandler {
      * Sends a query to the specified host.
      *
      * @param query the <tt>QueryRequest</tt> to send
-     * @param mc the <tt>ManagedConnection</tt> to send the query to
+     * @param mc the <tt>Connection</tt> to send the query to
      * @param handler the <tt>QueryHandler</tt> 
      * @return the number of new hosts theoretically hit by this query
      */
     static int sendQueryToHost(QueryRequest query, 
-                               ManagedConnection mc, 
+                               Connection mc, 
                                QueryHandler handler) {
         
         RouterService.getMessageRouter().originateQuery(query, mc);

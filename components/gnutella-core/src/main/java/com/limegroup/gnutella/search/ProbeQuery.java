@@ -77,7 +77,7 @@ final class ProbeQuery {
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
         while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
+            Connection mc = (Connection)iter.next();
             hosts += 
                 QueryHandler.sendQueryToHost(query, 
                                              mc, QUERY_HANDLER);
@@ -86,7 +86,7 @@ final class ProbeQuery {
         query = QUERY_HANDLER.createQuery((byte)2);
         iter = TTL_2_PROBES.iterator();
         while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
+            Connection mc = (Connection)iter.next();
             hosts += 
                 QueryHandler.sendQueryToHost(query, 
                                              mc, QUERY_HANDLER);
@@ -152,7 +152,7 @@ final class ProbeQuery {
         
         // if the file appears to be very popular, send it to only one host
         if(popularity == 1.0) {
-            ttl1List.add((ManagedConnection)hitConnections.removeFirst());
+            ttl1List.add((Connection)hitConnections.removeFirst());
             return returnLists;
         }
 

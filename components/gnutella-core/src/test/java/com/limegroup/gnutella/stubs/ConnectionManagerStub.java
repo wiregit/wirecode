@@ -20,7 +20,7 @@ public class ConnectionManagerStub extends ConnectionManager {
     }
 
     /** Calls c.close iff enableRemove */
-    public void remove(ManagedConnection c) {
+    public void remove(Connection c) {
         if (enableRemove) 
             c.close();
     }

@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -55,7 +54,7 @@ public final class QueryHandlerTest extends BaseTestCase {
             QueryHandler.createHandler(query, rh, new TestResultCounter());
         Class[] paramTypes = new Class[] {
             QueryRequest.class, 
-            ManagedConnection.class,
+            Connection.class,
             QueryHandler.class,
         };
 
@@ -64,7 +63,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          "sendQueryToHost",
                                          paramTypes);
 
-        ManagedConnection mc = new UltrapeerConnection();
+        Connection mc = new UltrapeerConnection();
         Object[] params = new Object[] {
             query, mc, qh,
         };
@@ -219,7 +218,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = NewConnection.createConnection(19);
+        Connection mc = NewConnection.createConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.*;
  * testing the horizon calculation and testing the new search
  * architecture.
  */
-public abstract class TestConnection extends ManagedConnection {
+public abstract class TestConnection extends Connection {
     
     private boolean _queriesMustBeInRoutingTables;
 

@@ -60,7 +60,7 @@ public final class ConnectionWatchdog implements Runnable {
         final long received;
 
         /** Takes a snapshot of the given connection. */
-        ConnectionState(ManagedConnection c) {
+        ConnectionState(Connection c) {
             this.sentDropped = c.stats().getNumSentMessagesDropped();
             this.sent = c.stats().getNumMessagesSent();
             this.received = c.stats().getNumMessagesReceived();            
@@ -100,7 +100,7 @@ public final class ConnectionWatchdog implements Runnable {
         //structures could be used here.
         Map /* ManagedConnection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
@@ -115,7 +115,7 @@ public final class ConnectionWatchdog implements Runnable {
         //have not made sufficient progress. 
         List ret = new ArrayList();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
             Object state=snapshot.get(c);
@@ -146,7 +146,7 @@ public final class ConnectionWatchdog implements Runnable {
         //(other than in response to my ping), they will be ignored.
         HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=connections.iterator(); iter.hasNext();) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
@@ -163,7 +163,7 @@ public final class ConnectionWatchdog implements Runnable {
         //Loop through all connections again.  This time, any that
         //haven't made progress are killed.
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
             c.stats().setHorizonEnabled(true);

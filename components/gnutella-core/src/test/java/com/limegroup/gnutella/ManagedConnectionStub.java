@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.*;
  * is in this package instead of com.limegroup.gnutella.stubs because it
  * requires package-access to ManagedConnection.
  */
-public class ManagedConnectionStub extends ManagedConnection {
+public class ManagedConnectionStub extends Connection {
     public ManagedConnectionStub() {
         super("1.2.3.4", 6346);
 		

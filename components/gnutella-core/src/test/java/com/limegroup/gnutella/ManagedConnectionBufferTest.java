@@ -23,7 +23,7 @@ import com.limegroup.gnutella.util.*;
 public class ManagedConnectionBufferTest extends BaseTestCase {
 	
     public static final int BUFFER_PORT = 6666;
-    private ManagedConnection out = null;
+    private Connection out = null;
     private Connection in = null;
     MiniAcceptor acceptor = null;
 
@@ -64,7 +64,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             BUFFER_PORT);
 
         CompositeQueue.QUEUE_TIME=1000;
-		out = new ManagedConnection("localhost", BUFFER_PORT);
+		out = new Connection("localhost", BUFFER_PORT);
         out.buildAndStartQueues();
     }
     
@@ -138,7 +138,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         if( in.isWriteDeflated() )
             assertInstanceof(CompressingOutputStream.class, inOut);
         else
-            assertInstanceof(BufferedOutputStream.class, inOut);
+            assertInstanceof(ThrottledOutputStream.class, inOut);
     }        
 
     /**
@@ -719,7 +719,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * @param mc the connection to stop
      * @throws Exception for a whole bunch of possible reasons
      */
-    private static void stopOutputRunner(ManagedConnection mc) 
+    private static void stopOutputRunner(Connection mc) 
         throws Exception {
         Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
         BIOMessageWriter writer = 
@@ -741,7 +741,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //mc.stopOutputRunner();
     }
     
-    private static void startOutputRunner(ManagedConnection mc)
+    private static void startOutputRunner(Connection mc)
         throws Exception {
         Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
         BIOMessageWriter writer = 
@@ -751,7 +751,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         start.invoke(writer, new Object[0]);   
     }
     
-    private static void resetPriority(ManagedConnection mc)
+    private static void resetPriority(Connection mc)
         throws Exception {
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
             BIOMessageWriter writer = 

@@ -15,7 +15,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
- * The list of all ManagedConnection's.  Provides a factory method for creating
+ * The list of all Connection's.  Provides a factory method for creating
  * user-requested outgoing connections, accepts incoming connections, and
  * fetches "automatic" outgoing connections as needed.  Creates threads for
  * handling these connections when appropriate.  Use the setKeepAlive(int)
@@ -79,7 +79,7 @@ public class ConnectionManager {
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
-    private final List /* of ManagedConnection */ _initializingFetchedConnections =
+    private final List /* of Connection */ _initializingFetchedConnections =
         new ArrayList();
 
 
@@ -113,11 +113,11 @@ public class ConnectionManager {
      *   much slower.  
      */
     //TODO:: why not use sets here??
-    private volatile List /* of ManagedConnection */ 
+    private volatile List /* of Connection */ 
         _connections = new ArrayList();
-    private volatile List /* of ManagedConnection */ 
+    private volatile List /* of Connection */ 
         _initializedConnections = new ArrayList();
-    private volatile List /* of ManagedConnection */ 
+    private volatile List /* of Connection */ 
         _initializedClientConnections = new ArrayList();
         
     private volatile int _shieldedConnections = 0;
@@ -162,10 +162,9 @@ public class ConnectionManager {
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(String hostname, int portnum) 
+    public Connection createConnectionBlocking(String hostname, int portnum) 
 		throws IOException {
-        ManagedConnection c = 
-			new ManagedConnection(hostname, portnum);
+        Connection c = new Connection(hostname, portnum);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -185,8 +184,7 @@ public class ConnectionManager {
             String hostname, int portnum) {
 
 		Runnable outgoingRunner = 
-			new OutgoingConnector(new ManagedConnection(hostname, portnum),
-								  true);
+			new OutgoingConnector(new Connection(hostname, portnum), true);
         // Initialize and loop for messages on another thread.
 
 		Thread outgoingConnectionRunner = 
@@ -206,7 +204,7 @@ public class ConnectionManager {
      void acceptConnection(Socket socket) {
          //1. Initialize connection.  It's always safe to recommend new headers.
          Thread.currentThread().setName("IncommingConnectionThread");
-         ManagedConnection connection = new ManagedConnection(socket);
+         Connection connection = new Connection(socket);
          try {
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
@@ -284,7 +282,7 @@ public class ConnectionManager {
         return _shieldedConnections != 0;
 //        List connections=getInitializedConnections();
 //        for (int i=0; i<connections.size(); i++) {
-//            ManagedConnection first=(ManagedConnection)connections.get(i);
+//            Connection first=(Connection)connections.get(i);
 //            if (first.isClientSupernodeConnection())
 //                return true;
 //        }
@@ -356,7 +354,7 @@ public class ConnectionManager {
         //(Remember that _connections is never mutated.)
         List connections=getConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
+            Connection mc = (Connection)iter.next();
  
             if (mc.getIPString().equals(hostName))
                 return true;
@@ -495,7 +493,7 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    private boolean allowConnection(ManagedConnection c) {
+    private boolean allowConnection(Connection c) {
         if(!c.receivedHeaders()) return false;
 		return allowConnection(c.headers(), false);
     }
@@ -674,7 +672,7 @@ public class ConnectionManager {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
+            Connection mc=(Connection)iter.next();
             if (mc.isSupernodeConnection())
                 ret++;
         }
@@ -689,7 +687,7 @@ public class ConnectionManager {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
+            Connection mc=(Connection)iter.next();
             if (mc.isSupernodeSupernodeConnection())
                 ret++;
         }
@@ -702,7 +700,7 @@ public class ConnectionManager {
 		// technically, we can allow old connections.
 		int ret = 0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
+            Connection mc=(Connection)iter.next();
             if (!mc.isSupernodeConnection())
                 ret++;
         }
@@ -811,7 +809,7 @@ public class ConnectionManager {
             Iterator ultrapeers = getInitializedConnections().iterator();
             Set proxies = new HashSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
-                ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+                Connection currMC = (Connection) ultrapeers.next();
                 if (currMC.getPushProxyPort() >= 0)
                     proxies.add(currMC);
             }
@@ -833,7 +831,7 @@ public class ConnectionManager {
         for(Iterator iterator = _initializedConnections.iterator();
             iterator.hasNext();)
         {
-            ManagedConnection connection = (ManagedConnection)iterator.next();
+            Connection connection = (Connection)iterator.next();
             if(connection.isSupernodeConnection())
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
@@ -858,7 +856,7 @@ public class ConnectionManager {
 	 */
 	public Endpoint getConnectedGUESSUltrapeer() {
 		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
+			Connection connection = (Connection)iter.next();
 			if(connection.isSupernodeConnection() && 
 			   connection.isGUESSUltrapeer()) {				
 				return new Endpoint(connection.getInetAddress().getAddress(),
@@ -873,12 +871,12 @@ public class ConnectionManager {
      *  enabled.
      *
      * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
-     * are represented as ManagedConnections.
+     * are represented as Connections.
      */
 	public List getConnectedGUESSUltrapeers() {
         List retList = new ArrayList();
 		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
+			Connection connection = (Connection)iter.next();
 			if(connection.isSupernodeConnection() && 
                connection.isGUESSUltrapeer()) 
 				retList.add(connection);
@@ -909,7 +907,7 @@ public class ConnectionManager {
      * This is called from initializeExternallyGeneratedConnection, for 
      * incoming connections
      */
-    private void connectionInitializingIncoming(ManagedConnection c) {
+    private void connectionInitializingIncoming(Connection c) {
         connectionInitializing(c);
     }
     
@@ -918,7 +916,7 @@ public class ConnectionManager {
      * removed from the list of open connections during its initialization.
      * Should only be called from a thread that has this' monitor.
      */
-    private boolean connectionInitialized(ManagedConnection c) {
+    private boolean connectionInitialized(Connection c) {
         if(_connections.contains(c)) {
 	        // build the queues and start the output runner.
 	        // this MUST be done before _initializedConnections
@@ -968,7 +966,7 @@ public class ConnectionManager {
         //2. Remove all connections.
         for (Iterator iter=getConnections().iterator();
              iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
@@ -1003,7 +1001,7 @@ public class ConnectionManager {
      * ttl of the PingRequest will be 1 if we don't need any connections.
      * Otherwise, the ttl = max ttl.
      */
-    private void sendInitialPingRequest(ManagedConnection connection) {
+    private void sendInitialPingRequest(Connection connection) {
         if(connection.supportsPongCaching()) return;
 
         //We need to compare how many connections we have to the keep alive to
@@ -1177,7 +1175,7 @@ public class ConnectionManager {
         int lastInitializingConnectionIndex =
             _initializingFetchedConnections.size();
         while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = (ManagedConnection)
+            Connection connection = (Connection)
                 _initializingFetchedConnections.remove(
                     --lastInitializingConnectionIndex);
             removeInternal(connection);
@@ -1199,7 +1197,7 @@ public class ConnectionManager {
      *  the connection during handshaking, etc. 
      * @see com.limegroup.gnutella.Connection#initialize(int)
      */
-    private void initializeFetchedConnection(ManagedConnection mc,
+    private void initializeFetchedConnection(Connection mc,
                                              ConnectionFetcher fetcher)
             throws NoGnutellaOkException, BadHandshakeException, IOException {
         synchronized(this) {
@@ -1409,7 +1407,7 @@ public class ConnectionManager {
      *
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
-    private void initializeExternallyGeneratedConnection(ManagedConnection c)
+    private void initializeExternallyGeneratedConnection(Connection c)
 		throws IOException {
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
@@ -1440,7 +1438,7 @@ public class ConnectionManager {
 		
         //If there's not space for the connection, reject it.  This mechanism
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
-        //connections.  Sometimes ManagedConnections are handled by headers
+        //connections.  Sometimes Connections are handled by headers
         //directly.
         if (!c.isOutgoing() && !allowConnection(c)) {
             //No need to remove, since it hasn't been added to any lists.
@@ -1464,13 +1462,13 @@ public class ConnectionManager {
     /**
      * Performs the steps necessary to complete connection initialization.
      *
-     * @param mc the <tt>ManagedConnection</tt> to finish initializing
+     * @param mc the <tt>Connection</tt> to finish initializing
      * @param fetched Specifies whether or not this connection is was fetched
      *  by a connection fetcher.  If so, this removes that connection from 
      *  the list of fetched connections being initialized, keeping the
      *  connection fetcher data in sync
      */
-    private void completeConnectionInitialization(ManagedConnection mc, 
+    private void completeConnectionInitialization(Connection mc, 
                                                   boolean fetched) {
         boolean connectionOpen = false;
         synchronized(this) {
@@ -1508,11 +1506,11 @@ public class ConnectionManager {
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections created through createConnectionAsynchronously and
+     * Connections created through createConnectionAsynchronously and
      * createConnectionBlocking
      */
     private class OutgoingConnector implements Runnable {
-        private final ManagedConnection _connection;
+        private final Connection _connection;
         private final boolean _doInitialization;
 
         /**
@@ -1521,7 +1519,7 @@ public class ConnectionManager {
 		 *
 		 * @param connection the host to connect to
          */
-        public OutgoingConnector(ManagedConnection connection,
+        public OutgoingConnector(Connection connection,
 								 boolean initialize) {
             _connection = connection;
             _doInitialization = initialize;
@@ -1549,11 +1547,11 @@ public class ConnectionManager {
 	 * Runs standard calls that should be made whenever a connection is fully
 	 * established and should wait for messages.
 	 *
-	 * @param conn the <tt>ManagedConnection</tt> instance to start
+	 * @param conn the <tt>Connection</tt> instance to start
 	 * @throws <tt>IOException</tt> if there is an excpetion while looping
 	 *  for messages
 	 */
-	private void startConnection(ManagedConnection conn) throws IOException {
+	private void startConnection(Connection conn) throws IOException {
 	    Thread.currentThread().setName("MessageLoopingThread");
 	    try {
     		if(conn.isGUESSUltrapeer()) {
@@ -1615,7 +1613,7 @@ public class ConnectionManager {
 
             Assert.that(endpoint != null);
 
-            ManagedConnection connection = new ManagedConnection(
+            Connection connection = new Connection(
                 endpoint.getHostname(), endpoint.getPort());
 
             try {

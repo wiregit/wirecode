@@ -337,6 +337,67 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private Set _domains;
     
+    /** 
+     * The total amount of upstream messaging bandwidth for ALL connections
+     * in BYTES (not bits) per second. 
+     */
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
+                                                            
+    /** 
+     * Limits outgoing bandwidth for ALL connections. 
+     */
+    private final static BandwidthThrottle _throttle=
+        new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
+        
+    /** 
+     * The timeout to use when connecting, in milliseconds.  This is NOT used
+     * for bootstrap servers.  
+     */
+    private static final int CONNECT_TIMEOUT = 6000;  //6 seconds
+
+    /**
+     * Creates a new outgoing connection to the specified host on the
+     * specified port.  
+     *
+     * @param host the address of the host we're connecting to
+     * @param port the port the host is listening on
+     */
+    public Connection(String host, int port) {
+        this(host, port, 
+             (RouterService.isSupernode() ? 
+              (Properties)(new UltrapeerHeaders(host)) : 
+              (Properties)(new LeafHeaders(host))),
+             (RouterService.isSupernode() ?
+              (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
+              (HandshakeResponder)new LeafHandshakeResponder(host)));
+    }
+
+    /**
+     * More customizable constructor used for testing.
+     */
+    static Connection 
+        createTestConnection(String host, int port, 
+          Properties props, HandshakeResponder responder) { 
+        return new Connection(host, port, props, responder);
+    }
+
+    /**
+     * Creates an incoming connection.
+     * ManagedConnections should only be constructed within ConnectionManager.
+     * @requires the word "GNUTELLA " and nothing else has just been read
+     *  from socket
+     * @effects wraps a connection around socket and does the rest of the
+     *  Gnutella handshake.
+     */
+    Connection(Socket socket) {
+        this(socket, 
+              RouterService.isSupernode() ? 
+              (HandshakeResponder)(new UltrapeerHandshakeResponder(
+                  socket.getInetAddress().getHostAddress())) : 
+              (HandshakeResponder)(new LeafHandshakeResponder(
+                  socket.getInetAddress().getHostAddress())));
+    }
+        
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
@@ -416,86 +477,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         }
     }
 
-    /**
-     * Call this method when you want to handle us to handle a VM.  We may....
-     */
-    public void handleVendorMessage(VendorMessage vm) {
-        if (vm instanceof MessagesSupportedVendorMessage)
-            _messagesSupported = (MessagesSupportedVendorMessage) vm;
-            
-        // now i can process
-        if (vm instanceof HopsFlowVendorMessage) {
-            // update the softMaxHops value so it can take effect....
-            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
-            _softMaxHops = hops.getHopValue();
-        }
-        else if (vm instanceof PushProxyAcknowledgement) {
-            // this connection can serve as a PushProxy, so note this....
-            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
-            if (Arrays.equals(ack.getGUID(),
-                              RouterService.getMessageRouter()._clientGUID)) {
-                _pushProxyPort = ack.getListeningPort();
-                _pushProxyAddr = ack.getListeningAddress();
-            }
-            // else mistake on the server side - the guid should be my client
-            // guid - not really necessary but whatever
-        }
-        else if (vm instanceof MessagesSupportedVendorMessage) {
-
-            // see if you need a PushProxy - the remoteHostSupportsPushProxy
-            // test incorporates my leaf status in it.....
-            if (remoteHostSupportsPushProxy() > -1) {
-                // get the client GUID and send off a PushProxyRequest
-                GUID clientGUID =
-                    new GUID(RouterService.getMessageRouter()._clientGUID);
-                try {
-                    PushProxyRequest req = new PushProxyRequest(clientGUID);
-                    send(req);
-                }
-                catch (BadPacketException never) {
-                    ErrorService.error(never);
-                }
-            }
-
-            // if we are ignoring local addresses and the connection is local
-            // or the guy has a similar address then ignore
-            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-               (isLocal() || !isConnectBackCapable()))
-                return;
-
-            // do i need to send any ConnectBack messages????
-            if (!UDPService.instance().canReceiveUnsolicited() &&
-                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
-                (remoteHostSupportsUDPConnectBack() > -1)) {
-                try {
-                    GUID connectBackGUID =
-                        RouterService.getUDPConnectBackGUID();
-                    UDPConnectBackVendorMessage udp = 
-                        new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                        connectBackGUID);
-                    send(udp);
-                    _numUDPConnectBackRequests++;
-                }
-                catch (BadPacketException ignored) {
-                    ErrorService.error(ignored);
-                }
-            }
-            if (!RouterService.acceptedIncomingConnection() &&
-                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
-                (remoteHostSupportsTCPConnectBack() > -1)) {
-                try {
-                    TCPConnectBackVendorMessage tcp =
-                       new TCPConnectBackVendorMessage(RouterService.getPort());
-                    send(tcp);
-                    _numTCPConnectBackRequests++;
-                }
-                catch (BadPacketException ignored) {
-                    ErrorService.error(ignored);
-                }
-            }
-        }
-    }
-
 
     /** 
      * Initializes this without timeout; exactly like initialize(0). 
@@ -503,7 +484,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public void initialize() 
         throws IOException, NoGnutellaOkException, BadHandshakeException {
-        initialize(0);
+        initialize(CONNECT_TIMEOUT);
     }
 
     /**
@@ -869,6 +850,87 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         }
     }
     
+    
+    /**
+     * Call this method when you want to handle us to handle a VM.  We may....
+     */
+    public void handleVendorMessage(VendorMessage vm) {
+        if (vm instanceof MessagesSupportedVendorMessage)
+            _messagesSupported = (MessagesSupportedVendorMessage) vm;
+            
+        // now i can process
+        if (vm instanceof HopsFlowVendorMessage) {
+            // update the softMaxHops value so it can take effect....
+            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
+            _softMaxHops = hops.getHopValue();
+        }
+        else if (vm instanceof PushProxyAcknowledgement) {
+            // this connection can serve as a PushProxy, so note this....
+            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
+            if (Arrays.equals(ack.getGUID(),
+                              RouterService.getMessageRouter()._clientGUID)) {
+                _pushProxyPort = ack.getListeningPort();
+                _pushProxyAddr = ack.getListeningAddress();
+            }
+            // else mistake on the server side - the guid should be my client
+            // guid - not really necessary but whatever
+        }
+        else if (vm instanceof MessagesSupportedVendorMessage) {
+
+            // see if you need a PushProxy - the remoteHostSupportsPushProxy
+            // test incorporates my leaf status in it.....
+            if (remoteHostSupportsPushProxy() > -1) {
+                // get the client GUID and send off a PushProxyRequest
+                GUID clientGUID =
+                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                try {
+                    PushProxyRequest req = new PushProxyRequest(clientGUID);
+                    send(req);
+                }
+                catch (BadPacketException never) {
+                    ErrorService.error(never);
+                }
+            }
+
+            // if we are ignoring local addresses and the connection is local
+            // or the guy has a similar address then ignore
+            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+               (isLocal() || !isConnectBackCapable()))
+                return;
+
+            // do i need to send any ConnectBack messages????
+            if (!UDPService.instance().canReceiveUnsolicited() &&
+                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsUDPConnectBack() > -1)) {
+                try {
+                    GUID connectBackGUID =
+                        RouterService.getUDPConnectBackGUID();
+                    UDPConnectBackVendorMessage udp = 
+                        new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                        connectBackGUID);
+                    send(udp);
+                    _numUDPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ErrorService.error(ignored);
+                }
+            }
+            if (!RouterService.acceptedIncomingConnection() &&
+                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsTCPConnectBack() > -1)) {
+                try {
+                    TCPConnectBackVendorMessage tcp =
+                       new TCPConnectBackVendorMessage(RouterService.getPort());
+                    send(tcp);
+                    _numTCPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ErrorService.error(ignored);
+                }
+            }
+        }
+    }
+    
     /** Returns true iff line ends with "CONNECT/N", where N
      *  is a number greater than or equal "0.6". */
     private static boolean notLessThan06(String line) {
@@ -1026,12 +1088,13 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
 
     /**
-     * Returns the stream to use for writing to s.
-     * By default this is a BufferedOutputStream.
-     * Subclasses may override to decorate the stream.
+     * Throttles the this connection's OutputStream.  This works quite well with
+     * compressed streams, because the chaining mechanism writes the
+     * compressed bytes, ensuring that we do not attempt to request
+     * more data (and thus sleep while throttling) than we will actually write.
      */
     protected OutputStream getOutputStream()  throws IOException {
-        return new BufferedOutputStream(_socket.getOutputStream());
+        return new ThrottledOutputStream(_socket.getOutputStream(), _throttle);
     }
 
     /**

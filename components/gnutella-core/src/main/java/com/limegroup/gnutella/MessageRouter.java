@@ -196,7 +196,7 @@ public abstract class MessageRouter {
      * message type.
 	 *
 	 * @param m the <tt>Message</tt> instance to route appropriately
-	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
+	 * @param receivingConnection the <tt>Connection</tt> over which
 	 *  the message was received
      */
     public void handleMessage(Message msg, 
@@ -461,7 +461,7 @@ public abstract class MessageRouter {
 	
     /**
      * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * Connection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handlePingRequestPossibleDuplicate(
@@ -472,7 +472,7 @@ public abstract class MessageRouter {
 
     /**
      * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * Connection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handleUDPPingRequestPossibleDuplicate(													 
@@ -483,7 +483,7 @@ public abstract class MessageRouter {
 
     /**
      * The handler for QueryRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * Connection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handleQueryRequest.
      */
     final void handleQueryRequestPossibleDuplicate(
@@ -599,7 +599,7 @@ public abstract class MessageRouter {
 
     /**
      * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
+     * Connection.loopForMessages().  This implementation updates stats,
      * does the broadcast, and generates a response.
      *
      * You can customize behavior in three ways:
@@ -676,7 +676,7 @@ public abstract class MessageRouter {
     
     /**
      * The default handler for QueryRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
+     * Connection.loopForMessages().  This implementation updates stats,
      * does the broadcast, and generates a response.
      *
      * You can customize behavior in three ways:
@@ -919,8 +919,7 @@ public abstract class MessageRouter {
      * Sends the ping request to the designated connection,
      * setting up the proper reply routing.
      */
-    public void sendPingRequest(PingRequest request,
-                                ManagedConnection connection) {
+    public void sendPingRequest(PingRequest request, Connection connection) {
         if(request == null) {
             throw new NullPointerException("null ping");
         }
@@ -1023,7 +1022,7 @@ public abstract class MessageRouter {
         if(size > 3) randomlyForward = true;
         double percentToIgnore;
         for(int i=0; i<size; i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
+            Connection mc = (Connection)list.get(i);
             if(!mc.isStable()) continue;
             if (receivingConnection == FOR_ME_REPLY_HANDLER || 
                 (mc != receivingConnection && 
@@ -1063,7 +1062,7 @@ public abstract class MessageRouter {
         List list = _manager.getInitializedClientConnections2();
         List hitConnections = new ArrayList();
         for(int i=0; i<list.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
+            Connection mc = (Connection)list.get(i);
             if(mc == handler) continue; 
             if(mc.qrp().hitsQueryRouteTable(query)) {
                 hitConnections.add(mc);
@@ -1080,7 +1079,7 @@ public abstract class MessageRouter {
         RoutedQueryStat.LEAF_DROP.addData(notSent);
         
         for(int i=0; i<hitConnections.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
+            Connection mc = (Connection)hitConnections.get(i);
             // sendRoutedQueryToHost is not called because 
             // we have already ensured it hits the routing table
             // by filling up the 'hitsConnection' list.
@@ -1095,12 +1094,12 @@ public abstract class MessageRouter {
 	 * query routing entries.
 	 *
 	 * @param query the <tt>QueryRequest</tt> to potentially forward
-	 * @param mc the <tt>ManagedConnection</tt> to forward the query to
+	 * @param mc the <tt>Connection</tt> to forward the query to
 	 * @param handler the <tt>ReplyHandler</tt> that will be entered into
 	 *  the routing tables to handle any replies
 	 * @return <tt>true</tt> if the query was sent, otherwise <tt>false</tt>
 	 */
-	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
+	private boolean sendRoutedQueryToHost(QueryRequest query, Connection mc,
 										  ReplyHandler handler) {
 		if (mc.qrp().hitsQueryRouteTable(query)) {
 			//A new client with routing entry, or one that hasn't started
@@ -1162,7 +1161,7 @@ public abstract class MessageRouter {
         int limit = list.size();
 
 		for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);      
+            Connection mc = (Connection)list.get(i);      
             forwardQueryToUltrapeer(query, handler, mc);  
         }
     }
@@ -1193,7 +1192,7 @@ public abstract class MessageRouter {
             // an old-style query, break out
             if(connectionsNeededForOld == 0) break;
 
-			ManagedConnection mc = (ManagedConnection)list.get(i);
+            Connection mc = (Connection)list.get(i);
             
             // if the query is comiing from an old connection, try to
             // send it's traffic to old connections.  Only send it to
@@ -1223,7 +1222,7 @@ public abstract class MessageRouter {
      */
     private void forwardQueryToUltrapeer(QueryRequest query, 
                                          ReplyHandler handler,
-                                         ManagedConnection ultrapeer) {    
+                                         Connection ultrapeer) {    
         // don't send a query back to the guy who sent it
         if(ultrapeer == handler) return;
 
@@ -1263,7 +1262,7 @@ public abstract class MessageRouter {
         // as a result of race conditions
         int limit = Math.min(4, list.size());
         for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);       
+			Connection mc = (Connection)list.get(i);       
             sendQueryRequest(qr, mc, FOR_ME_REPLY_HANDLER);
         }
     }
@@ -1282,7 +1281,7 @@ public abstract class MessageRouter {
      * received the query
      */
     public void sendQueryRequest(QueryRequest request, 
-								 ManagedConnection sendConnection, 
+								 Connection sendConnection, 
 								 ReplyHandler handler) {
 		if(request == null) {
 			throw new NullPointerException("null query");
@@ -1311,16 +1310,16 @@ public abstract class MessageRouter {
     }
     
     /**
-     * Originates a new query request to the ManagedConnection.
+     * Originates a new query request to the Connection.
      *
      * TODO:: this is only really here to remain compatible with tests such
      *  as UltrapeerQueryRouteTableTest -- we should really change the test
      *  to be compatible with current code
      * 
      * @param request The query to send.
-     * @param mc The ManagedConnection to send the query along
+     * @param mc The Connection to send the query along
      */
-    public void originateQuery(QueryRequest query, ManagedConnection mc) {
+    public void originateQuery(QueryRequest query, Connection mc) {
         if( query == null )
             throw new NullPointerException("null query");
         if( mc == null )
@@ -1382,7 +1381,7 @@ public abstract class MessageRouter {
                                                   byte[] clientGUID);
     /**
      * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation
+     * Connection.loopForMessages().  This implementation
      * uses the ping route table to route a ping reply.  If an appropriate route
      * doesn't exist, records the error statistics.  On sucessful routing,
      * the PingReply count is incremented.<p>
@@ -1428,7 +1427,7 @@ public abstract class MessageRouter {
         if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) {
-                ManagedConnection c = (ManagedConnection)list.get(i);
+                Connection c = (Connection)list.get(i);
                 Assert.that(c != null, "null c.");
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
                     c.handlePingReply(reply, handler);
@@ -1439,7 +1438,7 @@ public abstract class MessageRouter {
 
     /**
      * The default handler for QueryReplies received in
-     * ManagedConnection.loopForMessages().  This implementation
+     * Connection.loopForMessages().  This implementation
      * uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
      * the QueryReply count is incremented.<p>
@@ -1553,7 +1552,7 @@ public abstract class MessageRouter {
 
     /**
      * The default handler for PushRequests received in
-     * ManagedConnection.loopForMessages().  This implementation
+     * Connection.loopForMessages().  This implementation
      * uses the push route table to route a push request.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
      * the PushRequest count is incremented.
@@ -1823,7 +1822,7 @@ public abstract class MessageRouter {
      *
      * @param rtm the <tt>ResetTableMessage</tt> for resetting the query
      *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     * @param mc the <tt>Connection</tt> for which the query route
      *  table should be reset
      */
     private void handleResetTableMessage(ResetTableMessage rtm,
@@ -1849,7 +1848,7 @@ public abstract class MessageRouter {
      *
      * @param rtm the <tt>PatchTableMessage</tt> for patching the query
      *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     * @param mc the <tt>Connection</tt> for which the query route
      *  table should be patched
      */
     private void handlePatchTableMessage(PatchTableMessage ptm,
@@ -1923,7 +1922,7 @@ public abstract class MessageRouter {
 		List /* of RouteTableMessage */ patches = null;
 		QueryRouteTable lastSent = null;
 		for(int i=0; i<list.size(); i++) {                        
-			ManagedConnection c=(ManagedConnection)list.get(i);
+			Connection c=(Connection)list.get(i);
 			
 
 			// continue if I'm an Ultrapeer and the node on the
@@ -2042,7 +2041,7 @@ public abstract class MessageRouter {
 		List leaves = _manager.getInitializedClientConnections2();
 		
 		for(int i=0; i<leaves.size(); i++) {
-			ManagedConnection mc = (ManagedConnection)leaves.get(i);
+			Connection mc = (Connection)leaves.get(i);
         	synchronized (mc.qrp()) {
                 QueryRouteTable qrtr = mc.qrp().getQueryRouteTableReceived();
 				if(qrtr != null) {

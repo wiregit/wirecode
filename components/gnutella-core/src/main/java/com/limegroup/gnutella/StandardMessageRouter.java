@@ -108,8 +108,8 @@ public class StandardMessageRouter extends MessageRouter {
 								   ReplyHandler receivingConnection) {
         //We override the super's method so the receiving connection's
         //statistics are updated whether or not this is for me.
-		if(receivingConnection instanceof ManagedConnection) {
-			ManagedConnection mc = (ManagedConnection)receivingConnection;
+		if(receivingConnection instanceof Connection) {
+			Connection mc = (Connection)receivingConnection;
 			mc.stats().updateHorizonStats(pingReply);
 		}
         super.handlePingReply(pingReply, receivingConnection);

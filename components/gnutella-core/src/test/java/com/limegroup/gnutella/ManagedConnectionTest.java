@@ -73,7 +73,7 @@ public class ManagedConnectionTest extends BaseTestCase {
      * Tests the method for checking whether or not a connection is stable.
      */
     public void testIsStable() throws Exception {
-        ManagedConnection mc = new ManagedConnection("localhost", Backend.PORT);
+        Connection mc = new Connection("localhost", Backend.PORT);
         mc.initialize();
         mc.buildAndStartQueues();
         
@@ -105,8 +105,8 @@ public class ManagedConnectionTest extends BaseTestCase {
     }
     
     private void tForwardsGGEP() throws Exception {
-        ManagedConnection out = 
-            new ManagedConnection("localhost", Backend.PORT);
+        Connection out = 
+            new Connection("localhost", Backend.PORT);
         out.initialize();
         out.buildAndStartQueues();        
 
@@ -140,8 +140,8 @@ public class ManagedConnectionTest extends BaseTestCase {
      * connections.
      */
     public void testIsHighDegreeConnection() throws IOException {
-        ManagedConnection mc = 
-            new ManagedConnection("localhost", Backend.PORT);
+        Connection mc = 
+            new Connection("localhost", Backend.PORT);
         mc.initialize();
         mc.buildAndStartQueues();
         assertTrue("connection should be high degree", 
@@ -151,7 +151,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 
     public void testHorizonStatistics() {
         HorizonCounter hc = HorizonCounter.instance();
-        ManagedConnection mc= new ManagedConnection("", 1);
+        Connection mc= new Connection("", 1);
         mc.buildAndStartQueues();
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
@@ -238,11 +238,11 @@ public class ManagedConnectionTest extends BaseTestCase {
     }
         
     private void tStripsGGEP() throws Exception {
-        ManagedConnection out = 
-            ManagedConnection.createTestConnection("localhost", 
-                                                   Backend.PORT,
-                                                   new NoGGEPProperties(),
-                                                   new EmptyResponder());
+        Connection out = 
+            Connection.createTestConnection("localhost", 
+                                            Backend.PORT,
+                                            new NoGGEPProperties(),
+                                            new EmptyResponder());
         out.initialize();
         out.buildAndStartQueues();
 
@@ -267,7 +267,7 @@ public class ManagedConnectionTest extends BaseTestCase {
      * client side.
      */
     public void testClientSideClose() throws Exception {
-        ManagedConnection out=null;
+        Connection out = null;
         Connection in=null;
         //com.limegroup.gnutella.MiniAcceptor acceptor=null;                
         //When receive() or sendQueued() gets IOException, it calls
@@ -277,7 +277,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-        out = new ManagedConnection("localhost", Backend.PORT);
+        out = new Connection("localhost", Backend.PORT);
         out.initialize();            
         out.buildAndStartQueues();
 
@@ -301,7 +301,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         MiniAcceptor acceptor = new MiniAcceptor(PORT);
         
         //2. Remote close: discovered on read
-        ManagedConnection out = new ManagedConnection("localhost", PORT);
+        Connection out = new Connection("localhost", PORT);
         out.initialize();            
         out.buildAndStartQueues();
         Connection in = acceptor.accept(); 
@@ -325,7 +325,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         //semantics, we need TWO writes to discover this.  (See unit tests
         //for Connection.)
         acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
-        out = new ManagedConnection("localhost", PORT);
+        out = new Connection("localhost", PORT);
         out.initialize();            
         out.buildAndStartQueues();
         in = acceptor.accept(); 

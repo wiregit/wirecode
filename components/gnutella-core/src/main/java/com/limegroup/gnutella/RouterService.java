@@ -362,7 +362,7 @@ public class RouterService {
      * @return a connection to the request host
      * @exception IOException the connection failed
      */
-    public static ManagedConnection connectToHostBlocking(String hostname, int portnum)
+    public static Connection connectToHostBlocking(String hostname, int portnum)
 		throws IOException {
         return manager.createConnectionBlocking(hostname, portnum);
     }
@@ -614,7 +614,7 @@ public class RouterService {
         //fancy like incrementally updating them.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             c.setPersonalFilter(SpamFilter.newPersonalFilter());
             c.setRouteFilter(SpamFilter.newRouteFilter());
         }
@@ -655,7 +655,7 @@ public class RouterService {
         // Count the messages on initialized connections
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             count += c.stats().getNumMessagesSent();
             count += c.stats().getNumMessagesReceived();
         }
@@ -672,7 +672,7 @@ public class RouterService {
         // Count the messages on initialized connections
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+            Connection c=(Connection)iter.next();
             msgs = c.stats().getNumMessagesSent();
             msgs += c.stats().getNumMessagesReceived();
 			if ( msgs > messageThreshold )
@@ -1161,7 +1161,7 @@ public class RouterService {
 
     /**
      * Returns the port used for downloads and messaging connections.
-     * Used to fill out the My-Address header in ManagedConnection.
+     * Used to fill out the My-Address header in Connection.
      * @see Acceptor#getPort
      */    
 	public static int getPort() {

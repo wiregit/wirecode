@@ -47,10 +47,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			&& (pingReply.getFiles() < SharingSettings.FREELOADER_FILES.getValue())
 			&& ((int)(Math.random()*100.f) >
 				SharingSettings.FREELOADER_ALLOWED.getValue())
-			&& (handler instanceof ManagedConnection)
+			&& (handler instanceof Connection)
             && (handler.isStable())) {
 			ConnectionManager cm = RouterService.getConnectionManager();
-            cm.remove((ManagedConnection)handler);
+            cm.remove((Connection)handler);
         }
 	}
 	
