@@ -215,7 +215,8 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                 windowStart%windowSize == 0    &&
                 windowStart > MIN_START_WINDOW &&
                 _tracker.failureRate() < LOW_FAILURE_RATE ) {
-System.out.println("up _skipLimit = "+_skipLimit);
+                if(LOG.isDebugEnabled())  
+                    LOG.debug("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
                 LOG.debug(" -- UPP sL:"+_skipLimit);
@@ -235,7 +236,8 @@ System.out.println("up _skipLimit = "+_skipLimit);
         if ( _skipCount != 0 && 
              rtt < maxRTT && 
              receiverWindowSpace > LOW_WINDOW_SPACE )  {
-System.out.println("_skipLimit = "+_skipLimit);
+             if(LOG.isDebugEnabled())  
+                 LOG.debug("_skipLimit = "+_skipLimit);
             sleepTime = 0;
         }
 
