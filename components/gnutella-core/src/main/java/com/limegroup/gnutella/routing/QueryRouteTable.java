@@ -112,6 +112,15 @@ public class QueryRouteTable {
         this.sequenceSize = -1;
         this.nextPatch = 0;                
     }
+    
+    /**
+     * Returns the percentage of slots used in this QueryRouteTable's BitTable.
+     * The return value is from 0 to 100.
+     */
+    public double getPercentFull() {
+        double set = bitTable.cardinality();
+        return ( set / bitTableLength ) * 100.0;
+	}
 
     /**
      * Returns true if a response could be generated for qr.  Note that a return
