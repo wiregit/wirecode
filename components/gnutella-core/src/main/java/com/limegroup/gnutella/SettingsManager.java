@@ -124,167 +124,96 @@ public class SettingsManager implements SettingsInterface
 		    {
 			try {
 			    b = Byte.parseByte(p);
-			    try {
-				setTTL(b);
-			    }
-			    catch (IllegalArgumentException ie){
-				setTTL(SettingsInterface.DEFAULT_TTL);
-			    }
+			    try {setTTL(b);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setTTL(SettingsInterface.DEFAULT_TTL);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.MAX_TTL))
 		    {
 			try {
 			    b = Byte.parseByte(p);
-			    try {
-				setMaxTTL(b);
-			    }
-			    catch (IllegalArgumentException ie){
-				setMaxTTL(SettingsInterface.DEFAULT_MAX_TTL);
-			    }
+			    try {setMaxTTL(b);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setMaxTTL(SettingsInterface.DEFAULT_MAX_TTL);
-			}						
+			catch(NumberFormatException nfe){}  				
 		    }
 		else if(key.equals(SettingsInterface.MAX_LENGTH))
 		    {			
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setMaxLength(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setMaxLength(SettingsInterface.DEFAULT_MAX_LENGTH);
-			    }
+			    try {setMaxLength(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setMaxLength(SettingsInterface.DEFAULT_MAX_LENGTH);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.TIMEOUT))
 		    {
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setTimeout(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setTimeout(SettingsInterface.DEFAULT_TIMEOUT);
-			    }
+			    try {setTimeout(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setTimeout(SettingsInterface.DEFAULT_TIMEOUT);
-			}						
-		    }
-		else if(key.equals(SettingsInterface.HOST_LIST))
-		    {			
-			try {
-			    setHostList(p);
-			}
-			catch (IllegalArgumentException ie){
-			    setHostList(SettingsInterface.DEFAULT_HOST_LIST);
-			}
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.KEEP_ALIVE))
 		    {	
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setKeepAlive(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
-			    }
+			    try {setKeepAlive(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.PORT))
 		    {
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setPort(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setPort(SettingsInterface.DEFAULT_PORT);
-			    }
+			    try {setPort(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setPort(SettingsInterface.DEFAULT_PORT);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.SPEED))
 		    {
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setConnectionSpeed(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
-			    }
+			    try {setConnectionSpeed(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 		else if(key.equals(SettingsInterface.SEARCH_LIMIT))
 		    {
 			try {
 			    short s = Short.parseShort(p);
-			    try {
-				setSearchLimit(s);
-			    }
-			    catch (IllegalArgumentException ie){
-				setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
-			    }
+			    try {setSearchLimit(s);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
-			}			
+			catch(NumberFormatException nfe){}			
 		    }
 
 		else if(key.equals(SettingsInterface.CLIENT_ID))
 		    {
-			try {
-			    setClientID(p);
-			}
-			catch (IllegalArgumentException ie){
-			    setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
-			}
+			try {setClientID(p);}
+			catch (IllegalArgumentException ie){}
 		    }
 
 		else if(key.equals(SettingsInterface.STATS))
 		    {
 			boolean bs = p.equals("true");
-			try {
-			    setStats(bs);
-			}
-			catch (IllegalArgumentException ie){
-			    setStats(SettingsInterface.DEFAULT_STATS);
-			}
+			try {setStats(bs);}
+			catch (IllegalArgumentException ie){}
 		    }		
 
 		else if(key.equals(SettingsInterface.MAX_CONN))
 		    {
 			try {
 			    i = Integer.parseInt(p);
-			    try {
-				setMaxConn(i);
-			    }
-			    catch (IllegalArgumentException ie){
-				setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
-			    }
+			    try {setMaxConn(i);}
+			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){
-			    setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
-			}
+			catch(NumberFormatException nfe){}
 		    }		
 	    }
 	    catch(ClassCastException cce){}
@@ -310,83 +239,57 @@ public class SettingsManager implements SettingsInterface
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
     }
 
-    /**
-     *  Accessor methods 
-     */
-    public byte getTTL()
-    {
-	return ttl_;
-    }
+    /** returns the time to live */
+    public byte getTTL(){return ttl_;}
 
-    public byte getMaxTTL()
-    {
-	return maxttl_;
-    }
+    /** returns the maximum time to live*/
+    public byte getMaxTTL(){return maxttl_;}
 
-    public int getMaxLength()
-    {
-	return maxLength_;
-    }
+    /** returns the maximum allowable length of packets*/
+    public int getMaxLength(){return maxLength_;}
 
-    public int getTimeOut()
-    {
-	return timeout_;
-    }
+    /** returns the timeout value*/
+    public int getTimeOut(){return timeout_;}
 
-    public String getHostList()
-    {
-	return hostList_;
-    }
+    /** returns a string specifying the full
+     *  pathname of the file listing the hosts */
+    public String getHostList(){return hostList_;}
 
-    public int getKeepAlive()
-    {
-	return keepAlive_;
-    }
+    /** returns the keep alive value */
+    public int getKeepAlive(){return keepAlive_;}
 
-    public int getPort()
-    {
-	return port_;
-    }
+    /** returns the client's port number */
+    public int getPort(){return port_;}
 
-    public int getConnectionSpeed()
-    {
-	return connectionSpeed_;
-    }
+    /** returns the client's connection speed */
+    public int getConnectionSpeed(){return connectionSpeed_;}
 
-    public short getSearchSpeed()
-    {
-	return searchLimit_;
-    }
+    /** returns the client's search speed */
+    public short getSearchSpeed(){return searchLimit_;}
 
-    public String getClientID()
-    {
-	return clientID_;
-    }
+    /** returns the client id number */
+    public String getClientID(){return clientID_;}
 
-    public boolean getStats()
-    {
-	return stats_;
-    }
+    /** returns a boolean specifying whether or not a 
+     *  stats file exists */
+    public boolean getStats(){return stats_;}
 
-    public int getMaxConn()
-    {
-	return maxConn_;
-    }
+    /** returns the maximum number of connections to hold */
+    public int getMaxConn(){return maxConn_;}
 
-    public Properties getNDProps()
-    {
-	return ndProps_;
-    }
+    /** returns the Network Discovery specialized properties file */
+    public Properties getNDProps(){return ndProps_;}
 
+    /** returns the path of the properties and host list files */
     public String getPath()
     {
-	return System.getProperty("user.home");
+	String s = System.getProperty("user.home");
+	s = s + System.getProperty("file.separator");
+	return s;
     }
 
  
-    /**
-     *  Mutator methods 
-     */
+    /** sets the time to live */
     public void setTTL(byte ttl) 
 	throws IllegalArgumentException
     {
@@ -401,6 +304,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the maximum time to live */
     public void setMaxTTL(byte maxttl)
 	throws IllegalArgumentException
     {
@@ -415,6 +319,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the maximum length of packets (spam protection)*/
     public void setMaxLength(int maxLength)
 	throws IllegalArgumentException
     {
@@ -429,6 +334,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the timeout */
     public void setTimeout(int timeout)
 	throws IllegalArgumentException
     {
@@ -444,52 +350,7 @@ public class SettingsManager implements SettingsInterface
 		
     }
 
-    /**
-     *  Sets the pathname String for the file that 
-     *  lists the default hosts
-     */
-    public void setHostList(String hostList)
-	throws IllegalArgumentException
-    {
-	//System.out.println("SettingsManager::setHostList::file: " + hostList);
-	//String home = System.getProperty("user.home");
-	//System.out.println(home);
-	//String fileName;
-	
-	//int l = home.length();
-	//int counter = 0;
-	//char[] c = home.toCharArray();
-	//while(counter < l)
-	//  {
-	//System.out.println("char: " + c[counter]);
-	//counter++;
-	//  }
-	
-
-	File f = new File(hostList);
-	if(f.isFile() == true)
-	    hostList_ = hostList;
-	else
-	    {
-		String fileName = System.getProperty("user.home");
-		fileName = fileName + System.getProperty("file.separator");
-		fileName = fileName + SettingsInterface.DEFAULT_HOST_LIST;
-		try
-		    {
-			FileWriter fw = new FileWriter(fileName);
-			hostList_ = fileName;
-		    }
-		catch(IOException e)
-		    {
-			// not sure what to do if the filewriter
-			// fails to create a file
-		    }		
-	    }
-
-	props_.setProperty(SettingsInterface.HOST_LIST, hostList_);//hostList_);
-	writeProperties();		
-    }
-
+    /** sets the keep alive */
     public void setKeepAlive(int keepAlive)
 	throws IllegalArgumentException
     {
@@ -504,6 +365,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the port to connect on */
     public void setPort(int port)
     {
 	if(false)
@@ -517,6 +379,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the connection speed */
     public void setConnectionSpeed(int speed)
     {
 	if(false)
@@ -530,6 +393,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the limit for the number of searches */
     public void setSearchLimit(short limit)
     {
 	if(false)
@@ -543,6 +407,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets the client (gu) ID number */
     public void setClientID(String clientID)
     {
 	if(false)
@@ -555,6 +420,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** sets a boolean that specifies whether a stats file exists */
     public void setStats(boolean stats)
     {
 	if(false)
@@ -569,6 +435,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /** set the maximum number of connections to hold */
     public void setMaxConn(int maxConn)
     {
 	if(maxConn < 0)
@@ -582,21 +449,54 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    /**
+     *  Sets the pathname String for the file that 
+     *  lists the default hosts.  This is a unique
+     *  method in that the host list cannot be set
+     *  in the properties file
+     */
+    private void setHostList(String hostList)
+    {		
+	String fileName = System.getProperty("user.home");
+	fileName = fileName + System.getProperty("file.separator");
+	fileName = fileName + hostList;
+	File f = new File(fileName);
+	if(f.isFile() == true)
+	    hostList_ = fileName;
+	else
+	    {		
+		try{
+		    FileWriter fw = new FileWriter(fileName);
+		    hostList_ = fileName;
+		}
+		catch(IOException e){
+		    // not sure what to do if the filewriter
+		    // fails to create a file
+		}		
+	    }
+    }
+
+    /** writes out the Network Discovery specialized 
+     *  properties file
+     */
     public void writeNDProps()
     {
 	try {
 	    FileOutputStream ostream = new FileOutputStream(ndFileName_);
-	    props_.store(ostream, "HEADER");
+	    props_.store(ostream, "Properties file for Network Discovery");
 	    ostream.close();
 	} 
 	catch (Exception e){}
     }
 
-    private void writeProperties()
+    /** writes out the properties file to with the specified
+     *  name in the user's home directory
+     */
+    public void writeProperties()
     {
         try {
 	    FileOutputStream ostream = new FileOutputStream(fileName_);
-	    props_.store(ostream, "HEADER");
+	    props_.store(ostream, SettingsInterface.HEADER);
 	    ostream.close();
 	} 
 	catch (Exception e){}
