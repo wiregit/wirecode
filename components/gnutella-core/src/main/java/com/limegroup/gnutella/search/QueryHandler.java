@@ -610,6 +610,13 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
+        // ----------------
+        // NOTE: as agreed, _numResultsReportedByLeaf is the number of results
+        // the leaf has received/consumed by a filter DIVIDED by 4 (4 being the
+        // number of UPs connection it maintains).  That is why we don't divide
+        // it here or anything.  We aren't sure if this mixes well with
+        // BearShare's use but oh well....
+        // ----------------
         // if leaf guidance is in effect, we have different criteria.
         if (_numResultsReportedByLeaf > 0) {
             // we shouldn't route too much regardless of what the leaf says
