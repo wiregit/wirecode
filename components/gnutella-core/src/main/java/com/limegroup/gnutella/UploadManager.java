@@ -109,7 +109,21 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final int BROWSE_HOST_FILE_INDEX = -1;
     
+    /**
+     * The file index used in this structure to indicate an update-file
+     * request
+     */
     public static final int UPDATE_FILE_INDEX = -2;
+    
+    /**
+     * The file index used in this structure to indicate a bad URN query.
+     */
+    public static final int BAD_URN_QUERY_INDEX = -3;
+    
+    /**
+     * The file index used in this structure to indicate a malformed request.
+     */
+    public static final int MALFORMED_REQUEST_INDEX = -4;
 
                 
 	/**
@@ -138,14 +152,13 @@ public final class UploadManager implements BandwidthTracker {
                 String fileName = line._fileName;
                 
                 //if this is atleast the second time through --
-                //if this isn't a browse host --
+                //if this should show in the GUI
                 //if we're now processing a new file --
                 // then remove the old uploader from the gui.
                 //NOTE: This MUST be done before the new uploader
                 //      is created.  Otherwise the GUI won't
                 //      be able to remove it.
-                if ( uploader != null 
-                  && uploader.getState() != Uploader.BROWSE_HOST
+                if ( uploader != null && shouldShowInGUI(uploader)
                   && !oldFileName.equalsIgnoreCase(fileName) ) {
                     RouterService.getCallback().removeUpload(uploader);
                 }
@@ -164,11 +177,7 @@ public final class UploadManager implements BandwidthTracker {
                 debug(uploader+" HTTPUploader created and read all headers");
                 boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
                                     queued==ACCEPTED);
-
-                if(giveSlot == false && 
-                   (currentMethod == HTTPRequestMethod.HEAD)) {
-                    giveSlot = true;
-                }
+                                    
                 queued = doSingleUpload(uploader, socket,
 										socket.getInetAddress().getHostAddress(), 
 										line._index, giveSlot);
@@ -227,14 +236,34 @@ public final class UploadManager implements BandwidthTracker {
             }
 
             //ensure the uploader is removed from the GUI
-            if (uploader != null && 
-                (uploader.getState() != uploader.BROWSE_HOST))
+            if (uploader != null && shouldShowInGUI(uploader) )
                 RouterService.getCallback().removeUpload(uploader);            
             
             debug("closing socket");
             //close the socket
             close(socket);
         }
+    }
+    
+    /**
+     * Determines whether or no this Uploader should be shown
+     * in the GUI.
+     */
+    private boolean shouldShowInGUI(Uploader uploader) {
+        return !shouldBypassQueue(uploader);
+	}
+    
+    /**
+     * Determines whether or not this Uploader should bypass queueing,
+     * (meaning that it will always work immediately, and will not use
+     *  up slots for other uploaders).
+     */
+    private boolean shouldBypassQueue(Uploader uploader) {
+        return  uploader.getState() == Uploader.BROWSE_HOST ||
+            uploader.getState() == Uploader.UPDATE_FILE ||
+            uploader.getState() == Uploader.MALFORMED_REQUEST ||
+            uploader.getIndex() == BAD_URN_QUERY_INDEX ||
+            uploader.getMethod() == HTTPRequestMethod.HEAD;
     }
     
     /**
@@ -251,17 +280,13 @@ public final class UploadManager implements BandwidthTracker {
                                int index, boolean giveSlot) throws IOException {
         long startTime=-1;
         debug(uploader+ " starting single upload");
-        // note if this is a Browse Host Upload...
-        boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
-        
-        boolean updateCheck= (uploader.getState() == Uploader.UPDATE_FILE);
+                
         // check if it complies with the restrictions.
         // and set the uploader state accordingly
         int queued = -1;
-        if(!isBHUploader&&!updateCheck) { 
-            //testing and book-keeping only if !browse host and !updateCheck
-            //Note the state at this point can be either FILE_NOT_FOUND, 
-            //BROWSE_HOST, PUSH_FAILED or CONNECTING
+        if (!shouldBypassQueue(uploader)) {
+            // State at this point can be:
+            // FILE_NOT_FOUND, PUSH_FAILED, CONNECTING
             if(uploader.getState()==Uploader.CONNECTING) {
                 //can throw IOEx
                 queued = checkAndQueue(uploader, host, socket,giveSlot);
@@ -271,9 +296,9 @@ public final class UploadManager implements BandwidthTracker {
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
             //state
-            if ( uploader.getMethod() != HTTPRequestMethod.HEAD ) {
+            if ( shouldShowInGUI(uploader) ) {
                 RouterService.getCallback().addUpload(uploader);
-    			FileDesc fd = uploader.getFileDesc();
+                FileDesc fd = uploader.getFileDesc();
     			if(fd != null) {
     				fd.incrementAttemptedUploads();
     				RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
@@ -281,10 +306,14 @@ public final class UploadManager implements BandwidthTracker {
             }
         }
         
+        // Note that this will ONLY happen if checkAndQueue returned QUEUED
         if(queued == QUEUED) { //we were queued
             socket.setSoTimeout(MAX_POLL_TIME);
             uploader.setState(Uploader.QUEUED);
         }
+        // This is NOT done for Browse-Host, Update-File, Malformed-Requests,
+        // urn queries with a bad index, or HEAD requests
+        // because checkAndQueue is never called to set queued's state
         else if(queued == ACCEPTED) { // we have been given a slot
             synchronized (this) {
                 uploader.setState(Uploader.CONNECTING);
@@ -305,16 +334,6 @@ public final class UploadManager implements BandwidthTracker {
         debug(uploader+" Uploader wrote response");
         if ( uploader.getState() == Uploader.UPLOADING
             || uploader.getState() == Uploader.CONNECTING ) {
-            // somehow, some uploaders are getting through while
-            // in the UPLOADING state
-            // [never seen a connecting state...
-            //  but might as well check for it also]
-            // FYI, these all seem to come from the vendor:
-            // Java1.X.X[_0X]
-            // IE: Java1.4.1_04, Java1.3.1, etc...
-            // Also, all of them have the alternate location 
-            // of the local host IP addr.
-            // this is considered a temporary bug fix.
             uploader.setState(Uploader.INTERRUPTED);
         }
 
@@ -324,8 +343,7 @@ public final class UploadManager implements BandwidthTracker {
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
             // is this necessary? -- i'm pretty sure it is.
-            if ( !isBHUploader &&
-              uploader.getMethod() != HTTPRequestMethod.HEAD) {
+            if (shouldShowInGUI(uploader)) {
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
 					fd.incrementCompletedUploads();
@@ -792,7 +810,8 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> instance over which we're reading
 	 * @return the <tt>HttpRequestLine</tt> struct for the HTTP request
 	 */
-	private HttpRequestLine parseHttpRequest(Socket socket) throws IOException {
+	private HttpRequestLine parseHttpRequest(Socket socket)
+      throws IOException {
 
 		// Set the timeout so that we don't do block reading.
         socket.setSoTimeout(Constants.TIMEOUT);
@@ -801,24 +820,39 @@ public final class UploadManager implements BandwidthTracker {
 		
         // read the first line. if null, throw an exception
         String str = br.readLine();
+        
+        try {
 
-		if (str == null) {
-			throw new IOException();
-		}
+            if (str == null) {
+                throw new IOException();
+            }
 
-		str.trim();
+            str.trim();
 
-		// handle the get request depending on what type of request it is
-		if(this.isURNGet(str)) {
-			// handle the URN get request
-			return this.parseURNGet(str);
-		} else if (this.isMalformedURNGet(str)) {
-		    // handle the malforned URN get request
-		    return this.parseMalformedURNGet(str);
-		}
+            if(this.isURNGet(str)) {
+                // handle the URN get request
+                return this.parseURNGet(str);
+            } else if (this.isMalformedURNGet(str)) {
+                // handle the malforned URN get request
+                return this.parseMalformedURNGet(str);
+            }
 		
-		// handle the standard get request
-		return this.parseTraditionalGet(str);
+            // handle the standard get request
+            return this.parseTraditionalGet(str);
+        } catch (IOException ioe) {
+            // this means the request was malformed somehow.
+            // instead of closing the connection, we tell them
+            // by constructing a HttpRequestLine with a fake
+            // index.  it is up to HttpUploader to interpret
+            // this index correctly and send the appropriate
+            // info.
+            if( str == null ) 
+                return new HttpRequestLine(MALFORMED_REQUEST_INDEX,
+                    "Malformed Request", false);
+            else // we _attempt_ to determine if the request is http11
+                return new HttpRequestLine(MALFORMED_REQUEST_INDEX,
+                    "Malformed Request", isHTTP11Request(str));
+        }
   	}
 
 	/**
@@ -943,17 +977,22 @@ public final class UploadManager implements BandwidthTracker {
 	/**
 	 * Parses the get line for a URN request, throwing an exception if 
 	 * there are any errors in parsing.
+     *
+     * If we do not have the URN, we request a HttpRequestLine whose index
+     * is BAD_URN_QUERY_INDEX.  It is up to HTTPUploader to properly read
+     * the index and set the state to FILE_NOT_FOUND.
 	 *
 	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return a new <tt>RequestLine</tt> instance containing all of the data
 	 *  for the get request
 	 */
-	private HttpRequestLine parseURNGet(final String requestLine) 
-		throws IOException {
+	private HttpRequestLine parseURNGet(final String requestLine)
+      throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
-			throw new IOException("NO MATCHING FILEDESC FOR URN");
+            return new HttpRequestLine(BAD_URN_QUERY_INDEX,
+                  "Invalid URN query", isHTTP11Request(requestLine));
 		}		
 		int fileIndex = desc.getIndex();
 		String fileName = desc.getName();
@@ -970,8 +1009,8 @@ public final class UploadManager implements BandwidthTracker {
 	 * @return a new <tt>RequestLine</tt> instance containing all of the data
 	 *  for the get request
 	 */
-	private HttpRequestLine parseMalformedURNGet(final String requestLine) 
-		throws IOException {
+	private HttpRequestLine parseMalformedURNGet(final String requestLine)
+      throws IOException {
 		// this assumes the malformation is a /get/0/ before the /uri-res..
 		return parseURNGet(requestLine.substring(7));
 	}
@@ -987,7 +1026,7 @@ public final class UploadManager implements BandwidthTracker {
 	private boolean isHTTP11Request(final String requestLine) {
 		return requestLine.endsWith("1.1");
 	}
-
+    
 	/**
 	 * This is an immutable class that contains the data for the GET line of
 	 * the HTTP request.

@@ -116,13 +116,19 @@ public final class HTTPUploader implements Uploader {
 		try {			
 			_ostream = _socket.getOutputStream();
 
-            //special case for browse host
-            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
+            //special case for certain states
+            switch(index) {
+            case UploadManager.BROWSE_HOST_FILE_INDEX:
                 setState(BROWSE_HOST);
                 return;
-            } 
-            else if(index == UploadManager.UPDATE_FILE_INDEX) {
+            case UploadManager.UPDATE_FILE_INDEX:
                 setState(UPDATE_FILE);
+                return;
+            case UploadManager.BAD_URN_QUERY_INDEX:
+                setState(FILE_NOT_FOUND);
+                return;
+            case UploadManager.MALFORMED_REQUEST_INDEX:
+                setState(MALFORMED_REQUEST);
                 return;
             }
             
@@ -345,6 +351,9 @@ public final class HTTPUploader implements Uploader {
             break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
+            break;
+        case MALFORMED_REQUEST:
+            _state = new MalformedRequestState();
 		case COMPLETE:
 		case INTERRUPTED:		   
 			break;
