@@ -130,8 +130,9 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
+        
 		String filename = settings.getHostList();
-
+		
         //Read gnutella.net
         try {
             if (filename!=null)
@@ -139,7 +140,7 @@ public class HostCatcher {
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         }
-
+        
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
         //only do this if we also have incoming slots, but John Marshall from
@@ -161,6 +162,7 @@ public class HostCatcher {
                 }
             }
         };
+        
         RouterService.schedule(updater, 
 							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
 							   BootstrapServerManager.UPDATE_DELAY_MSEC);
@@ -183,7 +185,7 @@ public class HostCatcher {
             String line=in.readLine();
             if (line==null)
                 break;
-
+                
             //If endpoint a special GWebCache endpoint?  If so, add it to
             //gWebCache but not this.
             try {
@@ -449,6 +451,13 @@ public class HostCatcher {
             }
 
             try { 
+                // note : if this succeeds with an endpoint, it
+                // will return it.  otherwise, it will throw
+                // the exception, causing us to fall down to the wait.
+                // the wait will be notified to stop when something
+                // is added to the queue
+                //  (presumably from fetchEndpointsAsync working)               
+                
                 return getAnEndpointInternal();
             } catch (NoSuchElementException e) { }
             
@@ -659,34 +668,36 @@ public class HostCatcher {
         if (!DEBUG)
             return;
 
-        //Check ENDPOINT_SET == ENDPOINT_QUEUE
-        outer:
-        for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
-            Object e=iter.next();
-            for (Iterator iter2=ENDPOINT_QUEUE.iterator(); iter2.hasNext(); ) {
-                if (e.equals(iter2.next()))
-                    continue outer;
+        synchronized(this) {
+            //Check ENDPOINT_SET == ENDPOINT_QUEUE
+            outer:
+            for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                for (Iterator iter2=ENDPOINT_QUEUE.iterator(); iter2.hasNext(); ) {
+                    if (e.equals(iter2.next()))
+                        continue outer;
+                }
+                Assert.that(false, "Couldn't find "+e+" in queue");
             }
-            Assert.that(false, "Couldn't find "+e+" in queue");
-        }
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
-            Object e=iter.next();
-            Assert.that(e instanceof ExtendedEndpoint);
-            Assert.that(ENDPOINT_SET.contains(e));
-        }
-
-        //Check permanentHosts === permanentHostsSet
-        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-            Object o=iter.next();
-            Assert.that(o instanceof ExtendedEndpoint);
-            Assert.that(permanentHostsSet.contains(o));
-        }
-        for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
-            Object e=iter.next();
-            Assert.that(e instanceof ExtendedEndpoint);
-            Assert.that(permanentHosts.contains(e),
-                        "Couldn't find "+e+" from "
-                        +permanentHostsSet+" in "+permanentHosts);
+            for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                Assert.that(e instanceof ExtendedEndpoint);
+                Assert.that(ENDPOINT_SET.contains(e));
+            }
+        
+            //Check permanentHosts === permanentHostsSet
+            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+                Object o=iter.next();
+                Assert.that(o instanceof ExtendedEndpoint);
+                Assert.that(permanentHostsSet.contains(o));
+            }
+            for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                Assert.that(e instanceof ExtendedEndpoint);
+                Assert.that(permanentHosts.contains(e),
+                            "Couldn't find "+e+" from "
+                            +permanentHostsSet+" in "+permanentHosts);
+            }
         }
     }
 
