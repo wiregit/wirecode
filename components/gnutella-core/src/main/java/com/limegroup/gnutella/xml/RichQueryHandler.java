@@ -92,7 +92,7 @@ public class RichQueryHandler{
             } else { //meta-data about a specific file
                 fd = fManager.file2index(subjectFile);
                 if( fd == null || 
-                   (busy && fd.getNumberOfAlternateLocations() < 10) ) {
+                   (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.
                     valid = false;
