@@ -18,8 +18,6 @@ import com.sun.java.util.collections.*;
  * This class also encapsulates xml metadata.  See the description of the QHD 
  * below for more details.
  * 
- * Modified by Sumeet Thadani (5/22/2001) to handle Rich Queries
- * Modified by Susheel Daswani (8/20/2001) to handle the new xml QHD format.
  * 
  */
 public class QueryReply extends Message implements Serializable{
@@ -760,21 +758,27 @@ public class QueryReply extends Message implements Serializable{
 	 *
      * NOTE2:
      * QueryReply has need of this method now.  It is in TWO places,
-     * and i can't easily give access to it in StandardSearchView
+     * and i can't easily give access to it in SearchView
      * cuz that would be a gui dependency in core.
+     *
+     * NOTE3:
+     * Moved this code from SearchView to here permanently, so we 
+     * avoid duplication.  It makes sense from a data point of view
+     * to plaster this bad boy here as a public instance method.
+     * SearchView used to have it, it went bye-bye....
 	 */
-	private int calculateQualityOfService(QueryReply qr) {
+	public int calculateQualityOfService() {
 
 		int quality;
 		int busy;
 		int push;
 
-		Endpoint ep = new Endpoint(qr.getIP(), qr.getPort());
+		Endpoint ep = new Endpoint(this.getIP(), this.getPort());
 
 		// check isPrivate
 
 		try {
-			if (qr.getIsBusy())
+			if (this.getIsBusy())
 				busy = 1;
 			else busy = -1;// 1 == TRUE, -1 == FALSE
 		} catch (BadPacketException e) {
@@ -785,7 +789,7 @@ public class QueryReply extends Message implements Serializable{
 			push = 1;
 		else {
 			try {
-				if (qr.getNeedsPush()) // 1 == TRUE, -1 == FALSE
+				if (this.getNeedsPush()) // 1 == TRUE, -1 == FALSE
 					push = 1;
 				else push = -1;
 			} catch (BadPacketException e) {
@@ -875,14 +879,14 @@ public class QueryReply extends Message implements Serializable{
         int index = 0;
         // these will be used over and over....
         final String ip = getIP();
-        final int port = getPort(), qual = calculateQualityOfService(this);
+        final int port = getPort(), qual = calculateQualityOfService();
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;
         try {
             supportsChat = getSupportsChat();
         }
-        catch (Exception ignored) {} // don't let chat kill me....
+        catch (BadPacketException ignored) {} // don't let chat kill me....
         
         // construct RFDs....
         while (respIter.hasNext()) {
