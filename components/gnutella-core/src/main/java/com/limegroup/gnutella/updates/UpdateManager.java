@@ -190,7 +190,9 @@ public class UpdateManager {
                         //newer version exits, and tell her to check the website
                         //without necessarily telling them what the new version
                         //is. So a small indicator on the GUI will do just fine.
-
+                        String runningVersion=CommonUtils.getLimeWireVersion();
+                        if(!isGreaterVersion(newVersion, runningVersion))
+                            return; //runningVersion <= newVersion -- no message
                         RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(MalformedURLException mfux) {
