@@ -329,7 +329,15 @@ public abstract class MessageRouter {
 			if(RECORD_STATS) {
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
                 int numResps = qr.getResultCount();
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+                try {
+                    // only account for OOB stuff if this was response to a 
+                    // OOB query, multicast stuff is sent over UDP too....
+                    if (!qr.isReplyToMulticastQuery())
+                        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+                }
+                catch (BadPacketException bpe) {
+                    return;
+                }
             }
             handleQueryReply(qr, handler);
 		} else if(msg instanceof PingRequest) {
