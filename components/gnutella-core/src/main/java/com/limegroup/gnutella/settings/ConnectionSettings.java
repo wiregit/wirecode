@@ -255,11 +255,11 @@ public final class ConnectionSettings extends LimeProps {
 
     /**
      * how long we believe firewalls will let us send solicited udp
-     * traffic.  Field tests show at least a minute with most firewalls, so lets
-     * try 55 seconds.
+     * traffic.  The default slot time for packet filters is 2 minutes, but
+     * xp firewall keeps it only 90 seconds.  Take 85 to be safe.
      */
     public static final LongSetting SOLICITED_GRACE_PERIOD =
-    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",55000l);
+    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",85000l);
     
     /**
      * Helper method left from Settings Manager
