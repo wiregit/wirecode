@@ -14,7 +14,7 @@ import java.io.*;
  * This class is immutable.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class AlternateLocation {
+public final class AlternateLocation implements Comparable {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -209,6 +209,25 @@ public final class AlternateLocation {
 	 */
 	public boolean isNewerThan(AlternateLocation loc) {
 		return this.getTimestamp().after(loc.getTimestamp());
+	}
+
+	/**
+	 * Compares <tt>AlternateLocation</tt> instances by date.  
+	 *
+	 * @param obj the <tt>Object</tt> instance to be compared
+     * @return  the value <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
+	 *  with a timestamp equal to this <tt>AlternateLocation</tt>'s timestamp; 
+	 *  a value less than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt>
+	 *  with a timestamp after this <tt>AlternateLocation</tt>s timestamp; and a 
+	 *  value greater than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
+	 *  with a timestamp before the timestamp of this <tt>AlternateLocation</tt>
+     * @exception <tt>ClassCastException</tt> if the argument is not an
+     *  <tt>AlternateLocation</tt> 
+	 * @see java.util.Date
+	 * @see java.lang.Comparable
+	 */
+	public int compareTo(Object obj) {
+		return DATE.compareTo(((AlternateLocation)obj).getTimestamp());
 	}
 
 	/**
