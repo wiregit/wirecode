@@ -2,7 +2,6 @@
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
@@ -252,10 +251,15 @@ public final class QueryHandler {
 	 *  pre-defined parameters and the specified TTL
 	 * @throw <tt>IllegalArgumentException</tt> if the ttl is not within
 	 *  what is considered reasonable bounds
+	 * @throw NullPointerException if the <tt>query</tt> argument is 
+	 *    <tt>null</tt>
 	 */
 	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
 		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
+		if(query == null) {
+			throw new NullPointerException("null query");
+		}
 
 		// build it from scratch if it's from us
 		if(query.getHops() == 0) {
