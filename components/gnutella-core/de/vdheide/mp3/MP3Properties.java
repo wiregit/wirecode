@@ -1,5 +1,5 @@
 // MP3Properties
-// $Id: MP3Properties.java,v 1.1.4.1 2003-10-22 20:06:24 sdaswani Exp $
+// $Id: MP3Properties.java,v 1.1.4.2 2003-10-24 18:02:45 sdaswani Exp $
 //
 // de.vdheide.mp3: Access MP3 properties, ID3 and ID3v2 tags
 // Copyright (C) 1999 Jens Vonderheide <jens@vdheide.de>
@@ -517,7 +517,10 @@ public class MP3Properties
       
       // Instead, go for the easy solution
 
-      return (long)Math.floor((file.length() - id3v2_tagsize) / bitrate * 0.008);
+      if ((bitrate * 0.0008) <= 0)
+          return (long)Math.floor((file.length() - id3v2_tagsize));
+      else
+          return (long)Math.floor((file.length() - id3v2_tagsize) / bitrate * 0.008);
     }
 
 
