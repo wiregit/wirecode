@@ -49,7 +49,6 @@ public class RouterService
 		this.manager.initialize(router, catcher);
         //after initializations, create seperate thread to connect to a pong cache
         //server for initial hosts.
-		catcher.connectToPongServer();
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
 		this.downloader.initialize(callback, router, acceptor, FileManager.instance());
