@@ -64,7 +64,7 @@ public class CommonUtilsTest extends TestCase {
 			JarFile collections = new JarFile(new File("lib", "collections.jar"));
 			JarEntry entry = collections.getJarEntry(fileName);
 			long entrySize = entry.getCompressedSize();
-			CommonUtils.copyResourceFile(fileName, newResourceFile);
+			CommonUtils.copyResourceFile(fileName, newResourceFile, false);
 			assertEquals("size of file in jar should equal size on disk", 
 						 entrySize, newResourceFile.length());
 		} catch(Exception e) {
