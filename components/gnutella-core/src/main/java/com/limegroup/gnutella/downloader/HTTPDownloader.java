@@ -714,8 +714,18 @@ public class HTTPDownloader implements BandwidthTracker {
 				    com.limegroup.gnutella.downloader.FileNotFoundException();
 			else if (code == 410) // not shared.
 				throw new NotSharingException();
-            else if (code == 416) //requested range not available
+            else if (code == 416) {//requested range not available
+                //See if the uploader is up to mischief
+                Iterator iter = _rfd.getAvailableRanges().getAllIntervals();
+                while(iter.hasNext()) {
+                    Interval next = (Interval)iter.next();
+                    if(_requestedInterval.isSubrange(next))
+                        throw new 
+                             ProblemReadingHeaderException("Bad ranges sent");
+                }
+                //OK. The uploader is not messing with us.
                 throw new RangeNotAvailableException();
+            }
 			else if (code == 503) { // busy or queued, or range not available.
                 int min = refQueueInfo[0];
                 int max = refQueueInfo[1];
@@ -723,12 +733,19 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(min != -1 && max != -1 && pos != -1)
                     throw new QueuedException(min,max,pos);
                     
-                // per the PFSP spec, a 503 should be returned.
-                // but, to let us distinguish between a busy &
-                // a range not available, check if the partial
-                // sources are filled up ...
-                if( _rfd.isPartialSource() )
-                    throw new RangeNotAvailableException();
+                // per the PFSP spec, a 503 should be returned. But if the
+                // uploader returns a "Avaliable-Ranges" header regardless of
+                // whether it is really busy or just does not have the requested
+                // range, we cannot really distingush between the two cases on
+                // the client side.
+                
+                //For the most part clients send 416 when they have other ranges
+                //that may match the clients need. From LimeWire 4.0.6 onwards
+                //LimeWire will treate 503s to mean either busy or queued BUT
+                //NOT partial range available.
+
+                //if( _rfd.isPartialSource() )
+                //throw new RangeNotAvailableException();
                     
                 //no QueuedException or RangeNotAvailableException? not queued.
                 //throw a generic busy exception.
@@ -1132,15 +1149,6 @@ public class HTTPDownloader implements BandwidthTracker {
             }
             availableRanges.add(interval);
         }
-        //OK. All the ranges have been collated now. See if the uploader is up
-        //to mischief
-        Iterator iter = availableRanges.getAllIntervals();        
-        while(iter.hasNext()) {
-            Interval next = (Interval)iter.next();
-            if(_requestedInterval.isSubrange(next))
-                throw new ProblemReadingHeaderException("Bad ranges sent");
-        }
-
         rfd.setAvailableRanges(availableRanges);
     }
 
