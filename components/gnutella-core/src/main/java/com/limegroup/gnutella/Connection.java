@@ -2132,7 +2132,49 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return _connectionStats;
     }
     
-//////////////////// STATS  //////////////////////////
+    /**
+     * Handles core Gnutella request/reply protocol.  This call
+     * will run until the connection is closed.  Note that this is called
+     * from the run methods of several different thread implementations
+     * that are inner classes of ConnectionManager.  This allows a single
+     * thread to be used for initialization and for the request/reply loop.
+     *
+     * @requires this is initialized
+     * @modifies the network underlying this, manager
+     * @effects receives request and sends appropriate replies.
+     *
+     * @throws IOException passed on from the receive call; failures to forward
+     *         or route messages are silently swallowed, allowing the message
+     *         loop to continue.
+     */
+    void loopForMessages() throws IOException {
+        MessageRouter router = RouterService.getMessageRouter();
+        while (true) {
+            Message m=null;
+            try {
+                m = receive();
+                if (m==null)
+                    continue;
+            } catch (BadPacketException e) {
+                // Don't increment any message counters here.  It's as if
+                // the packet never existed
+                continue;
+            }
+
+            // Run through the route spam filter and drop accordingly.
+            if (isSpam(m)) {
+                if(!CommonUtils.isJava118()) {
+                    ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
+                        addMessage(m);
+                }
+                stats().countDroppedMessage();
+                continue;
+            }
+
+            //call MessageRouter to handle and process the message
+            router.handleMessage(m, this);            
+        }
+    }
 
 
     
