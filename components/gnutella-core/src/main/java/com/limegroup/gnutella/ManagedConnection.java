@@ -171,7 +171,8 @@ public class ManagedConnection
                       boolean isRouter,
                       int protocol) { 
         super(host, port,
-              protocol!=PROTOCOL_OLD ? createNewProperties() : null,
+              protocol!=PROTOCOL_OLD ? createNewProperties(isRouter?router:null)
+                                     : null,
               protocol!=PROTOCOL_OLD ? createEmptyResponder() : null,
               protocol==PROTOCOL_BEST ? true : false);
         _router = router;
@@ -751,16 +752,19 @@ public class ManagedConnection
                 || getProperty("Pong-Caching")==null;
     }
 
-    /** Creates the property set for "new" connections. */
-    private static Properties createNewProperties() {
+    /** Creates the property set for "new" connections.  The property will
+     *  include special router properties if router!=null.
+     *  @param router the source of my address for router connections, or null
+     *   otherwise. */
+    private static Properties createNewProperties(MessageRouter router) {
         Properties ret=new Properties();
         ret.setProperty("Query-Routing", "0.1");
         ret.setProperty("Pong-Caching",  "0.1");
-        //TODO3: only use for router connections, i.e., if _isRouter==true.  For
-        //now we always send it so it's easier to test.  Also, if this code is
-        //moved, we could afford to send the My-Address header, eliminating the
-        //need for group pings.
-        ret.setProperty("Want-Old-Pongs", "true");
+        if (router!=null) {
+            ret.setProperty("Want-Old-Pongs", "true");
+            Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+            ret.setProperty("My-Address", e.getHostname()+":"+e.getPort());
+        }
         return ret;
     }
 

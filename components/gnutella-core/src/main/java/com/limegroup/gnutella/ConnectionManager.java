@@ -174,13 +174,17 @@ public class ConnectionManager {
 		if ( hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER) ) {
 			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
 		}
-
+        // Using the router sets the My-Address and Want-Old-Pongs options.
         ManagedConnection c = 
 		  new ManagedConnection(hostname, portnum, _router, this, true,
                                 ManagedConnection.PROTOCOL_BEST);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
+        // Add any pongs received in Old-Pongs header.  This provides support
+        // for segregated new and old connection with dedicated LimeWire
+        // routers.
+        _catcher.addOldPongs(c);
         // Kick off a thread for the message loop.
         new OutgoingConnectionThread(c, false);
 
@@ -735,11 +739,14 @@ public class ConnectionManager {
             try {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
-
-				// Send GroupPingRequest to router
+				
+				//To announce our address to the new pong cache server, we use
+				//the new My-Address header.  This is simpler than the
+				//GroupPingRequest message.  But for backwards compatibility, we
+				//still send the group ping to router4.limewire.com.
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && 
-                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
+					  origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    PingRequest pingRequest = _router.createGroupPingRequest(group);
@@ -751,8 +758,6 @@ public class ConnectionManager {
                     //on num of connections and reserve cache size.
                     sendInitialPingRequest(_connection);
                 }
-                // Add any pongs sent in Old-Pongs header.
-                _catcher.addOldPongs(_connection);
                 _connection.loopForMessages();
                 //Ensure that the initial ping request is written in a timely fashion
                 try {
