@@ -182,7 +182,7 @@ public final class QueryHandler {
      * then those connections (of this ultrapeer) which match the 
      * locale will be used before the other connections.
      */
-    private String _prefLocale;
+    private final String _prefLocale;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -348,6 +348,10 @@ public final class QueryHandler {
 		_curTime = System.currentTimeMillis();
 		if(_curTime < _nextQueryTime) return;
 
+        if (LOG.isTraceEnabled())
+            LOG.trace("Query = " + QUERY.getQuery() +
+                      ", numHostsQueried: " + _theoreticalHostsQueried);
+
 		if(_queryStartTime == 0) {
 			_queryStartTime = _curTime;
         }
@@ -478,6 +482,8 @@ public final class QueryHandler {
         }
 
 		int length = ultrapeers.size();
+        if (LOG.isTraceEnabled())
+            LOG.trace("potential querier size: " + length);
         byte ttl = 0;
         ManagedConnection mc = null;
 
@@ -592,9 +598,14 @@ public final class QueryHandler {
             handler.QUERIED_PROBE_CONNECTIONS.add(mc);
         } else {
             handler.QUERIED_CONNECTIONS.add(mc);
+            if (LOG.isTraceEnabled())
+                LOG.trace("QUERIED_CONNECTIONS.size() = " +
+                          handler.QUERIED_CONNECTIONS.size());
         }
 
-        
+        if (LOG.isTraceEnabled())
+            LOG.trace("Querying host " + mc.getAddress() + " with ttl " +
+                      query.getTTL());
         
         handler._nextQueryTime = System.currentTimeMillis() + 
             (ttl * handler._timeToWaitPerHop);
