@@ -26,7 +26,8 @@ public class FileManager{
     private int _numFiles;      
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in the shared folder with the shareable extension. */
+     *  f[i]._path is in the shared folder with the shareable extension. 
+     *  LOCKING: obtain this before modifying. */
     private ArrayList /* of FileDesc */ _files;             
     private String[] _extensions;
 
@@ -53,7 +54,7 @@ public class FileManager{
     public int getSize() {return _size;}
     public int getNumFiles() {return _numFiles;}
 
-    public void reset() {
+    public synchronized void reset() {
         _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
@@ -85,7 +86,7 @@ public class FileManager{
      * Design note: this method returns null instead of an empty array to avoid
      * allocations in the common case of no matches.)  
      */
-    public synchronized Response[] query(QueryRequest request) {
+    public Response[] query(QueryRequest request) {
         String str = request.getQuery();
         ArrayList list = search(str);
         if (list==null)
@@ -311,8 +312,13 @@ public class FileManager{
      * Returns a list of FileDesc matching q, or null if there are no matches.
      * Subclasses may override to provide different notions of matching.  
      */
-    protected ArrayList search(String query) {
-        //Don't allocate until needed
+    protected synchronized ArrayList search(String query) {
+        //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
+        //Doing so would allow multiple queries to proceed in parallel.  But
+        //then you need to make _files volatile and work on a local reference,
+        //i.e., "_files=this._files"
+
+        // Don't allocate until needed
         ArrayList response_list=null;
 
         for(int i=0; i < _files.size(); i++) {
