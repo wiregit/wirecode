@@ -816,8 +816,6 @@ public class UDPConnectionProcessor {
 
             // Calculate a good maximum time to wait
             int rto      = _sendWindow.getRTO();
-            int adjRTO1  = (rto * 3 / 2);  // 150% of RTO
-            int adjRTO2  = (rto * 2);      // 200% of RTO
 
             long start   = _sendWindow.getWindowStart();
 
@@ -834,11 +832,17 @@ public class UDPConnectionProcessor {
 
                 // Get the oldest unacked block out of storage
                 drec     = _sendWindow.getOldestUnackedBlock();
+                int expRTO = (rto * (int)Math.pow(2,drec.sends));
+                if (LOG.isDebugEnabled())
+                	LOG.debug(" exponential backoff is now "+expRTO);
 
                 // Check if the next drec is acked
-                boolean nextIsAcked = false;
-                drecNext    = _sendWindow.getBlock(drec.pnum+1);
-                nextIsAcked = (drecNext != null) && (drecNext.acks > 0);
+                if(_sendWindow.countHigherAckBlocks() >0){
+                	expRTO*=0.75;
+                	if (LOG.isDebugEnabled())
+                		LOG.debug(" higher acked blocks, adjusting exponential backoff is now "+
+                    		expRTO);
+                }
 
                 // The assumption is that this record has not been acked
                 if ( drec == null ) break;
@@ -858,8 +862,8 @@ public class UDPConnectionProcessor {
                 // If it looks like we waited too long then speculatively resend
                 // Case 1: We waited 150% of RTO and next packet had been acked
                 // Case 2: We waited 200% of RTO 
-                if ( (currentWait > adjRTO1 && nextIsAcked ) ||
-                     (currentWait > adjRTO2)               ) {
+                if ( currentWait  > expRTO)
+					 {
                     if(LOG.isDebugEnabled())  
                         LOG.debug("Soft resending message:"+
                           drec.msg.getSequenceNumber());
@@ -873,7 +877,9 @@ public class UDPConnectionProcessor {
                     drec.sentTime = currTime;
                     drec.sends++;
                     numResent++;
-                }
+                } else 
+                	LOG.debug(" not resending message ");
+                
             }
             
             // Delay subsequent resends of data based on number resent
