@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
+import java.io.File;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -16,22 +19,68 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
     public static Test suite() {
         return buildTestSuite(HTTPDownloaderTest.class);
     }
-
-	public void testLegacy() throws Throwable {
-        assertEquals(1, parseContentRangeStart("Content-range: bytes 1-9/10"));
-        assertEquals(1, parseContentRangeStart("Content-range:bytes=1-9/10"));
-        assertEquals(0, parseContentRangeStart("Content-range:bytes */10"));
-        assertEquals(0, parseContentRangeStart("Content-range:bytes */*"));
-        assertEquals(1, parseContentRangeStart("Content-range:bytes 1-9/*"));
-        assertEquals(1, parseContentRangeStart("Content-range:bytes 1-9/*"));
-        assertEquals(0, parseContentRangeStart("Content-range:bytes 1-10/10"));
+    
+    public void testParseContentRange() throws Throwable {
+        int length = 1000;
+        RemoteFileDesc rfd= new RemoteFileDesc("1.2.3.4", 1, 1, "file",
+                                            length, new byte[16], 1,
+                                            false, 2, false, null,
+                                            null, false, false, "LIME",
+                                            0, null);
+        HTTPDownloader dl = new HTTPDownloader(rfd, new File("sam"));
         
+        
+        assertEquals(new Interval(1, 9), 
+                    parseContentRange(dl, "Content-range: bytes 1-9/10"));
+                        
+        assertEquals(new Interval(1, 9),
+                    parseContentRange(dl, "Content-range:bytes=1-9/10"));
+                        
+        // should this work?  the server says the size is 10, we think it's 
+        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
+        assertEquals(new Interval(0, 999),
+                    parseContentRange(dl, "Content-range:bytes */10"));
+                        
+        assertEquals(new Interval(0, 999),
+                    parseContentRange(dl, "Content-range:bytes */*"));
+                    
+        assertEquals(new Interval(1, 9),
+                    parseContentRange(dl, "Content-range:bytes 1-9/*"));
+                    
+        // should this work?  the server says the size is 10, we think it's
+        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
+        // Putting aside the "should it work" question, this is the faulty
+        // header from LimeWire 0.5, in which we subtract 1 from the
+        // sizes (they send exclusive instead of inclusive values).
+        assertEquals(new Interval(0, 9),
+                    parseContentRange(dl, "Content-range:bytes 1-10/10"));
+                    
+        Interval iv = null;        
         try {
-            parseContentRangeStart("Content-range:bytes 1 10 10");
-            fail("Exception should be thrown with faulty content range");
-        } catch (IOException ignored) {}           
+            iv = parseContentRange(dl, "Content-range:bytes 1 10 10");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch (ProblemReadingHeaderException ignored) {}
         
-
+        // low is less than high
+        try {
+            iv = parseContentRange(dl, "Content-range:bytes 10-9/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+        
+        // negative values.
+        try {
+            iv = parseContentRange(dl, "Content-range: bytes -10--5/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+        
+        // negative high.
+        try {
+            iv = parseContentRange(dl, "Content-range:bytes 0--10/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+    }
+    
+    public void testLegacy() throws Throwable {
         //readHeaders tests
 		String str;
 		HTTPDownloader down;
@@ -118,11 +167,11 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
 		} catch (NoHTTPOKException e) {}
 	}
 	
-	private static int parseContentRangeStart(String s) throws Throwable {
+	private static Interval parseContentRange(HTTPDownloader dl,
+                                              String s) throws Throwable {
 	    try {
-            return ((Integer)PrivilegedAccessor.invokeMethod(
-                HTTPDownloader.class, "parseContentRangeStart", 
-                new Object[] {s})).intValue();
+            return (Interval)PrivilegedAccessor.invokeMethod(
+                dl , "parseContentRange", new Object[] {s});
         } catch(Exception e) {
             if ( e.getCause() != null ) 
                 throw e.getCause();
