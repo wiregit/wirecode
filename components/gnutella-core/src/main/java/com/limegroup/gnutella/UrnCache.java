@@ -275,7 +275,9 @@ public final class UrnCache {
 		//cache.URN_MAP = null;
 		//cache.URN_MAP = UrnCache.createMap();
 		cache.URN_MAP.clear();
+		cache.URN_MAP.putAll(UrnCache.createMap());
 		System.out.println("map size after out:  "+cache.URN_MAP.size()); 
+		System.out.println("maps equal: "+cache.URN_MAP.equals(UrnCache.createMap())); 
 		for(int i=0; i<files.length; i++) {
 			Set set = cache.getUrns(files[i]);
 			System.out.println("sets equal: "+set.equals(sets[i])); 
@@ -285,6 +287,7 @@ public final class UrnCache {
 		}		
 	}
 	*/
+	
 }
 
 
