@@ -51,6 +51,7 @@ public class UltrapeerRoutingTest extends TestCase {
         settings.setForceSupernodeMode(true);
         settings.setMaxShieldedClientConnections(10);
         settings.setKeepAlive(6);
+        settings.setLocalIsPrivate(false);
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
