@@ -27,7 +27,8 @@ public class GreedyQueryFilter extends SpamFilter {
                && query.charAt(1)=='.' 
                && Character.isLetter(query.charAt(0)) )
             return false; 
-        if (this.isVeryGeneralSearch(query)) {
+        if (this.isVeryGeneralSearch(query) ||
+            this.isObfuscatedGeneralSearch(query)) {
             int hops = (int)m.getHops();
             int ttl = (int)m.getTTL();
             if (hops >= this.GREEDY_QUERY_MAX)
@@ -35,7 +36,7 @@ public class GreedyQueryFilter extends SpamFilter {
             if ( (hops + ttl) > this.GREEDY_QUERY_MAX) 
                 m.setTTL((byte)(this.GREEDY_QUERY_MAX - hops));
         }
- 
+
         return true;
     }
 
@@ -62,7 +63,22 @@ public class GreedyQueryFilter extends SpamFilter {
         
         return false; //not a general search
     }
-    
+
+
+    /** To combat system-wide gnutella overflow, this method checks for
+     *  permutations of "*.*"
+     */
+    private boolean isObfuscatedGeneralSearch(final String queryString) {
+        final String unacceptable = "*.- ";
+        for (int i = 0; i < queryString.length(); i++) 
+            // if a character is not one of the unacceptable strings, the query
+            // is ok.
+            if (unacceptable.indexOf(queryString.charAt(i)) == -1)
+                return false;
+
+        return true;
+    }
+
     /*
     public static void main(String args[]) {
         Message msg;
@@ -89,62 +105,73 @@ public class GreedyQueryFilter extends SpamFilter {
         msg=new QueryRequest((byte)5, 0, "z mpg");
         Assert.that(filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "*.mpg");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.mpg".getBytes());
         Assert.that(!filter.allow(msg));
 
         msg=new QueryRequest((byte)5, 0, "1.mpg");
         Assert.that(filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "*.mp3");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.mp3".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "*.*");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.*".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "*.MP3");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.MP3".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "*.MPG");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.MPG".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "mp3");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "mp3".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "mpg");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "mpg".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "MP3");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "MP3".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "MPG");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "MPG".getBytes());
         Assert.that(! filter.allow(msg));
 
-        msg=new QueryRequest((byte)5, 0, "a.b");
-        GreedyQueryFilter.setHops(msg);
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "a.b".getBytes());
         Assert.that(! filter.allow(msg));
-    } */
 
-    /**
-     * Increments the hops count 4 times by calling hop on the QueryRequest.
-     * Used for testing the Greedy Filter and making the hops count > what
-     * the max allowed hops for a general search (i.e., "*.*", "*.mp3", etc.)
-     */
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*.*-".getBytes());
+        Assert.that(! filter.allow(msg));
 
-    /*
-    private static void setHops(Message m)
-    {
-        m.hop();
-        m.hop();
-        m.hop();
-        m.hop();
+        msg=new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             (byte)2, "--**.*-".getBytes());
+        Assert.that(filter.allow(msg));
+
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             (byte)4, "*****".getBytes());
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest(GUID.makeGuid(), (byte)2,
+                             (byte)3, "britney*.*".getBytes());
+        Assert.that(filter.allow(msg)); 
+    
+        msg=new QueryRequest(GUID.makeGuid(), (byte)2,
+                             (byte)3, "*.*.".getBytes());
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest(GUID.makeGuid(), (byte)1,
+                             (byte)6, "new order*".getBytes());
+        Assert.that(filter.allow(msg)); 
+    
     }*/
+
 }
