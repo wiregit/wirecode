@@ -22,7 +22,6 @@ import com.limegroup.gnutella.gui.Utilities;
 import com.limegroup.gnutella.gui.UpdateHandler;
 import com.limegroup.gnutella.gui.UpdateTimedOutException;
 import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.util.Launcher;
 
 public class VersionUpdate
 {
@@ -323,15 +322,9 @@ public class VersionUpdate
 				if(_amountRead == _updateSize) {
 					_updateHandler.hideProgressWindow();
 					if(updateLAXFile(newFileName)) {
-						if(Utilities.isWindows()) {
-							String str = _currentDirectory + "LimeWire.exe";
-							Launcher.launch(str);
-						}
-						else {
-							String message = "Your LimeWire update has successfully "+
-							"completed.  Please restart LimeWire to use your new version.";
-							Utilities.showMessage(message);
-						}
+						String message = "Your LimeWire update has successfully "+
+						"completed.  Please restart LimeWire to use your new version.";
+						Utilities.showMessage(message);						
 						_settings.setLastVersionChecked(_newVersion);
 					}
 					_settings.writeProperties();
