@@ -134,7 +134,6 @@ public class UploadManager implements BandwidthTracker {
 		GETLine line;
 		try {
             //increment the download count
-            synchronized(this) { _activeUploads++; }
             
             //do uploads
             while(true) {
@@ -174,8 +173,6 @@ public class UploadManager implements BandwidthTracker {
                 }
             }//end of while
         } finally {
-            //decrement the download count
-            synchronized(this) { _activeUploads--; }
             //close the socket
             close(socket);
         }
@@ -199,6 +196,8 @@ public class UploadManager implements BandwidthTracker {
         // if a push was calling this method. 
         //Now the acceptPushDownload method connects directly.
         
+        synchronized(this) { _activeUploads++; }
+
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
         // way to handle it?
@@ -221,6 +220,7 @@ public class UploadManager implements BandwidthTracker {
                                   uploader.amountUploaded());
             removeFromMapAndList(uploader, host);
             removeAttemptingPush(host, index);
+            _activeUploads--;
             _callback.removeUpload(uploader);		
         }
     }
