@@ -119,6 +119,12 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
       File incompleteFile, AlternateLocationCollection alts) {
+        if(socket == null) {
+            throw new NullPointerException("null socket");
+        }
+        if(rfd == null) {
+            throw new NullPointerException("null rfd");
+        }
         _isPush=true;
         _rfd=rfd;
         _socket=socket;
@@ -177,7 +183,7 @@ public class HTTPDownloader implements BandwidthTracker {
             //detect a crashed uploader.
             Sockets.setKeepAlive(_socket, true);
             istream=_socket.getInputStream(); 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new CantConnectException();
         }
         //Note : once we have established the TCP connection with the host we
