@@ -29,9 +29,16 @@ public class ConnectionManager implements Runnable {
     public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
     static final Connection ME_CONNECTION=new Connection("",0);
 
-    /** List of all connections.  This is <i>not</i> synchronized, so you must
-     * always hold this' monitor before modifying it. */
+    /* List of all connections.  This is implemented with two data structures: a list
+     * for fast iteration, and a set for quickly telling what we're connected to.
+     * This is <i>not</i> synchronized, so you must always hold this' monitor before 
+     * modifying it. 
+     *
+     * INVARIANT: "connections" contains no duplicates, and "endpoints" contains exactly
+     * those endpoints that could be made from the elements of "connections".
+     */
     private List /* of Connection */ connections=new ArrayList();
+    private Set /* of Endpoint */ endpoints=new HashSet();
     /** List of all connection fetchers.  This is synchronized. */
     List /* of ConnectionFetcher */ fetchers=
 	Collections.synchronizedList(new ArrayList());
@@ -134,7 +141,6 @@ public class ConnectionManager implements Runnable {
 	//TODO2: use reader/writer lock to allow parallelism.  Avoid iterator.
 	Assert.that(m!=null);
 
-	//to forward to, especially on searches.
 	Iterator iter=connections.iterator();
 	while (iter.hasNext()) {
 	    Connection c2=(Connection)iter.next();
@@ -299,6 +305,7 @@ public class ConnectionManager implements Runnable {
 	Assert.that(!connections.contains(c));
 	
 	connections.add(c);
+	endpoints.add(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
 
 	// Tell the listener that this connection is okay.
 	if ( callback != null )
@@ -352,6 +359,7 @@ public class ConnectionManager implements Runnable {
 	    routeTable.remove(c);
 	    pushRouteTable.remove(c);
 	    connections.remove(i);
+	    endpoints.remove(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
 	    c.shutdown();//ensure that the connection is closed
 	    int need = keepAlive - getNumConnections() - fetchers.size();
 	    if ( need > 0 ) {
@@ -407,19 +415,10 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
-     * @requires host is in dotted decimal format, e.g., "127.0.0.1"
-     * @effects returns true if there is a connection to the given host. 
+     * returns true if there is a connection to the given host. 
      */
-    public synchronized boolean isConnected(String host, int port) {
-	//TODO3: can make this faster if necessary by augmenting the state
-	//of ConnectionManager
-	for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-	    Connection c=(Connection)iter.next();
-	    if (c.getInetAddress().getHostAddress().equals(host)
-		&& c.getPort()==port)
-		return true;
-	}
-	return false;
+    public synchronized boolean isConnected(Endpoint host) {
+	return endpoints.contains(host);
     }	
     
     /** Returns an unmodifiable iterator of a clone of this' connections.
