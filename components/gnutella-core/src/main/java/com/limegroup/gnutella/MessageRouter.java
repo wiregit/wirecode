@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.upelection.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -178,6 +179,11 @@ public abstract class MessageRouter {
     private final Map _messageListeners = new Hashtable();
 
     /**
+     * ref to the promotion manager.
+     */
+    private PromotionManager _promotionManager;
+    
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -201,6 +207,7 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
+		_promotionManager = RouterService.getPromotionManager();
 		DYNAMIC_QUERIER.start();
 	    QRP_PROPAGATOR.start();
 
@@ -491,6 +498,11 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        }
+        else if(msg instanceof UDPCrawlerPing) {
+        	if(RECORD_STATS)
+        		;//TODO: add the statistics recording code
+        	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
         notifyMessageListener(msg);
     }
@@ -2504,6 +2516,23 @@ public abstract class MessageRouter {
     }
 
 
+    /**
+     * responds to a request for the list of ultrapeers or leaves.  It is sent right back to the
+     * requestor on the UDP receiver thread.
+     * @param msg the request message
+     * @param handler the UDPHandler to send it to.
+     */
+    private void handleUDPCrawlerPing(UDPCrawlerPing msg, ReplyHandler handler){
+    	
+    	//make sure the same person doesn't request too often
+    	//note: this should only happen on the UDP receiver thread, that's why
+    	//I'm not locking it.
+    	if (!_promotionManager.allowUDPPing(handler))
+    		return; 
+    	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
+    	handler.handleUDPCrawlerPong(newMsg);
+    }
+    
     private static class QueryResponseBundle {
         public final QueryRequest _query;
         public final Response[] _responses;

@@ -103,6 +103,8 @@ public class ReplyHandlerStub implements ReplyHandler {
         return "en";
     }
 
+    public void handleUDPCrawlerPong(UDPCrawlerPong pong){}
+
 }
 
 

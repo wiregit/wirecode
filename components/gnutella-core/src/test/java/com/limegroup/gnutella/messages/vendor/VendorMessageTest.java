@@ -370,6 +370,34 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
     
 
+    public void testUDPCrawlerPingMessage() throws Exception {
+    	GUID guid = new GUID(GUID.makeGuid());
+    	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);
+    	assertEquals(1, req.getNumberUP());
+    	assertEquals(2, req.getNumberLeaves());
+    	assertFalse(req.hasConnectionTime());
+    	assertFalse(req.hasLocaleInfo());
+    	assertTrue(req.hasFeature(UDPCrawlerPing.PLAIN));
+    	testWrite(req);
+    	testRead(req);
+    	
+    	//also test one with newer mask - should be trimmed to our mask
+    	req = new UDPCrawlerPing(guid, 1,2,(byte)0xFF);
+    	assertTrue(req.hasFeature(UDPCrawlerPing.FEATURE_MASK));
+    	assertEquals(0,req.getFormat() & ~UDPCrawlerPing.FEATURE_MASK);
+    }
+    
+    public void testUDPCrawlerPongMessage() throws Exception {
+    	GUID guid = new GUID(GUID.makeGuid());
+    	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);
+    	UDPCrawlerPong rep = new UDPCrawlerPong(req);
+    	
+    	assertFalse(rep.hasConnectionTime());
+    	assertFalse(rep.hasLocaleInfo());
+    	testWrite(rep);
+    	testRead(rep);
+    }
+    
     public void testPushProxyVMs() throws Exception {
         GUID guid = new GUID(GUID.makeGuid());
         PushProxyRequest req = new PushProxyRequest(guid);

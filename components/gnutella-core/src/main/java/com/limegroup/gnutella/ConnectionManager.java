@@ -969,7 +969,22 @@ public class ConnectionManager {
         return _initializedClientConnections;
     }
 
-
+    /**
+     * return a list of initialized client connection that matches the parameter
+     * String loc.
+     * create a new linkedlist to return.
+     */
+    public List getInitializedClientConnectionsMatchLocale(String loc) {
+    	List matches = new LinkedList();
+        for(Iterator itr= _initializedClientConnections.iterator();
+            itr.hasNext();) {
+            Connection conn = (Connection)itr.next();
+            if(loc.equals(conn.getLocalePref()))
+                matches.add(conn);
+        }          
+        return matches;
+    }
+    
     /**
      * @return a clone of all of this' connections.
      * The iterator yields items in any order.  It <i>is</i> permissible

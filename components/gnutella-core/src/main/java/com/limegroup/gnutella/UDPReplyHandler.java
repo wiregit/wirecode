@@ -281,4 +281,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 				IP.toString()+"\r\n"+
 				PORT+"\r\n");
 	}
+	
+	/**
+	 * sends the response through udp back to the requesting party
+	 */
+	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
+		UDPService.instance().send(m, IP, PORT);
+	}
 }

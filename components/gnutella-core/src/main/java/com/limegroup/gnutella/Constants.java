@@ -22,4 +22,8 @@ public final class Constants {
      */
     public static final int TIMEOUT = 8000;  
 
+    /**
+     * how long a minute is.  Not final so that tests can change it.
+     */
+    public static long MINUTE = 60*1000;
 }

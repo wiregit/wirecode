@@ -282,6 +282,12 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public String getLocalePref() {
         return ApplicationSettings.LANGUAGE.getValue();
     }
+    
+    /**
+     * Handles the UDP analog of reply to "Crawler:" header
+     * STUB.
+     */
+    public void handleUDPCrawlerPong(UDPCrawlerPong m){}
 
 }
 

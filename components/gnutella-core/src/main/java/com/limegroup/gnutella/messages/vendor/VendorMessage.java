@@ -29,6 +29,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_PUSH_PROXY_ACK = 22;
     protected static final int F_GIVE_STATS = 14;
     protected static final int F_STATISTICS = 15;
+    protected static final int F_GIVE_ULTRAPEER = 5;
+    protected static final int F_ULTRAPEER_LIST = 6;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -230,7 +232,7 @@ public abstract class VendorMessage extends Message {
                                                     byte[] fromNetwork,
                                                     int network) 
         throws BadPacketException {
-
+    	
         // sanity check
         if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
             if( RECORD_STATS )
@@ -324,6 +326,14 @@ public abstract class VendorMessage extends Message {
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
         
 
+        if ((selector == F_GIVE_ULTRAPEER) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);
+        if ((selector == F_ULTRAPEER_LIST) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new UDPCrawlerPong(guid,ttl,hops,version,restOf);
+        
+        
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;

@@ -141,6 +141,13 @@ public class ExtendedEndpoint extends Endpoint {
         else
             return dailyUptime;
     }
+    
+    /**
+     * a setter for the daily uptime.
+     */
+    public void setDailyUptime(int uptime) {
+    	dailyUptime = uptime;
+    }
 
     /** Records that we just successfully connected to this. */
     public void recordConnectionSuccess() {
