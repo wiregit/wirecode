@@ -26,6 +26,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+
+	/**
+	 * Constant for the <tt>UDPAcceptor</tt>.
+	 */
+	private static final UDPAcceptor UDP_ACCEPTOR = UDPAcceptor.instance();
 	
 	/**
 	 * Constructor that sets the ip and port to reply to.
@@ -49,7 +54,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-		UDPAcceptor.instance().send(pong, IP, PORT);
+		UDP_ACCEPTOR.send(pong, IP, PORT);
 	}
 
 	/**
@@ -62,7 +67,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-		UDPAcceptor.instance().send(hit, IP, PORT);
+		UDP_ACCEPTOR.send(hit, IP, PORT);
 	}
 
 	/**
@@ -75,7 +80,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		UDPAcceptor.instance().send(request, IP, PORT);
+		UDP_ACCEPTOR.send(request, IP, PORT);
 	}
 
 	public void countDroppedMessage() {
@@ -92,8 +97,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	}
 
 	public boolean isOpen() {
-
-		// TODO:  really what we want??
 		return true;
 	}
 
