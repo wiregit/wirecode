@@ -13,6 +13,7 @@ import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
 import com.limegroup.gnutella.gui.GUIConstants;
 import com.sun.java.util.collections.Arrays;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class RemoteFileDesc implements Comparable, Serializable {
 
@@ -58,7 +59,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	private int _speed_priority;  
 	private int _numAttempts;  
 
-	
+	private LimeXMLDocument[] _xmlDocs = null;
 
 	/** 
 	 * @param host the host's ip
@@ -82,6 +83,26 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		calculateSpeedPriority();
 		calculatePriority();
 	}
+
+
+	/** 
+	 * @param host the host's ip
+	 * @param port the host's port
+	 * @param index the index of the file that the client sent
+	 * @param filename the name of the file
+	 * @param clientGUID the unique identifier of the client
+	 * @param speed the speed of the connection
+     * @param xmlDocs the array of xmlDocs pertaining to this file
+	 */
+	public RemoteFileDesc(String host, int port, long index, String filename,
+						  int size, byte[] clientGUID, int speed, 
+                          LimeXMLDocument[] xmlDocs) {
+		
+        this(host, port, index, filename, size, clientGUID, speed);
+        _xmlDocs = xmlDocs;
+	}
+
+    
 
 	public void print() {
 		//  System.out.println(_filename);
@@ -137,6 +158,8 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int getNumAttempts() {return _numAttempts;}
 	public void setNumAttempts(int n) {_numAttempts = n;}
 	public void incrementNumAttempts() {_numAttempts++;}
+
+    public LimeXMLDocument[] getXMLDocs() {return _xmlDocs;}
 
 	public boolean isPrivate() {
 		// System.out.println("host: " + _host);
