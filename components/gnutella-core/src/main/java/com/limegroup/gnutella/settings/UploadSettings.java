@@ -21,7 +21,7 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("UPLOAD_QUEUE_SIZE", 10);
         
 	/**
-     * Setting for the amount of uploads per person.
+     * Setting for the number of uploads per person.
      */
     public static final IntSetting UPLOADS_PER_PERSON =
         FACTORY.createIntSetting("UPLOADS_PER_PERSON", 3);
@@ -42,8 +42,8 @@ public final class UploadSettings extends LimeProps {
     /**
 	 * The maximum number of simultaneous uploads to allow.
 	 */
-    public static final IntSetting MAX_UPLOADS =
-        FACTORY.createIntSetting("MAX_UPLOADS", 20);
+    public static final IntSetting HARD_MAX_UPLOADS =
+        FACTORY.createIntSetting("HARD_MAX_UPLOADS", 20);
     
     /**
 	 * The "soft" maximum number of simultaneous uploads to allow,
