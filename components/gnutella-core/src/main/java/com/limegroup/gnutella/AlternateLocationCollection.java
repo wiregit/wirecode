@@ -4,7 +4,6 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.Random12;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.sun.java.util.collections.*;
-import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
 
