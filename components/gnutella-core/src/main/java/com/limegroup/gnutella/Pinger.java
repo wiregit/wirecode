@@ -50,7 +50,7 @@ public final class Pinger implements Runnable {
             while(true) {
                 if(RouterService.isSupernode()) {
                     RouterService.getMessageRouter().
-                        broadcastPingRequest(new PingRequest((byte)2));
+                        broadcastPingRequest(new PingRequest((byte)3));
                 }
                 
                 Thread.sleep(2000);
