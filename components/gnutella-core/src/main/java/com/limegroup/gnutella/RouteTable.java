@@ -3,39 +3,18 @@ package com.limegroup.gnutella;
 import java.util.*;
 
 /**
- * A mutable mapping from globally unique IDs to connections.
- * Old mappings may be purged without warning.  In all cases,
- * IDs are assumed to be 16 byte arrays.<p>
- * 
- * More formally, a RouteTable is a sequence [ (G1, C1), ... (G2, GN) ]
- * ordered from youngest to oldest entries.
+ * The reply routing table.  Given a GUID from a reply message header,
+ * this tells you where to route the reply.  It is mutable mapping
+ * from globally unique 16-byte message IDs to connections.  Old
+ * mappings may be purged without warning, preferably using a FIFO
+ * policy.
  */
 public class RouteTable {
-    /* The current implementation is a hashtable for the mapping and
-     * a queue maintaining the ordering.
-     *
-     * The abstraction function is
-     *   [ (queue[next-1], map.get(queue[next-1])), ..., 
-     *     (queue[0], map.get(queue[0])), 
-     *     (queue[n], map.get(queue[n])), ...,
-     *     (queue[next], map.get(queue[next])) ]
-     * BUT with null keys and/or values removed.  See remove()
-     * for an understanding of the implications.
-     *
-     * The rep. invariant is
-     *            n==queue.length
-     *
-     * Note that you could reduce the number of hashes necessary to 
-     * purge old entries by exposing the rep. of the hashtable and
-     * keeping a queue of indices, not pointers.  In this case, the
-     * hashtable should use probing, not chaining.
-     *
+    /* The ForgetfulHashMap takes care of all the work.
      * TODO3: I wish we could avoid creating new GUIDs everytime
      */
-    private Map map=new HashMap();
-    private Object[] queue;
-    private int next;
-    private int n;
+    private Map map;
+
 
     /** 
      * @requires size>0
@@ -43,35 +22,23 @@ public class RouteTable {
      * entries. 
      */
     public RouteTable(int size) {
-	Assert.that(size>0);
-	queue=new Object[size];
-	next=0;
-	n=size;
+	map=new ForgetfulHashMap(size);
     }
 
     /**
-     * @requires guid not in this, guid and c are non-null
-     * @effects adds the routing entry to this, i.e., this=[(guid,c)]+this
+     * @requires guid not in this, guid and c are non-null, guid.length==16
+     * @effects adds the routing entry to this
      */
     public synchronized void put(byte[] guid, Connection c) {
-	Assert.that(guid!=null);
-	Assert.that(c!=null);
 	GUID g=new GUID(guid);
 	map.put(g,c);
-	//Purge oldest entry if we're all full, or if we'll become full
-	//after adding this entry.
-	if (queue[next]!=null) {
-	    map.remove(queue[next]);
-	}
-	//And make (guid,c) the newest entry
-	queue[next]=g;
-	next++;
-	if (next>=n) {
-	    next=0;
-	}
     }
 
-    /** Returns the corresponding Connection for this GUID, or null if none. */
+    /** 
+     * @requires guid.length==16
+     * @effects returns the corresponding Connection for this GUID, or 
+     *  null if none. 
+     */
     public synchronized Connection get(byte[] guid) {
 	Object o=map.get(new GUID(guid));
 	if (o!=null)
@@ -80,6 +47,11 @@ public class RouteTable {
 	    return null;
     }
 
+    /**
+     * @requires guid.length==16
+     * @effects true if I've seen requests with the given guid and hence
+     *  know where to send the replies, i.e., get(guid)!=null
+     */
     public synchronized boolean hasRoute(byte[] guid) {
 	return map.get(new GUID(guid))!=null;
     }
@@ -87,17 +59,18 @@ public class RouteTable {
     /** 
      * @modifies this
      * @effects removes all entries [guid, c2] s.t. c2.equals(c).
-     *  This operation runs in O(n) time, where n is the max number
-     *  of routing table entries. 
+     *  This operation is fairly expensive.
      */
     public synchronized void remove(Connection c) {
-	for (int i=0; i<queue.length; i++) {
-	    Object guid=queue[i];
-	    if (guid==null)
+	Iterator iter=map.keySet().iterator();
+	while (iter.hasNext()) {
+	    Object guid=iter.next();
+	    if (guid==null) //it shouldn't be!
 		continue;
 	    if (map.get(guid).equals(c)) {
 		map.remove(guid);
-		queue[i]=null;
+		//musn't remove keys while iterating over set
+		iter=map.keySet().iterator();
 	    }
 	}
     }	
