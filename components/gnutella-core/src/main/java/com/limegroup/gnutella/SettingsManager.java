@@ -146,11 +146,12 @@ public class SettingsManager implements SettingsInterface
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
+		initialize();
     }
 
 
     /** Check the properties file and set the props */
-    public void initialize() {
+    private void initialize() {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
