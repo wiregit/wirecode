@@ -76,6 +76,19 @@ public abstract class MessageRouter
     private RouteTable _pushRouteTable = new RouteTable(7*60,
 														MAX_ROUTE_TABLE_SIZE);
 
+
+	/**
+	 * Constant for the <tt>Statistics</tt> class that handles keeping
+	 * all message statistics.
+	 */
+	private final Statistics STATS = Statistics.instance();
+
+	/**
+	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
+	 * upon very frequently.
+	 */
+	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
+
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.
 
@@ -180,26 +193,43 @@ public abstract class MessageRouter
 	/**
      * The handler for all message types.  Processes a message based on the 
      * message type.
+	 *
+	 * @param m the <tt>Message</tt> instance to route appropriately
+	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
+	 *  the message was received
      */
     public void handleMessage(Message m, ManagedConnection receivingConnection)
     {
         // Increment hops and decrease TTL.
         m.hop();
 	   
-        if(m instanceof PingRequest) 
-            handlePingRequestPossibleDuplicate((PingRequest)m, receivingConnection);
-        else if (m instanceof PingReply) 
+        if(m instanceof PingRequest) {
+			STATS.addTCPPingRequest();
+            handlePingRequestPossibleDuplicate((PingRequest)m, 
+											   receivingConnection);
+		}
+        else if (m instanceof PingReply) {
+			STATS.addTCPPingReply();
             handlePingReply((PingReply)m, receivingConnection);
-        else if (m instanceof QueryRequest)
+		}
+        else if (m instanceof QueryRequest) {
+			STATS.addTCPQueryRequest();
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)m, receivingConnection);
-        else if (m instanceof QueryReply)
+		}
+        else if (m instanceof QueryReply) {
+			STATS.addTCPQueryReply();
             handleQueryReply((QueryReply)m, receivingConnection);
-        else if (m instanceof PushRequest)
+		}
+        else if (m instanceof PushRequest) {
+			STATS.addTCPPushRequest();
             handlePushRequest((PushRequest)m, receivingConnection);
-        else if (m instanceof RouteTableMessage)
+		}
+        else if (m instanceof RouteTableMessage) {
+			STATS.addTCPRouteTableMessage();
             handleRouteTableMessage((RouteTableMessage)m,
                                     receivingConnection);
+		}
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -217,35 +247,49 @@ public abstract class MessageRouter
      */	
 	public void handleUDPMessage(Message msg, DatagramPacket datagram)
     {
-        // Increment hops and decrease TTL.
+        // Increment hops and decrement TTL.
         msg.hop();
-        
-        ExtendedEndpoint ee = 
-        new ExtendedEndpoint(datagram.getAddress().getHostName(), 
-                             datagram.getPort(), 0, true);
-		QueryUnicaster.instance().addUnicastEndpoint(ee);
 
 		UDPReplyHandler handler = 
 		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
 		
         if (msg instanceof QueryRequest) {
+			STATS.addUDPQueryRequest();
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
 			if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
+			STATS.addUDPQueryReply();
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
+			STATS.addUDPPingRequest();
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
+			STATS.addUDPPingReply();
+			addGUESSUltrapeer(datagram);
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
+			STATS.addUDPPushRequest();
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
+
+	/**
+	 * Adds the GUESS Ultrapeer that sent the specified datagram to
+	 * the list of GUESS Ultrapeers to query.
+	 *
+	 * @param datagram the <tt>DatagramPacket</tt> instance sent by
+	 *  the GUESS Ultrapeer
+	 */
+	private void addGUESSUltrapeer(DatagramPacket datagram) {
+        ExtendedEndpoint host = 
+		    new ExtendedEndpoint(datagram.getAddress().getHostAddress(), 
+								 datagram.getPort(), 0, true);
+		UNICASTER.addUnicastEndpoint(host);		
+	}   
 	
-    
     /**
      * The handler for PingRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
@@ -512,16 +556,7 @@ public abstract class MessageRouter
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 				
-		QueryUnicaster.instance().addQuery(query);
-
-//  		try {
-//  			InetAddress localHost = InetAddress.getLocalHost();
-//  			UDPAcceptor.instance().send(query, localHost, 6346);
-//  		} catch(UnknownHostException e) {
-//  			e.printStackTrace();
-//  		} catch(Exception e) {
-//  			e.printStackTrace();
-//  		}
+		UNICASTER.addQuery(query);
 	}
 
 
@@ -1075,36 +1110,6 @@ public abstract class MessageRouter
      */
     protected abstract void addQueryRoutingEntries(QueryRouteTable qrt);
     
-    /**
-     * Handle a reply to a PingRequest that originated here.
-     * Implementations typically process that various statistics in the reply.
-     * This method is called from the default handlePingReply.
-     */
-//      protected abstract void handlePingReplyForMe(
-//          PingReply pingReply,
-//          ReplyHandler receivingConnection);
-
-    /**
-     * Handle a reply to a QueryRequest that originated here.
-     * Implementations typically display or record the results of the query.
-     * This method is called from the default handleQueryReply.
-     */
-//      protected abstract void handleQueryReplyForMe(
-//          QueryReply queryReply,
-//          ReplyHandler receivingConnection);
-
-    /**
-     * Handle a PushRequest reply to a QueryReply that originated here.
-     * Implementations typically display or record the results of the query.
-     * This method is called from the default handlePushRequest
-     */
-//      protected abstract void handlePushRequestForMe(
-//          PushRequest pushRequest,
-//          ReplyHandler receivingConnection);
-
-
-
-
     //
     // Begin Statistics Accessors
     //
