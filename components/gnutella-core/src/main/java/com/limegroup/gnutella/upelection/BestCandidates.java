@@ -9,8 +9,12 @@ import com.sun.java.util.collections.*;
  * contains the current list of best candidates.  Singleton and thread-safe.
  * Although the leaf info is serializable, there is no need for this class
  * to be serializable as its data is valid only while Limewire is running.
- * 
  * The actual network de/serialization happens in BestCandidatesVendorMessage
+ * 
+ * A leaf can be present more than once if it is connected to more than one
+ * advertising ultrapeer.  In that case the getBest() behavior is undefined; 
+ * it will return the best candidate nevertheless but will not take the distance
+ * in consideration.  (It actually depends on the implementation of TreeSet.addAll)
  * 
  * Locking: obtain instance.
  */
