@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class AlternateLocationCollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class AlternateLocationCollectionTest extends BaseTestCase {
 
 	private Set _urnSet;
 	private Set _alternateLocations;
@@ -51,6 +51,65 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 			_alCollection.addAlternateLocation(al);
 		}
 	}
+
+    /**
+     * Test to make sure the wasRemoved method is working as expected.
+     */
+    public void testWasRemoved() throws Exception {
+        AlternateLocation al = HugeTestUtils.EQUAL_SHA1_LOCATIONS[0];
+        URN sha1 = al.getSHA1Urn();
+        AlternateLocationCollection alc = 
+            AlternateLocationCollection.createCollection(sha1);
+        alc.addAlternateLocation(al);
+        alc.removeAlternateLocation(al);
+        assertTrue("should have been removed", alc.wasRemoved(al));
+    }
+
+    /**
+     * Test the method for getting a diff of the alternate location
+     * collection.
+     */
+    public void testDiffAlternateLocationCollection() throws Exception {
+
+        // make sure the general case works
+        AlternateLocation al = HugeTestUtils.EQUAL_SHA1_LOCATIONS[0];
+        URN sha1 = al.getSHA1Urn();
+        AlternateLocationCollection alc1 = 
+            AlternateLocationCollection.createCollection(sha1);
+
+        alc1.addAlternateLocation(al);
+
+        // create a second one to pass into the diff method
+        AlternateLocationCollection alc2 = 
+            AlternateLocationCollection.createCollection(sha1);
+        alc2.addAlternateLocation(al);
+        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
+        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
+        alc2.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+
+        // create a third one that should be equal to the diffed collection
+        // after the method is invoked
+        AlternateLocationCollection alc3 = 
+            AlternateLocationCollection.createCollection(sha1);
+        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
+        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
+        alc3.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+
+        
+        AlternateLocationCollection alcTest = 
+            alc1.diffAlternateLocationCollection(alc2);
+        assertEquals("diffed collection should be equal", alc3, alcTest);
+
+        
+        // now, make sure the diff works when some of the locations 
+        // have already been removed.
+        alc1.removeAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
+        
+        // if the above remove hadn't worked, or if the diff method 
+        // didn't work, this would return alc2
+        alcTest = alc1.diffAlternateLocationCollection(alc2);
+        assertEquals("diffed collection should be equal", alc3, alcTest);                
+    }
 
 	/**
 	 * Tests that adding an <tt>AlternateLocationCollection</tt> works correctly.
@@ -150,8 +209,8 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 		}
 
 		//assertTrue("AlternateLocationCollections should be equal:\r\n"+_alCollection+
-		//	   "\r\n"+alc1, 
-		//	   _alCollection.equals(alc1));
+        //         "\r\n"+alc1, 
+        //         _alCollection.equals(alc1));
 
 		//AlternateLocationCollection alc2 = new AlternateLocationCollection();
 		//alc2.addAlternateLocationCollection(alc1);
@@ -197,3 +256,7 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 		}
     }        
 }
+
+
+
+
