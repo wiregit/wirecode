@@ -1174,6 +1174,40 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Downloader did not go to busy after getting ranges",
                      Downloader.WAITING_FOR_RETRY, downloader.getState());
     }
+    
+    public void testSimpleDownloadWithInitialAlts() throws Exception {
+        debug("-Testing download with initial alts");
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc[] rfds1 = {rfd1};
+        List rfds2 = new LinkedList();
+        rfds2.add(rfd2);
+        
+        tGeneric(rfds1, rfds2);
+        
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }
+        
 
 
     /*
@@ -1215,14 +1249,18 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     ////////////////////////// Helping Code ///////////////////////////
+    private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
+        tGeneric(rfds, DataUtils.EMPTY_LIST);
+    }
     
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
-    private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
+    private static void tGeneric(RemoteFileDesc[] rfds, List alts)
+      throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, false);
+        download=RouterService.download(rfds, alts, false);
 
         waitForComplete(false);
         if (isComplete())
