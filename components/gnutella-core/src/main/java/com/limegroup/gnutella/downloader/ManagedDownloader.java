@@ -107,6 +107,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  downloading from multiple other locations. */
     private String currentLocation;
 
+	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
+	 *  instance.
+	 */
+	private DownloadChatList chatList;
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
@@ -123,9 +128,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                              FileManager fileManager,
                              IncompleteFileManager incompleteFileManager) {
         this.allFiles=files;
-        this.fileManager=fileManager;
         this.incompleteFileManager=incompleteFileManager;
-        initialize(manager);
+        initialize(manager, fileManager);
     }
 
     /** See note on serialization at top of file */
@@ -133,6 +137,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException {
         stream.writeObject(allFiles);
         stream.writeObject(incompleteFileManager);
+		stream.writeObject(bandwidthTracker);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -141,6 +146,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
+		bandwidthTracker=(BandwidthTrackerImpl)stream.readObject();
+
         //The following is needed to prevent NullPointerException when reading
         //serialized object from disk.  This can't be done in the constructor or
         //initializer statements, as they're not executed.  Nor should it be
@@ -156,9 +163,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *     @requires this is uninitialized or stopped, 
      *      and allFiles, and incompleteFileManager are set
      *     @modifies everything but the above fields */
-    public void initialize(DownloadManager manager) {
+    public void initialize(DownloadManager manager, FileManager fileManager) {
         this.manager=manager;
+		this.fileManager=fileManager;
         dloaders=new LinkedList();
+		chatList=new DownloadChatList();
         stopped=false;
         setState(QUEUED);
             
@@ -228,8 +237,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         stopped=true;
         //This guarantees any downloads in progress will be killed.  New
         //downloads will not start because of the flag above.
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); )
-            ((HTTPDownloader)iter.next()).stop();
+        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
+            ((HTTPDownloader)iter.next()).stop();			
 
         //Interrupt thread if waiting to retry.  This is actually just an
         //optimization since the thread will terminate upon exiting wait.  In
@@ -253,7 +262,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //This stopped because all hosts were tried.  (Note that this
             //couldn't have been user aborted.)  Therefore no threads are
             //running in this and it may be safely resumed.
-            initialize(this.manager);
+            initialize(this.manager, this.fileManager);
         } else if (state==WAITING_FOR_RETRY) {
             //Interrupt any waits.
             if (dloaderManagerThread!=null)
@@ -668,6 +677,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (stopped)
                 throw new InterruptedException();
             dloaders.add(dloader);
+			chatList.addHost(dloader);
         }
         final HTTPDownloader dloaderAlias=dloader;
         Thread worker=new Thread() {
@@ -781,6 +791,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             downloader.doDownload();
         } catch (IOException e) {
+			chatList.removeHost(downloader);
         } finally {
             //int stop=downloader.getInitialReadingPoint()
             //            +downloader.getAmountRead();
@@ -845,8 +856,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             int bandwidth=1; //prevent divide by zero
             for (Iterator iter2=files.iterator(); iter2.hasNext(); ) {
                 RemoteFileDesc2 rfd2=(RemoteFileDesc2)iter2.next();
-                if (rfd2.getQuality()>=DECENT_QUALITY)
-                    bandwidth+=rfd2.getSpeed();
+                if (rfd2.getQuality()>=DECENT_QUALITY) {
+					bandwidth+=Math.min(rfd2.getSpeed(), SpeedConstants.T3_SPEED_INT);
+				}
             }
             float time=(float)size/(float)bandwidth;
             pairs[i]=new FilePair(incompleteFile, time);
@@ -1054,9 +1066,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         return getHosts(false);
     }
    
-    public synchronized Iterator /* of Endpoint */ getChattableHosts() {
-        return getHosts(true);
-    }
+	public synchronized Endpoint getChatEnabledHost() {
+		return chatList.getChatEnabledHost();
+	}
+
+	public synchronized boolean hasChatEnabledHost() {
+		return chatList.hasChatEnabledHost();
+	}
 
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();
