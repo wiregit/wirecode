@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.guess.*; 
+import com.limegroup.gnutella.settings.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.StringTokenizer;
@@ -31,6 +32,57 @@ public final class QueryRequestTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+	/**
+	 * Tests the constructor that most of the other constructors are built
+	 * off of.
+	 */
+	public void testQueriesFromNetworkWithGGEP() {
+		try {
+			ByteArrayOutputStream[] baos = 
+			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				baos[i] = new ByteArrayOutputStream();
+				baos[i].write(0);
+				baos[i].write(0);
+				baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+				baos[i].write(0);
+                // write the GGEP stuff
+                byte[] bytes = new byte[4];
+                (new Random()).nextBytes(bytes);
+                QueryKey qk = QueryKey.getQueryKey(bytes, true);
+                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
+                qk.write(qkBytes);
+                GGEP ggepBlock = new GGEP(false); // do COBS
+                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                              qkBytes.toByteArray());
+                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
+                ggepBlock.write(baos[i]);
+                baos[i].write(0x1c);
+				baos[i].write(0);
+				QueryRequest qr = null;
+				try {
+					qr = QueryRequest.createNetworkQuery(
+					    GUID.makeGuid(), (byte)6, (byte)4, 
+                        baos[i].toByteArray(), Message.N_UNKNOWN);
+				} catch(BadPacketException e) {
+                    e.printStackTrace();
+					fail("should have accepted query: "+qr);
+				}
+				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
+				assertEquals("queries should be equal", 
+							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
+				Set queryUrns = qr.getQueryUrns();
+                assertEquals("should not have any URNs", 0, queryUrns.size());
+
+                Set curUrnTypeSet = qr.getRequestedUrnTypes();
+                assertEquals("query keys should be equal",
+                             qk, qr.getQueryKey());
+			}		   
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
+		}
+	}	
 
 	/**
 	 * Tests to make sure that queries with no query string, no xml, and no
@@ -218,124 +270,120 @@ public final class QueryRequestTest extends BaseTestCase {
 	}
 
 
-	/**
-	 * Tests the constructor that most of the other constructors are built
-	 * off of.
-	 */
-	public void testQueryRequestConstructorWithGUID1() throws Exception {
-		ByteArrayOutputStream[] baos = 
+    /**
+     * Tests to make sure that network queries with URNS are not accepted.
+     */
+	public void testThatNetworkQueriesWithURNsAreNotAccepted() throws Exception {
+		ByteArrayOutputStream[] URN_BYTES = 
 		    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
 		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+			URN_BYTES[i] = new ByteArrayOutputStream();
+			URN_BYTES[i].write(0);
+			URN_BYTES[i].write(0);
+			URN_BYTES[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+			URN_BYTES[i].write(0);
+			Set curUrnSet = new HashSet();
+			Set curUrnTypeSet = new HashSet();
+			curUrnTypeSet.add(UrnType.ANY_TYPE_SET);
+			curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
+			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
+				URN_BYTES[i].write(HugeTestUtils.URNS[j].toString().getBytes());
+				curUrnSet.add(HugeTestUtils.URNS[j]);
+				if((j+1) != HugeTestUtils.URNS.length) {
+					URN_BYTES[i].write(0x1c);
+				}
+			}
+			URN_BYTES[i].write(0);
+        }        
+
+        byte ttl = 4;
+        byte hops = 2;
+
+        for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+            try {
+                QueryRequest qr = 
+                    QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                                                    URN_BYTES[i].toByteArray(), 
+                                                    Message.N_UNKNOWN);
+                fail("should not have accepted query: "+qr);
+            } catch(BadPacketException e) {
+                // should be thrown for queries with URNS
+            }
+        }
+    }
+
+
+    /**
+     * Test that network queries without URNs are accepted.
+     */
+	public void testThatWellFormedNetworkQueriesAreAccepted() throws Exception {
+		ByteArrayOutputStream[] baos = 
+		    new ByteArrayOutputStream[HugeTestUtils.QUERY_STRINGS.length];
+
+        byte ttl = 4;
+        byte hops = 2;
+		for(int i=0; i<HugeTestUtils.QUERY_STRINGS.length; i++) {
 			baos[i] = new ByteArrayOutputStream();
 			baos[i].write(0);
 			baos[i].write(0);
 			baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
 			baos[i].write(0);
-			Set curUrnSet = new HashSet();
-			Set curUrnTypeSet = new HashSet();
-			//curUrnTypeSet.add(UrnType.SHA1);
-			curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
-			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
-				baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
-				curUrnSet.add(HugeTestUtils.URNS[j]);
-				if((j+1) != HugeTestUtils.URNS.length) {
-					baos[i].write(0x1c);
-				}
-			}
 			baos[i].write(0);
 			QueryRequest qr = QueryRequest.createNetworkQuery(
-			    GUID.makeGuid(), (byte)6, (byte)4, 
+			    GUID.makeGuid(), ttl, hops, 
 			    baos[i].toByteArray(), Message.N_UNKNOWN);
+
+            assertEquals("incorrect hops", hops, qr.getHops());
+            assertEquals("incorrect ttl", ttl, qr.getTTL());
 			assertEquals("speeds should be equal", 0, qr.getMinSpeed());
 			assertEquals("queries should be equal", 
 						 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
-			Set queryUrns = qr.getQueryUrns();
-			assertEquals("query urn sets should be equal", curUrnSet, 
-                         queryUrns);
+
+            // we don't currently verify this -- should we accept queries
+            // that don't ask for URNs??
 			Set queryUrnTypes = qr.getRequestedUrnTypes();
-
-			assertEquals("urn type set sizes should be equal", 
-                         curUrnTypeSet.size(),
-						 queryUrnTypes.size());
-			assertEquals("urn types should be equal\r\n"+
-						 "set 1: "+print(curUrnTypeSet)+"r\n"+
-						 "set 2: "+print(queryUrnTypes), 
-						 curUrnTypeSet,
-						 queryUrnTypes);
         }
-	}	
+	}
 
 
-	/**
-	 * Tests the constructor that most of the other constructors are built
-	 * off of.
-	 */
-	public void testQueryRequestConstructorWithGUID2() {
-		try {
-			ByteArrayOutputStream[] baos = 
-			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
-			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-				baos[i] = new ByteArrayOutputStream();
-				baos[i].write(0);
-				baos[i].write(0);
-				baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
-				baos[i].write(0);
-				Set curUrnSet = new HashSet();
-				Set curUrnTypeSet = new HashSet();
-				//curUrnTypeSet.add(UrnType.SHA1);
-				curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
-                // write the GGEP stuff
-                byte[] bytes = new byte[4];
-                (new Random()).nextBytes(bytes);
-                QueryKey qk = QueryKey.getQueryKey(bytes, true);
-                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
-                qk.write(qkBytes);
-                GGEP ggepBlock = new GGEP(false); // do COBS
-                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
-                              qkBytes.toByteArray());
-                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
-                ggepBlock.write(baos[i]);
-                baos[i].write(0x1c);
-                // write the URN stuff
-				for(int j=i; j<HugeTestUtils.URNS.length; j++) {
-					baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
-					curUrnSet.add(HugeTestUtils.URNS[j]);
-					if((j+1) != HugeTestUtils.URNS.length) {
-						baos[i].write(0x1c);
-					}
-				}
-				baos[i].write(0);
-				QueryRequest qr = null;
-				try {
-					qr = QueryRequest.createNetworkQuery(
-					    GUID.makeGuid(), (byte)6, (byte)4, 
-                        baos[i].toByteArray(), Message.N_UNKNOWN);
-				} catch(BadPacketException e) {
-					fail("should have accepted query: "+qr);
-				}
-				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
-				assertEquals("queries should be equal", 
-							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
-				Set queryUrns = qr.getQueryUrns();
-				assertEquals("query urn sets should be equal", curUrnSet, 
-                             queryUrns);
-				Set queryUrnTypes = qr.getRequestedUrnTypes();
+    private static final String[] ILLEGAL_QUERIES = 
+        new String[SearchSettings.ILLEGAL_CHARS.getValue().length];
+    
+    static {
+        for(int i=0; i<ILLEGAL_QUERIES.length; i++) {
+            ILLEGAL_QUERIES[i] = "test"+SearchSettings.ILLEGAL_CHARS.getValue()[i];
+        }
+    }
 
-				assertEquals("urn type set sizes should be equal", 
-                             curUrnTypeSet.size(),
-							 queryUrnTypes.size());
-				assertEquals("urn types should be equal\r\n"+
-							 "set 1: "+print(curUrnTypeSet)+"r\n"+
-							 "set 2: "+print(queryUrnTypes), 
-							 curUrnTypeSet,
-							 queryUrnTypes);
-                assertEquals("query keys should be equal",
-                           qk, qr.getQueryKey());
-			}		   
-		} catch(IOException e) {
-			fail("unexpected exception: "+e);
-		}
-	}	
+    /**
+     * Test that network queries without URNs are accepted.
+     */
+	public void testThatNetworkQueriesWithIllegalCharsAreNotAccepted() throws Exception {
+		ByteArrayOutputStream[] baos = 
+		    new ByteArrayOutputStream[ILLEGAL_QUERIES.length];
+
+        byte ttl = 4;
+        byte hops = 2;
+		for(int i=0; i<ILLEGAL_QUERIES.length; i++) {
+			baos[i] = new ByteArrayOutputStream();
+			baos[i].write(0);
+			baos[i].write(0);
+			baos[i].write(ILLEGAL_QUERIES[i].getBytes());
+			baos[i].write(0);
+			baos[i].write(0);
+            try {
+                QueryRequest qr = 
+                    QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                                                    baos[i].toByteArray(), 
+                                                    Message.N_UNKNOWN);
+                
+                fail("should not have accepted illegal query chars");
+            } catch(BadPacketException e) {
+                // this should be thrown for illegal chars
+            }
+        }
+	}
+    
 
 
 	/**
@@ -485,7 +533,9 @@ public final class QueryRequestTest extends BaseTestCase {
 					 qr.getRequestedUrnTypes());	
 		assertEquals("URNs should be equal", urns, 
 					 qr.getQueryUrns());	
-		runIOChecks(qr);
+        if(qr.getQueryUrns().size() == 0) {
+            runIOChecks(qr);
+        }
 	}
 
 
