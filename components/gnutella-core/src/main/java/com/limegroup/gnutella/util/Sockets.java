@@ -171,10 +171,21 @@ public class Sockets {
 	 * </pre>
 	 *
 	 * This is basically just a hack to work around JDK bug 4110694.  It is
-	 * implemented in a similar way as Wayne Conrad's SocketOpener class, except
-	 * that it doesn't use Thread.stop() or interrupt().  Rather opening threads
-	 * hang around until the connection really times out.  That means frequent calls
-	 * to this may result in numerous threads waiting to die.<p>
+	 * implemented in a similar way as Wayne Conrad's SocketOpener class, using
+	 * Thread.interrupt().  This is necessary because of bugs in earlier Java 
+	 * implementations, where certain sockets fail to die.
+	 *
+	 * For an outrageous listing of large amounts of SocketOpener threads
+	 * left open, see the following bug reports:
+	 *
+	 * at http://www9.limewire.com:82/dev/exceptions/3.3.5/
+	 *          java.lang.OutOfMemoryError/start4794.txt    (1407 threads)
+	 *          java.io.FileNotFoundException/open24829.txt (177 threads)
+     *          java.io.FileNotFoundException/open24960.txt (168 threads)
+	 *          java.lang.OutOfMemoryError/start3462.txt    (45 threads)
+	 *          java.lang.OutOfMemoryError/err32041.txt     (56 threads)
+	 *          java.lang.OutOfMemoryError/err3183.txt      (29 threads)
+	 * etc..
 	 *
 	 * This class is currently NOT thread safe.  Currently connect() can only be 
 	 * called once.
@@ -211,7 +222,6 @@ public class Sockets {
 			//Asynchronously establish socket.
 			Thread t = new Thread(new SocketOpenerThread(), "SocketOpener");
 			t.setDaemon(true);
-			Assert.that(socket==null, "Socket already established w.o. lock.");
 			t.start();
 			
 			//Wait for socket to be established, or for timeout.
@@ -224,6 +234,8 @@ public class Sockets {
 					try { socket.close(); } catch (IOException e2) { }
 				throw new IOException();
 			}
+			// Ensure that the SocketOpener is killed.
+			t.stop();
 			
 			//a) Normal case
 			if (socket!=null) {
@@ -238,8 +250,8 @@ public class Sockets {
 		
 		private class SocketOpenerThread implements Runnable {
 			public void run() {
+			    Socket sock = null;
 				try {
-					Socket sock=null;
 					try {
 						sock=new Socket(host, port);
 					} catch (IOException e) { }                
@@ -252,7 +264,10 @@ public class Sockets {
 							SocketOpener.this.notify();
 						}
 					}
-				} catch(Throwable t) {
+                } catch(Throwable t) {
+                    // Note that if ThreadDeath is thrown, ErrorService will
+                    // correctly rethrow the death instead of reporting it
+                    // so that the thread can die.
 					ErrorService.error(t);
 				}
 			}
