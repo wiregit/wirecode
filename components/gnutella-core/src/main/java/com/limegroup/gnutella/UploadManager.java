@@ -145,6 +145,7 @@ public final class UploadManager implements BandwidthTracker {
 
                 HTTPUploader uploader=new HTTPUploader(method, line._fileName, 
                               socket, line._index, this, _fileManager, _router);
+                
                 try {
                     uploader.readHeader();
                 } catch(IOException iox) {
@@ -230,9 +231,13 @@ public final class UploadManager implements BandwidthTracker {
         int queued = -1;
         boolean ret = false;
         if(!isBHUploader) { //testing and book-keeping only if !browse host
-            queued = insertAndTest(uploader, host, socket);//can throw IOEx
-            debug(uploader+ " insert and test returned "+queued);
-            Assert.that(queued!=-1);
+            //Note the state at this point can be either FILE_NOT_FOUND, 
+            //BROWSE_HOST, PUSH_FAILED or CONNECTING
+            if(uploader.getState()==Uploader.CONNECTING) {
+                queued = insertAndTest(uploader, host, socket);//can throw IOEx
+                debug(uploader+ " insert and test returned "+queued);
+                Assert.that(queued!=-1);
+            }
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
             //state
