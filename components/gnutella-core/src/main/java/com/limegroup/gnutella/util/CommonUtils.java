@@ -714,7 +714,7 @@ public final class CommonUtils {
 	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
 	 */
 	public static void copyResourceFile(final String fileName) {
-		copyResourceFile(fileName, null);
+		copyResourceFile(fileName, null, false);
 	}  
 
 	/**
@@ -724,11 +724,12 @@ public final class CommonUtils {
 	 * @param fileName the name of the file to copy, relative to the jar 
 	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
 	 */
-    public static void copyResourceFile(final String fileName, File newFile) {
+    public static void copyResourceFile(final String fileName, File newFile, 
+										final boolean forceOverwrite) {
 		if(newFile == null) newFile = new File(fileName);
 
-		// return quickly if the dll is already there, no copy necessary
-		if( newFile.exists() ) return;
+		// return quickly if the file is already there, no copy necessary
+		if( !forceOverwrite && newFile.exists() ) return;
 		String parentString = newFile.getParent();
         if(parentString == null) return;
 		File parentFile = new File(parentString);
@@ -737,6 +738,7 @@ public final class CommonUtils {
 		}
 
 		ClassLoader cl = CommonUtils.class.getClassLoader();			
+		
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;            
 		try {
