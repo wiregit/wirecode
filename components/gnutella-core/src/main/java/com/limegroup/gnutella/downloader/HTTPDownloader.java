@@ -80,7 +80,8 @@ public class HTTPDownloader implements BandwidthTracker {
      *  the file
      * @param stop the last byte to read+1
      */
-	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile, AlternateLocationCollection alts) {
+	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile, 
+						  AlternateLocationCollection alts) {
         //Dirty secret: this is implemented with the push constructor!
         this(null, rfd, incompleteFile, alts);
         _isPush=false;
