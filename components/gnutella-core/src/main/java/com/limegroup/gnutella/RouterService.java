@@ -964,10 +964,11 @@ public final class RouterService {
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public static Downloader download(RemoteFileDesc[] files, boolean overwrite)
+	public static Downloader download(String name, RemoteFileDesc[] files, 
+									  boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.download(files, overwrite);
+		return downloader.download(name, files, overwrite);
 	}
 
     /*
