@@ -114,6 +114,7 @@ public class LimeXMLReplyCollection{
             if(!actualName.equalsIgnoreCase(identifier))
                 doc.setIdentifier(actualName);
             //TODO: Commit this to disk if any of the docs was dirty!
+            //toDisk("");//write the change out to disk
         }
     }
 
@@ -149,8 +150,7 @@ public class LimeXMLReplyCollection{
 
     public void addReply(String hash,LimeXMLDocument replyDoc){
         mainMap.put(hash,replyDoc);
-        if(replyDocs!=null)//add to this list only if it exists
-            replyDocs.add(replyDoc);
+        replyDocs=null;//things have changed
         count++;
     }
    
@@ -183,17 +183,14 @@ public class LimeXMLReplyCollection{
      * that correspond to the same schema as the query.
      */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
-        List replyDocs = getCollectionList();
-        int size = replyDocs.size();
+        Iterator iter = mainMap.keySet().iterator();
         List matchingReplyDocs = new ArrayList();
-        for(int i=0;i<size;i++){            
-            LimeXMLDocument currReplyDoc = (LimeXMLDocument)replyDocs.get(i);
-            //Note: currReplyDoc may be null, in which case match will return 
-            // false
+        while(iter.hasNext()){            
+            LimeXMLDocument currReplyDoc = (LimeXMLDocument)iter.next();
             boolean match = LimeXMLUtils.match(currReplyDoc, queryDoc);
             if(match){
                 matchingReplyDocs.add(currReplyDoc);
-                match = false;
+                match = false;//reset
             }
         }
         return matchingReplyDocs;
@@ -202,9 +199,11 @@ public class LimeXMLReplyCollection{
     
     public void replaceDoc(Object hash, LimeXMLDocument newDoc){
         mainMap.put(hash,newDoc);
+        replyDocs=null;//things have changed
     }
 
     public boolean removeDoc(String hash){
+        replyDocs=null;//things will change
         Object val = mainMap.remove(hash);
         boolean found = val==null?false:true;
         if(mainMap.size() == 0){//if there are no more replies.
@@ -236,6 +235,7 @@ public class LimeXMLReplyCollection{
      * modified file to commit data to it. 
      */
     public boolean toDisk(String modifiedFile){
+        this.replyDocs=null;//things are about to be changed.
         Iterator iter = mainMap.keySet().iterator();
         this.outMap = new HashMap();        
         while(iter.hasNext()){
