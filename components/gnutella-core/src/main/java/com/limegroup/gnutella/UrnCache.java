@@ -19,19 +19,20 @@ import java.util.Enumeration;
 public final class UrnCache {
     
     /**
-     * File where urns (currently SHA1 urns) get persisted to
+     * File where urns (currently SHA1 urns) for files are stored.
      */
     private static final File URN_CACHE_FILE = new File("fileurns.cache");
 
     /**
-     * UrnCache instance variable
+     * UrnCache instance variable.
      */
     private static UrnCache instance = null;
 
     /**
-     * UrnCache container
+     * UrnCache container.
      */
-    private final Map /* UrnSetKey -> HashSet */ URN_MAP;
+    private static final Map /* UrnSetKey -> HashSet */ URN_MAP =
+		createMap();
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -54,10 +55,10 @@ public final class UrnCache {
     }
 
     /**
-     *  Create and initialize urn cache
+     * Create and initialize urn cache.
      */
     private UrnCache() {
-        URN_MAP = createMap();//initCache();
+		removeOldEntries(URN_MAP);
 	}
     
     /**
@@ -93,37 +94,33 @@ public final class UrnCache {
 	 *
 	 * @param fileDesc the <tt>FileDesc</tt> instance containing URNs to store
      */
-    public void addUrns(File file, Set urns) {
+    public synchronized void addUrns(File file, Set urns) {
 		UrnSetKey key = new UrnSetKey(file);
         URN_MAP.put(key, Collections.unmodifiableSet(urns));
     }
-    
-    //
-    // UrnCache Management
-    //
-    
+        
     /**
      * Loads values from cache file, if available
      */
-    private static Map createMap() {//void initCache() {
-		if(!URN_CACHE_FILE.isFile()) {
-			return new Hashtable();
-		}
-		Map urnMap = null;
+    private static Map createMap() {
 		try {
             ObjectInputStream ois = 
 			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
-			urnMap = (Hashtable)ois.readObject();
-		} catch(FileNotFoundException e) {
-			// this should never happen, given our check above
-			e.printStackTrace();
-		} catch(IOException e) {
-			e.printStackTrace();
-		} catch(ClassNotFoundException e) {
-			e.printStackTrace();
+			return (Hashtable)ois.readObject();
+		} catch(Exception e) {
+			return new HashMap();
 		}
+	}
+
+	/**
+	 * Removes any stale entries from the map so that they will automatically
+	 * be replaced.
+	 *
+	 * @param map the <tt>Map</tt> to check
+	 */
+	private static void removeOldEntries(Map map) {
         // discard outdated info
-        Iterator iter = urnMap.keySet().iterator();
+        Iterator iter = map.keySet().iterator();
         while (iter.hasNext()) {
 			UrnSetKey key = (UrnSetKey)iter.next();
 
@@ -133,11 +130,10 @@ public final class UrnCache {
                 iter.remove();
             }
         }
-		return urnMap;
     }
     
     /**
-     * Write cache to disk to save recalc time later
+     * Write cache so that we only have to calculate them once.
      */
     public void persistCache() {
         try {
@@ -146,7 +142,6 @@ public final class UrnCache {
             oos.writeObject(URN_MAP);
             oos.close();
         } catch (Exception e) {
-			e.printStackTrace();
             // no great loss
         }
     }
