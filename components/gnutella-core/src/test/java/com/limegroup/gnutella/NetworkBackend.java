@@ -26,6 +26,9 @@
  * The return value will tell you whether the launch was successful.  You may want to wait some
  * time and check if the client has connected by calling the ".isConnected()" method of the server.
  * 
+ * Also, you will often want to change certain settings or use PrivilegedAccessor to alter
+ * timeouts.  You can do that by overriding NetworkClientCallbackStub.setSettings()
+ * 
  */
 package com.limegroup.gnutella;
 

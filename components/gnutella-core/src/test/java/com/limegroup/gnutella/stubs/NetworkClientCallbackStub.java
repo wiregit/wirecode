@@ -15,10 +15,16 @@
  * 	        ...
  * 	     }
  * 
- * then do the same at the server end.
+ * 		//if you need to change timeouts or private fields, override
+ * 
+ * 		protected void setSettings() {
+ * 			PrivilegedAccessor.doSomeChangeSomewhere(...);
+ * 		}
+ * 
+ * also see instructions for the server side.
  * 
  * DO NOT add constructors with different parameters as this class uses
- * reflection in order to get passed to a different jvm.
+ * reflection in order to get passed to the target jvm.
  */
 package com.limegroup.gnutella.stubs;
 
@@ -78,15 +84,32 @@ public class NetworkClientCallbackStub implements ActivityCallback {
 		Socket socket = new Socket(host,port);
 		OutputStream os = socket.getOutputStream();
 		_os = os;
+		setSettings();
 	}
 	
+	/**
+	 * override this method to change settings.  This method will be executed on the 
+	 * target jvm so if you want to change certain settings, timeouts or to 
+	 * use PrivilegedAccessor this is your chance.  
+	 * 
+	 * (since the classpaths of both jvms are the same, you can practically use any
+	 * tool in here that you can use in the standard tests.  Keep in mind though that this is
+	 * not started through ant/junit, so you won't be able to use any specific setUp/tearDown 
+	 * routines)
+	 * 
+	 * I'm doing this here rather than in NetworkBackend because you need to subclass
+	 * this class anyway while subclassing NetworkBackend is complicated and it relies
+	 * on factory methods which are *not fun* to modify.
+	 *
+	 */
+	protected void setSettings() {}
 	
 	private void write(int code) {
 		try {
 			_os.write(code);
 		}catch(IOException heh) {
 			//since this is intended for testing purposes,
-			//I will not hesitate to use stderr
+			//I will not hesitate to use stderr (which is redirected anyways)
 			heh.printStackTrace();
 		}
 	}
