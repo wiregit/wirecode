@@ -291,7 +291,7 @@ public final class CommonUtils {
      *  otherwise <tt>false</tt>
      */
     public static boolean isTestingVersion() {
-        return LIMEWIRE_VERSION.equals("@version@");
+        return LIMEWIRE_VERSION.equals("@" + "version" + "@");
     }
 
     static int getMinorVersionNumberInternal(String version) {
