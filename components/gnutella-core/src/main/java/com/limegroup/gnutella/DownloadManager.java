@@ -66,10 +66,10 @@ public class DownloadManager implements BandwidthTracker {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
     
     /**
-     * rfd that we have sent an udp push and are waiting a connection from.
+     * files that we have sent an udp pushes and are waiting a connection from.
      * LOCKING: obtain _failoverLock
      */
-    private Map /* of InetAddress -> Set of RFDs*/ 
+    private Map /* of InetAddress -> Set of Strings*/ 
 		_udpFailover = new HashMap();
     
     /**
@@ -1042,7 +1042,7 @@ public class DownloadManager implements BandwidthTracker {
                             port);
 
         if(LOG.isInfoEnabled())
-            LOG.info(("Sending push request through Gnutella: ") + pr);
+            LOG.info("Sending push request through Gnutella: " + pr);
         
         
         

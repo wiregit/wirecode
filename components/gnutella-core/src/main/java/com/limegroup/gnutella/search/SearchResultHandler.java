@@ -31,7 +31,7 @@ public final class SearchResultHandler {
      * set of hosts which are firewalled and returned ReplyNumberVMs.
      *  - it needs to be big since we can get results from lots of people.
      *  - static because a firewalled host is always firewalled
-     *  - self-expiring because we may not get a reply from the same host 
+     *  - self-expiring because we may get a reply from the same host 
      *    for more than one search and do not want to remove it from the set 
      *  - not locked because all processing happens in serial.
      */
