@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
@@ -9,7 +8,6 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.text.*;
 import java.io.*;
 
 /**
