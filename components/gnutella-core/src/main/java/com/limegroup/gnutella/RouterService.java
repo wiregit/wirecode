@@ -419,55 +419,6 @@ public class RouterService
     }
 
     /**
-     *  Return the number of good hosts in my horizon.
-     */
-    public long getNumHosts() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getNumHosts();
-        return ret;
-    }
-
-    /**
-     * Return the number of files in my horizon.
-     */
-    public long getNumFiles() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getNumFiles();
-        return ret;
-    }
-
-    /**
-     * Return the size of all files in my horizon, in kilobytes.
-     */
-    public long getTotalFileSize() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getTotalFileSize();
-        return ret;
-    }
-
-    /**
-     * Updates the horizon statistics.  This should called at least every five
-     * minutes or so to prevent the reported numbers from growing too large.
-     * You can safely call it more often.  Note that it does not modify the
-     * network; horizon stats are calculated by passively looking at messages.
-     *
-     * @modifies this (values returned by getNumFiles, getTotalFileSize, and
-     *  getNumHosts) 
-     */
-    public void updateHorizon() {        
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ((ManagedConnection)iter.next()).refreshHorizonStats();
-    }
-
-
-    /**
      * Searches Gnutellanet files of the given type with the given
      * query string and minimum speed.  If type is null, any file type
      * is acceptable.  Returns the GUID of the query request sent as a
@@ -538,33 +489,6 @@ public class RouterService
             c.flush();
         } catch (IOException e) {
             return null;
-        }
-
-        //3. Remove a lesser connection if necessary.  Current heuristic:
-        //drop the connection other than c with least number of files.
-        //
-        //TODO: this should go in ConnectionManager, but that requires
-        //us to add MAX_KEEP_ALIVE property.  Besides being the logical
-        //place for this functionality, it would make the network
-        //hill climbing a snap to implement.  It would also allow us to
-        //synchronize properly to prevent race conditions.
-        if (manager.getNumConnections()>manager.getKeepAlive()) {
-            ManagedConnection worst=null;
-            long files=Long.MAX_VALUE;
-            for (Iterator iter=manager.getConnections().iterator();
-                 iter.hasNext(); ) {
-                ManagedConnection c2=(ManagedConnection)iter.next();
-                //Don't remove the connection to the host we are browsing.
-                if (c2==c)
-                    continue;
-                long n=c2.getNumFiles();
-                if (n<files) {
-                    worst=c2;
-                    files=n;
-                }
-            }
-            if (worst!=null)
-                manager.remove(worst);
         }
 
         return qr.getGUID();

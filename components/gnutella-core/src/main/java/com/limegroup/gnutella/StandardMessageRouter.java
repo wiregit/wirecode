@@ -57,9 +57,6 @@ public class StandardMessageRouter
     public void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {
-        //We override the super's method so the receiving connection's
-        //statistics are updated whether or not this is for me.
-        receivingConnection.updateHorizonStats(pingReply);
         super.handlePingReply(pingReply, receivingConnection);
     }
     

@@ -40,13 +40,9 @@ public class Main implements ActivityCallback {
         //Print push route
         else if (command.equals("stat")) {
             service.dumpConnections();
-            System.out.println("Number of hosts: "+service.getNumHosts());
-            System.out.println("Number of files: "+service.getNumFiles());
-            System.out.println("Size of files: "+service.getTotalFileSize());
+            System.out.println("Number of cached hosts: "+service.getRealNumHosts());
+            System.out.println("Number of reserve hosts: "+service.getReserveHosts());
         }
-        //Send pings to everyone
-        else if (command.equals("update"))
-            service.updateHorizon();
         //Print hostcatcher
         else if (command.equals("catcher")) {
             for (Iterator iter=service.getReserveHosts(); iter.hasNext(); )
