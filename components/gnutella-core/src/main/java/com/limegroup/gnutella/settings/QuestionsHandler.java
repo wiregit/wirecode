@@ -105,4 +105,18 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting NO_PREVIEW_REPORT =
         FACTORY.createBooleanSetting("NO_PREVIEW_REPORT ", false);
+
+    /**
+     * Settings for whether or not to display a message if searching
+     * while not connected.
+     */
+    public static final BooleanSetting NO_NOT_CONNECTED =
+        FACTORY.createBooleanSetting("NO_NOT_CONNECTED", false);
+
+    /**
+     * Settings for whether or not to display a message if searching
+     * while still connecting.
+     */
+    public static final BooleanSetting NO_STILL_CONNECTING =
+        FACTORY.createBooleanSetting("NO_STILL_CONNECTING", false);
 }
