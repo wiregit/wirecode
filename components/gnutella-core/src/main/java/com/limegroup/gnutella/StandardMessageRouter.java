@@ -23,7 +23,7 @@ public class StandardMessageRouter
         if (!receivingConnection.isPersonalSpam(queryRequest))
         {
             _callback.handleQueryString(queryRequest.getQuery());
-        }
+        } 
 
         super.handleQueryRequest(queryRequest, receivingConnection);
     }
@@ -164,7 +164,7 @@ public class StandardMessageRouter
 
 			// create the new queryReply
 			queryReply = new QueryReply(guid, ttl, port, ip, 
-										speed, res, clientGUID);
+										speed, res, clientGUID, "LIME");
 			
 			// try to send the new queryReply
 			try {

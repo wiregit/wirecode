@@ -79,6 +79,89 @@ public class QueryReply extends Message implements Serializable{
         }
     }
     
+	/**
+	 * This is the constructor for a query reply that also 
+	 * includes some per packet (per host, per query reply)  
+	 * meta information.  the general strategy for including 
+	 * this information is to increase the size of the payload
+	 * length field in the descriptor header, and to add the meta
+	 * data after the Servant identifier.
+	 * 
+	 */ 
+    public QueryReply(byte[] guid, byte ttl,
+					  int port, byte[] ip, long speed, 
+					  Response[] responses,
+					  byte[] clientGUID, String meta) {
+
+		// invoke the super class constructor, adding the
+		// length of the meta data.
+		//11 bytes for header, plus file records, 
+		// plus 16-byte footer, plus meta length
+		
+		super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
+              11+rLength(responses)+16+meta.getBytes().length);
+
+		// create the meta info wrapper
+		PerPacketMetaInfo ppmi = new PerPacketMetaInfo(meta);
+		// get the size of the byte array of the meta info
+		int metaSize = ppmi.getSize();
+
+		// proceed with the normal query reply constructor 
+		Assert.that((port&0xFFFF0000)==0);
+        Assert.that(ip.length==4);
+        Assert.that((speed&0xFFFFFFFF00000000l)==0);
+        final int n=responses.length;
+        Assert.that(n<256);
+
+        payload=new byte[getLength()];
+        //Write beginning of payload.
+        //Downcasts are ok, even if they go negative
+        payload[0]=(byte)n;
+        ByteOrder.short2leb((short)port,payload,1);
+        payload[3]=ip[0];
+        payload[4]=ip[1];
+        payload[5]=ip[2];
+        payload[6]=ip[3];
+        ByteOrder.int2leb((int)speed,payload,7);
+
+        //Write each response at index i
+        int i=11;
+        for (int left=n; left>0; left--) {
+            Response r=responses[n-left];
+            ByteOrder.int2leb((int)r.getIndex(),payload,i);
+            ByteOrder.int2leb((int)r.getSize(),payload,i+4);
+            i+=8;
+            String name=r.getName();
+            //This getBytes method is deprecated because it does
+            //not properly convert Unicode (it throws away the high
+            //byte.  But this is not a problem since most Gnutella
+            //clients probably do not understand Unicode!
+            name.getBytes(0, name.length(), payload, i);
+            i+=name.length();
+            //Write double null terminator.
+            payload[i]=(byte)0;
+            payload[i+1]=(byte)0;
+            i+=2;
+        }
+
+        //Write footer at payload[i...i+16-1]
+		int j =0;
+        for (; j<16; j++) {
+            payload[i+j]=clientGUID[j];
+        }
+
+		// after normal construction, add the meta info
+		// place i into position for adding the meta info
+		i += j;      
+		byte[] metaAsBytes = ppmi.getMetaInfoAsBytes();
+		// write the meta data at the footer of payload
+		for (int k=0; k<metaSize; k++) {
+			System.out.println("k: " + k);
+			payload[i+k] = metaAsBytes[k];
+		}
+
+
+	}
     /** 
     * Creates a new query reply from the passed query Reply. The new one is
     * same as the passed one, but with different specified GUID
@@ -170,40 +253,64 @@ public class QueryReply extends Message implements Serializable{
         try {
             //For each record...
             for ( ; left > 0; left--) {
-            long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
-            long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
-            i+=8;
-
-            //The file name is supposed to be terminated by a double null
-            //terminator.  But Gnotella inserts meta-information between
-            //these null characters.  So we have to handle this.
-            //
-            //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
-
-            //Search for first single null terminator.
-            int j=i;
-            for ( ; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
+				long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
+				long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
+				i+=8;
+				
+				//The file name is supposed to be terminated by a double null
+				//terminator.  But Gnotella inserts meta-information between
+				//these null characters.  So we have to handle this.
+				//
+				//See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
+				
+				//Search for first single null terminator.
+				int j=i;
+				for ( ; ; j++) {
+					if (payload[j]==(byte)0)
+						break;
+				}
+				
+				//payload[i..j-1] is name.  This excludes the null terminator.
+				String name=new String(payload,i,j-i);
+				responses[responses.length-left]=new Response(index,size,name);
+				
+				//Search for remaining null terminator.
+				for ( j=j+1; ; j++) {
+					if (payload[j]==(byte)0)
+						break;
+				}
+				// i=j+1;
+				i = j+1;
             }
+			
 
-            //payload[i..j-1] is name.  This excludes the null terminator.
-            String name=new String(payload,i,j-i);
-            responses[responses.length-left]=new Response(index,size,name);
+			// Maybe the meta info is here?
+			if (i < payload.length-16) {
+				i+=16;  // two nulls + 16 bit guid
+				// there is extra data!
+				System.out.println("There was extra info");
+				int metaLength = payload.length - i;
+				byte[] metaData = new byte[metaLength];
+				for (int k = 0; k < metaLength; k++) {
+					System.out.println("Parsing k: " + k);
+					metaData[k] = payload[i+k];
+				}
+				PerPacketMetaInfo ppmi = new PerPacketMetaInfo(metaData);
+				System.out.println("About to print");
+				ppmi.print();
+			}
+			
 
-            //Search for remaining null terminator.
-            for ( j=j+1; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
-            }
-            i=j+1;
-            }
-            if (i<payload.length-16)
-            throw new BadPacketException("Extra data after "
-                             +"double null terminators");
-            else if (i>payload.length-16)
-            throw new BadPacketException("Missing null terminator "
-                             +"filename");
+
+         //     if (i<payload.length-16)
+//              throw new BadPacketException("Extra data after "
+//                               +"double null terminators");
+//              else if (i>payload.length-16)
+//              throw new BadPacketException("Missing null terminator "
+//                               +"filename");
+
+
+
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new BadPacketException();
         }
