@@ -29,9 +29,9 @@ public final class ConnectionWatchdog implements Runnable {
 
     /** How long (in msec) a connection can be a dud (see below)
      *  before being booted. */
-    private static final int EVALUATE_TIME=10000;
+    private static final int EVALUATE_TIME=30000;
     /** Additional time (in msec) to wait before rechecking connections. */
-    private static final int REEVALUATE_TIME=8000;
+    private static final int REEVALUATE_TIME=15000;
 
     /**
      * Singleton accessor for <tt>ConnectionWatchdog</tt> instance.
