@@ -50,7 +50,17 @@ public final class FileDesc {
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances, keyed by
 	 * <tt>AlternateLocation</tt>s.
 	 */
-	private Map/*AlternateLocation->AlternateLocation*/_alternateLocations;
+	private Map/*AlternateLocation->AlternateLocation*/
+		_alternateLocations;
+
+	/**
+	 * <tt>Map</tt> of temporary <tt>AlternateLocation</tt> instances, 
+	 * keyed by <tt>AlternateLocation</tt>s.  This is used to store
+	 * any temporary locations that should not be reported in HTTP
+	 * headers, at least for now.
+	 */
+	private Map/*AlternateLocation->AlternateLocation*/
+		_temporaryAlternateLocations;
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -100,6 +110,55 @@ public final class FileDesc {
 		// date according to the date class, namely:
 		// January 1, 1970, 00:00:00 GMT.
 		_alternateLocations.put(al, al);
+	}
+
+	/**
+	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
+	 * of "temporary" alternate locations.  These will not be stored to
+	 * the official alternate locations list until a call to 
+	 * commitTemporaryAlternateLocations is made.  This is to avoid,
+	 * for example, sending back the same alternate location headers
+	 * back to an uploader as they sent in with their upload request,
+	 * as they clearly already know about those locations.
+	 *
+	 * @param al the <tt>AlternateLocation</tt> instance to add to the 
+	 *  temporary list.
+	 */
+	public synchronized void addTemporaryAlternateLocation(AlternateLocation al) {
+		if(_temporaryAlternateLocations == null) {
+			// we use a TreeMap to both filter duplicates and provide
+			// ordering based on the timestamp
+			_temporaryAlternateLocations = 
+			    new TreeMap(AlternateLocation.createComparator());
+		}
+
+		// note that alternate locations without a timestamp are placed
+		// at the end of the map because they have the oldest possible
+		// date according to the date class, namely:
+		// January 1, 1970, 00:00:00 GMT.
+		_temporaryAlternateLocations.put(al, al);
+	}
+
+	/**
+	 * Moves all temporary alternate locations to the "official" list of
+	 * alternate locations for this file that will be reported in
+	 * HTTP headers.
+	 */
+	public synchronized void commitTemporaryAlternateLocations() {
+		// if there are no temporary locations to commit, just return
+		if(_temporaryAlternateLocations == null) {
+			return;
+		}
+		if(_alternateLocations == null) {
+			_alternateLocations =
+			    new TreeMap(AlternateLocation.createComparator());
+		}
+		_alternateLocations.putAll(_temporaryAlternateLocations);
+
+		// clear out all the temporary locations.  we could set this to
+		// null, but there's a good chance that if a file was asigned
+		// temporary alternate locations once, then it will be again
+		_temporaryAlternateLocations.clear();
 	}
 
 	/**
