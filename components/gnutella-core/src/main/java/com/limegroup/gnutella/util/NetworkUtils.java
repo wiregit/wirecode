@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.PushEndpoint;
@@ -285,18 +288,36 @@ public final class NetworkUtils {
     }
     
     /**
+     * Packs a Collection of IpPorts into a byte array.
+     */
+    public static byte[] packIpPorts(Collection ipPorts) {
+        byte[] data = new byte[ipPorts.size() * 6];
+        int offset = 0;
+        for(Iterator i = ipPorts.iterator(); i.hasNext(); ) {
+            IpPort next = (IpPort)i.next();
+            byte[] addr = next.getInetAddress().getAddress();
+            int port = next.getPort();
+            System.arraycopy(addr, 0, data, offset, 4);
+            offset += 4;
+            ByteOrder.short2leb((short)port, data, offset);
+            offset += 2;
+        }
+        return data;
+    }
+    
+    /**
      * parses an ip:port byte-packed values.  
      * 
      * @return a collection of <tt>IpPort</tt> objects.
      * @throws BadPacketException if an invalid Ip is found or the size 
      * is not divisble by six
      */
-    public static Collection unpackIps(byte [] data) throws BadPacketException{
+    public static List unpackIps(byte [] data) throws BadPacketException {
     	if (data.length % 6 != 0)
     		throw new BadPacketException("invalid size");
     	
     	int size = data.length/6;
-    	List ret = new Vector(size);
+    	List ret = new ArrayList(size);
     	byte [] current = new byte[6];
     	
     	
@@ -305,7 +326,7 @@ public final class NetworkUtils {
     		ret.add(QueryReply.IPPortCombo.getCombo(current));
     	}
     	
-    	return ret;
+    	return Collections.unmodifiableList(ret);
     }
 
     /**
@@ -313,9 +334,9 @@ public final class NetworkUtils {
      * @return a collection of <tt>PushEndpoint</tt> objects
      * @throws BadPacketException if parsing failed.
      */
-    public static Collection unpackPushEPs(byte [] data) 
+    public static List unpackPushEPs(byte [] data) 
     	throws BadPacketException {
-    	List ret = new Vector();
+    	List ret = new LinkedList();
     	
     	int i=0;
     	while (i < data.length ) {
@@ -324,7 +345,7 @@ public final class NetworkUtils {
     		ret.add(current);
     	}
     	
-    	return ret;
+    	return Collections.unmodifiableList(ret);
     }
 }
 

@@ -578,51 +578,10 @@ public final class HandshakeResponse {
      * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
      *  header set according to the incoming headers from the remote host
      */
-    private static Properties addXTryHeader(HandshakeResponse hr, 
-        Properties headers) {
-        Set hosts = new HashSet();
-        if(hr.isUltrapeer()) {
-            hosts.addAll(
-                RouterService.getHostCatcher().
-                getUltrapeersWithFreeUltrapeerSlots(hr.getLocalePref()));
-        } else {
-            hosts.addAll(
-                RouterService.getHostCatcher().
-                getUltrapeersWithFreeLeafSlots(hr.getLocalePref()));
-        }
-        
-        // If we don't have enough hosts for the X-Try-Ultrapeers header, add
-        // hosts that we're connected to.
-        
-        //is this efficient?
-        if(hosts.size() < 10) {
-            //we first try to get the connections that match the locale.
-            List conns = 
-                RouterService.getConnectionManager().
-                getInitializedConnectionsMatchLocale(hr.getLocalePref());
-            Iterator itr = conns.iterator();
-            for(int i = hosts.size(); itr.hasNext() && i < 10; i++) {
-                IpPort host = (IpPort)itr.next();
-                hosts.add(host);
-            }
-            
-            //if we still don't have enough hosts, get them from the list
-            //of all initialized connection
-            if(hosts.size() < 10) {
-                //list returned is unmmodifiable
-                conns =
-                    new LinkedList
-                    (RouterService.getConnectionManager()
-                     .getInitializedConnections());
-                //returned list may contain duplicates
-                conns.removeAll(hosts);
-                itr = conns.iterator();
-                for(int i = hosts.size();itr.hasNext() && i < 10; i++) {
-                    IpPort host = (IpPort)itr.next();
-                    hosts.add(host);
-                }
-            }
-        }
+    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
+        Collection hosts =
+            RouterService.getPreferencedHosts(
+                hr.isUltrapeer(), hr.getLocalePref());
         
         headers.put(HeaderNames.X_TRY_ULTRAPEERS,
                     createEndpointString(hosts));

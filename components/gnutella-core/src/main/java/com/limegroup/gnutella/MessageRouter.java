@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.TreeMap;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -245,9 +247,15 @@ public abstract class MessageRouter {
 
     /**
      * Keeps track of Listeners of GUIDs.
-     * GUID -> MessageListener
+     * GUID -> List of MessageListener
      */
-    private final Map _messageListeners = new Hashtable();
+    private volatile Map _messageListeners = Collections.EMPTY_MAP;
+    
+    /**
+     * Lock that registering & unregistering listeners can hold
+     * while replacing the listeners map / lists.
+     */
+    private final Object MESSAGE_LISTENER_LOCK = new Object();
 
     /**
      * ref to the promotion manager.
@@ -459,13 +467,21 @@ public abstract class MessageRouter {
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
 		//forwardQueryRouteTables();
-        notifyMessageListener(msg);
+        notifyMessageListener(msg, receivingConnection);
     }
 
-    private final void notifyMessageListener(Message msg) {
-        MessageListener ml = 
-            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
-        if (ml != null) ml.processMessage(msg);
+    /**
+     * Notifies any message listeners of this message's guid about the message.
+     * This holds no locks.
+     */
+    private final void notifyMessageListener(Message msg, ReplyHandler handler) {
+        List all = (List)_messageListeners.get(msg.getGUID());
+        if(all != null) {
+            for(Iterator i = all.iterator(); i.hasNext(); ) {
+                MessageListener next = (MessageListener)i.next();
+                next.processMessage(msg, handler);
+            }
+        }
     }
 
 	/**
@@ -557,7 +573,7 @@ public abstract class MessageRouter {
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, datagram);
         }
-        notifyMessageListener(msg);
+        notifyMessageListener(msg, handler);
     }
     
     /**
@@ -615,7 +631,7 @@ public abstract class MessageRouter {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
-        notifyMessageListener(msg);
+        notifyMessageListener(msg, handler);
     }
 
 
@@ -1846,7 +1862,7 @@ public abstract class MessageRouter {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = RouterService.getHostCatcher().add(reply);
 
-        if(newAddress) {
+        if(newAddress && !reply.isUDPHostCache()) {
             PongCacher.instance().addPong(reply);
         }
 
@@ -2589,17 +2605,59 @@ public abstract class MessageRouter {
 	}
 
     
-    /** Add a message listener if you want to be notified.  Please unregister
-     *  yourself ASAP.
+    /**
+     * Adds the specified MessageListener for messages with this GUID.
+     * You must manually unregister the listener.
+     *
+     * This works by replacing the necessary maps & lists, so that 
+     * notifying doesn't have to hold any locks.
      */
-    public void registerMessageListener(GUID guid, MessageListener ml) {
-        _messageListeners.put(guid, ml);
+    public void registerMessageListener(byte[] guid, MessageListener ml) {
+        ml.registered(guid);
+        synchronized(MESSAGE_LISTENER_LOCK) {
+            Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+            listeners.putAll(_messageListeners);
+            List all = (List)listeners.get(guid);
+            if(all == null) {
+                all = new ArrayList(1);
+                all.add(ml);
+            } else {
+                List temp = new ArrayList(all.size() + 1);
+                temp.addAll(all);
+                all = temp;
+                all.add(ml);
+            }
+            listeners.put(guid, Collections.unmodifiableList(all));
+            _messageListeners = Collections.unmodifiableMap(listeners);
+        }
     }
     
-    /** Unregister a message listener for a certain guid.
+    /**
+     * Unregisters this MessageListener from listening to the GUID.
+     *
+     * This works by replacing the necessary maps & lists so that
+     * notifying doesn't have to hold any locks.
      */
-    public void unregisterMessageListener(GUID guid) {
-        _messageListeners.remove(guid);
+    public void unregisterMessageListener(byte[] guid, MessageListener ml) {
+        boolean removed = false;
+        synchronized(MESSAGE_LISTENER_LOCK) {
+            List all = (List)_messageListeners.get(guid);
+            if(all != null) {
+                all = new ArrayList(all);
+                if(all.remove(ml)) {
+                    removed = true;
+                    Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+                    listeners.putAll(_messageListeners);
+                    if(all.isEmpty())
+                        listeners.remove(guid);
+                    else
+                        listeners.put(guid, Collections.unmodifiableList(all));
+                    _messageListeners = Collections.unmodifiableMap(listeners);
+                }
+            }
+        }
+        if(removed)
+            ml.unregistered(guid);
     }
 
 

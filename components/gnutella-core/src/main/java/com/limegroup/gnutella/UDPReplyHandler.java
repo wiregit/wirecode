@@ -261,6 +261,13 @@ public final class UDPReplyHandler implements ReplyHandler {
     public InetAddress getInetAddress() {
         return IP;
     }
+    
+    /**
+     * Retrieves the host address.
+     */
+    public String getAddress() {
+        return IP.getHostAddress();
+    }
 
     /**
      * Returns <tt>false</tt> to indicate that <tt>UDPReplyHandler</tt>s 

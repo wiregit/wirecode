@@ -21,12 +21,15 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 
@@ -134,8 +137,7 @@ public class HostCatcher {
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Set FREE_LEAF_SLOTS_SET = new HashSet();    
-
+    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
     
     /**
      * map of locale (string) to sets (of endpoints).
@@ -167,6 +169,10 @@ public class HostCatcher {
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache = 
         BootstrapServerManager.instance();
+        
+    /** The UDPHostCache bootstrap system. */
+    private UDPHostCache udpHostCache =
+        new UDPHostCache();
     
 	/**
 	 * Constant for the host file to read from and write to.
@@ -225,7 +231,7 @@ public class HostCatcher {
     /**
      * The scheduled runnable that fetches GWebCache entries if we need them.
      */
-    public final GWebCacheFetcher FETCHER = new GWebCacheFetcher();
+    public final Bootstrapper FETCHER = new Bootstrapper();
     
     /**
      * The number of threads waiting to get an endpoint.
@@ -267,23 +273,19 @@ public class HostCatcher {
         //Gnucleus says otherwise.
         Runnable updater=new Runnable() {
             public void run() {
-                try {
-                    if (RouterService.acceptedIncomingConnection() && 
-                        RouterService.isSupernode()) {
-                            byte[] addr = RouterService.getAddress();
-                            int port = RouterService.getPort();
-                            if(NetworkUtils.isValidAddress(addr) &&
-                               NetworkUtils.isValidPort(port) &&
-                               !NetworkUtils.isPrivateAddress(addr)) {
-                                Endpoint e=new Endpoint(addr, port);
-								// This spawns another thread, so blocking is  
-                                // not an issue.
-								gWebCache.sendUpdatesAsync(e);
-							}
-                        }
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                if (RouterService.acceptedIncomingConnection() && 
+                    RouterService.isSupernode()) {
+                        byte[] addr = RouterService.getAddress();
+                        int port = RouterService.getPort();
+                        if(NetworkUtils.isValidAddress(addr) &&
+                           NetworkUtils.isValidPort(port) &&
+                           !NetworkUtils.isPrivateAddress(addr)) {
+                            Endpoint e=new Endpoint(addr, port);
+							// This spawns another thread, so blocking is  
+                            // not an issue.
+							gWebCache.sendUpdatesAsync(e);
+						}
+                    }
             }
         };
         
@@ -293,19 +295,15 @@ public class HostCatcher {
         
         Runnable probationRestorer = new Runnable() {
             public void run() {
-                try {
-                    LOG.trace("restoring hosts on probation");
-                    synchronized(HostCatcher.this) {
-                        Iterator iter = PROBATION_HOSTS.iterator();
-                        while(iter.hasNext()) {
-                            Endpoint host = (Endpoint)iter.next();
-                            add(host, false);
-                        }
-                        
-                        PROBATION_HOSTS.clear();
+                LOG.trace("restoring hosts on probation");
+                synchronized(HostCatcher.this) {
+                    Iterator iter = PROBATION_HOSTS.iterator();
+                    while(iter.hasNext()) {
+                        Endpoint host = (Endpoint)iter.next();
+                        add(host, false);
                     }
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                    
+                    PROBATION_HOSTS.clear();
                 }
             } 
         };
@@ -334,7 +332,8 @@ public class HostCatcher {
                     public boolean isCancelled() {
                         return RouterService.isConnected();
                     }
-                }
+                },
+                PingRequest.createUDPPing()
             );
         }
     }
@@ -377,6 +376,7 @@ public class HostCatcher {
             }
         } finally {
             gWebCache.bootstrapServersAdded();
+            udpHostCache.hostCachesAdded();
             try {
                 if( in != null )
                     in.close();
@@ -411,6 +411,10 @@ public class HostCatcher {
                 out.write(ExtendedEndpoint.EOL);
             }
         }
+
+        //Write udp hostcache endpoints.
+        udpHostCache.write(out);
+
         //Write elements of permanent from worst to best.  Order matters, as it
         //allows read() to put them into queue in the right order without any
         //difficulty.
@@ -447,6 +451,11 @@ public class HostCatcher {
         //if the PingReply had locale information then set it in the endpoint
         if(!pr.getClientLocale().equals(""))
             endpoint.setClientLocale(pr.getClientLocale());
+            
+        if(pr.isUDPHostCache()) {
+            endpoint.setHostname(pr.getUDPCacheAddress());            
+            endpoint.setUDPHostCache(true);
+        }
         
         if(!isValidHost(endpoint))
             return false;
@@ -455,7 +464,29 @@ public class HostCatcher {
             QueryUnicaster.instance().
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
-
+        
+        // if the pong carried packed IP/Ports, add those as their own
+        // endpoints.
+        for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
+            IpPort ipp = (IpPort)i.next();
+            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            if(isValidHost(ep))
+                add(ep, GOOD_PRIORITY);
+        }
+        
+        // if the pong carried packed UDP host caches, add those as their
+        // own endpoints.
+        for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
+            IpPort ipp = (IpPort)i.next();
+            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            ep.setUDPHostCache(true);
+            if(isValidHost(ep))
+                addUDPHostCache(ep);
+        }
+        
+        // if it was a UDPHostCache pong, just add it as that.
+        if(endpoint.isUDPHostCache())
+            return addUDPHostCache(endpoint);
 
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
@@ -485,6 +516,14 @@ public class HostCatcher {
             return add(endpoint, GOOD_PRIORITY); 
         } else
             return add(endpoint, NORMAL_PRIORITY);
+    }
+    
+    /**
+     * Adds an endpoint to the udp host cache, returning true
+     * if it succesfully added.
+     */
+    private boolean addUDPHostCache(ExtendedEndpoint host) {
+        return udpHostCache.add(host);
     }
     
     /**
@@ -604,6 +643,9 @@ public class HostCatcher {
      */
     private boolean add(ExtendedEndpoint e, int priority) {
         repOk();
+        
+        if(e.isUDPHostCache())
+            return addUDPHostCache(e);
         
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
@@ -1058,6 +1100,7 @@ public class HostCatcher {
         _failures = 0;
         FETCHER.resetFetchTime();
         gWebCache.resetData();
+        udpHostCache.resetData();
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.
@@ -1096,12 +1139,12 @@ public class HostCatcher {
     }
     
     /**
-     * Runnable that looks for GWebCache entries.
+     * Runnable that looks for GWebCache or UDPHostCache entries.
      */
-    private class GWebCacheFetcher implements Runnable {
+    private class Bootstrapper implements Runnable {        
         /**
-         * The next time we're allowed to fetch.  Incremented
-         * after each succesful fetch.
+         * The next time we're allowed to fetch via GWebCache.
+         * Incremented after each succesful fetch.
          */
         private long nextAllowedFetchTime = 0;
         
@@ -1110,6 +1153,12 @@ public class HostCatcher {
          * Upped after each attempt at fetching.
          */
         private int delay = 20 * 1000;
+        
+        /**
+         * How long we must wait after contacting UDP before we can contact
+         * GWebCaches.
+         */
+        private static final int POST_UDP_DELAY = 30 * 1000;
 
         /**
          * Determines whether or not it is time to get more hosts,
@@ -1121,8 +1170,8 @@ public class HostCatcher {
                 return;
             
             long now = System.currentTimeMillis();
-            // if it isn't time yet, wait till it is.
-            if(now < nextAllowedFetchTime)
+            // if no possible udp hosts & not allowed gwebcache, wait.
+            if(udpHostCache.getSize() == 0 && now < nextAllowedFetchTime)
                 return;
                 
             //if we don't need hosts, exit.
@@ -1147,7 +1196,7 @@ public class HostCatcher {
         private synchronized boolean needsHosts(long now) {
             synchronized(HostCatcher.this) {
                 return getNumHosts() == 0 ||
-                    (!RouterService.isConnected() && _failures > 200);
+                    (!RouterService.isConnected() && _failures > 100);
             }
         }
         
@@ -1155,6 +1204,16 @@ public class HostCatcher {
          * Fetches more hosts, updating the next allowed time to fetch.
          */
         synchronized void getHosts(long now) {
+            // if we had udp host caches to fetch from, use them.
+            if(udpHostCache.fetchHosts()) {
+                nextAllowedFetchTime = now + POST_UDP_DELAY;
+                return;
+            } // else didn't attempt to contact any UDP hosts.
+            
+            // if we aren't allowed to contact gwebcache's yet, exit.
+            if(now < nextAllowedFetchTime)
+                return;
+            
             int ret = gWebCache.fetchEndpointsAsync();
             switch(ret) {
             case BootstrapServerManager.FETCH_SCHEDULED:

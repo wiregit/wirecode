@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.COBSUtil;
 import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.NameValue;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -45,6 +46,15 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_ALTS = "ALT";
     /** The extention header (key) for IpPort request */
     public static final String GGEP_HEADER_IPPORT="IP";
+    /** The extension header (key) for UDP HostCache pongs. */
+    public static final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
+    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
+    public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
+    /** The extension header (key) for packed IP/Ports */
+    public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension header (key) for packed UDP Host Caches */
+    public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
+    
     /**
      * The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.
@@ -421,6 +431,29 @@ public class GGEP extends Object {
     }
 
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
+    
+    /**
+     * Adds all the specified key/value pairs,
+     */
+    public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
+        for(Iterator i = fields.iterator(); i.hasNext(); ) {
+            NameValue next = (NameValue)i.next();
+            String key = next.getName();
+            Object value = next.getValue();
+            if(value == null)
+                put(key);
+            else if(value instanceof byte[])
+                put(key, (byte[])value);
+            else if(value instanceof String)
+                put(key, (String)value);
+            else if(value instanceof Integer)
+                put(key, ((Integer)value).intValue());
+            else if(value instanceof Long)
+                put(key, ((Long)value).longValue());
+            else
+                throw new IllegalArgumentException("Unknown value: " + value);
+        }
+    }             
 
     /** 
      * Adds a key with raw byte value.

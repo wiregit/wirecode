@@ -3,6 +3,10 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.List;
+import java.util.LinkedList;
+
+import com.limegroup.gnutella.util.NameValue;
 
 import junit.framework.Test;
 
@@ -39,46 +43,56 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("The .put method failed!! ", illegal);
         }
     }
+    
+    public void testPutAll() throws Exception {
+        List putm = new LinkedList();
+        putm.add(new NameValue("int", new Integer(1)));
+        putm.add(new NameValue("header"));
+        putm.add(new NameValue("long", new Long(2)));
+        putm.add(new NameValue("string", "value"));
+        putm.add(new NameValue("byte[]", new byte[] { 1, 2 } ));
+        
+        GGEP temp = new GGEP(true);
+        temp.putAll(putm);
+        
+        assertTrue(temp.hasKey("int"));
+        assertEquals(1, temp.getInt("int"));
+        assertTrue(temp.hasKey("header"));
+        assertTrue(temp.hasKey("long"));
+        assertEquals(2, temp.getLong("long"));
+        assertTrue(temp.hasKey("string"));
+        assertEquals("value", temp.getString("string"));
+        assertTrue(temp.hasKey("byte[]"));
+        assertEquals(new byte[] { 1, 2 }, temp.getBytes("byte[]"));
+    }
 
     public void testStringKeys() throws Exception {
-        try {
-            GGEP temp = new GGEP(true);
-            temp.put("A", "B");
-            temp.put("C", (String)null);
-            temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
-            assertTrue(temp.hasKey("A"));
-            assertEquals("B", temp.getString("A"));
-            assertTrue(temp.hasKey("C"));
-            assertTrue(temp.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-            assertEquals("", temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST));
-        } catch (BadGGEPPropertyException failed) {
-            fail("Couldn't get property", failed);
-        }
+        GGEP temp = new GGEP(true);
+        temp.put("A", "B");
+        temp.put("C", (String)null);
+        temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
+        assertTrue(temp.hasKey("A"));
+        assertEquals("B", temp.getString("A"));
+        assertTrue(temp.hasKey("C"));
+        assertTrue(temp.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
+        assertEquals("", temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST));
     }
 
     public void testByteKeys() throws Exception {
-        try {
-            GGEP temp = new GGEP(true);
-            temp.put("A", new byte[] { (byte)3 });
-            assertTrue(temp.hasKey("A"));
-            assertTrue(Arrays.equals(temp.getBytes("A"),
-                                     new byte[] { (byte)3 }));
-        } catch (BadGGEPPropertyException failed) {
-            fail("Couldn't get property", failed);
-        }
+        GGEP temp = new GGEP(true);
+        temp.put("A", new byte[] { (byte)3 });
+        assertTrue(temp.hasKey("A"));
+        assertTrue(Arrays.equals(temp.getBytes("A"),
+                                 new byte[] { (byte)3 }));
     }
 
     public void testIntKeys() throws Exception {
-        try {
-            GGEP temp = new GGEP(true);
-            temp.put("A", 527);
-            assertTrue(temp.hasKey("A"));
-            assertEquals(527, temp.getInt("A"));
-            assertTrue(Arrays.equals(temp.getBytes("A"),
-                                     new byte[] { (byte)0x0F, (byte)0x02 }));
-        } catch (BadGGEPPropertyException failed) {
-            fail("Couldn't get property", failed);
-        }
+        GGEP temp = new GGEP(true);
+        temp.put("A", 527);
+        assertTrue(temp.hasKey("A"));
+        assertEquals(527, temp.getInt("A"));
+        assertTrue(Arrays.equals(temp.getBytes("A"),
+                                 new byte[] { (byte)0x0F, (byte)0x02 }));
     }
     
     public void testLongKeys() throws Exception {
@@ -152,12 +166,8 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
-        try {
-            GGEP temp = new GGEP(true);
-            temp.put("WHATEVER", hasANull);
-        } catch (IllegalArgumentException pass) { 
-            fail("No IllegalArgumentException.");
-        }
+        GGEP temp = new GGEP(true);
+        temp.put("WHATEVER", hasANull);
     }
 
     /** Null bytes are always allowed now.
@@ -168,12 +178,8 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
-        try {
-            GGEP temp = new GGEP(false);
-            temp.put("WHATEVER", hasANull);
-        } catch (IllegalArgumentException fail) { 
-            fail("IllegalArgumentException.");
-        }
+        GGEP temp = new GGEP(false);
+        temp.put("WHATEVER", hasANull);
     }
 
     public void testEquals() {

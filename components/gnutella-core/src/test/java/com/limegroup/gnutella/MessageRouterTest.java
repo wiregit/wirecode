@@ -2,16 +2,23 @@ package com.limegroup.gnutella;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.DatagramPacket;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
+import java.util.Collection;
+import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NewConnection;
@@ -112,9 +119,8 @@ public final class MessageRouterTest extends BaseTestCase {
      * <tt>Response</tt> arrays.
      */
     public void testResponsesToQueryReplies() throws Exception {
-        
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
-        
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true); 
+
         Class[] paramTypes = new Class[] {
             Response[].class, 
             QueryRequest.class,
@@ -506,6 +512,142 @@ public final class MessageRouterTest extends BaseTestCase {
 
     }
     
+    public void testUDPPingReplies() throws Exception {
+        ConnectionManager cm = new ConnectionManager(null);
+        cm.initialize();
+        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+        
+        StubRouter stub = new StubRouter();
+        // send a PR that doesn't have SCP in it.
+        PingRequest pr = new PingRequest((byte)1);
+        assertFalse(pr.supportsCachedPongs());
+        assertFalse(pr.requestsIP());
+        
+        DatagramPacket dp = new DatagramPacket(new byte[0], 0);
+        dp.setAddress(InetAddress.getLocalHost());
+        dp.setPort(1);
+        
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        PingReply reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(0, reply.getPackedIPPorts().size());
+        assertNull(reply.getMyInetAddress());
+        assertEquals(0, reply.getMyPort());
+        
+        // send a PR that does have SCP in it.
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+        assertFalse(RouterService.isSupernode());
+        Collection hosts = RouterService.getPreferencedHosts(false, null);
+        assertEquals(hosts.toString(), 0, hosts.size());
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
+        assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
+        assertTrue(pr.requestsIP());
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(InetAddress.getLocalHost(), reply.getMyInetAddress());
+        assertEquals(1, reply.getMyPort());
+        assertEquals(0, reply.getPackedIPPorts().size());
+        
+        // add some hosts with free leaf slots (just 3), make sure we get'm back.
+        addFreeLeafSlotHosts(3);
+        hosts = RouterService.getPreferencedHosts(false, null);
+        assertEquals(hosts.toString(), 3, hosts.size());
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
+        assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(3, reply.getPackedIPPorts().size());
+        
+        // add 20 more free leaf slots, make sure we only get 10.
+        addFreeLeafSlotHosts(20);
+        hosts = RouterService.getPreferencedHosts(false, null);
+        assertEquals(hosts.toString(), 10, hosts.size());
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
+        assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(10, reply.getPackedIPPorts().size());
+        
+        clearFreeLeafSlotHosts();
+        addFreeLeafSlotHosts(2); // odd number, to make sure it isn't impacting other tests.
+        
+        // now test if we're an ultrapeer.
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        assertTrue(RouterService.isSupernode());
+        addFreeUltrapeerSlotHosts(4);
+        hosts = RouterService.getPreferencedHosts(true, null);
+        assertEquals(hosts.toString(), 4, hosts.size());
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
+        assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(4, reply.getPackedIPPorts().size());
+        
+        // and add a lot again, make sure we only get 10.
+        addFreeUltrapeerSlotHosts(20);
+        hosts = RouterService.getPreferencedHosts(true, null);
+        assertEquals(hosts.toString(), 10, hosts.size());
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
+        assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(10, reply.getPackedIPPorts().size());
+        
+        // Now try again, without an SCP request, and make sure we got none.
+        pr = new PingRequest((byte)1);
+        assertFalse(pr.supportsCachedPongs());
+        assertFalse(pr.requestsIP());
+        stub.respondToUDPPingRequest(pr, dp, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(0, reply.getPackedIPPorts().size());
+        assertNull(reply.getMyInetAddress());
+        assertEquals(0, reply.getMyPort());        
+    }
+    
+    private void addFreeLeafSlotHosts(int num) throws Exception {
+        HostCatcher hc = RouterService.getHostCatcher();
+        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        for(int i = 0; i < num; i++)
+            set.add(new Endpoint("1.2.3." + i, i+1));
+    }
+    
+    private void addFreeUltrapeerSlotHosts(int num) throws Exception {
+        HostCatcher hc = RouterService.getHostCatcher();
+        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
+        for(int i = 0; i < num; i++)
+            set.add(new Endpoint("1.2.3." + i, i+1));
+    }
+    
+    private void clearFreeLeafSlotHosts() throws Exception {
+        HostCatcher hc = RouterService.getHostCatcher();
+        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
+        set.clear();
+    }        
+        
+    
     /**
      * Test file manager that returns specialized keywords for QRP testing.
      */
@@ -529,4 +671,23 @@ public final class MessageRouterTest extends BaseTestCase {
             }
         }
     }
+    
+    /**
+     * Stub MessageRouter that catches 'sendPingReply' pings.
+     */
+    private static final class StubRouter extends StandardMessageRouter {
+        private List sentPongs = new LinkedList();
+        
+        // upp access.
+        public void respondToUDPPingRequest(PingRequest req, 
+                                            DatagramPacket pk,
+                                            ReplyHandler handler) {
+            super.respondToUDPPingRequest(req, pk, handler);
+        }
+        
+        protected void sendPingReply(PingReply pong, ReplyHandler handler) {
+            sentPongs.add(pong);
+        }
+    }
+                                            
 }

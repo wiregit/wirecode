@@ -10,8 +10,24 @@ import com.limegroup.gnutella.messages.Message;
  */
 public interface MessageListener {
 
-    /** PRE: m.getGUID() is equal to the GUID you registered for.
+    /**
+     * Callback for processing a message.
+     *
+     * This is intended to be used for processing messages
+     * with a specific GUID.
      */
-    public void processMessage(Message m);
+    public void processMessage(Message m, ReplyHandler handler);
+    
+    /**
+     * Callback notifying this MessageListener that it is now registered
+     * for listening to message with the specified guid.
+     */
+    public void registered(byte[] guid);
+    
+    /**
+     * Callback notifying this MessageListener that it is now unregistered
+     * for listening to messages with the specified guid.
+     */
+    public void unregistered(byte[] guid);
 
 }
