@@ -721,30 +721,35 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
         ////////////////////////////////////////////////
 
-        String returnedStats = new String(statsAck.getPayload());
+        byte[] giveStatsPayload = statsVM.getPayload();
+        byte[] statsPayload = statsAck.getPayload();
+        
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[0], statsPayload[0]);
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[1], statsPayload[1]);
+
+        String returnedStats = new String(statsPayload);
         //TODO:1 make sure this is what is expected. 
         //System.out.println(returnedStats);               
 
-        StringTokenizer tok = new StringTokenizer(returnedStats,":|");
+        StringTokenizer tok = new StringTokenizer(returnedStats,"^|");
         
         String token = tok.nextToken();//ignore
-        token = tok.nextToken();//ignore
         token = tok.nextToken(); // UP2 sent -- should be 0
         //System.out.println("****Sumeet***:"+token);
 
         int val = Integer.parseInt(token.trim());
 
         assertEquals("UP2 sent mismatch", ULTRAPEER_2.outgoingCount, val);
-        tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 sent -- should be 3
         assertEquals("UP2 dropped mismatched",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("UP1 sent mismatch", ULTRAPEER_1.outgoingCount , 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
+
         token = tok.nextToken();
         //TODO2: I am not sure why one message is being dropped, but this is the
         //statistic being returned consistently, For now we will leave it here
@@ -753,51 +758,51 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         assertEquals("UP1 dropped mismatch", 1, Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 sent mismatch", LEAF_1.outgoingCount ,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_2 sent mismatch", LEAF_2.outgoingCount,
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_2 dropped mismatch",0,Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_3 sent mismatch", LEAF_3.outgoingCount,
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
+
         token = tok.nextToken();
         assertEquals("Lead_3 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_4 sent mismatch", LEAF_4.outgoingCount, 
                                               Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
         ////////////////////////
         
+        giveStatsPayload = statsVM2.getPayload();
+        statsPayload = statsAck2.getPayload();
+        
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[0], statsPayload[0]);
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[1], statsPayload[1]);
+
         returnedStats = new String(statsAck2.getPayload());
 
-        tok = new StringTokenizer(returnedStats,":|");
+        tok = new StringTokenizer(returnedStats,"^|");
         
-        token = tok.nextToken();//ignore
         token = tok.nextToken();//ignore
         token = tok.nextToken(); // UP2 sent -- should be 0
         //System.out.println("****Sumeet***:"+token);
@@ -805,68 +810,65 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         val = Integer.parseInt(token.trim());
 
         assertEquals("UP2 received mismatch", ULTRAPEER_2.incomingCount, val);
-        tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 received -- should be 14
         assertEquals("UP2 dropped mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("UP1 received mismatch", ULTRAPEER_1.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("UP1 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 received mismacth", LEAF_1.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_2 received mismatch",LEAF_2.incomingCount,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_2 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_3 received mismatch",LEAF_3.incomingCount,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_3 dropped mismatch",0,Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_4 received mismatch", LEAF_4.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
         
         ///////////////////////////
 
+        giveStatsPayload = statsVM3.getPayload();
+        statsPayload = statsAck3.getPayload();
+        
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[0], statsPayload[0]);
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[1], statsPayload[1]);
+
+
         returnedStats = new String(statsAck3.getPayload());
         //TODO:1 make sure this is what is expected. 
         //System.out.println(returnedStats);               
 
-        tok = new StringTokenizer(returnedStats,":|");
+        tok = new StringTokenizer(returnedStats,"^|");
         
-        token = tok.nextToken();//ignore
         token = tok.nextToken();//ignore
         token = tok.nextToken(); // UP2 sent -- should be 0
         //System.out.println("****Sumeet***:"+token);
@@ -874,16 +876,13 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         val = Integer.parseInt(token.trim());
 
         assertEquals("UP2 sent mismatch", ULTRAPEER_2.outgoingCount, val);
-        tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 sent -- should be 3
         assertEquals("UP2 dropped mismatched",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("UP1 sent mismatch", ULTRAPEER_1.outgoingCount , 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         //TODO2: I am not sure why one message is being dropped, but this is the
         //statistic being returned consistently, For now we will leave it here
@@ -892,51 +891,50 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         assertEquals("UP1 dropped mismatch", 1, Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 sent mismatch", LEAF_1.outgoingCount ,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_2 sent mismatch", LEAF_2.outgoingCount,
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_2 dropped mismatch",0,Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_3 sent mismatch", LEAF_3.outgoingCount,
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_3 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_4 sent mismatch", LEAF_4.outgoingCount, 
                                               Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
         ////////////////////////
+
+        giveStatsPayload = statsVM4.getPayload();
+        statsPayload = statsAck4.getPayload();
         
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[0], statsPayload[0]);
+        assertEquals("stats message malformed", 
+                     giveStatsPayload[1], statsPayload[1]);        
+
         returnedStats = new String(statsAck4.getPayload());
 
-        tok = new StringTokenizer(returnedStats,":|");
+        tok = new StringTokenizer(returnedStats,"^|");
         
-        token = tok.nextToken();//ignore
         token = tok.nextToken();//ignore
         token = tok.nextToken(); // UP2 sent -- should be 0
         //System.out.println("****Sumeet***:"+token);
@@ -944,73 +942,48 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         val = Integer.parseInt(token.trim());
 
         assertEquals("UP2 received mismatch", ULTRAPEER_2.incomingCount, val);
-        tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 received -- should be 14
         assertEquals("UP2 dropped mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("UP1 received mismatch", ULTRAPEER_1.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("UP1 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 received mismacth", LEAF_1.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_2 received mismatch",LEAF_2.incomingCount,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_2 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_3 received mismatch",LEAF_3.incomingCount,
                                                Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_3 dropped mismatch",0,Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
-        tok.nextToken();//ignore
         token = tok.nextToken();
         assertEquals("Leaf_4 received mismatch", LEAF_4.incomingCount, 
                                                 Integer.parseInt(token.trim()));
-        tok.nextToken(); //ignore
         token = tok.nextToken();
         assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
     }
-
-   
-    //OK. Now we should have some basic traffic flow between this little
-    //network of ours. The querys are all created from TCP_TEST_LEAF and
-    //sent to the "CENTRAL_UP" which is connected to every faked up node we
-    //are using in this test.
-    
-    //Now lets pre-program some leaves and UPs to respond to specific
-    //queries they willl get in order to be able to count the Gnutella
-    //Traffic these nodes generate
-    
-        
-    //Now let's create some queries and send them out to the central UP
-    //which will forard to the appropriate leaves as per qrp.
     
 }

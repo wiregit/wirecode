@@ -11,6 +11,9 @@ public class StatisticVendorMessage extends VendorMessage {
     public static final int VERSION = 1;
 
     private static final String DELIMITER = " | ";
+    
+    private static final String DELIMITER2 = " ^ ";
+    
 
     /**
      * Constructor for a StatisticVendorMessage read off the network, meaing it
@@ -37,42 +40,54 @@ public class StatisticVendorMessage extends VendorMessage {
                                                      throws BadPacketException {
         byte control = giveStatsVM.getStatControl();
         byte type = giveStatsVM.getStatType();
-        
+        byte[] part1 = {control, type};
+        //write the type of stats we are writing out
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            baos.write(part1);
+        } catch(IOException iox) {
+            ErrorService.error(iox);
+        }
+        byte[] part2;
+
         if(type == GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC ||
            type == GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC) {
-
+            
             boolean incoming = 
             type==GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC;
-            
-            return getGnutellaStats(control,incoming);
+            part2 = getGnutellaStats(control,incoming);
         }
-        else if(type == GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS) {
-            //NOTE: in this case we ignore the granularity control, since HTTP
-            //traffic is not connection specific            
+        else if(type==GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS) {
+            //NOTE: in this case we ignore the granularity control, since
+            //HTTP traffic is not connection specific
             StringBuffer buff = new StringBuffer();
-            buff.append("HTTP header downstream bandwidth :");
             buff.append(
-                   BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.getTotal());
-            buff.append("HTTP body downstream bandwidth :");
+                     BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.getTotal());
+            buff.append(DELIMITER2);
             buff.append(
                       BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.getTotal());
-                      
-            return buff.toString().getBytes();
+            
+            part2 = buff.toString().getBytes();
         }
         else if( type == GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS) {
-            //NOTE: in this case we ignore the granularity control, since HTTP
-            //traffic is not connection specific            
+            //NOTE: in this case we ignore the granularity control, since
+            //HTTP traffic is not connection specific
             StringBuffer buff = new StringBuffer();
-            buff.append("HTTP header upstream bandwidth :");
             buff.append(
-                      BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.getTotal());
-            buff.append("HTTP body upstream bandwidth :");
+                       BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.getTotal());
+            buff.append(DELIMITER2);
             buff.append(BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.getTotal());
-            return buff.toString().getBytes();            
+            part2 = buff.toString().getBytes();
         }
         else {
             throw new BadPacketException("unknown stat type requested");
         }
+        try {
+            baos.write(part2);
+        } catch (IOException iox) {
+            ErrorService.error(iox);
+        }        
+        return baos.toByteArray();
     }
  
 
@@ -85,22 +100,18 @@ public class StatisticVendorMessage extends VendorMessage {
             for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
                 ManagedConnection c = (ManagedConnection)iter.next();
                 buff.append(c.toString());
-                buff.append(" messages count ");
+                buff.append(DELIMITER2);
                 if(incoming) {
-                    buff.append("(incoming) :");
                     buff.append(c.getNumMessagesReceived());
                     buff.append(DELIMITER);
-                    buff.append("(dropped incoming) :");
                     buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append("(outgoing) :");
                     buff.append(c.getNumMessagesSent());
                     buff.append(DELIMITER);
-                    buff.append("(dropped outgoing) :");
                     buff.append(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER);
+                buff.append(DELIMITER2);
             }
             return buff.toString().getBytes();
         }
@@ -114,13 +125,8 @@ public class StatisticVendorMessage extends VendorMessage {
                 dropped += incoming ? c.getNumReceivedMessagesDropped() :
                                                c.getNumSentMessagesDropped();
             }
-            buff.append("All connections message count ");
-            if(incoming) 
-                buff.append("(incoming) :");
-            else
-                buff.append("(outgoing) :");
             buff.append(messages);
-            buff.append(" (dropped): ");
+            buff.append(DELIMITER);
             buff.append(dropped);
             return buff.toString().getBytes();
         }
@@ -130,22 +136,18 @@ public class StatisticVendorMessage extends VendorMessage {
                 if(!c.isSupernodeConnection())
                     continue;
                 buff.append(c.toString());
-                buff.append(" messages count ");
+                buff.append(DELIMITER2);
                 if(incoming) {
-                    buff.append("(incoming) :");
                     buff.append(c.getNumMessagesReceived());
                     buff.append(DELIMITER);
-                    buff.append("(dropped incoming) :");
                     buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append("(outgoing) :");
                     buff.append(c.getNumMessagesSent());
                     buff.append(DELIMITER);
-                    buff.append("(dropped outgoing) :");
                     buff.append(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER);
+                buff.append(DELIMITER2);
             }
             return buff.toString().getBytes();
         }
@@ -155,22 +157,18 @@ public class StatisticVendorMessage extends VendorMessage {
                 if(!c.isLeafConnection())
                     continue;
                 buff.append(c.toString());
-                buff.append(" messages count ");
+                buff.append(DELIMITER2);
                 if(incoming) {
-                    buff.append("(incoming) :");
                     buff.append(c.getNumMessagesReceived());
                     buff.append(DELIMITER);
-                    buff.append("(dropped incoming) :");
                     buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append("(outgoing) :");
                     buff.append(c.getNumMessagesSent());
                     buff.append(DELIMITER);
-                    buff.append("(dropped outgoing) :");
                     buff.append(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER);
+                buff.append(DELIMITER2);
             }
             return buff.toString().getBytes();
         }
