@@ -70,7 +70,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     /*
      * The depth of this tree.
      */
-     
     private final int DEPTH;
     
     /**
@@ -240,6 +239,31 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         if (LOG.isDebugEnabled())
             LOG.debug("depth " + DEPTH + " file " + FILE_SIZE);
         return (DEPTH == calculateDepth(FILE_SIZE));
+    }
+    
+    /**
+     * Determines if this tree is better than another.
+     *
+     * A tree is considered better if the other's depth is not 'good',
+     * and this depth is good, or if both are not good then the depth
+     * closer to 'good' is best.
+     */
+    public boolean isBetterTree(HashTree other) {
+        if(other == null)
+            return true;
+        else if(other.isGoodDepth())
+            return false;
+        else if(this.isGoodDepth())
+            return true;
+        else {
+            int ideal = calculateDepth(FILE_SIZE);
+            int diff1 = Math.abs(this.DEPTH - ideal);
+            int diff2 = Math.abs(other.DEPTH - ideal);
+            if(diff1 < diff2)
+                return true;
+            else
+                return false;
+        }
     }
 
     /**

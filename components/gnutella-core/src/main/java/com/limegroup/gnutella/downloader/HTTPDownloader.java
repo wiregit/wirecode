@@ -91,6 +91,8 @@ public class HTTPDownloader implements BandwidthTracker {
 
 	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
+	private OutputStream _output;
+	private InputStream _input;
     private File _incompleteFile;
     
     /**
@@ -276,7 +278,9 @@ public class HTTPDownloader implements BandwidthTracker {
             //If platform supports it, set SO_KEEPALIVE option.  This helps
             //detect a crashed uploader.
             Sockets.setKeepAlive(_socket, true);
-            istream = _socket.getInputStream(); 
+            _input = new BufferedInputStream(_socket.getInputStream());
+            _output = new BufferedOutputStream(_socket.getOutputStream());
+            
         } catch (IOException e) {
             throw new CantConnectException();
         }
@@ -284,7 +288,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //want to download from we set the soTimeout. Its reset in doDownload
         //Note2 : this may throw an IOException.  
         _socket.setSoTimeout(Constants.TIMEOUT);
-        _byteReader = new ByteReader(istream);
+        _byteReader = new ByteReader(_input);
     }
     
     /** 
@@ -337,8 +341,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //Write GET request and headers.  We request HTTP/1.1 since we need
         //persistence for queuing & chunked downloads.
         //(So we can't write "Connection: close".)
-        OutputStream os = _socket.getOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os);
+        OutputStreamWriter osw = new OutputStreamWriter(_output);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET "+_rfd.getUrl().getFile()+" HTTP/1.1\r\n");
@@ -435,77 +438,115 @@ public class HTTPDownloader implements BandwidthTracker {
 	}
 	
     /**
-     * @return HashTree for this file or null
+     * Returns the ConnectionStatus from the request.
+     * Can be one of:
+     *   Connected -- means to immediately assignAndRequest.
+     *   Queued -- means to sleep while queued.
+     *   ThexResponse -- means the thex tree was received.
      */
-    public HashTree requestHashTree() {
-            if (LOG.isDebugEnabled())
-        LOG.debug("requesting HashTree for " + _thexUri + " from " +_host + ":" + _port);
+    public ConnectionStatus requestHashTree() {
+        if (LOG.isDebugEnabled())
+            LOG.debug("requesting HashTree for " + _thexUri + 
+                      " from " +_host + ":" + _port);
+
         try {
-            OutputStream os = _socket.getOutputStream();
             String str;
             str = "GET " + _thexUri +" HTTP/1.1\r\n";
-            os.write(str.getBytes());
+            _output.write(str.getBytes());
             str = "HOST: "+_host+":"+_port+"\r\n";
-            os.write(str.getBytes());
+            _output.write(str.getBytes());
             str = "User-Agent: "+CommonUtils.getHttpServer()+"\r\n";
-            os.write(str.getBytes());
+            _output.write(str.getBytes());
             str = "\r\n";
-            os.write(str.getBytes());
+            _output.write(str.getBytes());
+            _output.flush();
         } catch (IOException ioe) {
             if (LOG.isDebugEnabled())
-            LOG.debug("connection failed during sending hashtree request"); 
-            // connection failed.
-            return null;
+                LOG.debug("connection failed during sending hashtree request"); 
+            return ConnectionStatus.getConnected();
         }
-        InputStream is;
         try {
-            is = _socket.getInputStream();
-            readHeaders();
-            // We don't handle busy replies, queueing or whatever. 
-            // We won't wait in a queue for a couple of KB.
-        } catch (QueuedException qe) {
-            if (LOG.isDebugEnabled())
-            LOG.debug("hashtree request returned queued"); 
-            _rfd.setTHEXFailed(); 
-            return null;
-        } catch (TryAgainLaterException tale) {
-            if (LOG.isDebugEnabled())
-            LOG.debug("hashtree request returned busy"); 
-            _rfd.setTHEXFailed(); 
-            return null;
-        } catch (UnknownCodeException uce) {
-            if (LOG.isDebugEnabled())
-            LOG.debug("hashtree request returned unknown code"); 
-            _rfd.setTHEXFailed(); 
-            return null;
+            String line = _byteReader.readLine();
+            int code = parseHTTPCode(line, _rfd);
+            if(code < 200 || code >= 300) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("invalid HTTP code: " + code);
+                _rfd.setTHEXFailed();
+                return consumeResponse(code);
+            }
+            
+            // Code was 2xx, consume the headers
+            consumeHeaders(null);
+            // .. and read the body.
+            HashTree hashTree =
+                HashTree.createHashTree(_input, _rfd.getSHA1Urn().toString(),
+                                        _root32, (long)_rfd.getSize());
+            return ConnectionStatus.getThexResponse(hashTree);
         } catch (IOException ioe) {
-            if (LOG.isDebugEnabled())
-            LOG.debug("hashtree request returned ioe" + ioe.toString()); 
+            LOG.debug(ioe);
+            
+            _rfd.setTHEXFailed();
             // any other replies that can possibly cause an exception
             // (404, 410) will cause the host to fall through in the
             // ManagedDownloader anyway.
             // if it was just a connection failure, we may retry.
-            return null;
+            return ConnectionStatus.getConnected();
         }
-
-        HashTree hashTree = null;
-        try {
-            hashTree =
-                HashTree.createHashTree(is, _rfd.getSHA1Urn().toString(),
-                                        _root32, (long)_rfd.getSize());
-        } catch(IOException failed) {}
-
-        // Get somebody else to THEX me up! I don't want to download a hash
-        // tree from a host that sent me an illegal THEX reply.  
-        if (hashTree == null) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("hashtree from " + _host + ":" + _port + "was null");
-            _rfd.setTHEXFailed();
+    }
+    
+    /**
+     * Consumes the headers of an HTTP message, returning the Content-Length.
+     */
+    private int consumeHeaders(int[] queueInfo) throws IOException {
+        int contentLength = -1;
+        String str;
+        while(true) {
+            str = _byteReader.readLine();
+            if(str == null || str.equals(""))
+                break;
+            if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(str)) {
+                String value = HTTPUtils.extractHeaderValue(str);
+                if(value == null) continue;
+                try {
+                    contentLength = Integer.parseInt(value.trim());
+                } catch(NumberFormatException nfe) {
+                    contentLength = -1;
+                }
+            } else if(queueInfo != null && 
+                      HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
+                parseQueueHeaders(str, queueInfo);
         }
+        return contentLength;
+    }   
+    
+    /**
+     * Consumes the response of an HTTP message.
+     */
+    private ConnectionStatus consumeResponse(int code) throws IOException {
+        int[] queueInfo = { -1, -1, -1 };
+        int contentLength = consumeHeaders(queueInfo);
+        if(code == 503) {
+            int min = queueInfo[0];
+            int max = queueInfo[1];
+            int pos = queueInfo[2];
+            if(min != -1 && max != -1 && pos != -1)
+                return ConnectionStatus.getQueued(pos, min);
+        }
+        
+        if(contentLength == -1)
+            throw new IOException("unknown content-length, can't consume");
 
-        return hashTree;
-    }	
-	
+        byte[] buf = new byte[1024];
+        // read & ignore all the content.
+        while(contentLength > 0) {
+            int toRead = Math.max(buf.length, contentLength);
+            int read = _input.read(buf, 0, toRead);
+            if(read == -1)
+                break;
+            contentLength -= read;
+        }
+        return ConnectionStatus.getConnected();
+    }           
 
     /*
      * Reads the headers from this, setting _initialReadingPoint and
@@ -1162,6 +1203,14 @@ public class HTTPDownloader implements BandwidthTracker {
             if (_socket != null)
                 _socket.close();
         } catch (IOException e) { }
+        try {
+            if(_input != null)
+                _input.close();
+        } catch(IOException e) {}
+        try {
+            if(_output != null)
+                _output.close();
+        } catch(IOException e) {}
 	}
 
     /**

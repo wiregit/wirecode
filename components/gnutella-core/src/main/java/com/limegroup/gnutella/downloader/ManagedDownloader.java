@@ -115,12 +115,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                                (asynchronously)
                                     |
                               connectAndDownload
-                          /           |             \___________________
-        establishConnection     assignAndRequest       doDownload
-             |                        |                                  /     \
-       HTTPDownloader.connectTCP  assignWhite/assignGrey     requestHashTree    \
-                                      |           HTTPDownlaoder.doDownload
-                               HTTPDownloader.connectHTTP
+                          /           |             \
+        establishConnection     assignAndRequest    doDownload
+             |                        |             |       \
+       HTTPDownloader.connectTCP      |             |        requestHashTree
+                                      |             |- HTTPDownloader.download
+                            assignWhite/assignGrey
+                                      |
+                           HTTPDownloader.connectHTTP
 
       tryAllDownloads does the bucketing of files, as well as waiting for
       retries.  The core downloading loop is done by tryAllDownloads3.
@@ -2300,85 +2302,87 @@ public class ManagedDownloader implements Downloader, Serializable {
             //downloader should choose a part of the file to download
             //and send the appropriate HTTP hearders
             //Note: 0=disconnected,1=tcp-connected,2=http-connected            
-            int connected;
+            ConnectionStatus status;
             http11 = rfd.isHTTP11();
             while(true) { //while queued, connect and sleep if we queued
-                // request THEX from te dloader if we need it
-                if (dloader.hasHashTree() && hashTree == null) {
-                    HashTree temp = dloader.requestHashTree();
-                    if (temp != null) {
-                        hashTree = temp;
-                        // persist the hashTree in the TigerTreeCache
-                        // because we
-                        // won't save it in the ManagedDownloader
-                        TigerTreeCache.instance().addHashTree(
-                                rfd.getSHA1Urn(),
-                                hashTree);
+                status = null;
+                
+                // request THEX from te dloader if the tree we have
+                // isn't good enough (or we don't have a tree)
+                if (dloader.hasHashTree() &&
+                  (hashTree == null || !hashTree.isGoodDepth())) {
+                    status = dloader.requestHashTree();
+                    if(status.isThexResponse()) {
+                        HashTree temp = status.getHashTree();
+                        if (temp != null && temp.isBetterTree(hashTree)) {
+                            hashTree = temp;
+                            // persist the hashTree in the TigerTreeCache
+                            // because we won't save it in ManagedDownloader
+                            TigerTreeCache.instance().addHashTree(
+                                    rfd.getSHA1Urn(),
+                                    hashTree);
+                        }
                     }
                 }
-                int[] qInfo ={-1,-1};//reset the sleep value, and queue position
-                connected = assignAndRequest(dloader,qInfo,http11);
-                boolean addQueued = killQueuedIfNecessary(connected,qInfo[1]);
-                //an uploader we want to stay connected with
-                if(connected == 4)
-                    continue; // and has partial ranges
-                if(connected!=1)
+                
+                // if we didn't get queued doing the tree request,
+                // request another file.
+                if(status == null || !status.isQueued())
+                    status = assignAndRequest(dloader, http11);
+                
+                if(status.isPartialData()) {
+                    // loop again if they had partial ranges.
+                    continue;
+                } else if(status.isNoFile() || status.isNoData()) {
+                    //if they didn't have the file or we didn't need data,
+                    //break out of the loop.
+                    break;
+                }
+                
+                // must be queued or connected.
+                Assert.that(status.isQueued() || status.isConnected());
+                boolean addQueued = killQueuedIfNecessary(status);
+                
+                // we should have been told to stay alive if we're connected
+                // but it's possible that we are above our swarm capacity
+                // and nothing else was queued, in which case we really should
+                // kill ourselves, but there's no reason to not accept the
+                // extra host.
+                if(status.isConnected())
                     break;
                 
-                if(connected==1 && !addQueued) {
-                    //I'm queued, but no thread was killed for me. die!
-                    return true; //manager! keep churning more threads
-                }
-                if(connected==1) {//we have a queued thread, sleep
-                    Assert.that(qInfo[0]>-1&&qInfo[1]>-1,
-                                                    "inconsistent queue data");
-                    try {
-                        // make sure that we're not in dloaders if we're
-                        // sleeping/queued.  this would ONLY be possible
-                        // if some uploader was misbehaved and queued
-                        // us after we succesfully managed to download some
-                        // information.  despite the rarity of the situation,
-                        // we should be prepared.
-                        synchronized(this) {
-                            dloaders.remove(dloader);
-                        }
-                        Thread.sleep(qInfo[0]);//value from QueuedException
-                    } catch (InterruptedException ix) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("worker: interrupted while asleep in "+
-                              "queue" + dloader);
-                        queuedThreads.remove(Thread.currentThread());
-                        dloader.stop();//close connection
-                                // notifying will make no diff, coz the next 
-                                //iteration will throw interrupted exception.
-                        return true;
-                    }
-                }
-                else
-                    Assert.that(false,"this should never happen");
+                Assert.that(status.isQueued());
+                // if we didn't want to stay queued, try other sources
+                // or we got interrupted while sleeping, try other sources
+                if(!addQueued || handleQueued(status, dloader))
+                    return true;
             }
             //we have been given a slot remove this thread from queuedThreads
             synchronized(this) {
                 //no problem even if this thread is  not in there
                 queuedThreads.remove(Thread.currentThread()); 
-            } 
-
-            //Now, connected is either 0, 2 or 3.
-            Assert.that(connected==0 || connected==2 || connected==3,
-                        "invalid return from assignAndRequest "+connected);
-            if(connected==0) { // File Not Found, Try Again Later, etc...
-                dloader.stop(); // close the connection for now.
-                return true;
             }
-            else if(connected==3) { // Nothing more to download
+
+            switch(status.getType()) {
+            case ConnectionStatus.TYPE_NO_FILE:
+                // close the connection for now.            
+                dloader.stop();
+                return true;            
+            case ConnectionStatus.TYPE_NO_DATA:
                 // close the connection since we're finished.
                 dloader.stop();
                 return false;
-            }            
+            case ConnectionStatus.TYPE_CONNECTED:
+                break;
+            default:
+                throw new IllegalStateException("illegal status: " + 
+                                                status.getType());
+            }
+
+            Assert.that(status.isConnected());
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            boolean downloadOK = doDownload(dloader,http11);
-            if(!downloadOK)
+            if(!doDownload(dloader, http11))
                 break;
         } // end of while(http11)
         
@@ -2395,67 +2399,96 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
-     * @param connectCode 0 means no connection, 1 means connection queued, 2
-     * means connection made, 3 means no connection required, 4 means partial
-     * range available
-     * @param queuePos the position of this downloader in the remote queue, MUST
-     * be equal to -1 unless connectCode == 1 
-     * <P>
-     * Interrupts a remotely queued thread if the value of connectCode is 2
-     * (meaning queuePos is -1) or connectCode is 1(meaning queuePos is the the
-     * remote position of this thread) AND a thread has a worse position than
-     * queuePos.  
+     * Handles a queued downloader with the given ConnectionStatus.
+     * BLOCKING (while sleeping).
+     *
+     * @return true if we need to tell the manager to churn another
+     *         connection and let this one die, false if we are
+     *         going to try this connection again.
+     */
+    private boolean handleQueued(ConnectionStatus status,
+                                 HTTPDownloader dloader) {
+        try {
+            // make sure that we're not in dloaders if we're
+            // sleeping/queued.  this would ONLY be possible
+            // if some uploader was misbehaved and queued
+            // us after we succesfully managed to download some
+            // information.  despite the rarity of the situation,
+            // we should be prepared.
+            synchronized(this) {
+                dloaders.remove(dloader);
+            }
+            Thread.sleep(status.getQueuePollTime());//value from QueuedException
+            return false;
+        } catch (InterruptedException ix) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("worker: interrupted while asleep in "+
+                  "queue" + dloader);
+            queuedThreads.remove(Thread.currentThread());
+            dloader.stop();//close connection
+                    // notifying will make no diff, coz the next 
+                    //iteration will throw interrupted exception.
+            return true;
+        }
+    }
+    
+    /**
+     * Interrupts a remotely queued thread if we this status is connected,
+     * or if the status is queued and our queue position is better than
+     * an existing queued status.
+     *
+     * @param status The ConnectionStatus of this downloader.
+     *
      * @return true if this thread should be kept around, false otherwise --
      * explicitly, there is no need to kill any threads, or if the currentThread
      * is already in the queuedThreads, or if we did kill a thread worse than
      * this thread.  
      */
-    private boolean killQueuedIfNecessary(int connectCode, int queuePos) {
-        //check integrity constriants first
-        Assert.that(connectCode>=0 && connectCode <=4,"Invalid connectCode");
-        if(connectCode==2)
-            Assert.that(queuePos==-1,"inconsistnet parameter queuePos");
-        if(queuePos > -1)
-            Assert.that(connectCode==1,"inconsistnet parameter connectCode");
-
-        if(connectCode==0) //no need to replace a thread, server not available
-            return false;
-        if(connectCode==3) //no need to kill a thread for NoSuchElement
-            return false;
-        if(connectCode==4) //Partial ranges, don't kill now, defer the decision
-            return false;
+    private boolean killQueuedIfNecessary(ConnectionStatus status) {
         //Either I am queued or downloading, find the highest queued thread
         Thread killThread = null;
         Thread currentThread = Thread.currentThread();
-        synchronized(this) {            
-            if(getNumDownloaders() < getSwarmCapacity()) {//need not kill anyone
-                if(connectCode==1) //queued thread with no replacement required
-                    queuedThreads.put(currentThread,new Integer(queuePos));
+        int queuePos = status.isQueued() ? status.getQueuePosition() : -1;
+
+        synchronized(this) {
+            // No replacement required?...
+            if(getNumDownloaders() < getSwarmCapacity()) {
+                if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
                 return true;
             }
+            
+            // Already Queued?...
             if(queuedThreads.containsKey(currentThread)) {
-                //we are already in there, update position if we're still queued
-                if(connectCode==1)
-                    queuedThreads.put(currentThread,new Integer(queuePos));
+                // update position
+                if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
                 return true;
             }
+            
+            // Search for the queued thread with a slot worse than ours.
             Iterator iter = queuedThreads.keySet().iterator();
-            int highest = queuePos;
+            int highest = queuePos; // -1 if we aren't queued.
             while(iter.hasNext()) {
                 Object o = iter.next();
                 int currQueue = ((Integer)queuedThreads.get(o)).intValue();
-                if(currQueue > highest) { //queuePos==-1 for downloading threads
+                if(currQueue > highest) {
                     killThread=(Thread)o;
                     highest = currQueue;
                 }
             }
-            if(killThread == null) //no kill candidate
+
+            // No one worse than us?... kill us.
+            if(killThread == null)
                 return false;
-            //OK. let's kill this guy
+
+            //OK. let's kill this guy 
             killThread.interrupt();
+
             //OK. I should add myself to queuedThreads if I am queued
-            if(connectCode == 1)
-                queuedThreads.put(currentThread,new Integer(queuePos));
+            if(status.isQueued())
+                    queuedThreads.put(currentThread, new Integer(queuePos));
+            
             return true;
         }        
     }
@@ -2657,17 +2690,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
-     * @param refQueueInfo this parameter is used for pass by reference, this
-     * method puts the minPollTime as the 0th element of this array, and the
-     * remote queue postion of the downloader in the 1st element
-     * @return 0 if (the server is not giving us the file)
-     * TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
-     * otherwise if queued return 1
-     * otherwise if connected successfully return 2
-     * otherwise if NoSuchElement( we have no areas to steal) return 3
-     * otherwise if rfd was partial uploader and gave us ranges to try return 4 */
-    private int assignAndRequest(HTTPDownloader dloader,int[] refQueueInfo, 
-                                                              boolean http11) {
+     * @return the ConnectionStatus.
+     */
+    private ConnectionStatus assignAndRequest(HTTPDownloader dloader,
+                                              boolean http11) {
         synchronized(stealLock) {
             RemoteFileDesc rfd = dloader.getRemoteFileDesc();
             boolean shouldAssignWhite = false;
@@ -2692,7 +2718,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // this rfd
                     files.add(rfd);
                 }
-                return 3;
+                return ConnectionStatus.getNoData();
             } catch (NoSuchRangeException nsrx) { 
                 if(RECORD_STATS)
                     DownloadStat.NSR_EXCEPTION.incrementStat();
@@ -2708,7 +2734,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     files.add(rfd);
                 }
                 rfd.resetFailedCount();                
-                return 0;                
+                return ConnectionStatus.getNoFile();
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
@@ -2731,7 +2757,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     files.add(rfd);//try this rfd later
                 }
                 rfd.resetFailedCount();                
-                return 0;
+                return ConnectionStatus.getNoFile();
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
@@ -2739,29 +2765,27 @@ public class ManagedDownloader implements Downloader, Serializable {
                     LOG.debug("rnae thrown in assignAndRequest "+dloader,rnae);
                 rfd.resetFailedCount();                
                 informMesh(rfd, true);
-                return 4; //no need to add to files or busy we keep iterating
+                //no need to add to files or busy we keep iterating
+                return ConnectionStatus.getPartialData();
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("fnfx thrown in assignAndRequest"+dloader, fnfx);
                 informMesh(rfd, false);
-                return 0;//discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("nsx thrown in assignAndRequest "+dloader, nsx);
                 informMesh(rfd, false);
-                return 0;//discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
                     DownloadStat.Q_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
-                //The extra time to sleep can be tuned. For now it's 1 S.
-                refQueueInfo[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
-                refQueueInfo[1] = qx.getQueuePosition();
                 synchronized(this) {
                     if(dloaders.size()==0) {
                         setState(REMOTE_QUEUED);
@@ -2775,14 +2799,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }                    
                 }
                 rfd.resetFailedCount();                
-                return 1;
+                return ConnectionStatus.getQueued(qx.getQueuePosition(),
+                                                  qx.getMinPollTime());
             } catch(ProblemReadingHeaderException prhe) {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("prhe thrown in assignAndRequest "+dloader,prhe);
                 informMesh(rfd, false);
-                return 0; //discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
@@ -2791,13 +2816,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                               ") thrown in assignAndRequest " +
                               dloader, uce);
                 informMesh(rfd, false);
-                return 0; //discard the rfd of dloader
+                return ConnectionStatus.getNoFile();
             } catch (ContentUrnMismatchException cume) {
             	if(RECORD_STATS)
             		DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
             	if(LOG.isDebugEnabled())
             		LOG.debug("cume thrown in assignAndRequest " + dloader, cume);
-				return 0;            		
+				return ConnectionStatus.getNoFile();
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
@@ -2816,7 +2841,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 } else //tried the location twice -- it really is bad
                     informMesh(rfd, false);         
-                return 0;
+                return ConnectionStatus.getNoFile();
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
@@ -2851,7 +2876,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     releaseRanges(dloader); //give back a leased area
                     files.add(rfd);
                 }
-                return 0;//throw new InterruptedException();
+                return ConnectionStatus.getNoData();
             }
             synchronized(this) {
                 // only add if not already added.
@@ -2862,7 +2887,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             if(RECORD_STATS)
                 DownloadStat.RESPONSE_OK.incrementStat();            
-            return 2;
+            return ConnectionStatus.getConnected();
         }
     }
 	
