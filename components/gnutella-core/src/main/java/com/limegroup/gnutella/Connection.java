@@ -1863,6 +1863,14 @@ public class Connection implements IpPort {
     public String getLocalePref() {
         return _headers.getLocalePref();
     }
+    
+    //Implements IpPort interface
+    public boolean isSame(IpPort o) {
+    	if (o==null)
+    		return false;
+    	return getInetAddress().equals(o.getInetAddress()) &&
+			getPort() == o.getPort();
+    }
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is

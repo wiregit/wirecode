@@ -1403,6 +1403,14 @@ public class QueryReply extends Message implements Serializable{
         public String getAddress() {
             return _addr.getHostAddress();
         }
+        
+        // Implements IpPort interface
+        public boolean isSame(IpPort o) {
+        	if (o==null)
+        		return false;
+        	return _addr.equals(o.getInetAddress()) &&
+				_port == o.getPort();
+        }
 
         /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
          *  //TODO if IPv6 kicks in, this may fail, don't worry so much now.
