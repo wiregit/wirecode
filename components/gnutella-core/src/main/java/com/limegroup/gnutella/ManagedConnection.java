@@ -911,15 +911,17 @@ public class ManagedConnection
                 throw new IOException(
                     "Shielded Client wont accept incoming Connection");
             }else{
-                //check the headers. We must have received 'Supernode: True'
-                //to proceed
-                Properties responseProperties = response.getHeaders();
-                String supernode = responseProperties.getProperty(
-                    ConnectionHandshakeHeaders.SUPERNODE,"False");
-                if(!Boolean.getBoolean(supernode))
-                    throw new IOException(
-                        "I am a client node, and will connect to a supernode" 
-                        + "only");
+//                //check the headers. We must have received 'Supernode: True'
+//                //to proceed
+                //Note that we are accepting the connection here, and leave 
+                //it to manager to decide what to do
+//                Properties responseProperties = response.getHeaders();
+//                String supernode = responseProperties.getProperty(
+//                    ConnectionHandshakeHeaders.SUPERNODE,"False");
+//                if(!Boolean.getBoolean(supernode))
+//                    throw new IOException(
+//                        "I am a client node, and will connect to a supernode" 
+//                        + "only");
             }
             
             return new HandshakeResponse(code, message, ret);

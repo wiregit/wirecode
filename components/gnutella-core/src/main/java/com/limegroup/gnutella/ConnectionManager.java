@@ -230,7 +230,7 @@ public class ConnectionManager {
                 || (!isClientConnection && 
                 (_incomingConnections > _keepAlive))) {
                     synchronized(this){
-                        removeInternal(connection);
+                        remove(connection);
              }
              }else {                     
                  sendInitialPingRequest(connection);
@@ -361,6 +361,17 @@ public class ConnectionManager {
      */
     List getInitializedConnections2() {
         return _initializedConnections;
+    }
+    
+    /**
+     * @requires returned value not modified
+     * @effects returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some cases
+     *  as an optimization.</b>  All lookup values in the returned value
+     *  are guaranteed to run in linear time.
+     */
+    List getInitializedClientConnections2() {
+        return _initializedClientConnections;
     }
 
     /**
@@ -666,10 +677,48 @@ public class ConnectionManager {
             _callback.connectionInitialized(c);
     }
 
+    //anu TODO
+    /** 
+     * Indicates that we are a client node, and have received supernode
+     * connection. Executing this method will lead to dropping all the 
+     * connections except the one to the supernode. 
+     * @param supernodeConnection The connectionto the supernode that we
+     * wanna preserve
+     */
+    private synchronized void gotShieldedClientSupernodeConnection(
+        ManagedConnection supernodeConnection)
+    {
+        //set keep alive to 1, so that we are not fetching any connections
+        setKeepAlive(1);
+        _incomingConnections=0;
+        _incomingClientConnections=0;
+        
+        //close all other connections
+        Iterator iterator = _connections.iterator();
+        while(iterator.hasNext())
+        {
+            ManagedConnection connection = (ManagedConnection)iterator.next();
+            if(!connection.equals(supernodeConnection))
+                connection.close();
+        }
+        
+        //reinitialize the lists
+        List newConnections=new ArrayList();
+        newConnections.add(supernodeConnection);
+        _connections = newConnections;
+        
+        newConnections = new ArrayList();
+        newConnections.add(supernodeConnection);
+        _initializedConnections = newConnections;
+        
+        _initializedClientConnections = new ArrayList();
+    }
+    
     /**
      * Processes the headers received during connection handshake and updates
      * itself with any useful information contained in those headers
      * @param headers The headers to be processed
+     * @param connection The connection on which we received the headers
      */
     private void processConnectionHeaders(ManagedConnection connection){
         //get the connection headers
@@ -677,24 +726,41 @@ public class ConnectionManager {
         //return if no headers to process
         if(headers == null) return;
         
-        //check for the addresses of other hosts
-        String hostAddresses = 
-            headers.getProperty(ConnectionHandshakeHeaders.X_TRY);
-        //host addresses shoule be in the form:
-        //IP Address:Port [; IPAddress:Port]* 
-        //e.g. 123.4.5.67:6346; 234.5.6.78:6347
-        //Parse the addresses to retrieve individual host addresses 
-        //and store them
-        if(hostAddresses != null){
-            //tokenize to retrieve individual addresses
-            StringTokenizer st = new StringTokenizer(hostAddresses,";");
-            //iterate over the tokens
-            while(st.hasMoreTokens()){
-                //get an address
-                String address = ((String)st.nextToken()).trim();
-                //add it to the catcher
-                _catcher.add(new Endpoint(address), connection);
-            }
+        //update the addresses in the host cache (in case we received some
+        //in the headers)
+        updateHostCache(headers.getProperty(ConnectionHandshakeHeaders.X_TRY),
+            connection);
+        
+        //check for shieldedclient-supernode connection
+        if(!SettingsManager.instance().isSupernode() && Boolean.getBoolean(
+            headers.getProperty(ConnectionHandshakeHeaders.SUPERNODE))){
+            gotShieldedClientSupernodeConnection(connection);
+        }
+    }
+   
+    
+    /**
+     * Updates the addresses in the hostCache by parsing the passed string
+     * @param hostAddresses The string representing the addressess to be 
+     * added. It should be in the form:
+     * <p> IP Address:Port [; IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347 
+     * @param connection The connection on which we received the addresses
+     */
+    private void updateHostCache(String hostAddresses, ManagedConnection
+        connection){
+        //check for null param
+         if(hostAddresses == null)
+             return;
+       
+        //tokenize to retrieve individual addresses
+        StringTokenizer st = new StringTokenizer(hostAddresses,";");
+        //iterate over the tokens
+        while(st.hasMoreTokens()){
+            //get an address
+            String address = ((String)st.nextToken()).trim();
+            //add it to the catcher
+            _catcher.add(new Endpoint(address), connection);
         }
     }
     
@@ -928,8 +994,4 @@ public class ConnectionManager {
             }
         }
     }
-
-    //
-    // End connection launching thread inner classes
-    //
 }

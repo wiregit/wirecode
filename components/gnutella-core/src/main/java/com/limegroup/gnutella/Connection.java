@@ -260,7 +260,7 @@ public class Connection {
         else {
             //1. Send "GNUTELLA CONNECT" and headers
             sendString(GNUTELLA_CONNECT_06+CRLF);
-            sendHeaders(_propertiesWrittenP);                
+            sendHeaders(_propertiesWrittenP);   
             //2. Read "GNUTELLA/0.6 200 OK" and headers.  We require that the
             //response be at the same protocol level as we sent out.  This is
             //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
@@ -270,7 +270,7 @@ public class Connection {
             //check if the protocol is fine. We dont worry here about the 
             //status code (which dictates whether the connection will 
             //be accepted or not. We will worry about that later.
-            if (! readLine().startsWith(GNUTELLA_06))
+            if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
             //read the headers
             _propertiesRead=new Properties();
@@ -278,14 +278,17 @@ public class Connection {
             
             //if the connection was accepted (with 200 OK), we should go to the
             //third step and send back our headers
-            if (! readLine().equals(GNUTELLA_OK_06)){
+            if (! connectLine.equals(GNUTELLA_OK_06)){
                 throw new IOException("Bad connect string");
             }
             else{
-                //3. Send "GNUTELLA/200 OK" with no headers.
-                sendString(GNUTELLA_OK_06+CRLF);
-                sendHeaders(_propertiesWrittenR.respond(
-                    new HandshakeResponse(_propertiesRead), true).getHeaders());
+                //3. Send our response and headers
+                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                    new HandshakeResponse(_propertiesRead), true);
+                
+                sendString(GNUTELLA_06 + " " 
+                    + ourResponse.getStatusLine() + CRLF);
+                sendHeaders(ourResponse.getHeaders());
             }
         }
     }
@@ -390,6 +393,7 @@ public class Connection {
      * initialize().  
      *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
+        System.out.println(s);
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
         _out.write(bytes);

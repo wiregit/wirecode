@@ -338,7 +338,7 @@ public class SettingsManager {
     private volatile int _minShieldedClientConnections;
     private volatile long _supernodeProbationTime;
     private volatile boolean _supernodeMode;
-    
+    private volatile boolean _shieldedClientSupernodeConnection;
 
     /** 
 	 * Set up a local variable for the properties
@@ -1353,12 +1353,25 @@ public class SettingsManager {
     
     /**
      * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
      */
     public boolean isSupernode()
     {
         return _supernodeMode;
     }
 
+    /**
+     * Tells whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @return True, if the clientnode has connection to supernode,
+     * false otherwise
+     */
+    public boolean hasShieldedClientSupernodeConnection()
+    {
+        return _shieldedClientSupernodeConnection;
+    }
+    
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -2351,6 +2364,17 @@ public class SettingsManager {
         this._supernodeMode = supernodeMode;
         _props.put(SUPERNODE_MODE, 
             (new Boolean(supernodeMode)).toString());
+    }
+    
+    /**
+     * Sets the flag indicating whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @param flag the flag value to be set
+     */
+    public void setShieldedClientSupernodeConnection(boolean flag)
+    {
+        _shieldedClientSupernodeConnection = flag;
     }
     
     /******************************************************
