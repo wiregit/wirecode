@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileComparator;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
@@ -664,12 +665,12 @@ public abstract class FileManager {
         try {
             directory=FileUtils.getCanonicalFile(directory);
         } catch (IOException e) {
-            return new LinkedList();  //doesn't exist?
+            return DataUtils.EMPTY_LIST;  //doesn't exist?
         }
         
         // don't share the incomplete directory ... 
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
-            return new LinkedList();
+            return DataUtils.EMPTY_LIST;
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
@@ -678,7 +679,7 @@ public abstract class FileManager {
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
-            return new LinkedList();
+            return DataUtils.EMPTY_LIST;
 
         int numShareable = file_list.length;
         int numSubDirs = dir_list.length;
@@ -689,7 +690,7 @@ public abstract class FileManager {
         synchronized (this) {
             // if it was already added, ignore.
             if ( _sharedDirectories.get(directory) != null)
-                return new LinkedList();
+                return DataUtils.EMPTY_LIST;
                 
             _sharedDirectories.put(directory, new IntSet());
             
