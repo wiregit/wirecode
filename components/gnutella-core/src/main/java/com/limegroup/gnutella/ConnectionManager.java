@@ -41,11 +41,10 @@ public class ConnectionManager implements Runnable {
 	this(6346);
     }  
 
-    /** @modifies: network
+    /** @modifies network
      *
-     *  @effects: if this message has been encountered already, does
-     *    nothing.  Otherwise sends the message m to some some subset of
-     *    all connections except c. 
+     *  @effects sends the message m to all connections except c.  This is useful
+     *   for forwarding a packet.  (You don't want to forward it to the originator!)
      */
     public synchronized void sendToAllExcept(Message m, Connection c) 
 	throws IOException {
@@ -64,8 +63,27 @@ public class ConnectionManager implements Runnable {
 	}
     }
 
-    /** @modifies: this, network
-     *  @effects: accepts new incoming connections on a designated port
+    /** 
+     *  @modifies network
+     *  @effects sends the message m to all connections.  This
+     *   is useful for intiating a ping or query.
+     */
+    public synchronized void sendToAll(Message m) 
+	throws IOException {
+	Assert.that(m!=null);
+
+	//to forward to, especially on searches.
+	Iterator iter=connections.iterator();
+	while (iter.hasNext()) {
+	    Connection c2=(Connection)iter.next();
+	    Assert.that(c2!=null);
+	    c2.send(m);
+	}
+    }
+    
+
+    /** @modifies this, network
+     *  @effects accepts new incoming connections on a designated port
      *   and services incoming requests.
      */
     public void run() {	
@@ -88,16 +106,27 @@ public class ConnectionManager implements Runnable {
 	while (true) {
 	    try {
 		//Accept an incoming connection, make it into a Connection
-		//object, and give it a thread to service it.
+		//object, handshake, and give it a thread to service it.
 		Socket client=sock.accept();
-		Connection c=new Connection(this, client,true);
-		Thread t=new Thread(c);
-		t.setDaemon(true);
-		t.start();
+		try {
+		    Connection c=new Connection(this, client, true);		   
+		    Thread t=new Thread(c);
+		    t.setDaemon(true);
+		    t.start();
+		} catch (IOException e) { 
+		    //handshake failed: try to close connection.
+		    error("Could not establish incoming connection from "+
+			  client.getInetAddress().toString()+"; recovering.");
+		    try { client.close(); } catch (IOException e2) { }
+		    continue;
+		}
 	    } catch (IOException e) {
-		error("IO error; recovering");		
-	    } catch (SecurityException e) {
-		error("Permission denied");
+		error("Mysterious error while accepting "
+		      +"incoming connections; aborting.");
+		return;
+	    } catch (SecurityException e) {	
+		error("Could not listen to socket for incoming connections; aborting");
+		return;
 	    }
 	}
     }
