@@ -35,13 +35,6 @@ public final class AlternateLocationCollection
  
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
 	
-	/**
-	 * this is a set of alternate locations that require push requests to be sent.
-	 * LOCKING: same as for LOCATIONS
-	 * INVARIANT: this is always a subset of LOCATIONS.  can be empty.
-	 */
-	private final FixedSizeSortedSet PUSH_LOCATIONS = new FixedSizeSortedSet(MAX_SIZE);
-	
         
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -143,18 +136,16 @@ public final class AlternateLocationCollection
             if(alt==null) {//it was not in collections.
                 ret = true;
                 LOCATIONS.add(al);
-                if (al.getPushAddress() !=null)
-                	PUSH_LOCATIONS.add(al);
+
             }
             else {
                 LOCATIONS.remove(alt);
-                PUSH_LOCATIONS.remove(alt);
+
                 alt.increment();
                 alt.promote();
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
-                if (al.getPushAddress() != null)
-                	PUSH_LOCATIONS.add(al);
+
             }
             return ret;
         }
@@ -176,16 +167,14 @@ public final class AlternateLocationCollection
                 return false;
             if(loc.getDemoted()) {//if its demoted remove it
                 LOCATIONS.remove(loc);
-                PUSH_LOCATIONS.remove(loc);
                 return true;         
             }   
             else {
                 LOCATIONS.remove(loc);
-                PUSH_LOCATIONS.remove(loc);
+
                 loc.demote(); //one more strike and you are out...
                 LOCATIONS.add(loc); //make it replace the older loc
-                if (loc.getPushAddress()!=null)
-                	PUSH_LOCATIONS.add(loc);
+
                 return false;
             }
 		}
@@ -224,7 +213,6 @@ public final class AlternateLocationCollection
 
     public synchronized void clear() {
         LOCATIONS.clear();
-        PUSH_LOCATIONS.clear();
     }
 
 	// implements the AlternateLocationCollector interface
@@ -257,7 +245,7 @@ public final class AlternateLocationCollection
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
             	AlternateLocation current = (AlternateLocation)iter.next();
-            	if (current.getPushAddress()!=null)
+            	if (current instanceof PushAltLoc)
             		continue;
 			    writeBuffer.append(
                            current.httpStringValue());
@@ -345,34 +333,31 @@ public final class AlternateLocationCollection
     	
     
 	FixedSizeSortedSet clone=null;
-	int size;
-	synchronized(this) {
-		clone = (FixedSizeSortedSet) LOCATIONS.clone();
-		size = LOCATIONS.size() - PUSH_LOCATIONS.size();
-	}
-	
-	
-	if (number > size)
-		number = size;
+
 	
 	if (number <=0)
 		return null;
 	
-	byte [] ret = new byte[6*number];
-	int index=0;
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	DataOutputStream daos = new DataOutputStream(baos);
 	
+	try{
     	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
-    		AlternateLocation current = (AlternateLocation)iter.next();
-    		if (PUSH_LOCATIONS.contains(current))
+    		Object o = iter.next();
+    		if (!(o instanceof DirectAltLoc))
     			continue;
+    		
+    		DirectAltLoc current = (DirectAltLoc)o;
     		byte [] addr = current.getHost().getInetAddress().getAddress();
-    		System.arraycopy(addr,0,ret,index,4);
-    		ByteOrder.short2leb((short)
-    				current.getHost().getPort(),ret,index+4 );
-    		index+=6;
+    		baos.write(addr);
+    		daos.writeShort(current.getHost().getPort());
     		number--;
     	}
-    	return ret;
+	}catch(IOException impossible){
+		ErrorService.error(impossible);
+	}
+	
+    	return baos.toByteArray();
     }
     
     /**
@@ -395,14 +380,17 @@ public final class AlternateLocationCollection
     	
     	
     	synchronized(this) {
-    		clone =(FixedSizeSortedSet)PUSH_LOCATIONS.clone();
+    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
     	}
     	
     	int total = 0;
     	
     	try {
     		for (Iterator iter = clone.iterator();iter.hasNext() && total <number;) {
-    			AlternateLocation current = (AlternateLocation)iter.next();
+    			Object o = iter.next();
+    			if (!(o instanceof PushAltLoc))
+    				continue;
+    			PushAltLoc current = (PushAltLoc)o;
     			baos.write(current.getPushAddress().toBytes());
     			total++;
     		}

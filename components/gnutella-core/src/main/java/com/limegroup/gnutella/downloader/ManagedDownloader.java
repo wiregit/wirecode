@@ -1461,7 +1461,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 continue;//no need to tell uploader about itself
             
             //inform downloaders only about non-firewalled altlocs
-            if (loc.getPushAddress()==null)
+            if (loc instanceof DirectAltLoc)
             	if(good)
             		httpDloader.addSuccessfulAltLoc(loc);
             	else
@@ -2273,7 +2273,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
                 	AlternateLocation current = (AlternateLocation)iter.next();
-                	if (current.getPushAddress()==null) {
+                	if (current instanceof DirectAltLoc) {
                 		dloader.addSuccessfulAltLoc(current);
                 		count++;
                 	}
@@ -2281,7 +2281,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 iter = recentInvalidAlts.iterator();
                 while(iter.hasNext()) {
                 	AlternateLocation current = (AlternateLocation)iter.next();
-                	if (current.getPushAddress()==null) {
+                	if (current instanceof DirectAltLoc) {
                 		dloader.addFailedAltLoc(current);
                 		count++;
                 	}

@@ -7,6 +7,7 @@ import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
+
 import com.sun.java.util.collections.*;
 
 /**
@@ -18,7 +19,7 @@ import com.sun.java.util.collections.*;
  * Firewalled hosts can also be alternate locations, although the format is
  * slightly different.
  */
-public final class AlternateLocation implements HTTPHeaderValue, 
+public abstract class AlternateLocation implements HTTPHeaderValue, 
 	com.sun.java.util.collections.Comparable {
     
     /**
@@ -26,36 +27,26 @@ public final class AlternateLocation implements HTTPHeaderValue,
      */
     public static final String ALT_VENDOR = "ALT";
 
-	/**
-	 * A <tt>URL</tt> instance for the URL specified in the header.
-	 */
-	private final URL URL;
-
+	
 	/**
 	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
 	 * can be <tt>null</tt>.
 	 */
-	private final URN SHA1_URN;
+	protected final URN SHA1_URN;
 	
 	/**
 	 * Constant for the string to display as the httpStringValue.
 	 */
-	private final String DISPLAY_STRING;
+	protected String DISPLAY_STRING;
 	
-	/**
-	 * the host we would send push to.  Null if not firewalled.
-	 */
-	private final PushEndpoint _pushAddress;
+
 
 	/**
 	 * Cached hash code that is lazily initialized.
 	 */
-	private volatile int hashCode = 0;
+	protected volatile int hashCode = 0;
 	
-	/**
-	 * in case we do not have af ull url store the name here.
-	 */
-	private String _fileName;
+
 
     /**
      * LOCKING: obtain this' monitor while changing/accessing _count and 
@@ -68,7 +59,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
      * it has succeeded. Newly created AlternateLocations start out wit a value
      * of 1.
      */
-    private volatile int _count = 0;
+    protected volatile int _count = 0;
 
     /**
      * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
@@ -80,7 +71,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
      * modules like the download may not want to demote an AlternatLocation, 
      * other like the uploader may rely on it.
      */
-    private volatile boolean _demoted = false;
+    protected volatile boolean _demoted = false;
 
 
     ////////////////////////"Constructors"//////////////////////////////
@@ -104,7 +95,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 
 		URL url = AlternateLocation.createUrl(location);
 		URN sha1 = URN.createSHA1UrnFromURL(url);
-		return new AlternateLocation(url, sha1);
+		return new DirectAltLoc(url, sha1);
 	}
 	
 	/**
@@ -137,7 +128,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
         
         // Case 2.
 		URL url = AlternateLocation.createUrlFromMini(location, urn);
-		return new AlternateLocation(url, urn);
+		return new DirectAltLoc(url, urn);
     }
 
 	/**
@@ -164,7 +155,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
 							  url.getFile());
 		URN sha1 = URN.createSHA1UrnFromURL(tempUrl);
-		return new AlternateLocation(tempUrl, sha1);
+		return new DirectAltLoc(tempUrl, sha1);
 	}
 
 	/**
@@ -193,9 +184,9 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		if (!rfd.needsPush()) {
 			URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-			return new AlternateLocation(url, urn);
+			return new DirectAltLoc(url, urn);
 		}else {
-			return new AlternateLocation(rfd.getPushAddr(),urn,rfd.getFileName());
+			return new PushAltLoc(rfd.getPushAddr(),urn,rfd.getFileName());
 		}
 	}
 
@@ -217,77 +208,23 @@ public final class AlternateLocation implements HTTPHeaderValue,
             ErrorService.error(e);
         }
         try {
-		    return new AlternateLocation(url, urn);
+		    return new DirectAltLoc(url, urn);
         } catch(IOException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
-	/**
-	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
-	 * and <tt>Date</tt> timestamp.
-	 *
-	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
-	 * @param date the <tt>Date</tt> timestamp for the 
-	 *  <tt>AlternateLocation</tt>
-	 */
-	private AlternateLocation(final URL url, final URN sha1)
-	  throws IOException {
-		if(!NetworkUtils.isValidPort(url.getPort()))
-			throw new IOException("invalid port: " + url.getPort());
-        if(!NetworkUtils.isValidAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-        if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-        if(sha1 == null)
-            throw new IOException("null sha1");	    
-	    
-		this.URL       = url;
-		this.SHA1_URN  = sha1;
-		InetAddress ia = InetAddress.getByName(URL.getHost());
-		String ip = NetworkUtils.ip2string(ia.getAddress());
-		if( URL.getPort() == 6346 )
-		    DISPLAY_STRING = ip;
-		else
-		    DISPLAY_STRING = ip + ":" + URL.getPort();
-        _count = 1;
-        _demoted = false;
-        _pushAddress=null;
+
+	protected AlternateLocation(URN sha1) throws IOException {
+		if(sha1 == null)
+            throw new IOException("null sha1");	
+		SHA1_URN=sha1;
 	}
 	
-	/**
-	 * creates a new AlternateLocation for a firewalled host.
-	 * @param address
-	 * @param sha1
-	 * @throws IOException
-	 */
-	private AlternateLocation(final PushEndpoint address, final URN sha1, final String name) 
-		throws IOException {
-		
-		if(sha1 == null)
-            throw new IOException("null sha1");
-		if (address == null)
-			throw new IOException("null address");
-		if (address.getProxies().isEmpty())
-			throw new IOException("no proxies for altloc");
-		
-		this.SHA1_URN  = sha1;
-		_pushAddress = address;
-		
-		DISPLAY_STRING= ""; //eventually this will be a proper X-Alt header
-		_fileName = name;
-		URL= null;
-	}
 
     //////////////////////////////accessors////////////////////////////
 
 	
-	/**
-	 * Returns the host/port of this alternate location as an endpoint.
-	 */
-	public Endpoint getHost() {
-	    return new Endpoint(this.URL.getHost(), this.URL.getPort());
-	}
 
 	/**
 	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
@@ -301,13 +238,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
      */
     public synchronized int getCount() { return _count; }
     
-    /**
-     * 
-     * @return the PushAddress.  if it is null, the altloc is not firewalled.
-     */
-    public PushEndpoint getPushAddress() {
-    	return _pushAddress;
-    }
+
     
     /**
      * package access, accessor to the value of _demoted
@@ -320,6 +251,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 	    return DISPLAY_STRING;
     }
 
+	
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
@@ -329,30 +261,9 @@ public final class AlternateLocation implements HTTPHeaderValue,
 	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
 	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
-	public RemoteFileDesc createRemoteFileDesc(int size) {
-		Set urnSet = new HashSet();
-		urnSet.add(getSHA1Urn());
-        int quality = 3;
-		RemoteFileDesc ret; 
-		if (URL!=null)
-			ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
-								  0, URL.getFile(), size,  
-								  DataUtils.EMPTY_GUID, 1000,
-								  true, quality, false, null, urnSet, false,
-                                  false, //assume altLoc is not firewalled
-                                  ALT_VENDOR,//Never displayed, and we don't know
-                                  System.currentTimeMillis(), null, -1);
-		else if (_pushAddress!=null)
-			ret = new RemoteFileDesc("1.1.1.1",6346,0,_fileName,size,
-					_pushAddress.getClientGUID(), 1000, true, quality, false, null,
-					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
-					_pushAddress.getProxies(),-1);
-		else
-			throw new Error("an altloc didn't have URL or PE - bad.");
-		
-		return ret;
-	}
-
+	public abstract RemoteFileDesc createRemoteFileDesc(int size);
+	
+	
     /**
      * increment the count.
      * @see demote
@@ -372,23 +283,8 @@ public final class AlternateLocation implements HTTPHeaderValue,
     /**
      * could return null
      */ 
-    public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = null;
-        try {
-        	if (URL!=null)
-        		ret = new AlternateLocation(this.URL, this.SHA1_URN);
-        	else if (_pushAddress !=null)
-        		ret = new AlternateLocation(_pushAddress,SHA1_URN,_fileName);
-        	else
-        		throw new Error("an altloc had neither URL nor PE - bad.");
-        } catch(IOException ioe) {
-            ErrorService.error(ioe);
-            return null;
-        }
-        ret._demoted = this._demoted;
-        ret._count = this._count;
-        return ret;
-    }
+    public abstract AlternateLocation createClone();
+    
     
     ///////////////////////////////helpers////////////////////////////////
 
@@ -513,19 +409,8 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation other = (AlternateLocation)obj;
 		
-		if (other.URL ==null && other._pushAddress==null)
-			throw new IllegalArgumentException("invalid altloc passed as argument");
+		return SHA1_URN.equals(other.SHA1_URN);
 		
-		if (URL!=null)
-			return (URL.getHost().equals(other.URL.getHost()) &&
-                URL.getPort() == other.URL.getPort() &&
-                SHA1_URN.equals(other.SHA1_URN) &&
-                URL.getProtocol().equals(other.URL.getProtocol()) );
-		else if (_pushAddress!=null)
-			return SHA1_URN.equals(other.SHA1_URN) &&
-				_pushAddress.equals(other._pushAddress);
-		else
-			throw new Error("an altloc had neither URL nor PE - bad.");
 	}
 
     /**
@@ -558,28 +443,12 @@ public final class AlternateLocation implements HTTPHeaderValue,
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;
-        if (_pushAddress!=null) {
-        	ret = other._pushAddress.getProxies().size() - 
-				_pushAddress.getProxies().size();
-        	if (ret!=0)
-        		return ret;
-        }
-        else if (URL!=null){
-        	ret = this.URL.getHost().compareTo(other.URL.getHost());
-        	if(ret!=0)
-        		return ret;
-        	ret = (this.URL.getPort() - other.URL.getPort());
-        	if(ret!=0)
-        		return ret;
-        } 
-        else
-        	throw new Error("an altloc had neither URL nor PE - bad.");
         
         ret = SHA1_URN.httpStringValue().compareTo(
-            other.SHA1_URN.httpStringValue());
-        if(ret != 0)
-            return ret;
-        return hashCode() - other.hashCode(); 
+                other.SHA1_URN.httpStringValue());
+
+        return ret;
+ 
         			
     }
 
@@ -593,37 +462,8 @@ public final class AlternateLocation implements HTTPHeaderValue,
 	 * @return a hash code value for this object
 	 */
 	public int hashCode() {
-		if(hashCode == 0) {
-            int result = 17;
-            if (URL!=null) {
-            	result = (37* result)+this.URL.getHost().hashCode();
-            	result = (37* result)+this.URL.getPort();
-            	result = (37* result)+this.SHA1_URN.hashCode();
-            	result = (37* result)+this.URL.getProtocol().hashCode();
-            } 
-            else if (_pushAddress!=null)
-            	result = (37* result)+this._pushAddress.hashCode() +
-            		(37* result)+this.SHA1_URN.hashCode();
-            else 
-            	throw new Error("an altloc had neither an URL nor a PE - bad.");
-            hashCode = result;
-        }
-		return hashCode;
-	}
-
-	/**
-	 * Overrides toString to return a string representation of this 
-	 * <tt>AlternateLocation</tt>, namely the url and the date.
-	 *
-	 * @return the string representation of this alternate location
-	 */
-	public String toString() {
-		if (URL!=null)
-			return this.URL.toExternalForm()+","+_count+","+_demoted;
-		else if (_pushAddress != null)
-			return _pushAddress+","+_count+","+_demoted;
-		else
-			throw new Error("an altloc had neither URL nor PE - bad.");
+		
+        return 17*37+this.SHA1_URN.hashCode();        
 	}
 
 }
