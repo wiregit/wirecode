@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.BucketQueue;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
@@ -29,9 +29,13 @@ import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
  *
  * HostCatcher also manages the list of permanent bootstrap servers like
  * <tt>router.limewire.com</tt>.  The expire() method can force this to
- * reconnect to the bootstrap server by demoting ultrapeer pongs.  The
- * doneWithEndpoint(e) method helps this connect to only one bootstrap
- * server at a time.
+ * reconnect to the bootstrap server by demoting ultrapeer pongs.  YOU MUST CALL
+ * EXPIRE() TO GET BOOTSTRAP PONGS.  This should be done when calling
+ * RouterService.connect().  The doneWithEndpoint(e) method helps this connect
+ * to only one bootstrap server at a time.<p>
+ *
+ * Finally, HostCatcher maintains a list of "permanent" locations, based on
+ * average daily uptime.  These are stored in the gnutella.net file.  
  */
 public class HostCatcher {    
     /** The number of supernode pongs to store. */
@@ -42,23 +46,41 @@ public class HostCatcher {
     private static final int BAD_SIZE=15;
     private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
-    public static final int GOOD_PRIORITY=2;
-    public static final int NORMAL_PRIORITY=1;
-    public static final int BAD_PRIORITY=0;
+    /** The number of permanent locations to store in gnutella.net */
+    private static final int PERMANENT_SIZE=1000;
 
-    /* Our representation consists of a set and a queue, both bounded in size.
-     * The set lets us quickly check if there are duplicates, while the queue
-     * provides ordering.  The elements at the END of the queue have the highest
-     * priority. Note that if a priority queue is used instead of a bucket
-     * queue, old router pongs must be flushed when reconnecting to the server.
+    static final int GOOD_PRIORITY=2;
+    static final int NORMAL_PRIORITY=1;
+    static final int BAD_PRIORITY=0;
+
+
+    /** The list of hosts to try.  These are sorted by priority: ultrapeers,
+     * normal, then private addresses.  Within each priority level, recent hosts
+     * are prioritized over older ones.  Our representation consists of a set
+     * and a queue, both bounded in size.  The set lets us quickly check if
+     * there are duplicates, while the queue provides ordering.
      *
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
-     * LOCKING: obtain this' monitor before modifying either.
-     */
+     * LOCKING: obtain this' monitor before modifying either.  */
     private BucketQueue /* of Endpoint */ queue=
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
+
+
+    /** The list of pongs with the highest average daily uptimes.  Each host's
+     * weight is set to the uptime.  These are most likely to be reachable
+     * during the next session, though not necessarily likely to have slots
+     * available now.  In this way, they act more like bootstrap hosts than
+     * normal pongs.  This list is written to gnutella.net and used to
+     * initialize queue on startup.
+     *
+     * TODO: BinaryHeap is not the right data structure to use.  When full
+     * it does not necessarily remove the smallest element.  Better to
+     * use a tree with fixed size.  */
+    private BinaryHeap /* of Endpoint */ permanentHosts=
+        new BinaryHeap(PERMANENT_SIZE);
+    
 
     /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
      * router.limewire.com.  We try these hosts serially (starting with the
@@ -122,11 +144,14 @@ public class HostCatcher {
 
 
     /**
-     * Reads in endpoints from the given file
+     * Reads in endpoints from the given file.  This is called by initialize, so
+     * you don't need to call it manually.  It is package access for
+     * testability.
+     *
      * @modifies this
-     * @effects read hosts from the given file.
+     * @effects read hosts from the given file.  
      */
-    private synchronized void read(String filename)
+    synchronized void read(String filename)
             throws FileNotFoundException, IOException {
         BufferedReader in=null;
         in=new BufferedReader(new FileReader(filename));
@@ -135,37 +160,33 @@ public class HostCatcher {
             if (line==null)   //nothing left to read?  Done.
                 break;
 
-            //Break the line into host and port.  Skip if badly formatted.
-            int index=line.indexOf(':');
-            if (index==-1) {
+            //Break the line into host, port, and optional average daily uptime.
+            //Skip if badly formatted.
+            String[] linea=StringUtils.split(line, ": ");
+            if (linea.length==0)
                 continue;
+            String host=linea[0];
+            int port=6346;      //Assume port
+            if (linea.length>=2) {
+                try {
+                    port=Integer.parseInt(linea[1]);
+                } catch (NumberFormatException nfe) {
+                    continue;
+                }
             }
-            String host=line.substring(0,index);
-            int port=0;
-            try {
-                port=Integer.parseInt(line.substring(index+1));
-            } catch (NumberFormatException e) {
-                continue;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                continue;
-            }
-
-            //Everything passed!  Add it.
             Endpoint e = new Endpoint(host, port);
-            if (e.isPrivateAddress())
-                e.setWeight(BAD_PRIORITY);
-            else
-                e.setWeight(NORMAL_PRIORITY);
-
-            if ((! set.contains(e)) && (! isMe(host, port))) {
-                //add e to the head.  Order matters!
-                Object removed=queue.insert(e, e.getWeight());
-                //Shouldn't happen...
-                if (removed!=null)
-                    set.remove(removed);
-                set.add(e);
-                notify();
+            int uptime=expectedUptime(e, false);
+            if (linea.length>=3) {
+                try {
+                    uptime=Integer.parseInt(linea[2]);
+                } catch (NumberFormatException nfe) {
+                    continue;
+                }
             }
+
+            //Everything passed!  Add it.  Note that first elements read are
+            //the worst elements, so end up at the tail of the queue.
+            add(e, priority(e), uptime);
         }
     }
 
@@ -174,38 +195,37 @@ public class HostCatcher {
      * @effects writes this to the given file.  The file
      *  is prioritized by rough probability of being good.
      */
-    public synchronized void write(String filename) throws IOException {
-        FileWriter out=new FileWriter(filename);
-        //1) Write connections we're connected to--in no particular order.
-        //   Also add the connections to a set for step (2).  Ignore incoming
-        //   connections, since the remote host's port is ephemeral.
-        Set connections=new HashSet();
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            Connection c=(Connection)iter.next();
-            if (! c.isOutgoing()) //ignore incoming
-                continue;
-            Endpoint e=new Endpoint(c.getInetAddress().getHostAddress(),
-                        c.getPort());
-            connections.add(e);
-            writeInternal(out, e);
+    synchronized void write(String filename) throws IOException {
+        FileWriter out=new FileWriter(filename);       
+        //Write elements of permanent from best to worst.  Order matters, as it
+        //allows read() to put them into queue in the right order without any
+        //difficulty.  So first we copy into an external list...
+        Endpoint[] permanentHostsCopy=new Endpoint[permanentHosts.size()];  
+        Iterator iter=permanentHosts.iterator();
+        for (int i=0; i<permanentHostsCopy.length; i++) 
+            permanentHostsCopy[i]=(Endpoint)iter.next();
+        //...sort by uptime (weight)
+        Arrays.sort(permanentHostsCopy);                        
+        //...and write from head (worst) to tail (best).
+        for (int i=0; i<permanentHostsCopy.length; i++) {
+            Endpoint e=(Endpoint)permanentHostsCopy[i];
+            writeInternal(out, e, e.getWeight());
         }
 
-        //2.) Write hosts in this that are not in connections--in order.
-        for (int i=queue.size()-1; i>=0; i--) {
-            Endpoint e=(Endpoint)queue.extractMax();
-            if (connections.contains(e))
-                continue;
-            writeInternal(out, e);
-        }
         out.close();
     }
 
-    private void writeInternal(Writer out, Endpoint e) throws IOException {
-        out.write(e.getHostname()+":"+e.getPort()+"\n");
+    private void writeInternal(Writer out, Endpoint e, int uptime) 
+            throws IOException {
+        out.write(e.getHostname());
+        out.write(":");
+        out.write(Integer.toString(e.getPort()));
+        out.write(" ");
+        out.write(Integer.toString(uptime));
+        out.write("\n");
     }
 
-    //////////////////////////////////////////////////////////////////////
+    ///////////////////////////// Add Methods ////////////////////////////
 
 
     /**
@@ -223,41 +243,63 @@ public class HostCatcher {
                     pr.getFiles(), pr.getKbytes());
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
-        //supernode..
-        return add(e, pr.isMarked());
+        //supernode.  TODO: if uptime set, use that instead of estimate.
+        if (pr.isMarked())
+            return add(e, GOOD_PRIORITY, expectedUptime(e, true));
+        else
+            return add(e, priority(e), expectedUptime(e, false));
     }
 
     /**
      * Adds an address to this, possibly ejecting other elements from the cache.
-     * This method is used when getting an address from headers, instad of the
+     * This method is used when getting an address from headers instead of the
      * normal ping reply.
      *
-     * @param pr the pong containing the address/port to add
+     * @param pr the pong containing the address/port to add.  MODIFIES:
+     *  e.getWeight().  Caller should not modify this afterwards.
      * @param forceHighPriority true if this should always be of high priority
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
         //See preamble for a discussion of priorities
         if (forceHighPriority)
-            e.setWeight(GOOD_PRIORITY);
-        else if (e.isPrivateAddress())
-            e.setWeight(BAD_PRIORITY);
+            return add(e, GOOD_PRIORITY, expectedUptime(e, true));
         else
-            e.setWeight(NORMAL_PRIORITY);
-        return add(e);
+            return add(e, priority(e), expectedUptime(e, false));
     }
 
+//      /**
+//       * Adds an address to the permanent list of this without marking it for
+//       * immediate fetching.  This method is when connecting to a host and reading
+//       * its Uptime header.
+//       *
+//       * @param pr the pong containing the address/port to add.  MODIFIES:
+//       *  e.getWeight().  Caller should not modify this afterwards.
+//       * @param uptimeSeconds the time this has been up, in seconds.
+//       * @return true iff e was actually added 
+//       */
+//      public synchronized boolean addPermanent(Endpoint e, int uptimeSeconds) {
+//          //TODO: should we check that e does not exist in permanentHosts with a
+//          //different key?
+//          e.setWeight(uptimeSeconds);
+//          return permanentHosts.insert(e)!=e;  //was element other than e rejected?
+//      }
+
     /**
-     * Adds the passed endpoint to the set of hosts maintained. The endpoint 
-     * may not get added due to various reasons (including it might be our
-     * address itself, we migt be connected to it etc.). Also adding this
-     * endpoint may lead to the removal of some other endpoint from the
-     * cache.
+     * Adds the passed endpoint to the set of hosts maintained, temporary and
+     * permanent. The endpoint may not get added due to various reasons
+     * (including it might be our address itself, we might be connected to it
+     * etc.). Also adding this endpoint may lead to the removal of some other
+     * endpoint from the cache.
      *
      * @param e Endpoint to be added
-     * @return true iff e was actually added
+     * @param priority the priority to use for e, one of GOOD_PRIORITY 
+     *  (ultrapeer), NORMAL_PRIORITY, or BAD_PRIORITY (private address)
+     * @param uptime the host's uptime (or our best guess)
+     *
+     * @return true iff e was actually added 
      */
-    private boolean add(Endpoint e) {
+    private boolean add(Endpoint e, int priority, int uptime) {
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
@@ -275,27 +317,32 @@ public class HostCatcher {
         if (ManagedConnection.isRouter(e.getHostname())) 
             return false;
 
+        //Add to permanent list, regardless of whether it's actually in queue.
+        //Note that this modifies e.
+        addPermanent(e, uptime);
+
         boolean ret=false;
         boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
                 ret=true;
-                //Adding e may eject an older point from queue, so we have to
-                //cleanup the set to maintain rep. invariant.
+                //Add to temporary list. Adding e may eject an older point from
+                //queue, so we have to cleanup the set to maintain
+                //rep. invariant.
                 set.add(e);
-                Object ejected=queue.insert(e, e.getWeight());
+                Object ejected=queue.insert(e, priority);
                 if (ejected!=null)
-                    set.remove(ejected);
+                    set.remove(ejected);                             
 
-                 //If this is not full, notify the callback.  If this is full,
-                 //the GUI's display of the host catcher will differ from this.
-                 //This is acceptable; the user really doesn't need to see so
-                 //many hosts, and implementing the alternatives would require
-                 //many changes to ActivityCallback and probably a more efficient
-                 //representation on the GUI side.
-                 if (ejected==null)
-                     notifyGUI=true;
-
+                //If this is not full, notify the callback.  If this is full,
+                //the GUI's display of the host catcher will differ from this.
+                //This is acceptable; the user really doesn't need to see so
+                //many hosts, and implementing the alternatives would require
+                //many changes to ActivityCallback and probably a more efficient
+                //representation on the GUI side.
+                if (ejected==null)
+                    notifyGUI=true;
+                
                 this.notify();
             }
         }
@@ -307,15 +354,31 @@ public class HostCatcher {
         //view and use.  The second situation occurs the majority of times and
         //only in special cases such as a SimplePongCacheServer would the first 
         //situation occur.
-        if (alwaysNotifyKnownHost) {
+        if (alwaysNotifyKnownHost || notifyGUI) 
             callback.knownHost(e);
-        }
-        else {
-            if (notifyGUI)
-                callback.knownHost(e);
-        }
         return ret;
     }
+
+    /** Returns BAD_PRIORITY if e private, NORMAL_PRIORITY otherwise. */
+    private static int priority(Endpoint e) {
+        return e.isPrivateAddress() ? BAD_PRIORITY : NORMAL_PRIORITY;        
+    }
+
+    /** Returns the expected average daily uptime of the given node. */
+    private static int expectedUptime(Endpoint e, boolean ultrapeer) {
+        //By looking at version logs, we find that the average session uptime
+        //for a host is about 8.1 minutes.  A study of connection uptimes
+        //(http://www.limewire.com/developer/lifetimes/) confirms this.  Why not
+        //use 0?  If you have to choose between a node with an unknown uptime
+        //and one with a confirmed low uptime, you'll gamble on the former; it's
+        //unlikely to be worse!
+        //TODO: multiple by the average sessions per day (typically <1) to 
+        //get average daily uptime.
+        return 486;   //8.1 minutes * 60 sec/minute
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////
 
     /**
      * @modifies this
@@ -371,7 +434,8 @@ public class HostCatcher {
     }
 
     /**
-     *  Return the number of hosts
+     *  Return the number of hosts, i.e.,
+     *  getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
      */
     public int getNumHosts() {
         return( queue.size() );
@@ -382,6 +446,20 @@ public class HostCatcher {
      */
     public int getNumUltrapeerHosts() {
         return queue.size(GOOD_PRIORITY);
+    }
+    
+    /**
+     * Returns the number of non-marked non-private hosts.
+     */
+    int getNumNormalHosts() {
+        return queue.size(NORMAL_PRIORITY);
+    }
+
+    /**
+     * Returns the number of non-marked private hosts.
+     */
+    int getNumPrivateHosts() {
+        return queue.size(BAD_PRIORITY);
     }
 
     /**
@@ -464,8 +542,8 @@ public class HostCatcher {
         for (int i=0; i<n; i++) {
             try {
                 Endpoint e=getAnEndpointInternal();
-                e.setWeight(NORMAL_PRIORITY);
-                add(e);
+                //Uptime doesn't matter, since e already in permanent.
+                add(e, NORMAL_PRIORITY, 0);
             } catch (NoSuchElementException e) {
                 Assert.that(false, 
                     i+"'th getAnEndpointInternal not consistent with "+n);
@@ -516,125 +594,5 @@ public class HostCatcher {
         alwaysNotifyKnownHost = notifyKnownHost;
     }
 
-    /** Unit test */
-    /*
-    public static void main(String args[]) {
-        testBootstraps();
-        testExpire();
-        testIterators();
-    }
-
-    private static void testBootstraps() {
-        try {
-            //TODO: factor the new HostCatcher code into a setUp() method.
-            System.out.println("-Testing bootstrap servers");
-            SettingsManager.instance().setQuickConnectHosts(
-                new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
-            HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
-            hc.initialize(new Acceptor(6346, null),
-                          new ConnectionManager(null, null));
-
-            hc.add(new Endpoint("128.103.60.3", 6346), false);
-            hc.add(new Endpoint("128.103.60.2", 6346), false);
-            hc.add(new Endpoint("128.103.60.1", 6346), false);
-
-            Endpoint router1=hc.getAnEndpoint();
-            Assert.that(router1.equals(new Endpoint("r1.b.c.d", 6346)));         
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.1", 6346)));
-            hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.doneWithEndpoint(router1);    //got pong
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.144", 6346)));        
-
-            Endpoint router2=hc.getAnEndpoint();
-            Assert.that(router2.equals(new Endpoint("r2.b.c.d", 6347)));        
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.2", 6346)));        
-            hc.doneWithEndpoint(router2);    //did't get any pongs
-
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.3", 6346))); //no more bootstraps
-        } catch (InterruptedException e) {
-            Assert.that(false, "Mysterious InterruptedException");
-        }
-    }
-
-    private static void testExpire() {
-        try {
-            System.out.println("-Testing expire");
-            SettingsManager.instance().setQuickConnectHosts(
-                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
-            HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
-            hc.initialize(new Acceptor(6346, null),
-                          new ConnectionManager(null, null));
-
-            Assert.that(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
-
-            hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.add(new Endpoint("128.103.60.3", 6346), false);
-            hc.add(new Endpoint("192.168.0.1", 6346));
-            Assert.that(hc.getNumUltrapeerHosts()==1);
-
-            hc.expire();
-            Assert.that(hc.getNumUltrapeerHosts()==0);
-            Endpoint e=hc.getAnEndpoint();
-            Assert.that(e.equals(new Endpoint("r1.b.c.d", 6346)));
-            hc.doneWithEndpoint(e);
-            e=hc.getAnEndpoint();
-            Assert.that(e.equals(new Endpoint("r2.b.c.d", 6347)));
-            hc.doneWithEndpoint(e);
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.144", 6346)));
-            Assert.that(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.3", 6346)));
-        } catch (InterruptedException e) { 
-            Assert.that(false, "Mysterious InterruptedException");
-        }
-    }
-
-    private static void testIterators() {
-        System.out.println("-Testing iterators");
-        HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
-        hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null, null));
-
-        Iterator iter=hc.getNormalHosts(10);
-        Assert.that(! iter.hasNext());
-        iter=hc.getUltrapeerHosts(10);
-        Assert.that(! iter.hasNext());
-
-        Assert.that(hc.getNumUltrapeerHosts()==0);
-        hc.add(new Endpoint("18.239.0.1", 6346), true);
-        Assert.that(hc.getNumUltrapeerHosts()==1);
-        hc.add(new Endpoint("18.239.0.2", 6346), true);
-        hc.add(new Endpoint("128.103.60.1", 6346), false);
-        hc.add(new Endpoint("128.103.60.2", 6346), false);
-        Assert.that(hc.getNumUltrapeerHosts()==2);
-
-        iter=hc.getUltrapeerHosts(100);
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
-        Assert.that(! iter.hasNext());
-
-        iter=hc.getUltrapeerHosts(1);
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
-        Assert.that(! iter.hasNext());
-
-        iter=hc.getNormalHosts(100);
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.1", 6346)));
-        Assert.that(! iter.hasNext());
-
-        iter=hc.getNormalHosts(1);
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
-        Assert.that(! iter.hasNext());
-    }
-    */
+    //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
 }

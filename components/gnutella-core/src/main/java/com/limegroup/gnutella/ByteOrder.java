@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import com.sun.java.util.collections.Arrays;
 
 /**
  * Various static routines for solving endian problems.
@@ -75,6 +76,42 @@ public class ByteOrder {
         return x3|x2|x1|x0;
     }
 
+    /** 
+     * Little-endian bytes to int.  Unlike leb2int(x, offset), this version can
+     * read fewer than 4 bytes.  If n<4, the returned value is never negative.
+     * 
+     * @param x the source of the bytes
+     * @param offset the index to start reading bytes
+     * @param n the number of bytes to read, which must be between 1 and 4, 
+     *  inclusive
+     * @return the value of x[offset..offset+N] as an int, assuming x is 
+     *  interpreted as an unsigned little-endian number (i.e., x[offset] is LSB). 
+     * @exception IllegalArgumentException n is less than 1 or greater than 4
+     * @exception IndexOutOfBoundsException offset<0 or offset+n>x.length
+     */
+    public static int leb2int(byte[] x, int offset, int n) 
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        if (n<1 || n>4)
+            throw new IllegalArgumentException("No bytes specified");
+
+        //Must mask value after left-shifting, since case from byte
+        //to int copies most significant bit to the left!
+        int x0=x[offset] & 0x000000FF;
+        int x1=0;
+        int x2=0;
+        int x3=0;
+        if (n>1) {
+            x1=(x[offset+1]<<8) & 0x0000FF00;
+            if (n>2) {
+                x2=(x[offset+2]<<16) & 0x00FF0000;
+                if (n>3)
+                    x3=(x[offset+3]<<24);               
+            }
+        }
+        return x3|x2|x1|x0;
+    }
+
+
     /**
      * Short to little-endian bytes: writes x to buf[offset...]
      */
@@ -99,6 +136,24 @@ public class ByteOrder {
         buf[offset+1]=(byte)((x>>8) & 0x000000FF);
         buf[offset+2]=(byte)((x>>16) & 0x000000FF);
         buf[offset+3]=(byte)((x>>24) & 0x000000FF);
+    }
+
+    /**
+     * Returns the minimum number of bytes needed to encode x in little-endian 
+     * format, assuming x is non-negative.  Note that leb2int(int2leb(x))==x.
+     * @param x a non-negative integer
+     * @exception IllegalArgumentException x is negative
+     */
+    public static byte[] int2minLeb(int x) throws IllegalArgumentException {
+        if (x<0)
+            throw new IllegalArgumentException();
+
+        ByteArrayOutputStream baos=new ByteArrayOutputStream(4);
+        do {
+            baos.write(x & 0xFF);
+            x>>=8;
+        } while (x!=0);
+        return baos.toByteArray();
     }
 
     /**
@@ -139,7 +194,6 @@ public class ByteOrder {
     }
 
     /** Unit test */
-    /*
     public static void main(String args[]) {
         byte[] x1={(byte)0x2, (byte)0x1};  //{x1[0], x1[1]}
         short result1=leb2short(x1,0);
@@ -202,6 +256,37 @@ public class ByteOrder {
         Assert.that(long2int(0l)==0);
         Assert.that(long2int(0xABFFFFFFFFl)==0x7FFFFFFF);  //Integer.MAX_VALUE
         Assert.that(long2int(-0xABFFFFFFFFl)==0x80000000); //Integer.MIN_VALUE
+        
+        testInt2MinLeb();
+        testLeb2Int();
     }
-    */
+
+    public static void testInt2MinLeb() {
+        try {
+            int2minLeb(-1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+
+        Assert.that(Arrays.equals(int2minLeb(0), new byte[] {(byte)0}));
+        Assert.that(Arrays.equals(int2minLeb(1), new byte[] {(byte)1}));
+        Assert.that(Arrays.equals(int2minLeb(7), new byte[] {(byte)7}));
+        Assert.that(Arrays.equals(int2minLeb(72831), 
+            new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}));
+        Assert.that(Arrays.equals(int2minLeb(731328764), 
+            new byte[] {(byte)0xFC, (byte)0x30, (byte)0x97, (byte)0x2B}));
+        //TODO: consider renaming this method int2leb
+    }
+
+    public static void testLeb2Int() {
+        Assert.that(leb2int(new byte[] {(byte)0}, 0, 1)==0);
+        Assert.that(leb2int(new byte[] {(byte)1}, 0, 1)==1);
+        Assert.that(leb2int(new byte[] {(byte)7}, 0, 1)==7);
+        Assert.that(leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 
+                            0, 
+                            3)==0x11c7f);
+        Assert.that(leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 
+                            1, 
+                            1)==0x1c);
+        //TODO: expand tests to cover exceptional cases and negative values
+    }
 }
