@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileComparator;
@@ -192,7 +193,11 @@ public abstract class FileManager {
      */
     public static FilenameFilter DIRECTORY_FILTER = new DirectoryFilter();
         
-    
+    /**
+     * qrt
+     */
+    protected static QueryRouteTable _queryRouteTable;
+    private static boolean _doneInitialLoad = false;
 
     /**
      * Characters used to tokenize queries and file names.
@@ -556,6 +561,7 @@ public abstract class FileManager {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
 						RouterService.getCallback().fileManagerLoaded();
+                        buildQRT();
 					} catch(Throwable t) {
 						ErrorService.error(t);
 					}
@@ -769,11 +775,14 @@ public abstract class FileManager {
             _numPendingFiles++;
         }
         FileDesc fd;
-        if (directoryShared)
-            fd = addFile(f);
+        if (directoryShared) 
+            fd = addFile(f);            
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
+        if(_doneInitialLoad && fd != null) {
+            addToQRT(fd);
+        }
         return fd;
 	}
 
@@ -1135,46 +1144,34 @@ public abstract class FileManager {
         }        
         return true;
     }
+    
+    public QueryRouteTable getQRT() {
+        return _queryRouteTable;
+    }
 
     /**
-     * called when a query route table has to be made. The current 
-     * implementaion just takes all the file names and they are split
-     * internally when added the QRT
-     * 
-     * TODO: this method should probably change.  First, we don't return 
-     *  "keywords" here, we return file paths that are subsequently broken up
-     *  into keywords.  Second, it just doesn't make sense to rebuild the QRP
-     *  table for our files all the time.  FileManager should probably keep
-     *  track of the QRP table for our files and have a getQRPTable function.
-     *  This would enable it to update the QRP table internally whenever our
-     *  files changed.  This would also make the "getIndivisibleKeyWords" 
-     *  method unnecessary.
+     * build the qrt.  Subclasses can add other Strings to the
+     * QRT by calling buildQRT and then adding directly to the 
+     * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
-    public List getKeyWords(){
+    protected void buildQRT() {
+        _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
-        List retList = new ArrayList();
-        for(int i=0;i<fds.length;i++)
-            retList.add(fds[i].getPath());
-        return retList;
+        for(int i = 0; i < fds.length; i++) 
+            addToQRT(fds[i]);
     }
     
-
-    /** @return A List of KeyWords from the FS that one does NOT want broken
-     *  upon hashing into a QRT.  Initially being used for schema hashing.
-     *  We add all the hashes of the files we share so queries with hashes
-     *  can be checked for potential positives against a QRT.
+    /**
+     * function add and addIndivisible from passed in FileDesc
      */
-    public List getIndivisibleKeyWords() {
-        ArrayList retList = new ArrayList();
-        FileDesc[] files = getAllSharedFileDescriptors();
-        for (int i = 0; i < files.length; i++) {
-            Set urnsForCurrFile = files[i].getUrns();
-            Iterator iter = urnsForCurrFile.iterator();
-            while (iter.hasNext())
-                retList.add(((URN)iter.next()).httpStringValue());
-        }
-        return retList;
+    protected void addToQRT(FileDesc fd) {
+        _queryRouteTable.add(fd.getPath());
+        Set urns = fd.getUrns();
+        Iterator iter = urns.iterator();
+        while(iter.hasNext())
+            _queryRouteTable.addIndivisible(((URN)iter.next()).httpStringValue());
     }
+
 
     ////////////////////////////////// Queries ///////////////////////////////
 

@@ -2127,7 +2127,7 @@ public abstract class MessageRouter {
      */
     private static QueryRouteTable createRouteTable() {
         //TODO: choose size according to what's been propogated.
-        QueryRouteTable ret=new QueryRouteTable();
+        QueryRouteTable ret=_fileManager.getQRT();
         
         //Add my files...
         addQueryRoutingEntries(ret);
@@ -2143,6 +2143,7 @@ public abstract class MessageRouter {
      * rebuilding it each time!
      */
     private static void addQueryRoutingEntries(QueryRouteTable qrt) {
+        /*
         Iterator words = _fileManager.getKeyWords().iterator();
         while(words.hasNext())
             qrt.add((String)words.next());
@@ -2151,6 +2152,9 @@ public abstract class MessageRouter {
         Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
         while (indivisibleWords.hasNext()) 
             qrt.addIndivisible((String) indivisibleWords.next());
+        */
+        System.out.println(qrt);
+        System.out.println(qrt.getPercentFull());
 		if(RouterService.isSupernode()) {
 			addQueryRoutingEntriesForLeaves(qrt);
 		}
