@@ -602,6 +602,41 @@ public class RouterService
     }
 
     /**
+     * Count up all the messages on active connections
+     */
+    public int getActiveConnectionMessages() {
+		int count = 0;
+
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            count += c.getNumMessagesSent();
+            count += c.getNumMessagesReceived();
+        }
+		return count;
+    }
+
+    /**
+     * Count how many connections have already received N messages
+     */
+    public int countConnectionsWithNMessages(int messageThreshold) {
+		int count = 0;
+		int msgs; 
+
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            msgs = c.getNumMessagesSent();
+            msgs += c.getNumMessagesReceived();
+			if ( msgs > messageThreshold )
+				count++;
+        }
+		return count;
+    }
+
+    /**
      *  Returns the number of good hosts in my horizon.
      */
     public long getNumHosts() {
