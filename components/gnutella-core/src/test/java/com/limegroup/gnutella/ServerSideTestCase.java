@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 
 import junit.framework.Test;
 
@@ -29,7 +30,7 @@ import com.sun.java.util.collections.Iterator;
  *  their QRP tables.
  *
  *  Standard setup has the following settings:
- *  * Blocks all addresses, whitelists 127.*.*.* and 18.239.0.* .
+ *  * Blocks all addresses, whitelists 127.*.*.* and your local IP .
  *  * Node is in Ultrapeer mode with GWebCache and Watchdog off.
  *  * Sharing 2 files - berkeley.txt and susheel.txt
  *  * Max number of leaf connections is 4, max number of UP connections is 3.
@@ -94,10 +95,11 @@ public abstract class ServerSideTestCase extends BaseTestCase {
     }
 
     public static void setSettings() throws Exception {
+        String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
+            new String[] {"127.*.*.*", localIP});
         ConnectionSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
