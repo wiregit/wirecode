@@ -37,7 +37,7 @@ public class HTTPDownloader {
 	private volatile int _amountRead;
     /** The amount we'll have downloaded if the download completes properly. 
      *  Note that the amount still left to download is 
-     *  _amountToRead - _amountToRead. */
+     *  _amountToRead - _amountRead. */
 	private volatile int _amountToRead;
     /** The index to start reading from the server and start writing to the
      *  file. */
@@ -68,9 +68,9 @@ public class HTTPDownloader {
 	public HTTPDownloader(RemoteFileDesc rfd,
                           File incompleteFile,
                           int start,
-                          int bytes) {
+                          int stop) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile, start, bytes);
+        this(null, rfd, incompleteFile, start, stop);
         _isPush=false;
 	}	
 
@@ -93,7 +93,7 @@ public class HTTPDownloader {
                           RemoteFileDesc rfd,
                           File incompleteFile,
                           int start,
-                          int bytes) {
+                          int stop) {
         _isPush=true;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -106,7 +106,7 @@ public class HTTPDownloader {
 		_chatEnabled = rfd.chatEnabled();
         
 		_amountRead = 0;
-        _amountToRead = bytes;
+        _amountToRead = stop-start;
 		_initialReadingPoint = start;
     }
 
