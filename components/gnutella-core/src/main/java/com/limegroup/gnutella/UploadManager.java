@@ -82,6 +82,9 @@ public class UploadManager {
 
     public synchronized void acceptUpload(Socket socket) {
 
+		System.out.println("acceptUpload");
+		
+
 		HTTPUploader uploader;
 		GETLine line;
 		try {
@@ -97,6 +100,9 @@ public class UploadManager {
 		// if no, send an error.  
 		// if yes, constroct the uploader
 		uploader = new HTTPUploader(line._file, socket, line._index);
+
+		if (uploader.getState() == uploader.COULDNT_CONNECT)
+			return;
 
 		String host = socket.getInetAddress().getHostAddress();
 
@@ -115,6 +121,8 @@ public class UploadManager {
 	public synchronized void acceptPushUpload(String file, 
 											  String host, int port, 
 											  int index, String guid) { 
+
+		System.out.println("acceptPushUpload");
 
 		clearFailedPushes();
 
