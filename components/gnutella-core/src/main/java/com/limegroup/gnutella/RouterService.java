@@ -130,7 +130,8 @@ public class RouterService
                 return;
         }
 
-        manager.createConnectionAsynchronously(hostname, portnum);
+        if (!acceptor.isBannedIP(hostname))
+            manager.createConnectionAsynchronously(hostname, portnum);
     }
 
 
@@ -669,4 +670,17 @@ public class RouterService
         throws FileExistsException, AlreadyDownloadingException {
         return downloader.getFiles(files, overwrite);
     }
+
+
+    /** Added to fix bug where banned IP added is not effective until restart
+     *  (Bug 62001).
+     *  Simply allows a new host to be added to the Banned IPs list.  Just
+     *  routes to the acceptor, who reloads from SettingsManager.
+     *  @author Susheel M. Daswani
+     */
+    public void refreshBannedIPs() {
+        acceptor.refreshBannedIPs();
+    }
+
+
 }
