@@ -2498,6 +2498,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             return "";
         return queuePosition;
     }
+    
+    public synchronized int getNumDownloaders() {
+        return dloaders.size() + queuedCount;
+    }
 
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();

@@ -425,10 +425,32 @@ public class ConnectionManager {
      * @return the number of initializedclient connections, which is less than
      * or equals to the number of connections.  
      */
-    private int getNumInitializedClientConnections() {
+    public int getNumInitializedClientConnections() {
 		return _initializedClientConnections.size();
     }
 
+    /**
+     *@return the number of initialized connections for which
+     * isClientSupernodeConnection is true.
+     */
+    public int getNumClientSupernodeConnections() {
+        return _shieldedConnections;
+    }
+    
+    /**
+     *@return the number of ultrapeer -> ultrapeer connections.
+     */
+    public synchronized int getNumUltrapeerConnections() {
+        return ultrapeerConnections();
+    }
+    
+    /**
+     *@return the number of old unrouted connections.
+     */
+    public synchronized int getNumOldConnections() {
+        return oldConnections();
+    }
+    
     /**
      * @return the number of free leaf slots.
      */
@@ -702,8 +724,14 @@ public class ConnectionManager {
     /** Returns the number of old-fashioned unrouted connections.  Caller MUST
      *  hold this' monitor. */
     private int oldConnections() {		
-		// we no longer allow old connections!
-		return 0;
+		// technically, we can allow old connections.
+		int ret = 0;
+        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (!mc.isSupernodeConnection())
+                ret++;
+        }
+        return ret;
     }
 
     /**

@@ -448,10 +448,31 @@ public class RouterService {
     }
     
     /**
+     * Returns the number of downloads waiting to be started.
+     */
+    public static int getNumWaitingDownloads() {
+        return downloader.getNumWaitingDownloads();
+    }
+    
+    /**
+     * Returns the number of individual downloaders.
+     */
+    public static int getNumIndividualDownloaders() {
+        return downloader.getNumIndividualDownloaders();
+    }
+    
+    /**
      * Returns the number of uploads in progress.
      */
     public static int getNumUploads() {
         return uploadManager.uploadsInProgress();
+    }
+
+    /**
+     * Returns the number of queued uploads.
+     */
+    public static int getNumQueuedUploads() {
+        return uploadManager.getNumQueuedUploads();
     }
 
 
@@ -870,6 +891,34 @@ public class RouterService {
      */
     public static int getNumInitializedConnections() {
 		return manager.getNumInitializedConnections();
+    }
+    
+    /**
+     * Returns the number of active ultrapeer -> leaf connections.
+     */
+    public static int getNumUltrapeerToLeafConnections() {
+        return manager.getNumInitializedClientConnections();
+    }
+    
+    /**
+     * Returns the number of leaf -> ultrapeer connections.
+     */
+    public static int getNumLeafToUltrapeerConnections() {
+        return manager.getNumClientSupernodeConnections();
+    }
+    
+    /**
+     * Returns the number of ultrapeer -> ultrapeer connections.
+     */
+    public static int getNumUltrapeerToUltrapeerConnections() {
+        return manager.getNumUltrapeerConnections();
+    }
+    
+    /**
+     * Returns the number of old unrouted connections.
+     */
+    public static int getNumOldConnections() {
+        return manager.getNumOldConnections();
     }
 
 	/**

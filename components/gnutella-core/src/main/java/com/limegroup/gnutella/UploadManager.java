@@ -505,6 +505,9 @@ public final class UploadManager implements BandwidthTracker {
 		return _activeUploadList.size();
 	}
 
+	public synchronized int getNumQueuedUploads() {
+        return _queuedUploads.size();
+    }
 
 	/**
 	 * Returns true if this has ever successfully uploaded a file

@@ -119,6 +119,19 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
+    
+    public synchronized int getNumIndividualDownloaders() {
+        int ret = 0;
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            ret += md.getNumDownloaders();
+       }
+       return ret;
+    }
+   
+    public synchronized int getNumWaitingDownloads() {
+        return waiting.size();
+    }
 
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
