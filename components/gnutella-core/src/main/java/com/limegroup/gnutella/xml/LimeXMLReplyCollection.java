@@ -19,8 +19,11 @@ import org.xml.sax.*;
  */
 
 public class LimeXMLReplyCollection{
-    
-    private String schemaURI;
+
+    /**
+     * The schemaURI of this collection.
+     */
+    private final String schemaURI;
     
     /**
      * A map of URN -> LimeXMLDocument for each shared file that contains XML.
