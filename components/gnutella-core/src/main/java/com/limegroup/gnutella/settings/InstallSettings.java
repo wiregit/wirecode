@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-import com.sun.java.util.collections.*;
-
 /**
  * Handles installation preferences.
  */
