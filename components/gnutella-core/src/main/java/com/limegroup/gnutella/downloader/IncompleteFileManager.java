@@ -450,45 +450,4 @@ public class IncompleteFileManager implements Serializable {
         buf.append("}");
         return buf.toString();
     }
-    
-    /** Package access unitTest - to be called from JUnit. Will never be used
-     *in the regular code
-     */
-    static void unitTest() {
-        File file=new File("C:/tmp/test.txt");
-        IncompleteFileManager ifm=new IncompleteFileManager();
-        Iterator iter=null;
-        VerifyingFile vf = new VerifyingFile(true);
-        //0 blocks
-        Assert.that(ifm.getEntry(file)==null);
-        Assert.that(ifm.getBlockSize(file)==0);
-        //1 block
-        vf.addInterval(new Interval(0,10));
-        ifm.addEntry(file,vf);
-        Assert.that(ifm.getBlockSize(file)==11);//full inclusive now
-        iter=ifm.getEntry(file).getBlocks();
-        Assert.that(iter.next().equals(new Interval(0, 10)));
-        Assert.that(! iter.hasNext());
-        
-        SettingsManager.instance().setIncompletePurgeTime(26);
-        File young=new FakeTimedFile(25);
-        File old=new FakeTimedFile(27);
-        Assert.that(! IncompleteFileManager.isOld(young));
-        Assert.that(IncompleteFileManager.isOld(old));
-
-        //TODO: test removeBlocks
-    }
-
-    static class FakeTimedFile extends File {
-        private long days;
-        FakeTimedFile(int days) {
-            super("whatever.txt");
-            this.days=days;
-        }
-
-        public long lastModified() {
-            //30 days ago
-            return System.currentTimeMillis()-days*24l*60l*60l*1000l;
-        }
-    }
 }
