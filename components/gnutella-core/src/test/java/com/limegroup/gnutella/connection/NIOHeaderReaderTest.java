@@ -1,24 +1,21 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.http.HTTPHeader;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestChannel;
+import com.limegroup.gnutella.util.TestSocket;
 
 /**
  * Tests the class that performs non-blocking reading of Gnutella message
@@ -70,7 +67,6 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         PrivilegedAccessor.invokeMethod(reader, "read", new Object[] {buffer},
             new Class[]  {ByteBuffer.class});
         
-        //reader.read(buffer);
         
         for(int i=1; i<TEST_HEADERS.length; i++)  {
             assertEquals("unexpected header", 
@@ -81,7 +77,8 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         // now, we'll feed headers from our fake channel and make sure that
         // they're read correctly
         reader = 
-            NIOHeaderReader.createReader(new Connection(new TestSocket()));
+            NIOHeaderReader.createReader(
+                new Connection(new TestSocket(new ReaderTestChannel())));
 
         for(int i=0; i<TEST_HEADERS.length; i++)  {
             assertEquals("unexpected header", 
@@ -89,99 +86,21 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         } 
     }
     
-    /**
-     * Helper class that creates a socket that returns a "dummy" socket and
-     * channel -- useful for testing.
-     */
-    private static final class TestSocket extends Socket  {
-        public SocketChannel getChannel()   {
-            return new TestChannel();
-        } 
-        
-        public InetAddress getInetAddress()   {
-            try {
-                return InetAddress.getLocalHost();
-            } catch (UnknownHostException e) {
-                // this should not happen
-                return null;
-            }
-        } 
-    }
-    
-    /**
-     * "Dummy" test channel useful to avoid having to set up real sockets for
-     * testing.
-     */
-    private static final class TestChannel extends SocketChannel  {
-
-        public TestChannel()  {
-            super(null);
-        }
-        
-        // stub method
-        public boolean finishConnect() throws IOException {
-            return false;
-        }
-
-        // stub method
-        public boolean isConnected() {
-            return false;
-        }
-
-        // stub method
-        public boolean isConnectionPending() {
-            return false;
-        }
-
-        // stub method
-        public Socket socket() {
-            return null;
-        }
-
-        // stub method
-        public boolean connect(SocketAddress arg0) throws IOException {
-            return false;
-        }
-
+    private static final class ReaderTestChannel extends TestChannel {
         // stub method
         public int read(ByteBuffer buf) throws IOException {
-            
+        
             int numRead = 0;
             for(int i=0; i<TEST_HEADERS.length; i++)  {
                 byte[] bytes = TEST_HEADERS[i].getBytes();
                 numRead += bytes.length;
                 buf.put(bytes);
             }
-            
+        
             return numRead;
         }
-
-        // stub method
-        public int write(ByteBuffer arg0) throws IOException {
-            return 0;
-        }
-
-        // stub method
-        public long read(ByteBuffer[] arg0, int arg1, int arg2) 
-            throws IOException {
-            return 0;
-        }
-
-        // stub method
-        public long write(ByteBuffer[] arg0, int arg1, int arg2) 
-            throws IOException {
-            return 0;
-        }
-
-        // stub method
-        protected void implCloseSelectableChannel() throws IOException {       
-        }
-
-        // stub method
-        protected void implConfigureBlocking(boolean arg0) throws IOException { 
-        }
-        
     }
+    
     
     private static Socket createLegitSocket()  throws Exception {
         
