@@ -31,7 +31,7 @@
  * public class MyTestCase extends ... {
  *
  * 		//have an instance 
- * 		MyNetworkServerCallbackStub callback = new MyNetworkServerCallbackStub(...)
+ * 		NetworkServerCallbackStub callback = new NetworkServerCallbackStub(...);
  * 
  * 		/**
  *       * some test case which needs to wait for removeUpload to get called
