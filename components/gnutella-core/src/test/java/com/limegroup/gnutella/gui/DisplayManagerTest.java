@@ -2,7 +2,6 @@ package com.limegroup.gnutella.gui;
 
 import junit.framework.*;
 import com.limegroup.gnutella.util.BaseTestCase;
-import java.util.Locale;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.gui.search.DisplayManager;
