@@ -661,12 +661,11 @@ public class UploadManager implements BandwidthTracker {
 		str.trim();
 
 		// handle the get request depending on what type of request it is
-		if(this.isTraditionalGet(str)) {
-			// handle the standard get request
-			return this.parseTraditionalGet(str);
-		}
-		// handle the URN get request
-		return this.parseURNGet(str);
+        if (this.isURNGet(str)) 
+            // handle the URN get request
+            return this.parseURNGet(str);
+        // handle the standard get request
+        return this.parseTraditionalGet(str);
   	}
 
 	/**

@@ -106,17 +106,18 @@ public class HTTPUploader implements Uploader {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
+
+            //special case for browse host
+            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
+                setState(BROWSE_HOST);
+                return;
+            } 
+
 			_fileDesc = _fileManager.get(_index);
 			_fileSize = (int)_fileDesc.getSize();
 			_urn = _fileDesc.getSHA1Urn();
             
-            //special case for browse host
-            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
-                setState(BROWSE_HOST);
-            } 
-			else {
-				setState(CONNECTING);
-			}
+            setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
 			// some reason the index is no longer valid.
