@@ -197,7 +197,7 @@ public class HTTPUploader implements Runnable {
 	    _out.write("Server: Gnutella \r\n");
 	    String type = getMimeType();       /* write this method later  */
 	    _out.write("Content-type:" + type + "\r\n"); 	
-	    _out.write("Content-length: "+ _sizeOfFile + "\r\n");
+	    _out.write("Content-length:"+ _sizeOfFile + "\r\n");
 	    _out.write("\r\n");
 	}
 

@@ -15,12 +15,12 @@ import java.util.*;
 public class HTTPDownloader implements Runnable {
 
     private int BUFFSIZE = 1024;
-    private int MAX_BUFF = 6400;
+    private int MIN_BUFF = 1024;
+    private int MAX_BUFF = 64 * 1024;
+
+    private BufferedReader _in;
 
     private InputStream _istream;
-    private BufferedReader _in;
-	    
-
     private String _filename;
     private int _sizeOfFile;
     private int _amountRead;
@@ -44,8 +44,9 @@ public class HTTPDownloader implements Runnable {
 
 	try {
 	    _istream = s.getInputStream();
+	    _bis = new BufferedInputStream(_istream);
 	    InputStreamReader isr = new InputStreamReader(_istream);
-	    _in = new BufferedReader(isr);
+	    _in = new BufferedReader(isr, 1);
 	}
 
 	catch (Exception e) {
@@ -92,10 +93,13 @@ public class HTTPDownloader implements Runnable {
 	}
 	try {
 	    _istream = conn.getInputStream();
+	    _bis = new BufferedInputStream(_istream);
 	    InputStreamReader isr = new InputStreamReader(_istream);
-	    _in = new BufferedReader(isr);
+	    _in = new BufferedReader(isr, 1);
 	}
 	catch (IOException e) {
+	    System.out.println("THere was some sort of IOException");
+	    e.printStackTrace();
 	    sendPushRequest(host, index, port, guid);
 	    // _callback.error(ActivityCallback.ERROR_4);
 	    return;
@@ -174,48 +178,130 @@ public class HTTPDownloader implements Runnable {
 	_callback.removeDownload(this);
     }
 
+    
     public void doDownload() {
 	
-
-
 	readHeader();
-
+	
 	try {
 
 	    if (_sizeOfFile != -1) {
+		
 
 		SettingsManager set = SettingsManager.instance();
 		_downloadDir = set.getSaveDirectory();
-
 		String pathname = _downloadDir  + _filename;
-		
-		FileOutputStream myFile = new FileOutputStream(pathname);
-		BufferedOutputStream bos = new BufferedOutputStream(myFile);
+		System.out.println("THe Pathname is " + pathname);
 
-		int count = 0;
+
+		FileOutputStream myFile = new FileOutputStream(_filename);
+		
+		// BufferedOutputStream bos = new BufferedOutputStream(myFile);
+
 		int c = -1;
 		
 		_bis = new BufferedInputStream(_istream);
 
-		byte[] buf = new byte[MAX_BUFF];
+		
 
-		while (true) {
+		//  while (true) {
 		    
-		    int available = _bis.available();
+//  		    int buf_size = _bis.available();
+//  		    System.out.println("THe amount available: " + buf_size);
+//  		    byte[] buf = new byte[buf_size];
+//  		    c = _bis.read(buf);
+//  		    if (c == -1) 
+//  			break;
+//  		    // myFile.write(buf);
+//  		    bos.write(buf);
+//  		    _amountRead+=c;
+//  		    count++;
+		    
+//  		}
 
-		    c = _bis.read(buf, 0, Math.min(MAX_BUFF, available) );
-					    
+		FileOutputStream fos = new FileOutputStream(pathname);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		OutputStreamWriter osw = new OutputStreamWriter(bos); 
+		BufferedWriter out = new BufferedWriter(osw); 
+		
+		char[] buf = new char[1024];
+
+		//  while ((c = _in.read(buf)) != -1) {
+
+//  		    out.write(buf, 0, c);
+//  		    _amountRead+=c;
+
+//  		}
+
+
+		while ((c = _in.read()) != -1) {
+		    
+		    out.write(c);
+		    _amountRead+=c;
+
+		}
+
+		out.close();
+
+		System.out.println("THe FINAL amount read: " + _amountRead);
+		System.out.println("THe size of the file: " + _sizeOfFile);
+
+
+	    }
+	}
+
+	catch (Exception e) {
+	    
+	    _callback.error(ActivityCallback.ERROR_8);
+	    System.out.println("E :"+e+":");
+
+	}
+
+    }
+
+
+    public void doSchmownload() {
+	
+	System.out.println("DOing the Download....");
+	readHeader();
+	try {
+	    if (_sizeOfFile != -1) {
+		SettingsManager set = SettingsManager.instance();
+		_downloadDir = set.getSaveDirectory();
+		String pathname = _downloadDir  + _filename;
+		System.out.println("THe Pathname is " + pathname);
+		File myFile = new File(pathname);
+		FileOutputStream fos = new FileOutputStream(myFile);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		int count = 0;
+		int c = -1;
+		byte[] buf = new byte[MAX_BUFF];
+		while (true) {
+		    int available = _bis.available();
+		    System.out.println("THe Amoutn available: " + available);
+		    int amount = Math.min(MAX_BUFF, available);
+		    System.out.println("THe amount going to try to read " + amount);
+		    if (amount != 0) 
+			c = _bis.read(buf, 0, amount);
+		    else {
+			c = _bis.read();
+			System.out.println("THe c in the else " + c);
+			if (c != -1) {
+			    buf[0] = (byte)c;
+			    c = 1;
+			}
+		    }
+		    System.out.println("c " + c);
 		    if (c == -1) 
 			break;
 
-		    bos.write(buf, 0, Math.min(MAX_BUFF, available) );
+		    bos.write(buf, 0, c);
 
 		    _amountRead+=c;
 		    System.out.println("THe Amoutn read: " + _amountRead);
 		    count++;
-		    
-		    
 		}
+		// bos.flush();
 
 		System.out.println("THe FINAL amount read: " + _amountRead);
 		System.out.println("THe size of the file: " + _sizeOfFile);
@@ -245,7 +331,7 @@ public class HTTPDownloader implements Runnable {
  
 		if (str.indexOf("Content-length:") != -1) {
 
-		    String sub = str.substring(16);
+		    String sub = str.substring(15);
 		    sub.trim();
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 		    str = _in.readLine();
@@ -255,6 +341,7 @@ public class HTTPDownloader implements Runnable {
 		}
 		
 	    }
+
 	}
 	catch (Exception e) {
 	    _callback.error(ActivityCallback.ERROR_9);

@@ -392,7 +392,10 @@ public class SettingsManager implements SettingsInterface
     public int getMaxConn(){return maxConn_;}
 
     /** returns the directory to save to */
-    public String getSaveDirectory(){return saveDirectory_;}
+    public String getSaveDirectory() {
+	// saveDirectory_ += System.getProperty("file.separator");
+	return saveDirectory_;
+    }
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
