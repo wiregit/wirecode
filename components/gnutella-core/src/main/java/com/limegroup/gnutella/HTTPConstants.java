@@ -4,6 +4,12 @@ package com.limegroup.gnutella;
  * This class defines a set of constants for use in HTTP messages.
  */
 public final class HTTPConstants {
+
+    /**
+     * Private constructor to ensure that this class cannot be
+     * instantiated.
+     */
+    private HTTPConstants() {}
 	
 	/**
 	 * Constant for the character that marks the end of an HTTP 
