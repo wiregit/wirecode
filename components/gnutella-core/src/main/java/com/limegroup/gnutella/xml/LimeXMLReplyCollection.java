@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.*;
 import java.io.*;
+import org.xml.sax.*;
 
 /**
  *  Stores a schema and a list of Replies corresponding to the 
@@ -26,7 +27,6 @@ public class LimeXMLReplyCollection{
     private ID3Editor editor = null;
     private List replyDocs = null;
     private File dataFile = null;//flat file where all data is stored.
-    private int count;
     private String changedHash = null;
     private MetaFileManager metaFileManager = null;
 
@@ -67,38 +67,59 @@ public class LimeXMLReplyCollection{
         else 
             hashToXMLStr = ms.getMap();
         
-        if (this.audio) // special processing for mp3s needed
-            constructAudioCollection(hashSet, hashToXMLStr);
-
         // OLD VS. NEW - this code is here because we are changing the
-        // representation of the .sxml file for LimeWire 2.5 and on.  Now the
-        // hashToXMLStr is actually hashToXMLDoc - but we don't want older
-        // clients to lose any annotations, so we'll convert them at the first
-        // opportunity.
-
+        // representation of the .sxml file for LimeWire 2.5 and on.  Now
+        // the hashToXMLStr is actually hashToXMLDoc - but we don't want
+        // older clients to lose any annotations, so we'll convert them at
+        // the first opportunity.
+        
         // get the hash to xml (from the serialized file) and create a
-        // LimeXMLDocument out of each.  Then add it to the collection.
+        // LimeXMLDocument out of each.=  Then add it to the collection.
+        // we assume the hashSet input into the collection is the aggregate of
+        // files shared by LimeWire....
         Iterator iter = hashSet.iterator();
+        ID3Reader id3Reader = new ID3Reader();
         while((iter != null) && iter.hasNext()) {
             File file = (File)iter.next();
-            String hash = metaFileManager.readFromMap(file, audio);
-            Object xml = hashToXMLStr.get(hash); //cannot be null
+            String hash = metaFileManager.readFromMap(file);
+            Object xml = hashToXMLStr.get(hash); //lookup in store from disk
+            // at this point, xml can be either 1. a LimeXMLDoc, 2. a string 
+            // (a xml string), or 3. null
             LimeXMLDocument doc=null;
-            try{
-                if ((xml == null) || mainMap.containsKey(hash))
-                    continue;
-                else if (xml instanceof LimeXMLDocument) // NEW
-                    doc = (LimeXMLDocument) xml;
-                else // OLD
-                    // old style still exists, we need to write...
-                    doc = new LimeXMLDocument((String) xml);
-                
+            try {
+                if ((xml != null) && xml instanceof LimeXMLDocument)  {// NEW
+                    // easy, the whole serialized doc was on disk, just reuse it
+                    doc = (LimeXMLDocument) xml; //done!
+                }
+                else { // OLD
+                    String xmlStr = (String) xml; //xml could be null.
+                    // old style may exist or there may be no xml associated
+                    // with this file yet.....
+                    if (audio && LimeXMLUtils.isMP3File(file)) {
+                        // first try to get the id3 out of it.  if this file has
+                        // no id3 tag, just construct the doc out of the xml 
+                        // string....
+                        boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
+                        if(!onlyID3) {  //non-id3 values with mp3 file
+                            String id3XML=id3Reader.readDocument(file,onlyID3);
+                            String joinedXML = 
+                            joinAudioXMLStrings(id3XML, xmlStr);
+                            doc = new LimeXMLDocument(joinedXML);
+                        }
+                        else // only id3 data with mp3 files
+                            doc = id3Reader.readDocument(file);
+                    }
+                    else { // !audio || (audio && !mp3)
+                        doc = new LimeXMLDocument(xmlStr);
+                    }
+                }
                 addReply(hash, doc);
             }
-            catch(Exception e){
-            }
+            catch (SAXException ignored1) {}
+            catch (IOException ignored2) {}
+            catch (SchemaNotFoundException ignored3) {}
         }
-
+        
         if (hashSet != null)
             checkDocuments(hashSet,false);
 
@@ -106,53 +127,6 @@ public class LimeXMLReplyCollection{
 
         write();
     }
-
-
-    /**
-     * Handle creation of a Audio Collection.  Special because we need to read
-     * ID3s, etc.
-     */
-    private void constructAudioCollection(Set hashSet, Map hashToXMLStr) {
-        ID3Reader id3Reader = new ID3Reader();
-        // for each file, get the hash, then get the fileXMLString, and
-        // (possiblY) join it with the ID3 info.  Then add the reply.
-        Iterator iter = hashSet.iterator();
-        LimeXMLDocument doc = null;
-        boolean solo = false; //rich data only from ID3?
-        while(iter.hasNext()) {
-            File file = (File)iter.next();
-            String hash = metaFileManager.readFromMap(file, audio);
-            // don't call remove.  if two files conflict by hash (a definite
-            // possibility) you don't want to recalculate the doc.  so just
-            // keep it around.  but are we doing extra work in the main
-            // constructor - not really, doing a get is no biggie.  don't
-            // how much this is going to happen anyways, so the cost should
-            // be small. 
-            Object xml = hashToXMLStr.get(hash);
-            try{
-                if (xml instanceof LimeXMLDocument) // NEW
-                    doc = (LimeXMLDocument) xml;
-                else { // OLD
-                    String fileXMLString = (String) xml;
-                    solo = ((fileXMLString == null) || 
-                            fileXMLString.equals(""));
-                    if(!solo) {
-                        String xmlString = id3Reader.readDocument(file,solo);
-                        xmlString = 
-                        joinAudioXMLStrings(xmlString,fileXMLString);
-                        doc = new LimeXMLDocument(xmlString);
-                    }
-                    else
-                        doc = id3Reader.readDocument(file);
-                }
-                addReply(hash,doc);
-            }
-            catch(Exception e){
-                debug(e);
-            }
-        }
-    }
-    
 
     /**
      * Gets a list of keywords from all the documents in this collection.
@@ -182,7 +156,7 @@ public class LimeXMLReplyCollection{
             return;
         while(iter.hasNext()){
             File file  = (File)iter.next();
-            String hash=metaFileManager.readFromMap(file,mp3);
+            String hash=metaFileManager.readFromMap(file);
             LimeXMLDocument doc;
             synchronized(mainMap){
                 doc = (LimeXMLDocument)mainMap.get(hash);
@@ -245,7 +219,6 @@ public class LimeXMLReplyCollection{
             mainMap.put(hash,replyDoc);
         }
         replyDocs=null;//things have changed
-        count++;
     }
 
 
@@ -271,7 +244,7 @@ public class LimeXMLReplyCollection{
     }
 
     public int getCount(){
-        return count;
+        return mainMap.size();
     }
     
     /**
@@ -445,8 +418,7 @@ public class LimeXMLReplyCollection{
             mainMap.put(newHash, mainValue);
         }
         //replace the old hashValue
-        metaFileManager.writeToMap(file, newHash, 
-                                   LimeXMLUtils.isMP3File(mp3FileName));
+        metaFileManager.writeToMap(file, newHash);
         //Since the hash of the file has changed, the metadata pertaiing 
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 

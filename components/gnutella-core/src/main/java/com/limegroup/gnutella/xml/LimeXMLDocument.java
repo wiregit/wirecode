@@ -52,6 +52,8 @@ public class LimeXMLDocument implements Serializable {
     //constructor
     public LimeXMLDocument(String XMLStr) throws SAXException, 
                                         SchemaNotFoundException, IOException{
+        if(XMLStr==null || XMLStr.equals(""))
+            throw new SAXException(new Exception());
         InputSource doc = new InputSource(new StringReader(XMLStr));
         initialize(doc);
         this.xmlString = ripIdentifier(XMLStr);
