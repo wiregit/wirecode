@@ -55,13 +55,21 @@ public class LeafRoutingTest extends BaseTestCase {
         //the interactive prompts below.
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(PORT);
-        settings.setDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        settings.setExtensions("txt;");
+        // get the resource file for com/limegroup/gnutella
+        File berkeley = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        // now move them to the share dir        
+        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
     }        
     
     public static void globalSetUp() throws Exception {
@@ -313,6 +321,28 @@ public class LeafRoutingTest extends BaseTestCase {
             fail("handshake should not have succeeded");
         } catch (IOException e) {
         }        
+    }
+
+
+    public void testLeafAnswersQueries() throws Exception {
+        drain(ultrapeer2);
+
+        // make sure the set up succeeded
+        assertTrue(rs.getFileManager().getNumFiles() == 2);
+
+        // send a query that should hit
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
+                                              "berkeley", null, null, null,
+                                              null, false, 0, false);
+        ultrapeer2.send(query);
+        ultrapeer2.flush();
+        
+        // hope for the result
+        Message m = null;
+        do {
+            m = ultrapeer2.receive(TIMEOUT);
+        } while (!(m instanceof QueryReply)) ;
+        
     }
 
 
