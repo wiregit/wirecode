@@ -1449,8 +1449,9 @@ public abstract class MessageRouter {
                                        FOR_ME_REPLY_HANDLER);
             // Here we can do a couple of things - if the query wants
             // out-of-band replies we should do things differently.  else just
-            // send it off as usual
-            if (!query.desiresOutOfBandReplies()) 
+            // send it off as usual.  only send out-of-band if you aren't 
+            // directly connected.
+            if (!query.desiresOutOfBandReplies() || (query.getHops() < 2)) 
                 rrp.getReplyHandler().handleQueryReply(queryReply, null);
             else {
                 // special out of band handling....
