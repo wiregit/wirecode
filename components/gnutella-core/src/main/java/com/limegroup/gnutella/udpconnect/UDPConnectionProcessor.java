@@ -421,6 +421,7 @@ public class UDPConnectionProcessor {
 		// Just access the windowSpace for chunkLimit for now
         _chunkLimit = _sendWindow.getWindowSpace();  // TODO: performance?
 
+log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
@@ -497,6 +498,11 @@ public class UDPConnectionProcessor {
             // If Acking check needs to be woken up then do it
             if ( isAckTimeoutUpdateRequired()) 
                 scheduleAckIfNeeded();
+
+            // Predecrement the other sides window until I here otherwise.
+            // This prevents a cascade of sends before an Ack
+            if ( _receiverWindowSpace > 0 )
+                _receiverWindowSpace--;
 
         } catch (BadPacketException bpe) {
             // This would not be good.  
