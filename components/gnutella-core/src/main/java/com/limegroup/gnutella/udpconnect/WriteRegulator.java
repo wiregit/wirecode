@@ -189,7 +189,6 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                       " rtt:"+rtt+ 
                       " sL:"+_skipLimit);
             }
-            */
 
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
@@ -202,6 +201,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
                       " rRTT:"+realRTT+
                       " sT:"+sleepTime);
             }
+            */
         }
 
         // Cycle through the accelerator states and enforced backoff
