@@ -46,7 +46,12 @@ class RejectConnection extends Connection {
 
     private void loopForPingRequest()
             throws IOException {
-        while (true) { // continue till we get a PingRequest
+        //The first message we get from the remote host should be its initial
+        //ping.  However, some clients may start forwarding packets on the
+        //connection before they send the ping.  Hence the following loop.  The
+        //limit of 10 iterations guarantees that this method will not run for
+        //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
+        for (int i=0; i<10; i++) {
             Message m=null;
             try {
                 // get the timeout from SettingsManager
@@ -76,7 +81,8 @@ class RejectConnection extends Connection {
                     // state in the hostcatcher
                     send(pr);
                 }
-                // we have sent 10 hosts, so this thread's work is done.
+                flush();
+                return;
             }// end of (if m is PingRequest)
         } // End of while(true)
     }
