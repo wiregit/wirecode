@@ -51,11 +51,9 @@ public class StandardMessageRouter extends MessageRouter {
             }
     
             // handle heartbeat pings specially -- bypass pong caching code
-            if(hops == 1 && ttl == 0) {
-                PingReply pr = 
-                    PingReply.create(ping.getGUID(), (byte)1);
-               
-                sendPingReply(pr, handler);
+            if(ping.isHeartbeat()) {
+                sendPingReply(PingReply.create(ping.getGUID(), (byte)1), 
+                    handler);
                 return;
             }
     
