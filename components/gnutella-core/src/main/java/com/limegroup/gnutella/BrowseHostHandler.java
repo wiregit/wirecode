@@ -26,10 +26,6 @@ public class BrowseHostHandler {
      */
     private ActivityCallback _callback = null;
 
-    /** The MessageRouter instance.  Used for sending a Push.
-     */
-    private MessageRouter _router = null;
-
     /** The GUID to be used for incoming QRs from the Browse Request.
      */
     private GUID _guid = null;
@@ -53,10 +49,9 @@ public class BrowseHostHandler {
      * results of this Browse Host request.
      * @param serventID May be null, non-null if I need to push
      */
-    public  BrowseHostHandler(ActivityCallback callback, MessageRouter router,
+    public  BrowseHostHandler(ActivityCallback callback, 
                               GUID guid, GUID serventID) {
         _callback = callback;
-        _router = router;
         _guid = guid;
         _serventID = serventID;
     }
