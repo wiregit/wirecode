@@ -4,7 +4,6 @@ import com.limegroup.gnutella.Assert;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
-import com.apple.mrj.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -136,8 +135,8 @@ public final class CommonUtils {
 		}
 		else {
 			HTTP_SERVER = ("LimeWire/" + 
-						   LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4) +
-						   " (Pro)");
+                LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4)+
+				" (Pro)");
 		}
 	}
 
@@ -407,32 +406,17 @@ public final class CommonUtils {
         File settingsDir = null;
 		if(CommonUtils.isWindows()) {
 			settingsDir = CommonUtils.getCurrentDirectory();
-		}
-
-		// return the special user preferences directory on OS X.
-		// this may have problems on 10.0.
-		else if(CommonUtils.isMacOSX()) {
-		    File userPrefsDir;
-		    try {
-		        short userDomainCode = -32763;
-		        userPrefsDir = 
-		            MRJFileUtils.findFolder(userDomainCode,
-		    							    new MRJOSType("pref"));
-		        settingsDir = new File(userPrefsDir, ".limewire");
-		    } catch(FileNotFoundException e) {
-		        // this will just continue to return the default
-		        // directory for all oses
-		    } catch(NoSuchMethodError e) {
-				// this means it's probably an older java implementation,
-				// so just return the current directory
-				settingsDir = CommonUtils.getCurrentDirectory();
-			}
+		} else if(CommonUtils.isMacOSX()) {            
+            File tempSettingsDir = new File(getUserHomeDir(), 
+                                            "Library/Preferences");
+            settingsDir = new File(tempSettingsDir, ".limewire");
 		} else {
-            settingsDir = new File(CommonUtils.getUserHomeDir(), 
+            settingsDir = new File(getUserHomeDir(), 
 							       ".limewire");
 		}
+
 		if(settingsDir == null) {
-		    settingsDir = new File(CommonUtils.getUserHomeDir(), 
+		    settingsDir = new File(getUserHomeDir(), 
 							       ".limewire");
 		}
         if(!settingsDir.isDirectory()) {
