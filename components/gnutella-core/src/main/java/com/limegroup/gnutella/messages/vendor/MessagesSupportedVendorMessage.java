@@ -154,6 +154,23 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * @return -1 if the message isn't supported, else it returns the version 
      * of the message supported.
      */
+    public int supportsTCPConnectBackRedirect() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK);
+    }
+
+
+    /**
+     * @return -1 if the message isn't supported, else it returns the version 
+     * of the message supported.
+     */
+    public int supportsUDPConnectBackRedirect() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR);
+    }
+
+    /**
+     * @return -1 if the message isn't supported, else it returns the version 
+     * of the message supported.
+     */
     public int supportsHopsFlow() {
         return supportsMessage(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
     }

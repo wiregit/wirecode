@@ -268,10 +268,14 @@ public abstract class MessageRouter {
         else if (msg instanceof TCPConnectBackRedirect) {
 			if(RECORD_STATS)
                 ;
+            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
+                                         receivingConnection);
         }
         else if (msg instanceof UDPConnectBackRedirect) {
 			if(RECORD_STATS)
                 ;
+            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
+                                         receivingConnection);
         }
         else if (msg instanceof PushProxyRequest) {
 			if(RECORD_STATS)
@@ -911,6 +915,8 @@ public abstract class MessageRouter {
     /**
      * Basically, just get the correct parameters, create a temporary 
      * DatagramSocket, and send a Ping.
+     * This method will soon change to just forward a new message, a 
+     * UDPConnectBackRedirect, to a third party.
      */
     protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
@@ -935,8 +941,36 @@ public abstract class MessageRouter {
 
 
     /**
+     * Basically, just get the correct parameters, create a temporary 
+     * DatagramSocket, and send a Ping.
+     */
+    protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
+                                               Connection source) {
+        GUID guidToUse = udp.getConnectBackGUID();
+        int portToContact = udp.getConnectBackPort();
+        InetAddress addrToContact = udp.getConnectBackAddress();
+
+        // TODO
+        // keep track of who you tried connecting back too, don't do it too
+        // much....
+
+        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
+                                         (byte) 0);
+        try {
+            UDPService.instance().send(pr, addrToContact, portToContact);
+        } catch(IOException e) {
+            ErrorService.error(e, 
+                "invalid ip/port: " + addrToContact + ":" + portToContact);
+        }
+    }
+
+
+
+    /**
      * Basically, just get the correct parameters, create a Socket, and
      * send a "/n/n".
+     * This method will soon change to just forward a new message, a 
+     * UDPConnectBackRedirect, to a third party.
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
@@ -948,6 +982,43 @@ public abstract class MessageRouter {
         catch (IllegalStateException ise) {
             return;
         }
+        Thread connectBack = new Thread( new Runnable() {
+            public void run() {
+                Socket sock = null;
+                OutputStream os = null;
+                try {
+                    sock = Sockets.connect(addrToContact, portToContact, 12);
+                    os = sock.getOutputStream();
+                    os.write("\n\n".getBytes());
+                } catch (IOException ignored) {
+                } catch (SecurityException ignored) {
+                } catch (Throwable t) {
+                    ErrorService.error(t);
+                } finally {
+                    if(sock != null)
+                        try { sock.close(); } catch(IOException ignored) {}
+                    if(os != null)
+                        try { os.close(); } catch(IOException ignored) {}
+                }
+            }
+        }, "TCPConnectBackThread");
+        connectBack.start();
+    }
+
+
+    /**
+     * Basically, just get the correct parameters, create a Socket, and
+     * send a "/n/n".
+     */
+    protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
+                                                Connection source) {
+        final int portToContact = tcp.getConnectBackPort();
+        final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
+
+        // TODO
+        // keep track of who you tried connecting back too, don't do it too
+        // much....
+
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
                 Socket sock = null;
