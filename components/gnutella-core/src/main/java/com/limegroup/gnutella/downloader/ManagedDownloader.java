@@ -1324,6 +1324,33 @@ public class ManagedDownloader implements Downloader, Serializable {
             commonOutFile.clearManagedDownloader();
     }
 
+    /** @return either the URN of the file that was downloaded the most so far
+     *  or the URN of the bucket with the most sources.
+     */
+    private URN getBestURN() {
+        URN retURN = null;
+
+        // Iterate through all available URNs and attempt to get one with the
+        // biggest size
+        List urns = buckets.getURNs();
+        int currBigSize = 0;
+        Iterator iter = urns.iterator();
+        while (iter.hasNext()) {
+            URN currURN = (URN) iter.next();
+            File incompleteFile = incompleteFileManager.getFileForUrn(currURN);
+            if (incompleteFile == null) continue;
+            VerifyingFile vF =incompleteFileManager.getEntry(incompleteFile);
+            if (vF == null) continue;
+            if ((retURN == null) || (vF.getBlockSize() > currBigSize)) {
+                currBigSize = vF.getBlockSize();
+                retURN = currURN;
+            }
+        }
+
+        // if we haven't downloaded anything, just get the most redundant URN
+        if (retURN == null) retURN = buckets.getBestURN();
+        return retURN;
+    }
 
     /** 
      * Actually does the download, finding duplicate files, trying all
@@ -1416,7 +1443,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(ITERATIVE_GUESSING);
                         triedLocatingSources = true;
                         boolean areThereNewResults = false;
-                        URN bestURN = buckets.getBestURN();
+                        URN bestURN = getBestURN();
                         for (Iterator i = guessLocs.iterator();
                              i.hasNext() && !areThereNewResults; ) {
                             // send a guess query

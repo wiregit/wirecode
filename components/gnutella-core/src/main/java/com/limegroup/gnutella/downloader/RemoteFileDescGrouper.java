@@ -223,6 +223,13 @@ class RemoteFileDescGrouper implements Serializable {
         return 0;
     }
 
+    synchronized List getURNs() {
+        List retList = new ArrayList();
+        for (int i = 0; i < sha1s.length; i++)
+            retList.add(sha1s[i]);
+        return retList;
+    }
+
     synchronized URN getURNForBucket(int n) {
         if (n <0 || n>=buckets.size())
             throw new IllegalArgumentException("index: " + n + 
