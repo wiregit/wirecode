@@ -216,8 +216,11 @@ public class ServerSideWhatIsNewTest
 
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
-        for (int i = 0; (i < 15) && (rs.getNumSharedFiles() < 2); i++)
+        int i = 0;
+        for (; (i < 15) && (rs.getNumSharedFiles() < 2); i++)
             Thread.sleep(1000);
+        if (i == 15) assertTrue(false);
+        
 
         CreationTimeCache ctCache = CreationTimeCache.instance();
         FileManager fm = rs.getFileManager();
@@ -295,6 +298,65 @@ public class ServerSideWhatIsNewTest
         assertTrue(currResp.getName().equals("berkeley.txt") ||
                    currResp.getName().equals("susheel.txt"));
         assertFalse(iter.hasNext());
+    }
+
+
+    public void testAddSharedFiles() throws Exception {
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        FileManager fm = rs.getFileManager();
+        URN berkeleyURN = fm.getURNForFile(berkeley);
+        URN susheelURN = fm.getURNForFile(susheel);
+
+        File tempFile1 = new File("tempFile1.txt");
+        File tempFile2 = new File("tempFile2.txt");
+        tempFile1.deleteOnExit(); tempFile2.deleteOnExit();
+
+        FileWriter writer = null;
+        {
+            writer = new FileWriter(tempFile1);
+            writer.write(tempFile1.getName(), 0, tempFile1.getName().length());
+            writer.flush();
+            writer.close();
+        }
+        {
+            writer = new FileWriter(tempFile2);
+            writer.write(tempFile2.getName(), 0, tempFile2.getName().length());
+            writer.flush();
+            writer.close();
+        }
+        
+        // now move them to the share dir
+        CommonUtils.copy(tempFile1, new File(_sharedDir, "tempFile1.txt"));
+        CommonUtils.copy(tempFile2, new File(_sharedDir, "tempFile2.txt"));
+        tempFile1 = new File(_sharedDir, "tempFile1.txt");
+        tempFile2 = new File(_sharedDir, "tempFile2.txt");
+        assertTrue(tempFile1.exists());
+        assertTrue(tempFile2.exists());
+        
+        rs.getFileManager().loadSettings(false);
+        int i = 0;
+        for (; (i < 15) && (rs.getNumSharedFiles() < 4); i++)
+            Thread.sleep(1000);
+        if (i == 15) assertTrue("num shared files? " + rs.getNumSharedFiles(),
+                                false);
+
+        URN tempFile1URN = fm.getURNForFile(tempFile1);
+        URN tempFile2URN = fm.getURNForFile(tempFile2);
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(4, urnToLong.size());
+            assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
+            assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
+            assertNotNull(""+urnToLong, urnToLong.get(tempFile1URN));
+            assertNotNull(""+urnToLong, urnToLong.get(tempFile2URN));
+        }
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            assertTrue((longToUrns.size() == 2) || (longToUrns.size() == 3) ||
+                       (longToUrns.size() == 4));
+        }
     }
 
 
