@@ -297,7 +297,8 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("sha1 cannot be null");
 		}
 		if(!sha1.equals(SHA1_URN)) {
-			throw new IllegalArgumentException("URN does not match");
+			throw new IllegalArgumentException("URN does not match:\n"+
+											   SHA1_URN+"\n"+sha1);
 		}
 		URL url = al.getUrl();
 		ALT_LOCS.addAlternateLocation(al);
@@ -319,7 +320,8 @@ public class FileDesc implements AlternateLocationCollector {
             throw new NullPointerException("cannot accept null alt loc coll");
         }
 		if(!alc.getSHA1Urn().equals(SHA1_URN)) {
-			throw new IllegalArgumentException("SHA1 does not match");
+			throw new IllegalArgumentException("SHA1 does not match:\n"+
+											   SHA1_URN+"\n"+alc.getSHA1Urn());
 		}
 		ALT_LOCS.addAlternateLocationCollection(alc);
 	}
