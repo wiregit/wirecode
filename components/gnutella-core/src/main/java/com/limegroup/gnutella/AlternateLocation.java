@@ -386,8 +386,7 @@ public final class AlternateLocation
 	 */
 	public int compareTo(Object obj) {
 		AlternateLocation al = (AlternateLocation)obj;		
-		long anotherTime = al.getTimestamp();
-		return (TIME<anotherTime ? 1 : (TIME==anotherTime ? 0 : -1));
+		return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
 	}
 
 	/**
@@ -405,9 +404,7 @@ public final class AlternateLocation
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
-		long ts = al.getTimestamp();
-		URL url = al.getUrl();
-		return ((ts == TIME) && url.equals(URL));
+		return ((al.TIME == this.TIME) && al.URL.equals(this.URL));
 	}
 
 	/**
