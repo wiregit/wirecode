@@ -24,6 +24,7 @@ public class AssertComparisons extends TestCase {
     private static final int NOT_INSTANCE_OF = 7;
     private static final int CONTAINS = 8;
     private static final int NOT_CONTAINS = 9;
+    private static final int COMPARE_EQUALS = 10;
     
     /**
      * Named constructor.
@@ -378,6 +379,22 @@ public class AssertComparisons extends TestCase {
     static public void assertNotEquals(String msg, byte expected, byte actual) {
         assertNotEquals( msg, new Byte(expected), new Byte(actual) );
     }    
+    
+    /**
+     * Asserts that the actual is compareTo == 0 to another value.
+     * If it isn't, an AssertionFailedError is thrown.
+     */
+    static public void assertCompareToEquals(Object expected, Object actual) {
+        assertCompareToEquals(null, expected, actual);
+    }
+    
+    /**
+     * Asserts that the actual is compareTo == 0 to another value.
+     * If it isn't, an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertCompareToEquals(String msg, Object expected, Object actual) {
+        assertComparison(COMPARE_EQUALS, msg, expected, actual);
+    }
     
     /**
      * Assertes that actual is greater than expected.  If it isn't,
@@ -862,6 +879,9 @@ public class AssertComparisons extends TestCase {
         case GREATER_THAN_OR_EQUALS:
             if ( ret > 0 ) break;
             return;
+        case COMPARE_EQUALS:
+            if ( ret == 0 ) break;
+            return;
         }
 
         //if we didn't return, we failed.
@@ -912,6 +932,8 @@ public class AssertComparisons extends TestCase {
             compare = "to contain"; break;
         case NOT_CONTAINS:
             compare = "to not contain"; break;
+        case COMPARE_EQUALS:
+            compare = "compareTo difference than"; break;
         }
         String formatted = "";
         if ( message != null )

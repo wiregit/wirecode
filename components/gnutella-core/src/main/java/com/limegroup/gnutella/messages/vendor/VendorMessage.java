@@ -38,6 +38,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_UDP_HEAD_PING = 23;
     protected static final int F_UDP_HEAD_PONG = 24;
     protected static final int F_HEADER_UPDATE = 25;
+    protected static final int F_UPDATE_REQ = 26;
+    protected static final int F_UPDATE_RESP = 27;
 
 
     
@@ -347,6 +349,12 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UDP_HEAD_PONG) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new HeadPong(guid,ttl,hops,version,restOf);
+        if((selector == F_UPDATE_REQ) &&
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UpdateRequest(guid, ttl, hops, version, restOf);
+        if((selector == F_UPDATE_RESP) && 
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UpdateResponse(guid, ttl, hops, version, restOf);
         
         ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;

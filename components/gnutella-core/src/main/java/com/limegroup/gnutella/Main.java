@@ -10,6 +10,7 @@ import java.util.Vector;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -268,11 +269,11 @@ public class Main implements ActivityCallback, ErrorCallback {
     public void browseHostFailed(GUID guid) {}
 
 	public void setAnnotateEnabled(boolean enabled) {}
-
-    public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
-    }
-
-    public void indicateNewVersion() {}
+	
+	public void updateAvailable(UpdateInformation update) {
+	  System.out.println("You're running an older version.  Get " +
+	                     update.getUpdateVersion() + ", from " + update.getUpdateURL());
+    }  
 
     public boolean isQueryAlive(GUID guid) {
         return false;

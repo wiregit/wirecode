@@ -56,7 +56,9 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
+
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -391,7 +393,8 @@ public class RouterService {
             
             LOG.trace("START UpdateManager.instance");
             callback.componentLoading("UPDATE_MANAGER");
-            UpdateManager.instance();//initialize
+            UpdateManager.instance();
+            UpdateHandler.instance();
             LOG.trace("STOP UpdateManager.instance");
 
             LOG.trace("START QueryUnicaster");

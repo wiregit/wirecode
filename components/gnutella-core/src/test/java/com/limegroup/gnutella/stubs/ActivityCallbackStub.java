@@ -15,6 +15,7 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * A stub for ActivityCallback.  Does nothing.
@@ -67,10 +68,8 @@ public class ActivityCallbackStub implements ActivityCallback {
     public String getHostValue(String key) { return null;}
     public void handleSharedFileUpdate(File file) { }
     public void handleFileManagerEvent(FileManagerEvent evt) {}
-    public void notifyUserAboutUpdate(String version, boolean isPro, boolean l){
-    }
     public void fileManagerLoaded() {}
-    public void indicateNewVersion() {}
+    public void updateAvailable(UpdateInformation uc) {}
     public void showError(String message, String messageKey) {}
     public boolean isQueryAlive(GUID guid) {
         return false;

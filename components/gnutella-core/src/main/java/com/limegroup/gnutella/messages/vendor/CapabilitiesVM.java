@@ -16,6 +16,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /** 
  * The message that lets other know what capabilities you support.  Everytime 
@@ -36,6 +37,11 @@ public final class CapabilitiesVM extends VendorMessage {
      * implementation was broken.  We now use 'IMPP' to advertise support.
      */
     private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
+    
+    /**
+     * The bytes for the LMUP message.
+     */
+    private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
     
     /**
      * The current version of this message.
@@ -92,10 +98,8 @@ public final class CapabilitiesVM extends VendorMessage {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)hashSet.size(), baos);
-            Iterator iter = hashSet.iterator();
-            while (iter.hasNext()) {
-                SupportedMessageBlock currSMP = 
-                    (SupportedMessageBlock) iter.next();
+            for(Iterator i = hashSet.iterator(); i.hasNext(); ) {
+                SupportedMessageBlock currSMP = (SupportedMessageBlock)i.next();
                 currSMP.encode(baos);
             }
             return baos.toByteArray();
@@ -115,8 +119,13 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
                                         FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
+        
         smp = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
                                         SimppManager.instance().getVersion());
+        hashSet.add(smp);
+        
+        smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
+                                        UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
     }
 
@@ -138,8 +147,7 @@ public final class CapabilitiesVM extends VendorMessage {
     public int supportsCapability(byte[] capabilityName) {
         Iterator iter = _capabilitiesSupported.iterator();
         while (iter.hasNext()) {
-            SupportedMessageBlock currSMP = 
-                (SupportedMessageBlock) iter.next();
+            SupportedMessageBlock currSMP = (SupportedMessageBlock) iter.next();
             int version = currSMP.matches(capabilityName);
             if (version > -1)
                 return version;
@@ -169,6 +177,13 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public int supportsSIMPP() {
         return supportsCapability(SIMPP_CAPABILITY_BYTES);
+    }
+    
+    /**
+     * Returns the current Update version.
+     */
+    public int supportsUpdate() {
+        return supportsCapability(LIME_UPDATE_BYTES);
     }
 
     // override super

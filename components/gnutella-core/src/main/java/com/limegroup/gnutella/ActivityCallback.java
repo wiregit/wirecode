@@ -6,6 +6,7 @@ import java.util.Set;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  *  Callback to notify the GUI of asynchronous backend events.
@@ -87,12 +88,7 @@ public interface ActivityCallback
      *  @param guid The GUID of the browse host.
      */    
     public void browseHostFailed(GUID guid);
-
-    /**
-     * A new version of LimeWire is available, notify user.
-     */
-    public void notifyUserAboutUpdate(String message, boolean isPro, boolean l);
-    
+        
     /**
      * Notifies a user that the filemanager has completely loaded.
      */
@@ -139,8 +135,12 @@ public interface ActivityCallback
 	/**
 	 * The list of shared files has been emptied.
 	 */
-	public void clearSharedFiles();           
-
+	public void clearSharedFiles();
+	
+	/**
+	 * Notification that an update became available.
+	 */
+	public void updateAvailable(UpdateInformation info);
 
 	/**
 	 * Sets the enabled/disabled state of file annotation.
@@ -194,8 +194,6 @@ public interface ActivityCallback
 
 
     public String getHostValue(String key);
-
-    public void indicateNewVersion();
     
     /**
      * Indicates a component is loading.

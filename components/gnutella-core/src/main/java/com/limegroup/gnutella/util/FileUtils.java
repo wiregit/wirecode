@@ -5,16 +5,24 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream; 
+import java.io.RandomAccessFile;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UploadManager;
+
 
 /**
  *  This class provides static functions to load/store the files.
@@ -268,4 +276,59 @@ public class FileUtils
         }
         return success;
     }
+    
+    /**
+     * Saves the data iff it was written exactly as we wanted.
+     */
+    public static boolean verySafeSave(File dir, String name, byte[] data) {
+        File tmp;
+        try {
+            tmp = File.createTempFile(name, "tmp", dir);
+        } catch(IOException hrorible) {
+            return false;
+        }
+        
+        File out = new File(dir, name);
+        
+        OutputStream os = null;
+        try {
+            os = new BufferedOutputStream(new FileOutputStream(tmp));
+            os.write(data);
+            os.flush();
+        } catch(IOException bad) {
+            return false;
+        } finally {
+            IOUtils.close(os);
+        }
+        
+        //verify that we wrote everything correctly
+        byte[] read = readFileFully(tmp);
+        if(read == null || !Arrays.equals(read, data))
+            return false;
+        
+        return forceRename(tmp, out);
+    }
+    
+    /**
+     * Reads a file, filling a byte array.
+     */
+    public static byte[] readFileFully(File source) {
+        DataInputStream raf = null;
+        int length = (int)source.length();
+        if(length <= 0)
+            return null;
+
+        byte[] data = new byte[length];
+        try {
+            raf = new DataInputStream(new BufferedInputStream(new FileInputStream(source)));
+            raf.readFully(data);
+        } catch(IOException ioe) {
+            return null;
+        } finally {
+            IOUtils.close(raf);
+        }
+        
+        return data;
+    }
+
 }

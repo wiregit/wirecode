@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import java.io.ByteArrayInputStream;
@@ -190,6 +191,14 @@ public class IOUtils {
         }
     }
     
+    public static void close(RandomAccessFile raf) {
+        if(raf != null) {
+            try {
+                raf.close();
+            } catch(IOException ignored) {}
+        }
+    }
+    
     public static void close(Socket s) {
         if(s != null) {
             try {
@@ -247,6 +256,5 @@ public class IOUtils {
             IOUtils.close(in);
         }
     }    
-
 
 }

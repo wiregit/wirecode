@@ -400,12 +400,25 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
 
+        // Get a marker file.
+        File f = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        f = f.getCanonicalFile();
+                 //gnutella       // limegroup    // com         // tests       // .
+        f = f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+
         // Expand the xml.war file.
-        File xmlWar = CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war");
+        File xmlWar = new File(f, "gui/xml.war");
         assertTrue(xmlWar.exists());
         Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.
+
+        // Expand the update.ver file.
+        File updateVer = new File(f, "gui/update.ver");
+        assertTrue(updateVer.exists());
+        Expand.expandFile(updateVer, _settingsDir);
+
         _baseDir.deleteOnExit();
+        
     }
     
     /**
