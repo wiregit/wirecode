@@ -439,11 +439,8 @@ public class SettingsManager implements SettingsInterface {
 					setAppHeight(Integer.parseInt(p));
 				}
 				else if(key.equals(RUN_ONCE)) {
-					// if this key exists at all, we know
-					// it has been run once, so don't bother
-					// going through all of the boolean
-					// conversions.
-					setRunOnce(true);
+					Boolean runOnce = new Boolean(p);
+					setRunOnce(runOnce.booleanValue());
 				}
 
 				else if(key.equals(WINDOW_X)) {
@@ -485,8 +482,8 @@ public class SettingsManager implements SettingsInterface {
                         break;
 					setShowCloseDialog(showCloseDialog);
 				}
-                else if(key.equals(LIME_WIRE_JAR_NAME)){
-                    setLimeWireJarName(p);
+                else if(key.equals(CLASSPATH)){
+                    setClassPath(p);
                 }
             }
             catch(NumberFormatException nfe){ /* continue */ }
@@ -573,7 +570,7 @@ public class SettingsManager implements SettingsInterface {
 		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
-		setLimeWireJarName(DEFAULT_LIME_WIRE_JAR_NAME);
+		setClassPath(DEFAULT_CLASSPATH);
     }
 
 
@@ -871,10 +868,11 @@ public class SettingsManager implements SettingsInterface {
 	}
   
     /**
-     * returns the name of the LimeWire jar file to load at startup.
+     * returns the classpath string used for loading jar files
+	 * on startup.
      */
-    public String getLimeWireJarName() {
-        return _props.getProperty(LIME_WIRE_JAR_NAME);
+    public String getClassPath() {
+        return _props.getProperty(CLASSPATH);
     }
 
     /******************************************************
@@ -1727,10 +1725,10 @@ public class SettingsManager implements SettingsInterface {
 	}
     
     /**
-     * sets the name of the jar file to load at startup.
+     * sets the classpath for loading files at startup.
      */
-    public void setLimeWireJarName(String name) {
-        _props.put(LIME_WIRE_JAR_NAME, name);
+    public void setClassPath(String classpath) {
+        _props.put(CLASSPATH, classpath);
     }
 	
     /******************************************************
@@ -1738,9 +1736,10 @@ public class SettingsManager implements SettingsInterface {
      ******************************************************/
 
 
-    /** writes out the properties file to with the specified
-     *  name in the user's install directory.  This should only
-	 *  get called once when the program shuts down.
+    /** 
+	 * writes out the properties file to with the specified
+     * name in the user's install directory.  This should only
+	 * get called once when the program shuts down.
      */
     public void writeProperties() {
 		FileOutputStream ostream = null;
