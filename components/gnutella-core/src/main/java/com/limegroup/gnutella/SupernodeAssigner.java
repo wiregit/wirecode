@@ -26,16 +26,16 @@ public final class SupernodeAssigner implements Runnable {
 	private final SettingsManager SETTINGS = SettingsManager.instance();
 
 	/**
-	 * Constant for the minimum number of upstream bytes per second that 
+	 * Constant for the minimum number of upstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND = 10000;
+	private final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 10;
 
 	/**
-	 * Constant for the minimum number of downlstream bytes per second that 
+	 * Constant for the minimum number of downlstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND = 15000;
+	private final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 15;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
@@ -47,7 +47,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 9 * 60;    
+	private final int MINIMUM_CURRENT_UPTIME = 30 * 60; //1/2 hr
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
@@ -55,12 +55,6 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	private boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
 	
-	/**
-	 * Constant for the average uptime measured over the all of the
-	 * times this node has been run.
-	 */
-	private final long AVERAGE_UPTIME = SETTINGS.getAverageUptime();
-
 	/**
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
@@ -169,14 +163,18 @@ public final class SupernodeAssigner implements Runnable {
         }
 
         boolean isSupernodeCapable = 
-            (((_maxUpstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) ||
-            (_maxDownstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND)) &&
-            (AVERAGE_UPTIME >= MINIMUM_AVERAGE_UPTIME) &&
-			(_currentUptime >= MINIMUM_CURRENT_UPTIME) &&
-			(SETTINGS.getEverAcceptedIncoming()) &&
-			(SUPERNODE_OS));
+            //Is upstream OR downstream high enough?
+            (_maxUpstreamBytesPerSec >= 
+                    MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND ||
+             _maxDownstreamBytesPerSec >= 
+                    MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND) &&
+            //AND is my average uptime OR current uptime high enough?
+            (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
+             _currentUptime >= MINIMUM_CURRENT_UPTIME) &&
+            //AND am I not firewalled?
+			SETTINGS.getEverAcceptedIncoming() &&
+            //AND am I a capable OS?
+			SUPERNODE_OS;
         
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) SETTINGS.setEverSupernodeCapable(true);
