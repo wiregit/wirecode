@@ -25,11 +25,15 @@ public class HostCatcherTest extends TestCase {
 
         //This creates an acceptor thread.  We should probably use an Acceptor
         //stub or write a tearDown() method.
-		if(!RouterService.instance().isStarted()) {
-			RouterService.instance().start();
-		}
-        hc = RouterService.instance().getHostCatcher();
+		//if(!RouterService.instance().isStarted()) {
+		//RouterService.instance().start();
+		//}
+        hc = new HostCatcher();//RouterService.instance().getHostCatcher();
+		hc.initialize();
     }
+
+	public void tearDown() {
+	}
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */
@@ -269,7 +273,7 @@ public class HostCatcherTest extends TestCase {
     }
 
     public void testPermanent() {
-        //System.out.println("-Testing write of permanent nodes to Gnutella.net");
+        //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         try {
             //1. Create HC, add entries, write to disk.
             hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
