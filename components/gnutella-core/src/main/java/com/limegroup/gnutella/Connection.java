@@ -60,15 +60,15 @@ import com.limegroup.gnutella.statistics.*;
  * TTL traffic generally.
  */
 public class Connection {
-	
-	/**
-	 * Lock for maintaining accurate data for when to allow ping forwarding.
+    
+    /**
+     * Lock for maintaining accurate data for when to allow ping forwarding.
      */
-	private final Object PING_LOCK = new Object();
+    private final Object PING_LOCK = new Object();
 
     /**
-	 * Lock for maintaining accurate data for when to allow pong forwarding.
-	 */
+     * Lock for maintaining accurate data for when to allow pong forwarding.
+     */
     private final Object PONG_LOCK = new Object();
     
     /** 
@@ -153,20 +153,20 @@ public class Connection {
     protected volatile boolean _closed=false;
 
     /** 
-	 * The headers read from the connection.
-	 */
+     * The headers read from the connection.
+     */
     private final Properties HEADERS_READ = new Properties();
 
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
-	private HandshakeResponse _headers = 
+    private HandshakeResponse _headers = 
         HandshakeResponse.createEmptyResponse();
         
     /**
      * The <tt>HandshakeResponse</tt> wrapper for written connection headers.
      */
-	private HandshakeResponse _headersWritten = 
+    private HandshakeResponse _headersWritten = 
         HandshakeResponse.createEmptyResponse();        
 
     /** For outgoing Gnutella 0.6 connections, the properties written
@@ -189,14 +189,14 @@ public class Connection {
      *  read. */
     private final Properties HEADERS_WRITTEN = new Properties();
 
-	/**
-	 * Gnutella 0.6 connect string.
-	 */
+    /**
+     * Gnutella 0.6 connect string.
+     */
     private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
 
-	/**
-	 * Gnutella 0.6 accept connection string.
-	 */
+    /**
+     * Gnutella 0.6 accept connection string.
+     */
     public static final String GNUTELLA_OK_06 = "GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
     public static final String _200_OK     = " 200 OK";
@@ -253,7 +253,7 @@ public class Connection {
      */
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
-    
+
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
@@ -269,56 +269,56 @@ public class Connection {
      * @param responseHeaders a function returning the headers to be sent
      *  after the server's "GNUTELLA OK".  Typically this returns only
      *  vendor-specific properties.
-	 * @throws <tt>NullPointerException</tt> if any of the arguments are
-	 *  <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     * @throws <tt>NullPointerException</tt> if any of the arguments are
+     *  <tt>null</tt>
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public Connection(String host, int port,
                       Properties requestHeaders,
                       HandshakeResponder responseHeaders) {
 
-		if(host == null) {
-			throw new NullPointerException("null host");
-		}
-		if(!NetworkUtils.isValidPort(port)) {
-			throw new IllegalArgumentException("illegal port: "+port);
-		}
-		if(requestHeaders == null) {
-			throw new NullPointerException("null request headers");
-		}
-		if(responseHeaders == null) {
-			throw new NullPointerException("null response headers");
-		}		
+        if(host == null) {
+            throw new NullPointerException("null host");
+        }
+        if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("illegal port: "+port);
+        }
+        if(requestHeaders == null) {
+            throw new NullPointerException("null request headers");
+        }
+        if(responseHeaders == null) {
+            throw new NullPointerException("null response headers");
+        }       
 
         _host = host;
         _port = port;
         OUTGOING = true;
         REQUEST_HEADERS = requestHeaders;
         RESPONSE_HEADERS = responseHeaders;            
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
-		}
+        if(!CommonUtils.isJava118()) {
+            ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+        }
     }
 
     /**
      * Creates an uninitialized incoming 0.6 Gnutella connection. If the
-	 * client is attempting to connect using an 0.4 handshake, it is
-	 * rejected.
+     * client is attempting to connect using an 0.4 handshake, it is
+     * rejected.
      * 
      * @param socket the socket accepted by a ServerSocket.  The word
      *  "GNUTELLA " and nothing else must have been read from the socket.
      * @param responseHeaders the headers to be sent in response to the client's 
-	 *  "GNUTELLA CONNECT".  
-	 * @throws <tt>NullPointerException</tt> if any of the arguments are
-	 *  <tt>null</tt>
+     *  "GNUTELLA CONNECT".  
+     * @throws <tt>NullPointerException</tt> if any of the arguments are
+     *  <tt>null</tt>
      */
     public Connection(Socket socket, HandshakeResponder responseHeaders) {
-		if(socket == null) {
-			throw new NullPointerException("null socket");
-		}
-		if(responseHeaders == null) {
-			throw new NullPointerException("null response headers");
-		}
+        if(socket == null) {
+            throw new NullPointerException("null socket");
+        }
+        if(responseHeaders == null) {
+            throw new NullPointerException("null response headers");
+        }
         //Get the address in dotted-quad format.  It's important not to do a
         //reverse DNS lookup here, as that can block.  And on the Mac, it blocks
         //your entire system!
@@ -326,11 +326,11 @@ public class Connection {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
-        RESPONSE_HEADERS = responseHeaders;	
-		REQUEST_HEADERS = null;
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
-		}
+        RESPONSE_HEADERS = responseHeaders; 
+        REQUEST_HEADERS = null;
+        if(!CommonUtils.isJava118()) {
+            ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+        }
     }
 
     /**
@@ -347,7 +347,7 @@ public class Connection {
      * @see initialize(int)
      */
     public void initialize() 
-		throws IOException, NoGnutellaOkException, BadHandshakeException {
+        throws IOException, NoGnutellaOkException, BadHandshakeException {
         initialize(0);
     }
 
@@ -369,7 +369,7 @@ public class Connection {
      *  the connection during handshaking, etc.
      */
     public void initialize(int timeout) 
-		throws IOException, NoGnutellaOkException, BadHandshakeException {
+        throws IOException, NoGnutellaOkException, BadHandshakeException {
 
         if(isOutgoing())
             _socket=Sockets.connect(_host, _port, timeout);
@@ -381,7 +381,7 @@ public class Connection {
         } 
         
         // Check to see if this is an attempt to connect to ourselves
-		InetAddress localAddress = _socket.getLocalAddress();
+        InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
             _socket.getInetAddress().equals(localAddress) &&
             _port == ConnectionSettings.PORT.getValue()) {
@@ -395,7 +395,7 @@ public class Connection {
             _in = getInputStream();
             _out = getOutputStream();
             if (_in == null) throw new IOException("null input stream");
-			else if(_out == null) throw new IOException("null output stream");
+            else if(_out == null) throw new IOException("null output stream");
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
             //NullPointerException if the socket is closed.  (See Sun bug
@@ -424,9 +424,9 @@ public class Connection {
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
-            // The +1 on the soft max for "good" connections is because the message
-            // may come from a leaf, and therefore can have an extra hop.
-            // "Good" connections are connections with features such as 
+            // The +1 on the soft max for "good" connections is because the 
+            // message may come from a leaf, and therefore can have an extra
+            // hop.  "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
             _softMax = ConnectionSettings.SOFT_MAX.getValue();
             if(isGoodUltrapeer() || isGoodLeaf()) {
@@ -457,9 +457,8 @@ public class Connection {
             // This does not need to be in a finally clause, because if an
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
-            
-            UpdateManager.instance().checkAndUpdate(this);
-						
+              
+            UpdateManager.instance().checkAndUpdate(this);          
         } catch (NoGnutellaOkException e) {
             close();
             throw e;
@@ -517,14 +516,14 @@ public class Connection {
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++) {
 
-			//2. Read "GNUTELLA/0.6 200 OK"  
-			String connectLine = readLine();
-			Assert.that(connectLine != null, "null connectLine");
-			if (! connectLine.startsWith(GNUTELLA_06))
-				throw new IOException("Bad connect string");
-			
-			//3. Read the Gnutella headers. 
-			readHeaders();
+            //2. Read "GNUTELLA/0.6 200 OK"  
+            String connectLine = readLine();
+            Assert.that(connectLine != null, "null connectLine");
+            if (! connectLine.startsWith(GNUTELLA_06))
+                throw new IOException("Bad connect string");
+            
+            //3. Read the Gnutella headers. 
+            readHeaders();
 
             //Terminate abnormally if we read something other than 200 or 401.
             HandshakeResponse theirResponse = 
@@ -544,14 +543,13 @@ public class Connection {
             }
 
             //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
-			//   and headers.
-			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
+            //   and headers.
+            Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
             HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(theirResponse, true);
+                RESPONSE_HEADERS.respond(theirResponse, true);
 
             Assert.that(ourResponse != null, "null ourResponse");
-            writeLine(GNUTELLA_06 + " " 
-                + ourResponse.getStatusLine() + CRLF);
+            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
 
             code = ourResponse.getStatusCode();
@@ -589,12 +587,12 @@ public class Connection {
      *  with an error code other than 200 OK (possibly after several rounds
      *  of 401's)
      * @exception IOException if there's an unexpected connect string or
-	 *  any other problem
+     *  any other problem
      */
     private void initializeIncoming() throws IOException {
         //Dispatch based on first line read.  Remember that "GNUTELLA " has
         //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
-		String connectString = readLine();
+        String connectString = readLine();
         if (notLessThan06(connectString)) {
             //1. Read headers (connect line has already been read)
             readHeaders();
@@ -623,16 +621,16 @@ public class Connection {
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
             //2. Send our response and headers.
 
-			// is this an incoming connection from the crawler??
-			boolean isCrawler = _headers.isCrawler();
-			
-			//Note: in the following code, it appears that we're ignoring
-			//the response code written by the initiator of the connection.
-			//However, you can prove that the last code was always 200 OK.
-			//See initializeIncoming and the code at the bottom of this
-			//loop.
-			HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(_headers, false);
+            // is this an incoming connection from the crawler??
+            boolean isCrawler = _headers.isCrawler();
+            
+            //Note: in the following code, it appears that we're ignoring
+            //the response code written by the initiator of the connection.
+            //However, you can prove that the last code was always 200 OK.
+            //See initializeIncoming and the code at the bottom of this
+            //loop.
+            HandshakeResponse ourResponse = 
+                RESPONSE_HEADERS.respond(_headers, false);
 
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
@@ -660,7 +658,7 @@ public class Connection {
                 connectLine = readLine();  
                 readHeaders();
             }
-			
+            
             if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
 
@@ -674,11 +672,11 @@ public class Connection {
             code = ourResponse.getStatusCode();
             if(code == HandshakeResponse.OK) {
                 if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
-                	// if it's the crawler, we throw an exception to make sure we 
-                	// correctly disconnect
-                	if(isCrawler) {
-                		throw new IOException("connection from crawler -- disconnect");
-                	}
+                    // if it's the crawler, we throw an exception to make sure we 
+                    // correctly disconnect
+                    if(isCrawler) {
+                        throw new IOException("connection from crawler -- disconnect");
+                    }
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
                 }
@@ -778,10 +776,10 @@ public class Connection {
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
             if (HeaderNames.REMOTE_IP.equals(key) && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-            	try {
-            		ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(value);
-            	} catch (IllegalArgumentException ex) {
-            	}
+                try {
+                    ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(value);
+                } catch (IllegalArgumentException ex) {
+                }
             }
             HEADERS_READ.put(key, value);
         }
@@ -798,9 +796,9 @@ public class Connection {
 
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
-		if(!CommonUtils.isJava118()) {
-			BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
-			    bytes.length);
+        if(!CommonUtils.isJava118()) {
+            BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
+                bytes.length);
         }        
         _out.write(bytes);
         _out.flush();
@@ -843,9 +841,9 @@ public class Connection {
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
-			if(!CommonUtils.isJava118()) {
-				BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
-				    line.length());
+            if(!CommonUtils.isJava118()) {
+                BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
+                    line.length());
             }
             return line;
         } catch(NullPointerException npe) {
@@ -925,7 +923,7 @@ public class Connection {
      *  have been read.
      */
     public Message receive(int timeout)
-		throws IOException, BadPacketException, InterruptedIOException {
+        throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
             throw CONNECTION_CLOSED;
@@ -963,7 +961,12 @@ public class Connection {
             }
             
             // DO THE ACTUAL READ
-            msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+            try {
+                msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+            } catch(IOException ioe) {
+                close(); // if IOError, make sure we close.
+                throw ioe;
+            }
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -1000,7 +1003,6 @@ public class Connection {
      *   arise.
      */
     public void sendMessage(Message m) throws IOException {
-        //System.out.println("Connection::sendMessage");
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
@@ -1015,7 +1017,13 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
             
-            m.write(_out);
+            try {
+                m.write(_out);
+            } catch(IOException ioe) {
+                close(); // make sure we close.
+                throw ioe;
+            }
+
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
@@ -1040,7 +1048,13 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
 
-            _out.flush();
+            try {
+                _out.flush();
+            } catch(IOException ioe) {
+                close();
+                throw ioe;
+            }
+
             // we must update the write statistics again,
             // because flushing forces the deflater to deflate.
             updateWriteStatistics(null, priorUncompressed, priorCompressed);
@@ -1170,10 +1184,10 @@ public class Connection {
      * @exception IllegalStateException this is not initialized
      */
     public InetAddress getInetAddress() throws IllegalStateException {
-		if(_socket == null) {
-			throw new IllegalStateException("Not initialized");
-		}
-		return _socket.getInetAddress();
+        if(_socket == null) {
+            throw new IllegalStateException("Not initialized");
+        }
+        return _socket.getInetAddress();
     }
     
     /**
@@ -1321,7 +1335,7 @@ public class Connection {
         // method is called asynchronously before the socket is initialized.
         _closed = true;
         if(_socket != null) {
-            try {				
+            try {               
                 _socket.close();
             } catch(IOException e) {}
         }
@@ -1363,7 +1377,7 @@ public class Connection {
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
     public String getUserAgent() {
-		return _headers.getUserAgent();
+        return _headers.getUserAgent();
     }
     
     /**
@@ -1408,17 +1422,17 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     public boolean allowNewPings() {
-    	synchronized(PING_LOCK) {
-	        long curTime = System.currentTimeMillis();
-			
-			// don't allow new pings if the connection could drop any second
-			if(!isStable(curTime)) return false;
-	        if(curTime < _nextPingTime) {
-	            return false;
-	        } 
-			_nextPingTime = System.currentTimeMillis() + 2500;
-	        return true;
-    	}
+        synchronized(PING_LOCK) {
+            long curTime = System.currentTimeMillis();
+            
+            // don't allow new pings if the connection could drop any second
+            if(!isStable(curTime)) return false;
+            if(curTime < _nextPingTime) {
+                return false;
+            } 
+            _nextPingTime = System.currentTimeMillis() + 2500;
+            return true;
+        }
     }
 
 
@@ -1432,55 +1446,55 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     public boolean allowNewPongs() {
-    	synchronized(PONG_LOCK) {
-		    long curTime = System.currentTimeMillis();
+        synchronized(PONG_LOCK) {
+            long curTime = System.currentTimeMillis();
 
-			// don't allow new pongs if the connection could drop any second
-			if(!isStable(curTime)) return false;
-		    if(curTime < _nextPongTime) {
-		        return false;
-		    } 
-		    
-			int interval;
-		
-			// if the connection is young, give it a lot of pongs, otherwise
-			// be more conservative
-			if(curTime - getConnectionTime() < 10000) {
-				interval = 300;
-			} else {
-				interval = 12000;
-			}
-			_nextPongTime = curTime + interval;
-					
-		    return true;
-    	}
+            // don't allow new pongs if the connection could drop any second
+            if(!isStable(curTime)) return false;
+            if(curTime < _nextPongTime) {
+                return false;
+            } 
+            
+            int interval;
+        
+            // if the connection is young, give it a lot of pongs, otherwise
+            // be more conservative
+            if(curTime - getConnectionTime() < 10000) {
+                interval = 300;
+            } else {
+                interval = 12000;
+            }
+            _nextPongTime = curTime + interval;
+                    
+            return true;
+        }
     }
 
 
-	/**
-	 * Returns the number of intra-Ultrapeer connections this node maintains.
-	 * 
-	 * @return the number of intra-Ultrapeer connections this node maintains
-	 */
-	public int getNumIntraUltrapeerConnections() {
-		return _headers.getNumIntraUltrapeerConnections();
-	}
+    /**
+     * Returns the number of intra-Ultrapeer connections this node maintains.
+     * 
+     * @return the number of intra-Ultrapeer connections this node maintains
+     */
+    public int getNumIntraUltrapeerConnections() {
+        return _headers.getNumIntraUltrapeerConnections();
+    }
 
-	// implements ReplyHandler interface -- inherit doc comment
-	public boolean isHighDegreeConnection() {
-		return _headers.isHighDegreeConnection();
-	}
+    // implements ReplyHandler interface -- inherit doc comment
+    public boolean isHighDegreeConnection() {
+        return _headers.isHighDegreeConnection();
+    }
 
-	/**
-	 * Returns whether or not this connection is to an Ultrapeer that 
-	 * supports query routing between Ultrapeers at 1 hop.
-	 *
-	 * @return <tt>true</tt> if this is an Ultrapeer connection that
-	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
-	 *  otherwise <tt>false</tt>
-	 */
-	public boolean isUltrapeerQueryRoutingConnection() {
-		return _headers.isUltrapeerQueryRoutingConnection();
+    /**
+     * Returns whether or not this connection is to an Ultrapeer that 
+     * supports query routing between Ultrapeers at 1 hop.
+     *
+     * @return <tt>true</tt> if this is an Ultrapeer connection that
+     *  exchanges query routing tables with other Ultrapeers at 1 hop,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isUltrapeerQueryRoutingConnection() {
+        return _headers.isUltrapeerQueryRoutingConnection();
     }
 
     /**
@@ -1495,15 +1509,15 @@ public class Connection {
         return _headers.supportsProbeQueries();
     }
 
-	/**
-	 * Returns the authenticated domains listed in the connection headers
-	 * for this connection.
-	 *
-	 * @return the string of authenticated domains for this connection
-	 */
-	public String getDomainsAuthenticated() {
-		return _headers.getDomainsAuthenticated();
-	}
+    /**
+     * Returns the authenticated domains listed in the connection headers
+     * for this connection.
+     *
+     * @return the string of authenticated domains for this connection
+     */
+    public String getDomainsAuthenticated() {
+        return _headers.getDomainsAuthenticated();
+    }
 
     /**
      * Accessor for whether or not this connection has received any
@@ -1516,43 +1530,43 @@ public class Connection {
         return _headers != null;
     }
 
-	/**
-	 * Accessor for the <tt>HandshakeResponse</tt> instance containing all
-	 * of the Gnutella connection headers passed by this node.
-	 *
-	 * @return the <tt>HandshakeResponse</tt> instance containing all of
-	 *  the Gnutella connection headers passed by this node
-	 */
-	public HandshakeResponse headers() {
-		return _headers;
-	}
-	
-	/**
-	 * Accessor for the LimeWire version reported in the connection headers
-	 * for this node.	 
-	 */
-	public String getVersion() {
-		return _headers.getVersion();
-	}
+    /**
+     * Accessor for the <tt>HandshakeResponse</tt> instance containing all
+     * of the Gnutella connection headers passed by this node.
+     *
+     * @return the <tt>HandshakeResponse</tt> instance containing all of
+     *  the Gnutella connection headers passed by this node
+     */
+    public HandshakeResponse headers() {
+        return _headers;
+    }
+    
+    /**
+     * Accessor for the LimeWire version reported in the connection headers
+     * for this node.    
+     */
+    public String getVersion() {
+        return _headers.getVersion();
+    }
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-		return _headers.isLeaf();
+        return _headers.isLeaf();
     }
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-		return _headers.isUltrapeer();
+        return _headers.isUltrapeer();
     }
 
     /** 
-	 * Returns true iff the connection is an Ultrapeer and I am a leaf, i.e., 
+     * Returns true iff the connection is an Ultrapeer and I am a leaf, i.e., 
      * if I wrote "X-Ultrapeer: false", this connection wrote 
-	 * "X-Ultrapeer: true" (not necessarily in that order).  <b>Does 
-	 * NOT require that QRP is enabled</b> between the two; the Ultrapeer 
-	 * could be using reflector indexing, for example. 
-	 */
+     * "X-Ultrapeer: true" (not necessarily in that order).  <b>Does 
+     * NOT require that QRP is enabled</b> between the two; the Ultrapeer 
+     * could be using reflector indexing, for example. 
+     */
     public boolean isClientSupernodeConnection() {
         if(_isUltrapeer == null) {
             _isUltrapeer = 
@@ -1574,16 +1588,16 @@ public class Connection {
             return false;
         else 
             return !Boolean.valueOf(value).booleanValue();
-			
+            
     }
     
     /** 
-	 * Returns true iff the connection is an Ultrapeer and I am a Ultrapeer,
+     * Returns true iff the connection is an Ultrapeer and I am a Ultrapeer,
      * ie: if I wrote "X-Ultrapeer: true", this connection wrote 
-	 * "X-Ultrapeer: true" (not necessarily in that order).  <b>Does 
-	 * NOT require that QRP is enabled</b> between the two; the Ultrapeer 
-	 * could be using reflector indexing, for example. 
-	 */
+     * "X-Ultrapeer: true" (not necessarily in that order).  <b>Does 
+     * NOT require that QRP is enabled</b> between the two; the Ultrapeer 
+     * could be using reflector indexing, for example. 
+     */
     public boolean isSupernodeSupernodeConnection() {
         if(_isUltrapeerToUltrapeer == null) {
             _isUltrapeerToUltrapeer = 
@@ -1605,42 +1619,42 @@ public class Connection {
             return false;
         else 
             return Boolean.valueOf(value).booleanValue();
-			
+            
     }    
 
 
-	/**
-	 * Returns whether or not this connection is to a client supporting
-	 * GUESS.
-	 *
-	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  connection supports GUESS, <tt>false</tt> otherwise
-	 */
-	public boolean isGUESSCapable() {
-		return _headers.isGUESSCapable();
-	}
+    /**
+     * Returns whether or not this connection is to a client supporting
+     * GUESS.
+     *
+     * @return <tt>true</tt> if the node on the other end of this 
+     *  connection supports GUESS, <tt>false</tt> otherwise
+     */
+    public boolean isGUESSCapable() {
+        return _headers.isGUESSCapable();
+    }
 
-	/**
-	 * Returns whether or not this connection is to a ultrapeer supporting
-	 * GUESS.
-	 *
-	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
-	 */
-	public boolean isGUESSUltrapeer() {
-		return _headers.isGUESSUltrapeer();
-	}
+    /**
+     * Returns whether or not this connection is to a ultrapeer supporting
+     * GUESS.
+     *
+     * @return <tt>true</tt> if the node on the other end of this 
+     *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
+     */
+    public boolean isGUESSUltrapeer() {
+        return _headers.isGUESSUltrapeer();
+    }
 
 
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
-		return _headers.isTempConnection();
+        return _headers.isTempConnection();
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
      *  if I wrote "X-Ultrapeer: true" and this connection wrote 
-	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
+     *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
         if(_isLeaf == null) {
             _isLeaf =
@@ -1652,7 +1666,7 @@ public class Connection {
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
      *  if I wrote "X-Ultrapeer: true" and this connection wrote 
-	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
+     *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isLeafConnection())
@@ -1674,14 +1688,14 @@ public class Connection {
      *  big pongs) should only be sent along connections for which
      *  supportsGGEP()==true. */
     public boolean supportsGGEP() {
-		return _headers.supportsGGEP();
+        return _headers.supportsGGEP();
     }
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
-		return _headers.isQueryRoutingEnabled();
+        return _headers.isQueryRoutingEnabled();
     }
 
     // overrides Object.toString
@@ -1707,14 +1721,14 @@ public class Connection {
     // Until necessary, the equals & hashCode methods are therefore
     // commented out and sameness equality is being used.
     
-//	public boolean equals(Object o) {
+//  public boolean equals(Object o) {
 //      return super.equals(o);
-//	}
-//	
+//  }
+//  
 
-//	public int hashCode() {
+//  public int hashCode() {
 //      return super.hashCode();
-//	}
+//  }
     
     
     /////////////////////////// Unit Tests  ///////////////////////////////////
