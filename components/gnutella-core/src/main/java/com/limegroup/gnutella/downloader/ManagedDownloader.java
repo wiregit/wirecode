@@ -1430,6 +1430,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;
             } catch(TryAgainLaterException talx) {
                 debug("talx thrown in assignAndRequest"+dloader);
+                debug(talx);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
@@ -1442,13 +1443,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
-                try { 
-                    Thread.sleep(qx.getMinPollTime()+100);//tune this value
+                try { //The extra time to sleep can be tuned. Now it's 1 sec
+                    Thread.sleep(qx.getMinPollTime()*/*S->ms*/1000+1000);
                 } catch (InterruptedException ix) {
+                    //System.out.println("interrupted");
                     return 0;//close connection
                 }
                 return 1;
             } catch (IOException iox) {
+                debug(iox);
                 debug("iox thrown in assignAndReplace "+dloader);
                 return 0; //discard the rfd of dloader
             } finally {

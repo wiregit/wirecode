@@ -188,6 +188,10 @@ public class DownloadTest extends TestCase {
             tUpdateWhiteWithFailingFirstUploader();
             cleanup();
         }
+        if(args.length == 0 || args[0].equals("20")) {
+            tQueuedDownloader();
+            cleanup();
+        }
     }
     
     
@@ -787,13 +791,24 @@ public class DownloadTest extends TestCase {
         RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         tGeneric(rfds);        
-        
+
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         debug("\tu1: "+u1+"\n");
         debug("\tu2: "+u2+"\n");
         debug("\tTotal: "+(u1+u2)+"\n");
         debug("passed \n");
+    }
+
+    private static void tQueuedDownloader() {
+        debug("-Testing queued downloader. \n");
+        uploader1.setQueue(true);
+        RemoteFileDesc rfd1 = newRFD(6346, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        //the queued downloader will resend the query after sleeping,
+        //and then it shold complete the download, because TestUploader
+        //resets queue after sending 503
+        tGeneric(rfds);
     }
 
     private static void tGUI() {
@@ -851,7 +866,6 @@ public class DownloadTest extends TestCase {
         else
             check(false, "FAILED: complete corrupt");
     }
-
 
     private static URL rfdURL(RemoteFileDesc rfd) {
         String rfdStr;
