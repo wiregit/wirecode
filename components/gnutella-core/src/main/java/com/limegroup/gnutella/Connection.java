@@ -794,7 +794,8 @@ public class Connection {
             if (HeaderNames.REMOTE_IP.equals(key) &&
                 ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
                 StringSetting adr=ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-        	    if(!value.equals(adr.getValue())) {
+                String addr = adr.getValue();
+                if(NetworkUtils.isValidAddress(addr) && !value.equals(addr)) {
         	        adr.setValue(value);
         	        RouterService.addressChanged();
                 }
