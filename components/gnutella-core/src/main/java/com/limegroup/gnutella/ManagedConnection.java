@@ -68,8 +68,6 @@ public class ManagedConnection
 
     /** A lock to protect _outputQueue. */
     private Object _outputQueueLock=new Object();
-    /** The OutputRunner thread.  Needed for testing only. */
-    private Thread _outputRunnerThread;
     /** The producer's queues, one priority per mesage type. 
      *  INVARIANT: _outputQueue.length==PRIORITIES
      *  LOCKING: obtain _outputQueueLock. */
@@ -78,6 +76,8 @@ public class ManagedConnection
      *  INVARIANT: _queued==sum of _outputQueue[i].size() 
      *  LOCKING: obtain _outputQueueLock */
     private int _queued=0;
+    /** True if the OutputRunner died.  For testing only. */
+    private boolean _runnerDied=false;
     /** The priority of the last message added to _outputQueue. This is an
      *  optimization to keep OutputRunner from iterating through all priorities.
      *  This value is only a hint and can be legally set to any priority.  Hence
@@ -320,7 +320,7 @@ public class ManagedConnection
         //Establish the socket (if needed), handshake.
         super.initialize();
         //Start the thread to empty the output queue
-        _outputRunnerThread=new OutputRunner();
+        new OutputRunner();
     }
 
     /**
@@ -333,7 +333,8 @@ public class ManagedConnection
             m = super.receive();
             _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
-            _manager.remove(this);
+            if (_manager!=null) //may be null for testing
+                _manager.remove(this);
             throw e;
         }
         _numMessagesReceived++;
@@ -352,7 +353,8 @@ public class ManagedConnection
             m = super.receive(timeout);
             _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
-            _manager.remove(this);
+            if (_manager!=null) //may be null for testing
+                _manager.remove(this);
             throw e;
         }
         _numMessagesReceived++;
@@ -432,41 +434,41 @@ public class ManagedConnection
 
         /** While the connection is not closed, sends all data delay. */
         public void run() {
-            while (isOpen()) {
+            while (true) {
                 repOk();
                 try {
                     waitForQueued();
-                } catch (InterruptedException e) {
-                    //This only happens if I've been killed for debugging
-                    //purposes.  (See unit tests below.)
-                    System.err.println(" WARNING: OutputRunner terminating.");
-                    System.err.println("          Acceptable only if testing.");
-                    return;
-                }
-                //System.out.println(System.currentTimeMillis()+" before write");
-                //dumpQueueStats();
-                try {
                     sendQueued();
                 } catch (IOException e) {
-                    _manager.remove(ManagedConnection.this);
+                    if (_manager!=null) //may be null for testing
+                        _manager.remove(ManagedConnection.this);
+                    _runnerDied=true;
+                    return;
                 }
                 repOk();
             }
         }
 
-        /** Wait until the queue is (probably) non-empty. */
-        private final void waitForQueued() throws InterruptedException {
-            //The synchronized statement is outside the while loop because
-            //queued() is not thread-safe.
-            if (isInterrupted()) {
-                throw new InterruptedException();
-            }
+        /** 
+         * Wait until the queue is (probably) non-empty or closed. 
+         * @exception IOException this was closed while waiting
+         */
+        private final void waitForQueued() throws IOException {
+            //The synchronized statement is outside the while loop to
+            //protect _queued.
             synchronized (_outputQueueLock) {
-                while (_queued == 0) {                    
-                    _outputQueueLock.wait();
+                while (isOpen() && _queued==0) {           
+                    try {
+                        _outputQueueLock.wait();
+                    } catch (InterruptedException e) {
+                        Assert.that(false, "OutputRunner Interrupted");
+                    }
                 }
             }
-        }   
+            
+            if (! isOpen())
+                throw new IOException();
+        }
         
         /** Send several queued message of each type. */
         private final void sendQueued() throws IOException {  
@@ -525,6 +527,14 @@ public class ManagedConnection
         }
     }
 
+
+    public void close() {
+        //Ensure OutputRunner terminates.
+        synchronized (_outputQueueLock) {
+            super.close();
+            _outputQueueLock.notify();
+        }        
+    }
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -1225,6 +1235,8 @@ public class ManagedConnection
     /** Unit test. */
     /*
     public static void main(String args[]) {        
+        testClose();
+
         try {
             System.out.println("-Testing initialize");
             //Create loopback connection.  Uncomment the MiniAcceptor class in
@@ -1276,18 +1288,22 @@ public class ManagedConnection
     }
 
     private void stopOutputRunner() {
-        if (_outputRunnerThread==null)
-            return;
-
-        _outputRunnerThread.interrupt();
-        try {
-            _outputRunnerThread.join();
-        } catch (InterruptedException ignored) { }
-        _outputRunnerThread=null;
+        //Ensure OutputRunner terminates.
+        synchronized (_outputQueueLock) {
+            super._closed=true;  //doesn't close socket
+            _outputQueueLock.notify();
+        }
+        //Wait for OutputRunner to terminate
+        while (! _runnerDied) { 
+            Thread.yield();
+        }
+        //Make it alive again (except for runner)
+        _runnerDied=false;
+        super._closed=false;
     }
 
     private void startOutputRunner() {
-        _outputRunnerThread=new OutputRunner();
+        new OutputRunner();
     }
 
     private static void testReorderBuffer(ManagedConnection out, Connection in) 
@@ -1340,7 +1356,6 @@ public class ManagedConnection
         //  PING_REPLY: x/6341
         //  PING: x
         //  OTHER: reset patch1 patch2
-        Assert.that(out._outputRunnerThread==null);
         out._lastPriority=0;  //cheating to make old tests work
         out.startOutputRunner();
         
@@ -1539,14 +1554,85 @@ public class ManagedConnection
         Assert.that(dropped+read==total);
     }
 
+    private static void testClose() {
+        System.out.println("-Testing close");
+        try {
+            ManagedConnection out=null;
+            Connection in=null;
+            com.limegroup.gnutella.tests.MiniAcceptor acceptor=null;                
+            //When receive() or sendQueued() gets IOException, it calls
+            //ConnectionManager.remove().  This in turn calls
+            //ManagedConnection.close().  Our stub does this.
+            ConnectionManager manager=
+                new com.limegroup.gnutella.tests.stubs.ConnectionManagerStub();
+
+            //1. Locally closed
+            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            out=new ManagedConnection("localhost", 6346);
+            out.initialize();            
+            in=acceptor.accept(); 
+            Assert.that(out.isOpen());
+            Assert.that(! out._runnerDied);
+            out.close();
+            sleep(100);
+            Assert.that(! out.isOpen());
+            Assert.that(out._runnerDied);
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            in.close(); //needed to ensure connect below works
+
+            //2. Remote close: discovered on read
+            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            out=new ManagedConnection("localhost", 6346, manager);
+            out.initialize();            
+            in=acceptor.accept(); 
+            Assert.that(out.isOpen());
+            Assert.that(! out._runnerDied);
+            in.close();
+            try {
+                out.receive();
+                Assert.that(false);
+            } catch (BadPacketException e) {
+                Assert.that(false);
+            } catch (IOException e) { }            
+            sleep(100);
+            Assert.that(! out.isOpen());
+            Assert.that(out._runnerDied);
+
+            //3. Remote close: discovered on write.  Because of TCP's half-close
+            //semantics, we need TWO writes to discover this.  (See unit tests
+            //for Connection.)
+            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            out=new ManagedConnection("localhost", 6346, manager);
+            out.initialize();            
+            in=acceptor.accept(); 
+            Assert.that(out.isOpen());
+            Assert.that(! out._runnerDied);
+            in.close();
+            out.send(new PingRequest((byte)3));
+            out.send(new PingRequest((byte)3));
+            sleep(100);
+            Assert.that(! out.isOpen());
+            Assert.that(out._runnerDied);
+
+        } catch (IOException e) {
+            System.out.println("Unexpected exception:");
+            e.printStackTrace();
+        }
+    }
+
     //Stub for testing send
-    private ManagedConnection(String address, int port) {
+    private ManagedConnection(String address, int port, ConnectionManager manager) {
         super(address, port);
         this._router=new com.limegroup.gnutella.tests.MessageRouterStub();
+        this._manager=manager;
+    }
+
+    private ManagedConnection(String address, int port) {
+        this(address, port, null);
     }
 
     private static void testHorizonStatistics() {
-        System.out.println("-Testing horizon statistics");
+        System.out.println("-Testing horizon statistics");        
         ManagedConnection mc=new ManagedConnection();
         //For testing.  Make HORIZON_UPDATE_TIME non-final to compile.
         mc.HORIZON_UPDATE_TIME=1*1000;   
