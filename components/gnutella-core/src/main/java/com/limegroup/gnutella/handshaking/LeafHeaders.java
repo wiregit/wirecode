@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
-
 /**
  * Properties for connection handshake, if the node is a client
  */

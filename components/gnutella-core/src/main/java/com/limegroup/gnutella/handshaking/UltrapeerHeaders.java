@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
-
 /**
  * Headers that should be sent only by Ultrapeers.
  */
