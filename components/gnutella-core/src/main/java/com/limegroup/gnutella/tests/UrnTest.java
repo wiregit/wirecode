@@ -6,7 +6,9 @@ import junit.extensions.*;
 import java.io.*;
 
 /**
- * This class handles testing all methods of the urn class.
+ * This class handles testing all methods of the urn class.  This test
+ * needs to be run from either the core directory or the directory above
+ * the core directory.
  */
 public final class UrnTest extends TestCase {
 	
@@ -102,6 +104,8 @@ public final class UrnTest extends TestCase {
 		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC HTTP/1.0",
 	};
 
+	private File _testDir;
+
 	public UrnTest(String name) {
 		super(name);
 	}
@@ -145,6 +149,19 @@ public final class UrnTest extends TestCase {
 				assertTrue("could not create urns for URNTest setup: "+e, false);
 			}
 		}
+
+		_testDir = new File("com/limegroup/gnutella");
+		if(!_testDir.isDirectory()) {
+			_testDir = new File("core/com/limegroup/gnutella");
+		}
+		if(!_testDir.isDirectory()) {
+			_testDir = new File("tests/com/limegroup/gnutella");
+		} 
+		if(!_testDir.isDirectory()) {
+			_testDir = new File("limewire/tests/com/limegroup/gnutella");
+		} 
+		assertTrue("should have been able to initialize gnutella dir", 
+				   _testDir.isDirectory());
 	}
 
 	/**
@@ -181,7 +198,7 @@ public final class UrnTest extends TestCase {
 	 */
 	public void testUrnConstructionFromFiles() {
 		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
-		File[] testFiles = new File("gui/lib").listFiles();
+		File[] testFiles = _testDir.listFiles();
 		File curFile = null;
 		try {
 			for(int i=0; i<10; i++) {
@@ -234,8 +251,7 @@ public final class UrnTest extends TestCase {
 	 * Test the URN constructor that takes only a file parameter.
 	 */
 	public void testCreateSHA1Urn() {
-		File gnutellaDir = new File("c:/work/lime/core/com/limegroup/gnutella");
-		File[] files = gnutellaDir.listFiles();
+		File[] files = _testDir.listFiles();
 		for(int i=0; i<files.length; i++) {
 			if(!files[i].isFile()) continue;
 			try {
