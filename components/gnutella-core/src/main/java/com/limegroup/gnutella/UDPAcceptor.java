@@ -18,7 +18,7 @@ public final class UDPAcceptor implements Runnable {
 	/**
 	 * The socket that handles sending and receiving messages over UDP.
 	 */
-	private final DatagramSocket UDP_SOCKET;
+	private DatagramSocket _socket;
 	
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -34,30 +34,24 @@ public final class UDPAcceptor implements Runnable {
 	}
 
 	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>, attempting to open the
-	 * <tt>DatagramSocket</tt>.
+	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPAcceptor() {
-		DatagramSocket tempSocket = null;
-		for(int i=6346; i<6357; i++) {
-			try {
-				tempSocket = new DatagramSocket(i);
-				break;
-			} catch(SocketException e) {
-			}
-		}
-		
-		// this can be null if no socket was created
-		UDP_SOCKET = tempSocket;
-	}
+	private UDPAcceptor() {}
+
 
 	/**
 	 * Busy loop that accepts incoming messages sent over UDP and 
 	 * dispatches them to their appropriate handlers.
 	 */
 	public void run() {
-		// if the socket could not be initialized, return
-		if(UDP_SOCKET == null) return;
+		int port = RouterService.instance().getTCPListeningPort();
+
+		try {
+			_socket = new DatagramSocket(port);
+		} catch(SocketException e) {
+			return;
+		}
+
 		MessageRouter router = RouterService.instance().getMessageRouter();
 
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
@@ -66,7 +60,7 @@ public final class UDPAcceptor implements Runnable {
 
 		while(true) {
 			try {
-				UDP_SOCKET.receive(datagram);
+				_socket.receive(datagram);
 				byte[] data = datagram.getData();
 				//System.out.println("DATA RECEIVED: "+new String(data)); 
 				int length = datagram.getLength();
@@ -88,23 +82,16 @@ public final class UDPAcceptor implements Runnable {
 		}
 	}
 
-	public void sendDatagram(DatagramPacket datagram) throws IOException {
-		UDP_SOCKET.send(datagram);
-	}
-
-	//public DatagramSocket getDatagramSocket() {
-	//return UDP_SOCKET;
-	//}
-
 	/**
-	 * Returns the port that the UDP socket is listening on.
-	 * 
-	 * @param the port that the UDP socket is listening on, in the range
-	 *  6346-6356, or -1 if the socket has not yet been initialized
+	 * Sends the <tt>DatagramPacket</tt> out on the open socket.
+	 *
+	 * @param datagram the <tt>DatagramPacket</tt> to send
+	 * @throws <tt>IOException</tt> if there is an output error writing
+	 *  to the socket
 	 */
-	//public int getPort() {
-	//return UDP_SOCKET.getLocalPort();
-	//}
+	public void sendDatagram(DatagramPacket datagram) throws IOException {
+		_socket.send(datagram);
+	}
 
 	/** 
 	 * Overrides Object.toString to give more informative information
@@ -113,6 +100,6 @@ public final class UDPAcceptor implements Runnable {
 	 * @return the <tt>DatagramSocket</tt> data
 	 */
 	public String toString() {
-		return "UDPAcceptor\r\nsocket: "+UDP_SOCKET;
+		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 }
