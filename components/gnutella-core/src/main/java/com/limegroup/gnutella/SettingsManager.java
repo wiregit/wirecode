@@ -106,9 +106,6 @@ public class SettingsManager implements SettingsInterface {
     private String home_;
     private String fileName_;
     private String ndFileName_;
-    private String saveShareDir_;
-	private String oldJARName_ = "";
-	private boolean deleteOldJAR_ = false;
 
 	private boolean acceptedIncoming_ = false;
 
