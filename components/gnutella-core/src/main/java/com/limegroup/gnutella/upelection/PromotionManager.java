@@ -136,7 +136,7 @@ public class PromotionManager {
 			return false;
 		
 		//allow locals for testing
-		if (addr.isLoopbackAddress())
+		if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
 			return true;
 		
 		synchronized(_promotionLock) {

@@ -2680,7 +2680,7 @@ public abstract class MessageRouter {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
     				RouterService.getExternalAddress()) ||
-					handler.getInetAddress().isLoopbackAddress()) 
+					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) 
     			//for testing purposes allows requests from localhost
     			_promotionManager.initiatePromotion(msg);
     		return; 
