@@ -1266,7 +1266,7 @@ public class ConnectionManager {
         //or the supernode status is forced, dont change mode
         int connections=getNumInitializedConnections()
                        +getNumInitializedClientConnections();
-        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue()//_settings.getForceSupernodeMode() 
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() 
             || (isSupernode() && connections > 0))
             return false;
         else
