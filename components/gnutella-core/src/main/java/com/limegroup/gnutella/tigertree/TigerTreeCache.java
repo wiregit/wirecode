@@ -80,7 +80,8 @@ public final class TigerTreeCache implements Serializable {
         if (tree == null)
             scheduleForHashing(fd);
         if (LOG.isDebugEnabled() && tree != null)
-            LOG.debug("returned hashtree for urn " + fd.getSHA1Urn() + " -> " + tree.getRootHash() );
+            LOG.debug("returned hashtree for urn " + 
+                      fd.getSHA1Urn() + " -> " + tree.getRootHash() );
 
         return tree;
     }
@@ -109,7 +110,8 @@ public final class TigerTreeCache implements Serializable {
         if (tree.isGoodDepth()) {
             TREE_MAP.put(sha1, tree);
             if (LOG.isDebugEnabled())
-                LOG.debug("added hashtree for urn " + sha1 + ";" + tree.getRootHash());
+                LOG.debug("added hashtree for urn " +
+                          sha1 + ";" + tree.getRootHash());
         } else if (LOG.isDebugEnabled())
             LOG.debug("hashtree for urn " + sha1 + " had bad depth");
     }
@@ -172,13 +174,8 @@ public final class TigerTreeCache implements Serializable {
             URN sha1 = (URN) iter.next();
             if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
                 continue;
-            else if (
-                RouterService
-                    .getDownloadManager()
-                    .getIncompleteFileManager()
-                    .getFileForUrn(
-                    sha1)
-                    != null)
+            else if (RouterService.getDownloadManager()
+                     .getIncompleteFileManager().getFileForUrn(sha1) != null)
                 continue;
             else if (Math.random() > map.size() / 200)
                 // lazily removing entries if we don't have
@@ -201,13 +198,19 @@ public final class TigerTreeCache implements Serializable {
         // think
         //it's a problem in practice.
         removeOldEntries(TREE_MAP);
+
+        ObjectOutputStream oos = null;
         try {
-            ObjectOutputStream oos =
-                new ObjectOutputStream(new FileOutputStream(CACHE_FILE));
+            oos = new ObjectOutputStream(new FileOutputStream(CACHE_FILE));
             oos.writeObject(TREE_MAP);
-            oos.close();
         } catch (Exception e) {
             ErrorService.error(e);
+        } finally {
+            if(oos != null) {
+                try {
+                    oos.close();
+                } catch(IOException ignored) {}
+            }
         }
     }
 

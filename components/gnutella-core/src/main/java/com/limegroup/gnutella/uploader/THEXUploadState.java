@@ -105,7 +105,7 @@ public class THEXUploadState implements HTTPMessage {
      */
     public void writeMessageBody(OutputStream os) throws IOException {
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
-        FILE_DESC.getHashTree().getMessage().write(slowStream);
+        FILE_DESC.getHashTree().write(slowStream);
     }
 
     /**

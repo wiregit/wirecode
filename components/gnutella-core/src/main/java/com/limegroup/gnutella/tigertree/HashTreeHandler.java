@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.logging.Log;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,62 +17,109 @@ import org.xml.sax.SAXException;
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.dime.*;
+import com.limegroup.gnutella.util.UUID;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Gregorio Roper
  * 
  * Class handling all the reading and writing of HashTrees to the network
  */
-public class HashTreeDIMEMessage {
-    static transient int HASH_SIZE = 24;
-
-    private static final String DIGEST =
-        "http://open-content.net/spec/digest/tiger";
+class HashTreeHandler {
+    private static final Log LOG = LogFactory.getLog(HashTreeHandler.class);
 
     private static final String SERIALIZED_TREE_TYPE =
         "http://open-content.net/spec/thex/breadthfirst";
+    private static final String XML_TYPE = "text/xml";
+    private static final byte[] TREE_TYPE_BYTES;
+    private static final byte[] XML_TYPE_BYTES;
+    
+    static {
+        byte[] tree;
+        byte[] xml;
+        try {
+            tree = SERIALIZED_TREE_TYPE.getBytes("UTF-8");
+            xml = XML_TYPE.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException uee) {
+            tree = SERIALIZED_TREE_TYPE.getBytes();
+            xml = XML_TYPE.getBytes();
+        }
+        TREE_TYPE_BYTES = tree;
+        XML_TYPE_BYTES = xml;
+    }
 
-    private static final String XML_RECORD_ID = "xtd";
-    private static final String TREE_RECORD_ID = "tree";
-
-    private static final String XML_TREE_DESC_END = "</hashtree>";
-    private static final String XML_TREE_DESC_START =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<!DOCTYPE hashtree SYSTEM " 
-            + "\"http://open-content.net/spec/thex/thex.dtd\">"
-            + "<hashtree>";
-
+    private static final String DIGEST =
+        "http://open-content.net/spec/digest/tiger";    
     private static final String SYSTEM_ID =
         "http://open-content.net/spec/thex/thex.dtd";
     private static final String SYSTEM_STRING = "SYSTEM";
+    
+    private static final String XML_TREE_DESC_START =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        + "<!DOCTYPE hashtree " + SYSTEM_STRING + " \"" + SYSTEM_ID + "\">"
+        + "<hashtree>";
+    private static final String XML_TREE_DESC_END = "</hashtree>";
 
-    static Log LOG = HashTree.LOG;
+    private static int HASH_SIZE = 24;
 
     private final HashTree TREE;
     private final List NODES;
     private final byte[] ROOT_HASH;
+    private final UUID URI;
 
     /**
-     * Constructs a new DIMEMessage for sending
-     * 
-     * @param thexUri
-     *            the <tt>String</tt> containing the URI fir this message.
+     * Constructs a new handler for sending
      * @param tree
      *            the <tt>HashTree</tt> to construct this message from
      */
-    public HashTreeDIMEMessage(String thexUri, HashTree tree) {
-        //super(TYPE_URI, thexUri);
+    public HashTreeHandler(HashTree tree) {
         LOG.trace("creating HashTreeDIMEMessage for sending");
         TREE = tree;
         NODES = TREE.getNodes();
         ROOT_HASH = Base32.decode(TREE.getRootHash());
+        URI = UUID.nextUUID();
     }
+    
+    /**
+     * Creates a HashTreeHandler with data read from the network
+     * 
+     * @param fileSize
+     * @param xml
+     * @param hashtree
+     * @param root32
+     * @throws IOException
+     */
+    private HashTreeHandler(long fileSize, String xml, byte[] hashtree,
+                            String root32) throws IOException {
+        XMLTreeDescription xtd = new XMLTreeDescription(xml);
+        if (!xtd.isValid())
+            throw new IOException(
+                "invalid XMLTreeDescription " + xtd.toString());
+        if (xtd.getFileSize() != fileSize)
+            throw new IOException(
+                "file size attribute was "
+                    + xtd.getFileSize()
+                    + " expected "
+                    + fileSize);
+
+        HashTreeRecord htr = new HashTreeRecord(hashtree);
+
+        if (!Base32.encode(htr.getRoot()).equals(root32))
+            throw new IOException("Root hashes do not match");
+
+        NODES = htr.getNodes(fileSize);
+        ROOT_HASH = htr.getRoot();
+        TREE = null;
+        URI = null;
+    }    
 
     /**
-     * reads a new HashTreeDIMEMessage from an InputStream
+     * reads a new HashTreeHandler from an InputStream
      * 
      * @param is
      *            the <tt>InputStream</tt> to read from
@@ -81,44 +127,40 @@ public class HashTreeDIMEMessage {
      *            the size of the file we expect the hash tree for
      * @param root32
      *            Base32 encoded root hash
-     * @return HashTreeDIMEMessage containing the HashTree from the InputStream
+     * @return HashTreeHandler containing the HashTree from the InputStream
      * @throws IOException
      *             in case of a problem reading from the InputStream
      * @see com.limegroup.gnutella.dime.AbstractDIMEMessage
      */
-    static HashTreeDIMEMessage read(
-        InputStream is,
-        long fileSize,
-        String root32)
-        throws IOException {
+    static HashTreeHandler read(InputStream is, long fileSize, String root32)
+      throws IOException {
         LOG.trace("creating HashTreeDIMEMessage from network");
-        //is = new PrintingInputStream(is);
         DIMEParser parser = new DIMEParser(is);
-        DIMERecord xml = parser.nextRecord();
-        DIMERecord tree = parser.nextRecord();
+        DIMERecord xmlRecord = parser.nextRecord();
+        DIMERecord treeRecord = parser.nextRecord();
         if(LOG.isDebugEnabled()) {
             if(parser.hasNext())
                 LOG.debug("more elements in the dime record.");
-            LOG.debug("xml id: [" + xml.getIdentifier() + "]");
-            LOG.debug("xml type: [" + xml.getTypeString() + "]");
-            LOG.debug("tree id: [" + tree.getIdentifier() + "]");
-            LOG.debug("tree type: [" + tree.getTypeString() + "]");
-            LOG.debug("xml type num: [" + xml.getTypeId() + "]");
-            LOG.debug("tree type num: [" + tree.getTypeId() + "]");
+            LOG.debug("xml id: [" + xmlRecord.getIdentifier() + "]");
+            LOG.debug("xml type: [" + xmlRecord.getTypeString() + "]");
+            LOG.debug("tree id: [" + treeRecord.getIdentifier() + "]");
+            LOG.debug("tree type: [" + treeRecord.getTypeString() + "]");
+            LOG.debug("xml type num: [" + xmlRecord.getTypeId() + "]");
+            LOG.debug("tree type num: [" + treeRecord.getTypeId() + "]");
         }   
-            
-        return new HashTreeDIMEMessage(fileSize, xml, tree, root32);
+        String xml = new String(xmlRecord.getData(), "UTF-8");
+        byte[] tree = treeRecord.getData();
+        return new HashTreeHandler(fileSize, xml, tree, root32);
 
     }
 
     /**
-     * method for writing a DIMEMessage to an OutputStream
+     * method for writing a HashTree to an OutputStream
      * 
      * @param os
      *            the <tt>OutputStream</tt> to write to.
      * @throws IOException
      *             if there was a problem writing to os.
-     * @see com.limegroup.gnutella.dime.AbstractDIMEMessage#write(java.io.OutputStream)
      */
     public void write(OutputStream os) throws IOException {
         DIMEGenerator gen = new DIMEGenerator();
@@ -141,71 +183,35 @@ public class HashTreeDIMEMessage {
         return ROOT_HASH;
     }
 
-    /**
-     * Creates a HashTreeDIMEMessage read from the network
-     * 
-     * @param fileSize
-     * @param xml
-     * @param hashtree
-     * @param root32
-     * @throws IOException
-     */
-    private HashTreeDIMEMessage(long fileSize, DIMERecord xml,
-                                DIMERecord hashtree, String root32)
-                                throws IOException {
-
-        XMLTreeDescription xtd = new XMLTreeDescription(xml);
-        if (!xtd.isValid())
-            throw new IOException(
-                "invalid XMLTreeDescription " + xtd.toString());
-        if (xtd.getFileSize() != fileSize)
-            throw new IOException(
-                "file size attribute was "
-                    + xtd.getFileSize()
-                    + " expected "
-                    + fileSize);
-
-        HashTreeRecord htr = new HashTreeRecord(hashtree);
-
-        if (!Base32.encode(htr.getRoot()).equals(root32))
-            throw new IOException("Root hashes do not match");
-
-        NODES = htr.getNodes(fileSize);
-        ROOT_HASH = htr.getRoot();
-        TREE = null;
-        
-        if (!hashtree.isLastRecord())
-            LOG.debug("unexpected message in THEX transfer");        
-    }
-
     /*
      * Creates new DIMERecord for sending this hashtree in a DIMEMessage
      */
     private DIMERecord createXMLRecord() {
-        String xml = XML_TREE_DESC_START;
-        xml += "<file size='"
+        String xml =
+            XML_TREE_DESC_START
+            + "<file size='"
             + TREE.getFileSize()
             + "' segmentsize='"
             + HashTree.BLOCK_SIZE
-            + "'/>";
-        xml += "<digest algorithm='"
+            + "'/>"
+            + "<digest algorithm='"
             + DIGEST
             + "' outputsize='"
             + HASH_SIZE
-            + "'/>";
-        xml += "<serializedtree depth='"
+            + "'/>"
+            + "<serializedtree depth='"
             + TREE.getDepth()
             + "' type='"
             + SERIALIZED_TREE_TYPE
             + "' uri='"
-            + TREE.getThexURI()
-            + "'/>";
-        xml += XML_TREE_DESC_END;
+            + URI
+            + "'/>"
+            + XML_TREE_DESC_END;
         try {
             return DIMERecord.create(DIMERecord.TYPE_MEDIA_TYPE,
                                      null,
-                                     XML_RECORD_ID.getBytes("UTF-8"),
-                                     "application/xml".getBytes("UTF-8"),
+                                     null,
+                                     XML_TYPE_BYTES,
                                      xml.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException uee) {
             LOG.debug(uee);
@@ -239,8 +245,8 @@ public class HashTreeDIMEMessage {
         try {
             return DIMERecord.create(DIMERecord.TYPE_ABSOLUTE_URI,
                                      null,
-                                     TREE_RECORD_ID.getBytes("UTF-8"),
-                                     "http://open-content.net/spec/thex/breadthfirst".getBytes("UTF-8"),
+                                     URI.toString().getBytes("UTF-8"),
+                                     TREE_TYPE_BYTES,
                                      data);
         } catch(UnsupportedEncodingException uee) {
             LOG.debug(uee);
@@ -254,17 +260,19 @@ public class HashTreeDIMEMessage {
      * private class holding the XML Tree description
      */
     private class XMLTreeDescription {
-        private boolean _parsed = false;
+        private static final int UNKNOWN = 0;
+        private static final int VALID = 1;
+        private static final int INVALID = 2;
+        private int _parsed = UNKNOWN;
         private long _fileSize = 0;
         private int _blockSize = 0;
         private String _algorithm = null;
         private int _hashSize = 0;
         private String _serializationType = null;
-        private final byte[] DATA;
+        private String data;        
 
-        protected XMLTreeDescription(DIMERecord record) {
-            DATA = record.getData();
-             LOG.debug(new String(DATA));
+        protected XMLTreeDescription(String xml) {
+            data = xml;
         }
 
         /*
@@ -274,23 +282,30 @@ public class HashTreeDIMEMessage {
             return _fileSize;
         }
 
-        /*
+        /**
          * Check if the xml tree description if the tree is what we expected
          */
         boolean isValid() {
-            if (!_parsed)
-                parse();
-            if (_blockSize != HashTree.BLOCK_SIZE) {
-                debug("unexpected block size: " + _blockSize);
+            if (_parsed == UNKNOWN) {
+                _parsed = parse() ? VALID : INVALID;
+            } else if(_parsed == INVALID) {
+                return false;
+            } else if (_blockSize != HashTree.BLOCK_SIZE) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("unexpected block size: " + _blockSize);
                 return false;
             } else if (!DIGEST.equals(_algorithm)) {
-                debug("unsupported digest algorithm: " + _algorithm);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("unsupported digest algorithm: " + _algorithm);
                 return false;
             } else if (_hashSize != HASH_SIZE) {
-                debug("unexpected block size: " + _blockSize);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("unexpected block size: " + _blockSize);
                 return false;
             } else if (!SERIALIZED_TREE_TYPE.equals(_serializationType)) {
-                debug("unexpected serialization type: " + _serializationType);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("unexpected serialization type: " + 
+                              _serializationType);
                 return false;
             }
             return true;
@@ -299,15 +314,7 @@ public class HashTreeDIMEMessage {
         /*
          * A simple parsing method for reading the xml tree description.
          */
-        private void parse() {
-            String data;
-            try {
-                data = new String(DATA, "UTF-8");
-            } catch (UnsupportedEncodingException uee) {
-                debug(uee.toString());
-                return;
-            }
-
+        private boolean parse() {
             // hack!
             // Shareaza sends invalid XML,
             if (data.indexOf("system") > 0 && data.indexOf("system") < data.indexOf(SYSTEM_ID)) {
@@ -331,18 +338,19 @@ public class HashTreeDIMEMessage {
             try {
                 parser.parse(is);
             } catch (IOException ioe) {
-                debug(ioe.toString());
-                return;
+                LOG.debug(ioe);
+                return false;
             } catch (SAXException saxe) {
-                debug(saxe.toString());
-                return;
+                LOG.debug(saxe);
+                return false;
             }
 
             Document doc = parser.getDocument();
             Node treeDesc = doc.getElementsByTagName("hashtree").item(0);
             if (treeDesc == null) {
-                debug("couldn't find hashtree element: " + data);
-                return;
+                if(LOG.isDebugEnabled())
+                    LOG.debug("couldn't find hashtree element: " + data);
+                return false;
             }
 
             NodeList nodes = treeDesc.getChildNodes();
@@ -358,20 +366,24 @@ public class HashTreeDIMEMessage {
                         parseSerializedtreeElement(el);
                 }
             }
-            _parsed = true;
+            return true;
         }
 
         private void parseFileElement(Element e) {
             try {
                 _fileSize = Long.parseLong(e.getAttribute("size"));
             } catch (NumberFormatException nfe) {
-                debug("couldn't parse file size: " + e.getNodeValue());
+                if(LOG.isDebugEnabled())
+                    LOG.debug("couldn't parse file size: " + e.getNodeValue(), 
+                              nfe);
             }
 
             try {
                 _blockSize = Integer.parseInt(e.getAttribute("segmentsize"));
             } catch (NumberFormatException nfe) {
-                debug("couldn't parse block size: " + e.getNodeValue());
+                if(LOG.isDebugEnabled())
+                    LOG.debug("couldn't parse block size: " + e.getNodeValue(),
+                              nfe);
             }
         }
 
@@ -380,7 +392,9 @@ public class HashTreeDIMEMessage {
             try {
                 _hashSize = Integer.parseInt(e.getAttribute("outputsize"));
             } catch (NumberFormatException nfe) {
-                debug("couldn't parse hash size: " + e.getNodeValue());
+                if(LOG.isDebugEnabled())
+                    LOG.debug("couldn't parse hash size: " + e.getNodeValue(),
+                              nfe);
             }
         }
 
@@ -391,13 +405,10 @@ public class HashTreeDIMEMessage {
                 // a notice to the Log
                 Integer.parseInt(e.getAttribute("depth"));
             } catch (NumberFormatException nfe) {
-                debug("couldn't parse depth: " + e.getNodeValue());
+                if(LOG.isDebugEnabled())
+                    LOG.debug("couldn't parse depth: " + e.getNodeValue(),
+                              nfe);
             }
-        }
-
-        private void debug(String str) {
-            if (LOG.isDebugEnabled())
-                LOG.debug(str);
         }
     }
 
@@ -409,8 +420,8 @@ public class HashTreeDIMEMessage {
     private class HashTreeRecord {
         private final byte[] DATA;
         
-        protected HashTreeRecord(DIMERecord record) {
-            DATA = record.getData();
+        protected HashTreeRecord(byte[] data) {
+            DATA = data;
         }
 
         /*
@@ -515,9 +526,9 @@ public class HashTreeDIMEMessage {
                     }
                 }
             } // end of while
+
             // this is the last parentGeneration we have created.
-            if (LOG.isDebugEnabled())
-                LOG.debug("Good hash tree received.");
+            LOG.debug("Good hash tree received.");
             return parent;
         }
     }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
@@ -29,51 +30,65 @@ import com.sun.java.util.collections.List;
 /**
  * This class stores HashTrees and is capable of verifying a file it is also
  * used for storing them in a file.
+ *
+ * Be careful when modifying any non transient variables, as this
+ * class serialized to disk.
  * 
  * @author Gregorio Roper
  */
 public final class HashTree implements HTTPHeaderValue, Serializable {
+
+    private static transient final Log LOG = LogFactory.getLog(HashTree.class);
+
     // some static constants
-    private static transient final int KB = 1024;
-    private static transient final int MB = 1024 * KB;
-    static transient final int BLOCK_SIZE = 1024;
+    private static transient final int  KB                   = 1024;
+    private static transient final int  MB                   = 1024 * KB;
+            static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
 
-    static transient final Log LOG = LogFactory.getLog(HashTree.class);
-
-    // constants written to the outputstream when serialized. all other member
-    // variables we may or may not add should be transient so we don't break
-    // backwards compatibility
-    /* List of byte[] */
-    private final List NODES;
+    // constants written to the outputstream when serialized.
+    private final List /* of byte[] */ NODES;
     private final byte[] ROOT_HASH;
     private final long FILE_SIZE;
     private final int DEPTH;
     private final String THEX_URI;
 
+    /*
+     * Constructs a new HashTree out of the given nodes, root, sha1
+     * and filesize.
+     */
+    private HashTree(List nodes, byte[] root, String sha1, long fileSize) {
+        THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
+        NODES = Collections.unmodifiableList(nodes);
+        FILE_SIZE = fileSize;
+        ROOT_HASH = root;
+        // calculate the actual depth we read from the stream by calculating
+        // the log2.
+        DEPTH = log2Ceil(NODES.size());
+    }    
+
+    /**
+     * Creates a new HashTree for the given FileDesc.
+     */
     static HashTree createHashTree(FileDesc fd) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("creating hashtree for file " + fd);
         long fileSize = fd.getSize();
-        if (LOG.isDebugEnabled())
-            LOG.debug("fileSize " + fileSize);
-
         int depth = calculateDepth(fileSize);
-        if (LOG.isDebugEnabled())
-            LOG.debug("depth " + depth);
-
+        
         // don't create more than this many nodes
-        int maxNodes = 1 << depth;
-
+        int maxNodes = 1 << depth;        
         // calculate ideal node size, rounding up!
         int idealNodeSize = (int) (fileSize + 1) / maxNodes;
         // calculate nodes size, node size must equal to 2^n, n in {10,11,...}
         int n = log2Ceil(idealNodeSize);
-
         // 2^n
         int nodeSize = 1 << n;
-        if (LOG.isDebugEnabled())
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("creating hashtree for file " + fd);
+            LOG.debug("fileSize " + fileSize);
+            LOG.debug("depth " + depth);
             LOG.debug("nodeSize " + nodeSize);
+        }
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
@@ -85,18 +100,15 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         try {
             nodes = createTTNodes(nodeSize, fileSize, fd.createInputStream());
         } catch (FileNotFoundException fnfe) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("fnfe thrown in createHashTree");
+            LOG.debug("fnfe thrown in createHashTree", fnfe);
             return null;
         } catch (IOException ioe) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("ioe thrown in createHashTree");
+            LOG.debug("ioe thrown in createHashTree", ioe);
             return null;
         }
 
         // calculate the root hash
         byte[] root = createRootHash(nodes);
-
         return new HashTree(nodes, root, fd.getSHA1Urn().toString(), fileSize);
     }
 
@@ -115,23 +127,16 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @return HashTree if we successfully read from the network or null if
      *         there was an error.
      */
-    public static HashTree createHashTree(
-        InputStream is,
-        String sha1,
-        String root32,
-        long fileSize) {
-        LOG.trace("mapping " + sha1 + " -> " + root32);
+    public static HashTree createHashTree(InputStream is, String sha1,
+                                          String root32, long fileSize) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("mapping " + sha1 + " -> " + root32);
         try {
-            HashTreeDIMEMessage dm =
-                HashTreeDIMEMessage.read(is, fileSize, root32);
-            return new HashTree(
-                dm.getNodes(),
-                dm.getRootHash(),
-                sha1,
-                fileSize);
+            HashTreeHandler handl = HashTreeHandler.read(is, fileSize, root32);
+            return new HashTree(handl.getNodes(), handl.getRootHash(), sha1,
+                                fileSize);
         } catch (IOException ioe) {
-            if (LOG.isDebugEnabled())
-                LOG.debug(ioe);
+            LOG.debug(ioe);
             return null;
         }
     }
@@ -147,8 +152,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      *             if there was a problem reading the file
      */
     public List getCorruptRanges(InputStream is) throws IOException {
-        List ret = new ArrayList();
         LOG.trace("getting corrupt ranges ");
+
+        List ret = new ArrayList();
         // calculate the node size using FILE_SIZE and DEPTH.
         // nodeSize = 2^(log2Ceil(FILE_SIZE) - DEPTH);
         int n = log2Ceil((int) FILE_SIZE) - DEPTH;
@@ -233,10 +239,10 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     }
 
     /**
-     * @return HashTreeDIMEMessage for this Tree.
+     * Writes this HashTree to the specified OutputStream in using DIME.
      */
-    public HashTreeDIMEMessage getMessage() {
-        return new HashTreeDIMEMessage(THEX_URI, this);
+    public void write(OutputStream out) throws IOException {
+        new HashTreeHandler(this).write(out);
     }
 
     /**
@@ -268,19 +274,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             return 8;
         else
             return 9;
-    }
-
-    /*
-     * Private constructor
-     */
-    private HashTree(List nodes, byte[] root, String sha1, long fileSize) {
-        THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
-        NODES = Collections.unmodifiableList(nodes);
-        FILE_SIZE = fileSize;
-        ROOT_HASH = root;
-        // calculate the actual depth we read from the stream by calculating
-        // the log2.
-        DEPTH = log2Ceil(NODES.size());
     }
 
     /*
