@@ -187,8 +187,11 @@ public final class AlternateLocation
 		cal.setTime(date);
 		int[]    dateInts = new int[6];
 		String[] dateStrs = new String[6];
-		dateInts[0] = cal.get(Calendar.YEAR);
-		dateInts[1] = cal.get(Calendar.MONTH);
+
+
+		dateInts[0] = cal.get(Calendar.YEAR);		
+		// add a month because the Calendar class stores January as '0'
+		dateInts[1] = cal.get(Calendar.MONTH)+1;
 		dateInts[2] = cal.get(Calendar.DAY_OF_MONTH);
 		dateInts[3] = cal.get(Calendar.HOUR);
 		dateInts[4] = cal.get(Calendar.MINUTE);
@@ -206,12 +209,20 @@ public final class AlternateLocation
 		}
 		final String DASH  = "-";
 		final String COLON = ":";
-		return (dateStrs[0]+DASH+
-				dateStrs[1]+DASH+
-				dateStrs[2]+"T"+
-				dateStrs[3]+COLON+
-				dateStrs[4]+COLON+
-				dateStrs[5]+"Z");
+		StringBuffer sb = new StringBuffer();
+		sb.append(dateStrs[0]);
+		sb.append(DASH);
+		sb.append(dateStrs[1]);
+		sb.append(DASH);
+		sb.append(dateStrs[2]);
+		sb.append("T");
+		sb.append(dateStrs[3]);
+		sb.append(COLON);
+		sb.append(dateStrs[4]);
+		sb.append(COLON);
+		sb.append(dateStrs[5]);
+		sb.append("Z");
+		return sb.toString();
 	}
 
 	/**
