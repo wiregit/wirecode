@@ -1089,6 +1089,12 @@ public class QueryReply extends Message implements Serializable{
             (this.getPushProxies().size() > 1))
             hasPushProxies = true;
             
+        if (getSupportsFWTransfer() && 
+            UDPService.instance().canReceiveSolicited()) {
+            iFirewalled = false;
+            heFirewalled = NO;
+        }
+
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
          * this method, take a look at isFirewalledQuality! */
