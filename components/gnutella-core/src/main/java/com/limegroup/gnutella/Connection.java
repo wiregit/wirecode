@@ -336,7 +336,7 @@ public class Connection {
             // "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
             _softMax = ConnectionSettings.SOFT_MAX.getValue();
-            if(isGoodUltrapeer()) {
+            if(isGoodUltrapeer() || isGoodLeaf()) {
                 // we give these an extra hop because they might be sending
                 // us traffic from their leaves
                 _softMax++;
