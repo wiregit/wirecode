@@ -134,8 +134,11 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload.
      *  It is assumed that the initial word of the request (e.g., "GET") has
      *  been consumed (e.g., by Acceptor)
+     * @param forceAllow forces the UploadManager to allow all requests
+     *  on this socket to take place.
 	 */
-    public void acceptUpload(final HTTPRequestMethod method, Socket socket) {
+    public void acceptUpload(final HTTPRequestMethod method,
+                             Socket socket, boolean forceAllow) {
         debug(" accepting upload");
         HTTPUploader uploader = null;
 		try {
@@ -177,7 +180,11 @@ public final class UploadManager implements BandwidthTracker {
                 debug(uploader+" HTTPUploader created and read all headers");
                 boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
                                     queued==ACCEPTED);
-                                    
+                
+                // always give a slot if we're forcing UploadManager to allow
+                // this request.
+                giveSlot |= forceAllow;
+                
                 queued = doSingleUpload(uploader, socket,
 										socket.getInetAddress().getHostAddress(), 
 										line._index, giveSlot);
@@ -399,12 +406,15 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param port the port over which the transfer will occur
 	 * @param index the index of the file in <tt>FileManager</tt>
 	 * @param guid the unique identifying client guid of the uploading client
+     * @param forceAllow whether or not to force the UploadManager to send
+     *  accept this request when it comes back.
 	 */
 	public synchronized void acceptPushUpload(final String file, 
 											  final String host, 
                                               final int port, 
 											  final int index, 
-                                              final String guid) { 
+                                              final String guid,
+                                              final boolean forceAllow) { 
 		final HTTPUploader GIVuploader = new HTTPUploader
                          (file, host, port, index, guid);
         //Note: GIVuploader is just used to connect, and while connecting, 
@@ -413,8 +423,9 @@ public final class UploadManager implements BandwidthTracker {
         // Test if we are either currently attempting a push, or we have
         // unsuccessfully attempted a push with this host in the past.
 		clearFailedPushes();
-        if ( (! testAttemptingPush(host, index) )  ||
-             (! testFailedPush(host, index) ) )
+        if ( !forceAllow && (
+             (! testAttemptingPush(host, index) )  ||
+             (! testFailedPush(host, index) ) ) )
             return;
         insertAttemptingPush(host, index);        
 
@@ -427,9 +438,9 @@ public final class UploadManager implements BandwidthTracker {
                     //read GET or HEAD and delegate appropriately.
                     String word = IOUtils.readWord(s.getInputStream(), 4);
                     if (word.equals("GET"))
-                        acceptUpload(HTTPRequestMethod.GET, s);
+                        acceptUpload(HTTPRequestMethod.GET, s, forceAllow);
                     else if (word.equals("HEAD"))
-                        acceptUpload(HTTPRequestMethod.HEAD, s);
+                        acceptUpload(HTTPRequestMethod.HEAD, s, forceAllow);
                     else
                         throw new IOException();
                 } catch(IOException ioe){//connection failed? do book-keeping

@@ -351,6 +351,11 @@ public abstract class MessageRouter {
      *  port of the client node.
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
+        // no multicast messages should ever have been
+        // set with a TTL greater than 1.
+        if( msg.getTTL() > 1 )
+            return;
+
         // Increment hops and decrement TTL.
         msg.hop();
 
@@ -363,18 +368,10 @@ public abstract class MessageRouter {
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
-            //TODO: compare QueryKey with old generation params.  if it matches
-            //send a new one generated with current params 
-            //if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
-            //    sendAcknowledgement(datagram, msg.getGUID());
-                // a TTL above zero may indicate a malicious client, as UDP
-                // messages queries should not be sent with TTL above 1.
-                if(msg.getTTL() > 0) return;
-                if(!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
-                    ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
-                }
-           // }
+            if(!handleUDPQueryRequestPossibleDuplicate(
+              (QueryRequest)msg, handler) ) {
+                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
+            }
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
 	//	} else if (msg instanceof QueryReply) {			
@@ -390,10 +387,10 @@ public abstract class MessageRouter {
 	//		if(RECORD_STATS)
 	//			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
     //        handleUDPPingReply((PingReply)msg, handler, address, port);
-	//	} else if(msg instanceof PushRequest) {
-	//		if(RECORD_STATS)
-	//			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
-	//		handlePushRequest((PushRequest)msg, handler);
+		} else if(msg instanceof PushRequest) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
+			handlePushRequest((PushRequest)msg, handler);
 		}
     }
 

@@ -107,7 +107,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			
             RouterService.getUploadManager().
 			    acceptPushUpload(file, h, port, 
-								 index, req_guid_hexstring);
+								 index, req_guid_hexstring,
+                                 pushRequest.isMulticast() // force accept
+                                );
 		}
 	}
 	

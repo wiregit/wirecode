@@ -460,13 +460,13 @@ public class Acceptor implements Runnable {
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
-					um.acceptUpload(HTTPRequestMethod.GET, _socket);
+					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
 					if(!CommonUtils.isJava118()) {
 						HTTPStat.HTTP_GET_REQUESTS.incrementStat();
 					}
                 }
 				else if (word.equals("HEAD")) {
-					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
+					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
 					if(!CommonUtils.isJava118()) {
 						HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
 					}

@@ -203,7 +203,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.write(request.getBytes());
 		Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-		RouterService.getUploadManager().acceptUpload(method, sock);
+		RouterService.getUploadManager().acceptUpload(method, sock, false);
 		String reply = sock.getOutputStream().toString();
 		StringTokenizer st = new StringTokenizer(reply, "\r\n");
 		boolean contentUrnHeaderPresent = false;
@@ -255,7 +255,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.write(request.getBytes());
 		Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-		RouterService.getUploadManager().acceptUpload(method, sock);
+		RouterService.getUploadManager().acceptUpload(method, sock, false);
 		String reply = sock.getOutputStream().toString();
 		StringTokenizer st = new StringTokenizer(reply, "\r\n");
 		boolean sentExpectedError = false;

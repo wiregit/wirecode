@@ -434,7 +434,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         final UploadManager upman = upManager;
         Thread t = new Thread() {
             public void run() {
-                upman.acceptUpload(HTTPRequestMethod.GET, sa);
+                upman.acceptUpload(HTTPRequestMethod.GET, sa, false);
             }
         };
         t.setDaemon(true);
@@ -533,7 +533,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         final Socket sa=psf.getSocketA();
         Thread runner=new Thread() {
             public void run() {
-                upman.acceptUpload(HTTPRequestMethod.GET,sa);
+                upman.acceptUpload(HTTPRequestMethod.GET,sa, false);
             }
         };
         runner.setDaemon(true);
