@@ -545,7 +545,9 @@ public class LimeXMLReplyCollection{
         private void serializeToFile() throws Exception {
             FileOutputStream ostream = new FileOutputStream(_backingStoreFile);
             ObjectOutputStream objStream = new ObjectOutputStream(ostream);
-            objStream.writeObject(_hashMap);
+            synchronized (_hashMap) {
+                objStream.writeObject(_hashMap);
+            }
             ostream.close();
         }
 
