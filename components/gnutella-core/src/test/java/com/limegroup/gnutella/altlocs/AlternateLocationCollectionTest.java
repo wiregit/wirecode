@@ -390,11 +390,8 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
         PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2);
 
-        GUID localGuid = (GUID)PrivilegedAccessor.getValue(pe,"_guid");
-        m.put(localGuid,proxies);
-        
-        localGuid = (GUID)PrivilegedAccessor.getValue(pe2,"_guid");
-        m.put(localGuid,proxies2);
+        updateProxies(pe);
+        updateProxies(pe2);
         
         assertNotNull(pe.getProxies());
         assertNotNull(pe2.getProxies());
@@ -442,6 +439,13 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		assertEquals(2,set.size());
 		
+    }
+    
+    private void updateProxies(PushEndpoint pe) throws Exception {
+        PrivilegedAccessor.invokeAllStaticMethods(
+                PushEndpoint.class,"updateProxies",
+                new Object[]{pe,new Boolean(true)},
+                new Class[]{PushEndpoint.class,boolean.class});
     }
 }
 

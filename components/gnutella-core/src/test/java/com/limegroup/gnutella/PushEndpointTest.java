@@ -205,8 +205,9 @@ public class PushEndpointTest extends BaseTestCase {
     }
     
     private void updateProxies(PushEndpoint pe) throws Exception{
-        Set proxies = (Set)PrivilegedAccessor.getValue(pe,"_proxies");
-        GUID guid = (GUID)PrivilegedAccessor.getValue(pe,"_guid");
-        m.put(guid,proxies);
+        PrivilegedAccessor.invokeAllStaticMethods(
+                PushEndpoint.class,"updateProxies",
+                new Object[]{pe,new Boolean(true)},
+                new Class[]{PushEndpoint.class,boolean.class});
     }
 }
