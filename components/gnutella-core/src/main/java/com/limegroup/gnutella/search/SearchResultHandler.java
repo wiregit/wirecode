@@ -257,7 +257,7 @@ public final class SearchResultHandler {
             byte[] xmlCompressed = qr.getXMLBytes();
             if (xmlCompressed.length > 1) {
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
-                xmlCollectionString = new String(xmlUncompressed);
+                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
             }
         } catch (IOException ignored) {}
 
