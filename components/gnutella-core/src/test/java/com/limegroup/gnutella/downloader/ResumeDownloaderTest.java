@@ -33,6 +33,7 @@ import com.sun.java.util.collections.Set;
  */
 public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     static final String filePath="com/limegroup/gnutella/downloader/";
+    static final String queryName = "filename";
     static final String name="filename.txt";
     static final URN hash=TestFile.hash();
     static final int size=1111;
@@ -155,15 +156,17 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         if (expectHash) {
             assertEquals("unexpected hash", hash, _hash);
             // filenames were put in hash queries since everyone drops //
-            assertEquals("hash query should have filename",
-                name, qr.getQuery());
+            assertEquals("hash query should have name",
+                queryName, qr.getQuery());
         }
 
         // we never send URNs
         assertEquals("unexpected amount of urns",
                      0, qr.getQueryUrns().size());
+        assertEquals("unexpected query name",
+                     "filename", qr.getQuery());    
         assertEquals("unexpected filename",
-                     "filename.txt", qr.getQuery());            
+                     "filename.txt", rd.getFileName());        
     }
 
 
