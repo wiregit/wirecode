@@ -25,6 +25,7 @@ public interface Uploader extends BandwidthTracker {
     public static final int BANNED_GREEDY  	  = 14;
     public static final int THEX_REQUEST      = 15;
     public static final int FILE_VIEW         = 16;
+    public static final int FILE_VIEW_GIF     = 17;
 
     /**
 	 * Stops this upload.  If the download is already 

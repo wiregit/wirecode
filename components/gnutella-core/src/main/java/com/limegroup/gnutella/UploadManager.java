@@ -74,7 +74,7 @@ public class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
     public static final String FV_PASS =
-        new String(""+(new Random()).nextInt(999999));
+        new String(""+(new Random()).nextInt(999999999));
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -176,6 +176,12 @@ public class UploadManager implements BandwidthTracker {
      */
     public static final int FILE_VIEW_FILE_INDEX = -6;
     
+    /** 
+     * The file index used in this structure to indicate a HTTP File View GIF
+     * Get.
+     */
+    public static final int FILE_VIEW_GIF_INDEX = -7;
+    
     /**
      * Whether or not to record stats.
      */
@@ -190,6 +196,11 @@ public class UploadManager implements BandwidthTracker {
      * Constant for the beginning of a file-view request.
      */
     public static final String FV_REQ_BEGIN = "/gnutella/file-view";
+
+    /**
+     * Constant for file-view gif get.
+     */
+    public static final String FV_GIF_GET = "/gnutella/gif/file_view_logo.gif";
 
 	/**
      * Remembers uploaders to disadvantage uploaders that
@@ -425,6 +436,7 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
+               uploader.getIndex() != FILE_VIEW_GIF_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -515,6 +527,9 @@ public class UploadManager implements BandwidthTracker {
             return;
         case FILE_VIEW_FILE_INDEX:
             uploader.setState(Uploader.FILE_VIEW);
+            return;
+        case FILE_VIEW_GIF_INDEX:
+            uploader.setState(Uploader.FILE_VIEW_GIF);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -1309,8 +1324,14 @@ public class UploadManager implements BandwidthTracker {
                 if( RECORD_STATS )
                     UploadStat.BROWSE_HOST.incrementStat();
             } else if(fileInfoPart.startsWith(FV_REQ_BEGIN)) {
-                //special case for browse host request
+                //special case for file view request
                 index = FILE_VIEW_FILE_INDEX;
+                fileName = fileInfoPart;
+                if( RECORD_STATS )
+                    ;
+            } else if(fileInfoPart.startsWith(FV_GIF_GET)) {
+                //special case for file view gif get
+                index = FILE_VIEW_GIF_INDEX;
                 fileName = fileInfoPart;
                 if( RECORD_STATS )
                     ;
