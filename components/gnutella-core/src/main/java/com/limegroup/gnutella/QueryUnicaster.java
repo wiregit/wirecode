@@ -47,6 +47,23 @@ public class QueryUnicaster {
         return _instance;
     }
 
+
+    /** Returns a List of unicast Endpoints.
+     */
+    public List getUnicastEndpoints() {
+        List retList = new ArrayList();
+        synchronized (_queryHosts) {
+            int size = _queryHosts.size();
+            if (size > 0) {
+                int max = (size > 10 ? 10 : size);
+                for (int i = 0; i < max; i++)
+                    retList.add(_queryHosts.get(i));
+            }
+        }
+        return retList;
+    }
+
+
     protected QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable();
