@@ -192,30 +192,36 @@ public class HTTPDownloader implements Runnable {
 	
 	readHeader();
 	
-	try {
-
-	    if (_sizeOfFile != -1) {
-
-		int c = -1;		
-		byte[] buf = new byte[1024];
-		    
-		while (true) {
+	if (_sizeOfFile != -1) {
+	    
+	    int c = -1;		
+	    byte[] buf = new byte[1024];
+	    
+	    while (true) {
+		try {
 		    c = _istream.read(buf);
-		    if (c == -1) 
-			break;
-		    _fos.write(buf, 0, c);
-		    _amountRead+=c;
 		}
-
-		_fos.close();
-
+		catch (IOException e) {
+		    _callback.error(ActivityCallback.ERROR_8);
+		}
+		if (c == -1) 
+		    break;
+		try {
+		    _fos.write(buf, 0, c);
+		}
+		catch (IOException e) {
+		    _callback.error(ActivityCallback.ERROR_8);		    
+		}
+		_amountRead+=c;
 	    }
+	    try {
+		_fos.close();
+	    }
+	    catch (IOException e) {
+		_callback.error(ActivityCallback.ERROR_8);		    
+	    }
+	    
 	}
-
-	catch (Exception e) {
-	    _callback.error(ActivityCallback.ERROR_8);
-	}
-
     }
 
     public void readHeader() {
