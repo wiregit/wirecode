@@ -38,8 +38,8 @@ public final class QueryDispatcher implements Runnable {
 		new QueryDispatcher();
 	
 	//list of user killed searches
-    private final List _toRemove = 
-        Collections.synchronizedList(new LinkedList());
+    private final Set _toRemove = 
+        Collections.synchronizedSet(new HashSet());
     
 
 	/**
@@ -202,9 +202,6 @@ public final class QueryDispatcher implements Runnable {
                     _toRemove.remove(handler.getGUID());
                     expiredQueries.add(handler);
                 }
-                else
-                    handler.sendQuery();
-
                 handler.sendQuery();
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
