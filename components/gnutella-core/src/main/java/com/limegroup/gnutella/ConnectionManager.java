@@ -85,20 +85,6 @@ public class ConnectionManager {
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
-    /** 
-	 * The desired number of slots to reserve for "good" connections.  
-	 * Search architecture design is an ongoing area of research both in the
-	 * Gnutella world and in the academic world.  As a result, the meaning 
-	 * of "good" connection will vary over time with development in open
-	 * search architectures.  As of LimeWire 2.9, "good" connections
-	 * meant connections that used querty routing tables between Ultrapeers
-	 * and that used high numbers of intra-Ultrapeer connections.  At 
-	 * release time, that was only LimeWire, but it will likely soon include
-	 * BearShare.
-	 */
-    public static final int RESERVED_GOOD_CONNECTIONS = 0;  
-
-
 	/**
 	 * The number of leaf connections reserved for "good" clients.  As
 	 * described above, the definition of good constantly changes with 
@@ -688,9 +674,10 @@ public class ConnectionManager {
 			// we're a leaf -- don't allow any incoming connections
             return false;  
 		} else if (hr.isLeaf() || leaf) {
-            //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
-            //Preference trusted vendors using BearShare's clumping algorithm
-            //(see above).
+            // Leaf. As the spec. says, this assumes we are an ultrapeer.
+            // If the leaf supports features we're looking for, accept it
+            // if we have slots.  Otherwise, only accept it if it's a 
+            // trusted vendor and we have slots available for older clients
 			if(hr.isGoodLeaf()) {
 				return hasFreeLeafSlots(); 
 			} else {
