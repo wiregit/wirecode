@@ -113,7 +113,8 @@ public class DownloadTester {
         long start1=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(rfd, file);
-            VerifyingFile vf = new VerifyingFile(file,true, null);
+            VerifyingFile vf = new VerifyingFile(true);
+            vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0,TestFile.length());
             downloader.doDownload(vf);
@@ -133,7 +134,8 @@ public class DownloadTester {
         long start2=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(rfd, file);
-            VerifyingFile vf = new VerifyingFile(file,false, null);
+            VerifyingFile vf = new VerifyingFile(false);
+            vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0, TestFile.length());
             downloader.doDownload(vf);

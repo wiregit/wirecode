@@ -9,9 +9,12 @@ import com.limegroup.gnutella.util.*;
  * the parts of the file they are downloading through a single object of this 
  * class. 
  * <p> 
- * A VerifyingFile keeps track of which bytes have already been written to disk,
+ * Keeps track of which bytes have already been written to disk,
  * and based on this information makes a decision about whether or not to do
  * checking. 
+ * <p>
+ * Users of this class must call open(...) before calling writeBlock.
+ * <p>
  * @author Sumeet Thadani, Chris Rohrs
  */
 public class VerifyingFile {
@@ -27,34 +30,35 @@ public class VerifyingFile {
      */
     private IntervalSet writtenBlocks;
     
-    public VerifyingFile(File file, boolean checkOverlap,ManagedDownloader md) {
-        try{
-            this.fos =  new RandomAccessFile(file,"rw");
-        } catch(IOException e) {
-            //if this fails we will throw exception later, when we try to write
-        }
+    public VerifyingFile(boolean checkOverlap) {
         this.checkOverlap = checkOverlap;
-        this.managedDownloader = md;
         writtenBlocks = new IntervalSet();
     }
     
+    public void open(File file, ManagedDownloader md) throws IOException {
+        this.managedDownloader = md;
+        this.fos =  new RandomAccessFile(file,"rw");
+    }
+
     /**
-     * This method just delegates to IntervalSet.add. We need this method, 
-     * because when we are reading from IncompleteFileManger, we need to add 
-     * blocks to the IntervalSet. This method is used by IncompleteFileManager
-     * to add blocks from older LimeWire's downloads.dat
+     * used to add blocks direcly. WARNING: the intervals added using this 
+     * method are not checked for overlaps, incorrect use of this method, may 
+     * break integrity constrains.
      */
     public synchronized void addInterval(Interval interval) {
+        //delegates to underlying IntervalSet
         writtenBlocks.add(interval);
     }
 
-    public synchronized void writeBlock(long currPos, 
-                                           int numBytes,
-                                           byte[] buf) throws IOException {
+    public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
+                                                    throws IOException {
+        if(fos == null)
+            throw new IOException();
         boolean checkBeforeWrite = false;
         List overlapBlocks = null;
+        Interval intvl= null;
         if(checkOverlap) {
-            Interval intvl=new Interval((int)currPos,(int)currPos+numBytes-1);
+            intvl =new Interval((int)currPos,(int)currPos+numBytes-1);
             overlapBlocks = writtenBlocks.getOverlapIntervals(intvl);
             if(overlapBlocks.size()>0)
                 checkBeforeWrite = true;
@@ -83,11 +87,19 @@ public class VerifyingFile {
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
         //4. add this interval
-        writtenBlocks.add(new Interval((int)currPos, (int)currPos+numBytes-1));
+        if(intvl==null)
+            writtenBlocks.
+            add(new Interval((int)currPos, (int)currPos+numBytes-1));
+        else 
+            writtenBlocks.add(intvl);
     }
 
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
+    }
+
+    public synchronized List getBlocksAsList() {
+        return writtenBlocks.getAllIntervalsAsList();
     }
 
     public synchronized Iterator getFreeBlocks(int maxSize) {

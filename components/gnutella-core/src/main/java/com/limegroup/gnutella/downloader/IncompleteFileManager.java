@@ -33,10 +33,17 @@ public class IncompleteFileManager implements Serializable {
      * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
      * one interval.  Note that blocks are no sorted; there are typically few
      * blocks so performance isn't an issue.
+     * <p>
+     * Note: Older implementations mapped File -> List<Interval>. 
+     * The current version of the code converts the Intervals to a VerifyingFile
+     * and uses it for downloads. When the IncompleteFileManager needs to be 
+     * serialized, we convert the VerifyingFile back to a List of Intervals
+     * This is to reduce backwards compatibility and forwards compatibiliy 
+     * issues.
      */
-    private Map /* File -> List<Interval> */ blocks=
+    private Map /* File -> VerifyingFile */ blocks=
         new TreeMap(new FileComparator());  
-
+    
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +109,57 @@ public class IncompleteFileManager implements Serializable {
         return new File(incDir,"T"+SEPARATOR+size+SEPARATOR+name);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    
+    private synchronized void readObject(ObjectInputStream stream) 
+                                   throws IOException, ClassNotFoundException {
+        blocks = transform(stream.readObject());
 
+    }
+
+    private synchronized void writeObject(ObjectOutputStream stream) 
+                                throws IOException, ClassNotFoundException {
+        stream.writeObject(invTransform());
+    }
+        
+
+    /** Takes a map of File->List<Interval> and returns a new equivalent Map
+     *  of File->VerifyingFile*/
+    private Map transform(Object object) {
+        Map map = (Map)object;
+        Map retMap = new TreeMap(new FileComparator());
+        for(Iterator i = map.keySet().iterator(); i.hasNext();) {
+            Object incompleteFile = i.next();
+            Object o = map.remove(incompleteFile);
+            if(o==null) //no entry??!
+                continue;
+            else if(o instanceof VerifyingFile)
+                retMap.put(incompleteFile,o);//move to new map
+            else {// (o instanceof List) ie. old downloads.dat
+                Iterator iter = ((List)o).iterator();
+                VerifyingFile vf = new VerifyingFile(true);
+                while(iter.hasNext()) {
+                    Interval interval = (Interval)iter.next();
+                    vf.addInterval(interval);
+                }
+                retMap.put(incompleteFile,vf);
+            }
+        }//end of for
+        return retMap;
+    }
+    
+    /** Takes a map of File->VerifyingFile and returns a new equivalent Map
+     *  of File->List<Interval>*/
+    private Map invTransform() {
+        Map retMap = new HashMap();
+        for(Iterator i=blocks.keySet().iterator(); i.hasNext();) {
+            Object incompleteFile = i.next();
+            VerifyingFile vf  = (VerifyingFile)blocks.get(incompleteFile);
+            List l = vf.getBlocksAsList();
+            retMap.put(incompleteFile,l);
+        }
+        return retMap;
+    }
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
@@ -116,40 +173,18 @@ public class IncompleteFileManager implements Serializable {
         blocks.put(incompleteFile,vf);
     }
 
-    public synchronized VerifyingFile getEntry(File incompleteFile,
-                                               ManagedDownloader md) {
+    public synchronized VerifyingFile getEntry(File incompleteFile) {
         Object o = blocks.get(incompleteFile);
-        if(o==null) //no entry?
-            return null;
-        else if(o instanceof VerifyingFile)
-            return (VerifyingFile)o;
-        else {// (o instanceof List) ie. old downloads.dat
-            Iterator iter = ((List)o).iterator();
-            VerifyingFile vf = new VerifyingFile(incompleteFile,true, md);
-            while(iter.hasNext()) {
-                Interval interval = (Interval)iter.next();
-                vf.addInterval(interval);
-            }
-            return vf;
-        }
+        return (VerifyingFile)o;
     }
     
     public synchronized int getBlockSize(File incompleteFile) {
         Object o = blocks.get(incompleteFile);
         if(o==null)
             return 0;
-        if(o instanceof VerifyingFile) {
+        else {
             VerifyingFile vf = (VerifyingFile)o;
             return vf.getBlockSize();
-        }
-        else {//o instanceof List
-            int sum=0;
-            List l = (List)o;
-            for (Iterator iter=l.iterator(); iter.hasNext(); ) {
-                Interval block=(Interval)iter.next();
-                sum+=block.high-block.low;
-            }
-            return sum;
         }
     }
 

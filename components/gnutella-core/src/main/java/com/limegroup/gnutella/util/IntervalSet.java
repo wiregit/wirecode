@@ -119,6 +119,10 @@ public class IntervalSet {
         return intervals.iterator();
     }
 
+    public List getAllIntervalsAsList() {
+        return intervals;
+    }
+
     public int getSize() {
         int sum=0;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {

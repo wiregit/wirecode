@@ -1056,14 +1056,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized (incompleteFileManager) {
                     //get VerifyingFile
                     commonOutFile=
-                    incompleteFileManager.getEntry(incompleteFile,this);
+                    incompleteFileManager.getEntry(incompleteFile);
                 }
                 if(commonOutFile==null) {//no entry in incompleteFM
                     debug("creating a verifying file");
-                    commonOutFile = new VerifyingFile(incompleteFile,true,this);
+                    commonOutFile = new VerifyingFile(true);
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
+                }
+                //need to get the VerifyingFile ready to write
+                try {
+                    commonOutFile.open(incompleteFile,this);
+                } catch(IOException e) {
+                    return GAVE_UP;
                 }
                 //update needed
                 Iterator iter=commonOutFile.getFreeBlocks(rfd.getSize());
@@ -1727,6 +1733,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized int getAmountRead() {
         if (state!=CORRUPT_FILE) {
+            if(commonOutFile==null)
+                return 0;
             return commonOutFile.getBlockSize();
         } else {
             return corruptFileBytes;
