@@ -641,6 +641,65 @@ public class ServerSideWhatIsNewTest
         URN newFileURN = fm.getURNForFile(newFile);
         assertEquals(cTime, ctCache.getCreationTime(newFileURN));
     }
+
+
+    // download a file and make sure the creation time given back is stored...
+    public void testSwarmDownloadCapturesOlderCreationTime() throws Exception {
+        FileManager fm = rs.getFileManager();
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+
+        // get rid of the old shared file
+        File newFile = new File(_savedDir, "whatever.txt");
+        fm.removeFileIfShared(newFile);
+        newFile.delete();
+        assertEquals("num shared files? " + rs.getNumSharedFiles(), 1,
+                     rs.getNumSharedFiles());
+        
+        final int UPLOADER_PORT = 20000;
+        byte[] guid = GUID.makeGuid();
+        TestUploader uploader[] = new TestUploader[4];
+        Long cTime[] = new Long[uploader.length];
+        RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
+        for (int i = 0; i < uploader.length; i++) {
+            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
+            uploader[i].setRate(1);
+            cTime[i] = new Long(5+i);
+            uploader[i].setCreationTime(cTime[i]);
+            rfds[i] = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, 
+                                         "anita.txt", 10, 
+                                         guid, 1, false, 3,
+                                         false, null, null, false,
+                                         false, "LIME", 0, new HashSet());
+        }
+
+        Downloader downloader = rs.download(rfds, false, new GUID(guid));
+        
+        Thread.sleep(2000);
+        if (downloader.getState() != Downloader.COMPLETE) 
+            uploader[0].setRate(10000);
+        Thread.sleep(2000);
+        assertEquals("State = " + downloader.getState(),
+                     Downloader.COMPLETE, downloader.getState());
+        
+        assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
+                     rs.getNumSharedFiles());
+
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(""+urnToLong, 2, urnToLong.size());
+        }
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            assertEquals(""+longToUrns, 2, longToUrns.size());
+        }
+
+        newFile = new File(_savedDir, "anita.txt");
+        assertTrue(newFile.exists());
+        URN newFileURN = fm.getURNForFile(newFile);
+        assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
+    }
         
 
     private static void shutdown() throws IOException {
