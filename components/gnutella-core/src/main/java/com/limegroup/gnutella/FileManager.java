@@ -166,18 +166,20 @@ public class FileManager {
 	 *  -1 if not matching index could be found
 	 */
 	public int getFileIndexForUrn(final URN urn) {
-        Iterator iter = _files.iterator();
-		int count = 0;
-        while(iter.hasNext()) {
-            FileDesc candidate = (FileDesc)iter.next();
-            if (candidate==null) continue;
-            if (candidate.containsUrn(urn)) {
-                return count;
-            }
-			count++;
-        }
-        // none found
-        return -1;
+		synchronized(_files) {
+			Iterator iter = _files.iterator();
+			int count = 0;
+			while(iter.hasNext()) {
+				FileDesc candidate = (FileDesc)iter.next();
+				if (candidate==null) continue;
+				if (candidate.containsUrn(urn)) {
+					return count;
+				}
+				count++;
+			}
+		}
+		// none found
+		return -1;
 	}
 
 	/**
@@ -190,14 +192,16 @@ public class FileManager {
 	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
 	 */
 	public FileDesc getFileDescForUrn(final URN urn) {
-        Iterator iter = _files.iterator();
-        while(iter.hasNext()) {
-            FileDesc candidate = (FileDesc)iter.next();
-            if (candidate==null) continue;
-            if (candidate.containsUrn(urn)) {
-                return candidate;
-            }
-        }
+		synchronized(_files) {
+			Iterator iter = _files.iterator();
+			while(iter.hasNext()) {
+				FileDesc candidate = (FileDesc)iter.next();
+				if (candidate==null) continue;
+				if (candidate.containsUrn(urn)) {
+					return candidate;
+				}
+			}
+		}
         // none found
         return null;
 	}
@@ -209,15 +213,17 @@ public class FileManager {
      * data structures for local files
      */
     public FileDesc getFileDescMatching(File file) {
-        // linear probe. thankfully it's rare
-        Iterator iter = _files.iterator();
-        while(iter.hasNext()) {
-            FileDesc candidate = (FileDesc)iter.next();
-            if (candidate==null) continue;
-			if(file.equals(candidate.getFile())) {
-				return candidate;
+		synchronized(_files) {
+			// linear probe. thankfully it's rare
+			Iterator iter = _files.iterator();
+			while(iter.hasNext()) {
+				FileDesc candidate = (FileDesc)iter.next();
+				if (candidate==null) continue;
+				if(file.equals(candidate.getFile())) {
+					return candidate;
+				}
 			}
-        }
+		}
         // none found
         return null;
 	}
