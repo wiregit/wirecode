@@ -1,10 +1,25 @@
 package com.limegroup.gnutella;
 
-import java.util.StringTokenizer;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.SchemaNotFoundException;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
+import java.util.StringTokenizer;
+
 import org.xml.sax.SAXException;
-import java.io.*;
 import com.sun.java.util.collections.*;
 
 
@@ -18,6 +33,23 @@ import com.sun.java.util.collections.*;
  * mutator methods for metadata; these will be removed in the future.  
  */
 public class Response {
+    
+    /**
+     * The magic byte to use as extension seperators.
+     */
+    private static final byte EXT_SEPERATOR = 0x1c;
+    
+    /**
+     * The magic byte, as a string, to use as extension seperators.
+     */
+    private static final String EXT_STRING = "\u001c";
+    
+    /**
+     * The maximum number of alternate locations to include in responses
+     * in the GGEP block
+     */
+    private static final int MAX_LOCATIONS = 10;
+    
     /** Both index and size must fit into 4 unsigned bytes; see
      *  constructor for details. */
     private final long index;
@@ -70,6 +102,11 @@ public class Response {
 	 * an empty array.
 	 */
     private final byte[] extBytes;
+    
+    /**
+     * The set of other locations that have this file.
+     */
+    private final Set /* of Endpoint */ otherLocations;
 
 	
 	/**
@@ -131,7 +168,7 @@ public class Response {
      *  0 <= index, size < 2^32
      */
     public Response(long index, long size, String name) {
-		this(index, size, name, "", null, null, null);
+		this(index, size, name, "", null, null, null, null);
     }
 
 
@@ -141,7 +178,7 @@ public class Response {
      * @param doc the metadata to include
      */
     public Response(long index, long size, String name, LimeXMLDocument doc) {
-        this(index, size, name, extractMetadata(doc), null, doc, null);
+        this(index, size, name, extractMetadata(doc), null, doc, null, null);
     }
 
 
@@ -151,7 +188,7 @@ public class Response {
      * @param metadata a string of metadata, typically XML
      */
     public Response(long index, long size, String name, String metadata) {
-		this(index, size, name, metadata, null, null, null);
+		this(index, size, name, metadata, null, null, null, null);
 	}
 
 	/**
@@ -163,7 +200,9 @@ public class Response {
 	 */
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
-			 "", fd.getUrns(), null, null);
+			 "", fd.getUrns(), null, 
+			 getAsEndpoints(fd.getAlternateLocationCollection()),
+			 null);
 	}
 
     /**
@@ -171,6 +210,9 @@ public class Response {
      * meta-data and a <tt>Set</tt> of <tt>URN</tt> instances.  This 
 	 * is the primary constructor that establishes all of the class's 
 	 * invariants, does any necessary parameter validation, etc.
+	 *
+	 * If extensions is non-null, it is used as the extBytes instead
+	 * of creating them from the urns and locations.
 	 *
 	 * @param index the index of the file referenced in the response
 	 * @param size the size of the file (in bytes)
@@ -180,36 +222,43 @@ public class Response {
 	 *  with the file
 	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
 	 *  the file
+	 * @param endpoints a collection of other locations on this network
+	 *        that will have this file
+	 * @param extensions The raw unparsed extension bytes.
      */
-    public Response(long index, long size, String name,
+    private Response(long index, long size, String name,
 					 String metadata, Set urns, LimeXMLDocument doc, 
-					 byte[] rawMeta) {
+					 Set endpoints, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
         // see note in createFromStream about Integer.MAX_VALUE
         if (size > Integer.MAX_VALUE || size < 0)
             throw new IllegalArgumentException("invalid size: " + size);
+            
         this.index=index;
         this.size=size;
-		if(name == null) {
+        
+		if (name == null)
 			this.name = "";
-		} else {
+		else
 			this.name = name;
-		}
+
         this.nameBytes = this.name.getBytes();
 
-		if(urns == null) {
-			// this is necessary because Collections.EMPTY_SET is not
-			// serializable in collections 1.1
+		if (urns == null)
 			this.urns = DataUtils.EMPTY_SET;
-		}
-		else {
+		else
 			this.urns = Collections.unmodifiableSet(urns);
-		}
-		if ( rawMeta != null )
-		    this.extBytes = rawMeta;
+		
+		if (endpoints == null)
+		    this.otherLocations = DataUtils.EMPTY_SET;
+		else
+		    this.otherLocations = Collections.unmodifiableSet(endpoints);
+		
+		if (extensions != null)
+		    this.extBytes = extensions;
 		else 
-		    this.extBytes = createExtBytes(this.urns);
+		    this.extBytes = createExtBytes(this.urns, this.otherLocations);
 
 		if(((metadata == null) || (metadata.equals(""))) && (doc != null)) {
 			// this is guaranteed to be non-null, although it could be the
@@ -291,27 +340,66 @@ public class Response {
         } else {
 			// now handle between-the-nulls
 			// \u001c is the HUGE v0.93 GEM delimiter
-			StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); 
+			StringTokenizer stok = new StringTokenizer(betweenNulls, EXT_STRING); 
 			Set urns = null;
+			Set endpoints = null;
 			String metaString = null;
 			while(stok.hasMoreTokens()) {
-				String ext = stok.nextToken();
+				final String ext = stok.nextToken();
+				
+				// First see if this extension is URNs.
 				if(URN.isUrn(ext)) {
 					// it's a HUGE v0.93 URN name for the same files
 					try {
 						URN urn = URN.createSHA1Urn(ext);
-						if (urns == null) urns = new HashSet();
+						if (urns == null) urns = new HashSet(1);
 						urns.add(urn);
-					} catch(IOException e) {
-						// there was an error creating the URN, so go to the
-						// next one
 						continue;
+					} catch(IOException e) {
+					    // invalid URN. try something else.
 					}
-				} else {
-					metaString = createXmlString(name, ext);
 				}
+				
+				
+				// Then see if this extension is GGEP.
+				byte[] extBytes = ext.getBytes();
+				if( extBytes != null && extBytes.length > 1 && 
+				    extBytes[0] == GGEP.GGEP_PREFIX_MAGIC_NUMBER ) {
+				        // GGEP can contain 0x1c in its information,
+				        // so it is documented that a GGEP block must be
+				        // the last block.
+				        // So, gather the rest of the tokens and make them
+				        // into one huge token.
+				        if( stok.hasMoreTokens() ) {
+				            StringBuffer sb = new StringBuffer(ext);
+				            while(stok.hasMoreTokens()) {
+				                sb.append(EXT_STRING);
+				                sb.append(stok.nextToken());
+                            }
+				            extBytes = sb.toString().getBytes();
+                        }
+				        GGEP[] ggepBlocks = null;
+				        try {
+				            // See if there are any per-file GGEP blocks
+				            ggepBlocks = GGEP.read(extBytes, 0);
+				            endpoints = GGEPUtil.getLocations(ggepBlocks);
+				            continue;
+				        } catch(BadGGEPBlockException be) {
+				            be.printStackTrace();
+				            //invalid GGEP. try something else.
+				        }
+				}
+				
+				// If it wasn't any of the above, make XML out of it.
+                metaString = createXmlString(name, ext);
+                if(metaString == null || metaString.equals(""))
+                    System.out.println("unknown: " + ext);
+                else
+                    System.out.println("found raw metadata: " + metaString);
+                
 			}			
-			return new Response(index, size, name, metaString, urns, null, rawMeta);
+			return new Response(index, size, name, metaString, 
+			                    urns, null, endpoints, rawMeta);
         }
     }  
 
@@ -394,28 +482,78 @@ public class Response {
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
 	 *  constructing the byte array
 	 */
-	private static byte[] createExtBytes(Set urns) {
+	private static byte[] createExtBytes(Set urns, Set endpoints) {
         try {
-			if(urns == null) {
-				return DataUtils.EMPTY_BYTE_ARRAY;
-			}
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			Iterator iter = urns.iterator();
-			while (iter.hasNext()) {
-				URN urn = (URN)iter.next();
-                Assert.that(urn!=null, "Null URN");
-				baos.write(urn.toString().getBytes());
-				if (iter.hasNext()) {
-					baos.write(0x1c);
-				}
-			}
+            if( isEmpty(urns) && isEmpty(endpoints) )
+                return DataUtils.EMPTY_BYTE_ARRAY;
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();            
+            if( !isEmpty(urns) ) {
+                // Add the extension for URNs, if any.
+    			Iterator iter = urns.iterator();
+    			while (iter.hasNext()) {
+    				URN urn = (URN)iter.next();
+                    Assert.that(urn!=null, "Null URN");
+    				baos.write(urn.toString().getBytes());
+    				// If there's another URN, add the seperator.
+    				if (iter.hasNext()) {
+    					baos.write(EXT_SEPERATOR);
+    				}
+    			}
+    			
+    			// If there's endpoints, add the seperator.
+    		    if( !isEmpty(endpoints) )
+    		        baos.write(EXT_SEPERATOR);
+            }
+            
+            // If there's endpoints, add them.
+            // It is imperitive that GGEP is added LAST.
+            // That is because GGEP can contain 0x1c (EXT_SEPERATOR)
+            // within it, which would cause parsing problems
+            // otherwise.
+            if( !isEmpty(endpoints) )
+                GGEPUtil.addGGEP(baos, endpoints);
+			
             return baos.toByteArray();
-        } catch (IOException ioe) {
-			// simply do not store any bytes for extensions if there
-			// was a problem
-			return DataUtils.EMPTY_BYTE_ARRAY;
+        } catch (IOException impossible) {
+            ErrorService.error(impossible);
+            return DataUtils.EMPTY_BYTE_ARRAY;
         }
     }
+    
+    /**
+     * Utility method to know if a set is empty or null.
+     */
+    private static boolean isEmpty(Set set) {
+        return set == null || set.isEmpty();
+    }
+    
+    /**
+     * Utility method for converting an AlternateLocationCollection to a
+     * smaller set of endpoints.
+     */
+    private static Set getAsEndpoints(AlternateLocationCollection col) {
+        if( col == null || col.getAltLocsSize() == 0)
+            return DataUtils.EMPTY_SET;
+        
+        synchronized(col) {
+            Set endpoints = null;
+            int i = 0;
+            for(Iterator iter = col.iterator();
+              iter.hasNext() && i < MAX_LOCATIONS;) {
+                AlternateLocation al = (AlternateLocation)iter.next();
+                Endpoint host = al.getHost();
+                if( !NetworkUtils.isMe(host.getHostname(), host.getPort()) ) {
+                    if (endpoints == null)
+                        endpoints = new HashSet();
+                    endpoints.add( al.getHost() );
+                    i++;
+                }
+            }
+            return endpoints == null ? DataUtils.EMPTY_SET : endpoints;
+        }
+        
+    }           
 
 	/**
 	 * Utility method for extracting the metadata string from the given
@@ -627,28 +765,43 @@ public class Response {
 		return urns;
     }
     
+    /**
+     * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * contain the same file described in this <tt>Response</tt>.
+     *
+     * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * contain the same file described in this <tt>Response</tt>,
+     * guaranteed to be non-null, although the set could be empty
+     */
+    public Set getLocations() {
+        return otherLocations;
+    }
+    
     
     byte[] getExtBytes() {
         return extBytes;
     }
 
-	// overrides Object.equals to provide a broader and more precise
-	// definition of equality
+	/**
+	 * Overrides equals to check that these two responses are equal.
+	 * Raw extension bytes are not checked, because they may be
+	 * extensions that do not change equality, such as
+	 * otherLocations.
+	 */
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof Response))
             return false;
         Response r=(Response)o;
-		return (getIndex() == r.getIndex() &&
-                getSize() == r.getSize() &&
-				getName().equals(r.getName()) &&
-                Arrays.equals(getNameBytes(), r.getNameBytes()) &&
-				getMetadata().equals(r.getMetadata()) &&
-				Arrays.equals(getMetaBytes(), r.getMetaBytes()) &&
-				((getDocument() == null) ? (r.getDocument() == null) :
-				 getDocument().equals(r.getDocument())) &&
-				getUrns().equals(r.getUrns()) &&
-				Arrays.equals(getExtBytes(), r.getExtBytes()));
+		return getIndex() == r.getIndex() &&
+               getSize() == r.getSize() &&
+			   getName().equals(r.getName()) &&
+               Arrays.equals(getNameBytes(), r.getNameBytes()) &&
+               getMetadata().equals(r.getMetadata()) &&
+               Arrays.equals(getMetaBytes(), r.getMetaBytes()) &&
+               ((getDocument() == null) ? (r.getDocument() == null) :
+               getDocument().equals(r.getDocument())) &&
+               getUrns().equals(r.getUrns());
     }
 
 
@@ -669,9 +822,102 @@ public class Response {
 				"xml document: "+document+"\r\n"+
 				"urns:         "+urns);
 	}
+	
+    /**
+     * Utility class for handling GGEP blocks in the per-file section
+     * of QueryHits.
+     */
+    private static class GGEPUtil {
+        
+        /**
+         * Private constructor so it never gets constructed.
+         */
+        private GGEPUtil() {}
+        
+        /**
+         * Adds a GGEP block with the specified alternate locations to the 
+         * output stream.
+         */
+        static void addGGEP(OutputStream out, Set /* of Endpoint */ locs)
+          throws IOException {
+            if( locs == null || locs.size() == 0)
+                throw new NullPointerException("null or empty locations");
+            
+            GGEP info = new GGEP();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                for(Iterator i = locs.iterator(); i.hasNext();) {
+                    try {
+                        Endpoint ep = (Endpoint)i.next();
+                        baos.write(ep.getHostBytes());
+                        //baos.write(ep.getPort());
+                        ByteOrder.short2leb((short)ep.getPort(), baos);
+                    } catch(UnknownHostException uhe) {
+                        continue;
+                    }
+                }
+            } catch(IOException impossible) {
+                ErrorService.error(impossible);
+            }
+                
+            info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
+            
+            info.write(out);
+        }
+        
+        /**
+         * Returns a byte array of a GGEP block containing the
+         * set of endpoints
+         */
+        static byte[] getGGEPBytes(Set locs) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                addGGEP(baos, locs);
+            } catch(IOException impossible) {
+                ErrorService.error(impossible);
+            }
+            
+            return baos.toByteArray();
+        }
+        
+        /**
+         * Returns a <tt>Set</tt> of other endpoints described
+         * in one of the GGEP arrays.
+         */
+        static Set getLocations(GGEP[] ggeps) {
+            Set locations = new HashSet();
+            
+            for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
+                Set headers = ggeps[i].getHeaders();
+                // if the block has a ALTS value, get it, parse it,
+                // and move to the next.
+                if (headers.contains(GGEP.GGEP_HEADER_ALTS)) {
+                    byte[] locBytes = null;
+                    try {
+                        locBytes = ggeps[i].getBytes(GGEP.GGEP_HEADER_ALTS);
+                        // must be a multiple of 6
+                        if( locBytes.length % 6 != 0 )
+                            continue;
+                    } catch (BadGGEPPropertyException bad) {
+                        ErrorService.error(bad);
+                        continue;
+                    }
 
-    //Unit test can be found in
-    //core/com/limegroup/gnutella/tests/ResponseTest.java (soon to be
-    //tests/com/limegroup/gnutella/tests/ResponseTest.java)
+                    for(int j = 0; j < locBytes.length; j+=6) {
+                        String host = NetworkUtils.ip2string(locBytes, j);
+                        int port = ByteOrder.ubytes2int(
+                                    ByteOrder.leb2short(locBytes, j+4)
+                                   );
+                        if(!NetworkUtils.isValidPort(port))
+                            continue;
+                        if(!NetworkUtils.isValidAddress(host))
+                            continue;
+                        locations.add(new Endpoint(host, port));
+                    }
+                }
+            }
+            return locations;
+        }
+    }	
 }
 
