@@ -187,8 +187,7 @@ public final class MP3Info {
      *
      * @exception java.io.IOException mp3 fileName had no valid header
      */
-    public MP3Info(String file) 
-    	throws IOException {
+    public MP3Info(String file) throws IOException {
         
         _file = file;
              //TODO:use 1.4 BufferMaps
@@ -292,17 +291,19 @@ public final class MP3Info {
         // 120 is total 'possible' VBR length
         // 36  max bytes to skip
         // 3   is to cover length of VBR header
-        int need = (int)((adjustedEOB + 3) - (120 + 36 + i)); 
+        int need = (int)((i + 3) - (120 + 36 + i));
   		if (need < 0) { //special case, we need more data
 	  		//shift current data left to make room for need data
-	  		i -= need;
 			for (i = 0, need = -need; 
 		  		 need < buf.length; i++, need++ ) {
 		  		buf[i] = buf[need];
 	  		}
 	  		
-			c = fis.read(buf, 0, buf.length); //more
+	  		//read more, starting at where we last have valid data.
+			c = fis.read(buf, i, buf.length-i);
 		}
+		
+		
 		if ( getVersionIndex() == 3 ) { // mpeg version 1            
             i += (getModeIndex()==3  ?  21  :  36);
         }
@@ -341,13 +342,7 @@ public final class MP3Info {
 			//true VBR file may not have a proper tag, to find out for sure
 			//read every header to calculate true variable rate, length, etc
 
-		}
-        
-        }
-		catch (Throwable t) {
-			throw new IOException("Invalid MP3 File! " + t);
-		}
-		finally { //cleanup
+		} finally { //cleanup
 			try {				
 				if( fis != null )
 				    fis.close(); 
