@@ -182,7 +182,7 @@ public final class NetworkUtils {
     /**
      * If host is not a valid host address, returns false.
      * Otherwise, returns true if connecting to host:port would connect to
-     *  the manager's listening port.
+     *  this servent's listening port.
      *
      * @return <tt>true</tt> if the specified host/port combo is this servent,
      *         otherwise <tt>false</tt>.

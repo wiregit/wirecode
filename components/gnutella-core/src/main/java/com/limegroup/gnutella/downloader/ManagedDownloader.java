@@ -803,9 +803,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /** Like addDownload, but doesn't call allowAddition(..). 
-     *  @return true, since download always allowed */
+     *  @return true, since download always allowed or silently ignored */
     protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
+                                                            
+        // DO NOT DOWNLOAD FROM YOURSELF.
+        if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
+            return true;
+        
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
