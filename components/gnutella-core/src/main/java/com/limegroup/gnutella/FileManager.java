@@ -578,13 +578,13 @@ public class FileManager {
         File f = null;
         try {
             f=getCanonicalFile(file);
-            if (!f.exists())
+            if (!f.exists()) 
                 return false;
         } catch (IOException e) {
             return false;
-        }
+		}
         File dir = getParentFile(file);
-        if (dir==null)
+        if (dir==null) 
             return false;
 
         //TODO: if overwriting an existing, take special care.
@@ -594,8 +594,8 @@ public class FileManager {
         }
         if (directoryShared)
             return addFile(file);
-        else
-            return false;
+        else 
+            return false;		
 	}
 
     /**
@@ -621,16 +621,17 @@ public class FileManager {
      */
     private boolean addFile(File file) {
         repOk();
-        if (!hasExtension(file.getName())) {
+        if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
+			!hasExtension(file.getName())) {
 			return false;
 		}
 		long fileLength = file.length();  
-		if (fileLength>Integer.MAX_VALUE || fileLength<0)
+		if (fileLength>Integer.MAX_VALUE || fileLength<0) 
 			return false;
         
         //Calculate hash OUTSIDE of lock.
         Set urns=FileDesc.calculateAndCacheURN(file);  
-        if (loadThreadInterrupted())
+        if (loadThreadInterrupted()) 
             return false;
 
         synchronized (this) {
