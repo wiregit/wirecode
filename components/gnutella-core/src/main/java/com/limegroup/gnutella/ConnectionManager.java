@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.gui.Utilities;
+
 /**
  * The list of all connections.  Accepts new connections and creates
  * new threads to handle them.<p>
@@ -40,22 +42,40 @@ public class ConnectionManager {
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
-    private int _keepAlive=0;
-    private int _maxIncomingConnections=0;
+    /** 
+     * The number of connections to keep up.  Initially we will try _keepAlive
+     * outgoing connections.  At the same time we will accept up to _keepAlive
+     * incoming connections.  As outgoing connections fail, we will not accept
+     * any more incoming connections.  Hence we will converge on exactly
+     * _keepAlive incoming connections.  
+     */
+    private volatile int _keepAlive=0;
+    /** The number of incoming connections.  Used to avoid the cost of scanning
+     * through _initializedConnections when deciding whether to accept incoming..
+     *
+     *  INVARIANT: _incomingConnections>=the number of incoming connections in
+     *  _connections.  In the "steady state", i.e., when no incoming connections
+     *  are being initialized, this value is exactly equal to the number of
+     *  incoming connections.
+     *
+     *  LOCKING: obtain _incomingConnectionLock */
+    private int _incomingConnections=0;
+    /** The lock for the number of incoming connnections. */
+    private Object _incomingConnectionsLock=new Object();
 
     private MessageRouter _router;
     private HostCatcher _catcher;
     private ActivityCallback _callback;
-	private boolean _isWindows = false;
+	private SettingsManager _settings;
+	private ConnectionWatchdog _watchdog;
+	private Runnable _ultraFastCheck;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      */
     public ConnectionManager(ActivityCallback callback) {
-        _callback = callback;
-		String os = System.getProperty("os.name");
-		if(os.startsWith("Windows"))
-			_isWindows = true;
+        _callback = callback;		
+		_settings = SettingsManager.instance(); 
     }
 
     /**
@@ -68,14 +88,16 @@ public class ConnectionManager {
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        Thread watchdog=new Thread(new ConnectionWatchdog(this, _router));
+        _watchdog = new ConnectionWatchdog(this, _router);
+        Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
         watchdog.start();
 
-        setKeepAlive(SettingsManager.instance().getKeepAlive());
-        setMaxIncomingConnections(
-            SettingsManager.instance().getMaxIncomingConnections());
+        setKeepAlive(_settings.getKeepAlive());
+        //setMaxIncomingConnections(
+		//SettingsManager.instance().getMaxIncomingConnections());
     }
+
 
     /**
      * Create a new connection, blocking until it's initialized, but launching
@@ -133,35 +155,50 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         if (getNumInConnections() < _maxIncomingConnections) {             
-            ManagedConnection connection = new ManagedConnection(socket,
-                                                                 _router,
-                                                                 this);
-            try {
-                initializeExternallyGeneratedConnection(connection);
-                //We DO send ping requests on incoming connections.  This may
-                //double ping traffic, but if gives us more accurate horizon
-                //stats.  And it won't really affect traffic if people implement
-                //caching properly.
-                _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
-                    connection);
-                connection.loopForMessages();
-            } catch(IOException e) {
-            } catch(Exception e) {
-                //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
-            }
-        }
-        else {
-            // The constructor does the whole deal -- intializing,
-            // looking for and responding to a PingRequest.  It's
-            // all synchronous, because we have a dedicated thread
-            // right here.
-			if(_isWindows) {
+         //Atomically decide whether to accept connection.  Release lock
+         //before actually managing the connection.
+         boolean allowConnection=false;
+         synchronized (_incomingConnectionsLock) {
+             if (_incomingConnections < _keepAlive) {
+                 //Yes, we'll allow it.  Increment the incoming count NOW even
+                 //before this connection is processed.  The value will be
+                 //decremented in the finally clause below.
+                 _incomingConnections++;
+                 allowConnection=true;
+             }
+         }
+         
+         if (allowConnection) {
+             //a) Handle normal connection (blocking).
+             ManagedConnection connection = new ManagedConnection(
+                 socket, _router, this);
+             try {                     
+                 initializeExternallyGeneratedConnection(connection);
+                 //We DO send ping requests on incoming connections.  This may
+                 //double ping traffic, but if gives us more accurate horizon
+                 //stats.  And it won't really affect traffic if people implement
+                 //caching properly.
+                 _router.sendPingRequest(new PingRequest(_settings.getTTL()),
+                                         connection);
+                 connection.loopForMessages();
+             } catch(IOException e) {
+             } catch(Exception e) {
+                 //Internal error!
+                 _callback.error(ActivityCallback.ERROR_20, e);
+             } finally {
+                 synchronized (_incomingConnectionsLock) {
+                     _incomingConnections--;
+                 }
+             }
+         } else {
+             //b) Handle reject connection if on windows.  The constructor does the
+             //whole deal -- intializing, looking for and responding to a
+             //PingRequest.  It's all synchronous, because we have a dedicated
+             //thread right here.
+			if(Utilities.isWindows()) {
 				new RejectConnection(socket, _catcher);
 			}
-
+            
 			// Otherwise, we're not on windows.  We did this 
 			// because we know that RejectConnection was causing
 			// problems on the Mac (periodically freezing the
@@ -177,7 +214,7 @@ public class ConnectionManager {
 				}
 				catch(IOException ioe) {}
 			}
-        }
+         }
      }
 
     /**
@@ -216,9 +253,9 @@ public class ConnectionManager {
      * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
      * able to vary this without permanently setting the property.
      */
-    public void setMaxIncomingConnections(int max) {
-        _maxIncomingConnections = max;
-    }
+    //public void setMaxIncomingConnections(int max) {
+	//_maxIncomingConnections = max;
+    //}
 
     /**
      * @return true if there is a connection to the given host.
@@ -232,21 +269,6 @@ public class ConnectionManager {
      */
     public int getNumConnections() {
         return _connections.size();
-    }
-
-    /**
-     * @return the number of incoming connections
-     */
-    private int getNumInConnections() {
-        //This could be optimized if desired by augmenting the state of
-        //ConnectionManager.
-        int ret=0;
-        //Note that we DON'T use getInitializedConnections.
-        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
-            if (! ((Connection)iter.next()).isOutgoing())
-                ret++;
-        }
-        return ret;
     }
 
     /**
@@ -316,7 +338,52 @@ public class ConnectionManager {
                                           c.getPort()));
             _endpoints=newEndpoints;
         }
+
+		// Check for satisfied ultra-fast connection threshold
+		if ( _ultraFastCheck != null )
+			_ultraFastCheck.run();
     }
+
+	/**
+	 *  Activate the ultraFast runnable for returning keepAlive value to normal.
+	 */
+	public void activateUltraFastConnectShutdown() {
+		_ultraFastCheck = new AllowUltraFastConnect();
+	}
+
+	/**
+	 *  Deactivate the ultraFast runnable returning keepAlive value to normal.
+	 */
+	public void deactivateUltraFastConnectShutdown() {
+		_ultraFastCheck = null;
+	}
+
+    /**
+     * This Runnable resets the KeepAlive to the appropriate value
+	 * if there are an acceptible number of stable connections
+     */
+    private class AllowUltraFastConnect implements Runnable {
+		
+		public void run() {
+            SettingsManager settings=SettingsManager.instance();
+        	int outgoing=settings.getKeepAlive();
+			int desired = Math.min(outgoing, 3);
+
+			// Determine if we have 3/desired stable connections
+            Iterator iter=getConnections().iterator();
+            for ( ; iter.hasNext(); ) {
+                ManagedConnection c=(ManagedConnection)iter.next();
+				// Stable connections are measured by having 4 incoming msgs
+			    if ( c.getNumMessagesReceived() >= 4 )
+				    desired--;
+            }
+			if ( desired <= 0 ) {
+        	    setKeepAlive(outgoing);
+				// Deactivate extra ConnectionWatchdog Process
+		        deactivateUltraFastConnectShutdown(); 
+			}
+		}
+	}
 
     /**
      * An unsynchronized version of remove, meant to be used when the monitor
@@ -545,13 +612,12 @@ public class ConnectionManager {
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && origHost.equals("router.limewire.com"))
 				{
-                    SettingsManager settings = SettingsManager.instance();
-				    String group = "none:"+settings.getConnectionSpeed();
+				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
 				}
 				else
 				    pingRequest = 
-				      new PingRequest(SettingsManager.instance().getTTL());
+				      new PingRequest(_settings.getTTL());
 
                 _router.sendPingRequest(pingRequest, _connection);
                 _connection.loopForMessages();
@@ -672,7 +738,7 @@ public class ConnectionManager {
             try {
                 initializeFetchedConnection(connection, this);
                 _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
+                    new PingRequest(_settings.getTTL()),
                     connection);
                 connection.loopForMessages();
             } catch(IOException e) {
