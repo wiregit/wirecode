@@ -21,10 +21,11 @@ import java.net.*;
  * swarmed downloads, the ability to download copies of the same file from
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
- * Subclasses may refine the requery behavior by overriding the
- * nextRequeryTime, newRequery(n), allowAddition(..), and addDownload(..) 
- * methods.  MagnetDownloader also redefines the tryAllDownloads(..) method to
- * handle default locations.<p>
+ * Subclasses may refine the requery behavior by overriding the nextRequeryTime,
+ * newRequery(n), allowAddition(..), and addDownload(..)  methods.
+ * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
+ * default locations, and the getFileName() method to specify the completed
+ * file name.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -1080,19 +1081,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
-        //   etc.  We check this by looking where the downloaded file will
-        //   end up.
-        RemoteFileDesc rfd=null;
-        synchronized (this) {
-            rfd=(RemoteFileDesc)files.get(0);
-        }
-        int fileSize=rfd.getSize(); 
-        String filename=rfd.getFileName(); 
-        incompleteFile=incompleteFileManager.getFile(rfd);
+        //etc.  We check this by looking where the downloaded file will end up.
+        //The completed filename is chosen somewhat arbitrarily from the first
+        //file of the bucket; see case (b) of getFileName() and
+        //MagnetDownloader.getFileName().
+        //    incompleteFile is picked using an arbitrary RFD from the bucket, since
+        //IncompleteFileManager guarantees that any "same" files will get the
+        //same temporary file.
+        incompleteFile=incompleteFileManager.getFile(
+                                                  (RemoteFileDesc)files.get(0));
         File sharedDir;
         try {
             sharedDir=SettingsManager.instance().getSaveDirectory();
-            completeFile=new File(sharedDir, filename);
+            completeFile=new File(sharedDir, getFileName());
             String sharedPath = sharedDir.getCanonicalPath();		
             String completeFileParentPath = 
             new File(completeFile.getParent()).getCanonicalPath();
@@ -2066,17 +2067,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getFileName() {        
-        //If we're not actually downloading, we just pick some random value.
-        if (dloaders.size()==0)
-			if (allFiles.length > 0)
-                return allFiles[0].getFileName();
-			else
-				// Note that subclasses can override this result.
-				return UNKNOWN_FILENAME;  
-        else 
-            //Could also use currentFileName, but this works.
+        //Return the most specific information possible.  Case (b) is critical
+        //for picking the downloaded file name; see tryAllDownloads2.  See also
+        //http://core.limewire.org/issues/show_bug.cgi?id=122.
+        
+        //a) Return names of one of the active downloaders.
+        if (dloaders.size()>0)
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
+        //b) Return name of first element of current download bucket.
+        else if (files!=null && files.size()>0)
+            return ((RemoteFileDesc)files.get(0)).getFileName();
+        //c) Return name of some arbitrary RFD;
+        else if (allFiles.length > 0)
+            return allFiles[0].getFileName();
+        //d) Give up.  Note that subclass may take action.
+        else
+            return UNKNOWN_FILENAME;  
     }
 
     public synchronized int getContentLength() {

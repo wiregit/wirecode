@@ -321,7 +321,8 @@ public class RequeryDownloadTest extends TestCase {
         }
     }
 
-    /** Tests that MAGNET downloads work from a plain URL. */
+    /** Tests that MAGNET downloads work from a plain URL.
+     *  No display name is provided, so the filename is guessed from URL. */
     public void testMagnetSimpleDownload() {
         File f=null;
         try {
@@ -338,8 +339,8 @@ public class RequeryDownloadTest extends TestCase {
         try {
             downloader=mgr.download(null,           //no SHA1
                 "text query",                       //requery string
-                "filename.txt",                     //display name
-                new String[] {"http://127.0.0.1:6666/path/file.txt"});
+                null,                               //display name
+                new String[] {"http://127.0.0.1:6666/path/filename.txt"});
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {
@@ -350,6 +351,7 @@ public class RequeryDownloadTest extends TestCase {
         try { Thread.sleep(500); } catch (InterruptedException e) { }
         while (downloader.getState()!=Downloader.COMPLETE) {            
             assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            assertEquals("filename.txt", downloader.getFileName());
             try { Thread.sleep(200); } catch (InterruptedException e) { }
         }
         assertTrue(f.exists());
@@ -362,17 +364,29 @@ public class RequeryDownloadTest extends TestCase {
         //Check that no requeries were sent.
         assertEquals(0, router.broadcasts.size());
         //Check that the right kind of request was sent
-        assertEquals("GET /path/file.txt HTTP/1.1", uploader.getRequest());
+        assertEquals("GET /path/filename.txt HTTP/1.1", uploader.getRequest());
     }
 
-    /** Tests that a MAGNET download works from just a URN/keyword */
+    /** Tests that a MAGNET download works from just a URN/keyword
+     *  Tests that the display name is used, not the query reply's name. */
     public void testMagnetRequeryDownload() {
+        //Complete file
+        File f=null;
+        try {
+            f=new File(SettingsManager.instance().getSaveDirectory(),
+                        "filename.txt");
+        } catch (java.io.FileNotFoundException e) {
+            fail("Couldn't find "+f);
+        }
+        f.delete();
+        assertTrue(! f.exists());
+
         //Start a download.  No starting location.
         Downloader downloader=null;
         try {
             downloader=mgr.download(hash,           //no SHA1
                                     "text query",   //requery string
-                                    null,           //display name
+                                    "filename.txt", //display name
                                     null);          //URL
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
@@ -427,8 +441,12 @@ public class RequeryDownloadTest extends TestCase {
         try { Thread.sleep(500); } catch (InterruptedException e) { }
         while (downloader.getState()!=Downloader.COMPLETE) {            
             assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            assertEquals("filename.txt", downloader.getFileName());
             try { Thread.sleep(200); } catch (InterruptedException e) { }
         }
+
+        assertTrue(f.exists());
+        f.delete();
     }
 
     //TODO: more tests
