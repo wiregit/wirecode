@@ -567,6 +567,7 @@ public abstract class MessageRouter {
         // allow new pings on this connection, allow it.
         if((ping.getHops() == 1) || handler.allowNewPings()) {
             respondToPingRequest(ping);
+            handler.updatePingTime();
         } 
     }
 
