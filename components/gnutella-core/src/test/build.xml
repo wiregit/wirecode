@@ -154,7 +154,7 @@
  </target>
  
  <!-- Runs all backend LimeWire servers to test against on ports starting -->
- <!-- with 6000. -->
+ <!-- with 6300. -->
  <target name="run all servers">
     <property name="serversRunning" value="true"/>
     <!-- Start LimeWire servers on specific ports for the tests -->
@@ -169,9 +169,9 @@
  </target>
 
  <!-- Runs a specific class test while also running a LimeWire -->
- <!-- server on port 6000 that is a standardized Ultrapeer,-->
+ <!-- server on port 6300 that is a standardized Ultrapeer,-->
  <!-- running on localhost only, that accepts one connection at a time. -->
- <target name="test6000" if="class" depends="prepare, build">
+ <target name="test6300" if="class" depends="prepare, build">
     <parallel>
 
 	  <antcall target="run server"/>
@@ -190,9 +190,9 @@
     </parallel>
  </target>  
 
- <!-- The same as test6000, except that this runs another LimeWire-->
- <!-- server on port 6001 that rejects all connection attempts. -->
- <target name="test6001" if="class" depends="prepare, build">
+ <!-- The same as test6300, except that this runs another LimeWire-->
+ <!-- server on port 6301 that rejects all connection attempts. -->
+ <target name="test6301" if="class" depends="prepare, build">
     <parallel>
 
 	  <antcall target="run all servers"/>
@@ -203,7 +203,7 @@
 	           haltonfailure="yes"
 	           showoutput="true"
 		       fork="on">
-           <sysproperty key="servers" value="6001"/>
+           <sysproperty key="servers" value="6301"/>
 	       <classpath refid="default.classpath"/>
            <formatter type="plain" useFile="false"/>
 	       <test name="com.limegroup.gnutella.${class}"/>
@@ -212,7 +212,7 @@
     </parallel>
   </target>  
   
-  <!-- runs a backend server on 6000 for testing -->
+  <!-- runs a backend server on 6300 for testing -->
   <target name="run server">
 	<java classname="com.limegroup.gnutella.Backend"
 		  failonerror="true"
@@ -223,7 +223,7 @@
     </java>  
   </target>
 
-  <!-- runs a backend server on 6001 for testing -->
+  <!-- runs a backend server on 6301 for testing -->
   <target name="run reject server">
 	<java classname="com.limegroup.gnutella.Backend"
 		  failonerror="true"
