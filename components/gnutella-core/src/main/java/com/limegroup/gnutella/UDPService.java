@@ -198,8 +198,12 @@ public final class UDPService implements Runnable {
         //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
             synchronized (_sendLock) {
-                if (_socket == null)
+                // if we are being turned on
+                if ((_socket == null) && (datagramSocket != null))
                     _socketSetOnce = true;
+                // if we are being shut off
+                if (_socketSetOnce && (datagramSocket == null))
+                    _socketSetOnce = false;
                 // if the input is null, then the service will shut off ;) .
                 _socket = (DatagramSocket) datagramSocket;
                 _receiveLock.notify();
