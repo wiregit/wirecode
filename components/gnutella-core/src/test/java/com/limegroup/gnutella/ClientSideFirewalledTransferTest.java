@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.udpconnect.SynMessage;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -146,6 +147,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         QueryReply reply = (QueryReply) m;
         assertEquals(reply.getIP(), "10.7.19.76", reply.getIP());
         assertTrue(reply.getSupportsFWTransfer());
+        assertEquals(UDPConnection.VERSION, reply.getFWTransferVersion());
         assertNotNull(reply.getPushProxies());
 
         // check out PushProxy info
