@@ -311,19 +311,19 @@ public class LimeXMLReplyCollection {
             for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
-                final String value = (String)entry.getValue();
+                final String value = 
+                    I18NConvert.instance().getNorm((String)entry.getValue());
                 Trie trie = (Trie)trieMap.get(name);
                 // if no lookup table created yet, create one & insert.
                 if(trie == null) {
                     trie = new Trie(true); //ignore case.
                     trieMap.put(name, trie);
                 }
-                List allDocs = 
-                    (List)trie.get(I18NConvert.instance().getNorm(value));
+                List allDocs = (List)trie.get(value);
                 // if no list of docs for this value created, create & insert.
                 if( allDocs == null ) {
                     allDocs = new LinkedList();
-                    trie.add(I18NConvert.instance().getNorm(value), allDocs);
+                    trie.add(value, allDocs);
                 }
                 //Add the value to the list of docs
                 allDocs.add(doc);
