@@ -20,7 +20,7 @@ public class NormalUploadState implements UploadState {
 	private HTTPUploader _uploader;
 	private OutputStream _ostream;	  
 	private int _index;
-	private String _filename;
+	private String _fileName;
 	private int _fileSize;
 	private InputStream _fis;
 	private int _amountRead;
@@ -56,7 +56,7 @@ public class NormalUploadState implements UploadState {
             /* initialize the global variables */
             _ostream = _uploader.getOutputStream();
             _index = _uploader.getIndex();
-            _filename = _uploader.getFileName();
+            _fileName = _uploader.getFileName();
             _fileSize = _uploader.getFileSize();
             _fis =  _uploader.getInputStream();
             _amountRead = _uploader.amountUploaded();
@@ -205,11 +205,11 @@ public class NormalUploadState implements UploadState {
 //  		 * For pushed (server-side) uploads, check to see that 
 //  		 * the index matches the filename. */
 //  		String name = fdesc._name;
-//  		if (_filename == null) {
-//              _filename = name;
+//  		if (_fileName == null) {
+//              _fileName = name;
 //          } else {
 //  			/* matches the name */
-//  			if ( !name.equals(_filename) ) {
+//  			if ( !name.equals(_fileName) ) {
 //  				throw new IOException();
 //  			}
 //          }
@@ -284,6 +284,17 @@ public class NormalUploadState implements UploadState {
     public boolean getCloseConnection() {
         return _closeConnection;
     }
+
+
+	// overrides Object.toString
+	public String toString() {
+		return "NormalUploadState:\r\n"+
+		       "File Name:  "+_fileName+"\r\n"+
+		       "File Size:  "+_fileSize+"\r\n"+
+		       "File Index: "+_index+"\r\n"+
+		       "URN:        "+_urn+"\r\n"+
+		       "File Desc:  "+_fileDesc;
+	}
 
 	/*
 	public static void main(String[] args) {
