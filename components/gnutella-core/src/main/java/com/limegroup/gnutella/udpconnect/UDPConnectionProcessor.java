@@ -236,8 +236,7 @@ public class UDPConnectionProcessor {
 		_connectionState         = PRECONNECT_STATE;
 		_lastSendTime            = 0l;
         _lastDataSendTime        = 0l;
-    	_chunkLimit              = DATA_WINDOW_SIZE;// TODO:This varies based 
-											        // on Window fullness
+    	_chunkLimit              = DATA_WINDOW_SIZE;
     	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
         _waitingForDataSpace     = false;
         _waitingForDataAvailable = false;
@@ -254,7 +253,7 @@ public class UDPConnectionProcessor {
 
 		// If UDP is not running or not workable, barf
 		if ( !_udpService.isListening() || 
-			 !_udpService.canReceiveSolicited() ) { //TODO: Check this
+			 !_udpService.canReceiveSolicited() ) { 
 			throw CANT_RECEIVE_UDP;
 		}
 
@@ -411,7 +410,7 @@ public class UDPConnectionProcessor {
         _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE);
         _scheduler.register(_safeWriteWakeup);
 
-		// TODO: keep up to date
+		// Keep chunkLimit in sync with window space
         _chunkLimit      = _sendWindow.getWindowSpace();  
     }
 
@@ -640,11 +639,12 @@ public class UDPConnectionProcessor {
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION); 
         }
     }
 
     /**
-     *  Convenience method for sending data.  TODO: graceful shutdown on error
+     *  Convenience method for sending data.  
 	 */
     private synchronized void sendData(Chunk chunk) {
         try {  
@@ -677,6 +677,7 @@ public class UDPConnectionProcessor {
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
@@ -697,11 +698,13 @@ public class UDPConnectionProcessor {
 
             send(ack);
         } catch (BadPacketException bpe) {
-            // This would not be good.   TODO: ????
+            // This would not be good.   
             ErrorService.error(bpe);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
@@ -723,6 +726,7 @@ public class UDPConnectionProcessor {
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
@@ -736,6 +740,7 @@ public class UDPConnectionProcessor {
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
@@ -894,7 +899,6 @@ public class UDPConnectionProcessor {
                     throw CONNECTION_TIMEOUT;
 
 				// Send a SYN packet with our connectionID 
-				// TODO: performance of send?
 				send(synMsg);  
     
                 // Wait for some kind of response
@@ -1033,7 +1037,6 @@ public class UDPConnectionProcessor {
                   _extender.extendSequenceNumber(kmsg.getWindowStart()) );
 
                 long             seqNo  = kmsg.getSequenceNumber();
-                // TODO: make use of this as a pseudo ack
                 long             wStart = kmsg.getWindowStart(); 
                 int              priorR = _receiverWindowSpace;
                 _receiverWindowSpace    = kmsg.getWindowSpace();
