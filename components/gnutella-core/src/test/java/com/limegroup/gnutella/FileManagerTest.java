@@ -617,8 +617,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public void testSpecialSharing() throws Exception {
         //  create "shared" and "notShared" out of shared directory
-        File shared    = createNewNamedTestFile(10, "../shared");
-        File notShared = createNewNamedTestFile(10, "../notShared");
+        File shared    = createNewNamedTestFile(10, "shared", _sharedDir.getParentFile());
+        File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
 
         //  Add "shared" to special shared files
         File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
@@ -657,6 +657,58 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertFalse("non-shared file found in list of shared files", found);
     }
 
+    /**
+     * Tests whether a directory placed on the non-recursive share list
+     * successfully does not share files in its subdirectories. 
+     */
+    public void testNonRecursiveSharing() throws Exception {
+        //  add file "shared" in shared directory
+        File shared = createNewNamedTestFile(10, "shared");
+        waitForLoad();
+        
+        //  assert that "shared" is in a shared directory
+        assertTrue("shared should be in a shared directory", fman.isFileInSharedDirectories(shared));
+
+        //  make sure "shared" is shared
+        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
+        assertNotNull("no shared files, even though just added a shared file", sharedFiles);
+        boolean found = false;
+        for(int i = 0; i < sharedFiles.length; i++) {
+            FileDesc fd = sharedFiles[i];
+            if(fd == null) continue;
+            if(fd.getFile().equals(shared)) {
+                found = true;
+            }
+        }
+        assertTrue("shared file not found in list of shared files", found);
+        
+        //  make new subdirectory in shared directory
+        File subDir = new File(shared.getParent(), "noShare");
+        assertTrue("subdirectory \"noShare\" could not be created", subDir.mkdirs());
+        
+        //  mark shared directory so that it's shared non-recursively
+        File[] directories = SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.getValue();
+        File[] newDirectories = new File[directories.length + 1];
+        System.arraycopy(directories, 0, newDirectories, 0, directories.length);
+        newDirectories[directories.length] = subDir;
+        SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.setValue(newDirectories);
+
+        //  add "notShared" to subdirectory
+        File notShared = createNewNamedTestFile(10, "notShared", subDir);
+        waitForLoad();
+        
+        //  make sure "notShared" is not shared
+        found = false;
+        for(int i = 0; i < sharedFiles.length; i++) {
+            FileDesc fd = sharedFiles[i];
+            if(fd == null) continue;
+            if(fd.getFile().equals(notShared)) {
+                found = true;
+            }
+        }
+        assertFalse("file not intended to be shared found in list of shared files", found);
+    }
+
     //helper function to create queryrequest with I18N
     private QueryRequest get_qr(File f) {
         String norm = I18NConvert.instance().getNorm(f.getName());
@@ -664,20 +716,29 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         return QueryRequest.createQuery(norm);
     }
 
-    //helper function to create a new temporary file with passed in name
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name, in the default shared directory.
+     */
     protected File createNewNamedTestFile(int size, String name) 
         throws Exception {
-		File file = File.createTempFile(name, 
-                                        "." + EXTENSION , _sharedDir);
-		file.deleteOnExit();
-        OutputStream out=new FileOutputStream(file);
+        return createNewNamedTestFile(size, name, _sharedDir);
+    }
+
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name, in the given directory.
+     */
+    protected File createNewNamedTestFile(int size, String name, File directory) throws Exception {
+		File file = File.createTempFile(name, "." + EXTENSION, directory);
+        file.deleteOnExit();
+        OutputStream out = new FileOutputStream(file);
         out.write(new byte[size]);
         out.flush();
         out.close();
-        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
         return FileUtils.getCanonicalFile(file);
     }
-
 	
 	private void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";
