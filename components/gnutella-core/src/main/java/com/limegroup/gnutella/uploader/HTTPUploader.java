@@ -223,6 +223,7 @@ public class HTTPUploader implements Runnable {
         String give="GIV "+_index+":"+_clientGUID+"/"+_filename+"\n\n";
         out.write(give);
         out.flush();
+//System.out.println("Push :"+_filename);
 
         //3. Wait for   "GET /get/0/sample.txt HTTP/1.0"
         //   But use timeouts and don't wait too long.
@@ -404,11 +405,24 @@ public class HTTPUploader implements Runnable {
                 _state = CONNECTED;
             }
             //2. Actually do the transfer.
+			boolean limitExceeded = false;
             try {
-                synchronized(uploadCountLock) { uploadCount++; }
-                doUpload(); //sends headers via writeHeader
+                synchronized(uploadCountLock) 
+				{
+                    if ( getUploadCount() >=
+                         SettingsManager.instance().getMaxUploads() )
+				        limitExceeded = true;
+					else 
+				        uploadCount++; 
+//System.out.println("Count :" +uploadCount + "  :"+_filename + "  Limit:"+limitExceeded + " Set:"+ SettingsManager.instance().getMaxUploads() );
+				}
+				if ( limitExceeded )
+				    doLimitReached(_socket);//send 503 Limit Exceeded Headers
+				else
+                    doUpload();             //sends headers via writeHeader
             } finally {
-                synchronized(uploadCountLock) { uploadCount--; }
+				if ( !limitExceeded )
+                    synchronized(uploadCountLock) { uploadCount--; }
             }
             _state = COMPLETE;
         } catch (IOException e) {
@@ -516,6 +530,14 @@ public class HTTPUploader implements Runnable {
 
         _state = COMPLETE;
     }
+
+	/**
+	 *   Get an unsynchronized version of the total upload count.
+	 */ 
+	public static int getUploadCount()
+	{
+		return uploadCount;
+	}
 
     private String getMimeType() {         /* eventually this method should */
         String mimetype;                /* determine the mime type of a file */

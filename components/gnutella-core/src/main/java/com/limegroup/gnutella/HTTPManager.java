@@ -74,7 +74,8 @@ public class HTTPManager {
                 readRange();
 
                 // Prevent excess uploads from starting
-                if ( callback.getNumUploads() >=
+                //if ( callback.getNumUploads() >=
+                if ( HTTPUploader.getUploadCount() >=
                      SettingsManager.instance().getMaxUploads() )
                 {
                     HTTPUploader.doLimitReached(s);

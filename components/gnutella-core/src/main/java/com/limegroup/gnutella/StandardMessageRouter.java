@@ -128,7 +128,8 @@ public class StandardMessageRouter
         ManagedConnection receivingConnection)
     {
         // Ignore excess upload requests
-        if (_callback.getNumUploads() >=
+        //if (_callback.getNumUploads() >=
+        if (HTTPUploader.getUploadCount() >=
                 SettingsManager.instance().getMaxUploads())
             return;
 
