@@ -82,12 +82,4 @@ public final class BIOHeaderWriter implements HeaderWriter {
         OUTPUT_STREAM.flush(); 
         return true;                      
     }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderWriter#hasBufferedData()
-     */
-    public boolean hasBufferedData() {
-        // TODO Auto-generated method stub
-        return false;
-    }
 }
