@@ -107,7 +107,7 @@ public class ID3Editor {
      * The caller of this method has the xml string that represents a
      * LimeXMLDocument, and wants to write the document out to disk. For this
      * method to work effectively, the caller must instantiate this class and
-     * call this method first, and then call (TODO) to actually write the ID3
+     * call this method first, and then call to actually write the ID3
      * tags out.
      * <p>
      * This method reads the complete xml string and removes the id3 *
@@ -259,10 +259,8 @@ public class ID3Editor {
             try {
                 ret = writeID3V2DataToDisk(f);
             }  catch (IOException iox ) {
-                iox.printStackTrace();
                 return LimeXMLReplyCollection.RW_ERROR;  
             } catch (ID3v2Exception e) { //catches both ID3v2 related exceptions
-                e.printStackTrace();
                 ret = writeID3V1DataToDisk(file);
             } 
             return ret;
