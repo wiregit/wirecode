@@ -119,43 +119,61 @@ public class MediaType implements Serializable {
     private static MediaType[] getTypes() {
         MediaType any = new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE,
                                       null);
-            // This list isn't exhaustive, but it's not clear that we want it
-            // to.  We may only want the most common file types here.
-            // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
+        // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
         MediaType text = new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS,
             new String[] {
-                "html", "htm", "xml", "xhtml", "txt",
-                "pdf", "ps", "eps", "rtf", "doc",
-                "tex", "texi", "latex", "man"
+                "html", "htm", "xhtml", "mht", "mhtml", "xml",
+                "txt", "ans", "asc", "diz", "eml",
+                "pdf", "ps", "eps", "epsf",
+                "rtf", "wri", "doc", "mcw", "wps",
+                "xls", "wk1", "dif", "csv", "ppt",
+                "hlp", "chm",
+                "tex", "texi", "latex", "info", "man"
             });
         MediaType programs = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
-                "exe", "bin", "sh", "csh",
-                "zip", "arj", "rar", "lha",
+                "exe", "bin", "mdb",
+                "sh", "csh", "awk", "pl",
+                "zip", "jar", "arj", "rar", "ace", "lzh", "lha",
                 "cab", "rpm", "deb", "msi", "msp",
-                "gz", "gzip", "z",
+                "gz", "gzip", "z", "bz2", "zoo",
                 "tar", "tgz", "taz", "shar",
                 "hqx", "sit", "dmg", "7z"
             });
         MediaType audio = new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
-                "mp3", "mpa", "ogg", "wma",
-                "ra", "rm", "ram", "rmj", "lqt",
-                "wav", "au", "snd",
-                "aif", "aiff", "aifc", "mod", "med", "iso"
+                "mp3", "mpa", "mp1", "mpga",
+                "ra", "rm", "ram", "rmj",
+                "wma", "wav",
+                "lqt", "ogg", "med",
+                "aif", "aiff", "aifc",
+                "au", "snd", "iso",
+                "mid", "midi", "rmi", "mod"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
-                "mpg", "mpeg", "mpe", "mng",
-                "rm", "ram", "asf", "qt", "mov", "avi",
-                "swf", "dcr", "jve", "nsv"
+                "mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
+                "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v",
+                "vcd", "mp4", "dv", "dvd", "div", "divx", "dvx",
+                "smi", "smil", "rm", "ram", "rv",
+                "avi", "asf", "wmv", "qt", "mov",
+                "fli", "flc", "flx",
+                "wml", "vrml", "swf", "dcr", "jve", "nsv"
             });
         MediaType images = new MediaType(SCHEMA_IMAGES, IMAGES,
             new String[] {
-                "gif", "jpg", "jpeg", "jpe", "png",
-                "tif", "tiff", "bmp", "ico", "pcx",
-                "pic", "pbm", "pnm", "ppm", "xwd"
+                "gif", "png",
+                "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
+                "tif", "tiff", "iff", "lbm", "ilbm",
+                "mac", "drw", "pct", "img",
+                "bmp", "dib", "rle", "ico", "ani", "icl", "cur",
+                "emf", "wmf", "pcx",
+                "pcd", "tga", "pic",
+                "psd", "wpg", "dcx", "cpt", "mic",
+                "pbm", "pnm", "ppm", "xbm", "xpm", "xwd",
+                "sgi", "fax", "rgb", "ras"
             });
+
         // Added by Sumeet Thadani to allow a rich search window to be popped up.
         return new MediaType[] {any, text, programs, audio, video, images};
     }
