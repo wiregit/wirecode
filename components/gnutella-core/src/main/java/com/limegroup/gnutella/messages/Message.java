@@ -267,7 +267,7 @@ public abstract class Message
             if( RECORD_STATS )
                 ReceivedErrorStat.INVALID_TTL.incrementStat();
             throw new BadPacketException("Negative (or very large) TTL");
-        } else if ((hops >= softMax) && 
+        } else if ((hops > softMax) && 
                  (func != F_QUERY_REPLY) &&
                  (func != F_PING_REPLY)) {
             if( RECORD_STATS )
