@@ -96,30 +96,10 @@ public final class HandshakeResponse {
     private final Properties HEADERS;
 
     /** 
-	 * if I am a Ultrapeer shielding the given connection 
-	 */
-    private Boolean _isLeaf;
-
-    /** 
-	 * if I am a leaf connected to an Ultrapeer.
-	 */
-    private Boolean _isUltrapeer;
-
-
-    /** 
 	 * is the GGEP header set?  
 	 */
     private Boolean _supportsGGEP;
-
-    /**
-     * Creates a HandshakeResponse which defaults the status code and status
-     * message to be "200 Ok" and uses no headers in the response.
-     */
-    public HandshakeResponse() {
-        statusCode = OK;
-        statusMessage = OK_MESSAGE;
-        this.HEADERS = null;
-    }    
+    
     
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -129,7 +109,7 @@ public final class HandshakeResponse {
     public HandshakeResponse(Properties headers) {
         statusCode = OK;
         statusMessage = OK_MESSAGE;
-        this.HEADERS = headers;
+        HEADERS = headers;
     }    
 
     /**
@@ -139,11 +119,11 @@ public final class HandshakeResponse {
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-    public HandshakeResponse(int code, String message, Properties headers) { 
-        this.statusCode = code;
-        this.statusMessage = message;
-        this.HEADERS = headers;
-    }
+     public HandshakeResponse(int code, String message, Properties headers) { 
+         this.statusCode = code;
+         this.statusMessage = message;
+         this.HEADERS = headers;
+     }
     
     /**
      * Creates a HandshakeResponse with the desired status line, 
@@ -152,7 +132,7 @@ public final class HandshakeResponse {
      * HTTP status line. (e.g., "200 OK", "503 Service Not Available")
      * @param headers the headers to use in the response.
      */
-    public HandshakeResponse(String statusLine, Properties headers) { 
+    private HandshakeResponse(String statusLine, Properties headers) { 
         try {
             //get the status code and message out of the status line
             int statusMessageIndex = statusLine.indexOf(" ");
@@ -169,6 +149,18 @@ public final class HandshakeResponse {
         }
         
         this.HEADERS = headers;
+    }
+
+    /**
+     * Constructs the response from the other host during connection
+     * handshaking.
+     *
+     * @return a new <tt>HandshakeResponse</tt> instance with the headers
+     *  sent by the other host
+     */
+    public static HandshakeResponse 
+        createServerResponse(String message, Properties headers) {
+        return new HandshakeResponse(message, headers);        
     }
 
     /**
@@ -308,9 +300,9 @@ public final class HandshakeResponse {
     }
 
     /**
-     * Returns the headers to use in the response.
+     * Returns the headers as a <tt>Properties</tt> instance.
      */
-    public Properties getHeaders() {
+    public Properties props() {
         return HEADERS;
     }
 
@@ -330,23 +322,36 @@ public final class HandshakeResponse {
                 HeaderNames.USER_AGENT);
     }
 
+    /**
+     * Returns the maximum TTL that queries originating from us and 
+     * sent from this connection should have.  If the max TTL header is
+     * not present, the default TTL is assumed.
+     *
+     * @return the maximum TTL that queries sent to this connection
+     *  should have -- this will always be 5 or less
+     */
+    public int getMaxTTL() {
+        return extractIntHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 5);        
+    }
+    
+    /**
+     * Returns whether or not this host needs more Ultrapeers, i.e. sent
+     * X-Ultrapeer-Needed: true.
+     *
+     * @return <tt>true</tt> if the other host returned 
+     *  X-Ultrapeer-Needed: true, otherwise <tt>false</tt>
+     */
+    public boolean ultrapeerNeeded() {
+        return isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER_NEEDED);
+    }
+
 	/**
 	 * Returns the number of intra-Ultrapeer connections this node maintains.
 	 * 
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-		String connections = HEADERS.getProperty(HeaderNames.X_DEGREE);
-		if(connections == null) {
-			if(isSupernodeConnection()) return 6;
-			return 0;
-		}
-		
-		try {
-			return Integer.valueOf(connections).intValue();
-		} catch(NumberFormatException e) {
-			return 0;
-		}
+        return extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);
 	}
 
 	// implements ReplyHandler interface -- inherit doc comment
@@ -354,43 +359,31 @@ public final class HandshakeResponse {
 		return getNumIntraUltrapeerConnections() >= 15;
 	}
 
+
 	/**
-	 * Returns whether or not this connection is to an Ultrapeer that 
-	 * supports query routing between Ultrapeers at 1 hop.
+	 * Returns whether or not this connection supports query routing 
+     * between Ultrapeers at 1 hop.
 	 *
 	 * @return <tt>true</tt> if this is an Ultrapeer connection that
 	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
-		if(!isSupernodeConnection()) return false;
-        String value = 
-            HEADERS.getProperty(HeaderNames.X_ULTRAPEER_QUERY_ROUTING);
-        if(value == null) return false;
-		
-        return value.equals(HeaderNames.QUERY_ROUTING_VERSION);
+        return 
+            isVersionOrHigher(HEADERS, 
+                              HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
     }
 
 
-    /** Returns true iff this connection wrote "Ultrapeer: false".
+    /** Returns true iff this connection wrote "X-Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
-    public boolean isLeafConnection() {
-        String value=HEADERS.getProperty(HeaderNames.X_ULTRAPEER);
-        if (value==null)
-            return false;
-        else
-            //X-Ultrapeer: true  ==> false
-            //X-Ultrapeer: false ==> true
-            return !Boolean.valueOf(value).booleanValue();
+    public boolean isLeaf() {
+        return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
     }
 
-    /** Returns true iff this connection wrote "Supernode: true". */
-    public boolean isSupernodeConnection() {
-        String value=HEADERS.getProperty(HeaderNames.X_ULTRAPEER);
-        if (value==null)
-            return false;
-        else
-            return Boolean.valueOf(value).booleanValue();
+    /** Returns true iff this connection wrote "X-Ultrapeer: true". */
+    public boolean isUltrapeer() {
+        return isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
     }
 
 
@@ -416,7 +409,7 @@ public final class HandshakeResponse {
 	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSUltrapeer() {
-		return isGUESSCapable() && isSupernodeConnection();
+		return isGUESSCapable() && isUltrapeer();
 	}
 
 
@@ -502,8 +495,11 @@ public final class HandshakeResponse {
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-supernode relationships. */
     public boolean isQueryRoutingEnabled() {
+        return isVersionOrHigher(HEADERS, HeaderNames.X_QUERY_ROUTING, 0.1F);
+
         //We are ALWAYS QRP-enabled, so we only need to look at what the remote
         //host wrote.
+        /*
         String value = 
 			HEADERS.getProperty(HeaderNames.X_QUERY_ROUTING);
         if (value==null)
@@ -514,6 +510,100 @@ public final class HandshakeResponse {
         } catch (NumberFormatException e) {
             return false;
         }
+        */
+    }
+
+    /**
+     * Returns whether or not the node on the other end of this connection
+     * uses dynamic querying.
+     *
+     * @return <tt>true</tt> if this node uses dynamic querying, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean usesDynamicQuerying() {
+        return isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+    }
+
+    /**
+     * Utility method for checking whether or not a given header
+     * value is true.
+     *
+     * @param headers the headers to check
+     * @param headerName the header name to look for
+     */
+    private static boolean isTrueValue(Properties headers, String headerName) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        
+        return Boolean.valueOf(value).booleanValue();
+    }
+
+
+    /**
+     * Utility method for checking whether or not a given header
+     * value is false.
+     *
+     * @param headers the headers to check
+     * @param headerName the header name to look for
+     */
+    private static boolean isFalseValue(Properties headers, String headerName) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        
+        return !Boolean.valueOf(value).booleanValue();
+    }
+
+
+
+    /**
+     * Utility method that checks the headers to see if the advertised
+     * version for a specified feature is greater than or equal to the version
+     * we require (<tt>minVersion</tt>.
+     *
+     * @param headers the connection headers to evaluate
+     * @param headerName the header name for the feature to check
+     * @param minVersion the minimum version that we require for this feature
+     * 
+     * @return <tt>true</tt> if the version number for the specified feature
+     *  is greater than or equal to <tt>minVersion</tt>, otherwise 
+     *  <tt>false</tt>.
+     */
+    private static boolean isVersionOrHigher(Properties headers,
+                                             String headerName, 
+                                             float minVersion) {
+        String value = headers.getProperty(headerName);
+        if(value == null)
+            return false;
+        try {            
+            Float f = new Float(value);
+            return f.floatValue() >= minVersion;
+        } catch (NumberFormatException e) {
+            return false;
+        }        
+    }
+
+    /**
+     * Helper method for returning an int header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @param defaultValue the default value to return if the header value
+     *  could not be properly parsed
+     * @return the int value for the header
+     */
+    private static int extractIntHeaderValue(Properties headers, 
+                                             String headerName, 
+                                             int defaultValue) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return defaultValue;
+		try {
+			return Integer.valueOf(value).intValue();
+		} catch(NumberFormatException e) {
+			return defaultValue;
+		}
     }
 
     public String toString() {
