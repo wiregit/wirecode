@@ -23,7 +23,6 @@ import org.xml.sax.EntityResolver;
  * Stores a XML schema, and provides access to various components
  * of schema
  * @author asingla
- * @version
  */
 public class LimeXMLSchema 
 {
@@ -31,7 +30,8 @@ public class LimeXMLSchema
      * List<String> of fields (in canonicalized form to preserve the structural
      * information)
      */
-    private List /* of String */ _canonicalizedFields = new LinkedList();
+    private List /* of SchemaFieldInfo */ _canonicalizedFields 
+        = new LinkedList();
     
     /**
      * The URI for this schema
@@ -108,7 +108,8 @@ public class LimeXMLSchema
 //        printNode(root);
         
         //get the fields
-        _canonicalizedFields = LimeXMLSchemaFieldExtractor.getFields(document);
+        _canonicalizedFields = 
+            (new LimeXMLSchemaFieldExtractor()).getFields(document);
         
         //also get the schema URI
         _schemaURI = retrieveSchemaURI(document);
@@ -183,7 +184,7 @@ public class LimeXMLSchema
     }
     
     /**
-     * Returns all the field names (placeholders) in this schema.
+     * Returns all the fields(placeholders) in this schema.
      * The field names are canonicalized as mentioned below:
      * <p>
      * So as to preserve the structure, Structure.Field will be represented as
@@ -200,12 +201,112 @@ public class LimeXMLSchema
      * with __ (double underscore).
      * So element.attribute ==> element__attribute__
      *
-     * @return all the field names (placeholders) in this schema.
+     * @return unmodifiable list (of SchemaFieldInfo) of all the fields 
+     * in this schema.
+     */
+    public List getCanonicalizedFields()
+    {
+        return Collections.unmodifiableList(_canonicalizedFields);
+    }
+    
+    
+    /**
+     * Returns only those fields which are of enumeration type
+     */
+    public List getEnumerationFields()
+    {
+        //create a new list
+        List enumerationFields = new LinkedList();
+        
+        //iterate over canonicalized fields, and add only those which are 
+        //of enumerative type
+        Iterator iterator = _canonicalizedFields.iterator();
+        while(iterator.hasNext())
+        {
+            //get next schema field 
+            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+            //if enumerative type, add to the list of enumeration fields
+            if(schemaFieldInfo.getEnumerationList() != null)
+                enumerationFields.add(schemaFieldInfo);
+        }
+        
+        //return the list of enumeration fields
+        return enumerationFields;
+    }
+    
+    /**
+     * Returns Mapping from FieldName => (EnumerativeValue => Mapped Value)
+     * (String ==> Map (String => String))
+     */
+    public Map getDefaultFieldEnumerativeValueMap()
+    {
+        //create a new Map
+        Map fieldEnumerativeValueMap = new HashMap();
+        
+        //iterate over canonicalized fields, and add mappings for 
+        //only those which are of enumerative type
+        Iterator iterator = _canonicalizedFields.iterator();
+        while(iterator.hasNext())
+        {
+            //get next schema field 
+            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+            //get the enumerativeValueMap
+            Map enumerativeValueMap = 
+                schemaFieldInfo.getDefaultEnumerativeValueMap();
+            //if the map is not null (i.e. enumerations exist for this field,
+            //add the mapping
+            if(enumerativeValueMap != null)
+            {
+                fieldEnumerativeValueMap.put(
+                    schemaFieldInfo.getCanonicalizedFieldName(), 
+                    enumerativeValueMap);
+            }
+        }
+        
+        //return the mappings
+        return fieldEnumerativeValueMap;
+    }
+    
+    
+    /**
+     * Returns all the fields(placeholders) names in this schema.
+     * The field names are canonicalized as mentioned below:
+     * <p>
+     * So as to preserve the structure, Structure.Field will be represented as
+     * Structure__Field (Double Underscore is being used as a delimiter to 
+     * represent the structure).
+     *<p>
+     * In case of multiple structured values with same name, 
+     * as might occur while using + or * in the regular expressions in schema,
+     * those should be represented as using the array index using the __ 
+     * notation (withouth the square brackets)
+     * for e.g. myarray[0].name ==> myarray__0__name
+     *     
+     * attribute names for an element in the XML schema should be postfixed 
+     * with __ (double underscore).
+     * So element.attribute ==> element__attribute__
+     *
+     * @return list (Strings) of all the field names in this schema.
      */
     public String[] getCanonicalizedFieldNames()
     {
-        return (String[])_canonicalizedFields.toArray(new String[0]);
+        //get the fields
+        List canonicalizedFields = this.getCanonicalizedFields();
+        
+        //extract field names out of those
+        String[] fieldNames = new String[canonicalizedFields.size()];
+        Iterator iterator = canonicalizedFields.iterator();
+        for(int i=0; i < fieldNames.length; i++)
+        {
+            fieldNames[i] = ((SchemaFieldInfo)iterator.next())
+                .getCanonicalizedFieldName();
+        }
+        
+        //return the field names
+        return fieldNames;
     }
+    
+    
     
     public static void Test()
     {
@@ -214,7 +315,17 @@ public class LimeXMLSchema
             LimeXMLSchema schema = new LimeXMLSchema(new File(
                 LimeXMLProperties.instance().getXMLSchemaDir() 
                 + File.separator
-                + "gen_books.xsd"));
+                + "audio.xsd"));
+            
+            System.out.println("Printing fields:");
+            
+            //get the fields and print those
+            Iterator iterator = schema.getCanonicalizedFields().iterator();
+            while(iterator.hasNext())
+            {
+                SchemaFieldInfo fieldInfo = (SchemaFieldInfo)iterator.next();
+                System.out.println(fieldInfo.getCanonicalizedFieldName());
+            }
         }
         catch(Exception e)
         {
@@ -247,6 +358,20 @@ public class LimeXMLSchema
                 return null;
         }
     }//end of private innner class
-    
-    
+
+    /**
+     * Utility method to be used in the gui to display schemas
+     */
+    public static String getDisplayString(String schemaURI)
+    {
+        int start = schemaURI.lastIndexOf("/");
+        //TODO3: Are we sure that / is the correct delimiter???
+        int end = schemaURI.lastIndexOf(".");
+        String schemaStr;
+        if(start == -1 || end == -1)
+            schemaStr = schemaURI;
+        else
+            schemaStr= schemaURI.substring(start+1,end);
+        return schemaStr;
+    }
 }

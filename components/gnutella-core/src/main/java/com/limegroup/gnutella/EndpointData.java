@@ -12,7 +12,6 @@ import com.sun.java.util.collections.*;
 /**
  *
  * @author  Anurag Singla
- * @version
  */
 public class EndpointData extends Endpoint implements Cloneable, 
                         java.io.Serializable

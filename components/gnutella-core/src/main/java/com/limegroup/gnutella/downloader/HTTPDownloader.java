@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  */
 public class HTTPDownloader {
 
-	private int _index;
+	private long  _index;
 	private String _filename; 
 	private byte[] _guid;
 
@@ -193,7 +193,7 @@ public class HTTPDownloader {
 	}
 
 	/* Construction time variables */
-	public int getIndex() {return _index;}
+	public long  getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 	public int getPort() {return _port;}

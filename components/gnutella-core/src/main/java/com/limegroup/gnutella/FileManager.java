@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
-
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -70,7 +70,19 @@ public class FileManager {
     private Object _loadThreadLock=new Object();
 
     /** The single instance of FileManager.  (Singleton pattern.) */
-    private static FileManager _instance = new FileManager();
+    private static FileManager _instance = null;
+    //initialize _instance
+    static
+    {
+        //get the servant type
+        String servantType = SettingsManager.instance().getServantType();
+        if(servantType.equals(Constants.XML_CLIENT))
+            _instance = new MetaFileManager();
+        else
+            _instance = new FileManager();
+    }
+    
+    
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     private static ActivityCallback _callback;
@@ -95,7 +107,7 @@ public class FileManager {
         }
     }
 
-    private FileManager() {
+    protected FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
@@ -204,6 +216,12 @@ public class FileManager {
      * called before the indexing is complete, the original settings are
      * discarded, and loading starts over immediately.
      *
+     * Modification 8/01 - This method is still non-blocking and thread safe,
+     * but it was refactored to make for easier subclassing of FileManager.
+     * Now, a protected method called loadSettingsBlocking() is used to index
+     * the files asynchronously.  Subclasses can override or extend this method
+     * to impose their own functionality.  For example, see MetaFileManager.
+     *
      * @modifies this 
 	 * @param notifyOnClear if true, callback is notified via clearSharedFiles
      *  when the previous load settings thread has been killed.
@@ -228,67 +246,93 @@ public class FileManager {
                 }
             }
 
-            //Clear this and get the list of directories.
-            final String[] directories=loadSettingsInternal();
-            if (notifyOnClear) 
-                _callback.clearSharedFiles();
-
-            //Load the shared directories and their files asynchonously.
-            //Duplicates in the directories list will be ignored.  Note that the
-            //runner thread only obtain this' monitor when adding individual
-            //files.
-            _loadThread = new Thread("FileManager.loadSettings") {
+            final boolean notifyOnClearFinal = notifyOnClear;
+            _loadThread = new Thread("FileManager.loadSettingsBlocking") {
                 public void run() {
-                    // Add each directory as long as we're not interrupted.
-                    int i=0;
-                    while (i<directories.length && !_loadThread.isInterrupted()) {
-                        addDirectory(new File(directories[i]), null);      
-                        i++;
-                    }
-
-                    // Compact the index once.  As an optimization, we skip this
-                    // if loadSettings has subsequently been called.
-                    if (! _loadThread.isInterrupted())
-                        trim();                    
+                    loadSettingsBlocking(notifyOnClearFinal);
                 }
             };
             _loadThread.start();
         } 
     }
 
-    /** Clears this', reloads this' extensions, and returns an array of
-     *  directories that should be added to this via addDirectory.
-     *      @modifies this */
-    private synchronized String[] loadSettingsInternal() {
-        // Reset the file list info
-        _size = 0;
-        _numFiles = 0;
-        _files=new ArrayList();
-        _index=new Trie(true); //maintain invariant
-        _extensions = new TreeSet(new StringComparator());
-        _sharedDirectories = new TreeMap(new FileComparator());
-		
-        // Load the extensions.
-        String[] extensions = StringUtils.split(
-            SettingsManager.instance().getExtensions().trim(), ';');
-        for (int i=0; i<extensions.length; i++)
-            _extensions.add(extensions[i].toLowerCase());
-                      
-        //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
-        //C:\dir\subdir.  Although this isn't needed for correctness, it may
-        //help the GUI show "subdir" as a subdirectory of "dir".  One way of
-        //doing this is to do a full topological sort, but that's a lot of work.
-        //So we just approximate this by sorting by filename length, from
-        //smallest to largest.  Unless directories are specified as
-        //"C:\dir\..\dir\..\dir", this will do the right thing.
-        final String[] directories = StringUtils.split(
-            SettingsManager.instance().getDirectories().trim(), ';');
-        Arrays.sort(directories, new Comparator() {
-            public int compare(Object a, Object b) {
-                return ((String)a).length()-((String)b).length();
+    /** Clears this', reloads this' extensions, generates an array of
+     *  directories, and then indexes the generated directories files.
+     *  NOTE TO SUBCLASSES: extend this method as needed, it shall be
+     *  threaded and run asynchronously as to not slow down the main
+     *  thread (the GUI).
+     *  @modifies this */
+    protected void loadSettingsBlocking(boolean notifyOnClear) {
+
+        String[] tempDirVar;
+        synchronized (this) {
+            // Reset the file list info
+            _size = 0;
+            _numFiles = 0;
+            _files=new ArrayList();
+            _index=new Trie(true); //maintain invariant
+            _extensions = new TreeSet(new StringComparator());
+            _sharedDirectories = new TreeMap(new FileComparator());
+            
+            if (_loadThread.isInterrupted())
+                return;
+
+            // Load the extensions.
+            String[] extensions = 
+            StringUtils.split(SettingsManager.instance().getExtensions().trim(),
+                              ';');
+            for (int i=0; 
+                 (i<extensions.length) && !_loadThread.isInterrupted();
+                 i++)
+                _extensions.add(extensions[i].toLowerCase());
+            
+            if (_loadThread.isInterrupted())
+                return;
+
+            //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
+            //C:\dir\subdir.  Although this isn't needed for correctness, it may
+            //help the GUI show "subdir" as a subdirectory of "dir".  One way of
+            //doing this is to do a full topological sort, but that's a lot of work.
+            //So we just approximate this by sorting by filename length, from
+            //smallest to largest.  Unless directories are specified as
+            //"C:\dir\..\dir\..\dir", this will do the right thing.
+            final String[] directories = 
+            StringUtils.split(SettingsManager.instance().getDirectories().trim(),
+                              ';');
+
+            if (_loadThread.isInterrupted())
+                return;
+
+            Arrays.sort(directories, new Comparator() {
+                public int compare(Object a, Object b) {
+                    return ((String)a).length()-((String)b).length();
+                }
+            });
+            tempDirVar = directories;
+        }
+
+        //clear this, list of directories retreived
+        final String[] directories = tempDirVar;
+        if (notifyOnClear) 
+            _callback.clearSharedFiles();
+        
+        //Load the shared directories and their files.
+        //Duplicates in the directories list will be ignored.  Note that the
+        //runner thread only obtain this' monitor when adding individual
+        //files.
+        {
+            // Add each directory as long as we're not interrupted.
+            int i=0;
+            while (i<directories.length && !_loadThread.isInterrupted()) {
+                addDirectory(new File(directories[i]), null);      
+                i++;
             }
-        });
-        return directories;
+            
+            // Compact the index once.  As an optimization, we skip this
+            // if loadSettings has subsequently been called.
+            if (! _loadThread.isInterrupted())
+                trim();                    
+        }
     }
 
 
@@ -309,11 +353,15 @@ public class FileManager {
         //are the same on Windows but different on Unix.
         try {
             directory=getCanonicalFile(directory);
-            if (!directory.exists() || !directory.isDirectory())
-                return;       
         } catch (IOException e) {
             return;  //doesn't exist?
         }
+
+        //List contents of directory.
+        File[] file_list = listFiles(directory);
+        if (file_list == null) 
+            return; // directory doesn't exist or isn't a directory...
+        int n = file_list.length;                   /* directory */
 
         //Register this directory with list of share directories.
         synchronized (this) {
@@ -324,16 +372,7 @@ public class FileManager {
             if (_callback!=null)
                 _callback.addSharedDirectory(directory, parent);
         }
-
-        //List contents of directory.
-				
-        File[] file_list = listFiles(directory);    /* the files in a specified */
-
-		// this can still be null in some cases (even though it is a directory)
-		if(file_list == null) return;
-
-        int n = file_list.length;                   /* directory */
-       
+      
         //First add all files.  We'll add the directories later to smooth out
         //what the user sees.  It also decreases the size of the IntSet values
         //in _sharedDirectories.  Again, this is not strictly necessary for
@@ -635,6 +674,18 @@ public class FileManager {
         return response;
     }
 
+    public FileDesc file2index(String fullName) {  
+        // TODO1: precompute and store in table.
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc fd=(FileDesc)_files.get(i);
+            if (fd==null)  file://unshared
+            continue;
+            else if (fd._path.equals(fullName))
+                return fd;
+        }
+        return null;//The file with this name was not found.
+    }
+    
 
     /**
      * Returns a set of indices of files matching q, or null if there are no
@@ -699,6 +750,18 @@ public class FileManager {
             return null;
         else 
             return ret;
+    }
+    
+    /**
+     * Opens an input stream to the resource specified by the passed
+     * file descriptor
+     */
+    public InputStream getInputStream(FileDesc fdesc) throws IOException
+    {
+        // get the fileInputStream
+		String path = fdesc._path;
+		File myFile = new File(path);
+		return new FileInputStream(myFile);
     }
 
 

@@ -9,7 +9,6 @@ package com.limegroup.gnutella.util;
 /**
 *
 * @author  Anurag Singla
-* @version 
 */
 
 

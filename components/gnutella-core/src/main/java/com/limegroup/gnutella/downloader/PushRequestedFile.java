@@ -12,7 +12,7 @@ import com.sun.java.util.collections.Arrays;
 class PushRequestedFile {
     byte[] clientGUID;
     String filename;
-    int index;
+    long index;
     Date time;
 
     /**
@@ -22,7 +22,7 @@ class PushRequestedFile {
      *     @param filename the name of the requested file
      *     @param index the index of the file on the uploader
      */
-    public PushRequestedFile(byte[] clientGUID, String filename, int index) {
+    public PushRequestedFile(byte[] clientGUID, String filename, long index) {
         this.clientGUID=clientGUID;
         this.filename=filename;
         this.index=index;

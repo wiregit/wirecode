@@ -537,12 +537,34 @@ public class RouterService
      *  query results.  Guaranteed to be 16 bytes long.
      */
     public byte[] query(String query, int minSpeed, MediaType type) {
+        //anu modified
+        //TODO revert changes, or place somewhere else. I guess sumeet will
+        //figure out
+        //anu creating rich query (by duplicating the normal query into
+        //both plain and rich areas
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
+                                         minSpeed, query, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
     }
+
+    /**
+     * @see query(String, int, MediaType)
+     * same as the method above, except, the type is set to "any" and
+     * the it creates a rich Query. 
+     * @return the guid of the search, used to match up query with 
+     * replies. 
+     */
+    public byte[] query(String query, String richQuery, int minSpeed) {
+        //System.out.println("Sumeet rich query coming...");
+        QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
+                                         minSpeed, query, richQuery);
+        verifier.record(qr, null);
+        router.broadcastQueryRequest(qr);
+        return qr.getGUID();
+    }
+
 
     /** 
      * Searches the network for files with the given query string and 

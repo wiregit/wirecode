@@ -77,6 +77,8 @@ public class SettingsManager {
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
 		"bin;dmg";
 
+    private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
+    private final String SERVANT_TYPE          = "SERVANT_TYPE";
 
 	/** the number of uplads allowed per person at a given time */
     private final int     DEFAULT_UPLOADS_PER_PERSON=3;
@@ -326,7 +328,12 @@ public class SettingsManager {
     /** 
 	 * Specialized properties file for the network discoverer
      */
-    private volatile Properties _ndProps;
+    private volatile Properties _ndProps;    
+
+    /**
+     * Type of the servant: client, xml-client, server etc
+     */
+    private String    _servantType;
 
     /**
      * Set up the manager instance to follow the singleton pattern.
@@ -668,6 +675,9 @@ public class SettingsManager {
 				else if(key.equals(SESSIONS)) {
 					setSessions(Integer.parseInt(p)+1);
 				}
+                else if(key.equals(SERVANT_TYPE)) {
+					setServantType(p);
+				}
 				else if(key.equals(INSTALLED)) {
 					Boolean installed = new Boolean(p);
 					setInstalled(installed.booleanValue());
@@ -801,6 +811,8 @@ public class SettingsManager {
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
+        //anu added
+        setServantType(DEFAULT_SERVANT_TYPE);
 		setInstalled(DEFAULT_INSTALLED);
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
@@ -1114,6 +1126,14 @@ public class SettingsManager {
 	public int getAppHeight() {
 		return Integer.parseInt(_props.getProperty(APP_HEIGHT));
 	}
+    
+    /**
+     * Returns the type of the servant: client, xml-client, server etc
+     */
+    public String getServantType()
+    {
+        return _servantType;
+    }
 
 	/**
 	 * Returns a <tt>boolean</tt> specifying whether or not the 
@@ -2123,6 +2143,22 @@ public class SettingsManager {
      */
     public void setClassPath(final String classpath) {
         _props.put(CLASSPATH, classpath);
+    }
+    
+    /**
+     * Sets the type of the servant: client, xml-client, server etc
+     */
+    private void setServantType(String servantType)
+    {
+        if(Constants.isValidServantType(servantType))
+        {
+            _servantType = servantType;
+        }
+        else
+        {
+            _servantType = DEFAULT_SERVANT_TYPE;
+        }
+        _props.put(SERVANT_TYPE, _servantType);
     }
 
     /**

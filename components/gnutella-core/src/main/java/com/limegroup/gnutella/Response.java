@@ -18,8 +18,9 @@ public class Response {
 	/** The meta variable is a string of meta information that
 	 *  will be added per response (as opposed to per QueryReply
 	 */
-	private String meta;
-	
+	private String metadata;
+
+    private byte[] metaBytes;
 
     /** Creates a fresh new response.
      *
@@ -36,7 +37,25 @@ public class Response {
         this.size=size;
         this.name=name;
         this.nameBytes = name.getBytes();
-		meta = "";
+		metadata = "";
+        this.metaBytes = metadata.getBytes();
+    }
+
+    /**Overloaded constructor that allows the creation of Responses with
+     * meta-data
+     */
+    public Response(long index, long size, String name,String metadata) {
+        Assert.that((index & 0xFFFFFFFF00000000l)==0,
+                "Response constructor: index too big!");
+        Assert.that((size &  0xFFFFFFFF00000000l)==0,
+                "Response constructor: size too big!");
+        metadata = metadata.trim();      
+        this.index=index;
+        this.size=size;
+        this.name=name;
+        this.nameBytes = name.getBytes();
+		this.metadata = metadata;
+        this.metaBytes = metadata.getBytes();
     }
 
     public long getIndex() {
@@ -58,22 +77,34 @@ public class Response {
         return nameBytes.length;
     }
 
+    public int getMetaBytesSize() {
+        return metaBytes.length;
+    }
+
     public byte[] getNameBytes() {
         return nameBytes;
+    }
+
+    public byte[] getMetaBytes() {
+        return metaBytes;
     }
 
     public String getName() {
         return name;
     }
 
-	public void setMeta(String m) {
-		meta = m;
-	}
-	
-	public String getMeta() {
-		return meta;
+	public String getMetadata() {
+		return metadata;
 	}
 
+    /**
+     * returns true if metadata is not XML, but ToadNode's response
+     */
+    public boolean hasToadNodeData(){
+        if(metadata.indexOf("<")>-1 && metadata.indexOf(">") > -1)
+            return false;
+        return true;//no angular brackets. This is a TOADNODE response
+    }
 
     public boolean equals(Object o) {
         if (! (o instanceof Response))
@@ -99,5 +130,6 @@ public class Response {
         byte[] nameBytes = r.getNameBytes();
         Assert.that (nameBytes[0] == 65);
     } 
-    */       
+    */
 }
+

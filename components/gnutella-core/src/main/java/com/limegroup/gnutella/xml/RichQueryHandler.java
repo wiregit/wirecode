@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileDesc;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.List;
@@ -15,10 +17,9 @@ import java.util.List;
  * Has a singleton pattern.
  * @author Sumeet Thadani
  */
-class RichQueryHandler{
+public class RichQueryHandler{
     
     static RichQueryHandler instance;// the instance
-    
     
     /**
      * Call this method to get the singleton
@@ -38,6 +39,9 @@ class RichQueryHandler{
      * Warning: Returns null if the XMLQuery is malformed.
      */
     public Response[] query(String XMLQuery){
+        //System.out.println("Sumeet: "+XMLQuery);
+        if (XMLQuery.equals(""))
+            return null;
         LimeXMLDocument queryDoc = null;
         try{// if we catch an exception here the query is malformed.
             queryDoc=new LimeXMLDocument(XMLQuery);
@@ -45,28 +49,79 @@ class RichQueryHandler{
             return null; //Return null
         }catch (IOException ee){
             return null;
-        }            
+        }catch(SchemaNotFoundException eee){
+            return null;
+        }
         String schema = queryDoc.getSchemaURI();
-        
         SchemaReplyCollectionMapper mapper = 
                             SchemaReplyCollectionMapper.instance();
-        LimeXMLReplyCollection replyDocs = mapper.getReplyCollection(schema);
-        List matchingReplies = replyDocs.getMatchingReplies(queryDoc);
-        //TODO1: Complete
-        //find out if these replyDocuments correspond to dome file 
-        //(by checking the identifier tags.)
-        //If they correspond to files we make responses in the 
-        // regular way...with an index and a a size and a name and the
-        // meta info.
+        LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
+        if(replyCol == null)//no matching reply collection for schema
+            return null;
+        List matchingReplies = replyCol.getMatchingReplies(queryDoc);
+        //matchingReplies = a List of LimeXMLDocuments that match the query
+        int s = matchingReplies.size();
+        Response[] retResponses = new Response[s];
+        FileManager fManager = FileManager.instance();
+        //We need the MetaFileManager to get the FileDesc from full FileName
+        //Note:FileManager has been changed to return a MetaFileManager now
+        Response res;
+        long index=-1;
+        long size=-1;
+        String name="";
+        String metadata="";
+        int z =0;
+        boolean valid = true;
+        for(int i=0; i<s;i++){
+            LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
+            String subjectFile = currDoc.getIdentifier();//returns null if none
+            try {
+                metadata = currDoc.getXMLString();
+            }
+            catch (SchemaNotFoundException snfe) {};
+            if(subjectFile==null){//pure data (data about NO file)
+                index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
+                name = metadata.substring(22,33);//after <?xml version="1.0"?>
+                size = metadata.length();//Here: size = size of metadata String
+            }
+            else { //meta-data about a specific file
+                FileDesc fd = fManager.file2index(subjectFile);
+                if (fd != null){//we found a file with the right name
+                index = fd._index;
+                name =  fd._name;//need not send whole path; just name + index
+                size =  fd._size;
+                }
+                else{//meaning fd == null 
+                    //this is a bad case: 
+                    //the metadata says that its about a file but the 
+                    //fileManager cannot find this file.
+                    //we should remove this meta-data from the repository
+                    //The above is a TODO2
+                    valid = false;
+                }
+            }
+            if (valid){
+                //if this code is NOT run s times 
+                //there will be nulls at the end of the array
+                res = new Response(index,size,name,metadata);                
+                retResponses[z] = res;
+                z++;
+            }
+            valid = true;
+        }
 
-        //however if there is no file, we create the response with a
-        //special index (like -1) if that is legal. And then this will allow
-        //us to put the meta info in and not have the system check for
-        //corresponding file.
+        // need to ensure that no nulls are returned in my response[]
+        // z is a count of responses constructed, see just above...
+        // s == retResponses.length
+        if (z < s){
+            Response[] temp = new Response[z];  
+            for (int i = 0, j = 0; i < s; i++) // at most s responses
+                if (retResponses[i] != null)
+                    temp[j++] = retResponses[i];
+            retResponses = temp;
+        }
 
-        //Also, we have to a have a method called toXMLString in the 
-        //LimeXMLDocument class.
-        return null;
+        return retResponses;
     }
 
 }

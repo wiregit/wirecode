@@ -5,7 +5,11 @@
  */
 
 package com.limegroup.gnutella.xml;
+
 import java.util.*;
+import java.io.*;
+import com.limegroup.gnutella.SettingsManager;
+import com.limegroup.gnutella.*;
 
 /**
  * Provides utility methods to process the canonicalized strings we use to
@@ -25,7 +29,6 @@ import java.util.*;
  * with __ (double underscore).
  * So element.attribute ==> element__attribute__
  * @author  asingla
- * @version
  */
 public class XMLStringUtils
 {
@@ -36,10 +39,31 @@ public class XMLStringUtils
      */
     public static final String DELIMITER = "__";
     
-    /** Creates new XMLStringUtils */
-    public XMLStringUtils()
-    {
-    }
+    /**
+     * Fields ending with this string are supposed to be representing
+     * MAX value in the xml queries
+     */
+    public static final String MAX_ENDING = "_MAX";
+    
+    /**
+     * Fields ending with this string are supposed to be representing
+     * MIN value in the xml queries
+     */
+    public static final String MIN_ENDING = "_MIN";
+
+
+    /**
+     * Theh minimal part of the the string that is used as a ademiliter
+     * between xml documents, when stored in a file.
+     */
+    public static final String XML_DOC_START_IDENTIFIER = "<?xml";
+
+    /** The xml tag describing the version of xml used.  Used primarly as a
+     *  delimiter for xml in a Query Reply.
+     */
+    public static final String XML_VERSION_DELIM = "<?xml version=\"1.0\"?>";
+
+
     
     /**
      * Breaks the given string (which confirms to the pattern defined above
@@ -53,6 +77,7 @@ public class XMLStringUtils
      * most structural element, and the last one the actual field/attribute
      * name
      */ 
+
     public static List split(String canonicalizedField)
     {
         //form a blank list
@@ -80,5 +105,97 @@ public class XMLStringUtils
         //return the list
         return returnList;
     }//end of fn split
+    
+    /**
+     * Tokenizes the given string based upon the delimiter passed.
+     * No characters are lost from the string (delimiter becomes the 
+     * start of the tokenized string)
+     * @param content The string to be tokenized
+     * @param delimiter delimits/identifies the various parts of the content
+     * @return List (of String) of strings formed by chopping the original
+     * content
+     */
+    public static List tokenize(String content, String delimiter)
+    {
+        //list to contain chooped strings
+        List /* of String */ choppedElements = new LinkedList();
+        
+        //indexes in the content to identify start & end of the part to be
+        //chopped
+        int startIndex = content.indexOf(delimiter); 
+        int endIndex;
+        //go thru the content
+        while(startIndex != -1)
+        {
+            //get the end index for the current token
+            //(leave the current delimiter by starting from 1 instead of 0)
+            endIndex = content.indexOf(delimiter, startIndex + 1);  
+            //add the current element to the list
+            if(endIndex != -1)
+            {
+                //add the part from startIndex to endIndex
+                choppedElements.add(
+                    content.substring(startIndex,endIndex).trim());
+            }
+            else
+            {
+                //add the part from startIndex to the end of the string
+                //as this is the last part
+                choppedElements.add(content.substring(startIndex).trim());
+                //break out of the loop
+                break;
+            }
+            //move the startindex to the end of this token (or the start of 
+            //next)
+            startIndex = endIndex;
+        }
+        
+        System.out.println("finished tokenizing");
+        //return the list of chopped/tokenized elements    
+        return choppedElements;
+    }
+
+    
+    public static void saveMetaInfo(LimeXMLDocument doc, 
+                                    String fileName) {
+        File dir = null;
+        try{
+            // file needs to be properly located...
+            dir = SettingsManager.instance().getSaveDirectory();
+        }catch (FileNotFoundException e){
+            return;//fail silently
+        }
+        // get all needed info
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        String uri = doc.getSchemaURI();
+        LimeXMLReplyCollection collection = map.getReplyCollection(uri);
+        Assert.that(collection!=null,"Cant add doc to nonexistent collection");
+        File f = new File(dir,fileName);
+        String fName = "";
+        try{
+            fName = f.getCanonicalPath();
+        }catch(IOException e){
+            return;//if cannot find path fail silently. Just return
+        }
+        doc.setIdentifier(fName);
+        //we are adding new data
+        String hash=null;
+        try{
+            hash = new String(LimeXMLUtils.hashFile(f));
+        }catch(Exception e){//very bad case! Could not hash file.
+            return;//fail silently
+        }
+        collection.addReply(hash,doc);
+        
+        boolean committed;
+        if (collection.audio)
+            committed  = collection.mp3ToDisk(fileName);
+        else
+            committed = collection.toDisk("");
+        if (!committed){
+            // this is bad            
+        }
+    }
+    
     
 }

@@ -21,7 +21,7 @@ public class NormalUploadState implements UploadState {
 	private int _index;
 	private String _filename;
 	private int _fileSize;
-	private FileInputStream _fis;
+	private InputStream _fis;
 	private int _amountRead;
 	private int _uploadBegin;
 
@@ -39,7 +39,7 @@ public class NormalUploadState implements UploadState {
 		_index = _uploader.getIndex();
 		_filename = _uploader.getFileName();
 		_fileSize = _uploader.getFileSize();
-		_fis =  _uploader.getFileInputStream();
+		_fis =  _uploader.getInputStream();
 		_amountRead = _uploader.amountUploaded();
 		_uploadBegin =  _uploader.getUploadBegin();
 

@@ -12,9 +12,8 @@ import java.io.*;
  * Stores and provides access to various XML schemas that me might have.
  * Singleton class
  * @author  asingla
- * @version
  */
-public class LimeXMLSchemaRepository extends java.lang.Object
+public class LimeXMLSchemaRepository
 {
     
     /**
@@ -26,7 +25,8 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     /**
      * An instance of this class
      */
-    private static LimeXMLSchemaRepository _instance = null;
+    private static LimeXMLSchemaRepository _instance = 
+        new LimeXMLSchemaRepository();
     
     /** Creates new LimeXMLSchemaRepository */
     private LimeXMLSchemaRepository()
@@ -59,6 +59,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
                 catch(IOException ioe)
                 {
                     //no problem
+                    ioe.printStackTrace();
                 }//end of try
             }//end of for
         }//end of if
@@ -70,9 +71,6 @@ public class LimeXMLSchemaRepository extends java.lang.Object
      */
     public static LimeXMLSchemaRepository instance()
     {
-        if(_instance == null)
-            _instance = new LimeXMLSchemaRepository();
-        
         return _instance;
     }
     

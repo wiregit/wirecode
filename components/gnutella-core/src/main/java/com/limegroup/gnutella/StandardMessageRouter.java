@@ -134,6 +134,15 @@ public class StandardMessageRouter
         FileManager fm = FileManager.instance();
         Response[] responses = fm.query(queryRequest);
 
+        sendResponses(responses, queryRequest, acceptor, clientGUID);
+        
+    }
+    
+    public void sendResponses(Response[] responses, 
+                                        QueryRequest queryRequest,
+                                         Acceptor acceptor,
+                                         byte[] clientGUID)
+    {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -225,7 +234,7 @@ public class StandardMessageRouter
                 break;
             }
 
-        }
+        }//end of while
 
     }
 

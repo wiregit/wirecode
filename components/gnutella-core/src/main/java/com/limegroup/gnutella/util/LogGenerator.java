@@ -14,7 +14,6 @@ import java.util.TimerTask;
 /**
  * Generates a buffered log. It buffers the input and dumps it out after 
  * @author  asingla
- * @version
  */
 public class LogGenerator
 {

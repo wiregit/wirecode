@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import java.net.InetAddress;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -100,4 +101,10 @@ public interface Downloader {
      */
     public int getRetriesWaiting();
 
+    /** 
+     * Returns an LimeXMLDocument array describing the downloaded
+     * file.
+     */
+    public LimeXMLDocument[] getXMLDocs();
+    
 }

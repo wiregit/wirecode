@@ -1,6 +1,7 @@
 /**
  * This class is a wrapper for file information.
  *
+ * Modified by Sumeet Thadani (5/21): No need to store meta-data here
  */
 
 package com.limegroup.gnutella;
@@ -11,11 +12,6 @@ public class FileDesc {
     public String _path;
     public String _name;
     public int _size;
-	/* i'm storing the data as a String.  I don't 
-	   know if this is correct, since md5 and such 
-	   might be an int. i know all the others are 
-	   public but i like accessor methods */
-	private String _meta;  
 		
     /**
      * @param i index of the file
@@ -33,10 +29,6 @@ public class FileDesc {
         _size = s;
     }
 
-	public String getMeta() {return _meta;}
-	public void setMeta(String m) {_meta = m;}
-	
-
     public void print() {
         System.out.println("Name: " + _name);
         System.out.println("Index: " + _index);
@@ -45,3 +37,5 @@ public class FileDesc {
         System.out.println(" ");
     }
 }
+
+
