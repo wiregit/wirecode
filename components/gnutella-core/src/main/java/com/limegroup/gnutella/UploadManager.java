@@ -8,7 +8,6 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
@@ -972,7 +971,7 @@ public final class UploadManager implements BandwidthTracker {
             }
 		
             // handle the standard get request
-            return this.parseTraditionalGet(str);
+            return UploadManager.parseTraditionalGet(str);
         } catch (IOException ioe) {
             // this means the request was malformed somehow.
             // instead of closing the connection, we tell them
