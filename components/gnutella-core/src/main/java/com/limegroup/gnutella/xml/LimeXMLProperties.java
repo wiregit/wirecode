@@ -144,7 +144,7 @@ public class LimeXMLProperties
             _properties.load(new FileInputStream(
                 getPath() + XML_PROPS_FILENAME));
         }
-        catch(Exception e)
+        catch(IOException e)
         {
             //no problem, defaults will get used
         }
