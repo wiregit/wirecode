@@ -255,32 +255,6 @@ public final class UDPService implements Runnable {
         }
 	}
 
-	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified
-     * on the socket specified.
-     * This utility method is NOT synchronized - should only be used if you want
-     * to send a quick UDP message.....
-     *
-	 * @param msg  the <tt>Message</tt> to send
-	 * @param ip   the <tt>InetAddress</tt> to send to
-	 * @param port the <tt>port</tt> to send to
-     * @param socket the <tt>socket</tt> to send on.
-	 */
-    public static synchronized void send(Message msg, InetAddress ip, 
-                                         int port, DatagramSocket socket) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            msg.write(baos);
-            byte[] data = baos.toByteArray();
-            DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-            socket.send(dg);
-        }
-        catch(IOException e) {
-            System.err.println("ip: "+ip);
-            System.err.println("port: "+port); 
-            e.printStackTrace();
-        }
-	}
 
 	/**
 	 * Returns whether or not this node is capable of sending its own

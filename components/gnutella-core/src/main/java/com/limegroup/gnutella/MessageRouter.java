@@ -562,14 +562,7 @@ public abstract class MessageRouter {
         }
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        try {
-            DatagramSocket tempSocket = new DatagramSocket();
-            UDPService.send(pr, addrToContact, portToContact, tempSocket);
-            tempSocket.close();
-        }
-        catch (SocketException se) {
-            // whatever....            
-        }
+        UDPService.instance().send(pr, addrToContact, portToContact);
     }
 
 
