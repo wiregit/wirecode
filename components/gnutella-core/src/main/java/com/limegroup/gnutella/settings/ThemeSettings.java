@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.Properties;
+import java.util.Enumeration;
+import java.util.zip.*;
 
 /**
  * This class contains key/value pairs for the current "theme."  The
@@ -12,15 +15,78 @@ public final class ThemeSettings {
 
 	private static final Properties DEFAULT_PROPS = new Properties();
 
-	private static SettingsFactory FACTORY = 
-		new SettingsFactory(Settings.THEME_FILE.getValue(), DEFAULT_PROPS);
 
+	private static SettingsFactory FACTORY;
+
+	static {
+		reload();
+	}
 
 	/**
 	 * Reloads the file from disk to read values from.
 	 */
 	public static void reload() {
-		FACTORY.reload(Settings.THEME_FILE.getValue());
+		File themeFile = Settings.THEME_FILE.getValue();
+		String dirName = themeFile.getName();
+		dirName = dirName.substring(0, dirName.length()-4);
+		File themeDir = new File("themes", dirName);
+
+		final File THEME_PROPS = new File(themeDir, "theme.txt");
+
+		// unpack the zip if we haven't already
+		if(!themeDir.isDirectory() ||
+		   (themeDir.lastModified() < themeFile.lastModified())) {
+
+			themeDir.mkdirs();
+			
+			try {
+				ZipFile zf = 
+					new ZipFile(themeFile, ZipFile.OPEN_READ);		
+
+				
+				Enumeration list = zf.entries();
+				while (list.hasMoreElements()) {
+					ZipEntry ze = (ZipEntry)list.nextElement();
+					BufferedInputStream bis =
+						new BufferedInputStream(zf.getInputStream(ze));
+					FileOutputStream fos = 
+						new FileOutputStream(new File(themeDir, ze.getName()));
+					int sz = (int)ze.getSize();
+					final int N = 1024;
+					byte buf[] = new byte[N];
+					int ln = 0;
+					while (sz > 0 &&  // workaround for bug
+						   (ln = bis.read(buf, 0, Math.min(N, sz))) != -1) {
+						fos.write(buf, 0, ln);
+						sz -= ln;
+					}
+					bis.close();
+					fos.flush();				
+				}
+				
+				handleFactory(THEME_PROPS);
+			} catch(IOException e) {
+				// this should never really happen, so report it
+				RouterService.error(e);						
+			}
+		} 
+		handleFactory(THEME_PROPS);		
+		Settings.THEME_DIR.setValue(themeDir);
+	}
+
+	/**
+	 * Either creates the factory or reloads it as needed.
+	 */
+	private static void handleFactory(File file) {
+		if(FACTORY == null) {
+			FACTORY = SettingsFactory.createFromFile(file, DEFAULT_PROPS);				
+		} else {
+			try {
+				FACTORY.reload(new FileInputStream(file));
+			} catch (IOException e) {
+				RouterService.error(e);
+			}
+		}
 	}
 
 	/**
@@ -361,5 +427,8 @@ public final class ThemeSettings {
 	 */
 	public static final IntSetting SEARCH_RESULT_SPEED_COLOR_B = 
 		FACTORY.createIntSetting("SEARCH_RESULT_SPEED_COLOR_B", 0);
-	
+
+	public static void main(String[] args) {
+		ThemeSettings.reload();
+	}	
 }

@@ -29,12 +29,12 @@ abstract class AbstractSettings {
     /**
      * <tt>Properties</tt> instance for the defualt values.
      */
-    protected static final Properties DEFAULT_PROPS = new Properties();
+    private static final Properties DEFAULT_PROPS = new Properties();
 
     /**
      * The <tt>Properties</tt> instance containing all settings.
      */
-	protected static final Properties PROPS = new Properties(DEFAULT_PROPS);
+	private static final Properties PROPS = new Properties(DEFAULT_PROPS);
 
 	/**
 	 * Constant for the <tt>SettingsFactory</tt> that subclasses can use

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import java.util.zip.*;
 import java.util.*;
 import java.io.*;
 
@@ -35,30 +36,59 @@ public final class SettingsFactory {
 	 */
 	SettingsFactory(File settingsFile, Properties defaultProps, Properties props) {
 		DEFAULT_PROPS = defaultProps;
-		PROPS = props;
-		reload(settingsFile);
+		PROPS = props;		
+		try {
+			reload(new FileInputStream(settingsFile));
+		} catch(IOException e) {			
+			// this should never really happen, so report it
+			RouterService.error(e);
+		}
+	}
+
+	/**
+	 * Creates a new <tt>SettingsFactory</tt> instance with the specified stream
+	 * to read properties from.
+	 *
+	 * @param stream the <tt>InputStream</tt> to read properties from
+	 */
+	SettingsFactory(InputStream stream, Properties defaultProps) {
+		DEFAULT_PROPS = defaultProps; 
+		PROPS = new Properties(defaultProps);
+		reload(stream);
+	}
+
+	static SettingsFactory createFromFile(File file, Properties defaultProps) {
+		return new SettingsFactory(file, defaultProps, new Properties(defaultProps));
+	}
+
+	static SettingsFactory createFromZip(File file, String propsName, 
+										 Properties defaultProps) {
+		try {
+			ZipFile zip = new ZipFile(file, ZipFile.OPEN_READ);
+			return new SettingsFactory(zip.getInputStream(zip.getEntry(propsName)),
+									   defaultProps);
+		} catch(Exception e) {
+			System.out.println("unexpected exception in createFromZip::file: "+file+
+							   " props name: "+propsName); 
+			// this should never really happen, so report it
+			RouterService.error(e);
+			return null;
+		}
 	}
 
 	/**
 	 * Reloads the settings with the specified settings file from disk.
 	 *
-	 * @param settingsFile the <tt>File</tt> to load
+	 * @param settingsStream the <tt>InputStream</tt> to load
 	 */
-	public void reload(File settingsFile) {
+	public void reload(InputStream settingsStream) {
         try {
-            FileInputStream fis = new FileInputStream(settingsFile);
-            PROPS.load(fis);
-            fis.close(); 
-        } catch(FileNotFoundException e) {
-            // the default properties will be used
+            PROPS.load(settingsStream);
         } catch(IOException e) {
             // the default properties will be used            
         }		
 	}
 
-	SettingsFactory(File settingsFile, Properties defaultProps) {
-		this(settingsFile, defaultProps, new Properties(defaultProps));
-	}
 
 	/**
 	 * Creates a new <tt>StringSetting</tt> instance with the specified

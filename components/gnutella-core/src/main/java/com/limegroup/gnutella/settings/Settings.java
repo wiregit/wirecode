@@ -24,10 +24,24 @@ public final class Settings extends AbstractSettings {
 	public static final FileSetting THEME_DEFAULT = 
 		FACTORY.createFileSetting("THEME_DEFAULT", 
 								  new File("themes", 
-										   "default_theme.txt"));
+										   "default_theme.zip"));
+
+	/**
+	 * Setting for the default theme directory to use in LimeWire display.
+	 */
+	public static final FileSetting THEME_DEFAULT_DIR = 
+		FACTORY.createFileSetting("THEME_DEFAULT_DIR",  
+								  new File("themes", "default_theme"));
+
 	/**
 	 * Setting for the file name of the theme file.
 	 */
 	public static final FileSetting THEME_FILE =
 		FACTORY.createFileSetting("THEME_FILE", THEME_DEFAULT.getValue());
+
+	/**
+	 * Setting for the file name of the theme directory.
+	 */
+	public static final FileSetting THEME_DIR =
+		FACTORY.createFileSetting("THEME_DIR", THEME_DEFAULT_DIR.getValue());
 }
