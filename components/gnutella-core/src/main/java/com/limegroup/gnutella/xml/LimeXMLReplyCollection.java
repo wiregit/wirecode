@@ -339,11 +339,14 @@ public class LimeXMLReplyCollection {
             for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
-                final String value = (String)entry.getValue();
+                
                 Trie trie = (Trie)trieMap.get(name);
                 // if no trie, ignore.
                 if(trie == null)
                     continue;
+                    
+                final String value = 
+                    I18NConvert.instance().getNorm((String)entry.getValue());
                 List allDocs = (List)trie.get(value);
                 // if no list, ignore.
                 if( allDocs == null )
