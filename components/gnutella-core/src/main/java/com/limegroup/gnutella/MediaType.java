@@ -260,6 +260,13 @@ public class MediaType implements Serializable {
     }
     
     /**
+     * Returns the extensions for this media type.
+     */
+    public Set getExtensions() {
+        return exts;
+    }
+    
+    /**
      * Returns all default media types.
      */
     public static final MediaType[] getDefaultMediaTypes() {
