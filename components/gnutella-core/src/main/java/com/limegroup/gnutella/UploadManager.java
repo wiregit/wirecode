@@ -16,7 +16,6 @@ import com.limegroup.gnutella.tests.stubs.*; //for testing
  * 
  * 
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 public class UploadManager implements BandwidthTracker {
 	/** The callback for notifying the GUI of major changes. */
@@ -188,10 +187,15 @@ public class UploadManager implements BandwidthTracker {
     private void doSingleUpload(HTTPUploader uploader, String host,
         int index) {
         long startTime=-1;
-        //try {
+
         // check if it complies with the restrictions.
         //and set the uploader state accordingly
         boolean accepted=insertAndTest(uploader, host);
+
+        //We are going to notify the gui about the new upload, and let it 
+        //decide what to do with it - will act depending on it's state
+		_callback.addUpload(uploader);
+
         
         //Note: We do not call connect() anymore. That's because connect would
         //never do anything in the case of a normal upload  - becasue the
@@ -356,7 +360,6 @@ public class UploadManager implements BandwidthTracker {
 			 uploader.setState(Uploader.LIMIT_REACHED);
              return false;
 		}
-		_callback.addUpload(uploader);		
         return true;
 
 	}
