@@ -4,13 +4,22 @@ import java.io.File;
 import com.limegroup.gnutella.chat.*;
 
 /**
- *  Interface for connection events to be fed from the router into the
- *  visual world.
+ *  Callback to notify the GUI of asynchronous backend events.
+ *  The methods in this fall into the following categories:
+ *
+ *  <ul>
+ *  <li>Query replies (for displaying results) and query strings 
+ *     (for the monitor)
+ *  <li>Change of connection state
+ *  <li>New or dead uploads or downloads
+ *  <li>New chat requests and chat messages
+ *  <li>Error messages
+ *  </ul>
  */
 public interface ActivityCallback
 {
     /**
-     *  Handle a new connection.
+     *  Add a new unitialized connection.
      */
     public void connectionInitializing(Connection c);
 
@@ -20,40 +29,51 @@ public interface ActivityCallback
     public void connectionInitialized(Connection c);
 
     /**
-     *  Handle a removed connection.
+     *  Mark a connection as closed
      */
     public void connectionClosed(Connection c);
 
     /**
-     *  Add a known host/port
+     *  Add the given host/port to the host catcher
      */
     public void knownHost(Endpoint e);
 
     /**
-     *  Add a query reply to a query screen
+     * Add a query reply to the search result screen. 
+     *
+     * @param qr a query reply with the same GUID as a query you initiated.
+     *  The reply is not guaranteed to match the query; use 
+     *  RouterService.matchesType for that.  Also, it's possible that the
+     *  user has cancelled the search.
+     * @see RouterService#query(String,int,MediaType)
+     * @see RouterService#matchesType(byte[],Response)
      */
     public void handleQueryReply( QueryReply qr );
 
     /**
-     *  Add a query string to the monitor screen
+     * Add a query string to the monitor screen
      */
     public void handleQueryString( String query );
 
     /** Add a file to the download window */
     public void addDownload(Downloader d);
 
+    /** Remove a downloader from the download window. */
     public void removeDownload(Downloader d);
 
+    /** Add an uploader to the upload window */
     public void addUpload(Uploader u);
 
+    /** Remove an uploader from the upload window. */
     public void removeUpload(Uploader u);    
 
-	/** handle adding a chat, and messages to the chats */
+	/** Add a new incoming chat connection */
 	public void acceptChat(Chatter ctr);
 
+    /** A new message is available from the given chatter */
 	public void receiveMessage(Chatter chr);
 
-	/** lets the user know that a host is no longer available */
+	/** The given chatter is no longer available */
 	public void chatUnavailable(Chatter chatter);
 
     /**
@@ -62,8 +82,9 @@ public interface ActivityCallback
      * and extension settings.  Note that the files in directory are not
      * necessarily yet indexed at the time of this call.
      *
-     * @requires "directory" is a directory and "parent" is the parent
-	 *  directory of that directory, or null if no parent exists. 
+     * @param directory MUST be a directory
+     * @param parent MUST be the parent of directory, or null if no parent
+     *  exists. 
      */
     public void addSharedDirectory(final File directory, final File parent);
 
@@ -72,26 +93,30 @@ public interface ActivityCallback
      * called exactly once per file per change to the shared directory and
      * extension settings.
      *
-     * @requires f is a file, addSharedDirectory has been called with parent 
-     *  as an argument, and parent contains f 
+     * @param directory MUST be a directory
+     * @param parent MUST be the parent of directory, or null if no parent
+     *  exists. 
      */
     public void addSharedFile(final File file, final File parent);
 
 	/**
-	 * Nofifies the GUI that the shared files should be visually removed.
+	 * The list of shared files has been emptied.
 	 */
 	public void clearSharedFiles();           
 
     /**
-     * Equivalent to error(errorCode, t).
+     * An error has occured.
+     * 
+     * @param errorCode  the error message to diaplay.  MUST be one
+     *  of PORT_ERROR, SOCKET_ERROR, ASSERT_ERROR, or INTERNAL_ERROR.
      */
     public void error(int errorCode);
 
     /**
-	 * Displays an error message to the user.
+	 * An internal error has occured.
 	 *
-	 * @param errorCode  The int specifying the error message to diaplay
-	 *
+     * @param errorCode  the error message to diaplay.  MUST be one
+     *  of PORT_ERROR, SOCKET_ERROR, ASSERT_ERROR, or INTERNAL_ERROR.
 	 * @param t          The <code>Throwable</code> instance containing the
 	 *                   stack trace to display
      */
@@ -106,17 +131,17 @@ public interface ActivityCallback
     public void error(Throwable t);
 
 
-    /** error on port */
+    /** Could not establish a listening port. */
 	public static final int PORT_ERROR = 0;
 
-    /** error on listening to socket*/
+    /** Security error accepting incoming connection.  (Should never happen.) */
 	public static final int SOCKET_ERROR = 1;
 
-    /** internal error */
+    /** Internal error. */
 	public static final int INTERNAL_ERROR = 2;
 
     /** 
-	 * Error that caused an assertion failure.
+	 * Internal error caused by an assertion failure.
 	 */
 	public static final int ASSERT_ERROR = 3;
 

@@ -17,7 +17,7 @@ import com.limegroup.gnutella.chat.*;
  * rs.initialize();
  * ... //construct GUI
  * rs.postGuiInit();
- * rs.triggerQuery(...);
+ * rs.query(...);
  * rs.download(...);
  * rs.shutdown();
  * </pre>
