@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
@@ -17,16 +18,18 @@ import java.net.InetAddress;
  * they will be written to disk.
  */
 public class HostCatcher {
-    /* Our representation consists of both a set and a queue.  The
-     * set lets us quickly check if there are duplicates, while the
-     * queue provides ordering.  The elements at the END of the queue
-     * have the highest priority.
+    /** The number of elements to store. */
+    private static int SIZE=100;
+
+    /* Our representation consists of a set and a queue, both bounded in size.
+     * The set lets us quickly check if there are duplicates, while the queue
+     * provides ordering.  The elements at the END of the queue have the highest
+     * priority.
      *
      * INVARIANT: queue contains no duplicates and contains exactly the
      * same elements as set.
-     * LOCKING: obtain this' monitor before modifying either.
-     */
-    private List /* of Endpoint */ queue=new ArrayList();
+     * LOCKING: obtain this' monitor before modifying either.  */
+    private Buffer /* of Endpoint */ queue=new Buffer(SIZE);
     private Set /* of Endpoint */ set=new HashSet();
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
@@ -52,11 +55,11 @@ public class HostCatcher {
 
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
-     * connect is not specified in the SettingsManager, loads
-     * the hosts in the host list into the maybe set.  (The likelys set is
-     * empty.)  If filename does not exist, then no error message is printed and * this is initially empty.  The file is expected to contain a sequence of
-     * lines in the format "<host>:port\n".  Lines not in this format
-     * are silently ignored.
+     * connect is not specified in the SettingsManager, loads the hosts in the
+     * host list into the maybe set.  (The likelys set is empty.)  If filename
+     * does not exist, then no error message is printed and this is initially
+     * empty.  The file is expected to contain a sequence of lines in the format
+     * "<host>:port\n".  Lines not in this format are silently ignored.  
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
                            String filename) {
@@ -75,7 +78,7 @@ public class HostCatcher {
             throws FileNotFoundException, IOException {
         BufferedReader in=null;
         in=new BufferedReader(new FileReader(filename));
-        while (true) {
+        for (int i=0; i<SIZE; i++) {
             String line=in.readLine();
             if (line==null)   //nothing left to read?  Done.
                 break;
@@ -95,13 +98,15 @@ public class HostCatcher {
                 continue;
             }
 
-            //Everything passed!  Add it.  No need to synchronize because
-            //this is a constructor.
+            //Everything passed!  Add it. 
             Endpoint e = new Endpoint(host, port);
             if ((! set.contains(e)) && (! isMe(host, port))) {
-                queue.add(0,e); //add e to the head.  Order matters!
-            //no need to call notify since nothing can be waiting on this.
-            set.add(e);
+                Object removed=queue.addFirst(e); //add e to the head.  Order matters!
+                //Shouldn't happen...
+                if (removed!=null)
+                    set.remove(removed);
+                set.add(e);
+                notify();
             }
         }
     }
@@ -165,17 +170,34 @@ public class HostCatcher {
         if (isMe(e.getHostname(), e.getPort()))
             return;
 
+        boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
+                //We don't already have e, so add to both set and queue.
+                //Current policy: add e to the END of queue, so newer points are
+                //used before older.  Adding e may eject an older point from
+                //queue, so we have to cleanup the set to maintain
+                //rep. invariant.
                 set.add(e);
-                queue.add(e);  //add to tail of the queue.  Order matters!
+                Object ejected=queue.addLast(e);  
+                if (ejected!=null)
+                    set.remove(ejected);
+                
+                //If this is not full, notify the callback.  If this is full,
+                //the GUI's display of the host catcher will differ from this.
+                //This is acceptable; the user really doesn't need to see so
+                //many hosts, and implementing the alternatives would require
+                //many changes to ActivityCallback and probably a more efficient
+                //representation on the GUI side.
+                if (ejected==null)
+                    notifyGUI=true;
+
                 this.notify(); //notify anybody waiting for a connection
             }
         }
-
-        callback.knownHost(e);
+        if (notifyGUI)
+            callback.knownHost(e); 
     }
-
 
     /**
      * @modifies this
@@ -186,7 +208,7 @@ public class HostCatcher {
     public synchronized Endpoint getAnEndpoint() throws NoSuchElementException {
         if (! queue.isEmpty()) {
             //pop e from queue and remove from set.
-            Endpoint e=(Endpoint)queue.remove(queue.size()-1);
+            Endpoint e=(Endpoint)queue.removeLast();
             boolean ok=set.remove(e);
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
@@ -236,7 +258,7 @@ public class HostCatcher {
     public synchronized void removeHost(String host, int port) {
         Endpoint e=new Endpoint(host, port);
         boolean removed1=set.remove(e);
-        boolean removed2=queue.remove(e);
+        boolean removed2=queue.removeAll(e);
         //Check that set.contains(e) <==> queue.contains(e)
         Assert.that(removed1==removed2, "Rep. invariant for HostCatcher broken.");
     }
@@ -279,61 +301,65 @@ public class HostCatcher {
         return queue.toString();
     }
 
-//      /** Unit test. */
-//      public static void main(String args[]) {
-//      HostCatcher hc=new HostCatcher(null);
-//      PingRequest ping=new PingRequest((byte)3);
-//      Iterator iter=null;
-//      Endpoint e=null;
+    /** Unit test. */
+    /*
+    public static void main(String args[]) {
+        HostCatcher hc=new HostCatcher(new Main());
+        hc.initialize(new Acceptor(6346, null),
+                      new ConnectionManager(null));
+        PingRequest ping=new PingRequest((byte)3);
+        Iterator iter=null;
+        Endpoint e=null;
 
-//      iter=hc.getHosts();
-//      Assert.that(! iter.hasNext());
-//      iter=hc.getBestHosts(1);
-//      Assert.that(! iter.hasNext());
+        iter=hc.getHosts();
+        Assert.that(! iter.hasNext());
+        iter=hc.getBestHosts(1);
+        Assert.that(! iter.hasNext());
 
-//      //add and remove this
-//      PingReply pr0=new PingReply(ping.getGUID(), (byte)5, 6346,
-//                     new byte[] {(byte)127, (byte)0, (byte)0, (byte)0},
-//                     10, 20);
-//      hc.spy(pr0);
-//      hc.removeHost("127.0.0.0", 6346);
+        //add and remove this
+        PingReply pr0=new PingReply(ping.getGUID(), (byte)5, 6346,
+            new byte[] {(byte)127, (byte)0, (byte)0, (byte)0},
+            10, 20);
+        hc.spy(pr0);
+        hc.removeHost("127.0.0.0", 6346);
 
-//      //add these.  pr2 becomes the highest priority.
-//      Endpoint e1=new Endpoint("127.0.0.1", 6347);
-//      PingReply pr1=new PingReply(ping.getGUID(), (byte)5, 6347,
-//                      new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-//                      0, 0);
-//      hc.spy(pr1);
-//      Endpoint e2=new Endpoint("127.0.0.2", 6348);
-//      PingReply pr2=new PingReply(ping.getGUID(), (byte)5, 6348,
-//                     new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-//                     10, 20);
-//      hc.spy(pr2);
+        //add these.  pr2 becomes the highest priority.
+        Endpoint e1=new Endpoint("127.0.0.1", 6347);
+        PingReply pr1=new PingReply(ping.getGUID(), (byte)5, 6347,
+            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+            0, 0);
+        hc.spy(pr1);
+        Endpoint e2=new Endpoint("127.0.0.2", 6348);
+        PingReply pr2=new PingReply(ping.getGUID(), (byte)5, 6348,
+            new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
+            10, 20);
+        hc.spy(pr2);
 
-//      iter=hc.getBestHosts(10);
-//      Assert.that(iter.hasNext());
-//      e=(Endpoint)iter.next();
-//      Assert.that(e.getFiles()==10);
-//      Assert.that(e.getKbytes()==20);
-//      Assert.that(e.equals(e2));
-//      Assert.that(iter.hasNext());
-//      Assert.that(iter.next().equals(e1));
-//      Assert.that(!iter.hasNext());
+        iter=hc.getBestHosts(10);
+        Assert.that(iter.hasNext());
+        e=(Endpoint)iter.next();
+        Assert.that(e.getFiles()==10);
+        Assert.that(e.getKbytes()==20);
+        Assert.that(e.equals(e2));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(e1));
+        Assert.that(!iter.hasNext());
 
-//      iter=hc.getBestHosts(1);
-//      Assert.that(iter.hasNext());
-//      Assert.that(iter.next().equals(e2));
-//      Assert.that(!iter.hasNext());
+        iter=hc.getBestHosts(1);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(e2));
+        Assert.that(!iter.hasNext());
 
-//      iter=hc.getHosts();
-//      Assert.that(iter.hasNext());
-//      Assert.that(iter.next().equals(e2));
-//      Assert.that(iter.hasNext());
-//      Assert.that(iter.next().equals(e1));
-//      Assert.that(!iter.hasNext());
+        iter=hc.getHosts();
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(e2));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(e1));
+        Assert.that(!iter.hasNext());
 
-//      hc.clear();
-//      Assert.that(!hc.getHosts().hasNext());
-//      }
+        hc.clear();
+        Assert.that(!hc.getHosts().hasNext());
+    }
+    */
 }
 
