@@ -201,7 +201,7 @@ public final class QueryUnicaster {
 
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
-    public void addUnicastEndpoint(InetAddress address, int port) {//ExtendedEndpoint endpoint) {
+    public void addUnicastEndpoint(InetAddress address, int port) {
         if (notMe(address, port)) {
             synchronized (_queryHosts) {
                 debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
@@ -209,7 +209,7 @@ public final class QueryUnicaster {
                     _queryHosts.removeLast(); // evict a old guy...
                 _queryHosts.addFirst(new GUESSEndpoint(address, port));
                 _queryHosts.notify();
-				if(_testUDPPingsSent < 20) {
+				if(_testUDPPingsSent < 30 && !RouterService.isGUESSCapable()) {
 					UDPService.instance().send(new PingRequest((byte)1), 
 											   address, port);
 					_testUDPPingsSent++;
