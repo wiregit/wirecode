@@ -776,15 +776,18 @@ public abstract class FileManager {
         boolean directoryShared;
         synchronized (this) {
             directoryShared=_sharedDirectories.containsKey(dir);
-            _numPendingFiles++;
+            if(directoryShared)
+                _numPendingFiles++;
         }
         FileDesc fd;
-        if (directoryShared) 
-            fd = addFile(f);            
-        else 
+        if (directoryShared) {
+            fd = addFile(f);
+            synchronized(this) { _numPendingFiles--; }
+            _needRebuild = true;
+        } else {
             fd = null;
-        synchronized(this) { _numPendingFiles--; }
-        _needRebuild = true;
+        }
+
         return fd;
 	}
 
@@ -1129,6 +1132,17 @@ public abstract class FileManager {
         String ext = filename.substring(begin + 1).toLowerCase();
         return _extensions.contains(ext);
     }
+    
+    /**
+     * Returns true if this file is in a shared directory.
+     */
+    public synchronized boolean isFileInSharedDirectories(File f) {
+        File dir = FileUtils.getParentFile(f);
+        if (dir == null) 
+            return false;
+
+        return _sharedDirectories.containsKey(dir);
+	}    
     
     /**
      * Returns true if this file is sharable.

@@ -163,6 +163,10 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("file does not exist: "+file);
 		}
 		Set urns = UrnCache.instance().getUrns(file);
+        // TODO: If we ever create more URN types (other than SHA1)
+        // we cannot just check for size == 0, we must check for
+        // size == NUM_URNS_WE_WANT, and calculateUrns should only
+        // calculate the URN for the specific hash we still need.
 		if(urns.size() == 0) {			
 			// expensive the first time a new file is added
 			urns = calculateUrns(file);

@@ -1842,11 +1842,27 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
             
         incompleteFileManager.removeEntry(incompleteFile);
-
+        
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
+
+        //Add the URN of this file to the cache so that it won't
+        //be hashed again when added to the library -- reduces
+        //the time of the 'Saving File' state.
+        if(bucketHash != null) {
+            Set urns = new HashSet(1);
+            urns.add(bucketHash);
+            File file = completeFile;
+            try {
+                file = FileUtils.getCanonicalFile(completeFile);
+            } catch(IOException ignored) {}
+            // Only cache if we're going to share it.
+            if(fileManager.isFileInSharedDirectories(file))
+                UrnCache.instance().addUrns(file, urns);
+        }
+
         FileDesc fileDesc = 
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
