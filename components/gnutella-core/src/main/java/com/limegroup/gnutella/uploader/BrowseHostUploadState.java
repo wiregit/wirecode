@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * when the request is to browse the host
  * @author Anurag Singla
  */
-public class BrowseHostUploadState implements HTTPMessage {
+public final class BrowseHostUploadState implements HTTPMessage {
     
     private final HTTPUploader _uploader;
     private final FileManager _fileManager;
@@ -34,7 +34,7 @@ public class BrowseHostUploadState implements HTTPMessage {
         // don't accept them...
         if(!_uploader.getClientAcceptsXGnutellaQueryreplies()) {
             // send back a 406...
-            String str = "HTTP/1.0 406 Not Acceptable\r\n";
+            String str = "HTTP/1.1 406 Not Acceptable\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
             debug("BHUS.doUpload(): client does not accept QRs.");
@@ -61,7 +61,7 @@ public class BrowseHostUploadState implements HTTPMessage {
         }
      
         String str;
-		str = "HTTP/1.0 200 OK\r\n";
+		str = "HTTP/1.1 200 OK\r\n";
 		ostream.write(str.getBytes());
 		str = "User-Agent: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
@@ -75,7 +75,6 @@ public class BrowseHostUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
-        ostream.flush();
         _uploader.setAmountUploaded(BAOS.size());
         _uploader.setState(_uploader.COMPLETE);
         debug("BHUS.doUpload(): returning.");
