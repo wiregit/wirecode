@@ -2599,8 +2599,7 @@ public final class SettingsManager {
     public void setUseQuickConnect(boolean useQuickConnect) {
 		_useQuickConnect = useQuickConnect;
 		Boolean b = new Boolean(useQuickConnect);
-		String s = b.toString();
-		PROPS.put(USE_QUICK_CONNECT, s);
+		PROPS.put(USE_QUICK_CONNECT, b.toString());
     }
 
 	/**
@@ -2613,8 +2612,7 @@ public final class SettingsManager {
             throw new IllegalArgumentException();
         else {
             _quickConnectHosts = hosts;
-            PROPS.put(QUICK_CONNECT_HOSTS,
-                       encode(hosts));
+            PROPS.put(QUICK_CONNECT_HOSTS, encode(hosts));
         }
     }
 
