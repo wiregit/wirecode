@@ -675,7 +675,6 @@ public class ConnectionManager {
             pr = new PingRequest((byte)1);
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());
-        System.out.println("PR TTL is "+pr.getTTL());
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
