@@ -19,6 +19,11 @@ import java.io.IOException;
 public class CandidateHandler {
 	
 	/**
+	 * ref to the best candidates table
+	 */
+	private BestCandidates _bestCandidates = BestCandidates.instance();
+	
+	/**
 	 * reference to the connection object that will be sending the messages
 	 */
 	private final Connection _connection;
@@ -86,7 +91,7 @@ public class CandidateHandler {
     		
     		_features.putAll(fvm.getProperties());
     		
-    		BestCandidates.initialize();
+    		_bestCandidates.initialize();
     	} 
     	
     	else if (vm instanceof BestCandidatesVendorMessage) {
@@ -121,7 +126,7 @@ public class CandidateHandler {
         		candidates[1].setAdvertiser(_connection);
         	
         	//and update our internal table
-        	BestCandidates.update(candidates);
+        	_bestCandidates.update(candidates);
 
     	}
     	
@@ -181,12 +186,7 @@ public class CandidateHandler {
     public synchronized Candidate [] getCandidates() {
     	if (_candidatesReceived == null)
 			return null;
-		
-		/*Candidate [] ret = new Candidate[2];
-		
-		
-		ret[0] = _candidatesReceived.getBestCandidates()[0];
-		ret[1] = _candidatesReceived.getBestCandidates()[1];*/
+    	
     	return _candidatesReceived.getBestCandidates();
 		
     }

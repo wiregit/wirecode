@@ -2093,7 +2093,7 @@ public class Connection implements Candidate {
 	
 	
 	/**
-	 * @return Returns a copy of the candidates the remote host advertised.
+	 * @return Returns the candidates the remote host advertised.
 	 */
 	public Candidate [] getCandidates() {
 		return _candidateHandler.getCandidates();

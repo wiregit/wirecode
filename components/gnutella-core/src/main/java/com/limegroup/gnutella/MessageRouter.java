@@ -184,6 +184,11 @@ public abstract class MessageRouter {
     private PromotionManager _promotionManager;
     
     /**
+     * ref to the BestCandidates table
+     */
+    private BestCandidates _bestCandidates = BestCandidates.instance();
+    
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -2617,7 +2622,7 @@ public abstract class MessageRouter {
      */
     public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
 
-    	Connection route = BestCandidates.getRoute(msg.getCandidate(), 
+    	Connection route = _bestCandidates.getRoute(msg.getCandidate(), 
     			2-msg.getDistance());
 
     	if (route!=null && route.isOpen())

@@ -30,9 +30,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 */
 	public BestCandidatesVendorMessage(Candidate []bestCandidates) {
 		super(F_LIME_VENDOR_ID, F_BEST_CANDIDATES, VERSION, derivePayload(bestCandidates));
-		_bestCandidates = new Candidate[2];
-		_bestCandidates[0]=bestCandidates[0];
-		_bestCandidates[1]=bestCandidates[1];
+		_bestCandidates = bestCandidates;
 	}
 	
 	

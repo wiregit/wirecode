@@ -18,7 +18,17 @@ import com.limegroup.gnutella.util.*;
  * As a leaf:
  * sends out Features VMs to the connected UPs at specific intervals.
  */
-public class CandidateAdvertiser extends ManagedThread {
+public class CandidateAdvertiser implements Runnable {
+	
+	/**
+	 * whether this timer task is cancelled
+	 */
+	boolean _cancelled = false;
+	
+	/**
+	 * whether to initialize the candidates table
+	 */
+	boolean _initialize = false;
 	
 	/**
 	 * how long to wait until the first advertisement.
@@ -42,73 +52,107 @@ public class CandidateAdvertiser extends ManagedThread {
 	private  BestCandidatesVendorMessage _bcvm;
 	
 	
-	
-	public void managedRun() {
+	private BestCandidates _bestCandidates = BestCandidates.instance();
+
+	/**
+	 * creates a new CandidateAdvertiser
+	 * 
+	 * @param init whether this is called on startup.  If true,
+	 * the thread will be scheduled to run after INITIAL_DELAY and
+	 * it will initialize the BestCandidates table.
+	 */
+	public CandidateAdvertiser(boolean init) {
+		_initialize = init;
 		
-		try{
-			Thread.sleep(INITIAL_DELAY);
-		
-			//initialize the best candidates table.
-			BestCandidates.initialize();
-			
-			while(true) {
-			
-				if (!RouterService.isSupernode()) { 
-					sendFeaturesMessage();
-					Thread.sleep(LEAF_INTERVAL);
-				}
-				else {
-					sendCandidatesMessage();
-					Thread.sleep(UP_INTERVAL);
-				}
-			}
-		
-		}catch(InterruptedException hmm) {
-			//this thread should not be interrupted.
-			//unless you want to stop it for testing reasons.
-			return;
-		}
+		if (init)
+			RouterService.schedule(this,INITIAL_DELAY,0);
 	}
 	
-	
-	/**
-	 * sends a <tt>FeaturesVendorMessage</tt> to all connected
-	 * Ultrapeers.
-	 */
-	private void sendFeaturesMessage() {
-		FeaturesVendorMessage fvm = new FeaturesVendorMessage();
+	public void run() {
+		if (_cancelled)
+			return;
 		
-		for(Iterator iter = RouterService.getConnectionManager().
-				getInitializedConnections().iterator();iter.hasNext();)
-			try {
-				Connection c = (Connection)iter.next();
-				c.send(fvm);
-			}catch(IOException tooBad) {} //nothing we can do.  continue with next UP.
+		Worker worker = new Worker();
+		worker.setName("candidate advertiser");
+		worker.setDaemon(true);
+		worker.start();
 	}
 	
 	/**
 	 * @param _msg The message that should be sent out next time.
 	 */
-	public synchronized void setMsg(BestCandidatesVendorMessage msg) {
+	public void setMsg(BestCandidatesVendorMessage msg) {
 		_bcvm = msg;
 	}
 	
 	/**
-	 * sends a <tt>BestCandidatesVendorMessage</tt> to those 
-	 * ultrapeer connections which need updating.
-	 * 
-	 * synchronized so that bcvm doesn't change while we're sending
+	 * cancels this task
 	 */
-	private synchronized void sendCandidatesMessage() {
-		
-		if (_bcvm !=null)
-		for(Iterator iter = RouterService.getConnectionManager().
-				getInitializedConnections().iterator();iter.hasNext();)
-			try {
-				Connection c = (Connection)iter.next();
-				if (c.remoteHostSupportsBestCandidates() > 0)
-					c.handleBestCandidatesMessage(_bcvm);
-			}catch(IOException tooBad) {} //nothing we can do.  continue with next UP.
-		
+	public void cancel() {
+		_cancelled=true;
 	}
+	
+	/**
+	 * 
+	 * The thread that does the advertisement.  It does a lot of network i/o
+	 * so it cannot be put in the timer task.
+	 */
+	private class Worker extends ManagedThread {
+	
+		public void managedRun() {
+
+			if (_initialize)
+				_bestCandidates.initialize();
+			
+			if (!RouterService.isSupernode()) { 
+				sendFeaturesMessage();
+				RouterService.schedule(new CandidateAdvertiser(false),LEAF_INTERVAL,0);
+			}
+			else {
+				sendCandidatesMessage();
+				RouterService.schedule(new CandidateAdvertiser(false),UP_INTERVAL,0);
+			}
+		
+		}
+	
+	
+		/**
+		 * sends a <tt>FeaturesVendorMessage</tt> to all connected
+		 * Ultrapeers.
+		 */
+		private void sendFeaturesMessage() {
+			FeaturesVendorMessage fvm = new FeaturesVendorMessage();
+		
+			for(Iterator iter = RouterService.getConnectionManager().
+					getInitializedConnections().iterator();iter.hasNext();)
+				try {
+					Connection c = (Connection)iter.next();
+					c.send(fvm);
+				}catch(IOException tooBad) {} //nothing we can do.  continue with next UP.
+		}
+	
+		/**
+		 * sends a <tt>BestCandidatesVendorMessage</tt> to those 
+		 * ultrapeer connections which need updating.
+		 * 	
+		 * keeps a separate ref to the best candidates message.
+		 */
+		private void sendCandidatesMessage() {
+		
+			BestCandidatesVendorMessage bcvm = _bcvm;
+			
+			if (bcvm !=null)
+				for(Iterator iter = RouterService.getConnectionManager().
+						getInitializedConnections().iterator();iter.hasNext();)
+					try {
+						Connection c = (Connection)iter.next();
+						if (c.remoteHostSupportsBestCandidates() > 0)
+							c.handleBestCandidatesMessage(bcvm);
+					}catch(IOException tooBad) {} //nothing we can do.  continue with next UP.
+			
+		
+		}
+	}
+	
 }
+

@@ -68,6 +68,11 @@ public class PromotionManager {
 	private Expirer _expirer;
 	
 	/**
+	 * a ref to the best candidates table
+	 */
+	private BestCandidates _bestCandidates = BestCandidates.instance();
+	
+	/**
 	 * initiates the promotion process.  It sends out an udp ping to the
      * original requestor and when the ack comes back it the listener will 
      * start the crawl in a separate thread.
@@ -188,7 +193,7 @@ public class PromotionManager {
 				return;
 			
 			//set the promotion partner 
-			_promotionPartner = BestCandidates.getBest();
+			_promotionPartner = _bestCandidates.getBest();
 			
 			//start a resetting thread
 			_expirer = new Expirer(UP_REQUEST_TIMEOUT);

@@ -234,6 +234,11 @@ public class ConnectionManager {
      * The current measured downstream bandwidth.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
+    
+    /**
+     * ref to the BestCandidates table
+     */
+    private BestCandidates _bestCandidates = BestCandidates.instance();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -344,7 +349,7 @@ public class ConnectionManager {
         //if we are not disconnecting, we may need to update the 
 		//list of best candidates
 		if (_disconnectTime==0)
-			BestCandidates.routeFailed(mc);
+			_bestCandidates.routeFailed(mc);
     }
 
     /**
@@ -1255,7 +1260,7 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         _disconnectTime = System.currentTimeMillis();
-        BestCandidates.purge();
+        _bestCandidates.purge();
         
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
