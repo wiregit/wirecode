@@ -28,8 +28,6 @@ public abstract class Message
     public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x30;
     public static final byte F_VENDOR_MESSAGE=(byte)0x31;
     public static final byte F_VENDOR_MESSAGE_STABLE=(byte)0x32;
-
-    private final static boolean PARSE_GROUP_PINGS = false;
     
     public static final int N_UNKNOWN = -1;
     public static final int N_TCP = 1;
