@@ -240,14 +240,10 @@ public interface SettingsInterface
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
     public static final String  DEFAULT_EXTENSIONS     =
-    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;"+
-    "mp3;wav;au;aif;aiff;ra;ram;"+
-    "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;"+
-    "gif;jpg;jpeg;jpe;png;tif;tiff;"+
+    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+    "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
     "exe;zip;gz;gzip;hqx;tar;tgz;z";
-
 	
-
 
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
@@ -277,11 +273,11 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;	
 
-    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.5";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.5";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
 	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-	public static final String DEFAULT_FORCED_IP_ADDRESS = "";
-	public static final int DEFAULT_FORCED_PORT = 6346;
+	public static final String  DEFAULT_FORCED_IP_ADDRESS = "";
+	public static final int     DEFAULT_FORCED_PORT = 6346;
 
     // The property key name constants
     public static final String TTL            = "TTL";
