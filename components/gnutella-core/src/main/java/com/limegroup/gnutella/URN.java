@@ -544,10 +544,6 @@ public final class URN implements HTTPHeaderValue, Serializable {
 			return false;
 		}
 
-		// get the "urn:" substring so we can make sure it's there,
-		// ignoring case
-		String urnStr = urnString.substring(0, colon1Index+1);
-
 		// get the last colon -- this should separate the <NID>
 		// from the <NIS>
 		int colon2Index = urnString.indexOf(":", colon1Index+1);
