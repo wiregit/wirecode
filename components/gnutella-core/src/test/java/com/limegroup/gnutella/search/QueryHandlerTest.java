@@ -1,17 +1,27 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.*;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
-import junit.framework.*;
+import java.lang.reflect.Method;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LeafConnection;
+import com.limegroup.gnutella.util.NewConnection;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestConnectionManager;
+import com.limegroup.gnutella.util.TestResultCounter;
+import com.limegroup.gnutella.util.UltrapeerConnection;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 
 /**
@@ -38,7 +48,7 @@ public final class QueryHandlerTest extends BaseTestCase {
      * single connections.
      */
     public void testSendQueryToHost() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+        new RouterService(new ActivityCallbackStub());
         ReplyHandler rh = new UltrapeerConnection();        
         QueryRequest query = QueryRequest.createQuery("test", (byte)1);
         QueryHandler qh = 
@@ -126,12 +136,8 @@ public final class QueryHandlerTest extends BaseTestCase {
      * expected.
      */
     public void testPublicSendQuery() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "sendQuery",
-                                         new Class[]{});
+        new RouterService(new ActivityCallbackStub());
+        assertNotNull("should have a message router", RouterService.getMessageRouter());
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
@@ -150,7 +156,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                            
         handler.sendQuery();
         
-        int numQueries = tcm.getNumQueries();
+        int numQueries = tcm.getNumUltrapeerQueries();
         assertEquals("unexpected number of probe queries sent", 3, numQueries);
 
         // these calls should not go through, as it's too soon after the probe
@@ -159,7 +165,8 @@ public final class QueryHandlerTest extends BaseTestCase {
         handler.sendQuery();
         handler.sendQuery();
 
-        assertEquals("unexpected number of probe queries sent", 3, tcm.getNumQueries());        
+        assertEquals("unexpected number of probe queries sent", 3, 
+            tcm.getNumUltrapeerQueries());        
         
         Thread.sleep(8000);
 
@@ -168,7 +175,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         Thread.sleep(1000);
 
         // after the sleep, it should go through!
-        assertEquals("unexpected number of queries sent", 4, tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 4, tcm.getNumUltrapeerQueries());
 
         // these calls should not go through, as it's too soon after the last query
         // was sent!
@@ -176,13 +183,13 @@ public final class QueryHandlerTest extends BaseTestCase {
         handler.sendQuery();
         handler.sendQuery();
 
-        assertEquals("unexpected number of queries sent", 4, tcm.getNumQueries());        
+        assertEquals("unexpected number of queries sent", 4, tcm.getNumUltrapeerQueries());        
         
         Thread.sleep(8000);
         handler.sendQuery();
 
         // after the sleep, it should go through!
-        assertEquals("unexpected number of queries sent", 5, tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 5, tcm.getNumUltrapeerQueries());
 
         // now, send out a bunch of queries to make sure that, eventually, 
         // new queries don't go out because we've reached too high a theoretical
@@ -195,11 +202,8 @@ public final class QueryHandlerTest extends BaseTestCase {
             handler.sendQuery();
         }        
 
-        int horizon = 
-            ((Integer)PrivilegedAccessor.getValue(handler, 
-                                                  "_theoreticalHostsQueried")).intValue();
         assertTrue("too many hosts queried! -- theoretical horizon too high", 
-                   (tcm.getNumQueries() <= 12));
+                   (tcm.getNumUltrapeerQueries() <= 12));
     }
 
 
@@ -241,8 +245,8 @@ public final class QueryHandlerTest extends BaseTestCase {
      * basics of query dispatching are working correctly.
      */
     public void testPrivateSendQuery() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
+        new RouterService(new ActivityCallbackStub());
+        assertNotNull("should have a message router", RouterService.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "sendQuery",
