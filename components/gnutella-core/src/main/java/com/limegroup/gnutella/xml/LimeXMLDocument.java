@@ -32,7 +32,8 @@ public class LimeXMLDocument{
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    public Map fieldToValue;
+    protected Map fieldToValue;
+    protected String schemaUri;
     
     //constructor
     public LimeXMLDocument(String XMLString) {
@@ -51,20 +52,31 @@ public class LimeXMLDocument{
         }
         document = parser.getDocument();
         createMap(document);
+        makeSchemaURI(document);
     }
     
+    private void makeSchemaURI(Document doc){
+        List attributes = DOMUtils.getAttributes(doc.getAttributes());
+        int size = attributes.size();
+        for(int i=0; i< size; i++){
+            Node att = (Node)attributes.get(i);
+            String attName = att.getNodeName();
+            String lowerAttName = attName.toLowerCase();
+            if (lowerAttName.indexOf("schemalocation") >= 0){
+                schemaUri = att.getNodeValue();
+                break;
+            }
+        }
+    }
+
     /**
      * Returns the unique identifier which identifies the schema this XML
      * document conforms to
      * @return the unique identifier which identifies the schema this XML
      * document conforms to
      */
-    public String getSchemaURI()
-    {
-        //TODO (for Sumeet)
-        
-        //anu remove
-        return null;
+    public String getSchemaURI(){
+        return schemaUri;
     }
     
     
