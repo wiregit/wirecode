@@ -273,7 +273,10 @@ public class HTTPUploader implements Uploader {
 			// Look for the Range: header
 			// it will be in one of three forms.  either
 			// ' - n ', ' m - n', or ' 0 - '
-            if (indexOfIgnoreCase(str, "Range: bytes=") != -1) {
+			// We add the second check to accomodate old BearShares, 
+			// which break protocal by not sending the '='
+            if ( (indexOfIgnoreCase(str, "Range: bytes=") != -1) ||
+				 (indexOfIgnoreCase(str, "Range: bytes ") != -1) ) {
                 String sub = str.substring(13);
 				// remove the white space
                 sub = sub.trim();   
