@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
+import java.net.*;
 
 /**
  * Handles incoming search results from the network.  This class parses the 
@@ -133,6 +134,11 @@ public final class SearchResultHandler {
 		// displayed
 		if(data.getQuality() < settings.getMinimumSearchQuality()) return false;
 		if(data.getSpeed() < settings.getMinimumSearchSpeed()) return false;
+        if(data.isFirewalled() && 
+           (!RouterService.getAcceptor().acceptedIncoming() ||
+            NetworkUtils.isPrivateAddress(RouterService.getAddress()))) {
+            return false;
+        }
 
         List results = null;
         try {
