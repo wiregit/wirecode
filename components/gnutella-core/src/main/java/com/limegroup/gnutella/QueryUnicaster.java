@@ -45,6 +45,10 @@ public final class QueryUnicaster {
      */
     private FixedSizeList _pingList;
 
+    /** The last time I sent a broadcast ping.
+     */
+    private long _lastPingTime = 0;
+
     public static QueryUnicaster instance() {
         if (_instance == null)
             _instance = new QueryUnicaster();
@@ -246,10 +250,14 @@ public final class QueryUnicaster {
         synchronized (_queryHosts) {
 
             if (_queryHosts.isEmpty()) {
-                // first send a Ping, hopefully we'll get some pongs....
-                PingRequest pr = 
-                new PingRequest(SettingsManager.instance().getTTL());
-                RouterService.getMessageRouter().broadcastPingRequest(pr);
+                if ((System.currentTimeMillis() - _lastPingTime) >
+                    20000) { // don't sent too many pings..
+                    // first send a Ping, hopefully we'll get some pongs....
+                    PingRequest pr = 
+                    new PingRequest(SettingsManager.instance().getTTL());
+                    RouterService.getMessageRouter().broadcastPingRequest(pr);
+                    _lastPingTime = System.currentTimeMillis();
+                }
                 // now wait, what else can we do?
                 _queryHosts.wait();
             }
