@@ -5,7 +5,9 @@ import java.io.*;
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
-    byte[] payload;
+    private byte[] payload;
+    /** The query string, if we've already extracted it.  Null otherwise. */
+    private String query=null;
 
     /**
      * Builds a new query from scratch
@@ -41,16 +43,22 @@ public class QueryRequest extends Message implements Serializable{
     }
 
     public String getQuery() {
+        //Use cached result if possible.  This is always safe since
+        //strings are immutable.
+        if (query!=null)
+            return query;
+
         int n=payload.length;
         //Some clients (like Gnotella) DOUBLE null-terminate strings.
         //When you make a Java string with 0 in it, it is NOT ignored.
         //The solution is simple: just shave off the extra null terminator.
         if (super.getLength()>3 && payload[n-2]==(byte)0)
-            return new String(payload,2,payload.length-4);
+            query=new String(payload,2,payload.length-4);
         //Normal case: single null-terminated.
         //This also handles the special case of an empty search string.
         else
-            return new String(payload,2,payload.length-3);
+            query=new String(payload,2,payload.length-3);
+        return query;
     }
 
     /**
