@@ -12,7 +12,10 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
 
 /**
- * The list of all the uploads in progress.
+ * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>
+ * to handle individual uploads.
+ *
+ * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
 	/** The callback for notifying the GUI of major changes. */
@@ -136,9 +139,9 @@ public final class UploadManager implements BandwidthTracker {
             //do uploads
             while(true) {
                 //parse the get line
-                GETLine line;
+                HttpRequestLine line;
 				try {
-					line = parseGET(socket);
+					line = parseHttpRequest(socket);
 				} catch(IOException e) {
 					// TODO: we should really be returning 4XX errors here, 
 					// as this indicates that there was a problem with the
@@ -308,7 +311,7 @@ public final class UploadManager implements BandwidthTracker {
                     //Note: we do not do any book-keeping - like incrementing
                     //_activeUploads. Because that is taken care off in 
                     //acceptUpload.
-                }catch(IOException ioe){//connection failed? do book-keeping
+                } catch(IOException ioe){//connection failed? do book-keeping
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
                     }
@@ -612,14 +615,14 @@ public final class UploadManager implements BandwidthTracker {
     }
 
 	/**
-	 * Returns a new <tt>GETLine</tt> instance, where the <tt>GETLine</tt>
+	 * Returns a new <tt>HttpRequestLine</tt> instance, where the <tt>HttpRequestLine</tt>
 	 * class is an immutable struct that contains all data for the "GET" line
 	 * of the HTTP request.
 	 *
 	 * @param socket the <tt>Socket</tt> instance over which we're reading
-	 * @return the <tt>GETLine</tt> struct for the HTTP request
+	 * @return the <tt>HttpRequestLine</tt> struct for the HTTP request
 	 */
-	private GETLine parseGET(Socket socket) throws IOException {
+	private HttpRequestLine parseHttpRequest(Socket socket) throws IOException {
 
 		// Set the timeout so that we don't do block reading.
 		socket.setSoTimeout(SettingsManager.instance().getTimeout());
@@ -675,15 +678,15 @@ public final class UploadManager implements BandwidthTracker {
 
 	/**
 	 * Performs the parsing for a traditional HTTP Gnutella get request,
-	 * returning a new <tt>GETLine</tt> instance with the data for the
+	 * returning a new <tt>RequestLine</tt> instance with the data for the
 	 * request.
 	 *
 	 * @param requestLine the HTTP get request string
-	 * @return a new <tt>GETLine</tt> instance for the request
+	 * @return a new <tt>RequestLine</tt> instance for the request
 	 * @throws <tt>IOException</tt> if there is an error parsing the
 	 *  request
 	 */
-	private static GETLine parseTraditionalGet(final String requestLine) 
+	private static HttpRequestLine parseTraditionalGet(final String requestLine) 
 		throws IOException {
 		try {           
 			int index = -1;
@@ -721,7 +724,7 @@ public final class UploadManager implements BandwidthTracker {
             boolean http11 = false;
             if(requestLine.endsWith("1.1"))
                 http11 = true;
-			return new GETLine(index, fileName, http11);
+			return new HttpRequestLine(index, fileName, http11);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -736,23 +739,20 @@ public final class UploadManager implements BandwidthTracker {
 	 * there are any errors in parsing.
 	 *
 	 * @param requestLine the <tt>String</tt> instance containing the get request
-	 * @return a new <tt>GETLine</tt> instance containing all of the data
+	 * @return a new <tt>RequestLine</tt> instance containing all of the data
 	 *  for the get request
 	 */
-	private GETLine parseURNGet(final String requestLine) 
+	private HttpRequestLine parseURNGet(final String requestLine) 
 		throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");
 		}		
-		int fileIndex = _fileManager.getFileIndexForUrn(urn);
-		if(fileIndex == -1) {
-			throw new IOException("NO MATCHING FILE INDEX FOR URN");
-		}
+		int fileIndex = desc.getIndex();
 		String fileName = desc.getName();
-		boolean isHTTP11 = this.isHTTP11Request(requestLine);
-		return new GETLine(fileIndex, fileName, isHTTP11);		
+		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
+								   isHTTP11Request(requestLine));
 	}
 
 
@@ -770,21 +770,31 @@ public final class UploadManager implements BandwidthTracker {
 	 * This is an immutable class that contains the data for the GET line of
 	 * the HTTP request.
 	 */
-	private static class GETLine {
+	private final static class HttpRequestLine {
+		
+		/**
+		 * The index of the request.
+		 */
   		final int _index;
+
+		/**
+		 * The file name of the request.
+		 */
   		final String _fileName;
 
-        /** flag indicating if the protocol is HTTP1.1 */
+        /** 
+		 * Flag indicating if the protocol is HTTP1.1.
+		 */
         final boolean _http11;
 
 		/**
-		 * Constructs a new <tt>GETLine</tt> instance.
+		 * Constructs a new <tt>RequestLine</tt> instance.
 		 *
 		 * @param index the index for the file to get
 		 * @param fileName the name of the file to get
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
-		GETLine(int index, String fileName, boolean http11) {
+		HttpRequestLine(int index, String fileName, boolean http11) {
   			_index = index;
   			_fileName = fileName;
             _http11 = http11;
