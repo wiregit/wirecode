@@ -10,7 +10,10 @@ import com.limegroup.gnutella.*;
  * etc.  This class is specialized to only track messages received
  * from LimeWires.
  */
-public class OutOfBandThroughputStat extends AdvancedStatistic {
+public class OutOfBandThroughputStat extends BasicStatistic {
+
+    public static final int MIN_SAMPLE_SIZE = 275;
+    public static final int MIN_SUCCESS_RATE = 70;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
@@ -41,6 +44,23 @@ public class OutOfBandThroughputStat extends AdvancedStatistic {
 	public static final Statistic RESPONSES_BYPASSED = 
 	    new OutOfBandThroughputStat();
 
-    
+    /**
+     * @return a double from 0 to 100 that signifies the OOB success percentage.
+     */
+    public static double getSuccessRate() {
+        double numRequested = RESPONSES_REQUESTED.getTotal();
+        double numReceived  = RESPONSES_RECEIVED.getTotal();
+        return (numReceived/numRequested) * 100;
+    }
+
+    /**
+     * @return whether or not the success rate is good enough.
+     */
+    public static boolean successRateIsGood() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return true;
+        return (getSuccessRate() > MIN_SUCCESS_RATE);
+    }
 
 }

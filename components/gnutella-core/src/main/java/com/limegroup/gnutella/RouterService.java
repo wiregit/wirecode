@@ -11,6 +11,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
+import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
@@ -744,9 +745,12 @@ public class RouterService {
 
     /** 
      * Returns a new GUID for passing to query.
+     * This method is the central point of decision making for sending out OOB 
+     * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isGUESSCapable() && !uploadManager.isBusy())
+        if (isGUESSCapable() && !uploadManager.isBusy() && 
+            OutOfBandThroughputStat.successRateIsGood())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
