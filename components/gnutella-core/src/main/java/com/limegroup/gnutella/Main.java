@@ -35,8 +35,12 @@ public class Main {
 		//Print push route
 		else if (command.equals("stat")) {
 		    service.dumpConnections();
-		}
-		String[] commands=split(command);
+		    System.out.println("Number of hosts: "+service.getNumHosts());
+		    System.out.println("Number of files: "+service.getNumFiles());
+		    System.out.println("Size of files: "+service.getTotalFileSize());
+		} else if (command.equals("update"))
+		    service.updateHorizon();	    
+		String[] commands=split(command);	       
 		//Connect to remote host (establish outgoing connection)
 		if (commands.length>=2 && commands[0].equals("connect")) {
 		    try {
@@ -47,6 +51,12 @@ public class Main {
 		    } catch (IOException e) {
 			System.out.println("Couldn't establish connection.");
 		    }
+		} else if (commands.length>=2 && commands[0].equals("query")) {
+		    //Get query string from command (possibly multiple words)
+		    int i=command.indexOf(' ');
+		    Assert.that(i!=-1 && i<command.length());
+		    String query=command.substring(i+1);
+		    service.query(query,0);
 		}
 	    } catch (IOException e) {
 		System.exit(1);
