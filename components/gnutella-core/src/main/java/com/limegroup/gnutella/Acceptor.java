@@ -28,6 +28,7 @@ public class Acceptor extends Thread {
 
     private ConnectionManager _connectionManager;
     private DownloadManager _downloadManager;
+    private UploadManager _uploadManager;
     private MessageRouter _router;
     private ActivityCallback _callback;
 
@@ -86,11 +87,13 @@ public class Acceptor extends Thread {
      */
     public void initialize(ConnectionManager connectionManager,
                            MessageRouter router,
-                           DownloadManager downloadManager) {
+                           DownloadManager downloadManager,
+                           UploadManager uploadManager) {
         _connectionManager = connectionManager;
         _router = router;
         _downloadManager = downloadManager;
-
+        _uploadManager = uploadManager;
+		
         setDaemon(true);
         start();
     }
@@ -311,6 +314,7 @@ public class Acceptor extends Thread {
                 else if (word.equals("GET")) {
                  //     HTTPManager mgr = new HTTPManager(_socket, _router,
 //                          Acceptor.this, _callback, false);
+					_uploadManager.acceptUpload(_socket);
                 }
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {

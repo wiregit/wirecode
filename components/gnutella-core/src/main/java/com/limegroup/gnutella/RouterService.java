@@ -17,6 +17,7 @@ public class RouterService
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
     private DownloadManager downloader;
+    private UploadManager uploadmanager;
 
     /**
      * Create a RouterService accepting connections on the default port
@@ -42,13 +43,17 @@ public class RouterService
         this.router = router;
         this.catcher = new HostCatcher(callback);
         downloader = new DownloadManager();
+		this.uploadmanager = new UploadManager();
 
         // Now, link all the pieces together, starting the various threads.
         this.catcher.initialize(acceptor, manager,
                                 SettingsManager.instance().getHostList());
-        this.router.initialize(acceptor, manager, catcher);
+        // this.router.initialize(acceptor, manager, catcher);
+        this.router.initialize(acceptor, manager, catcher, uploadmanager);
         this.manager.initialize(router, catcher);
-        this.acceptor.initialize(manager, router, downloader);
+		
+		this.uploadmanager.initialize(activityCallback, router, acceptor);
+        this.acceptor.initialize(manager, router, downloader, uploadmanager);
         this.downloader.initialize(callback, router, acceptor, FileManager.instance());
     }
 

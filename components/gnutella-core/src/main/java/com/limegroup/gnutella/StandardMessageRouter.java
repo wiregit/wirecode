@@ -231,7 +231,7 @@ public class StandardMessageRouter
                 SettingsManager.instance().getMaxUploads())
             return;
 */
-
+		
         // Unpack the message
         String host = new String(pushRequest.getIP());
         byte[] ip = pushRequest.getIP();
@@ -257,7 +257,12 @@ public class StandardMessageRouter
             //not found....but why bother?
             return;
         }
+
         String file = desc._name;
+
+	
+		_uploadManager.acceptPushUpload(file, h, port, 
+										index, req_guid_hexstring);
 
 //          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
 //                                             _callback);

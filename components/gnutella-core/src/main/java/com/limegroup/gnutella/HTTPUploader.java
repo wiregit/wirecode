@@ -16,7 +16,7 @@ import com.sun.java.util.collections.*;
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class HTTPUploader implements Uploader {
+public abstract class HTTPUploader implements Uploader {
                     
 	protected int BUFFSIZE = 1024;
 	
@@ -25,9 +25,12 @@ public class HTTPUploader implements Uploader {
 	protected Socket _socket;
 	protected int _amountRead;
 	protected int _uploadBegin;
+	protected int _uploadEnd;
 	protected int _fileSize;
 	protected int _index;
 	protected String _filename;
+	protected String _hostName;
+	protected int _state;
 	
 	/****************** Constructors ***********************/
 	/**
@@ -47,14 +50,15 @@ public class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index,
-						int begin) throws IOException {
+	public HTTPUploader(String file, Socket s, int index)
+		throws IOException {
 		if (_socket == null)
 			throw new IOException("Socket is null");
 		_socket = s;
+		_hostName = _socket.getInetAddress().getHostAddress();
+		_hostName = 
 		_filename = file;
 		_index = index;
-		_uploadBegin = begin;
 		_amountRead = 0;
 	}
 		
@@ -64,13 +68,13 @@ public class HTTPUploader implements Uploader {
 		
 		// NOTE: Do we know the name of the file?  Can this be
 		// passed here? Or do we just know the index?
-
 		_socket = new Socket(host, port);
 		_filename = file;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
-		
+		_hostName = host;
+
 		// try to create the socket.
 		try {
 			_socket = new Socket(host, port);
@@ -151,31 +155,35 @@ public class HTTPUploader implements Uploader {
 	/**
 	 * returns the name of the file being uploaded.
 	 */
-	public String getFileName() {return null;}
+	public String getFileName() {return _filename;}
 	
 	/**
 	 * returns the length of the file being uploaded.
 	 */ 
-	public int getFileSize() {return 0;}
+	 public int getFileSize() {return _fileSize;}
 
 	/**
 	 * returns the index of the file being uploaded.
 	 */ 
-	public int getIndex() {return 0;}
+	public int getIndex() {return _index;}
 
 	/**
 	 * returns the amount that of data that has been uploaded.
 	 * this method was previously called "amountRead", but the
 	 * name was changed to make more sense.
 	 */ 
-	public int amountUploaded() {return 0;}
+	public int amountUploaded() {return _amountRead;}
 
 	/**
 	 * returns the string representation of the IP Address
 	 * of the host being uploaded to.
 	 */
-	public String getHost() {return null;}
+	public String getHost() {return _hostName;}
 	
-	public int getState() {return 0;}
+	/**
+	 * returns an integer value that represents a state, such
+	 * as CONNECTING, or ERROR.
+	 */ 
+	// public int getState() {return _state;}
 
 }

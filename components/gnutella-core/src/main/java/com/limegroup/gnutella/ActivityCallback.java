@@ -41,9 +41,9 @@ public interface ActivityCallback
 
     public void removeDownload(Downloader d);
 
-    public void addUpload(HTTPUploader u);
+    public void addUpload(Uploader u);
 
-    public void removeUpload(HTTPUploader u);
+    public void removeUpload(Uploader u);
 
     /** Temp function until we rewrite HTTPManager for counting connections */
     public int getNumUploads();
