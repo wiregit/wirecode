@@ -30,7 +30,7 @@ public class IOUtils {
         for (int i=0 ; i < maxSize+1 ; i++) {
             int got=in.read();
             if (got==-1) {//EOF
-                throw new IOException();
+                throw new IOException("unexpected end of file");
 			} else if ((char)got==' ') { //got word.  Exclude space.
 				return new String(buf,0,i);
             } else if(i != maxSize) { //We dont store the last letter
@@ -39,6 +39,6 @@ public class IOUtils {
         }
         //if word of size upto maxsize not found, throw an IOException to
         //indicate that (Fixes bug 26 in 'core' project)
-        throw new IOException();
+        throw new IOException("could not read word");
     }
 }
