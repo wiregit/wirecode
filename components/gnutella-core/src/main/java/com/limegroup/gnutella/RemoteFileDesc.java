@@ -15,7 +15,7 @@ public class RemoteFileDesc {
 	private String _filename; 
 	private int _index;
 	private byte[] _clientGUID;
-	private int _priority;
+	private int _speed;
 	private int _size;
 
 	/** 
@@ -24,10 +24,10 @@ public class RemoteFileDesc {
 	 * @param index the index of the file that the client sent
 	 * @param filename the name of the file
 	 * @param clientGUID the unique identifier of the client
-	 * @param priority this is still a little up in the air
+	 * @param spped the speed of the connection
 	 */
 	public RemoteFileDesc(String host, int port, int index, String filename,
-						  int size, byte[] clientGUID, int priority) {
+						  int size, byte[] clientGUID, int speed) {
 		
 		_host = host;
 		_port = port;
@@ -35,7 +35,7 @@ public class RemoteFileDesc {
 		_filename = filename;
 		_size = size;
 		_clientGUID = clientGUID;
-		_priority = priority;
+		_speed = speed;
 	}
 
 	/* Accessor Methods */
@@ -45,7 +45,7 @@ public class RemoteFileDesc {
 	public int getSize() {return _size;}
 	public String getFileName() {return _filename;}
 	public byte[] getClientGUID() {return _clientGUID;}
-	public int getPriority() {return _priority;}
+	public int getSpeed() {return _speed;}
 
 	public void setHost(String h) {_host = h;}
 	public void setPost(int p) {_port = p;}
@@ -53,6 +53,6 @@ public class RemoteFileDesc {
 	public void setSize(int s) {_size = s;}
 	public void setFileName(String name) {_filename = name;}
 	public void setClientGUID(byte[] b) {_clientGUID = b;}
-	public void setPriority(int p) {_priority = p;}
+	public void setSpeed(int s) {_speed = s;}
 
 }
