@@ -15,6 +15,7 @@ import java.util.Enumeration;
 
 public final class FileDesc {
     
+	private final File _file;
     public final int _index;
     public final String _path;
     public final String _name;
@@ -23,23 +24,25 @@ public final class FileDesc {
     public HashSet /* of Strings */ _urns; // one or more "urn:" names for this file
 		
     /**
-     * @param i index of the file
-     * @param n the name of the file (e.g., "funny.txt")
-     * @param p the fully-qualified path of the file
-     *  (e.g., "/home/local/funny.txt")
-     * @param s the size of the file, in bytes.  (Note that
-     *  files are currently limited to Integer.MAX_VALUE bytes
-     *  length, i.e., 2048MB.)
+	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
+	 * <tt>File</tt> class and the associated urns.
+	 *
+	 * @param file the <tt>File</tt> instance to use for constructing the
+	 *  <tt>FileDesc</tt>
+	 * @param urns the <tt>HashSet</tt> of URNs for this <tt>FileDesc</tt>
      */
     public FileDesc(File file, int index, HashSet urns) {
 		
+		_file = file;
         _index = index;
         _name = file.getName();
         _path = file.getAbsolutePath(); //TODO: right method?
         _size = (int)file.length();
         _modTime = file.lastModified();
         _urns = urns;
-        // if(shouldCalculateUrns()) calculateUrns();
+        //if(this.shouldCalculateUrns()) {
+		//this.calculateUrns();
+		//}
     }
 
     public void print() {
@@ -105,13 +108,13 @@ public final class FileDesc {
     }
     
     /**
-     * adds any URNs that can be locally calculated; may take a while to complete on large files
+     * adds any URNs that can be locally calculated; may take a while to 
+	 * complete on large files.
      */
     public void calculateUrns() {
         try {
             // update modTime
-            File f = new File(_path);
-            _modTime = f.lastModified();
+            _modTime = _file.lastModified();
             
             FileInputStream fis = new FileInputStream(_path);   
             // we can only calculate SHA1 for now
@@ -126,7 +129,8 @@ public final class FileDesc {
             if(_urns==null) _urns = new HashSet();
             // preferred casing: lowercase "urn:sha1:", uppercase encoded value
             // note that all URNs are case-insensitive for the "urn:<type>:" part,
-            // but some MAY be case-sensitive thereafter (SHA1/Base32 is case insensitive)
+            // but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
+			//insensitive)
             _urns.add("urn:sha1:"+Base32.encode(sha1));
         } catch (IOException e) {
             // relatively harmless to not have URN
@@ -140,7 +144,7 @@ public final class FileDesc {
      */
     public boolean satisfiesUrn(String urn) {
         // first check if modified since last hashing
-        if ((new File(_path)).lastModified()!=_modTime) {
+        if (_file.lastModified()!=_modTime) {
             // recently modified; throw out SHA1 values
             Iterator iter = _urns.iterator();
             while(iter.hasNext()){
@@ -175,7 +179,26 @@ public final class FileDesc {
         return null;
     }
 
+	/**
+	 * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
+	 *
+	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>
+	 */
+	public File getFile() {
+		return _file;
+	}
 
+    /**
+     * Opens an input stream to the <tt>File</tt> instance for this
+	 * <tt>FileDesc</tt>.
+	 *
+	 * @return an <tt>InputStream</tt> to the <tt>File</tt> instance
+	 * @throws <tt>FileNotFoundException</tt> if the file represented
+	 *  by the <tt>File</tt> instance could not be found
+     */
+    public InputStream getInputStream() throws FileNotFoundException {
+		return new FileInputStream(_file);
+    }
 }
 
 
