@@ -1,10 +1,12 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
@@ -346,8 +348,7 @@ public final class HugeTestUtils {
 
 		for(int i=0; i<UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				UNEQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.create(UNEQUAL_URLS[i]);
+				UNEQUAL_SHA1_LOCATIONS[i] = create(UNEQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);
@@ -356,8 +357,7 @@ public final class HugeTestUtils {
 
 		for(int i=0; i<EQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				EQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.create(EQUAL_URLS[i]);
+				EQUAL_SHA1_LOCATIONS[i] = create(EQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);
@@ -392,6 +392,30 @@ public final class HugeTestUtils {
 			}
 		}
 		*/
+	}
+	
+	/**
+	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
+	 * <tt>URL</tt> instance.  This constructor creates an alternate
+	 * location with the current date and time as its timestamp.
+	 * This can be used, for example, for newly uploaded files.
+	 *
+	 * @param url the <tt>URL</tt> instance for the resource
+	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
+	 *  <tt>null</tt>
+	 * @throws <tt>MalformedURLException</tt> if a copy of the supplied 
+	 *  <tt>URL</tt> instance cannot be successfully created
+	 * @throws <tt>IOException</tt> if the url argument is not a
+	 *  valid location for any reason
+	 * 
+	 *NOTE: this constructor is used only in tests, so it can be removed.
+	 */
+	public static AlternateLocation create(final URL url) 
+		                             throws MalformedURLException, IOException {
+		if(url == null) 
+			throw new NullPointerException("cannot accept null URL");
+
+		return AlternateLocation.create(url.toExternalForm());
 	}
 	
 }

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import junit.framework.Test;
@@ -18,6 +19,7 @@ import com.limegroup.gnutella.messages.*;
  */
 public final class AlternateLocationTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    
 
 	private static final String[] equalLocs = {
 		"http://200.30.1.02:6352" + HTTPConstants.URI_RES_N2R +
@@ -83,8 +85,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
 							  HTTPConstants.URI_RES_N2R+
 							  HugeTestUtils.URNS[i].httpStringValue());
-			AlternateLocation al = 
-			    AlternateLocation.create(url);
+			AlternateLocation al = HugeTestUtils.create(url);
 		}
 	}
 
@@ -111,8 +112,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
-				AlternateLocation al = 
-				    AlternateLocation.create(url);
+				AlternateLocation al = HugeTestUtils.create(url);
 				fail("AlternateLocation constructor should have thrown an exception");
 			}
 		} catch(IOException e) {
@@ -306,8 +306,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	public void testConstructorForBadPorts() throws Exception {
 		try {
 			for(int i=0; i<HugeTestUtils.BAD_PORT_URLS.length; i++) {
-				AlternateLocation al = 
-				    AlternateLocation.create(HugeTestUtils.BAD_PORT_URLS[i]);
+				AlternateLocation al = HugeTestUtils.create(HugeTestUtils.BAD_PORT_URLS[i]);
 				fail("alternate location string should not have been accepted: "+
 					 HugeTestUtils.BAD_PORT_URLS[i]);
 			}			
@@ -656,4 +655,5 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
             AlternateLocation al = AlternateLocation.create(loc);
         }
     }
+    
 }

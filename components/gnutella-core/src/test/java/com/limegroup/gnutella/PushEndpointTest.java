@@ -39,18 +39,18 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint empty = new PushEndpoint(guid1.bytes());
     	
     	assertEquals(guid1,new GUID(empty.getClientGUID()));
-    	assertEquals(PushEndpoint.HEADER_SIZE,empty.getSizeBytes());
+    	assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies()));
     	assertEquals(0,empty.getProxies().size());
     	
     	PushEndpoint one = new PushEndpoint(guid2.bytes(),set1);
     	assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE,
-    			one.getSizeBytes());
+    			PushEndpoint.getSizeBytes(one.getProxies()));
     	assertEquals(1,one.getProxies().size());
     	assertEquals(0,one.supportsFWTVersion());
     	
     	PushEndpoint two = new PushEndpoint(guid2.bytes(),set2);
     	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE,
-    			two.getSizeBytes());
+    			PushEndpoint.getSizeBytes(two.getProxies()));
     	assertEquals(2,two.getProxies().size());
     	assertEquals(0,two.supportsFWTVersion());
     	
@@ -85,10 +85,10 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
     	assertEquals(0,one.supportsFWTVersion());
     	byte [] network = one.toBytes();
-    	byte [] network2 = new byte [one.getSizeBytes()+5];
+    	byte [] network2 = new byte [PushEndpoint.getSizeBytes(one.getProxies())+5];
     	one.toBytes(network2,2);
     	
-    	assertEquals(one.getSizeBytes(),network.length);
+    	assertEquals(PushEndpoint.getSizeBytes(one.getProxies()),network.length);
     	PushEndpoint one_prim= PushEndpoint.fromBytes(network);
     	assertEquals(one,one_prim);
     	one_prim = PushEndpoint.fromBytes(network2,2);
@@ -99,7 +99,7 @@ public class PushEndpointTest extends BaseTestCase {
     			0,2);
     	assertEquals(2,six.supportsFWTVersion());
     	network = six.toBytes();
-    	assertEquals(six.getSizeBytes(),network.length);
+    	assertEquals(PushEndpoint.getSizeBytes(six.getProxies()),network.length);
     	PushEndpoint four = PushEndpoint.fromBytes(network);
     	assertNotEquals(six,four);
     	assertEquals(2,four.supportsFWTVersion());

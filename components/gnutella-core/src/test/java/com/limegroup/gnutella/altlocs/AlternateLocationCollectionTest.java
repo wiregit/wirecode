@@ -46,7 +46,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
             try {
                 _alternateLocations.add(
-                        AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
+                        HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]));
             } catch (IOException e) {
                 fail("could not set up test");
             }
@@ -241,7 +241,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         for(int i=0; i<5; i++) {
             AlternateLocation al = null;
             try {
-                al= AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]);
+                al= HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]);
             } catch (MalformedURLException e) {
                 fail("unable to set up test");
             } catch (IOException e) {
@@ -252,7 +252,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         }
         
         try {
-            c1.add(AlternateLocation.create(HugeTestUtils.UNEQUAL_URLS[2]));
+            c1.add(HugeTestUtils.create(HugeTestUtils.UNEQUAL_URLS[2]));
             fail("exception should have been thrown by now");
         } catch(Exception e) {
             //expected behaviour

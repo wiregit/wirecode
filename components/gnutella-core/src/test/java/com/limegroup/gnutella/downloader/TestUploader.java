@@ -783,13 +783,14 @@ public class TestUploader extends AssertComparisons {
             out.close();
             return;
         }
-        
+
         //Write data.
         for (int i=start; i<stop; ) {
             //1 second write cycle
             if (stopAfter > -1 && totalUploaded == stopAfter) {
                 stopped=true;
                 out.flush();
+                LOG.debug(name+" stopped at "+totalUploaded);
                 throw new IOException();
             }
             throttle.request(1);
@@ -799,6 +800,7 @@ public class TestUploader extends AssertComparisons {
                 out.write(TestFile.getByte(i)+(byte)1);
             else
                 out.write(TestFile.getByte(i));
+            
             totalUploaded++;
             i++;
         }
@@ -965,7 +967,7 @@ public class TestUploader extends AssertComparisons {
 		}		
 	}
 	
-	
+	private static final RoundRobinQueue rr = new RoundRobinQueue();
 	private class SocketHandler implements Runnable {
 	    private final Socket mySocket;
 	    public SocketHandler(Socket s) {
@@ -974,6 +976,7 @@ public class TestUploader extends AssertComparisons {
 	    public void run() {  
 	        LOG.debug(name+" starting to upload.. ");
             try {
+                rr.enqueue(this);
                 while(http11 && !stopped) {
 
                     handleRequest(mySocket);
@@ -984,6 +987,18 @@ public class TestUploader extends AssertComparisons {
                         handleRequest(mySocket);
                     }
                     mySocket.setSoTimeout(8000);
+                    
+                  /*  synchronized(this) {
+                        if (rr.size() > 1) {
+                            Object next = rr.next();
+                            if (next!=this) {
+                                synchronized(next){
+                                    next.notify();
+                                }
+                                wait();
+                            }
+                        }
+                    }*/
                 }
             } catch (IOException e) {
                 if(totalUploaded < totalAmountToUpload)
@@ -993,6 +1008,15 @@ public class TestUploader extends AssertComparisons {
                 ErrorService.error(t);
             } finally {
                 
+                synchronized(rr) {
+                    rr.remove(this);
+                    if (rr.size() > 0){
+                        Object next = rr.next();
+                        synchronized(next){
+                            next.notify();
+                        }
+                    }
+                }
                 try {
                     mySocket.close();
                 } catch (IOException e) {

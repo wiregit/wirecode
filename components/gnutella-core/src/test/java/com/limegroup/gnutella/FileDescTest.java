@@ -125,7 +125,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		URL sha1Url = new URL("http", "60.23.35.10", 6346, 
 							  "/uri-res/N2R?"+sha1.httpStringValue());
 		AlternateLocation loc =  
-			AlternateLocation.create(sha1Url);
+			HugeTestUtils.create(sha1Url);
 		fd.add(loc);
 	}
 
@@ -143,7 +143,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 								  HTTPConstants.URI_RES_N2R+
 								  HugeTestUtils.URNS[0]);
 			AlternateLocation loc =  
-				AlternateLocation.create(sha1Url);
+				HugeTestUtils.create(sha1Url);
 			assertNotNull("should not be null", loc.getSHA1Urn());
 			fd.add(loc);
 			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);

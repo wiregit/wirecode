@@ -325,7 +325,7 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("-Testing non-swarmed push download");
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
         RemoteFileDesc rfd = pushLoc.createRemoteFileDesc(TestFile.length());
         
@@ -375,7 +375,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
         RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
         
         uploader1.setRate(500);
@@ -1100,7 +1100,7 @@ public class DownloadTest extends BaseTestCase {
         pusher.setRate(RATE);
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1138,10 +1138,10 @@ public class DownloadTest extends BaseTestCase {
         second.setInterestedInFalts(true);
         
         AlternateLocation firstLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1195,7 +1195,7 @@ public class DownloadTest extends BaseTestCase {
         
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
         RemoteFileDesc pushRFD = pushLoc.createRemoteFileDesc(TestFile.length());
         
@@ -1260,8 +1260,7 @@ public class DownloadTest extends BaseTestCase {
         pusher2.setInterestedInFalts(true);
         
         AlternateLocation pushLocFWT = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),
-                savedFile.getName());
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
@@ -1305,7 +1304,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2.stopAfter(550000);
         
         AlternateLocation badPushLoc=AlternateLocation.create(
-                guid.toHexString()+";1.2.3.4:5",TestFile.hash(),savedFile.getName());
+                guid.toHexString()+";1.2.3.4:5",TestFile.hash());
         
         AlternateLocationCollection alc = 
             AlternateLocationCollection.create(TestFile.hash());
