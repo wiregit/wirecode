@@ -416,7 +416,12 @@ public final class AlternateLocationCollection
     }
     
     public AltLocDigest getDigest() {
+        return getDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
+    }
+    
+    public AltLocDigest getDigest(int elementSize) {
         AltLocDigest digest = new AltLocDigest();
+        digest.setElementSize(elementSize);
         FixedSizeSortedSet clone;
     	
     	
@@ -437,9 +442,13 @@ public final class AlternateLocationCollection
     }
     
     public AltLocDigest getPushDigest() {
+        return getPushDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
+    }
+    
+    public AltLocDigest getPushDigest(int elementSize) {
         AltLocDigest digest = new AltLocDigest();
+        digest.setElementSize(elementSize);
         FixedSizeSortedSet clone;
-    	
     	
     	synchronized(this) {
     		clone =(FixedSizeSortedSet)LOCATIONS.clone();

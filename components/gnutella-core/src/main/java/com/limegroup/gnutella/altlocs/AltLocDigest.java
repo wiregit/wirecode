@@ -39,7 +39,7 @@ public class AltLocDigest implements BloomFilter {
     /**
      * default size for each element.
      */
-    private static final int DEFAULT_ELEMENT_SIZE = 12;
+    public static final int DEFAULT_ELEMENT_SIZE = 12;
     
     /**
      * Max number of elements a digest can contain
@@ -140,6 +140,7 @@ public class AltLocDigest implements BloomFilter {
         ByteOrder.short2leb((short)_values.cardinality(),ret,1);
         
         // if the elements are the default size of 12 bits, serialize them the fast way
+        //TODO: write out optimized versions for the various powers of 2
         if (_elementSize == DEFAULT_ELEMENT_SIZE ) {
             int index = 3;
             boolean first = true;
@@ -273,7 +274,7 @@ public class AltLocDigest implements BloomFilter {
         _values.andNot(other._values);
     }
     
-    private void setElementSize(int size) {
+    public void setElementSize(int size) {
         _elementSize = size;
         for (int i=0;i < size;i++)
             _mask |= (1 << i); 
