@@ -9,9 +9,8 @@ public class Assert {
         if (!ok) {
             System.err.println("Assertion failed: "+msg);
 			RuntimeException re = new AssertFailure(msg);
-			RouterService rs = RouterService.instance();
-			if(rs != null) {
-				ActivityCallback callback = rs.getCallback();
+			ActivityCallback callback = RouterService.getCallback();
+			if(callback != null) {
 				callback.error(ActivityCallback.ASSERT_ERROR, re);
 			}
 			throw re;

@@ -27,7 +27,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			&& ((int)(Math.random()*100.f) >
 				settings.getFreeloaderAllowed())
 			&& (handler instanceof ManagedConnection)) {
-			ConnectionManager cm = RouterService.instance().getConnectionManager();
+			ConnectionManager cm = RouterService.getConnectionManager();
             cm.remove((ManagedConnection)handler);
         }
 	}
@@ -35,11 +35,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
 		if(handler.isPersonalSpam(reply)) return;
 			
-		RouterService rs = RouterService.instance();
-		ActivityCallback callback = rs.getCallback();
+		ActivityCallback callback = RouterService.getCallback();
 		callback.handleQueryReply(reply);
 
-		DownloadManager dm = rs.getDownloadManager();
+		DownloadManager dm = RouterService.getDownloadManager();
 		dm.handleQueryReply(reply);
 
         QueryUnicaster.instance().handleQueryReply(reply);
@@ -63,10 +62,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-		RouterService rs = RouterService.instance();
         FileDesc desc;
         try {
-			FileManager fm = rs.getFileManager();
+			FileManager fm = RouterService.getFileManager();
             desc = fm.get(index);
         }
         catch (IndexOutOfBoundsException e) {
@@ -78,10 +76,11 @@ public final class ForMeReplyHandler implements ReplyHandler {
         String file = desc.getName();
 
 		
-        if (!rs.getAcceptor().isBannedIP(h)) {
+        if (!RouterService.getAcceptor().isBannedIP(h)) {
 			
-            rs.getUploadManager().acceptPushUpload(file, h, port, 
-												   index, req_guid_hexstring);
+            RouterService.getUploadManager().
+			    acceptPushUpload(file, h, port, 
+								 index, req_guid_hexstring);
 		}
 	}
 	

@@ -151,7 +151,7 @@
 	      </t>
 	    </section>
 	  </section>
-	  <section title="Switch to Iterative Unicast, or UltraPeer Crawling">
+	  <section title="Switch to Iterative Unicast, or 'UltraPeer Crawling'">
 	    <t>
 	      We propose to alleviate these issues by reducing the TTL to 1 on
 		  outgoing queries and by sending queries to one UltraPeer at a time
@@ -179,10 +179,7 @@
 		any leaves not implementing this proposal to benefit from it
 		nevertheless.  From the UltraPeer perspective, it is simply 
 		a switch to sending out all queries with TTL=1 while querying
-		a much larger set of UltraPeers directly over UDP, in addition
-		to the traditional queries on intra-UltraPeer connections over
-		TCP.  
-
+		a much larger set of UltraPeers directly over UDP.
 
 		<vspace/>
 		<vspace/>
@@ -216,12 +213,17 @@
 		
 		The client MUST pause for a reasonable amount
 		of time between UltraPeer queries, perhaps about
-		600 milliseconds.  This gives the previous query time to supply
+		200 milliseconds.  This pause accounts for network latency, as it
+		takes a variable amount of time to receive results from an UltraPeer
+		and its leaves.  This interval gives the previous query time to supply
 		all of its results, potentially reaching the desired number
 		and ending the query.  The optimal interval between searches
 		should be determined by experimentation, but implementors MUST
 		send as few queries as possible without degrading user experience. 
-		This is a tradeoff between latency and network impact.
+		Implementations may also vary the interval between queries 
+		depending on how many UltraPeers have already been reached.
+		For example, the interval may be 400 milliseconds for the 
+		first 10 UltraPeers, but then go down to 200 for the next 100.
 
 		<vspace/>
 		<vspace/>
@@ -261,7 +263,7 @@
 			</t>
 			<t>
 			  Clients MUST NOT query more than 1 UltraPeer every
-			  100 milliseconds.
+			  50 milliseconds.
 			</t>
 		    <t>
 			  UltraPeers MUST NOT query the same UltraPeer more 
@@ -326,7 +328,16 @@
 		can be used more productively. 
 		</t>
 	  </section>
-	  <section anchor="discovery" title="UltraPeer Discovery">
+	  <section anchor="latency" title="Latency">
+	    <t>
+		  This change impacts the latency of search results.  If a
+		  given search is sent to 10,000 UltraPeers with an interval
+		  between individual UltraPeer queries of 100, the complete search 
+		  will take 1,000 seconds or over 15 minutes.  
+		</t>
+	  </section>
+	</section>
+	<section anchor="discovery" title="UltraPeer Discovery">
 	    <t>
 		  For this scheme to work, all UltraPeers must have the
 		  ability to discover other UltraPeers that accept incoming
@@ -380,8 +391,7 @@
 		  number of pings to make this possible, less the network
 		  become flooded with ping and pong traffic.
 		</t>
-	  </section>
-	  </section>
+	</section>
 
 
       <section anchor="udp" title="UDP">

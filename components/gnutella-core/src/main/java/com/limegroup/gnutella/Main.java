@@ -12,8 +12,8 @@ import com.limegroup.gnutella.security.User;
 public class Main implements ActivityCallback {
     public static void main(String args[]) {
 		ActivityCallback callback = new Main();
-		RouterService.setCallback(callback);
-		RouterService service = RouterService.instance();
+		//RouterService.setCallback(callback);
+		RouterService service = new RouterService(callback);
 		service.start();    
 
 

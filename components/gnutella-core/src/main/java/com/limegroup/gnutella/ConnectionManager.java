@@ -73,7 +73,7 @@ public class ConnectionManager {
     /* Sister backend classes. */
     private MessageRouter _router;
     private HostCatcher _catcher;
-    private ActivityCallback _callback;
+    //private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 
@@ -133,10 +133,9 @@ public class ConnectionManager {
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
-    public ConnectionManager(ActivityCallback callback, 
-        Authenticator authenticator) {
-        _callback = callback;		
-        this._authenticator = authenticator; 
+    public ConnectionManager(Authenticator authenticator) {
+        //_callback = callback;		
+        _authenticator = authenticator; 
 		_settings = SettingsManager.instance(); 
     }
 
@@ -144,9 +143,9 @@ public class ConnectionManager {
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    public void initialize(MessageRouter router, HostCatcher catcher) {
-        _router = router;
-        _catcher = catcher;
+    public void initialize() {
+        _router = RouterService.getMessageRouter();//router;
+        _catcher = RouterService.getHostCatcher();//catcher;
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
@@ -230,7 +229,8 @@ public class ConnectionManager {
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
-             _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+             RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
+											   e);
          } finally {
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
@@ -724,7 +724,8 @@ public class ConnectionManager {
      */
     public Endpoint getSelfAddress()
     {
-       return new Endpoint(_router.getAddress(), _router.getPort()); 
+       return new Endpoint(RouterService.getAddress(), 
+						   RouterService.getPort()); 
     }
     
     /**
@@ -939,7 +940,7 @@ public class ConnectionManager {
         _router.removeConnection(c);
 
         // 4) Notify the listener
-        _callback.connectionClosed(c); 
+        RouterService.getCallback().connectionClosed(c); 
     }
 
     /**
@@ -1037,7 +1038,7 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        _callback.connectionInitializing(c);
+        RouterService.getCallback().connectionInitializing(c);
 
         try {
             c.initialize();
@@ -1069,7 +1070,7 @@ public class ConnectionManager {
         }
         if(connectionOpen)
         {
-            _callback.connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
@@ -1250,7 +1251,7 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-            _callback.connectionInitializing(c);
+            RouterService.getCallback().connectionInitializing(c);
         }
             
         try {
@@ -1284,7 +1285,7 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-            _callback.connectionInitializing(c);
+            RouterService.getCallback().connectionInitializing(c);
         }
 
         boolean connectionOpen = false;
@@ -1298,7 +1299,7 @@ public class ConnectionManager {
         }
         if(connectionOpen)
         {
-            _callback.connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
@@ -1352,7 +1353,8 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
+												  e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1422,7 +1424,8 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
+												  e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1506,7 +1509,8 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
+												  e);
             }
             finally{
                 //Record that we're done with the connection, which may allow

@@ -17,7 +17,6 @@ import java.net.*;
  */
 public abstract class MessageRouter
 {
-    protected HostCatcher _catcher;
     protected ConnectionManager _manager;
     protected Acceptor _acceptor;
 
@@ -124,8 +123,6 @@ public abstract class MessageRouter
      */
     private volatile int _numRouteErrors;
 
-	protected UploadManager _uploadManager;
-
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -146,13 +143,10 @@ public abstract class MessageRouter
     /**
      * Links the MessageRouter up with the other back end pieces
      */
-    public void initialize(Acceptor acceptor, ConnectionManager manager,
-						   HostCatcher catcher, UploadManager uploadManager)
+    public void initialize()
     {
-        _acceptor = acceptor;
-        _manager = manager;
-        _catcher = catcher;
-        _uploadManager = uploadManager;
+        _acceptor = RouterService.getAcceptor();//acceptor;
+        _manager = RouterService.getConnectionManager();//manager;
 		_forMeReplyHandler = new ForMeReplyHandler();
     }
 
@@ -650,7 +644,8 @@ public abstract class MessageRouter
                                    ReplyHandler receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
-        boolean newAddress=_catcher.add(pingReply, receivingConnection);
+        boolean newAddress = 
+		    RouterService.getHostCatcher().add(pingReply, receivingConnection);
 
         //First route to originator in usual manner.
         ReplyHandler replyHandler =
@@ -969,8 +964,10 @@ public abstract class MessageRouter
         int port = _acceptor.getPort();
         byte[] ip = _acceptor.getAddress();
 
+		UploadManager um = RouterService.getUploadManager();
+
         //Return measured speed if possible, or user's speed otherwise.
-        long speed = _uploadManager.measuredUploadSpeed();
+        long speed = um.measuredUploadSpeed();
         boolean measuredSpeed=true;
         if (speed==-1) {
             speed=SettingsManager.instance().getConnectionSpeed();
@@ -1015,8 +1012,8 @@ public abstract class MessageRouter
             numResponses-= arraySize;
 
 			// see id there are any open slots
-			boolean busy = _uploadManager.isBusy();
-            boolean uploaded = _uploadManager.hadSuccesfulUpload();
+			boolean busy = um.isBusy();
+            boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
 			boolean incoming = _acceptor.acceptedIncoming();
@@ -1219,16 +1216,16 @@ public abstract class MessageRouter
      * Used to fill out the My-Address header in ManagedConnection.
      * @see Acceptor#getAddress
      */
-    public byte[] getAddress() {
-        return _acceptor.getAddress();
-    }
+    //public byte[] getAddress() {
+	//  return _acceptor.getAddress();
+    //}
 
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
      * @see Acceptor#getPort
      */    
-    public int getPort() {
-        return _acceptor.getPort();
-    }
+    //public int getPort() {
+	//  return _acceptor.getPort();
+    //}
 }

@@ -131,13 +131,13 @@ public final class SupernodeAssigner {
 	 * bandwidth used.  Non-blocking.
      * @param router provides the schedule(..) method for the timing
      */
-    public void start(RouterService router) {
+    public void start() {
         Runnable task=new Runnable() {
             public void run() {
                 collectBandwidthData();
             }
         };            
-        router.schedule(task, 0, TIMER_DELAY);
+        RouterService.schedule(task, 0, TIMER_DELAY);
     }
 
 	/**

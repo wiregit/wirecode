@@ -41,12 +41,9 @@ public class BrowseHostHandler {
      */
     private GUID _serventID = null;
 
-    /** Expires pushes that we are waiting for.
-     */
-    private static Expirer expirer = null;
     static {
-        expirer = new Expirer();
-        RouterService.instance().schedule(expirer, 0, 5000);// every 5 seconds
+        Expirer expirer = new Expirer();
+        RouterService.schedule(expirer, 0, 5000);// every 5 seconds
     }
 
     /**

@@ -824,7 +824,7 @@ public class QueryReply extends Message implements Serializable{
         final String ip = getIP();
         final int port = getPort();
         final int qual = 
-        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
+        calculateQualityOfService(!RouterService.acceptedIncomingConnection());
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;
@@ -899,7 +899,7 @@ public class QueryReply extends Message implements Serializable{
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
          * this method, take a look at isFirewalledQuality! */
-		if(Arrays.equals(_address, RouterService.instance().getIPAddress())) {
+		if(Arrays.equals(_address, RouterService.getAddress())) {
 			return 3;       // same address -- display it
         } else if (iFirewalled && heFirewalled==YES) {
             return -1;      //     both firewalled; transfer impossible

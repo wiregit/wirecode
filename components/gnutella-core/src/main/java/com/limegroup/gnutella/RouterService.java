@@ -45,96 +45,81 @@ import com.limegroup.gnutella.util.*;
  * </ul> 
  */
 public final class RouterService {
-    private static ActivityCallback callback;
 
-    private final HostCatcher catcher;
-    private final MessageRouter router;
-    private final Acceptor acceptor;
-    private final ConnectionManager manager;
-    private final ResponseVerifier verifier = new ResponseVerifier();
-    private final DownloadManager downloader;
-    private final UploadManager uploadManager;
-    private final FileManager fileManager;
+
+    private static final FileManager fileManager = new MetaFileManager();
+
+    /**
+     * For authenticating users
+     */
+    private static Authenticator authenticator = new ServerAuthenticator();
+
+    private static final SimpleTimer timer = new SimpleTimer(true);
+
+    private static final Acceptor acceptor = new Acceptor();
+
+	/**
+	 * Initialize the class that manages all TCP connections.
+	 */
+    private static final ConnectionManager manager =
+		new ConnectionManager(authenticator);
+
+    private static final HostCatcher catcher = new HostCatcher();
+    private static final DownloadManager downloader = new DownloadManager();
+    private static final UploadManager uploadManager = 
+		new UploadManager(fileManager);
+    private static final ResponseVerifier verifier = new ResponseVerifier();
+
 	//keep the reference around...prevent class GC
-    private final ChatManager chatManager;
-	private final Statistics statistics;
-    private final SimpleTimer timer;
+    private static final ChatManager chatManager = ChatManager.instance();
+	private static final Statistics statistics = Statistics.instance();
 
 	/**
 	 * Constant for the <tt>UDPAcceptor</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private final UDPAcceptor udpAcceptor;
-    
-    /**
-     * For authenticating users
-     */
-    private Authenticator authenticator;
+	private static final UDPAcceptor udpAcceptor = UDPAcceptor.instance();
 
     /**
      * isShuttingDown flag
      */
-    private boolean isShuttingDown;
+    private static boolean isShuttingDown;
 
 	/**
-	 * Boolean for whether or not the backend threads have started.
+	 * Variable for the <tt>ActivityCallback</tt> instance.
 	 */
-	private boolean started;
+    private static ActivityCallback callback;
+
+	/**
+	 * Variable for the <tt>MessageRouter</tt> that routes Gnutella
+	 * messages.
+	 */
+    private static MessageRouter router;
 
 	/**
 	 * Constant for the <tt>SettingsManager</tt>.
 	 */
-	private final SettingsManager SETTINGS = SettingsManager.instance();
+	private static final SettingsManager SETTINGS = 
+		SettingsManager.instance();
 
-	/**
-	 * <tt>RouterService</tt> instance, following singleton.
-	 */
-    private static RouterService instance;
-
-    /**
-	 * Accessor for the <tt>RouterService</tt> instance.  This is a bit of a
-	 * hack in that it does not really follow traditional singleton, as this
-	 * may return <tt>null</tt>. 
-	 *
-	 * @return the <tt>RouterService</tt> instance, which can be <tt>null</tt> 
-	 *  if the constructor has not been called
-     */
-    public static RouterService instance() {
-		if(instance == null) {
-			instance = new RouterService();
-		}
-        return instance;
-    }
 
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
 	 */
-  	private RouterService() {
-		this.fileManager = new MetaFileManager();
-		// this used to be given as a parameter, allowing other components,
-		// like the server, to use their own MessageRouter.
-  		this.router = new MetaEnabledMessageRouter(callback, fileManager);
-		this.authenticator = new ServerAuthenticator();
-        this.timer = new SimpleTimer(true, callback);
-		this.acceptor = new Acceptor();
-  		this.manager = new ConnectionManager(callback, authenticator);
-		this.catcher = new HostCatcher();
-		this.downloader = new DownloadManager();
-  		this.uploadManager = new UploadManager(callback, router, 
-											   fileManager);
-		this.chatManager = ChatManager.instance();
-		this.statistics = Statistics.instance();
-		this.udpAcceptor = UDPAcceptor.instance();
+  	public RouterService(ActivityCallback callback) {
+		RouterService.callback = callback;
+  		RouterService.router = 
+		    new MetaEnabledMessageRouter(callback, fileManager);
 
 		// Now, link all the pieces together, starting the various threads.
-		this.router.initialize(acceptor, manager, catcher, uploadManager);
-		this.manager.initialize(router, catcher);	   
-		this.downloader.initialize(callback, router, acceptor, fileManager); 
+		router.initialize();
+		manager.initialize();	   
+		this.downloader.initialize(); 
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
 													 manager);
-		sa.start(this);
+		sa.start();
 
 		if(SETTINGS.getConnectOnStartup()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
@@ -175,22 +160,12 @@ public final class RouterService {
 
         // Restore any downloads in progress.
         downloader.postGuiInit();
-		started = true;
-	}
-
-	/**
-	 * Returns whether or not the backend threads have started running.
-	 * 
-	 * @return <tt>true</tt> if the threads have started, <tt>false</tt> otherwise
-	 */
-	public boolean isStarted() {
-		return started;
 	}
 
     /**
      * Returns the ActivityCallback passed to this' constructor.
      */ 
-    public ActivityCallback getCallback() {
+    public static ActivityCallback getCallback() {
         return RouterService.callback;
     }
     
@@ -199,7 +174,7 @@ public final class RouterService {
 	 *
 	 * @return the <tt>FileManager</tt> in use
 	 */
-    public FileManager getFileManager(){
+    public static FileManager getFileManager(){
         return fileManager;
     }
 
@@ -208,7 +183,7 @@ public final class RouterService {
      *
      * @return the <tt>DownloadManager</tt> in use
      */
-    public DownloadManager getDownloadManager() {
+    public static DownloadManager getDownloadManager() {
         return downloader;
     }
 
@@ -217,7 +192,7 @@ public final class RouterService {
 	 *
 	 * @return the <tt>UDPAcceptor</tt> instance in use
 	 */
-	public UDPAcceptor getUdpAcceptor() {
+	public static UDPAcceptor getUdpAcceptor() {
 		return udpAcceptor;
 	}
 
@@ -226,7 +201,7 @@ public final class RouterService {
 	 *
 	 * @return the <tt>MessageRouter</tt> instance in use
 	 */
-	public MessageRouter getMessageRouter() {
+	public static MessageRouter getMessageRouter() {
 		return router;
 	}
 
@@ -235,7 +210,7 @@ public final class RouterService {
 	 *
 	 * @return the <tt>ConnectionManager</tt> instance in use
 	 */
-	public ConnectionManager getConnectionManager() {
+	public static ConnectionManager getConnectionManager() {
 		return manager;
 	}
 	
@@ -244,7 +219,7 @@ public final class RouterService {
      *
      * @return the <tt>UploadManager</tt> in use
      */
-	public UploadManager getUploadManager() {
+	public static UploadManager getUploadManager() {
 		return uploadManager;
 	}
 	
@@ -253,7 +228,7 @@ public final class RouterService {
      *
      * @return the <tt>Acceptor</tt> in use
      */
-	public Acceptor getAcceptor() {
+	public static Acceptor getAcceptor() {
 		return acceptor;
 	}
 
@@ -262,7 +237,7 @@ public final class RouterService {
      *
      * @return the <tt>HostCatcher</tt> in use
      */
-	public HostCatcher getHostCatcher() {
+	public static HostCatcher getHostCatcher() {
 		return catcher;
 	}
 
@@ -278,7 +253,7 @@ public final class RouterService {
      * @exception IllegalArgumentException delay or period negative
      * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    void schedule(Runnable task, long delay, long period) {
+    static void schedule(Runnable task, long delay, long period) {
         timer.schedule(task, delay, period);
     }
 
@@ -292,8 +267,8 @@ public final class RouterService {
      * @return a connection to the request host
      * @exception IOException the connection failed
      */
-    public ManagedConnection connectToHostBlocking(String hostname, int portnum)
-            throws IOException {
+    public static ManagedConnection connectToHostBlocking(String hostname, int portnum)
+		throws IOException {
         return manager.createConnectionBlocking(hostname, portnum);
     }
 
@@ -304,7 +279,7 @@ public final class RouterService {
 	 * @return the TCP port that the application is listening on -- if the
 	 *  port has not yet been set, this will return -1
 	 */
-	public int getTCPListeningPort() {
+	public static int getTCPListeningPort() {
 		return acceptor.getPort();
 	}
 
@@ -313,7 +288,7 @@ public final class RouterService {
      * Returns immediately without blocking.  If hostname would connect
      * us to ourselves, returns immediately.
      */
-    public void connectToHostAsynchronously(String hostname, int portnum) {
+    public static void connectToHostAsynchronously(String hostname, int portnum) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
@@ -435,7 +410,7 @@ public final class RouterService {
      * Connects to the network.  Ensures the number of messaging connections
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
-    public void connect() {
+    public static void connect() {
         //delegate to connection manager
         manager.connect();
     }
@@ -444,7 +419,7 @@ public final class RouterService {
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
      */
-    public void disconnect() {
+    public static void disconnect() {
 		// Delegate to connection manager
 		manager.disconnect();
     }
@@ -452,14 +427,14 @@ public final class RouterService {
     /**
      * Closes and removes the given connection.
      */
-    public void removeConnection(ManagedConnection c) {
+    public static void removeConnection(ManagedConnection c) {
         manager.remove(c);
     }
 
     /**
      * Clears the hostcatcher.
      */
-    public void clearHostCatcher() {
+    public static void clearHostCatcher() {
         catcher.clear();
     }
 
@@ -467,21 +442,21 @@ public final class RouterService {
      * Returns the number of pongs in the host catcher.  <i>This method is
      * poorly named, but it's obsolescent, so I won't bother to rename it.</i>
      */
-    public int getRealNumHosts() {
+    public static int getRealNumHosts() {
         return(catcher.getNumHosts());
     }
 
     /**
      * Returns the number of downloads in progress.
      */
-    public int getNumDownloads() {
+    public static int getNumDownloads() {
         return downloader.downloadsInProgress();
     }
     
     /**
      * Returns the number of uploads in progress.
      */
-    public int getNumUploads() {
+    public static int getNumUploads() {
         return uploadManager.uploadsInProgress();
     }
 
@@ -489,7 +464,7 @@ public final class RouterService {
     /**
      * Shuts down the backend and writes the gnutella.net file.
      */
-    public void shutdown() {
+    public static void shutdown() {
         //Update fractional uptime statistics (before writing limewire.props)
         Statistics.instance().shutdown();
 
@@ -537,7 +512,7 @@ public final class RouterService {
      * property.
      * @param newKeep the desired total number of messaging connections
      */
-    public void forceKeepAlive(int newKeep) {
+    public static void forceKeepAlive(int newKeep) {
         //no validation done
         
         //set the new keep alive
@@ -552,7 +527,7 @@ public final class RouterService {
      * @param newKeep the desired total number of messaging connections
      * @exception if the suggested keep alive value is not suitable
      */
-    public void setKeepAlive(int newKeep) throws BadConnectionSettingException {
+    public static void setKeepAlive(int newKeep) throws BadConnectionSettingException {
         
         //validate the keep alive value
 
@@ -603,7 +578,7 @@ public final class RouterService {
      * connection manager.  This does not affect the permanent
      * MAX_INCOMING_CONNECTIONS property.  
      */
-    //public void setMaxIncomingConnections(int max) {
+    //public static void setMaxIncomingConnections(int max) {
 	//manager.setMaxIncomingConnections(max);
     //}
 
@@ -611,7 +586,7 @@ public final class RouterService {
      * Notifies the backend that spam filters settings have changed, and that
      * extra work must be done.
      */
-    public void adjustSpamFilters() {
+    public static void adjustSpamFilters() {
         acceptor.refreshBannedIPs();
 
         //Just replace the spam filters.  No need to do anything
@@ -629,7 +604,7 @@ public final class RouterService {
      * If that fails, this is <i>not</i> modified and IOException is thrown.
      * If port==0, tells this to stop listening to incoming connections.
      */
-    public void setListeningPort(int port) throws IOException {
+    public static void setListeningPort(int port) throws IOException {
         acceptor.setListeningPort(port);
 		udpAcceptor.resetPort();
     }
@@ -638,7 +613,7 @@ public final class RouterService {
      * Sets the host catcher's flag for always notifing ActivityCallback on a 
      * known host added to the catcher.
      */
-    public void setAlwaysNotifyKnownHost(boolean notify) {
+    public static void setAlwaysNotifyKnownHost(boolean notify) {
         catcher.setAlwaysNotifyKnownHost(notify);
     }
 
@@ -647,7 +622,7 @@ public final class RouterService {
      * probably isn't firewalled.  (This is useful for colorizing search
      * results in the GUI.)
      */
-    public boolean acceptedIncomingConnection() {
+    public static boolean acceptedIncomingConnection() {
 		return acceptor.acceptedIncoming();
     }
 
@@ -655,28 +630,28 @@ public final class RouterService {
     /**
      *  Returns the total number of messages sent and received.
      */
-    public int getTotalMessages() {
+    public static int getTotalMessages() {
         return( router.getNumMessages() );
     }
 
     /**
      *  Returns the total number of dropped messages.
      */
-    public int getTotalDroppedMessages() {
+    public static int getTotalDroppedMessages() {
         return( router.getNumDroppedMessages() );
     }
 
     /**
      *  Returns the total number of misrouted messages.
      */
-    public int getTotalRouteErrors() {
+    public static int getTotalRouteErrors() {
         return( router.getNumRouteErrors() );
     }
 
     /**
      *  Returns the number of good hosts in my horizon.
      */
-    public long getNumHosts() {
+    public static long getNumHosts() {
 		long ret=0;
 		for (Iterator iter=manager.getInitializedConnections().iterator();
 			 iter.hasNext() ; )
@@ -687,7 +662,7 @@ public final class RouterService {
     /**
      * Returns the number of files in my horizon.
      */
-    public long getNumFiles() {
+    public static long getNumFiles() {
 		long ret=0;
 		for (Iterator iter=manager.getInitializedConnections().iterator();
 			 iter.hasNext() ; )
@@ -698,7 +673,7 @@ public final class RouterService {
     /**
      * Returns the size of all files in my horizon, in kilobytes.
      */
-    public long getTotalFileSize() {
+    public static long getTotalFileSize() {
 		long ret=0;
 		for (Iterator iter=manager.getInitializedConnections().iterator();
 			 iter.hasNext() ; )
@@ -709,7 +684,7 @@ public final class RouterService {
     /**
      * Prints out the information about current initialied connections
      */
-    public void dumpConnections() {
+    public static void dumpConnections() {
         //dump ultrapeer connections
         System.out.println("UltraPeer connections");
         dumpConnections(manager.getInitializedConnections2());
@@ -723,7 +698,7 @@ public final class RouterService {
      * @param connections The collection(of Connection) 
      * of connections to be printed
      */
-    private void dumpConnections(Collection connections)
+    private static void dumpConnections(Collection connections)
     {
         for(Iterator iterator = connections.iterator(); iterator.hasNext();) {
             System.out.println(iterator.next().toString());
@@ -739,7 +714,7 @@ public final class RouterService {
      * @modifies this (values returned by getNumFiles, getTotalFileSize, and
      *  getNumHosts) 
      */
-    public void updateHorizon() {        
+    public static void updateHorizon() {        
         for (Iterator iter=manager.getInitializedConnections().iterator();
 			 iter.hasNext() ; )
 			((ManagedConnection)iter.next()).refreshHorizonStats();
@@ -771,7 +746,7 @@ public final class RouterService {
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
+    public static void query(byte[] guid, String query, int minSpeed, MediaType type) {
 		query(guid, query, "", minSpeed, type);
 	}
 
@@ -782,7 +757,7 @@ public final class RouterService {
 	 *  typically in XML format
 	 * @see query(byte[], String, int, MediaType)
 	 */
-	public void query(final byte[] guid, final String query, 
+	public static void query(final byte[] guid, final String query, 
 					  final String richQuery, 
 					  final int minSpeed, final MediaType type) {
 
@@ -810,7 +785,7 @@ public final class RouterService {
      *
      * @see query(byte[], String, int, MediaType)
      */
-    public void query(byte[] guid, String query, int minSpeed) {
+    public static void query(byte[] guid, String query, int minSpeed) {
         query(guid, query, minSpeed, null);
     }
 
@@ -822,7 +797,7 @@ public final class RouterService {
      * @param resp a response delivered by ActivityCallback.handleQueryReply
      * @see ResponseVerifier#score(byte[], Response) 
      */
-    public int score(byte[] guid, Response resp){
+    public static int score(byte[] guid, Response resp){
         return verifier.score(guid,resp);
     }
 
@@ -830,7 +805,7 @@ public final class RouterService {
      * Returns true if the search related to the corresponding guid was a
      * 'specific' xml search, ie if it had two or more XML fields specified.
      */
-    public boolean isSpecificXMLSearch(byte[] guid) {
+    public static boolean isSpecificXMLSearch(byte[] guid) {
         return verifier.isSpecificXMLSearch(guid);
     }
 
@@ -843,7 +818,7 @@ public final class RouterService {
      * @param resp a response delivered by ActivityCallback.handleQueryReply
      * @see ResponseVerifier#matchesType(byte[], Response) 
      */
-    public boolean matchesType(byte[] guid, Response response) {
+    public static boolean matchesType(byte[] guid, Response response) {
         return verifier.matchesType(guid, response);
     }
 
@@ -858,7 +833,7 @@ public final class RouterService {
      * @param resp a response delivered by ActivityCallback.handleQueryReply
      * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
      */
-    public boolean isMandragoreWorm(byte[] guid, Response response) {
+    public static boolean isMandragoreWorm(byte[] guid, Response response) {
         return verifier.isMandragoreWorm(guid, response);
     }
 
@@ -866,14 +841,14 @@ public final class RouterService {
      * Returns an iterator of the hosts in the host catcher, each
      * an Endpoint.
      */
-    public Iterator getHosts() {
+    public static Iterator getHosts() {
         return catcher.getHosts();
     }
 
     /**
      *  Returns the number of messaging connections.
      */
-    public int getNumConnections() {
+    public static int getNumConnections() {
 		return manager.getNumConnections();
     }
 
@@ -884,28 +859,28 @@ public final class RouterService {
 	 * @return <tt>true</tt> if the client does have initialized connections,
 	 *  <tt>false</tt> otherwise
 	 */
-	public boolean isConnected() {
+	public static boolean isConnected() {
 		return manager.isConnected();
 	}
 
     /**
      *  Returns the number searches made to the local database.
      */
-    public int getNumLocalSearches() {
+    public static int getNumLocalSearches() {
         return router.getNumQueryRequests();
     }
 
     /**
      *  Ensures that the given host:port pair is not in the host catcher.
      */
-    public void removeHost(String host, int port) {
+    public static void removeHost(String host, int port) {
         catcher.removeHost(host, port);
     }
 
     /**
      * Returns the number of files being shared locally.
      */
-    public int getNumSharedFiles( ) {
+    public static int getNumSharedFiles( ) {
         return( fileManager.getNumFiles() );
     }
 
@@ -918,7 +893,7 @@ public final class RouterService {
      *
      * If directory is not a shared directory, returns null.
      */
-    public FileDesc[] getSharedFileDescriptors(File directory) {
+    public static FileDesc[] getSharedFileDescriptors(File directory) {
         return fileManager.getSharedFileDescriptors(directory);
     }
     
@@ -931,7 +906,7 @@ public final class RouterService {
      *
      * If directory is not a shared directory, returns null.
      */
-    public File[] getSharedFiles(File directory) {
+    public static File[] getSharedFiles(File directory) {
         return fileManager.getSharedFiles(directory);
     }
         
@@ -964,7 +939,7 @@ public final class RouterService {
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public Downloader download(RemoteFileDesc[] files, boolean overwrite)
+	public static Downloader download(RemoteFileDesc[] files, boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
 		return downloader.getFiles(files, overwrite);
@@ -982,7 +957,7 @@ public final class RouterService {
      * @param guid The guid associated with this query request.
      * @param type The mediatype associated with this search.
      */
-    public Downloader requeryDownload(String query, String richQuery,
+    public static Downloader requeryDownload(String query, String richQuery,
                                       byte[] guid, MediaType type) 
         throws AlreadyDownloadingException {
         return downloader.startRequeryDownload(query, richQuery,
@@ -992,7 +967,7 @@ public final class RouterService {
 	/**
 	 * Creates and returns a new chat to the given host and port.
 	 */
-	public Chatter createChat(String host, int port) {
+	public static Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);
 		return chatter;
 	}
@@ -1006,7 +981,7 @@ public final class RouterService {
      * @param serventID The guid of the client to browse from.  I need this in
      * case I need to push....
 	 */
-	public void doBrowseHost(String host, int port, 
+	public static void doBrowseHost(String host, int port, 
                              GUID guid, GUID serventID) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
                                                           acceptor, guid,
@@ -1018,15 +993,15 @@ public final class RouterService {
      * Tells whether the node is a supernode or not
      * @return true, if supernode, false otherwise
      */
-    public boolean isSupernode() {
+    public static boolean isSupernode() {
         return manager.isSupernode();
     }
 
-    public boolean hasClientSupernodeConnection() {
+    public static boolean hasClientSupernodeConnection() {
         return manager.hasClientSupernodeConnection();
     }
     
-    public boolean hasSupernodeClientConnection() {
+    public static boolean hasSupernodeClientConnection() {
         return manager.hasSupernodeClientConnection();
     }
 
@@ -1036,7 +1011,7 @@ public final class RouterService {
 	 *
      * @param flag the shutting down state to set
      */
-    public void setIsShuttingDown(boolean flag) {
+    public static void setIsShuttingDown(boolean flag) {
 		isShuttingDown = flag;
     }
 
@@ -1049,7 +1024,7 @@ public final class RouterService {
 	 * @return <tt>true</tt> if the application is in the shutting down state,
 	 *  <tt>false</tt> otherwise
 	 */
-    public boolean getIsShuttingDown() {
+    public static boolean getIsShuttingDown() {
 		return isShuttingDown;
     }
 
@@ -1058,8 +1033,17 @@ public final class RouterService {
 	 *
 	 * @return the raw IP address for this host
 	 */
-	public byte[] getIPAddress() {
+	public static byte[] getAddress() {
 		return acceptor.getAddress();
+	}
+
+    /**
+     * Returns the port used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
+     * @see Acceptor#getPort
+     */    
+	public static int getPort() {
+		return acceptor.getPort();
 	}
 
 }

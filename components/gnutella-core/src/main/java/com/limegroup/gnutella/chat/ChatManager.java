@@ -73,7 +73,7 @@ public final class ChatManager {
 
 		try {
 			ActivityCallback callback = 
-			    RouterService.instance().getCallback();
+			    RouterService.getCallback();
 			InstantMessenger im = 
 			    new InstantMessenger(socket, this, callback);
 			// insert the newly created InstantMessager into the list
@@ -98,7 +98,7 @@ public final class ChatManager {
 		InstantMessenger im = null;
 		try {
 			ActivityCallback callback = 
-			    RouterService.instance().getCallback();
+			    RouterService.getCallback();
 			im = new InstantMessenger(host, port, this, callback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add(im);

@@ -18,10 +18,6 @@ import com.limegroup.gnutella.downloader.*; //for testing
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
-	/** The callback for notifying the GUI of major changes. */
-    private ActivityCallback _callback;
-    /** The message router to use for pushes. */
-    private MessageRouter _router;
 
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
@@ -112,17 +108,11 @@ public final class UploadManager implements BandwidthTracker {
 	 * Constructs a new <tt>UploadManager</tt> instance, establishing its
 	 * invariants.
 	 *
-     * @param callback the UI callback to notify of download changes
-     * @param router the message router to use for sending push requests
 	 * @param fileManager the file manager for accessing data about uploading
 	 *  files
 	 */
-	public UploadManager(ActivityCallback callback,
-						 MessageRouter router,
-						 FileManager fileManager) {
+	public UploadManager(FileManager fileManager) {
         _fileManager = fileManager;
-        _callback = callback;
-        _router = router;
 	}
                 
 	/**
@@ -150,7 +140,8 @@ public final class UploadManager implements BandwidthTracker {
 
                 //create an uploader
                 HTTPUploader uploader = new HTTPUploader(method, line._fileName, 
-                    socket, line._index, this, _fileManager, _router);
+                    socket, line._index, this, 
+					_fileManager, RouterService.getMessageRouter());
 
                 //do the upload
                 doSingleUpload(uploader, 
@@ -200,15 +191,16 @@ public final class UploadManager implements BandwidthTracker {
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
+		ActivityCallback callback = RouterService.getCallback();
         // don't want to show browse host status in gui...
         if (!isBHUploader) {
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
-            _callback.addUpload(uploader);
+            callback.addUpload(uploader);
 			FileDesc fd = uploader.getFileDesc();
 			if(fd != null) {
 				fd.incrementAttemptedUploads();
-				_callback.handleSharedFileUpdate(fd.getFile());
+				callback.handleSharedFileUpdate(fd.getFile());
 			}
         }
 
@@ -254,7 +246,7 @@ public final class UploadManager implements BandwidthTracker {
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
 					fd.incrementCompletedUploads();
-					_callback.handleSharedFileUpdate(fd.getFile());            
+					callback.handleSharedFileUpdate(fd.getFile());            
 				}
             }
         }
@@ -272,7 +264,7 @@ public final class UploadManager implements BandwidthTracker {
             if (accepted && !isBHUploader)
                 _activeUploads--;
             if (!isBHUploader) // it was never added
-                _callback.removeUpload(uploader);		
+                callback.removeUpload(uploader);		
         }
     }
 
@@ -318,7 +310,7 @@ public final class UploadManager implements BandwidthTracker {
                                               final String guid) { 
 		final HTTPUploader GIVuploader = new HTTPUploader
                          (file, host, port, index, guid, this, _fileManager,
-                          _router);
+                          RouterService.getMessageRouter());
         //Note: GIVuploader is just used to connect, and while connecting, 
         //the GIVuploader uploads the GIV message.
 
@@ -345,7 +337,9 @@ public final class UploadManager implements BandwidthTracker {
                         insertFailedPush(host, index);  
                     }
                 } catch(Exception e) {
-					_callback.error(e);
+					ActivityCallback callback = 
+					    RouterService.getCallback();
+					callback.error(e);
 				}
                 finally {
                     //close the socket
@@ -370,7 +364,7 @@ public final class UploadManager implements BandwidthTracker {
      */
 	public synchronized boolean isBusy() {
 		// return true if Limewire is shutting down
-		if (RouterService.instance().getIsShuttingDown())
+		if (RouterService.getIsShuttingDown())
 		    return true;
 		
 		// testTotalUploadLimit returns true is there are
@@ -453,8 +447,10 @@ public final class UploadManager implements BandwidthTracker {
 		_activeUploadList.remove(uploader);
 
 		// Enable auto shutdown
-		if(_activeUploads == 0)
-			_callback.uploadsComplete();
+		if(_activeUploads == 0) {
+			ActivityCallback callback = RouterService.getCallback();
+			callback.uploadsComplete();
+		}
   	}
 	
 	private boolean testPerHostLimit(String host) {

@@ -260,7 +260,8 @@ public class StandardMessageRouter
         // get the appropriate queryReply information
 
         //Return measured speed if possible, or user's speed otherwise.
-        long speed = _uploadManager.measuredUploadSpeed();
+        long speed = 
+		    RouterService.getUploadManager().measuredUploadSpeed();
         boolean measuredSpeed=true;
         if (speed==-1) {
             speed=SettingsManager.instance().getConnectionSpeed();

@@ -184,7 +184,7 @@ public class Acceptor extends Thread {
      */
     public void run() {
 		int tempPort = SettingsManager.instance().getPort();
-		ActivityCallback callback = RouterService.instance().getCallback();
+		ActivityCallback callback = RouterService.getCallback();
 
         //0. Get local address.  This must be done here--not in the static
         //   initializer--because it can block under certain conditions.
@@ -297,11 +297,10 @@ public class Acceptor extends Thread {
         }
 
         public void run() {
-			RouterService rs          = RouterService.instance();
-			ActivityCallback callback = rs.getCallback();
-			ConnectionManager cm      = rs.getConnectionManager();
-			UploadManager um          = rs.getUploadManager();
-			DownloadManager dm        = rs.getDownloadManager();
+			ActivityCallback callback = RouterService.getCallback();
+			ConnectionManager cm      = RouterService.getConnectionManager();
+			UploadManager um          = RouterService.getUploadManager();
+			DownloadManager dm        = RouterService.getDownloadManager();
             try {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;

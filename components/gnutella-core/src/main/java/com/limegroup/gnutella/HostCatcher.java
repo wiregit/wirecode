@@ -129,7 +129,7 @@ public class HostCatcher {
      */
     public void initialize() {
 		String filename = SettingsManager.instance().getHostList();
-        this.acceptor = RouterService.instance().getAcceptor();
+        this.acceptor = RouterService.getAcceptor();
 
         //Read gnutella.net
         try {
@@ -334,7 +334,7 @@ public class HostCatcher {
         //only in special cases such as a SimplePongCacheServer would the first 
         //situation occur.
         if (alwaysNotifyKnownHost || notifyGUI) {
-            RouterService.instance().getCallback().knownHost(e);
+            RouterService.getCallback().knownHost(e);
 		}
         repOk();
         return ret;
