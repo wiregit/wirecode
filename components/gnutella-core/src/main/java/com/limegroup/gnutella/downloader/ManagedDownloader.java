@@ -55,17 +55,23 @@ public class ManagedDownloader implements Downloader {
     private static final int PUSH_TRIES=2;
     /** The max number of pushes to send in parallel. */
     private static final int PARALLEL_PUSH=6;
-    /** The amount of time to wait before retrying in milliseconds, This is also
-     *  the time to wait for incoming pushes to arrive.  TODO: increase 
-     *  exponentially with number of tries.   WARNING: if WAIT_TIME and
-     *  CONNECT_TIME are much smaller than the socket's natural timeout,
-     *  memory will be consumed since threads don't die! */
-    private static final int WAIT_TIME=30000;    //30 seconds
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
      *  incoming push connection. */
     private final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
+    /** Returns the amount of time to wait in milliseconds before retrying,
+     *  based on tries.  This is also the time to wait for * incoming pushes to
+     *  arrive, so it must not be too small.  A value of * tries==0 represents
+     *  the first try.  */
+    private long calculateWaitTime() {
+        if (tries<5)
+            return 30*1000l;     //30 seconds first 5 times
+        else if (tries<15)
+            return 5*60*1000l;   //5 minutes next 10 tries
+        else
+            return 60*60*1000l;  //hourly after that
+    }
 
 
     ////////////////////////// Core Variables ////////////////////////////
@@ -95,6 +101,8 @@ public class ManagedDownloader implements Downloader {
     /** The current address we're trying, or last address if waiting, or null
      *  if unknown. */
     private String lastAddress=null;
+    /** The number of tries we've made.  0 means on the first try. */
+    private int tries=0;
 
     
     /** 
@@ -193,6 +201,10 @@ public class ManagedDownloader implements Downloader {
             try {
                 boolean success;
                 for (int i=0; i<TRIES && !stopped; i++) {
+                    synchronized (ManagedDownloader.this) {
+                        ManagedDownloader.this.tries=i;
+                    }
+
                     //Nothing left to do?
                     if (files.size()==0 && pushFiles.size()==0)
                         break;
@@ -374,12 +386,14 @@ public class ManagedDownloader implements Downloader {
             }
         }
 
-        /** Waits at least WAIT_TIME seconds.  If any push downloads come in,
+        /** Waits at least WAIT_TIME milliseconds.  If any push downloads come in,
          * handle them, acquiring a download slot first.  Return true if one of
          * these downloads is successful.  Throws InterruptedException if a call
          * to stop() is detected. */
-        private boolean waitForPushDownloads() throws InterruptedException {
+        private boolean waitForPushDownloads() 
+                 throws InterruptedException {
             Date start=new Date();
+            long totalWait=calculateWaitTime();
             //Repeat until time has expired...
             while (true) {
                 //1. Wait for downloader.  Time is calculated as needed.
@@ -388,7 +402,7 @@ public class ManagedDownloader implements Downloader {
                     while (pushQueue.isEmpty()) {
                         Date now=new Date();
                         long elapsed=now.getTime()-start.getTime();                     
-                        long waitTime=WAIT_TIME-elapsed;
+                        long waitTime=totalWait-elapsed;
                         if (waitTime<=0)
                             return false;
                         ManagedDownloader.this.wait(waitTime);
@@ -479,7 +493,7 @@ public class ManagedDownloader implements Downloader {
         case CONNECTING:
             return timeDiff(now, CONNECT_TIME);
         case WAITING_FOR_RETRY:
-            return timeDiff(now, WAIT_TIME);
+            return timeDiff(now, calculateWaitTime());
         default:
             return Integer.MAX_VALUE;                
         }
