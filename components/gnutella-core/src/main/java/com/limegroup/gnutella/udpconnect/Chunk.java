@@ -7,4 +7,8 @@ public class Chunk {
 	public byte[] data;
     public int    start;
 	public int    length;
+
+	public String toString() {
+	    return " dl: "+data.length+" start:"+start+" len:"+length;
+	}
 }

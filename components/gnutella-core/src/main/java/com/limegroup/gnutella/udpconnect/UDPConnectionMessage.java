@@ -94,7 +94,8 @@ public abstract class UDPConnectionMessage extends Message {
       throws BadPacketException {
 
         super(
-          /*guid*/   buildGUID(connectionID, opcode, sequenceNumber, data), 
+          /*guid*/   buildGUID(connectionID, opcode, sequenceNumber, 
+					   data, datalength), 
           /*func*/   F_UDP_CONNECTION, 
           /*ttl*/    (byte)1, 
           /*hops*/   (byte)0, 
@@ -147,9 +148,9 @@ public abstract class UDPConnectionMessage extends Message {
      * Allocate and fill in the data packed in the GUID.
      */
     private static byte[] buildGUID(byte connectionID, byte opcode, 
-      int sequenceNumber, byte[] data) {
-        int guidDataLength = (data.length >= MAX_GUID_DATA ? MAX_GUID_DATA : 
-          data.length);
+      int sequenceNumber, byte[] data, int datalength) {
+        int guidDataLength = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
+          datalength);
 
         // Fill up the GUID
         byte guid[] = new byte[GUID_SIZE];
@@ -160,6 +161,7 @@ public abstract class UDPConnectionMessage extends Message {
         guid[3] = (byte)((sequenceNumber & 0x00ff));
         int end = GUID_DATA_START + guidDataLength;
         for ( int i = GUID_DATA_START; i < end; i++ ) {
+System.out.println("gd: "+data[i - GUID_DATA_START]);
             guid[i] = data[i - GUID_DATA_START];
         }
         return guid;
