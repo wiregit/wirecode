@@ -103,6 +103,7 @@ public class Launcher {
 			if(nativeLauncherLibrary.exists()) return;
 
 			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
+			if(is == null) return;
 			try {
 				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
 				int c;
