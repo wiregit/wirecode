@@ -486,7 +486,7 @@ public class ConnectionManager implements Runnable {
     public synchronized Iterator connections() {
 	List clone=new ArrayList();	
 	clone.addAll(connections);
-	return new clone.iterator();
+	return clone.iterator();
     }
 
     /**
