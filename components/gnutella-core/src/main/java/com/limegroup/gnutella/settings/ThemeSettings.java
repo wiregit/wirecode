@@ -40,7 +40,8 @@ public final class ThemeSettings {
 
 		// unpack the zip if we haven't already
 		if(!themeDir.isDirectory() ||
-		   (themeDir.lastModified() < themeFile.lastModified())) {
+		   (themeDir.lastModified() < themeFile.lastModified()) ||
+		   !THEME_PROPS.isFile()) {
 
 			themeDir.mkdirs();
             try {
