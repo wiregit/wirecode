@@ -1539,7 +1539,7 @@ public class ConnectionManager {
 
 		if(!CommonUtils.isJava14OrLater()) {
 			// this can throw IOException
-			conn.loopForMessages();	
+			//conn.loopForMessages();	
 		}	
 	}
     
