@@ -305,7 +305,8 @@ public class ConnectionManager {
      * false otherwise
      */
     public synchronized boolean hasShieldedClientSupernodeConnection() {
-        List connections=getConnections();
+        //TODO2: this can be optimized to avoid allocations
+        List connections=getInitializedConnections();
         if (connections.size()!=1)
             return false;
         else {
@@ -473,7 +474,7 @@ public class ConnectionManager {
     private void connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
             //update the appropriate list of connections
-            if(!c.isClientConnection()){
+            if(!c.isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections+[c]
                 List newConnections=new ArrayList(_initializedConnections);
@@ -655,7 +656,7 @@ public class ConnectionManager {
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
         boolean removed = false;
-        if(!c.isClientConnection()){
+        if(!c.isSupernodeClientConnection()){
             int i=_initializedConnections.indexOf(c);
             if (i != -1) {
                 removed = true;
