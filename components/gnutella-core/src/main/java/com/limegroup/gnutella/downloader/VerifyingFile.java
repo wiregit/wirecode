@@ -167,6 +167,11 @@ public class VerifyingFile {
         // In case any of the disk io (checking overlap, saving) throws,
         // the chunk will get re-downloaded.
         Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+        if (verifiedBlocks.getOverlapIntervals(intvl).size() > 0 ||
+                partialBlocks.getOverlapIntervals(intvl).size() > 0 ||
+                pendingBlocks.getOverlapIntervals(intvl).size() > 0)
+            LOG.debug("bad, writing over verified area "+dumpState(),new Exception());
+        
         leasedBlocks.delete(intvl);
         
         try {
@@ -193,6 +198,7 @@ public class VerifyingFile {
         if (tree != null) {
             for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
                 Interval i = (Interval) iter.next();
+                partialBlocks.delete(i);
                 pendingBlocks.add(i);
                 if (LOG.isDebugEnabled())
                     LOG.debug("will schedule for verification "+i);
@@ -270,7 +276,6 @@ public class VerifyingFile {
             while (current.high >= lowChunkOffset+chunkSize-1) {
                 Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
                 verifyable.add(complete);
-                partialBlocks.delete(complete);
                 lowChunkOffset += chunkSize;
             }
         }
@@ -282,7 +287,6 @@ public class VerifyingFile {
                 if(LOG.isDebugEnabled())
                     LOG.debug("adding the last chunk for verification");
                 verifyable.add(last);
-                partialBlocks.delete(last);
             }
         }
                 
@@ -290,15 +294,24 @@ public class VerifyingFile {
         return verifyable;
     }
     
+    public String dumpState() {
+        return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
+        	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
+    }
+    
     /**
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing white, state: "+dumpState());
         IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
         freeBlocks.delete(partialBlocks);
         freeBlocks.delete(pendingBlocks);
         Interval ret = freeBlocks.removeFirst();
+        if (LOG.isDebugEnabled())
+            LOG.debug(" freeblocks: "+freeBlocks+" selected "+ret);
         leaseBlock(ret);
         return ret;
     }
@@ -356,9 +369,18 @@ public class VerifyingFile {
      * Removes the specified internal from the set of leased intervals.
      */
     public synchronized void releaseBlock(Interval in) {
-        //if(LOG.isDebugEnabled())
-            //LOG.debug("Releasing interval: " + in);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);
+    }
+    
+    public synchronized void leaseFromPartial(Interval in) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("moving interval back to lease"+in+" status is "+dumpState());
+        partialBlocks.delete(in);
+        leasedBlocks.add(in);
+        if (LOG.isDebugEnabled())
+            LOG.debug("state after re-lease "+dumpState());
     }
     
     /**
@@ -401,9 +423,18 @@ public class VerifyingFile {
     }
 
     /**
-     * Returns the total number of verified bytes written to disk.
+     * Returns the total number of bytes written to disk.
      */
     public synchronized int getBlockSize() {
+        return verifiedBlocks.getSize() +
+        	partialBlocks.getSize() +
+        	pendingBlocks.getSize();
+    }
+    
+    /**
+     * Returns the total number of verified bytes written to disk.
+     */
+    public synchronized int getVerifiedBlockSize() {
         return verifiedBlocks.getSize();
     }
   
@@ -483,7 +514,7 @@ public class VerifyingFile {
      */
     private synchronized Interval allignInterval(Interval temp, int chunkSize) {
         if (LOG.isDebugEnabled())
-            LOG.debug("alligning "+temp +" with chunk size "+chunkSize);
+            LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
         
         Interval interval;
         
@@ -507,7 +538,7 @@ public class VerifyingFile {
             interval = temp;
 
         if (LOG.isDebugEnabled())
-            LOG.debug("aligned to interval: "+interval);
+            LOG.debug("aligned to interval: "+interval+" state is: "+dumpState());
         
         return interval;
     }
@@ -541,6 +572,7 @@ public class VerifyingFile {
                 pendingBlocks.delete(_interval);
                 if (good) 
                     verifiedBlocks.add(_interval);
+                LOG.debug("verifying: "+_interval+" state:"+dumpState());
             }
         }
         

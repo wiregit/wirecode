@@ -287,7 +287,7 @@ public class DownloadWorker implements Runnable {
                         }
                     } finally {
                         if( status == null || !status.isConnected() )
-                            _manager.releaseRanges(_downloader);
+                            releaseRanges();
                     }
                 }
                 
@@ -343,18 +343,13 @@ public class DownloadWorker implements Runnable {
             Assert.that(status.isConnected());
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            boolean downloadOK = false;
-            
-            try {
-                downloadOK = doDownload(http11);
-            } finally {
-                // Always release the ranges that were leftover from this download
-                _manager.releaseRanges(_downloader);
-            }
-            
             // If the download failed, don't keep trying to download.
-            if(!downloadOK)
-                break;
+            try {
+                if(!doDownload(http11))
+                    break;
+            }finally {
+                releaseRanges();
+            }
         } // end of while(http11)
         
         } finally {
@@ -369,6 +364,32 @@ public class DownloadWorker implements Runnable {
         return true;
     }
     
+    /**
+     * Release the ranges assigned to our downloader  
+     */
+    private void releaseRanges() {
+        int high, low;
+        synchronized(_downloader) {
+            // do not release ranges for downloaders that we have stolen from
+            // since they are still marked as leased
+            if (_downloader.isVictim())
+                return;
+            
+            low=_downloader.getInitialReadingPoint()+_downloader.getAmountRead();
+            high = _downloader.getInitialReadingPoint()+_downloader.getAmountToRead()-1;
+        }
+        
+        //note: the high'th byte will also be downloaded.
+        if( (high-low)>0) {//dloader failed to download a part assigned to it?
+            
+            if (LOG.isDebugEnabled())
+                LOG.debug("releasing ranges "+new Interval(low,high), new Exception());
+            
+            synchronized(_stealLock) {
+                _commonOutFile.releaseBlock(new Interval(low,high));
+            }
+        }
+    }
     
     /**
      * Handles a queued downloader with the given ConnectionStatus.
@@ -913,21 +934,21 @@ public class DownloadWorker implements Runnable {
         int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
         if(newLow > low) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+_myThread.hashCode()+
+                LOG.debug("WORKER:"+
                         " Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
             _commonOutFile.releaseBlock(new Interval(low, newLow-1));
         }
         if(newHigh < high) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+_myThread.hashCode()+
+                LOG.debug("WORKER:"+
                         " Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
             _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("WORKER:"+_myThread.hashCode()+
+            LOG.debug("WORKER:"+
                     " assigning white " + newLow + "-" + newHigh +
                       " to " + _downloader);
     }
@@ -1032,7 +1053,7 @@ public class DownloadWorker implements Runnable {
                  {
                 //replace (bad boy) biggest if possible
                 int start = biggest.getInitialReadingPoint() + amountRead;
-                int stop = biggest.getInitialReadingPoint() + 
+                final int stop = biggest.getInitialReadingPoint() + 
                            biggest.getAmountToRead();
                 
                 // If we happened to finish off the download, throw NSEX
@@ -1043,6 +1064,7 @@ public class DownloadWorker implements Runnable {
                 //Note: we are not interested in being queued at this point this
                 //line could throw a bunch of exceptions (not queuedException)
                 _downloader.connectHTTP(getOverlapOffset(start), stop, false);
+                
                 int newLow = _downloader.getInitialReadingPoint();
                 int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
                 
@@ -1061,8 +1083,25 @@ public class DownloadWorker implements Runnable {
                     LOG.debug("WORKER:"+
                             " picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+_downloader);
-                biggest.stopAt(start);
-                biggest.stop();
+                
+                // stop the victim
+                Interval toFree;
+                synchronized(biggest) {
+                    biggest.stopAt(stop);
+                    biggest.setVictim();
+                    
+                    // free up whatever the victim wrote while we were connecting
+                    // unless that data is already verified or pending verification
+                    int middle = biggest.getInitialReadingPoint()+biggest.getAmountRead();
+                    
+                    // the victim may have even completed the download while we were
+                    // connecting
+                    if (stop <= middle)
+                        throw new NoSuchElementException();
+                    
+                    toFree = new Interval(start,middle);
+                }
+                _commonOutFile.leaseFromPartial(toFree);
             }
             else { //less than MIN_SPLIT_SIZE...but we are doing fine...
                 throw new NoSuchElementException();
@@ -1078,11 +1117,14 @@ public class DownloadWorker implements Runnable {
             }
             int stop = biggest.getInitialReadingPoint() + 
                        biggest.getAmountToRead();
+            
             // If we happened to finish off the dl, don't download any more
             if(stop <= start)
                 throw new NoSuchElementException();
+            
             //this line could throw a bunch of exceptions
             _downloader.connectHTTP(getOverlapOffset(start), stop, true);
+            
             int newLow = _downloader.getInitialReadingPoint();
             int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
             if(newHigh < stop) {

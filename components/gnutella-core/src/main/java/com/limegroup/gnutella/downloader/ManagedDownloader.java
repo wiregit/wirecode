@@ -2398,8 +2398,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Finished.
             if (commonOutFile.isComplete()) {
                 // Kill any leftover downloaders.
-                for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) 
-                    ((HTTPDownloader)iter.next()).stop();		                
+                for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {
+                    DownloadWorker worker = (DownloadWorker)iter.next();
+                    worker.getDownloader().stop();
+                }
                 
                 //Interrupt all worker threads
                 for(int i=_workers.size();i>0;i--) {
@@ -2503,20 +2505,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized int getQueuedHostCount() {
         return queuedWorkers.size();
-    }
-
-    /**
-     * Release the ranges assigned to a downloader  
-     */
-    void releaseRanges(HTTPDownloader dloader) {
-        int low=dloader.getInitialReadingPoint();
-        int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead()-1;
-        //note: the high'th byte will also be downloaded.
-        if( (high-low)>0) {//dloader failed to download a part assigned to it?
-            synchronized(stealLock) {
-                commonOutFile.releaseBlock(new Interval(low,high));
-            }
-        }
     }
 
     /** 

@@ -125,20 +125,39 @@ public class HTTPDownloader implements BandwidthTracker {
 	private String _filename; 
 	private byte[] _guid;
 
+	
     /**
      * The total amount we've downloaded, including all previous 
      * HTTP connections
+     * LOCKING: this
      */
-    private volatile int _totalAmountRead;
-    /** The amount we've downloaded. */
-	private volatile int _amountRead;
-    /** The amount we'll have downloaded if the download completes properly. 
+    private int _totalAmountRead;
+    
+    /**
+     *  The amount we've downloaded.
+     * LOCKING: this 
+     */
+	private int _amountRead;
+	
+    /** 
+     * The amount we'll have downloaded if the download completes properly. 
      *  Note that the amount still left to download is 
-     *  _amountToRead - _amountRead. */
-	private volatile int _amountToRead;
-    /** The index to start reading from the server and start writing to the
-     *  file. */
+     *  _amountToRead - _amountRead.
+     * LOCKING: this 
+     */
+	private int _amountToRead;
+    /** 
+     *  The index to start reading from the server and start writing to the
+     *  file.
+     * LOCKING: this 
+     */
 	private int _initialReadingPoint;
+	
+	/**
+	 * Whether this download has been terminated due to a theft.
+	 * LOCKING: this
+	 */
+	private boolean _victim;
 	
 	/**
 	 * The content-length of the output, useful only for when we
@@ -295,7 +314,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		_filename = rfd.getFileName();
 		_index = rfd.getIndex();
 		_guid = rfd.getClientGUID();
-		_amountToRead = rfd.getSize();
+		//_amountToRead = rfd.getSize();
+		_amountToRead = 0;
 		_port = rfd.getPort();
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
@@ -476,12 +496,14 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new IllegalArgumentException("stop(" + stop +
                                                ") <= start(" + start +")");
 
-        _amountToRead = stop-start;
-        _totalAmountRead += _amountRead;
-        _amountRead = 0;
-        _initialReadingPoint = start;
-        _bodyConsumed = false;
-        _contentLength = 0;
+        synchronized(this) {
+            _amountToRead = stop-start;
+            _totalAmountRead += _amountRead;
+            _amountRead = 0;
+            _initialReadingPoint = start;
+            _bodyConsumed = false;
+            _contentLength = 0;
+        }
 		
 		// features to be sent with the X-Features header
         Set features = new HashSet();
@@ -633,7 +655,9 @@ public class HTTPDownloader implements BandwidthTracker {
 
         
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
-        _requestedInterval = new Interval(_initialReadingPoint, stop-1);
+        synchronized(this) {
+            _requestedInterval = new Interval(_initialReadingPoint, stop-1);
+        }
 		if (RouterService.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
@@ -858,17 +882,19 @@ public class HTTPDownloader implements BandwidthTracker {
                 Interval responseRange = parseContentRange(str);
                 int low = responseRange.low;
                 int high = responseRange.high + 1;
-                // Make sure that the range they gave us is a subrange
-                // of what we wanted in the first place.
-                if(low < _initialReadingPoint ||
-                   high > _initialReadingPoint + _amountToRead)
-                    throw new ProblemReadingHeaderException(
-                        "invalid subrange given.  wanted low: " + 
-                        _initialReadingPoint + ", high: " + 
-                        (_initialReadingPoint + _amountToRead - 1) +
-                        "... given low: " + low + ", high: " + high);                
-                _initialReadingPoint = low;
-                _amountToRead = high - low;
+                synchronized(this) {
+                    // Make sure that the range they gave us is a subrange
+                    // of what we wanted in the first place.
+                    if(low < _initialReadingPoint ||
+                            high > _initialReadingPoint + _amountToRead)
+                        throw new ProblemReadingHeaderException(
+                                "invalid subrange given.  wanted low: " + 
+                                _initialReadingPoint + ", high: " + 
+                                (_initialReadingPoint + _amountToRead - 1) +
+                                "... given low: " + low + ", high: " + high);                
+                    _initialReadingPoint = low;
+                    _amountToRead = high - low;
+                }
             }
             else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(str))
                 _contentLength = readContentLength(str);
@@ -1232,7 +1258,9 @@ public class HTTPDownloader implements BandwidthTracker {
             if (str.substring(start, slash).equals("*")) {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like */?, " + str);
-                return new Interval(0, _amountToRead - 1);
+                synchronized(this) {
+                    return new Interval(0, _amountToRead - 1);
+                }
             }
 
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
@@ -1531,10 +1559,16 @@ public class HTTPDownloader implements BandwidthTracker {
                 //FileTooLargeException.  Now we just return silently.  Note that
                 //we capture _amountToRead in a local variable to prevent race
                 //conditions; presumably Java can't de-optimize this.
-                int atr=_amountToRead;
-                if (_amountRead >= atr) 
-                    break;                
-                int left=atr - _amountRead;
+                int atr,ar;
+                synchronized(this) {
+                    atr=_amountToRead;
+                    ar = _amountRead;
+                }
+                
+                if (ar >= atr) 
+                    break;
+                
+                int left=atr - ar;
                 Assert.that(left>0);
 
                 BandwidthThrottle throttle = _socket instanceof UDPConnection ?
@@ -1551,17 +1585,31 @@ public class HTTPDownloader implements BandwidthTracker {
                 //which is easy in the case of resuming.  Also note that
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
-				commonOutFile.writeBlock(currPos,c, buf);
-                _outIsCorrupted = commonOutFile.isCorrupted();
-
-                currPos += c;//update the currPos for next iteration
-                _amountRead += c;
+				
+				synchronized(this) {
+				    if (_isActive) {
+				        commonOutFile.writeBlock(currPos,c, buf);
+				        
+				        _outIsCorrupted = commonOutFile.isCorrupted();
+				        
+				        currPos += c;//update the currPos for next iteration
+				        _amountRead += c;
+				    }
+				    else {
+				        if (LOG.isDebugEnabled())
+				            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
+				        break;
+				    }
+				} 
             }  // end of while loop
 
             //It's OK to have read too much; see comment (1) above.
-            if ( _amountRead < _amountToRead ) { 
-                throw new FileIncompleteException();  
+            synchronized(this) {
+                if ( _amountRead < _amountToRead ) { 
+                    throw new FileIncompleteException();  
+                }
             }
+            
         } finally {
             _bodyConsumed = true;
             _isActive = false;
@@ -1576,6 +1624,11 @@ public class HTTPDownloader implements BandwidthTracker {
      *     @modifies this
      */
 	public void stop() {
+	    synchronized(this) {
+	        if (LOG.isDebugEnabled())
+	            LOG.debug("WORKER:"+this+" signaled to stop at "+(_initialReadingPoint+_amountRead));
+	        _isActive = false;
+	    }
         if (_byteReader != null)
             _byteReader.close();
         try {
@@ -1597,18 +1650,26 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param stop the index just past the last byte to read;
      *  stop-1 is the index of the last byte to be downloaded
      */
-    public void stopAt(int stop) {
+    public synchronized void stopAt(int stop) {
         _amountToRead=(stop-_initialReadingPoint);
+    }
+    
+    public synchronized void setVictim() {
+        _victim = true;
+        stop();
     }
 
 
     ///////////////////////////// Accessors ///////////////////////////////////
 
-    public int getInitialReadingPoint() {return _initialReadingPoint;}
-	public int getAmountRead() {return _amountRead;}
-	public int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
-	public int getAmountToRead() {return _amountToRead;}
+    public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
+	public synchronized int getAmountRead() {return _amountRead;}
+	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
+	public synchronized int getAmountToRead() {return _amountToRead;}
 	public boolean isActive() { return _isActive; }
+	public synchronized boolean isVictim() {
+	    return _victim;
+	}
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
