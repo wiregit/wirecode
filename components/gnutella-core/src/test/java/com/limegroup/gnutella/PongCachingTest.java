@@ -269,7 +269,7 @@ public final class PongCachingTest extends BaseTestCase {
 		drain(ULTRAPEER_2);
 		drain(LEAF);
 
-        Message m = new PingRequest((byte)4);
+        Message m = new PingRequest((byte)7);
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();        
         
