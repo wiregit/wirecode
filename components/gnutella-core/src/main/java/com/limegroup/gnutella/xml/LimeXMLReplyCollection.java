@@ -586,10 +586,10 @@ public class LimeXMLReplyCollection{
                 istream = new FileInputStream(_backingStoreFile);
                 objStream = new ObjectInputStream(istream);
                 _hashMap = (Map) objStream.readObject();
-                for(Iterator it = _hashMap.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry ent = (Map.Entry)it.next();
-                    debug("read " + ent.getKey() + ", " + ent.getValue());
-                }
+//              for(Iterator it=_hashMap.entrySet().iterator();it.hasNext();){
+//                  Map.Entry ent = (Map.Entry)it.next();
+//                  debug("read " + ent.getKey() + ", " + ent.getValue());
+//              }
             } catch(ClassNotFoundException cnfe) {
                 throw new IOException("class not found");
             } catch(ClassCastException cce) {
