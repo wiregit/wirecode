@@ -105,7 +105,7 @@ public final class NormalUploadState implements HTTPMessage {
 			if(_fileDesc != null) {
 				URN urn = _fileDesc.getSHA1Urn();
 				if(urn != null) {
-					HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
+					HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, 
 										  urn,
 										  ostream);
 				}

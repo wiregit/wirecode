@@ -650,7 +650,7 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had a contentURN field
      */
     private boolean readContentURNHeader(String str) {
-        if ( ! HTTPHeaderName.CONTENT_URN.matchesStartOfString(str) )
+        if ( ! HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str) )
             return false;
 
         // Do we actually set the uploading file to be the URN anywhere?

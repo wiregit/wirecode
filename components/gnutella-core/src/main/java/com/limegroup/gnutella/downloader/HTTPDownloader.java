@@ -201,7 +201,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
-		    HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, sha1, out);
+		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1, out);
 		if(alts.size() > 0) {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}

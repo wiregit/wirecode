@@ -90,7 +90,7 @@ final class HeadRequester implements Runnable {
                         httpConnection.setUseCaches(false);
                         httpConnection.setAllowUserInteraction(false);
                         httpConnection.setRequestProperty(
-                            HTTPHeaderName.CONTENT_URN.httpStringValue(), 
+                            HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue(), 
                             RESOURCE_NAME.httpStringValue());
                         httpConnection.setRequestProperty(
 						    HTTPHeaderName.ALT_LOCATION.httpStringValue(),
@@ -100,7 +100,7 @@ final class HeadRequester implements Runnable {
                             "close");
                         httpConnection.connect();
                         String contentUrn = httpConnection.getHeaderField
-					        (HTTPHeaderName.CONTENT_URN.httpStringValue());
+					        (HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue());
                         if(contentUrn == null) {
                             continue;
                         }
