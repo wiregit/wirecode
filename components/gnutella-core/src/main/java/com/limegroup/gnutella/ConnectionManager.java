@@ -89,14 +89,7 @@ public class ConnectionManager implements Runnable {
      * of 0 means do not accept incoming connections. 
      */
     public ConnectionManager(int port) {
-	//If we're using quick-connect by default, don't load gnutella.net file.
-	//(In this case, RouterService will call quick connect.)
-	boolean quickConnect=SettingsManager.instance().getUseQuickConnect();
-	if (quickConnect)
-	    catcher=new HostCatcher(this);
-	else
-	    catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
-
+	this.port=port;
 	try {
 	    ip=InetAddress.getLocalHost().getAddress();
 	} catch (Exception e) {
@@ -104,9 +97,15 @@ public class ConnectionManager implements Runnable {
 	    //no choice but to use a fake address: all zeroes.
 	    ip=new byte[4];
 	}
-	    
 
-	this.port=port;
+	//If we're using quick-connect by default, don't load gnutella.net file.
+	//(In this case, RouterService will call quick connect.)
+	boolean quickConnect=SettingsManager.instance().getUseQuickConnect();
+	if (quickConnect)
+	    catcher=new HostCatcher(this);
+	else
+	    catcher=new HostCatcher(this,SettingsManager.instance().getHostList());	    
+
 	Thread t=new Thread(new MessageBroadcaster());
 	t.setDaemon(true);
 	t.start();    
