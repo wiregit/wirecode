@@ -210,6 +210,7 @@ public class DownloadTest extends BaseTestCase {
         
         callback.delCorrupt = false;
         callback.corruptChecked = false;
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
     }    
 
     public void tearDown() {
@@ -275,38 +276,6 @@ public class DownloadTest extends BaseTestCase {
     
     ////////////////////////// Test Cases //////////////////////////
     
-    private static void tOverlapCheckSpeed(int rate) throws Exception {
-        RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
-        LOG.debug("-Measuring time for download at rate "+rate+"... \n");
-        uploader1.setRate(rate);
-        long start1=System.currentTimeMillis();
-
-        HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile);
-        VerifyingFile vf = new VerifyingFile(TestFile.length());
-        vf.open(savedFile,null);
-        downloader.connectTCP(0);
-        downloader.connectHTTP(0,TestFile.length(),true);
-        downloader.doDownload(vf);
-
-        long elapsed1=System.currentTimeMillis()-start1;
-        
-        RandomAccessFile raf = new RandomAccessFile(savedFile,"rw");
-        raf.seek(300);
-        raf.write(65);
-        
-        long start2=System.currentTimeMillis();
-
-        downloader=new HTTPDownloader(rfd, savedFile);
-        vf = new VerifyingFile(TestFile.length());
-        vf.open(savedFile,null);
-        downloader.connectTCP(0);
-        downloader.connectHTTP(0, TestFile.length(),true);
-        downloader.doDownload(vf);
-
-        long elapsed2=System.currentTimeMillis()-start2;
-        LOG.debug("  No check="+elapsed2+", check="+elapsed1 +"\n");
-    }
-    
     /**
      * Tests a basic download that does not swarm.
      */
@@ -341,6 +310,7 @@ public class DownloadTest extends BaseTestCase {
         	private int requestNo;
         	public void requestHandled(){}
         	public void thexRequestStarted() {}
+            public void thexRequestHandled() {}
         	
         	// checks whether we request chunks at the proper offset, etc.
         	public void requestStarted(TestUploader uploader) {
@@ -399,9 +369,8 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         
-        Downloader download=null;
-
-        download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+        TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
+        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
         
         waitForComplete(false);
         assertEquals(6,uploader1.getRequestsReceived());
@@ -429,17 +398,23 @@ public class DownloadTest extends BaseTestCase {
         HTTP11Listener grayVerifier = new HTTP11Listener() {
         	private int requestNo;
         	private int thexStatus;
+            private int thexRequestIndex = -1 ;
         	private Interval lastInterval;
         	public synchronized void requestHandled(){
         	    LOG.debug("handled request");
-        	    // if the last request was a thex request, means we got thex now.
-        		if (thexStatus == 1) {
-        		    LOG.debug("handled thex request");
-        			thexStatus = 2;
-        		}
         	}
+            
+            public synchronized void thexRequestHandled() {
+                assertGreaterThan(0,thexStatus);
+                if (thexStatus == 1) {
+                    thexStatus = 2;
+                    thexRequestIndex = requestNo+1;
+                    LOG.debug("ending thex request at request no "+requestNo);
+                }
+            }
+            
         	public synchronized void thexRequestStarted() {
-        	    LOG.debug("starting thex request");
+        	    LOG.debug("starting thex request at request no "+requestNo);
         	    thexStatus=1;
         	}
         	
@@ -448,41 +423,34 @@ public class DownloadTest extends BaseTestCase {
         	    LOG.debug("started request "+uploader.start+"-"+uploader.stop);
         		
         		Interval i = new Interval (uploader.start,uploader.stop-1);
-        		switch(requestNo) {
-        			case 0: 
-        				assertEquals(0,thexStatus);
-        				// first request, we should have 0-99999 gray
-        				assertEquals(0,i.low);
-        				assertEquals(99999,i.high);
-        				lastInterval=i;
-        				break;
-        			case 1:
-        				lastInterval = i;
-        				
-    					// if no thex yet, so 100K-200K        				
-        				if (thexStatus == 0) 
-        					assertEquals(199999,i.high);
-        				
-    					// else 100K-256K        				
-        				if (thexStatus == 2) 
-        					assertEquals(256*1024 -1,i.high);
-        				break;
-        			case 2:
-        				assertEquals(lastInterval.high+1,i.low);
-        				// should have tree by now
-        				assertEquals(2,thexStatus);
-        				
-        				// either 200-256 or 256-512
-        				if (lastInterval.high == 256 *1024)
-        					assertEquals(512*1024 -1, i.high);
-        				else if (lastInterval.high == 199999)
-        					assertEquals(256*1024 -1, i.high);
-        				else
-        					fail("invalid high range on second request");
-        				
-        				lastInterval = i;
-        				break;
-        		}
+                if (requestNo == 0) {
+                    assertEquals(0,thexStatus);
+                    // first request, we should have 0-99999 gray
+                    assertEquals(0,i.low);
+                    assertEquals(99999,i.high);
+                    LOG.debug("request 0 pass");
+                }
+                else if (requestNo == 1) {
+                    
+                    // if no thex yet, so 100K-200K        				
+                    if (thexStatus == 0)  
+                        assertEquals(199999,i.high);
+                    
+                    // else 100K-256K        				
+                    if (thexStatus == 2 && thexRequestIndex == 1)
+                        assertEquals(256*1024 -1,i.high);
+                }
+                else if (requestNo < 5){
+                    assertEquals(lastInterval.high+1,i.low);
+                    
+                    if (thexStatus != 2) 
+                        assertEquals(100000,i.high - i.low +1);
+                     else if (thexRequestIndex >= requestNo) 
+                        assertTrue((0 == (i.high+1) % (256*1024)) ||
+                                i.high+1==TestFile.length());
+                     
+                }
+                lastInterval = i;
         		requestNo++;
         		
         	}
@@ -555,8 +523,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
         
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -588,9 +556,9 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
         
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
-                uploader1.amountUploaded());
+                uploader1.fullRequestsUploaded());
         
-        assertGreaterThan("pusher did all the work ",0,uploader1.amountUploaded());
+        assertGreaterThan("pusher did all the work ",0,uploader1.fullRequestsUploaded());
     }
 
     public void testUnbalancedSwarm() throws Exception  {
@@ -607,8 +575,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
         LOG.debug("\tu1: "+u1+"\n");
@@ -638,8 +606,8 @@ public class DownloadTest extends BaseTestCase {
                  new RemoteFileDesc[] { rfd1 });
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -672,8 +640,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
         
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -708,8 +676,8 @@ public class DownloadTest extends BaseTestCase {
 
         //Make sure there weren't too many overlapping regions. Each upload
         //should do roughly half the work.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
         LOG.debug("\tu1: "+u1+"\n");
@@ -735,8 +703,8 @@ public class DownloadTest extends BaseTestCase {
 
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -761,12 +729,13 @@ public class DownloadTest extends BaseTestCase {
 
         tGeneric(rfds);
         
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         int c1 = uploader1.getConnections();
         int c2 = uploader2.getConnections();
         
-        assertGreaterThan("u1 not used", 0, u1);
+        assertEquals("u1 served full request", 0, u1);
+        assertGreaterThan("u1 didn't upload anything",0,uploader1.getAmountUploaded());
         assertGreaterThan("u2 not used", 0, u2);
         assertEquals("extra connection attempts", 1, c1);
         assertEquals("extra connection attempts", 1, c2);
@@ -774,135 +743,92 @@ public class DownloadTest extends BaseTestCase {
         assertFalse("faster uploader killed",uploader2.killedByDownloader);
     }
     
-    public void testHighSmallerStealingFromHttp10() throws Exception {
-        LOG.debug("-Testing that a download discards a stealer whose" +
-                  " high subrange is smaller than the current http10.");
-
-        final float SLOW_RATE = 0.30f;
-        final int RATE = 25;
-        uploader1.setRate(SLOW_RATE);
-        uploader2.setRate(RATE);
-        uploader3.setRate(RATE);
-        
-        uploader1.setHTTP11(false);
-        uploader2.setHighChunkOffset(-50);
-        
-        RemoteFileDesc rfd1 = newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
-        
-        // rfd3 is used to make sure the test finishes without
-        // waiting 10 hours.
-        
-        tGeneric( new RemoteFileDesc[] { rfd1 },
-                  new RemoteFileDesc[] { rfd2, rfd3 });
-                  
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
-        assertGreaterThan("u1 not used", 5000, u1);
-        assertLessThan("u2 used", 5000, u2);
-        assertGreaterThan("u3 not used", 5000, u3);
-        
-        int c1 = uploader1.getConnections();
-        int c2 = uploader2.getConnections();
-        int c3 = uploader3.getConnections();
-        //may be one or two.  will be two if it tries to connect
-        //again after it reached its stop point.
-        assertLessThanOrEquals("u1 invalid connections", 2, c1);
-        // may be one or two.  will be two if the first time
-        // it tried to connect we didn't have data on the speed
-        // of rfd1.
-        assertLessThanOrEquals("u2 invalid connections", 2, c2);
-        // may be one or two.  will be two if the first time it
-        // tried to connect we didn't have data on the speed of rfd1.
-        assertLessThanOrEquals("u3 invalid connections", 2, c3);
-        
-        int r1 = uploader1.getRequestsReceived();
-        int r2 = uploader2.getRequestsReceived();
-        int r3 = uploader3.getRequestsReceived();
-        assertEquals("u1 invalid requests", 1, r1);
-        assertEquals("u2 invalid requests", 1, r2);
-        assertGreaterThan("u3 invalid requests", 1, r3);
-    }
-    
-    public void testUploaderWierdChunkSizes() throws Exception {
-        LOG.debug("-Testing that a download can handle an uploader who is" +
-                  " responding, but is not sending the ranges we requested");
-                  
-        final int RATE = 25;
-        uploader1.setRate(RATE);
-        uploader2.setRate(RATE);
-        uploader3.setRate(RATE);
-        uploader4.setRate(RATE);
-        uploader5.setRate(RATE*2); // control, to finish the test.
-        
-        // Muck around with the chunk sizes the uploaders will return
-        uploader1.setLowChunkOffset(50); // add 50 to'm
-        uploader2.setLowChunkOffset(-10); // subtract 10, should always fail
-        uploader3.setHighChunkOffset(-50); // subtract 50 to'm
-        uploader4.setHighChunkOffset(50); // add 50, should always fail
-        
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
-        RemoteFileDesc rfd4 = newRFDWithURN(PORT_4, 100);
+    public void testUploaderLowHigherRange()  throws Exception {
+        LOG.debug("-Testing that a download can handle an uploader giving low+higher ranges");
+        uploader1.setRate(25);
+        uploader1.setLowChunkOffset(50);
+        uploader5.setRate(100); // control, to finish the test.
         RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
         
-        RemoteFileDesc[] rfds = { rfd1, rfd3, rfd4 };
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-        	RouterService.download(rfds,true,null);
-        // u2 cannot be used first 'cause it may just work (if it responds
-        // to a request of range 0, it'll return starting at range 0,
-        // which is allowed)
-        // so it is added last
+            RouterService.download(rfds,true,null);
         
-        Thread.sleep(100);
-        md.addDownloadForced(rfd5,true);
-        Thread.sleep(100);
-        md.addDownloadForced(rfd2,true);
+        Thread.sleep(5000);
+        // at this point we should stall since we'll never get our 50 bytes
+        md.addDownloadForced(rfd5,false);
         
         waitForComplete(false);
-        
-        
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
-        int u4 = uploader4.amountUploaded();
-        int u5 = uploader5.amountUploaded();        
-        // Note that checking for greater than or equal to
-        // 0 won't work, because uploaders will send until
-        // the buffer is full (and will later see the IOException)
-        // so we check an arbitrarily small value of 10,000.
-        assertGreaterThan("u1 not used", 10000, u1);
-        assertLessThan("u2 used", 10000, u2);
-        assertGreaterThan("u3 not used", 10000, u3);
-        assertLessThan("u4 used", 10000, u4);
-        assertGreaterThan("u5 not used", 10000, u5);
-        
-        int c1 = uploader1.getConnections();
-        int c2 = uploader2.getConnections();
-        int c3 = uploader3.getConnections();
-        int c4 = uploader4.getConnections();
-        int c5 = uploader5.getConnections();
-        assertEquals("u1 extra connection attempts", 1, c1);
-        assertEquals("u2 extra connection attempts", 1, c2);
-        assertEquals("u3 extra connection attempts", 1, c3);
-        assertEquals("u4 extra connection attempts", 1, c4);
-        assertEquals("u5 extra connection attempts", 1, c5);
-        
-        int r1 = uploader1.getRequestsReceived();
-        int r2 = uploader2.getRequestsReceived();
-        int r3 = uploader3.getRequestsReceived();
-        int r4 = uploader4.getRequestsReceived();
-        int r5 = uploader5.getRequestsReceived();
-        assertGreaterThan("u1 invalid request attempts", 1, r1);
-        assertEquals("u2 invalid request attempts", 1, r2);
-        assertGreaterThan("u3 invalid request attempts", 1, r3);
-        assertEquals("u4 invalid request attempts", 1, r4);
-        assertGreaterThan("u5 invalid request attempts", 1, r5);
+        assertGreaterThanOrEquals(50,uploader5.fullRequestsUploaded());
+        assertGreaterThanOrEquals(100000-50,uploader1.fullRequestsUploaded());
     }
     
+    public void testUploaderLowLowerRange() throws Exception {
+        LOG.debug("-Testing that a download can handle an uploader giving low+lower ranges");
+        uploader1.setRate(25);
+        uploader1.setLowChunkOffset(-10);
+        uploader5.setRate(100); // control, to finish the test.
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        
+        RemoteFileDesc[] rfds = {rfd1};
+        ManagedDownloader md = (ManagedDownloader)
+            RouterService.download(rfds,true,null);
+        
+        Thread.sleep(5000);
+        md.addDownloadForced(rfd5,false);
+        // the first downloader should have failed after downloading a complete chunk
+        
+        assertLessThan(100001,uploader1.fullRequestsUploaded());
+        waitForComplete(false);
+        
+    }
+    
+    public void testUploaderHighHigherRange() throws Exception {
+        LOG.debug("-Testing that a download can handle an uploader giving high+higher ranges");
+        uploader1.setRate(25);
+        uploader1.setHighChunkOffset(50);
+        uploader5.setRate(100); // control, to finish the test.
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        
+        RemoteFileDesc[] rfds = {rfd1};
+        ManagedDownloader md = (ManagedDownloader)
+            RouterService.download(rfds,true,null);
+        
+        Thread.sleep(5000);
+        md.addDownloadForced(rfd5,false);
+        
+        // the first downloader should have failed without downloading a complete chunk
+        
+        assertEquals(0,uploader1.fullRequestsUploaded());
+        waitForComplete(false);
+    }
+    
+    public void testUploaderHighLowerRange() throws Exception {
+        LOG.debug("-Testing that a download can handle an uploader giving high+lower ranges");
+        uploader1.setRate(25);
+        uploader1.setHighChunkOffset(-10);
+        uploader5.setRate(100); // control, to finish the test.
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        ManagedDownloader md = (ManagedDownloader)
+            RouterService.download(rfds,true,null);
+        
+        Thread.sleep(5000);
+        // at this point we should stall since we'll never get our 50 bytes
+        md.addDownloadForced(rfd5,false);
+        
+        waitForComplete(false);
+        assertGreaterThanOrEquals(50,uploader5.fullRequestsUploaded());
+        assertGreaterThanOrEquals(100000-50,uploader1.fullRequestsUploaded());
+    }
+       
     public void testReuseHostWithBadTree() throws Exception {
         final int RATE=500;
         uploader1.setRate(RATE);
@@ -1272,8 +1198,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -1314,8 +1240,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds);
         
-        assertGreaterThan("u1 didn't do enough work ",100*1024,uploader1.amountUploaded());
-        assertGreaterThan("pusher didn't do enough work ",100*1024,pusher.amountUploaded());
+        assertGreaterThan("u1 didn't do enough work ",100*1024,uploader1.fullRequestsUploaded());
+        assertGreaterThan("pusher didn't do enough work ",100*1024,pusher.fullRequestsUploaded());
     }
     
     /**
@@ -1361,8 +1287,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfd);
         
         
-        assertGreaterThan("first pusher did no work",100000,first.amountUploaded());
-        assertGreaterThan("second pusher did no work",100000,second.amountUploaded());
+        assertGreaterThan("first pusher did no work",100000,first.fullRequestsUploaded());
+        assertGreaterThan("second pusher did no work",100000,second.fullRequestsUploaded());
         
         assertEquals(1,second.getAlternateLocations().getAltLocsSize());
         
@@ -1421,12 +1347,12 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(now,later);
         
 
-        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
+        assertGreaterThan("u1 did no work",100*1024,uploader1.fullRequestsUploaded());
 
-        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
-        assertLessThan("u2 did too much work",550*1024,uploader2.amountUploaded());
+        assertGreaterThan("u2 did no work",100*1024,uploader2.fullRequestsUploaded());
+        assertLessThan("u2 did too much work",550*1024,uploader2.fullRequestsUploaded());
 
-        assertGreaterThan("pusher did no work",100*1024,pusher.amountUploaded());
+        assertGreaterThan("pusher did no work",100*1024,pusher.fullRequestsUploaded());
         
         
         AlternateLocationCollection alc = uploader1.getAlternateLocations();
@@ -1544,8 +1470,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds);
         
-        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
-        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+        assertGreaterThan("u1 did no work",100*1024,uploader1.fullRequestsUploaded());
+        assertGreaterThan("u2 did no work",100*1024,uploader2.fullRequestsUploaded());
         
         assertFalse("bad pushloc got advertised",
                 uploader2.getAlternateLocations().contains(badPushLoc));
@@ -1604,9 +1530,9 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();        
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();        
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");        
@@ -1716,10 +1642,10 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
-        int u4 = uploader4.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();
+        int u4 = uploader4.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");
@@ -1772,8 +1698,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -1833,8 +1759,8 @@ public class DownloadTest extends BaseTestCase {
         tGenericCorrupt(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -1905,9 +1831,9 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");
@@ -1967,9 +1893,9 @@ public class DownloadTest extends BaseTestCase {
         tResume(incFile);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");
@@ -2002,8 +1928,8 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         tGeneric(rfds);        
 
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -2049,8 +1975,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds, later);
         
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         
         LOG.debug("u1: " + u1);
         LOG.debug("u2: " + u2);
@@ -2103,8 +2029,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -2133,8 +2059,8 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds1, rfds2);
         
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -2192,9 +2118,9 @@ public class DownloadTest extends BaseTestCase {
             LOG.debug("pass \n");
         else
             fail("FAILED: complete corrupt");
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();
 
         // we only care that the 3rd downloader doesn't download anything -
         // how the other two downloaders split the file between themselves 
@@ -2256,9 +2182,9 @@ public class DownloadTest extends BaseTestCase {
         else
             fail("FAILED: complete corrupt");
         
-        int u1 = uploader1.amountUploaded();
-        int u2 = uploader2.amountUploaded();
-        int u3 = uploader3.amountUploaded();
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        int u3 = uploader3.fullRequestsUploaded();
         
         assertEquals("queued uploader uploaded",0,u2);
         assertGreaterThan("u3 not given a chance to run", 0, u3);

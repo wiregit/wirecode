@@ -39,6 +39,7 @@ import com.limegroup.gnutella.util.RoundRobinQueue;
  */
 interface HTTP11Listener {
 	public void thexRequestStarted();
+    public void thexRequestHandled();
 	public void requestStarted(TestUploader uploader);
 	public void requestHandled();
 }
@@ -312,8 +313,12 @@ public class TestUploader extends AssertComparisons {
         _httpListener = null;
     }
 
-    public int amountUploaded() {
+    public int fullRequestsUploaded() {
         return totalUploaded;
+    }
+    
+    public int getAmountUploaded() {
+        return totalUploaded+amountThisRequest;
     }
     
     /** Sets the upload throttle rate 
@@ -681,8 +686,12 @@ public class TestUploader extends AssertComparisons {
             send(output, start, stop);
         }
         
-        if (_httpListener != null)
-        	_httpListener.requestHandled();
+        if (_httpListener != null) {
+            if (thexReq)
+                _httpListener.thexRequestHandled();
+            else
+                _httpListener.requestHandled();
+        }
     }
     
     private void sendThexTree(OutputStream out) throws IOException {
@@ -830,12 +839,13 @@ public class TestUploader extends AssertComparisons {
             return;
         }
 
-        //Write data.
+        amountThisRequest = 0;
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            if (stopAfter > -1 && totalUploaded == stopAfter) {
+            if (stopAfter > -1 && totalUploaded + amountThisRequest == stopAfter) {
                 stopped=true;
                 out.flush();
+                totalUploaded+=amountThisRequest;
                 LOG.debug(name+" stopped at "+totalUploaded);
                 throw new IOException();
             }
@@ -847,10 +857,13 @@ public class TestUploader extends AssertComparisons {
             else
                 out.write(TestFile.getByte(i));
             
-            totalUploaded++;
+            amountThisRequest++;
             i++;
+            
         }
         out.flush();
+        // only if the flush didn't throw do we add to totalUploaded
+        totalUploaded+=amountThisRequest;
     }
 
     /**
@@ -1016,6 +1029,8 @@ public class TestUploader extends AssertComparisons {
 	}
 	
 	private static final RoundRobinQueue rr = new RoundRobinQueue();
+
+    private int amountThisRequest;
 	private class SocketHandler implements Runnable {
 	    private final Socket mySocket;
 	    public SocketHandler(Socket s) {
