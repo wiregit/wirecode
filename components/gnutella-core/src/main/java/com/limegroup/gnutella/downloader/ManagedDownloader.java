@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.io.*;
@@ -837,16 +837,42 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+    /** call this method if you need to add a newly downloaded file to the
+        FileManager repository.
+    */
+    public void addFileToFM(File f, String hash) {
+        MetaFileManager mfm = (MetaFileManager) fileManager;                
+        mfm.writeToMap(f,hash,LimeXMLUtils.isMP3File(f));
+    }
+
+
     /** 
      * Returns an LimeXMLDocument array describing the downloaded
      * file.
-     * TODO1 : currently, the docs from a random (first) RFD are returned.
-     * Can this be improved?  It seems to be sufficent for now.
      */
     public LimeXMLDocument[] getXMLDocs() {
         LimeXMLDocument[] retArray = null;
-        if (this.allFiles[0] != null)
-            retArray = this.allFiles[0].getXMLDocs();
+        ArrayList allDocs = new ArrayList();
+
+        // get all docs possible
+        for (int i = 0; i < this.allFiles.length; i++) {
+            if (this.allFiles[i] != null) {
+                retArray = this.allFiles[i].getXMLDocs();
+                for (int j = 0; 
+                     (retArray != null) && (j < retArray.length);
+                     j++)
+                    allDocs.add(retArray[j]);                
+            }
+        }
+
+        if (allDocs.size() > 0) {
+            retArray = new LimeXMLDocument[allDocs.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (LimeXMLDocument) allDocs.get(i);
+        }
+        else
+            retArray = null;
+
         return retArray;
     }
 
