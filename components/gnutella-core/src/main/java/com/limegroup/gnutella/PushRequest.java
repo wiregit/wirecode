@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -27,6 +28,9 @@ public class PushRequest extends Message implements Serializable {
         if (payload.length < STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException("Payload too small: "+payload.length);
         this.payload=payload;
+		if(!MessageUtils.isValidPort(getPort())) {
+			throw new BadPacketException("invalid port");
+		}
     }
 
     /**
