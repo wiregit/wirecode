@@ -369,7 +369,7 @@ public class StandardMessageRouter extends MessageRouter {
                 queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
                                             _clientGUID, xmlCompressed,
                                             notIncoming, busy, uploaded, 
-                                            measuredSpeed,supportsChat, false);
+                                            measuredSpeed,supportsChat, isFromMcast);
                 queryReplies.add(queryReply);
             }
             catch (IllegalArgumentException ignored) {
