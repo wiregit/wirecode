@@ -1034,10 +1034,11 @@ public abstract class MessageRouter {
 	 *  request appropriately
 	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
-	 */
+     */
 	public final void forwardQueryRequestToLeaves(QueryRequest query,
                                                   ReplyHandler handler) {
 		if(!RouterService.isSupernode()) return;
+        
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
@@ -1056,16 +1057,19 @@ public abstract class MessageRouter {
             hitConnections = 
                 hitConnections.subList(0, hitConnections.size()/4);
         }
+        
+        int notSent = list.size() - hitConnections.size();
+        RoutedQueryStat.LEAF_DROP.addData(notSent);
+        
         for(int i=0; i<hitConnections.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc == handler) continue;
-
-            boolean sent = sendRoutedQueryToHost(query, mc, handler);
-            if(sent && RECORD_STATS) {
-                RoutedQueryStat.LEAF_SEND.incrementStat();
-            } else if(RECORD_STATS) {
-                RoutedQueryStat.LEAF_DROP.incrementStat();
-            }
+            
+            // sendRoutedQueryToHost is not called because 
+            // we have already ensured it hits the routing table
+            // by filling up the 'hitsConnection' list.
+            sendQueryRequest(query, mc, handler);
+            RoutedQueryStat.LEAF_SEND.incrementStat();
         }
 	}
 

@@ -70,7 +70,8 @@ public final class QueryDispatcher implements Runnable {
 	 * @param handler the <tt>QueryHandler</tt> instance to add
 	 */
 	public void addQuery(QueryHandler handler) {
-		NEW_QUERIES.add(handler);		   
+        handler.sendQuery();  // immediately sent out one query.
+		NEW_QUERIES.add(handler);
 	}
 
     /**
