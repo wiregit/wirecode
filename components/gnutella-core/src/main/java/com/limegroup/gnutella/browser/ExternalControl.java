@@ -125,7 +125,7 @@ public class ExternalControl {
 
 			BufferedOutputStream out =
 			  new BufferedOutputStream(socket.getOutputStream());
-			String s = CommonUtils.getUserName() + "\n\r";
+			String s = CommonUtils.getUserName() + "\r\n";
 			byte[] bytes=s.getBytes();
 			out.write(bytes);
 			out.flush();
@@ -164,7 +164,7 @@ public class ExternalControl {
 		    OutputStreamWriter osw = new OutputStreamWriter(os);
 		    BufferedWriter out=new BufferedWriter(osw);
 		    out.write("MAGNET "+arg+" ");
-		    out.write("\n\r");
+		    out.write("\r\n");
 		    out.flush();
 		    String str = byteReader.readLine();
 		    return(str != null && str.startsWith(CommonUtils.getUserName()));
