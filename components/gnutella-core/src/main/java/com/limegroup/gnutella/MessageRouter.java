@@ -1295,7 +1295,7 @@ public abstract class MessageRouter {
      * the QueryReply count is incremented.<p>
      *
      * Override as desired, but you probably want to call super.handleQueryReply
-     * if you do.
+     * if you do.  This is public for testing purposes.
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler handler) {
@@ -1386,7 +1386,7 @@ public abstract class MessageRouter {
      * Override as desired, but you probably want to call
      * super.handlePushRequest if you do.
      */
-    public void handlePushRequest(PushRequest request,
+    protected void handlePushRequest(PushRequest request,
                                   ReplyHandler handler) {
         if(request == null) {
             throw new NullPointerException("null request");
@@ -1414,7 +1414,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendPingReply(PingReply pong)
+    protected void sendPingReply(PingReply pong)
         throws IOException {
         if(pong == null) {
             throw new NullPointerException("null pong");
@@ -1434,7 +1434,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendQueryReply(QueryRequest query, QueryReply queryReply)
+    protected void sendQueryReply(QueryRequest query, QueryReply queryReply)
         throws IOException {
  
         if(queryReply == null) {
@@ -1511,7 +1511,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendPushRequest(PushRequest push)
+    protected void sendPushRequest(PushRequest push)
         throws IOException {
         if(push == null) {
             throw new NullPointerException("null push");
