@@ -8,6 +8,8 @@ package com.limegroup.gnutella;
  * @file RemoteFileDesc.java
  */
 
+import com.sun.java.util.collections.Comparator;
+
 public class RemoteFileDesc {
 
 	private String _host;
@@ -54,5 +56,43 @@ public class RemoteFileDesc {
 	public void setFileName(String name) {_filename = name;}
 	public void setClientGUID(byte[] b) {_clientGUID = b;}
 	public void setSpeed(int s) {_speed = s;}
+
+	public boolean isPrivate() {
+		Endpoint e = new Endpoint(_host, _port);
+		return e.isPrivateAddress();
+	}
+		
+	public static class RemoteFileDescComparator 
+		implements Comparator {
+		
+		public RemoteFileDescComparator() {}
+
+		public int compare(Object obj1, Object obj2) {
+				RemoteFileDesc rdf1;
+				RemoteFileDesc rdf2;
+			try {
+				rdf1 = (RemoteFileDesc)obj1;
+				rdf2 = (RemoteFileDesc)obj2;
+			}
+			catch (ClassCastException e) {
+				return 0;  // probably want to go ahead and throw this?
+			}
+
+		    if (!rdf1.isPrivate() && rdf2.isPrivate())
+				return -1;
+			else if (rdf1.isPrivate() && !rdf2.isPrivate())
+				return 1;
+
+			int speed1 = rdf1.getSpeed();
+			int speed2 = rdf2.getSpeed();
+			
+			if (speed1 < speed2) 
+				return -1;
+			else if (speed1 > speed2)
+				return 1;
+			else 
+				return 0;
+		}
+	}
 
 }
