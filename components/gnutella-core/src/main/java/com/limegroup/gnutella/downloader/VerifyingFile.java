@@ -153,7 +153,7 @@ public class VerifyingFile {
      * Writes bytes to the underlying file.
      */
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
-                                                    throws IOException {
+                                                    throws DiskException{
         
         if (LOG.isDebugEnabled())
             LOG.debug(" trying to write block at offset "+currPos+" with size "+numBytes);
@@ -161,7 +161,7 @@ public class VerifyingFile {
         if(numBytes==0) //nothing to write? return
             return;
         if(fos == null)
-            throw new IOException();
+            throw new DiskException("no file?");
         
         // remove from leased blocks before writing to disk.  
         // In case any of the disk io (checking overlap, saving) throws,
@@ -169,14 +169,19 @@ public class VerifyingFile {
         Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
         leasedBlocks.delete(intvl);
         
-        if(checkOverlap) 
-            checkOverlap(intvl, buf);
-        
-        //Got this far? Either no need to check, or it checks out OK. 
-        //2. get the fp back to the position we want to write to.
-        fos.seek(currPos);
-        //3. Write to disk.
-        fos.write(buf, 0, numBytes);
+        try {
+            if(checkOverlap) 
+                checkOverlap(intvl, buf);
+            
+            //Got this far? Either no need to check, or it checks out OK.
+            
+            //2. get the fp back to the position we want to write to.
+            fos.seek(currPos);
+            //3. Write to disk.
+            fos.write(buf, 0, numBytes);
+        }catch(IOException diskIO) {
+            throw new DiskException(diskIO);
+        }
         
         //4. if write went ok, add this interval to the partial blocks
         if (LOG.isDebugEnabled())
@@ -202,6 +207,10 @@ public class VerifyingFile {
         }
     }
 
+    /**
+     * checks whether data supposed to go at an interval on disk matches with any
+     * previous data written to the disk
+     */
     private void checkOverlap(Interval intvl, byte [] data) throws IOException {
         
         // get all written blocks
@@ -237,12 +246,11 @@ public class VerifyingFile {
             }
         }
     }
+    
     /**
      * iterates through the pending blocks and checks if the recent write has created
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
-     * per method call.
-     * 
-     * @param maxOffset do not check past this offset
+     * per method call unless the downloader is being deserialized from disk
      */
     private List findVerifyableBlocks() {
         if (LOG.isDebugEnabled())

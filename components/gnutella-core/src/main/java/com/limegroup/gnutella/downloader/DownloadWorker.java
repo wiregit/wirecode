@@ -7,7 +7,6 @@ import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -516,9 +515,9 @@ public class DownloadWorker implements Runnable {
             //the timer.
             if (_manager.getNumDownloaders() == 0 && state != ManagedDownloader.COMPLETE && 
                 state != ManagedDownloader.ABORTED && state != ManagedDownloader.GAVE_UP && 
-                state != ManagedDownloader.COULDNT_MOVE_TO_LIBRARY && state != ManagedDownloader.CORRUPT_FILE && 
+                state != ManagedDownloader.DISK_PROBLEM && state != ManagedDownloader.CORRUPT_FILE && 
                 state != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
-                    if(Thread.currentThread().isInterrupted())
+                    if(_myThread.isInterrupted())
                         return null; // we were signalled to stop.
                     _manager.setState(ManagedDownloader.CONNECTING, 
                             needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
@@ -689,6 +688,10 @@ public class DownloadWorker implements Runnable {
                 DownloadStat.SUCCESFULL_HTTP11.incrementStat();
             else
                 DownloadStat.SUCCESFULL_HTTP10.incrementStat();
+        } catch (DiskException e) {
+            // something went wrong while writing to the file on disk.
+            // kill the other threads and set
+            _manager.stop();
         } catch (IOException e) {
             if(http11)
                 DownloadStat.FAILED_HTTP11.incrementStat();
@@ -700,7 +703,7 @@ public class DownloadWorker implements Runnable {
             int stop=_downloader.getInitialReadingPoint()
                         +_downloader.getAmountRead();
             if(LOG.isDebugEnabled())
-                LOG.debug("    WORKER:+"+Thread.currentThread().hashCode()+
+                LOG.debug("    WORKER:+"+
                         " terminating from "+_downloader+" at "+stop+ 
                   " error? "+problem);
             synchronized (_manager) {
@@ -746,7 +749,7 @@ public class DownloadWorker implements Runnable {
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())            
-                LOG.debug(Thread.currentThread().hashCode()+" nsex thrown in assingAndRequest "+_downloader,nsex);
+                LOG.debug(" nsex thrown in assingAndRequest "+_downloader,nsex);
             
             return handleNoMoreDownloaders();
             
@@ -836,7 +839,7 @@ public class DownloadWorker implements Runnable {
         _rfd.resetFailedCount();
 
         synchronized(_manager) {
-            if (_manager.isCancelled() || _manager.isPaused() || Thread.currentThread().isInterrupted()) {
+            if (_manager.isCancelled() || _manager.isPaused() || _myThread.isInterrupted()) {
                 LOG.trace("Stopped in assignAndRequest");
                 _manager.addRFD(_rfd);
                 return ConnectionStatus.getNoData();
@@ -910,21 +913,21 @@ public class DownloadWorker implements Runnable {
         int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
         if(newLow > low) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                LOG.debug("WORKER:"+_myThread.hashCode()+
                         " Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
             _commonOutFile.releaseBlock(new Interval(low, newLow-1));
         }
         if(newHigh < high) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                LOG.debug("WORKER:"+_myThread.hashCode()+
                         " Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
             _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+            LOG.debug("WORKER:"+_myThread.hashCode()+
                     " assigning white " + newLow + "-" + newHigh +
                       " to " + _downloader);
     }
@@ -1000,20 +1003,20 @@ public class DownloadWorker implements Runnable {
                 bandwidthVictim = biggest.getAverageBandwidth();
                 biggest.getMeasuredBandwidth(); // trigger IDE.
             } catch (InsufficientDataException ide) {
-                LOG.debug(Thread.currentThread().hashCode()+" victim does not have datapoints", ide);
+                LOG.debug("victim does not have datapoints", ide);
                 bandwidthVictim = -1;
             }
             try {
                 bandwidthStealer = _downloader.getAverageBandwidth();
                 _downloader.getMeasuredBandwidth(); // trigger IDE.
             } catch(InsufficientDataException ide) {
-                LOG.debug(Thread.currentThread().hashCode()+" stealer does not have datapoints", ide);
+                LOG.debug("stealer does not have datapoints", ide);
                 bandwidthStealer = -1;
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: "+Thread.currentThread().hashCode()+" " 
-                        	+ _downloader + " attempting to steal from " + 
+                LOG.debug("WORKER: "+
+                        	 _downloader + " attempting to steal from " + 
                           biggest + ", stealer speed [" + bandwidthStealer +
                           "], victim speed [ " + bandwidthVictim + "]");
             
@@ -1055,7 +1058,7 @@ public class DownloadWorker implements Runnable {
                     throw new IOException("bad stealer.");
                 }
                 if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                    LOG.debug("WORKER:"+
                             " picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+_downloader);
                 biggest.stopAt(start);
@@ -1174,7 +1177,7 @@ public class DownloadWorker implements Runnable {
     
     private ConnectionStatus handleQueued(int position, int pollTime) {
         if(_manager.getActiveWorkers().isEmpty()) {
-            if(_manager.isCancelled() || _manager.isPaused() ||  Thread.currentThread().isInterrupted())
+            if(_manager.isCancelled() || _manager.isPaused() ||  _myThread.isInterrupted())
                 return ConnectionStatus.getNoData(); // we were signalled to stop.
             _manager.setState(ManagedDownloader.REMOTE_QUEUED);
         }

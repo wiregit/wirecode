@@ -1516,7 +1516,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  always) because the other end closed the connection.
      */
 	public void doDownload(VerifyingFile commonOutFile) 
-        throws IOException {
+        throws DiskException, IOException {
         _socket.setSoTimeout(10*60*1000);//downloading, can stall upto 10 mins
         long currPos = _initialReadingPoint;
         try {
@@ -1551,7 +1551,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 //which is easy in the case of resuming.  Also note that
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
-                commonOutFile.writeBlock(currPos,c, buf);
+				commonOutFile.writeBlock(currPos,c, buf);
                 _outIsCorrupted = commonOutFile.isCorrupted();
 
                 currPos += c;//update the currPos for next iteration

@@ -22,7 +22,7 @@ public interface Downloader extends BandwidthTracker {
      *  in the GAVE_UP state.
      */
     public static final int GAVE_UP                 = 6;
-    public static final int COULDNT_MOVE_TO_LIBRARY = 7;
+    public static final int DISK_PROBLEM 			= 7;
     public static final int WAITING_FOR_RESULTS     = 8;
     public static final int CORRUPT_FILE            = 9;
     public static final int REMOTE_QUEUED           = 10;

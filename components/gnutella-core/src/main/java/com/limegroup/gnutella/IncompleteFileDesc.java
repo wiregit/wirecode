@@ -165,7 +165,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         case Downloader.WAITING_FOR_RETRY:
         case Downloader.ABORTED:
         case Downloader.GAVE_UP:
-        case Downloader.COULDNT_MOVE_TO_LIBRARY:
+        case Downloader.DISK_PROBLEM:
         case Downloader.CORRUPT_FILE:
         case Downloader.REMOTE_QUEUED:
         case Downloader.WAITING_FOR_USER:

@@ -910,7 +910,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         switch(getState()) {
         case COMPLETE:
         case ABORTED:
-        case COULDNT_MOVE_TO_LIBRARY:
+        case DISK_PROBLEM:
         case CORRUPT_FILE:
             return true;
         }
@@ -1486,6 +1486,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.warn("MANAGER: no thread to interrupt");
         }
     }
+    
+    /**
+     * Callback from workers to inform the managing thread that
+     * a disk problem has occured.
+     */
+    synchronized void diskProblemOccured() {
+        setState(DISK_PROBLEM);
+        stop();
+    }
 
     /**
      * Notifies all existing HTTPDownloaders about this RFD.
@@ -1789,7 +1798,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {
             switch(status) {
             case COMPLETE:
-            case COULDNT_MOVE_TO_LIBRARY:
+            case DISK_PROBLEM:
             case CORRUPT_FILE:
                 setState(status);
                 return;
@@ -1884,7 +1893,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             initializeFilesAndFolders(firstDesc);
         } catch (IOException iox) {
-            return COULDNT_MOVE_TO_LIBRARY;
+            return DISK_PROBLEM;
         }
 
         // Create a new validAlts for this sha1.
@@ -2082,7 +2091,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // If that didn't work, we're out of luck.
         if (!success)
-            return COULDNT_MOVE_TO_LIBRARY;
+            return DISK_PROBLEM;
             
         incompleteFileManager.removeEntry(incompleteFile);
         
