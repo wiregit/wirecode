@@ -347,6 +347,9 @@ public class HTTPDownloader implements Runnable {
 		    _state = ERROR;
 		    return;
 		}
+
+		flag = 1;
+		
 		str = _br.readLine();
 	
 		break;
