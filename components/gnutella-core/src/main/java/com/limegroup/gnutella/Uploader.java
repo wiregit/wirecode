@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.net.*;
 
 /**
  * This is the Uploader interface.  There is a stop
@@ -68,7 +69,7 @@ public interface Uploader extends BandwidthTracker {
     public int getState();
 
 
-	public void connect() throws IOException;
+	public Socket connect() throws IOException;
 	public void start();
 	public void setState(int state);
 	public void setAmountUploaded(int amount);

@@ -184,41 +184,45 @@ public class UploadManager implements BandwidthTracker {
     private void doSingleUpload(Uploader uploader, String host,
         int index) {
         long startTime=-1;
-        try {
-            // check if it complies with the restrictions.
-            //and set the uploader state accordingly
-            insertAndTest(uploader, host);
-            // connect is always safe to call.  it should be
-            // if it is a non-push upload, then connect should
-            // just return.  if there is an error, it should
-            // be because the connection failed.
-            uploader.connect();
-            // start doesn't throw an exception.  rather, it
-            // handles it internally.  is this the correct
-            // way to handle it?
-            startTime=System.currentTimeMillis();
-            uploader.start();
-            // check the state of the upload once the
-            // start method has finished.  if it is complete...
-            if (uploader.getState() == Uploader.COMPLETE)
-                // then set a flag in the upload manager...
-                _hadSuccesfulUpload = true;
-        } catch (IOException e) {
-            // if it fails, insert it into the push failed list
-            synchronized(UploadManager.this) { insertFailedPush(host, index); }
-        } finally {			    
-            long finishTime=System.currentTimeMillis();
-            synchronized(UploadManager.this) {
-                //Report how quickly we uploaded the data, regardless of
-                //whether the transfer was interrupted, unless we couldn't
-                //connect.  The client will ignore small amounts of data.
-                if (startTime>0)
-                    reportUploadSpeed(finishTime-startTime,
-                                      uploader.amountUploaded());
-                removeFromMapAndList(uploader, host);
-                removeAttemptingPush(host, index);
-                _callback.removeUpload(uploader);		
-            }
+        //try {
+        // check if it complies with the restrictions.
+        //and set the uploader state accordingly
+        insertAndTest(uploader, host);
+        /*
+          // connect is always safe to call.  it should be
+          // if it is a non-push upload, then connect should
+          // just return.  if there is an error, it should
+          // be because the connection failed.
+          uploader.connect();
+        */
+        // start doesn't throw an exception.  rather, it
+        // handles it internally.  is this the correct
+        // way to handle it?
+        startTime=System.currentTimeMillis();
+        uploader.start();
+        // check the state of the upload once the
+        // start method has finished.  if it is complete...
+        if (uploader.getState() == Uploader.COMPLETE)
+            // then set a flag in the upload manager...
+            _hadSuccesfulUpload = true;
+        /*
+          } catch (IOException e) {
+          // if it fails, insert it into the push failed list
+          synchronized(UploadManager.this) { insertFailedPush(host, index); }
+          }
+        */
+        //finally {			    
+        long finishTime=System.currentTimeMillis();
+        synchronized(UploadManager.this) {
+            //Report how quickly we uploaded the data, regardless of
+            //whether the transfer was interrupted, unless we couldn't
+            //connect.  The client will ignore small amounts of data.
+            if (startTime>0)
+                reportUploadSpeed(finishTime-startTime,
+                                  uploader.amountUploaded());
+            removeFromMapAndList(uploader, host);
+            removeAttemptingPush(host, index);
+            _callback.removeUpload(uploader);		
         }
     }
 
@@ -270,11 +274,18 @@ public class UploadManager implements BandwidthTracker {
         Thread runner=new Thread() {
             public void run() {
                 try {
-                    synchronized(UploadManager.this) { _activeUploads++; }
-                    doSingleUpload(uploader, host, index);
-                } finally {
+                    //synchronized(UploadManager.this) { _activeUploads++; }
+                    Socket s = uploader.connect();
+                    acceptUpload(s);
+                    //doSingleUpload(uploader, host, index);
+                }catch(IOException ioe){ 
+                    synchronized(UploadManager.this) { 
+                        insertFailedPush(host, index);  
+                    }
+                }
+                finally {
                     //decrement the download count
-                    synchronized(UploadManager.this) { _activeUploads--; }
+                    //synchronized(UploadManager.this) { _activeUploads--; }
                     //close the socket
                     uploader.stop();
                 }

@@ -46,6 +46,19 @@ public class UploadTest {
             passed=downloadPush(file, "Range: bytes=2-5","cdef");
             test("Push download, middle range, inclusive",passed);
 
+            ///////////////////push downloads with HTTP1.1///////////////
+            
+            passed = downloadPush1(file, null,"abcdefghijklmnopqrstuvwxyz");
+            test("Push download with HTTP1.1",passed);
+            
+            passed=downloadPush1(encodedFile, null,
+                                "abcdefghijklmnopqrstuvwxyz");
+            test("Push download, encoded file name with HTTP1.1",passed);
+
+            passed=downloadPush1(file, "Range: bytes=2-5","cdef");
+            test("Push download, middle range, inclusive with HTTP1.1",passed);
+            
+
             //////////////normal downloads with HTTP 1.0//////////////
 
             passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
@@ -182,6 +195,61 @@ public class UploadTest {
         s.close();
         return ret.equals(expResp);
     }
+
+    private static boolean downloadPush1(String file, String header, 
+                                       String expResp) 
+            throws IOException, BadPacketException {
+        //Establish push route
+        Connection c=new Connection(address, port);
+        c.initialize();
+        QueryRequest query=new QueryRequest((byte)5, 0, "txt");
+        c.send(query);
+        c.flush();
+        QueryReply reply=null;
+        while (true) {
+            Message m=c.receive(2000);
+            if (m instanceof QueryReply) {
+                reply=(QueryReply)m;
+                break;
+            } 
+        }
+        PushRequest push=new PushRequest(GUID.makeGuid(),
+            (byte)5,
+            reply.getClientGUID(),
+            0,
+            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+            callbackPort);
+
+        //Create listening socket, then send push.
+        ServerSocket ss=new ServerSocket(callbackPort);
+        c.send(push);
+        c.flush();
+        Socket s=ss.accept();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        in.readLine();  //skip GIV        
+        in.readLine();  //skip blank line
+
+        //Download from the (incoming) TCP connection.
+        String retStr=downloadInternal1(file, header, out, in,expResp.length());
+        boolean ret = retStr.equals(expResp);
+        retStr = "";//reset it
+        
+        retStr = downloadInternal1(file, header, out, in,expResp.length());
+        
+        ret = ret && retStr.equals(expResp);
+
+        //Cleanup
+        c.close();
+        s.close();
+        ss.close();        
+        return ret;
+    }
+
+
+
 
     private static boolean downloadPush(String file, String header, 
                                        String expResp) 
