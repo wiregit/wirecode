@@ -951,7 +951,7 @@ public class UploadTest extends TestCase {
 	 */
 	private static Connection createConnection() {
 		return new Connection("localhost", PORT, new UltrapeerProperties(),
-							  new EmptyResponder(), false);
+							  new EmptyResponder());
 	}
 
     private static class UltrapeerProperties extends Properties {

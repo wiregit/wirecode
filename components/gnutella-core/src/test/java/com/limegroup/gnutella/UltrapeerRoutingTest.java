@@ -39,8 +39,8 @@ public class UltrapeerRoutingTest extends TestCase {
     private static Connection LEAF =
 		new Connection("localhost", PORT, 
 					   new LeafProperties(),
-					   new EmptyResponder(),
-					   false);
+					   new EmptyResponder()
+					   );
 
     /**
      * Ultrapeer connection.
@@ -48,8 +48,8 @@ public class UltrapeerRoutingTest extends TestCase {
     private static final Connection ULTRAPEER_1 = 
 		new Connection("localhost", PORT,
 					   new UltrapeerProperties(),
-					   new EmptyResponder(),
-					   false);
+					   new EmptyResponder()
+					   );
 
     /**
 	 * Second Ultrapeer connection
@@ -57,8 +57,8 @@ public class UltrapeerRoutingTest extends TestCase {
     private static final Connection ULTRAPEER_2 = 
 		new Connection("localhost", PORT,
 					   new UltrapeerProperties(),
-					   new EmptyResponder(),
-					   false);
+					   new EmptyResponder()
+					   );
 
 	private static final RouterService ROUTER_SERVICE = 
 		new RouterService(new ActivityCallbackStub());

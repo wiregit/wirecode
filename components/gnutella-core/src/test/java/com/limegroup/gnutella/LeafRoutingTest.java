@@ -230,8 +230,8 @@ public class LeafRoutingTest extends TestCase {
     private static void doRedirect() {
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
-                                    new OldResponder(),
-                                    false);
+                                    new OldResponder()
+                                    );
 
         try {
             c.initialize();
@@ -316,8 +316,8 @@ public class LeafRoutingTest extends TestCase {
     private static void doConnectionToOldDisallowed() {
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
-                                    new OldResponder(),
-                                    false);
+                                    new OldResponder()
+                                    );
         try {
             c.initialize();
             fail("handshake should not have succeeded");
