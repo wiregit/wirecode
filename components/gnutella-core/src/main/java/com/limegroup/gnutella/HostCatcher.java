@@ -114,14 +114,15 @@ public class HostCatcher {
     
     /** 
      * @modifies this
-     * @effects adds any hosts listed in m to this
+     * @effects ensures any hosts listed in m are in this
      */
     public void spy(Message m) {
 	String ip=null;
 	int port=6346;
 	if (m instanceof PingReply) {
-	    ip=((PingReply)m).getIP();
-	    port=port;
+	    PingReply pr=(PingReply)m;
+	    ip=pr.getIP();
+	    port=pr.getPort();
 	} 
 	//We could also get ip addresses from query hits and push
 	//requests, but then we have to guess the ports for incoming
@@ -130,7 +131,13 @@ public class HostCatcher {
 	    return;
 	}
 	synchronized(candidates) {
-	    candidates.add(new Endpoint(ip, port));
+	    Endpoint e=new Endpoint(ip, port);
+	    //Only add e if its not in candidates.  This effectively ignores
+	    //pings from any hosts we are directly connected to, since we added
+	    //them to the elected set via addGood.
+	    if (! elected.contains(e)) {
+		candidates.add(e);
+	    }
 	}
     }
 
