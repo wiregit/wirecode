@@ -96,19 +96,6 @@ public class ResumeDownloader extends ManagedDownloader
     }
 
     /**
-     * @param numRequeries The number of requeries sent so far.
-     */
-    protected boolean pauseForRequery(int numRequeries) {
-        if (numRequeries > 0) {
-            return super.pauseForRequery(numRequeries);
-        }
-        else
-            // don't wait the first time!!  we want to immediately start a new
-            // query
-            return false; 
-    }
-
-    /**
      * Overrides ManagedDownloader to display a reasonable file name even
      * when no locations have been found.
      */
@@ -127,17 +114,9 @@ public class ResumeDownloader extends ManagedDownloader
         //TODO: we always include the file name since HUGE specifies that
         //results should be sent if the name OR the hashes match.  But
         //ultrapeers may insist that all keywords are in the QRP tables.
-        boolean isRequery=numRequeries!=0;
-		if(isRequery) {
-		    if (_hash != null)
-		        return QueryRequest.createRequery(_hash);
-		    else
-		        return QueryRequest.createRequery(getFileName());
-		} else {
-		    if (_hash != null)
-		        return QueryRequest.createQuery(_hash);
-		    else
-		        return QueryRequest.createQuery(getFileName());
-	    }
+        if (_hash != null)
+            return QueryRequest.createQuery(_hash);
+        else
+            return QueryRequest.createQuery(getFileName());
     }
 }

@@ -210,23 +210,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     ////////////////////////////// Requery Logic ///////////////////////////
 
-    /**
-     * @param numRequeries The number of requeries sent so far.
-     */
-    protected boolean pauseForRequery(int numRequeries) {
-        if (numRequeries > 0) {
-            return super.pauseForRequery(numRequeries);
-        }
-        else
-            // don't wait the first time!!  we want to immediately start a new
-            // query
-            return false; 
-    }
-
     /** 
      * Overrides ManagedDownloader to use the query words and hash (if any)
-     * specified by the MAGNET URI.  The initial requery is unmarked, bypassing
-     * global rate limiting.
+     * specified by the MAGNET URI.
      */
     protected QueryRequest newRequery(int numRequeries) {        
         Set queryUrns=null;
@@ -234,18 +220,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             queryUrns=new HashSet(1);
             queryUrns.add(_urn);
         }
-
-        boolean isRequery = numRequeries!=0;
-		if(_urn != null && isRequery) {
-			return QueryRequest.createRequery(_urn);
-		} 
-		if(isRequery && (_urn != null)) {
-			return QueryRequest.createRequery(_urn);
-		} else if(isRequery) {
-			return QueryRequest.createRequery(_textQuery);
-		} else if(_urn != null) {
+        
+		if (_urn != null) 
             return QueryRequest.createQuery(_urn);
-        }
 		return QueryRequest.createQuery(_textQuery);
     }
 

@@ -567,6 +567,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
      * of all hashes.
      *
+     * Since there are not more AUTOMATIC requeries, subclasses are advised to
+     * stop using createRequery(...).  All attempts to 'requery' the network is
+     * spawned by the user, so use createQuery(...) .
+     *
      * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
@@ -582,6 +586,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return QueryRequest.createQuery(allFiles[0].getSHA1Urn());
     }
 
+    /** We need to offer this to subclasses to override because they might
+     *  have specific behavior when deserialized from disk.  for example,
+     *  RequeryDowloader should return a count of 0 upon deserialization, but 1
+     *  if started from scratch.
+     */
     protected int getQueryCount(boolean deserializedFromDisk) {
         // MDs, whether started from scratch or from disk, always
         // start with 0 query attempts.  subclasses should override as
@@ -992,8 +1001,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // influenced by the type of downloader i am and if i was started from
         // disk or from scratch
         int numQueries = getQueryCount(deserializedFromDisk);
-        // if i was woken up the *last* iteration due to new results
-        boolean wereThereNewResults = false;
+        // set this up in case you need to wait for results.  we'll always wait
+        // TIME_BETWEEN_REQUERIES long after a query
+        long timeQuerySent = System.currentTimeMillis();
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -1067,7 +1077,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // 2. If there is no retry, then we have the following options:
                 //    A.  If you are waiting for results, set up the GUI
                 //        correctly.  You know if you are waiting if
-                //        numQueries is positive and we spawned a new requery.
+                //        numQueries is positive and we still have to wait.
                 //    B.  Else, stall the download and see if the user ever
                 //        wants to relaunch the query.  Note that the stalled
                 //        download could be resumed because relevant results
@@ -1092,23 +1102,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // 2.
                 else {
                     boolean areThereNewResults = false;
+                    final long timeToWait = TIME_BETWEEN_REQUERIES - 
+                        (System.currentTimeMillis() - timeQuerySent);
                     // 2A) we've sent a requery and never received results, 
                     // so wait for results...
-                    if ((numQueries > 0) && !wereThereNewResults) {
-                        setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                    if ((numQueries > 0) && (timeToWait > 0)) {
+                        setState(WAITING_FOR_RESULTS, timeToWait);
                         try {
                             areThereNewResults = 
-                                reqLock.lock(TIME_BETWEEN_REQUERIES);
+                                reqLock.lock(timeToWait);
                         }
                         catch (InterruptedException timeOut) {}
                     }
-
-                    // remember, for next iteration, if there were new results
-                    // that woke us up - we don't want to wait again in 2) for
-                    // results.  to be precisely correct, we may want to see
-                    // how long we need to wait
-                    // TODO : wait in 2A for a total of TIME_BETWEEN_REQUERIES
-                    wereThereNewResults = areThereNewResults;
 
                     // 2B) should i send a requery?
                     if (!areThereNewResults) {
@@ -1117,18 +1122,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                         // results.  so if new results, go up top and try and
                         // get them, else the user woke us up so send another
                         // query
-                        if (pauseForRequery(numQueries)) {
-                            wereThereNewResults = true;
+                        if (pauseForRequery(numQueries)) 
                             continue;
-                        }
                         waitForStableConnections();
                         // yeah, it is about time and i've not sent too many...
                         try {
                             if (manager.sendQuery(this, 
                                                   newRequery(numQueries)))
                                 numQueries++;
-                            // sent a new query out so wait for stuff
-                            wereThereNewResults = false;
+                            // reset wait time for results
+                            timeQuerySent = System.currentTimeMillis();
                         } catch (CantResumeException ignore) { }
                         // set time for next requery...
                     }
