@@ -26,8 +26,9 @@ public class SmartDownloader extends HTTPDownloader {
 						   Acceptor acceptor, ActivityCallback callback) {
 
 		super();
+		_state = NOT_CONNECTED;  // not connected from the super class
 		_remoteFiles = files;
-
+		_callback = callback;
 	}
 
 
@@ -60,15 +61,182 @@ public class SmartDownloader extends HTTPDownloader {
 	/* try to download from one particular host */
 	public boolean tryHost(int index, String filename, 
 						   String host, int port) {
-						   
+			
+		// try to connect...
 		String furl = "/get/" + String.valueOf(index) + "/" + filename;
 		String protocal = "HTTP";
+		URLConnection conn;
 		try {
 			URL url = new URL(protocal, host, port, furl);
+			conn = url.openConnection();
+			conn.connect();
 		} catch (MalformedURLException e) {
+			// if you can't connect, return false
+			return false;
+		} catch (IOException e) {
 			return false;
 		}
-		return false;
+
+		try {
+			// try to open an input stream to read the file
+			_istream = conn.getInputStream();
+			_br = new ByteReader(_istream);
+		}
+		catch (Exception e) {
+			// if you can't, return false
+			return false;
+		}
+
+		// otherwise, try to read the header...
+		readHeader();
+
+		// if there is a problem, return false
+        if ( _state == ERROR ) {
+			_state = NOT_CONNECTED;
+            return false;
+		}
+
+		// check to see if the file already exists, etc.
+        SettingsManager set = SettingsManager.instance();
+
+        String downloadDir = set.getSaveDirectory();
+
+        String incompleteDir = set.getIncompleteDirectory();
+
+        File myFile = new File(incompleteDir, filename);
+        String pathname = myFile.getAbsolutePath();
+
+        File myTest = new File(downloadDir, filename);
+        String path = myTest.getAbsolutePath();
+
+        // This is necessary, and a little tricky. I
+		//  check to see if the canonical path of the
+		//  parent of the requested file is equivalent
+		//  to the canonical path of the shared directory. */
+
+        File f;
+        String p;
+        try {
+            File shared = new File(downloadDir);
+            String shared_path = shared.getCanonicalPath();
+
+            f = new File(myTest.getParent());
+            p = f.getCanonicalPath();
+
+            if (!p.equals(shared_path)) {
+                _state = NOT_CONNECTED;
+                return false;
+            }
+        } catch (Exception e) {
+            _state = NOT_CONNECTED;
+            return false;
+        }
+
+		if (   myFile.exists()  
+			|| myTest.exists()  ) {
+            // ask the user if the file should be overwritten
+            if ( ! _callback.overwriteFile(filename) ) {
+                _stateString = "File Already Exists";
+                _state = NOT_CONNECTED;
+                return false;
+            }
+        }
+		
+		FileOutputStream fos;
+
+		try {
+            fos = new FileOutputStream(pathname);
+        }
+        catch (FileNotFoundException e) {
+            _state = NOT_CONNECTED;
+            return false;
+        }
+        catch (Exception e) {
+            _state = NOT_CONNECTED;
+            return false;
+        }
+		
+		int c = -1;
+		
+        byte[] buf = new byte[1024];
+		
+        while (true) {
+
+			if (_amountRead == _sizeOfFile) {
+                _state = COMPLETE;
+                break;
+            }
+
+			// just a safety check.  hopefully this wouldn't
+			// happen, but if it does, need a way to exit 
+			// gracefully...
+			if (_amountRead > _sizeOfFile) {
+                _state = NOT_CONNECTED;
+                return false;
+            }
+
+            try {
+                c = _br.read(buf);
+            }
+            catch (Exception e) {
+                _state = NOT_CONNECTED;
+                return false;
+            }
+
+            if (c == -1) {
+                break;
+            }
+
+            try {
+                fos.write(buf, 0, c);
+            }
+            catch (Exception e) {
+                _state = ERROR;
+                break;
+            }
+
+            _amountRead+=c;
+
+        }
+
+		try {
+            _br.close();
+            fos.close();
+        }
+        catch (IOException e) {
+            _state = NOT_CONNECTED;
+            return false;
+        }
+
+        //Move from temporary directory to final directory.
+        if ( _amountRead == _sizeOfFile ) {
+            String pname = downloadDir + filename;
+            File target=new File(pname);
+            //If target doesn't exist, this will fail silently.  Otherwise,
+            //it's always safe to do this since we prompted the user above.
+            target.delete();
+            boolean ok=myFile.renameTo(target);
+            if (! ok) {
+                //renameTo is not guaranteed to work, esp. when the
+                //file is being moved across file systems.  
+                _state = NOT_CONNECTED;
+                _stateString = "Couldn't Move to Library";
+                return false;
+            }
+            _state = COMPLETE;
+            FileManager.getFileManager().addFileIfShared(pname);
+			return true;
+        }
+
+        else
+        {
+            _state = NOT_CONNECTED;
+            _stateString = "Interrupted";
+			return false;
+        }
+
+
+		// return false;
 	}
 	
 	/* this will establish a connection
