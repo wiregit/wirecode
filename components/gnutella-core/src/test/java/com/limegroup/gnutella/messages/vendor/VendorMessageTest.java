@@ -319,7 +319,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
 
         PushProxyAcknowledgement ack = new PushProxyAcknowledgement(LOCALHOST, 
                                                                     6346);
-        assertEquals(InetAddress.getLocalHost(), ack.getListeningAddress());
+        assertEquals(LOCALHOST, ack.getListeningAddress());
         assertTrue(ack.getListeningPort() == 6346);
         testWrite(ack);
         testRead(req);

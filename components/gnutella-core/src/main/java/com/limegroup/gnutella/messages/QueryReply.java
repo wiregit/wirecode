@@ -1391,7 +1391,9 @@ public class QueryReply extends Message implements Serializable{
         public boolean equals(Object other) {
             if (other instanceof IPPortCombo) {
                 IPPortCombo combo = (IPPortCombo) other;
-                return _addr.equals(combo._addr) && (_port == combo._port);
+                for (int i = 0; i < _addr.length; i++)
+                    if (_addr[i] != combo._addr[i]) return false;
+                return (_port == combo._port);
             }
             return false;
         }
@@ -1399,7 +1401,11 @@ public class QueryReply extends Message implements Serializable{
         // overridden to fulfill contract with equals for hash-based
         // collections
         public int hashCode() {
-            return _addr.hashCode() * _port;
+            int retInt = 0;
+            for (int i = 0; i < _addr.length; i++)
+                retInt += _addr[i] * 17;
+            retInt += _port * 17;
+            return retInt;
         }
 
     }
