@@ -47,7 +47,7 @@ public class LimeXMLUtils
     private static final String COMPRESS_HEADER_GZIP = 
         C_HEADER_BEGIN + C_HEADER_GZIP_VAL + C_HEADER_END;
     private static final String COMPRESS_HEADER_NONE = 
-        C_HEADER_BEGIN + C_HEADER_NONE_VAL + C_HEADER_END;
+        C_HEADER_BEGIN + C_HEADER_END;
 
     
     private static final int NONE = 0;
