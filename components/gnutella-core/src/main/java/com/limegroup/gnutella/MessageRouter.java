@@ -197,7 +197,7 @@ public abstract class MessageRouter
 			ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
-			if(msg.getTTL() > 0) return;
+			//if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
@@ -247,19 +247,21 @@ public abstract class MessageRouter
      * if the request has already been seen.  If not, calls handleQueryRequest.
      */
     final void handleQueryRequestPossibleDuplicate(
-        QueryRequest queryRequest, ManagedConnection receivingConnection)
+        QueryRequest request, ManagedConnection receivingConnection)
     {
-        if(_queryRouteTable.tryToRouteReply(queryRequest.getGUID(),
+        if(_queryRouteTable.tryToRouteReply(request.getGUID(),
                                             receivingConnection)) {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
 			//connection as unkillable so the ConnectionWatchdog will not police it
 			//any more.
 			if ((receivingConnection.getNumMessagesReceived()<=2)
-                && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals(FileManager.INDEXING_QUERY))) {
+                && (request.getHops()<=1)  //actually ==1 will do
+                && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
 				receivingConnection.setKillable(false);
 			}
-            handleQueryRequest(queryRequest, receivingConnection);
+            handleQueryRequest(request, receivingConnection);
+		} else {
+			ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
 		}
     }
 	
@@ -269,11 +271,13 @@ public abstract class MessageRouter
 	 * @param query the UDP <tt>QueryRequest</tt> 
 	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
 	 */
-	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest query,
+	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler) 
 	{
-        if(_queryRouteTable.tryToRouteReply(query.getGUID(), handler)) {
-            handleQueryRequest(query, handler);
+        if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler)) {
+            handleQueryRequest(request, handler);
+		} else {
+			ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
 		}
 	}
 
