@@ -33,72 +33,79 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
     
     public GUESSServerSideTest(String name) {
         super(name);
-        System.out.println("YOU MUST RUN THIS TEST WITH A ULTRAPEER WITH A NON-FORCED ADDRESS!!!  KEEP IN MIND THAT THIS TEST MAY NOT ALWAYS WORK - IT DOES USE UDP AFTER ALL!!");
-		_backend = Backend.createBackend(0);
-        _backend.start();
-        try {
+        //System.out.println("YOU MUST RUN THIS TEST WITH A ULTRAPEER WITH A NON-FORCED ADDRESS!!!  KEEP IN MIND THAT THIS TEST MAY NOT ALWAYS WORK - IT DOES USE UDP AFTER ALL!!");
+		//_backend = Backend.createBackend(0);
+        //_backend.start();
+        //try {
             // wait for backend to get up to speed
-            Thread.sleep(3000);
-        }
-        catch (Exception whatever) {}
+        //  Thread.sleep(3000);
+        //}
+        //catch (Exception whatever) {}
     }
 
     public static Test suite() {
         return new TestSuite(GUESSServerSideTest.class);
     }
+    
+    public void setUp() throws Exception {
+        launchBackend();
+    }
 
-    public void testThisOnly() {
-        RouterService rs = _backend.getRouterService();
-        InetAddress address = null;
-        try {
-            address = InetAddress.getLocalHost();
-        }
-        catch (UnknownHostException damn) {
-            cleanUp();
-            assertTrue("Couldn't get the local address!!!!", false);
-        }            
-        int port = rs.getPort();
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
 
-		try {
+    public void testThisOnly() throws Exception  {
+        //RouterService rs = _backend.getRouterService();
+        InetAddress address = InetAddress.getLocalHost();
+        //}
+        //catch (UnknownHostException damn) {
+            //cleanUp();
+        //  fail("Couldn't get the local address!!!!");
+        //}            
+        //int port = rs.getPort();
+
+		//try {
 			_socket = new DatagramSocket();
 			_socket.setSoTimeout(SOCKET_TIMEOUT);
-		} 
-        catch (SocketException e) {
-            cleanUp();
-			return;
-		}
-        catch (RuntimeException e) {
-            cleanUp();
-			return;
-		}
+            //} 
+            //catch (SocketException e) {
+            //fail("unexpected exception: "+e);
+            //cleanUp();
+			//return;
+            //}
+            //catch (RuntimeException e) {
+            //cleanUp();
+			//return;
+            //}
 
         // first try to get a QueryKey....
         PingRequest pr = new PingRequest();
         QueryKey qkToUse = null;
-        send(pr, address, port);
-        try {
+        send(pr, address, Backend.PORT);
+        //try {
             PingReply pRep = (PingReply) receive();
-            assertTrue(pRep.getQueryKey() != null);
+            assertNotNull("query key should not be null", pRep.getQueryKey());
             qkToUse = pRep.getQueryKey();
-        }
-        catch (Exception damn) {
-            damn.printStackTrace();
-            cleanUp();
-            assertTrue("Couldn't get a QueryKey!!", false);
-        }
+            //}
+            //catch (Exception damn) {
+            //damn.printStackTrace();
+            // cleanUp();
+            //assertTrue("Couldn't get a QueryKey!!", false);
+            //}
 
         // send a normal ping, should get a pong....
         pr = new PingRequest((byte)1);
-        send(pr, address, port);
-        try {
-            PingReply pRep = (PingReply) receive();
-            assertTrue(pRep.getQueryKey() == null);
-        }
-        catch (Exception damn) {
-            damn.printStackTrace();
-            cleanUp();
-            assertTrue("Didn't get a Pong!!", false);
-        }
+        send(pr, address, Backend.PORT);
+        //try {
+            pRep = (PingReply) receive();
+            assertNull("query key should be null", pRep.getQueryKey());
+            //}
+            //catch (Exception damn) {
+            //damn.printStackTrace();
+            //cleanUp();
+            //assertTrue("Didn't get a Pong!!", false);
+            //}
 
         // first try a bad QueryKey....
         byte[] fakeQueryKey = new byte[8];
@@ -107,10 +114,10 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
             new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
                              false, null, null, 
                              QueryKey.getQueryKey(fakeQueryKey, true), false);
-        send(crapQuery, address, port);
+        send(crapQuery, address, Backend.PORT);
         try {
             receive();
-            cleanUp();
+            //cleanUp();
             assertTrue("Fake Query Key worked!!", false);
         }
         catch (Exception shouldHappen) {
@@ -121,34 +128,35 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
         QueryRequest goodQuery = 
             new QueryRequest(guid, (byte) 1, 0, "susheel", null, 
                              false, null, null, qkToUse, false);
-        send(goodQuery, address, port);
-        try {
-            PingReply pRep = (PingReply) receive();
-            assertTrue(Arrays.equals(pRep.getGUID(), guid));
-        }
-        catch (Exception damn) {
-            damn.printStackTrace();
-            cleanUp();
-            assertTrue("Good Query Key didn't work!!", false);
-        }
+        send(goodQuery, address, Backend.PORT);
+        //try {
+            pRep = (PingReply) receive();
+            assertTrue("guids should be equal",
+                       Arrays.equals(pRep.getGUID(), guid));
+            //}
+            //catch (Exception damn) {
+            // damn.printStackTrace();
+            //cleanUp();
+            //assertTrue("Good Query Key didn't work!!", false);
+            //}
                              
-        cleanUp();
+        //cleanUp();
     }
 
-    private void cleanUp() {
-        Thread newThread = new Thread() {
-                public void run() {
-                    try {
-                        sleep(1*1000);
-                    }
-                    catch (Exception whatever) {}
-                    // the LAST thing i need to do....
-                    _socket.close();
-                    _backend.shutdown("GUESSServerSideTest is OUTTIE....");
-                }
-            };
-        newThread.start();
-    }
+//      private void cleanUp() {
+//          Thread newThread = new Thread() {
+//                  public void run() {
+//                      try {
+//                          sleep(1*1000);
+//                      }
+//                      catch (Exception whatever) {}
+//                      // the LAST thing i need to do....
+//                      _socket.close();
+//                      _backend.shutdown("GUESSServerSideTest is OUTTIE....");
+//                  }
+//              };
+//          newThread.start();
+//      }
 
     private Message receive() throws Exception {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
