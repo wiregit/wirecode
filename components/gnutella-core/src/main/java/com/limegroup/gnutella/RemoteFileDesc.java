@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.http.*;
 import org.xml.sax.*;
 import java.net.*;
 
@@ -251,7 +252,7 @@ public class RemoteFileDesc implements Serializable {
 			if(urn == null) {
 				fileName = "/get/"+_index+"/"+_filename;
 			} else {
-				fileName = "/uri-res/N2R?"+urn.httpStringValue();
+				fileName = HTTPConstants.URI_RES_N2R+urn.httpStringValue();
 			}
 			return new URL("http", _host, _port, fileName);
 		} catch(MalformedURLException e) {
