@@ -210,6 +210,8 @@ bg_BG   Македонски јазик/Македонја            mail: ? AT
 ------- ----------------------- ------------- -------------------------------
 sr      Serbian/Serbia-Montenegro Messages    "Borislav Tadic"
 sr_SR   Српски/Југославија                    borislav AT trust-b DOT com
+                                              "Nikola Milosavljevic"
+                                              nikolam AT stanford DOT edu
 ------- ----------------------- ------------- -------------------------------
 uk      Ukrainian/Ukrainia      Messages      New translator needed !
 uk_UA   Українська мова/Україна               mail: ? AT ? DOT ?
