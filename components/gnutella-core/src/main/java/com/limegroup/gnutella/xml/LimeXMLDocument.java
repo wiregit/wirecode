@@ -238,7 +238,7 @@ public class LimeXMLDocument{
         }
     }
     
-    public static String constructXML(ArrayList namValList, String uri){
+    public static String constructXML(List namValList, String uri){
         //OK so we have a list of all the populated fields. In correct order
         int size = namValList.size();
         String first="";
@@ -307,6 +307,7 @@ public class LimeXMLDocument{
             String tag = (String)tagsToClose.remove(l);
             first = first + "</"+tag+">";
         }
+        first = "<?xml version=\"1.0\"?>"+first;
         return first;
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
 import java.io.RandomAccessFile;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
@@ -29,16 +30,9 @@ public class LimeXMLReplyCollection{
     
     //Constructor
     public LimeXMLReplyCollection(String URI) {
-        schemaURI = URI;
-        int start = URI.lastIndexOf("/");
-        //TODO3: Are we sure that / is the correct delimiter???
-        int end = URI.lastIndexOf(".");
-        //if either of these is -1 the schemaURI is defective
-        //we are going to return without crating the LimeXMMLReplyCollection
-        //for that schema
-        if (start ==-1 || end == -1)
-            return;
-        String schemaName= schemaURI.substring(start+1,end) + ".xml";
+        schemaURI = URI;//store it away
+        String schemaStr = LimeXMLSchema.getDisplayString(URI);
+        String schemaName= schemaStr+".xml";
         replyDocs = new ArrayList();
         //Load up the docs from the file.
         LimeXMLProperties props = LimeXMLProperties.instance();
@@ -82,7 +76,7 @@ public class LimeXMLReplyCollection{
             try{
                 doc = new LimeXMLDocument(xmlString);
             }catch(Exception e){//the xml is malformed
-                e.printStackTrace();
+                //e.printStackTrace();
                 continue;//just ignore this document. do not add or set done
             }
             addReply(doc);
@@ -90,7 +84,22 @@ public class LimeXMLReplyCollection{
                 done = true;//set it to true coz now we have some data
         }
     }
-    
+
+    /** 
+     * Secondary constructor: used when the user adds meta-data, fot
+     * a particular schema - for which there are no previously existing
+     * LimeXMlReplyCollection. In that case this constructor is called
+     * <p>
+     * This constructor must be created with at least one LimeXMLDocument in
+     * hand. 
+     */
+    public LimeXMLReplyCollection(String uri, LimeXMLDocument doc){
+        schemaURI = uri;
+        replyDocs = new ArrayList();
+        addReply(doc);
+        done = true;
+    }
+
     public boolean getDone(){
         return done;
     }
@@ -127,8 +136,51 @@ public class LimeXMLReplyCollection{
     public void addReply(LimeXMLDocument replyDoc){
         replyDocs.add(replyDoc);
     }
+    
+    public void replaceDoc(LimeXMLDocument oldDoc, LimeXMLDocument newDoc){
+        int size = replyDocs.size();
+        for(int i=0;i<size;i++){
+            Object o = replyDocs.get(i);
+            if(o==oldDoc){
+                replyDocs.remove(i);
+                replyDocs.add(newDoc);
+                break;
+            }
+        }
+    }
 
-
+    public boolean toDisk(){
+        String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
+        String schemaName= schemaStr+".xml";
+        //Load up the docs from the file.
+        LimeXMLProperties props = LimeXMLProperties.instance();
+        String path = props.getXMLDocsDir();
+        String content = "";
+        int size = replyDocs.size();
+        for(int i=0; i<size;i++){
+            LimeXMLDocument currDoc = (LimeXMLDocument)replyDocs.get(i);
+            String xml = currDoc.getXMLString();
+            content = content+xml+"\n";
+        }
+        try{
+            String fileName = path+File.separator+schemaName;            
+            FileWriter writer = new FileWriter(fileName,false);//overwrite
+            writer.write(content,0,content.length());
+            writer.close();
+        }catch(IOException e){
+            return false;
+        }
+        return true;
+        
+        //TODO3: For later - the proposed technique is highly wasteful
+        //to re-write all docs to file when only 1 has been modified or 
+        //added. Replace this method. 
+        //Note : A good way of doing this would be to store the 
+        //start index and the end index of the file within the 
+        //LimeXMLDocument...and use this info to change just that part of the
+        //file...
+    }
+    
     public void appendCollectionList(List newReplyCollection){
         replyDocs.addAll(newReplyCollection);
     }
