@@ -19,6 +19,7 @@ public class SettingsManager implements SettingsInterface
 {
     /** Variables for the various settings */
     private static byte     ttl_;
+    private static byte     softmaxttl_;
     private static byte     maxttl_;
     private static int      maxLength_;
     private static int      timeout_;
@@ -131,6 +132,15 @@ public class SettingsManager implements SettingsInterface
 			    catch (IllegalArgumentException ie){}
 			}
 			catch(NumberFormatException nfe){}			
+		    }
+		else if(key.equals(SettingsInterface.SOFT_MAX_TTL))
+		    {
+			try {
+			    b = Byte.parseByte(p);
+			    try {setSoftMaxTTL(b);}
+			    catch (IllegalArgumentException ie){}
+			}
+			catch(NumberFormatException nfe){}  				
 		    }
 		else if(key.equals(SettingsInterface.MAX_TTL))
 		    {
@@ -247,6 +257,7 @@ public class SettingsManager implements SettingsInterface
     private void loadDefaults()
     {
 	setMaxTTL(SettingsInterface.DEFAULT_MAX_TTL);
+	setSoftMaxTTL(SettingsInterface.DEFAULT_SOFT_MAX_TTL);	
 	setTTL(SettingsInterface.DEFAULT_TTL);	
 	setMaxLength(SettingsInterface.DEFAULT_MAX_LENGTH);
 	setTimeout(SettingsInterface.DEFAULT_TIMEOUT);
@@ -268,6 +279,9 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the time to live */
     public byte getTTL(){return ttl_;}
+
+    /** return the soft maximum time to live */
+    public byte getSoftMaxTTL(){return softmaxttl_;}
 
     /** returns the maximum time to live*/
     public byte getMaxTTL(){return maxttl_;}
@@ -330,7 +344,7 @@ public class SettingsManager implements SettingsInterface
     public void setTTL(byte ttl) 
 	throws IllegalArgumentException
     {
-	if(ttl > maxttl_ || ttl < 1)
+	if(ttl > softmaxttl_ || ttl < 1)
 	    throw new IllegalArgumentException();
 	else
 	    {
@@ -341,11 +355,26 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    /** sets the maximum time to live */
+    /** sets the soft maximum time to live */
+    public void setSoftMaxTTL(byte softmaxttl)
+	throws IllegalArgumentException
+    {
+	if(softmaxttl < 0 || softmaxttl > 16)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		softmaxttl_ = softmaxttl;
+		String s = Byte.toString(softmaxttl);
+		props_.setProperty(SettingsInterface.SOFT_MAX_TTL, s);
+		writeProperties();
+	    }
+    }
+
+    /** sets the hard maximum time to live */
     public void setMaxTTL(byte maxttl)
 	throws IllegalArgumentException
     {
-	if(maxttl < 0 || maxttl > 20)
+	if(maxttl < 0 || maxttl > 50)
 	    throw new IllegalArgumentException();
 	else
 	    {
