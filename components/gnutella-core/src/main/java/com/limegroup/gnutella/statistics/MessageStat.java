@@ -8,7 +8,7 @@ import com.sun.java.util.collections.*;
  * own history, all messages received over a specific number of
  * time intervals.
  */
-public abstract class MessageStat {
+public abstract class MessageStat implements Statistic {
 
 	/**
 	 * <tt>List</tt> of all message statistics classes, allowing
@@ -43,7 +43,7 @@ public abstract class MessageStat {
 	/**
 	 * Constant for the number of records to hold for each statistic.
 	 */
-	public static final int HISTORY_LENGTH = 100;
+	public static final int HISTORY_LENGTH = 120;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance with 
@@ -56,6 +56,7 @@ public abstract class MessageStat {
 		ALL_STATS.add(this);
 	}
 
+
 	/**
 	 * Accessor for the total number of this statistic type received so 
 	 * far.
@@ -65,10 +66,6 @@ public abstract class MessageStat {
 	public long getTotal() {
 		return _total;
 	}
-
-	//public int getCurrent() {
-	//return _current;
-	//}
 
 	/**
 	 * Increments the statistic by one.
@@ -92,10 +89,6 @@ public abstract class MessageStat {
 	private void storeCurrentStat() {
 		STAT_HISTORY.remove(0);
 		STAT_HISTORY.add(new Integer(_current));
-		//Integer[] hist = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
-		//for(int i=0; i<hist.length; i++) {
-		//_statHistory[i] = hist[i].intValue();
-		//}
 		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
 		_current = 0;
 	}
