@@ -97,7 +97,7 @@ public class ConnectionManager {
         _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
-        watchdog.start();
+		watchdog.start();
 
         setKeepAlive(_settings.getKeepAlive());
         //setMaxIncomingConnections(

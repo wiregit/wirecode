@@ -82,7 +82,12 @@ public class ChatManager {
 
 	}
 
-	/** request a chat connection from the host specified */
+	/** 
+	 * request a chat connection from the host specified 
+	 * returns an uninitialized chat connection.  the callback
+	 * will be called when the connection is established or
+	 * the connection has died.
+	 */
 	public Chatter request(String host, int port) {
 		InstantMessenger im = null;
 		try {
@@ -90,7 +95,7 @@ public class ChatManager {
 									  _activityCallback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add(im);
-			_activityCallback.acceptChat(im);
+			//_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
 		} // catch (ConnectException ce) {

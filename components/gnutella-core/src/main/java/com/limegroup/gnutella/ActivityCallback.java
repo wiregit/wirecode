@@ -76,6 +76,9 @@ public interface ActivityCallback
 	/** The given chatter is no longer available */
 	public void chatUnavailable(Chatter chatter);
 
+	/** display an error message in the chat gui */
+	public void chatErrorMessage(Chatter chatter, String str);
+
     /**
      * Notifies the GUI that the given directory has been shared.  This method
      * is called exactly once per directory per change to the shared directory

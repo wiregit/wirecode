@@ -64,6 +64,7 @@ public class InstantMessenger implements Chatter {
 		_out.flush();
 		InputStream istream = _socket.getInputStream();
 		_reader = new ByteReader(istream);
+		_activityCallback.acceptChat(this);
 	}
 
 	/** starts the chatting */
@@ -75,7 +76,11 @@ public class InstantMessenger implements Chatter {
 
 	}
 
-	/** stop the chat, and close the connections */
+	/** stop the chat, and close the connections 
+	 * this is always safe to call, but it is recommended
+	 * that the gui try to encourage the user not to call 
+	 * this
+	 */
 	public void stop() {
 		_manager.removeChat(this);
 		try {
@@ -88,13 +93,20 @@ public class InstantMessenger implements Chatter {
 		}
 	}
 
-	/** send a message accross the socket to the other host */
+	/** 
+	 * send a message accross the socket to the other host 
+	 * as with stop, this is alway safe to call, but it is
+	 * recommended that the gui discourage the user from
+	 * calling it when a connection is not yet established.
+	 */
 	public void send(String message) {
 		try {
 			_out.write(message+"\n");
 			_out.flush();
 		} catch (IOException e) {
 			// e.printStackTrace();
+		} catch (NullPointerException e) {
+
 		}
 	}
 
@@ -152,7 +164,7 @@ public class InstantMessenger implements Chatter {
 
 		public void run() {
 
-			if (_outgoing) {
+			if(_outgoing) {
 				try {
 					OutgoingInitializer();
 				} catch (IOException e) {

@@ -246,5 +246,7 @@ public class Main implements ActivityCallback {
 	
 	public void chatUnavailable(Chatter chatter) {}
 
+	public void chatErrorMessage(Chatter chatter, String st) {}
+
 }
 
