@@ -22,8 +22,11 @@ public class SystemUtils {
                 if(CommonUtils.isWindows2000orXP())
                     System.loadLibrary("WindowsV5PlusUtils");
             }
+	    else if (CommonUtils.isLinux())
+		System.loadLibrary("IdleTime");
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
+		
             canLoad = false;
         }
         isLoaded = canLoad;
@@ -57,6 +60,8 @@ public class SystemUtils {
                 return true;
             else if(CommonUtils.isMacOSX())
                 return true;
+	    else if (CommonUtils.isLinux())
+		return true;
         }
             
         return false;
