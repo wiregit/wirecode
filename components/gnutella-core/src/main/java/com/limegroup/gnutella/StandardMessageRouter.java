@@ -321,7 +321,15 @@ public class StandardMessageRouter extends MessageRouter {
             xmlBytes = xmlCollectionString.getBytes("UTF-8");
         } catch(UnsupportedEncodingException ueex) {//no support for utf-8??
             //all implementations of java must support utf8 encoding
-            ErrorService.error(ueex);
+            //here we will allow this QueryReply to be sent out 
+            //with xml being empty rather than not allowing the
+            //Query to be sent out 
+            //therefore we won't throw a IllegalArgumentException but we will
+            //show it so the error will be sent to Bug servlet
+            ErrorService.error
+                (new IllegalArgumentException
+                 ("encountered UnsupportedEncodingException in creation of QueryReply : xmlCollectionString : " 
+                  + xmlCollectionString));
         }
         
         // get the *latest* push proxies if we have not accepted an incoming
@@ -348,8 +356,13 @@ public class StandardMessageRouter extends MessageRouter {
                 } catch(UnsupportedEncodingException ueex) {
                     //all implementations of java must support utf8 encoding
                     //so if we get here there was something really wrong
-                    ErrorService.error(ueex);
-                    //currXMLBytes = "".getBytes();
+                    //we will show the error but treat as if the currXML was
+                    //empty (see the try catch for uee earlier)
+                    ErrorService.error
+                        (new IllegalArgumentException
+                         ("encountered UnsupportedEncodingException : currXML " 
+                          + currXML));
+                    currXMLBytes = "".getBytes();
                 }
                 if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&
                                                         (currResps.length > 1)) 

@@ -264,7 +264,11 @@ public final class SearchResultHandler {
         catch (UnsupportedEncodingException use) {
             //b/c this should never happen, we will show and error
             //if it ever does for some reason.
-            ErrorService.error(use);
+            //we won't throw a BadPacketException here but we will show it.
+            //the uee will effect the xml part of the reply but we could
+            //still show the reply so there shouldn't be any ill effect if
+            //xmlCollectionString is ""
+            ErrorService.error(new BadPacketException("UnsupportedEncodingException thrown whil trying to create xmlCollectionString"));
         }
         catch (IOException ignored) {}
 

@@ -866,7 +866,18 @@ public class QueryRequest extends Message implements Serializable{
             }
 
             baos.write(0);                             // final null
-		} catch (IOException e) {
+		} 
+        catch(UnsupportedEncodingException uee) {
+            //this should never happen from the getBytes("UTF-8") call
+            //but there are UnsupportedEncodingExceptions being reported
+            //with UTF-8.
+            //Is there other information we want to pass in as the message?
+            throw new IllegalArgumentException("could not get UTF-8 bytes for query :"
+                                               + QUERY 
+                                               + " with richquery :"
+                                               + richQuery);
+        }
+        catch (IOException e) {
 		    ErrorService.error(e);
 		}
 
@@ -974,7 +985,13 @@ public class QueryRequest extends Message implements Serializable{
                     currIndex = delimIndex+1;
                 }
             }
-        } catch (IOException ioe) {
+        } 
+        catch(UnsupportedEncodingException uee) {
+            //couldn't build query from network due to unsupportedencodingexception
+            //so throw a BadPacketException 
+            throw new BadPacketException("encountered UnsupportedEncodingException with data snatched from network");
+        }
+        catch (IOException ioe) {
             ErrorService.error(ioe);
         }
 		QUERY = tempQuery;
