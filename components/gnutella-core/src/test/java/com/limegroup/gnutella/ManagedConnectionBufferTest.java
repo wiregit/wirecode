@@ -9,6 +9,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
 public class ManagedConnectionBufferTest extends TestCase {
@@ -30,6 +31,7 @@ public class ManagedConnectionBufferTest extends TestCase {
         //SupernodeHandshakeResponder.
         SettingsManager.instance().loadDefaults();
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
     }
 
     /** 
@@ -358,7 +360,19 @@ public class ManagedConnectionBufferTest extends TestCase {
     }
 
     private static ManagedConnection newConnection(String host, int port) {
-        return new ManagedConnection(host, port, new MessageRouterStub(),
-                                     new ConnectionManagerStub());
+        ManagedConnection mc = new ManagedConnection(host, port);
+		setStubs(mc);
+		return mc;
     }
+
+	private static void setStubs(ManagedConnection mc) {
+        try {
+            PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
+            PrivilegedAccessor.setValue(mc, "_manager", new ConnectionManagerStub());
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("could not initialize test");
+        }		
+	}
+
 }
