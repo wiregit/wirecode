@@ -1,87 +1,97 @@
-package com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.sun.java.util.collections.*;
 
 /** The message that lets other know what messages you support.  Everytime you
  *  add a subclass of VendorMessagePayload you should modify this class.
  */
-public final class MessagesSupportedVMP extends VendorMessagePayload {
+public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     public static final int VERSION = 0;
 
-    private byte[] _payload = null;
-    private Set _messagesSupported = new HashSet();
+    private final Set _messagesSupported = new HashSet();
 
-    private static MessagesSupportedVMP _instance = new MessagesSupportedVMP();
+    private static MessagesSupportedVendorMessage _instance;
 
-    MessagesSupportedVMP(int version, byte[] payload) 
+    MessagesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
+                                   int version, byte[] payload) 
         throws BadPacketException {
-        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, version);
-        if (version > VERSION)
+        super(guid, ttl, hops, F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, version,
+              payload);
+
+        if (getVersion() > VERSION)
             throw new BadPacketException("UNSUPPORTED VERSION");
-        // get the port from the payload....
-        _payload = payload;
+
+        // populate the Set of supported messages....
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(_payload);
+            ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
             int vectorSize = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
             for (int i = 0; i < vectorSize; i++)
                 _messagesSupported.add(new SupportedMessageBlock(bais));
         }
         catch (IOException ioe) {
-            throw new BadPacketException();
+            throw new BadPacketException("Couldn't write to a ByteStream!!!");
         }
     }
+
 
     /** @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      */
-    private MessagesSupportedVMP() {
-        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION);
-        addSupportedMessages();
+    private MessagesSupportedVendorMessage() throws BadPacketException {
+        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload());
+        addSupportedMessages(_messagesSupported);
+    }
+
+    private static byte[] derivePayload() throws BadPacketException {
+        Set hashSet = new HashSet();
+        addSupportedMessages(hashSet);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)_messagesSupported.size(), baos);
-            Iterator iter = _messagesSupported.iterator();
+            ByteOrder.short2leb((short)hashSet.size(), baos);
+            Iterator iter = hashSet.iterator();
             while (iter.hasNext()) {
                 SupportedMessageBlock currSMP = 
                     (SupportedMessageBlock) iter.next();
                 baos.write(currSMP.encode());
             }
-            _payload = baos.toByteArray();
+            return baos.toByteArray();
         }
         catch (IOException ioe) {
             ioe.printStackTrace();
+            throw new BadPacketException("Couldn't write to a ByteStream!!!");
         }
+
     }
 
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
-    private void addSupportedMessages() {
+    private static void addSupportedMessages(Set hashSet) {
         // TCP Connect Back
         SupportedMessageBlock smp = null;
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
-                                        TCPConnectBackVMP.VERSION);
-        _messagesSupported.add(smp);
+                                        TCPConnectBackVendorMessage.VERSION);
+        hashSet.add(smp);
         // UDP Connect Back
         smp = new SupportedMessageBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,
-                                        UDPConnectBackVMP.VERSION);
-        _messagesSupported.add(smp);
+                                        UDPConnectBackVendorMessage.VERSION);
+        hashSet.add(smp);
         // Hops Flow
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
-                                        HopsFlowVMP.VERSION);
-        _messagesSupported.add(smp);
+                                        HopsFlowVendorMessage.VERSION);
+        hashSet.add(smp);
     }
 
-    protected byte[] getPayload() {
-        // construction makes _payload
-        return _payload;
-    }
 
-    /** @return A MessagesSupportedVMP with the set of messages this client
-     *  supports.
+    /** @return A MessagesSupportedVendorMessage with the set of messages 
+     *  this client supports.
      */
-    public static MessagesSupportedVMP instance() {
+    public static MessagesSupportedVendorMessage instance() 
+        throws BadPacketException {
+        if (_instance == null)
+            _instance = new MessagesSupportedVendorMessage();
         return _instance;
     }
 
@@ -132,8 +142,9 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
     public boolean equals(Object other) {
         // basically two of these messages are the same if the support the same
         // messages
-        if (other instanceof MessagesSupportedVMP) {
-            MessagesSupportedVMP vmp = (MessagesSupportedVMP) other;
+        if (other instanceof MessagesSupportedVendorMessage) {
+            MessagesSupportedVendorMessage vmp = 
+                (MessagesSupportedVendorMessage) other;
             return (_messagesSupported.equals(vmp._messagesSupported));
         }
         return false;
@@ -142,22 +153,24 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
     
     // override super
     public int hashCode() {
-        return _messagesSupported.hashCode();
+        return 17*_messagesSupported.hashCode();
     }
     
 
     /** Container for vector elements.
      */  
     static class SupportedMessageBlock {
-        byte[] _vendorID = null;
-        int _selector = 0;
-        int _version = 0;
+        final byte[] _vendorID;
+        final int _selector;
+        final int _version;
+        final int _hashCode;
 
         public SupportedMessageBlock(byte[] vendorID, int selector, 
                                      int version) {
             _vendorID = vendorID;
             _selector = selector;
             _version = version;
+            _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 
         public SupportedMessageBlock(InputStream encodedBlock) 
@@ -171,6 +184,7 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
 
             _selector =ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
             _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
+            _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 
         public byte[] encode() {
@@ -207,13 +221,18 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
             }
             return false;
         }
-        
+
         public int hashCode() {
+            return _hashCode;
+        }
+        
+        private static int computeHashCode(byte[] vendorID, int selector, 
+                                           int version) {
             int hashCode = 0;
-            hashCode += 37*_version;
-            hashCode += 37*_selector;
-            for (int i = 0; i < _vendorID.length; i++)
-                hashCode += (int) 37*_vendorID[i];
+            hashCode += 37*version;
+            hashCode += 37*selector;
+            for (int i = 0; i < vendorID.length; i++)
+                hashCode += (int) 37*vendorID[i];
             return hashCode;
         }
     }

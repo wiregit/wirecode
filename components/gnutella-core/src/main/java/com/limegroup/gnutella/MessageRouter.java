@@ -6,6 +6,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -191,27 +192,17 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
-		} else if (msg instanceof VendorMessage) {
-            if (RECORD_STATS)
-                ; // nothing to record to (so far)
-            try {
-                VendorMessagePayload vmp = 
-                    ((VendorMessage)msg).getVendorMessagePayload();
-                if (vmp instanceof MessagesSupportedVMP) 
-                    receivingConnection.handleVendorMessagePayload(vmp);
-                else if (vmp instanceof HopsFlowVMP)
-                    receivingConnection.handleVendorMessagePayload(vmp);
-                else if (vmp instanceof TCPConnectBackVMP)
-                    handleTCPConnectBackRequest((TCPConnectBackVMP)vmp,
-                                                receivingConnection);
-                else if (vmp instanceof UDPConnectBackVMP)
-                    handleUDPConnectBackRequest((UDPConnectBackVMP)vmp,
-                                                receivingConnection);
-            }
-            catch (BadPacketException ohwell) {
-            }
-        }
-        
+		} 
+        else if (msg instanceof MessagesSupportedVendorMessage) 
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        else if (msg instanceof HopsFlowVendorMessage)
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        else if (msg instanceof TCPConnectBackVendorMessage)
+            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
+                                        receivingConnection);
+        else if (msg instanceof UDPConnectBackVendorMessage)
+            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
+                                        receivingConnection);
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -558,7 +549,7 @@ public abstract class MessageRouter {
      * Basically, just get the correct parameters, create a temporary 
      * DatagramSocket, and send a Ping.
      */
-    protected void handleUDPConnectBackRequest(UDPConnectBackVMP udp,
+    protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
         GUID guidToUse = udp.getConnectBackGUID();
         int portToContact = udp.getConnectBackPort();
@@ -586,7 +577,7 @@ public abstract class MessageRouter {
      * Basically, just get the correct parameters, create a Socket, and
      * send a "/n/n".
      */
-    protected void handleTCPConnectBackRequest(TCPConnectBackVMP tcp,
+    protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
         int portToContact = tcp.getConnectBackPort();
         InetAddress addrToContact = null;

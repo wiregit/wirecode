@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Sockets;
@@ -52,7 +53,7 @@ public class Connection {
     /** The possibly non-null VendorMessagePayload which describes what
      *  VendorMessages the guy on the other side of this connection supports.
      */
-    protected MessagesSupportedVMP _messagesSupported = null;
+    protected MessagesSupportedVendorMessage _messagesSupported = null;
     
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -181,22 +182,28 @@ public class Connection {
      *  as 'long-lived'.
      */
     protected void postInit() {
-        try { // TASK 1 - Send a MessagesSupportedVMP if necessary....
+        try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
             String value = 
                 getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
-            if ((value != null) && !value.equals(""))
-                send(MessagesSupportedVMP.instance().getVendorMessage());
+            if ((value != null) && !value.equals("")) {
+                MessagesSupportedVendorMessage msvm = null;
+                msvm = MessagesSupportedVendorMessage.instance();
+                send(msvm);
+            }
         }
         catch (IOException ioe) {
+        }
+        catch (BadPacketException bpe) {
+            bpe.printStackTrace();  // we don't really expect this....
         }
     }
 
     /**
-     * Call this method when you want to handle us to handle a VMP.  We may....
+     * Call this method when you want to handle us to handle a VM.  We may....
      */
-    protected void handleVendorMessagePayload(VendorMessagePayload vmp) {
-        if (vmp instanceof MessagesSupportedVMP)
-            _messagesSupported = (MessagesSupportedVMP) vmp;
+    protected void handleVendorMessage(VendorMessage vm) {
+        if (vm instanceof MessagesSupportedVendorMessage)
+            _messagesSupported = (MessagesSupportedVendorMessage) vm;
     }
 
 

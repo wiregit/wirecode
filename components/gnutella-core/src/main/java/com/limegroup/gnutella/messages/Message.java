@@ -5,6 +5,7 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.messages.vendor.*;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -235,12 +236,14 @@ public abstract class Message
                 if ((ttl != 1) || (hops != 0))
                     throw new BadPacketException("VM with bad ttl/hops: " +
                                                  ttl + "/" + hops);
-                return new VendorMessage(guid, ttl, hops, payload);
+                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+                                                         payload);
             case F_VENDOR_MESSAGE_STABLE:
                 if ((ttl != 1) || (hops != 0))
                     throw new BadPacketException("VM with bad ttl/hops: " +
                                                  ttl + "/" + hops);
-                return new VendorMessage(guid, ttl, hops, payload);
+                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+                                                         payload);
         }
         throw new BadPacketException("Unrecognized function code: "+func);
     }

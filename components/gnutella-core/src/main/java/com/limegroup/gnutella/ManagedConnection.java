@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
@@ -46,7 +47,7 @@ import com.limegroup.gnutella.updates.*;
  * 
  * ManagedConnection also takes care of various VendorMessage handling, in
  * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
- * handleVendorMessagePayload().
+ * handleVendorMessage().
  *
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
@@ -269,7 +270,7 @@ public class ManagedConnection
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
 
-    /** Use this if a HopsFlowVMP instructs us to stop sending queries below
+    /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
      */
     private int softMaxHops = -1;
@@ -963,33 +964,41 @@ public class ManagedConnection
     }
 
 
-    protected void handleVendorMessagePayload(VendorMessagePayload vmp) {
+    protected void handleVendorMessage(VendorMessage vm) {
         // let Connection do as needed....
-        super.handleVendorMessagePayload(vmp);
+        super.handleVendorMessage(vm);
         // now i can process
-        if (vmp instanceof HopsFlowVMP) {
+        if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
-            HopsFlowVMP hops = (HopsFlowVMP) vmp;
+            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             softMaxHops = hops.getHopValue();
         }
-        else if (vmp instanceof MessagesSupportedVMP) {
+        else if (vm instanceof MessagesSupportedVendorMessage) {
             // do i need to send any ConnectBack messages????
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPConnectBack() > -1)) {
-                _numUDPConnectBackRequests++;
-                UDPConnectBackVMP udp = 
-                   new UDPConnectBackVMP(RouterService.getPort(),
-                                         RouterService.getUDPConnectBackGUID());
-                send(udp.getVendorMessage());
+                try {
+                    GUID connectBackGUID =
+                        RouterService.getUDPConnectBackGUID();
+                    UDPConnectBackVendorMessage udp = 
+                    new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                    connectBackGUID);
+                    send(udp);
+                    _numUDPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {}
             }
             if (!RouterService.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsTCPConnectBack() > -1)) {
-                _numTCPConnectBackRequests++;
-                TCPConnectBackVMP tcp =
-                   new TCPConnectBackVMP(RouterService.getPort());
-                send(tcp.getVendorMessage());
+                try {
+                    TCPConnectBackVendorMessage tcp =
+                       new TCPConnectBackVendorMessage(RouterService.getPort());
+                    send(tcp);
+                    _numTCPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {}
             }
         }
     }

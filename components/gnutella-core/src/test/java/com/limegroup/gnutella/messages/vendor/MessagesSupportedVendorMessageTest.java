@@ -1,18 +1,20 @@
-package com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages.vendor;
 
 import junit.framework.*;
 import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.*;
 
-/** Tests the important MessagesSupportedVMP.
+/** Tests the important MessagesSupportedVendorMessage.
  */
-public class MessagesSupportedVMPTest extends TestCase {
-    public MessagesSupportedVMPTest(String name) {
+public class MessagesSupportedVendorMessageTest extends TestCase {
+    public MessagesSupportedVendorMessageTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return new TestSuite(MessagesSupportedVMPTest.class);
+        return new TestSuite(MessagesSupportedVendorMessageTest.class);
     }
 
 
@@ -22,19 +24,19 @@ public class MessagesSupportedVMPTest extends TestCase {
 
     
     public void testStaticConstructor() {
-        MessagesSupportedVMP vmp = MessagesSupportedVMP.instance();
-        assertTrue(vmp.supportsTCPConnectBack() > -1);
-        assertTrue(vmp.supportsUDPConnectBack() > -1);
-        
-        VendorMessage vm = vmp.getVendorMessage();
         try {
+            MessagesSupportedVendorMessage vmp = 
+                MessagesSupportedVendorMessage.instance();
+            assertTrue(vmp.supportsTCPConnectBack() > -1);
+            assertTrue(vmp.supportsUDPConnectBack() > -1);
+            assertTrue(vmp.supportsHopsFlow() > -1);
+        
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            vm.write(baos);
+            vmp.write(baos);
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
-            vm = (VendorMessage) Message.read(bais);
-            MessagesSupportedVMP vmpRead = 
-                (MessagesSupportedVMP) vm.getVendorMessagePayload();
+            MessagesSupportedVendorMessage vmpRead = 
+                (MessagesSupportedVendorMessage) Message.read(bais);
             assertTrue(vmp.equals(vmpRead));
             assertTrue(vmpRead.supportsTCPConnectBack() > -1);
             assertTrue(vmpRead.supportsUDPConnectBack() > -1);
@@ -46,31 +48,33 @@ public class MessagesSupportedVMPTest extends TestCase {
     }
 
     public void testNetworkConstructor() {
-        MessagesSupportedVMP.SupportedMessageBlock smp1 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("SUSH".getBytes(),
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
                                                             10, 10);
-        MessagesSupportedVMP.SupportedMessageBlock smp2 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("NEIL".getBytes(), 
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp2 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("NEIL".getBytes(), 
                                                            5, 5);
-        MessagesSupportedVMP.SupportedMessageBlock smp3 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("DAWG".getBytes(), 
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp3 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("DAWG".getBytes(), 
                                                            3, 3);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
+            byte[] guid = GUID.makeGuid();
+            byte ttl = 1, hops = 0;
             ByteOrder.short2leb((short)4, baos);
             baos.write(smp1.encode());
             baos.write(smp2.encode());
             baos.write(smp3.encode());
             baos.write(smp3.encode());
-            VendorMessage vm = new VendorMessage(new byte[4], 0, 0,
-                                                 baos.toByteArray());
+            VendorMessage vm = new MessagesSupportedVendorMessage(guid, ttl,
+                                                                  hops, 0,
+                                                                  baos.toByteArray());
             baos = new ByteArrayOutputStream();
             vm.write(baos);
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
-            vm = (VendorMessage) Message.read(bais);
-            MessagesSupportedVMP vmp = 
-                (MessagesSupportedVMP) vm.getVendorMessagePayload();
+            MessagesSupportedVendorMessage vmp = 
+               (MessagesSupportedVendorMessage) Message.read(bais);
             // make sure it supports everything we expect....
             assertTrue(vmp.supportsMessage("SUSH".getBytes(), 10) == 10);
             assertTrue(vmp.supportsMessage("NEIL".getBytes(), 5) == 5);
@@ -87,8 +91,9 @@ public class MessagesSupportedVMPTest extends TestCase {
             baos.write(smp3.encode());
             baos.write(smp1.encode());
             
-            MessagesSupportedVMP vmpOther = 
-                new MessagesSupportedVMP(0, baos.toByteArray());
+            MessagesSupportedVendorMessage vmpOther = 
+                new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
+                                                   baos.toByteArray());
 
             assertTrue(vmp.equals(vmpOther));
         }
@@ -105,16 +110,18 @@ public class MessagesSupportedVMPTest extends TestCase {
 
 
     public void testBadCases() {
-        MessagesSupportedVMP.SupportedMessageBlock smp1 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("SUSH".getBytes(),
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
                                                             10, 10);
-        MessagesSupportedVMP.SupportedMessageBlock smp2 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("NEIL".getBytes(), 
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp2 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("NEIL".getBytes(), 
                                                            5, 5);
-        MessagesSupportedVMP.SupportedMessageBlock smp3 = 
-            new MessagesSupportedVMP.SupportedMessageBlock("DAWG".getBytes(), 
+        MessagesSupportedVendorMessage.SupportedMessageBlock smp3 = 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock("DAWG".getBytes(), 
                                                            3, 3);
         ByteArrayOutputStream baos = null;
+        byte[] guid = GUID.makeGuid();
+        byte ttl = 1, hops = 0;
         try {
             // test missing info....
             baos = new ByteArrayOutputStream();
@@ -122,8 +129,9 @@ public class MessagesSupportedVMPTest extends TestCase {
             baos.write(smp2.encode());
             baos.write(smp3.encode());
             baos.write(smp1.encode());
-            MessagesSupportedVMP vmpOther = 
-                new MessagesSupportedVMP(0, baos.toByteArray());
+            MessagesSupportedVendorMessage vmpOther = 
+                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                                   baos.toByteArray());
             assertTrue(false);
         }
         catch (IOException noway) {
@@ -140,8 +148,9 @@ public class MessagesSupportedVMPTest extends TestCase {
             baos.write(smp3.encode());
             baos.write(smp1.encode());
             baos.write("crap".getBytes());
-            MessagesSupportedVMP vmpOther = 
-                new MessagesSupportedVMP(0, baos.toByteArray());
+            MessagesSupportedVendorMessage vmpOther = 
+                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                                   baos.toByteArray());
             assertTrue(false);
         }
         catch (IOException noway) {
@@ -157,15 +166,17 @@ public class MessagesSupportedVMPTest extends TestCase {
             baos.write(smp2.encode());
             baos.write(smp3.encode());
             baos.write(smp1.encode());
-            MessagesSupportedVMP vmpOther = 
-                new MessagesSupportedVMP(0, baos.toByteArray());
+            MessagesSupportedVendorMessage vmpOther = 
+                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                                   baos.toByteArray());
             baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)3, baos);
             baos.write(smp2.encode());
             baos.write(smp3.encode());
             baos.write(smp1.encode());
-            MessagesSupportedVMP vmpOneOther = 
-                new MessagesSupportedVMP(0, baos.toByteArray());
+            MessagesSupportedVendorMessage vmpOneOther = 
+                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                                   baos.toByteArray());
             assertTrue(!vmpOther.equals(vmpOneOther));
         }
         catch (IOException noway) {

@@ -16,10 +16,6 @@ public class AllTests {
         suite.addTest(PingRequestTest.suite());
         suite.addTest(PushRequestTest.suite());
 		suite.addTest(MessageUtilsTest.suite());
-		suite.addTest(VendorMessageTest.suite());
-		suite.addTest(ConnectBackVMPTest.suite());
-		suite.addTest(VendorMessagePayloadTest.suite());
-		suite.addTest(MessagesSupportedVMPTest.suite());
         return suite;
     }
 
