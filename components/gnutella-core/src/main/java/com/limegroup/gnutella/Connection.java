@@ -927,6 +927,11 @@ public class Connection {
 		return HEADERS.getUserAgent();
     }
 
+    // inherit doc comment
+    public boolean isGoodConnection() {
+        return HEADERS.isGoodConnection();
+    }
+
 	/**
 	 * Returns the number of intra-Ultrapeer connections this node maintains.
 	 * 
