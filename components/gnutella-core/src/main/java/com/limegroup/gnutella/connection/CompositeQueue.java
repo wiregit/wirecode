@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.connection;
 
+import java.io.IOException;
+
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.messages.*;
 
@@ -53,7 +55,7 @@ public final class CompositeQueue {
      * The max time to keep queries, pings, and pongs in the queues, in
      *  milliseconds.  Package-access for testing purposes only! 
      */
-    static int QUEUE_TIME = 5*1000;
+    public static int QUEUE_TIME = 5*1000;
     
     /** 
      * The number of different priority levels. 
@@ -89,9 +91,11 @@ public final class CompositeQueue {
     private MessageQueue[] _queues;
     
     /** 
-     * The current priority level to send.  Rotates through all 
-     *  entries in a round-robin fashion. 
-     *  INVARIANT: 0<=_priority<PRIORITIES 
+     * The priority of the last message added to _outputQueue. This is an
+     * optimization to keep OutputRunner from iterating through all priorities.
+     * This value is only a hint and can be legally set to any priority.  Hence
+     * no locking is necessary.
+     * INVARIANT: 0<=_priority<PRIORITIES 
      */
     private int _priority = 0;
     
@@ -108,12 +112,18 @@ public final class CompositeQueue {
     private final ManagedConnection CONNECTION;
     
     /**
+     * Lock for the output queue.
+     */
+    private Object _queueLock;
+    
+    /**
      * Creates a new <tt>CompositeQueue</tt> instance.
      * 
      * @return a new <tt>CompositeQueue</tt> instance
      */
-    public static CompositeQueue createQueue(ManagedConnection mc) {
-        return new CompositeQueue(mc);
+    public static CompositeQueue createQueue(ManagedConnection mc, 
+        Object queueLock) {
+        return new CompositeQueue(mc, queueLock);
     }
     
     /** 
@@ -121,118 +131,138 @@ public final class CompositeQueue {
      * 
      * @param mc the <tt>ManagedConnection</tt> associated with this queue
      */
-    private CompositeQueue(ManagedConnection mc) {
+    private CompositeQueue(ManagedConnection mc, Object queueLock) {
         CONNECTION = mc;
+        _queueLock = queueLock;
     }
     
     /**
-     * Lazily constructs the message queues.
+     * Static utility method for lazily constructing the message queues.
+     * 
+     * @return a new array of <tt>MessageQueue</tt>s, with one queue for each
+     *  message priority
      */
-    private void createQueues() {
+    private static MessageQueue[] createQueues() {
         // Instantiate queues.  
         // TODO: for ultrapeer->leaf connections, we can
         // save a fair bit of memory by not using buffering at all. 
-        _queues = new MessageQueue[PRIORITIES];
-        _queues[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
+        MessageQueue[] queues = new MessageQueue[PRIORITIES];
+        queues[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE,
                 true);
-        _queues[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(1, QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_PING_REPLY] 
+        queues[PRIORITY_PUSH]
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+        queues[PRIORITY_QUERY_REPLY]
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+        queues[PRIORITY_QUERY]      
+            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
+        queues[PRIORITY_PING_REPLY] 
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _queues[PRIORITY_PING]       
+        queues[PRIORITY_PING]       
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-		_queues[PRIORITY_OUR_QUERY]
+		queues[PRIORITY_OUR_QUERY]
 			= new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_OTHER]        //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
-    }                                                             
+        queues[PRIORITY_OTHER]        //FIFO, no timeout
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
+                false);
+        return queues;
+    }                                                      
 
     /** 
      * Adds m to this, possibly dropping some messages in the process; call
      * resetDropped to get the count of dropped messages.
      * @see resetDropped 
      */
-    public synchronized void add(Message m) {
+    public void add(Message msg) {
         repOk();
 
-        //Add m to appropriate buffer
-        int priority = calculatePriority(m);
-        
+        // create queues if they haven't yet been created
         if(_queues == null) {
-            createQueues();
+            _queues = createQueues();
         }
-        _queues[priority].add(m);
-
-        //Update statistics
-        int dropped = _queues[priority].resetDropped();
-        CONNECTION.addSentDropped(dropped);
         
-        //_dropped += dropped;
-        _size += 1-dropped;
-        
-        //An optimization to make removeBest faster in the common case that this
-        //only has a single element m.
-        if (size() == 1)
+        synchronized (_queueLock) {
+            int priority = calculatePriority(msg);
+            
+            // add msg to appropriate buffer
+            _queues[priority].add(msg);
+    
+            //Update statistics
+            int dropped = _queues[priority].resetDropped();
+            CONNECTION.addSentDropped(dropped);
+            _size += 1-dropped;
+            
+            // optimization -- make sure we start with a priority that actually
+            // has a message
             _priority = priority;
-
+        }
         repOk();
     }
-
+    
     /** 
      * Removes and returns the next message to send from this.  Returns null if
      * there are no more messages to send.  The returned message is guaranteed
      * be younger than TIMEOUT milliseconds.  Messages may be dropped in the
      * process; find out how many by calling resetDropped().  For this reason
      * note that size()>0 does not imply that removeBest()!=null.
-     * @return the next message, or null if none
-     * @see resetDropped
+     * 
+     * @return the next message, or <tt>null</tt> if none
+     * @see com.limegroup.gnutella.connection.MessageQueue#resetDropped()
+     * TODO:: make syncrhonization more fine-grained
      */
-    public synchronized Message removeNext() {        
-        try { 
-            repOk();
-
-            //Try all priorities in a round-robin fashion until we find a
-            //non-empty buffer.  This degenerates in performance if the queue
-            //contains only a single type of message.
-            while (size()>0) {
-                //Try to get a message from the current queue.
-                Message m = _queues[_priority].removeNext();
-                int dropped = _queues[_priority].resetDropped();
-                CONNECTION.addSentDropped(dropped);
-                _size -= (m==null?0:1) + dropped;  //maintain invariant
+    public void write() throws IOException {        
+        //try { 
+            //repOk();
+            
+        int start = _priority;
+        int i = start;
+        
+        do {
+            MessageQueue queue = _queues[i];
+            queue.resetCycle();
+            boolean emptied = false;
+            while(true) {
+                Message msg = null;
+                synchronized (_queueLock) {
+                    msg = queue.removeNext();
+                    int dropped = queue.resetDropped();
+                    CONNECTION.addSentDropped(dropped);
+                    _size -= (msg==null?0:1) + dropped;  //maintain invariant
+                    if (_size == 0) {
+                        emptied = true;
+                    } 
+                    if(msg == null) {
+                        break;
+                    }
+                }
                 
-                if (m != null)
-                    return m;
-
-                //No luck?  Go on to next queue.
-                _priority = (_priority+1) % PRIORITIES;
-                _queues[_priority].resetCycle();
+                //Note that if the ougoing stream is compressed
+                //(isWriteDeflated()), this call may not actually
+                //do anything.  This is because the Deflater waits
+                //until an optimal time to start deflating, buffering
+                //up incoming data until that time is reached, or the
+                //data is explicitly flushed.
+                CONNECTION.sendMessage(msg);
+                CONNECTION.addSent();
             }
+            
+            // Optimization: the if statement below is not needed for
+            // correctness but works nicely with the _priorityHint trick.
+            if (emptied)
+                break;
+            i = (i+1)%PRIORITIES;
+        } while(i != start);
+        
 
-            //Nothing to send.
-            return null;
-
-        } finally { 
-            repOk(); 
-        }
+        //2. Now force data from Connection's BufferedOutputStream into the
+        //kernel's TCP send buffer.  It doesn't force TCP to
+        //actually send the data to the network.  That is determined
+        //by the receiver's window size and Nagle's algorithm.
+        //Note that if the outgoing stream is compressed 
+        //(isWriteDeflated()), then this call may block while the
+        //Deflater deflates the data.        
+        CONNECTION.flushMessage();
     }
-
-    /** 
-     * Returns the number of dropped messages since the last call to
-     * resetDropped().
-     */
-    /*
-    public synchronized final int resetDropped() { 
-        int ret = _dropped;
-        _dropped = 0;
-        return ret;
-    }
-    */
 
     /** 
      * Returns the number of messages in this.  Note that size()>0 does not
@@ -261,25 +291,32 @@ public final class CompositeQueue {
         Assert.that(sum==_size, "Expected "+sum+", got "+_size);
         */
     }
+
+    /**
+     * Utility method used only for testing.
+     */    
+    void resetPriority() {
+        _priority = 0;
+    }
     
     /** 
      * Returns the send priority for the given message, with higher numbers for
      * higher priorities.
      * 
-     * @param m the <tt>Message</tt> whose priority should be calculated
+     * @param msg the <tt>Message</tt> whose priority should be calculated
      * @return the send priority for the message
      */
-    private static int calculatePriority(Message m) {
-        switch (m.getFunc()) {
+    private static int calculatePriority(Message msg) {
+        switch (msg.getFunc()) {
             case Message.F_QUERY:
                 return PRIORITY_QUERY;
             case Message.F_QUERY_REPLY: 
                 return PRIORITY_QUERY_REPLY;
             case Message.F_PING_REPLY: 
-                return (m.getHops()==0 && m.getTTL()<=2) ? 
+                return (msg.getHops()==0 && msg.getTTL()<=2) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
             case Message.F_PING: 
-                return (m.getHops()==0 && m.getTTL()==1) ? 
+                return (msg.getHops()==0 && msg.getTTL()<=2) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING;
             case Message.F_PUSH: 
                 return PRIORITY_PUSH;                
