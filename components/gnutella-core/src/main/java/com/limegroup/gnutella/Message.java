@@ -227,8 +227,15 @@ public abstract class Message implements Serializable{
         return hops;
     }
 
+    /** Returns the length of this' payload, in bytes. */
     public int getLength() {
         return length;
+    }
+
+    /** Returns the total length of this, in bytes */
+    public int getTotalLength() {
+        //Header is 23 bytes.
+        return 23+length;
     }
 
     /** Returns the ip (given in BIG-endian) format as standard
