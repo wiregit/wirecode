@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.SystemUtils;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.http.*; 
+import com.limegroup.gnutella.security.SHA1;
 import com.bitzi.util.*;
 import java.io.*;
 import java.security.*;

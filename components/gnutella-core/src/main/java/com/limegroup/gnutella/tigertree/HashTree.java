@@ -13,14 +13,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
-import com.bitzi.util.TigerTree;
-import com.bitzi.util.Tiger;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.security.Tiger;
+import com.limegroup.gnutella.security.TigerTree;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.ArrayList;

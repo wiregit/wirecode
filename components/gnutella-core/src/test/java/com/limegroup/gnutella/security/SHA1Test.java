@@ -11,9 +11,8 @@
  * Sun may wish to change the following package name, if integrating this
  * class in the Sun JCE Security Provider for Java 1.5 (code-named Tiger).
  */
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.security;
 
-import com.limegroup.gnutella.SHA1;
 import com.limegroup.gnutella.util.CommonUtils;
 
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -69,9 +68,9 @@ public class SHA1Test extends BaseTestCase {
         double rate = 1000.0 * ITERATIONS * BLOCKSIZE / ((t2 - t1) - (t1 - t0));
                     
         double limeRate = rate;
-//        System.out.println("Our rate = " +
-  //                          (float)(rate * 8) + " bits/s = " +
-    //                        (float)(rate / (1024 * 1024)) + " Megabytes/s");
+        //System.out.println("Our rate = " +
+        //                    (float)(rate * 8) + " bits/s = " +
+        //                    (float)(rate / (1024 * 1024)) + " Megabytes/s");
         // Java 1.5 beta-b32c, on Athlon XP 1800+: 47.62 Megabytes/s.
 
         MessageDigest md = MessageDigest.getInstance("SHA");
@@ -83,9 +82,9 @@ public class SHA1Test extends BaseTestCase {
         t2 = System.currentTimeMillis();
         md.reset();
         rate = 1000.0 * ITERATIONS * BLOCKSIZE / ((t2 - t1) - (t1 - t0));
-       //     System.out.println("JCE rate = " +
-         //                       (float)(rate * 8) + " bits/s = " +
-           //                     (float)(rate / (1024 * 1024)) + " Megabytes/s");
+            //System.out.println("JCE rate = " +
+            //                    (float)(rate * 8) + " bits/s = " +
+            //                    (float)(rate / (1024 * 1024)) + " Megabytes/s");
         // Java 1.5 beta-b32c, on Athlon XP 1800+: 22.78 Megabytes/s.
         
         assertGreaterThan(rate, limeRate);

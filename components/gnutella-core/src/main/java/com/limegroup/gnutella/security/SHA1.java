@@ -1,5 +1,4 @@
-/*
- * @(#)SHA1.java   1.9 2004-04-22
+/* @(#)SHA1.java	1.11 2004-04-26
  * This file was freely contributed to the LimeWire project and is covered
  * by its existing GPL licence, but it may be used individually as a public
  * domain implementation of a published algorithm (see below for references).
@@ -7,18 +6,20 @@
  * @author  Philippe Verdy
  */
 
-/*
- * Sun may wish to change the following package name, if integrating this
+/* Sun may wish to change the following package name, if integrating this
  * class in the Sun JCE Security Provider for Java 1.5 (code-named Tiger).
  *
  * You can include it in your own Security Provider by inserting
  * this property in your Provider derived class:
- * put("MessageDigest.SHA-1", "com.limegroup.gnutella.SHA1");
+ * put("MessageDigest.SHA-1", "com.limegroup.gnutella.security.SHA1");
  */
-package com.limegroup.gnutella;
+ 
+package com.limegroup.gnutella.security;
+
 import java.security.*;
-//--+---+1--+---+--2+---+---+3--+---+--4+---+---+5--+---+--6+---+---+7--+---+-
-//3456789012345678901234567890123456789012345678901234567890123456789012345678
+
+//--+---+1--+---+--2+---+---+3--+---+--4+---+---+5--+---+--6+---+---+7--+---+--
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
 
 /**
  * <p>The FIPS PUB 180-2 standard specifies four secure hash algorithms (SHA-1,
@@ -42,7 +43,7 @@ import java.security.*;
  *
  * <p>A "SHS change notice" adds a SHA-224 algorithm for interoperability,
  * which, like SHA-1 and SHA-256, operates on 512-bit blocks and 32-bit words,
- * </p>
+ * but truncates the final digest and uses distinct initialization values.</p>
  *
  * <p><b>References:</b></p>
  * <ol>
@@ -65,7 +66,7 @@ public final class SHA1 extends MessageDigest implements Cloneable {
     /**
      * This implementation returns a fixed-size digest.
      */
-    private static final int SHA1_LENGTH = 20; // bytes == 160 bits
+    private static final int HASH_LENGTH = 20; // bytes == 160 bits
 
     /**
      * Private context for incomplete blocks and padding bytes.
@@ -93,43 +94,15 @@ public final class SHA1 extends MessageDigest implements Cloneable {
     public SHA1() {
         super("SHA-1");
         pad = new byte[64];
-        engineReset();
-    }
-
-    /**
-     * Creates a SHA1 object with state (for cloning).
-     *
-     * @param state  the existing object to clone
-     */
-    public SHA1(final SHA1 state) {
-        this();
-        pad = (byte[])state.pad.clone();
-        padding = state.padding;
-        bytes = state.bytes;
-        hA = state.hA;
-        hB = state.hB;
-        hC = state.hC;
-        hD = state.hD;
-        hE = state.hE;
+        init();
     }
 
     /**
      * Clones this object.
      */
-    public Object clone() {
-        SHA1 that = null;
-        try {
-            that = (SHA1)super.clone();
-            that.pad = (byte[])this.pad.clone();
-            that.padding = this.padding;
-            that.bytes = this.bytes;
-            that.hA = this.hA;
-            that.hB = this.hB;
-            that.hC = this.hC;
-            that.hD = this.hD;
-            that.hE = this.hE;
-        } catch (CloneNotSupportedException e) {
-        }
+    public Object clone() throws CloneNotSupportedException  {
+        SHA1 that = (SHA1)super.clone();
+        that.pad = (byte[])this.pad.clone();
         return that;
     }
 
@@ -144,11 +117,11 @@ public final class SHA1 extends MessageDigest implements Cloneable {
      * @return the digest length in bytes.
      */
     public int engineGetDigestLength() {
-        return SHA1_LENGTH;
+        return HASH_LENGTH;
     }
 
     /**
-     * Initialize or reset the digest context.
+     * Reset athen initialize the digest context.
      *
      * Overrides the protected abstract method of
      * <code>java.security.MessageDigestSpi</code>.
@@ -163,6 +136,13 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         } while ((i -= 4) >= 0);
         padding = 0;
         bytes = 0;
+        init();
+    }
+
+    /**
+     * Initialize the digest context.
+     */
+    protected void init() {
         hA = 0x67452301;
         hB = 0xefcdab89;
         hC = 0x98badcfe;
@@ -180,11 +160,13 @@ public final class SHA1 extends MessageDigest implements Cloneable {
      */
     public void engineUpdate(byte input) {
         bytes++;
-        pad[padding] = input;
-        if (++padding == 64) {
-            computeBlock(pad, 0);
-            padding = 0;
+        if (padding < 63) {
+            pad[padding++] = input;
+            return;
         }
+        pad[63] = input;
+        computeBlock(pad, 0);
+        padding = 0;
     }
 
     /**
@@ -203,26 +185,42 @@ public final class SHA1 extends MessageDigest implements Cloneable {
     public void engineUpdate(byte[] input, int offset, int len) {
         if (offset >= 0 && len >= 0 && offset + len <= input.length) {
             bytes += len;
-            int padlen;
-            if (padding > 0 && len >= (padlen = 64 - padding)) {
+            /* Terminate the previous block. */
+            int padlen = 64 - padding;
+            if (padding > 0 && len >= padlen) {
                 System.arraycopy(input, offset, pad, padding, padlen);
                 computeBlock(pad, 0);
                 padding = 0;
                 offset += padlen;
                 len -= padlen;
             }
+            /* Loop on large sets of complete blocks. */
+            while (len >= 512) {
+                computeBlock(input, offset);
+                computeBlock(input, offset + 64);
+                computeBlock(input, offset + 128);
+                computeBlock(input, offset + 192);
+                computeBlock(input, offset + 256);
+                computeBlock(input, offset + 320);
+                computeBlock(input, offset + 384);
+                computeBlock(input, offset + 448);
+                offset += 512;
+                len -= 512;
+            }
+            /* Loop on remaining complete blocks. */
             while (len >= 64) {
                 computeBlock(input, offset);
                 offset += 64;
                 len -= 64;
             }
+            /* remaining bytes kept for next block. */
             if (len > 0) {
                 System.arraycopy(input, offset, pad, padding, len);
                 padding += len;
             }
             return;
         }
-        throw new ArrayIndexOutOfBoundsException();
+        throw new ArrayIndexOutOfBoundsException(offset);
     }
 
     /**
@@ -240,12 +238,12 @@ public final class SHA1 extends MessageDigest implements Cloneable {
      * @return the length of the digest stored in the output buffer.
      */
     public byte[] engineDigest() {
-        byte hashvalue[] = new byte[SHA1_LENGTH];
         try {
-            int outLen = engineDigest(hashvalue, 0, hashvalue.length);
+            final byte hashvalue[] = new byte[HASH_LENGTH];
+            engineDigest(hashvalue, 0, HASH_LENGTH);
             return hashvalue;
         } catch (DigestException e) {
-            throw new InternalError("");
+            return null;
         }
     }
 
@@ -269,95 +267,100 @@ public final class SHA1 extends MessageDigest implements Cloneable {
      *             length.
      * @return  the length of the digest stored in the output buffer.
      */
-    public int engineDigest(byte[] hashvalue, int offset, int len)
+    public int engineDigest(byte[] hashvalue, int offset, final int len)
             throws DigestException {
-        if (len < SHA1_LENGTH)
-            throw new DigestException(
-                "partial digests not returned");
-        if (hashvalue.length - offset < SHA1_LENGTH)
+        if (len >= HASH_LENGTH) {
+            if (hashvalue.length - offset >= HASH_LENGTH) {
+                /* Flush the trailing bytes, adding padding bytes into last
+                 * blocks. */
+                int i;
+                /* Add padding null bytes but replace the last 8 padding bytes
+                 * by the little-endian 64-bit digested message bit-length. */
+                pad[i = padding] = (byte)0x80; /* required 1st padding byte */
+                /* Check if 8 bytes available in pad to store the total
+                 * message size */
+                switch (i) { /* INVARIANT: i must be in [0..63] */
+                case 52: pad[53] = (byte)0x00; /* no break; falls thru */
+                case 53: pad[54] = (byte)0x00; /* no break; falls thru */
+                case 54: pad[55] = (byte)0x00; /* no break; falls thru */
+                case 55: break;
+                case 56: pad[57] = (byte)0x00; /* no break; falls thru */
+                case 57: pad[58] = (byte)0x00; /* no break; falls thru */
+                case 58: pad[59] = (byte)0x00; /* no break; falls thru */
+                case 59: pad[60] = (byte)0x00; /* no break; falls thru */
+                case 60: pad[61] = (byte)0x00; /* no break; falls thru */
+                case 61: pad[62] = (byte)0x00; /* no break; falls thru */
+                case 62: pad[63] = (byte)0x00; /* no break; falls thru */
+                case 63:
+                    computeBlock(pad, 0);
+                    /* Clear the 56 first bytes of pad[]. */
+                    i = 52;
+                    do {
+                        pad[i    ] = (byte)0x00;
+                        pad[i + 1] = (byte)0x00;
+                        pad[i + 2] = (byte)0x00;
+                        pad[i + 3] = (byte)0x00;
+                    } while ((i -= 4) >= 0);
+                    break;
+                default:
+                    /* Clear the rest of 56 first bytes of pad[]. */
+                    switch (i & 3) {
+                    case 3: i++;
+                            break;
+                    case 2: pad[(i += 2) - 1] = (byte)0x00;
+                            break;
+                    case 1: pad[(i += 3) - 2] = (byte)0x00;
+                            pad[ i       - 1] = (byte)0x00;
+                            break;
+                    case 0: pad[(i += 4) - 3] = (byte)0x00;
+                            pad[ i       - 2] = (byte)0x00;
+                            pad[ i       - 1] = (byte)0x00;
+                    }
+                    do {
+                        pad[i    ] = (byte)0x00;
+                        pad[i + 1] = (byte)0x00;
+                        pad[i + 2] = (byte)0x00;
+                        pad[i + 3] = (byte)0x00;
+                    } while ((i += 4) < 56);
+                }
+                /* Convert the message size from bytes to big-endian bits. */
+                pad[56] = (byte)((i = (int)(bytes >>> 29)) >> 24);
+                pad[57] = (byte)(i >>> 16);
+                pad[58] = (byte)(i >>> 8);
+                pad[59] = (byte)i;
+                pad[60] = (byte)((i = (int)bytes << 3) >> 24);
+                pad[61] = (byte)(i >>> 16);
+                pad[62] = (byte)(i >>> 8);
+                pad[63] = (byte)i;
+                computeBlock(pad, 0);
+                /* Return the computed digest in big-endian byte order. */
+                hashvalue[offset     ] = (byte)((i = hA) >>> 24);
+                hashvalue[offset +  1] = (byte)(i >>> 16);
+                hashvalue[offset +  2] = (byte)(i >>> 8);
+                hashvalue[offset +  3] = (byte)i;
+                hashvalue[offset +  4] = (byte)((i = hB) >>> 24);
+                hashvalue[offset += 5] = (byte)(i >>> 16);
+                hashvalue[offset +  1] = (byte)(i >>> 8);
+                hashvalue[offset +  2] = (byte)i;
+                hashvalue[offset +  3] = (byte)((i = hC) >>> 24);
+                hashvalue[offset +  4] = (byte)(i >>> 16);
+                hashvalue[offset += 5] = (byte)(i >>> 8);
+                hashvalue[offset +  1] = (byte)i;
+                hashvalue[offset +  2] = (byte)((i = hD) >>> 24);
+                hashvalue[offset +  3] = (byte)(i >>> 16);
+                hashvalue[offset +  4] = (byte)(i >>> 8);
+                hashvalue[offset += 5] = (byte)i;
+                hashvalue[offset +  1] = (byte)((i = hE) >>> 24);
+                hashvalue[offset +  2] = (byte)(i >>> 16);
+                hashvalue[offset +  3] = (byte)(i >>> 8);
+                hashvalue[offset +  4] = (byte)i;
+                engineReset(); /* clear the evidence */
+                return HASH_LENGTH;
+            }
             throw new DigestException(
                 "insufficient space in output buffer to store the digest");
-        // Flush the trailing bytes, adding padding bytes into last blocks.
-        int temp;
-        // Add padding null bytes but replace the last 8 padding bytes by
-        // the little-endian 64-bit digested message bit-length.
-        pad[temp = padding] = (byte)0x80; // required first padding byte value!
-        // Check if 8 bytes available in pad to store the total message size
-        switch (temp) { // INVARIANT: temp must be in [0..63]
-        case 56: pad[57] = (byte)0x00; // no break; falls thru
-        case 57: pad[58] = (byte)0x00; // no break; falls thru
-        case 58: pad[59] = (byte)0x00; // no break; falls thru
-        case 59: pad[60] = (byte)0x00; // no break; falls thru
-        case 60: pad[61] = (byte)0x00; // no break; falls thru
-        case 61: pad[62] = (byte)0x00; // no break; falls thru
-        case 62: pad[63] = (byte)0x00; // no break; falls thru
-        case 63: computeBlock(pad, 0);
-            // Clear the 56 first bytes of pad[].
-            temp = 52;
-            do {
-                pad[temp     ] = (byte)0x00;
-                pad[temp +  1] = (byte)0x00;
-                pad[temp +  2] = (byte)0x00;
-                pad[temp +  3] = (byte)0x00;
-            } while ((temp -= 4) >= 0);
-            break;
-        case 52: pad[53] = (byte)0x00; // no break; falls thru
-        case 53: pad[54] = (byte)0x00; // no break; falls thru
-        case 54: pad[55] = (byte)0x00; // no break; falls thru
-        case 55: break;
-        default: // Clear the rest of 56 first bytes of pad[].
-            switch (temp & 3) {
-            case 3: temp++;
-                    break;
-            case 2: pad[(temp += 2) - 1] = (byte)0x00;
-                    break;
-            case 1: pad[(temp += 3) - 2] = (byte)0x00;
-                    pad[ temp       - 1] = (byte)0x00;
-                    break;
-            case 0: pad[(temp += 4) - 3] = (byte)0x00;
-                    pad[ temp       - 2] = (byte)0x00;
-                    pad[ temp       - 1] = (byte)0x00;
-            }
-            do {
-                pad[temp    ] = (byte)0x00;
-                pad[temp + 1] = (byte)0x00;
-                pad[temp + 2] = (byte)0x00;
-                pad[temp + 3] = (byte)0x00;
-            } while ((temp += 4) < 56);
         }
-        // Convert the message size from bytes to bits (big endian).
-        pad[56] = (byte)((temp = (int)(bytes >>> 29)) >>> 24);
-        pad[57] = (byte)(temp >>> 16);
-        pad[58] = (byte)(temp >>>  8);
-        pad[59] = (byte)temp;
-        pad[60] = (byte)((temp = (int)bytes << 3) >>> 24);
-        pad[61] = (byte)(temp >>> 16);
-        pad[62] = (byte)(temp >>>  8);
-        pad[63] = (byte)temp;
-        computeBlock(pad, 0);
-        // Return the computed digest in big-endian byte order.
-        hashvalue[offset     ] = (byte)(hA >>> 24);
-        hashvalue[offset +  1] = (byte)(hA >>> 16);
-        hashvalue[offset +  2] = (byte)(hA >>>  8);
-        hashvalue[offset +  3] = (byte) hA;
-        hashvalue[offset +  4] = (byte)(hB >>> 24);
-        hashvalue[offset += 5] = (byte)(hB >>> 16);
-        hashvalue[offset +  1] = (byte)(hB >>>  8);
-        hashvalue[offset +  2] = (byte) hB;
-        hashvalue[offset +  3] = (byte)(hC >>> 24);
-        hashvalue[offset +  4] = (byte)(hC >>> 16);
-        hashvalue[offset += 5] = (byte)(hC >>>  8);
-        hashvalue[offset +  1] = (byte) hC;
-        hashvalue[offset +  2] = (byte)(hD >>> 24);
-        hashvalue[offset +  3] = (byte)(hD >>> 16);
-        hashvalue[offset +  4] = (byte)(hD >>>  8);
-        hashvalue[offset += 5] = (byte) hD;
-        hashvalue[offset +  1] = (byte)(hE >>> 24);
-        hashvalue[offset +  2] = (byte)(hE >>> 16);
-        hashvalue[offset +  3] = (byte)(hE >>>  8);
-        hashvalue[offset +  4] = (byte) hE;
-        engineReset(); // clear the evidence
-        return SHA1_LENGTH;
+        throw new DigestException("partial digests not returned");
     }
 
     /**
@@ -372,128 +375,115 @@ public final class SHA1 extends MessageDigest implements Cloneable {
      * @param offset  the offset to start from in the array of bytes.
      */
     private void computeBlock(final byte[] input, int offset) {
-        /*
-         * Local temporary work variables for intermediate digests.
-         */
+        /* Local temporary work variables for intermediate digests. */
         int a, b, c, d, e;
-
-        /*
-         * Cache the input block into the local working set of 64-bit
+        /* Cache the input block into the local working set of 32-bit
          * values, in big-endian byte order. Be careful when
-         * widening bytes or integers due to sign extension !
-         */
+         * widening bytes or integers due to sign extension! */
         int i00, i01, i02, i03, i04, i05, i06, i07,
             i08, i09, i10, i11, i12, i13, i14, i15;
-
-        /*
-         * Use hash schedule function Ch (rounds 0..19):
+        /* Use hash schedule function Ch (rounds 0..19):
          *   Ch(x,y,z) = (x & y) ^ (~x & z) = (x & (y ^ z)) ^ z,
-         * and K00 = .... = K19 = 0x5a827999.
-         */
-        /*
-         * First pass, on big endian input (rounds 0..15).
-         */
+         * and K00 = .... = K19 = 0x5a827999. */
+        /* First pass, on big endian input (rounds 0..15). */
         e =  hE
           +  (((a = hA) << 5) | (a >>> 27)) + 0x5a827999 // K00
           +  (((b = hB) & ((c = hC)      ^ (d = hD))) ^ d) // Ch(b,c,d)
-          +  (i00 = input[offset     ]         << 24 |
-                   (input[offset +  1] & 0xff) << 16 |
-                   (input[offset +  2] & 0xff) <<  8 |
-                   (input[offset +  3] & 0xff)      ); // W00
+          +  (i00 =  input[offset     ] << 24
+                  | (input[offset +  1] & 0xff) << 16
+                  | (input[offset +  2] & 0xff) << 8
+                  | (input[offset +  3] & 0xff)); // W00
         d += ((e << 5) | (e >>> 27)) + 0x5a827999 // K01
           +  ((a & ((b = (b << 30) | (b >>> 2)) ^ c)) ^ c) // Ch(a,b,c)
-          +  (i01 = input[offset +  4]         << 24 |
-                   (input[offset += 5] & 0xff) << 16 |
-                   (input[offset +  1] & 0xff) <<  8 |
-                   (input[offset +  2] & 0xff)      ); // W01
+          +  (i01 =  input[offset +  4] << 24
+                  | (input[offset += 5] & 0xff) << 16
+                  | (input[offset +  1] & 0xff) << 8
+                  | (input[offset +  2] & 0xff)); // W01
         c += ((d << 5) | (d >>> 27)) + 0x5a827999 // K02
           +  ((e & ((a = (a << 30) | (a >>> 2)) ^ b)) ^ b) // Ch(e,a,b)
-          +  (i02 = input[offset +  3]         << 24 |
-                   (input[offset +  4] & 0xff) << 16 |
-                   (input[offset += 5] & 0xff) <<  8 |
-                   (input[offset +  1] & 0xff)      ); // W02
+          +  (i02 =  input[offset +  3] << 24
+                  | (input[offset +  4] & 0xff) << 16
+                  | (input[offset += 5] & 0xff) << 8
+                  | (input[offset +  1] & 0xff)); // W02
         b += ((c << 5) | (c >>> 27)) + 0x5a827999 // K03
           +  ((d & ((e = (e << 30) | (e >>> 2)) ^ a)) ^ a) // Ch(d,e,a)
-          +  (i03 = input[offset +  2]         << 24 |
-                   (input[offset +  3] & 0xff) << 16 |
-                   (input[offset +  4] & 0xff) <<  8 |
-                   (input[offset += 5] & 0xff)      ); // W03
+          +  (i03 =  input[offset +  2] << 24
+                  | (input[offset +  3] & 0xff) << 16
+                  | (input[offset +  4] & 0xff) << 8
+                  | (input[offset += 5] & 0xff)); // W03
         a += ((b << 5) | (b >>> 27)) + 0x5a827999 // K04
           +  ((c & ((d = (d << 30) | (d >>> 2)) ^ e)) ^ e) // Ch(c,d,e)
-          +  (i04 = input[offset +  1]         << 24 |
-                   (input[offset +  2] & 0xff) << 16 |
-                   (input[offset +  3] & 0xff) <<  8 |
-                   (input[offset +  4] & 0xff)      ); // W04
+          +  (i04 =  input[offset +  1] << 24
+                  | (input[offset +  2] & 0xff) << 16
+                  | (input[offset +  3] & 0xff) << 8
+                  | (input[offset +  4] & 0xff)); // W04
         e += ((a << 5) | (a >>> 27)) + 0x5a827999 // K05
           +  ((b & ((c = (c << 30) | (c >>> 2)) ^ d)) ^ d) // Ch(b,c,d)
-          +  (i05 = input[offset += 5]         << 24 |
-                   (input[offset +  1] & 0xff) << 16 |
-                   (input[offset +  2] & 0xff) <<  8 |
-                   (input[offset +  3] & 0xff)      ); // W05
+          +  (i05 =  input[offset += 5] << 24
+                  | (input[offset +  1] & 0xff) << 16
+                  | (input[offset +  2] & 0xff) << 8
+                  | (input[offset +  3] & 0xff)); // W05
         d += ((e << 5) | (e >>> 27)) + 0x5a827999 // K06
           +  ((a & ((b = (b << 30) | (b >>> 2)) ^ c)) ^ c) // Ch(a,b,c)
-          +  (i06 = input[offset +  4]         << 24 |
-                   (input[offset += 5] & 0xff) << 16 |
-                   (input[offset +  1] & 0xff) <<  8 |
-                   (input[offset +  2] & 0xff)      ); // W06
+          +  (i06 =  input[offset +  4] << 24
+                  | (input[offset += 5] & 0xff) << 16
+                  | (input[offset +  1] & 0xff) << 8
+                  | (input[offset +  2] & 0xff)); // W06
         c += ((d << 5) | (d >>> 27)) + 0x5a827999 // K07
           +  ((e & ((a = (a << 30) | (a >>> 2)) ^ b)) ^ b) // Ch(e,a,b)
-          +  (i07 = input[offset +  3]         << 24 |
-                   (input[offset +  4] & 0xff) << 16 |
-                   (input[offset += 5] & 0xff) <<  8 |
-                   (input[offset +  1] & 0xff)      ); // W07
+          +  (i07 =  input[offset +  3] << 24
+                  | (input[offset +  4] & 0xff) << 16
+                  | (input[offset += 5] & 0xff) << 8
+                  | (input[offset +  1] & 0xff)); // W07
         b += ((c << 5) | (c >>> 27)) + 0x5a827999 // K08
           +  ((d & ((e = (e << 30) | (e >>> 2)) ^ a)) ^ a) // Ch(d,e,a)
-          +  (i08 = input[offset +  2]         << 24 |
-                   (input[offset +  3] & 0xff) << 16 |
-                   (input[offset +  4] & 0xff) <<  8 |
-                   (input[offset += 5] & 0xff)      ); // W08
+          +  (i08 =  input[offset +  2] << 24
+                  | (input[offset +  3] & 0xff) << 16
+                  | (input[offset +  4] & 0xff) << 8
+                  | (input[offset += 5] & 0xff)); // W08
         a += ((b << 5) | (b >>> 27)) + 0x5a827999 // K09
           +  ((c & ((d = (d << 30) | (d >>> 2)) ^ e)) ^ e) // Ch(c,d,e)
-          +  (i09 = input[offset +  1]         << 24 |
-                   (input[offset +  2] & 0xff) << 16 |
-                   (input[offset +  3] & 0xff) <<  8 |
-                   (input[offset +  4] & 0xff)      ); // W09
+          +  (i09 =  input[offset +  1] << 24
+                  | (input[offset +  2] & 0xff) << 16
+                  | (input[offset +  3] & 0xff) << 8
+                  | (input[offset +  4] & 0xff)); // W09
         e += ((a << 5) | (a >>> 27)) + 0x5a827999 // K10
           +  ((b & ((c = (c << 30) | (c >>> 2)) ^ d)) ^ d) // Ch(b,c,d)
-          +  (i10 = input[offset += 5]         << 24 |
-                   (input[offset +  1] & 0xff) << 16 |
-                   (input[offset +  2] & 0xff) <<  8 |
-                   (input[offset +  3] & 0xff)      ); // W10
+          +  (i10 =  input[offset += 5] << 24
+                  | (input[offset +  1] & 0xff) << 16
+                  | (input[offset +  2] & 0xff) << 8
+                  | (input[offset +  3] & 0xff)); // W10
         d += ((e << 5) | (e >>> 27)) + 0x5a827999 // K11
           +  ((a & ((b = (b << 30) | (b >>> 2)) ^ c)) ^ c) // Ch(a,b,c)
-          +  (i11 = input[offset +  4]         << 24 |
-                   (input[offset += 5] & 0xff) << 16 |
-                   (input[offset +  1] & 0xff) <<  8 |
-                   (input[offset +  2] & 0xff)      ); // W11
+          +  (i11 =  input[offset +  4] << 24
+                  | (input[offset += 5] & 0xff) << 16
+                  | (input[offset +  1] & 0xff) << 8
+                  | (input[offset +  2] & 0xff)); // W11
         c += ((d << 5) | (d >>> 27)) + 0x5a827999 // K12
           +  ((e & ((a = (a << 30) | (a >>> 2)) ^ b)) ^ b) // Ch(e,a,b)
-          +  (i12 = input[offset +  3]         << 24 |
-                   (input[offset +  4] & 0xff) << 16 |
-                   (input[offset += 5] & 0xff) <<  8 |
-                   (input[offset +  1] & 0xff)      ); // W12
+          +  (i12 =  input[offset +  3] << 24
+                  | (input[offset +  4] & 0xff) << 16
+                  | (input[offset += 5] & 0xff) << 8
+                  | (input[offset +  1] & 0xff)); // W12
         b += ((c << 5) | (c >>> 27)) + 0x5a827999 // K13
           +  ((d & ((e = (e << 30) | (e >>> 2)) ^ a)) ^ a) // Ch(d,e,a)
-          +  (i13 = input[offset +  2]         << 24 |
-                   (input[offset +  3] & 0xff) << 16 |
-                   (input[offset +  4] & 0xff) <<  8 |
-                   (input[offset += 5] & 0xff)      ); // W13
+          +  (i13 =  input[offset +  2] << 24
+                  | (input[offset +  3] & 0xff) << 16
+                  | (input[offset +  4] & 0xff) << 8
+                  | (input[offset += 5] & 0xff)); // W13
         a += ((b << 5) | (b >>> 27)) + 0x5a827999 // K14
           +  ((c & ((d = (d << 30) | (d >>> 2)) ^ e)) ^ e) // Ch(c,d,e)
-          +  (i14 = input[offset +  1]         << 24 |
-                   (input[offset +  2] & 0xff) << 16 |
-                   (input[offset +  3] & 0xff) <<  8 |
-                   (input[offset +  4] & 0xff)      ); // W14
+          +  (i14 =  input[offset +  1] << 24
+                  | (input[offset +  2] & 0xff) << 16
+                  | (input[offset +  3] & 0xff) << 8
+                  | (input[offset +  4] & 0xff)); // W14
         e += ((a << 5) | (a >>> 27)) + 0x5a827999 // K15
           +  ((b & ((c = (c << 30) | (c >>> 2)) ^ d)) ^ d) // Ch(b,c,d)
-          +  (i15 = input[offset += 5]         << 24 |
-                   (input[offset +  1] & 0xff) << 16 |
-                   (input[offset +  2] & 0xff) <<  8 |
-                   (input[offset +  3] & 0xff)      ); // W15
-
-        /*
-         * Second pass, on scheduled input (rounds 16..31).
-         */
+          +  (i15 =  input[offset += 5] << 24
+                  | (input[offset +  1] & 0xff) << 16
+                  | (input[offset +  2] & 0xff) << 8
+                  | (input[offset +  3] & 0xff)); // W15
+        /* Second pass, on scheduled input (rounds 16..31). */
         d += ((e << 5) | (e >>> 27)) + 0x5a827999 // K16
           +  ((a & ((b = (b << 30) | (b >>> 2)) ^ c)) ^ c) // Ch(a,b,c)
           +  (i00 = ((i00 ^= i02 ^ i08 ^ i13) << 1) | (i00 >>> 31)); // W16
@@ -506,12 +496,9 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         a += ((b << 5) | (b >>> 27)) + 0x5a827999 // K19
           +  ((c & ((d = (d << 30) | (d >>> 2)) ^ e)) ^ e) // Ch(c,d,e)
           +  (i03 = ((i03 ^= i05 ^ i11 ^ i00) << 1) | (i03 >>> 31)); // W19
-
-        /*
-         * Use hash schedule function Parity (rounds 20..39):
+        /* Use hash schedule function Parity (rounds 20..39):
          *   Parity(x,y,z) = x ^ y ^ z,
-         * and K20 = .... = K39 = 0x6ed9eba1.
-         */
+         * and K20 = .... = K39 = 0x6ed9eba1. */
         e += ((a << 5) | (a >>> 27)) + 0x6ed9eba1 // K20
           +  (b ^ (c = (c << 30) | (c >>> 2)) ^ d) // Parity(b,c,d)
           +  (i04 = ((i04 ^= i06 ^ i12 ^ i01) << 1) | (i04 >>> 31)); // W20
@@ -548,10 +535,7 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         d += ((e << 5) | (e >>> 27)) + 0x6ed9eba1 // K31
           +  (a ^ (b = (b << 30) | (b >>> 2)) ^ c) // Parity(a,b,c)
           +  (i15 = ((i15 ^= i01 ^ i07 ^ i12) << 1) | (i15 >>> 31)); // W31
-
-        /*
-         * Third pass, on scheduled input (rounds 32..47).
-         */
+        /* Third pass, on scheduled input (rounds 32..47). */
         c += ((d << 5) | (d >>> 27)) + 0x6ed9eba1 // K32
           +  (e ^ (a = (a << 30) | (a >>> 2)) ^ b) // Parity(e,a,b)
           +  (i00 = ((i00 ^= i02 ^ i08 ^ i13) << 1) | (i00 >>> 31)); // W32
@@ -576,82 +560,73 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         a += ((b << 5) | (b >>> 27)) + 0x6ed9eba1 // K39
           +  (c ^ (d = (d << 30) | (d >>> 2)) ^ e) // Parity(c,d,e)
           +  (i07 = ((i07 ^= i09 ^ i15 ^ i04) << 1) | (i07 >>> 31)); // W39
-
-        /*
-         * Use hash schedule function Maj (rounds 40..59):
-         *   Maj(x,y,z) = (x & y)^(x & z)^(y & z) = ((x & y)|((x | y)& z)),
-         * and K40 = .... = K59 = 0x8f1bbcdc.
-         */
+        /* Use hash schedule function Maj (rounds 40..59):
+         *   Maj(x,y,z) = (x&y) ^ (x&z) ^ (y&z) = (x & y) | ((x | y) & z),
+         * and K40 = .... = K59 = 0x8f1bbcdc. */
         e += ((a << 5) | (a >>> 27)) + 0x8f1bbcdc // K40
-          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) //Maj(b,c,d)
+          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) // Maj(b,c,d)
           +  (i08 = ((i08 ^= i10 ^ i00 ^ i05) << 1) | (i08 >>> 31)); // W40
         d += ((e << 5) | (e >>> 27)) + 0x8f1bbcdc // K41
-          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) //Maj(a,b,c)
+          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) // Maj(a,b,c)
           +  (i09 = ((i09 ^= i11 ^ i01 ^ i06) << 1) | (i09 >>> 31)); // W41
         c += ((d << 5) | (d >>> 27)) + 0x8f1bbcdc // K42
-          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) //Maj(e,a,b)
+          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) // Maj(e,a,b)
           +  (i10 = ((i10 ^= i12 ^ i02 ^ i07) << 1) | (i10 >>> 31)); // W42
         b += ((c << 5) | (c >>> 27)) + 0x8f1bbcdc // K43
-          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) //Maj(d,e,a)
+          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) // Maj(d,e,a)
           +  (i11 = ((i11 ^= i13 ^ i03 ^ i08) << 1) | (i11 >>> 31)); // W43
         a += ((b << 5) | (b >>> 27)) + 0x8f1bbcdc // K44
-          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) //Maj(c,d,e)
+          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) // Maj(c,d,e)
           +  (i12 = ((i12 ^= i14 ^ i04 ^ i09) << 1) | (i12 >>> 31)); // W44
         e += ((a << 5) | (a >>> 27)) + 0x8f1bbcdc // K45
-          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) //Maj(b,c,d)
+          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) // Maj(b,c,d)
           +  (i13 = ((i13 ^= i15 ^ i05 ^ i10) << 1) | (i13 >>> 31)); // W45
         d += ((e << 5) | (e >>> 27)) + 0x8f1bbcdc // K46
-          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) //Maj(a,b,c)
+          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) // Maj(a,b,c)
           +  (i14 = ((i14 ^= i00 ^ i06 ^ i11) << 1) | (i14 >>> 31)); // W46
         c += ((d << 5) | (d >>> 27)) + 0x8f1bbcdc // K47
-          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) //Maj(e,a,b)
+          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) // Maj(e,a,b)
           +  (i15 = ((i15 ^= i01 ^ i07 ^ i12) << 1) | (i15 >>> 31)); // W47
-
-        /*
-         * Fourth pass, on scheduled input (rounds 48..63).
-         */
+        /* Fourth pass, on scheduled input (rounds 48..63). */
         b += ((c << 5) | (c >>> 27)) + 0x8f1bbcdc // K48
-          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) //Maj(d,e,a)
+          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) // Maj(d,e,a)
           +  (i00 = ((i00 ^= i02 ^ i08 ^ i13) << 1) | (i00 >>> 31)); // W48
         a += ((b << 5) | (b >>> 27)) + 0x8f1bbcdc // K49
-          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) //Maj(c,d,e)
+          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) // Maj(c,d,e)
           +  (i01 = ((i01 ^= i03 ^ i09 ^ i14) << 1) | (i01 >>> 31)); // W49
         e += ((a << 5) | (a >>> 27)) + 0x8f1bbcdc // K50
-          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) //Maj(b,c,d)
+          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) // Maj(b,c,d)
           +  (i02 = ((i02 ^= i04 ^ i10 ^ i15) << 1) | (i02 >>> 31)); // W50
         d += ((e << 5) | (e >>> 27)) + 0x8f1bbcdc // K51
-          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) //Maj(a,b,c)
+          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) // Maj(a,b,c)
           +  (i03 = ((i03 ^= i05 ^ i11 ^ i00) << 1) | (i03 >>> 31)); // W51
         c += ((d << 5) | (d >>> 27)) + 0x8f1bbcdc // K52
-          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) //Maj(e,a,b)
+          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) // Maj(e,a,b)
           +  (i04 = ((i04 ^= i06 ^ i12 ^ i01) << 1) | (i04 >>> 31)); // W52
         b += ((c << 5) | (c >>> 27)) + 0x8f1bbcdc // K53
-          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) //Maj(d,e,a)
+          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) // Maj(d,e,a)
           +  (i05 = ((i05 ^= i07 ^ i13 ^ i02) << 1) | (i05 >>> 31)); // W53
         a += ((b << 5) | (b >>> 27)) + 0x8f1bbcdc // K54
-          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) //Maj(c,d,e)
+          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) // Maj(c,d,e)
           +  (i06 = ((i06 ^= i08 ^ i14 ^ i03) << 1) | (i06 >>> 31)); // W54
         e += ((a << 5) | (a >>> 27)) + 0x8f1bbcdc // K55
-          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) //Maj(b,c,d)
+          +  ((b & (c = (c << 30) | (c >>> 2))) | ((b | c) & d)) // Maj(b,c,d)
           +  (i07 = ((i07 ^= i09 ^ i15 ^ i04) << 1) | (i07 >>> 31)); // W55
         d += ((e << 5) | (e >>> 27)) + 0x8f1bbcdc // K56
-          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) //Maj(a,b,c)
+          +  ((a & (b = (b << 30) | (b >>> 2))) | ((a | b) & c)) // Maj(a,b,c)
           +  (i08 = ((i08 ^= i10 ^ i00 ^ i05) << 1) | (i08 >>> 31)); // W56
         c += ((d << 5) | (d >>> 27)) + 0x8f1bbcdc // K57
-          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) //Maj(e,a,b)
+          +  ((e & (a = (a << 30) | (a >>> 2))) | ((e | a) & b)) // Maj(e,a,b)
           +  (i09 = ((i09 ^= i11 ^ i01 ^ i06) << 1) | (i09 >>> 31)); // W57
         b += ((c << 5) | (c >>> 27)) + 0x8f1bbcdc // K58
-          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) //Maj(d,e,a)
+          +  ((d & (e = (e << 30) | (e >>> 2))) | ((d | e) & a)) // Maj(d,e,a)
           +  (i10 = ((i10 ^= i12 ^ i02 ^ i07) << 1) | (i10 >>> 31)); // W58
         a += ((b << 5) | (b >>> 27)) + 0x8f1bbcdc // K59
-          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) //Maj(c,d,e)
+          +  ((c & (d = (d << 30) | (d >>> 2))) | ((c | d) & e)) // Maj(c,d,e)
           +  (i11 = ((i11 ^= i13 ^ i03 ^ i08) << 1) | (i11 >>> 31)); // W59
-
-        /*
-         * Use hash schedule function Parity (rounds 60..79):
+        /* Use hash schedule function Parity (rounds 60..79):
          *   Parity(x,y,z) = x ^ y ^ z,
-         * and K60 = .... = K79 = 0xca62c1d6.
-         */
+         * and K60 = .... = K79 = 0xca62c1d6. */
         e += ((a << 5) | (a >>> 27)) + 0xca62c1d6 // K60
           +  (b ^ (c = (c << 30) | (c >>> 2)) ^ d) // Parity(b,c,d)
           +  (i12 = ((i12 ^= i14 ^ i04 ^ i09) << 1) | (i12 >>> 31)); // W60
@@ -664,10 +639,7 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         b += ((c << 5) | (c >>> 27)) + 0xca62c1d6 // K63
           +  (d ^ (e = (e << 30) | (e >>> 2)) ^ a) // Parity(d,e,a)
           +  (i15 = ((i15 ^= i01 ^ i07 ^ i12) << 1) | (i15 >>> 31)); // W63
-
-        /*
-         * Fifth pass, on scheduled input (rounds 64..79).
-         */
+        /* Fifth pass, on scheduled input (rounds 64..79). */
         a += ((b << 5) | (b >>> 27)) + 0xca62c1d6 // K64
           +  (c ^ (d = (d << 30) | (d >>> 2)) ^ e) // Parity(c,d,e)
           +  (i00 = ((i00 ^= i02 ^ i08 ^ i13) << 1) | (i00 >>> 31)); // W64
@@ -710,11 +682,8 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         c += ((d << 5) | (d >>> 27)) + 0xca62c1d6 // K77
           +  (e ^ (a = (a << 30) | (a >>> 2)) ^ b) // Parity(e,a,b)
           +  (i13 = ((i13 ^= i15 ^ i05 ^ i10) << 1) | (i13 >>> 31)); // W77
-
-        /*
-         * Terminate the last two rounds of fifth pass,
-         * feeding the final digest on the fly.
-         */
+        /* Terminate the last two rounds of fifth pass,
+         * feeding the final digest on the fly. */
         hB +=
         b += ((c << 5) | (c >>> 27)) + 0xca62c1d6 // K78
           +  (d ^ (e = (e << 30) | (e >>> 2)) ^ a) // Parity(d,e,a)
@@ -725,6 +694,6 @@ public final class SHA1 extends MessageDigest implements Cloneable {
           +  (i15 = ((i15 ^= i01 ^ i07 ^ i12) << 1) | (i15 >>> 31)); // W79
         hE += e;
         hD += d;
-        hC+=/*c=*/(c << 30) | (c >>> 2);
+        hC += /* c= */ (c << 30) | (c >>> 2);
     }
 }
