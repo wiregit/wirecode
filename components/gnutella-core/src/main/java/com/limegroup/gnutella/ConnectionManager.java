@@ -1530,7 +1530,7 @@ public class ConnectionManager {
     }
 
 	/**
-	 * Runs standard calls that should be made whenever a connection if fully
+	 * Runs standard calls that should be made whenever a connection is fully
 	 * established and should wait for messages.
 	 *
 	 * @param conn the <tt>ManagedConnection</tt> instance to start
@@ -1539,7 +1539,7 @@ public class ConnectionManager {
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {	
 		// Send ping...possibly group ping.
-		sendInitialPingRequest(conn);
+		//sendInitialPingRequest(conn);
 
 		if(conn.isGUESSUltrapeer()) {
 			int port = conn.getOrigPort();
