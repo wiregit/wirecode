@@ -683,6 +683,38 @@ public class HTTPUploader implements Runnable {
     }
 
     /**
+     *   Handle a web based freeloader
+     */
+    public static void doFreeloaderResponse(Socket s) {
+        OutputStream ostream = null;
+        /* Sends a 402 Browser Request Denied message */
+        try {
+            ostream = s.getOutputStream();
+            /* is this the right format? */
+            String str;
+            String errMsg = HTTPPage.responsePage;
+            str = "HTTP 200 OK \r\n";
+            ostream.write(str.getBytes());
+            str = "Server: " + "LimeWire" + "\r\n";
+            ostream.write(str.getBytes());
+            str = "Content-Type: text/html\r\n";
+            ostream.write(str.getBytes());
+            str = "Content-Length: " + errMsg.length() + "\r\n";
+            ostream.write(str.getBytes());
+            str = "\r\n";
+            ostream.write(str.getBytes());
+            ostream.write(errMsg.getBytes());
+            ostream.flush();
+        } catch (Exception e) {
+        }
+        try {
+            ostream.close();
+            s.close();
+        } catch (Exception e) {
+        }
+    }
+
+    /**
      *   Handle too many upload requests after push has connected
      */
     public void doLimitReachedAfterConnect() {

@@ -185,6 +185,8 @@ public class HTTPManager {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
 				if (SettingsManager.instance().getAllowBrowser() == false) {
+
+
 					// if we are not supposed to read from them
 					// throw an exception
 					if( (str.indexOf("Mozilla") != -1) ||
@@ -203,8 +205,10 @@ public class HTTPManager {
 						(str.indexOf("RealDownload") != -1) ||
 						(str.indexOf("SmartDownload") != -1) ||
 						(str.indexOf("Teleport") != -1) ||
-						(str.indexOf("WebDownloader") != -1) )
-						throw new IOException("Web Browser");
+						(str.indexOf("WebDownloader") != -1) ) {
+							HTTPUploader.doFreeloaderResponse(_socket);
+						    throw new IOException("Web Browser");
+						}
 					
 				}
 			}
