@@ -80,7 +80,7 @@ public class SettingsManager implements SettingsInterface
     {
 	props_      = new Properties();
 	ndProps_    = new Properties();
-	fileName_   = System.getProperty("user.home");
+	fileName_   = System.getProperty("java.class.path");
 	fileName_   = fileName_ + System.getProperty("file.separator");
 	ndFileName_ = fileName_;
 	fileName_   = fileName_ + SettingsInterface.DEFAULT_FILE_NAME;
@@ -346,7 +346,9 @@ public class SettingsManager implements SettingsInterface
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){
-	    setSaveDirectory(System.getProperty("user.home"));
+	    String dir = System.getProperty("java.class.path");
+	    dir += System.getProperty("file.separator");
+	    setSaveDirectory(dir);
 	}
     }
 
@@ -747,17 +749,15 @@ public class SettingsManager implements SettingsInterface
      */
     private void setHostList(String hostList)
     {		
-	String fileName = System.getProperty("user.home");
-	fileName = fileName + System.getProperty("file.separator");
-	fileName = fileName + hostList;
-	File f = new File(fileName);
+	String fn = fileName_ + hostList;
+	File f = new File(fn);
 	if(f.isFile() == true)
-	    hostList_ = fileName;
+	    hostList_ = fn;
 	else
 	    {		
 		try{
-		    FileWriter fw = new FileWriter(fileName);
-		    hostList_ = fileName;
+		    FileWriter fw = new FileWriter(fn);
+		    hostList_ = fn;
 		}
 		catch(IOException e){
 		    // not sure what to do if the filewriter
