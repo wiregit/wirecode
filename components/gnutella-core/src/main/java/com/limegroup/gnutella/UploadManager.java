@@ -257,20 +257,25 @@ public class UploadManager implements BandwidthTracker {
 
 		clearFailedPushes();
 
-		Uploader uploader;
-		uploader = new HTTPUploader(file, host, port, index, guid, this,
-                                    _fileManager);
-		// testing if we are either currently attempting a push, 
-		// or we have unsuccessfully attempted a push with this host in the
-		// past.
-		if ( (! testAttemptedPush(host, index) )  ||
-			 (! testFailedPush(host, index) ) )
-			return;
+		Uploader uploader = null;
+        try {
+            uploader = new HTTPUploader(file, host, port, index, guid, this,
+                                        _fileManager);
+            // testing if we are either currently attempting a push, 
+            // or we have unsuccessfully attempted a push with this host in the
+            // past.
+            if ( (! testAttemptedPush(host, index) )  ||
+                 (! testFailedPush(host, index) ) )
+                return;
 
-		insertAndTest(uploader, host);
-		insertAttemptedPush(host, index);
+            insertAndTest(uploader, host);
+            insertAttemptedPush(host, index);
 
-		doSingleUpload(uploader, host, index);
+            doSingleUpload(uploader, host, index);
+        } finally {
+            if(uploader != null)
+                uploader.stop();
+        }
 	}
 
 	/** 
