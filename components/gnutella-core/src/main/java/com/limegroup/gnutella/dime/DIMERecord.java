@@ -211,7 +211,7 @@ public class DIMERecord {
     public static DIMERecord create(byte typeId, byte[] options, byte[] id,
                              byte[] type, byte[] data) {
         byte byte1 = VERSION;
-        byte byte2 = (byte)(typeId & RESERVED);
+        byte byte2 = (byte)(typeId | RESERVED);
         if(options == null)
             options = DataUtils.EMPTY_BYTE_ARRAY;
         if(id == null)
@@ -417,7 +417,7 @@ public class DIMERecord {
             break;
         default:
             throw new IllegalArgumentException(
-                "invalid type: " + (maskedType >> 4));
+                "invalid type: " + ((maskedType >> 4) & 0x0F));
         }
     }      
     

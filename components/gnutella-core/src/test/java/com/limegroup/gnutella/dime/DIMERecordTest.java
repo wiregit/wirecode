@@ -84,6 +84,36 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(new HashMap(), record.getOptionsMap());
 	}
 	
+	public void testBadType() throws Exception {
+	    // 0 through 4 are valid, so start at 5.
+	    for(int i = 5; i < 0xF; i++) {
+	        int type = i << 4;
+    	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	    out.write( (byte)0x08 ); //version + mb, me & cf.
+    	    out.write( (byte)type ); // bad type + reserved
+    	    out.write( new byte[] { 0, 0 } ); // option length: 0
+    	    out.write( new byte[] { 0, 0 } ); // id length: 0
+    	    out.write( new byte[] { 0, 0 } ); // type length: 0
+    	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
+	        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+	        try {
+    	        DIMERecord record = DIMERecord.createFromStream(in);
+	            fail("expected exception");
+            } catch(IOException expected) {
+                assertEquals("invalid type: " + i, expected.getMessage());
+            }
+            
+            // try also creating not from network.
+            try {
+                DIMERecord record = DIMERecord.create((byte)type, null,
+                                                      null, null, null);
+                fail("expected exception");
+            } catch(IllegalArgumentException expected) {
+                assertEquals("invalid type: " + i, expected.getMessage());
+            }                                                      
+        }
+    }
+	
 	public void testBadVersion() throws Exception {
 	    //test every invalid version possible.
 	    for(int i = 0; i < (0xF8 >> 3); i++) {
@@ -108,7 +138,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     public void testBadReserved() throws Exception {
-	    //test every invalid version possible.
+	    //test every invalid reserved value possible.
 	    for(int i = 0; i < 0xF; i++) {
 	        if(i == 0) // valid
 	            continue;
