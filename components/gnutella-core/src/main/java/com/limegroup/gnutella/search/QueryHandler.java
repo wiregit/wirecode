@@ -500,7 +500,7 @@ public final class QueryHandler {
                                QueryHandler handler) {
         
         // send the query directly along the connection
-        _messageRouter.originateQuery(query, mc);
+        mc.send(query);
         
         byte ttl = query.getTTL();
 
