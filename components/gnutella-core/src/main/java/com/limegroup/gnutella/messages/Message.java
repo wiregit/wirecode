@@ -462,6 +462,18 @@ public abstract class Message
     protected void setGUID(GUID guid) {
         this.guid = guid.bytes();
     }
+    
+    /**
+     * If the hops is less than zero, throws IllegalArgumentException.
+     * Otherwise sets this hops to the given value.  This is useful when you
+     * want certain messages to look as if they've travelled further.
+     *   @modifies this' hops
+     */
+    public void setHops(byte hops) throws IllegalArgumentException {
+        if(hops < 0)
+            throw new IllegalArgumentException("invalid hops: " + hops);
+        this.hops = hops;
+    }
 
     public byte getHops() {
         return hops;

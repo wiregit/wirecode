@@ -1461,9 +1461,7 @@ public abstract class MessageRouter {
 
             ReplyHandler rh = rrp.getReplyHandler();
 
-            if(!shouldDropReply(rrp, queryReply.getTTL()) ||
-			   rh == FOR_ME_REPLY_HANDLER) {
-                
+            if(!shouldDropReply(rrp, rh, queryReply)) {                
                 rh.handleQueryReply(queryReply, handler);
                 // also add to the QueryUnicaster for accounting - basically,
                 // most results will not be relevant, but since it is a simple
@@ -1484,7 +1482,9 @@ public abstract class MessageRouter {
     }
 
     /**
-     * Checks if the <tt>QueryReply</tt> should be dropped based on per-TTL
+     * Checks if the <tt>QueryReply</tt> should be dropped for various reasons.
+     *
+     * Reason 1) The reply has already routed enough traffic.  Based on per-TTL
      * hard limits for the number of bytes routed for the given reply guid.
      * This algorithm favors replies that don't have as far to go on the 
      * network -- i.e., low TTL hits have more liberal limits than high TTL
@@ -1495,19 +1495,56 @@ public abstract class MessageRouter {
      * been sent for this GUID.  If this number is greater than a specified
      * limit, we simply drop the reply.
      *
+     * Reason 2) The reply contained the "MCAST" header, but was not meant
+     * for me, and a TTL+Hops > 1.  This is necessary because we now forward
+     * QueryRequests to the local subnet, and pass on replies.  Newer LimeWires
+     * (3.0+) will correctly not set the MCAST GGEP header for multicasted
+     * query requests that have been forwarded from the network.  Older
+     * LimeWires (2.9.10, 2.9.11) blindly respond to all multicast query
+     * requests with replies containing the MCAST header.
+     *
+     * Reason 3) The reply was meant for me -- DO NOT DROP.
+     *
+     * Reason 4) The TTL is 0, drop.
+     *
      * @param rrp the <tt>ReplyRoutePair</tt> containing data about what's 
      *  been routed for this GUID
      * @param ttl the time to live of the query hit
      * @return <tt>true if the reply should be dropped, otherwise <tt>false</tt>
      */
-    private static boolean shouldDropReply(RouteTable.ReplyRoutePair rrp, byte ttl) {
+    private boolean shouldDropReply(RouteTable.ReplyRoutePair rrp,
+                                    ReplyHandler rh,
+                                    QueryReply qr) {
+        int ttl = qr.getTTL();
+        int hops = qr.getHops();
+                                           
+        // Reason 3 --  The reply is meant for me, do not drop it.
+        if( rh == FOR_ME_REPLY_HANDLER ) return false;
+        
+        // Reason 4 -- drop if TTL is 0.
+        if( ttl == 0 ) return true;
+        
+        // Reason 2 -- reply to multicast query with an incorrect ttl/hops
+        try {
+            if( qr.isReplyToMulticastQuery() && (ttl + hops) > 1)
+                return true;
+            // Do not drop, ever, if this is a valid response to a 
+            // multicast query.
+            else if ( qr.isReplyToMulticastQuery() )
+                return false;
+        } catch(BadPacketException bpe) {
+            // Bad packet, drop.
+            return true;
+        }
+                
+
+        // Reason 1 ...
+        
         int resultsRouted = rrp.getResultsRouted();
 
         // drop the reply if we've already sent more than the specified number
         // of results for this GUID
         if(resultsRouted > 100) return true;
-        // drop the reply if the ttl is 0.
-        if(ttl == 0) return true;
 
         int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
@@ -1758,8 +1795,9 @@ public abstract class MessageRouter {
 			boolean chat = SettingsManager.instance().getChatEnabled();
 			
             // We only want to return a "reply to multicast query" QueryReply
-            // if the request was at its first hop.
-			boolean mcast = queryRequest.isMulticast() && queryRequest.getHops() == 1;
+            // if the request travelled a single hop.
+			boolean mcast = queryRequest.isMulticast() && 
+                (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
             // if it is a multicasted response, use the non-forced address.
 			if ( mcast ) {

@@ -469,11 +469,14 @@ public class QueryRequest extends Message implements Serializable{
 		if(qr == null) {
 			throw new NullPointerException("null query");
 		}
-		return new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
+        QueryRequest mQr =
+            new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
 								qr.getRichQuery(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								false, Message.N_MULTICAST, false);
+        mQr.setHops(qr.getHops());
+        return mQr;
 	}
 
     /** 
