@@ -78,9 +78,14 @@ public final class MulticastService implements Runnable {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private MulticastService() {
-	    MULTICAST_THREAD =
-	        new Thread(this, "MulticastService");
+	    MULTICAST_THREAD = new Thread(this, "MulticastService");
 		MULTICAST_THREAD.setDaemon(true);
+    }
+	
+	/**
+	 * Starts the Multicast service.
+	 */
+	public void start() {
         MULTICAST_THREAD.start();
     }
 	    
@@ -190,13 +195,6 @@ public final class MulticastService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_MULTICAST);
                     if(message == null) continue;
-                    // need to set router because this might have started
-                    // before RouterService was instantiated.
-                    // but we can cache the value for speed
-                    if(router == null) router = RouterService.getMessageRouter();
-
-                    // if the router is still null, just continue
-                    if(router == null) continue;
                     router.handleMulticastMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -219,32 +217,9 @@ public final class MulticastService implements Runnable {
 	 * @param msg  the <tt>Message</tt> to send
 	 */
     public synchronized void send(Message msg) {
-        UDPService.instance().send(msg, _group, _port);
-        /*
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            msg.write(baos);
-        } catch(IOException e) {
-            e.printStackTrace();
-            // can't send the hit, so return
-            return;
-        }
-
-        byte[] data = baos.toByteArray();
-        DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        synchronized (_sendLock) {
-            if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
-                                // thread this, we will wait...
-                return;
-            try {
-                _socket.send(dg);
-            } catch(IOException e) {
-                System.err.println("ip: "+ip);
-                System.err.println("port: "+port); 
-                e.printStackTrace();
-            }
-        }
-        */
+        // only send the msg if we've initialized the port.
+        if( _port != -1 )
+            UDPService.instance().send(msg, _group, _port);
 	}
 
 	/**

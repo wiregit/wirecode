@@ -91,9 +91,11 @@ public class Acceptor implements Runnable {
 	}
 
     /**
-     * Launches the port monitoring thread.
+     * Launches the port monitoring thread, MulticastService, and UDPService.
      */
-	public void start() { 
+	public void start() {
+	    MulticastService.instance().start();
+	    UDPService.instance().start();
 		Thread at = new Thread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();

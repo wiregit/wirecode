@@ -82,9 +82,15 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() {
+	private UDPService() {	    
         UDP_THREAD = new Thread(this, "UDPService");
 		UDP_THREAD.setDaemon(true);
+    }
+	
+	/**
+	 * Starts the UDP Service.
+	 */
+	public void start() {
         UDP_THREAD.start();
     }
 
@@ -197,10 +203,6 @@ public final class UDPService implements Runnable {
                             _acceptedSolicitedIncoming = true;
                     }
                     if(message == null) continue;
-                    // need to set router because this might have started
-                    // before RouterService was instantiated.
-                    // but we can cache the value for speed
-                    if(router == null) router = RouterService.getMessageRouter();
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
