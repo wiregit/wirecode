@@ -80,6 +80,12 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
 
     /**
+     * Statistic for the number of range not available download responses.
+     */
+    public static final Statistic RNAE_EXCEPTION =
+        new DownloadStat();
+
+    /**
      * Statistic for the number of file not found download responses.
      */ 
     public static final Statistic FNF_EXCEPTION =

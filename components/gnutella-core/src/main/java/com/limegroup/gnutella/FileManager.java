@@ -1,5 +1,3 @@
-
-
 package com.limegroup.gnutella;
 
 import java.io.*;
@@ -7,6 +5,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -213,14 +212,14 @@ public class FileManager {
 
 		IntSet.IntSetIterator iter = indeces.iterator();
 		
-		// we only care about one of the indeces -- it doesn't matter which
-		// one, since they all are the "same" file, with the same URN
-		if(iter.hasNext()) {
+        //Pick the first non-null non-Incomplete FileDesc.
+        FileDesc ret = null;
+		while ( iter.hasNext() 
+               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
 			int index = iter.next();
-			return (FileDesc)_files.get(index);
-		} else {
-			return null;
+            ret = (FileDesc)_files.get(index);
 		}
+        return ret;
 	}
 
 	/**
@@ -557,7 +556,11 @@ public class FileManager {
             if (! loadThreadInterrupted())
                 trim();                    
         }
-
+        
+        // Tell the download manager to notify us of incomplete files.
+		if (! loadThreadInterrupted())
+		    RouterService.getDownloadManager().updateIncompleteFiles();
+		    
 		// write out the cache of URNs
 		UrnCache.instance().persistCache();
     }
@@ -780,6 +783,25 @@ public class FileManager {
     }
 
     /**
+     * Adds an incomplete file to be used for partial file sharing.
+     *
+     * @modifies this
+     * @param IncompleteFileManager to create the new IncompleteFileDesc with
+     * @param URN the Urn to associate with the new IncompleteFileDesc
+     */
+    void addIncompleteFile(IncompleteFileManager ifm, URN urn) {
+        synchronized(this) {
+            int fileIndex = _files.size();
+            HashSet urns = new HashSet(1);
+            urns.add(urn);
+            IncompleteFileDesc ifd = new IncompleteFileDesc(
+                ifm, fileIndex, urns, urn);
+            _files.add(ifd);
+            this.updateUrnIndex(ifd);
+        }
+    }
+
+    /**
      * @modifies this
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
@@ -793,7 +815,6 @@ public class FileManager {
 				indices=new IntSet();
 				_urnIndex.put(urn, indices);
 			}
-
 			indices.add(fileDesc.getIndex());
 		}
     }
@@ -827,6 +848,17 @@ public class FileManager {
             //Aha, it's shared. Unshare it by nulling it out.
             if (f.equals(candidate)) {
                 _files.set(i,null);
+                
+                // If it's an incomplete file, the only reference we 
+                // have is the URN, so remove that and be done.
+                // We also return false, because the file was never really
+                // "shared" to begin with.
+                if (fd instanceof IncompleteFileDesc) {
+                    this.removeUrnIndex(fd);
+                    repOk();
+                    return false;
+                }
+                
                 _numFiles--;
                 _size-=fd.getSize();
 
@@ -1061,7 +1093,9 @@ public class FileManager {
             int j=0;
             for (int i=0; i<_files.size(); i++) {
                 FileDesc desc = (FileDesc)_files.get(i);
-                if (desc==null) 
+        		// If the file was unshared or is an incomplete file,
+        		// DO NOT SEND IT.
+                if (desc==null || desc instanceof IncompleteFileDesc) 
                     continue;    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
@@ -1210,7 +1244,11 @@ public class FileManager {
                 IntSet.IntSetIterator iter = hits.iterator();
                 while(iter.hasNext()) {
                     FileDesc fd = (FileDesc)_files.get(iter.next());
-                    if(fd!=null && fd.containsUrn(urn)) {
+        		    // If the file is unshared or an incomplete file
+        		    // DO NOT SEND IT.
+        		    if(fd == null || fd instanceof IncompleteFileDesc)
+        			    continue;
+                    if(fd.containsUrn(urn)) {
                         // still valid
                         if(ret==null) ret = new IntSet();
                         ret.add(fd.getIndex());

@@ -20,7 +20,8 @@ import java.util.StringTokenizer;
  * The state of HTTPUploader is maintained by this class.
  * HTTPUploader's state follows the following pattern:
  *                                                           \ /
- *                             /->---- PUSH_PROXY --------->--|
+ *                             |->---- UNAVAILABLE_RANGE -->--|
+ *                             |->---- PUSH_PROXY --------->--|
  *                            /-->---- FILE NOT FOUND ----->--|
  *                           /--->---- MALFORMED REQUEST -->--|
  *                          /---->---- BROWSE HOST -------->--|
@@ -474,13 +475,30 @@ public final class UploadManager implements BandwidthTracker {
      * Sets the uploader's state based off values read in the headers.
      */
     private void setUploaderStateOffHeaders(HTTPUploader uploader) {
-        // If the content URN they asked for 
-        URN urn = uploader.getRequestedURN();
         FileDesc fd = uploader.getFileDesc();
+
+        // If it's the wrong URN, File Not Found it.
+        URN urn = uploader.getRequestedURN();
 		if(fd != null && urn != null && !fd.containsUrn(urn)) {
             uploader.setState(Uploader.FILE_NOT_FOUND);
             return;
         }
+        
+        // If they requested an incomplete file, determine
+        // if we have the correct range.  If not, change
+        // state appropriately.
+        if (fd instanceof IncompleteFileDesc) {
+            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            int upStart = uploader.getUploadBegin();
+            int upEnd = uploader.getUploadEnd();
+            if ( !ifd.isRangeSatisfiable(upStart, upEnd) )
+                uploader.setState(Uploader.UNAVAILABLE_RANGE);
+            return;
+        }
+        
+        assertAsConnecting( uploader.getState() );
+        
+        return;
     }
         
     /**
@@ -581,6 +599,9 @@ public final class UploadManager implements BandwidthTracker {
     private void doSingleUpload(HTTPUploader uploader) throws IOException {
         
         switch(uploader.getState()) {
+            case Uploader.UNAVAILABLE_RANGE:
+                UploadStat.UNAVAILABLE_RANGE.incrementStat();
+                break;
             case Uploader.FILE_NOT_FOUND:
                 UploadStat.FILE_NOT_FOUND.incrementStat();
                 break;

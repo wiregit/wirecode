@@ -1536,11 +1536,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                         debug("MANAGER: terminating because of stop");
                         throw new InterruptedException();
                     } else if (dloaders.size()==0 && needed.size()==0) {
+                        // Verify the commonOutFile is all done.
+                        int doneSize =
+                            (int)incompleteFileManager.getCompletedSize(
+                                incompleteFile);
+                        Assert.that(
+                            !commonOutFile.getFreeBlocks(doneSize).hasNext(),
+                            "file is incomplete, but needed.sie() == 0" );
+                            
                         //Finished. Interrupt all worker threads
                         for(int i=threads.size();i>0;i--) {
                             Thread t = (Thread)threads.get(i-1);
                             t.interrupt();
                         }
+                        
                         debug("MANAGER: terminating because of completion");
                         return COMPLETE;
                     } else if (threads.size()==0
@@ -1633,7 +1642,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             int connected;
             //Note: If the set of urns is empty we assume the uploader does not
             //support persistence - vendors support http1.1 before hashes. 
-            http11 = !(rfd.getUrns().isEmpty());
+            http11 = rfd.isHTTP11();
             while(true) { //while queued, connect and sleep if we queued
                 int[] a = {-1};//reset the sleep value
                 connected = assignAndRequest(dloader,a,http11);
@@ -1676,7 +1685,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             //Step 3. OK, we have successfully connected, start saving the file
             //to disk
-            doDownload(dloader, http11);
+            doDownload(dloader);
         }
         //came out of the while loop, http1.0 spawn a thread
         return true;
@@ -1890,9 +1899,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
-                if (needed.size()>0)
+                if (needed.size()>0) {
                     assignWhite(dloader,http11);
-                else {
+                } else {
                     updateNeeded = false;      //1. See comment in finally
                     assignGrey(dloader,http11); 
                 }
@@ -1900,19 +1909,33 @@ public class ManagedDownloader implements Downloader, Serializable {
             } catch(NoSuchElementException nsex) {
                 if(RECORD_STATS)
                     DownloadStat.NSE_EXCEPTION.incrementStat();
-                //thrown in assignGrey.The downloader we were trying to steal
+                //if thrown in assignGrey.The downloader we were trying to steal
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
+                //if thrown in assignWhite, no range was assigned to the
+                //uploader.  DO NOT CALL updateNeeded() here either!
                 Assert.that(updateNeeded == false,
                             "updateNeeded not false in assignAndRequest");
                 debug("nsex thrown in assingAndRequest "+dloader);
                 synchronized(this) {
-                    files.add(dloader.getRemoteFileDesc());
+                    // Add to busy, not files.
+                    // We either don't need the range right now or the
+                    // range isn't available... we'll try again in a minute
+                    // if everyone else dies.
+                    busy.add(dloader.getRemoteFileDesc());
                 }
                 return 3;
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
                 debug("talx thrown in assignAndRequest"+dloader);
+                synchronized(this) {
+                    busy.add(dloader.getRemoteFileDesc());//try this rfd later
+                }
+                return 0;
+            } catch(RangeNotAvailableException rnae) {
+                if(RECORD_STATS)
+                    DownloadStat.RNAE_EXCEPTION.incrementStat();
+                debug("rnae thrown in assignAndRequest"+dloader);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
@@ -1964,10 +1987,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
                 //    was never modified since needed.size()==0
-                // 2. We completed normally.
+                // 2. NoSuchElementException was thrown in 
+                //    assignWhite or assignGrey
+                // 3. We completed normally.
                 //
                 //Equivalent: update the needed list IF we assigned white and 
-                //we weren't able to start the download.
+                //            we weren't able to start the download
                 if(updateNeeded)
                     updateNeeded(dloader);
             }
@@ -2063,37 +2088,143 @@ public class ManagedDownloader implements Downloader, Serializable {
 	    if ( totalAlternateLocations == null ) return 0;
 	    return totalAlternateLocations.getNumberOfAlternateLocations();
     }
+    
+    /**
+     * Extracts the first needed partial range from an HTTPDownloader.
+     * May throw NoSuchElementException if no elements are needed.
+     * Requires this' monitor is held.
+     *
+     * @return the first needed partial range from an HTTP Downloader.
+     * @throws NoSuchElementException if it has no elements that are neded
+     * @require this' monitor is held.
+     */
+    private Interval getNeededPartialRange(HTTPDownloader dloader)
+      throws NoSuchElementException {
+        List availableRanges =
+            dloader.getRemoteFileDesc().getAvailableRanges();
+        Interval ret = null;
 
+        // go through the list of needed ranges and match each one
+        // against the list of available ranges.
+        for (int i = 0; i < needed.size(); i++) {
+            // this is the interval we are going to match against
+            // the available ranges now
+            Interval need = (Interval)needed.get(i);
+            // go through the list of available ranges
+            for (int k = 0; k < availableRanges.size(); k++) {
+                // test this available range now but make sure
+                // to account for the OVERLAP_BYTES requested by
+                // the ManagedDownloader.
+                Interval available = (Interval)availableRanges.get(k);
+                available = addOverlap(available);
+                
+                // when the overlap was added, the range wasn't large
+                // enough, or the two ranges don't overlap...
+                if( available == null || !need.overlaps(available) )
+                    continue;
+                    
+                // we found a match! Remove the needed interval
+                ret = (Interval)needed.remove(i);
+
+                // set the high end of the interval to
+                // request. put the rest back.
+                if ( available.high < ret.high ) {
+                    needed.add( i, new Interval(
+                        available.high + 1, ret.high ) );
+                    ret = new Interval( 
+                        ret.low, available.high );
+                }
+
+                // set the low end of the interval 
+                // to request. Put the rest back.
+                if ( available.low > ret.low ) {
+                    needed.add( i, new Interval( 
+                        ret.low, available.low -1 ) );
+                    ret = new Interval( 
+                        available.low, ret.high);
+                }
+                       
+                // leave the inner for loop, because we
+                // found a match.
+                break;
+            }
+            if (ret != null) {
+                // we obviously found a match, 
+                // so we will break here.
+                break;
+            }
+        }
+        
+        if( ret == null )
+            throw new NoSuchElementException("no partial range is needed");
+            
+        return ret;
+    }
+    
+    /**
+     * Returns a new chunk that is less than CHUNK_SIZE.
+     * This reduces the high value of the interval.
+     * Adds what was cut off to needed.
+     * Requires this' monitor is held.
+     *
+     * @return a new (smaller) interval up to CHUNK_SIZE.
+     * @require this' monitor is held
+     */
+    private Interval fixIntervalForChunk(Interval temp) {
+        Interval interval;
+        if((temp.high-temp.low+1) > CHUNK_SIZE) {
+            int max = temp.low+CHUNK_SIZE-1;
+            interval = new Interval(temp.low, max);
+            temp = new Interval(max+1,temp.high);
+            // this is not strictly necessary, as we know
+            // the interval will always be added at element 0.
+            // for efficiency, we could simply call needed.add(0, temp)
+            addToNeeded(temp);
+        } 
+        else { //temp's size <= CHUNK_SIZE
+            interval = temp;
+        }
+        
+        return interval;
+    }
+    
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
     private void assignWhite(HTTPDownloader dloader, boolean http11) throws 
     IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException {
+    NotSharingException , QueuedException, NoSuchElementException {
         //Assign "white" (unclaimed) interval to new downloader.
-        //TODO2: choose biggest, earliest, etc.
         //TODO2: assign to existing downloader if possible, without
         //      increasing parallelis
         Interval interval = null;
-        if(!http11) 
-            synchronized(this) {interval=(Interval)needed.remove(0);}
-        else { //take a chunk out of the first white part and put the rest back
-            synchronized(this) { 
-                Interval temp = (Interval)needed.remove(0);
-                if((temp.high-temp.low+1) > CHUNK_SIZE) {
-                    int max = temp.low+CHUNK_SIZE-1;
-                    interval = new Interval(temp.low, max);
-                    temp = new Interval(max+1,temp.high);
-                    // this is not strictly necessary, as we know
-                    // the interval will always be added at element 0.
-                    // for efficiency, we could simply call needed.add(0, temp)
-                    addToNeeded(temp);
-                } 
-                else //temp's size <= CHUNK_SIZE
-                    interval = temp;
+        
+        // Note that the retrieval from needed & return to needed
+        // in fixIntervalForChunk MUST be atomic, otherwise
+        // another downloader could attempt to retrieve needed
+        // before we've put a chunk back in it.
+        
+        // If it's not a partial source, take the first chunk.
+        // Then, if it's HTTP11, reduce the chunk up to CHUNK_SIZE.
+        if( !dloader.getRemoteFileDesc().isPartialSource() ) {
+            synchronized(this) {
+                interval = (Interval)needed.remove(0);
+                if( dloader.isHTTP11() )
+                    interval = fixIntervalForChunk(interval);
             }
         }
+        // If it is a partial source, extract the first needed/available range
+        // Then, if it's HTTP11, reduce the chunk up to CHUNK_SIZE.
+        else {
+            synchronized(this) {
+                // May throw NoSuchElementException
+                interval = getNeededPartialRange(dloader);
+                if( dloader.isHTTP11() )
+                    interval = fixIntervalForChunk(interval);
+            }
+        }
+        
         //Intervals from the needed set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.  Also, the
@@ -2116,6 +2247,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void assignGrey(HTTPDownloader dloader, boolean http11) 
         throws NoSuchElementException,  IOException, TryAgainLaterException, 
                FileNotFoundException, NotSharingException, QueuedException {
+        //If this dloader is a partial source, don't attempt to steal...
+        //to confusing, too many problems, etc...
+        if( dloader.getRemoteFileDesc().isPartialSource() )
+            throw new NoSuchElementException();
+                
+                
         //Split largest "gray" interval, i.e., steal part of another
         //downloader's region for a new downloader.  
         //TODO3: split interval into P-|dloaders|, etc., not just half
@@ -2186,13 +2323,42 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+    /**
+     * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range
+     * for downloading.
+     */
     private int getOverlapOffset(int i) {
         return Math.max(0, i-OVERLAP_BYTES);
     }
+    
+    /**
+     * Ensures that the given internal is still valid after overlap bytes
+     * are subtract from it.  This is necessary because of the structure
+     * of ManagedDownloader, as it always subtracts OVERLAP_BYTES from the
+     * 'low' range of the interval when it requests data.
+     * To ensure that we can correctly use partial file sources, we must
+     * create a new interval that is offset by the bytes that will be
+     * removed later.
+     *
+     * @return a new Interval whose low value is incremented by OVERLAP_BYTES
+     *         if the increment does not exceed the high value.
+     *         Otherwise( in.low + OVERLAP_BYTES >= in.high ), null.
+     */
+    private Interval addOverlap (Interval in) {
+    	if ( in.low + OVERLAP_BYTES < in.high )
+	        return new Interval (in.low + OVERLAP_BYTES, in.high);
+    	else return null;
+    }    
 
     /**
      * Attempts to run downloader.doDownload, notifying manager of termination
-     * via downloaders.notify().  
+     * via downloaders.notify(). 
+     * To determine when this downloader should be removed
+     * from the dloaders list: never remove the downloader
+     * from dloaders if the uploader supports persistence, unless we get an
+     * exception - in which case we do not add it back to files.  If !http11,
+     * then we remove from the dloaders in the finally block and add to files as
+     * before if no problem was encountered.   
      * 
      * @param downloader the normal or push downloader to use for the transfer,
      * which MUST be initialized (i.e., downloader.connectTCP() and
@@ -2204,20 +2370,20 @@ public class ManagedDownloader implements Downloader, Serializable {
      * then we remove from the dloaders in the finally block and add to files as
      * before if no problem was encountered.  
      */
-    private void doDownload(HTTPDownloader downloader, boolean http11) {
+    private void doDownload(HTTPDownloader downloader) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
-            downloader.doDownload(commonOutFile, http11);
+            downloader.doDownload(commonOutFile);
             if(RECORD_STATS) {
-                if(http11)
+                if(downloader.isHTTP11())
                     DownloadStat.SUCCESFULL_HTTP11.incrementStat();
                 else
                     DownloadStat.SUCCESFULL_HTTP10.incrementStat();
             }
         } catch (IOException e) {
             if(RECORD_STATS) {
-                if(http11)
+                if(downloader.isHTTP11())
                     DownloadStat.FAILED_HTTP11.incrementStat();
                 else
                     DownloadStat.FAILED_HTTP10.incrementStat();
@@ -2236,10 +2402,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
             synchronized (this) {
-                if (problem)
+                if (problem) {
                     updateNeeded(downloader);
+                    downloader.stop();
+                }
+                
                 dloaders.remove(downloader);
-                if(!problem && !http11)//no  need to add http11 dloader to files
+                //no need to add http11 dloader to files                
+                if(!problem && !downloader.isHTTP11())
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
             }
@@ -2455,6 +2625,26 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Accessors that delegate to dloader. Synchronized because dloader can
      * change.
      *************************************************************************/
+     
+    /**
+     * Returns all URNs that have an associated incomplete file.
+     */     
+    public synchronized Iterator getUrnsAsIterator() {
+        HashSet set = new HashSet();
+        for ( int i = 0; i < allFiles.length; i++ ) {
+            Set urns = allFiles[i].getUrns();
+            URN urn = null;
+            for(Iterator it = urns.iterator(); it.hasNext(); ) {
+                urn = (URN)it.next();
+                // If no urn or urn already is added, ignore.
+                if(urn == null || set.contains(urn)) continue;
+                // If there is a file for this URN, add it.
+                if ( incompleteFileManager.getFileForUrn( urn ) != null )
+                    set.add( urn );
+            }
+        }
+        return set.iterator();
+    }        
 
     public synchronized int getState() {
         return state;

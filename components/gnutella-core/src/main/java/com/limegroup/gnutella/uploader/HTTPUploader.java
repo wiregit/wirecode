@@ -281,6 +281,8 @@ public final class HTTPUploader implements Uploader {
         case MALFORMED_REQUEST:
             _state = new MalformedRequestState();
             break;
+        case UNAVAILABLE_RANGE:
+            _state = new UnavailableRangeUploadState(_fileDesc);
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -355,9 +357,9 @@ public final class HTTPUploader implements Uploader {
 	}	 
 	 
     /** The byte offset where we should start the upload. */
-	int getUploadBegin() {return _uploadBegin;}
+	public int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
-    int getUploadEnd() {return _uploadEnd;}
+    public int getUploadEnd() {return _uploadEnd;}
 
 	// implements the Uploader interface
 	public int getFileSize() {return _fileSize;}

@@ -64,6 +64,12 @@ public class UploadStat extends AdvancedStatistic {
      */ 
     public static final Statistic LIMIT_REACHED =
         new UploadStat();
+        
+    /**
+     * Statistic for uploads whose status is UNAVAILABLE_RANGE.
+     */
+    public static final Statistic UNAVAILABLE_RANGE =
+        new UploadStat();
 
     /**
      * Statistic for uploads whose status is FREELOADER

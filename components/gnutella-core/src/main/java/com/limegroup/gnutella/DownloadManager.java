@@ -217,7 +217,33 @@ public class DownloadManager implements BandwidthTracker {
             return false;
         }
     }
-
+    
+    /**
+     * Registered the incomplete file used by this ManagedDownloader
+     * with the FileManager.
+     *
+     * The file is registered for each URN that this ManagedDownloader
+     * is associated with.
+     */
+    private synchronized void registerIncompleteFile(ManagedDownloader mdl) {
+        for ( Iterator iter = mdl.getUrnsAsIterator(); iter.hasNext(); ) {
+            fileManager.addIncompleteFile( 
+                incompleteFileManager, (URN)iter.next());
+        }
+    }
+    
+    /**
+     * Updates FileManager to contain all the incomplete files that are in use
+     * by all downloaders.
+     */
+    public synchronized void updateIncompleteFiles() {
+	    for (Iterator iter = active.iterator(); iter.hasNext(); ) {
+	        registerIncompleteFile((ManagedDownloader)iter.next());
+	    }
+	    for (Iterator iter = waiting.iterator(); iter.hasNext(); ) {
+	        registerIncompleteFile((ManagedDownloader)iter.next());
+	    }	    
+    }
      
     ////////////////////////// Main Public Interface ///////////////////////
            
@@ -275,11 +301,8 @@ public class DownloadManager implements BandwidthTracker {
         //active if it can.
         ManagedDownloader downloader =
 			new ManagedDownloader(files, incompleteFileManager);
-        downloader.initialize(this, fileManager, callback, false);
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        //Save this' state to disk for crash recovery.
-        writeSnapshot();
+
+        startDownload(downloader);
         return downloader;
     }   
     
@@ -320,13 +343,7 @@ public class DownloadManager implements BandwidthTracker {
                                               textQuery,
                                               filename,
                                               defaultURL);
-        downloader.initialize(this, fileManager, callback, false);
-
-        //Add download to appropriate lists and write snapshot.  
-        //TODO: factor to make less like getFiles().
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        writeSnapshot();
+        startDownload(downloader);
         return downloader;
     }
 
@@ -384,16 +401,11 @@ public class DownloadManager implements BandwidthTracker {
                                               incompleteFile,
                                               name,
                                               size);
-            downloader.initialize(this, fileManager, callback, false);
         } catch (IllegalArgumentException e) {
             throw new CantResumeException(incompleteFile.getName());
         }
-
-        //Add download to appropriate lists and write snapshot.  
-        //TODO: factor to make less like getFiles().
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        writeSnapshot();
+        
+        startDownload(downloader);
         return downloader;
     }
 
@@ -431,12 +443,25 @@ public class DownloadManager implements BandwidthTracker {
 
         RequeryDownloader downloader=
             new RequeryDownloader(incompleteFileManager,add);
-        downloader.initialize(this, fileManager, callback, false);
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        //Save this' state to disk for crash recovery.
-        writeSnapshot();
+
+        startDownload(downloader);
         return downloader;        
+    }
+    
+    /**
+     * Performs common tasks for starting the download.
+     * 1) Initializes the downloader.
+     * 2) Adds the download to the waiting list.
+     * 3) Notifies the callback about the new downloader.
+     * 4) Registers the incomplete file with FileManager.
+     * 5) Writes the new snapshot out to disk.
+     */
+    private void startDownload(ManagedDownloader md) {
+        md.initialize(this, fileManager, callback, false);
+        waiting.add(md);
+        callback.addDownload(md);
+        registerIncompleteFile(md);
+        writeSnapshot(); // Save state for crash recovery.
     }
 
 

@@ -8,11 +8,11 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * An implementaiton of the UploadState that sends an error message 
- * for the limit of uploads allowed has been reached. This is an
+ * for an unavailable range that has been requested. This is an
  * HTTP 503 error.
  */
-public class LimitReachedUploadState implements HTTPMessage {
-
+public class UnavailableRangeUploadState implements HTTPMessage {
+    
 	/**
 	 * Constant for the <tt>FileDesc</tt> instance that was requested.
 	 */
@@ -22,7 +22,7 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 * The error message to send in the message body.
 	 */
 	private final byte[] ERROR_MESSAGE = 
-		"Server busy.  Too many active uploads.".getBytes();
+		"The requested range is not available".getBytes();
 
 	/**
 	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
@@ -30,13 +30,13 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 *
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
-	public LimitReachedUploadState(FileDesc fd) {
+	public UnavailableRangeUploadState(FileDesc fd) {
 		FILE_DESC = fd;
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 		String str;
-		str = "HTTP/1.1 503 Service Unavailable\r\n";
+		str = "HTTP/1.1 503 Requested Range Unavailable\r\n";
 		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
@@ -56,17 +56,18 @@ public class LimitReachedUploadState implements HTTPMessage {
 										  FILE_DESC.getAlternateLocationCollection(),
 										  ostream);
 				}
-                if (FILE_DESC instanceof IncompleteFileDesc) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                          ((IncompleteFileDesc)FILE_DESC),
-                                          ostream);
-                }
 			}
+            if (FILE_DESC instanceof IncompleteFileDesc) {
+                HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
+                                      ((IncompleteFileDesc)FILE_DESC),
+                                      ostream);
+            }
 		}
+        
 		str = "\r\n";
 		ostream.write(str.getBytes());
 	}
-
+    
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
 	}

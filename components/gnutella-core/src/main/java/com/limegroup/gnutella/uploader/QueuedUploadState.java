@@ -46,6 +46,11 @@ public class QueuedUploadState implements HTTPMessage {
                                   FILE_DESC.getAlternateLocationCollection(),
                                           ostream);
                 }
+                if (FILE_DESC instanceof IncompleteFileDesc) {
+                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
+                                          ((IncompleteFileDesc)FILE_DESC),
+                                          ostream);
+                }
             }
         }
         str = "\r\n";

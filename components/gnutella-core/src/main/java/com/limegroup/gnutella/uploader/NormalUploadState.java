@@ -47,7 +47,7 @@ public final class NormalUploadState implements HTTPMessage {
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
 	 */
-	private final FileDesc _fileDesc;
+	private final FileDesc FILE_DESC;
 
 	/**
 	 * Constant for the MIME type to return.
@@ -63,7 +63,7 @@ public final class NormalUploadState implements HTTPMessage {
 	public NormalUploadState(HTTPUploader uploader, 
                                     StalledUploadWatchdog watchdog) {
 		_uploader = uploader;
-		_fileDesc = _uploader.getFileDesc();
+		FILE_DESC = _uploader.getFileDesc();
 		_index = _uploader.getIndex();	
 		_fileName = _uploader.getFileName();
 		_fileSize = _uploader.getFileSize();
@@ -112,18 +112,23 @@ public final class NormalUploadState implements HTTPMessage {
 			    ostream.write("Content-Range: bytes " + _uploadBegin  +
 				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
-			if(_fileDesc != null) {
-				URN urn = _fileDesc.getSHA1Urn();
+			if(FILE_DESC != null) {
+				URN urn = FILE_DESC.getSHA1Urn();
 				if(urn != null) {
 					HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, 
 										  urn,
 										  ostream);
 				}
-				if(_fileDesc.hasAlternateLocations()) {
+				if(FILE_DESC.hasAlternateLocations()) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-										  _fileDesc.getAlternateLocationCollection(),
+										  FILE_DESC.getAlternateLocationCollection(),
 										  ostream);
 				}
+                if (FILE_DESC instanceof IncompleteFileDesc) {
+                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
+                                          ((IncompleteFileDesc)FILE_DESC),
+                                          ostream);
+                }
 			}
 			
 			ostream.write("\r\n");
@@ -228,7 +233,7 @@ public final class NormalUploadState implements HTTPMessage {
 		       "File Name:  "+_fileName+"\r\n"+
 		       "File Size:  "+_fileSize+"\r\n"+
 		       "File Index: "+_index+"\r\n"+
-		       "File Desc:  "+_fileDesc;
+		       "File Desc:  "+FILE_DESC;
 	}	
 }
 

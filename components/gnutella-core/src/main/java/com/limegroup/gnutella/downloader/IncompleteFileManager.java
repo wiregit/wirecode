@@ -217,7 +217,20 @@ public class IncompleteFileManager implements Serializable {
             return new File(incDir, 
                             tempName(rfd.getFileName(), rfd.getSize(), 0));
         }
-    }    
+    }
+    
+    /**
+     * Returns the file associated with the specified URN.  If no file matches,
+     * returns null.
+     *
+     * @return the file associated with the URN, or null if none.
+     */
+    public synchronized File getFileForUrn(URN urn) {
+        if( urn == null )
+            throw new NullPointerException("null urn");
+        
+        return (File)hashes.get(urn);
+    }
 
     /** 
      * Returns the unqualified file name for a file with the given name
