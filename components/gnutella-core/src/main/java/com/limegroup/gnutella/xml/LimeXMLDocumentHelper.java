@@ -285,6 +285,9 @@ public final class LimeXMLDocumentHelper{
     }
 
     /*
+    // to run this test, you need to be one level above your lib directory.
+    // Moreover, you need to have the following schemas: slashdotNews, audio,
+    // video, and radiostations....
     public static void main(String argv[]) throws Exception {
         debugOn = false;
         LimeXMLDocumentHelper help = new LimeXMLDocumentHelper();
@@ -335,31 +338,61 @@ public final class LimeXMLDocumentHelper{
         
         debug("--------------------------------");
         
-//         List madeXMLList = 
-//         help.getDocuments("<?xml version=\"1.0\"?><backlash><story index=\"0\"><title>Susheel</title></story><story index=\"4\"><author>Daswani</author><section>News</section></story></backlash>", 6);
-//         LimeXMLDocument[] madeXML = (LimeXMLDocument[])madeXMLList.get(0);
-//          for (int i = 0; (i < 6) && (madeXML != null); i++)
-//              if (madeXM<audiosL[i] != null) {
-//                  madeXML[i].setSchemaURI("http://www.limewire.com/schemas/slashdotNews.xsd");
-//                  debug("mock-xml["+i+"] = " + 
-//                        madeXML[i].getXMLString());
-//              }
+        List madeXMLList = 
+        help.getDocuments("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story index=\"0\"><title>Susheel</title></story><story index=\"4\"><author>Daswani</author><section>News</section></story></backslash>", 6);
+        LimeXMLDocument a  = new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><title>Susheel</title></story></backslash>");
+        LimeXMLDocument b  = new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><author>Daswani</author><section>News</section></story></backslash>");
+        LimeXMLDocument[] madeXML = (LimeXMLDocument[])madeXMLList.get(0);
+        for (int i = 0; (i < 6) && (madeXML != null); i++)
+            switch (i) {
+            case 0:
+            case 4:
+                // these should have hexML
+                Assert.that(madeXML[i] != null);
+                if (i == 0)
+                    Assert.that(madeXML[i].equals(a));
+                else
+                    Assert.that(madeXML[i].equals(b));
+                break;
+            case 1:
+            case 2:
+            case 3:
+            case 5:
+                Assert.that(madeXML[i] == null, ""+i);
+            }
+        
+        debug("--------------------------------");
          
-//          debug("--------------------------------");
-         
-//          List retrievedXMLList = help.getDocuments(xmlCollectionString,
-//                                                    resps.length);
-//          Iterator arrays = retrievedXMLList.iterator();
-//          while (arrays.hasNext()) {
-//              LimeXMLDocument[] retrievedXML = (LimeXMLDocument[]) arrays.next();
-//              if (retrievedXML == null)
-//                  debug("unexpected!");
-//              for (int i = 0; (i < resps.length) && (retrievedXML != null); i++)
-//                  if (retrievedXML[i] != null) 
-//                      debug("ret-xml["+i+"] = " + 
-//                            retrievedXML[i].getXMLString());
-//          }
-         
+        // for this series of tests, see resps defined above....
+        List retrievedXMLList = help.getDocuments(xmlCollectionString,
+                                                   resps.length);
+        Iterator arrays = retrievedXMLList.iterator();
+        LimeXMLDocument[][] docsArray = 
+        new LimeXMLDocument[retrievedXMLList.size()][resps.length];
+        {   
+            // there are 3, but just do it generallly....
+            int index = 0;
+            while (arrays.hasNext()) 
+                docsArray[index++] = (LimeXMLDocument[]) arrays.next();
+        }
+        
+        for (int i = 0; i < resps.length; i++) {
+            switch (i) {
+            case 0:
+            case 2:
+            case 4:
+                // no docs here...
+                break;
+            default:
+                // one should be non-null at the very least....
+                Assert.that(docsArray[0][i] != null ||
+                            docsArray[1][i] != null ||
+                            docsArray[2][i] != null);
+                for (int j = 0; i < 3; i++)
+                    if (docsArray[j][i] != null)
+                        Assert.that(docsArray[j][i].equals(resps[i].getDocument()));
+            }                   
+        }
     }
     */
 }
