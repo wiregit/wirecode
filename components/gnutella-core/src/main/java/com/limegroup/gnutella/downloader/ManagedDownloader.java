@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.Launcher;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.io.*;
@@ -325,6 +326,30 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dloaderThread.interrupt();
         }
         return true;
+    }
+
+    public synchronized void launch() {
+        //We haven't started yet.
+        if (dloader==null)
+            return;
+
+        //a) If the file is being downloaded, launch incomplete file. If the
+        //download hasn't started, the incomplete file may not even exist--not a
+        //problem.  Note that if the download completes while the incomplete
+        //file is being previewed, it will be copied, not moved.
+        String partial=dloader.getFileName();
+        File absolute=null;
+        if (dloader.getAmountRead()<dloader.getFileSize()) {  //Incomplete
+            absolute=incompleteFileManager.
+                getFile(partial, dloader.getFileSize());            
+        }
+        //b) Otherwise, launch completed file.
+        else 
+            absolute=new File(SettingsManager.instance().getSaveDirectory(),
+                              partial);        
+        try {
+            Launcher.launch(absolute.getAbsolutePath());
+        } catch (IOException e) { }
     }
 
     /** Actually does the download. */

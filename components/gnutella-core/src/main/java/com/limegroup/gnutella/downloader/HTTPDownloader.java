@@ -349,18 +349,18 @@ public class HTTPDownloader {
 
 		//3. If not interrupted, move from temporary directory to final directory.
 		if ( _amountRead == _fileSize ) {
-			//If target doesn't exist, this will fail silently.  Otherwise, it's
-			//always safe to do this since we prompted the user in
-			//SearchView/DownloadManager.
+			//Delete target.  If target doesn't exist, this will fail silently.
+			//Otherwise, it's always safe to do this since we prompted the user
+			//in SearchView/DownloadManager.
 			complete_file.delete();
-			boolean ok = _incompleteFile.renameTo(complete_file);
-			if (! ok) 
-				throw new FileCantBeMovedException();
-			//renameTo is not guaranteed to work, esp. when the
-			//file is being moved across file systems.  
-
+            //Try moving file.  If we couldn't move the file, i.e., because
+            //someone is previewing it or it's on a different volume, try copy
+            //instead.  If that failed, notify user.
+            if (!_incompleteFile.renameTo(complete_file))
+                if (! CommonUtils.copy(_incompleteFile, complete_file))
+                    throw new FileCantBeMovedException();
+            //Add file to library.
 			FileManager.instance().addFileIfShared(complete_file);
-
 		} else 
 			throw new FileIncompleteException();
 	}

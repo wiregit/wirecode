@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.util.Properties;
+import java.io.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -144,14 +145,34 @@ public class CommonUtils {
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
 	}   
+
+    /** Copies the file 'src' to 'dst', returning true iff the copy succeeded.
+     *  If 'dst' already exists, the copy may or may not succeed. */
+    public static boolean copy(File src, File dst) {
+        boolean ok=true;
+        InputStream in=null;
+        OutputStream out=null;
+        try {
+            //I'm not sure whether buffering is needed here.  It can't hurt.
+            in=new BufferedInputStream(new FileInputStream(src));
+            out=new BufferedOutputStream(new FileOutputStream(dst));
+            byte[] buf=new byte[1024];
+            while (true) {
+                int read=in.read(buf);
+                if (read==-1)
+                    break;
+                out.write(buf, 0, read);
+            }
+        } catch (IOException e) {
+            ok=false;
+        } finally {
+            if (in!=null)
+                try { in.close(); } catch (IOException e) { ok=false; }
+            if (out!=null) {
+                try { out.flush(); } catch (IOException e) { ok=false; }
+                try { out.close(); } catch (IOException e) { ok=false; }
+            }
+        }
+        return ok;
+    }
 }
-
-
-
-
-
-
-
-
-
-

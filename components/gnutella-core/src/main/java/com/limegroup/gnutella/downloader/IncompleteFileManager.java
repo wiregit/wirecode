@@ -33,7 +33,13 @@ public class IncompleteFileManager implements Serializable {
      *  strengthened to depend on hash values.
      */
     public File getFile(RemoteFileDesc rfd) {
-        return new File(SettingsManager.instance().getIncompleteDirectory(),
-                        "T"+SEPARATOR+rfd.getSize()+SEPARATOR+rfd.getFileName());
+        return getFile(rfd.getFileName(), rfd.getSize());
     } 
+
+    /** Same thing as getFile(rfd), where rfd.getFile().equals(name) 
+     *  and rfd.getSize()==size. */ 
+    public File getFile(String name, int size) {
+        return new File(SettingsManager.instance().getIncompleteDirectory(),
+                        "T"+SEPARATOR+size+SEPARATOR+name);
+    }
 }

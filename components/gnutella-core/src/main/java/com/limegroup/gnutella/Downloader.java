@@ -35,6 +35,14 @@ public interface Downloader {
     public boolean resume() throws AlreadyDownloadingException;
 
     /**
+     * Launches the downloaded file with the appropriate program.  If the
+     * download isn't complete, launches whatever has been downloaded, taking
+     * extra work (e.g., copying) if necessary to avoid file locking problems.  
+     * Returns immediately, regardless of whether the launch worked or not.
+     */
+    public void launch();
+
+    /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
      * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
      */
