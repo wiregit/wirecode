@@ -971,7 +971,10 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static FileDesc[] getSharedFileDescriptors(File directory) {
-        return fileManager.getSharedFileDescriptors(directory);
+        if( directory == null )
+            return fileManager.getAllSharedFileDescriptors();
+        else
+            return fileManager.getSharedFileDescriptors(directory);
     }
     
     /**
@@ -984,7 +987,10 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static File[] getSharedFiles(File directory) {
-        return fileManager.getSharedFiles(directory);
+        if( directory == null )
+            return fileManager.getAllSharedFiles();
+        else
+            return fileManager.getSharedFiles(directory);
     }
     
     /** 

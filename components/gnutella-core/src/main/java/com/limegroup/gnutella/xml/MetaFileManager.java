@@ -159,7 +159,7 @@ public class MetaFileManager extends FileManager {
             //we have a list of schemas
             int len = schemas.length;
             LimeXMLReplyCollection collection;
-            FileDesc fds[] = super.getSharedFileDescriptors(null);
+            FileDesc fds[] = super.getAllSharedFileDescriptors();
             for(int i=0; i < len && !loadThreadInterrupted(); i++) {
                 //One ReplyCollection per schema
                 String s = LimeXMLSchema.getDisplayString(schemas[i]);
