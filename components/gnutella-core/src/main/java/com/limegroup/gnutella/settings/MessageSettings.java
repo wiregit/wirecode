@@ -12,5 +12,5 @@ public class MessageSettings extends LimeProps {
      * The maximum allowable length of packets
      */
     public static final IntSetting MAX_LENGTH = 
-        FACTORY.createIntSetting("MAX_LENGTH", 65536);
+        FACTORY.createIntSetting("MAX_LENGTH", 1024*6);
 }
