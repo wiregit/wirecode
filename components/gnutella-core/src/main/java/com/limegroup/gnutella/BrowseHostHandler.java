@@ -212,6 +212,14 @@ public class BrowseHostHandler {
     }
 
     private void browseExchange(Socket socket) throws IOException {
+    	try {
+    		browseExchangeInternal(socket);
+    	}finally {
+    		try{socket.close();}catch(IOException ignored){}
+    		setState(FINISHED);
+    	}
+    }
+    private void browseExchangeInternal(Socket socket) throws IOException {
     	socket.setSoTimeout(10000);
         LOG.trace("BHH.browseExchange(): entered.");
         setState(EXCHANGING);
@@ -285,38 +293,28 @@ public class BrowseHostHandler {
         // ok, everything checks out, proceed and read QRs...
         Message m = null;
         while(true) {
-            try {
-                m = null;
-                m = Message.read(in);
-            }
-            catch (BadPacketException bpe) {
-            }
-            catch (IOException bpe) {
-                // thrown when stream is closed
-            }
-            if(m == null) {
-                //we are finished reading the stream
-                setState(FINISHED);
-                
-                //close the connection since we won't be re-using it (yet)
-                try {
-                	socket.close();
-                }catch(IOException ignored){}
-                
-                return;
-            } else {
-                if(m instanceof QueryReply) {
-                    _currentLength += m.getTotalLength();
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("BHH.browseExchange(): read QR:" + m);
-                    QueryReply reply = (QueryReply)m;
-                    reply.setBrowseHostReply(true);
-                    reply.setGUID(_guid);
+        	try {
+        		m = null;
+        		m = Message.read(in);
+        	}
+        	catch (BadPacketException bpe) {}
+        	if(m == null) 
+        		return;
+        	 else {
+        		if(m instanceof QueryReply) {
+        			_currentLength += m.getTotalLength();
+        			if(LOG.isTraceEnabled())
+        				LOG.trace("BHH.browseExchange(): read QR:" + m);
+        			QueryReply reply = (QueryReply)m;
+        			reply.setBrowseHostReply(true);
+        			reply.setGUID(_guid);
 					
-					ForMeReplyHandler.instance().handleQueryReply(reply, null);
-                }
-            }
+        			ForMeReplyHandler.instance().handleQueryReply(reply, null);
+        		}
+        	}
         }
+        
+        
     }
     
     /**
