@@ -78,7 +78,7 @@ public final class SettingsFactory {
      *
      * @param settingsFile the file to read from and to write to
      */
-    SettingsFactory(File settingsFile) {
+    public SettingsFactory(File settingsFile) {
         this(settingsFile, "");
     }
     
@@ -89,7 +89,7 @@ public final class SettingsFactory {
      * @param settingsFile the file to read from and to write to
      * @param heading heading to use when writing property file
      */
-    SettingsFactory(File settingsFile, String heading) {
+    public SettingsFactory(File settingsFile, String heading) {
         SETTINGS_FILE = settingsFile;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
         HEADING = heading;
