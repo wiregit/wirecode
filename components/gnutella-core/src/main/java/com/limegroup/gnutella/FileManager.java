@@ -196,24 +196,21 @@ public class FileManager {
         return null;
 	}
 
-   /**
+	/**
      * Returns the FileDesc matching the passed-in path and size, if any,
      * null otherwise. Kind of silly, definitely inefficient, but only
      * needed rarely, from library view, because there's no sharing of
      * data structures for local files
-     */	
-    public FileDesc getFileDescMatching(String path, int size) {
+     */
+    public FileDesc getFileDescMatching(File file) {
         // linear probe. thankfully it's rare
         Iterator iter = _files.iterator();
         while(iter.hasNext()) {
             FileDesc candidate = (FileDesc)iter.next();
             if (candidate==null) continue;
-            // do quicker check first
-            if (size!=candidate._size) continue;
-            if (path.equals(candidate._path)) {
-                // bingo
-                return candidate;
-            }
+			if(file.equals(candidate.getFile())) {
+				return candidate;
+			}
         }
         // none found
         return null;
@@ -413,7 +410,11 @@ public class FileManager {
             final boolean notifyOnClearFinal = notifyOnClear;
             _loadThread = new Thread("FileManager.loadSettingsBlocking") {
                 public void run() {
-                    loadSettingsBlocking(notifyOnClearFinal);
+					try {
+						loadSettingsBlocking(notifyOnClearFinal);
+					} catch(Exception e) {
+						_callback.error(e);
+					}
                 }
             };
             _loadThread.start();
@@ -601,7 +602,7 @@ public class FileManager {
      *  security hazard.</b> 
      */
 	public synchronized boolean addFileIfShared(File file,
-                                                LimeXMLDocument[] metadata) {
+												   LimeXMLDocument[] metadata) {
         return addFileIfShared(file);
         //This implementation does nothing with metadata.  See MetaFileManager.
     }
