@@ -33,7 +33,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	private static final Log LOG =
         LogFactory.getLog(MP3DataEditor.class);
 
-    private static final String CHARSET = CommonUtils.getCharset();
+    private static final String ISO_LATIN_1 = "8859_1";
     private static final String UNICODE = "Unicode";
     
     static final String TITLE_ID = "TIT2";
@@ -157,7 +157,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	    
 	    try {
 	        return new ID3v2Frame(frameID, 
-	                          value.getBytes((isISOLatin1) ? CHARSET : UNICODE), 
+	                          value.getBytes((isISOLatin1) ? ISO_LATIN_1 : UNICODE), 
 	                          true, //discard tag if it's altered/unrecognized
 	                          true, //discard tag if file altered/unrecognized
 	                          false,//read/write
@@ -256,7 +256,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	        Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
 	    } else {
 	        try {
-	            fromString = val.getBytes(CHARSET);
+	            fromString = val.getBytes(ISO_LATIN_1);
 	        } catch (UnsupportedEncodingException err) {
 	            // Should never happen
 	            return false;
