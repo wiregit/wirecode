@@ -319,7 +319,7 @@ public final class HandshakeResponse {
     static HandshakeResponse createLeafRejectIncomingResponse(Properties headers) {
         addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     HandshakeResponse.SHIELDED_MESSAGE,
                                      headers);        
     }
 
@@ -332,7 +332,7 @@ public final class HandshakeResponse {
      */
     static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     HandshakeResponse.SHIELDED_MESSAGE,
                                      headers);        
     }
 
