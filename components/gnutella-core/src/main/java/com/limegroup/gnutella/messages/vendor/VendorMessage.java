@@ -29,6 +29,7 @@ public abstract class VendorMessage extends Message {
     protected static final int F_PUSH_PROXY_ACK = 22;
     protected static final int F_GIVE_STATS = 14;
     protected static final int F_STATISTICS = 15;
+    protected static final int F_BEST_CANDIDATE = 9;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
