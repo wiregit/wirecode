@@ -125,15 +125,15 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
             3, 30);
 
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);
+        assertEquals("unexpected number of files", mc.getNumFiles(), 0);
+        assertEquals("unexpected number of hosts", mc.getNumHosts(), 0);
+        assertEquals("unexted total file size", mc.getTotalFileSize(), 0);
 
         mc.updateHorizonStats(pr1);
         mc.updateHorizonStats(pr1);  //check duplicates
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
+        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
+        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
+        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }
@@ -142,21 +142,21 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         mc.updateHorizonStats(pr1);  //should be ignored for now
         mc.updateHorizonStats(pr2);
         mc.updateHorizonStats(pr3);
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
+        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
+        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
+        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
         mc.refreshHorizonStats();    //should be ignored
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
+        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
+        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
+        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }            
 
         mc.refreshHorizonStats();    //update stats
-        Assert.that(mc.getNumFiles()==(1+2+3));
-        Assert.that(mc.getNumHosts()==3);
-        Assert.that(mc.getTotalFileSize()==(10+20+30));
+        assertEquals("unexedted number of files", mc.getNumFiles(), (1+2+3));
+        assertEquals("unexpected number of hosts", mc.getNumHosts(), 3);
+        assertEquals("unexpedted total filesize", mc.getTotalFileSize(), (10+20+30));
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }       
@@ -353,11 +353,11 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
 	private static void setStubs(ManagedConnection mc, ConnectionManager cm) {
-        try {
+       /* try {
             PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
             PrivilegedAccessor.setValue(mc, "_manager", cm);
         } catch(Exception e) {
             fail("could not initialize test", e);
-        }		
+        } */		
 	}
 }
