@@ -29,7 +29,7 @@ public class ProxyTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        return buildTestSuite(ProxyTest.class);
+        return buildTestSuite(ProxyTest.class);//,"testSOCKS4Connection");
     }
     
     public static void main(String[] args) {
@@ -43,6 +43,9 @@ public class ProxyTest extends BaseTestCase {
 
     public void setUp() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
+        ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
+        fps.setMakeError(false);
     }
 
     public static void globalTeardown() {
@@ -71,9 +74,6 @@ public class ProxyTest extends BaseTestCase {
     public void testSOCKS5Connection() throws Exception {
         ConnectionSettings.CONNECTION_METHOD.setValue(
                                            ConnectionSettings.C_SOCKS5_PROXY);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
-        ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
         fps.setProxyVersion(SOCKS5);
@@ -88,9 +88,6 @@ public class ProxyTest extends BaseTestCase {
     public void testSOCKS5ConnectionWithError() throws Exception {
         ConnectionSettings.CONNECTION_METHOD.setValue(
                                            ConnectionSettings.C_SOCKS5_PROXY);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
-        ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
         fps.setProxyVersion(SOCKS5);
@@ -111,9 +108,6 @@ public class ProxyTest extends BaseTestCase {
     public void testSOCKS5WithAuth() throws Exception {
         ConnectionSettings.CONNECTION_METHOD.setValue(
                                            ConnectionSettings.C_SOCKS5_PROXY);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
-        ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
         ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
         ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
         ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
@@ -125,8 +119,51 @@ public class ProxyTest extends BaseTestCase {
         Socket s = Sockets.connect("localhost",DEST_PORT,0); //NPE is error
         s.close();
     }
+      
+
+    public void testSOCKS4Connection() throws Exception {
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                           ConnectionSettings.C_SOCKS4_PROXY);
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(SOCKS4);
+        Socket s = Sockets.connect("localhost", DEST_PORT, 0);
+        //Must connect somewhere, NPE is an error
+        s.close();
+    }    
+
+    public void testSOCKS4ConnectionWithError() throws Exception {
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                           ConnectionSettings.C_SOCKS4_PROXY);
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(SOCKS4);
+        fps.setMakeError(true);
+        try {
+            Socket s = Sockets.connect("localhost", DEST_PORT, 0);
+            fail("accepted connection from a bad proxy server");
+        } catch(IOException iox) {
+            //Good -- expected behaviour
+        }
+        fps.setMakeError(false);
+    } 
+
+    public void testSOCKS4WithAuth() throws Exception {
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                           ConnectionSettings.C_SOCKS4_PROXY);
+        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
+        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
+        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+
+        fps.setProxyOn(true);
+        fps.setAuthentication(true);
+        fps.setProxyVersion(SOCKS4);
         
-    //connect with sock4
+        Socket s = Sockets.connect("localhost",DEST_PORT,0); //NPE is error
+        s.close();
+    }
+      
+
 
     //connect with HTTP
 

@@ -46,16 +46,16 @@ public class FakeProxyServer {
             ErrorService.error(iox);
         }
 
-        Thread proxyThread = new Thread() {
-            public void run() {
+        Thread proxyThread = new ManagedThread() {
+            public void managedRun() {
                 proxyLoop();
             }
         };
         proxyThread.setDaemon(true);
         proxyThread.start();
         
-        Thread destThread = new Thread() {
-            public void run() {
+        Thread destThread = new ManagedThread() {
+            public void managedRun() {
                 destLoop();
             }            
         };
@@ -72,10 +72,11 @@ public class FakeProxyServer {
                     Assert.that(false,
                       "LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
+                OutputStream os = incomingProxy.getOutputStream();
                 if(_proxyVersion == ProxyTest.SOCKS4)
-                    checkSOCKS4(is);
+                    checkSOCKS4(is, os);
                 else if(_proxyVersion == ProxyTest.SOCKS5)
-                    checkSOCKS5(is, incomingProxy.getOutputStream());
+                    checkSOCKS5(is, os);
                 else if(_proxyVersion == ProxyTest.HTTP)
                     checkHTTP(is);
                 else
@@ -89,11 +90,40 @@ public class FakeProxyServer {
             }
         } catch(IOException iox) {
             ErrorService.error(iox);
+            //killServers();
         }
     }
 
-    private void checkSOCKS4(InputStream is) {
-        //TODO1: implement
+    private void checkSOCKS4(InputStream is, OutputStream os) 
+                                                       throws IOException {
+        byte currByte = (byte)is.read();
+        Assert.that((byte)4==currByte, "Wrong version sent by LW to proxy");
+        Assert.that((byte)is.read()==(byte)1, "connect command not sent");
+        //TODO: make sure port is correct
+        is.read();
+        is.read();
+        //check IP
+        Assert.that((byte)is.read()==(byte)127,"0th byte of ip wrong");
+        Assert.that((byte)is.read()==(byte)0,"1st byte of ip wrong");
+        Assert.that((byte)is.read()==(byte)0,"2nd byte of ip wrong");
+        Assert.that((byte)is.read()==(byte)1,"3rd byte of ip wrong");
+
+        if(_authentication) {
+            byte[] u = new byte[USER.length()];
+            is.read(u);
+            Assert.that(USER.equals(new String(u)),"LW sent wrong user");
+        }
+        Assert.that((byte)is.read()==(byte)0,"LW did not send terminating 0");
+        os.write((byte)4);//send version
+
+        if(_makeError)
+            os.write(0x33);//write wrong status code
+        else
+            os.write(0x5A);//write correct status code
+        //write out random ip port 
+        byte[] ip = {(byte)1,(byte)1,(byte)1,(byte)1,(byte)1, (byte)1, (byte)1};
+        os.write(ip);
+        os.flush();
     }
     
     private void checkSOCKS5(InputStream is, OutputStream os) 
