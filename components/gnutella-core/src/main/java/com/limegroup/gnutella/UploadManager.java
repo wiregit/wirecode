@@ -405,7 +405,6 @@ public final class UploadManager implements BandwidthTracker {
                 socket.setSoTimeout(MAX_POLL_TIME);
                 break;
             case ACCEPTED:
-                UploadStat.ATTEMPTED.incrementStat();
                 Assert.that(uploader.getState() == Uploader.CONNECTING,
                             "invalid state for accepted uploader");
                 synchronized (this) {
@@ -427,6 +426,15 @@ public final class UploadManager implements BandwidthTracker {
      * Does nothing if 'shouldShowInGUI' is false.
      */
     private void addToGUI(Uploader uploader) {
+        
+        // We want to increment attempted only for uploads that may
+        // have a chance of failing.
+        if( uploader.getMethod() != HTTPRequestMethod.HEAD &&
+            uploader.getState() == Uploader.QUEUED ||
+            uploader.getState() == Uploader.CONNECTING ) {
+            UploadStat.ATTEMPTED.incrementStat();        
+        }
+        
         //We are going to notify the gui about the new upload, and let
         //it decide what to do with it - will act depending on it's
         //state
