@@ -2040,8 +2040,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             return false;
         //Either I am queued or downloading, find the highest queued thread
         Thread killThread = null;
-        synchronized(this) {
-            if(getNumAllowedDownloads() > 0) 
+        synchronized(this) {            
+            if(getNumDownloaders() < getSwarmCapacity())
                 return true;//no need to kill a thread, but pretend like we did
             if(queuedThrreads.contains(Thread.currentThread())
                return true;//we are already in there, pretend we killed a thread
@@ -2821,16 +2821,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         //locations without hashes if throughput is good enough.
         //and load, but that's hard to do.
         int downloads=threads.size();
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
-            //Modems get 2 hosts at most...be safe and return positives
-            return Math.max(2-downloads,0);
-        else if (capacity<=SpeedConstants.T1_SPEED_INT)
-            //DSL, Cable, and "T1" can swarm from up to 6 locations.
-            return Math.max(6-downloads,0);
-        else 
-            //Wow you are fast, try 8
-            return Math.max(8-downloads,0);
+        return Math.max(getSwarmCapacity() - downloads, 0);
+    }
+
+    priavte int getSwarmCapacity() {
+        int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
+        if(capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
+            return 2;
+        else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
+            return 6;
+        else // T3
+            return 8;        
     }
 
     /** 
