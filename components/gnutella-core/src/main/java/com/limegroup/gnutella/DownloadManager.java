@@ -52,6 +52,12 @@ public class DownloadManager implements BandwidthTracker {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
+    /** This is a Map from Query GUIDs to the details of the search, which is
+     *  encapsulated by a AutoDownloadDetail structure.
+     */
+    private Map queryDetails = new Hashtable();
+
+
     //////////////////////// Creation and Saving /////////////////////////
 
     /** 
@@ -271,6 +277,17 @@ public class DownloadManager implements BandwidthTracker {
     }
 
 
+    public void registerAutomaticDownload(byte[] guid, String query,
+                                          String richQuery, MediaType type) {
+        
+        GUID key = new GUID(guid);
+        // in the off case that a key (GUID) inserted is already in the HT, then
+        // just ignore.  this shouldn't happen every since the guid space is so
+        // big and we'd assume no client will be up that long....
+        queryDetails.put(key, new AutoDownloadDetails(query, richQuery, type));
+    }
+
+
     /* Adds the file named in qr to an existing downloader if appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
@@ -316,10 +333,10 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
 
-        if (htGuidToADD.containsKey(new GUID(qr.getGUID()))) {
+        if (queryDetails.containsKey(new GUID(qr.getGUID()))) {
             // get the appropriate details....
             AutoDownloadDetails add = 
-            (AutoDownloadDetails) htGuidToADD.get(new GUID(qr.getGUID()));
+            (AutoDownloadDetails) queryDetails.get(new GUID(qr.getGUID()));
             List toDL = new ArrayList();
 
             // are there any files you should get?
@@ -356,7 +373,7 @@ public class DownloadManager implements BandwidthTracker {
 
             // if you've got enough files, don't consider this guy in the future
             if (add.expired())
-                htGuidToADD.remove(new GUID(qr.getGUID()));
+                queryDetails.remove(new GUID(qr.getGUID()));
         }
     }
 
@@ -698,24 +715,6 @@ public class DownloadManager implements BandwidthTracker {
         if (debugOn)
             e.printStackTrace();
     }
-
-
-    ///////////////////// AUTO DOWNLOADER FUNCTIONALITY //////////////////
-    /////////////////////             BEGIN             //////////////////
-
-    private Hashtable htGuidToADD = new Hashtable();
-
-    public void registerAutomaticDownload(byte[] guid, String query,
-                                          String richQuery, MediaType type) {
-        
-        GUID key = new GUID(guid);
-        // in the off case that a key (GUID) inserted is already in the HT, then
-        // just ignore.  this shouldn't happen every since the guid space is so
-        // big and we'd assume no client will be up that long....
-        htGuidToADD.put(key, new AutoDownloadDetails(query, richQuery, type));
-    }
-
-    /////////////////////              END              //////////////////
 
 
     /*
