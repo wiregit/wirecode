@@ -177,19 +177,24 @@ public final class SettingsFactory {
      * Save setting information to property file
      * We want to NOT save any properties which are the default value,
      * as well as any older properties that are no longer in use.
-     * To avoid having to manually encode the file, we create a new
-     * properties object and add to it only the ones we want to save.
+     * To avoid having to manually encode the file, we create clone
+     * the existing properties and manually remove the ones
+     * which are default and aren't required to be saved.
+     * It is important to do it this way (as opposed to creating a new
+     * properties object and adding only those that should be saved
+     * or aren't default) because 'adding' properties may fail if
+     * certain settings classes haven't been statically loaded yet.
      * (Note that we cannot use 'store' since it's only available in 1.2)
      */
     public synchronized void save() {
-        Properties toSave = new Properties();
+        Properties toSave = (Properties)PROPS.clone();
 
         //Add any settings which require saving or aren't default
         Iterator ii = settings.iterator();
         while( ii.hasNext() ) {
             Setting set = (Setting)ii.next();
-            if( set.shouldAlwaysSave() || !set.isDefault() )
-                toSave.put( set.getKey(), set.getValueAsString() );
+            if( !set.shouldAlwaysSave() && set.isDefault() )
+                toSave.remove( set.getKey() );
         }
         
         FileOutputStream out = null;
