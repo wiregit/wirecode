@@ -1164,7 +1164,7 @@ public class SettingsManager implements SettingsInterface {
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
 		
-		_props.put(SAVE_DIRECTORY, saveDir);
+		_props.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
     /** 
