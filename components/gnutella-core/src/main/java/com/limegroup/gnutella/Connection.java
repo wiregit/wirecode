@@ -108,23 +108,30 @@ public class Connection implements Runnable {
     }
     
     private synchronized void sendString(String s) throws IOException {
-	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
+	byte[] bytes=s.getBytes();
 	OutputStream out=sock.getOutputStream();
 	out.write(bytes);
 	out.flush();
     }
 
-    private void expectString(String s) throws IOException {
-	//TODO1: shouldn't this timeout?
-	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
-	InputStream in=sock.getInputStream();
-	//TODO3: can optimize, but this isn't really important
-	for (int i=0; i<bytes.length; i++) {
-	    int got=in.read();
-	    if (got==-1)
-		throw new IOException();
-	    if (bytes[i]!=(byte)got)
-		throw new IOException();
+    /** Tries to read s from the socket.  Throws IOException if some other
+     *  data was read instead or a timeout happened.  In any case,
+     *  leaves s with its original timeout value. */
+    private void expectString(String s) throws IOException {       	
+	int oldTimeout=sock.getSoTimeout();  //can throw IOException
+	sock.setSoTimeout(Const.TIMEOUT);    //can throw IOException
+	try {	   
+	    byte[] bytes=s.getBytes();
+	    InputStream in=sock.getInputStream();	
+	    for (int i=0; i<bytes.length; i++) {
+		int got=in.read();  //Could be optimized, but doesn't matter here.
+		if (got==-1)
+		    throw new IOException();
+		if (bytes[i]!=(byte)got)
+		    throw new IOException();
+	    }
+	} finally {
+	    sock.setSoTimeout(oldTimeout);
 	}
     }
     
