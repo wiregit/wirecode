@@ -219,16 +219,16 @@ public class RouterService {
     	    if ( isStarted() ) return;
             _started = true;
     
-            LOG.trace("START Acceptor");
-            callback.componentLoading("ACCEPTOR");
-    		acceptor.start();
-    		LOG.trace("STOP Acceptor");
-    		
     		// Now, link all the pieces together, starting the various threads.
             LOG.trace("START MessageRouter");
             callback.componentLoading("MESSAGE_ROUTER");
     		router.initialize();
     		LOG.trace("STOPMessageRouter");
+    		
+            LOG.trace("START Acceptor");
+            callback.componentLoading("ACCEPTOR");
+    		acceptor.start();
+    		LOG.trace("STOP Acceptor");
     		
     		LOG.trace("START ConnectionManager");
     		callback.componentLoading("CONNECTION_MANAGER");
