@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.util;
 
 import java.net.*;
+import java.nio.channels.SocketChannel;
 import java.io.*;
 import java.lang.reflect.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
 /**
@@ -82,17 +84,11 @@ public class Sockets {
             //Call socket.setKeepAlive(on) using reflection.  See below for
             //any explanation of why reflection must be used.
             try {
-                _setKeepAliveMethod.invoke(socket, 
-                    new Object[] { on ? Boolean.TRUE : Boolean.FALSE });
-                return true;
-            } catch(IllegalAccessException e) {
-                // this should not happen, and we want to know if it does
-                ErrorService.error(e);
-            } catch(InvocationTargetException e) {
-                // this should be a SocketException, indicating an 
-                // underlying protocol error, which should happen,
-                // for example, if the socket has disconnected
+                socket.setKeepAlive(on);
+            } catch (SocketException e1) {
+                // all we can do is try to set the keep alive
             }
+            return false;
         }
         return false;
     }
@@ -114,7 +110,8 @@ public class Sockets {
         if(!NetworkUtils.isValidPort(port)) {
             throw new IllegalArgumentException("port out of range: "+port);
         }
-        if (CommonUtils.isJava14OrLater()) {
+        if (CommonUtils.isJava14OrLater() &&
+            ConnectionSettings.USE_NIO.getValue()) {
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
             //      SocketAddress addr=new InetSocketAddress(host, port);
@@ -125,28 +122,34 @@ public class Sockets {
             //   of Java.  Worse, it may cause runtime errors if class loading
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
-            try {
-                Socket ret = (Socket)_socketClass.newInstance();
-
-				Object addr = _inetAddressConstructor.newInstance(
-                    new Object[] { host, new Integer(port) });
-
-                _connectMethod.invoke(ret, 
-                    new Object[] { addr, new Integer(timeout) });
-                return ret;
-            } catch (InvocationTargetException e) {
-                Throwable e2 = e.getTargetException();
-                if( !(e2 instanceof IOException) )
-                    ErrorService.error(e2);
-                throw (IOException)e2;
-            } catch(InstantiationException e) {
-                // this should never happen -- display the error
-                ErrorService.error(e);
-            } catch(IllegalAccessException e) {
-                // should almost never happen -- we want to know if it 
-                // does
-                ErrorService.error(e);
-            }
+            InetSocketAddress addr = new InetSocketAddress(host, port);
+            if (addr.isUnresolved())
+                throw new IOException("Couldn't resolve address");
+            Socket sock = SocketChannel.open().socket();
+            sock.connect(addr, timeout);
+            return sock;
+//            try {
+//                Socket ret = (Socket)_socketClass.newInstance();
+//
+//				Object addr = _inetAddressConstructor.newInstance(
+//                    new Object[] { host, new Integer(port) });
+//
+//                _connectMethod.invoke(ret, 
+//                    new Object[] { addr, new Integer(timeout) });
+//                return ret;
+//            } catch (InvocationTargetException e) {
+//                Throwable e2 = e.getTargetException();
+//                if( !(e2 instanceof IOException) )
+//                    ErrorService.error(e2);
+//                throw (IOException)e2;
+//            } catch(InstantiationException e) {
+//                // this should never happen -- display the error
+//                ErrorService.error(e);
+//            } catch(IllegalAccessException e) {
+//                // should almost never happen -- we want to know if it 
+//                // does
+//                ErrorService.error(e);
+//            }
         }
      
         if (timeout!=0) {
