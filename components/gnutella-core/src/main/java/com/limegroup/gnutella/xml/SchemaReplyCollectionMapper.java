@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.HashMap;
-import java.util.List;
+import com.sun.java.util.collections.*;
+
 
 /** 
  * Used to map schema URIs to Reply Collections.

@@ -5,8 +5,7 @@
  */
 
 package com.limegroup.gnutella.xml;
-import java.util.*;
-
+import com.sun.java.util.collections.*;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -59,7 +58,7 @@ class LimeXMLSchemaFieldExtractor
     /**
      * Set of primitive types (as per XML Schema specifications)
      */
-    private static final Set PRIMITIVE_TYPES;
+    private static final Set PRIMITIVE_TYPES = new HashSet();;
     
     /**
      * A counter to generate unique number which can be appened to strings
@@ -86,8 +85,6 @@ class LimeXMLSchemaFieldExtractor
     //initialize the static variables
     static
     {
-        //create a new HashSet
-        PRIMITIVE_TYPES = new HashSet();
         //fill it with primitive types
         PRIMITIVE_TYPES.add("xsi:string");
         PRIMITIVE_TYPES.add("string");

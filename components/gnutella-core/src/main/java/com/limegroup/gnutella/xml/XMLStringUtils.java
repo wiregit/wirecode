@@ -6,7 +6,7 @@
 
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.SettingsManager;
 import com.limegroup.gnutella.*;
@@ -191,7 +191,7 @@ public class XMLStringUtils
         if (collection.audio)
             committed  = collection.mp3ToDisk(fileName);
         else
-            committed = collection.toDisk("");
+            committed = collection.toDisk("",false);
         if (!committed){
             // this is bad            
         }

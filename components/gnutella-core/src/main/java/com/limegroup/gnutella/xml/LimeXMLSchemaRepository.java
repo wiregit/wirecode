@@ -5,7 +5,8 @@
  */
 
 package com.limegroup.gnutella.xml;
-import java.util.*;
+
+import com.sun.java.util.collections.*;
 import java.io.*;
 
 /**

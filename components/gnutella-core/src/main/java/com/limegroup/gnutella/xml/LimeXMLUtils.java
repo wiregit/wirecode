@@ -6,7 +6,7 @@
 
 package com.limegroup.gnutella.xml;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -305,8 +305,8 @@ public class LimeXMLUtils
                     // if this is a parse-able numeric value, doing a prefix
                     // matching doesn't make sense.  cast it to a double and do
                     // a straight equals comparison
-                    double rDVD = Double.parseDouble(replyDocValue);
-                    double qVD  = Double.parseDouble(queryValue);
+                    double rDVD = (new Double(replyDocValue)).doubleValue();
+                    double qVD  = (new Double(queryValue)).doubleValue();
                     if (rDVD == qVD)
                         matchCount++;
                     continue;

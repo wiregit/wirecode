@@ -198,6 +198,13 @@ public class SettingsManager {
 	 * per second upstream.
 	 */
 	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
+    
+    /**
+     * Constant default value for whether or not this node has ever been
+     * considered "supernode capable," meaning that it has met all of the
+     * requirements of a supernode, but not necessarily been a supernode.
+     */
+    private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
 
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
@@ -211,13 +218,6 @@ public class SettingsManager {
 	 */
 	private final int DEFAULT_SESSIONS = 1;
     
-    /**
-     * Constant default value for whether or not this node has ever been
-     * considered "supernode capable," meaning that it has met all of the
-     * requirements of a supernode, but not necessarily been a supernode.
-     */
-    private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
-
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
     private final String TTL                   = "TTL";
@@ -961,7 +961,6 @@ public class SettingsManager {
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
-		
     }
 
     /**

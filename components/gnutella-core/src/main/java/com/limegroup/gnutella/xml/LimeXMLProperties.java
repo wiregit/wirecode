@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.*;
+import com.sun.java.util.collections.*;
 import java.util.*;
-
 import com.limegroup.gnutella.*;
 
 /** 
@@ -404,7 +404,8 @@ public class LimeXMLProperties
      */
     public File[] getAllXMLSchemaFiles()
     {
-        return (new File(getXMLSchemaDir())).listFiles(
+        File dir = new File(getXMLSchemaDir());
+        String[] fileNames = (dir).list(
             new FilenameFilter()
             {
                 //the files to be accepted to be returned
@@ -417,6 +418,14 @@ public class LimeXMLProperties
                     return false;
                 }
             });
+        if(fileNames==null || fileNames.length==0)
+            return new File[0];
+        int z = fileNames.length;
+        File[] files = new File[z];
+        for(int i=0;i<z;i++){
+            files[i]  = new File(dir,fileNames[i]);
+        }
+        return files;
     }
     
     /**

@@ -2,10 +2,9 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 //imports to make the test code work
-import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
 
 public class MetaFileManager extends FileManager {
@@ -123,7 +122,7 @@ public class MetaFileManager extends FileManager {
               if (!Thread.currentThread().isInterrupted())
               initialized = true;
             */
-            //            showXMLData();
+            //showXMLData();
         }//end of synchronized block
     }//end of loadSettings.
 
