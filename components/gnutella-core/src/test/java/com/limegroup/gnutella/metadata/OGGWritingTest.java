@@ -61,6 +61,8 @@ public class OGGWritingTest extends BaseTestCase {
         
         int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
+	assertEquals(0,retVal);
+
         //3. Test if the data was written correctly
         data = (AudioMetaData)MetaData.parse(TEST_FILE);
 
