@@ -20,22 +20,25 @@
  
 package de.kapsi.util;
 
-import java.io.Serializable;
-
-/**
- * A simple Java Warpper for returned Apple Event Descriptors (AEDesc).
- *
- * <p><a href="http://developer.apple.com/documentation/Carbon/Reference/Apple_Event_Manager/apple_event_manager_ref/data_type_3.html#//apple_ref/c/tdef/AEDesc">AEDesc</a></p>
- */
-public class AEDesc implements Serializable {
+public class AEDesc {
+    
+	static {
+        System.loadLibrary("OpenScripting");
+    }
     
     private String type;
     private byte[] data;
     
     /* friendly */
-    AEDesc(int type, byte[] data) {
-        this.type = OSType2String(type);
-        this.data = data;
+    AEDesc(OSAScript script) {
+	
+        type = GetType(script.ptr);
+		
+		int size = GetDataSize(script.ptr);
+        if (size > 0) {
+			data = new byte[size];
+			GetData(script.ptr, data, 0, size);
+		}
     }
     
     /**
@@ -55,18 +58,11 @@ public class AEDesc implements Serializable {
     }
 
     public String toString() {
-        return "AEDesc(type=" + type + ", data.length=" + ((data != null) ? data.length : 0) + ")";
+        return "AEDesc(type=" + type + ", data.length=" + 
+					((data != null) ? data.length : 0) + ")";
     }
-    
-    private static String OSType2String(int OSType) {
-    
-        byte[] temp = new byte[4];
-        temp[3] = (byte)OSType;
-        temp[2] = (byte)(OSType >> 8);
-        temp[1] = (byte)(OSType >> 16);
-        temp[0] = (byte)(OSType >> 24);
-        
-        String type = new String(temp);
-        return type ;
-    }
+	
+	private static native synchronized String GetType(int ptr);
+	private static native synchronized int GetDataSize(int ptr);
+	private static native synchronized int GetData(int ptr, byte[] buf, int pos, int length);
 }

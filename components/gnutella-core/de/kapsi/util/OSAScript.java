@@ -25,43 +25,45 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
-import java.io.Serializable;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 /**
  * OSAScript is a simple scripting interface for Apple's Open Scripting Architecture (OSA).
  */
-public class OSAScript implements Serializable {
+public class OSAScript {
     
-    static {
+	static {
         System.loadLibrary("OpenScripting");
     }
-    
-    private int ptr;
-    private String source;
-    private boolean compiled;
-    
-    private OSAScript() {}
-    
+	
+	/* friendly */
+    final int ptr;
+	    
     /**
      * Creates a new OSAScript from the passed source code. E.g.
      * <p>
      * OSAScript os = new OSAScript("tell application \"Finder\"\nactivate\nend tell");<br>
      * os.execute();
      * </p>
+	 * <p>
+	 * Note: This type of scripts does not work accurate on Mac OS X 10.3! 
+	 * </p>
      */
     public OSAScript(String source) 
         throws UnsatisfiedLinkError, OSAException {
         
-        ptr = NewOSAScriptWithSource(source);
-        
-        this.compiled = false;
-        this.source = source;
+		int[] tmp = new int[1]; // Call by reference
+        int errorCode = NewOSAScriptWithSrc(tmp, source);
+		ptr = tmp[0];
+		
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
+			
+		compile();
     }
     
     /**
-     * Loads a precompiled .scpt file
+     * Loads a Script from a file (.scpt).
      */
     public OSAScript(File file) 
         throws UnsatisfiedLinkError, IOException, OSAException {
@@ -70,82 +72,62 @@ public class OSAScript implements Serializable {
         
         try {
             
-            byte[] bytes = new byte[(int)file.length()];
+            byte[] buf = new byte[(int)file.length()];
             in = new BufferedInputStream(new FileInputStream(file));
-            if (in.read(bytes, 0, bytes.length) != bytes.length) {
+            if (in.read(buf, 0, buf.length) != buf.length) {
                 throw new IOException();
             }
-
-            ptr = NewOSAScriptWithBinaries(bytes);
-            
-            this.compiled = true;
-            this.source = null;
-            
+			
+			in.close();
+			in = null;
+			
+			int[] tmp = new int[1]; // Call by reference
+            int errorCode = NewOSAScriptWithBin(tmp, buf);
+			ptr = tmp[0];
+			
+			if (errorCode < 0) {
+				throw (new OSAException(this, errorCode));
+			}
+			
         } finally {
-            if (in != null) { in.close(); }
+            if (in != null) { 
+				in.close(); 
+				in = null;
+			}
         }
     }
-    
-    private void readObject(java.io.ObjectInputStream stream)
-        throws IOException, ClassNotFoundException {
-        
-        compiled = stream.readBoolean();
-        source = (String)stream.readObject();
-        
-        if (compiled) {
-            byte[] bytes = (byte[])stream.readObject();
-            ptr = NewOSAScriptWithBinaries(bytes);
-            source = null;
-        }
-    }
-    
-    private void writeObject(java.io.ObjectOutputStream stream)
-        throws IOException {
-        
-        stream.writeBoolean(isCompiled());
-        stream.writeObject(source);
-        
-        if (compiled) {
-            byte[] bytes = GetOSAScriptBinaries(ptr);
-            stream.writeObject(bytes);
-        }
-    }
-    
-     /**
-      * Returns the source of this script or null if script was loaded
-      * from a file.
-      */ 
-    public String getSource() {
-        return source;
-    }
-    
-    /**
-     * Returns true if script is compiled
-     */
-    public boolean isCompiled() {
-        return compiled;
-    }
-    
+	
     /**
      * Returns the binaries of this Script or null if script
      * is not compiled. The binaries have the same format as
      * precompiled .scpt files!
      */
-    public byte[] getBytes() throws OSAException {
-        if (compiled) {
-            return GetOSAScriptBinaries(ptr);
-        }
-        
-        return null;
+    public synchronized byte[] getBytes() throws OSAException {
+
+		int size = GetOSAScriptSize(ptr);
+		if (size == 0) { return null; }
+		
+		byte[] dst = new byte[size];
+		
+		int errorCode = GetOSAScript(ptr, dst, 0, size);
+		
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
+		
+		return dst;
     }
     
     /**
      * Compiles the script
      */
-    public void compile() throws OSAException {
-        if (!compiled) {
-            compiled = CompileOSAScript(ptr);
-        }
+    private synchronized void compile() throws OSAException {
+			
+		int errorCode = CompileOSAScript(ptr);
+			
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
     }
     
     /**
@@ -153,13 +135,16 @@ public class OSAScript implements Serializable {
      * It is up to you to interpret the data (usually Strings). The
      * script will be compiled automatically if necessary.
      */
-    public AEDesc execute() throws OSAException {
-    
-        if (!compiled) {
-            compile();
-        }
+    public synchronized AEDesc execute() throws OSAException {
 
-        return ExecutOSAScript(ptr);
+		int errorCode = ExecuteOSAScript(ptr);
+		
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
+		
+		AEDesc desc = new AEDesc(this);
+		return (desc.getData() != null) ? desc : null;
     }
     
     /**
@@ -169,13 +154,16 @@ public class OSAScript implements Serializable {
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public AEDesc execute(String subroutine) throws OSAException {
+    public synchronized AEDesc execute(String subroutine) throws OSAException {
     
-        if (!compiled) {
-            compile();
-        }
-
-        return ExecuteOSAScriptEvent(ptr, subroutine, null);
+		int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, null);
+		
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
+		
+		AEDesc desc = new AEDesc(this);
+		return (desc.getData() != null) ? desc : null;
     }
     
     /**
@@ -185,26 +173,31 @@ public class OSAScript implements Serializable {
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public AEDesc execute(String subroutine, String[] args) throws OSAException {
+    public synchronized AEDesc execute(String subroutine, String[] args) throws OSAException {
     
-        if (!compiled) {
-            compile();
-        }
-
-        return ExecuteOSAScriptEvent(ptr, subroutine, args);
+        int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, args);
+	
+		if (errorCode < 0) {
+			throw (new OSAException(this, errorCode));
+		}
+		
+		AEDesc desc = new AEDesc(this);
+		return (desc.getData() != null) ? desc : null;
     }
     
     protected void finalize() throws Throwable {
         ReleaseOSAScript(ptr);
     }
-
-    private static native synchronized int NewOSAScriptWithSource(String source) throws OSAException;
-    private static native synchronized int NewOSAScriptWithBinaries(byte[] bytes) throws OSAException;
-    private static native synchronized void ReleaseOSAScript(int ptr) throws OSAException;
+	
+    private static native synchronized int NewOSAScriptWithSrc(int[] ptr, String src);
+    private static native synchronized int NewOSAScriptWithBin(int[] ptr, byte[] bin);
     
-    private static native synchronized boolean CompileOSAScript(int ptr) throws OSAException;
-    private static native synchronized AEDesc ExecutOSAScript(int ptr) throws OSAException;
-    private static native synchronized AEDesc ExecuteOSAScriptEvent(int ptr, String subroutine, String[] args) throws OSAException;
+    private static native synchronized int CompileOSAScript(int ptr);
+	private static native synchronized int ReleaseOSAScript(int ptr);
+	
+    private static native synchronized int ExecuteOSAScript(int ptr);
+    private static native synchronized int ExecuteOSAScriptEvent(int ptr, String subroutine, String[] args);
     
-    private static native synchronized byte[] GetOSAScriptBinaries(int ptr) throws OSAException;
+	private static native synchronized int GetOSAScriptSize(int ptr);
+    private static native synchronized int GetOSAScript(int ptr, byte[] buf, int pos, int length);
 }

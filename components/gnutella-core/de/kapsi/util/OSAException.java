@@ -22,73 +22,42 @@ package de.kapsi.util;
 
 /**
  * Thrown by OpenScripting components e.g. OSAScript. 
- *
- * @author <a href="mailto:info@kapsi.de">Roger Kapsi</a>
  */
-public class OSAException extends NativeException {
+public class OSAException extends Exception {
     
-    /** Not really an OSA error but very common ;) */
-    public static final int errAEEventNotHandled 		= -1708;
-    
-	public static final int errOSASystemError             = -1750;
-	public static final int errOSAInvalidID               = -1751;
-	public static final int errOSABadStorageType          = -1752;
-	public static final int errOSAScriptError             = -1753;
-	public static final int errOSABadSelector             = -1754;
-	public static final int errOSASourceNotAvailable      = -1756;
-	public static final int errOSANoSuchDialect           = -1757;
-	public static final int errOSADataFormatObsolete      = -1758;
-	public static final int errOSADataFormatTooNew        = -1759;
-	public static final int errOSACorruptData             = -1702;
-	public static final int errOSARecordingIsAlreadyOn    = -1732;
-	public static final int errOSAComponentMismatch       = -1761; /* Parameters are from 2 different components */
-	public static final int errOSACantOpenComponent       = -1762; /* Can't connect to scripting system with that ID */
-    
-    /**
-    @param eErrorCode the 'external' error code (e.g. errOSAScriptError)
-    @param iErrorCode the 'internal' error code (e.g. errAETimeout/-1712).
-    */
-    public OSAException(byte[] msg, int eErrorCode, int iErrorCode) {
-        super((msg != null) ? (new String(msg)) : createMessage(eErrorCode), 
-                new int[]{eErrorCode, iErrorCode});
+	static {
+        System.loadLibrary("OpenScripting");
     }
-    
-    /**
-     * Returns a more or less informative description for
-     * the errorCode.
-     */
-    protected static String createMessage(int errorCode) {
-        switch(errorCode) {
-            case errAEEventNotHandled:
-                return "AEEventNotHandled"; 
-            case errOSASystemError:
-                return "errOSASystemError";
-            case errOSAInvalidID:
-                return "errOSAInvalidID";
-            case errOSABadStorageType:
-                return "errOSABadStorageType";
-            case errOSAScriptError:
-                return "errOSAScriptError";
-            case errOSABadSelector:
-                return "errOSABadSelector";
-            case errOSASourceNotAvailable:
-                return "errOSASourceNotAvailable";
-            case errOSANoSuchDialect:
-                return "errOSANoSuchDialect";
-            case errOSADataFormatObsolete:
-                return "errOSADataFormatObsolete";
-            case errOSADataFormatTooNew:
-                return "errOSADataFormatTooNew";
-            case errOSACorruptData:
-                return "errOSACorruptData";
-            case errOSARecordingIsAlreadyOn:
-                return "errOSARecordingIsAlreadyOn";
-            case errOSAComponentMismatch:
-                return "errOSAComponentMismatch";
-            case errOSACantOpenComponent:
-                return "errOSACantOpenComponent";
-            default:
-                return NativeException.createMessage(errorCode);
-        }
-    }
+	
+	private String msg;
+	private int errorCode;
+	private int errorNum;
+	
+	/* friendly */
+	OSAException(OSAScript script, int errorCode) {
+		
+		msg = GetErrorMessage(script.ptr);
+		errorNum = GetErrorNumber(script.ptr);
+		
+		this.errorCode = errorCode;
+	}
+	
+	public int getErrorCode() {
+		return errorCode;
+	}
+	
+	public int getErrorNum() {
+		return errorNum;
+	}
+	
+	public String getMessage() {
+		if (msg == null) {
+			return errorCode + ", " + errorNum;
+		} else {
+			return msg + " (" + errorCode + ", " + errorNum + ")";
+		}
+	}
+	
+	private static native synchronized String GetErrorMessage(int ptr);
+	private static native synchronized int GetErrorNumber(int ptr);
 }
