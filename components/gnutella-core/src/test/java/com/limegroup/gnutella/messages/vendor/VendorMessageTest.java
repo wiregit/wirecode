@@ -495,7 +495,11 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	    		    return new byte[5];
     	    		}
     			},
-    			null
+    			new AltLocDigestStub() {
+    	    		public byte [] toBytes() {
+    	    		    return new byte[5];
+    	    		}
+    			}
     	};
     	
     	ping = new HeadPing(urn,
