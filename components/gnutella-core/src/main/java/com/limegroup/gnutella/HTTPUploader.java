@@ -20,6 +20,7 @@ public class HTTPUploader implements Runnable {
     private int _index;
     private int _sizeOfFile;
     private int _amountRead;
+    private int _priorAmountRead;
     private ConnectionManager _manager;
     private ActivityCallback _callback;
     private Socket _socket;   
@@ -29,6 +30,8 @@ public class HTTPUploader implements Runnable {
 
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
+
+	file = file.trim();
 
 	_filename = file;
 	_index = index;
@@ -60,7 +63,7 @@ public class HTTPUploader implements Runnable {
 	    _out = new BufferedWriter(osw); 
 	}
 	catch (Exception e) {
-	    _callback.error("unable to open outputsetream");
+	    uploadError("unable to open outputsetream");
 	}
 
 	try {
@@ -69,7 +72,7 @@ public class HTTPUploader implements Runnable {
 	}
 
 	catch (Exception e) {
-	    _callback.error("unable to open file");
+	    uploadError("unable to open file");
 	}
 
     }
@@ -77,7 +80,6 @@ public class HTTPUploader implements Runnable {
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
-
 
 	_filename = file;
 	_amountRead = 0;
@@ -107,7 +109,7 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
-	    _callback.error("unable to open file");
+	    uploadError("unable to open file");
 	}
 
 	URLConnection conn;
@@ -117,11 +119,11 @@ public class HTTPUploader implements Runnable {
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
-	    _callback.error("Bad URL");
+	    uploadError("Bad URL");
 	    return;
 	}
 	catch (IOException e) {
-	    _callback.error("can't opeInputStreamReader n connection");
+	    uploadError("can't opeInputStreamReader n connection");
 	    return;
 	}
 	try {
@@ -130,7 +132,7 @@ public class HTTPUploader implements Runnable {
 	    _out = new BufferedWriter(osr);
 	}
 	catch (IOException e) {
-	    _callback.error("can't open output stream");
+	    uploadError("can't open output stream");
 	}
 			
     }
@@ -148,6 +150,14 @@ public class HTTPUploader implements Runnable {
 	return _amountRead;
     }
 
+    public int getPriorAmountRead() {
+	return _priorAmountRead;
+    }
+
+    public void setPriorAmountRead( int val ) {
+	_priorAmountRead = val;
+    }
+
     public InetAddress getInetAddress() {
 	return _socket.getInetAddress();
     }   
@@ -163,7 +173,7 @@ public class HTTPUploader implements Runnable {
 	}
 
 	catch (Exception e) {
-	    _callback.error("Unable to write header info");
+	    uploadError("Unable to write header info");
 	    return;
 	}
     }
@@ -175,6 +185,8 @@ public class HTTPUploader implements Runnable {
     }
 
     public void doUpload() {
+
+        writeHeader();
 	
 	int c = -1;
 	
@@ -187,7 +199,7 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
-	    _callback.error("Unable to read from the file");
+	    uploadError("Unable to read from the file");
 	    
 	    return;
 	    
@@ -212,15 +224,23 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
-	    _callback.error("Unable to write out to the socket");
+	    uploadError("Unable to write out to the socket");
 	}
     }
 
+    public void shutdown()
+    {
+	try {
+	    _socket.close();
+	} catch (Exception e) {
+	}
+    }
+
+    private void uploadError(String str)
+    {
+	// These should not go anywhere for uploads
+    }
 
 }
-
-
-
-
 
 

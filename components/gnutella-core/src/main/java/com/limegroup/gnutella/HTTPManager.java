@@ -48,11 +48,17 @@ public class HTTPManager {
 
 	    String parse[] = HTTPUtil.stringSplit(command, '/'); 
 	                                       /* and the index, but i'm */
-	    String parse_two[] = HTTPUtil.stringSplit(parse[2], 'H'); 
-	                                       /* concerned this is way hackey */
+
+
+	    _filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP"));
+	    //String parse_two[] = HTTPUtil.stringSplit(parse[2], 'H'); 
+	                             /* concerned this is way hackey */
+	    //  NO KIDDING YOU DUFUS!!!!  Your lucky I found this ever.
+	    //  So is the whole concept here
+	    //_filename = parse_two[0];
+	
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
-	    _filename = parse_two[0];
 
 	    HTTPUploader uploader;
 	    uploader = new HTTPUploader(s, _filename, _index, _manager);

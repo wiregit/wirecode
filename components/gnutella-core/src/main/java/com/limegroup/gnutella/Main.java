@@ -104,9 +104,9 @@ public class Main implements ActivityCallback {
 	    Assert.that(false,"Unknown connection type");
 
 	if (status==ActivityCallback.STATUS_CONNECTED)
-	    System.out.println("Created "+direction+" connection "+direction2+host+":"+port+".");
+	    ;//System.out.println("Created "+direction+" connection "+direction2+host+":"+port+".");
 	else if (status==ActivityCallback.STATUS_CONNECTING)
-	    System.out.println("Creating "+direction+" connection "+direction2+host+":"+port+"...");
+	    ;//System.out.println("Creating "+direction+" connection "+direction2+host+":"+port+"...");
 	else
 	    Assert.that(false,"Unknown connection status");
     }
@@ -114,14 +114,14 @@ public class Main implements ActivityCallback {
     public void removeConnection(Connection c) {
 	String host = c.getOrigHost();
 	int    port = c.getOrigPort();
-	System.out.println("Connection to "+host+":"+port+" closed.");
+	//System.out.println("Connection to "+host+":"+port+" closed.");
     }
 
     public void updateConnection(Connection c, int status) {
 	String host = c.getOrigHost();
 	int    port = c.getOrigPort();
 	if (status==ActivityCallback.STATUS_CONNECTED)
-	    System.out.println("Connected to "+host+":"+port+".");
+	    ;//System.out.println("Connected to "+host+":"+port+".");
 	else {
 	    //Why would this be called?
 	}	    

@@ -273,6 +273,21 @@ public class RouterService
     public SettingsInterface getSettings() {
 	return SettingsManager.instance();
     }
+
+    /**
+     * Create a download request
+     */
+    public void tryDownload(String ip, int port, int index, String fname) {
+	String file = "get/" + String.valueOf(index) + "/" + fname;
+
+        HTTPDownloader down = new
+            HTTPDownloader("http", ip, port, file, manager );
+	Thread t = new Thread(down);
+	t.setDaemon(true);
+	t.start();
+    }
+
+	
 }
 
 
