@@ -18,7 +18,7 @@ public class GUESSMonitor {
 
     public final static String INSTRUCTIONS = 
         "? - Help; verbose - switch verbose on/off; connect - start the " +
-        "backend; disconnect - stop the backend";
+        "backend; disconnect - stop the backend; stats - show stats";
 
     private Backend _backend;
     private MyMessageRouter _messageRouter;
@@ -65,6 +65,12 @@ public class GUESSMonitor {
                     guessMon.connect();
                 else if (input.equals("disconnect"))
                     guessMon.disconnect();
+                else if (input.equals("stats"))
+                    guessMon.showOverallStats();
+                else if (input.equals(""))
+                    ;
+                else
+                    System.out.println("Unknown Command, type '?' for Help.");
             } 
             catch (IOException ioe) {
             }
@@ -139,17 +145,58 @@ public class GUESSMonitor {
                     float numSent = ((Float)retObjs[1]).floatValue();
                     float numGot = ((Float)retObjs[0]).floatValue();
                     float averageTime = ((Float)retObjs[2]).floatValue();
+                    float successRate = (numGot/numSent)*100;
+
+                    tallyStats(numGot, numSent, averageTime, successRate);
 
                     debug("Sent Queries to " + currPong.getIP() + ":" +
                           currPong.getPort() + " . " + "Success Rate = " +
-                          ((numGot/numSent)*100) + " at an average of " +
+                          successRate + " at an average of " +
                           averageTime + " ms per Query.");
-                    
+
                 }
             }
             debug("guessPongLoop(): returning.");
         }
 
+    }
+
+    /* Numbers for maintaining stats...
+     */
+    private float numTestsDone = 0;
+    private float numSuccessTests = 0;
+    private float overallDropRate = 0;
+    private float overallLatency = 0;
+
+    private synchronized void tallyStats(float numGot, float numSent, 
+                                    float averageTime, float successRate) {
+        if (numGot > 0) {
+            numSuccessTests++;
+            overallDropRate = 
+            ((overallDropRate*numTestsDone) + successRate) /
+            (numTestsDone+1);
+            overallLatency = 
+            ((overallLatency*numTestsDone) + averageTime) /
+            (numTestsDone+1);
+        }
+        numTestsDone++;
+    }
+
+
+    public synchronized void showOverallStats() {
+        System.out.println("---- STATS -----");
+        System.out.println("Current Time: " + 
+                           Calendar.getInstance().getTime());
+        System.out.println("Number of Tests : " + numTestsDone);
+        if (numSuccessTests > 0) {
+            System.out.println("Percentage of Tests Successful : " +
+                           (numSuccessTests/numTestsDone)*100);
+            System.out.println("Overall Drop Rate : " + overallDropRate +
+                               "%");
+            System.out.println("Overall Latency : " + overallLatency +
+                               "ms");
+        }
+        System.out.println("----------------");
     }
 
 
