@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-
+//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 /**
  * A Gnutella connection. A connection is either INCOMING or OUTGOING;
@@ -114,11 +114,11 @@ public class Connection implements Runnable {
      * The connection has a default spam filter, as determined by
      * settings manager.
      */
-    public Connection(String host, int port) {	
-	this.host=host;
-	this.port=port;
-	this.incoming=false;
-	this.doShutdown=false;
+    public Connection(String host, int port) {  
+        this.host=host;
+        this.port=port;
+        this.incoming=false;
+        this.doShutdown=false;
     }
 
     /** 
@@ -131,19 +131,19 @@ public class Connection implements Runnable {
      *  DOES NOT SEND INITIAL PING REQUEST OR ADD THIS TO MANAGER.
      */
     public synchronized void connect() throws IOException {
-	Assert.that(sock==null && in==null && out==null, "Illegal state");
-	//Entering CONNECTING state.  TODO: notify GUI
-	sock=new Socket(host, port);
-	//Entering CONNECTED state.  TODO: notify GUI
-	in=new BufferedInputStream(sock.getInputStream());
-	out=new BufferedOutputStream(sock.getOutputStream());
+        Assert.that(sock==null && in==null && out==null, "Illegal state");
+        //Entering CONNECTING state.  TODO: notify GUI
+        sock=new Socket(host, port);
+        //Entering CONNECTED state.  TODO: notify GUI
+        in=new BufferedInputStream(sock.getInputStream());
+        out=new BufferedOutputStream(sock.getOutputStream());
 
-	//Handshake
-	SettingsManager settings=SettingsManager.instance();
-	sendString(settings.getConnectString()+"\n\n");
-	expectString(settings.getConnectOkString()+"\n\n");
-	if ( doShutdown )
-	    sock.close();
+        //Handshake
+        SettingsManager settings=SettingsManager.instance();
+        sendString(settings.getConnectString()+"\n\n");
+        expectString(settings.getConnectOkString()+"\n\n");
+        if ( doShutdown )
+            sock.close();
     }
 
     /** 
@@ -152,11 +152,11 @@ public class Connection implements Runnable {
      * The connection has a default spam filter, as determined by settings
      * manager.
      */
-    public Connection(String host, int port, boolean incoming) {	
-	this.host=host;
-	this.port=port;
-	this.incoming=incoming;
-	this.doShutdown=false;
+    public Connection(String host, int port, boolean incoming) {    
+        this.host=host;
+        this.port=port;
+        this.incoming=incoming;
+        this.doShutdown=false;
     }    
 
     /** 
@@ -169,25 +169,25 @@ public class Connection implements Runnable {
      *  DOES NOT ADD THIS TO MANAGER. 
      */
     public void initIncoming(Socket sock) throws IOException {
-	this.sock=sock;
-	this.in=new BufferedInputStream(sock.getInputStream());
-	this.out=new BufferedOutputStream(sock.getOutputStream());
-	this.incoming=true;
+        this.sock=sock;
+        this.in=new BufferedInputStream(sock.getInputStream());
+        this.out=new BufferedOutputStream(sock.getOutputStream());
+        this.incoming=true;
 
-	//Handshake
-	SettingsManager settings=SettingsManager.instance();
-	expectString(settings.getConnectStringRemainder()+"\n\n");
-	sendString(settings.getConnectOkString()+"\n\n");
-	if ( doShutdown )
-	    sock.close();
+        //Handshake
+        SettingsManager settings=SettingsManager.instance();
+        expectString(settings.getConnectStringRemainder()+"\n\n");
+        sendString(settings.getConnectOkString()+"\n\n");
+        if ( doShutdown )
+            sock.close();
     }    
 
     protected synchronized void sendString(String s) throws IOException {
-	//TODO1: timeout.
-	byte[] bytes=s.getBytes();
-	OutputStream out=sock.getOutputStream();
-	out.write(bytes);
-	out.flush();
+        //TODO1: timeout.
+        byte[] bytes=s.getBytes();
+        OutputStream out=sock.getOutputStream();
+        out.write(bytes);
+        out.flush();
     }
 
     /**
@@ -198,21 +198,21 @@ public class Connection implements Runnable {
      *  property manager), throws IOException.
      */
     protected synchronized void expectString(String s) throws IOException {
-	int oldTimeout=sock.getSoTimeout();
-	try {
-	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
-	    byte[] bytes=s.getBytes();
-	    for (int i=0; i<bytes.length; i++) {
-		int got=in.read();
-		if (got==-1)
-		    throw new IOException();
-		if (bytes[i]!=(byte)got)
-		    throw new IOException();
-	    }
-	} finally {
-	    //Restore socket timeout.
-	    sock.setSoTimeout(oldTimeout);
-	}
+        int oldTimeout=sock.getSoTimeout();
+        try {
+            sock.setSoTimeout(SettingsManager.instance().getTimeout());
+            byte[] bytes=s.getBytes();
+            for (int i=0; i<bytes.length; i++) {
+                int got=in.read();
+                if (got==-1)
+                    throw new IOException();
+                if (bytes[i]!=(byte)got)
+                    throw new IOException();
+            }
+        } finally {
+            //Restore socket timeout.
+            sock.setSoTimeout(oldTimeout);
+        }
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -226,15 +226,15 @@ public class Connection implements Runnable {
      *   arise.  This is thread-safe.
      */
     public void send(Message m) throws IOException {
-	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for send");
-	//Can't use same lock as receive()!
-	synchronized (out) {
-	    m.write(out);
-  	    out.flush();
-	    sent++;	    
-	    if (manager!=null)
-		manager.total++;
-	}
+        Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for send");
+        //Can't use same lock as receive()!
+        synchronized (out) {
+            m.write(out);
+            out.flush();
+            sent++;     
+            if (manager!=null)
+                manager.total++;
+        }
     }
 
     /** 
@@ -246,20 +246,20 @@ public class Connection implements Runnable {
      *  results in InterruptedIOException.
      */
     public Message receive() throws IOException, BadPacketException {
-	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
-	//Can't use same lock as send()!
-	synchronized(in) {
-	    while (true) {
-		Message m=Message.read(in);
-		if (m==null) 
-		    continue;
-  		//System.out.println("Read "+m.toString());
-		if (manager!=null)
-		    manager.total++;
-		received++;  //keep statistics.
-		return m;
-	    }
-	}
+        Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
+        //Can't use same lock as send()!
+        synchronized(in) {
+            while (true) {
+                Message m=Message.read(in);
+                if (m==null) 
+                    continue;
+                //System.out.println("Read "+m.toString());
+                if (manager!=null)
+                    manager.total++;
+                received++;  //keep statistics.
+                return m;
+            }
+        }
     }
 
     /**
@@ -272,23 +272,23 @@ public class Connection implements Runnable {
      *  read.
      */
     public Message receive(int timeout) 
-	throws IOException, BadPacketException, InterruptedIOException {
-	synchronized (in) {
-	    //temporarily change socket timeout.
-	    int oldTimeout=sock.getSoTimeout();
-	    sock.setSoTimeout(timeout);
-	    try {
-		Message m=Message.read(in);
-		if (m==null)
-		    throw new InterruptedIOException();
-		if (manager!=null)
-		    manager.total++;
-		received++;  //keep statistics.
-		return m;		
-	    } finally {
-		sock.setSoTimeout(oldTimeout);
-	    }
-	}
+        throws IOException, BadPacketException, InterruptedIOException {
+        synchronized (in) {
+            //temporarily change socket timeout.
+            int oldTimeout=sock.getSoTimeout();
+            sock.setSoTimeout(timeout);
+            try {
+                Message m=Message.read(in);
+                if (m==null)
+                    throw new InterruptedIOException();
+                if (manager!=null)
+                    manager.total++;
+                received++;  //keep statistics.
+                return m;       
+            } finally {
+                sock.setSoTimeout(oldTimeout);
+            }
+        }
     }
 
     /** 
@@ -301,21 +301,21 @@ public class Connection implements Runnable {
      *  going to call the run method.
      */
     public synchronized void setManager(ConnectionManager manager) {
-	Assert.that(manager!=null, "Cannot set null manager");
-	this.manager=manager;
-	if (manager!=null){
-	    this.routeTable=manager.routeTable;
-	    this.pushRouteTable = manager.pushRouteTable;
-	}
+        Assert.that(manager!=null, "Cannot set null manager");
+        this.manager=manager;
+        if (manager!=null){
+            this.routeTable=manager.routeTable;
+            this.pushRouteTable = manager.pushRouteTable;
+        }
     }
 
     private final boolean isRouteSpam(Message m) {
-	if (! routeFilter.allow(m)) {
-	    manager.totDropped++;
-	    dropped++;
-	    return true;
-	} else
-	    return false;
+        if (! routeFilter.allow(m)) {
+            manager.totDropped++;
+            dropped++;
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -329,341 +329,344 @@ public class Connection implements Runnable {
      *   If this happens, removes itself from the manager's connection list.
      */
     public void run() {
-	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for run");
-	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null,
-		    "Illegal manager state for run");
-	//We won't wait more than TIMEOUT milliseconds for a half-completed message.
-	//However, we will wait as long as necessary for an incomplete message.
-	//See Message.read(..) for an explanation.
-//	Disabled 9/1/2000 by crohrs.
-//  	try {
-//  	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
-//  	} catch (SocketException e) {
-//  	    //Ignore?
-//  	}
-	try {
-	    while (true) {
-		Message m=null;
-		try {
-		    m=receive();
-		    if (m==null)
-			continue;
-		} 
-		catch (BadPacketException e) {
-		    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
-		    //dropped++;
-		    continue;
-		}
-		if(m instanceof PingRequest){
-		    Connection inConnection = routeTable.get(m.getGUID()); 
-		    //connection has never been encountered before...
-		    if (inConnection==null && !isRouteSpam(m)){
-			//reduce TTL, increment hops. If old val of TTL was 0 drop message
-			if (manager.stats==true)
-			    manager.PReqCount++;//keep track of statistics if stats is turned on.
-			if (m.hop()!=0){
-			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
-			    manager.sendToAllExcept(m, this);//broadcast to other hosts
-			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+        Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for run");
+        Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null,
+                    "Illegal manager state for run");
+        //We won't wait more than TIMEOUT milliseconds for a half-completed message.
+        //However, we will wait as long as necessary for an incomplete message.
+        //See Message.read(..) for an explanation.
+        //  Disabled 9/1/2000 by crohrs.
+        //      try {
+        //          sock.setSoTimeout(SettingsManager.instance().getTimeout());
+        //      } catch (SocketException e) {
+        //          //Ignore?
+        //      }
+        try {
+            while (true) {
+                Message m=null;
+                try {
+                    m=receive();
+                    if (m==null)
+                        continue;
+                } 
+                catch (BadPacketException e) {
+                    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
+                    //dropped++;
+                    continue;
+                }
+                if(m instanceof PingRequest){
+                    Connection inConnection = routeTable.get(m.getGUID()); 
+                    //connection has never been encountered before...
+                    if (inConnection==null && !isRouteSpam(m)){
+                        //reduce TTL, increment hops. If old val of TTL was 0 drop message
+                        if (manager.stats==true)
+                            manager.PReqCount++;//keep track of statistics if stats is turned on.
+                        if (m.hop()!=0){
+                            routeTable.put(m.getGUID(),this);//add to Reply Route Table
+                            manager.sendToAllExcept(m, this);//broadcast to other hosts
+                            byte[] ip=sock.getLocalAddress().getAddress(); //little endian
 
-			    FileManager fm = FileManager.getFileManager();
-			    
-			    int kilobytes = fm.getSize()/1024;
-			    int num_files = fm.getNumFiles();
+                            FileManager fm = FileManager.getFileManager();
+                
+                            int kilobytes = fm.getSize()/1024;
+                            int num_files = fm.getNumFiles();
 
-			    Message pingReply = new PingReply(m.getGUID(),(byte)(m.getHops()+1),
-							      manager.getListeningPort(),
-							      ip, num_files, kilobytes);
+                            Message pingReply = 
+							new PingReply(m.getGUID(),
+										  (byte)(m.getHops()+1),
+										  manager.getListeningPort(),
+										  ip, num_files, kilobytes);
+							
+                            send(pingReply);
+                            if (manager.stats==true)
+                                manager.PRepCount++;//keep stats if stats is turned on
+                        }
+                        else{//TTL is zero
+                            //do nothing (drop the message).
+                        }
+                    }
+                    else{// message has already been processed before
+                        //do nothing (drop message)
+                    }
+                }
+                else if (m instanceof PingReply){
+                    // System.out.println("Sumeet: Getting ping reply");
+                    Connection outConnection = routeTable.get(m.getGUID());
+                    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
+                    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
+                        if (manager.stats==true)
+                            manager.PRepCount++; //keep stats if stats is turned on
+                        //HACK: is the reply for me?
+                        if (outConnection.equals(manager.ME_CONNECTION)) {
+                            //System.out.println("Sumeet: I am the destination");
+                            //Update horizon stats.
+                            //This is not necessarily atomic, but that doesn't matter.
+                            totalFileSize += ((PingReply)m).getKbytes();
+                            numFiles += ((PingReply)m).getFiles();
+                            numHosts++;            
+                            //System.out.println("Sumeet : updated stats"); 
+                        }
+                        else{//message needs to routed
+                            m.hop();// It's Ok to route even if TTL is zero since this is a reply
+                            outConnection.send(m);
+                        }
+                    }
+                    else { //Route Table does not know what to do with message
+                        //do nothing...drop the message
+                        manager.totDropped++;
+                        dropped++;
+                    }
+                }
+                else if (m instanceof QueryRequest){
+                    Connection inConnection = routeTable.get(m.getGUID());
+                    if (inConnection==null && !isRouteSpam(m)){
 
-			    send(pingReply);
-			    if (manager.stats==true)
-				manager.PRepCount++;//keep stats if stats is turned on
-			}
-			else{//TTL is zero
-			    //do nothing (drop the message).
-			}
-		    }
-		    else{// message has already been processed before
-			//do nothing (drop message)
-		    }
-		}
-		else if (m instanceof PingReply){
-		    // System.out.println("Sumeet: Getting ping reply");
-		    Connection outConnection = routeTable.get(m.getGUID());
-		    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
-		    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
-			if (manager.stats==true)
-			    manager.PRepCount++; //keep stats if stats is turned on
-			//HACK: is the reply for me?
-			if (outConnection.equals(manager.ME_CONNECTION)) {
-			    //System.out.println("Sumeet: I am the destination");
-			    //Update horizon stats.
-			    //This is not necessarily atomic, but that doesn't matter.
-			    totalFileSize += ((PingReply)m).getKbytes();
-			    numFiles += ((PingReply)m).getFiles();
-			    numHosts++;			   
-			    //System.out.println("Sumeet : updated stats"); 
-			}
-			else{//message needs to routed
-			    m.hop();// It's Ok to route even if TTL is zero since this is a reply
-			    outConnection.send(m);
-			}
-		    }
-		    else { //Route Table does not know what to do with message
-			//do nothing...drop the message
-	                manager.totDropped++;
-			dropped++;
-		    }
-		}
-		else if (m instanceof QueryRequest){
-		    Connection inConnection = routeTable.get(m.getGUID());
-		    if (inConnection==null && !isRouteSpam(m)){
+                        // Feed to the UI Monitor
+                        ActivityCallback ui=manager.getCallback();
+                        if (ui!=null && personalFilter.allow(m)) 
+                            ui.handleQueryString(((QueryRequest)m).getQuery());
 
-			// Feed to the UI Monitor
-			ActivityCallback ui=manager.getCallback();
-			if (ui!=null && personalFilter.allow(m)) 
-			    ui.handleQueryString(((QueryRequest)m).getQuery());
+                        //reduce TTL,increment hops, If old val of TTL was 0 drop message
+                        //NOTE: This is Num Local Searches so always count it
+                        //if (manager.stats==true)  
+                        manager.QReqCount++;//keep stats if stats turned on
 
-			//reduce TTL,increment hops, If old val of TTL was 0 drop message
-			//NOTE: This is Num Local Searches so always count it
-			//if (manager.stats==true)  
-			manager.QReqCount++;//keep stats if stats turned on
+                        if (m.hop()!=0){
+                            routeTable.put(m.getGUID(),this); //add to Reply Route Table
+                            manager.sendToAllExcept(m,this); //broadcast to other hosts
+             
+                            FileManager fm = FileManager.getFileManager();
+                            Response[] responses = fm.query((QueryRequest)m);
+                
+                            if (responses.length > 0) {
+                                byte[] guid = m.getGUID();
+                                byte ttl = (byte)(m.getHops() +1);
+                                int port = manager.getListeningPort();
+                                byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+                                long speed = SettingsManager.instance().getConnectionSpeed();
+                                byte[] clientGUID = manager.ClientId.bytes();
 
-			if (m.hop()!=0){
-			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
-			    manager.sendToAllExcept(m,this); //broadcast to other hosts
-			 
-			    FileManager fm = FileManager.getFileManager();
-			    Response[] responses = fm.query((QueryRequest)m);
-			    
-			    if (responses.length > 0) {
-				byte[] guid = m.getGUID();
-				byte ttl = (byte)(m.getHops() +1);
-				int port = manager.getListeningPort();
-				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-				long speed = SettingsManager.instance().getConnectionSpeed();
-				byte[] clientGUID = manager.ClientId.bytes();
+                                // changing the port here to test push:
+                
+                                //Modified by Sumeet Thadani
+                                // If the number of responses is more 255, we are going to 
+                                // drop the responses after index 255. This can be corrected 
+                                //post beta, so that the extra responses can be sent along as
+                                //another query reply.
+                                if (responses.length > 255){
+                                    Response[] res = new Response[255];
+                                    for(int i=0; i<255;i++)
+                                        res[i] = responses[i]; //copy first 255 elements of old array
+                                    responses = res;//old array will be garbage collected
+                                }
+                                QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+                                                                   speed, responses, clientGUID);
+                                //QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
+                                //               speed, responses, clientGUID);                
+                                send(qreply);
+                                if(manager.stats == true)
+                                    manager.QRepCount++;//keep stats if stats is turned on
 
-				// changing the port here to test push:
-				
-				//Modified by Sumeet Thadani
-				// If the number of responses is more 255, we are going to 
-				// drop the responses after index 255. This can be corrected 
-				//post beta, so that the extra responses can be sent along as
-				//another query reply.
-				if (responses.length > 255){
-				    Response[] res = new Response[255];
-				    for(int i=0; i<255;i++)
-					res[i] = responses[i]; //copy first 255 elements of old array
-				    responses = res;//old array will be garbage collected
-				}
-			  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
-  								   speed, responses, clientGUID);
-				//QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
-				//  		     speed, responses, clientGUID);			       
-				send(qreply);
-				if(manager.stats == true)
-				    manager.QRepCount++;//keep stats if stats is turned on
+                            }
+                        }
+                        else{//TTL is zero
+                            //do nothing(drop the message)
+                        }
+                    }
+                    else{//message has been entry in Route Table, has already been processed.
+                        //do nothing (drop message)
+                    }
+                }
+                else if (m instanceof QueryReply){
+                    Connection outConnection = routeTable.get(m.getGUID());
+                    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
+                        if (manager.stats==true)
+                            manager.QRepCount++;
+                        //System.out.println("Sumeet:found connection");
+                        QueryReply qrep = (QueryReply)m;
+                        pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
+                        //HACK: is the reply for me?
+                        if (outConnection.equals(manager.ME_CONNECTION)) {
+                            //Unpack message and present it to user via ActivityCallback,
+                            //if it is not spam.
+                            ActivityCallback ui=manager.getCallback();
+                            if (ui!=null && personalFilter.allow(m)) 
+                                ui.handleQueryReply((QueryReply)m);
+                        }
+                        else {//message needs to be routed.
+                            m.hop(); // It's Ok to route even if TTL is zero since this is a reply
+                            outConnection.send(m);//send the message along on its route
+                        }
+                    }
+                    else{//route table does not know what to do this message
+                        //do nothing...drop the message
+                        manager.totDropped++;
+                        dropped++;
+                    }
+                }
+                else if (m instanceof PushRequest){
 
-			    }
-			}
-			else{//TTL is zero
-			    //do nothing(drop the message)
-			}
-		    }
-		    else{//message has been entry in Route Table, has already been processed.
-			//do nothing (drop message)
-		    }
-		}
-		else if (m instanceof QueryReply){
-		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
-			if (manager.stats==true)
-			    manager.QRepCount++;
-			//System.out.println("Sumeet:found connection");
-			QueryReply qrep = (QueryReply)m;
-			pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
-			//HACK: is the reply for me?
-			if (outConnection.equals(manager.ME_CONNECTION)) {
-			    //Unpack message and present it to user via ActivityCallback,
-			    //if it is not spam.
-			    ActivityCallback ui=manager.getCallback();
-			    if (ui!=null && personalFilter.allow(m)) 
-				ui.handleQueryReply((QueryReply)m);
-			}
-			else {//message needs to be routed.
-			    m.hop(); // It's Ok to route even if TTL is zero since this is a reply
-			    outConnection.send(m);//send the message along on its route
-			}
-		    }
-		    else{//route table does not know what to do this message
-			//do nothing...drop the message
-	                manager.totDropped++;
-			dropped++;
-		    }
-		}
-		else if (m instanceof PushRequest){
+                    //System.out.println("Requested a push");
 
-		    //System.out.println("Requested a push");
+                    if (manager.stats==true)
+                        manager.pushCount++;//keeps stats if stats turned on
+                    PushRequest req = (PushRequest)m;
 
-		    if (manager.stats==true)
-			manager.pushCount++;//keeps stats if stats turned on
-		    PushRequest req = (PushRequest)m;
+                    byte[] req_guid = req.getClientGUID();
+                    String req_guid_hexstring = (new GUID(req_guid)).toString();
+                    Connection nextHost = pushRouteTable.get(req_guid);
 
-		    byte[] req_guid = req.getClientGUID();
-		    String req_guid_hexstring = (new GUID(req_guid)).toString();
-		    Connection nextHost = pushRouteTable.get(req_guid);
+                    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
+                        m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
+                        nextHost.send(m); //send the message to appropriate host
+                    }
+            
+                    // This comparison doesn't work:
+                    // // if (manager.ClientId.equals(DestinationId) ){
+                    //I am the destination
+                    else if (manager.isClient(req_guid)) {
+                        //unpack message
+                        //make HTTP connection with originator
+                        String host = new String(req.getIP());
+                        byte[] ip = req.getIP();
+                        StringBuffer buf=new StringBuffer();
+                        buf.append(ByteOrder.ubyte2int(ip[0])+".");
+                        buf.append(ByteOrder.ubyte2int(ip[1])+".");
+                        buf.append(ByteOrder.ubyte2int(ip[2])+".");
+                        buf.append(ByteOrder.ubyte2int(ip[3])+"");
+                        String h = buf.toString();
+                        int port = req.getPort();
+            
+                        FileManager fmanager = FileManager.getFileManager();
+                        int index = (int)req.getIndex();
+            
+                        FileDesc desc;          
+                        try {
+                            desc =(FileDesc)fmanager._files.get(index); 
+                        }
+                        catch (Exception e) {
+                            //I'm catching Exception because I don't know
+                            //exactly which IndexOutOfBoundsException is
+                            //thrown: from normal util package or com.sun...
 
-		    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
-			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
-			nextHost.send(m); //send the message to appropriate host
-		    }
-		    
-		    // This comparison doesn't work:
-		    // // if (manager.ClientId.equals(DestinationId) ){
-		      //I am the destination
-		    else if (manager.isClient(req_guid)) {
-			//unpack message
-			//make HTTP connection with originator
-			String host = new String(req.getIP());
-			byte[] ip = req.getIP();
-			StringBuffer buf=new StringBuffer();
-			buf.append(ByteOrder.ubyte2int(ip[0])+".");
-			buf.append(ByteOrder.ubyte2int(ip[1])+".");
-			buf.append(ByteOrder.ubyte2int(ip[2])+".");
-			buf.append(ByteOrder.ubyte2int(ip[3])+"");
-			String h = buf.toString();
-			int port = req.getPort();
-			
-			FileManager fmanager = FileManager.getFileManager();
-			int index = (int)req.getIndex();
-			
-			FileDesc desc;			
-			try {
-			    desc =(FileDesc)fmanager._files.get(index); 
-			}
-			catch (Exception e) {
-			    //I'm catching Exception because I don't know
-			    //exactly which IndexOutOfBoundsException is
-			    //thrown: from normal util package or com.sun...
+                            //TODO?: You could connect and send 404 file
+                            //not found....but why bother?
+                            continue;
+                        } 
+                        String file = desc._name;
+            
+                        HTTPUploader up = new 
+                        HTTPUploader(h, port, index, req_guid_hexstring, manager);
+                        Thread t=new Thread(up);
+                        t.setDaemon(true);
+                        t.run();
+                    }
+                    else{// the message has arrived in error or is spam
+                        //do nothing.....drop the message
+                        manager.totRouteError++;
+                        manager.totDropped++;
+                        dropped++;
+                    }
+                }// else if     
+            }//while
+        }//try
+        catch (IOException e){
+       
+            manager.remove(this);
 
-			    //TODO?: You could connect and send 404 file
-			    //not found....but why bother?
-			    continue;
-			} 
-			String file = desc._name;
-			
-			HTTPUploader up = new 
-			    HTTPUploader(h, port, index, req_guid_hexstring, manager);
-  			Thread t=new Thread(up);
-			t.setDaemon(true);
-  			t.run();
-		    }
-		    else{// the message has arrived in error or is spam
-			//do nothing.....drop the message
-	                manager.totRouteError++;
-	                manager.totDropped++;
-			dropped++;
-		    }
-		}// else if		
-	    }//while
-	}//try
-	catch (IOException e){
-	    manager.remove(this);
-
-	}
-	catch (Exception e) {
-	    //Internal error!  Cleanup this connection and notify the user 
-	    //of the problem.
-	    manager.remove(this);
-	    ActivityCallback ui=manager.getCallback();
-	    if (ui!=null) {
-		ui.error(ActivityCallback.ERROR_20, e);
-	    }
-	}
+        }
+        catch (Exception e) {
+            //Internal error!  Cleanup this connection and notify the user 
+            //of the problem.
+            manager.remove(this);
+            ActivityCallback ui=manager.getCallback();
+            if (ui!=null) {
+                ui.error(ActivityCallback.ERROR_20, e);
+            }
+        }
 
 
     }//run
 
     public String toString() {
-	return "Connection("+(incoming?"incoming":"outgoing")
-	    +", "+host+":"+port+", "+sent+", "+received+")";
+        return "Connection("+(incoming?"incoming":"outgoing")
+        +", "+host+":"+port+", "+sent+", "+received+")";
     }
 
     public boolean isOutgoing() {
-	return !incoming;
+        return !incoming;
     }
 
     /**
      *  Shutdown the Connections socket and thus the connection itself.
      */
     public void shutdown() {
-	doShutdown = true;
-	try {
-	    sock.close();
-	} catch(Exception e) {}
+        doShutdown = true;
+        try {
+            sock.close();
+        } catch(Exception e) {}
     }
 
     /** Returns the host set at construction */
     public String getOrigHost() {
-	return host;
+        return host;
     }
 
     /** Returns the port set at construction */
     public int getOrigPort() {
-	return port;
+        return port;
     }
 
     /** Returns the port of the foreign host this is connected to. */
     public int getPort() {
-	return sock.getPort();
+        return sock.getPort();
     }
 
     /** Returns the port this is connected to locally. */
     public int getLocalPort() {
-	return sock.getLocalPort();
+        return sock.getLocalPort();
     }
 
     /** Returns the address of the foreign host this is connected to. */
     public InetAddress getInetAddress() {
-	return sock.getInetAddress();
+        return sock.getInetAddress();
     }
 
     /** Returns the local address of this. */
     public InetAddress getLocalAddress() {
-	return sock.getLocalAddress();
+        return sock.getLocalAddress();
     }
 
     /** Clears the statistics about files reachable from me. */
     public void clearHorizonStats() {
-	totalFileSize=0;
-	numHosts=0;
-	numFiles=0;
+        totalFileSize=0;
+        numHosts=0;
+        numFiles=0;
     }
 
     /** Returns the number of hosts reachable from me. */
     public long getNumHosts() {
-	return numHosts;
+        return numHosts;
     }
 
     /** Returns the number of files reachable from me. */
     public long getNumFiles() {
-	return numFiles;
+        return numFiles;
     }
 
     /** Returns the size of all files reachable from me. */
     public long getTotalFileSize() {
-	return totalFileSize;
+        return totalFileSize;
     }   
 
     /** Returns the number of messages sent on this connection */
     public long getNumSent() {
-	return sent;
+        return sent;
     }
 
     /** Returns the number of messages received on this connection */
     public long getNumReceived() {
-	return received;
+        return received;
     }
 
     /** Returns the number of messages dropped on this connection.<p>
@@ -674,39 +677,47 @@ public class Connection implements Runnable {
      * buffer overflows in sendToAll.  
      */
     public long getNumDropped() {
-	return dropped;
+        return dropped;
     }
 
     /** Return the percentage of messages dropped on this connection since
      *  the last call to getPercentDropped. */
     public float getPercentDropped() {
-	int rdiff=received-lastReceived;
-	int ddiff=dropped-lastDropped;
-	float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
-	
-	lastReceived=received;
-	lastDropped=dropped;
-	return percent;
+        int rdiff=received-lastReceived;
+        int ddiff=dropped-lastDropped;
+        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+    
+        lastReceived=received;
+        lastDropped=dropped;
+        return percent;
     }
 
-    /** 	
+    /**     
      * @modifies this
      * @effects sets the underlying routing filter.   Note that
      *  most filters are not thread-safe, so they should not be shared
      *  among multiple connections.
      */
     public void setRouteFilter(SpamFilter filter) {
-	this.routeFilter=filter;
+        this.routeFilter=filter;
     }
 
-    /** 	
+    /**     
      * @modifies this
      * @effects sets the underlying personal filter.   Note that
      *  most filters are not thread-safe, so they should not be shared
      *  among multiple connections.
      */
     public void setPersonalFilter(SpamFilter filter) {
-	this.personalFilter=filter;
+        this.personalFilter=filter;
+    }
+
+    /**
+    * Just for compatibility (future) reasons
+    */
+    public void flush()
+    {
+
     }
 
 }
