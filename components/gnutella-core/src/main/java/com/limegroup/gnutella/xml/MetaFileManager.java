@@ -106,6 +106,7 @@ public class MetaFileManager extends FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
+        _needRebuild = true;
         return addFileIfShared(f, xmlDocs);
     }        
     
@@ -136,6 +137,7 @@ public class MetaFileManager extends FileManager {
             if( col != null )
                 col.removeDoc( fd );
         }
+        _needRebuild = true;
         return fd;
     }
 
@@ -192,7 +194,7 @@ public class MetaFileManager extends FileManager {
             }
             
         }
-        
+        _needRebuild = true;
         return fd;
     }
 
@@ -366,3 +368,4 @@ public class MetaFileManager extends FileManager {
 }
 
         
+

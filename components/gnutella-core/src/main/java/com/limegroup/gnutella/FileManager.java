@@ -779,7 +779,7 @@ public abstract class FileManager {
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
-
+        _needRebuild = true;
         return fd;
 	}
 
@@ -871,7 +871,7 @@ public abstract class FileManager {
 		
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
-		
+            _needRebuild = true;            
             repOk();
             return fileDesc;
         }
@@ -938,7 +938,7 @@ public abstract class FileManager {
         _fileToFileDesc.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
-        
+        _needRebuild = true;
         File parent = FileUtils.getParentFile(incompleteFile);
         RouterService.getCallback().addSharedFile(ifd, parent);
     }
@@ -1045,7 +1045,7 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
-
+        _needRebuild = false;
         repOk();
         return fd;
     }
@@ -1156,7 +1156,7 @@ public abstract class FileManager {
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
     protected void buildQRT() {
-        System.out.println("build QRT");
+        //System.out.println("build QRT");
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) 
@@ -1505,3 +1505,9 @@ public abstract class FileManager {
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java
     //            core/com/limegroup/gnutella/tests/UrnRequestTest.java
 }
+
+
+
+
+
+
