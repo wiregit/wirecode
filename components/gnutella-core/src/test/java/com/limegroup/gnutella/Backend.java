@@ -18,6 +18,19 @@ import java.util.*;
  */
 public class Backend {
 
+    /**
+     * The default port that backend instances run on.
+     */
+    public static final int DEFAULT_PORT = 6000;
+
+    /**
+     * The default port that backend instances run on if they are
+     * a backend that rejects all connections.
+     */
+    public static final int DEFAULT_REJECT_PORT = 6001;
+
+    private final int PORT;
+
 	/**
 	 * The <tt>RouterService</tt> instance the constructs the backend.
 	 */
@@ -81,14 +94,14 @@ public class Backend {
      */
 	public static Backend createLongLivedBackend(ActivityCallback callback,
                                                  MessageRouter router) {
-		return new Backend(callback, router, 0);
+		return new Backend(callback, router, 0, DEFAULT_PORT);
 	}
 
     /**
      * @return a BackEnd that will live until you shutdown() it.
      */
 	public static Backend createLongLivedBackend(MessageRouter router) {
-		return new Backend(new ActivityCallbackStub(), router, 0);
+		return new Backend(new ActivityCallbackStub(), router, 0, DEFAULT_PORT);
 	}
 
 	/**
@@ -99,7 +112,8 @@ public class Backend {
 	 *  shutting down
 	 */
 	public static Backend createLocalBackend(int timeout) {
-		return new LocalBackend(new ActivityCallbackStub(), null, timeout);
+		return new LocalBackend(new ActivityCallbackStub(), null, 
+                                timeout, DEFAULT_PORT);
 	}
 
 	/**
@@ -109,7 +123,7 @@ public class Backend {
 	 * @param callback the <tt>ActivityCallback</tt> instance to use
 	 */
 	public static Backend createLocalBackend(ActivityCallback callback) {
-		return new LocalBackend(callback, null, 0);
+		return new LocalBackend(callback, null, 0, DEFAULT_PORT);
 	}
 
 	/**
@@ -121,13 +135,23 @@ public class Backend {
 	 */
 	public static Backend createLocalBackend(ActivityCallback callback, 
 											 MessageRouter router) {
-		return new LocalBackend(callback, router, 0);
+		return new LocalBackend(callback, router, 0, DEFAULT_PORT);
 	}
 											 
+    /**
+     * Creates a backend that rejects all incoming requests.
+     */
+    private static Backend createRejectingBackend(int timeout) {
+		return new LocalBackend(new ActivityCallbackStub(), null, 
+                                timeout, DEFAULT_REJECT_PORT);
+    }
     
-
+    /**
+     * Creates a <tt>Backend</tt> instance with the specified 
+     * <tt>ActivityCallback</tt> and timeout.
+     */
     private Backend(ActivityCallback callback, int timeout) {
-        this(callback, null, timeout);
+        this(callback, null, timeout, DEFAULT_PORT);
     }
 
 
@@ -138,14 +162,18 @@ public class Backend {
      * will cause the BackEnd to be shutoff in timeout milliseconds.
 	 */
 	protected Backend(ActivityCallback callback, MessageRouter router,
-					  int timeout) {
+					  int timeout, int port) {
 		System.out.println("STARTING BACKEND"); 
+        PORT = port;
 		makeSharedDirectory();
 		copySettingsFiles();
 		setStandardSettings();
 		CALLBACK = callback;
 		ROUTER = router;
 		TIMEOUT = timeout;
+        if(PORT == DEFAULT_REJECT_PORT) {
+            ConnectionSettings.KEEP_ALIVE.setValue(0);
+        }
 	}
 
 	/**
@@ -157,7 +185,10 @@ public class Backend {
         else
             ROUTER_SERVICE = new RouterService(CALLBACK, ROUTER);
         ROUTER_SERVICE.start();
-		ROUTER_SERVICE.connect();
+        RouterService.clearHostCatcher();
+        if(PORT != DEFAULT_REJECT_PORT) {
+            RouterService.connect();
+        }
 		try {
 			// sleep to let the file manager initialize
 			Thread.sleep(2000);
@@ -170,7 +201,7 @@ public class Backend {
                         shutdown("AUTOMATED");
                     }
                 }, TIMEOUT);
-        }		
+        }
 	}
 
 	/**
@@ -198,7 +229,7 @@ public class Backend {
 	 */
 	protected void setStandardSettings() {
 		SettingsManager settings = SettingsManager.instance();
-		settings.setPort(6346);
+		settings.setPort(PORT);
 		//settings.setKeepAlive(1);
 		settings.setDirectories(new File[] {TEMP_DIR});
 		settings.setExtensions("class");
@@ -209,6 +240,7 @@ public class Backend {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        //ConnectionSettings.USE_GWEBCACHE.setValue(false);
 	}
 
 	
@@ -248,7 +280,7 @@ public class Backend {
 		System.out.println("BACKEND SHUTDOWN: "+msg); 
 		ROUTER_SERVICE.shutdown();
 		restoreSettingsFiles();
-		System.exit(0);
+        System.exit(0);
 	}
 
 	/**
@@ -297,7 +329,17 @@ public class Backend {
 	 * run off of.
 	 */
 	public static void main(String[] args) {
-		Backend be = Backend.createLocalBackend(Integer.parseInt(args[0]));
+        Backend be = null;
+        if(args.length == 0) {
+            be = Backend.createLocalBackend(20000);
+        } else if(args.length == 1) {
+            be = Backend.createLocalBackend(Integer.parseInt(args[0]));
+        } else if(args[1].equals("reject")) {
+            System.out.println("STARTING REJECT SERVER"); 
+            be = Backend.createRejectingBackend(Integer.parseInt(args[0]));
+        } else {
+            be = Backend.createLocalBackend(Integer.parseInt(args[0]));
+        }
 		be.start();
 	}
 }
