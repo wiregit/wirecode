@@ -17,8 +17,22 @@ public class QueryRequest extends Message implements Serializable{
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      */
     public QueryRequest(byte ttl, int minSpeed, String query, String richQuery) {
+        this(ttl, minSpeed, query, richQuery, false);
+    }
+
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     */
+    public QueryRequest(byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery) {
         //Allocate two bytes for min speed plus query string and null terminator
-        super(Message.F_QUERY, ttl, 2+query.length()+1+richQuery.length()+1);
+        super((isRequery ? GUID.makeGuidRequery() : GUID.makeGuid()),
+              Message.F_QUERY, ttl, (byte)0, 
+              2+query.length()+1+richQuery.length()+1);
         payload=new byte[2+query.length()+1+richQuery.length()+1];
         int i = 0;//Num bytes in the payload
         //Extract minimum speed.  It's ok if "(short)minSpeed" is negative.
@@ -37,6 +51,8 @@ public class QueryRequest extends Message implements Serializable{
         i++; //just so the records are straight. 
     }
 
+
+
     /**
      * Older form of the constructor calls the newer form of the constructor
      * with a empty rich query
@@ -44,6 +60,17 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte ttl, int minSpeed, String query) {
         this(ttl, minSpeed, query, "");
     }
+
+
+    /**
+     * Older form of the constructor calls the newer form of the constructor
+     * with a empty rich query, but allows you to flag as a requery
+     */
+    public QueryRequest(byte ttl, int minSpeed, 
+                        String query, boolean isRequery) {
+        this(ttl, minSpeed, query, "", isRequery);
+    }
+
 
     /*
      * Build a new query with data snatched from network
