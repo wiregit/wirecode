@@ -57,6 +57,12 @@ public final class HTTPUploader implements Uploader {
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
     private final boolean _hadPassword;
+    
+    /**
+     * whether the remote side indicated they want to receive
+     * firewalled altlocs.
+     */
+    private boolean _wantsFalts = false;
 
     /**
      * The Watchdog that will kill this uploader if it takes too long.
@@ -102,9 +108,19 @@ public final class HTTPUploader implements Uploader {
     private Set _writtenLocs;
     
     /**
+     * The firewalled alternate locations that have been written out as good locations.
+     */
+    private Set _writtenPushLocs;
+    
+    /**
      * The maximum number of alts to write per http transfer.
      */
     private static final int MAX_LOCATIONS = 10;
+    
+    /**
+     * The maximum number of firewalled alts to write per http transfer.
+     */
+    private static final int MAX_PUSH_LOCATIONS = 5;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -612,6 +628,8 @@ public final class HTTPUploader implements Uploader {
                 else if ( readContentURNHeader(str)  ) ;
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readNAltLocationHeader(str)) ;
+                else if ( readFAltLocationHeader(str)) ;
+                else if ( readBFAltLocationHeader(str));
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
@@ -856,6 +874,33 @@ public final class HTTPUploader implements Uploader {
             parseAlternateLocations(str, _fileDesc, false);
         return true;
     }
+    
+	private boolean readFAltLocationHeader(String str) {
+        if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
+            return false;
+        
+        //also set the interested flag
+        _wantsFalts=true;
+        
+        if(_fileDesc != null) 
+            parseFAlternateLocations(str, _fileDesc, true);
+        return true;
+    }
+
+    private boolean readBFAltLocationHeader(String str) {
+        if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
+            return false;
+
+        //also set the interested flag
+        _wantsFalts=true;
+        
+        if(_fileDesc != null)
+            parseFAlternateLocations(str, _fileDesc, false);
+        return true;
+    }
+    
+    
+    
 
     /** 
      * Reads the Accept heder
@@ -1010,6 +1055,12 @@ public final class HTTPUploader implements Uploader {
                 continue;
             }
         }
+	}
+	
+	public void parseFAlternateLocations(final String altHeader,
+			final AlternateLocationCollector alc,
+			boolean isGood){
+		//TODO: parse firewalled altlocs and add to appropriate structure here.
 	}
 
 	public void measureBandwidth() {
