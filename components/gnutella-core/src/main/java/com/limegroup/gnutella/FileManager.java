@@ -805,13 +805,9 @@ public class FileManager {
             // it already was... and if so, ignore it.
     		Iterator iter = urns.iterator();
     		while (iter.hasNext()) {
-                // see if 
-    			URN urn = (URN)iter.next();
-                IntSet indices=(IntSet)_urnIndex.get(urn);
                 // if there were indices for this URN, exit.
-                if( indices != null ) {
+                if( _urnIndex.get(iter.next()) != null)
                     return;
-                }
             }
             
             // no indices were found for any URN associated with this
