@@ -7,8 +7,7 @@ import java.io.*;
 import org.xml.sax.*;
 
 /**
- *  Stores a schema and a list of Replies corresponding to the 
- *  the corresponding to this schema.
+ *  Stores a schema and a list of replies corresponding to that schema.
  *  <p>
  *  So when a search comes in, we only have to look at the set of replies
  *  that correspond to the schema of the query.
