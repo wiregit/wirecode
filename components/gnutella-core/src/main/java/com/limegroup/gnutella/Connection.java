@@ -111,30 +111,23 @@ public class Connection implements Runnable {
     }
     
     private synchronized void sendString(String s) throws IOException {
-	byte[] bytes=s.getBytes();
+	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
 	OutputStream out=sock.getOutputStream();
 	out.write(bytes);
 	out.flush();
     }
 
-    /** Tries to read s from the socket.  Throws IOException if some other
-     *  data was read instead or a timeout happened.  In any case,
-     *  leaves s with its original timeout value. */
-    private void expectString(String s) throws IOException {       	
-	int oldTimeout=sock.getSoTimeout();  //can throw IOException
-	sock.setSoTimeout(Const.TIMEOUT);    //can throw IOException
-	try {	   
-	    byte[] bytes=s.getBytes();
-	    InputStream in=sock.getInputStream();	
-	    for (int i=0; i<bytes.length; i++) {
-		int got=in.read();  //Could be optimized, but doesn't matter here.
-		if (got==-1)
-		    throw new IOException();
-		if (bytes[i]!=(byte)got)
-		    throw new IOException();
-	    }
-	} finally {
-	    sock.setSoTimeout(oldTimeout);
+    private void expectString(String s) throws IOException {
+	//TODO1: shouldn't this timeout?
+	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
+	InputStream in=sock.getInputStream();
+	//TODO3: can optimize, but this isn't really important
+	for (int i=0; i<bytes.length; i++) {
+	    int got=in.read();
+	    if (got==-1)
+		throw new IOException();
+	    if (bytes[i]!=(byte)got)
+		throw new IOException();
 	}
     }
     
@@ -197,7 +190,7 @@ public class Connection implements Runnable {
 		if(m instanceof PingRequest){
 		    Connection inConnection = routeTable.get(m.getGUID()); 
 		    //connection has never been encountered before...
-		    if (inConnection.equals(null)){
+		    if (inConnection==null){
 			//reduce TTL, increment hops. If old val of TTL was 0 drop message
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
@@ -219,7 +212,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof PingReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(!outConnection.equals(null)){ //we have a place to route it
+		    if(!outConnection==null){ //we have a place to route it
 			if (outConnection.equals(this)){ //I am the destination
 			    manager.catcher.spy(m);//update hostcatcher
 			    //TODO2: So what else do we have to do here??
@@ -234,7 +227,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryRequest){
 		    Connection inConnection = routeTable.get(m.getGUID());
-		    if (inConnection.equals(null)){
+		    if (inConnection==null){
 			//reduce TTL,increment hops, If old val of TTL was 0 drop message
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
@@ -254,7 +247,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(!outConnection.equals(null)){ //we have a place to route it
+		    if(!outConnection==null){ //we have a place to route it
 			pushRouteTable.put(this, m);//first store this in pushRouteTable
 			if (outConnection.equals(this)){ //I am the destination
 			    //TODO1: This needs to be interfaced with Rob
@@ -276,7 +269,7 @@ public class Connection implements Runnable {
 		    Connection nextHost = pushRouteTable.get(m);
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
-		    if (! nextHost.equals(null)){//we have a place to route this message
+		    if (! nextHost==null){//we have a place to route this message
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
