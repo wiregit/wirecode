@@ -38,6 +38,36 @@ public class IncompleteFileManager implements Serializable {
 
     ///////////////////////////////////////////////////////////////////////////
 
+    /** 
+     * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from
+     * disk.  Then removes any entries from this for which there is no file on
+     * disk.  
+     * @return true iff any entries were purged
+     */
+    public synchronized boolean purge() {
+        boolean ret=false;
+        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+            File file=(File)iter.next();
+            if (!file.exists() || isOld(file)) {
+                ret=true;
+                file.delete();  //always safe to call; return value ignored
+                iter.remove();
+            }                
+        }
+        return ret;
+    }
+
+    /** Returns true iff file is "too old". */
+    private static final boolean isOld(File file) {
+        //Inlining this method allows some optimizations--not that they matter.
+        long lastModified=file.lastModified();
+        int days=SettingsManager.instance().getIncompletePurgeTime();
+        //Back up a couple days. 
+        //24 hour/day * 60 min/hour * 60 sec/min * 1000 msec/sec
+        long purgeTime=System.currentTimeMillis()-days*24*60*60*1000;
+        return lastModified<purgeTime;            
+    }
+
     /** Creates a new TemporaryFile object to for a normal of the given
      *  file/location pair.  The location of the file is determined by the
      *  INCOMPLETE_DIRECTORY property.  The disk is not modified.

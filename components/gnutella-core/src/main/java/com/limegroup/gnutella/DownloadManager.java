@@ -110,6 +110,13 @@ public class DownloadManager {
         } catch (ClassNotFoundException e) {
             return false;
         }
+        
+        //Remove entries that are too old or no longer existent.  This is done
+        //before starting downloads in the rare case that a downloader uses one
+        //of these incomplete files.  Then commit changes to disk.  (This last
+        //step isn't really needed.)
+        if (incompleteFileManager.purge())
+            writeSnapshot();
 
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
