@@ -164,6 +164,11 @@ public class LimeXMLDocument implements Serializable {
         //action associated with this Document. 
     }
 
+    
+    public int getNumFields() {
+        return fieldToValue.size();
+    }
+
     /**
      * Returns all the non-numeric fields in this.  These are
      * not necessarily QRP keywords.  For example, one of the
