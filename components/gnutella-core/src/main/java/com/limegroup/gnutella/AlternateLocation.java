@@ -145,9 +145,10 @@ public final class AlternateLocation
 	 *  <tt>AlternateLocation</tt>
 	 * @return a new <tt>AlternateLocation</tt>
 	 * @throws <tt>IOException</tt> if the <tt>rfd</tt> does not contain
-	 *  a valid urn
-	 * @throww <tt>NullPointerException</tt> if the <tt>rfd</tt> is 
+	 *  a valid urn or if it's a private address
+	 * @throws <tt>NullPointerException</tt> if the <tt>rfd</tt> is 
 	 *  <tt>null</tt>
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
 	 */
 	public static AlternateLocation 
 		createAlternateLocation(final RemoteFileDesc rfd) 
@@ -160,9 +161,16 @@ public final class AlternateLocation
 			throw new IOException("no SHA1 in RFD");
 		}
 		int port = rfd.getPort();
-		if((port & 0xFFFF0000) != 0) {
+		if(!CommonUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
-		}		
+		}	
+
+        InetAddress address = InetAddress.getByName(rfd.getHost());
+        if(CommonUtils.isPrivateAddress(address.getAddress())) {
+            throw new IOException("cannot accept private addresses: "+
+                                  address.getAddress());
+        }
+
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 		return new AlternateLocation(url, new Date(), urn);
