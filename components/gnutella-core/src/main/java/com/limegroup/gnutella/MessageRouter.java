@@ -1079,8 +1079,8 @@ public abstract class MessageRouter {
      * Adds the QueryRequest to the unicaster module.  Not much work done here,
      * see QueryUnicaster for more details.
      */
-    protected synchronized void unicastQueryRequest(QueryRequest query,
-                                                    ReplyHandler conn) {
+    protected void unicastQueryRequest(QueryRequest query,
+                                       ReplyHandler conn) {
         
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
@@ -1091,7 +1091,7 @@ public abstract class MessageRouter {
     /**
      * Send the query to the multicast group.
      */
-    protected synchronized void multicastQueryRequest(QueryRequest query) {
+    protected void multicastQueryRequest(QueryRequest query) {
         
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
