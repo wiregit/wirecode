@@ -281,9 +281,9 @@ public class VendorMessageSupportTest extends BaseTestCase {
 
         try {
             _tcpSock.accept();  // wait for the TCP ConnectBack...
+            fail("Did recieve TCP ConnectBack!!");
         }
-        catch (Exception broken) {
-            fail("Did not recieve TCP ConnectBack!!", broken);
+        catch (Exception good) {
         }
 
         // we be golden dawg!!!
@@ -327,13 +327,10 @@ public class VendorMessageSupportTest extends BaseTestCase {
             ByteArrayInputStream bais =
                 new ByteArrayInputStream(dp.getData());
             pr = (PingRequest) Message.read(bais);
+            fail("Did recieve UDP ConnectBack!!");
         }
-        catch (Exception broken) {
-            fail("Did not recieve UDP ConnectBack!!", broken);
+        catch (Exception good) {
         }
-
-        if (!Arrays.equals(pr.getGUID(), guid.bytes()))
-            fail("Did not get correct UDP guid back!!");
 
         // we be golden dawg!!!
     }    
