@@ -89,8 +89,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/** prefixes and a suffix for the descriptions of our TCP and UDP mappings */
 	private static final String TCP_PREFIX = "LimeTCP";
 	private static final String UDP_PREFIX = "LimeUDP";
-	private static final String GUID_SUFFIX = 
-		ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+	private String _guidSuffix;
 	
 	private static final UPnPManager INSTANCE = new UPnPManager();
 
@@ -247,7 +246,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				localAddress,
 				localPort,
 				"UDP",
-				UDP_PREFIX + GUID_SUFFIX);
+				UDP_PREFIX + getGUIDSuffix());
 		
 		// add udp first in case it gets overwritten.
 		// if we can't add, update or find an appropriate port
@@ -267,7 +266,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 					localAddress,
 					localPort,
 					"UDP",
-					UDP_PREFIX + GUID_SUFFIX);
+					UDP_PREFIX + getGUIDSuffix());
 		}
 		
 		if (tries < 0) {
@@ -284,7 +283,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				localAddress,
 				localPort,
 				"TCP",
-				TCP_PREFIX + GUID_SUFFIX);
+				TCP_PREFIX + getGUIDSuffix());
 		if (!addMapping(tcp)) {
 			LOG.debug(" couldn't map tcp to whatever udp was mapped. cleaning up...");
 			port = 0;
@@ -300,7 +299,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		
 		// we're good - start a thread to clean up any potentially stale mappings
 		Thread staleCleaner = new ManagedThread(new StaleCleaner());
-		staleCleaner.setDaemon(false);
+		staleCleaner.setDaemon(true);
 		staleCleaner.setName("Stale Mapping Cleaner");
 		staleCleaner.start();
 		
@@ -406,6 +405,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		} catch (IllegalStateException ignored){}
 		
 		cleaner.setName("shutdown mapping cleaner");
+		cleaner.setDaemon(true);
 		cleaner.start();
 	}
 	
@@ -413,6 +413,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		stop();
 	}
 
+	private synchronized String getGUIDSuffix() {
+	    if (_guidSuffix == null)
+			_guidSuffix = ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+	    return _guidSuffix;
+	}
 	/**
 	 * stub 
 	 */
@@ -562,8 +567,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				    continue;
 				
 				// does it have our description?
-				if (current._description.equals(TCP_PREFIX+GUID_SUFFIX) ||
-						current._description.equals(UDP_PREFIX+GUID_SUFFIX)) {
+				if (current._description.equals(TCP_PREFIX+getGUIDSuffix()) ||
+						current._description.equals(UDP_PREFIX+getGUIDSuffix())) {
 					
 					// is it not the same as the mappings we created this session?
 					synchronized(this) {

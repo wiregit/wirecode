@@ -336,6 +336,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     public static void setupSettings() {
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
+        ConnectionSettings.DISABLE_UPNP.setValue(true);
     }
     
     /**
