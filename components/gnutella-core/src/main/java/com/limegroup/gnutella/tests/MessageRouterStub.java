@@ -36,4 +36,8 @@ public class MessageRouterStub extends MessageRouter {
     {
     }    
 
+    public GroupPingRequest createGroupPingRequest(String group) {
+        return new GroupPingRequest((byte)5, 6346, new byte[0], 0l, 0l, "");
+    }
+     
 }
