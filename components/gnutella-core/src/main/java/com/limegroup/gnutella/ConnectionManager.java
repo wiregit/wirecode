@@ -70,7 +70,7 @@ public class ConnectionManager {
 
     /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
-    //public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 
+    //public static final int MIN_CONNECTIONS_FOR_ULTRAPEER = 
 	//MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
 
 	/**
@@ -111,7 +111,7 @@ public class ConnectionManager {
 
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_ULTRAPEER headers. */
-    private static final int MAX_SUPERNODE_ENDPOINTS=10;
+    private static final int MAX_ULTRAPEER_ENDPOINTS=10;
 	
 	/** The maximum number of leaves to allow -- also the preferred number.*/		
 	private static final int MAX_LEAVES = 
@@ -281,7 +281,7 @@ public class ConnectionManager {
              //Internal error!
              ErrorService.error(e);
          } finally {
-            //if we were leaf to a supernode, reconnect to network 
+            //if we were leaf to a ultrapeer, reconnect to network 
             if (connection.isClientSupernodeConnection())
                 lostShieldedClientSupernodeConnection();
          }
@@ -344,7 +344,7 @@ public class ConnectionManager {
     }
     
     /**
-     * Ensures that if a node is acting as supernode, it has atleast 
+     * Ensures that if a node is acting as ultrapeer, it has atleast 
      * some minimum number of connections opened
      */ 
     public synchronized void ensureConnectionsForSupernode(){
@@ -367,8 +367,8 @@ public class ConnectionManager {
     }
     
     /**
-     * Returns true if this is a leaf node with a connection to a supernode.  It
-     * is not required that the supernode support query routing, though that is
+     * Returns true if this is a leaf node with a connection to a ultrapeer.  It
+     * is not required that the ultrapeer support query routing, though that is
      * generally the case.  
      */
     public boolean isLeaf() {
@@ -523,7 +523,7 @@ public class ConnectionManager {
 
     /**
      * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, supernode, 
+     * based upon the type of connection (e.g. client, ultrapeer, 
      * temporary etc). 
      * @param c The connection we received, for which to 
      * test if we have incoming slot.
@@ -536,7 +536,7 @@ public class ConnectionManager {
 
     /**
      * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, supernode, 
+     * based upon the type of connection (e.g. client, ultrapeer, 
      * temporary etc). 
      * @param c The connection we received, for which to 
      * test if we have incoming slot.
@@ -549,7 +549,7 @@ public class ConnectionManager {
 
     /**
      * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, supernode, 
+     * based upon the type of connection (e.g. client, ultrapeer, 
      * temporary etc). 
      * @param c The connection we received, for which to 
      * test if we have incoming slot.
@@ -728,11 +728,11 @@ public class ConnectionManager {
     }
 
     /**
-     * Tells if this node thinks that more supernodes are needed on the 
-     * network. This method should be invoked on a supernode only, as
-     * only supernode may have required information to make informed
+     * Tells if this node thinks that more ultrapeers are needed on the 
+     * network. This method should be invoked on a ultrapeer only, as
+     * only ultrapeer may have required information to make informed
      * decision.
-     * @return true, if more supernodes needed, false otherwise
+     * @return true, if more ultrapeers needed, false otherwise
      */
     public boolean supernodeNeeded(){
         //if more than 70% slots are full, return true 
@@ -819,7 +819,7 @@ public class ConnectionManager {
     public Set getSupernodeEndpoints(){
         Set retSet = new HashSet();
         //get an iterator over _initialized connections, and iterate to
-        //fill the retSet with supernode endpoints
+        //fill the retSet with ultrapeer endpoints
         for(Iterator iterator = _initializedConnections.iterator();
             iterator.hasNext();)
         {
@@ -831,7 +831,7 @@ public class ConnectionManager {
         }
         //add the best few endpoints from the hostcatcher.
         Iterator iterator =
-			RouterService.getHostCatcher().getUltrapeerHosts(MAX_SUPERNODE_ENDPOINTS);
+			RouterService.getHostCatcher().getUltrapeerHosts(MAX_ULTRAPEER_ENDPOINTS);
         while (iterator.hasNext()) {
             Endpoint e=(Endpoint)iterator.next();
             retSet.add(e);
@@ -936,7 +936,7 @@ public class ConnectionManager {
     public synchronized void disconnect() {
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
-        //   to ignore the fact that we have a client-supernode connection.
+        //   to ignore the fact that we have a client-ultrapeer connection.
         setKeepAlive(0);
         //2. Remove all connections.
         for (Iterator iter=getConnections().iterator();
@@ -1186,24 +1186,22 @@ public class ConnectionManager {
         if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(mc);
             //check if we are a client node, and now opened a connection 
-            //to supernode. In this case, we will drop all other connections
+            //to ultrapeer. In this case, we will drop all other connections
             //and just keep this one
-            //check for shieldedclient-supernode connection
+            //check for shieldedclient-ultrapeer connection
             if(mc.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection(mc);
+                gotShieldedClientSupernodeConnection();
             }
         }
     }
 
     /** 
-     * Indicates that we are a client node, and have received supernode
+     * Indicates that we are a client node, and have received ultrapeer
      * connection.  This may choose to adjust its keep-alive. 
-     * @param supernodeConnection the newly initialized leaf-ultrapeer
+     * @param ultrapeerConnection the newly initialized leaf-ultrapeer
      *  connection
      */
-    private synchronized void gotShieldedClientSupernodeConnection(
-        ManagedConnection supernodeConnection)
-    {
+    private synchronized void gotShieldedClientSupernodeConnection() {
         //How many leaf connections should we have?  There's a tension between
         //doing what LimeWire thinks is best and what the user wants.  Ideally
         //we would set the KEEP_ALIVE iff the user hasn't recently manually
@@ -1212,10 +1210,10 @@ public class ConnectionManager {
         //connection.  Typically this will happen just once, when we enter leaf
         //mode.  Note that we actually call ultrapeerConnections() instead of a
         //"clientSupernodeConnections()" method; if this method is called and
-        //ultrapeerConnections()==1, there is exactly one client-supernode
+        //ultrapeerConnections()==1, there is exactly one client-ultrapeer
         //connection.
-        boolean firstShieldedConnection=(ultrapeerConnections()==1) 
-                                       && _keepAlive>0;
+        boolean firstShieldedConnection = (ultrapeerConnections()==1) 
+            && _keepAlive>0;
         if (firstShieldedConnection)
             setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
     }
@@ -1272,7 +1270,7 @@ public class ConnectionManager {
             }
         }
         
-        //We used to check X_NEED_SUPERNODE here, but that is no longer
+        //We used to check X_NEED_ULTRAPEER here, but that is no longer
         //necessary.
     }
    
@@ -1287,8 +1285,8 @@ public class ConnectionManager {
     public boolean allowLeafDemotion() {
 		_leafTries++;
 
-        //if is a supernode, and have other connections (client or ultrapeer),
-        //or the supernode status is forced, dont change mode
+        //if is a ultrapeer, and have other connections (client or ultrapeer),
+        //or the ultrapeer status is forced, dont change mode
         int connections = getNumInitializedConnections()
 			+ getNumInitializedClientConnections();
         
@@ -1328,7 +1326,7 @@ public class ConnectionManager {
 								 ManagedConnection connection) {
         //get the ultrapeers, and add those to the host cache
         updateHostCache(headers.getProperty(
-                ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
+                ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS),
                 connection, true);
         //add the addresses received
         updateHostCache(headers.getProperty(
@@ -1444,11 +1442,11 @@ public class ConnectionManager {
         if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
-            //to supernode. In this case, we will drop all other connections
+            //to ultrapeer. In this case, we will drop all other connections
             //and just keep this one
-            //check for shieldedclient-supernode connection
+            //check for shieldedclient-ultrapeer connection
             if(c.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection(c);
+                gotShieldedClientSupernodeConnection();
             }
         }
     }
