@@ -30,7 +30,7 @@ public final class NIOMessageWriter implements MessageWriter {
     /**
 	 * Variable for the current message being written.
 	 */
-	//private Message _message;
+	private Message _curMessage;
     
     /**
      * <tt>ByteBuffer</tt> for the current message being sent.
@@ -120,6 +120,7 @@ public final class NIOMessageWriter implements MessageWriter {
             Assert.that(false, "IO problem from ByteArrayOutputStream");
             return false;
         }
+        _curMessage = msg;
         _message = ByteBuffer.allocate(msg.getTotalLength());
         _message.put(baos.toByteArray());
         _message.flip();        //prepare for writing        
@@ -152,6 +153,8 @@ public final class NIOMessageWriter implements MessageWriter {
         } else {
     	    CHANNEL.write(_message);
         	if(!_message.hasRemaining()) {
+                CONNECTION.stats().addBytesSent(_curMessage.getTotalLength());
+                CONNECTION.stats().addSent();
         		_message = null;
                 return QUEUE.size() == 0;
         	} else {
