@@ -234,7 +234,6 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
-
 			System.out.println("QueryHandler::sendQuery::ttl: "+ttl+" "+this+
 							   " hostToQuery: "+hostsToQueryPerConnection); 
 			QueryRequest query = createQuery(ttl);
@@ -250,7 +249,7 @@ public final class QueryHandler {
 			// just sent
 			_nextQueryTime = System.currentTimeMillis()+1500;
 
-			adjustTheoreticalHostsQueried(ttl);
+			adjustTheoreticalHostsQueried(mc, ttl);
 
 			break;
 		}	
@@ -274,7 +273,7 @@ public final class QueryHandler {
 			// add the reply handler to the list of queried hosts
 			QUERIED_REPLY_HANDLERS.add(mc);
 
-			adjustTheoreticalHostsQueried(ttl);
+			adjustTheoreticalHostsQueried(mc, ttl);
 		}
 		_nextQueryTime = System.currentTimeMillis() + 6000;
 	}
@@ -302,8 +301,9 @@ public final class QueryHandler {
 	 *
 	 * @param ttl the TTL of the query to add
 	 */
-	private void adjustTheoreticalHostsQueried(int ttl) {
-		final int intraUltrapeerConnections = 10;
+	private void adjustTheoreticalHostsQueried(ManagedConnection mc, int ttl) {
+		final int intraUltrapeerConnections = 
+			mc.getNumIntraUltrapeerConnections();
 		double newHosts = 0;
 		for(;ttl>0; ttl--) {
 			newHosts += Math.pow(intraUltrapeerConnections, ttl-1);
