@@ -282,7 +282,7 @@ public class DownloadTest extends BaseTestCase {
         long start1=System.currentTimeMillis();
 
         HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile);
-        VerifyingFile vf = new VerifyingFile(true, TestFile.length());
+        VerifyingFile vf = new VerifyingFile(TestFile.length());
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0,TestFile.length(),true);
@@ -297,7 +297,7 @@ public class DownloadTest extends BaseTestCase {
         long start2=System.currentTimeMillis();
 
         downloader=new HTTPDownloader(rfd, savedFile);
-        vf = new VerifyingFile(false, TestFile.length());
+        vf = new VerifyingFile(TestFile.length());
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0, TestFile.length(),true);
@@ -1954,7 +1954,7 @@ public class DownloadTest extends BaseTestCase {
         File incFile = ifm.getFile(rfd1);
         incFile.createNewFile();
         // add the entry, so it's added to FileManager.
-        ifm.addEntry(incFile, new VerifyingFile(true, TestFile.length()));
+        ifm.addEntry(incFile, new VerifyingFile(TestFile.length()));
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =

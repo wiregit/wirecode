@@ -16,7 +16,7 @@ public class IncompleteFileDescTest extends BaseTestCase {
     private String fileName = "ifd.txt";
     private URN urn;
     private Set urns;
-    private VerifyingFile vf  = new VerifyingFile(false, 0);
+    private VerifyingFile vf  = new VerifyingFile(0);
 
     public IncompleteFileDescTest(String name) {
         super(name);

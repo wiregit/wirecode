@@ -161,7 +161,7 @@ public class RequeryDownloadTest
        }
 
        //Record information in IncompleteFileManager.
-       VerifyingFile vf=new VerifyingFile(false, TestFile.length());
+       VerifyingFile vf=new VerifyingFile(TestFile.length());
        vf.addInterval(new Interval(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;

@@ -94,7 +94,7 @@ public class UploadTest extends BaseTestCase {
     private static final int callbackPort = 6671;
     private UploadManager upMan;
     /** The verifying file for the shared incomplete file */
-    private static final VerifyingFile vf = new VerifyingFile(false, 252450);
+    private static final VerifyingFile vf = new VerifyingFile(252450);
     /** The filedesc of the shared file. */
     private FileDesc FD;    
     /** The root32 of the shared file. */

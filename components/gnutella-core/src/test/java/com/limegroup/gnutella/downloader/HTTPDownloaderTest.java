@@ -29,6 +29,8 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
                                             0, null, -1);
         HTTPDownloader dl = new HTTPDownloader(rfd, new File("sam"));
         
+        PrivilegedAccessor.setValue(dl, "_amountToRead", new Integer(rfd.getSize()));
+        
         
         assertEquals(new Interval(1, 9), 
                     parseContentRange(dl, "Content-range: bytes 1-9/10"));
