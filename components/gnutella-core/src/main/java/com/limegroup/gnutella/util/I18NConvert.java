@@ -27,30 +27,30 @@ public class I18NConvert {
      * constructor : load in the excluded codepoints and the case map
      */
     private I18NConvert() {
-	java.util.BitSet bs = null;
-	Map hm = null;
-	try {
-	    ClassLoader cl = getClass().getClassLoader();
-	    
-	    //read in the explusion bitset
-	    ObjectInputStream ois = 
+    	java.util.BitSet bs = null;
+    	Map hm = null;
+    	try {
+    	    ClassLoader cl = getClass().getClassLoader();
+    	    
+    	    //read in the explusion bitset
+    	    ObjectInputStream ois = 
                 new ObjectInputStream(cl.getResource("excluded.dat").openStream());
-	    bs = (java.util.BitSet)ois.readObject();
-            
-	    //read in the case map
+    	    bs = (java.util.BitSet)ois.readObject();
+                
+    	    //read in the case map
             ois = new ObjectInputStream(cl.getResource("caseMap.dat").openStream());
             hm = (HashMap)ois.readObject();
-
-	}
-	catch(IOException ioe) {
-	    ErrorService.error(ioe);
-	}
-	catch(ClassNotFoundException ce) {
-	    ErrorService.error(ce);
-	}
-
-	_excluded = bs;
-	_cMap = hm;
+    
+    	}
+    	catch(IOException ioe) {
+    	    ErrorService.error(ioe);
+    	}
+    	catch(ClassNotFoundException ce) {
+    	    ErrorService.error(ce);
+    	}
+    
+    	_excluded = bs;
+    	_cMap = hm;
     }
 
     /** accesor */
@@ -95,28 +95,28 @@ public class I18NConvert {
      * @return converted String
      */
     private String convert(String s) {
-	//decompose to NFKD
-	String nfkd = Normalizer.decompose(s, true);
-	StringBuffer buf = new StringBuffer();
-	int len = nfkd.length();
-	String lower;
-	char c;
-
-	//loop through the string and check for excluded chars
-	//and lower case if necessary
-	for(int i = 0; i < len; i++) {
-	    c = nfkd.charAt(i);
-	    if(!_excluded.get(c)) {
-		lower = (String)_cMap.get(String.valueOf(c));
-		if(lower != null)
-		    buf.append(lower);
-		else
-		    buf.append(c);
-	    }
-	}
-	
-	//compose to nfc and split
-	return blockSplit(Normalizer.compose(buf.toString(), false));
+    	//decompose to NFKD
+    	String nfkd = Normalizer.decompose(s, true);
+    	StringBuffer buf = new StringBuffer();
+    	int len = nfkd.length();
+    	String lower;
+    	char c;
+    
+    	//loop through the string and check for excluded chars
+    	//and lower case if necessary
+    	for(int i = 0; i < len; i++) {
+    	    c = nfkd.charAt(i);
+    	    if(!_excluded.get(c)) {
+    		lower = (String)_cMap.get(String.valueOf(c));
+    		if(lower != null)
+    		    buf.append(lower);
+    		else
+    		    buf.append(c);
+    	    }
+    	}
+    	
+    	//compose to nfc and split
+    	return blockSplit(Normalizer.compose(buf.toString(), false));
     }
 
 
@@ -165,12 +165,12 @@ public class I18NConvert {
 	    top = blockStarts.length;
 	    current = top/2;
 	    while (top - bottom > 1) {
-		if (c >= blockStarts[current]) {
-		    bottom = current;
-		} else {
-		    top = current;
-		}
-		current = (top + bottom) / 2;
+    		if (c >= blockStarts[current]) {
+    		    bottom = current;
+    		} else {
+    		    top = current;
+    		}
+    		current = (top + bottom) / 2;
 	    }
 	    return current;
 	}
