@@ -751,7 +751,7 @@ public abstract class FileManager {
             KeyValue info = (KeyValue)i.next();
             File[] shareables = (File[])info.getValue();
             for(int j=0; j<shareables.length && !loadThreadInterrupted();j++) {
-                addFile(shareables[j]);
+                addFile(shareables[j], -1);
                 synchronized(this) { _numPendingFiles--; }
             }
             // let the gc clean up the array of shareables.
@@ -771,6 +771,21 @@ public abstract class FileManager {
      *  added, otherwise <tt>null</tt>
      */
 	public FileDesc addFileIfShared(File file) {
+        return addFileIfShared(file, -1);
+    }
+
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists in a shared 
+     *  directory and has a shared extension.  Returns true iff the file
+     *  was actually added.  <b>WARNING: this is a potential security 
+     *  hazard.</b> 
+     *
+     * @param creationTime -1 if not known, will use file.lastModified.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
+     */
+	public FileDesc addFileIfShared(File file, long creationTime) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
@@ -792,7 +807,7 @@ public abstract class FileManager {
         }
         FileDesc fd;
         if (directoryShared) 
-            fd = addFile(f);            
+            fd = addFile(f, creationTime);            
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
@@ -810,7 +825,23 @@ public abstract class FileManager {
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-	public abstract FileDesc addFileIfShared(File file, List metadata);
+	public FileDesc addFileIfShared(File file, List metadata) {
+        return addFileIfShared(file, metadata, -1);
+    }
+
+    /**
+     * @modifies this
+     * @effects calls addFileIfShared(file), then optionally stores any metadata
+     *  in the given XML documents.  metadata may be null if there is no data.
+     *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
+     *  security hazard.</b> 
+     *
+     * @param creationTime -1 if not known, will use file.lastModified.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
+     */
+	public abstract FileDesc addFileIfShared(File file, List metadata,
+                                             long creationTime);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -820,10 +851,11 @@ public abstract class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b>
      *
+     * @param creationTime -1 if not known, will use file.lastModified.
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-    private FileDesc addFile(File file) {
+    private FileDesc addFile(File file, long creationTime) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
@@ -891,7 +923,9 @@ public abstract class FileManager {
             Long cTime = CreationTimeCache.instance().getCreationTime(mainURN);
             if (cTime == null)
                 CreationTimeCache.instance().addTime(mainURN, 
-                                                     file.lastModified());
+                                                     (creationTime > 0 ?
+                                                      creationTime :
+                                                      file.lastModified()));
 
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
@@ -965,11 +999,6 @@ public abstract class FileManager {
         _needRebuild = true;
         File parent = FileUtils.getParentFile(incompleteFile);
         RouterService.getCallback().addSharedFile(ifd, parent);
-        // TODO: we should NOT be accessing lastModified() here - we should use
-        // the creation time we get off the wire during the download.  will
-        // update this when that infrastructure is in place.
-        CreationTimeCache.instance().addTime(ifd.getSHA1Urn(),
-                                             incompleteFile.lastModified());
     }
 
     /**
@@ -1004,10 +1033,7 @@ public abstract class FileManager {
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        FileDesc fd = addFileIfShared(f);
-        if (fd != null) // replace the mod time that was input....
-            CreationTimeCache.instance().addTime(fd.getSHA1Urn(), 
-                                                 cTime.longValue());
+        FileDesc fd = addFileIfShared(f, cTime.longValue());
         return fd;
     }
 
@@ -1134,7 +1160,8 @@ public abstract class FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());            
         fd = removeFileIfShared(oldName);
         Assert.that( fd != null, "invariant broken.");
-        fd = addFileIfShared(newName, xmlDocs);
+        // hash didn't change so no need to re-input creation time
+        fd = addFileIfShared(newName, xmlDocs, -1);
         return (fd != null);
     }
 
