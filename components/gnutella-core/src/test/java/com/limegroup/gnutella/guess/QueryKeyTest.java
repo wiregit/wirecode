@@ -3,7 +3,9 @@ package com.limegroup.gnutella.guess;
 import junit.framework.*;
 import java.util.*;
 import java.net.*;
+import java.io.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.*;
 
 public class QueryKeyTest extends TestCase {
     public QueryKeyTest(String name) {
@@ -27,7 +29,9 @@ public class QueryKeyTest extends TestCase {
         catch (IllegalArgumentException ignored) {}
         
         byte[] qk = new byte[8];
-        (new Random()).nextBytes(qk);
+        Random rand = new Random();
+        while (Arrays.binarySearch(qk, (byte) 0x1c) < 0)
+            rand.nextBytes(qk);
         QueryKey key1 = null, key2 = null, key3 = null;
         try {
             key1 = QueryKey.getQueryKey(qk, true);
@@ -40,7 +44,8 @@ public class QueryKeyTest extends TestCase {
         assertTrue(key1.equals(key2));
         assertTrue(!key1.equals(key3));
         assertTrue(key1.hashCode() == key2.hashCode());
-        assertTrue(key1.hashCode() != key3.hashCode());
+        // don't test key1.hashCode() vs. key3.hashCode() - they may very easily
+        // conflict
     }
 
     public void testSimpleGeneration() {
@@ -149,5 +154,36 @@ public class QueryKeyTest extends TestCase {
         }
     }
 
+
+    // Makes sure QueryKeys have no problem going in and out of GGEP blocks
+    public void testQueryKeysAndGGEP() {
+        Random rand = new Random();
+        for (int i = 4; i < 17; i++) {
+            byte[] qk = new byte[i];
+            // make sure the bytes have offensive characters....
+            while ((Arrays.binarySearch(qk, (byte) 0x1c) < 0) ||
+                   (Arrays.binarySearch(qk, (byte) 0x00) < 0))
+                rand.nextBytes(qk);
+            try {
+                QueryKey queryKey = QueryKey.getQueryKey(qk, true);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                queryKey.write(baos);
+                GGEP in = new GGEP(false);
+                in.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                       baos.toByteArray());
+                baos = new ByteArrayOutputStream();
+                in.write(baos);
+                GGEP out = new GGEP(baos.toByteArray(), 0, null);
+                QueryKey queryKey2 = 
+                QueryKey.getQueryKey(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT), false);
+                assertTrue("qks not equal, i = " + i,
+                           queryKey.equals(queryKey2));
+            }
+            catch (Exception damn) {
+                damn.printStackTrace();
+                assertTrue(false);
+            }
+        }
+    }
 
 }
