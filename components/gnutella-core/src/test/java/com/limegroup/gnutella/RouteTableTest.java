@@ -218,6 +218,10 @@ public final class RouteTableTest extends BaseTestCase {
         public boolean isHighDegreeConnection() {
             return false;
         }
+
+        public boolean isUltrapeerQueryRoutingConnection() {
+            return false;
+        }
     }
 
 }
