@@ -35,4 +35,11 @@ public interface AlternateLocationCollector {
 	 *
 	 */
 	public int numberOfAlternateLocations();
+
+	/**
+	 * Accessor for the SHA1 <tt>URN</tt> instance for this collection.
+	 *
+	 * @return the SHA1 <tt>URN</tt> for this collection
+	 */
+	public URN getSHA1Urn();
 }
