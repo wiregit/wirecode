@@ -3,8 +3,10 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.SettingsManager;
 
 /**
- * The LimeWire.props settings class.  All settings that want to save
- * to LimeWire.props should get the instance of this class.
+ * Handler for all 'LimeWire.props' settings.  Classes such
+ * as SearchSettings, ConnectionSettings, etc... should retrieve
+ * the factory via LimeProps.instance().getFactory() and add
+ * settings to that factory.
  */
 public final class LimeProps extends AbstractSettings {
         
@@ -12,13 +14,17 @@ public final class LimeProps extends AbstractSettings {
     
     private LimeProps() {
         super("limewire.props", "LimeWire properties file");
+        SettingsHandler.addSettings(this);
     }
     
+    /**
+     * Returns the only instance of this class.
+     */
     public static LimeProps instance() { return INSTANCE; }
     
     /**
-     * We must revert settings from the factory & legacy ones
-     * from SettingsManager.
+     * Overriden to revert to SettingsManager defaults as well
+     * as the factory defaults.
      */
     public void revertToDefault() {
         super.revertToDefault();
