@@ -132,7 +132,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(4);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
@@ -156,6 +156,17 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     
     public void setUp() throws Exception {
         setSettings();
+        
+        assertTrue("should be open", ULTRAPEER_1.isOpen());
+        assertTrue("should be open", ULTRAPEER_2.isOpen());
+        assertTrue("should be open", LEAF.isOpen());
+
+        assertTrue("should be up -> up",
+            ULTRAPEER_1.isSupernodeSupernodeConnection());
+        assertTrue("should be up -> up",
+            ULTRAPEER_2.isSupernodeSupernodeConnection());
+        assertTrue("should be client -> up",
+            LEAF.isClientSupernodeConnection());
     }
 
 
@@ -229,127 +240,6 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		drainAll();
 		sleep();
     }
-
-    /** 
-	 * Tries to receive any outstanding messages on c 
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                ret=true;
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
-    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
-     *  QRP stuff) were recieved.
-     */
-    private static boolean noUnexpectedMessages(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-            }
-            catch (InterruptedIOException ie) {
-                return true;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryRequest getFirstQueryRequest(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryRequest) 
-                    return (QueryRequest)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrReply received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryReply getFirstQueryReply(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryReply) 
-                    return (QueryReply)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-	/**
-	 * Asserts that the given message is a query, printing out the 
-	 * message and failing if it's not.
-	 *
-	 * @param m the <tt>Message</tt> to check
-	 */
-	private static void assertQuery(Message m) {
-		if(m instanceof QueryRequest) return;
-
-		assertInstanceof("message not a QueryRequest: " + m,
-		    QueryRequest.class, m);
-	}
-
 
     // BEGIN TESTS
     // ------------------------------------------------------
