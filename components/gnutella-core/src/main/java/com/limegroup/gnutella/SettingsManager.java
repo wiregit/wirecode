@@ -185,7 +185,7 @@ public class SettingsManager {
     private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
         = false;
     private static final String DEFAULT_COOKIES_FILE 
-        = "lib" + File.separator + "STDataMap.dat";
+        = "lib" + File.separator + "Cookies.dat";
     
 
 	/**
