@@ -162,7 +162,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		return false;
 	}
 	
-	public void updateHorizonStats(PingReply pingReply) {}
+	public void updateHorizonStats(PingReply pingReply) {
+        // TODO:: we should probably actually update the stats with this pong
+    }
 	
 	public boolean isOutgoing() {
 		return false;
