@@ -63,7 +63,6 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
 		SettingsManager.instance().setConnectOnStartup(true);
-		SettingsManager.instance().setQuickConnectHosts(new String[0]);
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
