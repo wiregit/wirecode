@@ -489,6 +489,11 @@ public class RouterService
         return verifier.matchesType(guid, response);
     }
 
+    /** Same as ResponseVerifier.isMandragoreWorm. */
+    public boolean isMandragoreWorm(byte[] guid, Response response) {
+        return verifier.isMandragoreWorm(guid, response);
+    }
+
     /**
      * Searches the given host for all its files.  Results are given
      * to the GUI via handleQuery.  Returns null if the host couldn't
