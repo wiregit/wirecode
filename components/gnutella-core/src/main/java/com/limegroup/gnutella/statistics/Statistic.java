@@ -37,6 +37,12 @@ public interface Statistic {
 	 *  time periods
 	 */
 	double getMax();
+	
+	/**
+	 * Accessor for the number added to this statistic during the last call
+	 * to storeCurrentStat.
+	 */
+	double getLast();
 
 	/**
 	 * Increments this statistic by one.

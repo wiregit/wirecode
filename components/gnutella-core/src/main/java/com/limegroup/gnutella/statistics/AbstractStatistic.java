@@ -76,6 +76,7 @@ public abstract class AbstractStatistic implements Statistic {
 
 	// inherit doc comment
 	public double getAverage() {
+	    if(_totalStatsRecorded == 0) return 0;
 		return _total/_totalStatsRecorded;
 	}
 
@@ -94,6 +95,24 @@ public abstract class AbstractStatistic implements Statistic {
 	public void addData(int data) {		
 		_current += data;
 		_total += data;
+	}
+	
+	// inherit doc comment
+	public double getLast() {
+	    synchronized(BUFFER_LOCK) {
+	        initializeBuffer();
+	        if(_buffer.isEmpty())
+	            return 0;
+	        try {
+	            return _buffer.last();
+            } catch (NoSuchElementException nsee) {
+                // this will never happen, because we
+                // check for isEmpty above.  this is
+                // useful to prevent throwing of an exception
+                // for every empty stat.
+                return 0;
+            }
+	    }
 	}
 		
 	// inherit doc comment

@@ -42,4 +42,14 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	public double getTotal() {
 		return (double)(_total/BYTES_PER_KILOBYTE);
 	}
+	
+	/**
+	 * Overriden to report the total for this statistic in kilboytes.
+	 *
+	 * @return the amount added to this statstic during the last
+	 * call to storeCurrentStat in kilobytes
+	 */
+	public double getLast() {
+	    return (double)(super.getLast()/BYTES_PER_KILOBYTE);
+	}
 }

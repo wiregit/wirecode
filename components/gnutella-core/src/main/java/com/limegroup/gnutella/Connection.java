@@ -836,8 +836,13 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
+            int pCompressed = 0, pUncompressed = 0;
+            if(isReadDeflated()) {
+                pCompressed = _inflater.getTotalIn();
+                pUncompressed = _inflater.getTotalOut();
+            }
             m = Message.read(_in, HEADER_BUF, _softMax);
-            updateReadStatistics(m);
+            updateReadStatistics(m, pUncompressed, pCompressed);
         }
         return m;
     }
@@ -863,8 +868,13 @@ public class Connection {
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {            
+            int pCompressed = 0, pUncompressed = 0;
+            if(isReadDeflated()) {
+                pCompressed = _inflater.getTotalIn();
+                pUncompressed = _inflater.getTotalOut();
+            }
             Message m = Message.read(_in, HEADER_BUF, _softMax);
-            updateReadStatistics(m);
+            updateReadStatistics(m, pUncompressed, pCompressed);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
@@ -878,8 +888,11 @@ public class Connection {
      * Updates statistics after a message is read.
      * If m is null and the read stream is not deflated,
      * this method has no effect.
+     * @param m the possibly null message to add to the read bytes
+     * @param pUn the prior uncompressed data sent, for adding to statistics
+     * @param pComp the prior compressed data sent, for adding to statistics
      */
-    private void updateReadStatistics(Message m) {
+    private void updateReadStatistics(Message m, int pUn, int pComp) {
         // _bytesReceived must be set differently
         // when compressed because the inflater will
         // read more input than a single message,
@@ -888,6 +901,12 @@ public class Connection {
         if( isReadDeflated() ) {
             _compressedBytesReceived = _inflater.getTotalIn();
             _bytesReceived = _inflater.getTotalOut();
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalOut() - pUn));
+                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalIn() - pComp));
+            }            
         } else if(m != null) {
             _bytesReceived += m.getTotalLength();
         }
@@ -905,27 +924,54 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        if ( isWriteDeflated() ) {
+            priorUncompressed = _deflater.getTotalIn();
+            priorCompressed = _deflater.getTotalOut();
+        }
+        
         m.write(_out);
-                
-        _bytesSent += m.getTotalLength();
-        // we attempt to set _compressedBytesSent here, but in all
-        // likelyhood, it will not be updated.  the true value is
-        // set after the data is flushed.
-        if(!_closed && isWriteDeflated())
-            _compressedBytesSent = _deflater.getTotalOut();        
+        updateWriteStatistics(m, priorUncompressed, priorCompressed);
     }
 
     /**
      * Flushes any buffered messages sent through the send method.
      */
     public void flush() throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        if ( isWriteDeflated() ) {
+            priorUncompressed = _deflater.getTotalIn();
+            priorCompressed = _deflater.getTotalOut();
+        }        
         _out.flush();
-        
-        // we must set the compressedBytesSent here because flush
-        // forces the deflater to deflate the output.
-        if(!_closed && isWriteDeflated())
-            _compressedBytesSent = _deflater.getTotalOut();
+        // we must update the write statistics again,
+        // because flushing forces the deflater to deflate.
+        updateWriteStatistics(null, priorUncompressed, priorCompressed);
     }
+    
+    /**
+     * Updates the write statistics.
+     * @param m the possibly null message to add to the bytes sent
+     * @param pUn the prior uncompressed traffic, used for adding to stats
+     * @param pComp the prior compressed traffic, used for adding to stats
+     */
+    private void updateWriteStatistics(Message m, long pUn, long pComp) {
+        if( m != null )
+            _bytesSent += m.getTotalLength();
+        if(!_closed && isWriteDeflated()) {
+            _compressedBytesSent = _deflater.getTotalOut();
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalIn() - pUn));
+                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalOut() - pComp));
+            }
+        }
+    }               
     
     /**
      * Returns the number of bytes sent on this connection.
