@@ -740,22 +740,22 @@ public abstract class FileManager {
      *  was actually added.  <b>WARNING: this is a potential security 
      *  hazard.</b> 
      *
-     * @return -1 if the file was not added.  Otherwise the index of the
-     * newly added file.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-	public int addFileIfShared(File file) {
+	public FileDesc addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
-            f=FileUtils.getCanonicalFile(file);
+            f = FileUtils.getCanonicalFile(file);
             if (!f.exists()) 
-                return -1;
+                return null;
         } catch (IOException e) {
-            return -1;
+            return null;
 		}
         File dir = FileUtils.getParentFile(file);
         if (dir==null) 
-            return -1;
+            return null;
 
         //TODO: if overwriting an existing, take special care.
         boolean directoryShared;
@@ -763,13 +763,13 @@ public abstract class FileManager {
             directoryShared=_sharedDirectories.containsKey(dir);
             _numPendingFiles++;
         }
-        int retval;
+        FileDesc fd;
         if (directoryShared)
-            retval = addFile(file);
+            fd = addFile(file);
         else 
-            retval = -1;
+            fd = null;
         synchronized(this) { _numPendingFiles--; }
-        return retval;
+        return fd;
 	}
 
     /**
@@ -779,10 +779,10 @@ public abstract class FileManager {
      *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
      *  security hazard.</b> 
      *
-     * @return -1 if the file was not added.  Otherwise the index of the newly
-     * added file.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-	public abstract int addFileIfShared(File file, List metadata);
+	public abstract FileDesc addFileIfShared(File file, List metadata);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -792,14 +792,14 @@ public abstract class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b>
      *
-     * @return -1 if the file was not added.  Otherwise the index of the newly
-     * added file.
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-    private int addFile(File file) {
+    private FileDesc addFile(File file) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
-            return -1;
+            return null;
         
         //Calculate hash OUTSIDE of lock.
         
@@ -809,18 +809,18 @@ public abstract class FileManager {
         } catch(IOException e) {
             // there was an IO error calculating the hash, so we can't
             // add the file
-            return -1;
+            return null;
         } catch(InterruptedException e) {
             // the hash calculation was interrupted, so we can't add
             // the file -- should get reloaded
-            return -1;
+            return null;
         }
         if (loadThreadInterrupted()) 
-            return -1;
+            return null;
         
         if(urns.size() == 0) {
             // the URN was not calculated correctly for some reason
-            return -1;
+            return null;
         }
 
         synchronized (this) {
@@ -861,7 +861,7 @@ public abstract class FileManager {
             this.updateUrnIndex(fileDesc);
 		
             repOk();
-            return fileIndex;
+            return fileDesc;
         }
     }
 
@@ -952,22 +952,22 @@ public abstract class FileManager {
     /**
      * Notification that a file has changed and new hashes should be
      * calculated.
-     * Returns the index of the changed file.  Returns -1 if hashing
-     * failed or no matching FileDesc could be found.
+     * 
+     * @return the new <tt>FileDesc</tt> for the file if it was successfully 
+     *  changed, otherwise <tt>null</tt>
      */
-    public int fileChanged(File f) {
+    public FileDesc fileChanged(File f) {
         try {
             f = FileUtils.getCanonicalFile(f);
         } catch(IOException ioe) {
-            return -1;
+            return null;
         }
         FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
         List xmlDocs = new LinkedList();
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
         Assert.that( fd == removed, "did not remove valid fd.");
-        int addedAt = addFileIfShared(f, xmlDocs);
-        return addedAt;
+        return addFileIfShared(f, xmlDocs);
     }
 
     /**
@@ -1084,8 +1084,8 @@ public abstract class FileManager {
             FileDesc removed=removeFileIfShared(oldName);
             if (removed == null)
                 return false;
-            int added=addFileIfShared(newName);
-            if (added == -1)
+            FileDesc fd = addFileIfShared(newName);
+            if (fd == null)
                 return false;
             return true;
         } finally {

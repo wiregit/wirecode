@@ -103,17 +103,16 @@ public class MetaFileManager extends FileManager {
      * @return -1 if the file was not added, otherwise the index of the newly
      * added file.
      */
-	public int addFileIfShared(File file, List metadata) {
-        int addedAt = super.addFileIfShared(file);
+	public FileDesc addFileIfShared(File file, List metadata) {
+        FileDesc fd = super.addFileIfShared(file);
         
         // if not added or no metadata, nothing else to do.
-        if( addedAt == -1 || metadata == null )
-            return addedAt;
+        if( fd == null || metadata == null )
+            return fd;
 
         SchemaReplyCollectionMapper mapper =
             SchemaReplyCollectionMapper.instance();
 
-        FileDesc fd = super.get(addedAt);
         Assert.that( fd != null, "null fd just added.");
         
         // add xml docs as appropriate
@@ -125,7 +124,7 @@ public class MetaFileManager extends FileManager {
                 collection.addReplyWithCommit(file, fd, currDoc);
         }
         
-        return addedAt;
+        return fd;
     }
 
     /**This method overrides FileManager.loadSettingsBlocking(), though
