@@ -19,6 +19,42 @@ public class LazyProperties extends Properties
         }
     }
     
+    /** 
+     * Use this if you want to create a LazyProperty with the TCP
+     * ConnectBack request.
+     * @param tcpConnectBack true if you want to get connected back via TCP.
+     */
+    protected LazyProperties(boolean tcpConnectBack) {
+        this(null, tcpConnectBack, false, null);
+    }
+    
+    /** 
+     * Use this if you want to create a LazyProperty with the UDP
+     * ConnectBack request.
+     * @param udpConnectBack true if you want to get connected back via UDP.
+     * @param GUID The GUID you want to be connected back with via UDP.
+     */
+    protected LazyProperties(boolean udpConnectBack, byte[] GUID) {
+        this(null, false, udpConnectBack, GUID);
+    }
+    
+    /** 
+     * Use this if you want to create a LazyProperty with both the TCP
+     * ConnectBack request and the UDP ConnectBack request.
+     * @param tcpConnectBack true if you want to get connected back via TCP.
+     * @param udpConnectBack true if you want to get connected back via UDP.
+     * @param udpGUID The GUID you want to be connected back with via UDP.
+     */
+    protected LazyProperties(String remoteIP, boolean tcpConnectBack, 
+                             boolean udpConnectBack, byte[] udpGUID) {
+        this(remoteIP);
+        if (tcpConnectBack)
+            put(ConnectionHandshakeHeaders.X_TCP_CONNECTBACK, "");
+        if (udpConnectBack && (udpGUID != null))
+            put(ConnectionHandshakeHeaders.X_UDP_CONNECTBACK, 
+                new String(udpGUID));
+    }
+    
     public String getProperty(String key, String defaultValue)
     {
         if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP))

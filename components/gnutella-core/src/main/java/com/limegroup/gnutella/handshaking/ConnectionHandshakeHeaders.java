@@ -32,6 +32,8 @@ public class ConnectionHandshakeHeaders
     public static final String GGEP                 = "GGEP";
     public static final String X_GUESS              = "X-Guess";
     public static final String X_VERSION            = "X-Version";
+    public static final String X_TCP_CONNECTBACK    = "X-TCP-ConnectBack";
+    public static final String X_UDP_CONNECTBACK    = "X-UDP-ConnectBack";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
