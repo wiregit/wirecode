@@ -71,7 +71,8 @@ public class Connection {
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
-	private HandshakeResponse HEADERS = HandshakeResponse.createEmptyResponse();
+	private HandshakeResponse _headers = 
+        HandshakeResponse.createEmptyResponse();
 
     /** For outgoing Gnutella 0.6 connections, the properties written
      *  after "GNUTELLA CONNECT".  Null otherwise. */
@@ -218,7 +219,7 @@ public class Connection {
      */
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
-			if(HEADERS.supportsVendorMessages()) {
+			if(_headers.supportsVendorMessages()) {
                 send(MessagesSupportedVendorMessage.instance());
 			}
         }
@@ -315,7 +316,7 @@ public class Connection {
             else
                 initializeIncoming();
 
-            HEADERS = HandshakeResponse.createServerResponse(HEADERS_READ);            
+            _headers = HandshakeResponse.createServerResponse(HEADERS_READ);            
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -324,7 +325,7 @@ public class Connection {
             // "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
             if(isGoodConnection()) {
-                _softMax = (byte)(HEADERS.getMaxTTL()+(byte)1);
+                _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
             } else {
                 _softMax = ConnectionSettings.SOFT_MAX.getValue();
             }
@@ -477,7 +478,7 @@ public class Connection {
 			//See initializeIncoming and the code at the bottom of this
 			//loop.
 			HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(HEADERS, false);
+				RESPONSE_HEADERS.respond(_headers, false);
 
             sendString(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
@@ -499,6 +500,7 @@ public class Connection {
                == HandshakeResponse.UNAUTHORIZED_CODE){
                 connectLine = readLine(USER_INPUT_WAIT_TIME);  
                 readHeaders(USER_INPUT_WAIT_TIME); 
+                _headers = HandshakeResponse.createServerResponse(HEADERS_READ);
             }else{
                 connectLine = readLine();  
                 readHeaders();
@@ -591,6 +593,7 @@ public class Connection {
      */
     private void readHeaders() throws IOException {
         readHeaders(Constants.TIMEOUT);
+        _headers = HandshakeResponse.createServerResponse(HEADERS_READ);
     }
     
     /**
@@ -977,12 +980,12 @@ public class Connection {
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
     public String getUserAgent() {
-		return HEADERS.getUserAgent();
+		return _headers.getUserAgent();
     }
 
     // inherit doc comment
     public boolean isGoodConnection() {
-        return HEADERS.isGoodConnection();
+        return _headers.isGoodConnection();
     }
 
 	/**
@@ -991,12 +994,12 @@ public class Connection {
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-		return HEADERS.getNumIntraUltrapeerConnections();
+		return _headers.getNumIntraUltrapeerConnections();
 	}
 
 	// implements ReplyHandler interface -- inherit doc comment
 	public boolean isHighDegreeConnection() {
-		return HEADERS.isHighDegreeConnection();
+		return _headers.isHighDegreeConnection();
 	}
 
 	/**
@@ -1008,7 +1011,7 @@ public class Connection {
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
-		return HEADERS.isUltrapeerQueryRoutingConnection();
+		return _headers.isUltrapeerQueryRoutingConnection();
     }
 
 	/**
@@ -1018,7 +1021,7 @@ public class Connection {
 	 * @return the string of authenticated domains for this connection
 	 */
 	public String getDomainsAuthenticated() {
-		return HEADERS.getDomainsAuthenticated();
+		return _headers.getDomainsAuthenticated();
 	}
 
     /**
@@ -1029,7 +1032,7 @@ public class Connection {
      *  and therefore has headers, otherwise <tt>false</tt>
      */
     public boolean receivedHeaders() {
-        return HEADERS != null;
+        return _headers != null;
     }
 
 	/**
@@ -1040,7 +1043,7 @@ public class Connection {
 	 *  the Gnutella connection headers passed by this node
 	 */
 	public HandshakeResponse headers() {
-		return HEADERS;
+		return _headers;
 	}
 	
 	/**
@@ -1048,18 +1051,18 @@ public class Connection {
 	 * for this node.	 
 	 */
 	public String getVersion() {
-		return HEADERS.getVersion();
+		return _headers.getVersion();
 	}
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-		return HEADERS.isLeaf();
+		return _headers.isLeaf();
     }
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-		return HEADERS.isUltrapeer();
+		return _headers.isUltrapeer();
     }
 
     /** 
@@ -1101,7 +1104,7 @@ public class Connection {
 	 *  connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSCapable() {
-		return HEADERS.isGUESSCapable();
+		return _headers.isGUESSCapable();
 	}
 
 	/**
@@ -1112,7 +1115,7 @@ public class Connection {
 	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSUltrapeer() {
-		return HEADERS.isGUESSUltrapeer();
+		return _headers.isGUESSUltrapeer();
 	}
 
 
@@ -1127,13 +1130,13 @@ public class Connection {
 	 *  or -1 if GUESS is not supported
 	 */
 	public int getGUESSVersion() {
-		return HEADERS.getGUESSVersion();
+		return _headers.getGUESSVersion();
 	}
 
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
-		return HEADERS.isTempConnection();
+		return _headers.isTempConnection();
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
@@ -1171,14 +1174,14 @@ public class Connection {
      *  big pongs) should only be sent along connections for which
      *  supportsGGEP()==true. */
     public boolean supportsGGEP() {
-		return HEADERS.supportsGGEP();
+		return _headers.supportsGGEP();
     }
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
-		return HEADERS.isQueryRoutingEnabled();
+		return _headers.isQueryRoutingEnabled();
     }
 
     // overrides Object.toString
