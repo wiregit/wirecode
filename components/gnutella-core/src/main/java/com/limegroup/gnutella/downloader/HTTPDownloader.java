@@ -133,6 +133,14 @@ public class HTTPDownloader implements BandwidthTracker {
 		_amountRead = 0;
     }
 
+    /**
+     * Accessor for the alternate locations received from the server for 
+     * this download attempt.  
+     *
+     * @return the <tt>AlternateLocationCollection</tt> containing the 
+     *  received locations, can be <tt>null</tt> if we could not create
+     *  a collection, or could be empty
+     */
 	public AlternateLocationCollection getAlternateLocations() { 
 	    return _alternateLocationsReceived;
     }
