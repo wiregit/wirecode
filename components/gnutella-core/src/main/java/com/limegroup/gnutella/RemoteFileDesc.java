@@ -187,7 +187,7 @@ public class RemoteFileDesc implements Serializable {
      * Returns true if this is a partial source
      */
     public boolean isPartialSource() {
-        return (_availableRanges == null);
+        return (_availableRanges != null);
     }
     
     /**
