@@ -1108,8 +1108,8 @@ public final class SettingsManager {
                     if( theClass == String.class )
                         theValue = (String)fields[i].get(this);
                     else if (theClass == Boolean.TYPE )
-                        theValue = 
-                            Boolean.valueOf(fields[i].getBoolean(this)).toString();
+                        theValue = fields[i].getBoolean(this) ? 
+                            Boolean.TRUE.toString() : Boolean.FALSE.toString();
                     else if (theClass == Byte.TYPE )
                         theValue = Byte.toString(fields[i].getByte(this));
                     else if (theClass == Character.TYPE )
