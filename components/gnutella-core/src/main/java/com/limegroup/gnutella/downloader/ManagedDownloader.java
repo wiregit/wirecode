@@ -1288,13 +1288,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         case 1:
             return 1;
         case 2:
-            return 2;
-        case 3:
-            return 4;
-        case 4:
-            return 8;
-        default:
             return 15;
+        case 3:
+            return 60;
+        case 4:
+            return 120;
+        default:
+            return 180;
         }
     }
 
