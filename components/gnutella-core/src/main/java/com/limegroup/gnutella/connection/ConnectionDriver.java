@@ -28,8 +28,8 @@ public class ConnectionDriver implements ConnectionListener {
     private List /* of Connection */ _needRegister=
         Collections.synchronizedList(new LinkedList());
     /** The list of messaging connections needing to be registered for writes as
-        well as reads.  Updated in MessageRouter.handleMessage -> ... ->
-        Connection.write -> this.needsWrite when a write failed. */
+     *  well as reads.  Updated in MessageRouter.handleMessage -> ... ->
+     *  Connection.write -> this.needsWrite when a write failed. */
     private List /* of Connection */ _needWriteRegister=
         Collections.synchronizedList(new LinkedList());
     
@@ -92,8 +92,9 @@ public class ConnectionDriver implements ConnectionListener {
 
     public void error(Connection c) {
         if (c instanceof ManagedConnection) {
+            //No need to actually unregister the socket; just make sure it's not
+            //in the broadcast list.
             ManagedConnection mc=(ManagedConnection)c;
-            //TODO: cancel from selector?
             _manager.remove(mc);
             //_catcher.doneWithMessageLoop(e);  TODO
         }
@@ -106,6 +107,7 @@ public class ConnectionDriver implements ConnectionListener {
      * which includes reject connections.
      */
     private void loopForMessages() {
+        //TODO: factor this
         //TODO: ChannelClosedException in register
 
         while (true) {
@@ -124,8 +126,8 @@ public class ConnectionDriver implements ConnectionListener {
             try {
                 _selector.select();
             } catch (IOException e) {
-                //TODO?
-                Assert.that(false, "IO problem selecting");
+                //It's really not clear why this can happen, but it does
+                //occasionally.  Ignore
             }
 
             //Handle all reads.  This generates event to listener (this), which
@@ -133,11 +135,16 @@ public class ConnectionDriver implements ConnectionListener {
             for (java.util.Iterator iter=_selector.selectedKeys().iterator(); 
                     iter.hasNext(); ) {
                 SelectionKey key=(SelectionKey)iter.next();
-                if (key.isReadable()) {       
-                    //System.out.println("Read");
-                    Connection connection=(Connection)key.attachment();
-                    iter.remove();      //remove from selected set
-                    connection.read();  //typically calls MessageRouter.handle
+                try {
+                    if (key.isReadable()) {       
+                        //System.out.println("Read");
+                        Connection connection=(Connection)key.attachment();
+                        connection.read();  //typically calls MessageRouter.handle
+                    }
+                } catch (CancelledKeyException e) {
+                    //Channel was closed.  Nothing to do.
+                } finally {
+                    iter.remove();          //remove from selected set
                 }
             }
 
@@ -159,14 +166,19 @@ public class ConnectionDriver implements ConnectionListener {
             for (java.util.Iterator iter=_selector.selectedKeys().iterator(); 
                     iter.hasNext(); ) {
                 SelectionKey key=(SelectionKey)iter.next();
-                if (key.isWritable()) {
-                    //System.out.println("Write");
-                    Connection connection=(Connection)key.attachment();
-                    iter.remove();  //remove from selected set
-                    boolean needsMoreWrite=connection.write();
-                    //If all data sent, Change registration status to only read.
-                    if (! needsMoreWrite)
-                        register(connection, false);
+                try {
+                    if (key.isWritable()) {
+                        //System.out.println("Write");
+                        Connection connection=(Connection)key.attachment();
+                        boolean needsMoreWrite=connection.write();
+                        //If all data sent, Change registration status to only read.
+                        if (! needsMoreWrite)
+                            register(connection, false);
+                    }
+                } catch (CancelledKeyException e) {
+                    //Channel was closed.  Nothing to do.
+                } finally {
+                    iter.remove();          //remove from selected set
                 }
             }
             } catch (Exception e) {
@@ -175,6 +187,7 @@ public class ConnectionDriver implements ConnectionListener {
             }
         }
     }
+
 
     /** 
      * Register c with this.
@@ -185,8 +198,8 @@ public class ConnectionDriver implements ConnectionListener {
             int ops=write ? SelectionKey.OP_READ|SelectionKey.OP_WRITE 
                           : SelectionKey.OP_READ;
             c.channel().register(_selector, ops, c);
-        } catch (IOException e) {
-            //TODO: what to do?
+        } catch (ClosedChannelException e) {
+            //Connection already closed.  Don't bother to register
         }
     }
 }
