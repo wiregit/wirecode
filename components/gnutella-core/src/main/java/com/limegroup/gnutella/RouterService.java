@@ -743,7 +743,7 @@ public final class RouterService {
 							 final int minSpeed, 
 							 final MediaType type) {
 
-		Thread searcherThread = new Thread() {
+		Thread searcherThread = new Thread("SearcherThread") {
 			public void run() {
                 try {
                     // per HUGE v0.94, ask for URNs on responses
