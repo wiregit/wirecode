@@ -29,13 +29,13 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum number of upstream bytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND = 200000;
+	private final int MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND = 10000;
 
 	/**
 	 * Constant for the minimum number of downlstream bytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND = 200000;
+	private final int MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND = 15000;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
@@ -47,7 +47,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 30 * 60;    
+	private final int MINIMUM_CURRENT_UPTIME = 10 * 60;    
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
@@ -170,10 +170,10 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	public boolean isSupernodeCapable() {
         boolean isSupernodeCapable = 
-            ((_maxUpstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) &&
+            (((_maxUpstreamBytesPerSec >= 
+            MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) ||
             (_maxDownstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND) &&
+            MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND)) &&
             (AVERAGE_UPTIME >= MINIMUM_AVERAGE_UPTIME) &&
 			(_currentUptime >= MINIMUM_CURRENT_UPTIME) &&
 			(!FIREWALLED) &&
