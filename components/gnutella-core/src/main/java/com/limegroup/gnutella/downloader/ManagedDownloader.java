@@ -244,13 +244,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         this map. The acceptor threads consumes these values and notifies the
         connecting threads when it is done.        
     */
-    private Map miniRFDToLock = Collections.synchronizedMap(new HashMap());
+    private Map miniRFDToLock;
     /** Object -> Socket
         When the acceptor thread has consumed the information in miniRDFToLock
         it adds values to this map before notifying the connecting thread. 
         The connecting thread consumes data from this map.
     */
-    private Map threadLockToSocket=Collections.synchronizedMap(new HashMap());
+    private Map threadLockToSocket;
 
 
 
@@ -384,7 +384,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         stopped=false;
         corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
-            
+        miniRFDToLock = Collections.synchronizedMap(new HashMap());
+        threadLockToSocket=Collections.synchronizedMap(new HashMap());
         this.dloaderManagerThread=new Thread() {
             public void run() {
                 try { 
