@@ -46,11 +46,11 @@ public class UnavailableRangeUploadState extends UploadState {
 		str = "Content-Length: 0\r\n";
 		ostream.write(str.getBytes());
 		
-        
+		writeAlts(ostream);
+		writeRanges(ostream);        
 		str = "\r\n";
 		ostream.write(str.getBytes());
-		writeAlts(ostream);
-		writeRanges(ostream);
+
 		
         if (FILE_DESC!=null && FILE_DESC instanceof IncompleteFileDesc) {
         	IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
