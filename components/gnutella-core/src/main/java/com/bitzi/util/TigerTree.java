@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.3 2004-05-13 17:39:05 sberlin Exp $
+ * $Id: TigerTree.java,v 1.4 2004-05-13 19:18:13 sberlin Exp $
  */
 package com.bitzi.util;
 
@@ -13,6 +13,8 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.security.Provider;
 
 
 import com.sun.java.util.collections.List;
@@ -20,6 +22,7 @@ import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.ErrorService;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
@@ -36,6 +39,7 @@ public class TigerTree extends MessageDigest {
     
     private static final boolean USE_CRYPTIX =
         CommonUtils.isJava14OrLater() &&
+        CommonUtils.isMacOSX() && 
         CommonUtils.isJaguarOrAbove() &&
         !CommonUtils.isPantherOrAbove();
     
@@ -44,10 +48,30 @@ public class TigerTree extends MessageDigest {
      * a platform that requires it.
      */
     static {
-        if(USE_CRYPTIX)
-            java.security.Security.addProvider(
-                new cryptix.jce.provider.CryptixCrypto()
-            );
+        if(USE_CRYPTIX) {
+            // Use reflection to load the Cryptix Provider.
+            // It's safest that way (since we don't want to include
+            // the cryptix jar on all installations, and Java
+            // may try to load the class otherwise).
+            try {
+                Class clazz =
+                    Class.forName("cryptix.jce.provider.CryptixCrypto");
+                Object o = clazz.newInstance();
+                Security.addProvider((Provider)o);
+            } catch(ClassNotFoundException e) {
+              ErrorService.error(e);
+            } catch(IllegalAccessException e) {
+              ErrorService.error(e);
+            } catch(InstantiationException e) {
+              ErrorService.error(e);
+            } catch(ExceptionInInitializerError e) {
+              ErrorService.error(e);
+            } catch(SecurityException e) {
+              ErrorService.error(e);
+            } catch(ClassCastException e) {
+              ErrorService.error(e);
+            }
+        }
     }
 
     /** 1024 byte buffer */
