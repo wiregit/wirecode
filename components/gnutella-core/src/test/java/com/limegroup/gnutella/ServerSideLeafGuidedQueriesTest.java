@@ -387,10 +387,12 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // one or more of the UPs should get it....
         Thread.sleep(3000);
         QueryRequest nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
             // send 10 results from this Ultrapeer....
-            for (int j = 0; (j < 10) && (nQuery != null); j++)
+            for (int j = 0; (j < 10) && (local != null); j++)
                 routeResultsToUltrapeer(nQuery.getGUID(), ULTRAPEERS[i]);
         }
 
@@ -399,13 +401,141 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // UPs should get more queries
         Thread.sleep(3000);
         nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++)
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
+            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+        }
 
         assertNotNull(nQuery);
 
         // now send enough results, we shouldn't get no more queries yo
         routeResultsToUltrapeers(query.getGUID(), 200);
+
+        // we shouldn't get no more queries yo
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertTrue(nQuery == null);
+    }
+
+
+    public void testUPRoutedMax() throws Exception {
+        drainAll();
+
+        // we want to make sure that the UP stops the query when enough results
+        // have been routed AND the leaf still wants more
+
+        // send a query from the leaf
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        LEAF.send(query);
+        LEAF.flush();
+
+        // one or more of the UPs should get it....
+        Thread.sleep(3000);
+        QueryRequest nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+            // send 10 results from this Ultrapeer....
+            for (int j = 0; (j < 10) && (local != null); j++)
+                routeResultsToUltrapeer(nQuery.getGUID(), ULTRAPEERS[i]);
+        }
+
+        assertTrue(nQuery != null);
+
+        // send a QueryStatus, but not one that will make the UP stop
+        QueryStatusResponse sResp = 
+             new QueryStatusResponse(new GUID(query.getGUID()), 25);
+        LEAF.send(sResp);
+        LEAF.flush();
+
+        // UPs should get more queries
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+        }
+
+        assertNotNull(nQuery);
+
+        // now send enough results, we shouldn't get no more queries yo
+        routeResultsToUltrapeers(query.getGUID(), 200);
+
+        // we shouldn't get no more queries yo
+        Thread.sleep(4000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertTrue(nQuery == null);
+    }
+
+
+    public void testLongLivedLeafGuidance() throws Exception {
+        drainAll();
+
+        // we want to make sure that the UP stops the query when enough results
+        // have been routed AND the leaf still wants more
+
+        // send a query from the leaf
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        LEAF.send(query);
+        LEAF.flush();
+
+        // one or more of the UPs should get it....
+        Thread.sleep(3000);
+        QueryRequest nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+        }
+
+        assertTrue(nQuery != null);
+
+        // send a QueryStatus, but not one that will make the UP stop
+        QueryStatusResponse sResp = 
+             new QueryStatusResponse(new GUID(query.getGUID()), 10);
+        LEAF.send(sResp);
+        LEAF.flush();
+
+        // UPs should get more queries
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+        }
+
+        assertNotNull(nQuery);
+
+        // send a QueryStatus, but not one that will make the UP stop
+        sResp = new QueryStatusResponse(new GUID(query.getGUID()), 30);
+        LEAF.send(sResp);
+        LEAF.flush();
+
+        // UPs should get more queries
+        Thread.sleep(4000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            if ((nQuery == null) && (local != null))
+                nQuery = local;
+        }
+
+        assertNotNull(nQuery);
+
+        // send a QueryStatus that will make UP stop
+        sResp = new QueryStatusResponse(new GUID(query.getGUID()), 50);
+        LEAF.send(sResp);
+        LEAF.flush();
 
         // we shouldn't get no more queries yo
         Thread.sleep(3000);
