@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import com.apple.mrj.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
@@ -509,6 +508,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             return false;
 
         // get other info...
+		final URN otherUrn = other.getSHA1Urn();
         final String otherName = other.getFileName();
         final long otherLength = other.getSize();
 
@@ -517,9 +517,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             for (int i=0; i<allFiles.length; i++) {
                 // get current info....
                 RemoteFileDesc rfd = (RemoteFileDesc) allFiles[i];
+				final URN urn = rfd.getSHA1Urn();
+				if(otherUrn != null && urn != null) {
+					return otherUrn.equals(urn);
+				}
                 final String thisName = rfd.getFileName();
                 final long thisLength = rfd.getSize();
-
+				
                 // if they are similarly named and are close in length....
                 // do sizeClose() first, much less expensive.....
                 if (sizeClose(otherLength, thisLength))
@@ -959,19 +963,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (! CommonUtils.copy(incompleteFile, completeFile))
                 return COULDNT_MOVE_TO_LIBRARY;
 
-		//Set the Mac ITunes file type and creator if we're on Mac
-		//and it's an mp3 file
-		
-//  		if(CommonUtils.isAnyMac() 
-//  		       && completeFile.getName().toLowerCase().endsWith("mp3")){
-//  			try {
-//  				MRJFileUtils.setFileTypeAndCreator(completeFile,
-//  												   new MRJOSType("MPG3"),
-//  												   new MRJOSType("hook"));
-//  			} catch(IOException ioe) {
-//  				// nothing we really can do if the call doesn't work
-//  			}
-//  		}
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
