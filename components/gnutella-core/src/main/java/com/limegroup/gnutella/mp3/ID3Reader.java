@@ -316,9 +316,7 @@ public final class ID3Reader {
         String str = "";
         try {
             str = mp3File.getTitle().getTextContent();
-            System.out.println("Sumeet: read TITLE from id3 "+str+"|");
         } catch(FrameDamagedException ignored) {
-            System.out.println("Sumeet: title frame damaged");
             str = "";
         }
         if(str!=null && !"".equals(str)) {
@@ -328,9 +326,7 @@ public final class ID3Reader {
         //2. artist 
         try {
             str = mp3File.getArtist().getTextContent();
-            System.out.println("Sumeet: read ARTIST from id3 "+str+"|");
         } catch(FrameDamagedException ignored) {
-            System.out.println("Sumeet: artist frame damaged");
             str = "";
         }
         if(str!=null && !"".equals(str)) {
@@ -380,16 +376,13 @@ public final class ID3Reader {
         //7. genre
         try {
             str = mp3File.getTrack().getTextContent();
-            System.out.println("Sumeet: read GENRE freme:"+str+"|");
         } catch(FrameDamagedException ignored) {
-            System.out.println("Sumeet: GENRE frame damaged");
             str = "";
         }
         if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[6] = str;
         }
-        System.out.println("Sumeet: READ "+fieldCount + " FIELDS");
         return fieldCount == 7;
     }
 

@@ -233,14 +233,12 @@ public class ID3Editor {
 
 
     public int writeID3DataToDisk(String filename) {
-        System.out.println("Roanne 0");
         if(! LimeXMLUtils.isMP3File(filename))
             return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         File f= null;
         RandomAccessFile file = null;        
         try {
             try {
-                System.out.println("Roanne: 0b");
                 f = new File(filename);
                 FileUtils.setWriteable(f);
                 file = new RandomAccessFile(f,"rw");
@@ -259,15 +257,12 @@ public class ID3Editor {
             //1. Try to write out the ID3v2 data first
             int ret = -1;
             try {
-                System.out.println("Roanne: 1 Writing id2 v2");
                 ret = writeID3V2DataToDisk(f);
-                System.out.println("Roanne: 2");
             }  catch (IOException iox ) {
                 iox.printStackTrace();
                 return LimeXMLReplyCollection.RW_ERROR;  
             } catch (ID3v2Exception e) { //catches both ID3v2 related exceptions
                 e.printStackTrace();
-                System.out.println("Roanne: 3");
                 ret = writeID3V1DataToDisk(file);
             } 
             return ret;
@@ -296,20 +291,14 @@ public class ID3Editor {
             updateAllv2Tags = true;
         }
         if(updateAllv2Tags) {
-            System.out.println("Ruch1");
             List updateFrames = new ArrayList();
             addAllNeededFrames(updateFrames);
-            System.out.println("Ruch2");
             if(updateFrames.size() > 0) {
-                System.out.println("Ruch3");
                 for(Iterator iter=updateFrames.iterator(); iter.hasNext() ; ) {
                     ID3v2Frame frame = (ID3v2Frame)iter.next();
                     id3Handler.addFrame(frame);
-                    System.out.println("Ruch4:adding"+frame.getID());
                 }
-                System.out.println("Ruch5");
                 id3Handler.update();               
-                System.out.println("Ruch6");
             }
             //no exception? we are home
            return LimeXMLReplyCollection.NORMAL;
@@ -327,8 +316,6 @@ public class ID3Editor {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String val = (String)updateFrames.get(frame);
             val = val==null?"":val;
-            System.out.println("Sumeet: adding frame:"+frame.getID()+", value:"+
-                               val);
             ID3v2Frame repFrame = new ID3v2Frame(frame.getID(),
                                              val.getBytes(),
                                              frame.getTagAlterPreservation(),
