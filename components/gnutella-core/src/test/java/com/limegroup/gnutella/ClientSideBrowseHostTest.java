@@ -27,6 +27,14 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     public ClientSideBrowseHostTest(String name) {
         super(name);
     }
+
+    public static Test suite() {
+        return buildTestSuite(ClientSideBrowseHostTest.class);
+    }    
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
     
     ///////////////////////// Actual Tests ////////////////////////////
     
@@ -134,6 +142,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testPushProxyRequest() throws Exception {
+        callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
@@ -168,7 +177,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // wait a while for Leaf to process result
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file, should result in PushProxy
@@ -270,6 +279,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testSendsPushRequest() throws Exception {
+        callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();

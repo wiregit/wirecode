@@ -24,7 +24,8 @@ import java.net.*;
  * sharing two txt files (berkeley and susheel), and accepting all search
  * results.
  * You must also implement getActivityCallback() (for custom callbacks) 
- * and numUPs (for the number of Ultrapeers to connect to, must be 1-4).
+ * and numUPs (for the number of Ultrapeers to connect to, must be 1-4), 
+ * and main and suite().
  */
 public abstract class ClientSideTestCase 
     extends com.limegroup.gnutella.util.BaseTestCase {
@@ -45,14 +46,6 @@ public abstract class ClientSideTestCase
 
     public ClientSideTestCase(String name) {
         super(name);
-    }
-    
-    public static Test suite() {
-        return buildTestSuite(ClientSideTestCase.class);
-    }    
-
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
     }
     
     private static void doSettings() {
@@ -83,7 +76,6 @@ public abstract class ClientSideTestCase
     }        
     
     public static void globalSetUp(Class callingClass) throws Exception {
-        System.out.println("Calling class is " + callingClass);
         // calls all doSettings() for me and my parents
         PrivilegedAccessor.invokeAllStaticMethods(callingClass, "doSettings",
                                                   null);
