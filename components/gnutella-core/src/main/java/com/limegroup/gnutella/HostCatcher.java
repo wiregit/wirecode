@@ -118,6 +118,8 @@ public class HostCatcher {
      */
     private boolean alwaysNotifyKnownHost=false;
 
+	private final Set udpUltraPeers = new HashSet();
+
 
     /**
      * Creates an empty host catcher.  Must call initialize before using.
@@ -239,7 +241,7 @@ public class HostCatcher {
      *  the pong.
      * @return true iff pr was actually added 
      */
-    public boolean add(PingReply pr, ManagedConnection receivingConnection) {
+    public boolean add(PingReply pr, ReplyHandler receivingConnection) {
         //Convert to endpoint
         ExtendedEndpoint e;
         try {
@@ -532,6 +534,10 @@ public class HostCatcher {
         //And return iterator of contents.
         return buf.iterator();
     }
+
+	public Set getUltraPeersSupportingUdp() {
+		return Collections.unmodifiableSet(udpUltraPeers);
+	}
 
     /**
      * Notifies this that the fetcher has finished attempting a connection to
