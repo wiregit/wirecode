@@ -42,10 +42,13 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
-        //check if can accept incoming and hops + ttl > 2
+        //If this wasn't a handshake or crawler ping, check if we can accept
+        //incoming connection for either 0.4 OR shielded 0.6 connections.
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
-        if ( (!_manager.hasAvailableIncoming()) && (hops+ttl > 2) )
+        if (   (hops+ttl > 2) 
+            && !_manager.hasAvailableIncoming(false) 
+            && !(_manager.isSupernode() && _manager.hasAvailableIncoming(true)))
             return;
 
         //for crawler pings we shouldn't send the pong with hops+1 as TTL.
