@@ -763,7 +763,7 @@ public class LimeXMLUtils
 
                 // beginning input....
                 clearHashBytes(hashBytes);
-                int numRead = fis.read(hashBytes);
+                fis.read(hashBytes);
                 md.update(hashBytes);
 
                 // if the file changed underneath me, throw away...
@@ -773,7 +773,7 @@ public class LimeXMLUtils
                 // middle input...
                 clearHashBytes(hashBytes);
                 fis.skip(thirds - NUM_BYTES_TO_HASH);
-                numRead = fis.read(hashBytes);
+                fis.read(hashBytes);
                 md.update(hashBytes);
 
                 // if the file changed underneath me, throw away...
@@ -785,7 +785,7 @@ public class LimeXMLUtils
                 fis.skip(toHash.length() - 
                          (thirds + NUM_BYTES_TO_HASH) -
                          NUM_BYTES_TO_HASH);
-                numRead = fis.read(hashBytes);
+                fis.read(hashBytes);
                 md.update(hashBytes);
 
                 // if the file changed underneath me, throw away...
