@@ -19,8 +19,7 @@ import java.util.StringTokenizer;
  * @author Adam Fisk
  */
 
-public class SettingsManager implements SettingsInterface
-{
+public class SettingsManager implements SettingsInterface {
     private boolean forceIPAddress_;
     private byte[]  forcedIPAddress_;
     private String  forcedIPAddressString_;
@@ -448,8 +447,7 @@ public class SettingsManager implements SettingsInterface
     /* Load in the default values.  Any properties
      * written to the real properties file will overwrite
      * these. */
-    private void loadDefaults()
-    {
+    private void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
         setMaxTTL(DEFAULT_MAX_TTL);
         setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
@@ -480,9 +478,9 @@ public class SettingsManager implements SettingsInterface
         setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
         setFilterBearShareQueries(SettingsInterface.DEFAULT_FILTER_BEARSHARE_QUERIES);
-        setDirectories(home_);
-        setSaveDirectory(home_);
-        setSaveDefault(home_);
+        //setDirectories(home_);
+        //setSaveDirectory(home_);
+        //setSaveDefault(home_);
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);
