@@ -130,7 +130,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
-        String typeString = URN.getTypeString(urnString).toLowerCase();
+        String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
         if (typeString.indexOf(UrnType.SHA1_STRING) == 4)
     		return createSHA1UrnFromString(urnString);
         else if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
@@ -262,7 +262,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
         int lastColon = urnString.lastIndexOf(":");
         String nameSpace = urnString.substring(0,lastColon+1);
         String hash = urnString.substring(lastColon+1);
-		this._urnString = nameSpace.toLowerCase() + hash.toUpperCase();
+		this._urnString = nameSpace.toLowerCase(Locale.US) +
+                                  hash.toUpperCase(Locale.US);
 		this._urnType = urnType;
 	}
 
