@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -243,6 +244,22 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             }
         }
         return ret;
+    }
+    
+    /**
+     * Checks whether the specific area of the file matches the hash tree. 
+     */
+    public boolean isCorrupt(Interval in, byte [] data) {
+        // if the interval is not a fixed chunk, we cannot verify it.
+        // (actually we can but its more complicated) 
+        if (in.low % _nodeSize == 0 && in.high == in.low+_nodeSize-1) {
+            TigerTree digest = new TigerTree();
+            digest.update(data);
+            byte [] hash = digest.digest();
+            byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
+            return Arrays.equals(treeHash, hash);
+        }
+        return false;
     }
 
     /**

@@ -3800,6 +3800,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized int getNumDownloaders() {
         return dloaders.size() + queuedThreads.size();
     }
+    
+    public synchronized HashTree getHashTree() {
+        return hashTree;
+    }
 
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();

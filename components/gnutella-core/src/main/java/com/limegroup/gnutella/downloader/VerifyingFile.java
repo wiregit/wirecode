@@ -190,15 +190,32 @@ public class VerifyingFile {
         pendingBlocks.add(intvl);
         
         //5. see if writing this block allows us to verify any full chunks
-        verifyAnyPendingBlocks();
+        verifyAnyPendingBlocks(intvl.high+1);
     }
 
-    private void verifyAnyPendingBlocks() {
+    /**
+     * iterates through the pending blocks and checks if the recent write has created
+     * some (verifiable) full chunks.  Its not possible to verify more than two chunks
+     * per method call.
+     * 
+     * @param maxOffset do not check past this offset
+     */
+    private void verifyAnyPendingBlocks(int maxOffset) {
+        
+        // cache an instance of the TigerTree we have now, since it may change by the time
+        // we finish iterating
+        
+        HashTree tree = managedDownloader.getHashTree(); //TODO: check vf->md locking
+        
         List verifiable = new ArrayList();
         List pending = pendingBlocks.getAllIntervalsAsList();
         int chunkSize = managedDownloader.getChunkSize();
         for (int i =0;i < pending.size();i++) {
             Interval current = (Interval)pending.get(0);
+            
+            // we passed the chunk we just added, no need to iterate further
+            if (current.low > maxOffset)
+                break;
             
             // find the beginning of the first chunk offset
             int lowChunkOffset = current.low - current.low % chunkSize;
@@ -212,7 +229,7 @@ public class VerifyingFile {
         
         for (Iterator iter = verifiable.iterator();iter.hasNext();) {
             Interval i = (Interval)iter.next();
-            if (verifyChunk(i)) 
+            if (verifyChunk(i,tree)) 
                 writtenBlocks.add(i);
             releaseBlock(i);
             pendingBlocks.delete(i);
@@ -220,11 +237,26 @@ public class VerifyingFile {
     }
     
     /**
-     * @return whether this chunk is corrupt according to our hash tree
+     * @return whether this chunk is corrupt according to the downloader's hash tree
      */
-    private boolean verifyChunk(Interval i) {
-        //TODO: stub for now
-        return true;
+    private boolean verifyChunk(Interval i, HashTree tree) {
+        byte []b = new byte[i.high - i.low+1];
+        // read the interval from the file
+        long pos = -1;
+        try {
+            pos = fos.getFilePointer();
+            fos.seek(i.low);
+            fos.read(b);
+        }catch (IOException bad) {
+            // we failed reading back from the file - assume block is corrupt
+            // and it will have to be re-downloaded
+            return false;
+        }finally {
+            if (pos != -1)
+                try {fos.seek(pos);}catch(IOException iox){}
+        }
+        
+        return tree.isCorrupt(i,b);
     }
     
     /**
@@ -335,7 +367,9 @@ public class VerifyingFile {
      * or written.
      */
     public synchronized boolean hasFreeBlocksToAssign() {
-        return ( writtenBlocks.getSize() + leasedBlocks.getSize() < completedSize); 
+        return ( writtenBlocks.getSize() + 
+                leasedBlocks.getSize() + 
+                pendingBlocks.getSize() < completedSize); 
     }
     
     /**
