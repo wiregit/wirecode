@@ -48,19 +48,6 @@ public class LimeXMLDocument implements Serializable {
      */
     private String identifier;
     private String action="";
-    
-    /**
-     * The URN that this XML doc is associated with.
-     */
-    private transient URN xmlHash = null;
-    
-    public URN getXMLUrn() {
-        return xmlHash;
-    }
-    
-    public void setXMLUrn(URN xmlHash) {
-        this.xmlHash = xmlHash;
-    }
 
     public void setIdentifier(String id) {
         identifier = id;

@@ -90,9 +90,6 @@ public class RichQueryHandler{
                 name = " "; //leave blank
                 res = new Response(index, size, name);
             } else { //meta-data about a specific file
-                URN hash = currDoc.getXMLUrn();
-                if( hash == null ) 
-                    continue;
                 fd = fManager.getFileDescForFile(new File(subjectFile));
                 if( fd == null || 
                    (busy && fd.getNumberOfAlternateLocations() >= 10) ) {

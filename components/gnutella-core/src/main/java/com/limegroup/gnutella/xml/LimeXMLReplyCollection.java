@@ -278,7 +278,6 @@ public class LimeXMLReplyCollection{
 
     /**
      * Adds a reply into the mainMap of this collection.
-     * Also sets the LimeXMLDocument's XMLUrn to be the FileDesc's SHA1.
      * Also adds this LimeXMLDocument to the list of documents the
      * FileDesc knows about.
      */
@@ -287,7 +286,6 @@ public class LimeXMLReplyCollection{
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
-        replyDoc.setXMLUrn(hash);
         fd.addLimeXMLDocument(replyDoc);
         try {
             String identifier = fd.getFile().getCanonicalPath();
@@ -298,7 +296,7 @@ public class LimeXMLReplyCollection{
 
     /**
      * Adds a reply into the mainMap of this collection, associating
-     * the XMLUrn with the FileDesc and the FileDesc with the LimeXMLDocument.
+     * the FileDesc with the LimeXMLDocument.
      * If this collection is an audio collection, this will write out the
      * file to disk, possibly adding/changing ID3 tags on an MP3 file.
      * If the file changed because of this operation, the FileManager
@@ -374,7 +372,6 @@ public class LimeXMLReplyCollection{
             oldDoc = (LimeXMLDocument)mainMap.get(hash);
             mainMap.put(hash,newDoc);
         }
-        newDoc.setXMLUrn(hash);
         fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
     }
