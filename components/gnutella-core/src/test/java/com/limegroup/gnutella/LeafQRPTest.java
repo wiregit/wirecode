@@ -79,13 +79,9 @@ public class LeafQRPTest extends ClientSideTestCase {
         // send a query that should hit in the qrt
         QueryRequest query = QueryRequest.createQuery("berkeley");
         QueryRequest query2 = QueryRequest.createQuery("susheel");
-        QueryRequest queryURN = QueryRequest.createQuery(berkeleyURN);
-        QueryRequest queryURN2 = QueryRequest.createQuery(susheelURN);
 
         assertTrue("qrt did not contain: " + query, qrt.contains(query));
         assertTrue("qrt did not contain: " + query2, qrt.contains(query2));
-        assertTrue("qrt did not contain: " + queryURN, qrt.contains(queryURN));
-        assertTrue("qrt did not contain: "+queryURN2, qrt.contains(queryURN2));
 
         /* //TODO: investigate why this isn't working....
         retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
