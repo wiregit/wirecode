@@ -93,6 +93,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         PrivilegedAccessor.setValue(ManagedConnection.class,
                                     "TIMED_GUID_LIFETIME",
                                     new Long(EXPIRE_TIME));
+        ConnectionSettings.MULTICAST_PORT.setValue(10100);
     }
 
     public static void setUpQRPTables() throws Exception {
@@ -318,6 +319,34 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         assertTrue(queryRec.desiresOutOfBandReplies());
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
         assertEquals(LEAF[0].getPort(), queryRec.getReplyPort());
+
+        // shut off query
+        QueryStatusResponse resp = 
+            new QueryStatusResponse(new GUID(queryRec.getGUID()), MAX_RESULTS);
+        sendF(LEAF[0], resp);
+        }
+        //------------------------------
+
+        //now send a 'no proxy' query and make sure it isn't proxied
+        //------------------------------
+        {
+        drainAll();    
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
+                                              "whatever", null, null, null, 
+                                              null, false, 
+                                              Message.N_UNKNOWN, false, 0,
+                                              true);
+        sendF(LEAF[0], query);
+        
+        Thread.sleep(1000);
+
+        // the Ultrapeer should get it.
+        QueryRequest queryRec = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
+                                                         QueryRequest.class);
+        assertNotNull(queryRec);
+        assertTrue(queryRec.doNotProxy());
+        assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
 
         // shut off query
         QueryStatusResponse resp = 
