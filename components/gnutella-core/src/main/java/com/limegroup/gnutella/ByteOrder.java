@@ -324,7 +324,7 @@ public class ByteOrder {
      *           to store x, in which case this will pad with 0.
      *
      * @param buf the buffer of bytes to write into
-     * @param x the little-endian byte to convert
+     * @param x the little-endian int to convert
      * @param offset the index to start writing into buf
      * @param n the number of bytes to write, which must be between 1 and 4,
      *   inclusive
@@ -357,6 +357,35 @@ public class ByteOrder {
             throw new IllegalArgumentException("invalid n: " + n);
         }
     }
+    
+    /**
+     * int2beb - stream version.
+     */
+    public static void int2beb(final int x, OutputStream out, final int n) 
+      throws IOException {
+        switch(n) {
+        case 1:
+            out.write((byte) x      );
+            break;
+        case 2:
+            out.write((byte)(x >> 8));
+            out.write((byte) x      );
+            break;            
+        case 3:
+            out.write((byte)(x >> 16));
+            out.write((byte)(x >>  8));
+            out.write((byte) x       );
+            break;
+        case 4:
+            out.write((byte)(x >> 24));
+            out.write((byte)(x >> 16));
+            out.write((byte)(x >>  8));
+            out.write((byte) x       );
+            break;
+        default:
+            throw new IllegalArgumentException("invalid n: " + n);
+        }
+    }    
 
     /**
      * Int to little-endian bytes: writes x to given stream.
