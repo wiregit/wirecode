@@ -31,8 +31,7 @@ public class QueryReply extends Message implements Serializable{
     //WARNING: see note in Message about IP addresses.
 
     // some parameters about xml, namely the max size of a xml collection string.
-    public static final int XML_MAX_SIZE = 65535;
-    private static final String XML_MAX_SIZE_STRING = "65535";
+    public static final int XML_MAX_SIZE = 32768;
     
     /** 2 bytes for public area, 2 bytes for xml length.
      */
