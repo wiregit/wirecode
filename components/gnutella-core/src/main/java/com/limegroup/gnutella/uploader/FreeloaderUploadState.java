@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -10,7 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * to them with more information on Gnutella and with more information on 
  * obtaining a client.
  */
-public class FreeloaderUploadState implements UploadState {
+public class FreeloaderUploadState implements UploadState, HTTPMessage {
 
     public static final String RESPONSE_PAGE =
 		"<html>\r\n"+
@@ -50,6 +51,12 @@ public class FreeloaderUploadState implements UploadState {
 
 	}
     
+	public void writeMessageHeaders(OutputStream os) {
+	}
+
+	public void writeMessageBody(OutputStream os) {
+	}
+
     /**
      * Tells if the upload state doesnt allow the connection to receive
      * another request on the same connection. This state never allows 

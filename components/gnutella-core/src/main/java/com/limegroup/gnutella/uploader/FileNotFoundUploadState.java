@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.io.*;
 
@@ -10,29 +11,30 @@ import java.io.*;
  * error codes to the requesting client indicating that this is the 
  * case.
  */
-public final class FileNotFoundUploadState implements UploadState {
+public final class FileNotFoundUploadState implements HTTPMessage {
 
 	/**
-	 * This class implements a HTTP response for the file not being 
-	 * found on the server.
+	 * Constant for the error message to send.
 	 */
-	public void doUpload(HTTPUploader uploader) throws IOException {
-		// Sends a 404 Service Unavailable message 
-		OutputStream ostream = uploader.getOutputStream();
+	private final byte[] ERROR_MESSAGE = 
+		"File not found on server.".getBytes();
 
+	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 		String str;
-		String errMsg = "File not found on server.";
 		str = "HTTP/1.1 404 Not Found\r\n";
 		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());
-	    str = "Content-Length: " + errMsg.length() + "\r\n";
+	    str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
 		ostream.write(str.getBytes());
 		str = "\r\n";
 		ostream.write(str.getBytes());
-		ostream.write(errMsg.getBytes());
+	}
+
+	public void writeMessageBody(OutputStream ostream) throws IOException {
+		ostream.write(ERROR_MESSAGE);
 		ostream.flush();
 	}
     

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.Date;
@@ -11,17 +12,16 @@ import com.limegroup.gnutella.util.CommonUtils;
  * i.e., the real uploader.  It should send the appropriate header information,
  * followed by the actual file.  
  */
-public class NormalUploadState implements UploadState {
+public class NormalUploadState implements HTTPMessage {
     /** The amount of time that a send/wait cycle should take for throttled
      *  uploads.  This should be short enough to not be noticeable in the GUI,
      *  but long enough so that waits are not called so often as to be
      *  inefficient. */
     public static final int CYCLE_TIME=1000;
-	private HTTPUploader _uploader;
-	private OutputStream _ostream;	  
-	private int _index;
-	private String _fileName;
-	private int _fileSize;
+	private final HTTPUploader _uploader;
+	private final int _index;
+	private final String _fileName;
+	private final int _fileSize;
 	private InputStream _fis;
 	private int _amountRead;
     /** @see HTTPUploader#getUploadBegin */
@@ -32,7 +32,7 @@ public class NormalUploadState implements UploadState {
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
 	 */
-	private FileDesc _fileDesc;
+	private final FileDesc _fileDesc;
 
     /** 
 	 * Flag indicating whether we should close the connection after serving
@@ -44,40 +44,87 @@ public class NormalUploadState implements UploadState {
 	 * Constant for the MIME type to return.
 	 */
 	private final String MIME_TYPE = "application/binary";
-    
-	/**
-	 * This class implements a succesful upload version
-	 * of the doUpload method.  It prepares a file, writes
-	 * the appropriate header, then sends the file.
-	 */
-	public void doUpload(HTTPUploader uploader) throws IOException {
-        try {
-            _uploader = uploader;
-            _uploader.setState(_uploader.UPLOADING);
-            /* initialize the global variables */
-            _ostream = _uploader.getOutputStream();
-            _index = _uploader.getIndex();
-            _fileName = _uploader.getFileName();
-            _fileSize = _uploader.getFileSize();
-            _fis =  _uploader.getInputStream();
-            _amountRead = _uploader.amountUploaded();
-            _uploadBegin =  _uploader.getUploadBegin();
-            _uploadEnd =  _uploader.getUploadEnd();
-			_fileDesc = _uploader.getFileDesc();
-            
-            //guard clause
-            if(_fileSize < _uploadBegin)
-                throw new IOException("Invalid Range");
-            
-            //if invalid end-index, then upload upto the end of file
-            if(_uploadEnd <= 0 
-                || _uploadEnd <= _uploadBegin 
-                || _uploadEnd > _fileSize)
-                _uploadEnd = _fileSize;
 
-            /* write the header information to the socket */
-            writeHeader();
-            /* write the file to the socket */
+	/**
+	 * Constructs a new <tt>NormalUploadState</tt>, establishing all 
+	 * invariants.
+	 *
+	 * @param uploaded the <tt>HTTPUploader</tt>
+	 */
+	public NormalUploadState(HTTPUploader uploader) {
+		_uploader = uploader;
+		_fileDesc = _uploader.getFileDesc();
+		_index = _uploader.getIndex();	
+		_fileName = _uploader.getFileName();
+		_fileSize = _uploader.getFileSize();   
+	}
+    
+	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+		try {
+			_uploader.setState(_uploader.UPLOADING);
+
+			_fis =  _uploader.getInputStream();
+			_amountRead = _uploader.amountUploaded();
+			_uploadBegin =  _uploader.getUploadBegin();
+			_uploadEnd =  _uploader.getUploadEnd();
+			//guard clause
+			if(_fileSize < _uploadBegin)
+				throw new IOException("Invalid Range");
+			
+			//if invalid end-index, then upload upto the end of file
+			if(_uploadEnd <= 0 
+			   || _uploadEnd <= _uploadBegin 
+			   || _uploadEnd > _fileSize)
+				_uploadEnd = _fileSize;
+			String str;
+			str = "HTTP/1.1 200 OK\r\n";
+			ostream.write(str.getBytes());
+			str = "Server: "+CommonUtils.getHttpServer()+"\r\n";
+			ostream.write(str.getBytes());
+			String type = getMimeType();       // write this method later  
+			str = "Content-Type: " + type + "\r\n";
+			ostream.write(str.getBytes());
+			str = "Content-Length: "+ (_uploadEnd - _uploadBegin) + "\r\n";
+			ostream.write(str.getBytes());
+			
+			// Version 0.5 of limewire misinterpreted Content-range
+			// to be 1 - n instead of 0 - (n-1), but because this is
+			// an optional field in the regular case, we don't need
+			// to send it.
+			// 
+			// Earlier version of LimeWire mistakenly sent "bytes=" instead of
+			// "bytes ".  Thankfully most clients understand both.
+			//
+			// _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
+			// an INCLUSIVE index.
+			if (_uploadBegin != 0) {
+				str = "Content-Range: bytes " + _uploadBegin  +
+				"-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n";
+				ostream.write(str.getBytes());
+			}
+			if(_fileDesc != null) {
+				HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
+									  _fileDesc.getSHA1Urn(),
+									  ostream);
+				if(_fileDesc.hasAlternateLocations()) {
+					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+										  _fileDesc.getAlternateLocationCollection(),
+										  ostream);
+				}
+			}
+			
+			str = "\r\n";
+			ostream.write(str.getBytes());
+		} catch(IOException e) {
+            //set the connection to be closed, in case of IO exception
+            _closeConnection = true;
+            throw e;
+		}
+	}
+
+	public void writeMessageBody(OutputStream ostream) throws IOException {
+        try {            
+            // write the file to the socket 
             int c = -1;
             byte[] buf = new byte[1024];
 
@@ -89,16 +136,16 @@ public class NormalUploadState implements UploadState {
             int speed=manager.getUploadSpeed();
             if (speed==100) {
                 //Special case: upload as fast as possible
-                uploadUnthrottled();
+                uploadUnthrottled(ostream);
             } else {
                 //Normal case: throttle uploads. Similar to above but we
                 //sleep after sending data.
-                uploadThrottled();
+                uploadThrottled(ostream);
             }
-        } catch(IOException ioe) {
+        } catch(IOException e) {
             //set the connection to be closed, in case of IO exception
             _closeConnection = true;
-            throw ioe;
+            throw e;
         }
 
         _uploader.setState(_uploader.COMPLETE);
@@ -108,7 +155,7 @@ public class NormalUploadState implements UploadState {
      * Uploads the file at maximum rate possible
      * @exception IOException If there is any I/O problem while uploading file
      */
-    private void uploadUnthrottled() throws IOException {
+    private void uploadUnthrottled(OutputStream ostream) throws IOException {
         int c = -1;
         byte[] buf = new byte[1024];
         
@@ -120,7 +167,7 @@ public class NormalUploadState implements UploadState {
             if( c > (_uploadEnd - _amountRead))
                 c = _uploadEnd - _amountRead;
             try {
-                _ostream.write(buf, 0, c);
+                ostream.write(buf, 0, c);
             } catch (java.net.SocketException e) {
                 throw new IOException();
             }
@@ -130,14 +177,14 @@ public class NormalUploadState implements UploadState {
             //finish uploading if the desired amount has been uploaded
             if(_amountRead >= _uploadEnd)
                 break;
-        }
-    }
+        }}
+	
     
     /**
      * Throttles the uploads by sleeping periodically
      * @exception IOException If there is any I/O problem while uploading file
      */
-    private void uploadThrottled() throws IOException {
+    private void uploadThrottled(OutputStream ostream) throws IOException {
         while (true) {
             int max = _uploader.getManager().calculateBandwidth();
             int burstSize=max*CYCLE_TIME;
@@ -155,7 +202,7 @@ public class NormalUploadState implements UploadState {
                     if( c > (_uploadEnd - _amountRead))
                         c = _uploadEnd - _amountRead;
                 try {
-                    _ostream.write(buf, 0, c);
+                    ostream.write(buf, 0, c);
                 } catch (java.net.SocketException e) {
                     throw new IOException();
                 }
@@ -191,57 +238,6 @@ public class NormalUploadState implements UploadState {
 	 * this later. assume binary for now */
 	private String getMimeType() {
         return "application/binary";                  
-	}
-
-	/**
-	 * writes the appropriate header information to the socket
-	 */
-	private void writeHeader() throws IOException {
-		String str;
-		str = "HTTP/1.1 200 OK\r\n";
-		_ostream.write(str.getBytes());
-		str = "Server: "+CommonUtils.getHttpServer()+"\r\n";
-		_ostream.write(str.getBytes());
-		String type = getMimeType();       // write this method later  
-		str = "Content-Type: " + type + "\r\n";
-		_ostream.write(str.getBytes());
-		str = "Content-Length: "+ (_uploadEnd - _uploadBegin) + "\r\n";
-		_ostream.write(str.getBytes());
-
-		// Version 0.5 of limewire misinterpreted Content-range
-		// to be 1 - n instead of 0 - (n-1), but because this is
-		// an optional field in the regular case, we don't need
-		// to send it.
-        // 
-        // Earlier version of LimeWire mistakenly sent "bytes=" instead of
-        // "bytes ".  Thankfully most clients understand both.
-        //
-        // _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
-        // an INCLUSIVE index.
-		if (_uploadBegin != 0) {
-			str = "Content-Range: bytes " + _uploadBegin  +
-			"-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n";
-			_ostream.write(str.getBytes());
-		}
-		if(_fileDesc != null) {
-			HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
-								  _fileDesc.getSHA1Urn(),
-								  _ostream);
-			if(_fileDesc.hasAlternateLocations()) {
-				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-									  _fileDesc.getAlternateLocationCollection(),
-									  _ostream);
-//AAAAA
-//System.out.println("Uploader Send (??):");
-//System.out.println(_fileDesc.getAlternateLocationCollection());
-//System.out.println("-------");
-//AAAAA
-			}
-		}
-		
-		 str = "\r\n";
-		_ostream.write(str.getBytes());
-		
 	}
 
     
