@@ -94,6 +94,11 @@ public class JOrbisComment {
     
     	write(out);
     
+    	out.flush();
+    	
+    	if (tempFile.length() == 0)
+    	    throw new IOException("writing of file failed");
+    	
     	//rename fails on some rare filesystem setups
     	if (!FileUtils.forceRename(tempFile,file)){
     		//something's seriously wrong
