@@ -176,7 +176,6 @@ public class StatisticsRecorder
                     "\n\n");
                 out.print(generateSendString());
                 out.close();
-                InputStream input = connection.getInputStream();
             }
             catch(Throwable t)
             {
