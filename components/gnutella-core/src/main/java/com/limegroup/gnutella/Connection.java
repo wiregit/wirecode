@@ -165,15 +165,28 @@ public class Connection implements Runnable {
 	out.flush();
     }
 
+    /**
+     * @modifies network
+     * @effects attempts to read s.size() characters from the network/
+     *  If they do not match s, throws IOException.  If the characters
+     *  cannot be read within TIMEOUT milliseconds (as defined by the
+     *  property manager), throws IOException.
+     */
     protected synchronized void expectString(String s) throws IOException {
-	//TODO1: timeout.
-	byte[] bytes=s.getBytes();
-	for (int i=0; i<bytes.length; i++) {
-	    int got=in.read();
-	    if (got==-1)
-		throw new IOException();
-	    if (bytes[i]!=(byte)got)
-		throw new IOException();
+	int oldTimeout=sock.getSoTimeout();
+	try {
+	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
+	    byte[] bytes=s.getBytes();
+	    for (int i=0; i<bytes.length; i++) {
+		int got=in.read();
+		if (got==-1)
+		    throw new IOException();
+		if (bytes[i]!=(byte)got)
+		    throw new IOException();
+	    }
+	} finally {
+	    //Restore socket timeout.
+	    sock.setSoTimeout(oldTimeout);
 	}
     }
     
@@ -205,19 +218,22 @@ public class Connection implements Runnable {
      *
      * @requires this is in the CONNECTED state
      * @effects exactly like Message.read(), but blocks until a 
-     *  message is available.
+     *  message is available.  A half-completed message
+     *  results in InterruptedIOException.
      */
     public Message receive() throws IOException, BadPacketException {
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
 	//Can't use same lock as send()!
 	synchronized(in) {
-	    Message m=Message.read(in);
-	    received++;  //keep statistics.
-	    if (manager!=null)
-		manager.total++;
-	    //	    if (m!=null)
-	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
-	    return m;
+	    while (true) {
+		Message m=Message.read(in);
+		if (m==null) 
+		    continue;
+		received++;  //keep statistics.
+		if (manager!=null)
+		    manager.total++;
+		return m;
+	    }
 	}
     }
 
@@ -237,7 +253,13 @@ public class Connection implements Runnable {
 	    int oldTimeout=sock.getSoTimeout();
 	    sock.setSoTimeout(timeout);
 	    try {
-		return receive();
+		Message m=Message.read(in);
+		if (m==null)
+		    throw new InterruptedIOException();
+		received++;  //keep statistics.
+		if (manager!=null)
+		    manager.total++;
+		return m;		
 	    } finally {
 		sock.setSoTimeout(oldTimeout);
 	    }
@@ -276,6 +298,14 @@ public class Connection implements Runnable {
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for run");
 	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null,
 		    "Illegal manager state for run");
+	//We won't wait more than TIMEOUT milliseconds for a half-completed message.
+	//However, we will wait as long as necessary for an incomplete message.
+	//See Message.read(..) for an explanation.
+	try {
+	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
+	} catch (SocketException e) {
+	    //Ignore?
+	}
 	try {
 	    while (true) {
 		Message m=null;
