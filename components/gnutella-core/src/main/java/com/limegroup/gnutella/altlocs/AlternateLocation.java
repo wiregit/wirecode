@@ -190,7 +190,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		    throw new NullPointerException("cannot accept null URN");
 		int port = rfd.getPort();
 
-		if (!rfd.isPushCapable()) {
+		if (!rfd.needsPush()) {
 			URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 			return new AlternateLocation(url, urn);

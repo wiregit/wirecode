@@ -2551,7 +2551,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         File incFile = incompleteFile;
         HTTPDownloader ret;
-        boolean needsPush = rfd.isPushCapable();//needsPush(rfd);
+        boolean needsPush = rfd.needsPush();//needsPush(rfd);
         
         
         synchronized (this) {

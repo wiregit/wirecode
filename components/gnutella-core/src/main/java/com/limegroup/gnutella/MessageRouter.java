@@ -2607,8 +2607,6 @@ public abstract class MessageRouter {
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
     	
-    	boolean send=false;
-    	
     	if (_udpHeadRequests.add(conn.getInetAddress())){
     		HeadPong pong = new HeadPong(ping);
     		conn.send(pong);

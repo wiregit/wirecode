@@ -190,7 +190,21 @@ public class PushEndpoint {
 		if (!(other instanceof PushEndpoint))
 			return false;
 		
-		return hashCode() == other.hashCode();
+		PushEndpoint o = (PushEndpoint)other;
+		
+		//same guid
+		boolean ret = Arrays.equals(_clientGUID,o.getClientGUID());
+		
+		//same # of push proxies
+		ret = ret & _proxies.size() == o.getProxies().size();
+		
+		//and the same proxies
+		HashSet temp = new HashSet(_proxies);
+		temp.retainAll(o.getProxies());
+		
+		ret = ret & temp.size() ==_proxies.size();
+		
+		return ret;
 	}
 	
 	public String toString() {

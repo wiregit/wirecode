@@ -40,7 +40,7 @@ public final class AlternateLocationCollection
 	 * LOCKING: same as for LOCATIONS
 	 * INVARIANT: this is always a subset of LOCATIONS.  can be empty.
 	 */
-	private final Set PUSH_LOCATIONS = new HashSet(MAX_SIZE);
+	private final FixedSizeSortedSet PUSH_LOCATIONS = new FixedSizeSortedSet(MAX_SIZE);
 	
         
     /**
@@ -391,11 +391,11 @@ public final class AlternateLocationCollection
     public byte [] toBytesPush(int number) {
     	
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	Set clone = new HashSet();
+    	FixedSizeSortedSet clone;
     	
     	
     	synchronized(this) {
-    		clone.addAll(PUSH_LOCATIONS);
+    		clone =(FixedSizeSortedSet)PUSH_LOCATIONS.clone();
     	}
     	
     	int total = 0;

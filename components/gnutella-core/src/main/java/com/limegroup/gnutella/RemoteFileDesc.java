@@ -84,7 +84,8 @@ public class RemoteFileDesc implements Serializable {
     private boolean _http11;
     
     /**
-     * The <tt>Set</tt> of proxies for this host -- can be empty.
+     * The <tt>PushEndpoint</tt> for this RFD.
+     * if null, the rfd is not behind a push proxy.
      */
     private transient PushEndpoint _pushAddr;
 		
@@ -247,8 +248,9 @@ public class RemoteFileDesc implements Serializable {
 		_index = index;
 		_filename = filename;
 		_size = size;
-		_pushAddr = new PushEndpoint(clientGUID,proxies);
-		_clientGUID = _pushAddr.getClientGUID();
+		if (clientGUID!=null)
+			_pushAddr = new PushEndpoint(clientGUID,proxies);
+		_clientGUID = clientGUID;
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
@@ -603,7 +605,10 @@ public class RemoteFileDesc implements Serializable {
      *  for this host -- can be empty
      */
     public final Set getPushProxies() {
-        return _pushAddr.getProxies();
+    	if (_pushAddr!=null)
+    		return _pushAddr.getProxies();
+    	else
+    		return DataUtils.EMPTY_SET;
     }
 
     /**
@@ -639,9 +644,9 @@ public class RemoteFileDesc implements Serializable {
     
     /**
      * 
-     * @return whether a push can/should be sent tho this rfd.
+     * @return whether a push should be sent tho this rfd.
      */
-    public boolean isPushCapable() {
+    public boolean needsPush() {
     	return _firewalled && _pushAddr!=null &&
 			_pushAddr.getProxies().size()>0;
     }
