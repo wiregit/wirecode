@@ -302,7 +302,15 @@ public final class AlternateLocation
 	private static URL createUrl(final String locationHeader) 
 		throws IOException {
 		String test = locationHeader.toLowerCase();
-		String urlString;		
+		String urlString;	
+
+		// we currently only support the http protocol specifier or the
+		// X-Gnutella-Alternate-Location specifier for the beginning
+		// of the alternate location line
+		if(!(test.startsWith("http") || 
+			 HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test))) {
+			throw new IOException("invalid start for alternate location");
+		}
 		if(!test.startsWith("http")) {
 			int colonIndex  = locationHeader.indexOf(":");
 			if(colonIndex == -1) {
