@@ -659,6 +659,9 @@ public abstract class FileManager {
 		if (! loadThreadInterrupted())
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
+
+        // prune away old creation times that may still exist
+        CreationTimeCache.instance().pruneTimes();
 		    
 		// write out the cache of URNs and creation times
 		UrnCache.instance().persistCache();

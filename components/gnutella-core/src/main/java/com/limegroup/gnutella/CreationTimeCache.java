@@ -71,7 +71,7 @@ public final class CreationTimeCache {
         URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
         TIME_TO_URNSET_MAP = new TreeMap(new MyComparator());
-		removeOldEntries(URN_TO_TIME_MAP);
+        pruneTimes(false);
         constructURNMap();
 	}
     
@@ -90,21 +90,39 @@ public final class CreationTimeCache {
      */
     public synchronized void removeTime(URN urn) {
         URN_TO_TIME_MAP.remove(urn);
-        
-        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
-        // find the urn in the map:
-        // 1) get rid of it
-        // 2) get rid of the empty set if it exists
+        removeURNFromURNSet(urn);
+    }
+
+
+    /**
+     * Clears away any URNs for files that do not exist anymore.
+     * @param shouldClearURNSetMap true if you want to clear TIME_TO_URNSET_MAP
+     * too
+     */
+    private synchronized void pruneTimes(boolean shouldClearURNSetMap) {
+        Iterator iter = URN_TO_TIME_MAP.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry currEntry = (Map.Entry) iter.next();
-            Set urnSet = (Set) currEntry.getValue();
-            if (urnSet.contains(urn)) {
-                urnSet.remove(urn); // 1)
-                if (urnSet.size() < 1) iter.remove(); // 2)
-                break;
+            URN currURN = (URN) currEntry.getKey();
+            
+            // check to see if file still exists
+            FileDesc fd = fileManager.getFileDescForUrn(currURN);
+            if ((fd == null) || (fd.getFile() == null) || 
+                !fd.getFile().exists()) {
+                iter.remove();
+                if (shouldClearURNSetMap) removeURNFromURNSet(currURN);
             }
         }
     }
+
+    
+    /**
+     * Clears away any URNs for files that do not exist anymore.
+     */
+    public synchronized void pruneTimes() {
+        pruneTimes(true);
+    }
+
 
     /**
      * Add a CreationTime for the specified <tt>URN</tt> instance.
@@ -183,27 +201,23 @@ public final class CreationTimeCache {
         }
     }
 
-    
-	/**
-	 * Removes any stale entries from the map so that they will automatically
-	 * be replaced.
-	 *
-	 * @param map the <tt>Map</tt> to check
-	 */
-	private static void removeOldEntries(Map map) {
-        // discard outdated info
-        Iterator iter = map.keySet().iterator();
-        while (iter.hasNext()) {
-			URN key = (URN) iter.next();
-            if(key == null) continue;
 
-            // check to see if file still exists
-            FileDesc fd = fileManager.getFileDescForUrn(key);
-            if ((fd == null) || (fd.getFile() == null) || 
-                !fd.getFile().exists())
-                iter.remove();
+    private synchronized void removeURNFromURNSet(URN urn) {
+        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
+        // find the urn in the map:
+        // 1) get rid of it
+        // 2) get rid of the empty set if it exists
+        while (iter.hasNext()) {
+            Map.Entry currEntry = (Map.Entry) iter.next();
+            Set urnSet = (Set) currEntry.getValue();
+            if (urnSet.contains(urn)) {
+                urnSet.remove(urn); // 1)
+                if (urnSet.size() < 1) iter.remove(); // 2)
+                break;
+            }
         }
     }
+    
 
     /**
      * Constructs the TIME_TO_URNSET_MAP, which is based off the entries in the
