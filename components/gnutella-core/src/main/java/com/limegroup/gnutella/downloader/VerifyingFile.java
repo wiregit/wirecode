@@ -27,9 +27,12 @@ public class VerifyingFile {
      */
     private IntervalSet writtenBlocks;
     
-    public VerifyingFile(RandomAccessFile file, boolean checkOverlap,
-                             ManagedDownloader md) {
-        this.fos =  file;
+    public VerifyingFile(File file, boolean checkOverlap,ManagedDownloader md) {
+        try{
+            this.fos =  new RandomAccessFile(file,"rw");
+        } catch(IOException e) {
+            //if this fails we will throw exception later, when we try to write
+        }
         this.checkOverlap = checkOverlap;
         this.managedDownloader = md;
         writtenBlocks = new IntervalSet();
@@ -38,12 +41,10 @@ public class VerifyingFile {
     /**
      * This method just delegates to IntervalSet.add. We need this method, 
      * because when we are reading from IncompleteFileManger, we need to add 
-     * blocks to the IntervalSet. 
+     * blocks to the IntervalSet. This method is used by IncompleteFileManager
+     * to add blocks from older LimeWire's downloads.dat
      */
     public synchronized void addInterval(Interval interval) {
-        //TODO1: Eventually the IncompleteaFileManager will rememeber 
-        //VerifyingFiles and so this method will not be needed, so it 
-        //should be removed.
         writtenBlocks.add(interval);
     }
 
@@ -85,6 +86,26 @@ public class VerifyingFile {
         writtenBlocks.add(new Interval((int)currPos, (int)currPos+numBytes-1));
     }
 
+    public synchronized Iterator getBlocks() {
+        return writtenBlocks.getAllIntervals();
+    }
+
+    public synchronized Iterator getFreeBlocks(int maxSize) {
+        return writtenBlocks.getNeededIntervals(maxSize);
+    }
+
+    public synchronized int getBlockSize() {
+        return writtenBlocks.getSize();
+    }
+  
+    public void close() {
+        try { 
+            fos.close();
+        } catch (IOException ioe) {}
+    }
+    
+    /////////////////////////private helpers//////////////////////////////
+    
     /*
      * @return the number of bytes from low where the two intervals,
      * begin to overlap.
@@ -96,11 +117,5 @@ public class VerifyingFile {
         else //interval.low > low
             return interval.low - (int)low;
             
-    }
-       
-    public void close() {
-        try { 
-            fos.close();
-        } catch (IOException ioe) {}
     }
 }

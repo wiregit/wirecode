@@ -674,7 +674,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                    +incomplete.getName());
             //Get the size of the first block of the file.  (Remember
             //that swarmed downloads don't always write in order.)
-            int size=amountForPreview(incomplete);
+            int size=amountForPreview();
             if (size<=0)
                 return null;
             //Copy first block, returning if nothing was copied.
@@ -703,21 +703,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param incompleteFile the file to examine, which MUST correspond to
      *  the current download.
      */
-    private synchronized int amountForPreview(File incompleteFile) {
-        //Add completed regions from HTTPDownloader to IncompleteFileManager.
-        updateIncompleteFileManager();
+    private synchronized int amountForPreview() {
         //And find the first block.
-        synchronized (incompleteFileManager) {
-            for (Iterator iter=incompleteFileManager.getBlocks(incompleteFile);
-                     iter.hasNext() ; ) {
+        synchronized (commonOutFile) {
+            for (Iterator iter=commonOutFile.getBlocks();iter.hasNext() ; ) {
                 Interval interval=(Interval)iter.next();
-                if (interval.low==0) {
+                if (interval.low==0)
                     return interval.high;
-                }
             }
         }
-        //Nothing to preview!
-        return 0;
+        return 0;//Nothing to preview!
     }
 
 
@@ -730,7 +725,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file to the library.  Called from dloadManagerThread.  
      */
     private void tryAllDownloads() {     
-
         // the number of requeries i've done...
         int numRequeries = 0;
         // the time to next requery.  We don't want to send the first requery
@@ -741,9 +735,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             + getMinutesToWaitForRequery(numRequeries)*60*1000;
 
         synchronized (this) {
-            buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
+            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
         }
-
         //While not success and still busy...
         while (true) {
             try {
@@ -1014,7 +1007,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incompleteFile, String name) {
         corruptFileBytes=getAmountRead();        
-        incompleteFileManager.removeBlocks(incompleteFile);
+        incompleteFileManager.removeEntry(incompleteFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
         //directory (INCOMPLETE_DIRECTORY).
@@ -1060,26 +1053,22 @@ public class ManagedDownloader implements Downloader, Serializable {
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
-                RandomAccessFile file = null;
-                try {
-                    file = new RandomAccessFile(incompleteFile,"rw");
-                }catch (IOException fnfx) {
-                    debug("could not create random access file...returning");
-                    return GAVE_UP;//TODO3: Is this appropriate?
-                }
-                debug("creating a verifying file");
-                commonOutFile = new VerifyingFile(file, true, this);
                 synchronized (incompleteFileManager) {
-                    //update VerifyingFile
-                    Iterator i=incompleteFileManager.getBlocks(incompleteFile);
-                    while(i.hasNext()) 
-                        commonOutFile.addInterval((Interval)i.next());
-                    //update needed
-                    Iterator iter=incompleteFileManager.
-                    getFreeBlocks(incompleteFile, rfd.getSize());
-                    while (iter.hasNext())
-                        needed.add((Interval)iter.next());
+                    //get VerifyingFile
+                    commonOutFile=
+                    incompleteFileManager.getEntry(incompleteFile,this);
                 }
+                if(commonOutFile==null) {//no entry in incompleteFM
+                    debug("creating a verifying file");
+                    commonOutFile = new VerifyingFile(incompleteFile,true,this);
+                    //we must add an entry for this in IncompleteFileManager
+                    incompleteFileManager.
+                                   addEntry(incompleteFile,commonOutFile);
+                }
+                //update needed
+                Iterator iter=commonOutFile.getFreeBlocks(rfd.getSize());
+                while (iter.hasNext())
+                    needed.add((Interval)iter.next());
             }
         }
 
@@ -1384,8 +1373,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         //this line can throw a bunch of exceptions.
         dloader.connectHTTP(getOverlapOffset(interval.low), interval.high);
-
-        dloader.stopAt(interval.high);
+        //Note: Intervals are used so the high'th byte will also be downloaded.
+        //But HTTPDownloader won't download the high'th byte.
+        dloader.stopAt(interval.high+1);
         debug("WORKER: picking white "+interval+" to "+dloader);
     }
 
@@ -1501,10 +1491,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(!problem)
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
-                incompleteFileManager.addBlock(
-                    incompleteFileManager.getFile(rfd),
-                    init,
-                    init+downloader.getAmountRead());
                 this.notifyAll();
             }
         }
@@ -1521,7 +1507,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //   -no elements of needed overlap any of the downloaders (500)
         //   -no downloaders overlap each other (500)
         int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
-        int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead();
+        int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead()-1;
+        //note: the high'th byte will also be downloaded.
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
             Interval in = new Interval(low,high);
             debug("Updating needed. Adding interval "+in+" from "+dloader);
@@ -1667,24 +1654,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         files = null;
     }
 
-    /**
-     * Ensures that any blocks downloaded by this is recorded in
-     * IncompleteFileManager.  Useful for checkpointing incomplete state.  
-     */
-    public synchronized void updateIncompleteFileManager() {
-        //See tryOneDownload.
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
-            HTTPDownloader downloader=(HTTPDownloader)iter.next();
-            File file=incompleteFileManager.getFile(
-                          downloader.getRemoteFileDesc());
-            int init=downloader.getInitialReadingPoint();
-            int stop=init+downloader.getAmountRead();
-            
-            incompleteFileManager.addBlock(file, init, stop);
-        }
-    }
-
-
     /////////////////////////////Display Variables////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
@@ -1758,10 +1727,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized int getAmountRead() {
         if (state!=CORRUPT_FILE) {
-            updateIncompleteFileManager();
-            File incompleteFile=incompleteFileManager.getFile(
-                currentFileName, currentFileSize);
-            return incompleteFileManager.getBlockSize(incompleteFile);
+            return commonOutFile.getBlockSize();
         } else {
             return corruptFileBytes;
         }

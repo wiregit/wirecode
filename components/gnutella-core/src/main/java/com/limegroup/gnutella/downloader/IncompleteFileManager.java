@@ -106,196 +106,53 @@ public class IncompleteFileManager implements Serializable {
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
-     * Returns an unmodifiable iterator of the complete blocks of the given
-     * file, each as a half-open Interval.  If nothing is known of the file,
-     * returns an empty iterator.  <b>Be sure to synchronize on this when using
-     * the Iterator in a multithreaded environment.</b>
-     *
-     * @param incompleteFile a fully qualified temporary file, i.e., the result
-     *  of getFile
-     * @return an iterator of Interval.  For each interval I, bytes I.low to
-     *  I.high-1 of incompleteFile have been written.  
+     * Removes the entry corresponding to the given incomplete file from this.
      */
-    public synchronized Iterator getBlocks(File incompleteFile) {
-        //TODO3: return unmodifiable
-        List intervals=(List)blocks.get(incompleteFile);
-        if (intervals==null)
-            return (new LinkedList()).iterator();
-        else
-            return intervals.iterator();
-    }
-    
-    /** 
-     * Returns the total amount of the given file on disk, i.e., the sum of all
-     * the size of all intervals returned by getBlocks(incompleteFile).
-     * 
-     * @param incompleteFile a fully qualified temporary file, i.e., the result
-     *  of getFile
-     * @return the amount of the file downloaded
-     */
-    public synchronized int getBlockSize(File incompleteFile) {
-        //If this is slow, it can be optimized by augmenting the data structure.
-        int sum=0;
-        for (Iterator iter=getBlocks(incompleteFile); iter.hasNext(); ) {
-            Interval block=(Interval)iter.next();
-            sum+=block.high-block.low;
-        }
-        return sum;
-    }
-
-    /**
-     * Notes that bytes low to high-1 of incompleteFile has been has been
-     * written to disk.  This method is idempotent; it is acceptable to call
-     * it multiple times with overlapping intervals.
-     *
-     * @param incompleteFile a fully qualified temporary file, i.e., the result
-     *  of getFile
-     * @param low the index of the first byte written
-     * @param high the index of the last byte written plus one
-     * @exception IllegalArgumentException if low>high
-     */
-    public synchronized void addBlock(File incompleteFile, int low, int high) 
-            throws IllegalArgumentException {
-        repOk();
-        if (low>high)
-            throw new IllegalArgumentException();
-        if (low==high)
-            return;  //empty interval!
-
-        //Get list of blocks assocated with incompleteFile, creating new one if
-        //necessary.
-        List intervals=(List)blocks.get(incompleteFile);
-        if (intervals==null) {
-            intervals=new LinkedList();
-            blocks.put(incompleteFile, intervals);
-        }
- 
-        //Search for intervals bordering above and below.  This has some
-        //similarities to IntSet.add, but I can't find any way of factoring
-        //that.
-        Interval lower=null;
-        Interval higher=null;
-        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            Interval interval=(Interval)iter.next();
-            if (low<=interval.low && interval.high<=high) {//  <low-------high>
-                iter.remove();                             //      interval
-                continue;
-            }
-
-            if (low<=interval.high && interval.low<low)    //     <low, high>
-                lower=interval;                            //  interval........
-
-            if (interval.low<=high && interval.high>high)  //     <low, high>
-                higher=interval;                           //  .........interval
-        }
-
-        //Add block.  Note that remove(..) is linear time.  That's not an issue
-        //because there are typically few blocks.
-        if (lower==null && higher==null) {
-            //a) Doesn't overlap
-            intervals.add(new Interval(low, high));
-        } else if (lower!=null && higher!=null) {
-            //b) Join two blocks
-            intervals.remove(higher);
-            intervals.remove(lower);
-            intervals.add(new Interval(lower.low, higher.high));
-        } else if (higher!=null) {
-            //c) Join with higher
-            intervals.remove(higher);
-            intervals.add(new Interval(low, higher.high));
-        } else if (lower!=null) {
-            //d) Join with lower
-            intervals.remove(lower);
-            intervals.add(new Interval(lower.low, high));
-        }   
-        repOk();
-    }
-
-    /** 
-     * Removes the blocks corresponding to the given incomplete file from this.
-     */
-    public synchronized void removeBlocks(File incompleteFile) {
+    public synchronized void removeEntry(File incompleteFile) {
         blocks.remove(incompleteFile);
     }
 
-    /**
-     * Returns the blocks in this that are not written.  This assumes that no
-     * downloaders are currently writing to the file.  <b>Be sure to synchronize
-     * on this when using the Iterator in a multithreaded environment.</b>
-     * 
-     * @param incompleteFile a fully qualified temporary file, i.e., the result
-     *  of getFile
-     * @param fileSize the size of the file.  (Needed in case 
-     *  incompleteFile doesn't exist.)
-     * @return an Iterator of Interval.  For each interval I, I.low to
-     *  I.high-1 needs downloading
-     */
-    public synchronized Iterator getFreeBlocks(File incompleteFile,
-                                               int fileSize) {
-        List intervals=(List)blocks.get(incompleteFile);
-        if (intervals==null || intervals.size()==0) {
-            //Nothing recorded?
-            Interval block=new Interval(0, fileSize);
-            List buf=new LinkedList(); 
-            buf.add(block);
-            return buf.iterator();
-        }
-            
-        //Sort list by low point in ascending order.  This has a side effect but
-        //it doesn't matter.
-        Collections.sort(intervals, new IntervalComparator());
-
-        //Now step through list one element at a time, putting gaps into buf.
-        //We take advantage of the fact that intervals are disjoint.  Treat
-        //beginning specially.  
-        //LOOP INVARIANT: interval!=null ==> low==interval.high
-        List buf=new LinkedList();
-        int low=0;
-        Interval interval=null;
-        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            interval=(Interval)iter.next();
-            if (low<interval.low)      //needed for first interval
-                buf.add(new Interval(low, interval.low));
-            low=interval.high;
-        }
-        //Special case space between last block and end of file.
-        Assert.that(interval!=null, "Null interval in getFreeBlocks");
-        if (interval.high<fileSize)
-            buf.add(new Interval(interval.high, fileSize));
-        
-        return buf.iterator();
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
+        blocks.put(incompleteFile,vf);
     }
 
-    private class IntervalComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            Interval ia=(Interval)a;
-            Interval ib=(Interval)b;
-            return ia.low-ib.low;
-        }
-    }
-
-    /** Tests all invariants.  Slow if actually enabled. */
-    private void repOk() {
-        /*
-        //For each block list
-        for (Iterator values=blocks.values().iterator(); values.hasNext(); ) {
-            List blockList=(List)values.next();
-            //Make sure blocks are disjoint (quadratic time)
-            for (Iterator iter1=blockList.iterator(); iter1.hasNext(); ) {
-                Interval a=(Interval)iter1.next();
-                for (Iterator iter2=blockList.iterator(); iter2.hasNext(); ) {
-                    Interval b=(Interval)iter2.next();
-                    if (a!=b) {
-                        Assert.that(! a.overlaps(b), 
-                                    "Intervals "+a+" and "+b+" overlap!");
-                        Assert.that(! a.adjacent(b), 
-                                    "Intervals "+a+" and "+b+" are adjacent!");
-                    }
-                }
+    public synchronized VerifyingFile getEntry(File incompleteFile,
+                                               ManagedDownloader md) {
+        Object o = blocks.get(incompleteFile);
+        if(o==null) //no entry?
+            return null;
+        else if(o instanceof VerifyingFile)
+            return (VerifyingFile)o;
+        else {// (o instanceof List) ie. old downloads.dat
+            Iterator iter = ((List)o).iterator();
+            VerifyingFile vf = new VerifyingFile(incompleteFile,true, md);
+            while(iter.hasNext()) {
+                Interval interval = (Interval)iter.next();
+                vf.addInterval(interval);
             }
+            return vf;
         }
-        */
     }
+    
+    public synchronized int getBlockSize(File incompleteFile) {
+        Object o = blocks.get(incompleteFile);
+        if(o==null)
+            return 0;
+        if(o instanceof VerifyingFile) {
+            VerifyingFile vf = (VerifyingFile)o;
+            return vf.getBlockSize();
+        }
+        else {//o instanceof List
+            int sum=0;
+            List l = (List)o;
+            for (Iterator iter=l.iterator(); iter.hasNext(); ) {
+                Interval block=(Interval)iter.next();
+                sum+=block.high-block.low;
+            }
+            return sum;
+        }
+    }
+
 
     public synchronized String toString() {
         StringBuffer buf=new StringBuffer();
@@ -316,7 +173,7 @@ public class IncompleteFileManager implements Serializable {
         buf.append("}");
         return buf.toString();
     }
-
+    
     /*
     public static void main(String args[]) {
         File file=new File("C:/tmp/test.txt");

@@ -120,13 +120,7 @@ public class DownloadManager implements BandwidthTracker {
         buf.addAll(active);
         buf.addAll(waiting);
         
-        //1. Update block list in IncompleteFileManager
-        for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
-            ManagedDownloader downloader=(ManagedDownloader)iter.next();
-            downloader.updateIncompleteFileManager();
-        }
-
-        //2. Write list of active and waiting downloaders, then block list in
+        // Write list of active and waiting downloaders, then block list in
         //   IncompleteFileManager.
         try {
             ObjectOutputStream out=new ObjectOutputStream(
