@@ -412,11 +412,7 @@ public class RemoteFileDesc implements Serializable {
      * it it's a private address
      */
 	public final boolean isPrivate() {
-        try {
-            return NetworkUtils.isPrivateAddress(_host);
-        } catch(UnknownHostException e) {
-            return true;
-        }
+        return NetworkUtils.isPrivateAddress(_host);
 	}
 
     /**
@@ -431,27 +427,15 @@ public class RemoteFileDesc implements Serializable {
     }
 
     /**
-     * @return true if I am not firewalled, multicast host or have private IP
+     * @return true if I am not (firewalled, multicast host, have private IP)
+     *         and i do have a valid port & address.
      */
     public final boolean isAltLocCapable() {
-        boolean isPrivateIP = false;
-        try {
-            isPrivateIP = NetworkUtils.isPrivateAddress(_host);
-        } catch (UnknownHostException e) {
-            isPrivateIP = true; //altloc incapable
-        }
-        if(_replyToMulticast || _firewalled || isPrivateIP)
-            return false;
-        //return true if it's valid        
-        boolean valid = false;
-        try {
-            valid = (NetworkUtils.isValidPort(_port) && 
-                     NetworkUtils.isValidAddress(
-                               InetAddress.getByName(_host).getAddress()) );
-        } catch (UnknownHostException e) {
-            return false;
-        }
-        return valid;
+        return !_replyToMulticast &&
+               !_firewalled &&
+               NetworkUtils.isValidPort(_port) &&
+               !NetworkUtils.isPrivateAddress(_host) &&
+               NetworkUtils.isValidAddress(_host);
     }
 
 	/**
@@ -473,20 +457,23 @@ public class RemoteFileDesc implements Serializable {
         if (! (o instanceof RemoteFileDesc))
             return false;
         RemoteFileDesc other=(RemoteFileDesc)o;        
-		return ((_host == null ? other._host == null : 
-				 _host.equals(other._host)) &&
-				(_port == other._port) &&
-				(_filename == null ? other._filename == null :
-				 _filename.equals(other._filename)) &&
-				(_index == other._index) &&
-				(_clientGUID == null ? other._clientGUID == null :
-				 Arrays.equals(_clientGUID, other._clientGUID)) &&
-				(_speed == other._speed) &&
-				(_size == other._size) &&
-				(getXMLDoc() == null ? other.getXMLDoc() == null :
-				  getXMLDoc().equals(other.getXMLDoc())) &&
-				(_urns == null ? other._urns == null :
-				 _urns.equals(other._urns)));		
+        return nullEquals(_host, other._host) &&
+               _port == other._port &&
+               nullEquals(_filename, other._filename) &&
+               _index == other._index &&
+               byteArrayEquals(_clientGUID, other._clientGUID) &&
+               _speed == other._speed &&
+               _size == other._size &&
+               nullEquals(getXMLDoc(), other.getXMLDoc()) &&
+               nullEquals(_urns, other._urns);
+    }
+    
+    private boolean nullEquals(Object one, Object two) {
+        return one == null ? two == null : one.equals(two);
+    }
+    
+    private boolean byteArrayEquals(byte[] one, byte[] two) {
+        return one == null ? two == null : Arrays.equals(one, two);
     }
 
 	//TODO:: ADD HASHCODE OVERRIDE
