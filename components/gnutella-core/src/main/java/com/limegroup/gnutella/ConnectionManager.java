@@ -695,7 +695,7 @@ public class ConnectionManager {
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
             ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeConnection())
+            if (mc.isSupernodeSupernodeConnection())
                 ret++;
         }
         return ret;

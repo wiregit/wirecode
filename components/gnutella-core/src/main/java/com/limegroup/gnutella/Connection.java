@@ -1523,6 +1523,36 @@ public class Connection {
             return !Boolean.valueOf(value).booleanValue();
 			
     }
+    
+    /** 
+	 * Returns true iff the connection is an Ultrapeer and I am a Ultrapeer,
+     * ie: if I wrote "X-Ultrapeer: true", this connection wrote 
+	 * "X-Ultrapeer: true" (not necessarily in that order).  <b>Does 
+	 * NOT require that QRP is enabled</b> between the two; the Ultrapeer 
+	 * could be using reflector indexing, for example. 
+	 */
+    public boolean isSupernodeSupernodeConnection() {
+        if(_isUltrapeer == null) {
+            _isUltrapeer = 
+                new Boolean(isClientSupernodeConnection2());
+        }
+        return _isUltrapeer.booleanValue();
+    }
+
+    private boolean isSupernodeSupernodeConnection2() {
+        //Is remote host a supernode...
+        if (! isSupernodeConnection())
+            return false;
+
+        //...and am I a leaf node?
+        String value=getPropertyWritten(
+            HeaderNames.X_ULTRAPEER);
+        if (value==null)
+            return false;
+        else 
+            return Boolean.valueOf(value).booleanValue();
+			
+    }    
 
 
 	/**
