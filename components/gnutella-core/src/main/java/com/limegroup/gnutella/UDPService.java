@@ -708,14 +708,22 @@ public class UDPService implements Runnable {
 	            canReceiveSolicited() && 
 	    		_portStable &&
 	    		_lastReportedPort==RouterService.getPort() &&
-	    		_lastReportedIP!=null &&
-	    		Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
+	    		ipStable();
 	    }
 	    
 	    if (!ret)
 	        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
 	    
 	    return ret;
+	}
+	
+	public synchronized boolean ipStable() {
+	    return _lastReportedIP!=null &&
+			Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
+	}
+	
+	public boolean portStable() {
+	    return _portStable;
 	}
 
 	/**
