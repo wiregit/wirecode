@@ -21,14 +21,15 @@ import com.limegroup.gnutella.messages.vendor.*;
 public abstract class Message 
     implements Serializable, com.sun.java.util.collections.Comparable {
     //Functional IDs defined by Gnutella protocol.
-    public static final byte F_PING=(byte)0x0;
-    public static final byte F_PING_REPLY=(byte)0x1;
-    public static final byte F_PUSH=(byte)0x40;
-    public static final byte F_QUERY=(byte)0x80;
-    public static final byte F_QUERY_REPLY=(byte)0x81;
-    public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x30;
-    public static final byte F_VENDOR_MESSAGE=(byte)0x31;
-    public static final byte F_VENDOR_MESSAGE_STABLE=(byte)0x32;
+    public static final byte F_PING                  = (byte)0x0;
+    public static final byte F_PING_REPLY            = (byte)0x1;
+    public static final byte F_PUSH                  = (byte)0x40;
+    public static final byte F_QUERY                 = (byte)0x80;
+    public static final byte F_QUERY_REPLY           = (byte)0x81;
+    public static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
+    public static final byte F_VENDOR_MESSAGE        = (byte)0x31;
+    public static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
+	public static final byte F_UDP_CONNECTION        = (byte)0x41;
     
     public static final int N_UNKNOWN = -1;
     public static final int N_TCP = 1;
