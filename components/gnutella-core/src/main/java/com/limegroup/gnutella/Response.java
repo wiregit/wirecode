@@ -227,6 +227,7 @@ public class Response {
 		} else {
 			this.metadata = metadata.trim();
 		}
+        Assert.that(this.metadata!=null, "Null metadata");
 		this.metaBytes = this.metadata.getBytes();
 		
 		// we don't generate this from the metadata string in the case where the
