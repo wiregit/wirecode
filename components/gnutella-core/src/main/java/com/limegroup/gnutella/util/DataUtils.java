@@ -49,4 +49,15 @@ public final class DataUtils {
      * An 16-length empty byte array, for GUIDs.
      */
     public static final byte[] EMPTY_GUID = new byte[16];
+    
+    /**
+     * Utility function to write out the toString contents
+     * of a URN.
+     */
+    public static String listSet(Set s) {
+        StringBuffer sb = new StringBuffer();
+        for(Iterator i = s.iterator(); i.hasNext();)
+            sb.append(i.next().toString());
+        return sb.toString();
+    }
 }

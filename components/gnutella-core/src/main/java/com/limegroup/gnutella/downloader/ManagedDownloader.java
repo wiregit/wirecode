@@ -1129,8 +1129,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(!bucketHash.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and the bucketHash match.
                 Assert.silent(false, "wrong IFD.\n" +
-                                "ours:   " + incompleteFile +
-                              "\ntheirs: " + ifd.getFile());
+                                "ours  :   " + incompleteFile +
+                              "\ntheirs: " + ifd.getFile() +
+                              "\nour hash    : " + bucketHash +
+                              "\ntheir hashes: " +
+                                DataUtils.listSet(ifd.getUrns()));
                 fileManager.removeFileIfShared(incompleteFile);
                 ifd = null; // do not use, it's bad.
             }
