@@ -23,11 +23,20 @@ import java.net.*;
  */
 public abstract class MessageRouter {
 	
-    protected ConnectionManager _manager;
+    /**
+     * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
+     */
+    protected static ConnectionManager _manager;
 
     /**
-     * @return the GUID we attach to QueryReplies to allow PushRequests in
-     *         response.
+     * Constant for the number of old connections to use when forwarding
+     * traffic from old connections.
+     */
+    private static final int OLD_CONNECTIONS_TO_USE = 5;
+
+    /**
+     * The GUID we attach to QueryReplies to allow PushRequests in
+     * responses.
      */
     protected byte[] _clientGUID;
 
@@ -676,10 +685,15 @@ public abstract class MessageRouter {
 																	  handler), 
 								 handler, counter);
 			}
-		} else if(request.getTTL() > 0) {
-			// send the request to intra-Ultrapeer connections -- this does
+		} else if(request.getTTL() > 0 && !RouterService.isLeaf()) {
+            // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
-			broadcastQueryRequest(request, handler);
+            if(handler.isGoodConnection()) {
+                // send it to everyone
+                forwardQueryToUltrapeers(request, handler);
+            } else {
+                forwardLimitedQueryToUltrapeers(request, handler);
+            }
 		}
 			
         if (locallyEvaluate) {
@@ -815,7 +829,7 @@ public abstract class MessageRouter {
 														FOR_ME_REPLY_HANDLER), 
 							 FOR_ME_REPLY_HANDLER, counter);
 		} else {
-			broadcastQueryRequest(query, FOR_ME_REPLY_HANDLER);
+            originateLeafQuery(query);
 		} 
 		
 		// always send the query to your multicast people
@@ -974,8 +988,8 @@ public abstract class MessageRouter {
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    protected void broadcastQueryRequest(QueryRequest query,
-										 ReplyHandler handler) {
+    private void forwardQueryToUltrapeers(QueryRequest query,
+                                          ReplyHandler handler) {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
 		
@@ -983,39 +997,116 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List list=_manager.getInitializedConnections2();
-		int limit;
-		if(handler.isGoodConnection()) {
-			limit = list.size();
-		} else {
-			limit = Math.min(5, list.size());
-		}
+		List list = _manager.getInitializedConnections2();
+        int limit = list.size();
+
+		for(int i=0; i<limit; i++) {
+			ManagedConnection mc = (ManagedConnection)list.get(i);      
+            forwardQueryToUltrapeer(query, handler, mc);  
+        }
+    }
+
+    /**
+     * Performs a limited broadcast of the specified query.  This is
+     * useful, for example, when receiving queries from old-style 
+     * connections that we don't want to forward to all connected
+     * Ultrapeers because we don't want to overly magnify the query.
+     *
+     * @param query the <tt>QueryRequest</tt> instance to forward
+     * @param handler the <tt>ReplyHandler</tt> from which we received
+     *  the query
+     */
+    private void forwardLimitedQueryToUltrapeers(QueryRequest query,
+                                                 ReplyHandler handler) {
+		//Broadcast the query to other connected nodes (ultrapeers or older
+		//nodes), but DON'T forward any queries not originating from me 
+		//along leaf to ultrapeer connections.
+	 
+		List list = _manager.getInitializedConnections2();
+        int limit = list.size();
 
 		// are we sending it to the last hop??
-		boolean lastHop = query.getTTL()==1;
-		for(int i=0; i<limit; i++){
-			ManagedConnection mc = (ManagedConnection)list.get(i);
-			if (handler == FOR_ME_REPLY_HANDLER || 
-				(mc != handler && !mc.isClientSupernodeConnection())) {
-				
-				// if it's the last hop to an Ultrapeer that sends
-				// query route tables, route it.
-				if(lastHop &&
-				   mc.isUltrapeerQueryRoutingConnection() &&
-                   RouterService.isSupernode()) {
-					boolean sent = sendRoutedQueryToHost(query, mc, handler);
-					if(sent && RECORD_STATS) {
-						RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-					} else if(RECORD_STATS) {
-						RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
-					}
-				} else {
-					sendQueryRequest(query, mc, handler);
-				}
-			}
-		}
-	}
+		boolean lastHop = query.getTTL() == 1;
+        int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
+		for(int i=0; i<limit; i++) {
+            
+            // if we've already queried enough old connections for
+            // an old-style query, break out
+            if(connectionsNeededForOld == 0) break;
 
+			ManagedConnection mc = (ManagedConnection)list.get(i);
+            
+            // if the query is comiing from an old connection, try to
+            // send it's traffic to old connections.  Only send it to
+            // new connections if we only have a minimum number left
+            if(mc.isGoodConnection() && 
+               (limit-i) > connectionsNeededForOld) {
+                continue;
+            }
+            forwardQueryToUltrapeer(query, handler, mc);
+            
+            // decrement the connections to use
+            connectionsNeededForOld--;
+		}    
+    }
+
+    /**
+     * Forwards the specified query to the specified Ultrapeer.  This
+     * encapsulates all necessary logic for forwarding queries to
+     * Ultrapeers, for example handling last hop Ultrapeers specially
+     * when the receiving Ultrapeer supports Ultrapeer query routing,
+     * meaning that we check it's routing tables for a match before sending 
+     * the query.
+     *
+     * @param query the <tt>QueryRequest</tt> to forward
+     * @param handler the <tt>ReplyHandler</tt> that sent the query
+     * @param ultrapeer the Ultrapeer to send the query to
+     */
+    private void forwardQueryToUltrapeer(QueryRequest query, 
+                                         ReplyHandler handler,
+                                         ManagedConnection ultrapeer) {    
+        // don't send a query back to the guy who sent it
+        if(ultrapeer == handler) return;
+
+        // make double-sure we don't send a query received
+        // by a leaf to other Ultrapeers
+        if(ultrapeer.isClientSupernodeConnection()) return;
+
+        // is this the last hop for the query??
+		boolean lastHop = query.getTTL() == 1; 
+           
+        // if it's the last hop to an Ultrapeer that sends
+        // query route tables, route it.
+        if(lastHop &&
+           ultrapeer.isUltrapeerQueryRoutingConnection()) {
+            boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler);
+            if(sent && RECORD_STATS) {
+                RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
+            } else if(RECORD_STATS) {
+                RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
+            }
+        } else {
+            // otherwise, just send it out
+            sendQueryRequest(query, ultrapeer, handler);
+        }
+    }
+
+
+    /**
+     * Originate a new query from this leaf node.
+     *
+     * @param qr the <tt>QueryRequest</tt> to send
+     */
+    private void originateLeafQuery(QueryRequest qr) {
+		List list = _manager.getInitializedConnections2();
+
+        // only send to at most 3 Ultrapeers
+        int limit = Math.min(3, list.size());
+        for(int i=0; i<limit; i++) {
+			ManagedConnection mc = (ManagedConnection)list.get(i);            
+            sendQueryRequest(qr, mc, FOR_ME_REPLY_HANDLER);
+        }
+    }
     
     /**
      * Sends the passed query request, received on handler, 
