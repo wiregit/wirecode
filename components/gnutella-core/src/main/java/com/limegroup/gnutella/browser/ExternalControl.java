@@ -73,6 +73,8 @@ public class ExternalControl {
 		}
 	}
 	
+	
+	//refactored the download logic into a separate method
 	public static void handleMagnetRequest(String arg) {
 	    LOG.trace("enter handleMagnetRequest");
 
@@ -92,8 +94,19 @@ public class ExternalControl {
 		        LOG.warn("Invalid magnet, ignoring: " + arg);
 			return;
         }
+		
+		downloadMagnet(options);
         
-        if(LOG.isDebugEnabled()) {
+        
+	}
+	
+	/**
+	 * performs the actual magnet download.  This way it is possible to 
+	 * parse and download the magnet separately (which is what I intend to do in the gui) --zab
+	 * @param options the magnet options returned from parseMagnet
+	 */
+	public static void downloadMagnet(MagnetOptions []options) {
+		if(LOG.isDebugEnabled()) {
             for(int i = 0; i < options.length; i++) {
                 LOG.debug("Kicking off downloader for option " + i +
                           " " + options[i]);
@@ -191,8 +204,8 @@ public class ExternalControl {
                 MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
             
             try {
-                RouterService.download
-                    (urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
+            	RouterService.download
+                   	(urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
             } catch ( AlreadyDownloadingException a ) {  
                 MessageService.showError(
                     "ERROR_ALREADY_DOWNLOADING", a.getFilename());
@@ -204,7 +217,7 @@ public class ExternalControl {
             }
 		}
 	}
-
+	
 	/**
 	 *  Handle a Magnet request via a socket (for TCP handling).
 	 *  Deiconify the application, fire MAGNET request
@@ -293,7 +306,8 @@ public class ExternalControl {
 	}
 
 
-	private static MagnetOptions[] parseMagnet(String arg) {
+	
+	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
 		MagnetOptions[] ret = null;
 		HashMap         options = new HashMap();
@@ -369,36 +383,6 @@ public class ExternalControl {
 		return ret;
 	}
 
-	/*
-    public static void main(String args[]) {
-		String arg = preprocessArgs(args);
-	    connectSearchDownload(arg);
-    }	
-	*/
+	
 
-}
-
-class MagnetOptions {
-	public static final String MAGNET    = "magnet:?";
-	public String xt;
-	public String dn; 
-	public String kt; 
-	public String xs;
-	public String as;  // This is technically suppose to handle multiple
-
-	public String toString() {
-		String ret = MAGNET;
-		
-		if ( xt != null ) 
-			ret += "&xt="+xt+"";
-		if ( dn != null ) 
-			ret += "&dn="+dn+"";
-		if ( kt != null ) 
-			ret += "&kt="+kt+"";
-		if ( xs != null ) 
-			ret += "&xs="+xs+"";
-		if ( as != null ) 
-			ret += "&as="+as+"";
-		return ret;
-	}
 }
