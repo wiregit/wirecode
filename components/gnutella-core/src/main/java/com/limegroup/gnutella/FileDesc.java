@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.*;
+
 import com.bitzi.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -39,9 +41,9 @@ public final class FileDesc {
     public long _modTime;
 
 	/**
-	 * Constant <tt>HashSet</tt> of <tt>URN</tt> instances for the file.
+	 * Constant <tt>Collection</tt> of <tt>URN</tt> instances for the file.
 	 */
-    private final HashSet /* of URNS */ URNS; 
+    private final Collection /* of URNS */ URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -56,7 +58,7 @@ public final class FileDesc {
 	 *  <tt>FileDesc</tt>
 	 * @param urns the <tt>HashSet</tt> of URNs for this <tt>FileDesc</tt>
      */
-    public FileDesc(File file, int index, HashSet urns) {		
+    public FileDesc(File file, int index, Collection urns) {		
 		// make a defensive copy
 		FILE = new File(file.getAbsolutePath());
         _index = index;
@@ -130,7 +132,10 @@ public final class FileDesc {
     
     /**
      * Adds any URNs that can be locally calculated; may take a while to 
-	 * complete on large files.
+	 * complete on large files.<p>
+	 * 
+	 * This is a place where members of <tt>FileDesc</tt> are mutable,
+	 * namely the <tt>Collection</tt> of <tt>URN</tt>s.
      */
     public void calculateUrns() {
 		// update modTime
@@ -180,7 +185,8 @@ public final class FileDesc {
 	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
 	 *  otherwise
      */
-    public URN getSHA1URN() {
+	/*
+    public URN getSHA1Urn() {
         Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
@@ -190,6 +196,7 @@ public final class FileDesc {
         }
         return null;
     }
+	*/
 
 	/**
 	 * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
@@ -201,13 +208,14 @@ public final class FileDesc {
 	}
 
 	/**
-	 * Accessor for the <tt>HashSet</tt> of <tt>URN</tt> instances.
+	 * Returns a new <tt>Collection</tt> instance containing the <tt>URN</tt>s
+	 * for the this <tt>FileDesc</tt>.
 	 *
-	 * @return the <tt>HashSet</tt> of <tt>URN</tt> instances, guaranteed
-	 *  to be non-null
+	 * @return a new <tt>Collection</tt> of <tt>URN</tt>s for this 
+	 *  <tt>FileDesc</tt>
 	 */
-	public HashSet getUrns() {
-		return URNS;
+	public Collection getUrns() {
+		return new HashSet(URNS);
 	}
 
     /**
