@@ -1047,10 +1047,10 @@ public final class CommonUtils {
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
         if ( _isWindows ) {
-            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i) 
+            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
         } else if ( _isLinux || _isSolaris ) {
-            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i) 
+            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
         }
         return name;
