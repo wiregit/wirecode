@@ -111,7 +111,7 @@ public void run()
     {           
         //open the connection to the servent
         connection = new Connection(host, port);
-        connection.connect();
+        connection.initialize();
 
         //start a request receiver thread
         RequestReceiver rr = new RequestReceiver();
@@ -220,7 +220,7 @@ public void run()
 
 
             //Now write replies as fast as possible from each of the request.
-            Response[] responses={new Response(0, 20, "file.mp3" + random.nextInt(2000))};
+            Response[] responses={new Response(0, 20, "file.mp3" + random.nextInt())};
 
             byte[] clientGUID=new byte[16]; //different for each response
             byte[] ip=new byte[4];          //different for each response
@@ -240,6 +240,7 @@ public void run()
                                                     ip, 56, responses, clientGUID);
                     reply.hop();  //so servent doesn't think it's from me
                     connection.send(reply); 
+                    connection.flush();
                     //System.out.println("reply sent");
                 }//end of inner for	
             }//end of outer for
@@ -266,7 +267,7 @@ private void addRequest(QueryRequest request)
 {
     synchronized(queryRequests)
     {
-        queryRequests.add(request);
+        queryRequests.addElement(request);
         
         //System.out.println("added request: " + request);
     }

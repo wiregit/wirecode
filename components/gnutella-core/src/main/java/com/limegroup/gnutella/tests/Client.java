@@ -12,13 +12,12 @@ import java.util.*;
  * The client part of a benchmark for testing Gnutella routing speed.  See
  * also Server.<p>
  *
- * This benchmark is designed to test the ability of a Gnutella servent
- * to read replies from many connections and route them to the appropriate clients
- * (interface the ones who initiate the query).
- * The output is the number of messages the servent can route
- * per sec.  The assumption is that the testers (Server and Client)
- * are much faster than the server, and the network bandwidth is not
- * a limiting factor.<p>
+ * This benchmark is designed to test the ability of a Gnutella servent to read
+ * replies from many connections and route them to the appropriate clients
+ * (interface the ones who initiate the query).  The output is the number of
+ * messages the servent can route per sec.  The assumption is that the testers
+ * (Server and Client) are much faster than the server, and the network
+ * bandwidth is not a limiting factor.<p>
  *
  * The benchmark works as follows.  First you connect Server to the
  * servent to test.  For example:
@@ -48,8 +47,7 @@ import java.util.*;
  * replies as fast as they can.
  * After specified interval of test time, the Client polls all the ClientThreads
  * and gathers statistics from them, to measure the rate of messages that the
- * servent can route.
- */
+ * servent can route.  */
 
 public class Client {
 
@@ -163,8 +161,7 @@ private synchronized void reportTime(long time)
     long avgTime = timeTaken/(numClientsFinished < numThreads ?
                 numClientsFinished : numThreads);
     float bandwidth = (float)NUM_MESSAGES * numClientsFinished / (avgTime/1000.f);
-    System.out.println("Reply bandwidth: Tis Time:" + NUM_MESSAGES/time
-            + " Avg. bandwidth" +" replies/sec");
+    System.out.println("Reply bandwidth: "+bandwidth+" replies/sec");
 }
 
 
@@ -192,11 +189,12 @@ public void run()
     {
         //open the connection to the servent
         Connection c=new Connection(host, port);
-        c.connect();
+        c.initialize();
 
         //send initial query request
         QueryRequest qr=new QueryRequest((byte)4,0,QUERY_STRING + random.nextInt());
         c.send(qr);
+        c.flush();
 
 
         //just receive some packets in the waruptime;
