@@ -92,7 +92,31 @@ public class UDPHostRankerTest extends ClientSideTestCase {
                                           "_messageListeners");
         assertEquals(0, map.size());
     }
+
     
+    public void testTCPMessageListener() throws Exception {
+        // UDP was tested above, so just do a Q&D test for TCP stuff.
+        final GUID guid = new GUID(GUID.makeGuid());
+        final MLImpl ml = new MLImpl();
+
+        PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
+
+        rs.getMessageRouter().registerMessageListener(guid, ml);
+        Map map = 
+        (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
+                                          "_messageListeners");
+        assertEquals(1, map.size());
+        assertEquals(0, ml.count);
+
+        // send off the pong for processing
+        testUP[0].send(pong);
+        testUP[0].flush();
+        Thread.sleep(2000);
+        
+        rs.getMessageRouter().unregisterMessageListener(guid);
+        assertEquals(0, map.size());
+        assertEquals(1, ml.count);
+    }
 
     //////////////////////////////////////////////////////////////////
     
