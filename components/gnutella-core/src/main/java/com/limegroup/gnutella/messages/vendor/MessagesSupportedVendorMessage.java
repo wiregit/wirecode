@@ -19,6 +19,9 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     private static MessagesSupportedVendorMessage _instance;
 
+    /**
+     * Constructs a new MSVM message with data from the network.
+     */
     MessagesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
                                    int version, byte[] payload) 
         throws BadPacketException {
@@ -34,22 +37,25 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             int vectorSize = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
             for (int i = 0; i < vectorSize; i++)
                 _messagesSupported.add(new SupportedMessageBlock(bais));
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
         }
     }
 
 
-    /** @param port The port you want people to connect back to.  If you give a
-     *  bad port I don't check so check yourself!
+    /**
+     * Private constructor for creating the sole MSVM message of all our
+     * supported messages.
      */
-    private MessagesSupportedVendorMessage() throws BadPacketException {
+    private MessagesSupportedVendorMessage() {
         super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload());
         addSupportedMessages(_messagesSupported);
     }
 
-    private static byte[] derivePayload() throws BadPacketException {
+    /**
+     * Constructs the payload for supporting all of the messages.
+     */
+    private static byte[] derivePayload() {
         Set hashSet = new HashSet();
         addSupportedMessages(hashSet);
         try {
@@ -59,12 +65,12 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             while (iter.hasNext()) {
                 SupportedMessageBlock currSMP = 
                     (SupportedMessageBlock) iter.next();
-                baos.write(currSMP.encode());
+                currSMP.encode(baos);
             }
             return baos.toByteArray();
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
+            return null;
         }
 
     }
@@ -112,8 +118,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     /** @return A MessagesSupportedVendorMessage with the set of messages 
      *  this client supports.
      */
-    public static MessagesSupportedVendorMessage instance() 
-        throws BadPacketException {
+    public static MessagesSupportedVendorMessage instance() {
         if (_instance == null)
             _instance = new MessagesSupportedVendorMessage();
         return _instance;
@@ -230,6 +235,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         final int _version;
         final int _hashCode;
 
+        /**
+         * Constructs a new SupportedMessageBlock with the given vendorID,
+         * selector, and version.
+         */
         public SupportedMessageBlock(byte[] vendorID, int selector, 
                                      int version) {
             _vendorID = vendorID;
@@ -238,10 +247,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 
+        /**
+         * Constructs a new SupportedMessageBlock from the input stream.
+         * Throws BadPacketException if the data is invalid.
+         */
         public SupportedMessageBlock(InputStream encodedBlock) 
-            throws IOException {
+            throws BadPacketException, IOException {
             if (encodedBlock.available() < 8)
-                throw new IOException();
+                throw new BadPacketException("invalid data.");
             
             // first 4 bytes are vendor ID
             _vendorID = new byte[4];
@@ -252,17 +265,13 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 
-        public byte[] encode() {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                baos.write(_vendorID);
-                ByteOrder.short2leb((short)_selector, baos);
-                ByteOrder.short2leb((short)_version, baos);
-            }
-            catch (IOException ioe) {
-                ErrorService.error(ioe);
-            }
-            return baos.toByteArray();
+        /**
+         * Encodes this SMB to the OutputStream.
+         */
+        public void encode(OutputStream out) throws IOException {
+            out.write(_vendorID);
+            ByteOrder.short2leb((short)_selector, out);
+            ByteOrder.short2leb((short)_version, out);
         }
 
         /** @return 0 or more if this matches the message you are looking for.

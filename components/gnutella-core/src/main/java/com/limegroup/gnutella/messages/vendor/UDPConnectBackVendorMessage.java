@@ -5,6 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
@@ -73,13 +74,14 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
     }
 
 
-    /** @param port The port you want people to connect back to.  If you give a
+    /**
+     * Constructs a new UDPConnectBackVendorMessage to be sent out.
+     * @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      *  @param guid The guid you want people to connect back with.  Serves as
      *  a flag that the connect back is 'unsolicited'.
      */
-    public UDPConnectBackVendorMessage(int port, GUID guid) 
-        throws BadPacketException {
+    public UDPConnectBackVendorMessage(int port, GUID guid) {
         super(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 1, 
               derivePayload(port, guid));
         _port = port;
@@ -94,17 +96,19 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
         return _guid;
     }
 
-    private static byte[] derivePayload(int port, GUID guid) 
-        throws BadPacketException {
+    /**
+     * Constructs the payload given the desired port & guid.
+     */
+    private static byte[] derivePayload(int port, GUID guid) {
         try {
             // do it during construction....
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)port,baos); // write port
             baos.write(guid.bytes());
             return baos.toByteArray();
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe);
+            return null;
         }
     }
 

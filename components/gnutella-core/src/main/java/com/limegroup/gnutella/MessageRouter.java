@@ -960,54 +960,49 @@ public abstract class MessageRouter {
      */
     protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
                                             DatagramPacket datagram) {
-        try {
-            GUID qGUID = new GUID(reply.getGUID());
-            int numResults = 
-            RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-            if (numResults < 0) // this may be a proxy query
-                numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
+        GUID qGUID = new GUID(reply.getGUID());
+        int numResults = 
+        RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+        if (numResults < 0) // this may be a proxy query
+            numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
 
-            // see if we need more results for this query....
-            // if not, remember this location for a future, 'find more sources'
-            // targeted GUESS query.
-            if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-                if (RECORD_STATS)
-                    OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+        // see if we need more results for this query....
+        // if not, remember this location for a future, 'find more sources'
+        // targeted GUESS query.
+        if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
+            if (RECORD_STATS)
+                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
 
-                DownloadManager dManager = RouterService.getDownloadManager();
-                // only store result if it is being shown to the user or if a
-                // file with the same guid is being downloaded
-                if (!_callback.isQueryAlive(qGUID) && 
-                    !dManager.isGuidForQueryDownloading(qGUID))
-                    return;
-
-                GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
-                                                     datagram.getPort());
-                synchronized (_bypassedResults) {
-                    // this is a quick critical section for _bypassedResults
-                    // AND the set within it
-                    Set eps = (Set) _bypassedResults.get(qGUID);
-                    if (eps == null) {
-                        eps = new HashSet();
-                        _bypassedResults.put(qGUID, eps);
-                    }
-                    if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
-                        eps.add(ep);
-                }
-
+            DownloadManager dManager = RouterService.getDownloadManager();
+            // only store result if it is being shown to the user or if a
+            // file with the same guid is being downloaded
+            if (!_callback.isQueryAlive(qGUID) && 
+                !dManager.isGuidForQueryDownloading(qGUID))
                 return;
+
+            GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
+                                                 datagram.getPort());
+            synchronized (_bypassedResults) {
+                // this is a quick critical section for _bypassedResults
+                // AND the set within it
+                Set eps = (Set) _bypassedResults.get(qGUID);
+                if (eps == null) {
+                    eps = new HashSet();
+                    _bypassedResults.put(qGUID, eps);
+                }
+                if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
+                    eps.add(ep);
             }
 
-            LimeACKVendorMessage ack = 
-                new LimeACKVendorMessage(qGUID, reply.getNumResults());
-            UDPService.instance().send(ack, datagram.getAddress(),
-                                       datagram.getPort());
-            if (RECORD_STATS)
-                OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
+            return;
         }
-        catch (BadPacketException terrible) {
-            ErrorService.error(terrible);
-        }
+
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(qGUID, reply.getNumResults());
+        UDPService.instance().send(ack, datagram.getAddress(),
+                                   datagram.getPort());
+        if (RECORD_STATS)
+            OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
 
@@ -1055,15 +1050,9 @@ public abstract class MessageRouter {
         List redirect = _manager.getUDPRedirectUltrapeers();
         if (redirect.size() > 0) {
             UDPConnectBackRedirect redir = null;
-            try {
-                // make a new redirect message
-                redir = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
-                                                   portToContact);
-            }
-            catch (BadPacketException bpe) {
-                ErrorService.error(bpe);
-                return;
-            }
+            // make a new redirect message
+            redir = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
+                                               portToContact);
             Iterator iter = redirect.iterator();
             while (iter.hasNext())
                 ((ManagedConnection)iter.next()).send(redir);
@@ -1141,14 +1130,8 @@ public abstract class MessageRouter {
         List redirect = _manager.getTCPRedirectUltrapeers();
         if (redirect.size() > 0) {
             TCPConnectBackRedirect redir = null;
-            try {
-                // make a new redirect message
-                redir = new TCPConnectBackRedirect(sourceAddr, portToContact);
-            }
-            catch (BadPacketException bpe) {
-                ErrorService.error(bpe);
-                return;
-            }
+            // make a new redirect message
+            redir = new TCPConnectBackRedirect(sourceAddr, portToContact);
             Iterator iter = redirect.iterator();
             while (iter.hasNext())
                 ((ManagedConnection)iter.next()).send(redir);
@@ -1245,27 +1228,24 @@ public abstract class MessageRouter {
     protected void handlePushProxyRequest(PushProxyRequest ppReq,
                                           ManagedConnection source) {
         if (source.isSupernodeClientConnection()) {
+            String stringAddr = 
+                NetworkUtils.ip2string(RouterService.getAddress());
+            InetAddress addr = null;
             try {
-                String stringAddr = 
-                    NetworkUtils.ip2string(RouterService.getAddress());
-                InetAddress addr = InetAddress.getByName(stringAddr);
-                // 1)
-                PushProxyAcknowledgement ack = 
-                    new PushProxyAcknowledgement(addr,RouterService.getPort(),
-                                                 ppReq.getClientGUID());
-                source.send(ack);
-                
-                // 2)
-                _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
-                                           source);
+                addr = InetAddress.getByName(stringAddr);
+            } catch(UnknownHostException uhe) {
+                ErrorService.error(uhe); // impossible
             }
-            catch (BadPacketException tooTerribleToIgnore) {
-                ErrorService.error(tooTerribleToIgnore);
-            }
-            catch (UnknownHostException tooTerribleToIgnore2) {
-                ErrorService.error(tooTerribleToIgnore2);
-            }
-                
+
+            // 1)
+            PushProxyAcknowledgement ack = 
+                new PushProxyAcknowledgement(addr,RouterService.getPort(),
+                                             ppReq.getClientGUID());
+            source.send(ack);
+            
+            // 2)
+            _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
+                                       source);
         }
     }
 
@@ -1958,13 +1938,13 @@ public abstract class MessageRouter {
                                              final ReplyHandler replyHandler) {
         StatisticVendorMessage statVM = null;
         try {
-            //create the reply -- StatisticVendorMessage
-            statVM = new StatisticVendorMessage(gsm);
-            //OK. Now send this message back to the client that asked for
-            //stats
-            replyHandler.handleStatisticVM(statVM);
-        } catch (BadPacketException bpx) {
-            return;
+            //create the reply if we understand how
+            if(StatisticVendorMessage.isSupported(gsm)) {
+                statVM = new StatisticVendorMessage(gsm);
+                //OK. Now send this message back to the client that asked for
+                //stats
+                replyHandler.handleStatisticVM(statVM);
+            }
         } catch(IOException iox) {
             return; //what can we really do now?
         }

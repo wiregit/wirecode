@@ -33,30 +33,25 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             vendorID = new byte[5];
             vm = new VM(vendorID, 1, 1, new byte[0]);
             fail("bpe should have been thrown.");
-        }
-        catch (BadPacketException expected) {
-        }
+        } catch (IllegalArgumentException expected) {}
+        
         try {
             // test bad selector
             vm = new VM(new byte[4], 0x10000000, 1, new byte[0]);
             fail("bpe should have been thrown.");
-        }
-        catch (BadPacketException expected) {
-        }
+        } catch (IllegalArgumentException expected) {}
+        
         try {
             // test bad version
             vm = new VM(vendorID, 1, 0x00020101, new byte[0]);
             fail("bpe should have been thrown.");
-        }
-        catch (BadPacketException expected) {
-        }
+        } catch (IllegalArgumentException expected) {}
+        
         try {
             // test bad payload
             vm = new VM(new byte[4], 1, 1, null);
             fail("bpe should have been thrown.");
-        }
-        catch (NullPointerException expected) {
-        }
+        } catch (NullPointerException expected) {}
     }
 
 
@@ -173,14 +168,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             GUID g = new GUID(GUID.makeGuid());
             ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
+        } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
             ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
+        } catch(IllegalArgumentException expected) {}
 
         for (int i = 1; i < 256; i++) {
             GUID guid = new GUID(GUID.makeGuid());
@@ -240,14 +233,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             GUID g = new GUID(GUID.makeGuid());
             LimeACKVendorMessage vm = new LimeACKVendorMessage(g, -1);
             assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
+        } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
             LimeACKVendorMessage vm = new LimeACKVendorMessage(g, 256);
             assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
+        } catch(IllegalArgumentException expected) {}
 
         for (int i = 0; i < 256; i++) {
             GUID guid = new GUID(GUID.makeGuid());
@@ -654,8 +645,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             super(guid, ttl, hops, vendorID, selector, version, payload);
         }
 
-        public VM(byte[] vendorID, int selector, int version, byte[] payload) 
-            throws BadPacketException {
+        public VM(byte[] vendorID, int selector, int version, byte[] payload) {
             super(vendorID, selector, version, payload);
         }
     }

@@ -86,10 +86,10 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         ByteOrder.short2leb((short)4, baos);
-        baos.write(smp1.encode());
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp3.encode());
+        smp1.encode(baos);
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp3.encode(baos);
         VendorMessage vm = new MessagesSupportedVendorMessage(guid, ttl,
                                                               hops, 0,
                                                               baos.toByteArray());
@@ -111,9 +111,9 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         // make sure they are equal....
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         
         MessagesSupportedVendorMessage vmpOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
@@ -141,9 +141,9 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             // test missing info....
             baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)4, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
+            smp2.encode(baos);
+            smp3.encode(baos);
+            smp1.encode(baos);
             MessagesSupportedVendorMessage vmpOther = 
                 new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
@@ -154,9 +154,9 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             // test corrupt info....
             baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)4, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
+            smp2.encode(baos);
+            smp3.encode(baos);
+            smp1.encode(baos);
             baos.write("crap".getBytes());
             MessagesSupportedVendorMessage vmpOther = 
                 new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
@@ -168,17 +168,17 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         // test semantics....
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)0, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         MessagesSupportedVendorMessage vmpOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                baos.toByteArray());
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         MessagesSupportedVendorMessage vmpOneOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                baos.toByteArray());

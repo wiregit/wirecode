@@ -16,6 +16,9 @@ public final class QueryStatusResponse extends VendorMessage {
 
     public static final int VERSION = 1;
 
+    /**
+     * Constructs a new QueryStatusResponse with data from the network.
+     */
     QueryStatusResponse(byte[] guid, byte ttl, byte hops, int version, 
                           byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_REPLY_NUMBER, version,
@@ -27,13 +30,14 @@ public final class QueryStatusResponse extends VendorMessage {
                                          getPayload().length);
     }
 
-    /** @param numResults The number of results (1-65535) that you have
+    /**
+     * Constructs a new QueryStatus response to be sent out.
+     * @param numResults The number of results (1-65535) that you have
      *  for this query.  If you have more than 65535 just send 65535.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    public QueryStatusResponse(GUID replyGUID, int numResults) 
-        throws BadPacketException {
+    public QueryStatusResponse(GUID replyGUID, int numResults) {
         super(F_BEAR_VENDOR_ID, F_REPLY_NUMBER, VERSION, 
               derivePayload(numResults));
         setGUID(replyGUID);
@@ -52,11 +56,13 @@ public final class QueryStatusResponse extends VendorMessage {
         return new GUID(getGUID());
     }
 
-    private static byte[] derivePayload(int numResults) 
-        throws BadPacketException {
+    /**
+     * Constructs the payload from the desired number of results.
+     */
+    private static byte[] derivePayload(int numResults) {
         if ((numResults < 0) || (numResults > 65535))
-            throw new BadPacketException("Number of results too big: " +
-                                         numResults);
+            throw new IllegalArgumentException("Number of results too big: " +
+                                               numResults);
         byte[] payload = new byte[2];
         ByteOrder.short2leb((short) numResults, payload, 0);
         return payload;

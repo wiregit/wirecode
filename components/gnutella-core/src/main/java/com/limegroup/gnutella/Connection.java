@@ -353,9 +353,6 @@ public class Connection implements IpPort {
                 send(CapabilitiesVM.instance());
 			}
         } catch (IOException ioe) {
-        } catch (BadPacketException bpe) {
-            // should never happen.
-            ErrorService.error(bpe);
         }
     }
 

@@ -26,6 +26,9 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
 
     public static final int VERSION = 1;
 
+    /**
+     * Constructs a new ReplyNumberVendorMessages with data from the network.
+     */
     ReplyNumberVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                           byte[] payload) 
         throws BadPacketException {
@@ -39,13 +42,14 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
                                          getPayload().length);
     }
 
-    /** @param numResults The number of results (1-255 inclusive) that you have
+    /**
+     * Constructs a new ReplyNumberVendorMessage to be sent out.
+     *  @param numResults The number of results (1-255 inclusive) that you have
      *  for this query.  If you have more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    public ReplyNumberVendorMessage(GUID replyGUID, 
-                                    int numResults) throws BadPacketException {
+    public ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
         super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, VERSION,
               derivePayload(numResults));
         setGUID(replyGUID);
@@ -58,11 +62,13 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
 
-    private static byte[] derivePayload(int numResults) 
-        throws BadPacketException {
+    /**
+     * Constructs the payload from the desired number of results.
+     */
+    private static byte[] derivePayload(int numResults) {
         if ((numResults < 1) || (numResults > 255))
-            throw new BadPacketException("Number of results too big: " +
-                                         numResults);
+            throw new IllegalArgumentException("Number of results too big: " +
+                                               numResults);
         byte[] payload = new byte[1];
         byte[] bytes = new byte[2];
         ByteOrder.short2leb((short) numResults, bytes, 0);

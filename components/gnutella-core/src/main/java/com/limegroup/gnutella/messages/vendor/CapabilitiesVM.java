@@ -7,8 +7,10 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 
-/** The message that lets other know what capabilities you support.  Everytime 
- *  you add a capability you should modify this class.
+/** 
+ * The message that lets other know what capabilities you support.  Everytime 
+ * you add a capability you should modify this class.
+ *
  */
 public final class CapabilitiesVM extends VendorMessage {
 
@@ -16,12 +18,15 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private static final byte[] CAPABILITY_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
-    /** This value can change - it is the version number of the highest 
-     *  Capability (e.g. What Is New?) query we support.
+    /**
+     *  This value can change - it is the version number of the highest 
+     *  Capability (currently 'What Is New?') query we support.
      */
     public static final int CAPABILITY_MAX_SELECTOR = 1;
-    /** this value will NEVER change - this is the version number of the first
-     *  'What Is' type query
+    
+    /**
+     * This value will NEVER change - this is the version number of the first
+     * Capability query.
      */
     public  static final int CAPABILITY_MIN_SELECTOR = 1;
 
@@ -31,9 +36,11 @@ public final class CapabilitiesVM extends VendorMessage {
 
     private static CapabilitiesVM _instance;
 
+    /**
+     * Constructs a new CapabilitiesVM from data read off the network.
+     */
     CapabilitiesVM(byte[] guid, byte ttl, byte hops, 
-                   int version, byte[] payload) 
-        throws BadPacketException {
+                   int version, byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_CAPABILITIES, version,
               payload);
 
@@ -41,23 +48,29 @@ public final class CapabilitiesVM extends VendorMessage {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
             int vectorSize = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            // constructing the SMB will cause a BadPacketException if the
+            // network data is invalid
             for (int i = 0; i < vectorSize; i++)
                 _capabilitiesSupported.add(new SupportedMessageBlock(bais));
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
         }
     }
 
 
-    /** Private constructor that fills up our capabilities.
+    /**
+     * Internal constructor for creating the sole instance of our 
+     * CapabilitiesVM.
      */
-    private CapabilitiesVM() throws BadPacketException {
+    private CapabilitiesVM() {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload());
         addSupportedMessages(_capabilitiesSupported);
     }
 
-    private static byte[] derivePayload() throws BadPacketException {
+    /**
+     * Generates the default payload, using all our supported messages.
+     */
+    private static byte[] derivePayload() {
         Set hashSet = new HashSet();
         addSupportedMessages(hashSet);
         try {
@@ -67,17 +80,20 @@ public final class CapabilitiesVM extends VendorMessage {
             while (iter.hasNext()) {
                 SupportedMessageBlock currSMP = 
                     (SupportedMessageBlock) iter.next();
-                baos.write(currSMP.encode());
+                currSMP.encode(baos);
             }
             return baos.toByteArray();
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
+            return null;
         }
 
     }
 
     // ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
+    /**
+     * Adds all supported capabilities to the given set.
+     */
     private static void addSupportedMessages(Set hashSet) {
         SupportedMessageBlock smp = null;
         smp = new SupportedMessageBlock(CAPABILITY_BYTES, 
@@ -89,8 +105,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /** @return A CapabilitiesVM with the set of messages 
      *  this client supports.
      */
-    public static CapabilitiesVM instance() 
-        throws BadPacketException {
+    public static CapabilitiesVM instance() {
         if (_instance == null)
             _instance = new CapabilitiesVM();
         return _instance;
@@ -114,7 +129,7 @@ public final class CapabilitiesVM extends VendorMessage {
     }
 
 
-    /** @return 1 or higher if the what is capability is supported.  the version
+    /** @return 1 or higher if capability queries are supported.  the version
      *  number gives some indication about what exactly is a supported.  if no
      *  support, returns -1.
      */
@@ -123,7 +138,7 @@ public final class CapabilitiesVM extends VendorMessage {
     }
     
 
-    /** @return true if 'what is new' feature is supported.
+    /** @return true if 'what is new' capability query feature is supported.
      */
     public boolean supportsWhatIsNew() {
         return supportsCapabilityQueries() > 0;
@@ -161,10 +176,15 @@ public final class CapabilitiesVM extends VendorMessage {
             _hashCode = computeHashCode(_capabilityName, _version);
         }
 
-        public SupportedMessageBlock(InputStream encodedBlock) 
-            throws IOException {
+        /**
+         * Constructs a new SupportedMessageBlock with data from the 
+         * InputStream.  If not enough data is available,
+         * throws BadPacketException.
+         */
+        public SupportedMessageBlock(InputStream encodedBlock)
+          throws BadPacketException, IOException {
             if (encodedBlock.available() < 6)
-                throw new IOException();
+                throw new BadPacketException("invalid block.");
             
             // first 4 bytes are capability name
             _capabilityName = new byte[4];
@@ -173,17 +193,13 @@ public final class CapabilitiesVM extends VendorMessage {
             _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
             _hashCode = computeHashCode(_capabilityName, _version);
         }
-
-        public byte[] encode() {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                baos.write(_capabilityName);
-                ByteOrder.short2leb((short)_version, baos);
-            }
-            catch (IOException ioe) {
-                ErrorService.error(ioe);
-            }
-            return baos.toByteArray();
+        
+        /**
+         * Writes this capability (and version) to the OutputStream.
+         */
+        public void encode(OutputStream out) throws IOException {
+            out.write(_capabilityName);
+            ByteOrder.short2leb((short)_version, out);
         }
 
         /** @return 0 or more if this matches the message you are looking for.

@@ -28,6 +28,9 @@ public final class LimeACKVendorMessage extends VendorMessage {
 
     public static final int VERSION = 2;
 
+    /**
+     * Constructs a new LimeACKVendorMessage with data from the network.
+     */
     LimeACKVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                           byte[] payload) 
         throws BadPacketException {
@@ -43,13 +46,15 @@ public final class LimeACKVendorMessage extends VendorMessage {
                                          getPayload().length);
     }
 
-    /** @param numResults The number of results (0-255 inclusive) that you want
+    /**
+     * Constructs a new LimeACKVendorMessage to be sent out.
+     *  @param numResults The number of results (0-255 inclusive) that you want
      *  for this query.  If you want more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
     public LimeACKVendorMessage(GUID replyGUID, 
-                                int numResults) throws BadPacketException {
+                                int numResults) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
               derivePayload(numResults));
         setGUID(replyGUID);
@@ -62,11 +67,14 @@ public final class LimeACKVendorMessage extends VendorMessage {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
 
-    private static byte[] derivePayload(int numResults) 
-        throws BadPacketException {
+    /**
+     * Constructs the payload for a LimeACKVendorMessage with the given
+     * number of results.
+     */
+    private static byte[] derivePayload(int numResults) {
         if ((numResults < 0) || (numResults > 255))
-            throw new BadPacketException("Number of results too big: " +
-                                         numResults);
+            throw new IllegalArgumentException("Number of results too big: " +
+                                               numResults);
         byte[] payload = new byte[1];
         byte[] bytes = new byte[2];
         ByteOrder.short2leb((short) numResults, bytes, 0);

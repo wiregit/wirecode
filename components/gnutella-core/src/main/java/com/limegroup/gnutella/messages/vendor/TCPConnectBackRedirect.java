@@ -4,6 +4,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 import java.net.*;
 
@@ -24,6 +25,9 @@ public final class TCPConnectBackRedirect extends VendorMessage {
      */
     private final InetAddress _addr;
 
+    /**
+     * Constructs a new TCPConnectBackRedirect with data from the network.
+     */
     TCPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
                            byte[] payload) 
         throws BadPacketException {
@@ -53,11 +57,12 @@ public final class TCPConnectBackRedirect extends VendorMessage {
     }
 
 
-    /** @param port The port you want people to connect back to.  If you give a
+    /**
+     * Constructs a new TCPConnectBackRedirect to send out.
+     * @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      */
-    public TCPConnectBackRedirect(InetAddress addr, 
-                                  int port) throws BadPacketException {
+    public TCPConnectBackRedirect(InetAddress addr, int port) {
         super(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK, VERSION, 
               derivePayload(addr, port));
         _addr = addr;
@@ -72,19 +77,22 @@ public final class TCPConnectBackRedirect extends VendorMessage {
         return _port;
     }
 
-    private static byte[] derivePayload(InetAddress addr, int port) 
-        throws BadPacketException {
+    /**
+     * Constructs the payload given the addr & port.
+     */
+    private static byte[] derivePayload(InetAddress addr, int port) {
         try {
             // i do it during construction....
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] ip = addr.getAddress();
-            if (ip.length != 4) throw new BadPacketException("Bad IP");
+            if(!NetworkUtils.isValidAddress(ip))
+                throw new IllegalArgumentException("invalid ip: " + addr);
             baos.write(ip); // write _addr
             ByteOrder.short2leb((short)port,baos); // write _port
             return baos.toByteArray();
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible;
+            return null;
         }
     }
 

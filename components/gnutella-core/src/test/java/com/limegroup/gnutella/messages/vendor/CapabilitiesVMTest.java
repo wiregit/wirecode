@@ -57,10 +57,10 @@ public class CapabilitiesVMTest
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         ByteOrder.short2leb((short)4, baos);
-        baos.write(smp1.encode());
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp3.encode());
+        smp1.encode(baos);
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp3.encode(baos);
         VendorMessage vm = new CapabilitiesVM(guid, ttl, hops, 0, 
                                               baos.toByteArray());
         baos = new ByteArrayOutputStream();
@@ -80,9 +80,9 @@ public class CapabilitiesVMTest
         // make sure they are equal....
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         
         CapabilitiesVM vmpOther = 
             new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
@@ -106,9 +106,9 @@ public class CapabilitiesVMTest
             // test missing info....
             baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)4, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
+            smp2.encode(baos);
+            smp3.encode(baos);
+            smp1.encode(baos);
             CapabilitiesVM vmpOther = 
                 new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
             fail("bpe should have been thrown.");
@@ -118,9 +118,9 @@ public class CapabilitiesVMTest
             // test corrupt info....
             baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)4, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
+            smp2.encode(baos);
+            smp3.encode(baos);
+            smp1.encode(baos);
             baos.write("crap".getBytes());
             CapabilitiesVM vmpOther = 
                 new CapabilitiesVM(guid, ttl, hops, 0, 
@@ -132,16 +132,16 @@ public class CapabilitiesVMTest
         // test semantics....
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)0, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         CapabilitiesVM vmpOther = 
             new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
-        baos.write(smp2.encode());
-        baos.write(smp3.encode());
-        baos.write(smp1.encode());
+        smp2.encode(baos);
+        smp3.encode(baos);
+        smp1.encode(baos);
         CapabilitiesVM vmpOneOther = 
             new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
         assertNotEquals(vmpOther,vmpOneOther);

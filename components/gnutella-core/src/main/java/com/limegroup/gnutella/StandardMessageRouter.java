@@ -238,18 +238,12 @@ public class StandardMessageRouter extends MessageRouter {
                 
                 // send a ReplyNumberVM to the host - he'll ACK you if he
                 // wants the whole shebang
-                try {
-                    int resultCount = 
-                        (responses.length > 255) ? 255 : responses.length;
-                    ReplyNumberVendorMessage vm = 
-                        new ReplyNumberVendorMessage(new GUID(query.getGUID()),
-                                                     resultCount);
-                    UDPService.instance().send(vm, addr, port);
-                }
-                catch (BadPacketException bpe) {
-                    // should NEVER happen
-                    ErrorService.error(bpe);
-                }
+                int resultCount = 
+                    (responses.length > 255) ? 255 : responses.length;
+                ReplyNumberVendorMessage vm = 
+                    new ReplyNumberVendorMessage(new GUID(query.getGUID()),
+                                                 resultCount);
+                UDPService.instance().send(vm, addr, port);
                 return true;
             }
             // else i couldn't buffer the responses due to busy-ness, oh, scrap

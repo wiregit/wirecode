@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.DataUtils;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this message is "BEAR/11".
@@ -16,7 +17,9 @@ public final class QueryStatusRequest extends VendorMessage {
 
     public static final int VERSION = 1;
 
-    /** The network constructor. */
+    /**
+     * Constructs a new QueryStatusRequest with data from the network.
+     */
     QueryStatusRequest(byte[] guid, byte ttl, byte hops, int version, 
                        byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_LIME_ACK, 
@@ -29,10 +32,13 @@ public final class QueryStatusRequest extends VendorMessage {
     }
 
 
-    /** @param guid the guid of the query you want the status about.
+    /**
+     * Constructs a new QueryStatusRequest to be sent out.
+     * @param guid the guid of the query you want the status about.
      */
-    public QueryStatusRequest(GUID guid) throws BadPacketException {
-        super(F_BEAR_VENDOR_ID, F_LIME_ACK, VERSION, new byte[0]);
+    public QueryStatusRequest(GUID guid) {
+        super(F_BEAR_VENDOR_ID, F_LIME_ACK, VERSION,
+              DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
     }
 

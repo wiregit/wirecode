@@ -7,6 +7,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.ErrorService;
 
 /** Vendor Messages are Gnutella Messages that are NEVER forwarded after
  *  recieved.
@@ -74,32 +75,87 @@ public abstract class VendorMessage extends Message {
     //----------------------------------
 
 
-    /** Package Level access only.  Used by specific vendor-message to
-     *  construct a Vendor Message.
+    /**
+     * Constructs a new VendorMessage with the given data.
+     * Each Vendor Message class delegates to this constructor (or the one
+     * also taking a network parameter) to construct new locally generated
+     * VMs.
      *  @param vendorIDBytes The Vendor ID of this message (bytes).  
      *  @param selector The selector of the message.
      *  @param version  The version of this message.
      *  @param payload  The payload (not including vendorIDBytes, selector, and
      *  version.
-     *  @exception BadPacketException Thrown if vendorIDBytes, selector,
-     *  or version is 'too big'.
      *  @exception NullPointerException Thrown if payload or vendorIDBytes are
      *  null.
      */
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
-                            byte[] payload) 
-        throws BadPacketException {
+                            byte[] payload) {
         this(vendorIDBytes, selector, version, payload, Message.N_UNKNOWN);
     }
     
+    /**
+     * Constructs a new VendorMessage with the given data.
+     * Each Vendor Message class delegates to this constructor (or the one that
+     * doesn't take the network parameter) to construct new locally generated
+     * VMs.
+     *  @param vendorIDBytes The Vendor ID of this message (bytes).  
+     *  @param selector The selector of the message.
+     *  @param version  The version of this message.
+     *  @param payload  The payload (not including vendorIDBytes, selector, and
+     *  version.
+     *  @param network The network this VM is to be written on.
+     *  @exception NullPointerException Thrown if payload or vendorIDBytes are
+     *  null.
+     */
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
-                            byte[] payload, int network) 
-                                                throws BadPacketException  {
+                            byte[] payload, int network) {
         super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length,
               network);
-        if ((vendorIDBytes.length != 4)) {
+        if ((vendorIDBytes.length != 4))
+            throw new IllegalArgumentException("wrong vendorID length: " +
+                                                vendorIDBytes.length);
+        if ((selector & 0xFFFF0000) != 0)
+            throw new IllegalArgumentException("invalid selector: " + selector);
+        if ((version & 0xFFFF0000) != 0)
+            throw new IllegalArgumentException("invalid version: " + version);
+        // set the instance params....
+        _vendorID = vendorIDBytes;
+        _selector = selector;
+        _version = version;
+        _payload = payload;
+        // lastly compute the hash
+        _hashCode = computeHashCode(_version, _selector, _vendorID, _payload);
+    }
+
+    /**
+     * Constructs a new VendorMessage with data from the network.
+     * Primarily built for the convenience of the class Message.
+     * Subclasses must extend this (or the below constructor that takes a 
+     * network parameter) and use getPayload() to parse the payload and do
+     * anything else they need to.
+     */
+    protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
+                            int selector, int version, byte[] payload) 
+        throws BadPacketException {
+        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
+    }
+
+    /**
+     * Constructs a new VendorMessage with data from the network.
+     * Primarily built for the convenience of the class Message.
+     * Subclasses must extend this (or the above constructor that doesn't 
+     * takes a network parameter) and use getPayload() to parse the payload
+     * and do anything else they need to.
+     */
+    protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
+                            int selector, int version, byte[] payload, 
+                            int network) throws BadPacketException {
+        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
+              network);
+        // set the instance params....
+        if ((vendorID.length != 4)) {
             if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();
+                ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();            
             throw new BadPacketException("Vendor ID Invalid!");
         }
         if ((selector & 0xFFFF0000) != 0) {
@@ -111,33 +167,7 @@ public abstract class VendorMessage extends Message {
             if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
             throw new BadPacketException("Version Invalid!");
-        }
-        // set the instance params....
-        _vendorID = vendorIDBytes;
-        _selector = selector;
-        _version = version;
-        _payload = payload;
-        // lastly compute the hash
-        _hashCode = computeHashCode(_version, _selector, _vendorID, _payload);
-    }
-
-    /** Should be used when encountered a Message from the Network.  Primarily
-     *  built for the convenience of the class Message.
-     *  Subclasses should call this first (well, they have to), then they can
-     *  use getPayload() to parse the payload and do anything they need to.
-     */
-    protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
-                            int selector, int version, byte[] payload) 
-        throws BadPacketException {
-        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
-    }
-
-    protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
-                            int selector, int version, byte[] payload, 
-                            int network) throws BadPacketException {
-        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
-              network);
-        // set the instance params....
+        }        
         _vendorID = vendorID;
         _selector = selector;
         _version = version;
@@ -147,6 +177,9 @@ public abstract class VendorMessage extends Message {
                                     _payload);
     }
 
+    /**
+     * Computes the hash code for a vendor message.
+     */
     private static int computeHashCode(int version, int selector, 
                                        byte[] vendorID, byte[] payload) {
         int hashCode = 0;
@@ -187,9 +220,15 @@ public abstract class VendorMessage extends Message {
     // Methods for all subclasses....
     //----------------------
 
+    /**
+     * Constructs a vendor message with the specified network data.
+     * The actual vendor message constructed is determined by the value
+     * of the selector within the message.
+     */
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl, 
                                                     byte hops,
-                                                    byte[] fromNetwork) 
+                                                    byte[] fromNetwork,
+                                                    int network) 
         throws BadPacketException {
 
         // sanity check
@@ -214,9 +253,8 @@ public abstract class VendorMessage extends Message {
             // get the rest....
             restOf = new byte[bais.available()];
             bais.read(restOf, 0, restOf.length);
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't read necessary params!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
         }
 
 
@@ -280,7 +318,7 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_GIVE_STATS) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf,
-                                              Message.N_UNKNOWN);
+                                              network);
         if ((selector == F_STATISTICS) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);

@@ -22,6 +22,10 @@ public final class PushProxyAcknowledgement extends VendorMessage {
      */
     private final int _port;
 
+    /**
+     * Constructs a new PushProxyAcknowledgement message with data from the
+     * network.
+     */
     PushProxyAcknowledgement(byte[] guid, byte ttl, byte hops, int version, 
                              byte[] payload) 
         throws BadPacketException {
@@ -44,25 +48,29 @@ public final class PushProxyAcknowledgement extends VendorMessage {
         _port = combo.getPort();
     }
 
-
-    /** @param port The port you want people to connect back to.  If you give a
+    /**
+     * Constructs a new PushProxyAcknowledgement message to be sent out.
+     * @param addr The address of the person to connect back to.
+     * @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      */
-    public PushProxyAcknowledgement(InetAddress addr, int port) 
-        throws BadPacketException {
+    public PushProxyAcknowledgement(InetAddress addr, int port) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
         _addr = addr;
         _port = port;
     }
 
-    /** @param port The port you want people to connect back to.  If you give a
+    /**
+     * Constructs a new PushProxyAcknowledgement message to be sent out.
+     * @param addr The address of the person to connect back to.
+     * @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      *  @param guid In case you want to set the guid (the PushProxy protocol
      *  advises this).
      */
     public PushProxyAcknowledgement(InetAddress addr, int port,
-                                    GUID guid) throws BadPacketException {
+                                    GUID guid) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
         _addr = addr;
@@ -82,18 +90,14 @@ public final class PushProxyAcknowledgement extends VendorMessage {
         return _addr;
     }
 
-    private static byte[] derivePayload(InetAddress addr, int port) 
-        throws BadPacketException{
+    private static byte[] derivePayload(InetAddress addr, int port) {
         try {
             // i do it during construction....
             QueryReply.IPPortCombo combo = 
                 new QueryReply.IPPortCombo(addr.getHostAddress(), port);
             return combo.toBytes();
-        }
-        catch (UnknownHostException uhe) {
-            // this should never happen!!!
-            ErrorService.error(uhe);
-            throw new BadPacketException("Bad host - should never happen!!!");
+        } catch (UnknownHostException uhe) {
+            throw new IllegalArgumentException(uhe.getMessage());
         }
     }
 

@@ -4,6 +4,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
@@ -18,6 +19,9 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
      */
     private final int _port;
 
+    /**
+     * Constructs a new TCPConnectBackVendorMessage with data from the network.
+     */
     TCPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                                 byte[] payload) 
         throws BadPacketException {
@@ -37,10 +41,12 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
     }
 
 
-    /** @param port The port you want people to connect back to.  If you give a
+    /**
+     * Constructs a new TCPConnectBackVendorMessage to be sent out.
+     * @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      */
-    public TCPConnectBackVendorMessage(int port) throws BadPacketException {
+    public TCPConnectBackVendorMessage(int port) {
         super(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, VERSION, 
               derivePayload(port));
         _port = port;
@@ -50,15 +56,18 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
         return _port;
     }
 
-    private static byte[] derivePayload(int port) throws BadPacketException{
+    /**
+     * Constructs the payload given the desired port.
+     */
+    private static byte[] derivePayload(int port) {
         try {
             // i do it during construction....
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)port,baos); // write _port
             return baos.toByteArray();
-        }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't write to a ByteStream!!!");
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
+            return null;
         }
     }
 

@@ -138,14 +138,9 @@ public final class SearchResultHandler {
             // been shut off - at worst we may shut it off twice, but that is
             // a timing issue that has a small probability of happening, no big
             // deal if it does....
-            try {
-                QueryStatusResponse stat = new QueryStatusResponse(guid, 
-                                                                   MAX_RESULTS);
-                RouterService.getConnectionManager().updateQueryStatus(stat);
-            }
-            catch (BadPacketException terrible) {
-                ErrorService.error(terrible);
-            }
+            QueryStatusResponse stat = new QueryStatusResponse(guid, 
+                                                               MAX_RESULTS);
+            RouterService.getConnectionManager().updateQueryStatus(stat);
         }
     }
 
@@ -401,15 +396,10 @@ public final class SearchResultHandler {
                     final int numResultsToReport = (gc.isFinished() ?
                                                     MAX_RESULTS :
                                                     gc.getNumResults()/4);
-                    try {
-                        QueryStatusResponse stat = 
-                            new QueryStatusResponse(gc.getGUID(), 
-                                                    numResultsToReport);
-                        RouterService.getConnectionManager().updateQueryStatus(stat);
-                    }
-                    catch (BadPacketException terrible) {
-                        ErrorService.error(terrible);
-                    }
+                    QueryStatusResponse stat = 
+                        new QueryStatusResponse(gc.getGUID(), 
+                                                numResultsToReport);
+                    RouterService.getConnectionManager().updateQueryStatus(stat);
                 }
 
             }

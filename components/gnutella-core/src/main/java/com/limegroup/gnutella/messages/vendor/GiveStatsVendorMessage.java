@@ -27,25 +27,23 @@ public class GiveStatsVendorMessage extends VendorMessage {
     public static final byte LEAF_CONNECTIONS_STATS = (byte)2;
     public static final byte UP_CONNECTIONS_STATS = (byte)3;
 
-
-    private int _network;
-
     /**
      * A vendor message read off the network. Package access
      */
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
                        byte[] payload, int network) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload);
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload,
+              network);
         if(getPayload().length < 2)
             throw new BadPacketException("INVALID PAYLOAD LENGTH: "+
                                          payload.length);
         if(version == 1 && getPayload().length != 2)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
                                          payload.length);
-        _network = network;
     }
     
     /**
+     * Constructs a new GiveStatsMessage to be sent out.
      * @param statsControl the byte the receiver will look at to decide the
      * ganularity of the desired stats (this connection, all connections, UPs
      * only, leaves only etc.) 
@@ -55,12 +53,16 @@ public class GiveStatsVendorMessage extends VendorMessage {
      * @param network to decide whether this message should go out via TCP, UDP,
      * multicast, etc.
      */
-    public GiveStatsVendorMessage(byte statsControl, byte statType, int network)
-                                              throws BadPacketException {
+    public GiveStatsVendorMessage(byte statsControl,
+                                  byte statType, 
+                                  int network) {
             super(F_LIME_VENDOR_ID, F_GIVE_STATS, VERSION, 
                                  derivePayload(statsControl, statType),network);
     }
     
+    /**
+     * Constructs the payload of the message, given the desired control & type.
+     */
     private static byte[] derivePayload(byte control, byte type) {
         if(control < (byte)0 || control > (byte)3)
             throw new IllegalArgumentException(" invalid control byte ");
@@ -74,12 +76,18 @@ public class GiveStatsVendorMessage extends VendorMessage {
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
         if(RECORD_STATS) {
-            if(_network == Message.N_TCP)
+            if(isTCP())
                 SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
-            else if(_network == Message.N_UDP)
+            else if(isUDP())
                 SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
         }
     }
+    
+    /** Overridden purely for stats handling.
+     */
+    public void recordDrop() {
+        super.recordDrop();
+    }    
     
     protected byte getStatControl() {
         byte[] payload = getPayload();
@@ -90,13 +98,4 @@ public class GiveStatsVendorMessage extends VendorMessage {
         byte[] payload = getPayload();
         return payload[1];
     }
-
-
-    /**
-     * Overriding abstract method, used for statistoics gathering. 
-     */ 
-    public void recordDrop() {
-        super.recordDrop();
-    }
-    
 }

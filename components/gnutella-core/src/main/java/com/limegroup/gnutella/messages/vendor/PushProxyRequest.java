@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.DataUtils;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this message is "LIME/20".
@@ -15,10 +16,11 @@ public final class PushProxyRequest extends VendorMessage {
 
     public static final int VERSION = 1;
 
-    /** The network constructor. */
+    /**
+     * Constructs a new PushProxyRequest from network data.
+     */
     PushProxyRequest(byte[] guid, byte ttl, byte hops, int version, 
-                     byte[] payload) 
-        throws BadPacketException {
+                     byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, 
               version, payload);
 
@@ -29,11 +31,13 @@ public final class PushProxyRequest extends VendorMessage {
     }
 
 
-    /** @param guid Your client guid.  Used to route PushRequests to you.
+    /**
+     * Constructs a new PushProxyRequest to be sent out.
+     * @param guid Your client guid.  Used to route PushRequests to you.
      */
-    public PushProxyRequest(GUID guid) 
-        throws BadPacketException {
-        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION, new byte[0]);
+    public PushProxyRequest(GUID guid) {
+        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION,
+              DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
     }
 

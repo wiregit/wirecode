@@ -13,8 +13,11 @@ public final class HopsFlowVendorMessage extends VendorMessage {
 
     public static final int VERSION = 1;
 
+    /**
+     * Constructs a new HopsFlowVendorMessage with data from the network.
+     */
     HopsFlowVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] payload) 
+                          byte[] payload)
         throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_HOPS_FLOW, version,
               payload);
@@ -25,13 +28,15 @@ public final class HopsFlowVendorMessage extends VendorMessage {
                                          getPayload().length);
     }
 
-    /** @param hopVal represents the upper bound value for hops that you wish to
+    /**
+     * Constructs a new HopsFlowVendorMessage to be sent out.
+     *  @param hopVal represents the upper bound value for hops that you wish to
      *  see in queries from the neighbor you send this to.  Only queries whose 
      *  hops are STRICTLY lower than hopVal are expected to be received.  A 
      *  hopVal of 0 means that NO queries should be sent at all.  A hopVal of 1
      *  would mean that only queries from the immediate neighbor should be sent.
      */
-    public HopsFlowVendorMessage(byte hopVal) throws BadPacketException {
+    public HopsFlowVendorMessage(byte hopVal) {
         super(F_BEAR_VENDOR_ID, F_HOPS_FLOW, VERSION, derivePayload(hopVal));
     }
 
@@ -42,6 +47,9 @@ public final class HopsFlowVendorMessage extends VendorMessage {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
 
+    /**
+     * Constructs the payload of the message, given the desired hops value.
+     */
     private static byte[] derivePayload(byte hopVal) {
         byte[] payload = new byte[1];
         payload[0] = hopVal;

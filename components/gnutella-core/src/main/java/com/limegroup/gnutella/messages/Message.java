@@ -329,13 +329,13 @@ public abstract class Message
                     throw new BadPacketException("VM with bad ttl/hops: " +
                                                  ttl + "/" + hops);
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
-                                                         payload);
+                                                         payload, network);
             case F_VENDOR_MESSAGE_STABLE:
                 if ((ttl != 1) || (hops != 0))
                     throw new BadPacketException("VM with bad ttl/hops: " +
                                                  ttl + "/" + hops);
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
-                                                         payload);
+                                                         payload, network);
         }
         
         if( RECORD_STATS )

@@ -1063,15 +1063,9 @@ public class ManagedConnection extends Connection
         }
 
         // if we had a match, then just construct a new one....
-        if (oobGUID != null) {
-            try {
-                return new QueryStatusResponse(oobGUID, resp.getNumResults());
-            }
-            catch (BadPacketException bpe) {
-                ErrorService.error(bpe);
-                return resp;
-            }
-        }
+        if (oobGUID != null)
+            return new QueryStatusResponse(oobGUID, resp.getNumResults());
+
         else return resp;
     }
     
@@ -1277,12 +1271,8 @@ public class ManagedConnection extends Connection
                 // get the client GUID and send off a PushProxyRequest
                 GUID clientGUID =
                     new GUID(RouterService.getMessageRouter()._clientGUID);
-                try {
-                    PushProxyRequest req = new PushProxyRequest(clientGUID);
-                    send(req);
-                } catch (BadPacketException never) {
-                    ErrorService.error(never);
-                }
+                PushProxyRequest req = new PushProxyRequest(clientGUID);
+                send(req);
             }
 
             // if we are ignoring local addresses and the connection is local
@@ -1295,29 +1285,21 @@ public class ManagedConnection extends Connection
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPConnectBack() > -1)) {
-                try {
-                    GUID connectBackGUID =
-                        RouterService.getUDPConnectBackGUID();
-                    UDPConnectBackVendorMessage udp = 
-                        new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                        connectBackGUID);
-                    send(udp);
-                    _numUDPConnectBackRequests++;
-                } catch (BadPacketException ignored) {
-                    ErrorService.error(ignored);
-                }
+                GUID connectBackGUID =
+                    RouterService.getUDPConnectBackGUID();
+                UDPConnectBackVendorMessage udp = 
+                    new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                    connectBackGUID);
+                send(udp);
+                _numUDPConnectBackRequests++;
             }
             if (!RouterService.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsTCPConnectBack() > -1)) {
-                try {
-                    TCPConnectBackVendorMessage tcp =
-                       new TCPConnectBackVendorMessage(RouterService.getPort());
-                    send(tcp);
-                    _numTCPConnectBackRequests++;
-                } catch (BadPacketException ignored) {
-                    ErrorService.error(ignored);
-                }
+                TCPConnectBackVendorMessage tcp =
+                   new TCPConnectBackVendorMessage(RouterService.getPort());
+                send(tcp);
+                _numTCPConnectBackRequests++;
             }
         }
     }
