@@ -222,9 +222,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
-    /** True iff a corrupt byte has been detected and this has been stopped by
-     *  the thread detecting the problem.  INVARIANT: corrupted=>stopped.  */
-    private boolean corrupted;
 
     
     /** The connections we're using for the current attempts. */    
@@ -322,8 +319,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * LOCKING: obtain corruptStateLock
      * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
      */
-    private int corruptState = NOT_CORRUPT_STATE;
-    private Object corruptStateLock = new Object();
+    private int corruptState;
+    private Object corruptStateLock;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -343,8 +340,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                              ActivityCallback callback) {
         this.allFiles=files;
         this.incompleteFileManager=incompleteFileManager;
-        this.callback = callback;
-        initialize(manager, fileManager);
+        initialize(manager, fileManager, callback);
     }
 
     /** 
@@ -395,18 +391,22 @@ public class ManagedDownloader implements Downloader, Serializable {
      *     @requires this is uninitialized or stopped, 
      *      and allFiles, and incompleteFileManager are set
      *     @modifies everything but the above fields */
-    public void initialize(DownloadManager manager, FileManager fileManager) {
+    public void initialize(DownloadManager manager, 
+                           FileManager fileManager, 
+                           ActivityCallback callback) {
         this.manager=manager;
 		this.fileManager=fileManager;
+        this.callback=callback;
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stealLock = new Object();
         stopped=false;
-        corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
         miniRFDToLock = Collections.synchronizedMap(new HashMap());
         threadLockToSocket=Collections.synchronizedMap(new HashMap());
+        corruptState=NOT_CORRUPT_STATE;
+        corruptStateLock=new Object();
         this.dloaderManagerThread=new Thread() {
             public void run() {
                 try { 
@@ -649,7 +649,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //This stopped because all hosts were tried.  (Note that this
             //couldn't have been user aborted.)  Therefore no threads are
             //running in this and it may be safely resumed.
-            initialize(this.manager, this.fileManager);
+            initialize(this.manager, this.fileManager, this.callback);
         } else if (state==WAITING_FOR_RETRY) {
             //Interrupt any waits.
             if (dloaderManagerThread!=null)
