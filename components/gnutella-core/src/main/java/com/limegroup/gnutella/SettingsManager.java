@@ -30,8 +30,6 @@ public final class SettingsManager {
 	 */
     private static final Properties PROPS = Settings.getProperties();
 
-	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
-
 	/**
 	 * Default name of the shared directory.
 	 */
@@ -66,8 +64,6 @@ public final class SettingsManager {
     private final byte    DEFAULT_MAX_TTL        = (byte)16;
     /** Default maximum packet length */
     private final int     DEFAULT_MAX_LENGTH     = 65536;
-    /** Default timeout */
-    private final int     DEFAULT_TIMEOUT        = 8000;
     /** Default timeout for persistent HTTP connections */
     private final int     DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT = 15000;
     /** Default port*/
@@ -83,9 +79,6 @@ public final class SettingsManager {
     private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default time to expire incomplete files, in days. */
     private final int     DEFAULT_INCOMPLETE_PURGE_TIME = 7;
-
-    private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
-    private final String SERVANT_TYPE          = "SERVANT_TYPE";
 
 	/** the number of uplads allowed per person at a given time */
     private final int DEFAULT_UPLOADS_PER_PERSON=3;
@@ -482,7 +475,6 @@ public final class SettingsManager {
     private volatile byte     _softmaxttl;
     private volatile byte     _maxttl;
     private volatile int      _maxLength;
-    private volatile int      _timeout;
     private volatile int      _persistentHTTPConnectionTimeout;
     private volatile String   _hostList;
     private volatile int      _port;
@@ -546,19 +538,9 @@ public final class SettingsManager {
 	private volatile boolean  _installed;
 	private volatile boolean  _acceptedIncoming = false;
 
-    /**
-     * Type of the servant: client, xml-client, server etc
-     */
-    private String _servantType;
-
 
     /** Specifies if the node is acting as server */
     private volatile boolean _server;
-
-    /**
-	 * Constant member variable for the main <tt>Properties</tt> instance.
-	 */
-    //private static final Properties PROPS = Setting.getProperties();//new Properties();
 
     /**
 	 * Specialized constant properties file for the network discoverer.
@@ -722,9 +704,6 @@ public final class SettingsManager {
                     else
                         break;
                     setClearCompletedUpload(bs);
-                }
-                else if(key.equals(TIMEOUT)) {
-                    setTimeout(Integer.parseInt(p));
                 }
                 else if(key.equals(PERSISTENT_HTTP_CONNECTION_TIMEOUT)) {
                     setPersistentHTTPConnectionTimeout(Integer.parseInt(p));
@@ -972,9 +951,6 @@ public final class SettingsManager {
                 else if(key.equals(FRACTIONAL_UPTIME)) {
                     setFractionalUptime(Float.valueOf(p).floatValue());
                 }
-                else if(key.equals(SERVANT_TYPE)) {
-					setServantType(p);
-				}
 				else if(key.equals(INSTALLED)) {
 					Boolean installed = new Boolean(p);
 					setInstalled(installed.booleanValue());
@@ -1071,7 +1047,6 @@ public final class SettingsManager {
         setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
         setTTL(DEFAULT_TTL);
         setMaxLength(DEFAULT_MAX_LENGTH);
-        setTimeout(DEFAULT_TIMEOUT);
         setPersistentHTTPConnectionTimeout(
             DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT);
         setPort(DEFAULT_PORT);
@@ -1121,8 +1096,6 @@ public final class SettingsManager {
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setLastShutdownTime(DEFAULT_LAST_SHUTDOWN_TIME);
         setFractionalUptime(DEFAULT_FRACTIONAL_UPTIME);
-        //anu added
-        setServantType(DEFAULT_SERVANT_TYPE);
 		setInstalled(DEFAULT_INSTALLED);
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
@@ -1187,9 +1160,6 @@ public final class SettingsManager {
 
     /** Returns the maximum allowable length of packets*/
     public int getMaxLength(){return _maxLength;}
-
-    /** Returns the timeout value*/
-    public int getTimeout(){return _timeout;}
 
     /** Returns the timeout value for persistent HTTP connections*/
     public int getPersistentHTTPConnectionTimeout(){
@@ -1731,13 +1701,6 @@ public final class SettingsManager {
 		return Integer.parseInt(PROPS.getProperty(APP_HEIGHT));
 	}
 
-    /**
-     * Returns the type of the servant: client, xml-client, server etc
-     */
-    public String getServantType() {
-        return _servantType;
-    }
-
 	/**
 	 * Returns a <tt>boolean</tt> specifying whether or not the
 	 * application has been run one time or not.
@@ -1995,15 +1958,6 @@ public final class SettingsManager {
 		_maxLength = maxLength;
 		String s = Integer.toString(_maxLength);
 		PROPS.put(MAX_LENGTH, s);
-    }
-
-    /**
-	 * Sets the timeout
-	 */
-    public void setTimeout(int timeout) {
-		_timeout = timeout;
-		String s = Integer.toString(_timeout);
-		PROPS.put(TIMEOUT, s);
     }
 
     /**
@@ -2837,18 +2791,6 @@ public final class SettingsManager {
 		setBooleanValue(SHUTDOWN_AFTER_TRANSFERS, whenReady);
 	}
 
-    /**
-     * Sets the type of the servant: client, xml-client, server etc
-     */
-    private void setServantType(String servantType) {
-        if(Constants.isValidServantType(servantType)) {
-            _servantType = servantType;
-        }
-        else {
-            _servantType = DEFAULT_SERVANT_TYPE;
-        }
-        PROPS.put(SERVANT_TYPE, _servantType);
-    }
 
 	/**
 	 * Sets the language to use for the application.
