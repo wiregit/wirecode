@@ -41,10 +41,11 @@ public class UDPCrawlerPing extends VendorMessage {
 	public static final byte CONNECTION_TIME = 0x1;
 	public static final byte LOCALE_INFO = 0x2;
 	public static final byte NEW_ONLY = 0x4;
-	//public static final byte SAMPLE_FEATURE = 0x8; //its a bitmask, so the next feature would be 0x16, etc.
+	public static final byte USER_AGENT = 0x8;
+	//public static final byte SAMPLE_FEATURE = 0x10; //its a bitmask, so the next feature would be 0x16, etc.
 	
 	//all features OR'd.
-	public static final byte FEATURE_MASK = 0x7; 
+	public static final byte FEATURE_MASK = 0xF; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
@@ -162,6 +163,15 @@ public class UDPCrawlerPing extends VendorMessage {
 	 */
 	public boolean hasNewOnly() {
 		return (byte)(NEW_ONLY & _format) == NEW_ONLY;
+	}
+	
+	/**
+	 * 
+	 * @return whether the ping wants to receive information about the 
+	 * User-Agent strings reported by the connections.
+	 */
+	public boolean hasUserAgent() {
+		return (byte)(USER_AGENT & _format) == USER_AGENT;
 	}
 	
 	/**

@@ -19,9 +19,12 @@ public class UDPCrawlerPong extends VendorMessage {
 	
 	public static final int VERSION = 1;
 	
-	List _ultrapeers, _leaves;
+	public static final String AGENT_SEP = "~";
+	private String _agents;
 	
-	final boolean _connectionTime, _localeInfo, _newOnly;
+	private List _ultrapeers, _leaves;
+	
+	final boolean _connectionTime, _localeInfo, _newOnly, _userAgent;
 	
 	/**
 	 * the format of the response.
@@ -39,6 +42,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		_localeInfo = request.hasLocaleInfo();
 		_connectionTime = request.hasConnectionTime();
 		_newOnly = request.hasNewOnly();
+		_userAgent = request.hasUserAgent();
 	}
 	
 	private static byte [] derivePayload(UDPCrawlerPing request) {
@@ -174,6 +178,29 @@ public class UDPCrawlerPong extends VendorMessage {
 			
 		}
 		
+		//if the ping asked for user agents, copy the reported strings verbatim
+		//in the same order as the results.
+		if (request.hasUserAgent()) {
+			StringBuffer agents = new StringBuffer();
+			iter = endpointsUP.iterator();
+			while(iter.hasNext()) {
+				Connection c = (Connection)iter.next();
+				agents.append(c.getUserAgent()).append(AGENT_SEP);
+			}
+			
+			//lose the trailing ~
+			if (agents.length() > 0)
+				agents.deleteCharAt(agents.length()-1);
+			
+			//put in the return payload.
+			byte [] versionsB = agents.toString().getBytes();
+			byte [] resTemp = result;
+			result = new byte[result.length+versionsB.length+1];
+			
+			System.arraycopy(resTemp,0,result,0,resTemp.length);
+			result[resTemp.length]=(byte)versionsB.length;
+			System.arraycopy(versionsB,0,result,resTemp.length+1,versionsB.length);
+		}
 		return result;
 	}
 	
@@ -224,6 +251,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			== (int)UDPCrawlerPing.LOCALE_INFO;
 		_newOnly =(_format & UDPCrawlerPing.NEW_ONLY)
 			== (int)UDPCrawlerPing.NEW_ONLY;
+		_userAgent =(_format & UDPCrawlerPing.USER_AGENT)
+			== (int)UDPCrawlerPing.USER_AGENT;
 		
 		int bytesPerResult = 6;
 		
@@ -232,11 +261,13 @@ public class UDPCrawlerPong extends VendorMessage {
 		if (_localeInfo)
 			bytesPerResult+=2;
 		
+		int agentsOffset=(numberUP+numberLeaves)*bytesPerResult+3;
+		
 		//check if the payload is legal length
 		if (getVersion() == VERSION && 
-				payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) 
+				payload.length< agentsOffset) 
 			throw new BadPacketException("size is "+payload.length+ 
-					" but should have been "+ (numberUP+numberLeaves)*bytesPerResult+3);
+					" but should have been at least"+ agentsOffset);
 		
 		//parse the up ip addresses
 		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
@@ -274,7 +305,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		}
 		
 		//parse the leaf ip addresses
-		for (int i = numberUP*bytesPerResult+3;i<payload.length;i+=bytesPerResult) {
+		for (int i = numberUP*bytesPerResult+3;i<agentsOffset;i+=bytesPerResult) {
 		
 			int index =i;
 		
@@ -307,6 +338,18 @@ public class UDPCrawlerPong extends VendorMessage {
 			 _leaves.add(result);
 		}
 		
+		
+		//check if the payload is proper size if it contains user agents.
+		if (_userAgent) {
+			int agentsSize = payload[agentsOffset];
+			
+			if (payload.length < agentsSize+agentsOffset)
+				throw new BadPacketException("payload is "+payload.length+
+						" but should have been at least "+
+						(agentsOffset+agentsSize+1));
+			_agents = new String(payload,agentsOffset+1,agentsSize);
+		}
+		
 		//Note: do the check whether we got as many results as requested elsewhere.
 	}
 	/**
@@ -333,5 +376,13 @@ public class UDPCrawlerPong extends VendorMessage {
 	 */
 	public boolean hasLocaleInfo() {
 		return _localeInfo;
+	}
+	
+	/**
+	 * 
+	 * @return the string containing the user agents.  Can be null.
+	 */
+	public String getAgents() {
+		return _agents;
 	}
 }
