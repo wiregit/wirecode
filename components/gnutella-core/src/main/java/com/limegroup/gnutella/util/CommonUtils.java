@@ -136,11 +136,11 @@ public final class CommonUtils {
      * Used by convertFileName
      */
     private static final char[] ILLEGAL_CHARS_ANY_OS = {
-		'/', '\n', '\r', '\t'
+		'/', '\n', '\r', '\t', '\0', '\f' 
 	};
     private static final char[] ILLEGAL_CHARS_UNIX = {'`'};
     private static final char[] ILLEGAL_CHARS_WINDOWS = { 
-		'?', '*', '\\', '<', '>', '|', '\"' 
+		'?', '*', '\\', '<', '>', '|', '\"', ':'
 	};
 	/**
 	 * Variable for whether or not the JVM is 1.1.8.
