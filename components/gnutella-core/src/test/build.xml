@@ -464,6 +464,7 @@
     <antcall target="html"/>	
     
   </target>
+
   
  <!-- Runs a specific class without building the HTML - passed by 'class' -->
  <target name="test class internal" if="class" depends="prepare, build">
@@ -477,6 +478,19 @@
 	  <test name="com.limegroup.gnutella.${class}"
 	    todir="${reports}" />
     
+	</junit>
+  </target>  
+
+ <!-- Runs a specific class without building the HTML - passed by 'class' -->
+ <target name="test" if="class" depends="prepare, build">
+    <junit printsummary="withOutAndErr" 
+	       haltonfailure="yes"
+	       showoutput="true"
+		   fork="on"
+    >
+	  <classpath refid="default.classpath"/>
+      <formatter type="plain" useFile="false"/>
+	  <test name="com.limegroup.gnutella.${class}"/>    
 	</junit>
   </target>  
 
