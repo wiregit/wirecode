@@ -68,6 +68,7 @@ public class UltrapeerRoutingTest extends TestCase {
             doBroadcastFromLeaf();  //also tests replies, pushes
             doBroadcastFromOld();
             doBroadcastFromOldToLeaf();
+            doBroadcastFromUltrapeerToBoth();
             doPingBroadcast();      //also tests replies
             doBigPingBroadcast();
             doMisroutedPong();
@@ -106,6 +107,7 @@ public class UltrapeerRoutingTest extends TestCase {
         leaf.initialize();
         QueryRouteTable qrt=new QueryRouteTable();
         qrt.add("test");
+        qrt.add("susheel");
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             leaf.send((RouteTableMessage)iter.next());
         }
@@ -308,6 +310,30 @@ public class UltrapeerRoutingTest extends TestCase {
         m=leaf.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
         assertTrue(((QueryRequest)m).getQuery().equals("test"));
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
+    }
+
+    private static void doBroadcastFromUltrapeerToBoth() 
+             throws IOException, BadPacketException {
+        //System.out.println("-Testing normal broadcast from old connnection"
+        //                   +", with forwarding to leaf");
+        drain(leaf);
+        drain(old);
+
+        QueryRequest qr=new QueryRequest((byte)7, 0, "susheel test");
+        ultrapeer.send(qr);
+        ultrapeer.flush();
+              
+        Message m=old.receive(TIMEOUT);
+        assertTrue(m instanceof QueryRequest);
+        assertEquals("susheel test", ((QueryRequest)m).getQuery());
+        assertTrue(m.getHops()==(byte)1); 
+        assertTrue(m.getTTL()==(byte)6);
+
+        m=leaf.receive(TIMEOUT);
+        assertTrue(m instanceof QueryRequest);
+        assertTrue(((QueryRequest)m).getQuery().equals("susheel test"));
         assertTrue(m.getHops()==(byte)1); 
         assertTrue(m.getTTL()==(byte)6);
     }
