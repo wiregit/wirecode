@@ -45,6 +45,9 @@ public class UltrapeerRoutingTest extends TestCase {
         return new TestSuite(UltrapeerRoutingTest.class);
     }    
    
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}
 
     public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
