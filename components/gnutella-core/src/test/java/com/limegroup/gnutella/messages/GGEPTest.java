@@ -1,6 +1,5 @@
-package com.limegroup.gnutella.tests;
+package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
