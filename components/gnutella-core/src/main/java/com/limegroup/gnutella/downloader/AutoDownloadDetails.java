@@ -95,15 +95,6 @@ public class AutoDownloadDetails implements Serializable {
     public MediaType getMediaType() {
         return type;
     }
-    
-
-    private Response deriveResponse(RemoteFileDesc rfd) {
-        Response retResponse = null;
-        retResponse = new Response(rfd.getIndex(),
-                                   rfd.getSize(),
-                                   rfd.getFileName());
-        return retResponse;
-    }
 
     /**
      * @param toAdd The RFD you are TRYING to add.
