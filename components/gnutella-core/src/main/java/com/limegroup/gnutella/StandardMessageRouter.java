@@ -91,6 +91,20 @@ public class StandardMessageRouter
         catch(IOException e) {}
     }
 
+	/**
+	 * Responds to a ping request received over a UDP port.  This is
+	 * handled differently from all other ping requests.  Instead of
+	 * responding with a pong from this node, we respond with a pong
+	 * from other UltraPeers supporting UDP from our cache.
+	 *
+	 * @param request the <tt>PingRequest</tt> to service
+	 */
+	protected void respondToUDPPingRequest(PingRequest request, 
+										   Acceptor acceptor) {
+		
+		
+	}
+
     /**
      * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
      * corresponding to all its leaves
