@@ -855,6 +855,21 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         throw NoGnutellaOkException.UNRESOLVED_CLIENT;
     }
     
+    /** 
+     * Call this method when the Connection has been initialized and accepted
+     * as 'long-lived'.
+     */
+    protected void postInit() {
+        try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
+            if(headers().supportsVendorMessages()) {
+                send(MessagesSupportedVendorMessage.instance());
+            }
+        } catch (BadPacketException bpe) {
+            // should never happen.
+            ErrorService.error(bpe);
+        }
+    }
+    
     /** Returns true iff line ends with "CONNECT/N", where N
      *  is a number greater than or equal "0.6". */
     private static boolean notLessThan06(String line) {
