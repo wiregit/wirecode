@@ -1084,17 +1084,6 @@ public final class UploadManager implements BandwidthTracker {
   	}
 
 	/**
-	 * Returns whether or not the HTTP get request is a traditional 
-	 * Gnutella-style HTTP get.
-	 *
-	 * @return <tt>true</tt> if it is a traditional Gnutella HTTP get,
-	 *  <tt>false</tt> otherwise
-	 */
-	private boolean isTraditionalGet(final String requestLine) {
-		return (requestLine.indexOf("/get/") != -1);
-	}
-
-	/**
 	 * Returns whether or not the get request for the specified line is
 	 * a URN request.
 	 *
@@ -1159,8 +1148,6 @@ public final class UploadManager implements BandwidthTracker {
             }
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
-            //http information part: HTTP/1.0
-            String httpInfoPart = st.nextToken().trim();
             
 			String fileName;
             if(fileInfoPart.equals("/")) {
@@ -1209,11 +1196,9 @@ public final class UploadManager implements BandwidthTracker {
                 if( RECORD_STATS )
                     UploadStat.TRADITIONAL_GET.incrementStat();				
             }
-            //check if the protocol is HTTP1.1. Note that this is not a very 
-            //strict check.
-            boolean http11 = false;
-            if(requestLine.endsWith("1.1"))
-                http11 = true;
+            //check if the protocol is HTTP1.1.
+            //Note that this is not a very strict check.
+            boolean http11 = isHTTP11Request(requestLine);
 			return new HttpRequestLine(index, fileName, http11);
 		} catch (NumberFormatException e) {
 			throw new IOException();
@@ -1244,8 +1229,6 @@ public final class UploadManager implements BandwidthTracker {
             return new HttpRequestLine(BAD_URN_QUERY_INDEX,
                   "Invalid URN query", isHTTP11Request(requestLine));
 		}		
-		int fileIndex = desc.getIndex();
-		String fileName = desc.getName();
         if( RECORD_STATS )
 		    UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
@@ -1275,7 +1258,7 @@ public final class UploadManager implements BandwidthTracker {
 	 * @return <tt>true</tt> if the get request specifies HTTP 1.1,
 	 *  <tt>false</tt> otherwise
 	 */
-	private boolean isHTTP11Request(final String requestLine) {
+	private static boolean isHTTP11Request(final String requestLine) {
 		return requestLine.endsWith("1.1");
 	}
 	
