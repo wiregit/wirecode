@@ -28,7 +28,13 @@ public class IOUtils {
         char[] buf=new char[maxSize];
         //iterate till maxSize +1 (for white space)
         for (int i=0 ; i < maxSize+1 ; i++) {
-            int got=in.read();
+            int got;
+            try {
+                got=in.read();
+            } catch(ArrayIndexOutOfBoundsException aioobe) {
+                // thrown in strange circumstances, consider IOX.
+                throw new IOException("unexpected aioobe");
+            }
             if (got==-1) {//EOF
                 throw new IOException("unexpected end of file");
 			} else if ((char)got==' ') { //got word.  Exclude space.
