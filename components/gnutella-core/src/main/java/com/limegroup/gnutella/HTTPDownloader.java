@@ -171,7 +171,8 @@ public class HTTPDownloader implements Runnable {
                           ActivityCallback callback) {
         _state = NOT_CONNECTED;
         _filename = file;
-        _amountRead = 0;
+		_amountRead = 0;
+		 //_amountRead = 1;
         _sizeOfFile = -1;
         _router = router;
         _acceptor = acceptor;
@@ -527,8 +528,15 @@ public class HTTPDownloader implements Runnable {
 
         byte[] buf = new byte[1024];
 
+
+
+		System.out.println("The amount read is: " + _amountRead);
+		System.out.println("The size of the file is: " + _sizeOfFile);
+
+
         while (true) {
-            if (_amountRead == _sizeOfFile) {
+
+			if (_amountRead == _sizeOfFile) {
                 _state = COMPLETE;
                 break;
             }
@@ -554,6 +562,11 @@ public class HTTPDownloader implements Runnable {
             }
 
             _amountRead+=c;
+
+			System.out.println("*******************");
+			System.out.println("The amount read is: " + _amountRead);
+			System.out.println("The size of the file is: " + _sizeOfFile);
+
         }
 
         try {
@@ -564,6 +577,9 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;
             return;
         }
+
+		System.out.println("The amount read is: " + _amountRead);
+		System.out.println("The size of the file is: " + _sizeOfFile);
 
         //Move from temporary directory to final directory.
         if ( _amountRead == _sizeOfFile ) {
@@ -702,7 +718,8 @@ public class HTTPDownloader implements Runnable {
                     return;
                 }
 				_amountRead = resumeInit;
-				if (_amountRead > 2)
+				tempSize++;
+				if (_amountRead > 1)
 					_amountRead--;
                 _resume = true;
 				foundLength = true;
