@@ -29,7 +29,6 @@ public class LimeXMLReplyCollection{
     private int count;
     private String changedHash = null;
     private MetaFileManager metaFileManager = null;
-    private XMLCacheWriter cacheWriter = null;
 
     public static final int NORMAL = 0;
     public static final int FILE_DEFECTIVE = 1;
@@ -57,10 +56,6 @@ public class LimeXMLReplyCollection{
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXMLStr;
         boolean shouldWrite = false;
-        cacheWriter = new XMLCacheWriter();
-        RouterService.instance().schedule(cacheWriter,
-                                          10000, // wait ten seconds...
-                                          XMLCacheWriter.RUN_FREQUENCY_MILLIS);
 
         //if File is invalid, ms== null
         if (ms == null) // create a dummy
@@ -369,14 +364,19 @@ public class LimeXMLReplyCollection{
     /** 
      * Simply write() out the mainMap to disk. 
      */
-    public boolean write() {
+    public boolean write(){
         if(dataFile==null){//calculate it
             String fname = LimeXMLSchema.getDisplayString(schemaURI)+".sxml";
             LimeXMLProperties props = LimeXMLProperties.instance();
             String path = props.getXMLDocsDir();
             dataFile = new File(path,fname);
+        }        
+        try{
+            MapSerializer ms = new MapSerializer(dataFile, mainMap);
+            ms.commit();
+        }catch (Exception e){
+            return false;
         }
-        cacheWriter.invalidateCache();
         return true;
     }
     
@@ -453,37 +453,6 @@ public class LimeXMLReplyCollection{
         //NOTE:This is the only time the hash will change-(mp3 and audio)
         metaFileManager.handleChangedHash(changedHash, newHash, this);
         return retVal;
-    }
-
-
-    /** Use this worker to write out the XML cache every so often.
-     *  There is minor synchronization, so a cache write may be late.
-     */
-    public class XMLCacheWriter implements Runnable {
-        
-        // so you'll lose as most 1 minute of changes.
-        public static final long RUN_FREQUENCY_MILLIS = 60000;
-
-        private boolean cacheInvalid = false;
-        public synchronized void invalidateCache() {
-            cacheInvalid = true;
-        }
-
-        public void run() {
-            boolean shouldRun = false;
-            synchronized (this) {
-                shouldRun = cacheInvalid;
-                cacheInvalid = false;
-            }
-            if (shouldRun) {
-                try{
-                    MapSerializer ms = new MapSerializer(dataFile, mainMap);
-                    ms.commit();
-                }
-                catch (Exception e){
-                }
-            }
-        }
     }
 
 
