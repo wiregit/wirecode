@@ -267,27 +267,25 @@ public class StandardMessageRouter extends MessageRouter {
                 InetAddress addr = null;
                 try {
                     addr = InetAddress.getByName(query.getReplyAddress());
-                }
-                catch (UnknownHostException uhe) {
-                    // weird - just forget about it.....
-                    return false;
-                }
+                } catch (UnknownHostException uhe) {}
                 int port = query.getReplyPort();
                 
-                // send a ReplyNumberVM to the host - he'll ACK you if he
-                // wants the whole shebang
-                int resultCount = 
-                    (responses.length > 255) ? 255 : responses.length;
-                ReplyNumberVendorMessage vm = 
-                    new ReplyNumberVendorMessage(new GUID(query.getGUID()),
-                                                 resultCount);
-                UDPService.instance().send(vm, addr, port);
-                return true;
-            }
-            // else i couldn't buffer the responses due to busy-ness, oh, scrap
-            // them.....
-
-            return false;
+                if(addr != null && NetworkUtils.isValidAddress(addr) &&
+                   NetworkUtils.isValidPort(port)) { 
+                    // send a ReplyNumberVM to the host - he'll ACK you if he
+                    // wants the whole shebang
+                    int resultCount = 
+                        (responses.length > 255) ? 255 : responses.length;
+                    ReplyNumberVendorMessage vm = 
+                        new ReplyNumberVendorMessage(new GUID(query.getGUID()),
+                                                     resultCount);
+                    UDPService.instance().send(vm, addr, port);
+                    return true;
+                }
+            } else {
+                // else i couldn't buffer the responses due to busy-ness, oh, scrap
+                // them.....
+            } return false;
         }
 
         // send the replies in-band

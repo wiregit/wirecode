@@ -237,12 +237,16 @@ public final class SettingsFactory {
                 FileUtils.setWriteable(parent);
             }
             FileUtils.setWriteable(SETTINGS_FILE);
-            out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+            try {
+                out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+            } catch(IOException ioe) {
+                // try deleting the file & recreating the input stream.
+                SETTINGS_FILE.delete();
+                out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+            }
 
             // save the properties to disk.
             toSave.store( out, HEADING);            
-        } catch(FileNotFoundException e) {
-            ErrorService.error(e);
         } catch (IOException e) {
             ErrorService.error(e);
         } finally {

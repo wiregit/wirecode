@@ -29,7 +29,7 @@ public class IntervalSet {
     
     //constructor.
     public IntervalSet() {
-        intervals = new TreeSet(new IntervalComparator());
+        intervals = new TreeSet(IntervalComparator.INSTANCE);
     }
 
     public void add(Interval addInterval) {
@@ -298,7 +298,8 @@ public class IntervalSet {
     /**
      * Comparator for intervals.
      */
-    private class IntervalComparator implements Comparator {
+    private static class IntervalComparator implements Comparator {
+        private static final IntervalComparator INSTANCE = new IntervalComparator();
         public int compare(Object a, Object b) {
             Interval ia=(Interval)a;
             Interval ib=(Interval)b;
