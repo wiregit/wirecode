@@ -1086,7 +1086,11 @@ public class SettingsManager {
 	public boolean getChatEnabled() {return _chatEnabled;}
 
 	/** Returns true if the player is enabled */
-	public boolean getPlayerEnabled() {return _playerEnabled;}
+	public boolean getPlayerEnabled() {
+        if (CommonUtils.isMacClassic())
+            return false;
+        return _playerEnabled;
+    }
 
     /** 
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
