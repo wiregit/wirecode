@@ -81,11 +81,7 @@ public final class ThemeSettings {
 		if(FACTORY == null) {
 			FACTORY = SettingsFactory.createFromFile(file, DEFAULT_PROPS);				
 		} else {
-			try {
-				FACTORY.reload(new FileInputStream(file));
-			} catch (IOException e) {
-				RouterService.error(e);
-			}
+			FACTORY.reload(file);
 		}
 	}
 
