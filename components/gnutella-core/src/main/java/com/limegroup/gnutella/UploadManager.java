@@ -48,7 +48,9 @@ public class UploadManager {
 		new HashMap();
 
     /**
-     * INVARIENT: ActiveUploads is always less than or equal to the
+     * The number of uploads that are actually transferring data.
+     *
+     * INVARIANT: _activeUploads is always less than or equal to the
      * summation of the values of _uploadsInProgress
      */
     private int _activeUploads= 0;
@@ -286,7 +288,7 @@ public class UploadManager {
 	public int calculateBandwidth() {
 		// public int calculateBurstSize() {
 		float totalBandwith = getTotalBandwith();
-		float burstSize = totalBandwith/_activeUploads;
+		float burstSize = totalBandwith/uploadsInProgress();
 		return (int)burstSize;
 	}
 
@@ -403,9 +405,7 @@ public class UploadManager {
 				insertFailedPush(_host);
 				// remove it from the uploads in progress
 				return;
-			} finally {
-			    
-
+			} finally {			    
 				synchronized(UploadManager.this) {
 				    _activeUploads--;
 					removeFromMap(_host);
