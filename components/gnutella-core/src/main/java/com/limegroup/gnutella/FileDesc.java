@@ -56,6 +56,14 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * The collection of alternate locations for the file.
 	 */
 	private AlternateLocationCollection _altLocs;
+
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections 1.1
+	 * implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 		
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -224,7 +232,7 @@ public final class FileDesc implements AlternateLocationCollector {
 			return set;
 		} catch(IOException e) {
 			// the urn just does not get added
-			return Collections.EMPTY_SET;
+			return EMPTY_SET;
 		}				
 	}
     

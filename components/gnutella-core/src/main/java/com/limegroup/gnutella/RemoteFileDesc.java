@@ -8,9 +8,7 @@ import org.xml.sax.*;
 /**
  * A reference to a single file on a remote machine.  In this respect
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
- * specific data as well, such as the server's 16-byte GUID.<p>
- *
- * This class is immutable.
+ * specific data as well, such as the server's 16-byte GUID.
  */
 public class RemoteFileDesc implements Serializable {
 
@@ -25,6 +23,14 @@ public class RemoteFileDesc implements Serializable {
     private final int _quality;
     private final LimeXMLDocument[] _xmlDocs;
 	private final Set _urns;
+
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections 1.1
+	 * implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 
 	/** 
      * Constructs a new RemoteFileDesc without metadata.
@@ -86,7 +92,7 @@ public class RemoteFileDesc implements Serializable {
 			System.arraycopy(xmlDocs, 0, _xmlDocs, 0, xmlDocs.length);
 		}
 		if(urns == null) {
-			_urns = Collections.EMPTY_SET;
+			_urns = EMPTY_SET;
 		}
 		else {
 			_urns = Collections.unmodifiableSet(urns);

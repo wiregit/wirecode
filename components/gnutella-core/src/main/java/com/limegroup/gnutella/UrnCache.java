@@ -1,3 +1,11 @@
+package com.limegroup.gnutella;
+
+import com.bitzi.util.*;
+import com.sun.java.util.collections.*;
+import java.io.*;
+import java.security.*;
+import java.util.Enumeration;
+
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
  * across sessions.
@@ -8,15 +16,6 @@
  * @see FileDesc
  * @see URN
  */
-
-package com.limegroup.gnutella;
-
-import com.bitzi.util.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.security.*;
-import java.util.Enumeration;
-
 public final class UrnCache {
     
     /**
@@ -33,6 +32,14 @@ public final class UrnCache {
      * UrnCache container
      */
     private final Map /* URNSetKey -> HashSet */ URN_MAP;
+
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections 
+	 * 1.1 implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
@@ -66,14 +73,14 @@ public final class UrnCache {
     public Set getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L) {
-			return Collections.EMPTY_SET;
+			return EMPTY_SET;
 		} 
 		URNSetKey key = new URNSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
 		if(cachedUrns == null) {
-			return Collections.EMPTY_SET;
+			return EMPTY_SET;
 		}
 
 		return Collections.unmodifiableSet(cachedUrns);
