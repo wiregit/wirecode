@@ -74,9 +74,10 @@ public final class AlternateLocationTest extends TestCase {
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
-				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
-								   "/uri-res/N2R?"+HugeTestUtils.URNS[i].httpStringValue());
-				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, "/test.htm");
+				URL url1 = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
+								   HTTPConstants.URI_RES_N2R+
+								   HugeTestUtils.URNS[i].httpStringValue());
+				URL url2 = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
 				AlternateLocation al1 = 
 				    AlternateLocation.createAlternateLocation(url1);
 				AlternateLocation al2 = 
@@ -86,6 +87,22 @@ public final class AlternateLocationTest extends TestCase {
 			// this also catches MalformedURLException
 			fail("AlternateLocation constructor should not have thrown an "+
 			"exception: "+e);
+		}
+	}
+
+	public void testRemoteFileDescConstructor() {
+		try {
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				RemoteFileDesc rfd = 
+					new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
+									   HugeTestUtils.URNS[i].httpStringValue(), 10, 
+									   GUID.makeGuid(), 10, true, 2, true, null, 
+									   HugeTestUtils.URN_SETS[i]);
+				AlternateLocation.createAlternateLocation(rfd);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
 		}
 	}
 
