@@ -155,7 +155,7 @@ public class DownloadManager {
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
-            String downloadDir = SettingsManager.instance().getSaveDirectory();
+            File downloadDir = SettingsManager.instance().getSaveDirectory();
             for (int i=0; i<files.length; i++) {
                 String filename=files[i].getFileName();
                 File completeFile = new File(downloadDir, filename);  

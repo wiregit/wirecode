@@ -292,12 +292,12 @@ public class HTTPDownloader {
         //1. For security, check that download location is OK.
         //   This is to prevent against any files with '.' or '/' or '\'.
 		SettingsManager settings = SettingsManager.instance();		
-		String download_dir = settings.getSaveDirectory();
+		File download_dir = settings.getSaveDirectory();
 
 		File complete_file = new File(download_dir, _filename);
 		
-		File shared = new File(download_dir);
-		String shared_path = shared.getCanonicalPath();
+		//File shared = new File(download_dir);
+		String shared_path = download_dir.getCanonicalPath();
 		
 		File parent_of_shared = new File(complete_file.getParent());
 		String path_to_parent = parent_of_shared.getCanonicalPath();
