@@ -732,8 +732,9 @@ public class ManagedConnection
         return ret;
     }
 
-    /** Returns the query route state associated with this. */
-    ManagedConnectionQueryInfo getQueryRouteState() {
+    /** Returns the query route state associated with this, or null if no
+     *  such state. */
+    public ManagedConnectionQueryInfo getQueryRouteState() {
         return queryInfo;
     }
 
