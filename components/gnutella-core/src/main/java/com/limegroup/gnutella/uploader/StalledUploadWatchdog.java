@@ -5,6 +5,9 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>
  * 
@@ -30,6 +33,9 @@ import java.io.IOException;
  */
 public final class StalledUploadWatchdog implements Runnable {
     
+    private static final Log LOG =
+        LogFactory.getLog(StalledUploadWatchdog.class);
+    
     /**
      * The amount of time to wait before we close this connection
      * if nothing has been written to the socket.
@@ -47,6 +53,8 @@ public final class StalledUploadWatchdog implements Runnable {
      * Deactives the killing of the NormalUploadState
      */
     public synchronized boolean deactivate() {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Deactived on: " + ostream);
         nextCheckTime = -1; // don't reschedule.
         ostream = null; //release the OutputStream
         return closed;
@@ -56,6 +64,8 @@ public final class StalledUploadWatchdog implements Runnable {
      * Activates the checking.
      */
     public synchronized void activate(OutputStream os) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Activated on: " + os);
         // let run() know when we're expecting to run, so
         // it can reschedule older schedulings if needed.
         nextCheckTime = System.currentTimeMillis() + DELAY_TIME;
@@ -94,6 +104,8 @@ public final class StalledUploadWatchdog implements Runnable {
                 // If it was null, it was already closed
                 // by an outside source.
                 if( ostream != null ) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("STALLED!  Killing: " + ostream);                    
                     UploadStat.STALLED.incrementStat();
                     ostream.close();
                 }

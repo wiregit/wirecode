@@ -31,6 +31,10 @@ public final class CountingOutputStream extends FilterOutputStream {
             _count += len - off;
     }
     
+    public void close() throws IOException {
+        out.close();
+    }    
+    
     public int getAmountWritten() {
         return _count;
     }

@@ -101,7 +101,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
-        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes
+        StalledUploadWatchdog.DELAY_TIME = 1000 * 30; // 30 seconds.
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -140,7 +140,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             0, upManager.getNumQueuedUploads());
         
         //sleep a little more than needed for the stall to die.
-        Thread.sleep(StalledUploadWatchdog.DELAY_TIME+5);
+        Thread.sleep(StalledUploadWatchdog.DELAY_TIME+5*1000);
         
         assertEquals("should have no active uploaders",
             0, upManager.uploadsInProgress());

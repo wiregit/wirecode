@@ -27,6 +27,10 @@ public final class CountingInputStream extends FilterInputStream {
         return read;
     }
     
+    public void close() throws IOException {
+        in.close();
+    }
+    
     public int getAmountRead() {
         return _count;
     }
