@@ -46,6 +46,7 @@ public class RemoteFileDesc implements Serializable {
     private LimeXMLDocument[] _xmlDocs;
 	private Set _urns;
 	private boolean _browseHostEnabled;
+    private PushProxyInterface[] _proxies;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -64,7 +65,7 @@ public class RemoteFileDesc implements Serializable {
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns) {
         this(host, port, index, filename, size, clientGUID, speed,
-             chat, quality, browseHost, xmlDoc, urns, false);
+             chat, quality, browseHost, xmlDoc, urns, false, null);
     }
 
 	/** 
@@ -94,7 +95,7 @@ public class RemoteFileDesc implements Serializable {
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
-						  boolean replyToMulticast) {
+						  boolean replyToMulticast, PushProxyInterface[] proxies) {
 		if((port & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -124,6 +125,7 @@ public class RemoteFileDesc implements Serializable {
         _quality = quality;
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
+        _proxies = proxies;
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
@@ -145,6 +147,7 @@ public class RemoteFileDesc implements Serializable {
         if(_urns == null) {
             _urns = EMPTY_SET;
             _browseHostEnabled= false;
+            _proxies = null;
         }
 		// preserve the invariant that the LimeXMLDocument array either be
 		// null or have at least one element
@@ -288,6 +291,10 @@ public class RemoteFileDesc implements Serializable {
 		return e.isPrivateAddress();
 	}
 
+    
+    public PushProxyInterface[] getPushProxies() {
+        return _proxies;
+    }
 
 	/**
 	 * Overrides <tt>Object.equals</tt> to return instance equality
@@ -298,6 +305,9 @@ public class RemoteFileDesc implements Serializable {
 	 *  fields of the specified object, and <tt>false</tt> if this
 	 *  is not the case, or if the specified object is not a 
 	 *  <tt>RemoteFileDesc</tt>.
+     *
+     * We do not evaluate PushProxy equality here since a responses PushProxy
+     * set is dynamic.
 	 */
     public boolean equals(Object o) {
 		if(o == this) return true;

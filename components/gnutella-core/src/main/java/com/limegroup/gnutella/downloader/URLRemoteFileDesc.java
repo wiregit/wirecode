@@ -28,7 +28,7 @@ public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
                              LimeXMLDocument xmlDoc, Set urns,
                              boolean replyToMulticast, URL url) {
         super(host, port, index, filename, size, clientGUID, speed, chat,
-              quality, browseHost, xmlDoc, urns, replyToMulticast);
+              quality, browseHost, xmlDoc, urns, replyToMulticast, null);
         this._url=url;
     }
 

@@ -962,7 +962,8 @@ public class QueryReply extends Message implements Serializable{
 												   supportsBrowseHost,
 												   currResp.getDocument(),
 												   currResp.getUrns(),
-												   isReplyToMulticast);
+												   isReplyToMulticast,
+                                                   _proxies);
         }
         
         return retArray;
