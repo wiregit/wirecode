@@ -207,6 +207,9 @@ public class HTTPUploader implements Uploader {
 			_state.doUpload(this);
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
+			try {
+			    _state.doUpload(this);
+			} catch (IOException e2) {};
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
