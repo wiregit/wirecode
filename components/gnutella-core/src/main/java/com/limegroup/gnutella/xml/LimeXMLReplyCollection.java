@@ -9,6 +9,9 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import org.xml.sax.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  *  Stores a schema and a list of replies corresponding to that schema.
  *  <p>
@@ -21,6 +24,9 @@ import org.xml.sax.*;
  */
 
 public class LimeXMLReplyCollection {
+    
+    private static final Log LOG =
+        LogFactory.getLog(LimeXMLReplyCollection.class);
 
     /**
      * The schemaURI of this collection.
@@ -88,8 +94,9 @@ public class LimeXMLReplyCollection {
     public LimeXMLReplyCollection(FileDesc[] fds, String URI, boolean audio) {
         this.schemaURI = URI;
         this.audio = audio;
-        debug("LimeXMLReplyCollection(): entered with audio = " +
-              audio);
+        if(LOG.isTraceEnabled())
+            LOG.trace("LimeXMLReplyCollection(): entered with audio = " +
+                      audio);
 
         // construct a backing store object (for serialization)
         mainMap = new HashMap();
@@ -135,7 +142,8 @@ public class LimeXMLReplyCollection {
             Iterator iter = hashToXML.keySet().iterator();
             if( iter.hasNext() )
                 requiresConversion = ( iter.next() instanceof String );
-            debug("requiresConversion: " + requiresConversion);
+            if(LOG.isDebugEnabled())
+                LOG.debug("requiresConversion: " + requiresConversion);
         }
         
         for(int i = 0; i < fds.length; i++) {
@@ -195,7 +203,7 @@ public class LimeXMLReplyCollection {
             }
         }
     
-        debug("LimeXMLReplyCollection(): returning.");
+        LOG.trace("LimeXMLReplyCollection(): returning.");
 
         write();
     }
@@ -274,7 +282,7 @@ public class LimeXMLReplyCollection {
         try {
             return new MapSerializer(dataFile);
         } catch(IOException e) {
-            debug(e);
+            LOG.debug("exception initializing", e);
             return null;
         }
     }
@@ -557,7 +565,8 @@ public class LimeXMLReplyCollection {
             }
         }
         
-        debug("found: " + found + ", written: " + written);
+        if(LOG.isDebugEnabled())
+            LOG.debug("found: " + found + ", written: " + written);
         
         return (found && written);
     }
@@ -596,7 +605,8 @@ public class LimeXMLReplyCollection {
         boolean wrote=false;
         int mp3WriteState = -1;
         
-        debug("writing: " + mp3FileName + " to disk.");
+        if(LOG.isDebugEnabled())
+            LOG.debug("writing: " + mp3FileName + " to disk.");
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
@@ -674,7 +684,7 @@ public class LimeXMLReplyCollection {
         
         //We are supposed to pick and chose the better set of tags
         if( newValues.equals(existing) ) {
-            debug("tag read from disk is same as XML doc.");
+            LOG.debug("tag read from disk is same as XML doc.");
             return null;
         }
         else if (existing.betterThan(newValues)) {
@@ -700,7 +710,8 @@ public class LimeXMLReplyCollection {
     private int commitID3Data(String mp3FileName, ID3Editor editor) {
         //write to mp3 file...
         int retVal = editor.writeID3DataToDisk(mp3FileName);
-        debug("wrote data: " + retVal);
+        if(LOG.isDebugEnabled())
+            LOG.debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 
         if( retVal == FILE_DEFECTIVE ||
             retVal == RW_ERROR ||
@@ -761,10 +772,13 @@ public class LimeXMLReplyCollection {
                 istream = new FileInputStream(_backingStoreFile);
                 objStream = new ObjectInputStream(istream);
                 _hashMap = (Map) objStream.readObject();
-//              for(Iterator it=_hashMap.entrySet().iterator();it.hasNext();){
-//                  Map.Entry ent = (Map.Entry)it.next();
-//                  debug("read " + ent.getKey() + ", " + ent.getValue());
-//              }
+                if(LOG.isDebugEnabled()) {
+                  for(Iterator it = _hashMap.entrySet().iterator();
+                      it.hasNext();) {
+                      Map.Entry ent = (Map.Entry)it.next();
+                      LOG.debug("read " + ent.getKey() + ", " +ent.getValue());
+                  }
+                }
             } catch(ClassNotFoundException cnfe) {
                 throw new IOException("class not found");
             } catch(ClassCastException cce) {
@@ -810,16 +824,5 @@ public class LimeXMLReplyCollection {
         public Map getMap() {
             return _hashMap;
         }
-
-    }
-
-    private final static boolean debugOn = false;
-    private final static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final static void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
     }
 }
