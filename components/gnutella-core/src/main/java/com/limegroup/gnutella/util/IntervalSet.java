@@ -246,9 +246,10 @@ public class IntervalSet {
             interval=(Interval)iter.next();
             if (interval.low!=0 && low<interval.low) {//needed for first interval
                 if (low+1 > interval.low-1)
-                    throw new Error("constructing invalid interval "+
+                    throw new IllegalArgumentException("constructing invalid interval "+
                             " while trying to invert \n"+toString()+
-                            " \n with size "+maxSize);
+                            " \n with size "+maxSize+
+                            " low:"+low+" interval.low:"+interval.low);
                 ret.add(new Interval(low+1, interval.low-1));
             }
             low=interval.high;
