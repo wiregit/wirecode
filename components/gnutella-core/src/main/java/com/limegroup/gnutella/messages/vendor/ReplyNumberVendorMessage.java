@@ -11,6 +11,16 @@ import java.io.*;
  *  results the sending host has for the guid of a query (the guid of this
  *  message is the same as the original query).  The recieving host can ACK
  *  this message with a LimeACKVendorMessage to actually recieve the replies.
+ *
+ *  This message must maintain backwards compatibility between successive
+ *  versions.  This entails that any new features would grow the message
+ *  outward but shouldn't change the meaning of older fields.  This could lead
+ *  to some issues (i.e. abandoning fields does not allow for older fields to
+ *  be reused) but since we don't expect major changes this is probably OK.
+ *
+ *  Note that this behavior of maintaining backwards compatiblity is really
+ *  only necessary for UDP messages since in the UDP case there is probably no
+ *  MessagesSupportedVM exchange.
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
@@ -21,10 +31,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
               payload);
-        if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
-        if (getPayload().length != 1)
+        if (getPayload().length < 1)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPayload().length);
+        if ((getVersion() == 1) && (getPayload().length != 1))
+            throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
     }
 

@@ -174,6 +174,39 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             assertEquals("after Read guids aren't equal!", guid, 
                          new GUID(vmRead.getGUID()));
         }
+
+        // test that the VM can be backwards compatible....
+        byte[] payload = null;
+        ReplyNumberVendorMessage vm = null;
+        
+        // first test that it needs a payload of at least size 1
+        payload = new byte[0];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 0, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // first test that version 1 needs a payload of only size 1
+        payload = new byte[2];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 1, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // test that it can handle versions other than 1
+        payload = new byte[3];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 2, payload);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
+        }
+        catch (BadPacketException expected) {
+            assertTrue(false);
+        }
     }
 
 
@@ -207,6 +240,48 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
                          new GUID(vmRead.getGUID()));
+        }
+
+        // test that the VM can be backwards compatible....
+        byte[] payload = null;
+        LimeACKVendorMessage vm = null;
+        
+        // first test that it needs a payload of at least size 1
+        payload = new byte[0];
+        try {
+            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 0, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // first test that it rejects all versions of 1
+        payload = new byte[1];
+        try {
+            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 1, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // first test that version 2 needs a payload of only size 1
+        payload = new byte[2];
+        try {
+            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 2, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // test that it can handle versions other than 1
+        payload = new byte[3];
+        try {
+            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 3, payload);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
+        }
+        catch (BadPacketException expected) {
+            assertTrue(false);
         }
     }
 

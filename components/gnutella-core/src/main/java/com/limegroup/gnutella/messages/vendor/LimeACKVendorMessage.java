@@ -11,6 +11,18 @@ import java.io.*;
  *  sends B a message with GUID g, B can acknowledge this message by sending a 
  *  LimeACKVendorMessage to A with GUID g).  It also contains the amount of
  *  results the client wants.
+ *
+ *  This message must maintain backwards compatibility between successive
+ *  versions.  This entails that any new features would grow the message
+ *  outward but shouldn't change the meaning of older fields.  This could lead
+ *  to some issues (i.e. abandoning fields does not allow for older fields to
+ *  be reused) but since we don't expect major changes this is probably OK.
+ *  EXCEPTION: Version 1 is NEVER accepted.  Only version's 2 and above are
+ *  recognized.
+ *
+ *  Note that this behavior of maintaining backwards compatiblity is really
+ *  only necessary for UDP messages since in the UDP case there is probably no
+ *  MessagesSupportedVM exchange.
  */
 public final class LimeACKVendorMessage extends VendorMessage {
 
@@ -23,10 +35,11 @@ public final class LimeACKVendorMessage extends VendorMessage {
               payload);
         if (getVersion() == 1)
             throw new BadPacketException("UNSUPPORTED OLD VERSION");
-        if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
-        if (getPayload().length != 1)
+        if (getPayload().length < 1)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPayload().length);
+        if ((getVersion() == 2) && (getPayload().length != 1))
+            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
     }
 
