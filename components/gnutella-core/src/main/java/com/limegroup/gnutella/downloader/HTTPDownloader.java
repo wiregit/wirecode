@@ -302,21 +302,16 @@ System.out.println(_alternateLocationsReceived);
 	 */
 	private static void readAlternateLocations(final String altHeader,
 											   final AlternateLocationCollector alc) {
-		int colonIndex = altHeader.indexOf(":");
-		if(colonIndex == -1) {
-			return;
-		}
-		final String alternateLocations = 
-		    altHeader.substring(colonIndex+1).trim();
+		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
 
 		while(st.hasMoreTokens()) {
 			try {
-				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
 				alc.addAlternateLocation(al);
 			} catch(IOException e) {
-				e.printStackTrace();
-				// just return without adding it.
+				// continue without adding it.
 				continue;
 			}
 		}

@@ -636,7 +636,8 @@ public class HTTPUploader implements Uploader {
 
 		while(st.hasMoreTokens()) {
 			try {
-				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
 				alc.addAlternateLocation(al);
 			} catch(IOException e) {
 				// just return without adding it.

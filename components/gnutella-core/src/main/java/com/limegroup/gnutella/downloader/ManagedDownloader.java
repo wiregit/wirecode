@@ -938,7 +938,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 				try {
 					rfdURL = new URL(rfdStr);
 				    totalAlternateLocations.addAlternateLocation(
-				      new AlternateLocation(rfdURL) );
+					    AlternateLocation.createAlternateLocation(rfdURL));
 				} catch( IOException e ) {
                     ManagedDownloader.this.manager.internalError(e);
                 }  
