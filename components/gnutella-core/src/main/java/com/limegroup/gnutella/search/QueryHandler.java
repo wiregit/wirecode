@@ -605,12 +605,18 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-		if(RESULT_COUNTER.getNumResults() >= RESULTS) {
-            return true;
-        }
-
-        //if the leaf has got enough results then cool. stop this badboy.
-        if(_numResultsReportedByLeaf >= RESULTS)
+        // if the leaf has reported results that is greater or equal to what it
+        // needs, OR the leaf has never reported results and we've routed what
+        // it needs, OR the leaf has reported results and we've routed 75 over
+        // what we think it needs, then return true
+		if((_numResultsReportedByLeaf >= RESULTS) || 
+           ((_numResultsReportedByLeaf == 0) &&
+            (RESULT_COUNTER.getNumResults() >= RESULTS)
+            ) ||
+           ((_numResultsReportedByLeaf > 0) &&
+            (RESULT_COUNTER.getNumResults() >= (RESULTS+75))
+            )
+           )
             return true;
 
         // if our theoretical horizon has gotten too high, consider
