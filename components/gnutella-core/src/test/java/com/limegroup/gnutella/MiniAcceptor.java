@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -27,7 +28,7 @@ public class MiniAcceptor implements Runnable {
     private Object lock=new Object();
     private Connection c=null;
     private boolean done=false;
-    private int port;
+    protected int port;
     private IOException error=null;
 
     private HandshakeResponder properties;
@@ -75,6 +76,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Don't call.  For internal use only. */
     public void run() {
+    	Thread.currentThread().setName("Acceptor thread");
         ServerSocket ss=null;
         try {
             ss=new ServerSocket(port);

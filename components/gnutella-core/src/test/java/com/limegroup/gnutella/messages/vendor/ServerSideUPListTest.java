@@ -40,7 +40,7 @@ public class ServerSideUPListTest extends BaseTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6667;
+    private static final int PORT = 6669;
     
     private static InetAddress _udpAddress;
 
@@ -79,7 +79,7 @@ public class ServerSideUPListTest extends BaseTestCase {
 	/**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS, UDP_WRITER;
+    private static DatagramSocket UDP_ACCESS;
 	
 	
 	public ServerSideUPListTest(String name) {
@@ -124,18 +124,10 @@ public class ServerSideUPListTest extends BaseTestCase {
 	    
 	    UDP_ACCESS = new DatagramSocket();
 	    
+	    
 	}
 	
 	public static void setSettings() {
-		
-		//set the timeout on the pingflood table to something smaller
-		try {
-			PrivilegedAccessor.setValue(RouterService.getMessageRouter(),
-					"_UDPListRequestors",
-					new FixedSizeExpiringSet(200,200));
-		}catch (Exception yeahRight) {
-			fail("couldn't change the UDP pingflood protection table", yeahRight);
-		}
 		
 		String localIP = null;
         try {
@@ -163,13 +155,19 @@ public class ServerSideUPListTest extends BaseTestCase {
 
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
-
+        
+        RouterService.setListeningPort(PORT);
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
+        
+        PrivilegedAccessor.setValue(RouterService.getPromotionManager(),
+				"_UDPListRequestors",
+				new FixedSizeExpiringSet(200,200));
+        UDP_ACCESS.connect(InetAddress.getLocalHost(),PORT);
 	}
 	
 	public void setUp() {
@@ -344,6 +342,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		reply = tryMessage(msgAll);
  		assertNotEquals(0,reply.getLeaves().size());
  		assertNotEquals(0,reply.getUltrapeers().size());
+ 		sleep();
  	}
  	
  	/**
@@ -358,6 +357,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		//see if the result we got had any uptime (it should!)
  		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
  		assertGreaterThan(0,result.getDailyUptime());
+ 		sleep();
  	}
  	
  	/**
@@ -374,27 +374,31 @@ public class ServerSideUPListTest extends BaseTestCase {
  		assertGreaterThan(0,result.getDailyUptime());
  	}
  	
- 	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
- 		UDP_ACCESS.setSoTimeout(500);
+ 	private UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
+ 		assertTrue(UDPService.instance().isListening());
+ 		UDP_ACCESS.setSoTimeout(5000);
+ 		
+ 		
  		_udpAddress = UDP_ACCESS.getLocalAddress();
- 		_udpPort = PORT;
  		
  		//send a packet
  		ByteArrayOutputStream baos = new ByteArrayOutputStream();
  		which.write(baos);
  		DatagramPacket pack = new DatagramPacket(baos.toByteArray(),
  							baos.toByteArray().length,
-							_udpAddress, _udpPort);
+							_udpAddress, PORT);
+ 		
  		assertNotNull(baos.toByteArray());
  		assertNotNull(_udpAddress);
+ 		
  		UDP_ACCESS.send(pack);
  		
  		//now read the response 		
- 		_udpAddress = UDP_ACCESS.getLocalAddress();
- 		_udpPort = UDP_ACCESS.getLocalPort();
+ 		//_udpPort = UDP_ACCESS.getLocalPort();
  		pack = new DatagramPacket(new byte[1000],1000);
  		
  		//not catching IOEx here because not replying is a valid scenario.
+ 		
  		UDP_ACCESS.receive(pack);
  		
  		

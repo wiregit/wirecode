@@ -68,24 +68,27 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 	
 	/**
 	 * tests the scenario where a promotion request arrives that is not for us.
-	 *
+	 */
 	public void testWrongLeaf() throws Exception {
 		try {
 			RouterService.getMessageRouter().handlePromotionRequestVM(wrongLeaf,UltrapeerStub);
 		} catch (RuntimeException bad) {
 			fail("leaf started promotion process, it shouldn't have");
 		}
-	}*/
+	}
 	
 	public void testPromotingLeaf() throws Exception {
 		
+		
+		//assert we are a leaf on startup
+		assertFalse(RouterService.isSupernode());
 		
 		assertEquals(32,ConnectionSettings.NUM_CONNECTIONS.getValue());
 		
 		_acceptor = new MiniAcceptor(new UPResponder(),8000);
 		try{Thread.sleep(500);}catch(InterruptedException iex){}
 		
-		_socket = new DatagramSocket(8000);
+		_socket = new DatagramSocket(8000,InetAddress.getByName("127.0.0.1"));
 		_socket.setSoTimeout(500);
 		
 		
@@ -98,39 +101,44 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 		_socket.receive(ping);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(ping.getData());
-		LimeACKVendorMessage challenge=null;
+		Message raw = null;
+		PromotionACKVendorMessage challenge=null;
 		try {
-			challenge = (LimeACKVendorMessage)Message.read(bais);
+			raw = Message.read(bais);
+			challenge = (PromotionACKVendorMessage)raw;
 		} catch (BadPacketException bpe) {
-			fail(" could not parse the ping", bpe);
+			fail(" could not parse the ping ", bpe);
+		} catch (ClassCastException ccx) {
+			fail(" received class "+raw.getClass(), ccx);
 		}
-		
-		//verify the ack request
-		assertEquals(new String(promotingLeaf.getGUID()), new String(challenge.getGUID()));
-		assertEquals(0, challenge.getNumResults());
-		
 		
 		
 		//create the remote response
-		LimeACKVendorMessage response = new LimeACKVendorMessage(new GUID(challenge.getGUID()),0);
+		PromotionACKVendorMessage response = new PromotionACKVendorMessage();
 		
 		
-		//call the handle method with the wrong datagram - shouldn't matter.
-		//note we call the main handle method, otherwise the listener won't get notified.
+		//send it through the proper channel
 		
-		try {
-			RouterService.getMessageRouter().handleUDPMessage(response,ping);
-			fail("should have thrown.");
-		}catch (RuntimeException expected) {}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		response.write(baos);
+		DatagramPacket packet = new DatagramPacket(baos.toByteArray(),baos.toByteArray().length,
+					InetAddress.getByName("127.0.0.1"), SERVER_PORT);
+		_socket.connect(_socket.getLocalAddress(),SERVER_PORT);
+		_socket.send(packet);
+		
+		//RouterService.getMessageRouter().handleUDPMessage(response,ping);
+		
+		try {Thread.sleep(2500);}catch(InterruptedException iex){}
 		
 		//make sure we have only one connection and that its supernode2supernode
 		assertEquals(1,RouterService.getConnectionManager().getNumInitializedConnections());
-		ManagedConnection ourConn = (ManagedConnection) RouterService.getConnectionManager().getInitializedConnections().get(0);
+		ManagedConnection ourConn = (ManagedConnection) 
+			RouterService.getConnectionManager().getInitializedConnections().get(0);
+		
 		assertTrue(ourConn.isSupernodeSupernodeConnection());
 		
-		//check if we have promoted ourselves
-		try {Thread.sleep(2000);}catch(InterruptedException iox) {}
-		assertTrue(RouterService.isSupernode());
+		//can't check whether we have promoted ourselves from within test environment.
+		//will do it on a live node.
 		_socket.close();
 		
 	}

@@ -53,8 +53,7 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	public static void globalSetUp() throws Exception {
 		
 		//schedule a second propagator with shorter delay values.
-		Class advertiser = PrivilegedAccessor.getClass(MessageRouter.class,"CandidateAdvertiser");
-		Runnable r = (Runnable)PrivilegedAccessor.invokeConstructor(advertiser,new Object[0],null);
+		Runnable r = new CandidateAdvertiser();
 		RouterService.schedule (r, 4000, 500);
 
 	}
