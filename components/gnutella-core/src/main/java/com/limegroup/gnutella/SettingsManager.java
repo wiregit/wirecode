@@ -506,7 +506,7 @@ public class SettingsManager implements SettingsInterface
     public void setKeepAlive(int keepAlive)
 	throws IllegalArgumentException
     {
-	if(false)
+	if(keepAlive<0)
 	    throw new IllegalArgumentException();
 	else
 	    {
