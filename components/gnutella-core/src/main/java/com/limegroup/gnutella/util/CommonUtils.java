@@ -282,7 +282,17 @@ public final class CommonUtils {
     public static boolean isPro() {
         return _isPro;
     }
-
+    
+    /**
+     * Accessor for whether or not this is a testing version
+     * (@version@) of LimeWire.
+     *
+     * @return <tt>true</tt> if the version is @version@,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isTestingVersion() {
+        return LIMEWIRE_VERSION.equals("@version@");
+    }
 
     static int getMinorVersionNumberInternal(String version) {
         if (!version.equals("@version@")) {
