@@ -235,7 +235,7 @@ public abstract class VendorMessage extends Message {
                                                     byte[] fromNetwork,
                                                     int network) 
         throws BadPacketException {
-
+    	
         // sanity check
         if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
             if( RECORD_STATS )
@@ -346,7 +346,7 @@ public abstract class VendorMessage extends Message {
         	return new PromotionRequestVendorMessage(guid,ttl,hops,version,restOf);
         
         if ((selector == F_PROMOTION_ACK) &&
-        		(Arrays.equals(vendorID,F_LIME_VENDOR_ID)))
+        		(Arrays.equals(vendorID,F_LIME_VENDOR_ID))) 
         	return new PromotionACKVendorMessage(guid,ttl,hops,version,restOf);
         
         

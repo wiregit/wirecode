@@ -2633,9 +2633,8 @@ public abstract class MessageRouter {
     	//make sure the same person doesn't request too often
     	//note: this should only happen on the UDP receiver thread, that's why
     	//I'm not locking it.
-    	if (!_promotionManager.getUDPListRequestors().add(handler.getInetAddress()))
+    	if (!_promotionManager.getUDPListRequestors().add(handler.getInetAddress())) 
     		return; //this also takes care of multiple instances running on the same ip address.
-    	
     	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
     	handler.handleUPListVM(newMsg);
     }
@@ -2663,7 +2662,6 @@ public abstract class MessageRouter {
 				
     	
     	//if we are a leaf and we are the target, start the promotion process.
-    	//(not yet implemented, just a stub)
     	if(!RouterService.isSupernode()) {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),

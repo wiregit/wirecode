@@ -92,7 +92,6 @@ public class PromotionManager {
     	_expirer = new ManagedThread(new Expirer());
     	
     	//ping the original requestor
-    	System.out.println("pinging the original requestor");
     	
     	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
     	UDPService.instance().send( ping, _promotionPartner);
@@ -124,11 +123,11 @@ public class PromotionManager {
     	Endpoint partner = null;
     	
     	synchronized(_promotionLock) {
-    		if (_promotionPartner == null) 
+    		if (_promotionPartner == null)  
     			return;
-    		
+    	
     		//check if we received the ACK from the right person
-    		if (!sender.equals(_promotionPartner))
+    		if (!sender.equals(_promotionPartner)) 
 					return;
     		
     		//set the promotion partner to null if that's the case

@@ -1483,7 +1483,7 @@ public class ConnectionManager {
      * @return whether we became an UP successfully.
      */
     public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
-    	System.out.println("trying to become an UP");
+   
     	//first, lose one of our current UPs in order to free a slot.
     	ManagedConnection sacrificed = (ManagedConnection)_initializedConnections.get(0);
     	remove(sacrificed);
@@ -1512,6 +1512,7 @@ public class ConnectionManager {
 		processConnectionHeaders(UPconn);
 		completeConnectionInitialization(UPconn, false);
 		
+		
 		//start it off-thread
 		Thread connThread = new ManagedThread() {
 			public void ManagedRun() {
@@ -1522,11 +1523,16 @@ public class ConnectionManager {
 		};
 		connThread.start();
 		
+		
 		//and close the old connections we had.
 		for (Iterator iter = oldConnections.iterator();iter.hasNext();) {
 			ManagedConnection conn = (ManagedConnection)iter.next();
-			conn.close();
+			if (conn!=UPconn) //make sure we don't close our special connection
+				conn.close();
 		}
+		
+		//that's it.  Now we have only one supernode2supernode connection, we should
+		//promote ourselves.
 		
     }
 
