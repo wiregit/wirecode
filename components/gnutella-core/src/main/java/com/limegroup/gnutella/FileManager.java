@@ -127,12 +127,12 @@ public abstract class FileManager {
      * 
      * IncompleteFile keywords are NOT stored.
      * 
-     * INVARIANT: For all keys k in _KeywordTrie, for all i in the IntSet
-     * _KeywordTrie.get(k), _files[i]._path.substring(k)!=-1. Likewise for all
+     * INVARIANT: For all keys k in _keywordTrie, for all i in the IntSet
+     * _keywordTrie.get(k), _files[i]._path.substring(k)!=-1. Likewise for all
      * i, for all k in _files[i]._path where _files[i] is not an
-     * IncompleteFileDesc, _KeywordTrie.get(k) contains i.
+     * IncompleteFileDesc, _keywordTrie.get(k) contains i.
      */
-    private Trie /* String -> IntSet  */ _KeywordTrie;
+    private Trie /* String -> IntSet  */ _keywordTrie;
     
     /**
      * A map of appropriately case-normalized URN strings to the
@@ -283,7 +283,7 @@ public abstract class FileManager {
         _numPendingFiles = 0;
         _numForcedFiles = 0;
         _files = new ArrayList();
-        _KeywordTrie = new Trie(true);  //ignore case
+        _keywordTrie = new Trie(true);  //ignore case
         _urnMap = new HashMap();
         _extensions = new TreeSet(Comparators.stringComparator());
         _sharedDirectories = new TreeMap(Comparators.fileComparator());
@@ -996,12 +996,11 @@ public abstract class FileManager {
             
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
-                //Ensure there _KeywordTrie has a set of indices associated with
-                //keyword.
-                IntSet indices=(IntSet)_KeywordTrie.get(keyword);
+                //Ensure the _keywordTrie has a set of indices associated with keyword.
+                IntSet indices=(IntSet)_keywordTrie.get(keyword);
                 if (indices==null) {
                     indices=new IntSet();
-                    _KeywordTrie.add(keyword, indices);
+                    _keywordTrie.add(keyword, indices);
                 }
                 //Add fileIndex to the set.
                 indices.add(fileIndex);
@@ -1265,11 +1264,11 @@ public abstract class FileManager {
         String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
-            IntSet indices=(IntSet)_KeywordTrie.get(keyword);
+            IntSet indices=(IntSet)_keywordTrie.get(keyword);
             if (indices!=null) {
                 indices.remove(i);
                 //TODO2: prune tree if possible.  call
-                //_KeywordTrie.remove(keyword) if indices.size()==0.
+                //_keywordTrie.remove(keyword) if indices.size()==0.
             }
         }
 
@@ -1359,7 +1358,7 @@ public abstract class FileManager {
     /** Ensures that this's index takes the minimum amount of space.  Only
      *  affects performance, not correctness; hence no modifies clause. */
     private synchronized void trim() {
-        _KeywordTrie.trim(new Function() {
+        _keywordTrie.trim(new Function() {
             public Object apply(Object intSet) {
                 ((IntSet)intSet).trim();
                 return intSet;
@@ -1368,7 +1367,7 @@ public abstract class FileManager {
     }
 
     /** Returns true if file has a shareable extension.  Case is ignored. */
-    public static boolean hasShareableExtension(File file) {
+    private static boolean hasShareableExtension(File file) {
         if(file == null) return false;
         String filename = file.getName();
         int begin = filename.lastIndexOf(".");
@@ -1484,7 +1483,7 @@ public abstract class FileManager {
         //Trie requires that getPrefixedBy(String, int, int) passes
         //an already case-changed string.  Both search & urnSearch
         //do this kind of match, so we canonicalize the case for them.
-        str = _KeywordTrie.canonicalCase(str);        
+        str = _keywordTrie.canonicalCase(str);        
         IntSet matches = search(str, null);
         if(request.getQueryUrns().size() > 0) {
             matches = urnSearch(request.getQueryUrns().iterator(),matches);
@@ -1641,7 +1640,7 @@ public abstract class FileManager {
 
             //Search for keyword, i.e., keywords[i...j-1].  
             Iterator /* of IntSet */ iter=
-                _KeywordTrie.getPrefixedBy(query, i, j);
+                _keywordTrie.getPrefixedBy(query, i, j);
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
                 //matches.  As an optimization, if this is the only keyword and
@@ -1754,9 +1753,9 @@ public abstract class FileManager {
             return;
         System.err.println("WARNING: running repOk()");
 
-        //Verify index.  Get the set of indices in the _KeywordTrie....
+        //Verify index.  Get the set of indices in the _keywordTrie....
         IntSet indices=new IntSet();
-        for (Iterator iter=_KeywordTrie.getPrefixedBy(""); iter.hasNext(); ) {
+        for (Iterator iter=_keywordTrie.getPrefixedBy(""); iter.hasNext(); ) {
             IntSet set=(IntSet)iter.next();
             indices.addAll(set);
         }

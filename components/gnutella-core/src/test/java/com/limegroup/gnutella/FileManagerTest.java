@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -676,7 +677,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
 
         //  assert that "shared" file does not have a shareable extension
-        assertFalse("shared file should not have a shareable extension", fman.hasShareableExtension(shared));
+        Method extensionCheck =
+            PrivilegedAccessor.getMethod(FileManager.class,  
+                "hasShareableExtension", new Class[] { File.class });
+        Object[] params = new File[] { shared };
+        boolean valid = 
+            ((Boolean)extensionCheck.invoke(FileManager.class, 
+                params)).booleanValue();
+        assertFalse("shared file should not have a shareable extension", valid);
         
         //  assert that "shared" is not in shared directories
         assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
