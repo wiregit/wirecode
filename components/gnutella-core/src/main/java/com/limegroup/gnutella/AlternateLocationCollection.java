@@ -82,7 +82,6 @@ public final class AlternateLocationCollection
 
 		Iterator iter = _alternateLocations.values().iterator();	   
 		StringBuffer writeBuffer = new StringBuffer();
-		writeBuffer.append(HTTPConstants.ALTERNATE_LOCATION_HEADER+" ");
 		while(iter.hasNext()) {
 			writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
 			if(iter.hasNext()) {
