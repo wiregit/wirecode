@@ -14,6 +14,8 @@ import java.util.*;
 
 public class HTTPDownloader implements Runnable {
 
+    private int BUFFSIZE = 1024;
+
     private InputStream _istream;
     private BufferedReader _in;
 	    
@@ -185,9 +187,11 @@ public class HTTPDownloader implements Runnable {
 		int count = 0;
 		int c = -1;
 		
-		while ( (c = _istream.read() ) != -1) {
-		    myFile.write(c);
-		    _amountRead++;
+		byte[] buf = new byte[BUFFSIZE];
+
+		while ( (c = _istream.read(buf) ) != -1) {
+		    myFile.write(buf);
+		    _amountRead+=c;
 		    count++;
 		}
 		    
