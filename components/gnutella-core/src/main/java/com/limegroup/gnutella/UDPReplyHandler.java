@@ -38,13 +38,56 @@ public final class UDPReplyHandler implements ReplyHandler {
 		PORT = port;
 	}
 
+	
+	/**
+	 * Sends the <tt>PingReply</tt> via a UDP datagram to the IP and port
+	 * for this handler.<p>
+	 *
+	 * Implements <tt>ReplyHandler</tt>.
+	 *
+	 * @param hit the <tt>PingReply</tt> to send
+	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
+		send(pong);
 	}
 
+	/**
+	 * Sends the <tt>QueryReply</tt> via a UDP datagram to the IP and port
+	 * for this handler.<p>
+	 *
+	 * Implements <tt>ReplyHandler</tt>.
+	 *
+	 * @param hit the <tt>QueryReply</tt> to send
+	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
+		send(hit);
+	}
+
+	/**
+	 * Sends the <tt>QueryRequest</tt> via a UDP datagram to the IP and port
+	 * for this handler.<p>
+	 *
+	 * Implements <tt>ReplyHandler</tt>.
+	 *
+	 * @param request the <tt>QueryRequest</tt> to send
+	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 */
+	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
+		send(request);
+	}
+
+	/**
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address for 
+	 * this <tt>UDPReplyHandler</tt>.
+	 *
+	 * @param msg the <tt>Message</tt> to send
+	 */
+	private synchronized void send(Message msg) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			hit.write(baos);
+			msg.write(baos);
 		} catch(IOException e) {
 			// can't send the hit, so return
 			return;
@@ -57,10 +100,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 		} catch(IOException e) {
 			// not sure what to do here -- try again??
 		}
-		//SOCKET.send(dg);
-	}
-
-	public void handlePushRequest(PushRequest reques, ReplyHandler handlert) {
 	}
 
 	public void countDroppedMessage() {
