@@ -31,6 +31,8 @@ public abstract class SourceRanker {
     }
     
     public abstract void addToPool(IpPort host);
+	
+	public abstract boolean hasMore();
     
     public abstract IpPort getBest();
     
@@ -41,7 +43,7 @@ public abstract class SourceRanker {
         // for example, if we can't receive solicited UDP we'd use a 
         // ranker that uses the current logic in ManagedDownloader.removeBest
         // which would be implemented in ClassicRanker or similar.
-        return EMPTY_RANKER;
+        return new LegacyRanker();
     }
     
     private static class EmptyRanker extends SourceRanker {
@@ -49,6 +51,7 @@ public abstract class SourceRanker {
         public IpPort getBest() {
             return null;
         }
+		public boolean hasMore(){return false;}
     }
 
 }
