@@ -32,9 +32,12 @@ public class Connection implements Runnable {
     private RouteTable routeTable=null;     //may be null
     private RouteTable pushRouteTable=null; 
     /** The underlying socket.  For thread synchronization reasons, it is important
-     *  that this only be modified by the send(m) and receive() methods. 
+     *  that this only be modified by the send(m) and receive() methods.  Also, use
+     *  in and out, buffered versions of the input and output streams, for writing.
      */
     private Socket sock;
+    private InputStream in;
+    private OutputStream out;
     private boolean incoming;
 
     /** The number of packets I sent and received.  This includes bad packets. */
@@ -84,6 +87,8 @@ public class Connection implements Runnable {
 	throws IOException {
 	this.manager=manager;
 	this.sock=sock;
+	this.in=new BufferedInputStream(sock.getInputStream());
+	this.out=new BufferedOutputStream(sock.getOutputStream());
 	this.incoming=incoming;
 	if (manager!=null){
 	    this.routeTable=manager.routeTable;
@@ -121,7 +126,6 @@ public class Connection implements Runnable {
     private void expectString(String s) throws IOException {
 	//TODO1: shouldn't this timeout?
 	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
-	InputStream in=sock.getInputStream();
 	//TODO3: can optimize, but this isn't really important
 	for (int i=0; i<bytes.length; i++) {
 	    int got=in.read();
@@ -141,7 +145,6 @@ public class Connection implements Runnable {
      */
     public void send(Message m) throws IOException {
 	//Can't use same lock as receive()!
-	OutputStream out=sock.getOutputStream();
 	synchronized (out) {
 	    m.write(out);
 	    out.flush();
@@ -298,8 +301,7 @@ public class Connection implements Runnable {
 	    }//while
 	}//try
 	catch (IOException e){
-	    System.out.println("IO Excpetion in Connection thread");
-	    System.out.println("removing this connection...");
+	    ConnectionManager.error("Connection closed: "+sock.toString());
 	    manager.remove(this);
 	}
     }//run
