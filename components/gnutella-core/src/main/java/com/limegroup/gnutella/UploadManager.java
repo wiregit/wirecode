@@ -6,6 +6,7 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 /**
  * The list of all the uploads in progress.
@@ -97,6 +98,12 @@ public class UploadManager implements BandwidthTracker {
     private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
     private FileManager _fileManager;
+    
+    /** 
+     * The file index used in this structure to indicate a browse host
+     * request
+     */
+    public static final int BROWSE_HOST_FILE_INDEX = -1;
 
 
    //////////////////////// Main Public Interface /////////////////////////
@@ -146,7 +153,7 @@ public class UploadManager implements BandwidthTracker {
                 }
                 //create an uploader
                 uploader = new HTTPUploader(line._file, socket, line._index, 
-                    this, _fileManager);
+                    this, _fileManager, _router);
                 //do the upload
                 doSingleUpload(uploader, 
                     socket.getInetAddress().getHostAddress(), line._index);
@@ -260,7 +267,7 @@ public class UploadManager implements BandwidthTracker {
 		Uploader uploader = null;
         try {
             uploader = new HTTPUploader(file, host, port, index, guid, this,
-                                        _fileManager);
+                                        _fileManager, _router);
             // testing if we are either currently attempting a push, 
             // or we have unsuccessfully attempted a push with this host in the
             // past.
@@ -526,6 +533,15 @@ public class UploadManager implements BandwidthTracker {
 		String host = Message.ip2string(address);
 		return host;
 	}
+    
+    /**
+	 * returns the ip address of the machine
+	 * that this limewire is running on.
+	 */
+	public byte[] getThisAddress() {
+		return _acceptor.getAddress() ;
+	}
+    
 	/**
 	 * returns the port of the machine that this limewire is
 	 * running on
@@ -574,29 +590,47 @@ public class UploadManager implements BandwidthTracker {
 
 	private static GETLine parseGET(Socket socket) throws IOException {
 		try {
+            int index = -1;
+            String file = null;
 			// Set the timeout so that we don't do block reading.
 			socket.setSoTimeout(SettingsManager.instance().getTimeout());
 			// open the stream from the socket for reading
 			InputStream istream = socket.getInputStream();
 			ByteReader br = new ByteReader(istream);
-			// read the first line. if null, throw an exception
-			String str = br.readLine();
+            //Expecting "GET /get/0/sample.txt HTTP/1.0"
+			// read the first line ("GET " has already been read). 
+			String str = br.readLine().trim();
 			if (str == null)
 				throw new IOException();
-			//Expecting "GET /get/0/sample.txt HTTP/1.0"
-			// parse this for the appropriate information
-			// find where the get is...
-			int g = str.indexOf("/get/");
-			// find the next "/" after the "/get/".  the number 
-			// between should be the index;
-			int d = str.indexOf( "/", (g + 5) ); 
-			// get the index
-			String str_index = str.substring( (g+5), d );
-			int index = java.lang.Integer.parseInt(str_index);
-			// get the filename, which should be right after
-			// the "/", and before the next " ".
-			int f = str.indexOf( " HTTP/", d );
-			String file = URLDecoder.decode(str.substring( (d+1), f));
+            
+            //tokenize the string to separate out file information part
+            //and the http information part
+            StringTokenizer st = new StringTokenizer(str);
+            //file information part: /get/0/sample.txt
+            String fileInfoPart = st.nextToken().trim();
+            //http information part: HTTP/1.0
+            String httpInfoPart = st.nextToken().trim();
+            
+            if(fileInfoPart.equals("/")) {
+                //special case for browse host request
+                index = BROWSE_HOST_FILE_INDEX;
+                file = "Browse-Host Request";
+            } else {
+                //NORMAL CASE
+                // parse this for the appropriate information
+                // find where the get is...
+                int g = str.indexOf("/get/");
+                // find the next "/" after the "/get/".  the number 
+                // between should be the index;
+                int d = str.indexOf( "/", (g + 5) ); 
+                // get the index
+                String str_index = str.substring( (g+5), d );
+                index = java.lang.Integer.parseInt(str_index);
+                // get the filename, which should be right after
+                // the "/", and before the next " ".
+                int f = str.indexOf( " HTTP/", d );
+                file = URLDecoder.decode(str.substring( (d+1), f));
+            }
             //check if the protocol is HTTP1.1. Note that this is not a very 
             //strict check.
             boolean http11 = false;
@@ -607,12 +641,14 @@ public class UploadManager implements BandwidthTracker {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException();
-		}
+		} catch (java.util.NoSuchElementException nsee) {
+            throw new IOException();
+        }
   	}
 
 
 	private static class GETLine {
-  		int _index;
+        int _index;
   		String _file;
         /** flag indicating if the protocol is HTTP1.1 */
         boolean _http11;
