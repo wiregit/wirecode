@@ -524,13 +524,14 @@ public class HTTPUploader implements Runnable {
             final int cycleTime=1000;
         outerLoop:
             while (true) {
-                //1. Calculate max upload bandwidth for this connection.  The
-                //user has specified a theoretical link bandwidth and the
-                //percentage of this bandwidth to use for uploads. We divide
-                //this bandwidth equally among all the uploads in progress.
-                //TODO: if one connection isn't using all the bandwidth, some
-                //coul get more.
-                int theoreticalBandwidth=manager.getConnectionSpeed();
+                //1. Calculate max upload bandwidth for this connection in
+                //kiloBYTES/sec.  The user has specified a theoretical link bandwidth
+                //(in kiloBITS/s) and the percentage of this bandwidth to use for
+                //uploads. We divide this bandwidth equally among all the
+                //uploads in progress.  TODO: if one connection isn't using all
+                //the bandwidth, some coul get more.
+                int theoreticalBandwidth=
+                    (int)(((float)manager.getConnectionSpeed())/8.f);
                 int maxBandwidth=(int)(theoreticalBandwidth*((float)speed/100.)
                                              /(float)uploadCount);
 

@@ -517,7 +517,8 @@ public class SettingsManager implements SettingsInterface
     /** returns the client's port number */
     public int getPort(){return port_;}
 
-    /** returns the client's connection speed */
+    /** returns the client's connection speed in kilobits/sec
+     *  (not kilobytes/sec) */
     public int getConnectionSpeed(){return connectionSpeed_;}
 
     public int getUploadSpeed() { return uploadSpeed_; }
