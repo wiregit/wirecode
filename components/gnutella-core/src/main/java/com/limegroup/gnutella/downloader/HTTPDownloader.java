@@ -171,7 +171,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception NotSharingException the host isn't sharing files (BearShare)
      * @exception IOException miscellaneous  error 
      */
-    public void connectHTTP(int start, int stop /*,boolean supportQueueing*/) 
+    public void connectHTTP(int start, int stop ,boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
                NotSharingException, QueuedException {
         _amountToRead = stop-start;
@@ -184,9 +184,9 @@ public class HTTPDownloader implements BandwidthTracker {
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
-        //TODO1: add this.
-        //if(supportQueueing)
-        //out.write("X-Queue: 0.1\r\n");//we support remote queueing
+
+        if(supportQueueing)
+            out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking
 		// while holding the lock

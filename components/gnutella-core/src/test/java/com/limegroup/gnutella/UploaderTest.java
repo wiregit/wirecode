@@ -291,7 +291,7 @@ public class UploaderTest extends TestCase {
                                        TryAgainLaterException, IOException {  
         if(tcp)
             dloader.connectTCP(0); //may throw TryAgainLater, etc.
-        dloader.connectHTTP(0,rfd.getSize());
+        dloader.connectHTTP(0,rfd.getSize(),true);
     }
 
     private static void kill(HTTPDownloader downloader) {

@@ -239,14 +239,17 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The connections we're using for the current attempts. */    
     private List /* of HTTPDownloader */ dloaders;
     /**
-     * The number of worker threads in progress.  Used to make sure that we do
+     * A List of worker threads in progress.  Used to make sure that we do
      * not terminate (in tryAllDownloads3) without hope if threads are
      * connecting to hosts (i.e., removed from files) but not have not yet been
-     * added to dloaders.  
+     * added to dloaders.
+     * Also, if the download completes and any of the threads are sleeping 
+     * because it has been queued by the uploader, those threads need to be 
+     * killed.
      * LOCKING: synchronize on this 
      * INVARIANT: dloaders.size<=threads 
      */
-    private int threads=0;
+    private List /*of Threads*/ threads;
     /** List of intervals within the file which have not been allocated to
      * any downloader yet. The set of these intervals represents the "white"
      * region of the file we are downloading*/
@@ -1139,6 +1142,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //INVARIANT: all intervals are disjoint and non-empty
         synchronized(this) {
             needed=new ArrayList(); 
+            threads=new ArrayList();
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
@@ -1173,7 +1177,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         busy=new LinkedList();
         int size = -1;
         int connectTo = -1;
-        Assert.that(threads==0);
+        Assert.that(threads.size()==0);
 
         //While there is still an unfinished region of the file...
         while (true) {
@@ -1190,10 +1194,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                         debug("MANAGER: terminating because of stop");
                         throw new InterruptedException();
                     } else if (dloaders.size()==0 && needed.size()==0) {
-                        //Finished.
+                        //Finished. Interrupt all worker threads
+                        for(int i=threads.size();i>0;i--) {
+                            Thread t = (Thread)threads.get(i-1);
+                            t.interrupt();
+                        }
                         debug("MANAGER: terminating because of completion");
                         return COMPLETE;
-                    } else if (threads==0
+                    } else if (threads.size()==0
                                && files.size()==0) {
                         //No downloaders worth living for.
                         if (busy.size()>0) {
@@ -1213,7 +1221,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             //OK. We are going to create a thread for each RFD, 
             for(int i=0; i<connectTo && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
-                synchronized (this) { threads++; }
                 Thread connectCreator = new Thread() {
                     public void run() {
                         try {
@@ -1225,11 +1232,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                             //the GUI for debugging purposes.
                             ManagedDownloader.this.manager.internalError(e);
                         } finally {
-                            synchronized (ManagedDownloader.this) { threads--; }
+                            synchronized (ManagedDownloader.this) { 
+                                threads.remove(this); 
+                            }
                         }
                     }//end of run
                 };
                 connectCreator.start();
+                synchronized (this) { threads.add(connectCreator); }
             }//end of for 
             //wait for a notification before we continue.
             synchronized(this) {
@@ -1509,7 +1519,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //code below.  Note connectHTTP can throw several exceptions.  Also, the
         //call to stopAt does not appear necessary, but we're leaving it in just
         //in case.
-        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high+1);
+        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high+1,
+                            true);
         dloader.stopAt(interval.high+1);
         debug("WORKER: picking white "+interval+" to "+dloader);
     }
@@ -1562,8 +1573,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 biggest.getInitialReadingPoint()+amountRead;
                 int stop=
                 biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-                //this line could throw a bunch of exceptions
-                dloader.connectHTTP(getOverlapOffset(start), stop);
+                //Note: we are not interested in being queued at this point this
+                //line could throw a bunch of exceptions (not queuedException)
+                dloader.connectHTTP(getOverlapOffset(start), stop, false);
                 dloader.stopAt(stop);
                 debug("WORKER: picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
@@ -1580,7 +1592,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             int stop=
             biggest.getInitialReadingPoint()+biggest.getAmountToRead();
             //this line could throw a bunch of exceptions
-            dloader.connectHTTP(getOverlapOffset(start), stop);
+            dloader.connectHTTP(getOverlapOffset(start), stop,true);
             dloader.stopAt(stop);
             biggest.stopAt(start);
             debug("MANAGER: assigning split grey "
@@ -2001,8 +2013,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {

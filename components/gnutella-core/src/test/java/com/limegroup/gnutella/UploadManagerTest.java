@@ -192,7 +192,7 @@ public class UploadManagerTest extends TestCase {
                                           new AlternateLocationCollection());
         try {
             downloader.connectTCP(0); //may throw TryAgainLater, etc.
-            downloader.connectHTTP(0,rfd.getSize());
+            downloader.connectHTTP(0,rfd.getSize(),true);
             return downloader;
         } finally {
             tmp.delete();
