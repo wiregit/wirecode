@@ -399,7 +399,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         assertTrue(nQuery != null);
 
         // UPs should get more queries
-        Thread.sleep(3000);
+        Thread.sleep(5000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
             QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i]);
@@ -411,6 +411,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 
         // now send enough results, we shouldn't get no more queries yo
         routeResultsToUltrapeers(query.getGUID(), 200);
+        drainAll(); // do this to make sure no queries were sent while executing
 
         // we shouldn't get no more queries yo
         Thread.sleep(3000);
@@ -466,6 +467,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 
         // now send enough results, we shouldn't get no more queries yo
         routeResultsToUltrapeers(query.getGUID(), 200);
+        drainAll(); // do this to make sure no queries were sent while executing
 
         // we shouldn't get no more queries yo
         Thread.sleep(4000);
@@ -536,6 +538,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         sResp = new QueryStatusResponse(new GUID(query.getGUID()), 50);
         LEAF.send(sResp);
         LEAF.flush();
+        drainAll(); // do this to make sure no queries were sent while executing
 
         // we shouldn't get no more queries yo
         Thread.sleep(3000);
