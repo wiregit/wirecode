@@ -188,7 +188,6 @@ public final class UDPService implements Runnable {
                 // process packet....
                 // *----------------------------
                 byte[] data = datagram.getData();
-                int length = datagram.getLength();
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
@@ -311,10 +310,4 @@ public final class UDPService implements Runnable {
 	public String toString() {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
-	
-    private static final boolean debug = false;
-    private static void debug(String out) {
-        if (debug)
-            System.out.println(out);
-    }		
 }
