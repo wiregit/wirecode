@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * This class manages the property settings.  It maintains default
@@ -102,6 +103,11 @@ import com.limegroup.gnutella.util.CommonUtils;
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class SettingsManager {
 
+    /**
+	 * Constant member variable for the main <tt>Properties</tt> instance.
+	 */
+    private static final Properties PROPS = Settings.getProperties();
+
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
 
 	/**
@@ -127,8 +133,8 @@ public final class SettingsManager {
     /**
      * Constant <tt>File</tt> instance for the properties file
      */
-    private final File PROPS_FILE =
-        new File(CommonUtils.getUserSettingsDir(), PROPS_NAME);
+    private final File PROPS_FILE = Settings.getPropertiesFile();
+    //new File(CommonUtils.getUserSettingsDir(), PROPS_NAME);
 
     /**
      * Time interval, after which the accumulated information expires
@@ -713,7 +719,7 @@ public final class SettingsManager {
     /**
 	 * Constant member variable for the main <tt>Properties</tt> instance.
 	 */
-    private final Properties PROPS = new Properties();
+    //private static final Properties PROPS = Setting.getProperties();//new Properties();
 
     /**
 	 * Specialized constant properties file for the network discoverer.
@@ -740,9 +746,8 @@ public final class SettingsManager {
      */
     private SettingsManager() {
         // load the specialized property file for network discovery
-        FileInputStream ndfis;
         try {
-            ndfis = new FileInputStream(new File(ND_PROPS_NAME));
+            FileInputStream ndfis = new FileInputStream(new File(ND_PROPS_NAME));
             try {ND_PROPS.load(ndfis);}
             catch(IOException ioe) {}
         }
@@ -751,9 +756,8 @@ public final class SettingsManager {
 
         // load the main application properties file
         Properties tempProps = new Properties();
-        FileInputStream fis;
         try {
-            fis = new FileInputStream(PROPS_FILE);
+            FileInputStream fis = new FileInputStream(PROPS_FILE);
             try {
                 tempProps.load(fis);
                 loadDefaults();
@@ -3763,6 +3767,10 @@ public final class SettingsManager {
 		DIALOG.pack();
 		DIALOG.show();
     }
+
+	public Properties getProperties() {
+		return PROPS;
+	}
 
 	// unit tests
 //  	public static void main(String args[]) {
