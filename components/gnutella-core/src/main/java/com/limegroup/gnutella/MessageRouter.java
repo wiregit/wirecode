@@ -2261,8 +2261,7 @@ public abstract class MessageRouter {
             final boolean fwTransfer = 
                 queryRequest.canDoFirewalledTransfer() && 
                 UDPService.instance().canDoFWT() &&
-                !RouterService.acceptedIncomingConnection() &&
-                NetworkUtils.isValidAddress(RouterService.getExternalAddress());
+                !RouterService.acceptedIncomingConnection();
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.
