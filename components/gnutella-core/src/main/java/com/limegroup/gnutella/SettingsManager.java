@@ -292,8 +292,8 @@ public final class SettingsManager {
 	private final boolean DEFAULT_EVER_ACCEPTED_INCOMING = false;
     
     //settings for Supernode implementation
-    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
-    private final int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
+    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
+    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
     
     //authentication settings
     private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
@@ -313,8 +313,7 @@ public final class SettingsManager {
 	/**
 	 * Value for the default minimum speed to allow in search results.
 	 */
-	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
-		SpeedConstants.MODEM_SPEED_INT;
+	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 0;
 
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
@@ -1163,9 +1162,9 @@ public final class SettingsManager {
 	
 		//Special case: if this is a modem, ensure that KEEP_ALIVE 
         //is sufficiently low.
-		if ( getConnectionSpeed()<=56 ) { //modem
-			setKeepAlive(Math.min(2, getKeepAlive()));
-		}
+		//if ( getConnectionSpeed()<=56 ) { //modem
+		//setKeepAlive(Math.min(2, getKeepAlive()));
+		//}
 	}
 
     /** 

@@ -132,7 +132,12 @@ public class ConnectionManager {
      * must have
      */
     public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
-    
+
+    /**
+     * Ideal number of connections for a leaf.
+     */
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
+
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_SUPERNODES headers. */
     private int MAX_SUPERNODE_ENDPOINTS=10;
@@ -161,7 +166,7 @@ public class ConnectionManager {
         _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
-		watchdog.start();
+  		watchdog.start();
 
 		if(_settings.getConnectOnStartup()) {
 			setKeepAlive(_settings.getKeepAlive());
@@ -354,10 +359,11 @@ public class ConnectionManager {
      * and newKeep>1 (sic).
      */
     public synchronized void setKeepAlive(int newKeep) {
-        //The request for increasing keep alive if we are leaf node is invalid.
-        //This logic is duplicated in RouterService.setKeepAlive.
-        if ((newKeep > 1) && hasClientSupernodeConnection())
-            return;
+        //TODO: we may want to re-enable this...with a higher limit.
+        ////The request for increasing keep alive if we are leaf node is invalid
+        ////This logic is duplicated in RouterService.setKeepAlive.
+        //if ((newKeep > 1) && hasClientSupernodeConnection())
+        //    return;
         
         _keepAlive = newKeep;
         adjustConnectionFetchers();
@@ -390,17 +396,16 @@ public class ConnectionManager {
      * is not required that the supernode support query routing, though that is
      * generally the case.  
      */
-    public synchronized boolean hasClientSupernodeConnection() {
-        //TODO3: it may be possible to remove the synchronized statement here,
-        //depending on whether Java ALWAYS stores the value of
-        //_incomingConnections in a register before proceeding.
-        List connections=_initializedConnections;
-        if (connections.size()!=1)
-            return false;
-        else {
-            ManagedConnection first=(ManagedConnection)connections.get(0);
-            return first.isClientSupernodeConnection();
+    public boolean hasClientSupernodeConnection() {
+        //TODO2: should we make this faster by augmenting state?  We could
+        //also return false if isSupernode().
+        List connections=getInitializedConnections();
+        for (int i=0; i<connections.size(); i++) {
+            ManagedConnection first=(ManagedConnection)connections.get(i);
+            if (first.isClientSupernodeConnection())
+                return true;
         }
+        return false;
     }
     
     /**
@@ -495,14 +500,15 @@ public class ConnectionManager {
      * Checks if the connection received can be accepted,
      * based upon the type of connection (e.g. client, supernode, 
      * temporary etc). 
-     * @param receivedConnection The connection we received, for which to 
+     * @param c The connection we received, for which to 
      * test if we have incoming slot.
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    public boolean hasAvailableIncoming(ManagedConnection receivedConnection) {
+    public boolean hasAvailableIncoming(ManagedConnection c) {
         return hasAvailableIncoming(
-            receivedConnection.isSupernodeClientConnection());
+            c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)!=null,
+            c.isSupernodeClientConnection());
     }
     
     /**
@@ -511,42 +517,80 @@ public class ConnectionManager {
      * false otherwise
      */
     public boolean hasAnyAvailableIncoming() {
-        //return true, if there's an available Ultrapeer OR leaf slot
-        return (hasAvailableIncoming(false) || 
-            (isSupernode() && hasAvailableIncoming(true)));
+        return hasAvailableIncoming(false, false)
+            || hasAvailableIncoming(true, false) 
+            || (isSupernode() && hasAvailableIncoming(true, true));
     }
     
     /**
-     * If leaf==true, returns true if this has slots for incoming leaf
-     * connections.  If leaf==false, returns false if this has slots 
-     * for incoming supernode or 0.4 connections.  Does not account for
-     * supernode capabilities in this decision.
+     * Returns true if this has slots for an incoming connection, <b>without
+     * accounting for this' ultrapeer capabilities</b>.  More specifically:
+     * <ul>
+     * <li>if !isUltrapeerAware, returns true if this has space for an incoming
+     *  unrouted 0.4-style connection.  The value of isLeaf is ignored.
+     * <li>if isUltrapeerAware&&isLeaf, returns true if this has slots for an
+     *  incoming leaf connection.
+     * <li>if isUltrapeerAware&&!isLeaf, returns true if this has slots for an
+     *  incoming ultrapeer connection.
+     * </ul>
+     *
+     * @param isUltrapeerAware whether the connection wrote the X-Ultrapeer 
+     *  header
+     * @param isLeaf whether the value of the X-Ultrapeer header was false,
+     *  assuming it was written
      */
-    private boolean hasAvailableIncoming(boolean leaf) {
+    public synchronized boolean hasAvailableIncoming(boolean isUltrapeerAware,
+                                                     boolean isLeaf) {
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0)
             return false;
         else if (hasClientSupernodeConnection())
-            return false;
-        else if (leaf) {
-            //As the spec. says, this assumes we are in supernode mode.
-            int shieldedMax=
-                SettingsManager.instance().getMaxShieldedClientConnections();
-            return _incomingClientConnections < shieldedMax;
+            //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
+            return false;  
+        else if (isUltrapeerAware) {
+            if (isLeaf) {
+                //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
+                int shieldedMax=
+                   SettingsManager.instance().getMaxShieldedClientConnections();
+                return _incomingClientConnections < shieldedMax;
+            } else {
+                //2. Ultrapeer.  Changed ultrapeers to prefer other ultrapeers.
+                //incoming ultrapeers are always allowed if there are fewer than
+                //KEEP_ALIVE ultrapeer connections, regardless of the number of
+                //incoming connections. So if you fetched KEEP_ALIVE outgoing
+                //connections, received KEEP_ALIVE incoming old-fashioned
+                //connections, then received KEEP_ALIVE incoming ultrapeer
+                //connections, you could temporarily have 3*KEEP_ALIVE (~18)
+                //connections!  Thankfully this almost never happens.
+                return ultrapeerConnections() < _keepAlive;
+            }
         } else {
+            //3. Old-style unrouted connection.
             return _incomingConnections < _keepAlive;
         }
     }
-    
-    
+        
     /**
      * Provides handle to the activity callback
      * @return Handle to the activity callback
      */
     public ActivityCallback getCallback(){
         return _callback;
+    }
+
+    /** Returns the number of connections to other ultrapeers.  Caller MUST hold
+     *  this' monitor. */
+    private int ultrapeerConnections() {
+        //TODO3: augment state of this if needed to avoid loop
+        int ret=0;
+        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (mc.isSupernodeConnection())
+                ret++;
+        }
+        return ret;
     }
 
     /**
@@ -652,10 +696,9 @@ public class ConnectionManager {
                     connection.getInetAddress().getAddress(),
                     connection.getOrigPort()));
         }
-        //add the best few endpoints from the hostcatcher.  TODO: limit this
-        //to N entries?
-        Iterator iterator=_catcher.getBestHosts();
-        for (int i=0; iterator.hasNext() && i<MAX_SUPERNODE_ENDPOINTS; i++) {
+        //add the best few endpoints from the hostcatcher.
+        Iterator iterator=_catcher.getUltrapeerHosts(MAX_SUPERNODE_ENDPOINTS);
+        while (iterator.hasNext()) {
             Endpoint e=(Endpoint)iterator.next();
             retSet.add(e);
         }
@@ -1095,29 +1138,41 @@ public class ConnectionManager {
     private synchronized void gotShieldedClientSupernodeConnection(
         ManagedConnection supernodeConnection)
     {
-        // Deactivate checking for Ultra Fast Shutdown
-		deactivateUltraFastConnectShutdown(); 
-        //Set keep alive to 1, so that we are not fetching any connections.
-        //KEEP_ALIVE property is not modified, so that when this connection
-        //drops, we can restore _keepAlive to its old value.  Note that we do
-        //not set _keepAlive to 0.  This allows
-        //lostShieldedClientSupernodeConnection to distinguish between being
-        //disconnected by the user and being disconnected by the remote host.
-        //(An earlier version required you to press the disconnect button twice
-        //when in leaf mode.)  hasAvailableIncoming will not allow incoming
-        //connections when we have a client/supernode connection, regardless of
-        //_keepAlive.  The call to math.min prevents us from reconnecting if
-        //disconnected.
-        setKeepAlive(Math.min(1, _keepAlive));
+        //How many leaf connections should we have?  There's a tension between
+        //doing what LimeWire thinks is best and what the user wants.  Here's
+        //how we compromise.  If we're quick-connecting automatically (on
+        //startup, from file menu, or after loosing all shielded connections),
+        //set KEEP_ALIVE to LimeWire's preferred value.  (Note that this is not
+        //stored in limewire.props.)  Otherwise, we use the user's desired
+        //value.  In either case, make sure the ultra-fast connect logic is
+        //disabled, since it tries to get KEEP_ALIVE connections.
+        boolean wasQuickConnecting=(_ultraFastCheck!=null) && _keepAlive>0;
+  		deactivateUltraFastConnectShutdown(); 
+        if (wasQuickConnecting)
+            setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
+
+        //This is totally disabled now that leaves can have multiple connections.
+//          //Set keep alive to 1, so that we are not fetching any connections.
+//          //KEEP_ALIVE property is not modified, so that when this connection
+//          //drops, we can restore _keepAlive to its old value.  Note that we do
+//          //not set _keepAlive to 0.  This allows
+//          //lostShieldedClientSupernodeConnection to distinguish between being
+//          //disconnected by the user and being disconnected by the remote host.
+//          //(An earlier version required you to press the disconnect button twice
+//          //when in leaf mode.)  hasAvailableIncoming will not allow incoming
+//          //connections when we have a client/supernode connection, regardless of
+//          //_keepAlive.  The call to math.min prevents us from reconnecting if
+//          //disconnected.
+//          setKeepAlive(Math.min(1, _keepAlive));
         
-        //close all other connections
-        Iterator iterator = _connections.iterator();
-        while(iterator.hasNext())
-        {
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            if(!connection.equals(supernodeConnection))
-                remove(connection);
-        }
+//          //close all other connections
+//          Iterator iterator = _connections.iterator();
+//          while(iterator.hasNext())
+//          {
+//              ManagedConnection connection = (ManagedConnection)iterator.next();
+//              if(!connection.equals(supernodeConnection))
+//                  remove(connection);
+//          }
     }
     
     /** 
@@ -1126,12 +1181,11 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        //Return KEEP_ALIVE to old value...unless we're disconnected.
-        //(Recall that the KEEP_ALIVE is set to *one* when getting 
-        //a shielded leaf connection.)
-        if(_connections.size() == 0 && _keepAlive>0)
+        //If the user is connected and we've lost all client connections, run
+        //the quick connect logic.  See gotShieldedClientSupernodeConnection.
+        if(_keepAlive>0 && !hasClientSupernodeConnection())
         {
-            setKeepAlive(SettingsManager.instance().getKeepAlive());
+            connect();
         }
     }
     
@@ -1411,13 +1465,15 @@ public class ConnectionManager {
     
     /**
      * @requires n>0
-     * @effects returns an iterator that yields up the best n endpoints of this.
-     *  It's not guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     *  observed.  
+     * @effects returns an iterator that yields up the best n non-ultrapeer
+     *  endpoints of this.  It's not guaranteed that these are reachable. This
+     *  can be modified while iterating through the result, but the modifications
+     *  will not be observed.  
      */
-    public synchronized Iterator getBestHosts(int n) {
-        return _catcher.getBestHosts(n);
+    public synchronized Iterator getNormalHosts(int n) {
+        //TODO: this method doesn't really belong here.  It's used because parts
+        //of ManagedConnection have a reference to this but not the HostCatcher.
+        return _catcher.getNormalHosts(n);
     }
     
 

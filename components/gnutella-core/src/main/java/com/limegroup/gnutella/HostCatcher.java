@@ -560,25 +560,28 @@ public class HostCatcher {
     }
 
     /**
-     *  Returns an iterator of the ultrapeer endpoints of this.  It's not
-     *  guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     *  observed.  
-     */
-    public synchronized Iterator getBestHosts() {
-        return getBestHosts(queue.size(GOOD_PRIORITY));
-    }
-
-    /**
-     * @requires n>0
-     * @effects returns an iterator that yields up the best n endpoints of this.
+     *  Returns an iterator of the (at most) n best ultrapeer endpoints of this.
      *  It's not guaranteed that these are reachable. This can be modified while
      *  iterating through the result, but the modifications will not be
      *  observed.  
      */
-    public synchronized Iterator getBestHosts(int n) {
-        //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator(n);
+    public synchronized Iterator getUltrapeerHosts(int n) {
+        //TODO2: do we really need to clone this?!
+        BucketQueue clone=new BucketQueue(queue);
+        return clone.iterator(GOOD_PRIORITY,
+                              Math.min(n, clone.size(GOOD_PRIORITY)));
+    }
+
+    /**
+     *  Returns an iterator of the (at most) n best non-ultrapeer endpoints of
+     *  this.  It's not guaranteed that these are reachable. This can be
+     *  modified while iterating through the result, but the modifications will
+     *  not be observed.  
+     */
+    public synchronized Iterator getNormalHosts(int n) {
+        //TODO2: do we really need to clone this?!
+        BucketQueue clone=new BucketQueue(queue);
+        return clone.iterator(NORMAL_PRIORITY, n);
     }
 
     /**
@@ -697,20 +700,46 @@ public class HostCatcher {
 //      }
 
 
-//      /** A simpler unit test */
-//      public static void main(String args[]) {
-//          HostCatcher hc=new HostCatcher(new Main());
-//          hc.initialize(new Acceptor(6346, null),
-//                        new ConnectionManager(null));
+    /** A simpler unit test */
+    /*
+    public static void main(String args[]) {
+        HostCatcher hc=new HostCatcher(new Main());
+        hc.initialize(new Acceptor(6346, null),
+                      new ConnectionManager(null));
 
-//          Iterator iter=hc.getBestHosts();
-//          Assert.that(! iter.hasNext());
+        Iterator iter=hc.getNormalHosts(10);
+        Assert.that(! iter.hasNext());
+        iter=hc.getUltrapeerHosts(10);
+        Assert.that(! iter.hasNext());
 
-//          hc.add(new Endpoint("18.239.0.1", 6346), true);
-//          hc.add(new Endpoint("18.239.0.2", 6347), false);
-//          iter=hc.getBestHosts();
-//          Assert.that(iter.hasNext());
-//          Assert.that(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
-//          Assert.that(! iter.hasNext());
-//      }
+        hc.add(new Endpoint("18.239.0.1", 6346), true);
+        hc.add(new Endpoint("18.239.0.2", 6346), true);
+        hc.add(new Endpoint("128.103.60.1", 6346), false);
+        hc.add(new Endpoint("128.103.60.2", 6346), false);
+
+        iter=hc.getUltrapeerHosts(100);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
+        Assert.that(! iter.hasNext());
+
+        iter=hc.getUltrapeerHosts(1);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(! iter.hasNext());
+
+        iter=hc.getNormalHosts(100);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.1", 6346)));
+        Assert.that(! iter.hasNext());
+
+        iter=hc.getNormalHosts(1);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        Assert.that(! iter.hasNext());
+    }
+    */
 }

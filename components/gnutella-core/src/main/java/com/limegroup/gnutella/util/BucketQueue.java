@@ -115,17 +115,18 @@ public class BucketQueue implements Cloneable {
      *  yielded before older ones.  
      */
     public Iterator iterator() {
-        return new BucketQueueIterator(this.size());
+        return new BucketQueueIterator(buckets.length-1, this.size());
     }
 
     /** 
      * @requires this not modified while iterator in use
-     * @effects yields the best min(n, this.size()) elements of this exactly
-     *  once, from highest priority to lowest priority.  Within each priority
-     *  level, newer elements are yielded before older ones.  
+     * @effects yields the best n elements from startPriority down to to lowest
+     *  priority.  Within each priority level, newer elements are yielded before
+     *  older ones, and each element is yielded exactly once.  May yield fewer
+     *  than n elements.
      */
-    public Iterator iterator(int n) {
-        return new BucketQueueIterator(n);
+    public Iterator iterator(int startPriority, int n) {
+        return new BucketQueueIterator(startPriority, n);
     }
 
     private class BucketQueueIterator extends UnmodifiableIterator {
@@ -138,8 +139,8 @@ public class BucketQueue implements Cloneable {
          * @effects creates an iterator that yields the best
          *  n elements.
          */
-        public BucketQueueIterator(int n) {
-            this.currentBucket=buckets.length-1;
+        public BucketQueueIterator(int startPriority, int n) {
+            this.currentBucket=startPriority;
             this.currentIterator=buckets[currentBucket].iterator();
             this.left=n;
         }
@@ -220,7 +221,7 @@ public class BucketQueue implements Cloneable {
         } catch (NoSuchElementException e) { }
 
         //Make sure hasNext is idempotent
-        iter=q.iterator(100);
+        iter=q.iterator(4, 100);
         Assert.that(iter.hasNext());
         Assert.that(iter.next()==e4);
         Assert.that(iter.hasNext());
@@ -236,10 +237,24 @@ public class BucketQueue implements Cloneable {
             Assert.that(false);
         } catch (NoSuchElementException e) { }
 
-        iter=q.iterator(2);
+        iter=q.iterator(4, 2);
         Assert.that(iter.next()==e4);
         Assert.that(iter.next()==e2a);
         Assert.that(! iter.hasNext());        
+
+        iter=q.iterator(2, 3);     //sorting by priority
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next()==e2a);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next()==e2b);
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next()==e0);
+        Assert.that(! iter.hasNext());
+
+        iter=q.iterator(1, 3);     //sorting by priority
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next()==e0);
+        Assert.that(! iter.hasNext());
 
         Assert.that(q.getMax()==e4);
         Assert.that(q.extractMax()==e4);

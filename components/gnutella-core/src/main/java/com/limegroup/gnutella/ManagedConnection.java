@@ -221,8 +221,10 @@ public class ManagedConnection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
     
-    //if I am a supernode shielding the given connection
+    /** if I am a supernode shielding the given connection */
     private Boolean _isSupernodeClientConnection=null;
+    /** if I am a leaf connected to a supernode  */
+    private Boolean _isClientSupernodeConnection=null;
 
     /**
      * The domain to which this connection is authenticated
@@ -527,14 +529,14 @@ public class ManagedConnection
                 // this is the only kind of message we will deal with
                 // in Reject Connection
                 // If any other kind of message comes in we drop
-               
+              
                 //SPECIAL CASE: for Crawle ping
                 if(m.getTTL() == 2) {
                     handleCrawlerPing((PingRequest)m);
                     return;
                 }
-                
-                Iterator iter = catcher.getBestHosts(10);
+
+                Iterator iter = catcher.getNormalHosts(10);
                  // we are going to send rejected host the top ten
                  // connections
                 while(iter.hasNext()) {
@@ -1047,6 +1049,14 @@ public class ManagedConnection
      *  between the two; the supernode could be using reflector indexing, for
      *  example. */
     public boolean isClientSupernodeConnection() {
+        if(_isClientSupernodeConnection == null) {
+            _isClientSupernodeConnection = 
+                new Boolean(isClientSupernodeConnection2());
+        }
+        return _isClientSupernodeConnection.booleanValue();
+    }
+
+    private boolean isClientSupernodeConnection2() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
             return false;

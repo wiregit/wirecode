@@ -440,10 +440,11 @@ public class RouterService
                 BadConnectionSettingException.NEGATIVE_VALUE,
                 SettingsManager.instance().getKeepAlive());
         
-        //The request for increasing keep alive if we are leaf node is invalid
-        if ((newKeep > 1) && hasClientSupernodeConnection())
-            throw new BadConnectionSettingException(
-                BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
+        //TODO: we may want to re-enable this...with a higher limit.
+        ////The request for increasing keep alive if we are leaf node is invalid
+        //if ((newKeep > 1) && hasClientSupernodeConnection())
+        //    throw new BadConnectionSettingException(
+        //       BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
 
         //max connections for this connection speed
         int max = SettingsManager.instance().maxConnections();
@@ -657,26 +658,26 @@ public class RouterService
      */
     public byte[] query(String query, String richQuery, 
                         int minSpeed, MediaType type, String schemaURI) {
-        //System.out.println("Sumeet rich query coming...");
-        Assert.that(schemaURI!=null,"rich query without schema");
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         //Rich query? Check if there are special servers to send this query to
         //Then spawn the RichConnectionThread and send the rich query out w/ it
-        try{
-            XMLHostCache xhc = new XMLHostCache();
-            String[] ips = xhc.getCachedHostsForURI(schemaURI);
-            if(ips!=null){
-                for(int i=0;i<ips.length;i++){//usually just  1 iteration
-                    Thread rcThread=new 
-                                      RichConnectionThread(ips[i],qr,callback);
-                    rcThread.start();
+        if (schemaURI!=null) {
+            try{
+                XMLHostCache xhc = new XMLHostCache();
+                String[] ips = xhc.getCachedHostsForURI(schemaURI);
+                if(ips!=null){
+                    for(int i=0;i<ips.length;i++){//usually just  1 iteration
+                        Thread rcThread=new 
+                        RichConnectionThread(ips[i],qr,callback);
+                        rcThread.start();
+                    }
                 }
+            }catch(Exception e){
+                //do nothing
             }
-        }catch(Exception e){
-            //do nothing
         }
         return qr.getGUID();
     }
