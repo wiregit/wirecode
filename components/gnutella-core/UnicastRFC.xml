@@ -220,7 +220,7 @@
 	  </t> 
 	  <section anchor="algorithm" title="Client">
 	    <t>
-		Clients send queries to GUESS Ultrapeers one by one until 
+		Clients send queries to Ultrapeers one by one until 
 		one of the following occurs:
 		  <list style="numbers">
 		    <t>
@@ -231,7 +231,9 @@
 			</t>
 		  </list>
 		
-		To make sure these queries do not flood the network with too
+		If TCP connections to Ultrapeers are available, the client
+		SHOULD send TTL=1 queries to those Ultrapeers first.  To make 
+		sure queries do not flood the network with too
 		much traffic, the client MUST pause for a reasonable amount
 		of time between each query, perhaps about 200 milliseconds.  This 
 		pause accounts for network latency, as it takes a variable 
@@ -475,7 +477,7 @@
 		GUESS architecture without connecting a GUESS Ultrapeer, allowing
 		older clients to become GUESS leaves.  Shifting the control of
 		queries to leaves does not uniformally reduce traffic at the
-		Ultrapeers.  In particular, Leaves need enough pongs to
+		Ultrapeers.  In particular, leaves need enough pongs to
 		run queries on their own, increasing Ultrapeer ping and pong 
 		traffic.  Ultrapeers will no longer have to pass the more 
 		expensive queries and query hits on behalf of leaves running their
@@ -490,8 +492,8 @@
 		they will likely still be able to receive incoming UDP 
 		packets.  This is possible because many firewalls will 
 		allow incoming UPD packets if the firewalled host 
-		has sent an outgoing packet to the same IP and port of the incoming 
-		packet.
+		has sent an outgoing packet to the same IP and port of the 
+		incoming packet.
 
 		<vspace/>
 		<vspace/>
@@ -513,9 +515,12 @@
 		GUESS queries on its own.  The algorithm for this is identical 
 		to the algorithm discussed in 
 		the <xref target="algorithm">section</xref> on client 
-		searching. If leaves are unable to accept incoming UDP
-		packets, they MUST send all queries to their Ultrapeer,
-		using the Ultrapeer as a proxy.
+		searching. Just as in the normal algorithm the leaf should
+		first query Ultrapeers it is directly connected to via TCP,
+		and these can be either GUESS Ultrapeers or not.  If leaves 
+		are unable to accept incoming UDP packets, they MUST send 
+		all queries to their Ultrapeer, using the Ultrapeer as a 
+		proxy.
 	  </t> 
 	</section>
 
