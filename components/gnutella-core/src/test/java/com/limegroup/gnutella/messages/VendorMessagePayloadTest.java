@@ -75,11 +75,15 @@ public class VendorMessagePayloadTest extends TestCase {
         UDPConnectBackVMP udp = 
             new UDPConnectBackVMP(6346, 
                                   new GUID(GUID.makeGuid()));
+        MessagesSupportedVMP ms = MessagesSupportedVMP.instance();
+        HopsFlowVMP hops = new HopsFlowVMP((byte)4);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             tcp.getVendorMessage().write(baos);
             udp.getVendorMessage().write(baos);
+            ms.getVendorMessage().write(baos);
+            hops.getVendorMessage().write(baos);
         }
         catch (IOException uhoh) {
             assertTrue(false);
@@ -102,6 +106,24 @@ public class VendorMessagePayloadTest extends TestCase {
             vm.hop();
             VendorMessagePayload vmp = vm.getVendorMessagePayload();
             assertTrue(vmp.equals(udp));
+        }
+        catch (Exception uhoh) {
+            uhoh.printStackTrace();
+            assertTrue(false);
+        }
+        try {
+            VendorMessage vm = (VendorMessage) Message.read(bais);
+            VendorMessagePayload vmp = vm.getVendorMessagePayload();
+            assertTrue(vmp.equals(ms));
+        }
+        catch (Exception uhoh) {
+            uhoh.printStackTrace();
+            assertTrue(false);
+        }
+        try {
+            VendorMessage vm = (VendorMessage) Message.read(bais);
+            VendorMessagePayload vmp = vm.getVendorMessagePayload();
+            assertTrue(vmp.equals(hops));
         }
         catch (Exception uhoh) {
             uhoh.printStackTrace();

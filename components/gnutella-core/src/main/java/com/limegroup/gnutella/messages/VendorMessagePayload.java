@@ -68,10 +68,10 @@ public abstract class VendorMessagePayload {
                                                         int version,
                                                         byte[] payload)
         throws BadPacketException {
-        if ((selector == F_HOPS_FLOW) && (Arrays.equals(vendorID, 
-                                                        F_BEAR_VENDOR_ID)))
+        if ((selector == F_HOPS_FLOW) && 
+            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
             // HOPS FLOW MESSAGE
-            ;
+            return new HopsFlowVMP(version, payload);
         if ((selector == F_TCP_CONNECT_BACK) && 
             (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
             // TCP CONNECT BACK

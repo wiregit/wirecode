@@ -38,6 +38,7 @@ public class MessagesSupportedVMPTest extends TestCase {
             assertTrue(vmp.equals(vmpRead));
             assertTrue(vmpRead.supportsTCPConnectBack() > -1);
             assertTrue(vmpRead.supportsUDPConnectBack() > -1);
+            assertTrue(vmpRead.supportsHopsFlow() > -1);
         }
         catch (Exception noway) {
             assertTrue(false);
@@ -76,6 +77,7 @@ public class MessagesSupportedVMPTest extends TestCase {
             assertTrue(vmp.supportsMessage("DAWG".getBytes(), 3) == 3);
             assertTrue(vmp.supportsTCPConnectBack() == -1);
             assertTrue(vmp.supportsUDPConnectBack() == -1);
+            assertTrue(vmp.supportsHopsFlow() == -1);
 
             // now creat another one, mix up the blocks that are supported, and
             // make sure they are equal....

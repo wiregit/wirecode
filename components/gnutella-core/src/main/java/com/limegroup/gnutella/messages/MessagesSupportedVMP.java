@@ -66,7 +66,10 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
         // UDP Connect Back
         smp = new SupportedMessageBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,
                                         UDPConnectBackVMP.VERSION);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        _messagesSupported.add(smp);
+        // Hops Flow
+        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
+                                        HopsFlowVMP.VERSION);
         _messagesSupported.add(smp);
     }
 
@@ -115,6 +118,14 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
      */
     public int supportsUDPConnectBack() {
         return supportsMessage(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK);
+    }
+
+    /**
+     * @return -1 if the message isn't supported, else it returns the version 
+     * of the message supported.
+     */
+    public int supportsHopsFlow() {
+        return supportsMessage(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
     }
 
     // override super
