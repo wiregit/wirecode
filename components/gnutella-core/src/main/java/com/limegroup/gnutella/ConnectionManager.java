@@ -234,8 +234,7 @@ public class ConnectionManager implements Runnable {
 	try {
 	    setListeningPort(this.port);
 	} catch (IOException e) {
-	    error("Can't listen for incoming connections on port "+port
-		  +"; please specify another port.");
+	    error(ActivityCallback.ERROR_0);
 	}
 
 	//3. Start the statistics thread
@@ -246,7 +245,7 @@ public class ConnectionManager implements Runnable {
 		stat.start();
 	}
 	catch (Exception e){
-	    error("Could not start statistics gatherer.");
+	    error(ActivityCallback.ERROR_1);
 	}
 	while (true) {
 	    Connection c = null;
@@ -323,11 +322,10 @@ public class ConnectionManager implements Runnable {
 		    continue;
 		}
 	    } catch (IOException e) {
-		error("Mysterious error while accepting "
-		      +"incoming connections; aborting.");
+		error(ActivityCallback.ERROR_2);
 		return;
 	    } catch (SecurityException e) {	
-		error("Could not listen to socket for incoming connections; aborting");
+		error(ActivityCallback.ERROR_3);
 		return;
 	    }
 	}
@@ -350,7 +348,7 @@ public class ConnectionManager implements Runnable {
 	throw new IOException();       	    
     }
 
-    private void error(String msg) {
+    private void error(int msg) {
 	ActivityCallback callback=getCallback();
 	if (callback!=null)
 	    callback.error(msg);

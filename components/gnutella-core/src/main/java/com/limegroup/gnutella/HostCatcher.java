@@ -36,7 +36,7 @@ public class HostCatcher {
     protected ConnectionManager manager;
 
 
-    private void error(String message) {
+    private void error(int message) {
 	if (manager!=null) {
 	    ActivityCallback callback=manager.getCallback();
 	    if (callback!=null)
@@ -65,7 +65,7 @@ public class HostCatcher {
 	try {
 	    in=new BufferedReader(new FileReader(filename));
 	} catch (FileNotFoundException e) {
-	    error("HostCatcher couldn't find gnutella.net file: ignoring");
+	    error(ActivityCallback.ERROR_10);
 	    return;
 	}
 	while (true) {

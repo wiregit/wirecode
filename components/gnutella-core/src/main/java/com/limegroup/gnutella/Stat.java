@@ -27,7 +27,7 @@ public class Stat implements Runnable{
 	catch(Exception e){
 	    ActivityCallback callback=cm.getCallback();
 	    if (callback!=null)
-		callback.error("Could not create output file for statistics logging.");
+		callback.error(ActivityCallback.ERROR_11);
 	}
     }
    
@@ -65,7 +65,7 @@ public class Stat implements Runnable{
 	    catch (Exception e) {
 	    ActivityCallback callback=man.getCallback();
 	    if (callback!=null)
-		callback.error("Could not write statistics data to log.");		
+		callback.error(ActivityCallback.ERROR_12);		
 	    }
 	}
     }

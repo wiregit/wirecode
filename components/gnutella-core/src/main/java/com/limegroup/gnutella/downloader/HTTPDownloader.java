@@ -41,7 +41,7 @@ public class HTTPDownloader implements Runnable {
 	}
 
 	catch (Exception e) {
-	    _callback.error("unable to open inputstream");
+	    _callback.error(ActivityCallback.ERROR_4);
 	}
 	
     }
@@ -69,11 +69,11 @@ public class HTTPDownloader implements Runnable {
 	}
 	catch (java.net.MalformedURLException e) {
 	    sendPushRequest(host, port, index, guid);
-	    _callback.error("Bad URL");
+	    _callback.error(ActivityCallback.ERROR_5);
 	    return;
 	}
 	catch (IOException e) {
-	    _callback.error("can't open connection");
+	    _callback.error(ActivityCallback.ERROR_6);
 	    return;
 	}
 	try {
@@ -82,7 +82,7 @@ public class HTTPDownloader implements Runnable {
 	    _in = new BufferedReader(isr);
 	}
 	catch (IOException e) {
-	    _callback.error("can't open input stream");
+	    _callback.error(ActivityCallback.ERROR_4);
 	}
 
     }
@@ -115,7 +115,7 @@ public class HTTPDownloader implements Runnable {
 	    _manager.sendToAll(push);
 	}
 	catch (IOException e) {
-	    _callback.error("Could not send push request");
+	    _callback.error(ActivityCallback.ERROR_7);
 	    return;
 	}
 
@@ -173,7 +173,7 @@ public class HTTPDownloader implements Runnable {
 
 	catch (Exception e) {
 	    
-	    _callback.error("Unable to write to file");
+	    _callback.error(ActivityCallback.ERROR_8);
 System.out.println("E :"+e+":");
 	}
 
@@ -204,7 +204,7 @@ System.out.println("DH2 :"+str+":");
 	    }
 	}
 	catch (Exception e) {
-	    _callback.error("Unable to read the header information");
+	    _callback.error(ActivityCallback.ERROR_9);
 	}
 	    
     }
