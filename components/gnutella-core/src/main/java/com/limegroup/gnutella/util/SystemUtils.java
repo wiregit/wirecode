@@ -45,7 +45,17 @@ public class SystemUtils {
         else if(CommonUtils.isMacOSX())
             return true;
             
-        return false;        
+        return false;
+    }
+    
+    /**
+     * Sets the number of open files, if supported.
+     */
+    public static long setOpenFileLimit(int max) {
+        if(CommonUtils.isMacOSX())
+            return setOpenFileLimit0(max);
+        else
+            return -1;
     }
     
     /**
@@ -60,4 +70,5 @@ public class SystemUtils {
     
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
+    private static final native int setOpenFileLimit0(int max);
 }
