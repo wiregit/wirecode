@@ -181,6 +181,7 @@ public class Acceptor extends Thread {
                 _port=i+6346;
                 try {
                     setListeningPort(_port);
+                    break;
                 } catch (IOException e2) { }
             }
 
