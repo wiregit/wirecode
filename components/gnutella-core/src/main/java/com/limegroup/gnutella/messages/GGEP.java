@@ -150,11 +150,16 @@ public class GGEP extends Object {
 
                 // cobs decode this bad boy....
                 if (encoded) {
-                    byte[] decoded = COBSUtil.cobsDecode(data);
-                    // decoded has a extra stray 0 at the end....
-                    data = new byte[decoded.length-1];
-                    System.arraycopy(decoded, 0, data, 0, 
-                                     (decoded.length-1));
+                    try {
+                        byte[] decoded = COBSUtil.cobsDecode(data);
+                        // decoded has a extra stray 0 at the end....
+                        data = new byte[decoded.length-1];
+                        System.arraycopy(decoded, 0, data, 0, 
+                                         (decoded.length-1));
+                    }
+                    catch (IOException badCobsEncoding) {
+                        throw new BadGGEPBlockException("Bad COBS Encoding");
+                    }
                 }
 
                 // LimeWire currently does not support flate/default, so

@@ -55,7 +55,7 @@ public class COBSUtil {
      *  @return the original COBS decoded string with a extra trailing 0 at the
      *  end - feel free to discard it.
      */
-    public static byte[] cobsDecode(byte[] src) {
+    public static byte[] cobsDecode(byte[] src) throws IOException {
         final int srcLen = src.length;
         int currIndex = 0;
         int code = 0;
@@ -63,6 +63,8 @@ public class COBSUtil {
 
         while (currIndex < srcLen) {
             code = ByteOrder.ubyte2int(src[currIndex++]);
+            if ((currIndex+(code-2)) >= srcLen)
+                throw new IOException();
             for (int i = 1; i < code; i++) {
                 sink.write((int)src[currIndex++]);
             }
