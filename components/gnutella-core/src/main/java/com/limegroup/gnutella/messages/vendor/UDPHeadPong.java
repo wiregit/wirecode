@@ -64,6 +64,7 @@ public class UDPHeadPong extends VendorMessage {
 	private static final byte FILE_NOT_FOUND= (byte)0x0;
 	private static final byte COMPLETE_FILE= (byte)0x1;
 	private static final byte PARTIAL_FILE = (byte)0x2;
+	private static final byte FIREWALLED = (byte)0x4;
 	
 	/**
 	 * all our slots are full..
@@ -103,6 +104,11 @@ public class UDPHeadPong extends VendorMessage {
 	private byte [] _vendorId;
 	
 	/**
+	 * whether the other host can receive unsolicited udp
+	 */
+	private boolean _isFirewalled;
+	
+	/**
 	 * creates a message object with data from the network.
 	 */
 	protected UDPHeadPong(byte[] guid, byte ttl, byte hops,
@@ -112,15 +118,13 @@ public class UDPHeadPong extends VendorMessage {
 		
 		//we should have some payload
 		if (payload==null || payload.length<2)
-			throw new BadPacketException("empty payload");
+			throw new BadPacketException("bad payload");
 		
 		
 		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE 
 		//or COMPLETE_FILE
 		if (version == VERSION && 
-				payload[1]!=FILE_NOT_FOUND &&
-				payload[1]!=PARTIAL_FILE &&
-				payload[1]!=COMPLETE_FILE)
+				payload[1]>6) 
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
@@ -139,6 +143,10 @@ public class UDPHeadPong extends VendorMessage {
 			return;
 		else
 			_fileFound=true;
+		
+		//is the other host firewalled?
+		if ((code & FIREWALLED) == FIREWALLED)
+			_isFirewalled=true;
 		
 		//read the vendor id
 		_vendorId = new byte[4];
@@ -198,7 +206,7 @@ public class UDPHeadPong extends VendorMessage {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		CountingOutputStream caos = new CountingOutputStream(baos);
 		
-		final byte retCode;
+		byte retCode=0;
 		byte queueStatus;
 		
 		
@@ -217,11 +225,15 @@ public class UDPHeadPong extends VendorMessage {
 			return baos.toByteArray();
 		}
 		
+		//if we can't receive unsolicited udp...
+		if (!RouterService.acceptedIncomingConnection())
+			retCode = FIREWALLED;
+		
 		//we have the file... is it complete or not?
 		if (desc instanceof IncompleteFileDesc)
-			retCode = COMPLETE_FILE;
+			retCode = (byte) (retCode | COMPLETE_FILE);
 		else 
-			retCode = PARTIAL_FILE;
+			retCode = (byte) (retCode | PARTIAL_FILE);
 		caos.write(retCode);
 		
 		//write the vendor id
@@ -328,6 +340,14 @@ public class UDPHeadPong extends VendorMessage {
 	 */
 	public String getVendor() {
 		return new String(_vendorId);
+	}
+	
+	/**
+	 * 
+	 * @return whether the remote is firewalled and will need a push
+	 */
+	public boolean isFirewalled() {
+		return _isFirewalled;
 	}
 }
 	
