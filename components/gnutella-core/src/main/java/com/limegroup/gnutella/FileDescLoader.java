@@ -46,6 +46,7 @@ public final class FileDescLoader implements Runnable {
 	 * @return a new <tt>FileDesc</tt> instance
 	 */
 	public FileDesc createFileDesc(File file, int fileIndex) {
+		// this is guaranteeed to be non-null
 		Collection urns = UrnCache.instance().getUrns(file);
 		FileDesc fileDesc = new FileDesc(file, fileIndex, urns);
 		if(!fileDesc.hasSHA1Urn()) {
