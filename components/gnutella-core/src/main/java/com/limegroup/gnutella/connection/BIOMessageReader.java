@@ -24,11 +24,6 @@ import com.limegroup.gnutella.util.DataUtils;
  * Class that takes care of reading messages from blocking sockets.
  */
 public class BIOMessageReader extends AbstractMessageReader {
-
-    /**
-     * Constant for the <tt>Connection</tt> this reader is reading for.
-     */
-    private final Connection CONNECTION;
     
     /**
      * Cache the 'connection closed' exception, so we have to allocate
@@ -82,7 +77,7 @@ public class BIOMessageReader extends AbstractMessageReader {
      * @param conn the <tt>Connection</tt> instance this reader reads for
      */
     private BIOMessageReader(Connection conn) {
-        CONNECTION = conn;
+        super(conn);
         SOCKET = CONNECTION.getSocket();
         INFLATER = CONNECTION.getInflater();
         INPUT_STREAM = CONNECTION.getInputStream();
@@ -385,12 +380,11 @@ public class BIOMessageReader extends AbstractMessageReader {
      * @throws IOException if there is an IO error reading from this socket
      */
     public void startReading() throws IOException {
-        MessageRouter router = RouterService.getMessageRouter();
         while (true) {
-            Message m = null;
+            Message msg = null;
             try {
-                m = read();
-                if (m==null)
+                msg = read();
+                if (msg == null)
                     continue;
             } catch (BadPacketException e) {
                 // Don't increment any message counters here.  It's as if
@@ -398,18 +392,7 @@ public class BIOMessageReader extends AbstractMessageReader {
                 continue;
             }
     
-            // Run through the route spam filter and drop accordingly.
-            if (CONNECTION.isSpam(m)) {
-                if(!CommonUtils.isJava118()) {
-                    ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                        addMessage(m);
-                }
-                CONNECTION.stats().countDroppedMessage();
-                continue;
-            }
-    
-            //call MessageRouter to handle and process the message
-            router.handleMessage(m, CONNECTION);            
+            routeMessage(msg);
         }
     }
 }
