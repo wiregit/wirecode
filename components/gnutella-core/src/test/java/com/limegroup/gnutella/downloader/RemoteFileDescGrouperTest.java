@@ -19,6 +19,8 @@ public class RemoteFileDescGrouperTest extends TestCase {
     IncompleteFileManager ifm;
     
     public void setUp() {
+        RemoteFileDescGrouper.DEBUG=true;
+
         ifm=new IncompleteFileManager();
         rf1=new RemoteFileDesc(
             "1.2.3.4", 6346, 0, "some file.txt", 1000, 

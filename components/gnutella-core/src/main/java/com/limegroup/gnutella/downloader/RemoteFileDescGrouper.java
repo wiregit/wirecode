@@ -39,13 +39,14 @@ class RemoteFileDescGrouper implements Serializable {
      *  INVARIANT: for all i, sha1s[i]==null || sha1s[i].isSHA1()
      *  INVARIANT: for all i, j, S=buckets[i][j].getSHA1Urn(),
      *     S!=null ==> sha1s[i].equals(S)
-     *  INVARIANT: for all i, 
-     *     (for all j, buckets[i][j].getSHA1Urn()==null)    [no element has a hash]
-     *     ==> sha1s[i]==null
      *  COROLLARY: buckets.size()==incompletes.size(); 
      *  COROLLARY: no elements of buckets[i] have differing hashes.  This does
      *     NOT imply that two elements with the same hash are in the same 
-     *     bucket. */
+     *     bucket. 
+     *
+     * Also note that if no element ever added to a bucket i had a SHA1, 
+     * sha1s[i]==null.  However, sha1s[i] may be non-null even if a bucket
+     * has no hashes because of previous entries to the bucket. */
     private URN[] /* of URN */ sha1s=new URN[0];
 
     /** Used to calculate incomplete file lengths. */
@@ -71,7 +72,7 @@ class RemoteFileDescGrouper implements Serializable {
         //runs in O(N^2) time.  It's possible to optimize.
         for (int i=0; i<rfds.length; i++) 
             add(rfds[i]);
-
+        repOk();
 
         //2.  Now we need to rearrange the buckets according to download time.
         //We do this using another array.  First estimate remaining download
@@ -80,7 +81,7 @@ class RemoteFileDescGrouper implements Serializable {
         //advertised speed.  Fat chance that will happen, but it's probably a
         //good enough heuristic.  Still, we may want to preference buckets with
         //more quality loctions even if the total bandwidth is lower.
-        FilePair[] pairs=new FilePair[buckets.size()];
+        FileTuple[] pairs=new FileTuple[buckets.size()];
         for (int i=0; i<buckets.size(); i++) {
             File incompleteFile=(File)incompletes.get(i);
             List /* of RemoteFileDesc */ files=(List)buckets.get(i);
@@ -95,18 +96,19 @@ class RemoteFileDescGrouper implements Serializable {
 				}
             }
             float time=(float)size/(float)bandwidth;
-            pairs[i]=new FilePair(files, incompleteFile, sha1s[i], time);
+            pairs[i]=new FileTuple(files, incompleteFile, sha1s[i], time);
         }
         
         //3. Sort by download time and overwrite elements of buckets,
         //incompletes, and sha1s.
         Arrays.sort(pairs);
         for (int i=0; i<pairs.length; i++) {
-            FilePair pair=pairs[i];
+            FileTuple pair=pairs[i];
             buckets.set(i, pair.bucket);
             incompletes.set(i, pair.incompleteFile);
             sha1s[i]=pair.sha1;
         }
+        repOk();
     }
 
     /** Normalizes the given speed, e.g., reports "50 KB/s" for T3 speeds
@@ -125,17 +127,17 @@ class RemoteFileDescGrouper implements Serializable {
     }
 
     /** Bucket/incomplete/sha1/time pair to help implement constructor. */
-    private static class FilePair
+    private static class FileTuple
             implements com.sun.java.util.collections.Comparable {
         List /* of RemoteFileDesc */ bucket;
         File incompleteFile;
         URN sha1;
         float time;
 
-        public FilePair(List /* of RemoteFileDesc */ bucket, 
-                        File incompleteFile, 
-                        URN sha1, 
-                        float time) {
+        public FileTuple(List /* of RemoteFileDesc */ bucket, 
+                         File incompleteFile, 
+                         URN sha1, 
+                         float time) {
             this.bucket=bucket;;
             this.incompleteFile=incompleteFile;
             this.sha1=sha1;
@@ -143,7 +145,7 @@ class RemoteFileDescGrouper implements Serializable {
         }
 
         public int compareTo(Object o) {
-            float diff=this.time-((FilePair)o).time;
+            float diff=this.time-((FileTuple)o).time;
             if (diff<0)
                 return -1;
             else if (diff>0)
@@ -164,6 +166,7 @@ class RemoteFileDescGrouper implements Serializable {
     synchronized boolean add(RemoteFileDesc rfd) {
         //Convert rfd to a RemoteFileDesc2 so we can store auxilliary
         //information in ManagedDownloader.
+        repOk();
         RemoteFileDesc rfd2=new RemoteFileDesc2(rfd, false);
         File incompleteFile=incompleteFileManager.getFile(rfd2);
 
@@ -188,6 +191,7 @@ class RemoteFileDescGrouper implements Serializable {
                     sha1s[i]=rfd2.getSHA1Urn();
                 List bucket=(List)buckets.get(i);
                 bucket.add(rfd2);
+                repOk();
                 return true;
             }
         }
@@ -204,6 +208,7 @@ class RemoteFileDescGrouper implements Serializable {
         System.arraycopy(sha1s,0,newArray,0,sha1s.length);
         newArray[p-1] = rfd.getSHA1Urn();   //may be null
         sha1s = newArray;
+        repOk();
         return false;
     }
 
@@ -259,4 +264,40 @@ class RemoteFileDescGrouper implements Serializable {
 
     //Unit tests: tests/com/limegroup/gnutella/
     //               downloader/RemoteFileDescGrouperTest.java
+
+    static boolean DEBUG=false;
+    /** Checks internal consistency.  Slow. */
+    protected void repOk() {
+        if (!DEBUG)
+            return;
+
+        Assert.that(buckets.size()==incompletes.size());
+        Assert.that(buckets.size()==sha1s.length);
+
+        //Check incompletes.  For each bucket i...
+        for (int i=0; i<buckets.size(); i++) {
+            List bucket=(List)buckets.get(i);
+            File tmp1=(File)incompletes.get(i);
+            for (int j=0; j<bucket.size(); j++) {
+                File tmp2=incompleteFileManager.getFile(
+                                    (RemoteFileDesc)bucket.get(j));
+                Assert.that(tmp1.equals(tmp2));
+            }
+        }
+
+        //Check URN's.  For each bucket i...
+        for (int i=0; i<buckets.size(); i++) {
+            List bucket=(List)buckets.get(i);
+            URN urn1=sha1s[i];
+            boolean gotURN=false;
+            for (int j=0; j<bucket.size(); j++) {
+                URN urn2=((RemoteFileDesc)bucket.get(j)).getSHA1Urn();
+                if (urn2!=null) {      
+                    Assert.that(urn1!=null);
+                    Assert.that(urn1.equals(urn2));
+                    gotURN=true;
+                }
+            }
+        }
+    }
 }
