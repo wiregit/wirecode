@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 
 /**
  * a.k.a. The "ObjectMolester"
@@ -118,12 +119,36 @@ public class PrivilegedAccessor {
                                    String methodName, 
                                    Class[] classTypes ) 
                                    throws NoSuchMethodException {
-        Method accessMethod = getMethod(instance.getClass(), 
-                                        methodName, 
-                                        classTypes);
+        Method accessMethod;
+        if ( instance instanceof Class )
+            accessMethod = getMethod((Class)instance, methodName, classTypes);
+        else
+            accessMethod = getMethod(instance.getClass(), methodName, classTypes);
         accessMethod.setAccessible(true);
         return accessMethod;
     }
+    
+    /**
+     * Constructs an object with the given parameters.
+     */
+    public static Object invokeConstructor(Class clazz,
+                                           Object[] args ) 
+        throws NoSuchMethodException,
+               IllegalAccessException,
+               InvocationTargetException,
+               InstantiationException {
+        Class[] classTypes = null;
+        if( args != null) {
+            classTypes = new Class[args.length];
+            for( int i = 0; i < args.length; i++ ) {
+                if( args[i] != null )
+                    classTypes[i] = args[i].getClass();
+            }
+        }
+        return getConstructor(clazz, classTypes).newInstance(args);
+    }
+    
+    
 
     /**
      * Return the named field from the given class.
@@ -157,5 +182,20 @@ public class PrivilegedAccessor {
         catch(NoSuchMethodException e) {
             return getMethod(thisClass.getSuperclass(), methodName, classTypes);
         }
+    }
+    
+    /**
+     * Return the constructor with the given parameters.
+     */
+    private static Constructor getConstructor(Class clazz, Class[] classTypes)
+      throws NoSuchMethodException {
+        Constructor[] cs = clazz.getDeclaredConstructors();
+        for (int i = 0; i < cs.length; i++) {
+            if ( Arrays.equals(classTypes, cs[i].getParameterTypes()) ) {
+                cs[i].setAccessible(true);
+                return cs[i];
+            }
+        }
+        throw new NoSuchMethodException();
     }
 }
