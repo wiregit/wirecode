@@ -85,33 +85,39 @@ public final class ForMeReplyHandler implements ReplyHandler {
         buf.append(ByteOrder.ubyte2int(ip[2])+".");
         buf.append(ByteOrder.ubyte2int(ip[3])+"");
         String h = buf.toString();
+        
+        // if the IP is banned, don't accept it
+        if (RouterService.getAcceptor().isBannedIP(h)) {
+            // TODO: return different status code??
+            return;
+        }
         int port = pushRequest.getPort();
         int index = (int)pushRequest.getIndex();
+
+        FileManager fm = RouterService.getFileManager();
+        if(!fm.isValidIndex(index)) {
+            return;
+        }
+
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        FileDesc desc;
-        try {
-			FileManager fm = RouterService.getFileManager();
-            desc = fm.get(index);
-        }
-        catch (IndexOutOfBoundsException e) {
-            //You could connect and send 404 file
-            //not found....but why bother?
+        
+        FileDesc desc = fm.get(index);
+        
+        // if the file has been unshared, return
+        if(desc == null) {
+            // TODO: make sure we return a 404 here
             return;
         }
 
         String file = desc.getName();
 
-		
-        if (!RouterService.getAcceptor().isBannedIP(h)) {
-			
-            RouterService.getUploadManager().
-			    acceptPushUpload(file, h, port, 
-								 index, req_guid_hexstring,
-                                 pushRequest.isMulticast() // force accept
-                                );
-		}
+        RouterService.getUploadManager().
+            acceptPushUpload(file, h, port, 
+                             index, req_guid_hexstring,
+                             pushRequest.isMulticast() // force accept
+                             );
 	}
 	
 	public boolean isOpen() {
