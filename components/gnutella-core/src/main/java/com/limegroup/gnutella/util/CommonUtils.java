@@ -589,7 +589,10 @@ public final class CommonUtils {
         File currentDir = CommonUtils.getCurrentDirectory();
         for(int i=0; i<USER_FILES.length; i++) {
             File curUserFile = new File(settingsDir, USER_FILES[i]);
-            File curDirFile  = new File(currentDir, USER_FILES[i]);
+            File curDirFile  = new File(currentDir,  USER_FILES[i]);
+            
+            // if the file already exists in the user's home directory,
+            // don't copy it
             if(curUserFile.isFile()) {
                 continue;
             }
