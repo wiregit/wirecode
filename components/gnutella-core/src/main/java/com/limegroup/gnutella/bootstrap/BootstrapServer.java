@@ -4,6 +4,9 @@ import java.net.*;
 import java.text.ParseException;
 import com.limegroup.gnutella.util.StringUtils;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
+
 /**
  * A URL for a GWebCache endpoint, plus some additional connection
  * history data:
@@ -23,7 +26,7 @@ public class BootstrapServer {
     //TODO: factor code with ExtendedEndpoint?
 
     /** The URL to server's script, e.g., "http://path/to/script.php". */        
-    private final URL _url;
+    private final URI _url;
 
     /** 
      * Constructs a new BootstrapServer from a URL or an extended
@@ -40,13 +43,14 @@ public class BootstrapServer {
     public BootstrapServer(String s) throws ParseException {
         if (!StringUtils.startsWithIgnoreCase(s, "http"))
             throw new ParseException(s, 0);
+            
         try {
             int i=s.indexOf(",");        //TODO: relies on s being URL encoded
-            if (i<0)
-                _url=new URL(s);                  //simple url
-            else
-                _url=new URL(s.substring(0,i));   //extended gnutella.net
-        } catch (MalformedURLException e) {
+            if (i<0)  //simple url
+                _url = new URI(s.toCharArray());
+            else  //extended gnutella.net
+                _url = new URI(s.substring(0,i).toCharArray());
+        } catch (URIException e) {
             throw new ParseException(s, 0);
         }
     }
@@ -55,8 +59,8 @@ public class BootstrapServer {
 	 * Returns the URL to the server, minus any request parameters. This is
 	 * guaranteed to be non-null.
 	 */
-    public URL getURL() {
-        return _url;
+    public String getURLString() {
+        return _url.toString();
     }
 
     /** 

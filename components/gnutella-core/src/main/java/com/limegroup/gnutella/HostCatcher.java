@@ -223,10 +223,16 @@ public class HostCatcher {
      */
     public void initialize() {
         //Read gnutella.net
+        LOG.trace("START readHostsFile");
         readHostsFile();
+        LOG.trace("STOP readHostsFile");
         
+        LOG.trace("START sendUDPPings");
         sendUDPPings();
+        LOG.trace("STOP sendUDPPings");
         
+        
+        LOG.trace("START scheduling");
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
         //only do this if we also have incoming slots, but John Marshall from
@@ -283,6 +289,7 @@ public class HostCatcher {
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
         RouterService.schedule(FETCHER, 0, 2*1000);
+        LOG.trace("STOP scheduling");
     }
 
     /**
@@ -311,6 +318,9 @@ public class HostCatcher {
             in = new BufferedReader(new FileReader(hostFile));
             while (true) {
                 String line=in.readLine();
+                if(LOG.isTraceEnabled())
+                    LOG.trace("read line: " + line);
+
                 if (line==null)
                     break;
                     
