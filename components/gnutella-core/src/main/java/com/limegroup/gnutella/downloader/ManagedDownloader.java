@@ -381,8 +381,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //for retry (by sleeping).
         if (state==Downloader.WAITING_FOR_RETRY)
             dloaderManagerThread.interrupt();   //see tryAllDownloads    
-        else if ((state==Downloader.REQUERYING_NETWORK) ||
-                 (state==Downloader.WAITING_FOR_RESULTS)) 
+        else if (state==Downloader.WAITING_FOR_RESULTS)
             reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
@@ -616,15 +615,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return;
                     }
                     else if (numRequeries++ < REQUERY_ATTEMPTS) {
-                        setState(REQUERYING_NETWORK);
                         manager.sendQuery(allFiles);
                         // reset numRetries for next iteration...
                         numRetries = 0;
-                        
+
                         int waitTime = getMinutesToWaitForRequery(numRequeries);
                         waitTime *= (60 * 1000);                        
-
                         setState(WAITING_FOR_RESULTS, (long) waitTime);
+                        
                         reqLock.lock((long) waitTime);
                     }
                     else {
