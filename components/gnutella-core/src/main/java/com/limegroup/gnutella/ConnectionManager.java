@@ -186,11 +186,11 @@ public class ConnectionManager {
                  }
              }
          } else {
-             //b) Handle reject connection if on windows.  The constructor does the
-             //whole deal -- intializing, looking for and responding to a
-             //PingRequest.  It's all synchronous, because we have a dedicated
-             //thread right here.
-			if(CommonUtils.isWindows()) {
+             //b) Handle reject connection if not on a Mac with OS 9.1 or below.  
+			 //The constructor does the whole deal -- intializing, looking for 
+			 //and responding to a PingRequest.  It's all synchronous, because 
+			 //we have a dedicated thread right here.
+			if(!CommonUtils.isMacClassic()) {
 				new RejectConnection(socket, _catcher);
 			}
             
