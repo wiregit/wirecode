@@ -215,7 +215,7 @@ public class DownloadManager implements BandwidthTracker {
      * succeeds.
      *
      *     @modifies this, disk */
-    public synchronized Downloader getFiles(RemoteFileDesc[] files,
+    public synchronized Downloader download(RemoteFileDesc[] files,
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
@@ -265,7 +265,7 @@ public class DownloadManager implements BandwidthTracker {
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
      */ 
-    public synchronized Downloader startResumeDownload(File incompleteFile)
+    public synchronized Downloader download(File incompleteFile)
             throws AlreadyDownloadingException, CantResumeException { 
         //Check for conflicts.  TODO: refactor to make less like conflicts().
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
@@ -310,21 +310,20 @@ public class DownloadManager implements BandwidthTracker {
 
 
     /**
-     * Starts a "requery download".
-     * A "requery download" should be started when the user has not received any
-     * results for her query, and wants LimeWire to spawn a specialized
-     * Downloader that requeries the network until a 'appropriate' file is
-     * found.
+     * Starts a "requery download", aka, a "wishlist download".  A "requery
+     * download" should be started when the user has not received any results
+     * for her query, and wants LimeWire to spawn a specialized Downloader that
+     * requeries the network until a 'appropriate' file is found.
      * 
      * @param query The original query string.
      * @param richQuery The original richQuery string.
      * @param guid The guid associated with this query request.
-     * @param type The mediatype associated with this search.
+     * @param type The mediatype associated with this search.  
      */
-    public synchronized Downloader startRequeryDownload(String query,
-                                                        String richQuery,
-                                                        byte[] guid,
-                                                        MediaType type) 
+    public synchronized Downloader download(String query,
+                                            String richQuery,
+                                            byte[] guid,
+                                            MediaType type) 
     throws AlreadyDownloadingException {
         AutoDownloadDetails add = new AutoDownloadDetails(query,
                                                           richQuery,

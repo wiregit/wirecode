@@ -374,7 +374,7 @@ public class DownloadTest extends TestCase {
         Downloader download=null;
         try {
             //Start one location, wait a bit, then add another.
-            download=dm.getFiles(new RemoteFileDesc[] {rfd1}, false);
+            download=dm.download(new RemoteFileDesc[] {rfd1}, false);
             ((ManagedDownloader)download).addDownload(rfd2);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
@@ -445,7 +445,7 @@ public class DownloadTest extends TestCase {
         Downloader download=null;
         try {
             //Start one location, wait a bit, then add another.
-            download=dm.getFiles(new RemoteFileDesc[] {rfd1,rfd2}, false);
+            download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
             return;
@@ -482,7 +482,7 @@ public class DownloadTest extends TestCase {
         Downloader download=null;
         try {
             //Start one location, wait a bit, then add another.
-            download=dm.getFiles(new RemoteFileDesc[] {rfd1,rfd2}, false);
+            download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
             return;
@@ -508,7 +508,7 @@ public class DownloadTest extends TestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(6346,100,null);
         Downloader download = null;
         try {
-            download = dm.getFiles(new RemoteFileDesc[] {rfd1}, false);        
+            download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
             return;
@@ -834,7 +834,7 @@ public class DownloadTest extends TestCase {
     private static void tGeneric(RemoteFileDesc[] rfds) {
         Downloader download=null;
         try {
-            download=dm.getFiles(rfds, false);
+            download=dm.download(rfds, false);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
             return;

@@ -174,7 +174,7 @@ public class RequeryDownloadTest extends TestCase {
         //to start up and send its requery.
         Downloader downloader=null;
         try {
-            downloader=mgr.startResumeDownload(incompleteFile);
+            downloader=mgr.download(incompleteFile);
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (CantResumeException e) {
@@ -248,10 +248,10 @@ public class RequeryDownloadTest extends TestCase {
         //to start up, then make sure nothing has been sent initially.
         Downloader downloader=null;
         try {
-            downloader=mgr.startRequeryDownload("file name", 
-                                                null, 
-                                                GUID.makeGuid(),
-                                                null);
+            downloader=mgr.download("file name", 
+                                    null, 
+                                    GUID.makeGuid(),
+                                    null);
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         }
@@ -320,10 +320,8 @@ public class RequeryDownloadTest extends TestCase {
         Downloader downloader1=null;
         Downloader downloader2=null;
         try {
-            downloader1=mgr.startRequeryDownload(
-                "aaaaa", null, GUID.makeGuid(), null);
-            downloader2=mgr.startRequeryDownload(
-                "bbbbb", null, GUID.makeGuid(), null);
+            downloader1=mgr.download("aaaaa", null, GUID.makeGuid(), null);
+            downloader2=mgr.download("bbbbb", null, GUID.makeGuid(), null);
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         }
