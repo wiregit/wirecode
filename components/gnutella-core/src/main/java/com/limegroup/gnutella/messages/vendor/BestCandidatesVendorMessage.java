@@ -113,6 +113,11 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		
 		Candidate [] otherCandidates = other.getBestCandidates();
 		
+		if (_bestCandidates[0] == null && otherCandidates[0]==null)
+			if (_bestCandidates[1]==null)
+				return otherCandidates[1] == null;
+			else return _bestCandidates[1].isSame(otherCandidates[1]);
+		
 		if (!_bestCandidates[0].isSame(otherCandidates[0]))
 			return false;
 		
