@@ -18,6 +18,7 @@ import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -932,6 +933,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
+			if(fd.getName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			    continue;
 			QueryRequest qr = QueryRequest.createQuery(fd.getName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
@@ -977,6 +980,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = new Response(fd);
 			assertEquals(expectTime, testResponse.getCreateTime());
+			if(fd.getName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			    continue;
 			QueryRequest qr = QueryRequest.createQuery(fd.getName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);

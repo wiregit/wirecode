@@ -13,6 +13,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import java.util.HashSet;
 import java.util.Set;
@@ -115,7 +117,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         responses=fman.query(QueryRequest.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
         responses=fman.query(QueryRequest.createQuery(
-            "FileManager_UNIT_tEsT", (byte)3));
+            "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);        
                 
         
@@ -494,7 +496,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
-			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
+			String name = I18NConvert.instance().getNorm(fd.getName());
+			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			    continue;
+			QueryRequest qr = QueryRequest.createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -521,7 +526,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
-			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
+			String name = I18NConvert.instance().getNorm(fd.getName());
+			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			    continue;
+			QueryRequest qr = QueryRequest.createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -606,9 +614,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     //helper function to create queryrequest with I18N
     private QueryRequest get_qr(File f) {
-        return 
-            QueryRequest.createQuery
-            (I18NConvert.instance().getNorm(f.getName()));
+        String norm = I18NConvert.instance().getNorm(f.getName());
+        norm = StringUtils.replace(norm, "_", " ");
+        return QueryRequest.createQuery(norm);
     }
 
     //helper function to create a new temporary file with passed in name
