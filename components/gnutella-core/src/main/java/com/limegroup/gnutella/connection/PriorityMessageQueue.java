@@ -50,8 +50,13 @@ public class PriorityMessageQueue extends MessageQueue {
     }
 
     public void add(Message m) {
-        if (_queue.insert(m, priority(m))!=null)
-            super._dropped++;
+		Message droppedMessage = (Message)_queue.insert(m, priority(m));
+		if(droppedMessage != null) {
+			droppedMessage.recordDrop();
+			super._dropped++;
+		}
+        //if (_queue.insert(m, priority(m))!=null)
+		//  super._dropped++;
     }
 
     /** Calculates a m's priority according to its message type.  Larger values
