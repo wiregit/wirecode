@@ -63,6 +63,19 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
 
+    
+    /**
+     * Tests the method for checking whether or not a connection is stable.
+     */
+    public void testIsStable() throws Exception {
+        Connection conn = new ManagedConnection("localhost", Backend.PORT);
+        conn.initialize();
+        
+        assertTrue("should not yet be considered stable", !conn.isStable());
+
+        Thread.sleep(6000);
+        assertTrue("connection should be considered stable", conn.isStable());
+    }
 
 	/**
 	 * Test to make sure that GGEP extensions are correctly returned in pongs.
