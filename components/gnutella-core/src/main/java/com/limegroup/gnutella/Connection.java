@@ -84,13 +84,25 @@ public class Connection implements Runnable {
     /** Trigger an opening connection to shutdown after it opens */
     private boolean doShutdown;
 
-    /** The number of packets I sent and received.  This includes bad packets. 
-     *  These are synchronized by out and in, respectively. */
-
+    /** 
+     * The number of packets I sent and received.  This includes bad
+     * packets.  These are synchronized by out and in, respectively.
+     *
+     * Dropped is the number of packets I read (<read) and dropped because the
+     * host made one of the following errors: sent replies to requests
+     * I didn't make, sent bad packets, or sent (route) spam.  It does
+     * not include: TTL's of zero, duplicate requests (it's not their
+     * fault), or buffer overflows in sendToAll.  
+     *
+     * lastReceived and lastDropped are the values of received and
+     * dropped at the last call to getPercentDropped.
+     */
     protected int sent=0;
     protected int received=0;
     protected int dropped=0;
-    
+    protected int lastReceived=0;
+    protected int lastDropped=0;
+
     /** Statistics about horizon size. */
     public long totalFileSize;
     public long numFiles;
@@ -244,9 +256,9 @@ public class Connection implements Runnable {
 		if (m==null) 
 		    continue;
   		//System.out.println("Read "+m.toString());
-		received++;  //keep statistics.
 		if (manager!=null)
 		    manager.total++;
+		received++;  //keep statistics.
 		return m;
 	    }
 	}
@@ -271,9 +283,9 @@ public class Connection implements Runnable {
 		Message m=Message.read(in);
 		if (m==null)
 		    throw new InterruptedIOException();
-		received++;  //keep statistics.
 		if (manager!=null)
 		    manager.total++;
+		received++;  //keep statistics.
 		return m;		
 	    } finally {
 		sock.setSoTimeout(oldTimeout);
@@ -297,6 +309,14 @@ public class Connection implements Runnable {
 	    this.routeTable=manager.routeTable;
 	    this.pushRouteTable = manager.pushRouteTable;
 	}
+    }
+
+    private final boolean isRouteSpam(Message m) {
+	if (! routeFilter.allow(m)) {
+	    dropped++;
+	    return true;
+	} else
+	    return false;
     }
 
     /**
@@ -331,12 +351,13 @@ public class Connection implements Runnable {
 		} 
 		catch (BadPacketException e) {
 		    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
+		    //dropped++;
 		    continue;
 		}
 		if(m instanceof PingRequest){
 		    Connection inConnection = routeTable.get(m.getGUID()); 
 		    //connection has never been encountered before...
-		    if (inConnection==null && routeFilter.allow(m)){
+		    if (inConnection==null && !isRouteSpam(m)){
 			//reduce TTL, increment hops. If old val of TTL was 0 drop message
 			if (manager.stats==true)
 			    manager.PReqCount++;//keep track of statistics if stats is turned on.
@@ -360,12 +381,10 @@ public class Connection implements Runnable {
 			}
 			else{//TTL is zero
 			    //do nothing (drop the message).
-			    dropped++;
 			}
 		    }
 		    else{// message has already been processed before
 			//do nothing (drop message)
-			dropped++;
 		    }
 		}
 		else if (m instanceof PingReply){
@@ -397,7 +416,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryRequest){
 		    Connection inConnection = routeTable.get(m.getGUID());
-		    if (inConnection==null && routeFilter.allow(m)){
+		    if (inConnection==null && !isRouteSpam(m)){
 
 			// Feed to the UI Monitor
 			ActivityCallback ui=manager.getCallback();
@@ -443,7 +462,6 @@ public class Connection implements Runnable {
 		    }
 		    else{//message has been entry in Route Table, has already been processed.
 			//do nothing (drop message)
-			dropped++;
 		    }
 		}
 		else if (m instanceof QueryReply){
@@ -542,9 +560,7 @@ public class Connection implements Runnable {
 			up.run();
 
 		    }
-		    else{// the message has arrived in error
-			//System.out.println("Sumeet: Message arrived in error");
-			//System.out.println("Droppoing message");
+		    else{// the message has arrived in error or is spam
 			//do nothing.....drop the message
 			dropped++;
 		    }
@@ -638,9 +654,27 @@ public class Connection implements Runnable {
 	return received;
     }
 
-    /** Returns the number of messages dropped on this connection */
+    /** Returns the number of messages dropped on this connection.<p>
+     * 
+     * Here, dropped messages mean replies to requests I didn't make,
+     * bad packets, broadcasted pushes, or spam.  It does not include:
+     * TTL's of zero, duplicate requests (it's not their fault), or
+     * buffer overflows in sendToAll.  
+     */
     public long getNumDropped() {
 	return dropped;
+    }
+
+    /** Return the percentage of messages dropped on this connection since
+     *  the last call to getPercentDropped. */
+    public float getPercentDropped() {
+	int rdiff=received-lastReceived;
+	int ddiff=dropped-lastDropped;
+	float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+	
+	lastReceived=received;
+	lastDropped=dropped;
+	return percent;
     }
 
     /** 	
