@@ -60,6 +60,10 @@ public class ReplyHandlerStub implements ReplyHandler {
         return false;
     }
 
+    public boolean supportsPongCaching() {
+        return true;
+    }
+
     public boolean allowNewPings() {
         return true;
     }

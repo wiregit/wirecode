@@ -301,6 +301,10 @@ public final class RouteTableTest extends BaseTestCase {
             return true;
         }
 
+        public boolean supportsPongCaching() {
+            return true;
+        }
+
         public boolean allowNewPings() {
             return true;
         }
