@@ -12,14 +12,14 @@ import junit.framework.*;
 /**
  * Tests backwards compatibility with old downloads.dat files.
  */
-public class TestOldDownloads extends TestCase {
+public class OldDownloadsTest extends TestCase {
 
-    public TestOldDownloads(String name) {
+    public OldDownloadsTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return new TestSuite(TestOldDownloads.class);
+        return new TestSuite(OldDownloadsTest.class);
     }
 
 

@@ -20,6 +20,7 @@ public class ManagedDownloaderTest extends TestCase {
     }
     
     public void setUp() {
+        //System.out.println(" setting up ManagedDownloader test. " );
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
             ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);

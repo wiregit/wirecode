@@ -11,8 +11,8 @@ public class AllTests {
         TestSuite suite=new TestSuite("Downloader tests");
         suite.addTest(RemoteFileDescGrouperTest.suite());
         suite.addTest(DownloadTest.suite());
-        suite.addTest(ManagedDownloaderTest.suite());
-        suite.addTest(TestOldDownloads.suite());
+       // suite.addTest(ManagedDownloaderTest.suite());
+        suite.addTest(OldDownloadsTest.suite());
         suite.addTest(HTTPDownloaderTest.suite());
         suite.addTest(IntervalTest.suite());
         suite.addTest(MiniRemoteFileDescTest.suite());

@@ -48,8 +48,8 @@ public class TestUploader {
     private long maxPollTime = -1;
     //Note if either of these is changed we must change the X-Queue header in
     //this test
-    private final int MIN_POLL = 45000;
-    private final int MAX_POLL = 120000;
+    private final int MIN_POLL = 5000;
+    private final int MAX_POLL = 15000;
 
 
     /** 
@@ -299,7 +299,7 @@ public class TestUploader {
 		out.write(str.getBytes());
 
         if(queue) {
-            String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
+            String s = "X-Queue: position=1, pollMin=" + MIN_POLL/1000 + ", pollMax=" + MAX_POLL/1000 + "\r\n";
             out.write(s.getBytes());
             s = "\r\n";
             out.write(s.getBytes());
