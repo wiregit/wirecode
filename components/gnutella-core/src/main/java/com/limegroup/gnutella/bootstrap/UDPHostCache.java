@@ -112,19 +112,23 @@ public class UDPHostCache {
      */
     public synchronized void resetData() {
         LOG.debug("Clearing attempted udp host caches");
-        attemptedHosts.clear();
         decrementFailures();
+        attemptedHosts.clear();
     }
     
     /**
      * Decrements the failure count for each known cache.
      */
     protected synchronized void decrementFailures() {
-        for(Iterator i = udpHosts.iterator(); i.hasNext(); ) {
+        for(Iterator i = attemptedHosts.iterator(); i.hasNext(); ) {
             ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
             ep.decrementUDPHostCacheFailure();
-            // we do not set dirty because _every_ host changed,
-            // meaning the order stays the same.
+            // if we brought this guy down back to a managable
+            // failure size, add'm back if we have room.
+            if(ep.getUDPHostCacheFailures() == MAXIMUM_FAILURES &&
+               udpHosts.size() < PERMANENT_SIZE)
+                add(ep);
+            dirty = true;
         }
     }
     

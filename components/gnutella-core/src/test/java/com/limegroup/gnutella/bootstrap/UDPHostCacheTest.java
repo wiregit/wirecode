@@ -417,14 +417,15 @@ public class UDPHostCacheTest extends BaseTestCase {
         
         // now try a real reset data that decrements failures,
         // ensure the caches failures went down 
-        // (except for e4, which was ejected)
+        // this includes e4, because we did attempt it.
         cache.doRealDecrement = true;
         cache.resetData();
         assertEquals(0, e1.getUDPHostCacheFailures());
         assertEquals(0, e2.getUDPHostCacheFailures());
         assertEquals(2, e3.getUDPHostCacheFailures());
-        assertEquals(6, e4.getUDPHostCacheFailures());
+        assertEquals(5, e4.getUDPHostCacheFailures());
         assertEquals(3, e5.getUDPHostCacheFailures());
+        assertEquals(5, cache.getSize()); // e4 was readded.
     }
     
     private void routeFor(String host, byte[] guid) throws Exception {
