@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.io.IOException;
+
 /**
  * Abstract clas to use for different normalization implementations
  * Helper functions like blockSplit are also defined here.
@@ -15,14 +17,8 @@ abstract class AbstractI18NConverter {
      */
     public abstract String getNorm(String s);
     
-    /**
-     * Should return an array of keywords built from parameter s.
-     * After normalizing String s the string should be 
-     * split and an array of String(s) should be built.
-     * @param s source string to split into keywords
-     * @return an array of keywords created from s
-     */
-    public abstract String[] getKeywords(String s);
+    public abstract void initialize()
+        throws IOException, ClassNotFoundException;
 
     /**
      * Returns a string split according to the unicode blocks.  A

@@ -12,36 +12,32 @@ final class I18NConvert118 extends AbstractI18NConverter {
     private Trie _convert, _kc;
     java.util.BitSet _ex;
 
+
+    I18NConvert118() {}
+
     /** read in the necessary data files created by UDataFileCreator */
-    I18NConvert118() {
+    public void initialize()
+        throws IOException, ClassNotFoundException {
         _convert = new Trie(false);
         _kc = new Trie(false);
-        try {
-            InputStream fi = CommonUtils.getResourceStream("nudata.txt");
-            BufferedReader buf = 
-                new BufferedReader(new InputStreamReader(fi));
-            
-            String line;
-            String[] splitUp;
-            
-            while((line = buf.readLine()) != null) {
-                splitUp = StringUtils.splitNoCoalesce(line, ";");
-                _convert.add(code2char(splitUp[0]), code2char(splitUp[1]));
-                if(!splitUp[2].equals(""))
-                    _kc.add(code2char(splitUp[1]), code2char(splitUp[2]));
-            }
 
-            fi = CommonUtils.getResourceStream("excluded.dat");            
-            ObjectInputStream ois = new ObjectInputStream(fi);
-            _ex = (java.util.BitSet)ois.readObject();
-            
+        InputStream fi = CommonUtils.getResourceStream("nudata.txt");
+        BufferedReader buf = 
+            new BufferedReader(new InputStreamReader(fi));
+        
+        String line;
+        String[] splitUp;
+        
+        while((line = buf.readLine()) != null) {
+            splitUp = StringUtils.splitNoCoalesce(line, ";");
+            _convert.add(code2char(splitUp[0]), code2char(splitUp[1]));
+            if(!splitUp[2].equals(""))
+                _kc.add(code2char(splitUp[1]), code2char(splitUp[2]));
         }
-        catch(IOException e) {
-            ErrorService.error(e);
-        }
-        catch(ClassNotFoundException ce) {
-            ErrorService.error(ce);
-        }
+        
+        fi = CommonUtils.getResourceStream("excluded.dat");            
+        ObjectInputStream ois = new ObjectInputStream(fi);
+        _ex = (java.util.BitSet)ois.readObject();
     }
     
     /** 
@@ -55,18 +51,6 @@ final class I18NConvert118 extends AbstractI18NConverter {
         return blockSplit(kmp(dekmp(s)));
     }
 
-    /**
-     * Returns an array of keywords built from parameter s.
-     * The string s will be first converted (removal of accents, etc.)
-     * then split into the unicode blocks, then the array will be created
-     * by splitting the string by 'space'.  The conversion will convert
-     * all delim characters to '\u0020' so we just split with '\u0020'
-     * @param s source string to split into keywords
-     * @return an array of keywords created from s
-     */
-    public String[] getKeywords(String s) {
-        return StringUtils.split(getNorm(s), " ");
-    }
 
     /**
      * Return the decomposed form of parameter s. For each char

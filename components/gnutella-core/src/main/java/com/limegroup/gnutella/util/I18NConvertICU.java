@@ -12,13 +12,15 @@ import com.sun.java.util.collections.HashMap;
 final class I18NConvertICU extends AbstractI18NConverter {
 
     /** excluded codepoints (like accents) */
-    private final java.util.BitSet _excluded;
+    private java.util.BitSet _excluded;
     /** certain chars to be replaced by space (like commas, etc) */
-    private final java.util.BitSet _replaceWithSpace;
-    private final Map _cMap;
+    private java.util.BitSet _replaceWithSpace;
+    private Map _cMap;
+
+    I18NConvertICU() {}
 
     /**
-     * constructor:
+     * initializer:
      * this subclass of AbstractI18NConverter uses the icu4j's 
      * pacakges to normalize Strings.  
      * _excluded and _replaceWithSpace (BitSet) are read in from
@@ -26,34 +28,27 @@ final class I18NConvertICU extends AbstractI18NConverter {
      * remove accents, etc. and replace certain code points with
      * ascii space (\u0020)
      */
-    I18NConvertICU() {
+    public void initialize()
+        throws IOException, ClassNotFoundException {
     	java.util.BitSet bs = null;
         java.util.BitSet bs2 = null;
     	Map hm = null;
-    	try {
-    	    InputStream fi = CommonUtils.getResourceStream("excluded.dat");
-    	    //read in the explusion bitset
-    	    ObjectInputStream ois = 
-                new ObjectInputStream(fi);
-    	    bs = (java.util.BitSet)ois.readObject();
-            
-            fi = CommonUtils.getResourceStream("caseMap.dat");
-    	    //read in the case map
-            ois = new ObjectInputStream(fi);
-            hm = (HashMap)ois.readObject();
 
-            fi = CommonUtils.getResourceStream("replaceSpace.dat");
-            ois = new  ObjectInputStream(fi);
-            bs2 = (java.util.BitSet)ois.readObject();
+        InputStream fi = CommonUtils.getResourceStream("excluded.dat");
+        //read in the explusion bitset
+        ObjectInputStream ois = 
+            new ObjectInputStream(fi);
+        bs = (java.util.BitSet)ois.readObject();
+        
+        fi = CommonUtils.getResourceStream("caseMap.dat");
+        //read in the case map
+        ois = new ObjectInputStream(fi);
+        hm = (HashMap)ois.readObject();
+        
+        fi = CommonUtils.getResourceStream("replaceSpace.dat");
+        ois = new  ObjectInputStream(fi);
+        bs2 = (java.util.BitSet)ois.readObject();
             
-    	}
-    	catch(IOException ioe) {
-    	    ErrorService.error(ioe);
-    	}
-    	catch(ClassNotFoundException ce) {
-    	    ErrorService.error(ce);
-    	}
-    
     	_excluded = bs;
     	_cMap = hm;
         _replaceWithSpace = bs2;
@@ -69,20 +64,6 @@ final class I18NConvertICU extends AbstractI18NConverter {
     public String getNorm(String s) {
         return convert(s);
     } 
-    
-    
-    /**
-     * Returns an array of keywords built from parameter s.
-     * The string s will be first converted (removal of accents, etc.)
-     * then split into the unicode blocks, then the array will be created
-     * by splitting the string by 'space'.  The conversion will convert
-     * all delim characters to '\u0020' so we just split with '\u0020'
-     * @param s source string to split into keywords
-     * @return an array of keywords created from s
-     */
-    public String[] getKeywords(String s) {
-        return StringUtils.split(convert(s), "\u0020");
-    }
     
     
     /**
