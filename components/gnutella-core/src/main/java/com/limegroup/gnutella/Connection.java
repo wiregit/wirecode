@@ -722,10 +722,7 @@ public class Connection {
      * Subclasses may override to decorate the stream.
      */
     protected OutputStream getOutputStream()  throws IOException {
-        //if(isWriteDeflated())
-          //  return new DeflaterOutputStream(_socket.getOutputStream());
-        //else            
-            return new BufferedOutputStream(_socket.getOutputStream());
+        return new BufferedOutputStream(_socket.getOutputStream());
     }
 
     /**
@@ -735,10 +732,7 @@ public class Connection {
      * Subclasses may override to decorate the stream.
      */
     protected InputStream getInputStream() throws IOException {
-        //if(isReadDeflated())
-            //return new InflaterInputStream(_socket.getInputStream());
-        //else
-            return new BufferedInputStream(_socket.getInputStream());
+        return new BufferedInputStream(_socket.getInputStream());
     }    
     
     
@@ -774,21 +768,21 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
-            if( isReadDeflated() ) {
-                Assert.that(_in instanceof InflaterInputStream, "should be inflating, but _in not an inflater");
-                try {
-                    m = Message.read(_in, HEADER_BUF, _softMax);
-                    System.out.println(this + ": Read " + m + " from deflated stream.");
-                    System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
-                } catch(IOException e) {
-                    System.out.println(this + ": Read failed.");
-                    System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-            else
-                m = Message.read(_socket.getInputStream(), HEADER_BUF, _softMax);
+//            if( isReadDeflated() ) {
+//                //Assert.that(_in instanceof InflaterInputStream, "should be inflating, but _in not an inflater");
+//                try {
+//                    m = Message.read(_in, HEADER_BUF, _softMax);
+//                   // System.out.println(this + ": Read " + m + " from deflated stream.");
+//                    //System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
+//                } catch(IOException e) {
+//                    //System.out.println(this + ": Read failed.");
+//                    //System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
+//                    //e.printStackTrace();
+//                    throw e;
+//                }
+//            }
+//            else
+                m = Message.read(_in, HEADER_BUF, _softMax);
         }
         return m;
     }
@@ -840,10 +834,10 @@ public class Connection {
     public void send(Message m) throws IOException {
         if ( isWriteDeflated() ) {
             ZOutputStream zos = (ZOutputStream)_out;
-            System.out.println(this + ": writing " + m + " to a deflated stream");
+            //System.out.println(this + ": writing " + m + " to a deflated stream");
             m.write(_out);
             totalLength += m.getTotalLength();
-            System.out.println(this + ": Total message length: " + totalLength + ", TotalIn: " + zos.getTotalIn() + ", TotalOut: " + zos.getTotalOut());
+            //System.out.println(this + ": Total message length: " + totalLength + ", TotalIn: " + zos.getTotalIn() + ", TotalOut: " + zos.getTotalOut());
         } else {
             m.write(_out);
         }
