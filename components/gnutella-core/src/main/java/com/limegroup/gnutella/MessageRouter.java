@@ -836,9 +836,9 @@ public abstract class MessageRouter {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc != handler) {
 				boolean sent = sendRoutedQueryToHost(request, mc, handler);
-				if(sent) {
+				if(sent && RECORD_STATS) {
 					RoutedQueryStat.LEAF_SEND.incrementStat();
-				} else {
+				} else if(RECORD_STATS) {
 					RoutedQueryStat.LEAF_DROP.incrementStat();
 				}				
             }
@@ -939,11 +939,12 @@ public abstract class MessageRouter {
 				// if it's the last hop to an Ultrapeer that sends
 				// query route tables, route it.
 				if(lastHop &&
-				   mc.isUltrapeerQueryRoutingConnection()) {
+				   mc.isUltrapeerQueryRoutingConnection() &&
+                   RouterService.isSupernode()) {
 					boolean sent = sendRoutedQueryToHost(query, mc, handler);
-					if(sent) {
+					if(sent && RECORD_STATS) {
 						RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-					} else {
+					} else if(RECORD_STATS) {
 						RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
 					}
 				} else {
@@ -966,7 +967,6 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
-
 		if(request == null) {
 			throw new NullPointerException("null query");
 		}
