@@ -444,6 +444,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseAvailableRangesHeader(str, _rfd);
             else if (HTTPHeaderName.RETRY_AFTER.matchesStartOfString(str)) 
                 parseRetryAfterHeader(str, _rfd);
+            else if (HTTPHeaderName.CREATION_TIME.matchesStartOfString(str))
+                parseCreationTimeHeader(str, _rfd);
         }
 
 
@@ -818,6 +820,25 @@ public class HTTPDownloader implements BandwidthTracker {
         // make sure the value is not larger than MAX_RETRY_AFTER seconds
         seconds = Math.min(seconds, MAX_RETRY_AFTER);
         rfd.setRetryAfter(seconds);
+    }
+    
+    /**
+     * Parses the Creation Time header.
+     * @param str - expects a long number specifying the age in milliseconds
+     * of this file.
+     * @exception ProblemReadingHeaderException if we could not read 
+     * the header
+     */
+    private static void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
+        throws IOException {
+        str = HTTPUtils.extractHeaderValue(str);
+        long milliSeconds = 0;
+        try {
+            milliSeconds = Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            throw new ProblemReadingHeaderException();
+        }
+        rfd.setCreationTime(milliSeconds);
     }
     
     /////////////////////////////// Download ////////////////////////////////
