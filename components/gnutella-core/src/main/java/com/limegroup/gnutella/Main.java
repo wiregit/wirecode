@@ -16,6 +16,7 @@ public class Main {
 	} else {
 	    router=new Router();
 	}
+	router.setKeepAlive(Const.KEEP_ALIVE);
 	Thread t=new Thread(router);
 	t.setDaemon(true);
 	t.start();	
@@ -59,6 +60,7 @@ public class Main {
 	    }	    
 	}
 	System.out.println("Good bye.");
+	router.shutdown(); //write gnutella.net
     }
 
     /** Returns an array of strings containing the words of s, where
