@@ -281,24 +281,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 				UDP_PREFIX + GUID_SUFFIX);
 		
 		// add udp first in case it gets overwritten.
-		addMapping(udp);
-		addMapping(tcp);
-		
-		// check if all went well
-		Map m =getExistingMappings();
-		synchronized(this) {
-			_mappings = m;
-		}
-		
-		if (LOG.isDebugEnabled()) {
-			if (_mappings.containsKey(tcp._description))
-				LOG.debug("tcp mapping successful");
-			if (_mappings.containsKey(udp._description)) 
-				LOG.debug("udp mapping successful");
-			
-			LOG.debug("current mappings: "+_mappings);
-		}
-				
+		if (addMapping(udp))
+			_mappings.put(udp._description,udp);
+		if (addMapping(tcp))
+			_mappings.put(tcp._description,tcp);
 	}
 	
 	private Map /*String description->Mapping */ getExistingMappings() 

@@ -44,7 +44,9 @@ public class Acceptor implements Runnable {
     static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
     
-    private UPnPManager _upnpManager;
+    /** the UPnPManager to use */
+    private static final UPnPManager UPNP_MANAGER = 
+    	CommonUtils.isJava14OrLater() ? UPnPManager.instance() : null;
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -163,12 +165,6 @@ public class Acceptor implements Runnable {
 	public void start() {
 	    MulticastService.instance().start();
 	    UDPService.instance().start();
-	    
-	    // UPNP requires 1.4+
-	    if (CommonUtils.isJava14OrLater())
-	    	_upnpManager = UPnPManager.instance();
-	    else
-	    	_upnpManager = null;
 	    
 		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);
@@ -406,6 +402,10 @@ public class Acceptor implements Runnable {
         } catch (SecurityException e) {
         }
 
+        // 0.5 if we have jre14+ but no nat, halt the UPnP Manager
+        if (UPNP_MANAGER != null && !UPNP_MANAGER.NATPresent())
+        	UPNP_MANAGER.halt();
+        
         // Create the server socket, bind it to a port, and listen for
         // incoming connections.  If there are problems, we can continue
         // onward.
@@ -415,7 +415,7 @@ public class Acceptor implements Runnable {
         try {
         	// if we have a NAT and the default port is not available, lets try
         	// another one
-        	if (_upnpManager != null && !_upnpManager.portAvailable(tempPort))
+        	if (UPNP_MANAGER != null && !UPNP_MANAGER.portAvailable(tempPort))
         		throw new IOException();
         	
 			setListeningPort(tempPort);
@@ -444,8 +444,8 @@ public class Acceptor implements Runnable {
 				    continue;
 				}
                 try {
-                	if (_upnpManager != null && 
-                			!_upnpManager.portAvailable(tempPort))
+                	if (UPNP_MANAGER != null && 
+                			!UPNP_MANAGER.portAvailable(tempPort))
                 		continue;
                     setListeningPort(tempPort);
 					_port = tempPort;
@@ -462,10 +462,10 @@ public class Acceptor implements Runnable {
         } finally {
         	// if we created a socket and have a NAT, open the ports
         	if (_socket != null && 
-        			_upnpManager != null && 
-					_upnpManager.NATPresent() &&
+        			UPNP_MANAGER != null && 
+					UPNP_MANAGER.NATPresent() &&
 					NetworkUtils.isValidPort(_port))
-        		_upnpManager.mapPort(_port);
+        		UPNP_MANAGER.mapPort(_port);
         }
         
         socketError = null;
