@@ -91,7 +91,7 @@ public abstract class TestConnection extends ManagedConnection {
         _receivedQuery = true;
         _numQueries++;
         QueryRequest qr = (QueryRequest)msg;
-        if(_queriesMustBeInRoutingTables && !hitsQueryRouteTable(qr))  {
+        if(_queriesMustBeInRoutingTables && !shouldForwardQuery(qr))  {
             throw new IllegalArgumentException("received query that's not in table1: "+qr+" "+this);
         }
         int ttl = qr.getTTL();

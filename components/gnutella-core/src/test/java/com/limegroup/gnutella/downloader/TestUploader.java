@@ -73,6 +73,7 @@ public class TestUploader {
     final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
     private int partial = 0;
+    private Long creationTime = null;
     
     boolean unqueue = true;
     int queuePos = 1;
@@ -232,6 +233,10 @@ public class TestUploader {
 
     public void setQueue(boolean q) { 
         this.queue = q;
+    }
+
+    public void setCreationTime(Long l) {
+        this.creationTime = l;
     }
 
     public void setPartial(boolean part) {
@@ -505,7 +510,7 @@ public class TestUploader {
             maxPollTime = t+MAX_POLL;
             return;
         }
-        
+
         if(partial > 0) {
             switch(partial) {
             case 1:
@@ -543,6 +548,11 @@ public class TestUploader {
                                   storedAltLocs, out);
         } else {
             LOG.debug("Did not write alt locs:\n"+storedAltLocs+"\n");
+        }
+        if(creationTime != null) {
+            LOG.debug("Writing out Creation Time.");
+            HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
+                                  out);
         }
         str = "\r\n";
 		out.write(str.getBytes());

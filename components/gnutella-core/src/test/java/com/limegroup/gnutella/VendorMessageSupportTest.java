@@ -16,6 +16,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
@@ -130,6 +131,9 @@ public class VendorMessageSupportTest extends BaseTestCase {
                     if (m instanceof MessagesSupportedVendorMessage) {
                         c.handleVendorMessage((VendorMessage) m);
                         receivedDesiredMessage = true;
+                    }
+                    else if (m instanceof CapabilitiesVM) {
+                        // this is expected....
                     }
                     else
                         fail("Unexpected VendorMessage of class" + m.getClass());

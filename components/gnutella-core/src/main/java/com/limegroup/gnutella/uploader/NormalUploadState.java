@@ -129,6 +129,14 @@ public final class NormalUploadState implements HTTPMessage {
                                           ((IncompleteFileDesc)FILE_DESC),
                                           ostream);
                 }
+                {
+                    // always write out the creation time
+                    CreationTimeCache cache = CreationTimeCache.instance();
+                    if (cache.getCreationTime(urn) != null)
+                    HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME,
+                                          cache.getCreationTime(urn).toString(),
+                                          ostream);
+                }
 			}
 			
 			ostream.write("\r\n");

@@ -117,7 +117,7 @@ final class ProbeQuery {
             ManagedConnection mc = (ManagedConnection)iter.next();
             
             if(mc.isUltrapeerQueryRoutingConnection()) {
-                if(mc.hitsQueryRouteTable(query)) { 
+                if(mc.shouldForwardQuery(query)) { 
                     hitConnections.add(mc);
                 } else {
                     missConnections.add(mc);

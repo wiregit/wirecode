@@ -157,6 +157,12 @@ public class StandardMessageRouter extends MessageRouter {
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID) {
+
+        // This is a special What is Query - we can only answer queries which
+        // have version numbers at or below our supported version
+        if ((queryRequest.getCapabilitySelector() > 0) &&
+            (queryRequest.getCapabilitySelector() > 
+             CapabilitiesVM.CAPABILITY_MAX_SELECTOR)) return false;
                                                 
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"

@@ -492,7 +492,7 @@ public final class QueryHandler {
         // match anyway
         if(ttl == 1 && 
            ((mc.isUltrapeerQueryRoutingConnection() &&
-            !mc.hitsQueryRouteTable(QUERY)) || probeConnection)) {
+            !mc.shouldForwardQuery(QUERY)) || probeConnection)) {
             ttl = 2;
         }
         QueryRequest query = createQuery(QUERY, ttl);
@@ -515,8 +515,9 @@ public final class QueryHandler {
                                ManagedConnection mc, 
                                QueryHandler handler) {
         
-        // send the query directly along the connection
-        _messageRouter.originateQuery(query, mc);
+        // send the query directly along the connection, but if the query didn't
+        // go through send back 0....
+        if (!_messageRouter.originateQuery(query, mc)) return 0;
         
         byte ttl = query.getTTL();
 

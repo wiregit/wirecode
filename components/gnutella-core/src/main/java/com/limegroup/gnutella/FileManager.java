@@ -27,6 +27,7 @@ import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.TreeMap;
 import com.sun.java.util.collections.TreeSet;
 
@@ -325,8 +326,18 @@ public abstract class FileManager {
     public synchronized boolean isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
-    
-    
+
+
+    /**
+     * Returns the <tt>URN<tt> for the File.  May return null;
+     */    
+    public synchronized URN getURNForFile(File f) {
+        FileDesc fd = getFileDescForFile(f);
+        if (fd != null) return fd.getSHA1Urn();
+        return null;
+    }
+
+
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared.
@@ -651,9 +662,13 @@ public abstract class FileManager {
 		if (! loadThreadInterrupted())
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
+
+        // prune away old creation times that may still exist
+        CreationTimeCache.instance().pruneTimes();
 		    
-		// write out the cache of URNs
+		// write out the cache of URNs and creation times
 		UrnCache.instance().persistCache();
+        CreationTimeCache.instance().persistCache();
     }
     
     /**
@@ -752,6 +767,7 @@ public abstract class FileManager {
         }
     }
     
+
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
@@ -794,6 +810,7 @@ public abstract class FileManager {
 
         return fd;
 	}
+
 
     /**
      * @modifies this
@@ -881,6 +898,17 @@ public abstract class FileManager {
                 indices.add(fileIndex);
             }
 		
+            // Commit the time in the CreactionTimeCache
+            URN mainURN = fileDesc.getSHA1Urn();
+            CreationTimeCache ctCache = CreationTimeCache.instance();
+            synchronized (ctCache) {
+                Long cTime = ctCache.getCreationTime(mainURN);
+                if (cTime == null)
+                    ctCache.addTime(mainURN, file.lastModified());
+                // this call may be superfluous but it is quite fast....
+                ctCache.commitTime(mainURN);
+            }
+
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
             _needRebuild = true;            
@@ -981,10 +1009,24 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
+        URN oldURN = getURNForFile(f);
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        Long cTime = ctCache.getCreationTime(oldURN);
+        // Is this assertion too stringent?  Possibly.  There is only one
+        // VERY unlikely case where it could happen.  It is probably better to
+        // have the assert there than not.
+        Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        return addFileIfShared(f);
+        FileDesc fd = addFileIfShared(f);
+        //re-populate the ctCache
+        synchronized (ctCache) {
+            ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+            ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+            ctCache.commitTime(fd.getSHA1Urn());
+        }
+        return fd;
     }
 
     /**
@@ -1044,7 +1086,7 @@ public abstract class FileManager {
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        //Remove references to this from index.                                            
+        //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
@@ -1058,6 +1100,9 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
+        //Remove creation time information
+        if (_urnIndex.get(fd.getSHA1Urn()) == null)
+            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         repOk();
         return fd;
@@ -1110,6 +1155,7 @@ public abstract class FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());            
         fd = removeFileIfShared(oldName);
         Assert.that( fd != null, "invariant broken.");
+        // hash didn't change so no need to re-input creation time
         fd = addFileIfShared(newName, xmlDocs);
         return (fd != null);
     }
@@ -1235,39 +1281,17 @@ public abstract class FileManager {
         String str = request.getQuery();
         boolean includeXML = shouldIncludeXMLInResponse(request);
 
+        //Special case: return up to 3 of your 'youngest' files.
+        if (request.isWhatIsNewRequest()) 
+            return respondToWhatIsNewRequest(includeXML);
+
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,
         //StandardMessageRouter will clip the number of results sent on the
         //network.  Note that some initial TTLs are filterd by GreedyQuery
         //before they ever reach this point.
-        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
-            //Special case: if no shared files, return null
-            // This works even if incomplete files are shared, because
-            // they are added to _numIncompleteFiles and not _numFiles.
-            if (_numFiles==0)
-                return EMPTY_RESPONSES;
-            //Extract responses for all non-null (i.e., not deleted) files.
-            //Because we ignore all incomplete files, _numFiles continues
-            //to work as the expected size of ret.
-            Response[] ret=new Response[_numFiles];
-            int j=0;
-            for (int i=0; i<_files.size(); i++) {
-                FileDesc desc = (FileDesc)_files.get(i);
-        		// If the file was unshared or is an incomplete file,
-        		// DO NOT SEND IT.
-                if (desc==null || desc instanceof IncompleteFileDesc) 
-                    continue;    
-                Assert.that(j<ret.length,
-                            "_numFiles is too small");
-                ret[j] = new Response(desc);
-                if(includeXML)
-                    addXMLToResponse(ret[j], desc);
-                j++;
-            }
-            Assert.that(j==ret.length,
-                        "_numFiles is too large");
-            return ret;
-        }
+        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY))
+            return respondToIndexingQuery(includeXML);
 
         //Normal case: query the index to find all matches.  TODO: this
         //sometimes returns more results (>255) than we actually send out.
@@ -1308,6 +1332,72 @@ public abstract class FileManager {
         }
         return (Response[])responses.toArray(new Response[responses.size()]);
     }
+
+    /**
+     * Responds to a what is new request.
+     */
+    private Response[] respondToWhatIsNewRequest(boolean includeXML) {
+        // see if there are any files to send....
+        // NOTE: we only request up to 3 urns.  we don't need to worry
+        // about partial files because we don't add them to the cache.
+        List urnList = CreationTimeCache.instance().getFiles(3);
+        if (urnList.size() == 0)
+            return EMPTY_RESPONSES;
+        
+        // get the appropriate responses
+        Response[] resps = new Response[urnList.size()];
+        for (int i = 0; i < urnList.size(); i++) {
+            URN currURN = (URN) urnList.get(i);
+            FileDesc desc = getFileDescForUrn(currURN);
+            
+            // should never happen since we don't add times for IFDs and
+            // we clear removed files...
+            if ((desc==null) || (desc instanceof IncompleteFileDesc))
+                throw new RuntimeException("Bad Rep - No IFDs allowed!");
+            
+            // Formulate the response
+            Response r = new Response(desc);
+            if(includeXML)
+                addXMLToResponse(r, desc);
+            
+            // Cache it
+            resps[i] = r;
+        }
+        return resps;
+    }
+
+    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
+     *  files of this client.
+     */
+    private Response[] respondToIndexingQuery(boolean includeXML) {
+        //Special case: if no shared files, return null
+        // This works even if incomplete files are shared, because
+        // they are added to _numIncompleteFiles and not _numFiles.
+        if (_numFiles==0)
+            return EMPTY_RESPONSES;
+        //Extract responses for all non-null (i.e., not deleted) files.
+        //Because we ignore all incomplete files, _numFiles continues
+        //to work as the expected size of ret.
+        Response[] ret=new Response[_numFiles];
+        int j=0;
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc desc = (FileDesc)_files.get(i);
+            // If the file was unshared or is an incomplete file,
+            // DO NOT SEND IT.
+            if (desc==null || desc instanceof IncompleteFileDesc) 
+                continue;    
+            Assert.that(j<ret.length,
+                        "_numFiles is too small");
+            ret[j] = new Response(desc);
+            if(includeXML)
+                addXMLToResponse(ret[j], desc);
+            j++;
+        }
+        Assert.that(j==ret.length,
+                    "_numFiles is too large");
+        return ret;
+    }
+
     
     /**
      * A normal FileManager will never include XML.

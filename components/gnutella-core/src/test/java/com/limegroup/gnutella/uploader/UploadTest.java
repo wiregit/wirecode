@@ -24,6 +24,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.downloader.Interval;
@@ -189,7 +190,7 @@ public class UploadTest extends BaseTestCase {
         //try {Thread.sleep(200); } catch (InterruptedException e) { }
             
     //} 
-    
+
     ///////////////////push downloads with HTTP1.0///////////
     public void testHTTP10Push() throws Exception {
         boolean passed = false;
@@ -1056,6 +1057,36 @@ public class UploadTest extends BaseTestCase {
             true, false, "HTTP/1.1 400 Malformed Request");
     }
 
+    ///////////////////test that creation time is given///////////
+    public void testCreationTimeGiven() throws Exception {
+
+        //0. Confirm creation time exists
+        URN urn = URN.createSHA1Urn(hash);
+        Long cTime = CreationTimeCache.instance().getCreationTime(urn);
+        assertNotNull(cTime);
+        assertTrue(cTime.longValue() > 0);
+
+        assertTrue(download("/uri-res/N2R?" + hash, null,
+                          "abcdefghijklmnopqrstuvwxyz",
+                            "X-Create-Time: " + cTime));
+    }
+    
+    
+    public void testCreationTimeGivenForPartial() throws Exception {
+
+        //0. make creatio time
+        
+        URN urn = URN.createSHA1Urn(incompleteHash);
+        Long cTime = new Long("10776");
+        CreationTimeCache.instance().addTime(urn, cTime.longValue());
+
+        // successful interval 2-5 was set above
+        assertTrue(download("/uri-res/N2R?" + incompleteHash, "Range: bytes 2-5",
+                          "cdef", "X-Create-Time: " + cTime));
+    }
+
+
+    
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
      * content as a string. If header!=null, includes it as a request header.
@@ -1390,6 +1421,10 @@ public class UploadTest extends BaseTestCase {
                     return false;
             }
             return true;
+        }
+
+        public String toString() {
+            return title + " : " + contents;
         }
     }
                 

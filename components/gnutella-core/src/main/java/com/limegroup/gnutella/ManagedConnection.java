@@ -387,17 +387,27 @@ public class ManagedConnection extends Connection
 
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
-     * instance has a hit in the query routing tables.  If this 
-     * connection has not yet sent a query route table, this returns
-     * <tt>false</tt>.
+     * instance should be sent to the connection.  The method takes a couple
+     * factors into account, such as QRP tables, type of query, etc.
      *
      * @param query the <tt>QueryRequest</tt> to check against
-     *  the tables
-     * @return <tt>true</tt> if the <tt>QueryRequest</tt> has a hit
-     *  in the tables, otherwise <tt>false</tt>
+     *  the data
+     * @return <tt>true</tt> if the <tt>QueryRequest</tt> should be sent to
+     * this connection, otherwise <tt>false</tt>
      */
-    public boolean hitsQueryRouteTable(QueryRequest query) {
-        if(_lastQRPTableReceived == null) return false;
+    public boolean shouldForwardQuery(QueryRequest query) {
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if (query.getCapabilitySelector() > 0) {
+            if (isSupernodeClientConnection())
+                return (getRemoteHostCapabilitySelector() >= 
+                        query.getCapabilitySelector());
+            else if (isSupernodeSupernodeConnection())
+                return (getRemoteHostCapabilitySelector() >=  
+                        CapabilitiesVM.CAPABILITY_MIN_SELECTOR);
+            else return false;
+        }
+        else if(_lastQRPTableReceived == null) return false;
         return _lastQRPTableReceived.contains(query);
     }
 

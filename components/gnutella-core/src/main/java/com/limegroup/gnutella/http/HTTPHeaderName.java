@@ -146,6 +146,14 @@ public class HTTPHeaderName {
     public static final HTTPHeaderName RETRY_AFTER = 
         new HTTPHeaderName("Retry-After");
 
+
+    /**
+     * Header for creation time.  Allows the creation time
+     * of the file to propagate throughout the network.
+     */
+    public static final HTTPHeaderName CREATION_TIME =
+        new HTTPHeaderName("X-Create-Time");
+
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.

@@ -323,6 +323,11 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
+        else if (msg instanceof CapabilitiesVM) {
+			if(RECORD_STATS)
+                ;
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        }
         else if (msg instanceof HopsFlowVendorMessage) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);
@@ -1426,7 +1431,7 @@ public abstract class MessageRouter {
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc == handler) continue;
-            if(mc.hitsQueryRouteTable(query)) {
+            if(mc.shouldForwardQuery(query)) {
                 hitConnections.add(mc);
             }
         }
@@ -1464,7 +1469,7 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		if (mc.hitsQueryRouteTable(query)) {
+		if (mc.shouldForwardQuery(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -1593,6 +1598,12 @@ public abstract class MessageRouter {
         // by a leaf to other Ultrapeers
         if(ultrapeer.isClientSupernodeConnection()) return;
 
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if ((query.getCapabilitySelector() > 0) &&
+            (ultrapeer.getRemoteHostCapabilitySelector() <
+             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)) return;
+
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
            
@@ -1681,14 +1692,22 @@ public abstract class MessageRouter {
      *
      * @param request The query to send.
      * @param mc The ManagedConnection to send the query along
+     * @return false if the query was not sent, true if so
      */
-    public void originateQuery(QueryRequest query, ManagedConnection mc) {
+    public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
         if( query == null )
             throw new NullPointerException("null query");
         if( mc == null )
             throw new NullPointerException("null connection");
         
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if ((query.getCapabilitySelector() > 0) &&
+            (mc.getRemoteHostCapabilitySelector() < 
+             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)
+            ) return false;
         mc.originateQuery(query);
+        return true;
     }
     
 

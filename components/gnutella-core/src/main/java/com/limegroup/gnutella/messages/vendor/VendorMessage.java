@@ -21,6 +21,7 @@ public abstract class VendorMessage extends Message {
     protected static final int F_TCP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
+    protected static final int F_CAPABILITIES = 10;
     protected static final int F_LIME_ACK = 11;
     protected static final int F_REPLY_NUMBER = 12;
     protected static final int F_PUSH_PROXY_REQ = 21;
@@ -258,6 +259,9 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UDP_CONNECT_BACK_REDIR) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
+        if ((selector == F_CAPABILITIES) && 
+            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
+            return new CapabilitiesVM(guid, ttl, hops, version, restOf);
 
 
         if( RECORD_STATS )
