@@ -142,7 +142,9 @@ public final class QueryUnicaster {
 				queryLoop();
 			}
 		};
-        _querier.start();
+        // only if settings says i can....
+        if (SettingsManager.instance().getGuessEnabled())
+            _querier.start();
     }
 
     /** The main work to be done.
