@@ -34,6 +34,8 @@ import com.sun.java.util.collections.Iterator;
  */
 public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     
+    protected static int TIMEOUT = 2000;
+
     public ServerSideDynamicQueryTest(String name) {
         super(name);
     }

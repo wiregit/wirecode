@@ -54,6 +54,8 @@ import com.sun.java.util.collections.Random;
  */
 public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
+    protected static int TIMEOUT = 2000;
+
     /**
      * Ultrapeer 1 UDP connection.
      */

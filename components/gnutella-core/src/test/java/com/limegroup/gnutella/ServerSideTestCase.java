@@ -39,7 +39,7 @@ import com.sun.java.util.collections.Iterator;
  *  You CAN  implement the following methods: setSettings
  */
 public abstract class ServerSideTestCase extends BaseTestCase {
-    
+
     /**
      * Simple IP so a blank one isn't used.
      */
@@ -50,13 +50,6 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 	 * connect to it on.
 	 */
     protected static final int PORT = 6667;
-
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.  Subclasses can change this in
-     * setSettings().
-	 */
-    protected static int TIMEOUT = 2000;
 
     /**
      * Leaf connections to the Ultrapeer.
@@ -224,12 +217,6 @@ public abstract class ServerSideTestCase extends BaseTestCase {
         PrivilegedAccessor.invokeAllStaticMethods(callingClass, "setUpQRPTables",
                                                   null);
 
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
     }
 
 }

@@ -42,6 +42,8 @@ import com.sun.java.util.collections.Iterator;
  */
 public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
+    protected static int TIMEOUT = 2000;
+
     public ServerSideBrowseHostTest(String name) {
         super(name);
     }

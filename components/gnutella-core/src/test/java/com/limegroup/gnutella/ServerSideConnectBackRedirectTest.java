@@ -44,6 +44,8 @@ import com.sun.java.util.collections.Iterator;
  */
 public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase {
 
+    protected static int TIMEOUT = 2000;
+
     /**
      * Ultrapeer 1 UDP connection.
      */
