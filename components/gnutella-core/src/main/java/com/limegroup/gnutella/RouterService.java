@@ -234,5 +234,17 @@ public class RouterService
     public void removeHost(String host, int port) {
 	manager.catcher.removeHost(host, port);
     }
+
+    /**
+     * Returns an instance of a SettingsInterface
+     */
+    public SettingsInterface getSettings() {
+	return SettingsManager.instance();
+    }
 }
+
+
+
+
+
 
