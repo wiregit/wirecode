@@ -129,6 +129,7 @@ public class HTTPManager {
 
                 //Constructor to HTTPUploader checks that we can accept the
                 //file.
+                s.setSoTimeout(0);
                 HTTPDownloader downloader;
                 downloader = new HTTPDownloader(s, _filename, _index, guid,
                                                 router, acceptor, callback);
