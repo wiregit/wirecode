@@ -216,13 +216,14 @@ public final class CreationTimeCache {
             // on what the query desires
             Iterator innerIter = urns.iterator();
             while ((urnList.size() < max) && innerIter.hasNext()) {
-                if (filter == null) urnList.add(innerIter.next());
-                else {
-                    URN currURN = (URN) innerIter.next();
-                    FileDesc fd = fileManager.getFileDescForUrn(currURN);
-                    if ((fd != null) && filter.allow(fd.getName())) 
-                        urnList.add(currURN);
-                }
+                URN currURN = (URN) innerIter.next();
+                FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                // unfortunately fds can turn into ifds so ignore
+                if (fd instanceof IncompleteFileDesc) continue;
+
+                if (filter == null) urnList.add(currURN);
+                else if ((fd != null) && filter.allow(fd.getName())) 
+                    urnList.add(currURN);
             }
         }
 
