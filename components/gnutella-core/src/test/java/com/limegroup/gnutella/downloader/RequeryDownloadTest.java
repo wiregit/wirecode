@@ -102,6 +102,7 @@ public class RequeryDownloadTest
         createSnapshot();
         _mgr=RouterService.getDownloadManager();
         _mgr.initialize();
+        _mgr.scheduleWaitingPump();
         boolean ok=_mgr.readSnapshot(_snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         _uploader=new TestUploader("uploader 6666", 6666);
@@ -213,15 +214,12 @@ public class RequeryDownloadTest
         
         int counts = 0;
 		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() != Downloader.WAITING_FOR_RESULTS) {
-			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.WAITING_FOR_RESULTS, 
-				  downloader.getState());
+        while (downloader.getState() == Downloader.QUEUED) {
             Thread.sleep(200);
             if(counts++ > 25)
                 fail("took too long, state: " + downloader.getState());
 		}
-        assertEquals("downloader isn't waiting for user (also for results)", 
+        assertEquals("downloader isn't waiting for results", 
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
@@ -269,7 +267,7 @@ public class RequeryDownloadTest
         _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         counts = 0;
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.

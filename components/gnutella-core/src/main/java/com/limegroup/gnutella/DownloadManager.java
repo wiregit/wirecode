@@ -153,7 +153,14 @@ public class DownloadManager implements BandwidthTracker {
         RouterService.schedule(checkpointer, 
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
-							   
+
+        scheduleWaitingPump();
+    }
+    
+    /**
+     * Schedules the runnable that pumps through waiting downloads.
+     */
+    public void scheduleWaitingPump() {
         Runnable waitingReader = new Runnable() {
             public void run() {
                 synchronized(this) {

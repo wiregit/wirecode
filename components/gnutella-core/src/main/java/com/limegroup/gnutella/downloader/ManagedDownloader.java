@@ -706,6 +706,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Handles state changes when inactive.
      */
     public void handleInactivity() {
+        LOG.trace("handling inactivity. state: " + getState() + ", hasnew: " + hasNewSources() + ", left: " + getRemainingStateTime());
+        
         switch(getState()) {
         case WAITING_FOR_RETRY:
         case WAITING_FOR_CONNECTIONS:
@@ -1243,8 +1245,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.trace("added rfd: " + rfd);
             if (!isInactive())
                 this.notify();                      //see tryAllDownloads3
-            else
+            else {
+                LOG.trace("inactive, marking as new source");
                 receivedNewSources = true;
+            }
             // we could manager.requestStart, but that is synchronized on
             // manager and we can't grab that lock if we're synchronized on
             // this.  since we can't guarantee we won't be holding this' lock,
