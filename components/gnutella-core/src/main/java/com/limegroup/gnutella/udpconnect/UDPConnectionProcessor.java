@@ -192,7 +192,13 @@ public class UDPConnectionProcessor {
 	 *  into this connection.
      */
 	public OutputStream getOutputStream() throws IOException {
+		// Start looking for data to write after an initial startup time
+		// Note: the caller needs to open the output connection and write
+		// some data before we can do anything.
+		scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+
         _input = new UDPBufferedOutputStream(this);
+
         return _input;
 	}
 
@@ -350,7 +356,6 @@ public class UDPConnectionProcessor {
      *  Test whether the ip and ports match
      */
 	public boolean matchAddress(InetAddress ip, int port) {
-System.out.println("matchAddress ip:"+ip+" p:"+port);
 		return (_ip.equals(ip) && _port == port);
 	}
 
@@ -434,7 +439,9 @@ System.out.println("matchAddress ip:"+ip+" p:"+port);
             DataMessage dm = new DataMessage(_theirConnectionID, 
 			  _sequenceNumber, chunk.data, chunk.length);
             send(dm);
-			_sendWindow.addData(dm);  
+			DataRecord drec = _sendWindow.addData(dm);  
+            drec.sentTime = System.currentTimeMillis();
+			drec.sends++;
 
 			_sequenceNumber++;
 
@@ -528,6 +535,8 @@ System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
         DataRecord drec = _sendWindow.getOldestUnackedBlock();
         if ( drec != null ) {
             int rto         = _sendWindow.getRTO();
+			if (rto == 0) 
+				rto = (int) DEFAULT_RTO_WAIT_TIME;
             long waitTime    = drec.sentTime + ((long)rto);
             scheduleAckTimeoutEvent(waitTime);
         } else {
@@ -644,11 +653,6 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
                 waitTime += SYN_WAIT_TIME;
 			}
 
-			// Start looking for data to write after an initial startup time
-			// Note: the caller needs to open the output connection and write
-			// some data before we can do anything.
-	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
-
 		} catch (IllegalArgumentException iae) {
 			throw new IOException(iae.getMessage());
 		}
@@ -695,6 +699,7 @@ System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
             } else {
             	// Record the ack
 				_sendWindow.ackBlock(seqNo);
+System.out.println("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 			}
         } else if (msg instanceof DataMessage) {
             // Pass the data message to the output window
@@ -702,7 +707,10 @@ System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
             // Make sure the data is not before the window start
             if ( dmsg.getSequenceNumber() >= _receiveWindow.getWindowStart() ) {
-                _receiveWindow.addData(dmsg);  
+				// Record the receipt of the data in the receive window
+                DataRecord drec = _receiveWindow.addData(dmsg);  
+            	drec.ackTime = System.currentTimeMillis();
+				drec.acks++;
                 // TODO: You are not enforcing any real upper limit 
             } else {
 System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
@@ -754,7 +762,7 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
 		// TODO: Simplify experimental algorithm and plug it in
 		long waitTime = (long)_sendWindow.getRTO() / 3l;
 		if (waitTime == 0) 
-			waitTime = DEFAULT_RTO_WAIT_TIME / 3l;
+			waitTime = DEFAULT_RTO_WAIT_TIME;
 
         long time = System.currentTimeMillis() + waitTime;
         scheduleWriteDataEvent(time);
@@ -770,10 +778,12 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
+System.out.println("keepalive");
 		
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+System.out.println("shutdown");
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
@@ -783,6 +793,7 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
+System.out.println("sendKeepAlive");
                     sendKeepAlive();
                 } else {
                     return;
@@ -803,6 +814,7 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
         }
 
         public void handleEvent() {
+System.out.println("data timeout");
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -831,6 +843,7 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
         }
 
         public void handleEvent() {
+System.out.println("ack timeout");
             
             if ( isConnected() ) {
                 validateAckedData();

@@ -30,7 +30,7 @@ public class DataWindow
 	private int     lowRTTCount;
     private float   srtt;
     private float   rttvar;
-    private int     rto;
+    private float   rto;
 
     /*
      *  Define a data window for sending or receiving multiple udp packets
@@ -213,7 +213,7 @@ System.out.println("RTO:"+rto);
      *  Return the RTO based on window data and acks.
      */
     public synchronized int getRTO() {
-        return rto;
+        return (int)rto;
     }
 
     /** 
@@ -258,17 +258,22 @@ System.out.println("RTO:"+rto);
             // g is the gain applied to the RTT estimator and equals 
             // 1/8. h is the gain applied to the mean deviation estimator 
             // and equals 1/4. 
+System.out.println("RAW sends: "+drec.sends);
 
 			// Add to the averageRTT
 			if ( drec.acks == 1 && drec.sends == 1 ) {
 				long  rtt    = (drec.ackTime-drec.sentTime);
+System.out.println("RAW rtt: "+rtt);
 				long  adjRTT = rtt + HIST_SIZE/2 + 1;
                 float delta  = ((float) rtt) - srtt;
 				if ( rtt > 0 ) {
                     // Compute RTO
-                    srtt   = srtt + RTT_GAIN * delta;
+					if ( srtt <= 0.1 )
+						srtt = delta;
+					else
+                    	srtt   = srtt + RTT_GAIN * delta;
                     rttvar = rttvar + DEVIATION_GAIN*(Math.abs(delta) - rttvar);
-                    rto    = (int)(srtt + 4 * rttvar + 0.5);     
+                    rto    = (float)(srtt + 4 * rttvar + 0.5);     
 
 					// Compute the average RTT
 					if ( averageRTT == 0 ) 
