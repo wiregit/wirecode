@@ -21,11 +21,10 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public ClientHandshakeResponder(ConnectionManager manager, 
-        String host)
+    public ClientHandshakeResponder(String host)
     {
-        super(manager, host);
-        this._manager = manager;
+        super(RouterService.getConnectionManager(), host);
+        this._manager = RouterService.getConnectionManager();
     }
     
     //inherit doc comment

@@ -12,7 +12,7 @@ import java.io.IOException;
 public class SupernodeHandshakeResponder 
     extends AuthenticationHandshakeResponder
 {
-    private ConnectionManager _manager;
+    private final ConnectionManager _manager;
     
     /**
      * Creates a new instance of ClientHandshakeResponder
@@ -22,11 +22,10 @@ public class SupernodeHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public SupernodeHandshakeResponder(ConnectionManager manager, 
-		String host)
+    public SupernodeHandshakeResponder(String host)
     {
-        super(manager, host);
-        this._manager = manager;
+        super(RouterService.getConnectionManager(), host);
+        this._manager = RouterService.getConnectionManager();
     }
     
     //inherit doc comment
