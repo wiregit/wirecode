@@ -37,6 +37,14 @@ public final class NIOMessageWriter implements MessageWriter {
      * <tt>ByteBuffer</tt> for the current message being sent.
      */
     private ByteBuffer _message;
+    
+    
+    private final CompositeQueue QUEUE;
+    
+    /** 
+     * A lock to protect changes to the message queue for this connection. 
+     */
+    private final Object QUEUE_LOCK = new Object();
 	
     
     /**
@@ -56,6 +64,7 @@ public final class NIOMessageWriter implements MessageWriter {
 	private NIOMessageWriter(Connection conn) {
 		CHANNEL = conn.getSocket().getChannel();
         CONNECTION = conn;
+        QUEUE = CompositeQueue.createQueue(conn, QUEUE_LOCK);
 	}
 	
 	/**
@@ -83,7 +92,8 @@ public final class NIOMessageWriter implements MessageWriter {
         // that has not been fully sent -- throw IllegalStateExcepion in this
         // case
         if(hasPendingMessage()) {
-            throw new IllegalStateException("previous message pending");
+            QUEUE.add(msg);
+            //throw new IllegalStateException("previous message pending");
         }
         //System.out.println("MessageWriter::write");
         //Copy m to a ByteBuffer.  TODO: avoid allocating ByteBuffer each time.
@@ -118,6 +128,9 @@ public final class NIOMessageWriter implements MessageWriter {
     		throw new IllegalStateException("no pending message");
     	}
         
+        if(!CHANNEL.isConnected()) {
+            throw new IOException("connection closed");
+        }
     	CHANNEL.write(_message);
     	if(!_message.hasRemaining()) {
     		_message = null;
