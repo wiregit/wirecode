@@ -18,12 +18,6 @@ public final class Pinger implements Runnable {
     private static final Pinger INSTANCE = new Pinger();
 
     /**
-     * Constant ping instance sent to all connections.
-     */
-    private static final PingRequest PING =
-        new PingRequest((byte)5);
-
-    /**
      * Returns the single <tt>Pinger</tt> instance.
      */
     public static Pinger instance() {
@@ -55,13 +49,18 @@ public final class Pinger implements Runnable {
         try {
             while(true) {
                 if(RouterService.isSupernode()) {
-                    RouterService.getMessageRouter().broadcastPingRequest(PING);
+                    RouterService.getMessageRouter().
+                        broadcastPingRequest(new PingRequest((byte)1));
                 }
                 
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             }
         } catch(Throwable t) {
             ErrorService.error(t);
         }
     }
 }
+
+
+
+
