@@ -110,6 +110,9 @@ public class UDPConnectionProcessor {
         firing - This should achieve part of nagles algorithm.  */
     private static final long WRITE_WAKEUP_DELAY_TIME = 10;
 
+    /** Time to wait after a close before everything is totally shutdown. */
+    private static final long SHUTDOWN_DELAY_TIME     = 400;
+
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -153,11 +156,17 @@ public class UDPConnectionProcessor {
     /** Scheduled event for writing data appropriately over time  */
     private UDPTimerEvent     _writeDataEvent;
 
+    /** Scheduled event for cleaning up at end of connection life  */
+    private UDPTimerEvent     _closedCleanupEvent;
+
     /** Flag that the writeEvent is shutdown waiting for space to write */
 	private boolean           _waitingForDataSpace;
 
     /** Flag that the writeEvent is shutdown waiting for data to write */
 	private volatile boolean  _waitingForDataAvailable;
+
+    /** Flag saying that a Fin packet has been acked on shutdown */
+    private boolean           _waitingForFinAck;
 
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
@@ -166,7 +175,10 @@ public class UDPConnectionProcessor {
     private SafeWriteWakeupTimerEvent _safeWriteWakeup;
 
     /** The current sequence number of messages originated here */
-	private long              _sequenceNumber;
+    private long              _sequenceNumber;
+
+    /** The sequence number of a pending fin message */
+	private long              _finSeqNo;
 
 	/** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
 		8 byte longs of essentially infinite size */
@@ -222,6 +234,7 @@ public class UDPConnectionProcessor {
     	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
         _waitingForDataSpace     = false;
         _waitingForDataAvailable = false;
+        _waitingForFinAck        = false;  
         _skipADataWrite          = false;
         _ackResendCount          = 0;
 
@@ -291,7 +304,7 @@ public class UDPConnectionProcessor {
         _readTimeOut = timeout;
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 
         // If closed then done
         if ( _connectionState == FIN_STATE ) 
@@ -313,11 +326,11 @@ public class UDPConnectionProcessor {
         if ( _safeWriteWakeup != null ) 
             _scheduler.unregister(_safeWriteWakeup);
 
-        // Unregister for message multiplexing
-        _multiplexor.unregister(this);
-
 		// Register that the connection is closed
         _connectionState = FIN_STATE;
+
+        // Track incoming ACKS for an ack of FinMessage
+        _waitingForFinAck = true;  
 
 		// Tell the receiver that we are shutting down
     	safeSendFin();
@@ -326,12 +339,25 @@ public class UDPConnectionProcessor {
         if ( _outputToInputStream != null )
             _outputToInputStream.wakeup();
 
-		// TODO: should I wait for ack. Communicate state to streams.
-        // There should likely be a shutdown event that resends the FIN
-        // a few times if the ack doesn't come back.  As it is, something
-        // is occasionally generating multiple FINs - probably from closing
-        // repeatedly.
+        // Register for a full cleanup after a slight delay
+        _closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
+           System.currentTimeMillis() + SHUTDOWN_DELAY_TIME);
 	}
+
+    private synchronized void finalClose() {
+
+        // Send one final Fin message if not acked.
+        if (_waitingForFinAck)
+            safeSendFin();
+
+        // Unregister for message multiplexing
+        _multiplexor.unregister(this);
+
+        // Clean up my caller
+        _scheduler.unregister(_closedCleanupEvent);
+
+        // TODO: Clear up state to streams? Might need more time. Anything else?
+    }
 
     /**
      *  Return the InetAddress.
@@ -683,6 +709,11 @@ public class UDPConnectionProcessor {
         // Ack the message
         FinMessage fin = null;
         try {
+            // Record sequence number for ack monitoring
+            // Not that it should increment anymore anyways
+            _finSeqNo = _sequenceNumber;
+
+            // Send the FinMessage
             fin = new FinMessage(_theirConnectionID, _sequenceNumber);
             send(fin);
         } catch (BadPacketException bpe) {
@@ -884,7 +915,7 @@ public class UDPConnectionProcessor {
      *  Take action on a received message.
      */
     public void handleMessage(UDPConnectionMessage msg) {
-        boolean doYield = false;  // Trigger a yield at the end
+        boolean doYield = false;  // Trigger a yield at the end if 1k available
 
         synchronized (this) {
             // Extend the msgs sequenceNumber to 8 bytes based on past state
@@ -934,6 +965,9 @@ public class UDPConnectionProcessor {
                     // receive their SYN so move state to CONNECT_STATE
                     // and get ready for activity
                     prepareOpenConnection();
+                } else if ( _waitingForFinAck && seqNo == _finSeqNo ) { 
+                    // A fin message has been acked on shutdown
+                    _waitingForFinAck = false;
                 } else {
                     // Record the ack
                     _sendWindow.ackBlock(seqNo);
@@ -972,8 +1006,9 @@ public class UDPConnectionProcessor {
                     if ( _outputToInputStream != null ) {
                         _outputToInputStream.wakeup();
 
-                        // Get the reader moving at the end of method
-                        doYield = true; 
+                        // Get the reader moving after 1k received 
+                        if ( (seqNo % 2) == 0)
+                            doYield = true; 
                     }
                 } else {
                     if(LOG.isDebugEnabled())  
@@ -996,6 +1031,11 @@ public class UDPConnectionProcessor {
                 long             wStart = kmsg.getWindowStart(); 
                 int              priorR = _receiverWindowSpace;
                 _receiverWindowSpace    = kmsg.getWindowSpace();
+
+                // If receiving KeepAlives when closed, send another FinMessage
+                if ( isClosed() ) {
+                    safeSendFin();
+                }
 
                 // Ensure that all messages up to sent windowStart are acked
                 // Note, you could get here preinitialization - in which case,
@@ -1116,7 +1156,7 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when a keepalive timer fires.
      */
-    class  KeepAliveTimerEvent extends UDPTimerEvent {
+    class KeepAliveTimerEvent extends UDPTimerEvent {
         public KeepAliveTimerEvent(long time) {
             super(time);
         }
@@ -1162,7 +1202,7 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when a WriteData timer event fires.
      */
-    class  WriteDataTimerEvent extends UDPTimerEvent {
+    class WriteDataTimerEvent extends UDPTimerEvent {
         public WriteDataTimerEvent(long time) {
             super(time);
         }
@@ -1193,7 +1233,7 @@ public class UDPConnectionProcessor {
     /** 
      *  Define what happens when an ack timeout occurs
      */
-    class  AckTimeoutTimerEvent extends UDPTimerEvent {
+    class AckTimeoutTimerEvent extends UDPTimerEvent {
 
         public AckTimeoutTimerEvent(long time) {
             super(time);
@@ -1213,7 +1253,7 @@ public class UDPConnectionProcessor {
     /** 
      *  This is an event that wakes up writing with a given delay
      */
-    class  SafeWriteWakeupTimerEvent extends UDPTimerEvent {
+    class SafeWriteWakeupTimerEvent extends UDPTimerEvent {
 
         public SafeWriteWakeupTimerEvent(long time) {
             super(time);
@@ -1229,6 +1269,28 @@ public class UDPConnectionProcessor {
             _scheduler.scheduleEvent(this);
             if(LOG.isDebugEnabled())  
                 LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
+        }
+    }
+
+    /** 
+     *  Do final cleanup and shutdown after connection is closed.
+     */
+    class ClosedConnectionCleanupTimerEvent extends UDPTimerEvent {
+
+        public ClosedConnectionCleanupTimerEvent(long time) {
+            super(time);
+        }
+
+        public void handleEvent() {
+            if(LOG.isDebugEnabled())  
+                LOG.debug("Closed connection timeout: "+ 
+                  System.currentTimeMillis());
+
+            finalClose();
+
+
+            if(LOG.isDebugEnabled())  
+                LOG.debug("Closed connection done: "+ System.currentTimeMillis());
         }
     }
     //
