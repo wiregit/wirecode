@@ -165,7 +165,15 @@ public class NIOMessageReader extends AbstractMessageReader {
         return readPayload(key, network);
     }
 
-    
+    /**
+     * Utility method for reading header data from a <tt>ByteBuffer</tt>.  This
+     * is particularly used to handle leftover data from a connection handshake.
+     * 
+     * @param header the header buffer to fill with read data
+     * @param buffer the <tt>ByteBuffer</tt> containing data to read
+     * @return <tt>true</tt> if there was enough data in the buffer to read a
+     *  complete header, otherwise <tt>false</tt>
+     */
     private static boolean readHeader(ByteBuffer header, ByteBuffer buffer) {
         if(buffer.remaining() < HEADER_SIZE) {
             header.put(buffer);
@@ -178,8 +186,22 @@ public class NIOMessageReader extends AbstractMessageReader {
         return true;
     }
 
+    /**
+     * Utility method for reading the payload of a Gnutella message from a
+     * <tt>ByteBuffer</tt>.  This is particularly used for reading leftover
+     * message data from NIO handshaking.
+     * 
+     * @param header the <tt>ByteBuffer</tt>containing header data
+     * @param payload the <tt>ByteBuffer</tt> that will store payload data
+     * @param conn the <tt>Connection</tt> over which this message was read
+     * @param buffer the <tt>ByteBuffer</tt> containing the payload data to 
+     *  read
+     * @return a new <tt>Message</tt> instance, or <tt>null</tt> if there was
+     *  an error reading the message
+     * @throws IOException if an IO error occurs while reading the message
+     */
     private static Message readPayload(ByteBuffer header, ByteBuffer payload, 
-        Connection conn, ByteBuffer buffer) {
+        Connection conn, ByteBuffer buffer) throws IOException {
         // If the buffer does not contain the full payload, just copy
         // what it has and wait to read more data from the channel.
         if(buffer.remaining() < payload.limit()) {
@@ -192,9 +214,9 @@ public class NIOMessageReader extends AbstractMessageReader {
         while(payload.hasRemaining()) {
             payload.put(buffer.get());
         } 
-           
+         
         try {
-            return createMessage(header, payload, conn, Message.N_TCP);
+            return handleReadPayload(header, payload, conn, Message.N_TCP);
         } catch (BadPacketException e) {
             // Ignore this packet and hope to read valid packets on subsequent
             // reads.
@@ -231,7 +253,8 @@ public class NIOMessageReader extends AbstractMessageReader {
     }
     
     /**
-     * Reads the payload of an incoming message.
+     * Reads the payload of an incoming message and returns the newly created
+     * message.
      * 
      * @param key the <tt>SelectionKey</tt> for the incoming messsage
      * @param network the transport layer the message arrived on, such as 
@@ -264,6 +287,19 @@ public class NIOMessageReader extends AbstractMessageReader {
             network); 
     }
     
+    /**
+     * Abstracted-out method for reading the length of the payload and setting
+     * that length as the read limit on the payload <tt>ByteBuffer</tt>.  This
+     * is a separate method because this has to be performed both when data is
+     * read directly from a socket channel and when data is read from a buffer
+     * of message data leftover from handshaking.
+     * 
+     * @param header the header data containing the length of the payload
+     * @param payload the payload buffer whose limit should be set to the 
+     *  payload length
+     * @throws IOException if an IO error occurs while setting the payload 
+     *  limit
+     */
     private static void handlePayloadLimit(ByteBuffer header, 
         ByteBuffer payload) throws IOException {
         // If we've made it this far, the entire header has been
@@ -288,6 +324,23 @@ public class NIOMessageReader extends AbstractMessageReader {
         payload.limit(length);             
     }
     
+    /**
+     * Abstracted-out method for reading the message payload.  This
+     * is a separate method because this has to be performed both when data is
+     * read directly from a socket channel and when data is read from a buffer
+     * of message data leftover from handshaking.
+     * 
+     * @param header the Gnutella message header data
+     * @param payload the Gnutella message payload data
+     * @param conn the <tt>Connection</tt> over which this message was received
+     * @param network the "network" over which this message was received, such
+     *  as TCP, UDP, or multicast (UDP)
+     * @return a new <tt>Message</tt> instance, or <tt>null</tt> if a complete
+     *  message could not be read
+     * @throws IOException if an IO error occurs while reading the payload
+     * @throws BadPacketException if the message data does not match any of 
+     *  the known message formats or has unreasonable values
+     */
     private static Message handleReadPayload(ByteBuffer header, 
         ByteBuffer payload, Connection conn, int network) throws IOException, 
         BadPacketException {
@@ -305,6 +358,7 @@ public class NIOMessageReader extends AbstractMessageReader {
             payload.clear();
         }        
     }
+    
     /**
      * Creates a new <tt>Message</tt> instance from the specified header,
      * payload, connection, and network.
