@@ -475,6 +475,9 @@ public class Acceptor implements Runnable {
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
                     dm.acceptDownload(_socket);
+                    if(!CommonUtils.isJava118()) {
+                        HTTPStat.HTTP_GIV_REQUESTS.incrementStat();
+                    }
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);

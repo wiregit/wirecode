@@ -14,23 +14,11 @@ public class HTTPStat extends AdvancedStatistic {
 	private HTTPStat() {}
 
 	/**
-	 * Specialized class for incrementing the number of HEAD requests
-	 * received.  In addition to incrementing the number of HEAD requests,
-	 * this also increments the total number of HTTP requests stored.
+	 * Specialized class for increment the number of HTTP requests
+	 * received.  In addition to increment the actual stat,
+	 * this increments the total number of HTTP Requests.
 	 */
-	private static class HeadRequestStat extends HTTPStat {
-		public void incrementStat() {
-			super.incrementStat();
-			HTTP_REQUESTS.incrementStat();
-		}
-	}
-
-	/**
-	 * Specialized class for incrementing the number of GET requests
-	 * received.  In addition to incrementing the number of GET requests,
-	 * this also increments the total number of HTTP requests stored.
-	 */
-	private static class GetRequestStat extends HTTPStat {
+	private static class HTTPRequestStat extends HTTPStat {
 		public void incrementStat() {
 			super.incrementStat();
 			HTTP_REQUESTS.incrementStat();
@@ -49,12 +37,19 @@ public class HTTPStat extends AdvancedStatistic {
 	 * been made in this session.
 	 */
 	public static final Statistic HTTP_HEAD_REQUESTS =
-		new HeadRequestStat();
+		new HTTPRequestStat();
 
 	/**
 	 * <tt>Statistic</tt> for all HTTP GET requests that have
 	 * been made in this session.
 	 */
 	public static final Statistic HTTP_GET_REQUESTS =
-		new GetRequestStat();
+		new HTTPRequestStat();
+		
+    /**
+     * <tt>Statistic</tt> for all HTTP GIV requests that have been made
+     * in this session.
+     */
+    public static final Statistic HTTP_GIV_REQUESTS =
+        new HTTPRequestStat();
 }

@@ -5,6 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.statistics.DownloadStat;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.util.Calendar;
@@ -391,6 +392,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The average bandwidth over all managed downloads.
      */
     private float averageBandwidth = 0f;
+
+    /**
+     * Whether or not to record stats.
+     */
+    private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -1727,6 +1733,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         debug("WORKER: attempting connect to "
               + rfd.getHost() + ":" + rfd.getPort());        
         
+        if(RECORD_STATS)
+            DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
+
         // for multicast replies, try pushes first
         // and then try direct connects.
         // this is because newer clients work better with pushes,
@@ -1783,7 +1792,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         ret = new HTTPDownloader(rfd, incompleteFile,totalAlternateLocations);
         // Note that connectTCP can throw IOException
         // (and the subclassed CantConnectException)
+        try {
         ret.connectTCP(NORMAL_CONNECT_TIME);
+            if(RECORD_STATS)
+                DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
+        } catch(IOException iox) {
+            if(RECORD_STATS)
+                DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
+            throw iox;
+        }
         return ret;
     }
     
@@ -1804,9 +1821,11 @@ public class ManagedDownloader implements Downloader, Serializable {
        
         miniRFDToLock.put(mrfd,threadLock);
 
+        boolean pushSent;
         synchronized(threadLock) {
             // only wait if we actually were able to send the push
-            if ( manager.sendPush(rfd) ) {    
+            pushSent = manager.sendPush(rfd);
+            if ( pushSent ) {
                 //No loop is actually needed here, assuming spurious
                 //notify()'s don't occur.  (They are not allowed by the Java
                 //Language Specifications.)  Look at acceptDownload for
@@ -1814,6 +1833,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     threadLock.wait(PUSH_CONNECT_TIME);  
                 } catch(InterruptedException e) {
+                    if(RECORD_STATS)
+                        DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                     throw new IOException("push interupted.");
                 }
             }
@@ -1822,6 +1843,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
         if (pushSocket==null) {
+            if(RECORD_STATS) {
+                if( !pushSent )
+                    DownloadStat.PUSH_FAILURE_NO_ROUTE.incrementStat();
+                else
+                    DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+            }
             throw new IOException("push socket is null");
         }
         
@@ -1830,9 +1857,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 		  totalAlternateLocations);
         
         //This should never really throw an exception since we are only
-        //initializing the byteReader with this call, but if it does
-        //let the calling method handle it.
+        //initializing the byteReader with this call.
+        try {
         ret.connectTCP(0);//just initializes the byteReader in this case
+            if(RECORD_STATS)
+                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
+        } catch(IOException iox) {
+            Assert.that(false, "push connectTCP should not throw IOX");
+        }
+        
          
         return ret;
     }
@@ -1863,6 +1896,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 updateNeeded = false;          //2. See comment in finally
             } catch(NoSuchElementException nsex) {
+                if(RECORD_STATS)
+                    DownloadStat.NSE_EXCEPTION.incrementStat();
                 //thrown in assignGrey.The downloader we were trying to steal
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
                 Assert.that(updateNeeded == false,
@@ -1873,20 +1908,28 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 return 3;
             } catch(TryAgainLaterException talx) {
+                if(RECORD_STATS)
+                    DownloadStat.TAL_EXCEPTION.incrementStat();
                 debug("talx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
                 return 0;
             } catch (FileNotFoundException fnfx) {
+                if(RECORD_STATS)
+                    DownloadStat.FNF_EXCEPTION.incrementStat();
                 debug("fnfx thrown in assignAndRequest "+dloader);
                 removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
+                if(RECORD_STATS)
+                    DownloadStat.NS_EXCEPTION.incrementStat();
                 debug("nsx thrown in assignAndRequest "+dloader);
                 removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
+                if(RECORD_STATS)
+                    DownloadStat.Q_EXCEPTION.incrementStat();
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
                 //The extra time to sleep can be tuned. For now it's 1 S.
                 refSleepTime[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
@@ -1904,6 +1947,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 return 1;
             } catch (IOException iox) {
+                if(RECORD_STATS)
+                    DownloadStat.IO_EXCEPTION.incrementStat();
                 debug("iox thrown in assignAndRequest "+dloader);
                 removeAlternateLocation(dloader.getRemoteFileDesc());                
                 return 0; //discard the rfd of dloader
@@ -1942,6 +1987,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
             }
+            if(RECORD_STATS)
+                DownloadStat.RESPONSE_OK.incrementStat();            
             return 2;
         }
     }
@@ -1964,6 +2011,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 			  totalAlternateLocations.diffAlternateLocationCollection(alts);
 			totalAlternateLocations.addAlternateLocationCollection(alts);
 		}
+
+		int added = nalts.getNumberOfAlternateLocations();
+		int notAdded = alts.getNumberOfAlternateLocations() - added;
+        if(RECORD_STATS) {
+            DownloadStat.ALTERNATE_NOT_ADDED.addData(notAdded);
+            DownloadStat.ALTERNATE_COLLECTED.addData(added);
+        }   
 
 		// Add any new AlternateLocations to the available list of 
 	    // download locations
@@ -1989,11 +2043,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 	    try {
 	        toRemove = AlternateLocation.createAlternateLocation(rfd);
         } catch(Exception failed) {
+            if(RECORD_STATS)
+                DownloadStat.ALTERNATE_INVALID.incrementStat();
             return; // can't remove if we can't create.
         }
         
 	    // remove this location
-	    totalAlternateLocations.removeAlternateLocation(toRemove);
+	    if(totalAlternateLocations.removeAlternateLocation(toRemove) &&
+	       RECORD_STATS)
+	        DownloadStat.ALTERNATE_REMOVED.incrementStat();
     }
 	
 	/**
@@ -2149,7 +2207,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean problem = false;
         try {
             downloader.doDownload(commonOutFile, http11);
+            if(RECORD_STATS) {
+                if(http11)
+                    DownloadStat.SUCCESFULL_HTTP11.incrementStat();
+                else
+                    DownloadStat.SUCCESFULL_HTTP10.incrementStat();
+            }
         } catch (IOException e) {
+            if(RECORD_STATS) {
+                if(http11)
+                    DownloadStat.FAILED_HTTP11.incrementStat();
+                else
+                    DownloadStat.FAILED_HTTP10.incrementStat();
+             }
             problem = true;
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
