@@ -265,6 +265,10 @@ public class HTTPDownloader implements BandwidthTracker {
         // during this session.
         if (RouterService.acceptedIncomingConnection() &&
           _incompleteFile.length() > _minPartialFileSize) {
+            if( alts == null ) // if we had no alts to send, this will be null
+                alts = AlternateLocationCollection.createCollection(
+                    _alternateLocationsToSend.getSHA1Urn());
+
             AlternateLocation al =
                 AlternateLocation.createAlternateLocation(alts.getSHA1Urn());
             alts.addAlternateLocation(al);
