@@ -16,7 +16,6 @@ public class FixedSizeSortedSet {
      *  The maximum size of this, defaults to 50
      */
     private int _maxSize;
-
     
     ///////////////////////////////constructors////////////////////
     /**
@@ -31,6 +30,17 @@ public class FixedSizeSortedSet {
         _sortedSet = new TreeSet();
         _map = new HashMap();
     }
+
+    public FixedSizeSortedSet(Comparator c) {
+        this(c,50);
+    }
+
+    public FixedSizeSortedSet(Comparator c, int maxSize) {
+        _maxSize = maxSize;
+        _sortedSet = new TreeSet(c);
+        _map = new HashMap();
+    }
+
     
     ////////////////////////Sorted Set methods///////////////////////
     public Object  clone() {
