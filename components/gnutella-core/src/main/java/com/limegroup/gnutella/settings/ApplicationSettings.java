@@ -154,5 +154,5 @@ public class ApplicationSettings extends LimeProps {
 	 * A boolean flag for whether or not we should check again for an update.
 	 */
     public static final BooleanSetting CHECK_AGAIN = 
-        FACTORY.createBooleanSetting("CHECK_AGAIN", true);                /**     * A boolean flag for whether or not to start LimeWire on system startup.     */    public static final BooleanSetting RUN_ON_STARTUP =         FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
+        FACTORY.createBooleanSetting("CHECK_AGAIN", true);        
 }
