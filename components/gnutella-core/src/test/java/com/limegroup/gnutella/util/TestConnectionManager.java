@@ -1,0 +1,248 @@
+package com.limegroup.gnutella.util;
+
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.*;
+import com.sun.java.util.collections.*;
+
+/**
+ * Helper class that supplies the list of connections for searching.
+ */
+public final class TestConnectionManager extends ConnectionManager {
+    
+    /**
+     * The list of ultrapeer <tt>Connection</tt> instances
+     */
+    private final List CONNECTIONS = new LinkedList();
+    
+    /**
+     * The list of leaf <tt>Connection</tt> instances
+     */
+    private final List LEAF_CONNECTIONS = new LinkedList();
+    
+    /**
+     * Constant for whether or not this should be considered an
+     * Ultrapeer.
+     */
+    private final boolean ULTRAPEER;
+
+    /**
+     * Constant for the number of Ultrapeer connections that the 
+     * test connection manager should maintain.
+     */
+    private final int NUM_CONNECTIONS;
+
+    /**
+     * Constant for the number of leaf connections that the test 
+     * connection manager should maintain.
+     */
+    private final int NUM_LEAF_CONNECTIONS;
+
+    /**
+     * Constant array for the keywords that I should have (this node).
+     */
+    private final String[] MY_KEYWORDS;
+
+    /**
+     * Constant array for the keywords that I should have (this node)
+     * by default, unless the caller specifies otherwise.
+     */
+    private static final String[] DEFAULT_MY_KEYWORDS = {
+        "me",
+    };
+
+    /**
+     * Constant array for the keywords for Ultrapeers to use.
+     */
+    private static final String[] ULTRAPEER_KEYWORDS = {
+        "qwe", "wer", "ert", "rty", "tyu", 
+        "yui", "uio", "iop", "opa ", "pas", 
+        "asd", "sdf", "dfg", "fgh", "ghj", 
+        "hjk", "jkl", "klz", "lzx", "zxc", 
+        "xcv", "cvb", "vbn", "bnm", "qwer",
+        "wert", "erty", "rtyu", "tyui", "yuio",        
+    };
+
+    /**
+     * Constant array for the keywords for leaves to use.
+     */
+    private static final String[] LEAF_KEYWORDS = {
+        "this", "is", "a", "test", "for", 
+        "query", "routing", "in", "all", "its", 
+        "forms", "including", "both", "leaves", "and", 
+        "Ultrapeers", "which", "should", "both", "work", 
+        "like", "we", "expect", "them", "to", 
+        "at", "least", "in", "theory", "and", 
+        "hopefully", "in", "fact", "as", "well", 
+        "but", "it's", "hard", "to", "know", 
+    };
+
+    /**
+     * Array of keywords that should not match anything in the routing
+     * tables.
+     */
+    private static final String[] UNMATCHING_KEYWORDS = {
+        "miss", "NCWEPHCE", "IEYWHFDSNC", "UIYRIEH", "dfjaivuih",
+    };
+
+    /**
+     * Convenience constructor that creates a new 
+     * <tt>TestConnectionManager</tt> with all of the default settings.
+     */
+    public TestConnectionManager() {
+        this(20);
+    }
+
+    public TestConnectionManager(String[] myKeywords) {
+        this(20, true, 20, 30, myKeywords);
+    }
+    
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     */
+    public TestConnectionManager(int numNewConnections) {
+        this(numNewConnections, true);
+    }
+
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     * @param ultrapeer whether or not this should be considered
+     *  an ultrapeer
+     */
+    public TestConnectionManager(int numNewConnections, boolean ultrapeer) {
+        this(numNewConnections, ultrapeer, 20, 30, DEFAULT_MY_KEYWORDS);
+    }
+
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     * @param ultrapeer whether or not this should be considered
+     *  an ultrapeer
+     */
+    public TestConnectionManager(int numNewConnections, boolean ultrapeer,
+                                 int numConnections, int numLeafConnections,
+                                 String[] myKeywords) {
+        super(new DummyAuthenticator());
+        NUM_CONNECTIONS = numConnections;
+        NUM_LEAF_CONNECTIONS = numLeafConnections;
+        MY_KEYWORDS = myKeywords;
+        for(int i=0; i<NUM_CONNECTIONS; i++) {
+            if(i < numNewConnections) {
+                CONNECTIONS.add(new UltrapeerConnection(
+                    new String[]{ULTRAPEER_KEYWORDS[i]}));
+            } else {
+                CONNECTIONS.add(new OldConnection(15));                    
+            }
+        }
+
+        // now, give ourselves 30 leaves
+        for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
+            LEAF_CONNECTIONS.add(new LeafConnection(
+                new String[]{LEAF_KEYWORDS[i]}));
+        }
+        ULTRAPEER = ultrapeer;
+    }
+
+    /**
+     * Test to make sure that the given <tt>QueryRouteTable</tt> has matches
+     * for all of the expected keywords and that it doesn't have matches
+     * for any of the unexpected keywords.
+     *
+     * @param qrt the <tt>QueryRouteTable</tt> instance to test
+     */
+    public boolean runQRPMatch(QueryRouteTable qrt) {
+        for(int i=0; i<MY_KEYWORDS.length; i++) {
+            QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
+            if(!qrt.contains(qr)) return false;
+        }
+
+        for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
+            QueryRequest qr = QueryRequest.createQuery(LEAF_KEYWORDS[i]);
+            if(!qrt.contains(qr)) return false;
+        }
+
+        for(int i=0; i<UNMATCHING_KEYWORDS.length; i++) {
+            QueryRequest qr = 
+                QueryRequest.createQuery(UNMATCHING_KEYWORDS[i]);
+            if(qrt.contains(qr)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Accessor for the custom list of connections.
+     */
+    public List getInitializedConnections2() {
+        return CONNECTIONS;
+    }
+
+    public List getInitializedClientConnections2() {
+        return LEAF_CONNECTIONS;
+    }
+
+    public boolean isSupernode() {
+        return ULTRAPEER;
+    }
+
+    /**
+     * Returns the total number of queries received over all connections.
+     */
+    public int getNumQueries() {
+        int numQueries = 0;
+        Iterator iter = CONNECTIONS.iterator();
+        while(iter.hasNext()) {
+            TestConnection tc = (TestConnection)iter.next();
+            numQueries += tc.getNumQueries();
+        }
+        return numQueries;
+    }
+
+
+    /**
+     * Returns the total number of queries received over all old connections.
+     */
+    public int getNumOldConnectionQueries() {
+        int numQueries = 0;
+        Iterator iter = CONNECTIONS.iterator();
+        while(iter.hasNext()) {
+            TestConnection tc = (TestConnection)iter.next();
+            if(tc instanceof OldConnection) {
+                numQueries += tc.getNumQueries();
+            }
+        }
+        return numQueries;
+    }
+
+    /**
+     * Returns the total number of queries received over all old connections.
+     */
+    public int getNumNewConnectionQueries() {
+        int numQueries = 0;
+        Iterator iter = CONNECTIONS.iterator();
+        while(iter.hasNext()) {
+            TestConnection tc = (TestConnection)iter.next();
+            if(tc instanceof NewConnection) {
+                numQueries += tc.getNumQueries();
+            }
+        }
+        return numQueries;
+    }    
+
+    public boolean isClientSupernodeConnection() {
+        return false;
+    }
+}
+
+
