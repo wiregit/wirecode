@@ -327,4 +327,30 @@ public class VerifyingFileTest extends BaseTestCase {
         assertTrue(vf.isComplete());
         
     }
+    
+    public void testWaitForPending() throws Exception {
+        vf.leaseWhite((int)completeFile.length());
+        
+        byte [] chunk = new byte[hashTree.getNodeSize()];
+        raf.readFully(chunk);
+        
+        // write a chunk.  waitForPending should return very quickly
+        vf.writeBlock(0,chunk);
+        long now = System.currentTimeMillis();
+        vf.waitForPendingIfNeeded();
+        assertLessThanOrEquals(50,System.currentTimeMillis() - now);
+        
+        Thread.sleep(500);
+        assertEquals(hashTree.getNodeSize(),vf.getVerifiedBlockSize());
+
+        // now fill in the rest of the file.  waitForPending should wait until all pending
+        // chunks have been verified.
+        chunk = new byte[(int)completeFile.length() - hashTree.getNodeSize()];
+        raf.readFully(chunk);
+        vf.writeBlock(hashTree.getNodeSize(),chunk);
+        assertFalse(vf.isComplete());
+        vf.waitForPendingIfNeeded();
+        assertTrue(vf.isComplete());
+        
+    }
 }
