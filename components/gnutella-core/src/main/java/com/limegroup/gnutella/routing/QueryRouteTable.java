@@ -17,9 +17,11 @@ import java.io.*;
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=65536;
+    public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
     /** The suggested default max table TTL. */
     public static final byte DEFAULT_INFINITY=(byte)7;
+    /** The maximum size of patch messages, in bytes. */
+    public static final int MAX_PATCH_SIZE=1024; //1 KB
 
     /** 
      * The table of keywords and their associated TTLs.  Each value table[i] is
@@ -43,8 +45,17 @@ public class QueryRouteTable {
 
     /** The index of the next table entry to patch. */
     private int nextPatch;
+    /** The uncompressor. This state must be maintained to implement chunked
+     *  PATCH messages.  (You may need data from message N-1 to apply the patch
+     *  in message N.) */
+    private Inflater uncompressor;
     /** True if this has been fully patched following a reset. */
     private boolean isPatched;
+
+
+
+    /////////////////////////////// Basic Methods ///////////////////////////
+
 
     /** Creates a QueryRouteTable with default sizes. */
     public QueryRouteTable() {
@@ -210,9 +221,10 @@ public class QueryRouteTable {
             return;
         }
     }
-    //All encoding works in a pipelined manner, by continually modifying a byte
-    //array called 'data'.  We could avoid a lot of allocations here if memory 
-    //is at a premium.
+
+    //All encoding/decoding works in a pipelined manner, by continually
+    //modifying a byte array called 'data'.  TODO2: we could avoid a lot of
+    //allocations here if memory is at a premium.
 
     private void handlePatch(PatchTableMessage m) throws BadPacketException {
         //0. Verify that m belongs in this sequence.
@@ -225,23 +237,31 @@ public class QueryRouteTable {
                                          +m.getSequenceNumber()
                                          +" vs. "+sequenceNumber);
 
-        //1. Uncompress as needed.
         byte[] data=m.getData();
-        if (m.getCompressor()==PatchTableMessage.COMPRESSOR_GZIP) {
+
+        //1. Start pipelined uncompression.
+        //TODO: check that compression is same as last message.
+        if (m.getCompressor()==PatchTableMessage.COMPRESSOR_DEFLATE) {
             try {
-                data=uncompress(data);
+                //a) If first message, create uncompressor (if needed).
+                if (m.getSequenceNumber()==1)
+                    uncompressor=new Inflater();
+                Assert.that(uncompressor!=null, "Null uncompressor");
+                data=uncompress(data);            
             } catch (IOException e) {
-                throw new BadPacketException("Data not properly GZIP'ed!");
+                throw new BadPacketException("Couldn't uncompress data: "+e);
             }
         } else if (m.getCompressor()!=PatchTableMessage.COMPRESSOR_NONE) {
-            throw new BadPacketException("Unknown compression scheme.");
+            throw new BadPacketException("Unknown compressor");
         }
+        
+        //2. Expand nibbles if necessary.
         if (m.getEntryBits()==4) 
             data=unhalve(data);
         else if (m.getEntryBits()!=8)
             throw new BadPacketException("Unknown value for entry bits");
 
-        //2. Add data[0...] to table[nextPatch...]            
+        //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
                 table[nextPatch]+=data[i];
@@ -253,7 +273,7 @@ public class QueryRouteTable {
             nextPatch++;
         }
 
-        //3. Update sequence numbers.
+        //4. Update sequence numbers.
         if (m.getSequenceNumber()!=m.getSequenceSize()) {            
             this.sequenceNumber=m.getSequenceNumber();
         } else {
@@ -321,15 +341,22 @@ public class QueryRouteTable {
         if (patchCompressed.length<data.length) {
             //...Hooray!  Compression was efficient.
             data=patchCompressed;
-            compression=PatchTableMessage.COMPRESSOR_GZIP;
+            compression=PatchTableMessage.COMPRESSOR_DEFLATE;
         }
                    
 
-        //Create message and return.  TODO: chunking.
-        buf.add(new PatchTableMessage((short)1, (short)1,
-                                      compression, bits,
-                                      data, 0, data.length));
-        
+        //3. Break into 1KB chunks and send.  TODO: break size limits if needed.
+        final int chunks=(int)Math.ceil((float)data.length/(float)MAX_PATCH_SIZE);
+        int chunk=1;
+        for (int i=0; i<data.length; i+=MAX_PATCH_SIZE) {
+            //Just past the last position of data to copy.
+            //Note special case for last chunk.  
+            int stop=Math.min(i+MAX_PATCH_SIZE, data.length);
+            buf.add(new PatchTableMessage((short)chunk, (short)chunks,
+                                          compression, bits,
+                                          data, i, stop));
+            chunk++;
+        }        
         return buf.iterator();        
     }
 
@@ -337,12 +364,12 @@ public class QueryRouteTable {
     ///////////////// Helper Functions for Codec ////////////////////////
 
     /** Returns a GZIP'ed version of data. */
-    private static byte[] compress(byte[] data) {
+    private byte[] compress(byte[] data) {
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            GZIPOutputStream gos=new GZIPOutputStream(baos);
-            gos.write(data, 0, data.length);
-            gos.close();                      //flushes bytes
+            DeflaterOutputStream dos=new DeflaterOutputStream(baos);
+            dos.write(data, 0, data.length);
+            dos.close();                      //flushes bytes
             return baos.toByteArray();
         } catch (IOException e) {
             //This should REALLY never happen because no devices are involved.
@@ -352,21 +379,32 @@ public class QueryRouteTable {
         }
     }
 
-    /** Returns the uncompressed version of the given GZIP'ed bytes.  Throws
-     *  IOException if the data is corrupt. */
-    private static byte[] uncompress(byte[] data) throws IOException {
-        ByteArrayInputStream bais=new ByteArrayInputStream(data);
-        GZIPInputStream gis=new GZIPInputStream(bais);
+    /** Returns the uncompressed version of the given defalted bytes, using
+     *  any dictionaries in uncompressor.  Throws IOException if the data is
+     *  corrupt.
+     *      @requires inflater initialized 
+     *      @modifies inflater */
+    private byte[] uncompress(byte[] data) throws IOException {
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        while (true) {
-            int b=gis.read();
-            if (b==-1)
-                break;
-            baos.write(b);
+        uncompressor.setInput(data);
+        
+        try {
+            byte[] buf=new byte[1024];
+            while (true) {
+                int read=uncompressor.inflate(buf);
+                //Needs input?
+                if (read==0)
+                    break;
+                baos.write(buf, 0, read);                
+            }
+            baos.flush();
+            return baos.toByteArray();
+        } catch (DataFormatException e) {
+            throw new IOException("Bad deflate format");
         }
-        return baos.toByteArray();
     }
 
+    
     /** Returns an array R of length array.length/2, where R[i] consists of the
      *  low nibble of array[2i] concatentated with the low nibble of array[2i+1].
      *  Note that unhalve(halve(array))=array if all elements of array fit can 
@@ -405,18 +443,44 @@ public class QueryRouteTable {
     
     /** Unit test */
     public static void main(String args[]) {
-        //TODO: handle bad packets (sequences, etc)
-        //0. compress/uncompress
-        byte[] data=new byte[1000];  data[1]=(byte)7;  data[100]=(byte)7;
-        byte[] dataCompressed=compress(data);
+        //TODO: test handle bad packets (sequences, etc)
+
+        //0. compress/uncompress.  First we make a huge array with lots of
+        //random bytes but also long strings of zeroes.  This means that
+        //compression will work, but not too well.  Then we take the compressed
+        //value and dice it up randomly.  It's critical to make sure that
+        //decompress works incrementally without blocking.
+        QueryRouteTable dummy=new QueryRouteTable();
+        dummy.uncompressor=new Inflater();
+        byte[] data=new byte[10000];
+        Random rand=new Random();
+        rand.nextBytes(data);
+        for (int i=100; i<7000; i++) {
+            data[i]=(byte)0;
+        }
+        byte[] dataCompressed=dummy.compress(data);
+        //System.out.println("Compressed 10000 to "+dataCompressed.length);
         Assert.that(dataCompressed.length<data.length);
+        
         try {
-            byte[] dataUncompressed=uncompress(dataCompressed);
-            Assert.that(Arrays.equals(data, dataUncompressed),
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            for (int i=0; i<dataCompressed.length; ) {
+                int length=Math.min(rand.nextInt(100), dataCompressed.length-i);
+                //System.out.print(length+"/");
+                byte[] chunk=new byte[length];
+                System.arraycopy(dataCompressed, i, chunk, 0, length);
+                byte[] chunkRead=dummy.uncompress(chunk);
+                //System.out.print(chunkRead.length+" ");
+                baos.write(chunkRead);
+                i+=length;
+            }
+            baos.flush();
+            Assert.that(Arrays.equals(data, baos.toByteArray()),
                         "Compress/uncompress loop failed");
         } catch (IOException e) {
-            Assert.that(false, "Bad GZIP data.");
-        }           
+            System.out.println("Decompress failed: "+e);
+            e.printStackTrace();
+        }
 
         //0.1. halve/unhalve
         Assert.that(extendNibble((byte)0x03)==0x03);
@@ -466,11 +530,11 @@ public class QueryRouteTable {
             }
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_GZIP);
+                    ==PatchTableMessage.COMPRESSOR_DEFLATE);
         }
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
-        System.out.println("");
 
+        System.out.println();
         qrt.add("bad", 2);
         qrt.add("other", 4); //qrt={good/1, book/1, bad/2, other/4}
         Assert.that(! qrt2.equals(qrt));
@@ -484,7 +548,7 @@ public class QueryRouteTable {
             }
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_GZIP);
+                    ==PatchTableMessage.COMPRESSOR_DEFLATE);
         }
         Assert.that(qrt2.equals(qrt));
 
@@ -496,13 +560,14 @@ public class QueryRouteTable {
         //4. encode-decode test--without compression.  (We know compression
         //won't work because the table is very small and filled with random bytes.)
         qrt=new QueryRouteTable(10, (byte)10);
-        Random rand=new Random();
+        rand=new Random();
         for (int i=0; i<qrt.table.length; i++)
             qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
         qrt.table[0]=(byte)1;
         qrt2=new QueryRouteTable(10, (byte)10);
         Assert.that(! qrt2.equals(qrt));
 
+        System.out.println();
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             System.out.println("Got "+m);
@@ -516,6 +581,27 @@ public class QueryRouteTable {
                     ==PatchTableMessage.COMPRESSOR_NONE);
         }
         Assert.that(qrt2.equals(qrt));
+
+        //4b. Encode/decode tests with multiple patched messages.
+        qrt=new QueryRouteTable(5000, (byte)10);
+        rand=new Random();
+        for (int i=0; i<qrt.table.length; i++)
+            qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
+        qrt2=new QueryRouteTable(5000, (byte)10);
+        Assert.that(! qrt2.equals(qrt));
+
+        System.out.println();
+        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
+            RouteTableMessage m=(RouteTableMessage)iter.next();
+            System.out.println("Got "+m);
+            try { 
+                qrt2.update(m); 
+            } catch (BadPacketException e) {
+                System.out.println("Got bad packet "+e);
+            }
+        }
+        Assert.that(qrt2.equals(qrt));
+
 
         //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
         //added to everything!
