@@ -26,12 +26,26 @@ public class SystemUtils {
      * the mouse.  The time returned is in milliseconds.
      */
     public static long getIdleTime() {
+        if(supportsIdleTime()) 
+            return idleTime();
+        
+        return 0;
+    }
+    
+    /**
+     * Returns whether or not the idle time function is supported on this
+     * operating system.
+     * 
+     * @return <tt>true</tt> if we're able to determine the idle time on this
+     *  operating system, otherwise <tt>false</tt>
+     */
+    public static boolean supportsIdleTime() {
         if(CommonUtils.isWindows2000orXP())
-            return idleTime();
+            return true;
         else if(CommonUtils.isMacOSX())
-            return idleTime();
-        else
-            return 0;
+            return true;
+            
+        return false;        
     }
     
     /**
