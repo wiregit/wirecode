@@ -317,9 +317,8 @@ public class ConnectionManager implements Runnable {
 	    setListeningPort(port,true);
 	    if (port!=oldPort) {
 		SettingsManager.instance().setPort(port);
-		//TODO: it would really be better to notify the GUI
-		//directly via ActivityCallback in case the GUI has
-		//already read the properties settings.
+		if (callback!=null)
+		    callback.setPort(port);
 	    }
 	} catch (IOException e) {
 	    error(ActivityCallback.ERROR_0);
