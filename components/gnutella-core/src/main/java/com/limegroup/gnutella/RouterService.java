@@ -820,15 +820,6 @@ public class RouterService {
         QueryUnicaster.instance().purgeQuery(guid);
     }
 
-    /**
-     * Returns true if the search related to the corresponding guid was a
-     * 'specific' xml search, ie if it had two or more XML fields specified.
-     */
-    public static boolean isSpecificXMLSearch(byte[] guid) {
-        return verifier.isSpecificXMLSearch(guid);
-    }
-
-
     /** 
      * Returns true if the given response is of the same type as the the query
      * with the given guid.  Returns 100 if guid is not recognized.

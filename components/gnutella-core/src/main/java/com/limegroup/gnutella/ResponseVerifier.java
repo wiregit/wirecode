@@ -6,7 +6,6 @@ import org.xml.sax.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.*;
 
 /**
  * Records information about queries so that responses can be validated later.
@@ -68,27 +67,6 @@ public class ResponseVerifier {
                                                   qr.getRichQuery(),
                                                   type));
     }
-
-    public synchronized boolean isSpecificXMLSearch(byte[] guid) {
-        boolean retVal=false;
-
-        RequestData request=(RequestData)mapper.get(new GUID(guid));
-        if (request != null) {
-            try {
-                if ((new LimeXMLDocument(request.richQuery)).getNumFields() > 1)
-                    retVal = true;
-            }
-            catch (SAXException eSAX) {
-            }                
-            catch (SchemaNotFoundException eSchema) {
-            }                
-            catch (IOException eIO) {
-            }                            
-        }
-
-        return retVal;
-    }
-
 
     /**
      * Returns the score of the given response compared to the given query.
@@ -158,19 +136,6 @@ public class ResponseVerifier {
         return mapper.toString();
     }
 
-
-    /** Returns all search terms as one long string.  This includes xml and
-     *  the standard search terms.  the terms are all in lowercase....
-     */
-    private static String getSearchTerms(Response resp) {
-        StringBuffer retSB = new StringBuffer();
-        String[] terms = getSearchTerms(resp.getName(), resp.getMetadata());
-        for (int i = 0; i < terms.length; i++)
-            retSB.append(terms[i] + " ");
-        return retSB.toString().trim();
-    }
-
-    
     private static String[] getSearchTerms(String query,
                                            String richQuery) {
         String[] retTerms = null;
