@@ -77,7 +77,7 @@ public class LimeXMLProperties
         try
         {
             _properties.load(new FileInputStream(
-                SettingsManager.instance().getPath() + XML_PROPS_FILENAME));
+                getPath() + XML_PROPS_FILENAME));
         }
         catch(Exception e)
         {
@@ -112,7 +112,7 @@ public class LimeXMLProperties
         String xmlSchemaDirRel = _properties.getProperty(XML_SCHEMA_DIR, 
                                                      XML_SCHEMA_DIR_DEF);
 
-        return SettingsManager.instance().getPath() + xmlSchemaDirRel ;                   
+        return getPath() + xmlSchemaDirRel ;                   
     }
         
     /**
@@ -122,6 +122,16 @@ public class LimeXMLProperties
     public File[] getAllXMLSchemaFiles()
     {
         return (new File(getXMLSchemaDir())).listFiles();
+    }
+    
+    /**
+     * Returns the base path for properties
+     */
+    private String getPath()
+    {
+        //a hack. I guess, adam will provide some way so that installation
+        //directory can be accesed in some other way than user.dir
+        return "E:\\work";
     }
     
 }//end of class

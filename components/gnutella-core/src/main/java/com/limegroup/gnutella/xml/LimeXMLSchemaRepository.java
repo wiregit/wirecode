@@ -9,7 +9,8 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Stores and provides access to various XML schemas that me might have
+ * Stores and provides access to various XML schemas that me might have.
+ * Singleton class
  * @author  asingla
  * @version
  */
@@ -19,13 +20,13 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     /**
      * Mapping from URI (string) to an instance of XMLSchema
      */
-    private Map /* Schema URI (String) ==> XMLSchema */ _uriSchemaMap 
+    private Map /* Schema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
         = new HashMap();
     
     /**
      * An instance of this class
      */
-    private LimeXMLSchemaRepository _instance = null;
+    private static LimeXMLSchemaRepository _instance = null;
     
     /** Creates new LimeXMLSchemaRepository */
     private LimeXMLSchemaRepository()
@@ -43,28 +44,31 @@ public class LimeXMLSchemaRepository extends java.lang.Object
         File[] schemaFiles = 
                 LimeXMLProperties.instance().getAllXMLSchemaFiles();
         
-        LimeXMLSchema limeXmlSchema;
-        //create schema objects and put them in the _uriSchemaMap
-        for(int i=0; i < schemaFiles.length; i++)
+        //if there are some files there,initialize from those files
+        if(schemaFiles != null)
         {
-            try
+            LimeXMLSchema limeXmlSchema;
+            //create schema objects and put them in the _uriSchemaMap
+            for(int i=0; i < schemaFiles.length; i++)
             {
-                limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
-                _uriSchemaMap.put(limeXmlSchema.getSchemaIdentifier(),limeXmlSchema);
-            }
-            catch(IOException ioe)
-            {
-                //no problem
-            }
-        }
-        
-    }
+                try
+                {
+                    limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
+                    _uriSchemaMap.put(limeXmlSchema.getSchemaIdentifier(),limeXmlSchema);
+                }
+                catch(IOException ioe)
+                {
+                    //no problem
+                }//end of try
+            }//end of for
+        }//end of if
+    }//end of fn initialize
     
     /**
      * Returns an instance of this class. Adheres to Singleton design pattern.
      * So, only one instance of the class is created.
      */
-    public LimeXMLSchemaRepository instance()
+    public static LimeXMLSchemaRepository instance()
     {
         if(_instance == null)
             _instance = new LimeXMLSchemaRepository();
@@ -92,11 +96,16 @@ public class LimeXMLSchemaRepository extends java.lang.Object
      */ 
     public String[] getAvailableSchemaURIs()
     {
-        synchronized(_uriSchemaMap)
-        {
-            Set keySet = _uriSchemaMap.keySet();
-            return (String[])keySet.toArray(new String[0]);
-        }
+        
+        //TODO anu remove
+        String[] result = {"temp1", "temp2"};
+        return result;
+        //end remove
+//        synchronized(_uriSchemaMap)
+//        {
+//            Set keySet = _uriSchemaMap.keySet();
+//            return (String[])keySet.toArray(new String[0]);
+//        }
     }
     
 }
