@@ -79,15 +79,14 @@ public interface SettingsInterface {
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
 	/** This is limewire's public pong cache */
     public static final String  DEFAULT_LIMEWIRE_ROUTER    = 
-	  "router.limewire.com";
+	  "sparky.limewire.com";
 	/** This is limewire's dedicated pong cache */
     public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
-	  "router4.limewire.com";
+	  "sparky.limewire.com";
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS
-    = {DEFAULT_LIMEWIRE_ROUTER+":6346",
-       "gnutellahosts.com:6346",
-    };
+        = {DEFAULT_LIMEWIRE_ROUTER+":6364"};
+
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     /** Default for whether user should be prompted before downloading exe's. */
