@@ -160,6 +160,7 @@ public final class CommonUtils {
     private static final char[] ILLEGAL_CHARS_WINDOWS = { 
 		'?', '*', '\\', '<', '>', '|', '\"', ':'
 	};
+	private static final char[] ILLEGAL_CHARS_MACOS = {':'};
 
 	/**
 	 * Cached constant for the HTTP Server: header value.
@@ -1098,6 +1099,9 @@ public final class CommonUtils {
         } else if ( _isLinux || _isSolaris ) {
             for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+        } else if (_isMacOSX) {
+            for(int i = 0; i < ILLEGAL_CHARS_MACOS.length; i++)
+                name = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
         }
         
         return name;
