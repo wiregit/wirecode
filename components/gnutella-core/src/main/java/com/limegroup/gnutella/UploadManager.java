@@ -70,7 +70,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
-public final class UploadManager implements BandwidthTracker {
+public class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
     public static final String FV_PASS =

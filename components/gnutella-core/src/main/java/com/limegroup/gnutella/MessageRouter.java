@@ -121,6 +121,16 @@ public abstract class MessageRouter {
      */
     private static final FixedsizeHashMap _tcpConnectBacks = 
         new FixedsizeHashMap(200);
+    
+    /**
+     * keeps track of which hosts have sent us head pongs.  We may choose
+     * to use these messages for udp tunnel keep-alive, so we don't want to
+     * set the minimum interval too high.  Right now it is half of what we
+     * believe to be the solicited grace period.
+     */
+    private static final FixedSizeExpiringSet _udpHeadRequests =
+    	new FixedSizeExpiringSet(200,
+    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2);
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -407,6 +417,7 @@ public abstract class MessageRouter {
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
         }
+        
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -508,6 +519,11 @@ public abstract class MessageRouter {
         	if(RECORD_STATS)
         		;//TODO: add the statistics recording code
         	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
+        }
+        else if (msg instanceof UDPHeadPing) {
+        	if(RECORD_STATS)
+        		;//TODO: add the statistics recording code
+        	handleUDPHeadPing((UDPHeadPing)msg, datagram);
         }
         notifyMessageListener(msg);
     }
@@ -2542,6 +2558,23 @@ public abstract class MessageRouter {
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
     	handler.handleUDPCrawlerPong(newMsg);
+    }
+    
+    /**
+     * replies to an udp head ping, unless the same person has pinged us 
+     * too recently.
+     */
+    private void handleUDPHeadPing(UDPHeadPing ping, DatagramPacket datagram) {
+    	
+
+    	//since this message can arrive through udp and is handled by 
+    	//single thread, the access is not synchronized
+    	InetAddress host = datagram.getAddress();
+    	if (_udpHeadRequests.add(host)) {
+    		int port = datagram.getPort();
+    		UDPHeadPong pong = new UDPHeadPong(ping);
+    		UDPService.instance().send(pong, host, port);
+    	}
     }
     
     private static class QueryResponseBundle {

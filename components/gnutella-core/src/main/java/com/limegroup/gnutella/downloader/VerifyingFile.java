@@ -235,6 +235,10 @@ public class VerifyingFile {
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
     }
+    
+    public synchronized byte [] toBytes() {
+    	return writtenBlocks.toBytes();
+    }
 
     /**
      * Returns all written blocks as a List.

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.sun.java.util.collections.Comparable;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;;
 
 /** The half-open interval [low, high) inclusive on the low end. */
 public class Interval implements Serializable, Comparable {
@@ -76,6 +77,13 @@ public class Interval implements Serializable, Comparable {
             return false;
         Interval other=(Interval)o;
         return low==other.low && high==other.high;
+    }
+    
+    public byte [] toBytes() {
+    	byte [] res = new byte[8];
+    	ByteOrder.int2beb(low,res,0);
+    	ByteOrder.int2beb(high,res,4);
+    	return res;
     }
 
 }

@@ -1,25 +1,35 @@
+
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
 
-public class FileDescStub extends FileDesc {
-    public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+/**
+ * A stub that is identical to FileDescStub.  The code uses instanceof,
+ * so we need this stub for Partial files.
+ * 
+ * It also stubs out some methods.  Feel free to stub out more methods as
+ * need arises.
+ */
+public class IncompleteFileDescStub extends IncompleteFileDesc {
+	public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final Set set;
     private static Set localSet2,globalSet;
     public Set localSet;
-    public static final int size = 1126400;
     
     private AlternateLocationCollection _altlocCollection;
     
+    private byte [] _ranges;
+    
+    public static final int size = 1126400;
     static {
         set = new HashSet();
         globalSet=new HashSet();
@@ -31,17 +41,17 @@ public class FileDescStub extends FileDesc {
         }
     }
     
-    public FileDescStub() {
+    public IncompleteFileDescStub() {
         this("abc.txt");
     }
     
-    public FileDescStub(String name) {
-        super(new File(name), set, 0);
+    public IncompleteFileDescStub(String name) {
+        super(new File(name), set, 0,name,size,null);
         localSet=new HashSet();
     }
     
-    public FileDescStub(String name, URN urn, int index) {
-    	super(new File(name), createUrnSet(urn),index);
+    public IncompleteFileDescStub(String name, URN urn, int index) {
+    	super(new File(name), createUrnSet(urn),index,name,size,null);
     	localSet=localSet2;
     }
     
@@ -81,7 +91,16 @@ public class FileDescStub extends FileDesc {
     	else return
 			(URN)localSet.toArray()[0];
     }
-    
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.IncompleteFileDesc#getRangesAsByte()
+	 */
+	public byte[] getRangesAsByte() {
+		return _ranges;
+	}
+	
+	public void setRangesByte(byte [] what) {
+		_ranges=what;
+	}
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
 	 */

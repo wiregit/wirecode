@@ -6,12 +6,13 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.RouterService;
+
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.*;
+
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -439,6 +440,32 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	testWrite(rep);
     	testRead(rep);
     }
+    
+    public void testUDPHeadPingMessage() throws Exception {
+    	URN urn = URN.createSHA1Urn(FileDescStub.urn);
+    	
+    	UDPHeadPing ping = new UDPHeadPing(urn);
+    	
+    	assertEquals(UDPHeadPing.PLAIN, ping.getFeatures());
+    	assertFalse(ping.requestsAltlocs());
+    	assertFalse(ping.requestsRanges());
+    	
+    	ping = new UDPHeadPing(urn, 0xFF);
+    	assertEquals(UDPHeadPing.FEATURE_MASK, ping.getFeatures());
+    	assertTrue(ping.requestsAltlocs());
+    	assertTrue(ping.requestsRanges());
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	ping.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	UDPHeadPing ping2 = (UDPHeadPing) Message.read(bais);
+    	
+    	assertEquals(ping.getUrn(), ping2.getUrn());
+    	assertEquals(ping.getFeatures(),ping2.getFeatures());
+    	
+    	testWrite(ping);
+    }
+    
     
     public void testPushProxyVMs() throws Exception {
         GUID guid = new GUID(GUID.makeGuid());

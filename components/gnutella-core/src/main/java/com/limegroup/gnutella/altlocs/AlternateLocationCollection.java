@@ -306,4 +306,43 @@ public final class AlternateLocationCollection
         }
         return ret;
     }
+    
+    /**
+     * 
+     * @return the alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytes() {
+    	return toBytes(MAX_SIZE);
+    }
+    
+    /**
+     * 
+     * @param number number of altlocs to return. 
+     * @return the alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytes(int number) {
+    	
+    	if (number > LOCATIONS.size())
+    		number = LOCATIONS.size();
+    	
+    	if (number <=0)
+    		return null;
+    	
+    	byte [] ret = new byte[6*number];
+    	int index=0;
+	FixedSizeSortedSet clone=null;
+	synchronized(this) {
+		clone = (FixedSizeSortedSet) LOCATIONS.clone();
+	}
+    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
+    		AlternateLocation current = (AlternateLocation)iter.next();
+    		byte [] addr = current.getHost().getInetAddress().getAddress();
+    		System.arraycopy(addr,0,ret,index,4);
+    		ByteOrder.short2leb((short)
+    				current.getHost().getPort(),ret,index+4 );
+    		index+=6;
+    		number--;
+    	}
+    	return ret;
+    }
 }
