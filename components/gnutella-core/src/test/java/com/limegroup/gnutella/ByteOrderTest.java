@@ -2,8 +2,10 @@ package com.limegroup.gnutella;
 
 import junit.framework.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.Arrays;
 
 /**
  * Unit tests for ByteOrder
@@ -18,6 +20,8 @@ public class ByteOrderTest extends BaseTestCase {
     int out2;
     int in3;
     long out4;
+    ByteArrayInputStream sin;
+    ByteArrayOutputStream sout;
 
     
 	public ByteOrderTest(String name) {
@@ -39,9 +43,13 @@ public class ByteOrderTest extends BaseTestCase {
 	    assertEquals(3, x2[1]);
         assertEquals(2, x2[2]);
         assertEquals(1, x2[3]);
+        
+        byte[] x3 = new byte[0];
+        byte[] x4 = ByteOrder.reverse(x3);
+        assertEquals(x3, x4);
     }
 	
-	public void testLeb2ShortAndShort2Leb() {
+	public void testLeb2ShortAndShort2Leb() throws Exception {
     
         byte[] x1={(byte)0x2, (byte)0x1};  //{x1[0], x1[1]}
         result1=ByteOrder.leb2short(x1,0);
@@ -50,9 +58,19 @@ public class ByteOrderTest extends BaseTestCase {
         ByteOrder.short2leb(result1, x1b, 0);
         for (int i=0; i<2; i++) 
             assertEquals(x1[i], x1b[i]);
+            
+        // stream version
+        sin = new ByteArrayInputStream(x1);
+        result1 = ByteOrder.leb2short(sin);
+        assertEquals(258, result1);
+        
+        sout = new ByteArrayOutputStream();
+        ByteOrder.short2leb(result1, sout);
+        assertEquals(x1, sout.toByteArray());
+        
     }
     
-    public void testLeb2IntAndInt2Leb() {
+    public void testLeb2IntAndInt2Leb() throws Exception {
         byte[] x2={(byte)0x2, (byte)0, (byte)0, (byte)0x1};
         //2^24+2 = 16777216+2 = 16777218
         result2=ByteOrder.leb2int(x2,0);
@@ -67,23 +85,103 @@ public class ByteOrderTest extends BaseTestCase {
         result3=ByteOrder.leb2int(x3,0);
         assertEquals("unexpected result3 ("+Integer.toHexString(result3)+")",
             0xFF00F300, result3);
+            
+        // stream version.
+        sin = new ByteArrayInputStream(x2);
+        result2 = ByteOrder.leb2int(sin);
+        assertEquals(16777218, result2);
+        
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2leb(result3, sout);
+        assertEquals(x3, sout.toByteArray());
     }
     
-    public void testBeb2Int() {
+    public void testBeb2ShortAndShort2Beb() throws Exception {
+        byte[] x2 = { (byte)0x1, (byte)0x2 };
+        result1 = ByteOrder.beb2short(x2, 0);
+        assertEquals(Integer.toHexString(result1), 258, result1);
+
+        byte[] x3={(byte)0x0F, (byte)0xA3 };
+        result4=ByteOrder.beb2short(x3,0);
+        assertEquals("unexpected result3 ("+Integer.toHexString(result4)+")",
+            0x0FA3, result4);
+            
+        short a = 515;
+        byte[] x4 = new byte[2];
+        ByteOrder.short2beb(a, x4, 0);
+        assertEquals(new byte[] { 0x2, 0x3 }, x4);
+        
+        // stream version.
+        sin = new ByteArrayInputStream(x2);
+        result1 = ByteOrder.beb2short(sin);
+        assertEquals(Integer.toHexString(result1), 258, result1);
+        
+        sout = new ByteArrayOutputStream();
+        ByteOrder.short2beb(a, sout);
+        assertEquals(x4, sout.toByteArray());        
+    }        
+    
+    public void testBeb2IntAndInt2Beb() throws Exception {
         byte[] x2 = { (byte)0x1, (byte)0, (byte)0, (byte)0x2 };
          //2^24+2 = 16777216+2 = 16777218
         result2 = ByteOrder.beb2int(x2, 0);
         assertEquals(16777218, result2);
 
-        byte[] x3={(byte)0xFF, (byte)0, (byte)0xF3, (byte)0x00};
+        byte[] x3={(byte)0xFF, (byte)0x01, (byte)0xF3, (byte)0x00};
         result3=ByteOrder.beb2int(x3,0);
         assertEquals("unexpected result3 ("+Integer.toHexString(result3)+")",
-            0xFF00F300, result3);
-
+            0xFF01F300, result3);
+        
+        byte[] buf = new byte[4];
+        ByteOrder.int2beb(result3, buf, 0);
+        assertEquals(buf, x3);
+            
+        // stream version
+        sin = new ByteArrayInputStream(x2);
+        result2 = ByteOrder.beb2int(sin);
+        assertEquals(16777218, result2);
+        
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2beb(result3, sout);
+        assertEquals(x3, sout.toByteArray());
+        
+        // limited version.
+        byte[] x4 = { (byte)0x1, (byte)0x2, (byte)0x04, (byte)0x3 };
+        int res1, res2, res3, res4;
+        res1 = ByteOrder.beb2int(x4, 3, 1);
+        res2 = ByteOrder.beb2int(x4, 2, 2);
+        res3 = ByteOrder.beb2int(x4, 1, 3);
+        res4 = ByteOrder.beb2int(x4, 0, 4);
+        assertEquals(0x3, res1);
+        assertEquals(0x403, res2);
+        assertEquals(0x20403, res3);
+        assertEquals(0x1020403, res4);
+        
+        try {
+            ByteOrder.beb2int(x4, 3, 5);
+            fail("expected exception");
+        } catch(IllegalArgumentException expected) {}
+        
+        // limited version of stream int2beb.
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2beb(1, sout, 1);
+        assertEquals(new byte[] { (byte)1 }, sout.toByteArray());
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2beb(258, sout, 2);
+        assertEquals(new byte[] { (byte)0x01, (byte)0x02 }, sout.toByteArray());
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2beb(259, sout, 3);
+        assertEquals(new byte[] { 0, (byte)0x01, (byte)0x03 },
+                     sout.toByteArray());
+        sout = new ByteArrayOutputStream();
+        ByteOrder.int2beb(Integer.MAX_VALUE, sout, 4);
+        assertEquals(
+            new byte[] {(byte)0x7F, (byte)0xFF, (byte)0xFF, (byte)0xFF },
+            sout.toByteArray()
+        );
     }
     
     public void testLeb2Short() {
-
         byte[] x4={(byte)0xFF, (byte)0xF3};
         result4=ByteOrder.leb2short(x4,0);
         assertEquals("unexpected result4 ("+Integer.toHexString(result4)+")",
@@ -146,27 +244,47 @@ public class ByteOrderTest extends BaseTestCase {
             fail("exception should have been thrown");
         } catch (IllegalArgumentException e) { }
 
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(0), new byte[] {(byte)0}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(1), new byte[] {(byte)1}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(7), new byte[] {(byte)7}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(255), 
-                                 new byte[] {(byte)0xFF}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(256), 
-                                 new byte[] {(byte)0, (byte)0x1}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(72831), 
-            new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}));
-        assertTrue(Arrays.equals(ByteOrder.int2minLeb(731328764), 
-            new byte[] {(byte)0xFC, (byte)0x30, (byte)0x97, (byte)0x2B}));
+        assertEquals(ByteOrder.int2minLeb(0), new byte[] {(byte)0});
+        assertEquals(ByteOrder.int2minLeb(1), new byte[] {(byte)1});
+        assertEquals(ByteOrder.int2minLeb(7), new byte[] {(byte)7});
+        assertEquals(ByteOrder.int2minLeb(255), new byte[] {(byte)0xFF});
+        assertEquals(ByteOrder.int2minLeb(256),
+            new byte[] {(byte)0, (byte)0x1});
+        assertEquals(ByteOrder.int2minLeb(72831), 
+            new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1});
+        assertEquals(ByteOrder.int2minLeb(731328764), 
+            new byte[] {(byte)0xFC, (byte)0x30, (byte)0x97, (byte)0x2B});
     }
+    
+    public void testInt2MinBeb() {
+        try {
+            ByteOrder.int2minBeb(-1);
+            fail("expected exception");
+        } catch(IllegalArgumentException expected) {}
+        
+        assertEquals(ByteOrder.int2minBeb(0), new byte[] {(byte)0});
+        assertEquals(ByteOrder.int2minBeb(1), new byte[] {(byte)1});
+        assertEquals(ByteOrder.int2minBeb(7), new byte[] {(byte)7});
+        assertEquals(ByteOrder.int2minBeb(255), new byte[] {(byte)0xFF});
+        assertEquals(ByteOrder.int2minBeb(256),
+            new byte[] {(byte)0x1, (byte)0});
+        assertEquals(ByteOrder.int2minBeb(72831), 
+            new byte[] { (byte)0x1, (byte)0x1c, (byte)0x7f});
+        assertEquals(ByteOrder.int2minBeb(731328764), 
+            new byte[] {(byte)0x2B, (byte)0x97, (byte)0x30, (byte)0xFC});
+        
+    }   
     
     public void testLeb2Int() {
           assertEquals(0, ByteOrder.leb2int(new byte[] {(byte)0}, 0, 1));
           assertEquals(1, ByteOrder.leb2int(new byte[] {(byte)1}, 0, 1));
           assertEquals(7, ByteOrder.leb2int(new byte[] {(byte)7}, 0, 1));
-          assertEquals(0x11c7f,
-            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
           assertEquals(0x1c,
             ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
+          assertEquals(0x11c,
+            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 2));
+          assertEquals(0x11c7f,
+            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
           assertEquals(0x1011c7f,
             ByteOrder.leb2int(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
                                           (byte)0x1, (byte)0x1}, 1, 4));
