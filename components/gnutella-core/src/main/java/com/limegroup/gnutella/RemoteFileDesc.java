@@ -37,8 +37,8 @@ public class RemoteFileDesc implements Serializable {
      *  file.  In other words, _xmlDocs is typically null or a single non-null
      *  element, unless this was deserialized from an older version.  */
     private final LimeXMLDocument[] _xmlDocs;
-	private final Set _urns;
-	private final boolean _browseHostEnabled;
+	private Set _urns;
+	private boolean _browseHostEnabled;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -80,6 +80,8 @@ public class RemoteFileDesc implements Serializable {
 		_browseHostEnabled = browseHost;
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
+        else
+            _xmlDocs = null;
 		if(urns == null) {
 			_urns = EMPTY_SET;
 		}
@@ -88,8 +90,9 @@ public class RemoteFileDesc implements Serializable {
 		}
 	}
 
-    private void readObject(ObjectInputStream stream) {
-        defaultReadObject();
+    private void readObject(ObjectInputStream stream) 
+                                   throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
         //_browseHostEnabled.  See class overview for more details.

@@ -160,7 +160,6 @@ public class DownloadManager implements BandwidthTracker {
             buf=(List)in.readObject();
             incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch (IOException e) {
-            e.printStackTrace();
             return false;
         } catch (ClassCastException e) {
             return false;
