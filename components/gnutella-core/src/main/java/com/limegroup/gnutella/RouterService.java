@@ -1163,4 +1163,29 @@ public final class RouterService {
 	public static boolean isGUESSCapable() {
 		return udpService.isGUESSCapable();
 	}
+
+
+	public static final int MIN_NUM_CONNECTIONS      = 2;
+	public static final int MIN_CONNECTION_MESSAGES  = 6;
+	public static final int MIN_TOTAL_MESSAGES       = 45;
+	public static final int CONNECTION_DELAY         = 500;
+    /**
+     *  Wait for good, stable, connections with some amount of reach
+	 *  or message flow.
+     */
+    public static void waitForStableConnections() 
+      throws InterruptedException {
+		// TODO: Note that on a private network, these conditions might
+		//       be too strict.
+
+		// Wait till your connections are stable enough to get the minimum 
+		// number of messages
+		while ((countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+                < MIN_NUM_CONNECTIONS) &&
+               (getActiveConnectionMessages() < MIN_TOTAL_MESSAGES)
+               )
+			Thread.sleep(CONNECTION_DELAY); 
+    }
+
+
 }
