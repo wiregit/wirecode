@@ -359,8 +359,6 @@ public class SettingsManager implements SettingsInterface
 	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 	setStats(SettingsInterface.DEFAULT_STATS);
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
-	try {setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
-	catch(IllegalArgumentException e){setDirectories(home_);}
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
 	setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
@@ -368,6 +366,8 @@ public class SettingsManager implements SettingsInterface
 	setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
 	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
+	try {setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
+	catch(IllegalArgumentException e){setDirectories(home_);}
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){setSaveDirectory(home_);}
     }
