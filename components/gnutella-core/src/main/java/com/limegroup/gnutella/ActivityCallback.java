@@ -54,7 +54,7 @@ public interface ActivityCallback
 	/** removes a chat from the gui */
 	public void removeChat(Chatter ctr);
 
-	public void recieveMessage(Chatter chr);
+	public void receiveMessage(Chatter chr);
 
 	/** lets the user know that a host is no longer available */
 	public void chatUnavailable(Chatter chatter);

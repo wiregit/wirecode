@@ -155,7 +155,7 @@ public class InstantMessenger implements Chatter {
 					if( ( str == null ) || (str == "") )
 						throw new IOException();
 					_message += str;
-					_activityCallback.recieveMessage(_chatter);
+					_activityCallback.receiveMessage(_chatter);
 						// } 
 					
 				} catch (IOException e) {
