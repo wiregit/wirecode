@@ -535,7 +535,8 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    public boolean allowConnection(ManagedConnection c) {
+    private boolean allowConnection(ManagedConnection c) {
+        if(!c.receivedHeaders()) return false;
 		return allowConnection(c.headers(), false);
     }
 
