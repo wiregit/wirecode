@@ -166,12 +166,12 @@ public final class ID3Reader {
         String genre = getGenreString(gen);
         boolean hasCCLicense = false;
 
+        String absPath = file.getAbsolutePath();
         {   // try and validate a CC license....
             Set urns = UrnCache.instance().getUrns(file);
             if ((urns != null) && (urns.size() > 0)) {
                 URN firstURN = (URN) urns.iterator().next();
-                hasCCLicense = hasVerifiedLicense(file.getAbsolutePath(),
-                                                  firstURN.toString());
+                hasCCLicense = hasVerifiedLicense(absPath, firstURN.toString());
             }
         }
 
@@ -195,11 +195,47 @@ public final class ID3Reader {
         if(seconds > 0) 
             nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
         if(hasCCLicense)
-            nameValList.add(new NameValue(LICENSE_KEY, CC_LICENSE_STRING));
+            nameValList.add(new NameValue(LICENSE_KEY, 
+                                          getCCLicense(absPath)));
         if(nameValList.isEmpty())
             throw new IOException("invalid/no data.");
 
         return new LimeXMLDocument(nameValList, schemaURI);
+    }
+
+    /** Returns a string with the URI of the license or null if none exists.
+     */
+    public static String getCCLicense(final String filename) {
+        try {
+            // get the TCOP frame            
+            MP3File mp3 = new MP3File(filename);
+            TagContent content = mp3.getCopyrightText();
+            String textContent = content.getTextContent();
+            if (textContent == null)
+                return null;
+
+            // parse the TCOP frame and record the license
+            StringTokenizer st = new StringTokenizer(textContent);
+            String license = null;
+            while ((license == null) && st.hasMoreTokens()) {
+                String currToken = st.nextToken();
+                if (currToken.startsWith("http"))
+                    license = currToken;
+            }
+            return license;
+        }
+        catch (IOException why) {
+            return null;
+        }
+        catch (NoMP3FrameException why) {
+            return null;
+        }
+        catch (FrameDamagedException thatsucks) {
+            return null;
+        }
+        catch (ID3v2Exception suckypoo) {
+            return null;
+        }
     }
 
     /**
