@@ -381,6 +381,22 @@ public class ConnectionManager implements Runnable {
 	    return true;
 	return false;
     }
+
+    /**
+     * @requires host is in dotted decimal format, e.g., "127.0.0.1"
+     * @effects returns true if there is a connection to the given host. 
+     */
+    public synchronized boolean isConnected(String host, int port) {
+	//TODO3: can make this faster if necessary by augmenting the state
+	//of ConnectionManager
+	for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+	    Connection c=(Connection)iter.next();
+	    if (c.getInetAddress().getHostAddress().equals(host)
+		&& c.getPort()==port)
+		return true;
+	}
+	return false;
+    }	
     
     /** Returns an unmodifiable iterator of a clone of this' connections.
      *  The iterator yields items in any order.  It <i>is</i> permissible
