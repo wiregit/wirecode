@@ -893,9 +893,7 @@ public class Connection {
      */
     public float getSentSavedFromCompression() {
         if( !isWriteDeflated() ) return 0;
-        float saved = 1-((float)_deflater.getTotalOut()/(float)_deflater.getTotalIn());
-        System.out.println("Deflater... TotalOut: " + _deflater.getTotalOut() + ", TotalIn: " + _deflater.getTotalIn() + ", saved: " + saved);
-        return saved;
+        return 1-((float)_deflater.getTotalOut()/(float)_deflater.getTotalIn());
     }
     
     /**
@@ -906,9 +904,7 @@ public class Connection {
      */
     public float getReadSavedFromCompression() {
         if( !isReadDeflated() ) return 0;
-        float saved = 1-((float)_inflater.getTotalIn()/(float)_inflater.getTotalOut());
-        System.out.println("Inflater... TotalOut: " + _inflater.getTotalOut() + ", TotalIn: " + _inflater.getTotalIn() + ", saved: " + saved);        
-        return saved;
+        return 1-((float)_inflater.getTotalIn()/(float)_inflater.getTotalOut());
     }
 
     /** Returns the host set at construction */
