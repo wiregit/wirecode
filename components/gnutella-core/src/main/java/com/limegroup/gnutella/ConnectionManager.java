@@ -1529,6 +1529,11 @@ public class ConnectionManager {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		isSupernode();
 		
+		//connect using the classic method.  This should be removed
+		//when the crawler is implemented
+		recoverHosts();
+		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
+		
     }
 
     /** 

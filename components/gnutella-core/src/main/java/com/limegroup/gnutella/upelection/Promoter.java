@@ -28,7 +28,7 @@ public class Promoter implements Runnable {
 		
 		
 		//throw new RuntimeException("keep implementing");
-		System.out.println("keep implementing");
+		//System.out.println("keep implementing");
 		
 	}
 	
