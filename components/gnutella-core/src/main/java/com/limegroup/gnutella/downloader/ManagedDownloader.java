@@ -720,6 +720,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Put the keywords into a string, up to MAX_LEN
         Set intersection=keywords(allFiles[0].getFileName());
+        if (intersection.size() < 1) // nothing to extract!
+            return StringUtils.truncate(allFiles[0].getFileName(), 30);
         StringBuffer sb = new StringBuffer();
         int numWritten = 0;
         for (Iterator keys=intersection.iterator(); 
