@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.chat.*;
@@ -168,7 +170,10 @@ public class Acceptor extends Thread {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new ServerSocket(port);
+                ServerSocketChannel channel=ServerSocketChannel.open();
+                channel.configureBlocking(true);
+                channel.socket().bind(new InetSocketAddress(port));
+                newSocket=channel.socket();
             } catch (IOException e) {
                 throw e;
             } catch (IllegalArgumentException e) {
@@ -257,7 +262,7 @@ public class Acceptor extends Thread {
                 synchronized (_socketLock) {
                     if (_socket!=null) {
                         try {
-                            client=_socket.accept();
+                            client=_socket.getChannel().accept().socket();
                         } catch (IOException e) {
                             continue;
                         }

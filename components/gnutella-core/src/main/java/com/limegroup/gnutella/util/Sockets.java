@@ -2,6 +2,8 @@ package com.limegroup.gnutella.util;
 
 import java.net.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import java.lang.reflect.*;
 import com.limegroup.gnutella.Assert;
 
@@ -58,55 +60,62 @@ public class Sockets {
     public static Socket connect(String host, int port, 
                                  int timeout, boolean emulate) 
                                  throws IOException {
-        if (CommonUtils.isJava14OrLater()) {
-            //a) Non-blocking IO using Java 1.4. Conceptually, this code
-            //   does the following:
-            //      SocketAddress addr=new InetSocketAddress(host, port);
-            //      Socket ret=new Socket();
-            //      ret.connect(addr, timeout);
-            //      return ret;
-            //   Unfortunately that causes compile errors on older versions
-            //   of Java.  Worse, it may cause runtime errors if class loading
-            //   is not done lazily.  (See chapter 12.3.4 of the Java Language
-            //   Specification.)  So we use reflection.
-            try {
-                Class inetSocketAddress=
-                    Class.forName("java.net.InetSocketAddress");
-                Constructor inetSocketAddressCtor=
-                    inetSocketAddress.getConstructor(
-                        new Class[] { String.class, Integer.TYPE });
-                Object addr=inetSocketAddressCtor.newInstance(
-                    new Object[] { host, new Integer(port) });
+        //TODO: use reflection for 1.8, add timeouts.  I think this requires
+        //use of Selector.select(timeout); the old code below will not give
+        //us a Socket with a channel.  But what about blocking DNS resolution?
+        InetSocketAddress addr=new InetSocketAddress(host, port);
+        if (addr.isUnresolved())
+            throw new IOException("Couldn't resolve address");
+        return SocketChannel.open(addr).socket();
+//          if (CommonUtils.isJava14OrLater()) {
+//              //a) Non-blocking IO using Java 1.4. Conceptually, this code
+//              //   does the following:
+//              //      SocketAddress addr=new InetSocketAddress(host, port);
+//              //      Socket ret=new Socket();
+//              //      ret.connect(addr, timeout);
+//              //      return ret;
+//              //   Unfortunately that causes compile errors on older versions
+//              //   of Java.  Worse, it may cause runtime errors if class loading
+//              //   is not done lazily.  (See chapter 12.3.4 of the Java Language
+//              //   Specification.)  So we use reflection.
+//              try {
+//                  Class inetSocketAddress=
+//                      Class.forName("java.net.InetSocketAddress");
+//                  Constructor inetSocketAddressCtor=
+//                      inetSocketAddress.getConstructor(
+//                          new Class[] { String.class, Integer.TYPE });
+//                  Object addr=inetSocketAddressCtor.newInstance(
+//                      new Object[] { host, new Integer(port) });
 
-                Class socket=Class.forName("java.net.Socket");
-                Object ret=socket.newInstance();
+//                  Class socket=Class.forName("java.net.Socket");
+//                  Object ret=socket.newInstance();
 
-                Class socketAddress=Class.forName("java.net.SocketAddress");
-                Method connect=socket.getMethod("connect", 
-                    new Class[] { socketAddress, Integer.TYPE });
-                connect.invoke(ret, 
-                    new Object[] { addr, new Integer(timeout) });
+//                  Class socketAddress=Class.forName("java.net.SocketAddress");
+//                  Method connect=socket.getMethod("connect", 
+//                      new Class[] { socketAddress, Integer.TYPE });
+//                  connect.invoke(ret, 
+//                      new Object[] { addr, new Integer(timeout) });
 
-                return (Socket)ret;
-            } catch (InvocationTargetException ioException) {
-                //ioException.getTargetException() should be an instance of
-                //IOexception, but this is safer.
-                throw new IOException(); 
-            } catch (Exception ignored) {
-                //I don't like generic "catch Exception"'s, but I think it's
-                //clearer than listing the zillion cases from above.  This
-                //should never happen, but we can go on to the emulation step
-                //below.
-            }
-        }
+//                  return (Socket)ret;
+//              } catch (InvocationTargetException ioException) {
+//                  //ioException.getTargetException() should be an instance of
+//                  //IOexception, but this is safer.
+//                  throw new IOException(); 
+//              } catch (Exception ignored) {
+//                  //I don't like generic "catch Exception"'s, but I think it's
+//                  //clearer than listing the zillion cases from above.  This
+//                  //should never happen, but we can go on to the emulation step
+//                  //below.
+//              }
+//          }
      
-        if (emulate && timeout!=0) {
-            //b) Emulation using threads
-            return (new SocketOpener(host, port)).connect(timeout);
-        } else {
-            //c) No timeouts
-            return new Socket(host, port);
-        }
+//          if (emulate && timeout!=0) {
+//              //b) Emulation using threads
+//              return (new SocketOpener(host, port)).connect(timeout);
+//          } else {
+//              //c) No timeouts
+//              return new Socket(host, port);
+//          }
     }
 }
 

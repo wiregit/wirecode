@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import com.sun.java.util.collections.*;
 
 import java.util.Properties;
@@ -10,6 +12,7 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.*;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -76,6 +79,7 @@ public class ConnectionManager {
     private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
+    public ConnectionDriver _driver;
 
 
     /** The number of connections to keep up.  */
@@ -123,6 +127,7 @@ public class ConnectionManager {
     private volatile List /* of ManagedConnection */ 
         _initializedClientConnections = new ArrayList();
 
+
     /**
      * For authenticating users
      */
@@ -144,16 +149,20 @@ public class ConnectionManager {
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    public void initialize(MessageRouter router, HostCatcher catcher) {
+    public void initialize(MessageRouter router, 
+                           HostCatcher catcher, 
+                           ConnectionDriver driver) {
         _router = router;
         _catcher = catcher;
+        _driver = driver;
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
         _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
-  		watchdog.start();
+  		//watchdog.start();
+        System.err.println("Warning: watchdog disabled");
         
         //We used to set the keep-alive to zero here, but that caused problems
         //because connection fetchers could wait in HostCatcher.getAnEndpoint()
@@ -226,15 +235,11 @@ public class ConnectionManager {
                 ensureConnectionsForSupernode();
              
              sendInitialPingRequest(connection);
-             connection.loopForMessages();
-         } catch(IOException e) {
+             //The call to Connection.initialize() registered this connection with the
+             //selector thread, allowing this thread to terminate.
          } catch(Exception e) {
              //Internal error!
              _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-         } finally {
-            //if we were leaf to a supernode, reconnect to network 
-            if (connection.isClientSupernodeConnection())
-                lostShieldedClientSupernodeConnection();
          }
      }
 
@@ -269,6 +274,7 @@ public class ConnectionManager {
      *  this one.
      */
     public synchronized void remove(ManagedConnection c) {
+        //TODO: do we need to affect _selector?
         removeInternal(c);
         adjustConnectionFetchers();
     }
@@ -880,11 +886,8 @@ public class ConnectionManager {
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());  //c
 
-        connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
-        try {
-            connection.flush();
-        } catch (IOException e) { /* close it later */ }
+        connection.write(pr);
     }
 
     /**
@@ -1043,7 +1046,7 @@ public class ConnectionManager {
         _callback.connectionInitializing(c);
 
         try {
-            c.initialize();
+            c.initialize(_driver);
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
                 _initializingFetchedConnections.remove(c);
@@ -1107,18 +1110,7 @@ public class ConnectionManager {
         if (firstShieldedConnection)
             setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
     }
-    
-    /** 
-     * Indicates that the node is in client mode and has lost a leaf
-     * to ultrapeer connection.
-     */
-    private synchronized void lostShieldedClientSupernodeConnection()
-    {
-        //Does nothing!  adjustConnectionFetchers takes care of everything now.
-        //I'm leaving this method here as a nice place holder in case we
-        //need to take action in the future.
-    }
-    
+
     /**
      * Processes the headers received during connection handshake and updates
      * itself with any useful information contained in those headers.
@@ -1253,7 +1245,7 @@ public class ConnectionManager {
         }
             
         try {
-            c.initialize();
+            c.initialize(_driver);
         } catch(IOException e) {
             remove(c);
             throw e;
@@ -1270,7 +1262,7 @@ public class ConnectionManager {
         //directly.
         if (!c.isOutgoing() && 
                 !allowConnection(c)) {
-            c.loopToReject(_catcher);     
+            //c.loopToReject(_catcher);     //TODO: re-enable
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
@@ -1347,15 +1339,12 @@ public class ConnectionManager {
 
 				// Send ping...possibly group ping.
                 sendInitialPingRequest(_connection);
-                _connection.loopForMessages();
+                //The call to Connection.initialize() registered this connection
+                //with the selector thread, allowing this thread to terminate.
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-            }
-            finally{
-                if (_connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
             }
         }
     }
@@ -1417,15 +1406,11 @@ public class ConnectionManager {
         public void run() {
             try {
                 _router.sendPingRequest(_specialPing, _connection);
-                _connection.loopForMessages();
-            } catch(IOException e) {
+                //The call to Connection.initialize() registered this connection with the
+                //selector thread, allowing this thread to terminate.
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-            }
-            finally{
-                if (_connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -1501,60 +1486,15 @@ public class ConnectionManager {
                 }
                 //Handle messages.
                 sendInitialPingRequest(connection);
-                connection.loopForMessages();
+
+                //The call to Connection.initialize() registered this connection
+                //with the selector thread, allowing this thread to terminate.
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
-            finally{
-                //Record that we're done with the connection, which may allow
-                //HostCatcher to go on to other endpoints.
-                _catcher.doneWithMessageLoop(endpoint);
-                if (connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
         }
     }
-
-    /*
-    public static void main(String[] args) {
-        TestManagedConnection i13=new TestManagedConnection(false, 1, 3);
-        TestManagedConnection o13=new TestManagedConnection(true, 1, 3);
-        TestManagedConnection i10=new TestManagedConnection(false, 1, 0);
-        TestManagedConnection o10=new TestManagedConnection(true, 1, 0);
-        
-        List l=new ArrayList(); l.add(i13); l.add(o13); l.add(i10); l.add(o10);
-        Collections.sort(l, new ManagedConnectionComparator());
-        Assert.that(l.get(0)==o10);
-        Assert.that(l.get(1)==o13);
-        Assert.that(l.get(2)==i10);
-        Assert.that(l.get(3)==i13);
-    }
-
-    private static class TestManagedConnection extends ManagedConnection {
-        private boolean isOutgoing;
-        private int sent;
-        private int received;
-
-        public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super();  //may require adding stub constructor to ManagedConnection
-            this.isOutgoing=isOutgoing;
-            this.sent=sent;
-            this.received=received;
-        }
-
-        public boolean isOutgoing() {
-            return isOutgoing;
-        }
-
-        public int getNumMessagesSent() {
-            return sent;
-        }
-        
-        public int getNumMessagesReceived() {
-            return received;
-        }        
-    }
-    */
 }
+

@@ -74,7 +74,7 @@ public abstract class MessageRouter
     // BE 100% ACCURATE.
 
     /**
-     * The total number of messages that pass through ManagedConnection.send()
+     * The total number of messages that pass through ManagedConnection.write()
      * and ManagedConnection.receive().
      */
     private volatile int _numMessages;
@@ -308,7 +308,7 @@ public abstract class MessageRouter
                                 ManagedConnection connection)
     {
         _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
-        connection.send(pingRequest);
+        connection.write(pingRequest);
     }
 
     /**
@@ -319,7 +319,7 @@ public abstract class MessageRouter
                                  ManagedConnection connection)
     {
         _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        connection.send(queryRequest);
+        connection.write(queryRequest);
     }
 
     /**
@@ -369,7 +369,7 @@ public abstract class MessageRouter
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-                c.send(pingRequest);
+                c.write(pingRequest);
             }
         }
     }
@@ -454,7 +454,7 @@ public abstract class MessageRouter
                 sendConnection.getDomains())
             || Utilities.hasIntersection(
             receivingConnection.getDomains(), sendConnection.getDomains()))
-            sendConnection.send(queryRequest);
+            sendConnection.write(queryRequest);
     }
     
 
@@ -541,7 +541,7 @@ public abstract class MessageRouter
             {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 if (c!=receivingConnection && c!=replyHandler)
-                    c.send(pingReply);        
+                    c.write(pingReply);        
             }
         }
     }
@@ -773,7 +773,7 @@ public abstract class MessageRouter
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
                     //System.out.println("    Sending "+m.toString()+" to "+c);
-                    c.send(m);
+                    c.write(m);
                 }
                 qi.lastSent=table;
             }

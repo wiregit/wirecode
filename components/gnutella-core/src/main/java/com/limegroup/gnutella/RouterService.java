@@ -9,6 +9,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -52,6 +53,7 @@ public class RouterService
     private MessageRouter router;
     private Acceptor acceptor;
     private ConnectionManager manager;
+    private ConnectionDriver driver;
     private ResponseVerifier verifier = new ResponseVerifier();
     private DownloadManager downloader;
     private UploadManager uploadManager;
@@ -109,6 +111,7 @@ public class RouterService
   		this.acceptor = new Acceptor(port, callback);
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
+        this.driver = new ConnectionDriver();
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
 											   this.fileManager);
@@ -119,7 +122,8 @@ public class RouterService
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
-		this.manager.initialize(router, catcher);		
+        this.driver.initialize(manager, router, callback);
+		this.manager.initialize(router, catcher, driver);		
 		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
         this.chatManager.setActivityCallback(callback);

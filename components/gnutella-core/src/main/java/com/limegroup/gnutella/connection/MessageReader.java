@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.connection;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -55,7 +55,10 @@ public class MessageReader {
     /** Reads as much of the header as possible.  If done, sets the state to
      *  READING_PAYLOAD_STATE and allocates payload. */
     private void readHeader() throws IOException {
-        channel.read(header);        
+        int n=channel.read(header);   
+        if (n<0)
+            throw new IOException("Connection closed");
+        //System.out.println("Read "+n+" bytes of header ("+header.remaining()+")");
         if (! header.hasRemaining()) {
             //Done with header, transfer states to begin reading payload.
             int length=header.getInt(Message.LENGTH_OFFSET);  //little endian
@@ -76,7 +79,10 @@ public class MessageReader {
      *  READING_HEADER_STATE and clears header.  Returns the Message
      *  read. */
     private Message readPayload() throws BadPacketException, IOException {
-        channel.read(payload);
+        int n=channel.read(payload);
+        if (n<0)
+            throw new IOException("Connection closed");
+        //System.out.println("Read "+n+" bytes of payload ("+payload.remaining()+")");
         if (! payload.hasRemaining()) {
             try {
                 return createMessage();
@@ -93,7 +99,7 @@ public class MessageReader {
      *  READING_PAYLOAD_STATE with nothing left to read. */
     private Message createMessage() throws BadPacketException {
         //Unpack.
-        header.position(0);
+        header.flip();
         byte[] guid=new byte[Message.GUID_SIZE];
         header.get(guid);
         int length=payload.capacity();
@@ -121,7 +127,8 @@ public class MessageReader {
                                      //new ttl>=0
         }
 
-        //Dispatch based on opcode.        
+        //Dispatch based on opcode.   
+        payload.flip();     
         byte[] payloadBytes=new byte[payload.capacity()];
         payload.get(payloadBytes, 0, payloadBytes.length);
         switch (func) {

@@ -4,6 +4,8 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
 import java.net.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -67,22 +69,28 @@ public class MiniAcceptor implements Runnable {
 
     /** Don't call.  For internal use only. */
     public void run() {
-        ServerSocket ss=null;
+        ServerSocketChannel listener=null;
         try {
-            ss=new ServerSocket(port);
-            Socket s=ss.accept();
-            //Technically "GNUTELLA " should be read from s.  Turns out that
-            //out implementation doesn't care;
+            //Listen on port
+            listener=ServerSocketChannel.open();
+            listener.configureBlocking(true);
+            listener.socket().bind(new InetSocketAddress(port));
+
+            //Accept connection.  Technically "GNUTELLA " should be read from s.
+            //Turns out that out implementation doesn't care;
+            Socket s=listener.accept().socket();
             Connection c=new Connection(s, properties);
             c.initialize();
-            ss.close();
+
+            //Close listener and store connection.
+            listener.socket().close();
             synchronized (lock) {
                 this.c=c;
                 done=true;
                 lock.notify();
             } 
         } catch (IOException e) {
-            if (ss==null) {
+            if (listener==null) {
                 System.err.println("Couldn't listen to port "+port);
                 e.printStackTrace();  //Couldn't listen?  Serious.
             }

@@ -83,10 +83,8 @@ public class ManagedConnection
      *  INVARIANT: _queued==sum of _outputQueue[i].size() 
      *  LOCKING: obtain _outputQueueLock */
     private int _queued=0;
-    /** True if the OutputRunner died.  For testing only. */
-    private boolean _runnerDied=false;
     /** The priority of the last message added to _outputQueue. This is an
-     *  optimization to keep OutputRunner from iterating through all priorities.
+     *  optimization to keep write() from iterating through all priorities.
      *  This value is only a hint and can be legally set to any priority.  Hence
      *  no locking is necessary.  Package-access for testing purposes only. */
     int _lastPriority=0;
@@ -342,458 +340,425 @@ public class ManagedConnection
         _manager = manager;
     }
 
-    public void initialize()
+    public void initialize(ConnectionListener listener)
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
         if (_isRouter)
-            super.initialize();   //no timeout for bootstrap server
+            super.initialize(listener);   //no timeout for bootstrap server
         else
-            super.initialize(CONNECT_TIMEOUT);
-
-        //Start the thread to empty the output queue
-        new OutputRunner();
+            super.initialize(listener, CONNECT_TIMEOUT);
     }
 
-    /** Throttles the super's OutputStream. */
-    protected OutputStream getOutputStream(Socket s)  throws IOException {
-        return new ThrottledOutputStream(super.getOutputStream(s), _throttle);
-    }
+//      /**
+//       * Override of receive to do ConnectionManager stats and to properly shut
+//       * down the connection on IOException
+//       */
+//      public Message receive() throws IOException, BadPacketException {
+//          Message m = null;
+//          try {
+//              m = super.receive();
+//              _bytesReceived+=m.getTotalLength();
+//          } catch(IOException e) {
+//              if (_manager!=null) //may be null for testing
+//                  _manager.remove(this);
+//              throw e;
+//          }
+//          _numMessagesReceived++;
+//          _router.countMessage();
+//          return m;
+//      }
 
-    /** Delegates to super. */
-    protected InputStream getInputStream(Socket s) throws IOException {
-        return super.getInputStream(s);
-    }
-
-
-    /**
-     * Override of receive to do ConnectionManager stats and to properly shut
-     * down the connection on IOException
-     */
-    public Message receive() throws IOException, BadPacketException {
-        Message m = null;
-        try {
-            m = super.receive();
-            _bytesReceived+=m.getTotalLength();
-        } catch(IOException e) {
-            if (_manager!=null) //may be null for testing
-                _manager.remove(this);
-            throw e;
-        }
-        _numMessagesReceived++;
-        _router.countMessage();
-        return m;
-    }
-
-    /**
-     * Override of receive to do MessageRouter stats and to properly shut
-     * down the connection on IOException
-     */
-    public Message receive(int timeout)
-            throws IOException, BadPacketException, InterruptedIOException {
-        Message m = null;
-        try {
-            m = super.receive(timeout);
-            _bytesReceived+=m.getTotalLength();
-        } catch(IOException e) {
-            if (_manager!=null) //may be null for testing
-                _manager.remove(this);
-            throw e;
-        }
-        _numMessagesReceived++;
-        _router.countMessage();
-        return m;
-    }
+//      /**
+//       * Override of receive to do MessageRouter stats and to properly shut
+//       * down the connection on IOException
+//       */
+//      public Message receive(int timeout)
+//              throws IOException, BadPacketException, InterruptedIOException {
+//          Message m = null;
+//          try {
+//              m = super.receive(timeout);
+//              _bytesReceived+=m.getTotalLength();
+//          } catch(IOException e) {
+//              if (_manager!=null) //may be null for testing
+//                  _manager.remove(this);
+//              throw e;
+//          }
+//          _numMessagesReceived++;
+//          _router.countMessage();
+//          return m;
+//      }
 
 
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
 
-    /**
-     * Sends a message.  This overrides does extra buffering so that Messages
-     * are dropped if the socket gets backed up.  Will remove any extended
-     * payloads if the receiving connection does not support GGGEP.   Also
-     * updates MessageRouter stats.<p>
-     *
-     * This methodIS thread safe.  Multiple threads can be in a send call
-     * at the same time for a given connection.
-     *
-     * @requires this is fully constructed
-     * @modifies the network underlying this
-     * @effects send m on the network.  Throws IOException if the connection
-     *  is already closed.  This is thread-safe and guaranteed not to block.
-     */
-    public void send(Message m) {
-        if (! supportsGGEP())
-            m=m.stripExtendedPayload();
+//      /**
+//       * Queue a message.  This does extra buffering so that Messages
+//       * are dropped if the socket gets backed up.  Will remove any extended
+//       * payloads if the receiving connection does not support GGGEP.   Also
+//       * updates MessageRouter stats.<p>
+//       *
+//       * This methodIS thread safe.  Multiple threads can be in a send call
+//       * at the same time for a given connection.
+//       *
+//       * @requires this is fully constructed
+//       * @modifies the network underlying this
+//       * @effects send m on the network.  Throws IOException if the connection
+//       *  is already closed.  This is thread-safe and guaranteed not to block.
+//       */
+//      public boolean queue(Message m) {
+//          if (! supportsGGEP())
+//              m=m.stripExtendedPayload();
 
-        repOk();
-        _router.countMessage();
-        int priority=calculatePriority(m);
-        synchronized (_outputQueueLock) {
-            _numMessagesSent++;
-            _outputQueue[priority].add(m);
-            int dropped=_outputQueue[priority].resetDropped();
-            _numSentMessagesDropped+=dropped;
-            _queued+=1-dropped;
-            _lastPriority=priority;
-            _outputQueueLock.notify();
-        }
-        repOk();
-    }
- 
-    /** 
-     * Returns the send priority for the given message, with higher number for
-     * higher priorities.  TODO: this method will eventually be moved to
-     * MessageRouter and account for number of reply bytes.
-     */
-    private int calculatePriority(Message m) {
-        //TODO: use switch statement?
-        byte opcode=m.getFunc();
-        boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
-        switch (opcode) {
-            case Message.F_QUERY: 
-                return PRIORITY_QUERY;
-            case Message.F_QUERY_REPLY: 
-                return PRIORITY_QUERY_REPLY;
-            case Message.F_PING_REPLY: 
-                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
-            case Message.F_PING: 
-                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
-            case Message.F_PUSH: 
-                return PRIORITY_PUSH;
-            default: 
-                return PRIORITY_OTHER;  //includes QRP Tables
-        }
-    }
+//          repOk();
+//          _router.countMessage();
+//          int priority=calculatePriority(m);
+//          synchronized (_outputQueueLock) {
+//              _numMessagesSent++;
+//              _outputQueue[priority].add(m);
+//              int dropped=_outputQueue[priority].resetDropped();
+//              _numSentMessagesDropped+=dropped;
+//              _queued+=1-dropped;
+//              _lastPriority=priority;
+//              _outputQueueLock.notify();
+//          }
+//          repOk();
+//          return true;   //not strictly appropriate
+//      }
 
-    /**
-     * Does nothing.  Since this automatically takes care of flushing output
-     * buffers, there is nothing to do.  Note that flush() does NOT block for
-     * TCP buffers to be emptied.  
-     */
-    public void flush() throws IOException {        
-    }
+//      /** 
+//       * Returns the send priority for the given message, with higher number for
+//       * higher priorities.  TODO: this method will eventually be moved to
+//       * MessageRouter and account for number of reply bytes.
+//       */
+//      private int calculatePriority(Message m) {
+//          //TODO: use switch statement?
+//          byte opcode=m.getFunc();
+//          boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
+//          switch (opcode) {
+//              case Message.F_QUERY: 
+//                  return PRIORITY_QUERY;
+//              case Message.F_QUERY_REPLY: 
+//                  return PRIORITY_QUERY_REPLY;
+//              case Message.F_PING_REPLY: 
+//                  return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
+//              case Message.F_PING: 
+//                  return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
+//              case Message.F_PUSH: 
+//                  return PRIORITY_PUSH;
+//              default: 
+//                  return PRIORITY_OTHER;  //includes QRP Tables
+//          }
+//      }
 
-    /** Repeatedly sends all the queued data. */
-    private class OutputRunner extends Thread {
-        public OutputRunner() {
-            setDaemon(true);
-            start();
-        }
+//      public boolean hasQueued() {
+//          synchronized (_outputQueueLock) {
+//              return _queued==0;
+//          }
+//      }
 
-        /** While the connection is not closed, sends all data delay. */
-        public void run() {
-            while (true) {
-                repOk();
-                try {
-                    waitForQueued();
-                    sendQueued();
-                } catch (IOException e) {
-                    if (_manager!=null) //may be null for testing
-                        _manager.remove(ManagedConnection.this);
-                    _runnerDied=true;
-                    return;
-                }
-                repOk();
-            }
-        }
-
-        /** 
-         * Wait until the queue is (probably) non-empty or closed. 
-         * @exception IOException this was closed while waiting
-         */
-        private final void waitForQueued() throws IOException {
-            //The synchronized statement is outside the while loop to
-            //protect _queued.
-            synchronized (_outputQueueLock) {
-                while (isOpen() && _queued==0) {           
-                    try {
-                        _outputQueueLock.wait();
-                    } catch (InterruptedException e) {
-                        Assert.that(false, "OutputRunner Interrupted");
-                    }
-                }
-            }
+//      public boolean write() throws IOException {  //overrides Connection.write
+//          boolean ret=false;
+//          //Terminate when either
+//          //a) super cannot send any more data because its send
+//          //   buffer is full OR
+//          //b) neither super nor this have any queued data            
+//          while (true) {
+//              //Add more queued data to super if possible
+//              if (! super.hasQueued()) {
+//                  if (! this.hasQueued())
+//                      break;
+//                  Message m=queue.extractBest();
+//                  super.queue(m);
+//              }
             
-            if (! isOpen())
-                throw new IOException();
-        }
+//              //Write data from super.  (Returns false if nothing queued.)
+//              boolean wrote=super.write();   
+//              ret=ret|wrote;
+            
+//              //Terminate if write didn't make progress
+//              if (! wrote)   
+//                  break;
+//          }
+//          return ret;
+//      }
+
+//      /** Repeatedly sends all the queued data. */
+//      private class OutputRunner extends Thread {
+//          public OutputRunner() {
+//              setDaemon(true);
+//              start();
+//          }
+
+//          /** While the connection is not closed, sends all data delay. */
+//          public void run() {
+//              while (true) {
+//                  repOk();
+//                  try {
+//                      waitForQueued();
+//                      sendQueued();
+//                  } catch (IOException e) {
+//                      if (_manager!=null) //may be null for testing
+//                          _manager.remove(ManagedConnection.this);
+//                      _runnerDied=true;
+//                      return;
+//                  }
+//                  repOk();
+//              }
+//          }
+
+//          /** 
+//           * Wait until the queue is (probably) non-empty or closed. 
+//           * @exception IOException this was closed while waiting
+//           */
+//          private final void waitForQueued() throws IOException {
+//              //The synchronized statement is outside the while loop to
+//              //protect _queued.
+//              synchronized (_outputQueueLock) {
+//                  while (isOpen() && _queued==0) {           
+//                      try {
+//                          _outputQueueLock.wait();
+//                      } catch (InterruptedException e) {
+//                          Assert.that(false, "OutputRunner Interrupted");
+//                      }
+//                  }
+//              }
+            
+//              if (! isOpen())
+//                  throw new IOException();
+//          }
         
-        /** Send several queued message of each type. */
-        private final void sendQueued() throws IOException {  
-            //1. For each priority i send as many messages as desired for that
-            //type.  As an optimization, we start with the buffer of the last
-            //message sent, wrapping around the buffer.  You can also search
-            //from 0 to the end.
-            int start=_lastPriority;
-            int i=start;
-            do {                   
-                //IMPORTANT: we only obtain _outputQueueLock while touching the
-                //queue, not while actually sending (which can block).
-                MessageQueue queue=_outputQueue[i];
-                queue.resetCycle();
-                boolean emptied=false;
-                while (true) {
-                    Message m=null;
-                    synchronized (_outputQueueLock) {
-                        m=(Message)queue.removeNext(); 
-                        int dropped=queue.resetDropped();
-                        _numSentMessagesDropped+=dropped;
-                        _queued-=(m==null?0:1)+dropped;  //maintain invariant
-                        if (_queued==0)
-                            emptied=true;                        
-                        if (m==null)
-                            break;
-                    }
-                    ManagedConnection.super.send(m);
-                    _bytesSent+=m.getTotalLength();
-                }
+//          /** Send several queued message of each type. */
+//          private final void sendQueued() throws IOException {  
+//              //1. For each priority i send as many messages as desired for that
+//              //type.  As an optimization, we start with the buffer of the last
+//              //message sent, wrapping around the buffer.  You can also search
+//              //from 0 to the end.
+//              int start=_lastPriority;
+//              int i=start;
+//              do {                   
+//                  //IMPORTANT: we only obtain _outputQueueLock while touching the
+//                  //queue, not while actually sending (which can block).
+//                  MessageQueue queue=_outputQueue[i];
+//                  queue.resetCycle();
+//                  boolean emptied=false;
+//                  while (true) {
+//                      Message m=null;
+//                      synchronized (_outputQueueLock) {
+//                          m=(Message)queue.removeNext(); 
+//                          int dropped=queue.resetDropped();
+//                          _numSentMessagesDropped+=dropped;
+//                          _queued-=(m==null?0:1)+dropped;  //maintain invariant
+//                          if (_queued==0)
+//                              emptied=true;                        
+//                          if (m==null)
+//                              break;
+//                      }
+//                      ManagedConnection.super.send(m);
+//                      _bytesSent+=m.getTotalLength();
+//                  }
                 
-                //Optimization: the if statement below is not needed for
-                //correctness but works nicely with the _priorityHint trick.
-                if (emptied)
-                    break;
-                i=(i+1)%PRIORITIES;
-            } while (i!=start);
+//                  //Optimization: the if statement below is not needed for
+//                  //correctness but works nicely with the _priorityHint trick.
+//                  if (emptied)
+//                      break;
+//                  i=(i+1)%PRIORITIES;
+//              } while (i!=start);
             
             
-            //2. Now force data from Connection's BufferedOutputStream into the
-            //kernel's TCP send buffer.  It doesn't force TCP to
-            //actually send the data to the network.  That is determined
-            //by the receiver's window size and Nagle's algorithm.
-            ManagedConnection.super.flush();
-        }
-    } //end OutputRunner
+//              //2. Now force data from Connection's BufferedOutputStream into the
+//              //kernel's TCP send buffer.  It doesn't force TCP to
+//              //actually send the data to the network.  That is determined
+//              //by the receiver's window size and Nagle's algorithm.
+//              ManagedConnection.super.flush();
+//          }
+//      } //end OutputRunner
 
 
-    /** 
-     * For debugging only: prints to stdout the number of queued messages in
-     * this, by type.
-     */
-    private void dumpQueueStats() {
-        synchronized (_outputQueueLock) {
-            for (int i=0; i<PRIORITIES; i++) {
-                System.out.println(i+" "+_outputQueue[i].size());
-            }
-            System.out.println("* "+_queued+"\n");
-        }
-    }
+//      /** 
+//       * For debugging only: prints to stdout the number of queued messages in
+//       * this, by type.
+//       */
+//      private void dumpQueueStats() {
+//          synchronized (_outputQueueLock) {
+//              for (int i=0; i<PRIORITIES; i++) {
+//                  System.out.println(i+" "+_outputQueue[i].size());
+//              }
+//              System.out.println("* "+_queued+"\n");
+//          }
+//      }
 
 
-    public void close() {
-        //Ensure OutputRunner terminates.
-        synchronized (_outputQueueLock) {
-            super.close();
-            _outputQueueLock.notify();
-        }        
-    }
+//      public void close() {
+//          //Ensure OutputRunner terminates.
+//          synchronized (_outputQueueLock) {
+//              super.close();
+//              _outputQueueLock.notify();
+//          }        
+//      }
 
     //////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Implements the reject connection mechanism.  Loops until receiving a
-     * handshake ping, responds with the best N pongs, and closes the
-     * connection.  Closes the connection if no ping is received within a
-     * reasonable amount of time.  Does NOT clean up route tables in the case
-     * of an IOException.
-     */
-    void loopToReject(HostCatcher catcher) {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-        //Unfortunately it still can be triggered by the
-        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
-        //thread in this case?
+//      /**
+//       * Implements the reject connection mechanism.  Loops until receiving a
+//       * handshake ping, responds with the best N pongs, and closes the
+//       * connection.  Closes the connection if no ping is received within a
+//       * reasonable amount of time.  Does NOT clean up route tables in the case
+//       * of an IOException.
+//       */
+//      void loopToReject(HostCatcher catcher) {
+//          //IMPORTANT: note that we do not use this' send or receive methods.
+//          //This is an important optimization to prevent calling
+//          //RouteTable.removeReplyHandler when the connection is closed.
+//          //Unfortunately it still can be triggered by the
+//          //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
+//          //thread in this case?
 
-        try {
-        //The first message we get from the remote host should be its initial
-        //ping.  However, some clients may start forwarding packets on the
-        //connection before they send the ping.  Hence the following loop.  The
-        //limit of 10 iterations guarantees that this method will not run for
-        //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
-        for (int i=0; i<10; i++) {
-            Message m=null;
-            try {                
-                m=super.receive(REJECT_TIMEOUT);
-                if (m==null)
-                    return; //Timeout has occured and we havent received the ping,
-                            //so just return
-            }// end of try for BadPacketEception from socket
-            catch (BadPacketException e) {
-                return; //Its a bad packet, just return
-            }
-            if((m instanceof PingRequest) && (m.getHops()==0)) {
-                // this is the only kind of message we will deal with
-                // in Reject Connection
-                // If any other kind of message comes in we drop
+//          try {
+//          //The first message we get from the remote host should be its initial
+//          //ping.  However, some clients may start forwarding packets on the
+//          //connection before they send the ping.  Hence the following loop.  The
+//          //limit of 10 iterations guarantees that this method will not run for
+//          //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
+//          for (int i=0; i<10; i++) {
+//              Message m=null;
+//              try {                
+//                  m=super.receive(REJECT_TIMEOUT);
+//                  if (m==null)
+//                      return; //Timeout has occured and we havent received the ping,
+//                              //so just return
+//              }// end of try for BadPacketEception from socket
+//              catch (BadPacketException e) {
+//                  return; //Its a bad packet, just return
+//              }
+//              if((m instanceof PingRequest) && (m.getHops()==0)) {
+//                  // this is the only kind of message we will deal with
+//                  // in Reject Connection
+//                  // If any other kind of message comes in we drop
               
-                //SPECIAL CASE: for Crawle ping
-                if(m.getTTL() == 2) {
-                    handleCrawlerPing((PingRequest)m);
-                    return;
-                }
+//                  //SPECIAL CASE: for Crawle ping
+//                  if(m.getTTL() == 2) {
+//                      handleCrawlerPing((PingRequest)m);
+//                      return;
+//                  }
 
-                Iterator iter = catcher.getNormalHosts(10);
-                 // we are going to send rejected host the top ten
-                 // connections
-                while(iter.hasNext()) {
-                    Endpoint bestEndPoint =(Endpoint)iter.next();
-                    // make a pong with this host info
-                    PingReply pr = new PingReply(m.getGUID(),(byte)1,
-                        bestEndPoint.getPort(),
-                        bestEndPoint.getHostBytes(), 0, 0);
-                    // the ttl is 1; and for now the number of files
-                    // and kbytes is set to 0 until chris stores more
-                    // state in the hostcatcher
-                    super.send(pr);
-                }
-                super.flush();
-                return;
-            }// end of (if m is PingRequest)
-        } // End of while(true)
-        } catch (IOException e) {
-        } finally {
-            close();
-        }
-    }
+//                  Iterator iter = catcher.getNormalHosts(10);
+//                   // we are going to send rejected host the top ten
+//                   // connections
+//                  while(iter.hasNext()) {
+//                      Endpoint bestEndPoint =(Endpoint)iter.next();
+//                      // make a pong with this host info
+//                      PingReply pr = new PingReply(m.getGUID(),(byte)1,
+//                          bestEndPoint.getPort(),
+//                          bestEndPoint.getHostBytes(), 0, 0);
+//                      // the ttl is 1; and for now the number of files
+//                      // and kbytes is set to 0 until chris stores more
+//                      // state in the hostcatcher
+//                      super.send(pr);
+//                  }
+//                  super.flush();
+//                  return;
+//              }// end of (if m is PingRequest)
+//          } // End of while(true)
+//          } catch (IOException e) {
+//          } finally {
+//              close();
+//          }
+//      }
 
-    /**
-     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its neighbors
-     * @param m The ping request received
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
-     */
-    private void handleCrawlerPing(PingRequest m) throws IOException {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-        //Unfortunately it still can be triggered by the
-        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
-        //thread in this case?
+//      /**
+//       * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
+//       * corresponding to all its neighbors
+//       * @param m The ping request received
+//       * @exception In case any I/O error occurs while writing Pongs over the
+//       * connection
+//       */
+//      private void handleCrawlerPing(PingRequest m) throws IOException {
+//          //IMPORTANT: note that we do not use this' send or receive methods.
+//          //This is an important optimization to prevent calling
+//          //RouteTable.removeReplyHandler when the connection is closed.
+//          //Unfortunately it still can be triggered by the
+//          //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
+//          //thread in this case?
 
-        //send the pongs for the Ultrapeer & 0.4 connections
-        List /*<ManagedConnection>*/ nonLeafConnections 
-            = _manager.getInitializedConnections2();
+//          //send the pongs for the Ultrapeer & 0.4 connections
+//          List /*<ManagedConnection>*/ nonLeafConnections 
+//              = _manager.getInitializedConnections2();
         
-        supersendNeighborPongs(m, nonLeafConnections);
+//          supersendNeighborPongs(m, nonLeafConnections);
         
-        //send the pongs for leaves
-        List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections2();
-        supersendNeighborPongs(m, leafConnections);
+//          //send the pongs for leaves
+//          List /*<ManagedConnection>*/ leafConnections 
+//              = _manager.getInitializedClientConnections2();
+//          supersendNeighborPongs(m, leafConnections);
         
-        //Note that sending its own pong is not necessary, as the crawler has
-        //already connected to this node, and is not sent therefore. 
-        //May be sent for completeness though
-    }
+//          //Note that sending its own pong is not necessary, as the crawler has
+//          //already connected to this node, and is not sent therefore. 
+//          //May be sent for completeness though
+//      }
+    
+//      /**
+//       * Uses the super class's send message to send the pongs corresponding 
+//       * to the list of connections passed.
+//       * This prevents calling RouteTable.removeReplyHandler when 
+//       * the connection is closed.
+//       * @param m Th epingrequest received that needs Pongs
+//       * @param neigbors List (of ManagedConnection) of  neighboring connections
+//       * @exception In case any I/O error occurs while writing Pongs over the
+//       * connection
+//       */
+//      private void supersendNeighborPongs(PingRequest m, List neighbors) 
+//          throws IOException {
+//          for(Iterator iterator = neighbors.iterator();
+//              iterator.hasNext();) {
+//              //get the next connection
+//              ManagedConnection connection = (ManagedConnection)iterator.next();
+            
+//              //create the pong for this connection
+//              //mark the pong if supernode
+//              PingReply pr;
+//              if(connection.isSupernodeConnection()) {
+//                  pr = new PingReply(m.getGUID(),(byte)2,
+//                  connection.getOrigPort(),
+//                  connection.getInetAddress().getAddress(), 0, 0, true);  
+//              } else if(connection.isClientConnection() 
+//                  || connection.isOutgoing()){
+//                  //we know the listening port of the host in this case
+//                  pr = new PingReply(m.getGUID(),(byte)2,
+//                  connection.getOrigPort(),
+//                  connection.getInetAddress().getAddress(), 0, 0); 
+//              }
+//              else{
+//                  //Use the port '0' in this case, as we dont know the listening
+//                  //port of the host
+//                  pr = new PingReply(m.getGUID(),(byte)2,
+//                  0,
+//                  connection.getInetAddress().getAddress(), 0, 0); 
+//              }
+            
+//              //hop the message, as it is ideally coming from the connected host
+//              pr.hop();
+            
+//              //send the message
+//              super.send(pr);
+//          }
+        
+//          super.flush();
+//      }
     
     /**
-     * Uses the super class's send message to send the pongs corresponding 
-     * to the list of connections passed.
-     * This prevents calling RouteTable.removeReplyHandler when 
-     * the connection is closed.
-     * @param m Th epingrequest received that needs Pongs
-     * @param neigbors List (of ManagedConnection) of  neighboring connections
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
+     * Handles a read of message <tt>m</tt> from <tt>this</tt>.
      */
-    private void supersendNeighborPongs(PingRequest m, List neighbors) 
-        throws IOException {
-        for(Iterator iterator = neighbors.iterator();
-            iterator.hasNext();) {
-            //get the next connection
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            
-            //create the pong for this connection
-            //mark the pong if supernode
-            PingReply pr;
-            if(connection.isSupernodeConnection()) {
-                pr = new PingReply(m.getGUID(),(byte)2,
-                connection.getOrigPort(),
-                connection.getInetAddress().getAddress(), 0, 0, true);  
-            } else if(connection.isClientConnection() 
-                || connection.isOutgoing()){
-                //we know the listening port of the host in this case
-                pr = new PingReply(m.getGUID(),(byte)2,
-                connection.getOrigPort(),
-                connection.getInetAddress().getAddress(), 0, 0); 
-            }
-            else{
-                //Use the port '0' in this case, as we dont know the listening
-                //port of the host
-                pr = new PingReply(m.getGUID(),(byte)2,
-                0,
-                connection.getInetAddress().getAddress(), 0, 0); 
-            }
-            
-            //hop the message, as it is ideally coming from the connected host
-            pr.hop();
-            
-            //send the message
-            super.send(pr);
+    public void handleRead(Message m) {
+        // Run through the route spam filter and drop accordingly.
+        if (!_routeFilter.allow(m)) {
+            _router.countFilteredMessage();
+            _numReceivedMessagesDropped++;
+            return;
         }
-        
-        super.flush();
-    }
-    
-    /**
-     * Handles core Gnutella request/reply protocol.  This call
-     * will run until the connection is closed.  Note that this is called
-     * from the run methods of several different thread implementations
-     * that are inner classes of ConnectionManager.  This allows a single
-     * thread to be used for initialization and for the request/reply loop.
-     *
-     * @requires this is initialized
-     * @modifies the network underlying this, manager
-     * @effects receives request and sends appropriate replies.
-     *   Returns if either the connection is closed or an error happens.
-     *   If this happens, removes itself from the manager's connection list,
-     *   so no further cleanup is necessary.  No exception is thrown
-     *
-     * @throws IOException passed on from the receive call; failures to forward
-     *         or route messages are silently swallowed, allowing the message
-     *         loop to continue.
-     */
-    void loopForMessages()
-            throws IOException {
-        while (true) {
-            Message m=null;
-            try {
-                m=receive();
-                if (m==null)
-                    continue;
-            } catch (BadPacketException e) {
-                // Don't increment any message counters here.  It's as if
-                // the packet never existed
-                continue;
-            }
 
-            // Run through the route spam filter and drop accordingly.
-            if (!_routeFilter.allow(m)) {
-                _router.countFilteredMessage();
-                _numReceivedMessagesDropped++;
-                continue;
-            }
-
-            //call MessageRouter to handle and process the message
-            _router.handleMessage(m, this);
-            
-//            // Increment hops and decrease TTL
-//            m.hop();
-//
-//            if(m instanceof PingRequest)
-//                _router.handlePingRequestPossibleDuplicate(
-//                    (PingRequest)m, this);
-//            else if (m instanceof PingReply)
-//                _router.handlePingReply((PingReply)m, this);
-//            else if (m instanceof QueryRequest)
-//                _router.handleQueryRequestPossibleDuplicate(
-//                    (QueryRequest)m, this);
-//            else if (m instanceof QueryReply)
-//                _router.handleQueryReply((QueryReply)m, this);
-//            else if (m instanceof PushRequest)
-//                _router.handlePushRequest((PushRequest)m, this);
-        }
+        //Call MessageRouter to handle and process the message
+        //TODO: reject connection handles differently
+        _router.handleMessage(m, this);         
     }
 
     //
@@ -902,7 +867,7 @@ public class ManagedConnection
      */
     public void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection) {
-        send(pingReply);
+        write(pingReply);
     }
 
     /**
@@ -913,7 +878,7 @@ public class ManagedConnection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ManagedConnection receivingConnection) {
-        send(queryReply);
+        write(queryReply);
     }
 
     /**
@@ -924,7 +889,7 @@ public class ManagedConnection
      */
     public void handlePushRequest(PushRequest pushRequest,
                                   ManagedConnection receivingConnection) {
-        send(pushRequest);
+        write(pushRequest);
     }
 
     //
@@ -1362,30 +1327,4 @@ public class ManagedConnection
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
      **************************************************************************/
-
-    /** FOR TESTING PURPOSES ONLY! */
-    void stopOutputRunner() {
-        //Ensure OutputRunner terminates.
-        synchronized (_outputQueueLock) {
-            super._closed=true;  //doesn't close socket
-            _outputQueueLock.notify();
-        }
-        //Wait for OutputRunner to terminate
-        while (! _runnerDied) { 
-            Thread.yield();
-        }
-        //Make it alive again (except for runner)
-        _runnerDied=false;
-        super._closed=false;
-    }
-
-    /** FOR TESTING PURPOSES ONLY! */
-    void startOutputRunner() {
-        new OutputRunner();
-    }
-
-    /** FOR TESTING PURPOSES ONLY! */
-    boolean runnerDied() {
-        return _runnerDied;
-    }
 }

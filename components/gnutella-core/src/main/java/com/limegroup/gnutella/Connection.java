@@ -2,9 +2,12 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -12,8 +15,8 @@ import com.limegroup.gnutella.util.Sockets;
  * A Gnutella messaging connection.  Provides handshaking functionality and
  * routines for reading and writing of Gnutella messages.  A connection is
  * either incoming (created from a Socket) or outgoing (created from an
- * address).  This class does not provide sophisticated buffering or routing
- * logic; use ManagedConnection for that. <p>
+ * address).  This class does not provide buffering or flow control; use
+ * ManagedConnection.  <p>
  *
  * You will note that the constructors don't actually involve the network and
  * hence never throw exceptions or block. <b>To actual initialize a connection,
@@ -35,17 +38,23 @@ import com.limegroup.gnutella.util.Sockets;
  */
 public class Connection {
     /** 
-     * The underlying socket, its address, and input and output streams.  sock,
-     * in, and out are null iff this is in the unconnected state.  For thread
-     * synchronization reasons, it is important that this only be modified by
-     * the send(m) and receive() methods.
+     * The underlying socket, its address, and input and output streams.  These
+     * variables are null iff this is in the unconnected state.  _in/_out and
+     * _reader/_writer refer to the same socket.  The former is used for
+     * handshaking and the latter for message reading/writing.  Hence they must
+     * not be buffered, and only one can be used at a time.  
      */
     private String _host;
     private int _port;
     private Socket _socket;
     private InputStream _in;
     private OutputStream _out;
+    private MessageReader _reader;
+    private MessageWriter _writer;
     private boolean _outgoing;
+
+    /** The listener for connection events. */
+    private ConnectionListener _listener;
 
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -154,6 +163,8 @@ public class Connection {
      *
      * @param socket the socket accepted by a ServerSocket.  The word
      *  "GNUTELLA " and nothing else must have been read from the socket.
+     *  The socket MUST have been created with ServerSocketChannel.accept()
+     *  instead of ServerSocket.accept; otherwise non-blocking IO will fail.
      */
     public Connection(Socket socket) {
         this(socket, null);
@@ -166,6 +177,8 @@ public class Connection {
      * 
      * @param socket the socket accepted by a ServerSocket.  The word
      *  "GNUTELLA " and nothing else must have been read from the socket.
+     *  The socket MUST have been created with ServerSocketChannel.accept()
+     *  instead of ServerSocket.accept; otherwise non-blocking IO will fail.
      * @param properties a function returning the headers to be sent in response
      *  to the client's "GNUTELLA CONNECT".  If the client connected at the 0.4
      *  level, this method is never called.  
@@ -179,15 +192,16 @@ public class Connection {
         _socket = socket;
         _outgoing = false;
         _propertiesWrittenR=properties;
+        Assert.that(socket.getChannel()!=null, "No channel for socket");
     }
 
     /** 
-     * Initializes this without timeout; exactly like initialize(0). 
+     * Initializes this without timeout; exactly like initialize(listener, 0). 
      * @see initialize(int)
      */
-    public void initialize() 
+    public void initialize(ConnectionListener listener) 
             throws IOException, NoGnutellaOkException, BadHandshakeException {
-        initialize(0);
+        initialize(listener, 0);
     }
 
     /**
@@ -195,6 +209,7 @@ public class Connection {
      * if we were unable to establish a normal messaging connection for
      * any reason.  Do not call send or receive if this happens.
      *
+     * @param listener the observer of all Connection events
      * @param timeout for outgoing connections, the timeout in milliseconds
      *  to use in establishing the socket, or 0 for no timeout.  If the 
      *  platform does not support native timeouts, it will be emulated with
@@ -207,8 +222,9 @@ public class Connection {
      *  the connection, e.g., the server responded with HTTP, closed the
      *  the connection during handshaking, etc.
      */
-    public void initialize(int timeout) 
+    public void initialize(ConnectionListener listener, int timeout) 
             throws IOException, NoGnutellaOkException, BadHandshakeException {
+        this._listener=listener;
         try {
             initializeWithoutRetry(timeout);
         } catch (NoGnutellaOkException e) {
@@ -231,6 +247,10 @@ public class Connection {
                 throw e;
             }
         }
+        //Change to non-blocking mode for messaging.
+        _socket.getChannel().configureBlocking(false);
+        //Notify of initialization.  TODO: notify of close as well.
+        _listener.initialized(this);
     }
     
     /*
@@ -262,8 +282,8 @@ public class Connection {
             // Set the Acceptors IP address
             Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
             
-            _in = getInputStream(_socket);
-            _out = getOutputStream(_socket);
+            _in = _socket.getInputStream();
+            _out = _socket.getOutputStream();           
             if (_in==null || _out==null) throw new IOException();
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
@@ -277,6 +297,11 @@ public class Connection {
             //are not null.
             throw new IOException();
         }
+        SocketChannel channel=_socket.getChannel();
+        Assert.that(channel!=null,"Null channel for socket ("+isOutgoing()+")");
+        channel.configureBlocking(true);  //for handshaking; see initialize()
+        _reader=new MessageReader(channel);
+        _writer=new MessageWriter(channel);
 
         try {
             //In all the line reading code below, we are somewhat lax in
@@ -519,9 +544,9 @@ public class Connection {
                                         "Too much handshaking, no conclusion");
     }
     
-    /** Returns true iff line ends with "CONNECT/N", where N
-     *  is a number greater than or equal "0.6". */
-    private static boolean notLessThan06(String line) {
+    /** Returns true iff line ends with "CONNECT/N", where N is a number greater
+     *  than or equal "0.6".  Public for testing purposes only. */
+    public static boolean notLessThan06(String line) {
         int i=line.indexOf(CONNECT);
         if (i<0)
             return false;
@@ -652,19 +677,6 @@ public class Connection {
         }
     }
 
-    /** Returns the stream to use for writing to s.  By default this is a
-     *  BufferedOutputStream.  Subclasses may override to decorate the
-     *  stream. */
-    protected OutputStream getOutputStream(Socket s)  throws IOException {
-        return new BufferedOutputStream(_socket.getOutputStream());
-    }
-
-    /** Returns the stream to use for reading from s.  By default this is a
-     *  BufferedInputStream.  Subclasses may override to decorate the stream. */
-    protected InputStream getInputStream(Socket s) throws IOException {
-        return new BufferedInputStream(_socket.getInputStream());
-    }
-
     /////////////////////////////////////////////////////////////////////////
 
     /**
@@ -674,83 +686,94 @@ public class Connection {
         return _outgoing;
     }
 
-    /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
-    private byte[] HEADER_BUF=new byte[23];
     /**
-     * Receives a message.  This method is NOT thread-safe.  Behavior is
-     * undefined if two threads are in a receive call at the same time for a
-     * given connection.
-     *
-     * @requires this is fully initialized
-     * @effects exactly like Message.read(), but blocks until a
-     *  message is available.  A half-completed message
-     *  results in InterruptedIOException.
+     * Returns this' underlying communication channel.  This exposes the
+     * internals of this but is necessary for registering with a Selector.  DO
+     * NOT MODIFY CHANNEL.  
      */
-    public Message receive() throws IOException, BadPacketException {
+    public SocketChannel channel() {
+        return _socket.getChannel();
+    }
+
+    /**
+     * Reads as much data from the channel as possible.  For any messages m
+     * received (zero or many), calls listener.read(this, m).  Calls
+     * listener.read(this, error) for any non-fatal errors, and
+     * listener.error(c) for any fatal errors, like the connection being closed.
+     */
+    public void read() {
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
         //that Message.read may still throw IOException below.
-        if (_closed)
-            throw new IOException();
-
-        Message m = null;
-        while (m == null) {
-            m = Message.read(_in, HEADER_BUF);
+        if (_closed) {            
+            _listener.error(this);         //Is this still needed?
+            return;            
         }
-        return m;
-    }
-
-    /**
-     * Receives a message with timeout.  This method is NOT thread-safe.
-     * Behavior is undefined if two threads are in a receive call at the same
-     * time for a given connection.
-     *
-     * @requires this is fully initialized
-     * @effects exactly like Message.read(), but throws InterruptedIOException
-     *  if timeout!=0 and no message is read after "timeout" milliseconds.  In
-     *  this case, you should terminate the connection, as half a message may
-     *  have been read.
-     */
-    public Message receive(int timeout)
-            throws IOException, BadPacketException, InterruptedIOException {
-        //See note in receive().
-        if (_closed)
-            throw new IOException();
-
-        //temporarily change socket timeout.
-        int oldTimeout=_socket.getSoTimeout();
-        _socket.setSoTimeout(timeout);
+             
+        //TODO: read as much as possible without blocking?
         try {
-            Message m=Message.read(_in);
-            if (m==null)
-                throw new InterruptedIOException();
-            return m;
-        } finally {
-            _socket.setSoTimeout(oldTimeout);
-        }
+            Message m=_reader.read();
+            if (m!=null)
+                _listener.read(this, m);            
+        } catch (BadPacketException e) {
+            _listener.read(this, e);
+        } catch (IOException e) {
+            _listener.error(this);
+        }                   
     }
 
     /**
-     * Sends a message.  The message may be buffered, so call flush() to
-     * guarantee that the message is sent synchronously.  This method is NOT
-     * thread-safe. Behavior is undefined if two threads are in a send call
-     * at the same time for a given connection.
+     * Attempts to send m, or as much as possible.  First attempts to add m to
+     * this' send queue, possibly discarding other queued messages (or m) for
+     * which sending has not yet started.  Then attempts to send as much data to
+     * the network as possible without blocking.  Calls
+     * listener.needsWrite(this) if not all data was sent.  Calls
+     * listener.error(this) if connection closed.<p>
      *
-     * @requires this is fully initialized
-     * @modifies the network underlying this
-     * @effects send m on the network.  Throws IOException if problems
-     *   arise.
+     * This method is called from deep within the bowels of the message handling
+     * code.  That's why it doesn't block and generates needWrite events through
+     * a callback instead of a simple return value.  
      */
-    public void send(Message m) throws IOException {
-        m.write(_out);
+    public void write(Message m) {
+        if (_closed) {
+            _listener.error(this);
+            return;
+        }                    
+
+        try {            
+            boolean needsWrite=_writer.write(m);
+            if (needsWrite)
+                _listener.needsWrite(this); 
+        } catch (IOException e) {
+            _listener.error(this);
+        }                 
     }
 
     /**
-     * Flushes any buffered messages sent through the send method.
+     * Sends as much queued data as possible, if any.  Calls
+     * listener.error(this) if connection closed.  Does NOT call
+     * listener.needsWrite(this).<p>
+     *
+     * This method is called within the Selector code, which typically
+     * needs to know whether to register the write operation.  That's why this
+     * returns a value instead of using the callback.
+     * 
+     * @return true iff this still has unsent queued data.  If true, the caller
+     *  must subsequently call write() again 
      */
-    public void flush() throws IOException {
-        _out.flush();
+    public boolean write() {
+        if (_closed) {
+            _listener.error(this);
+            return false;
+        }
+
+        try {            
+            return _writer.write();
+        } catch (IOException e) {
+            _listener.error(this);
+            return false;
+        }                
     }
 
     /** Returns the host set at construction */
@@ -879,143 +902,5 @@ public class Connection {
         return "host=" + _host  + " port=" + _port; 
     }
     
-    
-    /////////////////////////// Unit Tests  ///////////////////////////////////
-    
-//      /** Unit test */
-//      public static void main(String args[]) {
-//          Assert.that(! notLessThan06("CONNECT"));
-//          Assert.that(! notLessThan06("CONNECT/0.4"));
-//          Assert.that(! notLessThan06("CONNECT/0.599"));
-//          Assert.that(! notLessThan06("CONNECT/XP"));
-//          Assert.that(notLessThan06("CONNECT/0.6"));
-//          Assert.that(notLessThan06("CONNECT/0.7"));
-//          Assert.that(notLessThan06("GNUTELLA CONNECT/1.0"));
-
-//          final Properties props=new Properties();
-//          props.setProperty("Query-Routing", "0.3");        
-//          HandshakeResponder standardResponder=new HandshakeResponder() {
-//              public HandshakeResponse respond(HandshakeResponse response,
-//                                               boolean outgoing) {
-//                  return new HandshakeResponse(props);
-//              }
-//          };        
-//          HandshakeResponder secretResponder=new HandshakeResponder() {
-//              public HandshakeResponse respond(HandshakeResponse response,
-//                                               boolean outgoing) {
-//                  Properties props2=new Properties();
-//                  props2.setProperty("Secret", "abcdefg");
-//                  return new HandshakeResponse(props2);
-//              }
-//          };
-//          ConnectionPair p=null;
-
-//          //1. 0.4 => 0.4
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //2. 0.6 => 0.6
-//          p=connect(standardResponder, props, secretResponder);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing").equals("0.3"));
-//          Assert.that(p.out.getProperty("Query-Routing").equals("0.3"));
-//          Assert.that(p.out.getProperty("Secret")==null);
-//          Assert.that(p.in.getProperty("Secret").equals("abcdefg"));
-//          disconnect(p);
-
-//          //3. 0.4 => 0.6 (Incoming doesn't send properties)
-//          p=connect(standardResponder, null, null);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //4. 0.6 => 0.4 (If the receiving connection were Gnutella 0.4, this
-//          //wouldn't work.  But the new guy will automatically upgrade to 0.6.)
-//          p=connect(null, props, standardResponder);
-//          Assert.that(p!=null);
-//          //Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //5.
-//          System.out.println("-Testing IOException reading from closed socket");
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          p.in.close();
-//          try {
-//              p.out.receive();
-//              Assert.that(false);
-//          } catch (BadPacketException failed) {
-//              Assert.that(false);
-//          } catch (IOException pass) {
-//          }
-
-//          //6.
-//          System.out.println("-Testing IOException writing to closed socket");
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          p.in.close();
-//          try { Thread.sleep(2000); } catch (InterruptedException e) { }
-//          try {
-//              //You'd think that only one write is needed to get IOException.
-//              //That doesn't seem to be the case, and I'm not 100% sure why.  It
-//              //has something to do with TCP half-close state.  Anyway, this
-//              //slightly weaker test is good enough.
-//              p.out.send(new QueryRequest((byte)3, 0, "las"));
-//              p.out.flush();
-//              p.out.send(new QueryRequest((byte)3, 0, "las"));
-//              p.out.flush();
-//              Assert.that(false);
-//          } catch (IOException pass) {
-//          }
-
-//          //7.
-//          System.out.println("-Testing connect with timeout");
-//          Connection c=new Connection("this-host-does-not-exist.limewire.com", 6346);
-//          int TIMEOUT=1000;
-//          long start=System.currentTimeMillis();
-//          try {
-//              c.initialize(TIMEOUT);
-//              Assert.that(false);
-//          } catch (IOException e) {
-//              //Check that exception happened quickly.  Note fudge factor below.
-//              long elapsed=System.currentTimeMillis()-start;  
-//              Assert.that(elapsed<(3*TIMEOUT)/2, "Took too long to connect: "+elapsed);
-//          }
-//      }   
-
-//      private static class ConnectionPair {
-//          Connection in;
-//          Connection out;
-//      }
-
-//      private static ConnectionPair connect(HandshakeResponder inProperties,
-//                                            Properties outProperties1,
-//                                            HandshakeResponder outProperties2) {
-//          ConnectionPair ret=new ConnectionPair();
-//          com.limegroup.gnutella.tests.MiniAcceptor acceptor=
-//              new com.limegroup.gnutella.tests.MiniAcceptor(inProperties);
-//          try {
-//              ret.out=new Connection("localhost", 6346,
-//                                     outProperties1, outProperties2,
-//                                     true);
-//              ret.out.initialize();
-//          } catch (IOException e) { }
-//          ret.in=acceptor.accept();
-//          if (ret.in==null || ret.out==null)
-//              return null;
-//          else
-//              return ret;
-//      }
-
-//      private static void disconnect(ConnectionPair cp) {
-//          if (cp.in!=null)
-//              cp.in.close();
-//          if (cp.out!=null)
-//              cp.out.close();
-//      }    
+    //Unit test: tests/com/limegroup/gnutella/connection/ConnectionTest.java   
 }

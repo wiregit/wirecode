@@ -535,7 +535,7 @@ public class HostCatcher {
      *  getAnEndpoint 
      */
     public synchronized void doneWithMessageLoop(Endpoint e) {
-        if (e==bootstrapHostInProgress) {  //not .equals
+        if (e.equals(bootstrapHostInProgress)) {  //not .equals
             //Was a special bootstrap host?  Keep track.
             bootstrapHostInProgress=null;
             notifyAll();  //may be able to try other bootstrap servers
