@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * This class handles testing all methods of the urn class.
  */
-public class UrnTest extends TestCase {
+public final class UrnTest extends TestCase {
 	
 	private static final String [] VALID_URNS = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
