@@ -54,8 +54,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	/**
 	 * The collection of alternate locations for the file.
 	 */
-	private final AlternateLocationCollection ALT_LOCS = 
-		new AlternateLocationCollection();
+	private AlternateLocationCollection _altLocs;
 		
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -65,7 +64,15 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  <tt>FileDesc</tt>
 	 * @param urns the <tt>HashSet</tt> of URNs for this <tt>FileDesc</tt>
      */
-    public FileDesc(File file, int index, Collection urns) {		
+    public FileDesc(File file, int index, Collection urns) {	
+		if((file == null) || (urns == null)) {
+			throw new NullPointerException("cannot create a FileDesc with "+
+										   "null values");
+		}
+		if(index <0) {
+			throw new IndexOutOfBoundsException("negative values not permitted "+
+												"in FileDesc: "+index);
+		}
 		// make a defensive copy
 		FILE = new File(file.getAbsolutePath());
         _index = index;
@@ -74,61 +81,76 @@ public final class FileDesc implements AlternateLocationCollector {
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
 
-		// defensively copy the urn HashSet
-        URNS = new HashSet(urns);
+		// defensively copy the urn HashSet		
+		URNS = new HashSet(urns);
+
         //if(this.shouldCalculateUrns()) {
 		//this.calculateUrns();
 		//}
     }
 
+	/**
+	 * Returns the index of this file in our file data structure.
+	 *
+	 * @return the index of this file in our file data structure
+	 */
 	public int getIndex() {
 		return _index;
 	}
 
+	/**
+	 * Returns the size of the file on disk, in bytes.
+	 *
+	 * @return the size of the file on disk, in bytes
+	 */
 	public long getSize() {
 		return _size;
 	}
 
+	/**
+	 * Returns the name of this file.
+	 * 
+	 * @return the name of this file
+	 */
 	public String getName() {
 		return _name;
 	}
 
 	/**
-	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
-	 * of alternate locations for this this file.
+	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
+	 * <tt>FileDesc</tt>.  The collection could be empty or <tt>null</tt>.
 	 *
-	 * @param al the <tt>AlternateLocation</tt> instance to add
+	 * @return the <tt>AlternateLocationCollection</tt> for this 
+	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
+	 *  if it is not initialized
 	 */
-	public void addAlternateLocation(AlternateLocation al) {
-		ALT_LOCS.addAlternateLocation(al);
-	}
-
-	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
-		ALT_LOCS.addAlternateLocationCollection(alc);
-	}
-
 	public AlternateLocationCollection getAlternateLocationCollection() {
-		return ALT_LOCS;
+		return _altLocs;
 	}
 
+	// implements AlternateLocationCollector interface
+	public void addAlternateLocation(AlternateLocation al) {
+		createAlternateLocations();
+		_altLocs.addAlternateLocation(al);
+	}
+
+	// implements AlternateLocationCollector interface
+	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
+		createAlternateLocations();
+		_altLocs.addAlternateLocationCollection(alc);
+	}
+
+	// implements AlternateLocationCollector interface
 	public boolean hasAlternateLocations() {
-		return ALT_LOCS.hasAlternateLocations();
+		if(_altLocs == null) return false;
+		return _altLocs.hasAlternateLocations();
 	}
 
 	/**
-	 * Writes the SHA1 URN for this file out to the specified stream in
-	 * the format described in HUGE v0.93.
-	 * 
-	 * @param os the <tt>OutputStream</tt> instance to write to
-	 * @exception <tt>IOException</tt> if we could not write to the
-	 *  output stream
+	 * Constructs the alternate location collection instance if it's null.
 	 */
-	public synchronized void writeUrnTo(OutputStream os) 
-		throws IOException {
-		URN urn = this.getSHA1Urn();
-		if(urn == null) return;
-		String str = HTTPConstants.CONTENT_URN_HEADER+" "+urn+HTTPConstants.CRLF;
-		os.write(str.getBytes());
+	private void createAlternateLocations() {
+		if(_altLocs == null) _altLocs = new AlternateLocationCollection();		
 	}
     
     /**
@@ -148,18 +170,17 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * complete on large files.<p>
 	 * 
 	 * This is a place where members of <tt>FileDesc</tt> are mutable,
-	 * namely the <tt>Collection</tt> of <tt>URN</tt>s.
+	 * namely the collection of <tt>URN</tt>s.
      */
     public void calculateUrns() {
 		// update modTime
 		_modTime = FILE.lastModified();
-		URN urn =  null;
 		try {
-			urn = URNFactory.createSHA1Urn(FILE);
+			URN urn = URNFactory.createSHA1Urn(FILE);
+			URNS.add(urn);
 		} catch(IOException e) {
-			return;
+			// the urn just does not get added
 		}		
-		URNS.add(urn);
 	}
     
     /**
@@ -198,7 +219,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
 	 *  otherwise
      */
-    public URN getSHA1Urn() {
+    public synchronized URN getSHA1Urn() {
         Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
@@ -240,36 +261,6 @@ public final class FileDesc implements AlternateLocationCollector {
     public InputStream getInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
     }
-
-	/*
-	public static void main(String[] args) {
-		FileDesc fd = new FileDesc(new File("FileDesc.java"), 0, 
-								   new HashSet());
-		String[] validDistinctLocations = {
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg"
-		};
-
-		OutputStream os = new ByteArrayOutputStream();	   
-		try {
-			for(int i=0; i<validDistinctLocations.length; i++) {
-				AlternateLocation al = 
-				    new AlternateLocation(validDistinctLocations[i]);
-				fd.addAlternateLocation(al);
-			}
-			fd.writeAlternateLocationsTo(os);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("FILE DESC ALT LOCATIONS:");
-		System.out.println(); 
-		System.out.println(os); 		
-	}
-	*/
-
 }
 
 
