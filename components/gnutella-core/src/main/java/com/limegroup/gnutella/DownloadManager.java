@@ -373,6 +373,7 @@ public class DownloadManager implements BandwidthTracker {
         //step isn't really needed.)
         if (incompleteFileManager.purge(true))
             writeSnapshot();
+        buf = new LinkedList(new HashSet(buf));
 
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
@@ -606,7 +607,7 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void startDownload(ManagedDownloader md) {
+    private synchronized void startDownload(ManagedDownloader md) {
         md.initialize(this, fileManager, callback);
         waiting.add(md);
         callback.addDownload(md);
@@ -800,7 +801,7 @@ public class DownloadManager implements BandwidthTracker {
      * Requests a download to start.
      */
     public synchronized void requestStart(ManagedDownloader md) {
-        if(hasFreeSlot()) {
+        if(hasFreeSlot() && !active.contains(md)) {
             waiting.remove(md);
             active.add(md);
             md.startDownload();

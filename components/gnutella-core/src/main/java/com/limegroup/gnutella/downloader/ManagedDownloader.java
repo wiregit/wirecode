@@ -708,7 +708,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Starts the download.
      */
-    public void startDownload() {
+    public synchronized void startDownload() {
         dloaderManagerThread = new ManagedThread(new Runnable() {
             public void run() {
                 try {
@@ -818,7 +818,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Handles state changes when inactive.
      */
-    public void handleInactivity() {
+    public synchronized void handleInactivity() {
         if(LOG.isTraceEnabled())
             LOG.trace("handling inactivity. state: " + 
                       getState() + ", hasnew: " + hasNewSources() + 
@@ -937,7 +937,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initialize files wrt allFiles.
      */
-    protected void initializeFiles() {
+    protected synchronized void initializeFiles() {
         for(int i = 0; i < allFiles.length; i++)
             if(!isRFDAlreadyStored(allFiles[i]))
                 files.add(allFiles[i]);
@@ -1587,14 +1587,21 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //AlternateLocationCollections
                 if(!validAlts.contains(loc)) {
                     if(rfd.isFromAlternateLocation() )
-                        DownloadStat.ALTERNATE_WORKED.incrementStat(); 
+                        if (rfd.needsPush())
+                            DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
+                        else
+                            DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(loc);
                     if( ifd != null )
                         ifd.addVerified(forFD);
                 }
             }  else {
                     if(rfd.isFromAlternateLocation() )
-                        DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                        if(rfd.needsPush())
+                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
+                        else
+                                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                    
                     validAlts.remove(loc);
                     if( ifd != null )
                         ifd.remove(forFD);

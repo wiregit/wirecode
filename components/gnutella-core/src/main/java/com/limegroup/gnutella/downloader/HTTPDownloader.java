@@ -1012,8 +1012,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 		synchronized(_pushAltLocsReceived) {
                 			added = _pushAltLocsReceived.add(al);
                 		}
-                		if(added) ;
-                			//TODO: put in a different stat
+                		if(added) 
+                			DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
                 	}
 
                 }
