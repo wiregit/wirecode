@@ -280,7 +280,7 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         }
         catch (IOException good) {
         }
-
+ 
         cbGuid = new GUID(GUID.makeGuid());
         udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
                                          UDP_ACCESS.getLocalPort());
@@ -337,7 +337,6 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
     public void testTCPConnectBackRedirect() throws Exception {
         drainAll();
         
-        GUID cbGuid = new GUID(GUID.makeGuid());
         TCPConnectBackRedirect tcp = 
             new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                        TCP_ACCESS.getLocalPort());
@@ -354,7 +353,6 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         catch (IOException good) {
         }
 
-        cbGuid = new GUID(GUID.makeGuid());
         tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                          TCP_ACCESS.getLocalPort());
         
@@ -374,7 +372,6 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
     public void testTCPConnectBackAlreadyConnected() throws Exception {
         drainAll();
 
-        System.out.println(""+LEAF.getSocket().getInetAddress());
         TCPConnectBackRedirect tcp = 
             new TCPConnectBackRedirect(LEAF.getSocket().getInetAddress(),
                                        TCP_ACCESS.getLocalPort());
@@ -392,6 +389,94 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         }
     }
 
+
+    public void testConnectBackExpirer() throws Exception {
+        drainAll();
+        
+        GUID cbGuid = new GUID(GUID.makeGuid());
+        UDPConnectBackRedirect udp = 
+            new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
+                                       UDP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_2.send(udp);
+        ULTRAPEER_2.flush();
+        
+        // we should NOT get a ping request over our UDP because we just did this
+        UDP_ACCESS.setSoTimeout(1000);
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            UDP_ACCESS.receive(pack);
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+
+        TCPConnectBackRedirect tcp = 
+            new TCPConnectBackRedirect(InetAddress.getLocalHost(),
+                                       TCP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_2.send(tcp);
+        ULTRAPEER_2.flush();
+        
+        // we should NOT get a incoming connection since we did this already
+        TCP_ACCESS.setSoTimeout(1000);
+        try {
+            TCP_ACCESS.accept();
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+
+        // simulate the running of the thread - technically i'm not testing
+        // the situation precisely, but i'm confident the schedule work so the
+        // abstraction isn't terrible
+        Thread cbThread = new Thread(new MessageRouter.ConnectBackExpirer());
+        cbThread.start();
+        cbThread.join();
+
+        // now these two things should work....
+        cbGuid = new GUID(GUID.makeGuid());
+        udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
+                                         UDP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_2.send(udp);
+        ULTRAPEER_2.flush();
+        
+        // we should get a ping request over our UDP
+        UDP_ACCESS.setSoTimeout(1000);
+        // we should get a ping reply over our UDP socket....
+        while (true) {
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                Message m = Message.read(in);
+                if (m instanceof PingRequest) {
+                    PingRequest reply = (PingRequest) m; 
+                    assertEquals(new GUID(reply.getGUID()), cbGuid);
+                    break;
+                }
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get reply", false);
+            }
+        }
+
+        tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
+                                         TCP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_2.send(tcp);
+        ULTRAPEER_2.flush();
+        
+        // we should get a incoming connection
+        TCP_ACCESS.setSoTimeout(1000);
+        try {
+            TCP_ACCESS.accept();
+        }
+        catch (IOException good) {
+            assertTrue(false);
+        }
+    }
 
 
     // ------------------------------------------------------

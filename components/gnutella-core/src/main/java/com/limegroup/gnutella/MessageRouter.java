@@ -91,6 +91,22 @@ public abstract class MessageRouter {
      */
     private final Map _outOfBandReplies = new Hashtable();
 
+    /**
+     * Keeps track of what hosts we have recently tried to connect back to via
+     * UDP.  The size is limited and once the size is reached, no more connect
+     * back attempts will be honored.
+     */
+    private static final FixedsizeHashMap _udpConnectBacks = 
+        new FixedsizeHashMap(200);
+
+    /**
+     * Keeps track of what hosts we have recently tried to connect back to via
+     * TCP.  The size is limited and once the size is reached, no more connect
+     * back attempts will be honored.
+     */
+    private static final FixedsizeHashMap _tcpConnectBacks = 
+        new FixedsizeHashMap(200);
+
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
@@ -169,6 +185,9 @@ public abstract class MessageRouter {
 
         // schedule a runner to clear unused out-of-band replies
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
+        // schedule a runner to clear guys we've connected back to
+        RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
+                               10 * CLEAR_TIME);
     }
 
     public String getPingRouteTableDump() {
@@ -959,9 +978,20 @@ public abstract class MessageRouter {
                                          portToContact);
         if (_manager.isConnectedTo(endPoint)) return;
 
-        // TODO
         // keep track of who you tried connecting back too, don't do it too
         // much....
+        String addrString = addrToContact.getHostAddress();
+        Object placeHolder = _udpConnectBacks.get(addrString);
+        if (placeHolder == null) {
+            try {
+                _udpConnectBacks.put(addrString, new Object());
+            }
+            catch (NoMoreStorageException nomo) {
+                return;  // we've done too many connect backs, stop....
+            }
+        }
+        else
+            return;  // we've connected back to this guy recently....
 
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
@@ -1033,9 +1063,19 @@ public abstract class MessageRouter {
         Endpoint endPoint = new Endpoint(addrToContact, portToContact);
         if (_manager.isConnectedTo(endPoint)) return;
 
-        // TODO
         // keep track of who you tried connecting back too, don't do it too
         // much....
+        Object placeHolder = _tcpConnectBacks.get(addrToContact);
+        if (placeHolder == null) {
+            try {
+                _tcpConnectBacks.put(addrToContact, new Object());
+            }
+            catch (NoMoreStorageException nomo) {
+                return;  // we've done too many connect backs, stop....
+            }
+        }
+        else
+            return;  // we've connected back to this guy recently....
 
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
@@ -2347,5 +2387,22 @@ public abstract class MessageRouter {
             }
         }
     }
+
+
+    /** This is run to clear out the registry of connect back attempts...
+     *  Made package access for easy test access.
+     */
+    static class ConnectBackExpirer implements Runnable {
+        public void run() {
+            try {
+                _tcpConnectBacks.clear();
+                _udpConnectBacks.clear();
+            } 
+            catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+    }
+
 
 }
