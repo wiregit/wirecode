@@ -67,6 +67,11 @@ public class RouterService
      */
     private Authenticator authenticator;
 
+    /**
+     * isShuttingDown flag
+     */
+    private boolean isShuttingDown;
+
     private static RouterService me = null;
     /* @return May return null, be careful....
      */
@@ -1002,8 +1007,7 @@ public class RouterService
      * Tells whether the node is a supernode or not
      * @return true, if supernode, false otherwise
      */
-    public boolean isSupernode()
-    {
+    public boolean isSupernode() {
         return manager.isSupernode();
     }
 
@@ -1013,6 +1017,29 @@ public class RouterService
     
     public boolean hasSupernodeClientConnection() {
         return manager.hasSupernodeClientConnection();
+    }
+
+    /**
+     * Sets the flag for whether or not LimeWire is currently in the process of 
+	 * shutting down.
+	 *
+     * @param flag the shutting down state to set
+     */
+    public void setIsShuttingDown(boolean flag) {
+		isShuttingDown = flag;
+    }
+
+	/**
+	 * Returns whether or not LimeWire is currently in the shutting down state,
+	 * meaning that a shutdown has been initiated but not completed.  This
+	 * is most often the case when there are active file transfers and the
+	 * application is set to shutdown after current file transfers are complete.
+	 *
+	 * @return <tt>true</tt> if the application is in the shutting down state,
+	 *  <tt>false</tt> otherwise
+	 */
+    public boolean getIsShuttingDown() {
+		return isShuttingDown;
     }
 
 }
