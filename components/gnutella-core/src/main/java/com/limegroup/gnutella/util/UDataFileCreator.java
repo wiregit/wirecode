@@ -30,7 +30,7 @@ public class UDataFileCreator {
     
     public void createFile() {
         java.util.BitSet dontExclude = new java.util.BitSet();
-        Map codepoints = new TreeMap();
+        Map codepoints = new TreeMap(new StringComparator());
 
         HashMap caseMap = new HashMap();
         java.util.BitSet excludedChars = new java.util.BitSet();
@@ -177,6 +177,15 @@ public class UDataFileCreator {
             if(excludedPClass(parts[0])) {
                 numEx++;
                 excluded.set(Integer.parseInt(parts[0],16));
+            }
+            else if(!isExcluded(parts, ex)) {
+                //not expluded
+                //put this codepoint into the cp map
+                udata u = new udata();
+                //populate the category for the data wrapper
+                u.cat = parts[2];
+                u.CC = parts[3];
+                cp.put(parts[0], u);
             }
             else {
                 replaceWithSpace.set(Integer.parseInt(parts[0], 16));
