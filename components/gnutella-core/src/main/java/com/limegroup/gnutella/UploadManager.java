@@ -256,9 +256,7 @@ public class UploadManager {
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
 			pfile = (PushedFile)iter.next();
-			// NOTE : this should be iter.remove ???
 			if ( pf.equals(pfile) ) 
-				// _attemptingPushes.remove(host);
 				// calling iter.remove() rather than
 				// remove on the list, since this will be
 				// safer while iterating through the list.
@@ -336,7 +334,6 @@ public class UploadManager {
 
 	private GETLine parseGET(Socket socket) throws IOException {
 		try {
-			// System.out.println("GETLINE PARSEGET");
 			// Set the timeout so that we don't do block reading.
 			socket.setSoTimeout(SettingsManager.instance().getTimeout());
 			// open the stream from the socket for reading

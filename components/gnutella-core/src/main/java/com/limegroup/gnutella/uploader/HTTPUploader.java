@@ -64,17 +64,18 @@ public class HTTPUploader implements Uploader {
 		boolean ioexcept = false;
 
 		try {
-			// THIS CAN'T BE MOVED OR FILENOTFOUND will have 
-			// a null pointer
+			// This line can't be moved, or FileNotFoundUploadState
+			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
-			// Shouldn't this be FILE_NOT_FOUND
 			desc = FileManager.instance().get(_index);
 			_fileSize = desc._size;
-
-			// Check if ostream is null...
 		} catch (IndexOutOfBoundsException e) {
+			// this is an unlikely case, but if for
+			// some reason the index is no longer valid.
 			indexOut = true;
 		} catch (IOException e) {
+			// FileManager.get() throws an IOException if
+			// the file has been deleted
 			ioexcept = true;
 		}
 		if (indexOut)
@@ -116,7 +117,6 @@ public class HTTPUploader implements Uploader {
 			return;
 
 		try {
-			// this.setState(UPLOADING);
 			// try to create the socket.
 			_socket = new Socket(_hostName, _port);
 			// open a stream for writing to the socket
@@ -191,6 +191,11 @@ public class HTTPUploader implements Uploader {
 	}
 
     
+	/*
+	 * Is called by the thread.  makes the
+	 * actual call upload the file or appropriate
+	 * error information.
+	 */
 	public void start() {
 		try {
 			prepareFile();
@@ -209,6 +214,10 @@ public class HTTPUploader implements Uploader {
 		
 	}
 
+	/**
+	 * closes the outputstream, inputstream, and socket
+	 * if they are not null.
+	 */
 	public void stop() {
 		try {
 			if (_ostream != null)
@@ -273,9 +282,6 @@ public class HTTPUploader implements Uploader {
 
 	private void readHeader() throws IOException {
 
-		// NOTE : There are exceptions that couldcould be caught here
-		// IndexOutOfBounds and NumberFormat and turn them into IO
-
         String str = " ";
         _uploadBegin = 0;
         _uploadEnd = 0;
@@ -284,6 +290,9 @@ public class HTTPUploader implements Uploader {
 		InputStream istream = _socket.getInputStream();
 		ByteReader br = new ByteReader(istream);
         
+		// NOTE: it might improve readability to move
+		// the try and catches around the big loops.
+
 		while (true) {
 			// read the line in from the socket.
             str = br.readLine();
@@ -393,7 +402,10 @@ public class HTTPUploader implements Uploader {
 			_uploadEnd = _fileSize;
 	}
 
-	
+	/**
+	 * a helper method to compare two strings 
+	 * ignoring their case.
+	 */ 
 	private int indexOfIgnoreCase(String str, String section) {
 		// convert both strings to lower case
 		String aaa = str.toLowerCase();
@@ -402,10 +414,6 @@ public class HTTPUploader implements Uploader {
 		return aaa.indexOf(bbb);
 	}
 
-
-	/*
-	 * prepares the requested file to be read.
-	 */
 
 	/**
 	 * prepares the file to be read for sending accross the socket
