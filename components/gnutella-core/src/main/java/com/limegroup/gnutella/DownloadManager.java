@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -529,7 +530,8 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /** 
-     * Adds the file named in qr to an existing downloader if appropriate.
+     * Adds all responses (and alternates) in qr to any downloaders, if
+     * appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
@@ -538,40 +540,57 @@ public class DownloadManager implements BandwidthTracker {
                 !RouterService.acceptedIncomingConnection()) < 1)
             return;
 
-        // get them as RFDs....
-        RemoteFileDesc[] rfds = null;
-        try { 
-            rfds = qr.toRemoteFileDescArray();
-        }
-        catch (BadPacketException bpe) {
-            debug(bpe);
-            rfds = new RemoteFileDesc[0];
+        List responses;
+        HostData data;
+        try {
+            responses = qr.getResultsAsList();
+            data = qr.getHostData();
+        } catch(BadPacketException bpe) {
+            return; // bad packet, do nothing.
         }
         
-        handleManagedDownloaderAdditions(rfds);
+        handleNewResponses(responses, data);
     }
 
-    private void handleManagedDownloaderAdditions(RemoteFileDesc[] rfds) {
-
-        if (rfds.length == 0)
-            return;
+    /**
+     * The implementation of the above method.
+     */
+    private void handleNewResponses(List responses, HostData data) {
+        if(responses == null)
+            throw new NullPointerException("null responses");
+        if(data == null)
+            throw new NullPointerException("null hostdata");
 
         // need to synch because active and waiting are not thread safe
-        List downloaders = new ArrayList();
+        List downloaders = new ArrayList(active.size() + waiting.size());
         synchronized (this) { 
             // add to all downloaders, even if they are waiting....
             downloaders.addAll(active);
             downloaders.addAll(waiting);
-        }        
+        }
 
-        //For each rfd i, offer it to downloader j.  Give rfd i to at most one
-        //RFD.  TODO: it's possible that downloader x could accept rfds[i] but
+        //For each response i, offer it to each downloader j.  Give a response
+        // to at most one downloader.
+        // TODO: it's possible that downloader x could accept response[i] but
         //that would cause a conflict with downloader y.  Check for this.
-        for (int i = 0; i < rfds.length; i++) {
-            for (int j = 0; j < downloaders.size(); j++) {
-                ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
-                if (currD.addDownload(rfds[i],true))
+        for(Iterator i = responses.iterator(); i.hasNext(); ) {
+            Response r = (Response)i.next();
+            // Don't bother with making XML from the EQHD.
+            RemoteFileDesc rfd = r.toRemoteFileDesc(data, null);
+            for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
+                ManagedDownloader currD = (ManagedDownloader)j.next();
+                // If we were able to add this specific rfd,
+                // add any alternates that this response might have
+                // also.
+                if (currD.addDownload(rfd, true)) {
+                    Set alts = r.getLocations();
+                    for(Iterator k = alts.iterator(); k.hasNext(); ) {
+                        Endpoint ep = (Endpoint)k.next();
+                        // don't cache alts.
+                        currD.addDownload(new RemoteFileDesc(rfd, ep), false);
+                    }
                     break;
+                }
             }
         }
     }
