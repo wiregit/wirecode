@@ -36,7 +36,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 		String str;
-		str = "HTTP/1.1 503 Requested Range Unavailable\r\n";
+		str = "HTTP/1.1 416 Requested Range Unavailable\r\n";
 		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());

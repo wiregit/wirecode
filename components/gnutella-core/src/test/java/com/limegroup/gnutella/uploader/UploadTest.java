@@ -349,7 +349,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testIncompleteFileUpload() throws Exception {
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true,
-                "HTTP/1.1 503 Requested Range Unavailable");
+                "HTTP/1.1 416 Requested Range Unavailable");
     }
     
     public void testIncompleteFileWithRanges() throws Exception {
@@ -365,7 +365,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         String header = "Range: bytes 30-50";
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, header, true,
-                 "HTTP/1.1 503 Requested Range Unavailable");
+                 "HTTP/1.1 416 Requested Range Unavailable");
     }        
 
     public void testHTTP11WrongURI() throws Exception {
