@@ -64,6 +64,9 @@ public final class AlternateLocation
 		}
 
 		URL url = AlternateLocation.createUrl(location);
+        if(url.getPort()==-1)
+            throw new IOException("URL without port, cannot create RFD");
+        
 		if(url == null) {
 			throw new IOException("could not parse url for alt loc: "+
 								  location);
