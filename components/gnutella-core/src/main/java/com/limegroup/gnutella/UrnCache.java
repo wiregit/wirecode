@@ -178,13 +178,21 @@ public final class UrnCache {
         // discard outdated info
         Iterator iter = map.keySet().iterator();
         while (iter.hasNext()) {
-			UrnSetKey key = (UrnSetKey)iter.next();
-
-            if(key == null) continue;
-
-            // check to see if file still exists unmodified
-            File f = new File(key._path);
-            if (!f.exists() || f.lastModified() != key._modTime) {
+            Object next = iter.next();
+            if(next instanceof UrnSetKey) {
+                UrnSetKey key = (UrnSetKey)next;
+    
+                if(key == null) continue;
+    
+                // check to see if file still exists unmodified
+                File f = new File(key._path);
+                if (!f.exists() || f.lastModified() != key._modTime) {
+                    iter.remove();
+                }
+            } else {
+                Assert.silent(false,
+                    "expected UrnSetKey, was [" + next +
+                    "], type [" + next.getClass() + "]");
                 iter.remove();
             }
         }
