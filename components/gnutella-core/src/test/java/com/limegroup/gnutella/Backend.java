@@ -17,7 +17,6 @@ import java.util.*;
  */
 public final class Backend {
 
-	private static Backend _instance;
 	private final RouterService ROUTER_SERVICE;
 
 	private final File TEMP_DIR = new File("temp");
@@ -25,31 +24,32 @@ public final class Backend {
 	private final Timer TIMER = new Timer();
 
 
-	public static Backend createBackend(ActivityCallback callback) {
-		_instance = new Backend(callback);
-		return _instance;
+	public static Backend createBackend(ActivityCallback callback, int timeout) {
+		return new Backend(callback, timeout);
 	}
 
-	/**
-	 * Instance accessor for the <tt>Backend</tt>.
-	 */
-	public static Backend instance() {
-		if(_instance == null) {
-			_instance = new Backend(new ActivityCallbackStub());
-		}
-		return _instance;
+
+	public static Backend createBackend(int timeout) {
+		return new Backend(new ActivityCallbackStub(), timeout);
 	}
+
+
 
 	/**
 	 * Constructs a new <tt>Backend</tt>.
 	 */
-	private Backend(ActivityCallback callback) {
+	private Backend(ActivityCallback callback, int timeout) {
 		System.out.println("STARTING BACKEND"); 
 		File gnutellaDotNet = new File("gnutella.net");
+		File propsFile = new File("limewire.props");
 		
 		// remove hosts file to get rid of variable conditions across
 		// test runs
 		gnutellaDotNet.delete();
+
+		// remove props file to get rid of variable settings
+		propsFile.delete();
+
 		SettingsManager settings = SettingsManager.instance();
 		settings.setPort(6346);
 		settings.setKeepAlive(1);
@@ -79,7 +79,7 @@ public final class Backend {
 			public void run() {
 				shutdown("AUTOMATED");
 			}
-		}, 200*1000);
+		}, timeout);
 	}
 
 	/**
@@ -97,8 +97,11 @@ public final class Backend {
 	 */
 	public void shutdown(String msg) {
 		System.out.println("BACKEND SHUTDOWN: "+msg); 
-		SettingsManager.instance().setPort(6346);
-		ROUTER_SERVICE.shutdown();	
+		ROUTER_SERVICE.shutdown();
+		File propsFile = new File("limewire.props");
+		File gnutellaDotNet = new File("gnutella.net");		
+		propsFile.delete();
+		gnutellaDotNet.delete();	
 		System.exit(0);
 	}
 
@@ -148,7 +151,7 @@ public final class Backend {
 	 * run off of.
 	 */
 	public static void main(String[] args) {
-		Backend.instance();
+		Backend.createBackend(200*1000);
 	}
 }
 
