@@ -924,25 +924,6 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-//  	/** sets the incomplete directory.  this is not 
-//  	 *  synchronized since it will only get called
-//  	 *  once on startup. */
-//      public void setIncompleteDirectory(String dir) {
-//          File f = new File(dir);
-//          boolean b = f.isDirectory();
-//          if(b == false)
-//              throw new IllegalArgumentException();
-//          else {
-//  			String incDir = dir;
-//  			try {
-//  				incDir = f.getCanonicalPath();
-//  			}
-//  			catch(IOException ioe) {}
-//              incompleteDirectory_ = incDir;
-//              props_.put(INCOMPLETE_DIR, incompleteDirectory_);
-//          }
-//      }
-
     /** sets the hard maximum time to live */
     public synchronized void setMaxTTL(byte maxttl)
         throws IllegalArgumentException {
@@ -1012,14 +993,17 @@ public class SettingsManager implements SettingsInterface
     /** set the directory for saving files */
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
-		String tempPath = saveFile.getAbsolutePath();
-		if(tempPath.endsWith(File.separator)) {
-			tempPath = tempPath.substring(0, tempPath.length() -1);
+		File incFile  = null;
+		String tempPath = "";
+		try {
+			tempPath = saveFile.getCanonicalPath();
+			tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
+			tempPath += "Incomplete";
+			incFile = new File(tempPath);
+		} catch(IOException ioe) {
+			return;
 		}
-		tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
-		tempPath += "Incomplete";
-		tempPath += File.separator;
-		File incFile  = new File(tempPath);
+		
 		if(!saveFile.isDirectory()) {
 			saveFile.mkdirs();
 		}
