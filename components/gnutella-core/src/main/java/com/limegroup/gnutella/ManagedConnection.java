@@ -948,7 +948,7 @@ public class ManagedConnection
     }
 
     /** Returns the number of messages sent on this connection */
-    public long getNumMessagesSent() {
+    public int getNumMessagesSent() {
         return _numMessagesSent;
     }
 
