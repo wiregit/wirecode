@@ -174,12 +174,34 @@ public class GUID implements java.lang.Comparable,
         return bytes[8]==(byte)0xFF;
     }
 
-    /** Compares this GUID to o, lexically.  Throws ClassCastException if o not
-     *  a GUID. */
+    /** 
+     * Compares this GUID to o, lexically.  Throws ClassCastException if o not
+     *  a GUID. 
+     */
     public int compareTo(Object o) {
-        byte[] bytes2=((GUID)o).bytes;
+        return compare(this.bytes, ((GUID)o).bytes);
+    }
+
+    /** Compares GUID's lexically. */
+    public static class GUIDComparator implements java.util.Comparator, 
+            com.sun.java.util.collections.Comparator {
+        public int compare(Object a, Object b) {
+            return GUID.compare(((GUID)a).bytes, ((GUID)b).bytes);
+        }
+    }
+
+    /** Compares 16-byte arrays (raw GUIDs) lexically. */
+    public static class GUIDByteComparator implements java.util.Comparator, 
+            com.sun.java.util.collections.Comparator {
+        public int compare(Object a, Object b) {
+            return GUID.compare((byte[])a, (byte[])b);
+        }
+    }
+
+    /** Compares guid and guid2 lexically, which MUST be 16-byte guids. */
+    private static final int compare(byte[] guid, byte[] guid2) {
         for (int i=0; i<SZ; i++) {
-            int diff=bytes[i]-bytes2[i];
+            int diff=guid[i]-guid2[i];
             if (diff!=0)
                 return diff;
         }
@@ -414,6 +436,10 @@ public class GUID implements java.lang.Comparable,
         b2[7]+=1;
         g2=new GUID(b2);
         Assert.that(g1.compareTo(g2)<0);
+        Assert.that((new GUID.GUIDComparator()).compare(g1, g2) < 0);
+        Assert.that((new GUID.GUIDComparator()).compare(g2, g1) > 0);
+        Assert.that((new GUID.GUIDByteComparator()).compare(b1, b2) < 0);
+        Assert.that((new GUID.GUIDByteComparator()).compare(b2, b1) > 0);
         Assert.that(g2.compareTo(g1)>0);
         Assert.that(g1.hashCode()!=g2.hashCode());  //not strictly REQUIRED
         System.out.println("Hash: "+Integer.toHexString(g2.hashCode()));
