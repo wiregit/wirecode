@@ -305,11 +305,9 @@ public class BrowseHostHandler {
             Iterator keys = null;
             synchronized (_pushedHosts) {
                 keys = _pushedHosts.keySet().iterator();
-            }
-            while (keys.hasNext()) {
-                Object currKey = keys.next();
-                PushRequestDetails currPRD = null;
-                synchronized (_pushedHosts) {
+                while (keys.hasNext()) {
+                    Object currKey = keys.next();
+                    PushRequestDetails currPRD = null;
                     currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
                     if ((currPRD != null) && (currPRD.isExpired())) {
                         debug("Expirer.run(): expiring a badboy.");
