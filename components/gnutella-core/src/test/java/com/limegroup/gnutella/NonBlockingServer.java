@@ -93,10 +93,10 @@ public class NonBlockingServer implements Runnable {
         SELECTOR.wakeup();
     }
 
-    private void addWriter(SocketHandler handler) {
-        WRITERS.add(handler);
-        SELECTOR.wakeup();
-    }
+    //private void addWriter(SocketHandler handler) {
+      //  WRITERS.add(handler);
+        //SELECTOR.wakeup();
+    //}
     
 
     /**
@@ -146,9 +146,9 @@ public class NonBlockingServer implements Runnable {
                         handleReader(key);
                     }
                     
-                    else if(key.isWritable())  {
-                        handleWriter(key);
-                    }
+                    //else if(key.isWritable())  {
+                      //  handleWriter(key);
+                    //}
                     
                 } catch(CancelledKeyException e) {
                     e.printStackTrace();
@@ -166,10 +166,7 @@ public class NonBlockingServer implements Runnable {
         SocketHandler handler = (SocketHandler)key.attachment();
         try {
             handler.read();
-            if(!handler.write(true)) {
-                System.out.println("adding writer");
-                addWriter(handler);
-            }
+            handler.write();
         } catch (IOException e) {
             // should not happen
             e.printStackTrace();
@@ -179,6 +176,7 @@ public class NonBlockingServer implements Runnable {
     /**
      * @param key
      */
+    /*
     private void handleWriter(SelectionKey key) {
         SocketHandler handler = (SocketHandler)key.attachment();
         try {
@@ -188,6 +186,7 @@ public class NonBlockingServer implements Runnable {
             e.printStackTrace();
         }
     }
+    */
 
     
     /**
@@ -263,21 +262,13 @@ public class NonBlockingServer implements Runnable {
         /**
          * @return
          */
-        public boolean write(boolean newWrite) throws IOException {
-            if(newWrite) {
-                _numberOfWrites++;
+        public boolean write() throws IOException {
+            CHANNEL.write(WRITE_BUFFER);
+            if(WRITE_BUFFER.hasRemaining()) {
+                System.out.println("could not write");
+                return false;
             }
-            while(_numberOfWrites > 0) {
-                CHANNEL.write(WRITE_BUFFER);
-                if(WRITE_BUFFER.hasRemaining()) {
-                    NonBlockingServer.this.addWriter(this);
-                    return false;
-                }
-                
-                WRITE_BUFFER.flip();                
-                
-                _numberOfWrites--;
-            }
+            WRITE_BUFFER.flip();
             return true;
         }
 
