@@ -171,11 +171,7 @@ public abstract class MessageRouter {
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
-        // this used to be called from RouterService.schedule, but i'm afraid
-        // that during hectic times the schedule thread may be waiting for this
-        // guy
-        Thread expirer = new Thread(new Expirer());
-        expirer.start();
+        RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
     }
 
     public String getPingRouteTableDump() {
@@ -1877,28 +1873,24 @@ public abstract class MessageRouter {
      */
     private class Expirer implements Runnable {
         public void run() {
-            while (true) {
-                try {
-                    Thread.sleep(CLEAR_TIME);
-                    Set toRemove = new HashSet();
-                    synchronized (_outOfBandReplies) {
-                        Iterator keys = _outOfBandReplies.keySet().iterator();
-                        while (keys.hasNext()) {
-                            TimedGUID currQB = (TimedGUID) keys.next();
-                            if ((currQB != null) && (currQB.shouldExpire()))
-                                toRemove.add(currQB);
-                        }
-                        // done iterating through _outOfBandReplies, remove the 
-                        // keys now...
-                        keys = toRemove.iterator();
-                        while (keys.hasNext())
-                            _outOfBandReplies.remove(keys.next());
+            try {
+                Set toRemove = new HashSet();
+                synchronized (_outOfBandReplies) {
+                    Iterator keys = _outOfBandReplies.keySet().iterator();
+                    while (keys.hasNext()) {
+                        TimedGUID currQB = (TimedGUID) keys.next();
+                        if ((currQB != null) && (currQB.shouldExpire()))
+                            toRemove.add(currQB);
                     }
-                } 
-                catch (InterruptedException ignored) {}
-                catch(Throwable t) {
-                    ErrorService.error(t);
+                    // done iterating through _outOfBandReplies, remove the 
+                    // keys now...
+                    keys = toRemove.iterator();
+                    while (keys.hasNext())
+                        _outOfBandReplies.remove(keys.next());
                 }
+            } 
+            catch(Throwable t) {
+                ErrorService.error(t);
             }
         }
     }
