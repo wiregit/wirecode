@@ -19,8 +19,8 @@ com.sun.java.util.collections.Comparable
     private long kbytes=-1;
 
     /**
-     * Needed for Network Discovery. Records information regarding wthether the neighbours
-     * of this node has been identified or not
+     * Needed for Network Discovery. Records information regarding
+     * wthether the neighbours of this node has been identified or not 
      */
     public transient boolean processed = false;
 
@@ -73,9 +73,10 @@ com.sun.java.util.collections.Comparable
     }
 
     /**
-     * The comparison function (It uses the connectivity as the measure for comparison
-     * ie if a.connectivity > b.connectivity then a.compareTo(b) > 0
-     * @param o the other object to be compared to
+     * The comparison function (It uses the connectivity as the
+     * measure for comparison ie if a.connectivity > b.connectivity
+     * then a.compareTo(b) > 0
+     * @param o the other object to be compared to 
      */
     public int compareTo(Object o)
     {
@@ -193,8 +194,8 @@ com.sun.java.util.collections.Comparable
 
     /**
      * If the number of files or the kbytes exceed certain limit, it
-     * considers them as false data, and initializes the number of files as well
-     * as kbytes to zero in that case
+     * considers them as false data, and initializes the number of
+     * files as well as kbytes to zero in that case 
      */
     public void normalizeFilesAndSize()
 
