@@ -285,7 +285,8 @@ public class StandardMessageRouter extends MessageRouter {
             } else {
                 // else i couldn't buffer the responses due to busy-ness, oh, scrap
                 // them.....
-            } return false;
+                return false;                
+            }
         }
 
         // send the replies in-band
