@@ -9,6 +9,7 @@ import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
@@ -242,12 +243,6 @@ public class ManagedConnection
     private BandwidthTrackerImpl _downBandwidthTracker=
         new BandwidthTrackerImpl();
 
-    /** 
-     * True if this connected to a router (e.g. future router.limewire.com) or
-     * pong-cache server (e.g. gnutellahosts.com).  This may be replaced
-     * with a more general priority-based scheme later.
-     */
-    //private boolean _isRouter=false;
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
@@ -280,16 +275,13 @@ public class ManagedConnection
     private static int _numTCPConnectBackRequests = 0;
 
     /**
-     * Creates an outgoing connection.  The connection is considered a special
-     * LimeWire router connection iff isRouter==true.  In this case host should
-     * already be translated.  This constructor exists only for the convenience
-     * of implementation.
+     * Creates a new outgoing connection to the specified host on the
+	 * specified port.  
+	 *
+	 * @param host the address of the host we're connecting to
+	 * @param port the port the host is listening on
      */
     public ManagedConnection(String host, int port) {
-        //If a router connection, connect as 0.4 by setting responders to null.
-        //(Yes, it's a hack, but this is how Connection(String,int) is
-        //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
-        //the headers according to whether we're supernode capable.
         this(host, port, 
 			 (RouterService.isSupernode() ? 
 			  (Properties)(new SupernodeProperties(host)) : 
@@ -1224,7 +1216,7 @@ public class ManagedConnection
 
 	// implements ReplyHandler interface -- inherit doc comment
 	public boolean isHighDegreeConnection() {
-		return getNumIntraUltrapeerConnections() > 20;
+		return getNumIntraUltrapeerConnections() > 15;
 	}
 
 	/**
@@ -1428,18 +1420,18 @@ public class ManagedConnection
         _nextQRPForwardTime=time;
     }
 
-    public void setKillable(boolean killable) {
-        this._isKillable=killable;
-    }
+	public void setKillable(boolean killable) {
+		this._isKillable=killable;
+	}
 
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
      * e.g., because this is a connection to a Clip2 reflector. Default value:
      * true.
      */
-    public boolean isKillable() {
-        return _isKillable;
-    }
+	public boolean isKillable() {
+		return _isKillable;
+	}
     
     /** Returns the query route state associated with this, or null if no
      *  such state. 
