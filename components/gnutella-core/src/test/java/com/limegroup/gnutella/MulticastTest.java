@@ -285,7 +285,8 @@ public class MulticastTest extends BaseTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false);
+        RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+                               new GUID(guid));
         
         // sleep to make sure the download starts & push goes through.
         sleep(10000);

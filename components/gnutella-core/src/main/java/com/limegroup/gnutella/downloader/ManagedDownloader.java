@@ -431,14 +431,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
+     * The GUID of the original query.  may be null;
+     */
+    private final GUID _originalQueryGUID;
+
+
+    /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
      * any other methods until that point.
      * @param files the list of files to get.  This stops after ANY of the
      *  files is downloaded.
      * @param ifc the repository of incomplete files for resuming
+     * @param originalQueryGUID the guid of the original query.  sometimes
+     * useful for WAITING_FOR_USER state.  can be null.
      */
-    public ManagedDownloader(RemoteFileDesc[] files,IncompleteFileManager ifc) {
+    public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+                             GUID originalQueryGUID) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -447,6 +456,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
         this.allFiles = files;
         this.incompleteFileManager = ifc;
+        this._originalQueryGUID = originalQueryGUID;
     }
 
     /** 

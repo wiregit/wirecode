@@ -290,11 +290,15 @@ public class DownloadManager implements BandwidthTracker {
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
      *
+     * @param queryGUID the guid of the query that resulted in the RFDs being
+     * downloaded.
+     *
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
                                             List alts, 
-                                            boolean overwrite) 
+                                            boolean overwrite,
+                                            GUID queryGUID) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
@@ -326,7 +330,7 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-			new ManagedDownloader(files, incompleteFileManager);
+            new ManagedDownloader(files, incompleteFileManager, queryGUID);
 
         startDownload(downloader, false);
         
@@ -501,7 +505,7 @@ public class DownloadManager implements BandwidthTracker {
         incompleteFileManager.purge(false);
 
         RequeryDownloader downloader=
-            new RequeryDownloader(incompleteFileManager,add);
+            new RequeryDownloader(incompleteFileManager, add, new GUID(guid));
 
         startDownload(downloader, false);
         return downloader;        

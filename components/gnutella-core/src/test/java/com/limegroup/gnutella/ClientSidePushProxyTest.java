@@ -320,7 +320,8 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true, 
+                    new GUID(m.getGUID()));
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -423,7 +424,8 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true,
+                    new GUID(m.getGUID()));
 
         // await a PushRequest
         do {
@@ -471,7 +473,8 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true,
+                    new GUID((m.getGUID())));
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();

@@ -93,6 +93,12 @@ public abstract class MessageRouter {
     private final Map _outOfBandReplies = new Hashtable();
 
     /**
+     * Keeps track of potential sources of content.  Comprised of Sets of GUESS
+     * Endpoints.  Kept tidy when searches/downloads are killed.
+     */
+    private final Map _bypassedResults = new HashMap();
+
+    /**
      * Keeps track of what hosts we have recently tried to connect back to via
      * UDP.  The size is limited and once the size is reached, no more connect
      * back attempts will be honored.
@@ -891,11 +897,24 @@ public abstract class MessageRouter {
             RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
 
             // see if we need more results for this query....
-            // TODO: remember this location for a future, 'find more sources'
+            // if not, remember this location for a future, 'find more sources'
             // targeted GUESS query.
             if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-            if (RECORD_STATS)
-                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+                if (RECORD_STATS)
+                    OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+                GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
+                                                     datagram.getPort());
+                synchronized (_bypassedResults) {
+                    // this is a quick critical section for _bypassedResults
+                    // AND the set within it
+                    Set eps = (Set) _bypassedResults.get(qGUID);
+                    if (eps == null) {
+                        eps = new HashSet();
+                        _bypassedResults.put(qGUID, eps);
+                    }
+                    eps.add(ep);
+                }
+
                 return;
             }
             

@@ -27,7 +27,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         VerifyingFile vf = new VerifyingFile(true);
         vf.addInterval(new Interval(10,20));
         ifm.addEntry(new File("T-10-test.txt"), vf);
-        RequeryDownloader downloader=new RequeryDownloader(ifm, details);
+        RequeryDownloader downloader=new RequeryDownloader(ifm, details, null);
         downloader.initialize(new DownloadManager(), 
                               new SimpleFileManager(),
                               new ActivityCallbackStub(), false);

@@ -1017,6 +1017,7 @@ public class RouterService {
      * @param alts a List of secondary RFDs to use for other sources
      * @param overwrite true iff the download should proceded without
      *  checking if it's on disk
+     * @param the guid of the query that returned the results (i.e. files)
      * @return the download object you can use to start and resume the download
      * @exception AlreadyDownloadingException the file is already being 
      *  downloaded.
@@ -1025,20 +1026,21 @@ public class RouterService {
      */
 	public static Downloader download(RemoteFileDesc[] files, 
 	                                  List alts,
-	                                  boolean overwrite)
+	                                  boolean overwrite,
+                                      GUID queryGUID)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.download(files, alts, overwrite);
+		return downloader.download(files, alts, overwrite, queryGUID);
 	}
 	
 	/**
 	 * Stub for calling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
 	 */
 	public static Downloader download(RemoteFileDesc[] files,
-	                                boolean overwrite)
+                                      boolean overwrite, GUID queryGUID)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return download(files, DataUtils.EMPTY_LIST, overwrite);
+		return download(files, DataUtils.EMPTY_LIST, overwrite, queryGUID);
 	}
         
 
