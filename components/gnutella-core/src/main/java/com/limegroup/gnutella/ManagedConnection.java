@@ -299,6 +299,11 @@ public class ManagedConnection extends Connection
     private static int _numTCPConnectBackRequests = 0;
 
     /**
+     * Variable for the <tt>QueryRouteTable</tt> for this connection.
+     */
+    private QueryRouteTable _lastQRPTableReceived;
+
+    /**
      * Creates a new outgoing connection to the specified host on the
 	 * specified port.  
 	 *
@@ -383,6 +388,38 @@ public class ManagedConnection extends Connection
 
         UpdateManager updater = UpdateManager.instance();
         updater.checkAndUpdate(this);
+    }
+
+    /**
+     * Updates the query route table for this connection with data
+     * from the specified <tt>RouteTableMessage</tt>.
+     *
+     * @param rtm the <tt>RouteTableMessage</tt> with new query route
+     *  table data
+     */
+    public void updateQueryRouteTable(RouteTableMessage rtm) {
+        if(_lastQRPTableReceived == null) {
+            _lastQRPTableReceived = new QueryRouteTable();
+        }
+        try {
+            _lastQRPTableReceived.update(rtm);
+        } catch(BadPacketException e) {
+            // not sure what to do here!!
+        }
+    }
+
+    /**
+     * Determines whether or not the specified <tt>QueryRequest</tt>
+     * instance has a hit in the query routing tables.
+     *
+     * @param query the <tt>QueryRequest</tt> to check against
+     *  the tables
+     * @return <tt>true</tt> if the <tt>QueryRequest</tt> has a hit
+     *  in the tables, otherwise <tt>false</tt>
+     */
+    public boolean hitsQueryRouteTable(QueryRequest query) {
+        if(_lastQRPTableReceived == null) return false;
+        return _lastQRPTableReceived.contains(query);
     }
 
     /** Throttles the super's OutputStream. */
