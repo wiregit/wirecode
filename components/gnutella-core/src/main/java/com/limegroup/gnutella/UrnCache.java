@@ -17,7 +17,7 @@ import java.util.Enumeration;
 public class UrnCache {
     
     /**
-     * File where urns (currently SHA1 urns) get persisted too
+     * File where urns (currently SHA1 urns) get persisted to
      */
     private static final String URN_CACHE_FILE = "fileurns.cache";
 
