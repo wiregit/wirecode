@@ -9,7 +9,8 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
-
+import com.limegroup.gnutella.browser.*;
+  
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
  * communicating with the backend.  RouterService plays a key role in
@@ -107,6 +108,7 @@ public class RouterService
 		SettingsManager settings = SettingsManager.instance();
   		int port = settings.getPort();
   		this.acceptor = new Acceptor(port, callback);
+	    new HTTPAcceptor(callback);	
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
   		this.downloader = new DownloadManager();
@@ -928,7 +930,7 @@ public class RouterService
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
      * @param filename the final file name, or null if unknown
-     * @param defaultURL the initial location to try (exact source), or null 
+     * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
      * @exception AlreadyDownloadingException couldn't download because the
@@ -936,7 +938,7 @@ public class RouterService
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
     public synchronized Downloader download(
-            URN urn, String textQuery, String filename, String defaultURL) 
+            URN urn, String textQuery, String filename, String [] defaultURL) 
             throws IllegalArgumentException, AlreadyDownloadingException { 
         return downloader.download(urn, textQuery, filename, defaultURL);
     }

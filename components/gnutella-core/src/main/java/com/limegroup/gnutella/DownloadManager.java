@@ -266,19 +266,19 @@ public class DownloadManager implements BandwidthTracker {
      * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
      * <tt>filename</tt> is specified, it will be used as the name of the
      * complete file; otherwise it will be taken from any search results or
-     * guessed from <tt>defaultURL</tt>.
+     * guessed from <tt>defaultURLs</tt>.
      *
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
      * @param filename the final file name, or null if unknown
-     * @param defaultURL the initial location to try (exact source), or null 
+     * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
      * @exception AlreadyDownloadingException couldn't download because the
      *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null */
     public synchronized Downloader download(
-            URN urn, String textQuery, String filename, String defaultURL) 
+            URN urn, String textQuery, String filename, String [] defaultURL) 
             throws IllegalArgumentException, AlreadyDownloadingException {         
         if (textQuery==null && urn==null)
             throw new IllegalArgumentException("Need something for requeries");

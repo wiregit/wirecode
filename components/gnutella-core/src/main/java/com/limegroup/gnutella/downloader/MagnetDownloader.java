@@ -44,16 +44,16 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     private String _filename;
     /** The default location, or null if not provided.  Not currently used, but
      *  may be useful later. */
-    private String _defaultURL;
+    private String[] _defaultURLs;
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
+     * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
      * not provide alternate locations, issues a requery with <tt>textQuery</tt>
      * and </tt>urn</tt>, as provided.  (Note that at least one must be
      * non-null.)  If <tt>filename</tt> is specified, it will be used as the
      * name of the complete file; otherwise it will be taken from any search
-     * results or guessed from <tt>defaultURL</tt>.
+     * results or guessed from <tt>defaultURLs</tt>.
      *
      * @param manager controls download queuing; passed to superclass
      * @param filemanager shares saved files; passed to superclass
@@ -62,7 +62,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
      * @param filename the final file name, or null if unknown
-     * @param defaultURL the initial location to try (exact source), or null 
+     * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
@@ -73,7 +73,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             URN urn,
                             String textQuery,
                             String filename,
-                            String defaultURL)
+                            String [] defaultURLs)
             throws IllegalArgumentException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
@@ -86,26 +86,32 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         this._textQuery=textQuery;
         this._urn=urn;
         this._filename=filename;
-        this._defaultURL=defaultURL;
+        this._defaultURLs=defaultURLs;
     }
     
     /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
     protected void tryAllDownloads() {     
-        //Send HEAD request to default location (if present) to get its size.
-        //This can block, so it must be done here instead of in constructor.
-        //See class overview and ManagedDownloader.tryAllDownloads.
-        RemoteFileDesc defaultRFD=createRemoteFileDesc(_defaultURL,
-                                                       _filename,
-                                                       _urn);
-        if (defaultRFD!=null) {
-            //Add the faked up location before starting download.  Note that we
-            //must force ManagedDownloader to accept this RFD in case it has no
-            //hash and a name that doesn't match the search keywords.
-            boolean added=super.addDownloadForced(defaultRFD);
-            Assert.that(added, "Download rfd not accepted "+defaultRFD);
-        }
+
+		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
+			//Send HEAD request to default location (if present)to get its size.
+			//This can block, so it must be done here instead of in constructor.
+			//See class overview and ManagedDownloader.tryAllDownloads.
+			RemoteFileDesc defaultRFD=createRemoteFileDesc(_defaultURLs[i],
+														   _filename,
+														   _urn);
+System.out.println("RFD: "+defaultRFD);
+			if (defaultRFD!=null) {
+				//Add the faked up location before starting download. Note that 
+				//we must force ManagedDownloader to accept this RFD in case 
+				//it has no hash and a name that doesn't match the search 
+				//keywords.
+				boolean added=super.addDownloadForced(defaultRFD);
+				Assert.that(added, "Download rfd not accepted "+defaultRFD);
+			}
+		}
+
         //Start the downloads for real.
         super.tryAllDownloads();
     }
@@ -123,7 +129,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             return null;
 
         try {
+System.out.println("Creating Remote:"+defaultURL);
             URL url=new URL(defaultURL);
+System.out.println("URL:"+url);
             int port=url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
@@ -147,6 +155,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 urns,
                 url);           //url for GET request
         } catch (IOException e) {
+System.out.println("Exception:"+e);
             return null;
         }
 
@@ -292,8 +301,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			return _urn.toString();
         else if ( _textQuery != null )
             return _textQuery;
-        else if ( _defaultURL != null )
-            return _defaultURL;
+        else if ( _defaultURLs != null && _defaultURLs.length > 0 )
+            return _defaultURLs[0];
 		else
 			return "";
     }
