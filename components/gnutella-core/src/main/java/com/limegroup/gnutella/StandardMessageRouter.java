@@ -16,8 +16,8 @@ public class StandardMessageRouter
     /**
      * Override of handleQueryRequest to send query strings to the callback.
      */
-    public void handleQueryRequest(QueryRequest queryRequest,
-                                   ManagedConnection receivingConnection)
+    protected void handleQueryRequest(QueryRequest queryRequest,
+                                      ManagedConnection receivingConnection)
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
@@ -34,27 +34,28 @@ public class StandardMessageRouter
      * Responds to the PingRequest by getting information from the FileManager
      * and the Acceptor.  However, it only sends a Ping Reply back if we
      * can currently accept incoming connections or the hops + ttl <= 2 (to allow
-     * for crawler pings) or if not firewalled (with respect to the connection).
+     * for crawler pings).
      */
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor,
                                         ManagedConnection connection)
     {
-        //check if connection is "firewalled" with respect to the remote host.
-        if (connection.isFirewalled())
-            return;
-
-        //check if can accept incoming and hops + ttl > 2
+         //check if can accept incoming and hops + ttl > 2
         int ttl = (int)pingRequest.getTTL();
         int hops = (int)pingRequest.getHops();
         if (!_manager.hasAvailableIncoming() && ((hops+ttl) > 2)) 
             return;
 
+        //for crawler pings we shouldn't send the pong with hops+1 as TTL.
+        int newTTL = hops+1;
+        if ( (hops+ttl) <=2)
+            newTTL = 1;
+
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
 
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
-                                            (byte)(pingRequest.getHops()+1),
+                                            (byte)newTTL,
                                             acceptor.getPort(),
                                             acceptor.getAddress(),
                                             num_files,
@@ -62,7 +63,7 @@ public class StandardMessageRouter
         connection.send(pingReply);
     }
 
-    public void handlePingReply(PingReply pingReply,
+    protected void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {
         super.handlePingReply(pingReply, receivingConnection);

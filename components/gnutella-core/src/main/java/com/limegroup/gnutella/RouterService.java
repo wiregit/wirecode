@@ -46,7 +46,10 @@ public class RouterService
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
-		this.manager.initialize(router, catcher);		
+		this.manager.initialize(router, catcher);
+        //after initializations, create seperate thread to connect to a pong cache
+        //server for initial hosts.
+		catcher.connectToPongServer();
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
 		this.downloader.initialize(callback, router, acceptor, FileManager.instance());
@@ -115,9 +118,6 @@ public class RouterService
         return false;
     }
 
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
-                                           (byte)1};
-
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established.
@@ -134,26 +134,8 @@ public class RouterService
      * the connection is not established.
      */
     public void connectToHostAsynchronously(String hostname, int portnum) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases for this machine.
-        byte[] cIP = null;
-        try {
-            cIP=InetAddress.getByName(hostname).getAddress();
-        } catch(UnknownHostException e) {
-            return;
-        }
-        if ((Arrays.equals(cIP, LOCALHOST)) &&
-            (portnum==acceptor.getPort())) {
-                return;
-        } else {
-            byte[] managerIP=acceptor.getAddress();
-            if (Arrays.equals(cIP, managerIP)
-                && portnum==acceptor.getPort())
-                return;
-        }
-
-        manager.createConnectionAsynchronously(hostname, portnum);
+        if (!Acceptor.isMe(hostname, portnum))
+            manager.createConnectionAsynchronously(hostname, portnum);
     }
 
 
@@ -213,9 +195,6 @@ public class RouterService
         // Disconnect from current connections.
         disconnect();
 
-        // Clear host catcher.
-        catcher.silentClear();
-
         // Kickoff the Group Connect fetch of PingReplies
         try {
             groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
@@ -254,29 +233,10 @@ public class RouterService
      *  pong server as needed.
      */
     public void connect() {
-        //HACK. People used to complain that the connect button wasn't
-        //working when the host catcher was empty and 
-        //USE_QUICK_CONNECT=false.  This is not a bug; LimeWire isn't supposed 
-        //to connect to the pong server in this case.  But this IS admittedly 
-        //confusing.  So we force a connection to the pong server in this case 
-        //by disconnecting and temporarily setting USE_QUICK_CONNECT to true.  
-        //But we have to sleep(..) a little bit before setting 
-        //USE_QUICK_CONNECT back to false to give the connection fetchers time 
-        //to do their thing.  Ugh.  A Thread.yield() may work here too, but 
-        //that's less dependable.  And I do not want to bother with 
-        //wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
-        boolean useHack=
-            (!settings.getUseQuickConnect())
-                && PingReplyCache.instance().size()==0 
-                && (!catcher.reserveCacheSufficient());
-        if (useHack) {
-            settings.setUseQuickConnect(true);
-            disconnect();
-        }
+        SettingsManager settings = SettingsManager.instance();
 
-        //Force reconnect to pong server.
-        catcher.expire();
+        //force the catcher to connect to router.
+        catcher.connectToPongServer();
 
         //Ensure outgoing connections is positive.
         int outgoing=settings.getKeepAlive();
@@ -295,21 +255,13 @@ public class RouterService
 
         //int incoming=settings.getKeepAlive();
         //setMaxIncomingConnections(incoming);
-
-        //See note above.
-        if (useHack) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) { }
-            SettingsManager.instance().setUseQuickConnect(false);
-        }
     }
 
     /**
      * @modifies this
      * @effects removes all connections.
      * @effects deactivates extra connection watchdog check
-     * @effects clears the PingReplyCache.
+     * @effects clears the HostCatcher (both main and reserve cache)
      */
     public void disconnect() {
 		// Deactivate checking for Ultra Fast Shutdown
@@ -329,9 +281,8 @@ public class RouterService
             removeConnection(c);
         }
         
-        //to maintain consistency, since we're removing all our connections,
-        //we need to clear the PingReply cache.
-        PingReplyCache.instance().clear();
+        //to maintain consistency, we need to clear the HostCatcher
+        catcher.reset();
     }
 
 	/**
@@ -352,21 +303,14 @@ public class RouterService
      * Clear the hostcatcher if requested
      */
     public void clearHostCatcher() {
-        catcher.silentClear();
-    }
-
-    /**
-     * Get the reserve number of hosts from the host catcher
-     */
-    public int getNumReserveHosts() {
-        return(catcher.getNumReserveHosts());
+        catcher.reset();
     }
 
     /** 
-     * Get the number of hosts from the Ping Reply Cache
+     * Get the number of hosts from the host catcher
      */
     public int getRealNumHosts() {
-        return (PingReplyCache.instance().size());
+        return (catcher.cacheSize());
     }
 
     /**
@@ -561,17 +505,17 @@ public class RouterService
     }
 
     /**
-     *  Return an iterator on the hostcatcher hosts
+     * Returns the number of hosts in the host catcher main cache.
      */
-    public Iterator getReserveHosts() {
-        return catcher.getReserveHosts();
+    public int getNumCachedHosts() {
+        return catcher.cacheSize();
     }
 
     /**
-     * Return an iterator on the PingReplyCache hosts
+     * Return an iterator on the cached hosts in HostCatcher
      */
     public Iterator getCachedHosts() {
-        return PingReplyCache.instance().iterator();
+        return catcher.getNPingReplies(null, 100);
     }
 
     /**
@@ -593,13 +537,6 @@ public class RouterService
      */
     public int getNumLocalSearches() {
         return router.getNumQueryRequests();
-    }
-
-    /**
-     *  Remove unwanted or used entries from host catcher
-     */
-    public void removeHost(String host, int port) {
-        catcher.removeHost(host, port);
     }
 
     /**

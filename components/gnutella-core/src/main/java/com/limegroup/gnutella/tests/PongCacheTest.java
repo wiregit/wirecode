@@ -16,18 +16,18 @@ public class PongCacheTest
     {
         this.port = port;
 
-        System.out.println("\nStaring new client test ...... ");
+        System.out.println("\nStaring normal test ...... ");
         //run all the tests
-        if (!newClientPingTest())
-            System.out.println("\nNew Client ping request: failure!");
+        if (!normalPingTest())
+            System.out.println("\nNormal test: failure!");
         else
-            System.out.println("\nNew Client ping request: success!");
+            System.out.println("\nNormal test: success!");
         
-        System.out.println("\nStarting old client test ...... ");
-        if (!oldClientPingTest())
-            System.out.println("\nOld Client ping request: failure!");
+        System.out.println("\nStarting throttle test ...... ");
+        if (!throttlePingTest())
+            System.out.println("\nThrottle test: failure!");
         else
-            System.out.println("\nOld Client ping request: success!");
+            System.out.println("\nThrottle test: success!");
     }
 
     public static void main(String[] args)
@@ -52,43 +52,61 @@ public class PongCacheTest
     }
 
     /**
-     * Tests when a new client sends a ping twice, the first time, the ping
+     * Tests when a client sends a ping twice, the first time, the ping
      * is broadcasted to all connections and the second time, the cached 
      * pongs are returned.
      */
-    private boolean newClientPingTest()
+    private boolean normalPingTest()
     {
         //create a connection to local host, port specified.
-        Connection conn = new Connection(HOST, port);
+        Connection conn1 = new Connection(HOST, port);
         try 
         {
-            conn.initialize();
+            conn1.initialize();
         }
         catch (IOException ioe)
         {
             System.out.println("Couldn't connect to " + HOST + ":" + port);
             System.exit(1);
         }
-      
+
         //send out ping request and wait for pongs
-        if (!waitForPingReplies(conn))
+        if (!waitForPingReplies(conn1, false))
         {
-            conn.close();
+            conn1.close();
             return false;
         }
 
-        //send out ping request again and wait for pongs 
-        if (!waitForPingReplies(conn))
+        conn1.close(); //close the connection 
+
+        //create another connection to the same host and see if we receive the
+        //cached pongs.
+        Connection conn2 = new Connection(HOST, port);
+        try
         {
-            conn.close();
+            conn2.initialize();
+        }
+        catch(IOException ioe)
+        {
+            System.out.println("Couldn't connect to " + HOST + ":" + port);
+            System.exit(1);
+        }
+ 
+        //send out ping request again and wait for pongs 
+        if (!waitForPingReplies(conn2, false))
+        {
+            conn2.close();
             return false;
         }
         
-        conn.close();
+        conn2.close();
         return true;
     }
 
-    private boolean oldClientPingTest()
+    /**
+     * Tests to see if ping requests are throttled correctly.
+     */
+    private boolean throttlePingTest()
     {
         //create a connection to local host, port specified.
         Connection conn = new Connection(HOST, port);
@@ -103,14 +121,14 @@ public class PongCacheTest
         }
       
         //send out ping request and wait for pongs
-        if (!waitForPingReplies(conn, true, true))
+        if (!waitForPingReplies(conn, false))
         {
             conn.close();
             return false;
         }
 
         //send out ping request again and wait for timeout
-        if (!waitForPingReplies(conn, true, false))
+        if (!waitForPingReplies(conn, true))
         {
             conn.close();
             return false;
@@ -121,41 +139,14 @@ public class PongCacheTest
      }
 
     /**
-     * Overloaded function for new clients to use and not worry about whether
-     * first request, subsequent request, old client, new client, etc.
+     * Sends out a ping request and waits for four replies.  If first request
+     * is true, then waits for a timeout.
      */
-    private boolean waitForPingReplies(Connection c)
-    {
-        return waitForPingReplies(c, false, false);
-    }
-
-    /**
-     * Send a ping request and wait for 4 ping replies.  oldClient param is
-     * used when changing the GUID to reflect an old client, and setting
-     * a timeout, if an old client.  
-     *
-     * @requires - if oldclient, firstRequest should be use to indicate whether
-     *             sending the first PingRequest or the second.
-     */
-    private boolean waitForPingReplies(Connection c, boolean oldClient, 
-                                       boolean firstRequest)
+    private boolean waitForPingReplies(Connection c, boolean waitForTimeout)
     {
         int count = 0;
-        //first, send ping request, and if older client, then we need to 
-        //generate a GUID and then change the lasy byte to be an old version
-        //number
-        PingRequest pr = null;
-        if (oldClient)
-        {
-            byte[] guid = GUID.makeGuid();
-            guid[15] = (byte)0x00;
-            pr = new PingRequest(guid, (byte)7, (byte)0);
-        }
-        else
-        {
-            pr = new PingRequest((byte)7);
-        }
-        
+        PingRequest pr = new PingRequest((byte)7);
+
         try
         {
             System.out.println("\nSending ping request");
@@ -167,15 +158,13 @@ public class PongCacheTest
             return false;
         }
 
-        while (count < 4)
+        while (count < 2)
         {
             try 
             {
                 Message m = c.receive(SettingsManager.instance().getTimeout());
                 if (!(m instanceof PingReply))
                     return false;
-                //if (m.getGUID() != pr.getGUID())
-                //    return false;
                 count++;
                 PingReply reply = (PingReply)m;
                 System.out.println("Ping Reply received: " + reply.getIP() + 
@@ -184,20 +173,10 @@ public class PongCacheTest
             catch (InterruptedIOException e)
             {
                 //we received a socket timeout
-                if (oldClient)
+                if (waitForTimeout)
                 {
-                    //if first request, then exception is bad
-                    if (firstRequest)
-                    {
-                        System.out.println("Ping Request throttled");
-                        break;
-                    }
-                    //if subsequent request, then we were throttled (correctly)
-                    else
-                    {
-                        System.out.println("Ping Request throttled");
-                        return true;
-                    }
+                    System.out.println("Ping Request throttled");
+                    return true;
                 }
                 else 
                 {
@@ -213,7 +192,7 @@ public class PongCacheTest
                 break;
             }
         }
-        if (count < 4)
+        if (count < 2)
             return false;
         else
             return true;

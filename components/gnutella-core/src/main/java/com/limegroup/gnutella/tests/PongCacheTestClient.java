@@ -159,7 +159,21 @@ public class PongCacheTestClient
             router.addOutgoingConnection(conn);
             System.out.println("Created outgoing connection to " + 
                                conn.getOrigHost() + ":" + conn.getOrigPort());
-            
+            //send handshake ping
+            PingRequest pr = new PingRequest((byte)1);
+            conn.setHandshakeGUID(pr.getGUID());
+            try 
+            {
+                conn.send(pr);
+                conn.flush();
+            }
+            catch(IOException ioe) 
+            {
+                System.out.println("Exception sending handshake ping." +
+                    "Closing connection");
+                conn.close();
+            }
+
             //wait for messages
             while (true)
             {

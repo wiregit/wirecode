@@ -85,8 +85,6 @@ public class ConnectionManager {
     public void initialize(MessageRouter router, HostCatcher catcher) {
         _router = router;
         _catcher = catcher;
-        //notify host catcher that its' okay to create router connections now.
-        _catcher.setConnectionManagerInitialized();
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
@@ -107,7 +105,6 @@ public class ConnectionManager {
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
-
         ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
                                                     this);
 
@@ -389,21 +386,37 @@ public class ConnectionManager {
 	}
 
     /** 
-     * Sends the initial ping request to a newly initialized connection.  The ttl
-     * of the PingRequest will be 1 if we don't need any connections and there
-     * is enough hosts in the reserve cache (HostCatcher).  Otherwise, the ttl
-     * of the PingRequest = max ttl for refreshing the PingReplyCache.
+     * Sends two ping requests to the connection.  First ping request has a TTL of
+     * 1 for handshaking purposes.  Then, send another ping request with TTL of 7
+     * to get some pongs back.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        PingRequest pr;
-        //based on the invariant: numInitializedConnections + numFetchers >= 
-        //_keepAlive
-        if ( (getNumInitializedConnections() + _fetchers.size() >= _keepAlive) &&
-             (_catcher.reserveCacheSufficient()))
-            pr = new PingRequest((byte)1);
-        else
-            pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-        connection.send(pr);
+        //only send handshake ping, if not a connection to a router (e.g., 
+        //router.limewire.com)
+        if (!isRouterConnection(connection)) {
+            PingRequest handshake = new PingRequest((byte)1);
+            //record the GUID of the handshake ping
+            connection.setHandshakeGUID(handshake.getGUID());
+            connection.send(handshake);
+        }
+        PingRequest initialPing = 
+            new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+        connection.send(initialPing);
+    }
+
+    /**
+     * Returns whether a connection is to a pong cache server such as router.
+     * limewire.com or gnutellahosts.com
+     */
+    private boolean isRouterConnection(ManagedConnection connection) {
+        String host = connection.getOrigHost();
+        String[] routers = SettingsManager.instance().getQuickConnectHosts();
+        for (int i = 0; i < routers.length; i++) {
+            if (host.equals(routers[i]))
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -540,7 +553,7 @@ public class ConnectionManager {
                                              ConnectionFetcher fetcher)
             throws IOException {
         synchronized(this) {
-            if(fetcher.isInterrupted())
+            if(fetcher.isInterrupted()) 
                 // Externally generated interrupt.
                 // The interrupting thread has recorded the
                 // death of the fetcher, so throw IOException.
@@ -659,7 +672,8 @@ public class ConnectionManager {
 
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
-				if (origHost != null && origHost.equals("router.limewire.com"))
+				if (origHost != null && 
+                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
@@ -769,44 +783,19 @@ public class ConnectionManager {
         public void run() {
             // Wait for an endpoint.
             Endpoint endpoint = null;
-            Random random = new Random();
-            int hops;
-            PingReplyCache pongCache = PingReplyCache.instance();
-            PingReplyCacheEntry entry = null;
-            PingReply pr = null;
-            
-            //if neither the pong cache, nor the reserve cache contains any
-            //endpoints, then return, allowing for the recording of the death
-            //of the fetcher.
-            if ((pongCache.size() == 0) && 
-                (_catcher.getNumReserveHosts() == 0)) {
-                _fetchers.remove(this);
-                return;                        
-            }
 
             do {
                 try {
-                    hops = random.nextInt
-                        (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    entry = pongCache.getEntry(hops+1);
-                    //if nothing in the cache, then try from the reserve cache
-                    if (entry == null) {
-                        endpoint = _catcher.getAnEndpoint();
-                    }
-                    else {
-                        pr = entry.getPingReply();
-                        endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
-                    }
-                } catch (NoSuchElementException exc2) {
-                    //If we get here, it means that even the reserve cache has
-                    //either no elements (or only private IPs), so just return
-                    //and record the death of the fetcher.
-                    _fetchers.remove(this);
+                    endpoint = _catcher.getAnEndpoint();
+                } catch (InterruptedException exc2) {
+                    // Externally generated interrupt.
+                    // The interrupting thread has recorded the
+                    // death of the fetcher, so just return.
                     return;
                 }               
-            } while ((endpoint == null) || (isConnected(endpoint)) || 
-                     (Acceptor.isMe(endpoint.getHostname(), 
-                      endpoint.getPort())) );
+            } while ( (isConnected(endpoint)) || 
+                      (Acceptor.isMe(endpoint.getHostname(), 
+                       endpoint.getPort())) );
 
             Assert.that(endpoint != null);
 

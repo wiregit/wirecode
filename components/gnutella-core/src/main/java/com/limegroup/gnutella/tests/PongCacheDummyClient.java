@@ -117,11 +117,15 @@ public class PongCacheDummyClient
      */
     private class ConnectionThread implements Runnable
     {
-        private Connection conn;
+        private PongCacheTestManagedConnection conn;
 
         public ConnectionThread(Socket client)
         {
-            conn = new Connection(client);
+            byte[] myIP = client.getLocalAddress().getAddress();
+            int port = client.getLocalPort();
+            PongCacheMessageRouter router = 
+                new PongCacheMessageRouter(myIP, port);
+            conn = new PongCacheTestManagedConnection(client, router);
         }
 
         public void run()
@@ -138,6 +142,21 @@ public class PongCacheDummyClient
             }
             
             System.out.println("Incoming connection established");
+            //handshake ping
+            PingRequest handshake = new PingRequest((byte)1);
+            try 
+            {
+                conn.send(handshake);
+                conn.flush();
+            }
+            catch (IOException ie) 
+            {
+                System.out.println("IOException sending handshake.  Closing " +
+                    "connection");
+                conn.close();
+                return;
+            }
+
             while (true)
             {
                 try 
@@ -145,7 +164,6 @@ public class PongCacheDummyClient
                     Message m = conn.receive();
                     if (!(m instanceof PingRequest))
                         continue;
-                    System.out.println("Received ping");
                     PingReply pr = new PingReply(m.getGUID(), (byte)3, port,
                                                  myIP, 0, 0);
                     System.out.println("Sending pong with own address");

@@ -65,12 +65,9 @@ class RejectConnection extends Connection {
                 return; //Its a bad packet, just return
             }
             if((m instanceof PingRequest) && (m.getHops()==0)) {
-                //forward some pongs from the PingReplyCache back to this 
+                //forward some pongs from the host catcher back to this 
                 //rejected connection.
-                if (PingReplyCache.instance().size() <= 10)
-                    sendAllPongs(m);
-                else
-                    sendSomePongs(m);
+                sendSomePongs(m);
                 flush();
                 return;
             }// end of (if m is PingRequest)
@@ -78,43 +75,17 @@ class RejectConnection extends Connection {
     }
 
     /**
-     * Sends out all the PingReplies stored in the PingReply cache to the 
-     * rejected connection.  The new Ping Reply, however, only has a ttl = 1,
-     * since we don't want this pong to go any further than just the rejected
-     * connection.
-     *
-     * @requires - size of PingReplyCache <= 10
-     */
-    private void sendAllPongs(Message m) throws IOException {
-        PingReplyCache pongCache = PingReplyCache.instance();
-        PingReply cachedPingReply = null;
-
-        Iterator iter = pongCache.iterator();
-        while (iter.hasNext()) {
-            cachedPingReply = ((PingReplyCacheEntry)iter.next()).getPingReply();
-            PingReply newReply = new PingReply(m.getGUID(), (byte)1,
-                cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
-                cachedPingReply.getFiles(), cachedPingReply.getKbytes());
-            send(newReply);
-        }
-    }
-
-    /**
-     * Sends out randomly selected PingReplies stored in the PingReply cache
-     * to the rejected connection.  The new Ping Reply, however, only has a 
-     * ttt = 1, since we don't want this pong to go any further than just the
-     * rejected connection.
+     * Sends out some ping replies gotten from the host catcher to the rejected
+     * connection.  The new Ping Reply, however, only has a ttl = 1, since we 
+     * don't want this pong to go any further than just the rejected connection.
      */
     private void sendSomePongs(Message m) throws IOException {
-        PingReplyCache pongCache = PingReplyCache.instance();
-        Random random = new Random();
         PingReply cachedPingReply = null;
-        int hops;
 
-        for (int i = 0; i < 10; i++) {
-            hops = random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-            cachedPingReply = 
-                ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).getPingReply();
+        Iterator iter = _hostCatcher.getNPingReplies(this, 
+            MessageRouter.MAX_PONGS_TO_RETURN);
+        while (iter.hasNext()) {
+            cachedPingReply = ((MainCacheEntry)iter.next()).getPingReply();
             PingReply newReply = new PingReply(m.getGUID(), (byte)1,
                 cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
                 cachedPingReply.getFiles(), cachedPingReply.getKbytes());

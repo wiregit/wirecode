@@ -8,8 +8,10 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 
 /**
  * A Connection that is managed.  Includes a loopForMessages method that runs
- * forever (or until an IOException occurs), receiving and replying to Gnutella 
- * messages.
+ * forever (or until an IOException occurs), receiving Gnutella messages and
+ * dispatching them to a message router.  Also takes care of automatic buffering
+ * and flushing of data, maintaining statistics, filtering bad messages, and
+ * maintaining ping and query routing state.
  *
  * This class implements ReplyHandler to route Queries and pushes that originated
  * from it.
@@ -59,6 +61,14 @@ public class ManagedConnection
         new ManagedConnectionMessageStats(this);
 
 
+    /**
+     * Reference to ManagedConnectionPingInfo for this connection.  This 
+     * reference contains the last GUID, whether to throttle an incoming ping, 
+     * the needed pongs to return, etc .  It's initially set to null and then
+     * instantianted when the first ping is received.
+     */
+    private ManagedConnectionPingInfo pingInfo = null;
+
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
     private volatile long _bytesSent;
@@ -79,6 +89,29 @@ public class ManagedConnection
      * (according to the the Protocol Version number in any message GUID).
      */
     private volatile boolean _isOldClient = true;
+
+    /**
+     * First Ping is used to determine if this is a connection to an older
+     * client or not.  Then, we can set the accept time for allowing Pings
+     * from this older client.
+     */
+    private boolean _receivedFirstPing = false;
+
+    /**
+     * This is the pong that the remote side sends after receiving a handshake
+     * ping.  It contains the IP address and listening port of the remote side
+     * of this managed connection and is used in responding to crawler pings
+     * with all the addresses of our neighbors.  Note: We cannot use the address
+     * from the socket, since the port for incoming connections is an ephemeral
+     * port.
+     */
+    private PingReply _remotePong = null;
+
+    /**
+     * GUID of handshake ping sent.  This is used to determine if a pong 
+     * received is a handshake pong or not.
+     */
+    private byte[] _handshakeGUID = null;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -387,67 +420,133 @@ public class ManagedConnection
                 continue;
             }
 
-            //if crawler ping, send back pongs of neighbors.
-            if ((m instanceof PingRequest) && (isCrawlerPing(m))) {
-                _router.sendCrawlerPingReplies((PingRequest)m, this);
-                continue;
-            }
-
-            // Increment hops and decrease TTL
-            m.hop();
-
-            checkForOlderClient(m);
+            //call MessageRouter to handle and process the message
             _router.handleMessage(m, this);
         }
     }
-
+        
     /**
      * Determines if this connection is to an older client by checking the
      * Protocol Version (of the GUID of the Message) and sets necessary
-     * flags.
+     * flags.  It also makes sure the GUID is a new GUID (based on byte[8])
      */
-    private void checkForOlderClient(Message m)
-    {
-        //m.hop() already called
-        if (m.getHops()==1 && (m instanceof PingRequest)) 
-        {  
-            //if the protocol version is less than 1, it's an older client.
-            byte[] guid=m.getGUID();
-            _isOldClient = ! (GUID.isNewGUID(guid) 
-                && GUID.getProtocolVersion(guid)>GUID.GNUTELLA_VERSION_05);
-        }                            
+    public void checkForOlderClient(Message m) {
+        //if already checked once, we don't need to check again
+        if (_receivedFirstPing)
+            return;
+
+        _receivedFirstPing = true;
+        byte[] guid = m.getGUID();
+
+        //if it is an old GUID or the protocol version is less than 1, 
+        //it's an older client.
+        if ((GUID.isNewGUID(guid)) && 
+             (GUID.getProtocolVersion(guid) >= 
+              GUID.GNUTELLA_VERSION_06) ) 
+            _isOldClient = false;
+    }
+
+
+    /**
+     * Sets the remote pong to the pong passed in.  This remote pong can later
+     * be used in responding to crawler pings.
+     */
+    public void setRemotePong(PingReply pong) {
+        _remotePong = pong;
+    }
+
+
+    /**
+     * Sets the handshake GUID to the guid passed in.  This guid is used to 
+     * match a handshake pong to our handshake ping.
+     */
+    public void setHandshakeGUID(byte[] guid) {
+        _handshakeGUID = guid;
     }
 
     /**
-     * Returns whether the Ping received was from a GNUTELLA crawler, by 
-     * looking at the TTL and hops count.
+     * Returns the handshake GUID of the initial ping request this connection
+     * sent.
      */
-    private boolean isCrawlerPing(Message m) {
-        int ttl = (int)m.getTTL();
-        int hops = (int)m.getHops();
-
-        if ((ttl == 2) && (hops == 0))
-            return true;
-        else
-            return false;
+    public byte[] getHandshakeGUID() {
+        return _handshakeGUID;
     }
 
     /**
-     * Returns whether the Ping received was a handshake ping by looking at the
-     * ttl and hops count.  (ttl should be 0 and hops should be 1) since we 
-     * should be calling this method after calling hop on the messsage.
-     *
-     * @required - m.hop() has been called
+     * Return the remote pong (sent in the response to the handshake ping 
+     * request) with the guid passed in.  This is used to return pongs to the 
+     * crawler of all our neighbors.  If the pong is null (i.e., no handshake 
+     * pong received yet, then if the connection is an outgoing connection, 
+     * it returns the address of the outgoing connection, otherwise it returns 
+     * null.
      */
-    private boolean isHandshake(Message m) {
-        int ttl = (int)m.getTTL(); 
-        int hops = (int)m.getHops();
-
-        if ((ttl == 0) && (hops == 1))
-            return true;
-        else
-            return false;
+    public PingReply getRemotePong(byte[] guid) {
+        PingReply pr = null;
+        if (_remotePong != null) 
+            pr = new PingReply(guid, (byte)1, _remotePong.getPort(), 
+                _remotePong.getIPBytes(), _remotePong.getFiles(), 
+                _remotePong.getKbytes());
+        else if (isOutgoing()) //if outgoing, we know the address and port
+            pr = new PingReply(guid, (byte)1, getOrigPort(), 
+                getInetAddress().getAddress(), 0, 0);
+        return pr;
     }
+
+    /**
+     * Determines whether to throttle an incoming ping request by calling
+     * the ManagedConnectionPingInfo's throttle message.  Note, that if
+     * a ManagedConnectionPinfoInfo has not been instantiated yet (i.e., no
+     * ping received), then it is instantiated here without checking if the
+     * ping should be throttled.
+     */
+    public boolean throttlePing() {
+        if (pingInfo == null) {
+            pingInfo = new ManagedConnectionPingInfo();
+            return false;
+        }
+        else {
+            if (pingInfo.throttlePing()) {
+                countDroppedMessage();
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    //------ Interface to ManagedConnectionPingInfo -----------------
+    public void setLastPingGUID(byte[] guid) {
+        pingInfo.setLastGUID(guid);
+    }
+
+    public void setNeededPingReplies(int ttl) {
+        pingInfo.setNeededPingReplies(ttl);
+    }
+
+    public int getTotalPongsNeeded() {
+        return pingInfo.getTotalNeeded();
+    }
+
+    public byte[] getLastPingGUID() {
+        return pingInfo.getLastGUID();
+    }
+
+    public int getLastPingTTL() {
+        return pingInfo.getLastTTL();
+    }
+
+    public int[] getNeededPongsList() {
+        return pingInfo.getNeededPingReplies();
+    }
+
+    /**
+     * Returns whether ManagedConnectionPingInfo is instantiated or not.
+     */
+    public boolean receivedFirstPing() {
+        return (pingInfo != null);
+    }
+    //end -- Interface
 
     /**
      * A callback for the ConnectionManager to inform this connection that a
