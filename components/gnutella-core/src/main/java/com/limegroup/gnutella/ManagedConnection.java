@@ -78,7 +78,7 @@ public class ManagedConnection
      * indicates whether the connection is to an "old Gnutella client" 
      * (according to the the Protocol Version number in any message GUID).
      */
-    private boolean _isOldClient = true;
+    private volatile boolean _isOldClient = true;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
