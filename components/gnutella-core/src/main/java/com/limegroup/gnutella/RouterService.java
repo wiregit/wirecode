@@ -10,6 +10,10 @@ import com.sun.java.util.collections.*;
  */
 public class RouterService
 {
+    private ActivityCallback callback;
+    private HostCatcher catcher;
+    private MessageRouter router;
+    private Acceptor acceptor;
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
 
@@ -17,7 +21,32 @@ public class RouterService
      * Create a connection manager using the default port
      */
     public RouterService(ActivityCallback activityCallback) {
-        manager = new ConnectionManager(activityCallback);
+        callback = activityCallback;
+
+        // First, construct all the pieces
+        acceptor = new Acceptor(callback);
+        manager = new ConnectionManager(callback);
+        router = new MessageRouter(
+            callback,
+            FileManagerPingRequestHandler.instance(),
+            StandardPingReplyHandler.instance(),
+            FileManagerQueryRequestHandler.instance(),
+            StandardQueryReplyHandler.instance(),
+            FileManagerPushRequestHandler.instance());
+        //If we're using quick-connect by default, don't load gnutella.net file.
+        //(In this case, we'll call quick connect later.)
+        if (SettingsManager.instance().getUseQuickConnect())
+            catcher = new HostCatcher(callback);
+        else
+            catcher = new HostCatcher(callback,
+                SettingsManager.instance().getHostList());
+
+        // Now, link all the pieces together, starting the various threads.
+        catcher.initialize(acceptor, manager);
+        router.initialize(acceptor, manager, catcher);
+        manager.initialize(router, catcher);
+        acceptor.initialize(manager, router);
+
         //Now if quick connecting, try hosts.
         if (SettingsManager.instance().getUseQuickConnect()) {
             Thread t2=new Thread() {
@@ -34,7 +63,32 @@ public class RouterService
      * Create a connection manager using the specified port
      */
     public RouterService(int port, ActivityCallback activityCallback) {
-        manager = new ConnectionManager(port, activityCallback);
+        callback = activityCallback;
+
+        // First, construct all the pieces
+        acceptor = new Acceptor(port, callback);
+        manager = new ConnectionManager(callback);
+        router = new MessageRouter(
+            callback,
+            FileManagerPingRequestHandler.instance(),
+            StandardPingReplyHandler.instance(),
+            FileManagerQueryRequestHandler.instance(),
+            StandardQueryReplyHandler.instance(),
+            FileManagerPushRequestHandler.instance());
+        //If we're using quick-connect by default, don't load gnutella.net file.
+        //(In this case, we'll call quick connect later.)
+        if (SettingsManager.instance().getUseQuickConnect())
+            catcher = new HostCatcher(callback);
+        else
+            catcher = new HostCatcher(callback,
+                SettingsManager.instance().getHostList());
+
+        // Now, link all the pieces together, starting the various threads.
+        catcher.initialize(acceptor, manager);
+        router.initialize(acceptor, manager, catcher);
+        manager.initialize(router, catcher);
+        acceptor.initialize(manager, router);
+
         //Now if quick connecting, try hosts.
         if (SettingsManager.instance().getUseQuickConnect()) {
             Thread t2=new Thread() {
@@ -48,17 +102,18 @@ public class RouterService
     }
 
     /**
-     * Dump the routing table
+     * Dump the ping and query routing tables
      */
     public void dumpRouteTable() {
-        System.out.println(manager.getRouteTable().toString());
+        System.out.println(router.getPingRouteTableDump());
+        System.out.println(router.getQueryRouteTableDump());
     }
 
     /**
-     * Dump the puch routing table
+     * Dump the push routing table
      */
     public void dumpPushRouteTable() {
-        System.out.println(manager.getPushRouteTable().toString());
+        System.out.println(router.getPushRouteTableDump());
     }
 
     /**
@@ -70,13 +125,14 @@ public class RouterService
             System.out.println(iter.next().toString());
     }
 
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
+    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
+                                           (byte)1};
 
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established.
      */
-    public Connection connectToHostBlocking(String hostname, int portnum)
+    public ManagedConnection connectToHostBlocking(String hostname, int portnum)
             throws IOException {
         return manager.createConnectionBlocking(hostname, portnum);
     }
@@ -90,7 +146,7 @@ public class RouterService
     public void connectToHostAsynchronously(String hostname, int portnum) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases for what is returned by manager.getListeningPort.
+        //they are aliases for this machine.
         byte[] cIP = null;
         try {
             cIP=InetAddress.getByName(hostname).getAddress();
@@ -98,12 +154,12 @@ public class RouterService
             return;
         }
         if ((Arrays.equals(cIP, LOCALHOST)) &&
-            (portnum==manager.getListeningPort())) {
+            (portnum==acceptor.getPort())) {
                 return;
         } else {
-            byte[] managerIP=manager.getAddress();
+            byte[] managerIP=acceptor.getAddress();
             if (Arrays.equals(cIP, managerIP)
-                && portnum==manager.getListeningPort())
+                && portnum==acceptor.getPort())
                 return;
         }
 
@@ -116,10 +172,13 @@ public class RouterService
      */
     public void quickConnect() {
         SettingsManager settings=SettingsManager.instance();
-        //Ensure the keep alive is at least 1.
+
+        // Ensure the keep alive is at least 1.
+        // Note:  Keep this in sync with connect code in StatusLine
         if (settings.getKeepAlive()<1)
             settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
         setKeepAlive(settings.getKeepAlive());
+
         //Clear host catcher.  Note that if we already have outgoing
         //connections the host catcher will fill up after clearing it.
         //This means we won't really be trying those hosts.
@@ -149,7 +208,7 @@ public class RouterService
                     wait(4000);
                 } catch (InterruptedException exc) { }
             }
-            if (manager.getCatcher().getNumHosts()>=settings.getKeepAlive()) {
+            if (catcher.getNumHosts()>=settings.getKeepAlive()) {
                 break;
             }
         }
@@ -167,7 +226,7 @@ public class RouterService
         setKeepAlive(0);
         //2. Remove all connections.
         for (Iterator iter=manager.connections(); iter.hasNext(); ) {
-            Connection c=(Connection)iter.next();
+            ManagedConnection c=(ManagedConnection)iter.next();
             removeConnection(c);
         }
     }
@@ -175,7 +234,7 @@ public class RouterService
     /**
      * Remove a connection based on the host/port
      */
-    public void removeConnection( Connection c ) {
+    public void removeConnection(ManagedConnection c) {
         manager.remove(c);
     }
 
@@ -183,7 +242,7 @@ public class RouterService
      * Clear the hostcatcher if requested
      */
     public void clearHostCatcher() {
-        manager.getCatcher().clear();
+        catcher.clear();
     }
 
 
@@ -191,7 +250,9 @@ public class RouterService
      * Shut stuff down and write the gnutella.net file
      */
     public void shutdown() {
-        manager.shutdown(); //write gnutella.net
+        try {
+            catcher.write(SettingsManager.instance().getHostList());
+        } catch (IOException e) {}
     }
 
     /**
@@ -207,7 +268,7 @@ public class RouterService
      * extra work must be done.
      */
     public void adjustSpamFilters() {
-        //Just replace all the spam filters.  No need to do anything
+        //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
         for (Iterator iter=manager.connections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
@@ -223,28 +284,28 @@ public class RouterService
      *  If port==0, tells this to stop listening to incoming connections.
      */
     public void setListeningPort(int port) throws IOException {
-        manager.setListeningPort(port);
+        acceptor.setListeningPort(port);
     }
 
     /**
      *  Return the total number of messages sent and received
      */
     public int getTotalMessages() {
-        return( manager.getTotalMessages() );
+        return( router.getNumMessages() );
     }
 
     /**
      *  Return the total number of dropped messages
      */
     public int getTotalDroppedMessages() {
-        return( manager.totDropped );
+        return( router.getNumDroppedMessages() );
     }
 
     /**
      *  Return the total number of misrouted messages
      */
     public int getTotalRouteErrors() {
-        return( manager.totRouteError );
+        return( router.getNumRouteErrors() );
     }
 
     /**
@@ -291,11 +352,9 @@ public class RouterService
         for (Iterator iter=manager.initializedConnections(); iter.hasNext() ; )
             ((ManagedConnection)iter.next()).clearHorizonStats();
 
-        //Send ping to everyone.  Call to fromMe() notes that replies
-        //are to me.
+        //Send ping to everyone.
         PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
-        manager.fromMe(pr);
-        manager.sendToAll(pr);
+        router.broadcastPingRequest(pr);
     }
 
     /**
@@ -310,9 +369,8 @@ public class RouterService
     public byte[] query(String query, int minSpeed, MediaType type) {
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query);
-        manager.fromMe(qr);
         verifier.record(qr, type);
-        manager.sendToAll(qr);
+        router.broadcastQueryRequest(qr);
         return qr.getGUID();
     }
 
@@ -339,11 +397,11 @@ public class RouterService
      * the query is sent.
      */
     public byte[] browse(String host, int port) {
-        Connection c=null;
+        ManagedConnection c=null;
 
         //1. See if we're connected....
         for (Iterator iter=manager.initializedConnections(); iter.hasNext(); ) {
-            Connection c2=(Connection)iter.next();
+            ManagedConnection c2=(ManagedConnection)iter.next();
             //Get the IP address of c2 in dotted decimal form.  Note
             //that c2.getOrigHost is no good as it may return a
             //symbolic name.
@@ -364,9 +422,8 @@ public class RouterService
 
         //2. Send a query for "*.*" with a TTL of 1.
         QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
-        manager.fromMe(qr);
         try {
-            c.send(qr);
+            router.sendQueryRequest(qr, c);
         } catch (IOException e) {
             return null;
         }
@@ -405,7 +462,7 @@ public class RouterService
      *  Return an iterator on the hostcatcher hosts
      */
     public Iterator getHosts() {
-        return manager.getCatcher().getHosts();
+        return catcher.getHosts();
     }
 
     /**
@@ -419,14 +476,14 @@ public class RouterService
      *  Return the number searches made locally ( QReq )
      */
     public int getNumLocalSearches() {
-        return manager.QReqCount;
+        return router.getNumQueryRequests();
     }
 
     /**
      *  Remove unwanted or used entries from host catcher
      */
     public void removeHost(String host, int port) {
-        manager.getCatcher().removeHost(host, port);
+        catcher.removeHost(host, port);
     }
 
     /**
@@ -441,8 +498,8 @@ public class RouterService
      */
     public HTTPDownloader initDownload(String ip, int port, int index,
           String fname, byte[] bguid, int size) {
-        return new HTTPDownloader("http", ip, port, index, fname, manager,
-                                  bguid, size);
+        return new HTTPDownloader("http", ip, port, index, fname, router,
+                                  acceptor, callback, bguid, size);
 
     }
 
@@ -480,7 +537,7 @@ public class RouterService
         HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
 
         down.setQueued();
-        manager.getCallback().addDownload( down );
+        callback.addDownload( down );
     }
 
     /**
@@ -500,12 +557,3 @@ public class RouterService
         return( FileManager.getFileManager().getNumFiles() );
     }
 }
-
-
-
-
-
-
-
-
-

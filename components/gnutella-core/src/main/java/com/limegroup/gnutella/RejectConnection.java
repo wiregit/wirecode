@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
-import java.net.*;
-import java.io.*;
-import com.sun.java.util.collections.*;
+import com.sun.java.util.collections.Iterator;
+import java.net.Socket;
+import java.io.IOException;
 
 /**
  * This class extends Connection and is invkoed when the Connection Manager has
@@ -14,44 +14,34 @@ import com.sun.java.util.collections.*;
  * Creates messages as if they were pongs from the hosts and sends them along
  * and closes the connection
  *
- *The connection that requested the connection thus gets fake pongs from us and
- *populates it's host catcher with the very best connections on the network at this time
+ * The connection that requested the connection thus gets fake pongs from us and
+ * populates it's host catcher with the very best connections on the network at
+ * this time.
  *
  */
 class RejectConnection extends Connection {
-    private class PortMonitorThread extends Thread {
-        public PortMonitorThread() {
-            setDaemon(true);
-            start();
-        }
-
-        public void run() {
-            try {
-                initialize();
-                loopForPingRequest();
-            } catch(IOException e) {
-                // finally does all the cleanup we need.
-            } finally {
-                close(); // whether we have an IO Exception or
-                         // a successful set of PONGs, drop the connection
-            }
-        }
-    }
-
     private HostCatcher _hostCatcher;
 
     /**
      * Constructs a temporary connection that waits for a ping and then replies
      * with pongs for the given HostCatcher's ten best hosts.
      *
-     * The constructor kicks off a thread that does the initialize() call,
-     * so allow you need to do is construct the RejectConnection, and it's
-     * off and running.
+     * The constructor does all the work -- initializing, waiting for the ping,
+     * replying, so you better be ready to have your thread block for a while
+     * if you construct a RejectConnection.
      */
     RejectConnection(Socket socket, HostCatcher hostCatcher) {
         super(socket);
         _hostCatcher = hostCatcher;
-        new PortMonitorThread(); // The constructor does the start call
+        try {
+            initialize();
+            loopForPingRequest();
+        } catch(IOException e) {
+            // finally does all the cleanup we need.
+        } finally {
+            close(); // whether we have an IO Exception or
+                     // a successful set of PONGs, drop the connection
+        }
     }
 
     private void loopForPingRequest()

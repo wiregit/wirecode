@@ -20,12 +20,12 @@ public class HTTPUploader implements Runnable {
      * It does not mean the file was actually transferred.) If we get
      * another push request from one of these hosts (e.g., because the
      * host is firewalled and sends multiple push packets) we will not
-     * try again.  
+     * try again.
      *
      * INVARIANT: for all i>j, ! failedPushes[i].before(failedPushes[j])
-     * 
+     *
      * This is not really the best place to store the data, but it is
-     * the most appropriate place until HTTPManager is persistent.  
+     * the most appropriate place until HTTPManager is persistent.
      * Besides, it's consistent with the push requests stored in
      * HTTPDownloader.
      */
@@ -35,6 +35,12 @@ public class HTTPUploader implements Runnable {
      *  try the push again.  This should be larger than the 15+4*30=135 sec
      *  window in which Gnotella resends pushes by default */
     private static final int PUSH_INVALIDATE_TIME=60*5;  //5 minutes
+
+    /** The number of uploads in progress, i.e., already connected and
+     *  transferring.  This is used to calculate the bandwidth available to
+     *  throttled uploads.  LOCKING: obtain uploadsCountLock first. */
+    private static volatile int uploadCount=0;
+    private static Object uploadCountLock=new Object();
 
 
     //////////// Initialized in Constructors ///////////
@@ -48,7 +54,6 @@ public class HTTPUploader implements Runnable {
      *  false if client-side (actively establishes connection). */
     private boolean _isServer;
 
-    private ConnectionManager _manager;
     private ActivityCallback _callback;
     private FileManager _fmanager;
 
@@ -109,27 +114,26 @@ public class HTTPUploader implements Runnable {
      *  be greater than equal to end.</b>
      */
     public HTTPUploader(Socket s, String file,
-            int index, ConnectionManager m,
+            int index, ActivityCallback callback,
             int begin, int end) {
-    _state = CONNECTED;
-    _isServer = true;
-    _manager = m;
-    _callback = _manager.getCallback();
-    _fmanager = FileManager.getFileManager();
-    _host = s.getInetAddress().getHostAddress();
-    _port = s.getPort();
-    _index = index;
-    _uploadBegin = begin;
-    _uploadEnd = end;
-    _amountRead = 0;
-    _priorAmountRead = 0;
-    _socket = s;
-    try {
-        _ostream = s.getOutputStream();
-    } catch (IOException e) {
-        _state = ERROR;
-    }
-    _filename = file;
+        _state = CONNECTED;
+        _isServer = true;
+        _callback = callback;
+        _fmanager = FileManager.getFileManager();
+        _host = s.getInetAddress().getHostAddress();
+        _port = s.getPort();
+        _index = index;
+        _uploadBegin = begin;
+        _uploadEnd = end;
+        _amountRead = 0;
+        _priorAmountRead = 0;
+        _socket = s;
+        try {
+            _ostream = s.getOutputStream();
+        } catch (IOException e) {
+            _state = ERROR;
+        }
+        _filename = file;
     }
 
 
@@ -153,11 +157,10 @@ public class HTTPUploader implements Runnable {
      */
     public HTTPUploader(String host, int port,
             int index,
-            String guidString, ConnectionManager m) {
+            String guidString, ActivityCallback callback) {
         _state = NOT_CONNECTED;
         _isServer = false;
-        _manager = m;
-        _callback = _manager.getCallback();
+        _callback = callback;
         _fmanager = FileManager.getFileManager();
         _host = host;
         _port = port;
@@ -222,12 +225,15 @@ public class HTTPUploader implements Runnable {
         out.flush();
 
         //3. Wait for   "GET /get/0/sample.txt HTTP/1.0"
+        //   But use timeouts and don't wait too long.
         //   This code is stolen from HTTPManager.
         //   It should really be factored into some method.
-        //   TODO2: timeout, range headers.
+        //   TODO2:  range headers.
         try {
             ByteReader in=new ByteReader(_socket.getInputStream());
+            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             String line=in.readLine();
+            _socket.setSoTimeout(0);
             if (line==null)
                 throw new IOException();
 
@@ -247,7 +253,8 @@ public class HTTPUploader implements Runnable {
             //Check that the filename matches what we sent
             //in the GIV request.  I guess it doesn't need
             //to match technically, but we check to be safe.
-            String filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP")-1);
+            String filename = parse[2].substring(0,
+                parse[2].lastIndexOf("HTTP")-1);
             if (! filename.equals(_filename))
                 throw new IOException();
             int index = java.lang.Integer.parseInt(parse[1]);
@@ -397,7 +404,12 @@ public class HTTPUploader implements Runnable {
                 _state = CONNECTED;
             }
             //2. Actually do the transfer.
-            doUpload(); //sends headers via writeHeader
+            try {
+                synchronized(uploadCountLock) { uploadCount++; }
+                doUpload(); //sends headers via writeHeader
+            } finally {
+                synchronized(uploadCountLock) { uploadCount--; }
+            }
             _state = COMPLETE;
         } catch (IOException e) {
             _state = ERROR;
@@ -411,41 +423,88 @@ public class HTTPUploader implements Runnable {
         writeHeader();
         int c = -1;
         int available = 0;
-
         byte[] buf = new byte[1024];
 
-        //  int skip = 0;
-    //      if (_uploadBegin != 0)
-    //          skip = _uploadBegin -1;
-
-        //  System.out.println("skipping: " + _uploadBegin);
-
         long a = _fis.skip(_uploadBegin);
-
-        //  System.out.println("skipped: " + a);
-
         _amountRead+=a;
 
-        while (true) {
-            try {
+        SettingsManager manager=SettingsManager.instance();
+        int speed=manager.getUploadSpeed();
+        if (speed==100) {
+            //Special case: upload as fast as possible
+            while (true) {
+                try {
+                    c = _fis.read(buf);
+                }
+                catch (IOException e) {
+                    throw e;
+                }
+                if (c == -1)
+                    break;
+                try {
+                    _ostream.write(buf, 0, c);
+                } catch (IOException e) {
+                    throw e;
+                }
+                _amountRead += c;
+            }
+        } else {
+            //Normal case: throttle uploads. Similar to above but we
+            //sleep after sending data.
+            final int cycleTime=1000;
+        outerLoop:
+            while (true) {
+                //1. Calculate max upload bandwidth for this connection.  The
+                //user has specified a theoretical link bandwidth and the
+                //percentage of this bandwidth to use for uploads. We divide
+                //this bandwidth equally among all the uploads in progress.
+                //TODO: if one connection isn't using all the bandwidth, some
+                //coul get more.
+                int theoreticalBandwidth=manager.getConnectionSpeed();
+                int maxBandwidth=(int)(theoreticalBandwidth*((float)speed/100.)
+                                             /(float)uploadCount);
 
-            //  if ((_uploadEnd != 0) &&
-    //              (_uploadEnd == _amountRead ))
-    //              break;
+                //2. Send burstSize bytes of data as fast as possible, recording
+                //the time to send this.  How big should burstSize be?  We want
+                //the total time to complete one send/sleep iteration to be
+                //about one second. (Any less is inefficient.  Any more might
+                //cause the user to see erratic transfer speeds.)  So we send
+                //1000*maxBandwidth bytes.
+                int burstSize=maxBandwidth*cycleTime;
+                int burstSent=0;
+                Date start=new Date();
+                while (burstSent<burstSize) {
+                    try {
+                        c = _fis.read(buf);
+                    }
+                    catch (IOException e) {
+                        throw e;
+                    }
+                    if (c == -1)
+                        break outerLoop;  //get out of BOTH loops
+                    try {
+                        _ostream.write(buf, 0, c);
+                    } catch (IOException e) {
+                        throw e;
+                    }
+                    _amountRead += c;
+                    burstSent += c;
+                }
+                Date stop=new Date();
 
-                c = _fis.read(buf);
+                //3.  Pause as needed so as not to exceed maxBandwidth.
+                int elapsed=(int)(stop.getTime()-start.getTime());
+                int sleepTime=cycleTime-elapsed;
+                if (sleepTime>0) {
+                    try {
+                        Thread.currentThread().sleep(sleepTime);
+                    } catch (InterruptedException e) { }
+                }
+//                  System.out.println("  sent "+burstSent+" of "+burstSize
+//                                     +" bytes in "+elapsed+" msecs at "
+//                                     +measuredBandwidth+" kb/sec, paused for "
+//                                     +sleepTime+" msecs");
             }
-            catch (IOException e) {
-                throw e;
-            }
-            if (c == -1)
-                break;
-            try {
-                _ostream.write(buf, 0, c);
-            } catch (IOException e) {
-                throw e;
-            }
-            _amountRead += c;
         }
 
         try {
@@ -479,29 +538,29 @@ public class HTTPUploader implements Runnable {
         }
     }
 
-	/**
+    /**
      *   Handle too many upload requests
-	 */
+     */
     public static void doLimitReached(Socket s) {
-    	OutputStream ostream = null;
+        OutputStream ostream = null;
         /* Sends a 503 Service Unavailable message */
         try {
             ostream = s.getOutputStream();
             /* is this the right format? */
             String str;
-	        String errMsg = "Server busy.  Too many active downloads."; 
+            String errMsg = "Server busy.  Too many active downloads.";
             str = "HTTP/1.1 503 Service Unavailable\r\n";
             ostream.write(str.getBytes());
-			str = "Server: " + "LimeWire" + "\r\n";
+            str = "Server: " + "LimeWire" + "\r\n";
             ostream.write(str.getBytes());
-		    str = "Content-Type: text/plain\r\n";
+            str = "Content-Type: text/plain\r\n";
             ostream.write(str.getBytes());
-		    str = "Content-Length: " + errMsg.length() + "\r\n";
+            str = "Content-Length: " + errMsg.length() + "\r\n";
             ostream.write(str.getBytes());
-            str = "\r\n";     
+            str = "\r\n";
             ostream.write(str.getBytes());
             ostream.write(errMsg.getBytes());
-            ostream.flush();    
+            ostream.flush();
         } catch (Exception e) {
         }
         try {
@@ -528,11 +587,6 @@ public class HTTPUploader implements Runnable {
         }
     }
 
-    private void uploadError(String str)
-    {
-
-    }
-
     public int getState() {
         return _state;
     }
@@ -547,7 +601,7 @@ public class HTTPUploader implements Runnable {
 
         //Try failed upload #1.
         System.out.println("Trying upload to non-existent host.  Please wait...");
-        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+        uploader=new HTTPUploader("bogus.host", 6347, 0,
                                   "bogus client string", manager);
         Assert.that(uploader.getState()!=ERROR);
         uploader.run();
@@ -555,7 +609,7 @@ public class HTTPUploader implements Runnable {
 
         //Try uploading same file again.  This should not even bother connecting.
         System.out.println("Trying upload again...");
-        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+        uploader=new HTTPUploader("bogus.host", 6347, 0,
                                   "bogus client string", manager);
         Assert.that(uploader.getState()==ERROR);
 
@@ -565,57 +619,57 @@ public class HTTPUploader implements Runnable {
         try {
             Thread.currentThread().sleep(n*1000);
         } catch (InterruptedException e) { }
-        
+
         System.out.println("  ...and checking state.");
-        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+        uploader=new HTTPUploader("bogus.host", 6347, 0,
                                   "bogus client string", manager);
-        Assert.that(uploader.getState()!=ERROR);        
+        Assert.that(uploader.getState()!=ERROR);
     }
     */
-}
 
 
-/** A file that we requested via a push message. */
-class PushedFile {
-    String host;
-    int port;
-    int index;
-    Date time;
+    /** A file that we requested via a push message. */
+    private static class PushedFile {
+        String host;
+        int port;
+        int index;
+        Date time;
 
-    /**
-     * @param host the host to connect to, in symbolic form or 
-     *  dotted-quad notation
-     * @param port the port to connect to on host
-     * @param index the index of the file we are trying to GIV    
-     */
-    public PushedFile(String host, int port, int index) {
-        this.host=host;
-        this.port=port;
-        this.index=index;
-        this.time=new Date();
-    }
+        /**
+         * @param host the host to connect to, in symbolic form or
+         *  dotted-quad notation
+         * @param port the port to connect to on host
+         * @param index the index of the file we are trying to GIV
+         */
+        public PushedFile(String host, int port, int index) {
+            this.host=host;
+            this.port=port;
+            this.index=index;
+            this.time=new Date();
+        }
 
-    /** Returns true if this request was made before the given time. */
-    public boolean before(Date time) {
-        return this.time.before(time);
-    }
+        /** Returns true if this request was made before the given time. */
+        public boolean before(Date time) {
+            return this.time.before(time);
+        }
 
-    public boolean equals(Object o) {
-        if (! (o instanceof PushedFile))
-            return false;
+        public boolean equals(Object o) {
+            if (! (o instanceof PushedFile))
+                return false;
 
-        PushedFile pf=(PushedFile)o;
-        return this.host.equals(pf.host) 
-            && this.port==pf.port
-            && this.index==pf.index;
-    }
+            PushedFile pf=(PushedFile)o;
+            return this.host.equals(pf.host)
+                && this.port==pf.port
+                && this.index==pf.index;
+        }
 
-    public int hashCode() {
-        //This is good enough
-        return host.hashCode()+index;
-    }
+        public int hashCode() {
+            //This is good enough
+            return host.hashCode()+index;
+        }
 
-    public String toString() {
-        return "<"+host+", "+index+", "+index+">";
+        public String toString() {
+            return "<"+host+", "+index+", "+index+">";
+        }
     }
 }

@@ -3,23 +3,23 @@ package com.limegroup.gnutella;
 import java.io.*;
 
 /**
- * A Gnutella ping message.  
+ * A Gnutella ping message.
  */
 
 public class PingRequest extends Message {
     public PingRequest(byte ttl) {
-	super((byte)0x0, ttl, (byte)0);
+        super((byte)0x0, ttl, (byte)0);
     }
 
     public PingRequest(byte[] guid, byte ttl, byte hops) {
-	super(guid, Message.F_PING, ttl, hops, 0);
+        super(guid, Message.F_PING, ttl, hops, 0);
     }
 
     public void writePayload(OutputStream out) {
-	//Does nothing...there is no payload!
+        //Does nothing...there is no payload!
     }
 
     public String toString() {
-	return "PingRequest("+super.toString()+")";
+        return "PingRequest("+super.toString()+")";
     }
 }

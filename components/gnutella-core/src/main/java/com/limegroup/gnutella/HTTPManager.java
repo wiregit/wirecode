@@ -16,7 +16,6 @@ public class HTTPManager {
     private Socket _socket;
     private String _filename;
     private int _index;
-    private ConnectionManager _manager;
     private InputStream _istream;
     private ByteReader _br;
     private int _uploadBegin;
@@ -25,18 +24,23 @@ public class HTTPManager {
     /**
      * @requires If isPush, "GIV " was just read from s.
      *           Otherwise, "GET " was just read from s.
-     * @effects  Transfers the file over s in the background.
+     * @effects  Transfers the file over s <i>in the foreground</i>.
      *           Throws IOException if the handshake failed.
      */
-    public HTTPManager(Socket s, ConnectionManager m, boolean isPush)
-    throws IOException {
+    public HTTPManager(Socket s, MessageRouter router, Acceptor acceptor,
+                       ActivityCallback callback, boolean isPush)
+            throws IOException {
         _socket = s;
-        _manager = m;
 
         String command=null;
         FileManager fm = FileManager.getFileManager();
 
         try {
+            //We set the timeout now so we don't block reading
+            //connection strings.  If this is a GIV connection, we
+            //reset the timeout immediately before downloading;
+            //otherwise, it isn't touched again.
+            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             _istream = _socket.getInputStream();
             _br = new ByteReader(_istream);
             command = _br.readLine();   /* read in the first line */
@@ -69,20 +73,20 @@ public class HTTPManager {
 
                 readRange();
 
-				// Prevent excess uploads from starting
-				if ( m.getCallback().getNumUploads() >=
+                // Prevent excess uploads from starting
+                if ( callback.getNumUploads() >=
                      SettingsManager.instance().getMaxUploads() )
-				{
-				    HTTPUploader.doLimitReached(s);
-					return;
-				}
+                {
+                    HTTPUploader.doLimitReached(s);
+                    return;
+                }
 
                 HTTPUploader uploader;
-                uploader = new HTTPUploader(s, _filename, _index, _manager,
+                uploader = new HTTPUploader(s, _filename, _index,
+                                            callback,
                                             _uploadBegin, _uploadEnd);
-                Thread t = new Thread(uploader);
-                t.setDaemon(true);
-                t.start();
+                Thread.currentThread().setName("HTTPUploader (normal)");
+                uploader.run(); //Ok, since we've already spawned a thread.
             }
 
             else /* isPush */ {
@@ -111,10 +115,9 @@ public class HTTPManager {
                 //file.
                 HTTPDownloader downloader;
                 downloader = new HTTPDownloader(s, _filename, _index, guid,
-                                _manager);
-                Thread t = new Thread(downloader);
-                t.setDaemon(true);
-                t.start();
+                                                router, acceptor, callback);
+                Thread.currentThread().setName("HTTPDownload (push)");
+                downloader.run(); //Ok, since we've already spawned a thread.
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();

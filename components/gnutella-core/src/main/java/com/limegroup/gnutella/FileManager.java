@@ -10,9 +10,6 @@
  * searches are possible with Regular Expressions. Imported necessary package
  */
 
-// This comment line is just a test to see if Adam is getting the
-// right version of the FileManager. -rob
-
 package com.limegroup.gnutella;
 
 import java.io.*;
@@ -36,8 +33,9 @@ public class FileManager{
     // For our enhancements of RegEx.
     private static final String EscapeChars = "./(){}\"\\";
 
-
     private static FileManager _myFileManager;
+
+    java.util.Hashtable _sharedHash;
 
     public FileManager() {               /* the constructor initializes */
         _size = 0;                       /* all the provate variables */
@@ -86,8 +84,6 @@ public class FileManager{
     }
 
 
-
-
     public boolean hasExtension(String filename) {
         int begin = filename.lastIndexOf(".") + 1;
 
@@ -107,7 +103,12 @@ public class FileManager{
 
     }
 
-    public synchronized void addFile(String path) {
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists.
+     *  <b>WARNING: this is a potential security hazard.</b>
+     */
+    private synchronized void addFile(String path) {
         File myFile = new File(path);
 
         if (!myFile.exists())
@@ -140,37 +141,89 @@ public class FileManager{
 
     }
 
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists
+     *  and if it is shared.
+     *  <b>WARNING: this is a potential security hazard.</b>
+     */
+    public synchronized void addFileIfShared(String path) {
+
+        if (_sharedHash == null)
+            return;
+
+        File f = new File(path);
+
+        String parent = f.getParent();
+
+        File dir = new File(parent);
+
+        if (dir == null)
+            return;
+
+        String p;
+
+        try {
+            p = dir.getCanonicalPath();
+        } catch (IOException e) {
+            return;
+        }
+        if (!_sharedHash.containsKey(p))
+            return;
+
+        addFile(path);
+
+
+    }
+
+
+    /**
+     * @modifies this
+     * @effects recursively adds the following directories
+     *  to this.  <b>WARNING: this is a potential security hazard.</b>
+     */
     public synchronized void addDirectories(String dir_names) {
 
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
         // need to see if there are duplicated directories...
 
-        java.util.Hashtable hash = new java.util.Hashtable();
+        _sharedHash = new java.util.Hashtable();
 
         int size = names.length;
 
+        File f;  // temporary file for testing existence
+        String p;  // for the canonical path of a file
+        String name;  //the semi colon deliminated string
+
         for (int i = 0; i < size; i++) {
-            if (!hash.containsKey(names[i]))
-                hash.put(names[i], names[i]);
+
+            name = names[i];
+
+            f = new File(name);
+
+            if (!f.isDirectory())
+                continue;
+            try {
+                p = f.getCanonicalPath();
+            }
+            catch (Exception e) {
+                continue;
+            }
+            if (!_sharedHash.containsKey(p)) {
+                _sharedHash.put(p, p);
+            }
         }
 
-        int hashsize = hash.size();
+        int hashsize = _sharedHash.size();
 
         String[] dirs = new String[hashsize];
 
         int j=0;
 
-        for(Enumeration e = hash.keys(); e.hasMoreElements() ;) {
+        for(Enumeration e = _sharedHash.keys(); e.hasMoreElements() ;) {
             dirs[j++] = (String)e.nextElement();
         }
-
-
-        // Collection c = hash.values();
-
-        // String[] dirs = (String[])c.toArray();
-
-        // int length = dirs.length;
 
         for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);

@@ -28,28 +28,19 @@ public class HostCatcher {
      */
     private List /* of Endpoint */ queue=new ArrayList();
     private Set /* of Endpoint */ set=new HashSet();
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
+    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
+                                           (byte)1};
 
-    /*
-     * The list of all connections.  Used exclusively for callbacks
-     * (getActivityCallback()) and to find out if we're connected to a
-     * host (in choose() and write()).  May be null if we don't care.
-     */
-    protected ConnectionManager manager;
-
-    private void error(int message) {
-        if (manager!=null) {
-            ActivityCallback callback=manager.getCallback();
-            if (callback!=null)
-                callback.error(message);
-        }
-    }
+    private Acceptor acceptor;
+    private ConnectionManager manager;
+    private ActivityCallback callback;
 
     /**
-     * Creates an empty host catcher.  manager is used for callbacks
-     * and checking my list of current connections, or null if we don't care.
+     * Creates an empty host catcher.  Must call initialize before using.
      */
-    public HostCatcher(ConnectionManager manager) { this.manager=manager; }
+    public HostCatcher(ActivityCallback callback) {
+        this.callback=callback;
+    }
 
     /**
      * Creates a host catcher whose maybe set contains the hosts
@@ -57,16 +48,17 @@ public class HostCatcher {
      * does not exist, then no error message is printed and this is
      * initially empty.  The file is expected to contain a sequence of
      * lines in the format "<host>:port\n".  Lines not in this format
-     * are silently ignored.  manager is as described above.
+     * are silently ignored.
+     * Must call initialize before using.
      */
-    public HostCatcher(ConnectionManager manager, String filename) {
-        this.manager=manager;
+    public HostCatcher(ActivityCallback callback, String filename) {
+        this.callback = callback;
 
         BufferedReader in=null;
         try {
             in=new BufferedReader(new FileReader(filename));
         } catch (FileNotFoundException e) {
-            error(ActivityCallback.ERROR_10);
+            callback.error(ActivityCallback.ERROR_10);
             return;
         }
         while (true) {
@@ -106,6 +98,14 @@ public class HostCatcher {
     }
 
     /**
+     * Links the HostCatcher up with the other back end pieces
+     */
+    public void initialize(Acceptor acceptor, ConnectionManager manager) {
+        this.acceptor = acceptor;
+        this.manager = manager;
+    }
+
+    /**
      * @modifies the file named filename
      * @effects writes this to the given file.  The file
      *  is prioritized by rough probability of being good.
@@ -116,24 +116,22 @@ public class HostCatcher {
         //   Also add the connections to a set for step (2).  Ignore incoming
         //   connections, since the remote host's port is ephemeral.
         Set connections=new HashSet();
-        if (manager!=null) {
-            for (Iterator iter=manager.initializedConnections();
-                 iter.hasNext(); ) {
-                Connection c=(Connection)iter.next();
-                if (! c.isOutgoing()) //ignore incoming
-                    continue;
-                Endpoint e=new Endpoint(c.getInetAddress().getHostAddress(),
-                            c.getPort());
-                connections.add(e);
-                writeInternal(out, e);
-            }
+        for (Iterator iter=manager.initializedConnections();
+             iter.hasNext(); ) {
+            Connection c=(Connection)iter.next();
+            if (! c.isOutgoing()) //ignore incoming
+                continue;
+            Endpoint e=new Endpoint(c.getInetAddress().getHostAddress(),
+                        c.getPort());
+            connections.add(e);
+            writeInternal(out, e);
         }
 
         //2.) Write hosts in this that are not in connections--in order.
         for (int i=queue.size()-1; i>=0; i--) {
             Endpoint e=(Endpoint)queue.get(i);
             if (connections.contains(e))
-            continue;
+                continue;
             writeInternal(out, e);
         }
         out.close();
@@ -148,37 +146,33 @@ public class HostCatcher {
 
     /**
      * @modifies this
-     * @effects may choose to add hosts listed in m to this
+     * @effects may choose to add hosts listed in pr to this
      */
-    public void spy(Message m) {
-    //We could also get ip addresses from query hits and push
-    //requests, but then we have to guess the ports for incoming
-    //connections.  (These only give ports for HTTP.)
+    public void spy(PingReply pr) {
+        //We could also get ip addresses from query hits and push
+        //requests, but then we have to guess the ports for incoming
+        //connections.  (These only give ports for HTTP.)
 
-    if (! (m instanceof PingReply))
-        return;
+        Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
+                    pr.getFiles(), pr.getKbytes());
 
-    PingReply pr=(PingReply)m;
-    Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
-                pr.getFiles(), pr.getKbytes());
+        //Skip if we're connected to it.
+        if (manager.isConnected(e))
+            return;
 
-    //Skip if we're connected to it.
-    if (manager!=null && manager.isConnected(e))
-        return;
+        //Skip if this would connect us to our listening port.
+        if (isMe(e.getHostname(), e.getPort()))
+            return;
 
-    //Skip if this would connect us to our listening port.
-    if (isMe(e.getHostname(), e.getPort()))
-        return;
-
-    synchronized(this) {
-        if (! (set.contains(e))) {
-            set.add(e);
-            queue.add(e);  //add to tail of the queue.  Order matters!
-            this.notify(); //notify anybody waiting for a connection
+        synchronized(this) {
+            if (! (set.contains(e))) {
+                set.add(e);
+                queue.add(e);  //add to tail of the queue.  Order matters!
+                this.notify(); //notify anybody waiting for a connection
+            }
         }
-    }
 
-    addKnownHost(e);
+        callback.knownHost(e);
     }
 
 
@@ -236,15 +230,6 @@ public class HostCatcher {
     }
 
     /**
-     *  Notifies callback that e has been discovered.
-     */
-    private void addKnownHost(Endpoint e)
-    {
-        if ( manager!=null && manager.getCallback() != null )
-            manager.getCallback().knownHost(e);
-    }
-
-    /**
      *  Remove unwanted or used entries
      */
     public synchronized void removeHost(String host, int port) {
@@ -265,19 +250,14 @@ public class HostCatcher {
     }
 
     /**
-     * If manager==null, returns false.
      * If host is not a valid host address, returns false.
      * Otherwise, returns true if connecting to host:port would connect to
      *  the manager's listening port.
      */
     private boolean isMe(String host, int port) {
-        if (manager==null) {
-            return false;
-        }
-
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases for what is returned by manager.getListeningPort.
+        //they are aliases this machine.
         byte[] cIP;
         try {
             cIP=InetAddress.getByName(host).getAddress();
@@ -286,11 +266,11 @@ public class HostCatcher {
         }
 
         if (Arrays.equals(cIP, LOCALHOST)) {
-            return port==manager.getListeningPort();
+            return port == acceptor.getPort();
         } else {
-            byte[] managerIP=manager.getAddress();
-            return Arrays.equals(cIP, managerIP)
-            && port==manager.getListeningPort();
+            byte[] managerIP = acceptor.getAddress();
+            return (Arrays.equals(cIP, managerIP) &&
+                    (port==acceptor.getPort()));
         }
     }
 

@@ -78,7 +78,7 @@ public class ConnectionWatchdog implements Runnable {
             //Loop through all connections, trying to find ones that
             //have not made sufficient progress.
             for (Iterator iter=manager.connections(); iter.hasNext(); ) {
-                Connection c=(Connection)iter.next();
+                ManagedConnection c=(ManagedConnection)iter.next();
                 Object state=snapshot.get(c);
                 if (state==null)
                     continue;  //this is a new connection

@@ -29,7 +29,8 @@ public class HTTPDownloader implements Runnable {
     private String _filename;
     private int _sizeOfFile;
     private int _amountRead;
-    private ConnectionManager _manager;
+    private MessageRouter _router;
+    private Acceptor _acceptor;
     private ActivityCallback _callback;
     private Socket _socket;
     private String _downloadDir;
@@ -44,7 +45,7 @@ public class HTTPDownloader implements Runnable {
     private int _mode;
 
     private int    _state;
-	private String _stateString = null;
+    private String _stateString = null;
 
     private boolean _resume;
     private boolean        _wasShutdown = false;
@@ -63,7 +64,7 @@ public class HTTPDownloader implements Runnable {
      * HTTPDownloader's.  Note that it is synchronized.
      */
     private static List /* of PushRequestedFile */ requested=
-    Collections.synchronizedList(new LinkedList());
+        Collections.synchronizedList(new LinkedList());
     /** The maximum time, in SECONDS, allowed between a push request and an
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
@@ -78,7 +79,9 @@ public class HTTPDownloader implements Runnable {
      *  IllegalAccessException if we never requested the file.
      */
     public HTTPDownloader(Socket s, String file, int index, byte[] clientGUID,
-              ConnectionManager m) throws IllegalAccessException {
+                          MessageRouter router, Acceptor acceptor,
+                          ActivityCallback callback)
+              throws IllegalAccessException {
         //Authentication: check if we are requested via push.  First we clear
         //out very old entries in requested.
         Date time=new Date();
@@ -103,7 +106,7 @@ public class HTTPDownloader implements Runnable {
             throw new IllegalAccessException();
 
         _guid=clientGUID;
-        construct(file, m);
+        construct(file, router, acceptor, callback);
         _mode = 1;
         _socket = s;
         _index=index;
@@ -111,9 +114,10 @@ public class HTTPDownloader implements Runnable {
 
     /* The client side get */
     public HTTPDownloader(String protocol, String host,
-              int port, int index, String file,
-              ConnectionManager m, byte[] guid, int size ) {
-        construct(file, m);
+              int port, int index, String file, MessageRouter router,
+              Acceptor acceptor, ActivityCallback callback, byte[] guid,
+              int size ) {
+        construct(file, router, acceptor, callback);
         _mode = 2;
         _socket = null;
         _protocol = protocol;
@@ -121,7 +125,7 @@ public class HTTPDownloader implements Runnable {
         _index = index;
         _port = port;
         _guid = guid;
-		_sizeOfFile = size;
+        _sizeOfFile = size;
     }
 
     public void setDownloadInfo(HTTPDownloader down) {
@@ -135,16 +139,6 @@ public class HTTPDownloader implements Runnable {
 
     }
 
-    public void setDownloadInfo(String protocol, String host,
-                int port, int index, String file,
-                ConnectionManager m, byte[] guid ) {
-        _protocol = protocol;
-        _host = host;
-        _index = index;
-        _port = port;
-        _guid = guid;
-    }
-
     public String getProtocal() {return _protocol;}
     public String getHost() {return _host;}
     public int getIndex() {return _index;}
@@ -154,7 +148,7 @@ public class HTTPDownloader implements Runnable {
     public int getContentLength() {return _sizeOfFile;}
     public int getAmountRead() {return _amountRead;}
     public int getState() {return _state;}
-	public String getStateString() { return _stateString; }
+    public String getStateString() { return _stateString; }
     public void setResume() {_resume = true;}
 
     public InetAddress getInetAddress() {
@@ -171,13 +165,15 @@ public class HTTPDownloader implements Runnable {
     }
 
 
-    public void construct(String file, ConnectionManager m) {
+    public void construct(String file, MessageRouter router, Acceptor acceptor,
+                          ActivityCallback callback) {
         _state = NOT_CONNECTED;
         _filename = file;
         _amountRead = 0;
         _sizeOfFile = -1;
-        _manager = m;
-        _callback = _manager.getCallback();
+        _router = router;
+        _acceptor = acceptor;
+        _callback = callback;
         _downloadDir = "";
     }
 
@@ -248,20 +244,20 @@ public class HTTPDownloader implements Runnable {
         }
         catch (IOException e) {
 
-			// Handle immediate error cases
-			String str=conn.getHeaderField(0);
-			if ( str != null && str.indexOf(" 404 ") > 0 )
-			{
-				_state = ERROR;
-				_stateString = "File Not Found";
-				return;
-			}
-			else if ( str != null && str.indexOf(" 503 ") > 0 )
-			{
-				_state = ERROR;
-				_stateString = "Try Again Later";
-				return;
-			}
+            // Handle immediate error cases
+            String str=conn.getHeaderField(0);
+            if ( str != null && str.indexOf(" 404 ") > 0 )
+            {
+                _state = ERROR;
+                _stateString = "File Not Found";
+                return;
+            }
+            else if ( str != null && str.indexOf(" 503 ") > 0 )
+            {
+                _state = ERROR;
+                _stateString = "Try Again Later";
+                return;
+            }
             sendPushRequest();
             return;
         }
@@ -276,6 +272,10 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void initThree() {
+
+        // Reset any error message
+        _stateString = null;
+
         SettingsManager set = SettingsManager.instance();
         _downloadDir = set.getSaveDirectory();
         String pathname = _downloadDir + _filename;
@@ -283,6 +283,7 @@ public class HTTPDownloader implements Runnable {
 
         if (!myFile.exists()) {
             // allert an error
+            _stateString = "Resumed File Not Found";
             _state = ERROR;
             return;
         }
@@ -304,6 +305,7 @@ public class HTTPDownloader implements Runnable {
             _br = new ByteReader(_istream);
         }
         catch (Exception e) {
+            _stateString = "Resumed Connection Failed";
             _state = ERROR;
             return;
         }
@@ -313,7 +315,7 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
-		
+
         if (_mode == 1){
             // Need to mutate the original connection into this connection
             //if ( _state != QUEUED )
@@ -363,7 +365,7 @@ public class HTTPDownloader implements Runnable {
 
         _state    = REQUESTING;
         timeCount = 0;
-		
+
 
         //Record this push so incoming push connections can be verified.
         Assert.that(clientGUID!=null);
@@ -393,60 +395,15 @@ public class HTTPDownloader implements Runnable {
         //route push request, this is unfortunately NOT the case.
         byte[] messageGUID = Message.makeGuid();
         byte ttl = SettingsManager.instance().getTTL();
-        byte[] myIP = _manager.getAddress();
-        int myPort=_manager.getListeningPort();
+        byte[] myIP = _acceptor.getAddress();
+        int myPort= _acceptor.getPort();
 
         PushRequest push = new PushRequest(messageGUID, ttl, clientGUID,
                            _index, myIP, myPort);
 
         try {
-            //ROUTE the push to the appropriate connection, if possible.
-            Connection c=_manager.getPushRouteTable().get(clientGUID);
-            if (c!=null)
-                c.send(push);
-            else {
-                _state = ERROR;
-                return;
-            }
-        }
-        catch (Exception e) {
-            _state = ERROR;
-            return;
-        }
-    }
-
-    public void sendPushRequest(String hostname, int index,
-                int port, byte[] cguid) {
-        _state = REQUESTING;
-
-        StringTokenizer tokenizer = new StringTokenizer(hostname,".");
-        String a = tokenizer.nextToken();
-        String b = tokenizer.nextToken();
-        String c = tokenizer.nextToken();
-        String d = tokenizer.nextToken();
-
-        int a1 = Integer.parseInt(a);
-        int b1 = Integer.parseInt(b);
-        int c1 = Integer.parseInt(c);
-        int d1 = Integer.parseInt(d);
-        byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
-
-        byte[] guid = _manager.getClientGUID();
-
-        // last 16 bytes of the query reply message...
-        byte[] clientGUID = cguid;
-
-        byte ttl = SettingsManager.instance().getTTL();
-
-        // am i passing the right guid's?
-
-        PushRequest push = new PushRequest(guid, ttl, clientGUID,
-                           index, ip, port);
-
-        try {
-            _manager.sendToAll(push);
-        }
-        catch (Exception e) {
+            _router.sendPushRequest(push);
+        } catch (Exception e) {
             _state = ERROR;
             return;
         }
@@ -454,24 +411,52 @@ public class HTTPDownloader implements Runnable {
 
     public void doDownload() {
         readHeader();
-		if ( _state == ERROR )
-			return;
-	
+        if ( _state == ERROR )
+            return;
+
         SettingsManager set = SettingsManager.instance();
 
         _downloadDir = set.getSaveDirectory();
 
-	    String incompleteDir = set.getIncompleteDirectory();
+        String incompleteDir = set.getIncompleteDirectory();
 
-        String pathname = incompleteDir +  _filename;
-        File myFile = new File(pathname);
+        File myFile = new File(incompleteDir, _filename);
+        String pathname = myFile.getAbsolutePath();
 
-	    String path = _downloadDir + _filename;
-        File myTest = new File(path);
+        File myTest = new File(_downloadDir, _filename);
+        String path = myTest.getAbsolutePath();
+
+        /********* Double Checking For Security **********/
+        /* This is necessary, and a little tricky. I
+           check to see if the canonical path of the
+           parent of the requested file is equivalent
+           to the canonical path of the shared directory. */
+
+        File f;
+        String p;
+        try {
+            File shared = new File(_downloadDir);
+            String shared_path = shared.getCanonicalPath();
+
+            f = new File(myTest.getParent());
+            p = f.getCanonicalPath();
+
+            if (!p.equals(shared_path)) {
+                System.out.println("Caught the malicious one!");
+                _state = ERROR;
+                return;
+            }
+        } catch (Exception e) {
+            _state = ERROR;
+            return;
+        }
+
+        /***********End of Double Check ***********/
 
         if ((myTest.exists()) && (!_resume)) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
+                _stateString = "File Already Exists";
                 _state = ERROR;
                 return;
             }
@@ -533,13 +518,16 @@ public class HTTPDownloader implements Runnable {
         }
 
         if ( _amountRead == _sizeOfFile ) {
-	    String pname = _downloadDir + _filename;
-	    myFile.renameTo(new File(pname));
+            String pname = _downloadDir + _filename;
+            myFile.renameTo(new File(pname));
             _state = COMPLETE;
-	}
+            FileManager.getFileManager().addFileIfShared(pname);
+        }
 
         else
+        {
             _state = ERROR;
+        }
     }
 
     public void readHeader() {
@@ -549,22 +537,31 @@ public class HTTPDownloader implements Runnable {
         boolean foundRangeInitial = false;
         boolean foundRangeFinal = false;
         int     tempSize = -1;
+        int     lineNumber = -1;
 
         while (true) {
             try {
                 str = _br.readLine();
+                lineNumber++;
             } catch (IOException e) {
                 _state = ERROR;
                 return;
-			}
+            }
 
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
+            // Handle a 503 error from Gnotella
+            if ( lineNumber == 0 && str.equals("3") )
+            {
+                _stateString = "Try Again Later";
+                _state = ERROR;
+                return;
+            }
 
-            if ((str.indexOf("Content-length:") != -1)  ||
-				(str.indexOf("Content-Length:") != -1))  {
+            if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
+
                 String sub;
                 try {
                     sub=str.substring(15);
@@ -581,13 +578,14 @@ public class HTTPDownloader implements Runnable {
                     return;
                 }
 
-                foundLength = true;;
+                foundLength = true;
             }
 
-            if (str.indexOf("Content-range:") != -1) {
+            if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
     //          System.out.println("Content-range line:");
     //          System.out.println(str);
                 _resume = true;
+                foundLength = true;
             }
         }
 
@@ -665,14 +663,14 @@ public class HTTPDownloader implements Runnable {
         return false;
     }
 
-	/** 
+    /**
      *  Get an integer time count
      */
     public int getTimeCount() {
         return (timeCount);
     }
 
-	/** 
+    /**
      *  Inc an integer time count
      */
     public void incTimeCount() {

@@ -19,7 +19,7 @@ import com.limegroup.gnutella.util.Buffer;
  *
  * <pre>
  *   //1. Setup manager and connection.
- *   ConnectionManager cm=new ConnectionManager();
+ *   ConnectionManager cm=new ConnectionManager(...);
  *   cm.createConnectionAsynchronously(host, port);
  * </pre>
  *
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.util.Buffer;
  *
  * <pre>
  *   //1. Setup manager and connection.
- *   ConnectionManager cm=new ConnectionManager();
+ *   ConnectionManager cm=new ConnectionManager(...);
  *   Connection c = cm.createConnectionBlocking(host, port);
  *   c.send(whatever);
  * </pre>
@@ -106,6 +106,10 @@ public class Connection {
     /** True iff the output thread should write the queue immediately.
      *  Synchronized by _outputQueueLock. */
     private boolean _flushImmediately=false;
+    /** A condition variable used to implement the flush() method.
+     *  Call notify when outputQueueLock and oldOutputQueueLock are
+     *  empty. */
+    private Object _flushLock=new Object();
 
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -129,11 +133,6 @@ public class Connection {
     private int _received=0;
 
     /**
-     * A dummy constructor for ConnectionManager.ME_CONNECTION
-     */
-    public Connection() {}
-
-    /**
      * Creates an outgoing connection with the specified listener.
      * initalize() must be called before anything else.
      */
@@ -149,13 +148,11 @@ public class Connection {
      *
      * @requires the word "GNUTELLA " and nothing else has just been read
      *  from socket
-     * @effects wraps a connection around socket and does the rest of the Gnutella
-     *  handshake.  Throws IOException if the connection couldn't be established.
-     *  If such an error happens, the socket is properly closed.
      */
     public Connection(Socket socket) {
         _host = socket.getInetAddress().toString();
         _port = socket.getPort();
+        _socket = socket;
         _outgoing = false;
     }
 
@@ -191,6 +188,10 @@ public class Connection {
             _socket.close();
             throw e;
         }
+
+         Thread t=new Thread(new OutputRunner());
+         t.setDaemon(true);
+         t.start();
     }
 
     /**
@@ -293,16 +294,31 @@ public class Connection {
         }
     }
 
-    /** Ensures that any data queued in this is written to output as
-     *  soon as possible.  Normally, there is no need to call this
-     *  method; the output buffers are automatically flushed every few
-     *  seconds (at most).  However, it may be necessary to call this
-     *  method in situations where latencies are not tolerable, e.g.,
-     *  in the network discoverer. */
+    /**
+     * @requires no other threads are calling send() or flush()
+     * @effects block until all queued data is written.  Normally,
+     *  there is no need to call this method; the output buffers are
+     *  automatically flushed every few seconds (at most).  However, it
+     *  may be necessary to call this method in situations where high
+     *  latencies are not tolerable, e.g., in the network
+     *  discoverer.
+     */
     public void flush() {
         synchronized (_outputQueueLock) {
             _flushImmediately=true;
             _outputQueueLock.notify();
+        }
+        synchronized (_flushLock) {
+            while (! (_outputQueue.isEmpty() && _oldOutputQueue.isEmpty())) {
+                try {
+                    _flushLock.wait();
+                } catch (InterruptedException e) { }
+                try {
+                    //Flush is needed in case the wait() returns
+                    //prematurely.
+                    _out.flush();
+                } catch (IOException e) { /* throw to caller? */ }
+            }
         }
     }
 
@@ -350,6 +366,11 @@ public class Connection {
                     _out.flush();
                 } catch (IOException e) {
                     close();
+                }
+                synchronized(_flushLock) {
+                    //note that oldOutputQueue.isEmpty()
+                    if (_outputQueue.isEmpty())
+                        _flushLock.notify();
                 }
             }
         }

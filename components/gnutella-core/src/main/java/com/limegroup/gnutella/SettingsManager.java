@@ -32,6 +32,7 @@ public class SettingsManager implements SettingsInterface
     private static int      keepAlive_;
     private static int      port_;
     private static int      connectionSpeed_;
+    private static int      uploadSpeed_;
     private static byte     searchLimit_;
     private static String   clientID_;
     private static int      maxConn_;
@@ -46,6 +47,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  filterAdult_;
     private static boolean  filterVbs_;
     private static boolean  filterHtml_;
+    private static boolean  filterGreedyQueries_;
     private static boolean  useQuickConnect_;
     private static String[] quickConnectHosts_;
     private static int      parallelSearchMax_;
@@ -192,6 +194,52 @@ public class SettingsManager implements SettingsInterface
                     }
                     catch(NumberFormatException nfe){}
                 }
+                else if(key.equals(SettingsInterface.PARALLEL_SEARCH)) {
+                    try {
+                        i = Integer.parseInt(p);
+                        try { setParallelSearchMax(i); }
+                        catch (IllegalArgumentException ie){}
+                    }
+                    catch(NumberFormatException nfe){}
+                }
+                else if(key.equals(SettingsInterface.MAX_SIM_DOWNLOAD)) {
+                    try {
+                        i = Integer.parseInt(p);
+                        try { setMaxSimDownload(i); }
+                        catch (IllegalArgumentException ie){}
+                    }
+                    catch(NumberFormatException nfe){}
+                }
+                else if(key.equals(SettingsInterface.MAX_UPLOADS)) {
+                    try {
+                        i = Integer.parseInt(p);
+                        try { setMaxUploads(i); }
+                        catch (IllegalArgumentException ie){}
+                    }
+                    catch(NumberFormatException nfe){}
+                }
+                else if(key.equals(SettingsInterface.CLEAR_DOWNLOAD)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try { setClearCompletedDownload(bs); }
+                    catch (IllegalArgumentException ie){}
+                }
+                else if(key.equals(SettingsInterface.CLEAR_UPLOAD)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try { setClearCompletedUpload(bs); }
+                    catch (IllegalArgumentException ie){}
+                }
                 else if(key.equals(SettingsInterface.TIMEOUT)) {
                     try {
                         i = Integer.parseInt(p);
@@ -223,6 +271,15 @@ public class SettingsManager implements SettingsInterface
                         catch (IllegalArgumentException ie){}
                     }
                     catch(NumberFormatException nfe){}
+                }
+                else if(key.equals(SettingsInterface.UPLOAD_SPEED)) {
+                    try {
+                        i = Integer.parseInt(p);
+                        try {setUploadSpeed(i);}
+                        catch (IllegalArgumentException ie){}
+                    }
+                    catch(NumberFormatException nfe){}
+
                 }
                 else if(key.equals(SettingsInterface.SEARCH_LIMIT)) {
                     try {
@@ -263,7 +320,7 @@ public class SettingsManager implements SettingsInterface
                 }
 
                 else if(key.equals(SettingsInterface.INCOMPLETE_DIR)) {
-                  setIncompleteDirectory(p);
+                    setIncompleteDirectory(p);
                 }
 
                 else if(key.equals(SettingsInterface.BANNED_IPS)) {
@@ -316,6 +373,17 @@ public class SettingsManager implements SettingsInterface
                     else
                         return;
                     try {setFilterVbs(bs);}
+                    catch (IllegalArgumentException ie){}
+                }
+                else if(key.equals(SettingsInterface.FILTER_GREEDY_QUERIES)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try {setFilterGreedyQueries(bs);}
                     catch (IllegalArgumentException ie){}
                 }
                 else if(key.equals(SettingsInterface.USE_QUICK_CONNECT)) {
@@ -376,7 +444,9 @@ public class SettingsManager implements SettingsInterface
         setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
         setPort(SettingsInterface.DEFAULT_PORT);
         setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
+        setUploadSpeed(SettingsInterface.DEFAULT_UPLOAD_SPEED);
         setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
+        //setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
         setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
         setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
@@ -385,11 +455,14 @@ public class SettingsManager implements SettingsInterface
         setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
         setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
         setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
+        setFilterGreedyQueries(
+                    SettingsInterface.DEFAULT_FILTER_GREEDY_QUERIES);
         setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
-        setDirectories("");
+        setDirectories(home_);
         setSaveDirectory(home_);
         setSaveDefault(home_);
         setIncompleteDirectory(home_);
+        //setInstallDir("");
         setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
@@ -431,6 +504,8 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the client's connection speed */
     public int getConnectionSpeed(){return connectionSpeed_;}
+
+    public int getUploadSpeed() { return uploadSpeed_; }
 
     /** returns the client's search speed */
     public byte getSearchLimit(){return searchLimit_;}
@@ -486,6 +561,7 @@ public class SettingsManager implements SettingsInterface
     public boolean getFilterDuplicates(){return filterDuplicates_;}
     public boolean getFilterHtml(){return filterHtml_;}
     public boolean getFilterVbs(){return filterVbs_;}
+    public boolean getFilterGreedyQueries() { return filterGreedyQueries_; }
 
     public boolean getUseQuickConnect(){return useQuickConnect_;}
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}
@@ -517,6 +593,7 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the path of the properties and host list files */
     public String getPath() {return home_;}
+
 
     /** sets the maximum length of packets (spam protection)*/
     public synchronized void setMaxLength(int maxLength)
@@ -799,6 +876,19 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+    /** Sets the percentage of total bandwidth (as given by
+     *  CONNECTION_SPEED) to use for uploads.  This is shared
+     *  equally among all uploads.  Throws IllegalArgumentException
+     *  if speed<0 or speed>100. */
+    public synchronized void setUploadSpeed(int speed) {
+        if (speed<0 || speed>100)
+            throw new IllegalArgumentException();
+        else {
+            uploadSpeed_ = speed;
+            String s = Integer.toString(uploadSpeed_);
+            props_.put(SettingsInterface.UPLOAD_SPEED, s);
+        }
+    }
 
     public void setConnectString(String connect)
         throws IllegalArgumentException {
@@ -845,6 +935,56 @@ public class SettingsManager implements SettingsInterface
 
         connectOkString_=ok;
         props_.put(SettingsInterface.CONNECT_OK_STRING, ok);
+    }
+
+    public synchronized void setParallelSearchMax(int max) {
+        if(max<1)
+            throw new IllegalArgumentException();
+        else {
+            parallelSearchMax_ = max;
+            String s = String.valueOf(max);
+            props_.put(SettingsInterface.PARALLEL_SEARCH, s);
+        }
+    }
+
+    public void setMaxSimDownload(int max) {
+        if(false)
+            throw new IllegalArgumentException();
+        else {
+            maxSimDownload_ = max;
+            String s = String.valueOf(max);
+            props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+        }
+    }
+
+    public void setMaxUploads(int max) {
+        if(false)
+            throw new IllegalArgumentException();
+        else {
+            maxUploads_ = max;
+            String s = String.valueOf(max);
+            props_.put(SettingsInterface.MAX_UPLOADS, s);
+        }
+    }
+
+    public void setClearCompletedUpload(boolean b) {
+        if(false)
+            throw new IllegalArgumentException();
+        else {
+            clearCompletedUpload_ = b;
+            String s = String.valueOf(b);
+            props_.put(SettingsInterface.CLEAR_UPLOAD, s);
+        }
+    }
+
+    public void setClearCompletedDownload(boolean b) {
+        if(false)
+            throw new IllegalArgumentException();
+        else {
+            clearCompletedDownload_ = b;
+            String s = String.valueOf(b);
+            props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
+        }
     }
 
     /******************************************************
@@ -921,6 +1061,14 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+    public synchronized void setFilterGreedyQueries(boolean yes) {
+        filterGreedyQueries_ = yes;
+        Boolean b = new Boolean(yes);
+        String s = b.toString();
+        props_.put(SettingsInterface.FILTER_GREEDY_QUERIES, s);
+        writeProperties();
+    }
+
     public synchronized void setUseQuickConnect(boolean useQuickConnect) {
         if(false)
             throw new IllegalArgumentException();
@@ -944,16 +1092,6 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    public synchronized void setParallelSearchMax(int max) {
-        if(max<1)
-            throw new IllegalArgumentException();
-        else {
-            parallelSearchMax_ = max;
-            String s = String.valueOf(max);
-            props_.put(SettingsInterface.PARALLEL_SEARCH, s);
-            writeProperties();
-        }
-    }
 
     public synchronized void setSearchAnimationTime(int seconds) {
         if(seconds < 0)
@@ -962,50 +1100,6 @@ public class SettingsManager implements SettingsInterface
             searchAnimationTime_=seconds;
             String s = Integer.toString(seconds);
             props_.put(SettingsInterface.SEARCH_ANIMATION_TIME, s);
-            writeProperties();
-        }
-    }
-
-    public synchronized void setMaxSimDownload(int max) {
-        if(false)
-            throw new IllegalArgumentException();
-        else {
-            maxSimDownload_ = max;
-            String s = String.valueOf(max);
-            props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
-            writeProperties();
-        }
-    }
-
-    public synchronized void setMaxUploads(int max) {
-        if(false)
-            throw new IllegalArgumentException();
-        else {
-            maxUploads_ = max;
-            String s = String.valueOf(max);
-            props_.put(SettingsInterface.MAX_UPLOADS, s);
-            writeProperties();
-        }
-    }
-
-    public synchronized void setClearCompletedUpload(boolean b) {
-        if(false)
-            throw new IllegalArgumentException();
-        else {
-            clearCompletedUpload_ = b;
-            String s = String.valueOf(b);
-            props_.put(SettingsInterface.CLEAR_UPLOAD, s);
-            writeProperties();
-        }
-    }
-
-    public synchronized void setClearCompletedDownload(boolean b) {
-        if(false)
-            throw new IllegalArgumentException();
-        else {
-            clearCompletedDownload_ = b;
-            String s = String.valueOf(b);
-            props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
             writeProperties();
         }
     }
@@ -1033,6 +1127,7 @@ public class SettingsManager implements SettingsInterface
             }
         }
     }
+
 
     /** writes out the Network Discovery specialized
      *  properties file
@@ -1134,17 +1229,3 @@ public class SettingsManager implements SettingsInterface
     //      Assert.that(manager.getConnectStringRemainder().equals(""));
     //      }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -91,7 +91,7 @@ public abstract class Message {
      *    </ul>
      */
     public static Message read(InputStream in)
-    throws BadPacketException, IOException {
+            throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
         //   exception.
@@ -239,14 +239,6 @@ public abstract class Message {
         buf.append(ByteOrder.ubyte2int(ip[2])+".");
         buf.append(ByteOrder.ubyte2int(ip[3])+"");
         return buf.toString();
-    }
-
-    /**
-     * A convenience routine: returns true iff this should be forwarded
-     * to other servents.
-     */
-    public boolean isRequest() {
-        return func==F_PING || func==F_PUSH || func==F_QUERY;
     }
 
     /** @modifies this

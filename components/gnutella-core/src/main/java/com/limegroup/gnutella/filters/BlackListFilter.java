@@ -4,16 +4,15 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 
 /**This class provides an interface to the list of ip addresses that
- * have been black listed. 
- *There are two ways for an IP address to the added to the blacklisted 
- *list. One - directly by the user, through the GUI. Second, the anti spam 
+ * have been black listed.
+ *There are two ways for an IP address to the added to the blacklisted
+ *list. One - directly by the user, through the GUI. Second, the anti spam
  *stuff Chris is writing can update the list.
  * @ author Sumeet Thadani
  */
 public class BlackListFilter extends SpamFilter{
-    
+
     private Vector badHosts = new Vector();
-    private ConnectionManager cm;
     private static BlackListFilter instance;
 
     /** Constructs a new BlackListFilter containing the addresses listed
@@ -23,7 +22,7 @@ public class BlackListFilter extends SpamFilter{
         for (int i=0; i<allHosts.length; i++)
             badHosts.add(allHosts[i]);
     }
-    
+
     /** To ensure the singleton pattern
      */
     public static BlackListFilter instance(){
@@ -31,8 +30,8 @@ public class BlackListFilter extends SpamFilter{
             instance = new BlackListFilter();
         return instance;
     }
-    
-    /** 
+
+    /**
      * @modifies this
      * @effects ensures badGuy is in this.  <i>Settings manager is not
      *  modified.</i>
@@ -43,7 +42,7 @@ public class BlackListFilter extends SpamFilter{
         badHosts.add(badGuy);
     }
 
-    /** 
+    /**
      * @modifies this
      * @effects ensures goodGuy is not in this.   <i>Settings manager is not
      *  modified.</i>
@@ -63,9 +62,9 @@ public class BlackListFilter extends SpamFilter{
     public void clear() {
         badHosts.clear();
     }
-    
-    /** Checks if a given host is in the the bad hosts list 
-     *  This method will be called when accepting an incomming 
+
+    /** Checks if a given host is in the the bad hosts list
+     *  This method will be called when accepting an incomming
      *  or outgoing connection. It returns true if the given host is
      *  a bad guy
      */
@@ -76,7 +75,7 @@ public class BlackListFilter extends SpamFilter{
     }
 
     /** This method will be called from Connection, when Query Replies or Ping Replies come in
-     *  We cannot findout about host ip addresses in Ping Requests and  Query Requests 
+     *  We cannot findout about host ip addresses in Ping Requests and  Query Requests
      * (for anonymity reasons)
      */
     public boolean allow(Message m){
@@ -96,11 +95,11 @@ public class BlackListFilter extends SpamFilter{
             return false;
         return true;
     }
-    
+
     /*
       //unit tests
       public static void main(String args[]){
-      BlackListFilter fil = BlackListFilter.instance(new ConnectionManager());
+      BlackListFilter fil = BlackListFilter.instance();
       System.out.println("value "+ fil.check("192.192.192.197"));
       }
     */

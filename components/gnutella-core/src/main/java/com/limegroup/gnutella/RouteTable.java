@@ -14,7 +14,7 @@ public class RouteTable {
     /* The ForgetfulHashMap takes care of all the work.
      * TODO3: I wish we could avoid creating new GUIDs everytime
      */
-    private Map map;
+    private Map _map;
 
 
     /**
@@ -23,17 +23,18 @@ public class RouteTable {
      * entries.
      */
     public RouteTable(int size) {
-        map=new ForgetfulHashMap(size);
+        _map=new ForgetfulHashMap(size);
     }
 
     /**
      * @requires guid not in this, guid and c are non-null, guid.length==16
      * @effects adds the routing entry to this
      */
-    public synchronized void put(byte[] guid, Connection c) {
-        Assert.that(c != null);
+    public synchronized void routeReply(byte[] guid,
+                                        ReplyHandler replyHandler) {
+        Assert.that(replyHandler != null);
         GUID g=new GUID(guid);
-        map.put(g,c);
+        _map.put(g, replyHandler);
     }
 
     /**
@@ -41,60 +42,32 @@ public class RouteTable {
      * @effects returns the corresponding Connection for this GUID, or
      *  null if none.
      */
-    public synchronized Connection get(byte[] guid) {
-        Object o=map.get(new GUID(guid));
-        if (o!=null)
-            return (Connection)o;
-        else
-            return null;
-    }
-
-    /**
-     * @requires guid.length==16
-     * @effects true if I've seen requests with the given guid and hence
-     *  know where to send the replies, i.e., get(guid)!=null
-     */
-    public synchronized boolean hasRoute(byte[] guid) {
-        return map.get(new GUID(guid))!=null;
+    public synchronized ReplyHandler getReplyHandler(byte[] guid) {
+        return (ReplyHandler)_map.get(new GUID(guid));
     }
 
     /**
      * @modifies this
-     * @effects removes all entries [guid, c2] s.t. c2.equals(c).
+     * @effects removes all entries [guid, rh2] s.t. rh2.equals(replyHandler).
      *  This operation is fairly expensive.
      */
-    public synchronized void remove(Connection c) {
-        Iterator iter=map.keySet().iterator();
-        while (iter.hasNext()) {
-            Object guid=iter.next();
-            if (guid==null) //it shouldn't be!
-                continue;
-            if (map.get(guid).equals(c)) {
-
-                    iter.remove();
-
-            //anu commented out the following lines and instead used the remove method
-            //in iterator interface top remove entry from the underlying collection
-            //map.remove(guid);
-            //musn't remove keys while iterating over set
-            //iter=map.keySet().iterator();
-            }
-        }
+    public synchronized void removeReplyHandler(ReplyHandler replyHandler) {
+        Collection values = _map.values();
+        // Loop, removing values until there are no more
+        while(values.remove(replyHandler));
     }
 
     public synchronized String toString() {
-    StringBuffer buf=new StringBuffer("\n");
-    Iterator iter=map.keySet().iterator();
-    while (iter.hasNext()) {
-        GUID guid=(GUID)(iter.next());
-        Connection conn=get(guid.bytes());
-        Assert.that(conn!=null);
-        buf.append(guid.toString());
-        buf.append(" -> ");
-        buf.append(conn.toString());
-        buf.append("\n");
-    }
-    return buf.toString();
+        StringBuffer buf=new StringBuffer("\n");
+        Iterator iter=_map.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry)(iter.next());
+            buf.append(entry.getKey()); // GUID
+            buf.append(" -> ");
+            buf.append(entry.getValue()); // Connection
+            buf.append("\n");
+        }
+        return buf.toString();
     }
 
 //      /** Unit test */

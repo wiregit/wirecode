@@ -1,43 +1,42 @@
-#Makefile for LimeWire
-javac=javac -g
-
-classes = Main.class ConnectionManager.class RouteTable.class \
-	Connection.class BadPacketException.class GUID.class \
-	Assert.class \
-	Message.class PingRequest.class PingReply.class \
-	QueryRequest.class QueryReply.class Response.class \
-	PushRequest.class ByteOrder.class HostCatcher.class \
-	Endpoint.class \
-	SettingsInterface.class SettingsManager.class \
-	HTTPManager.class HTTPUploader.class HTTPDownloader.class HTTPUtil.class \
-	SpamFilter.class \
-	RouterService.class ResponseVerifier.class \
-	MediaType.class \
-	FileManager.class RejectConnection.class \
-	ConnectionWatchdog.class
-
-subpackages = util gui filters networkdiscoverer
-
-all : $(classes) $(subpackages)
-
-$(classes) : %.class: %.java
-	$(javac) $<
-
-#Recursively call make
-.PHONY: gui
-gui:
-	$(MAKE) -C gui
-
-.PHONY: util
-util:
-	$(MAKE) -C util
-
-.PHONY: filters
-filters:
-	$(MAKE) -C filters
+# Makefile
 
 
-# .PHONY: doc
-# doc:
-# 	cd ../../..
-# 	javadoc170 -d doc/api com.limegroup.gnutella"
+# the java compiler
+JAVA  = javac 
+
+RM      = /bin/rm -rf
+
+# grab all sources - kind of hacky
+SRCS := $(wildcard *.java)
+
+# our object files
+OBJS  = $(SRCS:.java=.class)
+
+SUBDIRS = gui util install
+
+# targets
+
+# make everything, (just makes .class files, for now)
+all: $(SRCS)
+	$(JAVA) $<
+
+subdirs: $(SUBDIRS)
+	cd $<; $(MAKE) -f ../Makefile
+
+# dont need this part... 
+# make all class files
+# class: $(OBJS)
+#   $(JAVA) $<
+
+show_srcs:
+	@echo $(SRCS)
+
+show_objs:
+	@echo $(OBJS) 
+
+# clean and then make again
+again:  clean all
+
+# clean up after making - remove core, ~ files, and .bak files
+clean:
+	$(RM) $(OBJS) core *~ *.bak
