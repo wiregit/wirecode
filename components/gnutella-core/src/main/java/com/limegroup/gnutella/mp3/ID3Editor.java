@@ -3,6 +3,7 @@ package com.limegroup.gnutella.mp3;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Used when a user wants to edit meta-information about a .mp3 file, and asks
@@ -222,6 +223,7 @@ public class ID3Editor{
         try {
             try{
                 f = new File(fileName);
+                FileUtils.setWriteable(f);
                 file = new RandomAccessFile(f,"rw");
             }catch(IOException e){
                 return LimeXMLReplyCollection.FILE_DEFECTIVE;
@@ -229,7 +231,7 @@ public class ID3Editor{
             long length=0;
             try{
                 length = file.length();
-                if(length < 128)//could not write - file too small
+                if(length < 128) //could not write - file too small
                     return LimeXMLReplyCollection.FILE_DEFECTIVE;
                 file.seek(length - 128);
             }catch(IOException ee){
