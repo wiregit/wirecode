@@ -640,51 +640,51 @@ public class RouterService
             ((ManagedConnection)iter.next()).refreshHorizonStats();
     }
 
-
-    /**
-     * Searches the network for files of the given type with the given
-     * query string and minimum speed.  If type is null, any file type
-     * is acceptable.  Returns the GUID of the query request sent as a
-     * 16 byte array.<p>
-     *
-     * ActivityCallback is notified asynchronously of responses.
-     * These responses can be matched with requests by looking at
-     * their GUIDs.  (You may want to wrap the bytes with a GUID
-     * object for simplicity.) 
-     * 
-     * @param query the query string to use
-     * @param minSpeed the minimum desired result speed
-     * @param type the desired type of result (e.g., audio, video), or
-     *  null if you don't care
-     * @return the guid of the underlying search.  Used to match up
-     *  query results.  Guaranteed to be 16 bytes long.
+    /** 
+     * Returns a new GUID for passing to query.
      */
-    public byte[] query(String query, int minSpeed, MediaType type) {
-        //anu modified
-        //TODO revert changes, or place somewhere else. I guess sumeet will
-        //figure out
-        //anu creating rich query (by duplicating the normal query into
-        //both plain and rich areas
-        QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
-        verifier.record(qr, type);
-        router.broadcastQueryRequest(qr);
-        return qr.getGUID();
+    public static byte[] newQueryGUID() {
+        return QueryRequest.newQueryGUID(false);
     }
 
     /**
-     * @see query(String, int, MediaType)
-     * same as the method above, except, the type is set to "any" and
-     * the it creates a rich Query. 
-     * @return the guid of the search, used to match up query with 
-     * replies. 
+     * Searches the network for files of the given type with the given
+     * GUID, query string and minimum speed.  If type is null, any file type
+     * is acceptable.<p>
+     *
+     * ActivityCallback is notified asynchronously of responses.  These
+     * responses can be matched with requests by looking at their GUIDs.  (You
+     * may want to wrap the bytes with a GUID object for simplicity.)  An
+     * earlier version of this method returned the reply GUID instead of taking
+     * it as an argument.  Unfortunately this caused a race condition where
+     * replies were returned before the GUI was prepared to handle them.
+     * 
+     * @param guid the guid to use for the query.  MUST be a 16-byte
+     *  value as returned by newQueryGUID.
+     * @param query the query string to use
+     * @param minSpeed the minimum desired result speed
      * @param type the desired type of result (e.g., audio, video), or
-     *  null if you don't care
+     *  null if you don't care 
      */
-    public byte[] query(String query, String richQuery, 
+    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
+        QueryRequest qr=new QueryRequest(guid,
+                                         SettingsManager.instance().getTTL(),
+                                         minSpeed, query);
+        verifier.record(qr, type);
+        router.broadcastQueryRequest(qr);
+    }
+
+    /**
+     * Searches the network for files with the given metadata.
+     * 
+     * @param richQuery metadata query to insert between the nulls,
+     *  typically in XML format
+     * @see query(byte[], String, int, MediaType)
+     */
+    public void query(byte[] guid, String query, String richQuery, 
                         int minSpeed, MediaType type) {
-        //System.out.println("Sumeet rich query coming...");
-        QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
+        QueryRequest qr=new QueryRequest(guid,
+                                         SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
@@ -708,18 +708,17 @@ public class RouterService
          //do nothing
          }
         */
-        return qr.getGUID();
     }
 
 
     /** 
      * Searches the network for files with the given query string and 
-     * minimum speed, i.e., same as query(query, minSpeed, null). 
+     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
      *
-     * @see query(String, int, MediaType)
+     * @see query(byte[], String, int, MediaType)
      */
-    public byte[] query(String query, int minSpeed) {
-        return query(query, minSpeed, null);
+    public void query(byte[] guid, String query, int minSpeed) {
+        query(guid, query, minSpeed, null);
     }
 
     /** 
