@@ -104,6 +104,8 @@ public class RouteClient {
 	if (nocheck) {
 	    System.out.println("done.\nReading replies quickly.  "
 			       +"Press Ctrl-C to end.");
+        long totBytes=0;
+        long totTime=0;
 	    while (true) {
             final int CHUNK=100;
             Date startTime=new Date();
@@ -112,9 +114,13 @@ public class RouteClient {
             }
             Date endTime=new Date();
             float milliseconds=(float)(endTime.getTime()-startTime.getTime());
+            totTime+=milliseconds;
+            totBytes+=MEASURE*CHUNK;
             //MEASURE*CHUNK bytes were read.  Note that bytes/msec=kbyte/sec
             float bandwidth=((float)MEASURE*CHUNK)/milliseconds;
-            System.out.println("Reply bandwidth: "+bandwidth+" kb/sec");
+            float totBandwidth=(float)totBytes/(float)totTime;
+            System.out.println("Reply bandwidth (kb/s): "+bandwidth+" for quantum, "
+                               +totBandwidth+" overall");
 	    }	
 	}
     //   b) Measure in messages/sec and verify message.
