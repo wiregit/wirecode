@@ -27,6 +27,10 @@ public final class HandshakeResponseTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    /**
+     * Tests the method for checking whether or not the specified
+     * host supports probe queries.
+     */
     public void testSupportsProbeQueries() throws Exception {
         Properties props = new Properties();
         HandshakeResponse hr = HandshakeResponse.createResponse(props);
