@@ -93,35 +93,22 @@ public class ByteReader {
 	    if (c == -1) 
 		break;
 	    
-	  //    buf[i++] = (byte)c;
-//  	    numBytes++;
-
-	    if ( c == creturn[0] ) {	
-		try {
-		    b = _istream.read();
-		}
-		catch (IOException e) {
-		}
-
-		if (b == -1)
-		    break;
-
-		// buf[i++] = (byte)b;
-		// numBytes++;
-		
-		if ( b == nline[0] ) 
-		    break;
-		    // endOfLine = true;
-		else {
-		    // buf[i++] = (byte)c;
-		    // buf[i++] = (byte)b;
-		    // numBytes+=2;
-		}
+	    if ( b == creturn[0] ) {
+		// do nothing
 	    }
+		
+	    else if ( c == nline[0] ) {
+		// break if either a "/r/n'"
+		// or a "/n/n" is found
+		if( ( b == creturn[0] ) ||
+		    ( b == nline[0] ) )
+		    break;
+	    } 
+	    		
 	    else {
 		buf[i++] = (byte)c;
 		numBytes++;
-	   
+		b = c;
 	    }
 
 	    if (numBytes == BUFSIZE) {

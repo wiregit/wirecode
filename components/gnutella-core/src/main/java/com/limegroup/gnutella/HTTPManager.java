@@ -69,7 +69,7 @@ public class HTTPManager {
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
-	    readRange();
+	    // readRange();
 
 	    HTTPUploader uploader;
 	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadBegin);
