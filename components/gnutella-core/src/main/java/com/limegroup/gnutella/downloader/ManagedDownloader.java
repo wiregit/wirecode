@@ -23,7 +23,8 @@ import java.net.*;
  *
  * Subclasses may refine the requery behavior by overriding the
  * nextRequeryTime, newRequery(n), allowAddition(..), and addDownload(..) 
- * methods.<p>
+ * methods.  MagnetDownloader also redefines the tryAllDownloads(..) method to
+ * handle default locations.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -703,7 +704,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized boolean addDownload(RemoteFileDesc rfd) {
         if (! allowAddition(rfd))
             return false;
+        return addDownloadForced(rfd);
+    }
 
+    /** Like addDownload, but doesn't call allowAddition(..). 
+     *  @return true, since download always allowed */
+    protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd) {
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
@@ -880,7 +886,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
      */
-    private void tryAllDownloads() {     
+    protected void tryAllDownloads() {     
         // the number of requeries i've done...
         int numRequeries = 0;
         // the time to next requery.  We don't want to send the first requery

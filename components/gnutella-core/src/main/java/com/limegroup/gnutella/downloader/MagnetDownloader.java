@@ -1,5 +1,3 @@
-//TODO: serialization!  set uuid
-
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
@@ -77,8 +75,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             String filename,
                             String defaultURL)
             throws IllegalArgumentException {
+        //Initialize superclass with no locations.  We'll add the default
+        //location when the download control thread calls tryAllDownloads.
         super(manager, 
-              createRemoteFileDescs(defaultURL, filename, urn), 
+              new RemoteFileDesc[0],
               filemanager, 
               ifm, 
               callback);
@@ -89,32 +89,50 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         this._defaultURL=defaultURL;
     }
     
-    /** 
-     * Creates a faked-up array of RemoteFileDesc's to pass to
-     * ManagedDownloader.  If a URL is provided, issues a HEAD request to get
-     * the file size.  If this fails, returns an empty array.  
+    /**
+     * Overrides ManagedDownloader to ensure that the default location is tried.
      */
-    private static RemoteFileDesc[] createRemoteFileDescs(String urlString, 
-                                                          String displayName,
-                                                          URN urn) {
-        if (urlString==null)
-            return new RemoteFileDesc[0];
+    protected void tryAllDownloads() {     
+        //Send HEAD request to default location (if present) to get its size.
+        //This can block, so it must be done here instead of in constructor.
+        //See class overview and ManagedDownloader.tryAllDownloads.
+        RemoteFileDesc defaultRFD=createRemoteFileDesc();
+        if (defaultRFD!=null) {
+            //Add the faked up location before starting download.  Note that we
+            //must force ManagedDownloader to accept this RFD in case it has no
+            //hash and a name that doesn't match the search keywords.
+            boolean added=super.addDownloadForced(defaultRFD);
+            Assert.that(added, "Download rfd not accepted "+defaultRFD);
+        }
+        //Start the downloads for real.
+        super.tryAllDownloads();
+    }
+
+
+    /** 
+     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
+     * is provided, issues a HEAD request to get the file size.  If this fails,
+     * returns null. 
+     */
+    private RemoteFileDesc createRemoteFileDesc() {
+        if (_defaultURL==null)
+            return null;
 
         try {
-            URL url=new URL(urlString);
+            URL url=new URL(_defaultURL);
             int port=url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
 
             Set urns=new HashSet(1);
-            if (urn!=null)
-                urns.add(urn);
+            if (_urn!=null)
+                urns.add(_urn);
             
-            RemoteFileDesc fake=new RemoteFileDesc(
+            return new RemoteFileDesc(
                 url.getHost(),  //TODO: can this be null?
                 port,
                 0l,             //index--doesn't matter since we won't push
-                filename(displayName, url),
+                filename(_filename, url),
                 contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
@@ -123,15 +141,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 false,          //no browse host
                 null,           //no metadata
                 urns);
-            return new RemoteFileDesc[] { fake };
         } catch (IOException e) {
-            return new RemoteFileDesc[0];
+            return null;
         }
 
     } 
 
     /** Returns the filename to use for the download, guessed if necessary. 
-     *  Package-access for testing. 
+     *  Package-access and static for easy testing. 
      *  @param filename the filename to use if non-null
      *  @param url the URL for the resource, which must not be null */
     static String filename(String filename, URL url) {

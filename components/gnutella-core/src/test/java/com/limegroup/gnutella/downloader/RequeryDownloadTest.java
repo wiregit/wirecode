@@ -473,18 +473,20 @@ public class RequeryDownloadTest extends TestCase {
                    Math.abs(xCount-yCount)<=1);
     }
 
-    /** Makes sure that magnet and resume downloads are not initially subject to
-     *  the global throttle rate and are not initially requeries. */
+    /** Makes sure that magnet and resume downloads are initially free from the
+     *  global throttle rate and not requeries.  Subsequently, they obey
+     *  the same throttles and markings as normal requeries.  */
     public void testRequeryUnthrottled() {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=100; //0.1 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=2000;  //2 seconds
 
-        //Start a download.  No starting location.
+        //Start a download.  No starting location for the MAGNET download;
+        //trying the URL will delay the requery a few milliseconds.
         Downloader downloader1=null;
         Downloader downloader2=null;
         try {
             downloader1=mgr.download(new File("T-1232-some crap.txt"));
-            downloader2=mgr.download(null, "text query", null, "http://x.y.z"); 
+            downloader2=mgr.download(null, "text query", null, (String)null); 
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {
@@ -509,5 +511,25 @@ public class RequeryDownloadTest extends TestCase {
 
     private static boolean isRequery(QueryRequest query) {
         return GUID.isLimeRequeryGUID(query.getGUID());
+    }
+
+    /** Checks that the download(..) method doesn't block while contacting
+     *  initial location. */
+    public void testMagnetURLDoesntBlock() {
+        long start=System.currentTimeMillis();
+        Downloader downloader=null;
+        try {
+            downloader=mgr.download(null, "text query", null, 
+                                     "http://resolve.this.address.com");
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        } catch (IllegalArgumentException e) {
+            fail("Missing download info");
+        }
+        long elapsed=System.currentTimeMillis()-start;
+        
+        //150 msecs should be plenty of time on most machines to execute the
+        //above code.
+        assertTrue("Creating upload took too long", elapsed<150);
     }
 }
