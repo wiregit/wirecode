@@ -776,28 +776,37 @@ public class HostCatcher implements HostListener {
 
     
     /**
-     * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
-     * free Ultrapeer slots.  The returned <tt>Collection</tt> is a complete 
-     * copy of the hosts with free slots and can therefore be modified in any 
-     * way.
+     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
+     * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> and can therefore be modified in any way.
      * 
-     * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
-     *  that they have free ultrapeer slots
+     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  have advertised they have free ultrapeer slots
      */
     public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
-        return new HashSet(FREE_ULTRAPEER_SLOTS_SET);
+        Set copy = new HashSet();
+        Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+        for(int i=0; iter.hasNext() && i<10; i++) {
+            copy.add(iter.next());
+        }
+        return copy;
     }
 
     /**
-     * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
-     * free leaf slots.  The returned <tt>Collection</tt> is a complete copy
-     * of the hosts with free slots and can therefore be modified in any way.
+     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
+     * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> and can therefore be modified in any way.
      * 
-     * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
-     *  that they have free leaf slots
+     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  have advertised they have free leaf slots
      */
     public synchronized Collection getUltrapeersWithFreeLeafSlots() {
-        return new HashSet(FREE_LEAF_SLOTS_SET);
+        Set copy = new HashSet();
+        Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
+        for(int i=0; iter.hasNext() && i<10; i++) {
+            copy.add(iter.next());
+        }
+        return copy;
     }
 
     /**
