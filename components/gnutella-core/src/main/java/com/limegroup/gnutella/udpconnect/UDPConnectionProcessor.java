@@ -102,6 +102,10 @@ public class UDPConnectionProcessor {
     /** Define the size of a small send window for increasing wait time */
     private static final long SMALL_WINDOW_MULTIPLE   = 3;
 
+    /** Ensure that writing takes a break every 4 writes so other 
+        synchronized activity can take place */
+    private static final long MAX_WRITE_WITHOUT_SLEEP = 4;
+
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -994,6 +998,9 @@ public class UDPConnectionProcessor {
      */
     public synchronized void writeData() {
 
+        // Make sure we don't write without a break for too long
+        int noSleepCount = 0;
+        
         while (true) {
             // If the input has not been started then wait again
             if ( _inputFromOutputStream == null ) {
@@ -1001,26 +1008,27 @@ public class UDPConnectionProcessor {
                 return;
             }
 
-            // If someone wanted us to wait a bit then don't send data now
-            if ( _skipADataWrite ) {
-                _skipADataWrite = false;
-                return;
-            }
-
             // Reset special flags for long wait times
             _waitingForDataAvailable = false;
             _waitingForDataSpace = false;
 
-            // If there is room to send something then send data if available
-            if ( getChunkLimit() > 0 ) {
-                // Get data and send it
-                Chunk chunk = _inputFromOutputStream.getChunk();
-                if ( chunk != null )
-                    sendData(chunk);
-            } else {
-                // if no room to send data then wait for the window to Open
-                scheduleWriteDataEvent(Long.MAX_VALUE);
-                _waitingForDataSpace = true;
+            // If someone wanted us to wait a bit then don't send data now
+            if ( _skipADataWrite ) {
+                _skipADataWrite = false;
+            } else {  // Otherwise, it is safe to send some data
+            
+                // If there is room to send something then send data 
+                // if available
+                if ( getChunkLimit() > 0 ) {
+                    // Get data and send it
+                    Chunk chunk = _inputFromOutputStream.getChunk();
+                    if ( chunk != null )
+                        sendData(chunk);
+                } else {
+                    // if no room to send data then wait for the window to Open
+                    scheduleWriteDataEvent(Long.MAX_VALUE);
+                    _waitingForDataSpace = true;
+                }
             }
 
             // Don't wait for next write if there is no chunk available.
@@ -1052,12 +1060,21 @@ public class UDPConnectionProcessor {
             if (waitTime == 0 && _sequenceNumber < 10 ) 
                 waitTime = DEFAULT_RTO_WAIT_TIME;
 
+            // Enforce some minimal sleep time if we have been in tight loop
+            // This will allow handleMessages to get done if pending
+            if (noSleepCount >= MAX_WRITE_WITHOUT_SLEEP) {
+                waitTime += 1;
+            }
+
             // Only wait if the waitTime is more than zero
             if ( waitTime > 0 ) {
                 long time = System.currentTimeMillis() + waitTime;
                 scheduleWriteDataEvent(time);
                 break;
             }
+
+            // Count how long we are sending without a sleep
+            noSleepCount++;
         }
     }
 
