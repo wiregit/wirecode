@@ -11,9 +11,11 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashSet;
@@ -906,7 +908,73 @@ public final class QueryRequestTest extends BaseTestCase {
         }
     }
 
+    
+    public void testMetaFlagConstructor2() throws Exception {
+        {
+            QueryRequest query = 
+                QueryRequest.createQuery(GUID.makeGuid(), "whatever", "",
+                                         MediaType.getAudioMediaType());
+            
+            assertTrue(query.desiresAudio());
+            assertFalse(query.desiresVideo());
+            assertFalse(query.desiresDocuments());
+            assertFalse(query.desiresImages());
+            assertFalse(query.desiresWindowsPrograms());
+            assertFalse(query.desiresLinuxOSXPrograms());
+        }
+        {
+            QueryRequest query = 
+                QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "whatever", 
+                                                  "",
+                                                  MediaType.getVideoMediaType());
+            
+            assertFalse(query.desiresAudio());
+            assertTrue(query.desiresVideo());
+            assertFalse(query.desiresDocuments());
+            assertFalse(query.desiresImages());
+            assertFalse(query.desiresWindowsPrograms());
+            assertFalse(query.desiresLinuxOSXPrograms());
+        }
+        {
+            QueryRequest query = 
+                QueryRequest.createQuery(GUID.makeGuid(), "whatever", "",
+                                         MediaType.getImageMediaType());
+            
+            assertFalse(query.desiresAudio());
+            assertFalse(query.desiresVideo());
+            assertFalse(query.desiresDocuments());
+            assertTrue(query.desiresImages());
+            assertFalse(query.desiresWindowsPrograms());
+            assertFalse(query.desiresLinuxOSXPrograms());
+        }
+        {
+            QueryRequest query = 
+                QueryRequest.createWhatIsNewQuery(GUID.makeGuid(), (byte) 2,
+                                               MediaType.getDocumentMediaType());
+            
+            assertFalse(query.desiresAudio());
+            assertFalse(query.desiresVideo());
+            assertTrue(query.desiresDocuments());
+            assertFalse(query.desiresImages());
+            assertFalse(query.desiresWindowsPrograms());
+            assertFalse(query.desiresLinuxOSXPrograms());
+        }
+        {
+            QueryRequest query = 
+                QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte) 2,
+                                               MediaType.getProgramMediaType());
+            
+            assertFalse(query.desiresAudio());
+            assertFalse(query.desiresVideo());
+            assertFalse(query.desiresDocuments());
+            assertFalse(query.desiresImages());
+            assertEquals(CommonUtils.isWindows(), 
+                         query.desiresWindowsPrograms());
+            assertEquals(CommonUtils.isLinux() || CommonUtils.isAnyMac(),
+                         query.desiresLinuxOSXPrograms());
+        }
 
+    }
     
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();
