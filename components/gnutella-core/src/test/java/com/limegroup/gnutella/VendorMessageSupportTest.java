@@ -12,12 +12,11 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 
-/** This test should NOT be run by the nightly tests build.
- */
+
 public class VendorMessageSupportTest extends BaseTestCase {
     
     private String _remoteHost = "localhost";
-    private int _remotePort = 6300;
+    private int _remotePort = Backend.PORT;
     private static final int TIMEOUT = 500;
     private boolean _localTest = true;
 
@@ -42,124 +41,68 @@ public class VendorMessageSupportTest extends BaseTestCase {
     private Connection _leaf1 = null;
     private Connection _leaf2 = null;
 
-    private boolean _testHopsFlow = true;
-    private boolean _testTCPCB = true;
-    private boolean _testUDPCB = true;
+    private static boolean _testHopsFlow = true;
+    private static boolean _testTCPCB = true;
+    private static boolean _testUDPCB = true;
 
-    public void connect() {
+    public void setUp() throws Exception {
         debug("Expecting to test Gnutella host on " +
               _remoteHost + ":" + _remotePort);
+              
+        if ( _localTest )
+            launchBackend();              
+              
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);                    
 
         // Set up a TCP Listening socket....
-        try {
-            _tcpSock = new ServerSocket(0);
-        }
-        catch (Exception unexpected) {
-            unexpected.printStackTrace();
-            assertTrue(false);
-        }
+        _tcpSock = new ServerSocket(0);
+        _tcpSock.setReuseAddress(true);
 
         // Set up a UDP Listening socket....
-        try {
-            _udpSock = new DatagramSocket();
-        }
-        catch (Exception unexpected) {
-            unexpected.printStackTrace();
-            assertTrue(false);
-        }
+        _udpSock = new DatagramSocket();
+        _udpSock.setReuseAddress(true);
 
-        try {
+        // Set up QRT
+        QueryRouteTable qrt = new QueryRouteTable();
+        qrt.add("susheel");
+        qrt.add("daswani");
+        qrt.add("foosball");
 
-            // Set up QRT
-            QueryRouteTable qrt = new QueryRouteTable();
-            qrt.add("susheel");
-            qrt.add("daswani");
-            qrt.add("foosball");
-
-            // Set up a connection to the host....
-            _leaf1=new Connection(_remoteHost, _remotePort, 
-                                  new ClientProperties(""),
-                                  new EmptyResponder());
-            _leaf1.initialize();
-            for (Iterator iter=qrt.encode(null); iter.hasNext(); )
-                _leaf1.send((RouteTableMessage)iter.next());
-            _leaf1.flush();
-            // don't do postInit() - you don't want him thinking
-            // you support any vendor message....
-            
-            // Set up another connection to the host....
-            _leaf2=new Connection(_remoteHost, _remotePort, 
-                                  new ClientProperties(""),
-                                  new EmptyResponder());
-            _leaf2.initialize();
-            for (Iterator iter=qrt.encode(null); iter.hasNext(); )
-                _leaf2.send((RouteTableMessage)iter.next());
-            _leaf2.flush();
-            // don't do postInit() - you don't want him thinking
-            // you support any vendor message....
-
-        }
-        catch (Exception unexpected) {
-            unexpected.printStackTrace();
-            assertTrue(false);
-        }
+        // Set up a connection to the host....
+        _leaf1=new Connection(_remoteHost, _remotePort, 
+                              new ClientProperties(""),
+                              new EmptyResponder());
+        _leaf1.initialize();
+        for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+            _leaf1.send((RouteTableMessage)iter.next());
+        _leaf1.flush();
+        // don't do postInit() - you don't want him thinking
+        // you support any vendor message....
+        
+        // Set up another connection to the host....
+        _leaf2=new Connection(_remoteHost, _remotePort, 
+                              new ClientProperties(""),
+                              new EmptyResponder());
+        _leaf2.initialize();
+        for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+            _leaf2.send((RouteTableMessage)iter.next());
+        _leaf2.flush();
+        // don't do postInit() - you don't want him thinking
+        // you support any vendor message....
+    }
+    
+    public void tearDown() throws Exception {
+        if ( _leaf1 != null )
+            _leaf1.close();
+        if ( _leaf2 != null )
+            _leaf2.close();
+        if ( _tcpSock != null )
+            _tcpSock.close();
+        if ( _udpSock != null )
+            _udpSock.close();
     }
 
-    public void testAll() {
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);        
-        connect();
-        try {
-            confirmSupportedMessages();
-        }
-        catch (Exception e) {
-            debug(e);
-            if (_localTest)
-                assertTrue(false);
-            else
-                System.out.println("Missing Vendor Message Support!!");
-            return;
-        }
-        try {
-            if (_testHopsFlow)
-                tryHopsFlow();
-        }
-        catch (Exception e) {
-            debug(e);
-            if (_localTest)
-                assertTrue(false);
-            else
-                System.out.println("HOPS FLOW NOT SUPPORTED!!!!!!!!");
-            return;
-        }
-        try {
-            if (_testTCPCB)
-                tryTCPConnectBack();
-        }
-        catch (Exception e) {
-            debug(e);
-            if (_localTest)
-                assertTrue(false);
-            else
-                System.out.println("TCP CONNECTBACK NOT SUPPORTED!!!!!!!!");
-            return;
-        }
-        try {
-            if (_testUDPCB)
-                tryUDPConnectBack();
-        }
-        catch (Exception e) {
-            debug(e);
-            if (_localTest)
-                assertTrue(false);
-            else
-                System.out.println("UDP CONNECTBACK NOT SUPPORTED!!!!!!!!");
-            return;
-        }
-        disconnect();
-    }
-
-
-    private void confirmSupportedMessages() throws Exception {
+    public void testConfirmSupportedMessages() throws Exception {
         testConnection(_leaf1);
     }
 
@@ -174,8 +117,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                         receivedDesiredMessage = true;
                     }
                     else
-                        throw new Exception("Unexpected VendorMessage of class" +
-                                            m.getClass());
+                        fail("Unexpected VendorMessage of class" + m.getClass());
                 }
             }
             catch (InterruptedIOException iioe) {
@@ -184,22 +126,22 @@ public class VendorMessageSupportTest extends BaseTestCase {
             catch (Exception ignoreOthers) {}
         }
         if (!receivedDesiredMessage)
-            throw new Exception("No MessagesSupportedMessage received");
+            fail("No MessagesSupportedMessage recieved");
         if (c.supportsVendorMessage("BEAR".getBytes(), 4) < 1) {
             _testHopsFlow = false;
-            System.out.println("Does not seem to support Hops Flow!!");
         }
         if (c.supportsVendorMessage("GTKG".getBytes(), 7) < 1) {
             _testUDPCB = false;
-            System.out.println("Does not seem to support UDP ConnectBack!!");
         }
         if (c.supportsVendorMessage("BEAR".getBytes(), 7) < 1) {
             _testTCPCB = false;
-            System.out.println("Does not seem to support TCP ConnectBack!!");
         }
     }
 
-    private void tryHopsFlow() throws Exception {
+    public void testHopsFlow() throws Exception {
+        if ( !_testHopsFlow )
+            fail("hops flow not supported - ignoring test.");
+        
         drain(_leaf1);
         drain(_leaf2);
 
@@ -225,7 +167,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
             catch (IOException ioe) {}
         }
         if (!gotQR) 
-            throw new Exception("Did not get expected QR 1!!");
+            fail("Did not get expected QR 1!!");
         
 
         // now send the hops flow and it shouldn't get through!!
@@ -248,7 +190,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                 Message m = _leaf1.receive(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("daswani"))
-                        throw new Exception("Hops Flow Message Ineffectual!!!");
+                        fail("Hops Flow message Ineffectual!!!");
             } 
             catch (InterruptedIOException e) {
                 break; // cool, what we want....
@@ -281,10 +223,13 @@ public class VendorMessageSupportTest extends BaseTestCase {
             catch (IOException ioe) {}
         }
         if (!gotQR) 
-            throw new Exception("Did not get expected QR 2!!");
+            fail("Did not get expected QR 2!!");
     }
 
-    private void tryTCPConnectBack() throws Exception {
+    public void testTCPConnectBack() throws Exception {
+        if (!_testTCPCB) 
+            fail("TCP ConnectBack not supported - ignoring test.");
+        
         drain(_leaf1);
         drain(_leaf2);
         
@@ -303,7 +248,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                     c.flush();
                 }
                 catch (Exception e) {
-                    throw new RuntimeException("Couldn't send tcp!!");
+                    fail("Couldn't send tcp!!", e);
                 }
             }
         };
@@ -313,13 +258,16 @@ public class VendorMessageSupportTest extends BaseTestCase {
             _tcpSock.accept();  // wait for the TCP ConnectBack...
         }
         catch (Exception broken) {
-            throw new Exception("Did not receive TCP ConnectBack!!");
+            fail("Did not recieve TCP ConnectBack!!", broken);
         }
 
         // we be golden dawg!!!
     }
 
-    private void tryUDPConnectBack() throws Exception {
+    public void testUDPConnectBack() throws Exception {
+        if(!_testUDPCB)
+            fail("UDP Connectback not supported - ignoring test");
+        
         drain(_leaf1);
         drain(_leaf2);
 
@@ -342,7 +290,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                     c.flush();
                 }
                 catch (Exception e) {
-                    throw new RuntimeException("Couldn't send udp!!");
+                    fail("Couldn't send udp!!", e);
                 }
             }
         };
@@ -356,27 +304,14 @@ public class VendorMessageSupportTest extends BaseTestCase {
             pr = (PingRequest) Message.read(bais);
         }
         catch (Exception broken) {
-            throw new Exception("Did not receive UDP ConnectBack!!");
+            fail("Did not recieve UDP ConnectBack!!", broken);
         }
 
         if (!Arrays.equals(pr.getGUID(), guid.bytes()))
-            throw new Exception("Did not get correct UDP guid back!!");
+            fail("Did not get correct UDP guid back!!");
 
         // we be golden dawg!!!
     }
-
-
-    public void disconnect() {
-        try {
-            _tcpSock.close();
-            _udpSock.close();
-            _leaf1.close();
-            _leaf2.close();
-        }
-        catch (Exception whatever) {
-        }
-    }
-
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
@@ -409,7 +344,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         if (argv.length != 2)
             junit.textui.TestRunner.run(suite());
         else {
-            String name = "testAll";
+            String name = VendorMessageSupportTest.class.getName();
             String host = argv[0];
             int port = Integer.parseInt(argv[1]);
             junit.textui.TestRunner.run(new VendorMessageSupportTest(name,
