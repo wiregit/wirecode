@@ -1005,9 +1005,11 @@ public class ManagedConnection extends Connection
         // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
         // 2) Leaf must support Leaf Guidance
         // 3) Query must not be OOB.
+        // 3.5) The query originator should not disallow proxying.
         // 4) We must be able to OOB and have great success rate.
         if (remoteHostSupportsLeafGuidance() < 1) return query;
         if (query.desiresOutOfBandReplies()) return query;
+        if (query.doNotProxy()) return query;
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
