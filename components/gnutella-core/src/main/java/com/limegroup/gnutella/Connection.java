@@ -977,12 +977,7 @@ public class Connection {
             }
             
             // DO THE ACTUAL READ
-            try {
-                msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            } catch(IOException ioe) {
-                close(); // if IOError, make sure we close.
-                throw ioe;
-            }
+            msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -1033,12 +1028,7 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
             
-            try {
-                m.write(_out);
-            } catch(IOException ioe) {
-                close(); // make sure we close.
-                throw ioe;
-            }
+            m.write(_out);
 
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
@@ -1064,12 +1054,7 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
 
-            try {
-                _out.flush();
-            } catch(IOException ioe) {
-                close();
-                throw ioe;
-            }
+            _out.flush();
 
             // we must update the write statistics again,
             // because flushing forces the deflater to deflate.
@@ -1347,6 +1332,9 @@ public class Connection {
      *  Closes the Connection's socket and thus the connection itself.
      */
     public void close() {
+        if(_closed)
+            return;
+        
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
         _closed = true;
