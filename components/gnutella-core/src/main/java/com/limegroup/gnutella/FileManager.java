@@ -31,7 +31,7 @@ public class FileManager {
      * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
      * Likewise for all i, for all k in _files[i]._path, _index.get(k)
      * contains i. */
-    private Trie /* String -> Set<Integer>  */ _index;
+    private Trie /* String -> IntSet  */ _index;
 
     private String[] _extensions;
     private Set _sharedDirectories;
@@ -119,14 +119,16 @@ public class FileManager {
         //TODO1: handle clip2 indexing query
         //TODO1: handle wildcards
         String str = request.getQuery();
-        Set matches = search(str);
+        IntSet matches = search(str);
         if (matches==null)
             return null;
 
         Response[] response = new Response[matches.size()];
         int j=0;
-        for (Iterator iter=matches.iterator(); iter.hasNext(); j++) {            
-            int i=((Integer)iter.next()).intValue();
+        for (IntSet.IntSetIterator iter=matches.iterator(); 
+                 iter.hasNext(); 
+                 j++) {            
+            int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
             response[j] = new Response(desc._index, desc._size, desc._name);
         }
@@ -173,15 +175,15 @@ public class FileManager {
             _numFiles++;
 
             //For each keyword...
-            Integer j=new Integer(_files.size()-1);
+            int j=_files.size()-1;
             String[] keywords=StringUtils.split(path, DELIMETERS);
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 //Ensure there _index has a set of indices associated with
                 //keyword.
-                Set indices=(Set)_index.get(keyword);
+                IntSet indices=(IntSet)_index.get(keyword);
                 if (indices==null) {
-                    indices=new TreeSet(ArrayListUtil.integerComparator());
+                    indices=new IntSet();
                     _index.add(keyword, indices);
                 }
                 //Add j to the set.
@@ -250,9 +252,9 @@ public class FileManager {
                                                     DELIMETERS);
                 for (int j=0; j<keywords.length; j++) {
                     String keyword=keywords[j];
-                    Set indices=(Set)_index.get(keyword);
+                    IntSet indices=(IntSet)_index.get(keyword);
                     if (indices!=null) {
-                        indices.remove(new Integer(i));
+                        indices.remove(i);
                         //TODO2: prune tree if possible.  call
                         //_index.remove(keyword) if indices.size()==0.
                     }
@@ -333,8 +335,8 @@ public class FileManager {
         }
      
 
-        //System.out.println("Index loaded.");
-        //System.out.println(_index.toString());   
+        System.out.println("Index loaded.");
+        System.out.println(_index.toString());   
     }
 
     /**
@@ -390,7 +392,7 @@ public class FileManager {
      * matching.  The caller of this method must not mutate the returned
      * value.
      */
-    protected synchronized Set search(String query) {
+    protected synchronized IntSet search(String query) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
         //Doing so would allow multiple queries to proceed in parallel.  But
         //then you need to make _files volatile and work on a local reference,
@@ -399,7 +401,7 @@ public class FileManager {
         //As an optimization, we lazily allocate all sets in case there are no
         //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
         //returns an iterator of one element and there is only one keyword.
-        Set ret=null;
+        IntSet ret=null;
 
         //For each keyword in the query....  (Note that we avoid calling
         //StringUtils.split and take advantage of Trie's offset/limit feature.)
@@ -415,14 +417,14 @@ public class FileManager {
             }
 
             //Search for keyword, i.e., keywords[i...j-1].  
-            Iterator /* of Set<Integer> */ iter=
+            Iterator /* of IntSet */ iter=
                 _index.getPrefixedBy(query, i, j);
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
                 //matches.
-                Set matches=new TreeSet(ArrayListUtil.integerComparator());
+                IntSet matches=new IntSet();
                 while (iter.hasNext()) {                
-                    Set s=(Set)iter.next();
+                    IntSet s=(IntSet)iter.next();
                     matches.addAll(s);
                 }
 
