@@ -70,27 +70,28 @@ public final class NIODispatcher implements Runnable {
 	}
 	
 	/**
-	 * Adds the specified <tt>Connection</tt> as needing to be registered for read events.
-	 * Read events occur whenever data comes in from the network on that channel.
+	 * Adds the specified <tt>Connection</tt> as needing to be registered for 
+     * read events.  Read events occur whenever data comes in from the network 
+     * on that channel.
 	 * 
-	 * @param conn the <tt>Connection</tt> instance that will be reading data from 
-	 *    the network
+	 * @param conn the <tt>Connection</tt> instance that will be reading data 
+     * from the network
 	 */
     public void addReader(Connection conn) {
-        System.out.println("NIODispatcher::addReader");
 		READERS.add(conn);
 		_selector.wakeup();
 	}
 	
 	/**
-	 * Adds the specified <tt>Connection</tt> as needing an additional write.  This is only
-	 * called when a former call to write on the channel did not write all of the requested 
-	 * data.  In that case, this method should be called so that the connection registers 
-	 * itself for write events.  Write events occur whenever there is room in the TCP buffers,
-	 * allowing the unwritten data to go through.
+	 * Adds the specified <tt>Connection</tt> as needing an additional write.  
+     * This is only called when a former call to write on the channel did not 
+     * write all of the requested data.  In that case, this method should be 
+     * called so that the connection registers itself for write events.  Write 
+     * events occur whenever there is room in the TCP buffers, allowing the 
+     * unwritten data to go through.
 	 * 
-	 * @param conn the <tt>Connection</tt> instance containing a message that was not
-	 *     fully written
+	 * @param conn the <tt>Connection</tt> instance containing a message that 
+     *  was not fully written
 	 */
 	public void addWriter(Connection conn) {
 		WRITERS.add(conn);
@@ -188,32 +189,36 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
-			java.util.Iterator keyIter = _selector.selectedKeys().iterator();
-			while(keyIter.hasNext()) {
-				SelectionKey key = (SelectionKey)keyIter.next();
-				keyIter.remove();
-				
-				// ignore invalid keys
-				if(!key.isValid()) continue;
-				if(key.isReadable()) {
-					try {
-						Message msg = MessageReader.createMessageFromTCP(key);
-						
-						if(msg == null) {
-                            System.out.println("NIODispatcher::read NULL message");
-							continue;
-						}
-                        System.out.println("NIODispatcher::read message: "+msg);
-						// TODO:: don't use RouterService
-						RouterService.getMessageRouter().handleMessage(msg, 
-							(ManagedConnection)key.attachment());
-					} catch (BadPacketException e) {
-                        MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
-					} catch (IOException e) {
-                        MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
+		while(keyIter.hasNext()) {
+			SelectionKey key = (SelectionKey)keyIter.next();
+			keyIter.remove();
+			
+			// ignore invalid keys
+			if(!key.isValid()) continue;
+			if(key.isReadable()) {
+				try {
+                    ManagedConnection mc = (ManagedConnection)key.attachment();
+					Message msg = mc.getReader().createMessageFromTCP(key);
+					
+					if(msg == null) {
+                        System.out.println("NIODispatcher::read NULL message");
+						continue;
 					}
+                    System.out.println("NIODispatcher::read message: "+msg);
+                    
+                    if(!mc.isSpam(msg)) {
+                        // TODO:: don't use RouterService
+                        RouterService.getMessageRouter().handleMessage(msg, 
+                            (ManagedConnection)key.attachment());
+                    }
+				} catch (BadPacketException e) {
+                    MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+				} catch (IOException e) {
+                    MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 				}
 			}
+		}
 	}
 	
 	/**
@@ -230,7 +235,7 @@ public final class NIODispatcher implements Runnable {
 			if(!key.isValid()) continue;
 			if(key.isWritable()) {
 				Connection conn = (Connection)key.attachment();
-				if(conn.write()) {
+				if(!conn.write()) {
 					// register the writer again if not all of the data was sent
 					registerWriter(conn);
 				}
