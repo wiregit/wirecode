@@ -100,6 +100,8 @@ public class CandidateAdvertiser extends ManagedThread {
 	 * synchronized so that bcvm doesn't change while we're sending
 	 */
 	private synchronized void sendCandidatesMessage() {
+		
+		if (_bcvm !=null)
 		for(Iterator iter = RouterService.getConnectionManager().
 				getInitializedConnections().iterator();iter.hasNext();)
 			try {
@@ -108,6 +110,5 @@ public class CandidateAdvertiser extends ManagedThread {
 					c.handleBestCandidatesMessage(_bcvm);
 			}catch(IOException tooBad) {} //nothing we can do.  continue with next UP.
 		
-		_bcvm = null;
 	}
 }

@@ -20,6 +20,7 @@ public class FeaturesVendorMessage extends VendorMessage {
 	public static final String OS ="OS";
 	public static final String INCOMING_TCP="IN_TCP";	
 	public static final String INCOMING_UDP="IN_UDP";
+	public static final String SOLICITED_UDP="S_UDP";
 	public static final String FILES_SHARED="Files";
 	public static final String JVM="JVM";  //why not
 	public static final String BANDWIDTH="BW";
@@ -34,7 +35,12 @@ public class FeaturesVendorMessage extends VendorMessage {
 	Properties _properties;
 	
 	int _filesShared, _bandwith;
-	boolean _inTcp,_inUdp;
+	boolean _inTcp,_inUdp,_sUdp;
+	
+	/**
+	 * non-final instance for easier testing.
+	 */
+	static UDPService _udpService = UDPService.instance();
 	
 	/**
 	 * constructs an object with data from the network
@@ -70,21 +76,22 @@ public class FeaturesVendorMessage extends VendorMessage {
 		if (_properties==null)
 			return;
 		try {
-			_filesShared=Integer.parseInt(_properties.getProperty(FILES_SHARED));
-			_bandwith = Integer.parseInt(_properties.getProperty(BANDWIDTH));
+			_filesShared=Integer.parseInt(_properties.getProperty(FILES_SHARED,"-1"));
+			_bandwith = Integer.parseInt(_properties.getProperty(BANDWIDTH,"-1"));
 		}catch(NumberFormatException bad) {
 			throw new BadPacketException ("invalid integer values in packet");
 		}
 		
-		_inTcp = Boolean.valueOf(_properties.getProperty(INCOMING_TCP)).booleanValue();
-		_inUdp = Boolean.valueOf(_properties.getProperty(INCOMING_UDP)).booleanValue();
+		_inTcp = Boolean.valueOf(_properties.getProperty(INCOMING_TCP,"false")).booleanValue();
+		_inUdp = Boolean.valueOf(_properties.getProperty(INCOMING_UDP,"false")).booleanValue();
+		_sUdp = Boolean.valueOf(_properties.getProperty(SOLICITED_UDP,"false")).booleanValue();
 	}
 	
 	/**
 	 * creates a Vendor Message containing some of our features.
 	 */
 	public FeaturesVendorMessage() {
-		super(F_LIME_VENDOR_ID, F_FEATURES, VERSION, derivePayload(getProperties()));
+		super(F_LIME_VENDOR_ID, F_FEATURES, VERSION, derivePayload(deriveProperties()));
 		try{
 			parseFields();
 		}catch(BadPacketException ignored) {} //we don't care when sending out.
@@ -123,14 +130,15 @@ public class FeaturesVendorMessage extends VendorMessage {
 	/**
 	 * gets some properties from the system.
 	 */
-	private static Properties getProperties() {
+	private static Properties deriveProperties() {
 		Properties  ret = new Properties();
 		
 		ret.setProperty(OS,CommonUtils.getOS().toLowerCase());
 		ret.setProperty(JVM,CommonUtils.getJavaVersion());
 		ret.setProperty(FILES_SHARED,""+RouterService.getFileManager().getNumFiles());
 		ret.setProperty(INCOMING_TCP,""+RouterService.acceptedIncomingConnection());
-		ret.setProperty(INCOMING_UDP,""+RouterService.isOOBCapable());
+		ret.setProperty(INCOMING_UDP,""+_udpService.canReceiveUnsolicited());
+		ret.setProperty(SOLICITED_UDP,""+_udpService.canReceiveSolicited());
 		
 		//FIXME: decide which parameter to use for the available bandwith.
 		ret.setProperty(BANDWIDTH,""+(int)RouterService.getConnectionManager().
@@ -180,9 +188,24 @@ public class FeaturesVendorMessage extends VendorMessage {
 	
 	/**
 	 * 
+	 * @return whether the node reported it can receive solicited UDP
+	 */
+	public boolean isSolicitedUDPCapable() {
+		return _sUdp;
+	}
+	
+	/**
+	 * 
 	 * @return the reported upstream bandwidth by the node.
 	 */
 	public int getBandidth() {
 		return _bandwith;
+	}
+	
+	/** 
+	 * @return the Properties object itself.
+	 */
+	public Properties getProperties() {
+		return _properties;
 	}
 }

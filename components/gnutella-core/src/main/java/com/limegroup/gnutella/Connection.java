@@ -150,55 +150,7 @@ public class Connection implements Candidate {
      */
     protected CapabilitiesVM _capabilities = null;
     
-    /**
-     * The possibly non-null VendorMessagePayload which describes what
-     * features the guy on the other side of this connection supports.
-     * LOCKING: _advertisementLock
-     */
-    protected FeaturesVendorMessage _features = null;
-    
-    /**
-     * The possibly non-null VendorMessagePayload which describes what
-     * candidates the guy on the other side of this connection advertises.
-     * LOCKING: _advertisementLock
-     */
-    protected BestCandidatesVendorMessage _candidatesReceived = null;
-    
-    /**
-     * The possibly non-null VendorMessagePayload
-     * LOCKING: obtain _advertisementLock
-     */
-    protected BestCandidatesVendorMessage _candidatesSent = null;
-    
-    /**
-     * the last time we received an advertisement on this connection
-     * LOCKING: _advertisementLock
-     */
-    private long _lastReceivedAdvertisementTime;
-    
-    /**
-     * the last time we sent an advertisement on this connection
-     * LOCKING: obtain _advertisementLock
-     */
-    private long _lastSentAdvertisementTime;
-    
-    /**
-     * we should not send or receive advertisements more often than this
-     * interval.  Not final so that tests can change it.
-     */
-    private static long ADVERTISEMENT_INTERVAL = 2 * Constants.MINUTE;  // 2 minutes?
-    
-    /**
-     * this flag is set only if we needed to update the connection with
-     * new candidates before the advertisement  interval had expired.
-     */
-    private boolean _needsAdvertisement;
-    
-    /**
-     * LOCKS: _candidatesReceived, _candidatesSent, _features,
-     * _lastReceivedAdvertisementTime, _lastSentAdvertisementTime
-     */
-    private Object _advertisementLock = new Object();
+    protected CandidateHandler _candidateHandler = null;
     
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -408,48 +360,10 @@ public class Connection implements Candidate {
         if (vm instanceof CapabilitiesVM)
             _capabilities = (CapabilitiesVM) vm;
         
-        if (vm instanceof FeaturesVendorMessage)
-        	synchronized(_advertisementLock) {
-        		_features = (FeaturesVendorMessage) vm;
-        	}
+        if (vm instanceof FeaturesVendorMessage ||
+        		vm instanceof BestCandidatesVendorMessage)
+        	_candidateHandler.handleVendorMessage(vm);
         
-        //if we are receiving a BestCandidatesVendorMessage
-        //we need to do some extra processing.
-        
-        if (vm instanceof BestCandidatesVendorMessage) {
-        	
-        	//do nothing if we are a leaf or the connection is a leaf.
-        	if (!RouterService.isSupernode() || !isGoodUltrapeer())
-        		return;
-        	
-        	
-
-        	 // it is not possible for two threads to try and set this, but it is
-        	 // possible for the message parsing thread to set this while the advertising
-        	// thread is trying to read it.
-        	 
-        	synchronized(_advertisementLock) {
-        	//make sure they aren't advertising too soon.
-        		if (System.currentTimeMillis() - _lastReceivedAdvertisementTime <
-        			ADVERTISEMENT_INTERVAL)
-        			return;
-        	
-        		//update the values
-        		_lastReceivedAdvertisementTime = System.currentTimeMillis();
-        		_candidatesReceived = (BestCandidatesVendorMessage)vm;
-        	}
-        	
-        	//then add a ref of the advertiser to each candidate received
-        	Candidate [] candidates = _candidatesReceived.getBestCandidates();
-        	
-        	
-        	candidates[0].setAdvertiser(this);
-        	if (candidates[1]!=null)
-        		candidates[1].setAdvertiser(this);
-        	
-        	//and update our internal table
-        	BestCandidates.update(candidates);
-        }
     }
 
 
@@ -2176,58 +2090,12 @@ public class Connection implements Candidate {
 		return res;
 	}
 	
-	/**
-	 * @return the reported shared files.
-	 */
-	public int getFileShared() {
-		return _features!= null ? _features.getFileShared() : -1;
-	}
-	/**
-	 * @return the reported JVM version
-	 */
-	public String getJVM() {
-		return _features!= null ? _features.getJVM() : null;
-	}
-	/**
-	 * @return the reported OS version
-	 */
-	public String getOS() {
-		return _features!=null ? _features.getOS() : null;
-	}
-	/**
-	 * @return the reported incoming TCP capability
-	 */
-	public boolean isTCPCapable() {
-		return _features!= null ?_features.isTCPCapable() : false;
-	}
-	/**
-	 * @return the reported UDP capability
-	 */
-	public boolean isUDPCapable() {
-		return _features != null ? _features.isUDPCapable() : false;
-	}
 	
-	/**
-	 * @return the reported upstream bandwidth.
-	 */
-	public int getBandwidth() {
-		return _features !=null ? _features.getBandidth() : -1;
-	}
 	/**
 	 * @return Returns a copy of the candidates the remote host advertised.
 	 */
 	public Candidate [] getCandidates() {
-		if (_candidatesReceived == null)
-			return null;
-		
-		Candidate [] ret = new Candidate[2];
-		
-		synchronized(_advertisementLock) {
-			ret[0] = _candidatesReceived.getBestCandidates()[0];
-			ret[1] = _candidatesReceived.getBestCandidates()[1];
-		}
-		
-		return ret;
+		return _candidateHandler.getCandidates();
 	}
 	
 	/**
@@ -2241,28 +2109,8 @@ public class Connection implements Candidate {
 	 * considered for election
 	 */
 	public boolean isGoodCandidate() {
-		synchronized (_advertisementLock) {
-			if (!
-				( isTCPCapable() && //incoming TCP
-				isUDPCapable() && //unsolicited UDP
-				isGoodLeaf() &&
-				getBandwidth() > 16 &&
-				getJVM().indexOf("1.4.0") == -1))
-					return false;
-			
-			//filter out non-32 bit windowses
-			if (getOS().startsWith("windows") && 
-					getOS().indexOf("xp") ==-1 &&
-					getOS().indexOf("2000") ==-1)
-					return false;
-			
-			//and mac os 9
-			if (getOS().startsWith("mac os") &&
-					!getOS().endsWith("x"))
-				return false;
-			
-			return true;
-		}
+		return  _candidateHandler.isGoodCandidate();
+		
 	}
 	
 	/**
@@ -2273,51 +2121,10 @@ public class Connection implements Candidate {
 	 * the whole method is syncrhonized.  There's no real need for finer locking.
 	 */
 	public void handleBestCandidatesMessage(BestCandidatesVendorMessage m) throws IOException {
-		synchronized(_advertisementLock) {
-			handleBestCandidatesMessageInternal(m);
-		}
+		
+		_candidateHandler.handleBestCandidatesMessage(m);
+		
 	}
 	
-	private void handleBestCandidatesMessageInternal(BestCandidatesVendorMessage m) 
-		throws IOException {
-		
-		
-		
-		//first see if we are not sending to this connection too soon.
-		if (System.currentTimeMillis() - _lastSentAdvertisementTime 
-				< ADVERTISEMENT_INTERVAL) {
-			
-			//we are trying to send too soon.  However if the message should be scheduled
-			//to be sent once the interval expires.
-			if (m!=null && !m.isSame(_candidatesSent)){
-				_needsAdvertisement=true;
-				_candidatesSent=m;
-			}
-			
-			return;
-		}
-		
-		//we got called just to check if we couldn't send the last update on time.
-		if (m==null) {
-			if (_needsAdvertisement && _candidatesSent!=null){ 
-				_needsAdvertisement=false;
-				_lastSentAdvertisementTime = System.currentTimeMillis();
-				send(_candidatesSent);
-			}
-			return;
-		}
-		
-		
-		//also see if anything has changed since last time.
-		if (m.isSame(_candidatesSent))
-			return;
-		
-		//if not we should send the new message
-		
-		_lastSentAdvertisementTime = System.currentTimeMillis();
-		_candidatesSent=m;
-		_needsAdvertisement = false;
-		
-		send(m);
-	}
+	
 }
