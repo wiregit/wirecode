@@ -22,12 +22,17 @@ public class UnitTest {
                                   negotiator2.generateSymmetricKey(neg1Key)));
         
         testN();
-        testEnpryptedOutputStream();
-         testWorksWithCorrectPassword();
-         testDoesNotWorkWithIncorrectPassword();
-         testDecryptedInputStream();
-         testBulkRead();
-         testNegativeOne();
+        UnitTest t = new UnitTest();
+        try {
+            t.testEnpryptedOutputStream();
+            t.testWorksWithCorrectPassword();
+            t.testDoesNotWorkWithIncorrectPassword();
+            t.testDecryptedInputStream();
+            t.testBulkRead();
+            t.testNegativeOne();
+        } catch (Exception e) {
+            Assert.that(false, "test failed");
+        }
     }
 
 
@@ -47,9 +52,11 @@ public class UnitTest {
         Assert.that(Arrays.equals(out.toByteArray(), new byte[] {2}));
 
         addOneToEachByteEncrypter=new AddOneToEachByteEncrypter();
-         encryptingOutputStream = 
+        out.reset();
+        encryptingOutputStream = 
                      new EncryptedOutputStream(addOneToEachByteEncrypter,out);
         encryptingOutputStream.write(new byte[] {1,2,3,4});
+        byte[] a = out.toByteArray();
         Assert.that(Arrays.equals(out.toByteArray(), new byte[] {2,3,4,5}));
     }
     
