@@ -28,6 +28,12 @@ public final class CommonUtils {
      */
     private static final int _minorVersionNumber = 
         getMinorVersionNumberInternal(LIMEWIRE_VERSION);
+        
+    /**
+     * The cached value of the really minor version number.
+     */
+    private static final int _serviceVersionNumber =
+        getServiceVersionNumberInternal(LIMEWIRE_VERSION);
 
     /**
      * The cached value of the GUESS major revision number.
@@ -259,6 +265,13 @@ public final class CommonUtils {
     public static int getMinorVersionNumber() {
         return _minorVersionNumber;
     }
+    
+    /** Gets the minor minor version of LimeWire.
+     */
+   public static int getServiceVersionNumber() {
+        return _serviceVersionNumber;
+   }
+    
 
     static int getMajorVersionNumberInternal(String version) {
         if (!version.equals("@" + "version" + "@")) {
@@ -309,6 +322,23 @@ public final class CommonUtils {
         // in case this is a mainline version or NFE was caught (strange)
         return 7;
     }
+    
+    static int getServiceVersionNumberInternal(String version) {
+        if (!version.equals("@" + "version" + "@")) {
+            try {
+                int firstDot = version.indexOf(".");
+                String minusMajor = version.substring(firstDot+1);
+                int secondDot = minusMajor.indexOf(".");
+                String minorStr = minusMajor.substring(0, secondDot);
+                String service = minusMajor.substring(secondDot+1);
+                return new Integer(service).intValue();
+            }
+            catch (NumberFormatException nfe) {
+            }
+        }
+        // in case this is a mainline version or NFE was caught (strange)
+        return 0;
+    }    
 
 	/**
 	 * Returns a version number appropriate for upload headers.
