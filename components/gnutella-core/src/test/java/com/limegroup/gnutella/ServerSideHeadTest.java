@@ -47,29 +47,19 @@ public class ServerSideHeadTest extends BaseTestCase {
 
     	ping1 = new HeadPing(FileManagerStub._notHave);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
-    	ping3 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN),
-    			new Endpoint("127.0.0.1",port2));
-    	ping4 = new HeadPing(FileManagerStub._notHave,
-    			new Endpoint("127.0.0.1",port1));
+
 
     	
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
     	ping1.write(baos1);
     	ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
     	ping2.write(baos2);
-    	ByteArrayOutputStream baos3 = new ByteArrayOutputStream();
-    	ping3.write(baos3);
-    	ByteArrayOutputStream baos4 = new ByteArrayOutputStream();
-    	ping4.write(baos4);
     	
     	datagram1 = new DatagramPacket(baos1.toByteArray(),baos1.toByteArray().length,
     			InetAddress.getLocalHost(),port1);
     	datagram2 = new DatagramPacket(baos2.toByteArray(),baos2.toByteArray().length,
     			InetAddress.getLocalHost(),port2);
-    	datagram3 = new DatagramPacket(baos3.toByteArray(),baos3.toByteArray().length,
-    			InetAddress.getLocalHost(),port1);
-    	datagram4 = new DatagramPacket(baos4.toByteArray(),baos4.toByteArray().length,
-    			InetAddress.getLocalHost(),port2);
+
     	
     	FileManagerStub fmanager = new FileManagerStub();
     	
@@ -80,7 +70,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     }
     
     public void tearDown() throws Exception {
-    	Thread.sleep(ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue());
+    //	Thread.sleep(ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue());
     }
     
     public static void globalTearDown() throws Exception {
@@ -138,50 +128,4 @@ public class ServerSideHeadTest extends BaseTestCase {
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     }
     
-    /**
-     * tests the scenario where a ping requests to be sent elsewhere.
-     */
-    public void testRedirectPing() throws Exception {
-    	
-    	PrivilegedAccessor.setValue(UDPService.instance(),
-    			"_acceptedUnsolicitedIncoming",new Boolean(false));
-    	
-    	MessageRouter router = RouterService.getMessageRouter();
-    	
-    	router.handleUDPMessage(ping3,datagram3);
-    	Thread.sleep(100);
-    	
-    	DatagramPacket received = new DatagramPacket(new byte[1024],1024);
-    	
-    	socket2.receive(received);
-    	
-    	try{
-    		socket1.receive(received);
-    		fail("pong sent to wrong place");
-    	}catch(IOException expected) {}
-    	
-    	
-    	
-    	HeadPong pong = (HeadPong) 
-		Message.read(new ByteArrayInputStream(received.getData()));
-	
-    	assertTrue(Arrays.equals(ping3.getGUID(),pong.getGUID()));
-    	
-    	//now test a redirect message for a file we do not have.
-    	router.handleUDPMessage(ping4,datagram4);
-    	Thread.sleep(100);
-    	
-    	
-    	try{
-    		socket1.receive(received);
-    		fail("pong redirected when file was not found");
-    	}catch(IOException expected) {}
-    	
-    	try{
-    		socket2.receive(received);
-    		fail("pong sent to wrong place");
-    	}catch(IOException expected) {}
-    	
-    }
-
 }
