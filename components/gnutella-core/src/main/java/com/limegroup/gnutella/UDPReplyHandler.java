@@ -5,7 +5,6 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
-import java.io.*;
 
 /**
  * This class is an implementation of <tt>ReplyHandler</tt> that is 
@@ -214,12 +213,6 @@ public final class UDPReplyHandler implements ReplyHandler {
     public boolean allowNewPings() {
         return true;
     }
-
-    /**
-     * Does nothing for UDP traffic, since we'll always accept new pings over
-     * UDP.
-     */
-    public void updatePingTime() {}
 
 
     // inherit doc comment

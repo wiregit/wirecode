@@ -19,9 +19,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	private static final ReplyHandler INSTANCE =
 		new ForMeReplyHandler();
 
-	private final Set EMPTY_SET = 
-		Collections.unmodifiableSet(new HashSet());
-
 	/**
 	 * Singleton accessor.
 	 *
@@ -146,7 +143,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	}
 	
 	public Set getDomains() {
-		return EMPTY_SET;
+		return DataUtils.EMPTY_SET;
 	}
 	
 	public boolean isPersonalSpam(Message m) {
@@ -241,12 +238,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean allowNewPings() {
         return true;
     }
-
-    /**
-     * Does nothing for traffic to this host, since we'll always allow new pings
-     * from ourselves.
-     */
-    public void updatePingTime() {}
 
     // inherit doc comment
     public InetAddress getInetAddress() {

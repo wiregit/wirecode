@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 
@@ -133,12 +132,6 @@ public interface ReplyHandler {
      *  <tt>false</tt>
      */
     boolean allowNewPings();
-
-    /**
-     * Updates the time after which we will allow new pings from this handler
-     * Before this time is reached, new pings will be ignored.
-     */
-    void updatePingTime();
 
     /**
      * Accessor for the <tt>InetAddress</tt> instance for this host.
