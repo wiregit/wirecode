@@ -49,7 +49,7 @@ public class HeadTest extends BaseTestCase {
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-	static IntervalSet _ranges, _rangesMedium, _rangesTooBig;
+	static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig;
 	
 	static PushEndpoint pe;
 	
@@ -96,8 +96,16 @@ public class HeadTest extends BaseTestCase {
 		}
 		
 		base=0;
+		_rangesJustFit = new IntervalSet();
+		for (int i=2;i<73;i++) {
+			int low = base;
+			_rangesJustFit.add(new Interval(low,low+i));
+			base+=2*i;
+		}
+		
+		base=0;
 		_rangesTooBig = new IntervalSet();
-		for (int i=2;i<200;i++) {
+		for (int i=2;i<220;i++) {
 			int low = base;
 			_rangesTooBig.add(new Interval(low,low+i));
 			base+=2*i;
@@ -291,7 +299,7 @@ public class HeadTest extends BaseTestCase {
 		_um.setIsBusy(true);
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(new HeadPong(ping));
-		assertGreaterThanOrEquals(127,pong.getQueueStatus());
+		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
 	}
 	
 	/**
@@ -319,6 +327,18 @@ public class HeadTest extends BaseTestCase {
 		
 		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());
 		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
+		
+		//now test if no locs will fit because of too many ranges
+		_partial.setRangesByte(_rangesJustFit.toBytes());
+		ping2 = new HeadPing(_havePartial,
+				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
+		pong2 = reparse (new HeadPong(ping2));
+		
+		assertNotNull(pong2.getRanges());
+		assertNull(pong2.getAltLocs());
+		
+		//restore medium ranges to partial file
+		_partial.setRangesByte(_rangesMedium.toBytes());
 	}
 	
 	public void testFirewalledAltlocs() throws Exception {
@@ -349,6 +369,37 @@ public class HeadTest extends BaseTestCase {
 		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
 		PushEndpoint point = rfd.getPushAddr();
 		assertEquals(pe,point);
+		
+		//now ask only for fwt push locs - nothing returned
+		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
+		assertTrue(ping1.requestsFWTPushLocs());
+		pong1 = reparse(new HeadPong(ping1));
+		assertNull(pong1.getPushLocs());
+	}
+	
+	public void testMixedLocs() throws Exception {
+		HeadPing ping = new HeadPing(_havePartial,
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);
+		
+		HeadPong pong = reparse(new HeadPong(ping));
+		
+		assertNotNull(pong.getAltLocs());
+		assertNotNull(pong.getPushLocs());
+		
+		RemoteFileDesc rfd = new RemoteFileDesc(
+				"1.2.3.4",1,1,"filename",
+				1,null,1,
+				false,1,false,
+				null,null,
+				false,false,
+				"",0,
+				null,1);
+		
+		Set rfds = pong.getAllLocsRFD(rfd);
+		
+		assertEquals(pong.getAltLocs().size() + pong.getPushLocs().size(),
+				rfds.size());
+		
 	}
 	
 	private HeadPong reparse(HeadPong original) throws Exception{
