@@ -358,7 +358,7 @@ public class QueryReply extends Message implements Serializable{
                 
                 //e) private area: one byte with flags 
                 //for chat support
-                byte chatSupport=(byte)(supportsChat ? CHAT_MASK : 0);
+                byte chatSupport = supportsChat ? CHAT_MASK : 0;
                 baos.write(chatSupport);
                 
                 //f) the GGEP block
