@@ -142,6 +142,18 @@ public class UploadStat extends AdvancedStatistic {
      */
     public static final Statistic PUSH_FAILED =
         new UploadStat();
+        
+    /**
+     * Statistic for a succesful FW-FW upload connection.
+     */
+    public static final Statistic FW_FW_SUCCESS =
+        new UploadStat();
+        
+    /**
+     * Statistic for a failed FW-FW upload connection.
+     */
+    public static final Statistic FW_FW_FAILURE =
+        new UploadStat();
 
     /**
      * Statistic for the number malformed requests we receive.

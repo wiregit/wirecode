@@ -68,10 +68,14 @@ public final class PushManager {
         if( guid == null )
             throw new NullPointerException("null guid");
                                     
-        // First validate the information.     
-        if (RouterService.getNumSharedFiles() < 1) return;
+
         FileManager fm = RouterService.getFileManager();
-        final int index = 0;
+        
+        // TODO: why is this check here?  it's a tiny optimization,
+        // but could potentially kill any sharing of files that aren't
+        // counted in the library.
+        if (fm.getNumFiles() < 1 && fm.getNumIncompleteFiles() < 1)
+            return;
 
         // We used to have code here that tested if the guy we are pushing to is
         // 1) hammering us, or 2) is actually firewalled.  1) is done above us
@@ -93,8 +97,10 @@ public final class PushManager {
         			ostream.flush();
 
                     //read GET or HEAD and delegate appropriately.
-                    String word = IOUtils.readWord(
-                        s.getInputStream(), 4);
+                    String word = IOUtils.readWord(s.getInputStream(), 4);
+                    if(isFWTransfer)
+                        UploadStat.FW_FW_SUCCESS.incrementStat();
+                    
                     if (word.equals("GET")) {
                         UploadStat.PUSHED_GET.incrementStat();
                         RouterService.getUploadManager().acceptUpload(
@@ -107,12 +113,11 @@ public final class PushManager {
                         UploadStat.PUSHED_UNKNOWN.incrementStat();
                         throw new IOException();
                     }
-                } catch(IOException ioe){//connection failed? do book-keeping
+                } catch(IOException ioe){
+                    if(isFWTransfer)
+                        UploadStat.FW_FW_FAILURE.incrementStat();
                     UploadStat.PUSH_FAILED.incrementStat();
-                } catch(Throwable e) {
-					ErrorService.error(e);
-				}
-                finally {
+                } finally {
                     if( s != null ) {
                         try {
                             s.getInputStream().close();
@@ -127,6 +132,7 @@ public final class PushManager {
                 }
             }
         };
+        runner.setDaemon(true);
         runner.start();
 	}
 }

@@ -60,6 +60,18 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
         
     /**
+     * Statistic for FW-FW downloads that connected.
+     */
+    public static final Statistic FW_FW_SUCCESS =
+        new DownloadStat();
+        
+    /**
+     * Statistic for FW-FW downloads that failed to connect.
+     */
+    public static final Statistic FW_FW_FAILURE =
+        new DownloadStat();
+        
+    /**
      * Statistic for attempting to steal from a grey area of another downloader
      * when no such grey area existed.
      */ 

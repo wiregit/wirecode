@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
@@ -1099,6 +1100,7 @@ public class DownloadManager implements BandwidthTracker {
                 try {
                     Socket fwTrans = 
                         new UDPConnection(file.getHost(), file.getPort());
+                    DownloadStat.FW_FW_SUCCESS.incrementStat();
                     // TODO: put this out to Acceptor in // the future
                     InputStream is = fwTrans.getInputStream();
                     String word = IOUtils.readWord(is, 4);
@@ -1106,7 +1108,9 @@ public class DownloadManager implements BandwidthTracker {
                         acceptDownload(fwTrans);
                     else
                         fwTrans.close();
-                } catch (IOException crap) {}
+                } catch (IOException crap) {
+                    DownloadStat.FW_FW_FAILURE.incrementStat();
+                }
             }
         };
         startPushThread.start();
