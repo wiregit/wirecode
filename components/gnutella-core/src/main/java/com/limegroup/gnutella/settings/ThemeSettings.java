@@ -220,6 +220,20 @@ public final class ThemeSettings extends LimeProps {
     }
     
     /**
+     * Determines if the current theme is the native OSX theme.
+     */
+    public static boolean isNativeOSXTheme() {
+        return CommonUtils.isMacOSX() && isDefaultTheme();
+    }
+    
+    /**
+     * Determines if the current theme is the native theme.
+     */
+    public static boolean isNativeTheme() {
+        return isNativeOSXTheme() || isWindowsTheme();
+    }
+    
+    /**
      * Formats a theme name, removing the underscore characters,
      * capitalizing the first letter of each word, and removing
      * the 'lwtp'.
