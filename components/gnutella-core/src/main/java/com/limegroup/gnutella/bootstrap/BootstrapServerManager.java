@@ -271,9 +271,11 @@ public class BootstrapServerManager {
             }
         }
         /** Called when we got a line of data.  Implementation may wish
-         *  to call handleError if the data is in a bad format. */
-        protected abstract void handleResponseData(BootstrapServer server, 
-												   String line);
+         *  to call handleError if the data is in a bad format. 
+         *  @return false if there was an error processing, true otherwise.
+         */
+        protected abstract boolean handleResponseData(BootstrapServer server, 
+                                                      String line);
         /** Should we go on to another host? */
         protected abstract boolean needsMoreData();
         /** The next server to contact */
@@ -287,7 +289,8 @@ public class BootstrapServerManager {
         protected String parameters() {
             return "hostfile=1";
         }
-        protected void handleResponseData(BootstrapServer server, String line) {
+        protected boolean handleResponseData(BootstrapServer server, 
+                                             String line) {
             try {
                 //Only accept numeric addresses.  (An earlier version of this
                 //did not do strict checking, possibly resulting in HTML in the
@@ -305,7 +308,9 @@ public class BootstrapServerManager {
             } catch (IllegalArgumentException bad) { 
                 //One strike and you're out; skip servers that send bad data.
                 handleError(server);
-            }            
+                return false;
+            }
+            return true;
         }
         protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
@@ -341,7 +346,8 @@ public class BootstrapServerManager {
         protected String parameters() {
             return "urlfile=1";
         }
-        protected void handleResponseData(BootstrapServer server, String line) {
+        protected boolean handleResponseData(BootstrapServer server,
+                                             String line) {
             try {
                 BootstrapServer e=new BootstrapServer(line);
                 //Ensure url in this.  If list is too big, remove an
@@ -357,7 +363,9 @@ public class BootstrapServerManager {
             } catch (ParseException error) { 
                 //One strike and you're out; skip servers that send bad data.
                 handleError(server);
-            }            
+                return false;
+            }
+            return true;
         }
         protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
@@ -412,9 +420,11 @@ public class BootstrapServerManager {
                 return ipPart+"&"+urlPart;            
             }
         }
-        protected void handleResponseData(BootstrapServer server, String line) {
+        protected boolean handleResponseData(BootstrapServer server,
+                                             String line) {
             if (StringUtils.startsWithIgnoreCase(line, "OK"))
                 gotResponse=true;
+            return true;
         }
         protected boolean needsMoreData() {
             return !gotResponse;
@@ -547,7 +557,8 @@ public class BootstrapServerManager {
                     request.handleError(server);
                     errors = true;
                 } else {
-                    request.handleResponseData(server, line);
+                    boolean retVal = request.handleResponseData(server, line);
+                    if (!errors) errors = !retVal;
                 }
 
                 firstLine = false;
