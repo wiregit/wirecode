@@ -392,33 +392,33 @@ public class CountPercent {
 "     The LimeWire Open Source project has embarked on an effort to\n" +
 "     internationalize LimeWire. This involves efforts not just by programmers and\n" +
 "     developers, but also avid LimeWire users who are bilingual. If you are an\n" +
-"     English speaking user fluent in another language, we need your help.<br>\n" +
-"     <br>\n" +
+"     English speaking user fluent in another language, we need your help.<br />\n" +
+"     <br />\n" +
 "     Before we begin, you should read the following to better acquaint you with\n" +
 "     the open source development environment and this website, LimeWire.org. We\n" +
-"     will try to make this process as computer science-free as possible.<br>\n" +
-"     <br>\n" +
-"     <b>How LimeWire Renders Code to a Spoken Language</b><br>\n" + 
-"     <br>\n" +
+"     will try to make this process as computer science-free as possible.<br />\n" +
+"     <br />\n" +
+"     <b>How LimeWire Renders Code to a Spoken Language</b><br />\n" + 
+"     <br />\n" +
 "     Open up this <a href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n" +
-"     target=\"_blank\">LimeWire Screenshot</a>.<br>\n" +
+"     target=\"_blank\">LimeWire Screenshot</a>.<br />\n" +
 "     Take a look at the tabs, <b>Search</b>, <b>Monitor</b>, <b>Library</b>, etc.\n" +
 "     Now take a look at the buttons, <b>Download</b>, <b>Kill Download</b>,\n" +
 "     etc...All of these elements of LimeWire (the buttons, the tabs, the Genre\n" +
 "     type, the Options window) can be translated to any language very easily. You\n" +
 "     can change the word \"Download\" seen on the frequently used \"Download\"\n" +
 "     button to \"Télécharger\" (French for \"download\"), via a text file found\n"+
-"     in your LimeWire application directory.<br>\n" +
-"     <br>\n" +
+"     in your LimeWire application directory.<br />\n" +
+"     <br />\n" +
 "     This file is called the \"<b>Messages Bundle</b>\" file. This file\n" +
 "     acts as a dictionary, translating Java code to English or French, etc. When\n" +
 "     you start LimeWire, the program reads this file and plugs in the\n" +
-"     translations.<br>\n" +
-"     <br>\n" + 
+"     translations.<br />\n" +
+"     <br />\n" + 
 "     <a href=\"" + PRE_LINK + "MessagesBundle_es.properties\"><b>Click\n" +
 "     here to see what a Messages Bundle looks like</b></a>: (In this example, the\n" +
-"     Messages Bundle file has been partly translated into Spanish.)<br>\n" +
-"     <br>\n");
+"     Messages Bundle file has been partly translated into Spanish.)<br />\n" +
+"     <br />\n");
     }
     
     private void buildStatus(StringBuffer page,
@@ -429,7 +429,7 @@ public class CountPercent {
                              List langsEmbryonic) {
         page.append(
 "     <b>Translations Status:</b>\n" +
-"     <br>\n" +
+"     <br />\n" +
 "     <ol>\n");
         buildStatus(page, langsCompleted,
 "       are complete and will require only small revisions during the project\n" +
@@ -473,32 +473,32 @@ public class CountPercent {
 
     private void buildAfterStatus(StringBuffer page) {
         page.append(
-"     <br>\n" +
-"     <b>Which tool or editor is needed to work on a translation:</b><br>\n" + 
-"     <br>\n" + 
+"     <br />\n" +
+"     <b>Which tool or editor is needed to work on a translation:</b><br />\n" + 
+"     <br />\n" + 
 "     For <b>Western European Latin-based languages</b>, which can use the US-ASCII \n" +
 "     or ISO-8859-1 character set, any text editor (such as NotePad on Windows) can\n" +
 "     be used on Windows and Linux. Once a file is completed, it can be sent as a\n" +
 "     simple text file to\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br>\n" +
-"     <br>\n" +
+      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
+"     <br />\n" +
 "     For <b>Central European languages</b>, the prefered format is a simple text\n" +
 "     file encoded with the ISO-8859-2 character set, or an UTF-8 encoded simple\n" +
 "     text file (which can be edited with NotePad on Windows 2000/XP), or a\n" +
-"     correctly marked-up HTML document such as HTML email, or a Word document.<br>\n" +
-"     <br>\n" +
+"     correctly marked-up HTML document such as HTML email, or a Word document.<br />\n" +
+"     <br />\n" +
 "     For <b>other European or Semitic languages</b>, the preferred format is a\n" +
 "     plain text file, encoded with a ISO-8859-* character set which you must\n" +
 "     explicitly specify, or a correctly marked-up HTML document, or a Word\n" +
-"     document.<br>\n" +
-"     <br>\n" +
+"     document.<br />\n" +
+"     <br />\n" +
 "     For <b>Asian Languages</b>, the preferred submission format is a Unicode text\n" +
 "     file encoded with UTF-8. Users of Windows 2000/XP can use NotePad but you\n" +
 "     must explicitly select the UTF-8 encoding when saving your file. Users of\n" +
 "     localized versions of Windows 95/98/ME can only save their file in the native\n" +
 "     local \"ANSI\" encoding, and should then send us their translation by\n" +
-"     copy/pasting it in the content body of the email.<br>\n" +
-"     <br>\n" +
+"     copy/pasting it in the content body of the email.<br />\n" +
+"     <br />\n" +
 "     <b>Macintosh users</b> should use a word-processor and send us their\n" +
 "     translations in an unambiguous format. Mac OS 8/9 \"SimpleText\"\n" +
 "     files use a Mac specific specific encoding for international languages\n" +
@@ -506,85 +506,96 @@ public class CountPercent {
 "     specific format for text attachments (we may enventually have difficulties to\n" +
 "     decipher some Mac encodings used in simple text files attachment). On Mac OSX,\n" +
 "     the best tool is \"TextEdit\", from the Jaguar accessories, with\n" +
-"     which you can directly edit and save plain text files encoded with UTF-8.<br>\n" +
-"     <br>\n" +
+"     which you can directly edit and save plain text files encoded with UTF-8.\n" +
+"     <br />\n" +
 "     <b>Linux users</b> can also participate if they have a correctly setup\n" +
 "     environment for their locale. Files can be edited with \"vi\", \"emacs\", or\n" +
-"     graphical editors for X11.<br>\n" +
-"     <br>\n" +
+"     graphical editors for X11.<br />\n" +
+"     <br />\n" +
 "     For other information about internationalization standards, language and\n" +
-"     country codes, character sets and encodings, you may visit these web pages:<br>\n" +
+"     country codes, character sets and encodings, you may visit these web pages:<br />\n" +
 "     <ul>\n" +
-"      <li>Language codes: <a href=\"http://www.loc.gov/standards/iso639-2/englangn.html\">http://www.loc.gov/standards/iso639-2/englangn.html</a></li>\n" +
-"      <li>Country codes: <a href=\"http://www.iso.org/iso/en/prods-services/iso3166ma/index.html\">http://www.iso.org/iso/en/prods-services/iso3166ma/index.html</a></li>\n" +
-"      <li>Character sets: <a href=\"http://www.w3.org/International/O-charset.html\">http://www.w3.org/International/O-charset.html</a></li>\n" +
-"      <li>Internationalization data: <a href=\"http://www.unicode.org/unicode/onlinedat/resources.html\">http://www.unicode.org/unicode/onlinedat/resources.html</a></li>\n" +
+"      <li>Language codes: <a href=\"http://www.loc.gov/standards/iso639-2/englangn.html\"\n" +
+"       target=\"_blank\">http://www.loc.gov/standards/iso639-2/englangn.html</a></li>\n" +
+"      <li>Country codes: <a href=\"http://www.iso.org/iso/en/prods-services/iso3166ma/index.html\"\n" +
+"       target=\"_blank\">http://www.iso.org/iso/en/prods-services/iso3166ma/index.html</a></li>\n" +
+"      <li>Character sets: <a href=\"http://www.w3.org/International/O-charset.html\"\n" +
+"       target=\"_blank\">http://www.w3.org/International/O-charset.html</a></li>\n" +
+"      <li>Letter database (languages and character sets): <a href=\"http://www.eki.ee/letter/\"\n" +
+"       target=\"_blank\">http://www.eki.ee/letter/</a></li>\n" +
+"      <li>Other internationalization data: <a href=\"http://www.unicode.org/unicode/onlinedat/resources.html\"\n" +
+"       target=\"_blank\">http://www.unicode.org/unicode/onlinedat/resources.html</a></li>\n" +
 "     </ul>\n" +
-"     <br>\n" +
-"     <b>How to submit corrections or enhancements for your language:</b><br>\n" +
-"     <br>\n" +
+"     An excellent tutorial on various character sets, including the ASCII variants, the\n" +
+"     ISO-8859 family, the Windows \"ANSI code pages\", Macintosh character codes, and\n" +
+"     Unicode (or its ISO/IEC 10646 repertoire) can be found on:\n" +
+"     <a href=\"http://www.cs.tut.fi/~jkorpela/chars.html\"\n" +
+"     target=\"_blank\">http://www.cs.tut.fi/~jkorpela/chars.html</a></li><br />\n" +
+"     <br />\n" +
+"     <b>How to submit corrections or enhancements for your language:</b><br />\n" +
+"     <br />\n" +
 "     Users that don't have the correct tools to edit a Messages Bundle can send us\n" +
-"     an Email in English or in French, that explain their needs.<br>\n" +
+"     an Email in English or in French, that explain their needs.<br />\n" +
 "     For any discussion with the contributing translators you may write to\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br>\n" +
-"     <br>\n" +
+      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
+"     <br />\n" +
 "     <b>If your corrections are significant</b>, you may send us your complete\n" +
 "     Message Bundle. Please be sure to include all resource strings defined in the\n" +
 "     latest version of the existing Messages Bundle before sending us your\n" +
-"     revision.<br>\n" +
-"     <br>\n" +
+"     revision.<br />\n" +
+"     <br />\n" +
 "     <b>For simple few corrections or additions</b>, just send the corrected lines\n" +
 "     in the content body of an Email (make sure you select the correct character encoding\n" +
 "     in your email tool before sending it so that non-ASCII characters are not lost or\n" +
 "     replaced), with your comments. <i>We will review your translations and integrate\n" +
-"     them into our existing versions after review.</i><br>\n" +
-"     <br>\n" +
-"     <b>How to test a new translation:</b><br>\n" +
-"     <br>\n" +
+"     them into our existing versions after review.</i><br />\n" +
+"     <br />\n" +
+"     <b>How to test a new translation:</b><br />\n" +
+"     <br />\n" +
 "     Only Windows and Unix simple text editors can create a plain text file which\n" +
 "     will work in LimeWire, and only for languages using the Western European\n" +
 "     Latin character set. Don't use \"SimpleText\" on Mac OS to edit\n" +
 "     properties files as SimpleText does not create plain text files. Other\n" +
 "     translations need to be converted into regular properties files, encoded\n" +
 "     using the ISO-8859-1 Latin character set and Unicode escape sequences, with a\n" +
-"     tool \"native2ascii\" found in the Java Development Kit.<br>\n" +
-"     <br>\n" +
+"     tool \"native2ascii\" found in the Java Development Kit.<br />\n" +
+"     <br />\n" +
 "     You don't need to rename your translated and converted bundle, which can\n" +
 "     coexist with the English version. LimeWire will load the appropriate\n" +
 "     resources file according to the \"LANGUAGE=\", and\n" +
 "     \"COUNTRY=\" settings stored in your \"limewire.props\"\n" +
 "     preferences file. Lookup for the correct language code to use, in the list\n" +
-"     beside.<br>\n" +
-"     <br>\n" +
+"     beside.<br />\n" +
+"     <br />\n" +
 "     Until version 2.4 of LimeWire, bundles used by LimeWire were simply stored in\n" +
 "     a single \"MessagesBundle.properties\" file of your installation\n" +
 "     directory. However these versions support other bundles in the same\n" +
-"     directory.<br>\n" +
-"     <br>\n" +
+"     directory.<br />\n" +
+"     <br />\n" +
 "     Since version 2.5, bundles are searched in a single <b>zipped archive</b>\n" +
 "     named \"MessagesBundles.jar\" installed with LimeWire. All bundles\n" +
 "     are named \"MessagesBundle_xx.properties\", where \"xx\" is\n" +
 "     replaced by the language code (as shown on the table beside).\n" +
 "     If you don't know how to proceed to test the translation yourself,\n" +
-"     ask us for assistance at the same email address used for your contributions.<br>\n" +
-"     <br>\n" +
-"     <b>How to create a new translation:</b><br>\n" +
-"     <br>\n" +
+"     ask us for assistance at the same email address used for your contributions.<br />\n" +
+"     <br />\n" +
+"     <b>How to create a new translation:</b><br />\n" +
+"     <br />\n" +
 "     Users that wish to contribute with a new translation must be fluent in the\n" +
 "     target language, preferably native of a country where this language is\n" +
 "     official. The English version is the reference one, but if needed you can\n" +
 "     look for suggestions at the other completed translations. Before starting\n" +
 "     your work, please contact us at\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br>\n" +
+      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     During the translation process, you may subscribe to the translate list (see above)\n" +
-"     where you will benefit from other contributions sent to this address.<br>\n" + 
-"     <br>\n" + 
+"     where you will benefit from other contributions sent to this address.<br />\n" + 
+"     <br />\n" + 
 "     Do not start with the existing Message Bundle installed with your current\n" +
 "     servent. <b>Work on the latest version of a complete Messages Bundle</b> from\n" +
 "     the list of languages on the right of this page (preferably the English\n" +
 "     version or the French version which is constantly maintained in sync and is\n" +
-"     fully translated). Look also to other existing translations if you need tips.<br>\n" +
-"     <br>\n" +
+"     fully translated). Look also to other existing translations if you need tips.<br />\n" +
+"     <br />\n" +
 "     When translating, adopt the <b>common terminology</b> used in your localized\n" +
 "     operating system. In some cases, some terms were imported from English,\n" +
 "     despite other terms already existed in your own language. If a local term can\n" +
@@ -593,37 +604,37 @@ public class CountPercent {
 "     translation must be understood by most native people that are not addicted to\n" +
 "     the Internet and computers \"jargon\". Pay particularly attention to the\n" +
 "     non-technical translation of common terms: download, upload, host, byte,\n" +
-"     firewall, address, file, directory, # (number of), leaf (terminal node)...<br>\n" +
-"     <br>\n" +
+"     firewall, address, file, directory, # (number of), leaf (terminal node)...<br />\n" +
+"     <br />\n" +
 "     Avoid translating word for word, don't use blindly automatic translators,\n" +
 "     be imaginative but make a <b>clear and concise</b> translation. For button\n" +
 "     labels and column names, don't translate them with long sentences, as they\n" +
 "     may be truncated; suppress some articles, or use abbreviations if needed.\n" +
 "     If there are problems translating some difficult terms, write to the translate\n" +
 "     list (in English or French) for assistance, and subscribe to this list to\n" +
-"     receive comments from users or other translators.<br>\n" +
-"     <br>\n" +
+"     receive comments from users or other translators.<br />\n" +
+"     <br />\n" +
 "     After you've plugged in your translations into your language's Messages\n" +
 "     Bundle, send your copy as a plain text file attachement to\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br>\n" +
+      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <i>We will review your translations and integrate them into our existing\n" +
-"     versions after review.</i><br>\n"+
-"     <br>\n" +
-"     <br>\n" +
+"     versions after review.</i><br />\n"+
+"     <br />\n" +
+"     <br />\n" +
 "    </td>\n" + /* End of column 1 (spacing) */
 "    <td>&nbsp;&nbsp;&nbsp;</td>\n" + /* Column 2 (spacing) */
 "    <td valign=\"top\">\n" + /* Start of column 3 (status) */
       /* Start shaded right rectangle */
 "     <table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#b1b1b1\" width=\"270\">\n" +
 "     <tr bgcolor=\"#EFEFEF\">\n" + 
-"      <td valign=\"top\"><br>\n" +
-"       <b>LAST UPDATED: <font color=\"#FF0000\">" + df.format(new Date()) + "</font><br>\n" +
-"       <br>\n" +
-"       LATEST TRANSLATIONS & COMPLETION STATUS:</b><br>\n" +
-"       <br>\n" +
+"      <td valign=\"top\"><br />\n" +
+"       <b>LAST UPDATED: <font color=\"#FF0000\">" + df.format(new Date()) + "</font><br />\n" +
+"       <br />\n" +
+"       LATEST TRANSLATIONS & COMPLETION STATUS:</b><br />\n" +
+"       <br />\n" +
 "       To get the most recent version of a Messages Bundle, <b>click on the\n" +
-"       corresponding language</b> in the following list.<br>\n" +
-"       <br>\n" +
+"       corresponding language</b> in the following list.<br />\n" +
+"       <br />\n" +
 "       <font color=\"#FF0000\">To view all available Messages Bundle projects\n" +
 "       (new languages may be added), <a\n" +
 "       href=\"" + PRE_LINK + "\">click here</a></font>.\n");
