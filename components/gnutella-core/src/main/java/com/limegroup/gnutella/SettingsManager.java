@@ -132,8 +132,26 @@ public class SettingsManager {
     private final int     DEFAULT_FORCED_PORT         = 6346;
     private final int     DEFAULT_FREELOADER_FILES    = 1;
     private final int     DEFAULT_FREELOADER_ALLOWED  = 100;
-	private final long    DEFAULT_AVERAGE_UPTIME      = 200;
-	private final long    DEFAULT_TOTAL_UPTIME        = 0;
+
+	/**
+	 * Default average amount of time that the application is run,
+	 * set at 20 minutes.
+	 */
+	private final long    DEFAULT_AVERAGE_UPTIME      = 20*60;
+	
+	/**
+	 * Default total amount of time the application has been run,
+	 * set at 20 minutes to begin with, based on the default 
+	 * setting of having been run for one session for the
+	 * average number of seconds.
+	 */
+	private final long    DEFAULT_TOTAL_UPTIME        = 20*60;
+
+	/**
+	 * Default value for whether or not some installation sequence,
+	 * whether it be InstallShield, InstallAnywhere, or our own
+	 * setup wizard, has set up the user's properties.
+	 */
 	private final boolean DEFAULT_INSTALLED           = false;
 	private final int     DEFAULT_APP_WIDTH           = 640;
 	private final int     DEFAULT_APP_HEIGHT          = 620;
@@ -181,11 +199,6 @@ public class SettingsManager {
 	 */
 	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
 
-	/**
-	 * Constant default value for the maximum number of bytes ever passed
-	 * per second downstream.
-	 */
-	private final int DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC = 0;
     
     /**
      * Constant default value for whether or not this node has ever been
@@ -193,6 +206,19 @@ public class SettingsManager {
      * requirements of a supernode, but not necessarily been a supernode.
      */
     private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
+
+	/**
+	 * Constant default value for the maximum number of bytes ever passed
+	 * per second downstream.
+	 */
+	private final int DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC = 0;
+
+	/**
+	 * Default value for the number of times the application has been
+	 * run on this machine.
+	 */
+	private final int DEFAULT_SESSIONS = 1;
+    
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -934,6 +960,21 @@ public class SettingsManager {
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
         setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
         setSupernodeMode(DEFAULT_SUPERNODE_MODE);
+		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
+		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
+		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
+        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
+        
+        //settings for Supernode implementation
+        setMaxShieldedClientConnections(
+            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
+        setMinShieldedClientConnections(
+            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
+        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
+        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
+		setSessions(DEFAULT_SESSIONS);		
+		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
+		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
     }
 
     /**
@@ -1685,11 +1726,12 @@ public class SettingsManager {
 	 *                      application running
 	 */
 	private void setAverageUptime(long averageUptime) {
+		_averageUptime = averageUptime;
 		PROPS.put(AVERAGE_UPTIME, Long.toString(averageUptime));
 	}
 
 	/** 
-	 * Sets the total time this user has used the application
+	 * Sets the total time this user has used the application.
 	 *
 	 * @param totalUptime the total time the application has been run
 	 */
