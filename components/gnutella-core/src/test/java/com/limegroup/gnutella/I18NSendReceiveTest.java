@@ -10,6 +10,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -115,8 +116,10 @@ public class I18NSendReceiveTest
 
 
     private static void connect() throws Exception {
+        UltrapeerHeaders headers = new UltrapeerHeaders("localhost");
+        headers.put(HeaderNames.X_DEGREE,"42");
         CONN_1 = new Connection("localhost", TEST_PORT,
-                                new UltrapeerHeaders("localhost"),
+                                headers,
                                 new EmptyResponder());
         CONN_1.initialize();
         drain(CONN_1);
