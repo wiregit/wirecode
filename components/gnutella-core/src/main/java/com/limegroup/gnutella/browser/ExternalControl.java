@@ -133,8 +133,6 @@ public class ExternalControl {
 				  socket.getInetAddress().getHostAddress()) )
 				return;
 
-			InputStream in = socket.getInputStream();
-
 			// First read extra parameter
 			socket.setSoTimeout(Constants.TIMEOUT);
 			ByteReader br = new ByteReader(socket.getInputStream());
