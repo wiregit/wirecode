@@ -132,7 +132,7 @@ public final class PongCachingTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(4);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
@@ -169,13 +169,13 @@ public final class PongCachingTest extends BaseTestCase {
 	 */
  	private void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
+ 			drain(ULTRAPEER_1, TIMEOUT);
  		}
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_2);
+ 			drain(ULTRAPEER_2, TIMEOUT);
  		}
  		if(LEAF.isOpen()) {
- 			drain(LEAF);
+ 			drain(LEAF, TIMEOUT);
  		}
  	}
 
@@ -186,12 +186,18 @@ public final class PongCachingTest extends BaseTestCase {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
+        assertTrue("should be open", ULTRAPEER_2.isOpen());
+        assertTrue("should be up", ULTRAPEER_2.isSupernodeSupernodeConnection());
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
+        assertTrue("should be open", ULTRAPEER_1.isOpen());
+        assertTrue("should be up", ULTRAPEER_1.isSupernodeSupernodeConnection());        
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
+        assertTrue("should be open", LEAF.isOpen());
+        assertTrue("should be up", LEAF.isClientSupernodeConnection());        
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");
@@ -210,17 +216,9 @@ public final class PongCachingTest extends BaseTestCase {
 			ULTRAPEER_1.flush();
         }
 
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-		assertTrue("LEAF should be connected", LEAF.isOpen());
-
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
 		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
-        drainAll();
     }
 
     /**
@@ -230,9 +228,14 @@ public final class PongCachingTest extends BaseTestCase {
     public void testPongsReceivedFromPing() throws Exception {
         PingPongSettings.PINGS_ACTIVE.setValue(false);
 
+
+        byte[] ip = { (byte)1, (byte)2, (byte)3, (byte)4 };
+
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = PingReply.create(new GUID().bytes(),
-                                                           (byte)3);
+                                                 (byte)3,
+                                                 13232,
+                                                 ip);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
                     curPong.hop();
@@ -240,19 +243,18 @@ public final class PongCachingTest extends BaseTestCase {
             }
             PongCacher.instance().addPong(curPong);            
         }
-		drain(ULTRAPEER_1);
-		drain(ULTRAPEER_2);
-		drain(LEAF);
+        
+        List pongs = PongCacher.instance().getBestPongs();
+        assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         Message m = new PingRequest((byte)7);
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();        
         
-        Message received;
+        Message received;   
         for(int i=0; i<PongCacher.NUM_HOPS; i++) {
-            received = ULTRAPEER_1.receive(TIMEOUT);
-            assertInstanceof("message should be a pong", PingReply.class, 
-                             received);
+            received = getFirstMessageOfType(ULTRAPEER_1, PingReply.class, 10000);
+            assertNotNull("should have gotten pong. hop: " + i, received);
         }
         PingPongSettings.PINGS_ACTIVE.setValue(true);
     }
