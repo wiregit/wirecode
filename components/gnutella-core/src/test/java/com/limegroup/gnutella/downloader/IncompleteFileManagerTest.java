@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import java.io.*;
@@ -328,8 +329,10 @@ public class IncompleteFileManagerTest extends TestCase {
         IncompleteFileManager read=null;
         try {
             ObjectInputStream in=new ObjectInputStream(
-                new FileInputStream(
-                    "com/limegroup/gnutella/downloader/"+filename));
+                new FileInputStream( CommonUtils.getResourceFile(
+                    "com/limegroup/gnutella/downloader/"+filename
+                ) )
+            );
             read=(IncompleteFileManager)in.readObject();
             in.close();
         } catch (IOException e) {

@@ -6,6 +6,7 @@ import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 
 /** 
@@ -14,6 +15,7 @@ import com.sun.java.util.collections.*;
  * @see RequeryDownloadTest 
  */
 public class ResumeDownloaderTest extends TestCase {
+    static final String filePath="com/limegroup/gnutella/downloader/";
     static final String name="filename.txt";
     static final URN hash=TestFile.hash();
     static final int size=1111;
@@ -106,16 +108,14 @@ public class ResumeDownloaderTest extends TestCase {
      */
     public void testSerialization12()
             throws IOException, ClassNotFoundException {
-        tSerialization(
-            "com/limegroup/gnutella/downloader/ResumeDownloader.1_2.dat", false);
+        tSerialization("ResumeDownloader.1_2.dat", false);
     }
 
     /** Tests serialization of version 1.3 of ResumeDownloader.
      *  (LimeWire 2.7.3) */
     public void testSerialization13()
             throws IOException, ClassNotFoundException {
-        tSerialization(
-            "com/limegroup/gnutella/downloader/ResumeDownloader.1_3.dat", true);
+        tSerialization("ResumeDownloader.1_3.dat", true);
     }
     
     /** Generic serialization testing routing. 
@@ -123,7 +123,9 @@ public class ResumeDownloaderTest extends TestCase {
      *  @param expectHash true iff there should be a hash in the downloader */
     private void tSerialization(String file, boolean expectHash) 
             throws IOException, ClassNotFoundException {
-        ObjectInputStream in=new ObjectInputStream(new FileInputStream(file));
+        ObjectInputStream in=new ObjectInputStream(
+            new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
+        );
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
         QueryRequest qr=rd.newRequery(0);
         assertEquals("filename.txt", qr.getQuery());
@@ -144,7 +146,11 @@ public class ResumeDownloaderTest extends TestCase {
             ResumeDownloader rd=newResumeDownloader();
             ObjectOutputStream out=new ObjectOutputStream(
                                     new FileOutputStream(
-                                      "ResumeDownloader.dat"));
+                                      CommonUtils.getResourceFile(
+                                        filePath + "ResumeDownloader.dat"
+                                      )
+                                    )
+                                  );
             out.writeObject(rd);
             out.flush();
             out.close();    

@@ -13,6 +13,7 @@ import junit.framework.*;
  * Tests backwards compatibility with old downloads.dat files.
  */
 public class OldDownloadsTest extends TestCase {
+    private static final String filePath = "com/limegroup/gnutella/downloader/";
 
     public OldDownloadsTest(String name) {
         super(name);
@@ -25,8 +26,6 @@ public class OldDownloadsTest extends TestCase {
 
 
     public static void testLegacy() {
-        DownloadTest.debug(
-            "Please make sure you are in the com/./downloader directory");
         doTest("downloads_233.dat");
         //doTest("downloads_224.dat");  //Has XML serialization problem
         //doTest("downloads_202.dat");  //Has XML serialization problem
@@ -41,8 +40,9 @@ public class OldDownloadsTest extends TestCase {
         SettingsManager.instance().setMaxSimDownload(0);  //queue everything
         TestActivityCallback callback=new TestActivityCallback();
         RouterService rs = new RouterService(callback);
-        assertTrue(rs.getDownloadManager().readSnapshot(new File(
-                        "com/limegroup/gnutella/downloader",file)));
+        assertTrue(rs.getDownloadManager().readSnapshot(
+            CommonUtils.getResourceFile(filePath+file)
+        ));
         assertTrue(callback.downloaders.size()==1);
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);
         assertTrue(md.getFileName(),md.getFileName().equals("Test1.mp3"));
