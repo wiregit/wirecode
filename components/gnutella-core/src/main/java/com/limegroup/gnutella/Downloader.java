@@ -186,6 +186,11 @@ public interface Downloader extends BandwidthTracker {
      * @return the number of hosts we are remotely queued on. 
      */
     public int getQueuedHostCount();
+    
+    /**
+     * Determines if the download is completed.
+     */
+    public boolean isCompleted();
 
 
 }
