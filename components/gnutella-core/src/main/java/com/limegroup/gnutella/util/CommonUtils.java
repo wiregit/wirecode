@@ -1001,7 +1001,8 @@ public final class CommonUtils {
     public static boolean isPrivateAddress(byte[] address) {
         if (address[0]==(byte)10) {
             return true;  //10.0.0.0 - 10.255.255.255
-        } else if (address[0]==(byte)127) {
+        } else if (address[0]==(byte)127 && 
+                   ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return true;  //127.x.x.x
         } else if (address[0]==(byte)172 &&
                    address[1]>=(byte)16 &&
