@@ -1616,13 +1616,6 @@ public class ManagedConnection extends Connection
     }
 
 
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.ReplyHandler#getInetAddress()
-	 */
-	public InetAddress getInetAddress() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
