@@ -127,6 +127,11 @@ public abstract class MessageRouter {
 	 */
 	private final boolean RECORD_STATS = !CommonUtils.isJava118();
 
+	/**
+	 * A handle to the thread that deals with QRP Propagation
+	 */
+	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
+
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -151,6 +156,7 @@ public abstract class MessageRouter {
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
 		DYNAMIC_QUERIER.start();
+	    QRP_PROPAGATOR.start();
     }
 
     public String getPingRouteTableDump() {
@@ -231,7 +237,7 @@ public abstract class MessageRouter {
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
-		forwardQueryRouteTables();      
+		//forwardQueryRouteTables();      
     }
 
 	/**
@@ -1380,6 +1386,30 @@ public abstract class MessageRouter {
             }
         }
     }
+
+    /** Thread the processing of QRP Table delivery. */
+    private class QRPPropagator extends Thread {
+        public QRPPropagator() {
+            setName("QRPPropagator");
+            setDaemon(true);
+        }
+
+        /** While the connection is not closed, sends all data delay. */
+        public void run() {
+            try {
+                while (true) {
+					// Check for any scheduled QRP table propagations
+					// every 10 seconds
+                    Thread.sleep(10*1000);
+    				forwardQueryRouteTables();
+                }
+            } catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+
+    } //end QRPPropagator
+
 
     /**
      * Sends updated query routing tables to all connections which haven't
