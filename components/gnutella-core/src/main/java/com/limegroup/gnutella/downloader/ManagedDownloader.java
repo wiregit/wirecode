@@ -1172,11 +1172,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
 		// Prepare a fresh set of alternate locations for these file
-		totalAlternateLocations=AlternateLocationCollection.createCollection();
+		//totalAlternateLocations=AlternateLocationCollection.createCollection();
 
 		// null out the alternate locations so we can create a new set
 		// for these files
-		//totalAlternateLocations = null;  
+		totalAlternateLocations = null;  
 		RemoteFileDesc tempRFD;
 		String rfdStr;
 		URL    rfdURL;
@@ -1191,11 +1191,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 				if(sha1 == null)
 				    continue;
 
-				if(totalAlternateLocations.size() == 0) {
+                if(totalAlternateLocations == null) {
+                    totalAlternateLocations = 
+                        AlternateLocationCollection.createCollection(sha1);
+                }
+				//if(totalAlternateLocations.numberOfAlternateLocations() == 0) {
 					// Prepare a fresh set of alternate locations for these file
-					totalAlternateLocations = 
-						AlternateLocationCollection.createCollection(sha1);
-				} else if(!sha1.equals(totalAlternateLocations.getSHA1Urn())) {
+                //totalAlternateLocations = 
+                //AlternateLocationCollection.createCollection(sha1);
+				if(!sha1.equals(totalAlternateLocations.getSHA1Urn())) {
 					// if the SHA1s don't match, keep going
 					continue;
 				}
@@ -1315,8 +1319,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
 				HeadRequester requester = 
-			        new HeadRequester(files, fileHash, 
-									  fileDesc, totalAlternateLocations);
+			        new HeadRequester(files, fileHash, fileDesc, 
+                                      fileDesc.getAlternateLocationCollection());
 				Thread headThread = new Thread(requester, "HEAD Request Thread");
 				headThread.setDaemon(true);
 				headThread.start();
