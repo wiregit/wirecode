@@ -70,14 +70,15 @@ public class ManagedConnectionTest extends BaseTestCase {
      * Tests the method for checking whether or not a connection is stable.
      */
     public void testIsStable() throws Exception {
-        Connection conn = new ManagedConnection("localhost", Backend.PORT);
-        conn.initialize();
+        ManagedConnection mc = new ManagedConnection("localhost", Backend.PORT);
+        mc.initialize();
+        mc.buildAndStartQueues();
         
-        assertTrue("should not yet be considered stable", !conn.isStable());
+        assertTrue("should not yet be considered stable", !mc.isStable());
 
         Thread.sleep(6000);
-        assertTrue("connection should be considered stable", conn.isStable());
-        conn.close();
+        assertTrue("connection should be considered stable", mc.isStable());
+        mc.close();
     }
 
 	/**
@@ -139,6 +140,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ManagedConnection mc = 
             new ManagedConnection("localhost", Backend.PORT);
 		mc.initialize();
+        mc.buildAndStartQueues();
 		assertTrue("connection should be high degree", 
 				   mc.isHighDegreeConnection());
         mc.close();
@@ -147,6 +149,7 @@ public class ManagedConnectionTest extends BaseTestCase {
     public void testHorizonStatistics() {
         HorizonCounter hc = HorizonCounter.instance();
         ManagedConnection mc= new ManagedConnection("", 1);
+        mc.buildAndStartQueues();
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         HorizonCounter.HORIZON_UPDATE_TIME=1*200;   
@@ -242,11 +245,8 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         assertTrue("connection is open", out.isOpen());
 		// receive initial ping
-        //drain(out);
-		out.receive();
-		out.receive();
-		//out.receive();`
-
+        drain(out);
+                
 		out.send(new PingRequest((byte)3));
 		
 		Message m = out.receive();
@@ -274,7 +274,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
 		out = new ManagedConnection("localhost", Backend.PORT);
-        out.initialize();            
+        out.initialize();          
+        out.buildAndStartQueues();  
 
         //in=acceptor.accept(); 
 		assertTrue("connection should be open", out.isOpen());
@@ -297,19 +298,21 @@ public class ManagedConnectionTest extends BaseTestCase {
 		
 		//2. Remote close: discovered on read
 		ManagedConnection out = new ManagedConnection("localhost", PORT);
-		out.initialize();            
+		out.initialize();        
+        out.buildAndStartQueues();    
         Connection in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
 
 
         in.close();
+        Message msg = null;
         try {
-			out.receive();
+			msg = out.receive();
 			fail("should not have received message");
         } catch (BadPacketException e) {
 			fail("should not have received bad packet", e);
-        } catch (IOException e) { }            
+        } catch (IOException e) {}            
 
         sleep(100);
         assertTrue("connection should not be open", !out.isOpen());
@@ -320,7 +323,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         //for Connection.)
         acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
         out = new ManagedConnection("localhost", PORT);
-        out.initialize();            
+        out.initialize(); 
+        out.buildAndStartQueues();           
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
@@ -334,6 +338,21 @@ public class ManagedConnectionTest extends BaseTestCase {
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());
 		sleep(2000);
+    }
+    
+    /** Tries to receive any outstanding messages on c 
+     *  @return true if this got a message */
+    private static boolean drain(Connection c) throws IOException {
+        boolean ret=false;
+        while (true) {
+            try {
+                c.receive(2000);
+                ret=true;
+            } catch (InterruptedIOException e) {
+                return ret;
+            } catch (BadPacketException e) {
+            }
+        }
     }
 
     class GGEPResponder implements HandshakeResponder {
