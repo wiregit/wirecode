@@ -12,7 +12,10 @@ package com.limegroup.gnutella.handshaking;
  */
 public class ConnectionHandshakeHeaders
 {
+    /** Obsolete; use X_LISTEN_IP instead */
     public static final String X_MY_ADDRESS         = "X-My-Address";
+    /** The replacement for X_MY_ADDRESS */
+    public static final String LISTEN_IP            = "Listen-IP";
     public static final String X_SUPERNODE          = "X-Ultrapeer";
     public static final String X_TRY                = "X-Try";
     public static final String X_TRY_SUPERNODES     = "X-Try-Ultrapeers";

@@ -14,7 +14,7 @@ public class LazyProperties extends Properties
         this.router=router;
         if (router!=null)
         {
-            put(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");
+            put(ConnectionHandshakeHeaders.LISTEN_IP, "");
             //just temporary!
         }
         if (remoteIP!=null)
@@ -26,7 +26,7 @@ public class LazyProperties extends Properties
     public String getProperty(String key, String defaultValue)
     {
         if (router!=null && key.equals(
-        ConnectionHandshakeHeaders.X_MY_ADDRESS))
+        ConnectionHandshakeHeaders.LISTEN_IP))
         {
             Endpoint e=new Endpoint(router.getAddress(), router.getPort());
             return e.getHostname()+":"+e.getPort();
@@ -39,7 +39,7 @@ public class LazyProperties extends Properties
     public String getProperty(String key)
     {
         if (router!=null && key.equals(
-        ConnectionHandshakeHeaders.X_MY_ADDRESS))
+        ConnectionHandshakeHeaders.LISTEN_IP))
         {
             Endpoint e=new Endpoint(router.getAddress(), router.getPort());
             return e.getHostname()+":"+e.getPort();

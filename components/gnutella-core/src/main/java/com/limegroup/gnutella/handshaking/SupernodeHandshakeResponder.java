@@ -47,7 +47,7 @@ public class SupernodeHandshakeResponder
             (new Boolean(_manager.supernodeNeeded())).toString());
             
             //give own IP address
-            ret.put(ConnectionHandshakeHeaders.X_MY_ADDRESS,
+            ret.put(ConnectionHandshakeHeaders.LISTEN_IP,
             _manager.getSelfAddress().getHostname() + ":"
             + _manager.getSelfAddress().getPort());
             

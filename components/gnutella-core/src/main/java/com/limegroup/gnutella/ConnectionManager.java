@@ -1136,9 +1136,13 @@ public class ConnectionManager {
         //in the headers)
         updateHostCache(headers, connection);
                 
-        //get remote address
+        //get remote address.  If the more modern "Listen-IP" header is
+        //not included, try the old-fashioned "X-My-Address".
         String remoteAddress 
-            = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
+            = headers.getProperty(ConnectionHandshakeHeaders.LISTEN_IP);
+        if (remoteAddress==null)
+            remoteAddress 
+                = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
         if((remoteAddress != null) && (!connection.isOutgoing()))
