@@ -139,6 +139,6 @@ log("UPP reset:"+_skipLimit);
     }
 
 	private static void log(String str) {
-		//System.err.println(str);
+		System.err.println(str);
 	}
 }

@@ -665,7 +665,7 @@ public class UDPConnectionProcessor {
     private synchronized void validateAckedData() {
         long currTime = System.currentTimeMillis();
 
-        if (_sendWindow.acksAppearToBeMissing(currTime, 1)) {
+        if (_sendWindow.acksAppearToBeMissing(currTime, 2)) {
 
             // if the older blocks ack have been missing for a while
             // resend them.
