@@ -647,7 +647,7 @@ public class AssertComparisons extends TestCase {
             ret = -1 *
                 ((com.sun.java.util.collections.Comparable)actual).compareTo(expected);
         } else { //neither implement either interface.
-            fail("Neither " + expected + " nor actual " + 
+            fail("Neither " + expected + " nor " + actual + 
                  "implement expected Comparable interface.");
         }
         
