@@ -46,7 +46,6 @@
            nowarn="${NOWARN}"
            excludes="${tests}/**"
            target="1.1"
-           compiler="javac1.3"
     >
     <classpath refid="default.classpath" />
     </javac>
