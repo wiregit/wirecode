@@ -64,7 +64,7 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * try to make packets less than this size
 	 */
-	private static final int PACKET_SIZE = 512;
+	private static final int PACKET_SIZE = 580;
 	
 	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 

@@ -144,7 +144,7 @@ public class BrowseHostHandler {
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
                                        null, null,false,false,"",0l, proxies,
-                                       -1, 1);  //TODO:get right number here
+                                       -1, canDoFWTransfer ? 1 : 0);  //TODO:get right number here
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
