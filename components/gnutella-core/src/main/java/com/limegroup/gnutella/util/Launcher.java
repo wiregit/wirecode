@@ -71,7 +71,7 @@ public class Launcher {
 	/** initialization block that determines the operating 
 	 *  system and loads the necessary runtime data. */
 	static {		
-		if(Utilities.isMac()) {
+		if(Utilities.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
@@ -95,7 +95,7 @@ public class Launcher {
 			if(Utilities.isWindows()) {
 				launchFileWindows(path);
 			}	   
-			else if(Utilities.isMac()) {
+			else if(Utilities.isMacClassic()) {
 				launchFileMac(path);
 			}
 			else if(Utilities.isUnix()) {
