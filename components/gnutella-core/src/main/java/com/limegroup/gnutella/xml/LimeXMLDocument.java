@@ -93,7 +93,20 @@ public class LimeXMLDocument implements Serializable {
         if(xmlString.equals(""))
             throw new SAXException("empty after identifier ripped");
     }
-    
+
+    /**
+     * Constructs a new LimeXMLDocument
+     * @param map Map with keys in canonicalized
+     * form and corresponding values that will be used to create the 
+     * new instance
+     * @param schemaURI The schema URI for the LimeXMLDocument to be
+     * created
+     */    
+    LimeXMLDocument(TreeMap map, String schemaURI){
+        this.schemaUri = schemaURI;
+        if(map.keySet().isEmpty()) throw new IllegalArgumentException("empty map");
+        fieldToValue = map;
+    }
 
     /**
      * Constructs a new LimeXMLDocument
