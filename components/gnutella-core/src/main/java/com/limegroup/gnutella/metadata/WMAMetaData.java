@@ -196,7 +196,6 @@ public class WMAMetaData extends AudioMetaData {
             
             IOUtils.ensureSkip(ds, 20);
             int maxBR = ByteOrder.leb2int(ds);
-            // TODO: assign duration based off this??
             if(LOG.isDebugEnabled())
                 LOG.debug("maxBitrate: " + maxBR);
             setBitrate(maxBR / 1000);
@@ -427,6 +426,7 @@ public class WMAMetaData extends AudioMetaData {
     /**
      * Returns a String uses WMA's encoding.
      * WMA strings have 0s interspersed between the characters.
+     * TODO:  These look like WCHAR -- how do you translate that in Java?
      */
     private String wmaString(byte[] x) throws IOException {
         int pos = 0;
