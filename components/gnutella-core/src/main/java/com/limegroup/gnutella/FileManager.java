@@ -21,7 +21,9 @@ public class FileManager{
     /** the total size of all files, in bytes. 
      *  INVARIANT: _size=sum of all size of the elements of _files */
     private int _size;                  
-
+    /** the total number of files.  INVARIANT: _numFiles==number of 
+     *  elements of _files that are not null. */
+    private int _numFiles;      
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in the shared folder with the shareable extension. 
@@ -35,6 +37,7 @@ public class FileManager{
 
     public FileManager() {               /* the constructor initializes */
         _size = 0;                       /* all the provate variables */
+        _numFiles = 0;
         _files = new ArrayList();
         _extensions = new String[0];
 
@@ -49,11 +52,12 @@ public class FileManager{
 
     /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
-    public int getNumFiles() {return _files.size();}//_numFiles;}
+    public int getNumFiles() {return _numFiles;}
 
     public synchronized void reset() {
         _size = 0;
-        _files = new ArrayList();
+        _numFiles = 0;
+        _files=new ArrayList();
         // _extensions = new String[0];
     }
 
@@ -142,7 +146,8 @@ public class FileManager{
         if (hasExtension(name)) {
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
-            _files.add(new FileDesc(_files.size(), name, path, n));
+            _files.add(new FileDesc(_files.size(), name, path,  n));
+            _numFiles++;
         }
     }
 
@@ -199,6 +204,7 @@ public class FileManager{
             //Aha, it's shared. Unshare it by nulling it out.
             if (file.equals(candidate)) {
                 _files.set(i,null);
+                _numFiles--;
                 _size-=fd._size;
                 return true;  //No more files in list will match this.
             }                
@@ -207,13 +213,18 @@ public class FileManager{
     }
 
     /**
+     * @requires dir_names is a semicolon separated list of names
      * @modifies this
-     * @effects recursively adds the following directories
-     *  to this.  <b>WARNING: this is a potential security hazard.</b>
+     * @effects ensures that this contains exactly the files recursively given
+     *  directories and all their recursive subdirectories.  If dir_names
+     *  contains duplicate directories, the duplicates will be ignored.  If
+     *  dir_names contains files, they will be ignored.  Note that some files in
+     *  this before the call will not be in this after the call, or they may 
+     *  have a different index.  <b>WARNING: this is a potential security 
+     *  hazard.</b>
      */
-    public synchronized void addDirectories(String dir_names) {
-		
-		_files.clear();
+    public synchronized void setDirectories(String dir_names) {
+		reset();
 		dir_names.trim();
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
@@ -278,6 +289,13 @@ public class FileManager{
         return theFiles;
     }
 
+    /**
+     * @modifies this
+     * @effects adds the all the files with shared extensions
+     *  in the given directory and its recursive children.
+     *  If dir_name is actually a file, it will be added if it has
+     *  a shared extension.  Entries in this before the call are unmodified.
+     */
     public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
         File myFile = new File(dir_name);       /* recursively adds all of */
         if (!myFile.exists())
