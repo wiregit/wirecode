@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.*;
-import java.util.Properties;
-import java.io.*;
 
 
 /**
@@ -93,4 +90,12 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting NO_INTERNET =
         FACTORY.createBooleanSetting("NO_INTERNET", false);
+
+    /**
+     * Settings for whether or not to display a message that no
+     * internet connection is detected and the user has been notified that 
+     * LimeWire will automatically keep trying to connect.
+     */
+    public static final BooleanSetting NO_INTERNET_RETRYING =
+        FACTORY.createBooleanSetting("NO_INTERNET_RETRYING ", false);
 }
