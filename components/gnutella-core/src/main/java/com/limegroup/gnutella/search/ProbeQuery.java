@@ -165,25 +165,20 @@ final class ProbeQuery {
         double popularity = 
             (double)((double)numHitConnections/
                      ((double)missConnections.size()+numHitConnections));
-
-        // if there were no matches, then it's almost definitely a fairly
-        // rare file, so send out a more aggressive probe
-        if(popularity == 0.0) {
-            return createAggressiveProbe(oldConnections, missConnections, 
-                                         hitConnections, returnLists);      
-        }
         
         // if the file appears to be very popular, send it to only one host
         if(popularity == 1.0) {
-            ttl1List.add(hitConnections.getFirst());
+            ttl1List.add((ManagedConnection)hitConnections.removeFirst());
             return returnLists;
         }
 
         if(numHitConnections > 3) {
-            int numToTry = Math.min(6, numHitConnections);
-            ttl1List.addAll(hitConnections.subList(numHitConnections-
-                                                   numToTry, 
-                                                   numHitConnections));
+            // TTL=1 queries are cheap -- send a lot of them if we can
+            int numToTry = Math.min(9, numHitConnections);
+
+            int startIndex = numHitConnections-numToTry;
+            int endIndex   = numHitConnections;
+            ttl1List.addAll(hitConnections.subList(startIndex, endIndex));
             return returnLists;
         }
 
