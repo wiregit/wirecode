@@ -47,11 +47,11 @@ public class FixedsizePriorityQueue {
      * is necessary to allow multiple nodes with same priority.  See
      * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
      */
-    private class Node implements Comparable {
+    private final class Node implements Comparable {
         /** The underlying data. */
-        private Object data;     
+        private final Object data;     
         /** Used to guarantee two nodes are never equal. */
-        private int myID;
+        private final int myID;
 
         Node(Object data) {
             this.data=data;
