@@ -387,13 +387,15 @@ public class Connection {
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
 
-            int theirCode = theirResponse.getStatusCode();
-            if (theirCode != HandshakeResponse.OK 
-				&&  theirCode != HandshakeResponse.UNAUTHORIZED_CODE)
-                throw new NoGnutellaOkException(false, 
-                                                theirResponse.getStatusCode(),
-                                                "Server sent fatal response: "+
-												theirResponse.getStatusCode());
+            int code = theirResponse.getStatusCode();
+            if (code != HandshakeResponse.OK &&  
+                code != HandshakeResponse.UNAUTHORIZED_CODE) {
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.SERVER_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createServerUnknown(code);
+                }
+            }
 
             //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
 			//   and headers.
@@ -403,31 +405,32 @@ public class Connection {
             sendString(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
+
+            code = ourResponse.getStatusCode();
             //Consider termination...
-            if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
+            if(code == HandshakeResponse.OK) {
                 if(ourResponse.getStatusMessage().equals(
                     HandshakeResponse.OK_MESSAGE)){
                     //a) Terminate normally if we wrote "200 OK".
                     return;
                 } else {
-                    //b) Continue loop if we wrote "200 AUTHENTICATING".                    
+                    //b) Continue loop if we wrote "200 AUTHENTICATING".
                     continue;
                 }
-            } else {
-                //c) Terminate abnormally if we wrote anything else.               
-                throw new NoGnutellaOkException(true,
-                                                ourResponse.getStatusCode(),
-                                                "We sent fatal response: "+
-												ourResponse);
+            } else {                
+                //c) Terminate abnormally if we wrote anything else.
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.CLIENT_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createClientUnknown(code);
+                }
             }
         }
             
         //If we didn't successfully return out of the method, throw an exception
         //to indicate that handshaking didn't reach any conclusion.  The values
         //here are kind of a hack.
-        throw new NoGnutellaOkException(false,
-                                        HandshakeResponse.UNAUTHORIZED_CODE,
-                                        "Too much handshaking, no conclusion");
+        throw NoGnutellaOkException.UNRESOLVED_SERVER;
     }
     
     /** 
@@ -484,13 +487,14 @@ public class Connection {
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
-            if((ourResponse.getStatusCode() != HandshakeResponse.OK)
-               && (ourResponse.getStatusCode() !=
-                   HandshakeResponse.UNAUTHORIZED_CODE)) {
-                throw new NoGnutellaOkException(true,
-                                                ourResponse.getStatusCode(),
-                                                "We sent fatal status code: "+
-                                                ourResponse);
+            int code = ourResponse.getStatusCode();
+            if((code != HandshakeResponse.OK) && 
+               (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.CLIENT_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createClientUnknown(code);
+                }
             }
                     
             //3. read the response from the other side.  If we asked the other
@@ -516,31 +520,27 @@ public class Connection {
 
 
             //Decide whether to proceed.
-            int ourCode=ourResponse.getStatusCode();
-            if(ourCode == HandshakeResponse.OK) {
+            code = ourResponse.getStatusCode();
+            if(code == HandshakeResponse.OK) {
                 if(theirResponse.getStatusCode()==HandshakeResponse.OK)
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
             } else {
-                Assert.that(ourCode==HandshakeResponse.UNAUTHORIZED_CODE,
-                            "Response code: "+ourCode);
+                Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
+                            "Response code: "+code);
                 if(theirResponse.getStatusCode()==HandshakeResponse.OK)
                     //b) If we wrote 401 and they wrote "200...", keep looping.
                     continue;
             }
             //c) Terminate abnormally
-            throw new NoGnutellaOkException(false,
-                                            theirResponse.getStatusCode(),
-                                            "Initiator sent fatal status code: "+
-                                            theirResponse);
+            throw NoGnutellaOkException.
+                createServerUnknown(theirResponse.getStatusCode());
         }        
-
+        
         //If we didn't successfully return out of the method, throw an exception
         //to indicate that handshaking didn't reach any conclusion.  The values
         //here are kind of a hack.
-        throw new NoGnutellaOkException(true,
-                                        HandshakeResponse.UNAUTHORIZED_CODE,
-                                        "Too much handshaking, no conclusion");
+        throw NoGnutellaOkException.UNRESOLVED_CLIENT;
     }
     
     /** Returns true iff line ends with "CONNECT/N", where N
