@@ -17,9 +17,9 @@ public final class AlternateLocationTest extends TestCase {
 
 
 	private static final String[] equalLocs = {
-		"http://Y.Y.Y.Y:6352/get/2/"+
+		"http://200.30.1.02:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		"http://Y.Y.Y.Y:6352/get/2/"+
+		"http://200.30.1.02:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg"
 	};
 
@@ -94,18 +94,20 @@ public final class AlternateLocationTest extends TestCase {
 	 * valid alternate location strings that include timestamps.
 	 */
 	public void testStringConstructorForTimestampedLocs() {
-		try {
-			for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
+
+        for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
+            try {
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				if(!al.isTimestamped()) {
 					assertTrue("test failed -- alternate location string not "+
-							   "considered stamped", false);
+							   "considered stamped: "+
+                               HugeTestUtils.VALID_TIMESTAMPED_LOCS[i], false);
 				}
-			}
-		} catch(IOException e) {
-			assertTrue("test failed with exception "+e, false);
-		}		
+			} catch(IOException e) {
+                assertTrue("test failed with exception "+e, false);
+            }		 
+		}
 	}
 
 	/**
@@ -352,4 +354,28 @@ public final class AlternateLocationTest extends TestCase {
 			}
 		}
 	}
+
+    /**
+     * Test to make sure that we're handling firewalls fine -- rejecting
+     * firewalled locations and accepting non-firewalled locations.
+     */
+    public void testAlternateLocationToMakeSureItDisallowsFirewalledHosts() {
+        for(int i=0; i<HugeTestUtils.FIREWALLED_LOCS.length; i++) {
+            String loc = HugeTestUtils.FIREWALLED_LOCS[i];
+            try {
+                AlternateLocation al = AlternateLocation.createAlternateLocation(loc);
+                fail("alt loc should have thrown an exception for loc: "+loc);
+            } catch(Exception e) {
+            }
+        }
+
+        for(int i=0; i<HugeTestUtils.NON_FIREWALLED_LOCS.length; i++) {
+            String loc = HugeTestUtils.NON_FIREWALLED_LOCS[i];
+            try {
+                AlternateLocation al = AlternateLocation.createAlternateLocation(loc);
+            } catch(Exception e) {
+                fail("unexpected exception for loc: "+loc+" "+e);
+            }
+        }
+    }
 }
