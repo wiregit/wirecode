@@ -102,6 +102,9 @@ public class DirectAltLoc extends AlternateLocation {
 	 * Returns the host/port of this alternate location as an endpoint.
 	 */
 	public Endpoint getHost() {
+		if (_node instanceof Endpoint)
+			return (Endpoint)_node;
+		else
 	    return new Endpoint(_node.getAddress(), _node.getPort());
 	}
 

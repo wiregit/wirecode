@@ -37,7 +37,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	/**
 	 * Constant for the string to display as the httpStringValue.
 	 */
-	protected String DISPLAY_STRING;
+	private String DISPLAY_STRING;
 	
 
 
@@ -127,9 +127,11 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         }
         
         // Case 2. Direct Alt Loc
+        //Note: the AlternateLocation object created this way does not know 
+        //the name of the file it is pointing to.
         if (location.indexOf(";")==-1) {
-        	URL url = AlternateLocation.createUrlFromMini(location, urn);
-			return new DirectAltLoc(url, urn);
+        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
+			return new DirectAltLoc(addr,"", urn);
         }
         
         //Case 3. Push Alt loc
@@ -152,6 +154,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 *  <tt>URL</tt> instance cannot be successfully created
 	 * @throws <tt>IOException</tt> if the url argument is not a
 	 *  valid location for any reason
+	 * 
+	 *NOTE: this constructor is used only in tests, so it can be removed.
 	 */
 	public static AlternateLocation create(final URL url) 
 		                             throws MalformedURLException, IOException {
@@ -190,9 +194,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		int port = rfd.getPort();
 
 		if (!rfd.needsPush()) {
-			URL url = new URL("http", rfd.getHost(), port,						  
-						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-			return new DirectAltLoc(url, urn);
+			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()),
+					rfd.getFileName(), urn);
 		}else {
 			return new PushAltLoc(rfd.getPushAddr(),urn,rfd.getFileName());
 		}
@@ -201,22 +204,17 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> for a file stored locally 
 	 * with the specified <tt>URN</tt>.
+	 * 
+	 * Note: the altloc created this way does not know the name of the file.
 	 *
 	 * @param urn the <tt>URN</tt> of the locally stored file
 	 */
 	public static AlternateLocation create(URN urn) {
 		if(urn == null) throw new NullPointerException("null sha1");
-		URL url = null;
         try {
             int port = RouterService.getPort();
             String addr = NetworkUtils.ip2string(RouterService.getAddress());
-			url = new URL("http", addr, port,
-                          HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-        } catch(MalformedURLException e) {
-            ErrorService.error(e);
-        }
-        try {
-		    return new DirectAltLoc(url, urn);
+            return new DirectAltLoc(new Endpoint(addr,port),"",urn);
         } catch(IOException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
@@ -343,7 +341,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 * Creates a new <tt>URL</tt> based on the IP and port in the location
 	 * The location MUST be a dotted IP address.
 	 */
-	private static URL createUrlFromMini(final String location, URN urn)
+	private static IpPort createUrlFromMini(final String location, URN urn)
 	  throws IOException {
 	    int port = location.indexOf(':');
 	    final String loc =
@@ -372,8 +370,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             }
         }
 	    
-	    return new URL("http", loc, port,
-	                HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+	    return new Endpoint(loc,port);
     }
 
 	/**
