@@ -306,6 +306,17 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Handle to the message reader for this connection.
      */
     private MessageReader _messageReader;
+
+    /**
+     * Handle to the header writer for this connection.
+     */
+    private HeaderWriter _headerWriter;
+    
+    /**
+     * Handle to the header reader for this connection.
+     */
+    //private HeaderReader _headerReader;
+
     
     /**
      * Handle to the statistics recording class for this connection.
@@ -501,7 +512,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         throws IOException, NoGnutellaOkException, BadHandshakeException {
 
         if(isOutgoing())
-            _socket=Sockets.connect(_host, _port, timeout);
+            _socket = Sockets.connect(_host, _port, timeout);
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
@@ -537,6 +548,16 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             //close();
             throw new IOException("could not establish connection");
         }
+
+        if(ConnectionSettings.USE_NIO.getValue()) {
+            _headerWriter = NIOHeaderWriter.createWriter(this);            
+        } else {
+            _headerWriter = BIOHeaderWriter.createWriter(this);
+        }
+
+        if(ConnectionSettings.USE_NIO.getValue()) {
+            NIODispatcher.instance().addReader(this);     
+        }
         
         //In all the line reading code below, we are somewhat lax in
         //distinguishing between '\r' and '\n'.  Who cares?
@@ -544,6 +565,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             initializeOutgoing();
         else
             initializeIncoming();
+
+        _headerWriter = null;
+        //_headerReader = null;
 
         _headers = HandshakeResponse.createResponse(HEADERS_READ);
         _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
@@ -589,11 +613,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         _messageWriter = new MessageWriterProxy(this); 
         _messageReader = new MessageReaderProxy(this);
         
-        if(CommonUtils.isJava14OrLater() && 
-           ConnectionSettings.USE_NIO.getValue()) {
-            _socket.getChannel().configureBlocking(false);
-            NIODispatcher.instance().addReader(this);     
-        }
          
         // check for updates from this host  
         UpdateManager.instance().checkAndUpdate(this);          
@@ -624,7 +643,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private void initializeOutgoing() throws IOException {
         //1. Send "GNUTELLA CONNECT/0.6" and headers
-        writeLine(GNUTELLA_CONNECT_06+CRLF);
+        _headerWriter.writeHeader(GNUTELLA_CONNECT_06+CRLF);
         sendHeaders(REQUEST_HEADERS);   
         
         //conclude the handshake (This may involve exchange of 
@@ -680,7 +699,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                 RESPONSE_HEADERS.respond(theirResponse, true);
 
             Assert.that(ourResponse != null, "null ourResponse");
-            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
+            _headerWriter.writeHeader(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
 
             code = ourResponse.getStatusCode();
@@ -763,7 +782,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             HandshakeResponse ourResponse = 
                 RESPONSE_HEADERS.respond(_headers, false);
 
-            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
+            _headerWriter.writeHeader(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
@@ -991,12 +1010,13 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                     value=getInetAddress().getHostAddress();
                 if (value==null)
                     value="";
-                writeLine(key+": "+value+CRLF);   
+                _headerWriter.writeHeader(key+": "+value+CRLF);   
                 HEADERS_WRITTEN.put(key, value);
             }
         }
         //send the trailer
-        writeLine(CRLF);
+        _headerWriter.closeHeaderWriting();
+        //writeLine(CRLF);
     }
 
 
@@ -1048,6 +1068,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Writes s to out, with no trailing linefeeds.  Called only from
      * initialize().  
      *    @requires _socket, _out are properly set up */
+    /*
     private void writeLine(String s) throws IOException {
         if(s == null || s.equals("")) {
             throw new NullPointerException("null or empty string: "+s);
@@ -1062,6 +1083,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         _out.write(bytes);
         _out.flush();
     }
+    */
     
     /**
      * Reads and returns one line from the network.  A line is defined as a
@@ -1196,6 +1218,22 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                                   ReplyHandler rh) {
         send(pushRequest);
     }  
+
+
+    public boolean write() throws IOException {
+        if(_headerWriter == null) {
+            return _messageWriter.write();
+        } 
+        return _headerWriter.write();
+    }
+
+    public void setWriteRegistered(boolean registered) {
+        if(_headerWriter != null) {
+            _headerWriter.setWriteRegistered(registered);
+        }
+
+        _messageWriter.setWriteRegistered(registered);
+    }
     
     /**
      * Accessor for the <tt>MessageReader</tt> instance for this connection.
