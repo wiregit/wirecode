@@ -4,6 +4,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.Assert;
 import java.util.Enumeration;
+import com.limegroup.gnutella.*;
 
 /** 
  * An abstraction of a GGEP Block.
@@ -31,6 +32,9 @@ public class GGEP extends Object {
     /** The collection of key/value pairs this GGEP instance represents.
      */
     private Map _props = null;
+    Map getProps() {
+        return _props;
+    }
 
     /** Constructs a GGEP instance with the set of specified key/val pairs.
      *  The key and values you submit should be stringable!  The key string
@@ -69,8 +73,9 @@ public class GGEP extends Object {
 
     private void validateKey(String key) throws BadGGEPPropertyException {
         if ((key == null) ||
-            (key.equals(EMPTY_STRING)) ||
-            (key.getBytes().length > MAX_KEY_SIZE_IN_BYTES)
+            key.equals(EMPTY_STRING) ||
+            (key.getBytes().length > MAX_KEY_SIZE_IN_BYTES) ||
+            containsNull(key)
             )
             throw new BadGGEPPropertyException();
     }
@@ -255,6 +260,80 @@ public class GGEP extends Object {
      *  @exception IOException Thrown if had error writing to out.
      */
     public void write(OutputStream out) throws IOException {
+        if (getHeaders().size() > 0) {
+            // start with the magic prefix
+            out.write(GGEP_PREFIX_MAGIC_NUMBER);
+
+            Iterator headers = getHeaders().iterator();
+            // for each header, write the GGEP header and data
+            while (headers.hasNext()) {
+                String currHeader = (String) headers.next();
+                String currData   = (String) getData(currHeader);
+                int dataLen = 0;
+                if (currData != null)
+                    dataLen = currData.getBytes().length;
+                debug("GGEP.write(): dataLen for " + currHeader + 
+                      " is " + dataLen);
+                writeHeader(currHeader, dataLen, 
+                            !headers.hasNext(), out);
+                if (dataLen > 0)
+                    writeData(currData, out);
+            }
+        }
+        debug("GGEP.write(): returning " + 
+              toHexString(((ByteArrayOutputStream)out).toByteArray()));
+    }
+
+    
+    private void writeHeader(String header, final int dataLen, 
+                             boolean isLast, OutputStream out) 
+        throws IOException{
+
+        // 1. WRITE THE HEADER FLAGS
+        // in the future, when we actually encode and compress, this code should
+        // still work.  well, the code that deals with the header flags, that
+        // is, you'll still need to encode/compress
+        boolean shouldEncode = false;
+        boolean shouldCompress = false;
+
+        int flags = 0x00;
+        if (isLast)
+            flags = flags | 0x80;
+        if (shouldEncode)
+            flags = flags | 0x40;
+        if (shouldCompress)
+            flags = flags | 0x20;
+        flags = flags | header.getBytes().length;
+        out.write(flags);
+
+        // 2. WRITE THE HEADER
+        out.write(header.getBytes());
+
+        // 3. WRITE THE DATA LEN
+        // possibly 3 bytes
+        int toWrite;
+        int begin = dataLen & 0x3F000;
+        if (begin != 0) {
+            begin = begin >> 12; // relevant bytes at the bottom now...
+            toWrite = 0x80 | begin;
+            out.write(toWrite);
+        }
+        int middle = dataLen & 0xFC0;
+        if (middle != 0) {
+            middle = middle >> 6; // relevant bytes at the bottom now...
+            toWrite = 0x80 | middle;
+            out.write(toWrite);
+        }
+        int end = dataLen & 0x3F; // shut off everything except last 6 bits...
+        toWrite = 0x40 | end;
+        out.write(toWrite);
+    }
+
+    private void writeData(String data, OutputStream out) throws IOException {
+        // write now, all we need to do is write the data bytes.  but in the
+        // future, we may need to encode or compress the data and then write it
+        // out.
+        out.write(data.getBytes());
     }
 
     /** Constructs an array of all GGEP blocks starting at
@@ -269,6 +348,33 @@ public class GGEP extends Object {
                               int beginOffset) throws BadGGEPBlockException {
         return new GGEP[0];
     }
+
+    /** @return True if the two Maps that represent header/data pairs are
+     *  equivalent.
+     */
+    public boolean equals(Object o) {
+        if (o instanceof GGEP) 
+            return _props.equals(((GGEP)o).getProps());
+        return false;
+    }
+
+
+    private String toHexString(byte[] bytes) {
+        StringBuffer buf = new StringBuffer();
+        String       str;
+        int val;
+        for (int i = 0; i < bytes.length; i++) {
+            //Treating each byte as an unsigned value ensures
+            //that we don't str doesn't equal things like 0xFFFF...
+            val = ByteOrder.ubyte2int(bytes[i]);
+            str = Integer.toHexString(val);
+            while (str.length() < 2)
+                str = "0" + str;
+            buf.append(str);
+        }
+        return buf.toString().toUpperCase();
+    }
+
 
     public static final boolean debugOn = false;
     public void debug(String out) {

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.message.*;
+import java.io.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 
@@ -198,6 +199,53 @@ public class GGEPTest extends TestCase {
     }
 
 
+    public void testWriteMethod() {
+        GGEP one = null, two = null;
+        byte[] bytes = new byte[24];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)0x87;
+        bytes[9] =  (byte)'S';
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        bytes[22] = (byte)'N';
+        bytes[23] = (byte)'I';        
+        try {
+            one = new GGEP(bytes,0);
+        }
+        catch (BadGGEPBlockException hopefullyNot) {
+            Assert.assertTrue("Write Test Failed!", false);
+        }
+        ByteArrayOutputStream oStream = new ByteArrayOutputStream();
+        try {
+            one.write(oStream);
+            two = new GGEP(oStream.toByteArray(), 0);
+        }
+        catch (IOException hopefullyNot1) {
+            Assert.assertTrue("Instance Write Failed!!", false);
+        }
+        catch (BadGGEPBlockException hopefullyNot2) {
+            Assert.assertTrue("Write wrote incorrectly!!", false);
+        }
+
+        Assert.assertTrue("One is not Two!!", one.equals(two));
+    }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
