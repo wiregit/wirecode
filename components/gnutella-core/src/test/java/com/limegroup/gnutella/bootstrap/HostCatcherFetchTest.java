@@ -19,13 +19,22 @@ public class HostCatcherFetchTest extends TestCase {
     public static Test suite() {
         return new TestSuite(HostCatcherFetchTest.class);
     }
+    
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
 
     public void setUp() {
+        // we don't actually need the service, we just need it
+        // to start up the other services.
+        new RouterService( new ActivityCallbackStub() );
+
         //Create special TestBootstrapServerManager to record GWebCache hits.
-        //Mutate HostCatcher to use this.
-        new RouterService(new ActivityCallbackStub());
-        hc=new HostCatcher();
         gWebCache=new RecordingBootstrapServerManager();
+
+        hc=new HostCatcher();
+
+        //Mutate HostCatcher to use this.
         try {
             PrivilegedAccessor.setValue(hc, "gWebCache", gWebCache);
         } catch (Exception e) {
@@ -39,21 +48,40 @@ public class HostCatcherFetchTest extends TestCase {
         try {
             //Initially catcher is empty.  Calling getAnEndpoint will block, so
             //start thread to add a crap result.
-            assertEquals(0, gWebCache.hostfiles);
+            assertEquals("initial hostfiles not empty.", 0, gWebCache.hostfiles);
+            
             Thread responder=new Thread() {
                 public void run() {
+                    //we must yield to ensure that getAnEndpoint
+                    //is called before the endpoint is added to
+                    //the hostCatcher, forcing a call to the gWebCache
+                    yield();
                     hc.add(new Endpoint("1.1.1.1", 6346), false);
-                    hc.add(new Endpoint("1.1.1.2", 6346), false);
+                }
+            };
+            responder.start();
+            
+            //Now make sure that exactly one fetch was issued.
+            assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+            assertEquals("first look at hostfiles", 1, gWebCache.hostfiles);
+            
+            // now add something to the hostCatcher and make sure
+            // it uses that instead of hitting the gWebCache for more.
+            hc.add( new Endpoint("1.1.1.2", 6346), false);
+            assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+            assertEquals("second look at hostfiles", 1, gWebCache.hostfiles);
+            
+            //and now that hostcatcher is empty, it should hit it again.
+            responder = new Thread() {
+                public void run() {
+                    yield();
                     hc.add(new Endpoint("1.1.1.3", 6346), false);
                 }
             };
             responder.start();
-            //Now make sure that exactly one fetch was issued.
-            assertTrue(hc.getAnEndpoint()!=null);
-            assertEquals(1, gWebCache.hostfiles);
-            //And no more are done.
-            assertTrue(hc.getAnEndpoint()!=null);
-            assertEquals(1, gWebCache.hostfiles);
+            assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+            assertEquals("third look at hostfiles", 2, gWebCache.hostfiles);
+            
         } catch (InterruptedException e) {
             e.printStackTrace();
             fail("Interrupted!");
@@ -64,9 +92,13 @@ public class HostCatcherFetchTest extends TestCase {
      *  gnutella.net file. */
     public void testGetAnEndpoint_DelayedFetch() {        
         try {
-            //Fill up hc with crap pongs.  No fetches are allowed initially.
+            //Fill up hc with crap pongs.
             for (int i=0; i<20; i++) 
                 hc.add(new Endpoint("1.1.1."+i, 6346+i), false);
+                
+            //The first few calls (all those before GWEBCACHE_DELAY)
+            //will be forced to use the stale pongs...
+            //because it is bad to always hammer gWebCache's on startup
             assertTrue(hc.getAnEndpoint()!=null);
             assertTrue(hc.getAnEndpoint()!=null);
             assertEquals(0, gWebCache.hostfiles);
