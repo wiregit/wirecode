@@ -69,15 +69,11 @@ interface ReplyHandler {
 	boolean isLeafConnection();
 
 	/**
-	 * Accessor for the reported number of intra-Ultrapeer connections
-	 * this connection attempts to maintain.  If the node is not an
-	 * Ultrapeer, this returns 0.  If it is an Ultrapeer but does not
-	 * support this header, we assume that it tries to maintain 6 intra-
-	 * Ultrapeer connections.
+	 * Returns whether or not this connection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer connections.
 	 *
-	 * @return the number of intra-Ultrapeer connections the connected node
-	 *  attempts to maintain, as reported in the X-Degree handshake header
-	 *  or guessed at otherwise
+	 * @return <tt>true</tt> if this is a 'high-degree' connection, 
+	 * otherwise <tt>false</tt>
 	 */
-	int getNumIntraUltrapeerConnections();
+	public boolean isHighDegreeConnection();
 }
