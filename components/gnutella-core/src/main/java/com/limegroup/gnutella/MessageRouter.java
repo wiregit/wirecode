@@ -2764,41 +2764,15 @@ public abstract class MessageRouter {
     
     /**
      * handles an ACK for a promotion request message.
+     * delegates the call to promotion manager.
      * 
      */
     private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
     			ReplyHandler handler, DatagramPacket datagram) {
     	
-    	//first see if anyone is indeed a promotion partner
-    	Endpoint partner = null;
-    	synchronized(_promotionLock) {
-    		if (_promotionPartner == null)
-    			return;
-    		
-    		//check if we received the ACK from the right person
-    		if (!datagram.getAddress().equals(_promotionPartner.getInetAddress()) ||
-    				datagram.getPort() != _promotionPartner.getPort())
-					return;
-    		
-    		//set the promotion partner to null if that's the case
-    		partner = _promotionPartner;
-    		_promotionPartner = null;
-    	}
+    	_promotionManager.handleACK(message,
+    			new Endpoint(datagram.getAddress().getHostAddress(),datagram.getPort()));
     	
-    	//we know we have received a proper ACK.  Proceed as appropriate.
-    	
-    	//if we are a leaf, start the promotion process
-    	if (!RouterService.isSupernode()) {
-    		Thread promoter = new ManagedThread(
-    				new Promoter(datagram.getAddress().getHostAddress(),datagram.getPort()));
-    		promoter.setDaemon(true);
-    		promoter.start();
-    	} 
-    	else {
-    		//we are the originally requesting UP, ACK back.
-    		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
-    		UDPService.instance().send(pong, datagram.getAddress(),datagram.getPort());
-    	}
     }
 
 
