@@ -115,19 +115,20 @@ public final class ServerSideIntermediateRedirectTest
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
-        // ok, currently there are no redirect ultrapeers, so both a TCPCB
-        // and a UDPCB should be serviced by the tested Ultrapeer
+        // ok, currently there are no redirect ultrapeers, so we've changed
+        // the behavior - the Ultrapeer should just drop them on the floor
         TCPConnectBackVendorMessage tcp = 
             new TCPConnectBackVendorMessage(TCP_ACCESS_PORT);
         LEAF[0].send(tcp);
         LEAF[0].flush();
 
         try {
+            TCP_ACCESS.setSoTimeout(TIMEOUT);
             Socket s = TCP_ACCESS.accept();
             s.close();
-        }
-        catch (InterruptedIOException bad) {
             assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {
         }
 
         GUID cbGuid = new GUID(GUID.makeGuid());
@@ -142,13 +143,11 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
             PingRequest ping = (PingRequest) Message.read(bais);
-            assertEquals(cbGuid, new GUID(ping.getGUID()));
-        }
-        catch (InterruptedIOException bad) {
             assertTrue(false);
         }
-        catch (ClassCastException bad) {
-            assertTrue(false);
+        catch (InterruptedIOException expected) {
+        }
+        catch (ClassCastException fine) {
         }
     }
 
