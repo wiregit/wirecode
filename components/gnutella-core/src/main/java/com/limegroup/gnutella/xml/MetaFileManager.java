@@ -3,7 +3,7 @@ package com.limegroup.gnutella.xml;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.mp3.ID3Reader;
+import com.limegroup.gnutella.mp3.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
@@ -99,9 +99,9 @@ public class MetaFileManager extends FileManager {
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
         List xmlDocs = fd.getLimeXMLDocuments();        
-        if(LimeXMLUtils.isMP3File(f)) {
+        if(LimeXMLUtils.isSupportedAudioFormat(f)) {
             try {
-                LimeXMLDocument diskID3Doc = ID3Reader.readDocument(f);
+                LimeXMLDocument diskID3Doc = MetaDataReader.readDocument(f);
                 xmlDocs = resolveAudioDocs(xmlDocs,diskID3Doc);
             } catch(IOException e) {
                 // if we were unable to read this document,
@@ -133,7 +133,7 @@ public class MetaFileManager extends FileManager {
     private List resolveAudioDocs(List allDocs, LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
-        LimeXMLSchemaRepository.instance().getSchema(ID3Reader.schemaURI);
+        LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI);
         
         for(Iterator iter = allDocs.iterator(); iter.hasNext() ;) {
             LimeXMLDocument doc = (LimeXMLDocument)iter.next();
@@ -167,10 +167,10 @@ public class MetaFileManager extends FileManager {
         }
         for(int i = 0; i < audioList.size(); i++) {
             NameValue nameVal = (NameValue)audioList.get(i);
-            if(ID3Reader.isNonID3Field(nameVal.getName()))
+            if(AudioMetaData.isNonID3Field(nameVal.getName()))
                 id3List.add(nameVal);
         }
-        audioDoc = new LimeXMLDocument(id3List, ID3Reader.schemaURI);
+        audioDoc = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);
         retList.add(audioDoc);
         return retList;
     }
@@ -226,12 +226,12 @@ public class MetaFileManager extends FileManager {
         // if added, but no metadata, try and create some.
         if( metadata == null || metadata.size() == 0) {
             // not mp3, can't create any ... 
-            if(!LimeXMLUtils.isMP3File(file))
+            if(!LimeXMLUtils.isSupportedAudioFormat(file))
                 return fd;
 
             LimeXMLDocument doc;
             try {
-                doc = ID3Reader.readDocument(file);
+                doc = MetaDataReader.readDocument(file);
             } catch(IOException ioe) {
                 // unable to read? oh well, no metadata.
                 return fd;
@@ -254,8 +254,8 @@ public class MetaFileManager extends FileManager {
             LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
             if (collection != null && !schemasAddedTo.contains(uri)) {
                 schemasAddedTo.add(uri);
-                if( ID3Reader.isCorrupted(currDoc) )
-                    currDoc = ID3Reader.fixCorruption(currDoc);
+                if( AudioMetaData.isCorrupted(currDoc) )
+                    currDoc = AudioMetaData.fixCorruption(currDoc);
                 collection.addReplyWithCommit(file, fd, currDoc, true);
                 
             }

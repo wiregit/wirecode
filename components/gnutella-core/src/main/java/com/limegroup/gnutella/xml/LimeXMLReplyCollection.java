@@ -208,8 +208,8 @@ public class LimeXMLReplyCollection {
             }   
                 
             // check to see if it's corrupted and if so, fix it.
-            if( ID3Reader.isCorrupted(doc) ) {
-                doc = ID3Reader.fixCorruption(doc);
+            if( AudioMetaData.isCorrupted(doc) ) {
+                doc = AudioMetaData.fixCorruption(doc);
                 addReplyWithCommit(file, fd, doc, false);
             } else {
                 addReply(fd, doc);
@@ -229,20 +229,20 @@ public class LimeXMLReplyCollection {
     private LimeXMLDocument constructDocument(String xmlStr, File file) {
         // old style may exist or there may be no xml associated
         // with this file yet.....
-        if (audio && LimeXMLUtils.isMP3File(file)) {
+        if (audio && LimeXMLUtils.isSupportedAudioFormat(file)) {
             // first try to get the id3 out of it.  if this file has
             // no id3 tag, just construct the doc out of the xml 
             // string....
             boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
             try {
                 if(!onlyID3) {  //non-id3 values with mp3 file
-                    String id3XML = ID3Reader.readDocument(file,onlyID3);
+                    String id3XML = MetaDataReader.readDocument(file,onlyID3);
                     String joinedXML = joinAudioXMLStrings(id3XML, xmlStr);
                     if( joinedXML != null )
                         return new LimeXMLDocument(joinedXML);
                 }
                 // no XML data we can use.
-                return ID3Reader.readDocument(file);
+                return MetaDataReader.readDocument(file);
             }
             catch (SAXException ignored) { }
             catch (IOException ignored) { }
@@ -675,7 +675,7 @@ public class LimeXMLReplyCollection {
         ID3Editor existing = new ID3Editor();
         LimeXMLDocument existingDoc = null;
         try {
-            existingDoc = ID3Reader.readDocument(new File(mp3File));
+            existingDoc = MetaDataReader.readDocument(new File(mp3File));
         } catch(IOException e) {
             return null;
         }

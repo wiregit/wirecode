@@ -371,7 +371,30 @@ public class LimeXMLUtils
         boolean retVal = isMP3File(in.getName());        
         return retVal;
     }
+    
+    public static boolean isOGGFile(String in) {
+        boolean retVal = false;
 
+        in = in.toLowerCase(Locale.US);
+        if (in.endsWith(".ogg"))
+            retVal = true;
+        
+        return retVal;
+    }
+
+
+    public static boolean isOGGFile(File in) {
+        boolean retVal = isOGGFile(in.getName());        
+        return retVal;
+    }
+    
+    public static boolean isSupportedAudioFormat(File file) {
+    	return isMP3File(file) || isOGGFile(file);
+    }
+
+    public static boolean isSupportedAudioFormat(String file) {
+    	return isMP3File(file) || isOGGFile(file);
+    }
     
     /**
       * Converts the given list of xml documents to an array of responses
