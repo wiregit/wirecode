@@ -665,22 +665,26 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			if(handler.isGoodConnection()) {
+            locallyEvaluate = false;
+			if(handler.isGoodLeaf()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
-																	  handler), 
-								 handler, counter);
+																	  handler,
+                                                                      counter), 
+								 handler);
 			} else {
 				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
-																	  handler), 
-								 handler, counter);
+																	  handler,
+                                                                      counter), 
+								 handler);
 			}
-		} else if(request.getTTL() > 0 && !RouterService.isLeaf()) {
+		} else if(request.getTTL() > 0 && RouterService.isSupernode()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
-            if(handler.isGoodConnection()) {
+            if(handler.isGoodUltrapeer()) {
                 // send it to everyone
                 forwardQueryToUltrapeers(request, handler);
             } else {
+                // otherwise, only send it to some connections
                 forwardLimitedQueryToUltrapeers(request, handler);
             }
 		}
@@ -811,12 +815,10 @@ public abstract class MessageRouter {
 			_queryRouteTable.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
-			// create a query to send to leaves
-			forwardQueryRequestToLeaves(query, 
-										FOR_ME_REPLY_HANDLER);
 			sendDynamicQuery(QueryHandler.createHandler(query, 
-														FOR_ME_REPLY_HANDLER), 
-							 FOR_ME_REPLY_HANDLER, counter);
+														FOR_ME_REPLY_HANDLER,
+                                                        counter), 
+							 FOR_ME_REPLY_HANDLER);
 		} else {
             originateLeafQuery(query);
 		} 
@@ -837,17 +839,12 @@ public abstract class MessageRouter {
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
 	 */
-	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
-								  ResultCounter counter) {
+	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler) {
 		if(qh == null) {
 			throw new NullPointerException("null QueryHandler");
 		} else if(handler == null) {
 			throw new NullPointerException("null ReplyHandler");
-		} else if(counter == null) {
-			throw new NullPointerException("null ResultCounter");
-		}
-
-		qh.setResultCounter(counter);
+		} 
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
 
@@ -890,8 +887,8 @@ public abstract class MessageRouter {
 	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
 	 */
-	protected void forwardQueryRequestToLeaves(QueryRequest request,
-											   ReplyHandler handler) {
+	public final void forwardQueryRequestToLeaves(QueryRequest request,
+                                                  ReplyHandler handler) {
 		if(!RouterService.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
@@ -1028,7 +1025,7 @@ public abstract class MessageRouter {
             // if the query is comiing from an old connection, try to
             // send it's traffic to old connections.  Only send it to
             // new connections if we only have a minimum number left
-            if(mc.isGoodConnection() && 
+            if(mc.isGoodUltrapeer() && 
                (limit-i) > connectionsNeededForOld) {
                 continue;
             }
