@@ -207,7 +207,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();
 		    
 		    
-			if (open)
+			if (open && !NetworkUtils.isPrivate())
 				return new DirectAltLoc(urn);
 			else 
 				return new PushAltLoc(urn);

@@ -15,6 +15,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,40 +50,24 @@ public class DirectAltLoc extends AlternateLocation {
 	 */
 	protected DirectAltLoc(final URL url, final URN sha1)
 	  throws IOException {
-		super(sha1);
-		if(!NetworkUtils.isValidPort(url.getPort()))
-			throw new IOException("invalid port: " + url.getPort());
-        if(!NetworkUtils.isValidAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-        if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-            
-        try {
-            _node = new QueryReply.IPPortCombo(url.getHost(),url.getPort());
-        }catch(UnknownHostException bad) {
-            throw new IOException(bad.getMessage());
-        }
-
-	    
-
-        _count = 1;
-        _demoted = false;
+		this(new IpPortImpl(url.getHost(),url.getPort()),sha1);
 	}
 	
 	/**
 	 * creates an altloc for myself.
 	 */
 	protected DirectAltLoc(final URN sha1) throws IOException{
-
 		this(new Endpoint(
 				NetworkUtils.ip2string(RouterService.getAddress()),
 				RouterService.getPort()),
 			 sha1);
 	}
 	
-	protected DirectAltLoc(IpPort address, URN sha1) 
-		throws IOException{
+	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
 		super(sha1);
+		if (NetworkUtils.isValidExternalIpPort(address))
+		    throw new IOException("not a valid external address:port in direct altloc");
+		
 		_node=address;
 	}
 	
