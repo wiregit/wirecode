@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.Cancellable;
 import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.Iterator;
 
@@ -32,13 +33,20 @@ public class UDPHostRanker {
      *  <tt>null</tt> or if the listener argument is <tt>null</tt>
      */
     public static void rank(final Collection hosts,
-                            final MessageListener listener) {
-        if(hosts == null) {
+                            final MessageListener listener,
+                            Cancellable canceller) {
+        if(hosts == null)
             throw new NullPointerException("null hosts not allowed");
+        if(canceller == null) {
+            canceller = new Cancellable() {
+                public boolean isCancelled() { return false; }
+            };
         }
+
+        final Cancellable cancel = canceller;
         Thread ranker = new ManagedThread(new Runnable() {
             public void run() {
-                new UDPHostRanker(hosts, listener);
+                new UDPHostRanker(hosts, listener, cancel);
             }
         }, "UDPHostRanker");
         ranker.setDaemon(true);
@@ -52,9 +60,12 @@ public class UDPHostRanker {
      * 
      * @param hosts the hosts to rank
      */
-    private UDPHostRanker(Collection hosts, MessageListener listener) {
+    private UDPHostRanker(Collection hosts,
+                          MessageListener listener,
+                          Cancellable canceller) {
         int waits = 0;
-        while(!UDPService.instance().isListening() && waits < 10) {
+        while(!UDPService.instance().isListening() && waits < 10 &&
+              !canceller.isCancelled()) {
             synchronized(this) {
                 try {
                     wait(600);
@@ -68,12 +79,12 @@ public class UDPHostRanker {
         final PingRequest ping = new PingRequest((byte)1);
         final GUID pingGUID = new GUID(ping.getGUID());
         
-        if (listener != null) ROUTER.registerMessageListener(pingGUID, 
-                                                             listener);
+        if (listener != null)
+            ROUTER.registerMessageListener(pingGUID, listener);
 
         final int MAX_SENDS = 15;
         Iterator iter = hosts.iterator();
-        for(int i = 0; iter.hasNext(); i++) {
+        for(int i = 0; iter.hasNext() && !canceller.isCancelled(); i++) {
             if(i == MAX_SENDS) {
                 try {
                     Thread.sleep(1000);

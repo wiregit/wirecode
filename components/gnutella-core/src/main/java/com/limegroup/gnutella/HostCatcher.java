@@ -309,7 +309,16 @@ public class HostCatcher {
     private void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            UDPHostRanker.rank(new HashSet(ENDPOINT_SET), null);
+            UDPHostRanker.rank(
+                new HashSet(ENDPOINT_SET),
+                null,
+                // cancel when connected -- don't send out any more pings
+                new Cancellable() {
+                    public boolean isCancelled() {
+                        return RouterService.isConnected();
+                    }
+                }
+            );
         }
     }
     
