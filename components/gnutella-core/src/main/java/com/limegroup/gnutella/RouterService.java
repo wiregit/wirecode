@@ -584,12 +584,15 @@ public class RouterService
      * the it creates a rich Query. 
      * @return the guid of the search, used to match up query with 
      * replies. 
+     * @param type the desired type of result (e.g., audio, video), or
+     *  null if you don't care
      */
-    public byte[] query(String query, String richQuery, int minSpeed) {
+    public byte[] query(String query, String richQuery, 
+                        int minSpeed, MediaType type) {
         //System.out.println("Sumeet rich query coming...");
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
-        verifier.record(qr, null);
+        verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
     }
