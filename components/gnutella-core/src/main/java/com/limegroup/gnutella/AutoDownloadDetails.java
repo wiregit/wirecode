@@ -28,7 +28,7 @@ class AutoDownloadDetails {
     /** the precision that the matcher uses for comparing candidates to RFDs
      *  that have already been accepted for download....
      */
-    private float MATCH_PRECISION_DL = 0.5f;
+    private float MATCH_PRECISION_DL = 0.35f;
 
     static {
         matcher.setIgnoreCase(true);
@@ -38,7 +38,7 @@ class AutoDownloadDetails {
     
     
     // don't auto dl any more than this number of files....
-    public static final int MAX_DOWNLOADS = 2;
+    public static final int MAX_DOWNLOADS = 5;
     
     /**
      * @param inQuery the standard query string associated with this query.
