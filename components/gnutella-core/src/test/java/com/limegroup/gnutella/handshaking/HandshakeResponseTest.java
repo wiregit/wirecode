@@ -27,7 +27,14 @@ public final class HandshakeResponseTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
+    
+    /**
+     * Individual tests will change these as needed.
+     */    
+    public void setUp() {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }
     
     /**
      * Tests the method for extracting the status message from a connection
@@ -341,17 +348,22 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * Test to make sure that Ultrapeer headers are created correctly.
      */
     public void testUltrapeerHeaders() {
+        
+        // Test once with deflate support & once without.
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         HandshakeResponse hr = 
             HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
+        
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+        hr = HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
 
-        // these tests are redundant (and the first assignment is ignored anyway??)
-//        hr = HandshakeResponse.createAcceptOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
-//        hr = HandshakeResponse.createRejectOutgoingResponse(new UltrapeerHeaders("32.9.8.9"));
-//        runUltrapeerHeadersTest(hr);
+        hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        runUltrapeerHeadersTest(hr);
     }
 
     
@@ -359,6 +371,11 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * Test to make sure that leaf headers are created correctly.
      */
     public void testLeafHeaders() {
+        // don't let the short-circuit take place, we want a real test.
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);        
+        
+        // Test once with deflate support & once without.
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);        
         HandshakeResponse hr = 
             HandshakeResponse.createRejectIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
@@ -366,12 +383,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
         hr = HandshakeResponse.createAcceptIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
-        // these tests are redundant
-//        hr = HandshakeResponse.createRejectOutgoingResponse(new LeafHeaders("32.9.8.9"));
-//        runLeafHeadersTest(hr);
-//
-//        hr = HandshakeResponse.createAcceptOutgoingResponse(new LeafHeaders("32.9.8.9"));
-//        runLeafHeadersTest(hr);
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+        hr = HandshakeResponse.createRejectOutgoingResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
+
+        hr = HandshakeResponse.createAcceptOutgoingResponse(new LeafHeaders("32.9.8.9"));
+        runLeafHeadersTest(hr);
     }
 
     /**
@@ -395,6 +412,9 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * @param hr the headers to test
      */
     private static void runUltrapeerHeadersTest(HandshakeResponse hr) {
+        // don't let the short-circuit take place, we want a real test.        
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);        
+        
         runCommonHeadersTest(hr);
         assertTrue("should be an Ultrapeer connection", hr.isUltrapeer());
         assertTrue("should not be a leaf connection", !hr.isLeaf());
@@ -425,9 +445,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should support vendor messages", hr.supportsVendorMessages());
         assertTrue("should use dynamic querying", hr.isDynamicQueryConnection());
 
-        // we only will think the other side accepts deflate encoding if we're
-        // allowed to encode in deflate.
-        if( ConnectionSettings.ENCODE_DEFLATE.getValue() )
+        //if we added the value, make sure its there.
+        if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
             assertTrue("should accept deflate encoding", hr.isDeflateAccepted());
         else 
             assertTrue("should not accept deflate encoding", !hr.isDeflateAccepted());
