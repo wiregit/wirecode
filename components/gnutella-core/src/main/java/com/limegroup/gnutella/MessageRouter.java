@@ -11,9 +11,9 @@ import java.io.IOException;
  */
 public abstract class MessageRouter
 {
-    private HostCatcher _catcher;
-    private ConnectionManager _manager;
-    private Acceptor _acceptor;
+    protected HostCatcher _catcher;
+    protected ConnectionManager _manager;
+    protected Acceptor _acceptor;
 
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
