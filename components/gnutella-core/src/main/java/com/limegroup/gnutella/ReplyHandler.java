@@ -124,4 +124,10 @@ public interface ReplyHandler {
      *  <tt>false</tt>
      */
     public boolean allowNewPings();
+
+    /**
+     * Updates the time after which we will allow new pings from this handler
+     * Before this time is reached, new pings will be ignored.
+     */
+    public void updatePingTime();
 }

@@ -204,6 +204,12 @@ public final class UDPReplyHandler implements ReplyHandler {
         return true;
     }
 
+    /**
+     * Does nothing for UDP traffic, since we'll always accept new pings over
+     * UDP.
+     */
+    public void updatePingTime() {}
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

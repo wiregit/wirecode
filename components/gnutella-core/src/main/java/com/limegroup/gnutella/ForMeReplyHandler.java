@@ -212,6 +212,12 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean allowNewPings() {
         return true;
     }
+
+    /**
+     * Does nothing for traffic to this host, since we'll always allow new pings
+     * from ourselves.
+     */
+    public void updatePingTime() {}
 }
 
 
