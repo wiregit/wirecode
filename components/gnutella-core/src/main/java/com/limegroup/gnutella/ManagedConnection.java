@@ -89,6 +89,11 @@ public class ManagedConnection extends Connection
 	/** Handle to the <tt>ConnectionManager</tt>.
 	 */
     private ConnectionManager _manager;
+    
+    /**
+     * Handle to the message writer for this connection.
+     */
+    private MessageWriter _messageWriter;
 
 	/** Filter for filtering out messages that are considered spam.
 	 */
@@ -494,20 +499,23 @@ public class ManagedConnection extends Connection
      * @param priority the priority to send the message with
      */
     private void send(Message m, int priority) {
-        if (! supportsGGEP())
-            m=m.stripExtendedPayload();
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time....
         if ((softMaxHops > -1) &&
             (m instanceof QueryRequest) &&
-            (m.getHops() >= softMaxHops))
+            (m.getHops() >= softMaxHops)) {
+                
+            //TODO: record stats for this
             return;
+        }
+
+        if (! supportsGGEP())
+            m = m.stripExtendedPayload();
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
 
         synchronized (_outputQueueLock) {
-            _numMessagesSent++;
             _outputQueue[priority].add(m);
             int dropped=_outputQueue[priority].resetDropped();
             addSentDropped(dropped);
@@ -523,7 +531,7 @@ public class ManagedConnection extends Connection
      * 
      * @param dropped the number of dropped messages to add
      */
-    private void addSentDropped(int dropped) {
+    public void addSentDropped(int dropped) {
         _numSentMessagesDropped += dropped;
     }
     
@@ -580,9 +588,19 @@ public class ManagedConnection extends Connection
      * the OutputRunner for reject connections.
      */
     public void buildAndStartQueues() {
+        // at this poing, everything's initialized, so create our readers and
+        // writers.
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+            _messageWriter = NIOMessageWriter.createWriter(this);       
+        } else {
+            _messageWriter = BIOMessageWriter.createWriter(this);
+        }
+        
         //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
         //save a fair bit of memory by not using buffering at all.  But this
         //requires the CompositeMessageQueue class from nio-branch.
+        /*
         _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
                 true);
@@ -604,6 +622,7 @@ public class ManagedConnection extends Connection
         
         //Start the thread to empty the output queue
         new OutputRunner();
+        */
     }        
 
     /** Repeatedly sends all the queued data. */
@@ -1352,7 +1371,15 @@ public class ManagedConnection extends Connection
         return pushProxyAddr;
     }
     
-
+    /**
+     * Sets whether or not the sending thread has died -- really only used
+     * for testing.
+     * 
+     * @param died specifies whether or not the sender has died
+     */
+    public void setSenderDied(boolean died) {
+        _runnerDied = died;    
+    }
     
     /** 
      * Tests representation invariants.  For performance reasons, this is
