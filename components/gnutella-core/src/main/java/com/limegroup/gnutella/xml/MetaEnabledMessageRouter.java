@@ -53,7 +53,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
 
         int numHops = queryRequest.getHops();
 
-        QueryReply queryReply;
+        QueryReply queryReply = null;
 
         // modified by rsoule, 11/16/00
 
@@ -100,16 +100,25 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
             (new LimeXMLDocumentHelper()).getAggregateString(res);
             if (xmlCollectionString == null)
                 xmlCollectionString = "";
-            debug ("MetaEnabledMessageRouter.sendResponses(): " +
-                   " xmlCollectionString = " + 
-                   xmlCollectionString);
+            debug("xmlCollectionString.length(): " + 
+                  xmlCollectionString.length() + 
+                  "\nvalue = " + xmlCollectionString);
+
 
             // create the new queryReply
-            queryReply = new QueryReply(guid, ttl, port, ip,
-                                        speed, res, clientGUID, 
-                                        xmlCollectionString,
-										!incoming, busy, uploaded, 
-                                        measuredSpeed);
+            try {
+                byte[] xmlCompressed = LimeXMLUtils.compress(xmlCollectionString.getBytes());
+                queryReply = new QueryReply(guid, ttl, port, ip,
+                                            speed, res, clientGUID, 
+                                            xmlCompressed,
+                                            !incoming, busy, uploaded, 
+                                            measuredSpeed);
+            }
+            catch (Exception e) {
+                // if i couldn't construct it, do nothing....
+                e.printStackTrace();
+                return;
+            }
 
             // try to send the new queryReply
             try {
