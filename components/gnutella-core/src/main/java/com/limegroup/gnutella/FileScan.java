@@ -20,7 +20,7 @@ import java.io.*;
 
 public class FileScan {
 
-    private int MEM_WEIGHT = 0;
+    private int MEM_WEIGHT = 1;
     private int NUM_WEIGHT = 1;
     private int MAX_DEPTH = 3;
 
@@ -31,6 +31,13 @@ public class FileScan {
     public FileScan() {
         _list = new LimitedList();
         _filters = new String[0];
+		_extensions = new String [] {"html","htm","xml","txt","pdf",
+									 "ps","rtf","doc","tex","mp3",
+									 "wav","au","aif","aiff","ra","ram",
+									 "mpg","mpeg","asf","qt","mov","avi",
+									 "mpe","gif","jpg","jpeg","jpe","png",
+									 "tif","tiff","exe","zip","gz","gzip",
+									 "hqx","tar","tgz","z"};
     }
 
     public void setExtensions(String[] e) {
@@ -76,11 +83,11 @@ public class FileScan {
     
     }
 
-    public void add(String pathname) {
-        add(pathname, MAX_DEPTH);
-    
+    public void scan(String pathname) {
+        scan(pathname, MAX_DEPTH);    
     }
-    public void add(String pathname, int depth) {
+
+    public void scan(String pathname, int depth) {
     
         if (depth == 0) 
             return;
@@ -98,7 +105,7 @@ public class FileScan {
             File f = files[i];
             if ( f.isDirectory() ) {
                 addDirectory(f.getAbsolutePath());
-                add(f.getAbsolutePath(), depth);
+                scan(f.getAbsolutePath(), depth);
             }
         
         }   
