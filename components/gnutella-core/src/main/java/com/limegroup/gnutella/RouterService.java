@@ -248,6 +248,23 @@ public class RouterService {
   		RouterService.router = router;
   	}
 
+  	/**
+  	 * Performs startup tasks that should happen while the GUI loads
+  	 */
+  	public void asyncGuiInit() {
+  	    Runnable r = new Runnable() {
+  	        public void run() {
+  	            // add more while-gui init tasks here
+  	            acceptor.init();
+  	        }
+  	    };
+  	    
+  	    Thread t = new ManagedThread(r);
+  	    t.setName("async gui initializer");
+  	    t.setDaemon(false);
+  	    t.start();
+  	}
+  	
 	/**
 	 * Starts various threads and tasks once all core classes have
 	 * been constructed.
