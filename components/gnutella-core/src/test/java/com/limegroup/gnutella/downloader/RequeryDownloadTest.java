@@ -211,12 +211,15 @@ public class RequeryDownloadTest
         downloader = _mgr.download(_incompleteFile);
         assertTrue(downloader instanceof ResumeDownloader);
         
+        int counts = 0;
 		// Make sure that you are through the QUEUED state.
         while (downloader.getState() != Downloader.WAITING_FOR_RESULTS) {
 			if ( downloader.getState() != Downloader.QUEUED )
                 assertEquals(Downloader.WAITING_FOR_RESULTS, 
 				  downloader.getState());
             Thread.sleep(200);
+            if(counts++ > 25)
+                fail("took too long, state: " + downloader.getState());
 		}
         assertEquals("downloader isn't waiting for user (also for results)", 
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -267,15 +270,17 @@ public class RequeryDownloadTest
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(1000);
+        counts = 0;
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
             while (downloader.getState()!=Downloader.COMPLETE) {            
 			    if ( downloader.getState() != Downloader.CONNECTING &&
 			         downloader.getState() != Downloader.HASHING &&
-			         downloader.getState() != Downloader.SAVING &&
-			         downloader.getState() != Downloader.DOWNLOADING )
+			         downloader.getState() != Downloader.SAVING )
                     assertEquals(Downloader.DOWNLOADING, downloader.getState());
-                Thread.sleep(200);
+                Thread.sleep(500);
+                if(counts++ > 60)
+                    fail("took too long, state: " + downloader.getState());
             }
         } 
         else {

@@ -69,13 +69,10 @@ public class ManagedDownloader implements Downloader, Serializable {
       but not yet completed.  White regions have not been assigned to a
       downloader.
       
-      LimeWire uses the following algorithm for swarming.  First all download
-      locations are divided into buckets of "same" files. Then the following is
-      done for each bucket:
-
-      while the file has not been downloaded, and we have not given up
-           try to increasing parallelism, to our maximum capacity
+      LimeWire uses the following algorithm for swarming:
                
+      While the file has not been downloaded, and we have not given up
+      try to increasing parallelism, to our maximum capacity...
       Each potential downloader thats working in parallel does these steps
       1. Establish a TCP connection with an rfd
          if unable to connect end this parallel execution
@@ -107,8 +104,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      "master" thread is as follows:
 
                              tryAllDownloads
-                             /      |
-                         bucket   tryAllDownloads2
+                                    |
+                              tryAllDownloads2
                                     |
                                   tryAllDownloads3
                                     | 
@@ -124,8 +121,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                                       |
                            HTTPDownloader.connectHTTP
 
-      tryAllDownloads does the bucketing of files, as well as waiting for
-      retries.  The core downloading loop is done by tryAllDownloads3.
+      tryAllDownloads waits for retries.
+      The core downloading loop is done by tryAllDownloads3.
       connectAndDownload (which is started asynchronously in tryAllDownloads3),
       does the three step ennumerated above.
 
@@ -281,20 +278,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         new ApproximateMatcher(MATCHER_BUF_SIZE);    
 
     ////////////////////////// Core Variables /////////////////////////////
-    /** The buckets of "same" files, each a list of RemoteFileDesc. One by one,
-     *  we will try to swarm each bucket.  Buckets are passed to the
-     *  tryAllDownloadsX, removeBest, and tryOneDownload methods, which can
-     *  mutate them.  Also, existing buckets can be modified and new buckets
-     *  added by the addDownload method.  Therefore great care must be taken to
-     *  synchronize on this when modifying buckets, as well as avoiding
-     *  ConcurrentModificationException. 
-     * 
-     *  INVARIANT: buckets contains a subset of allFiles.  (Remember that we
-     *  remove locations from buckets if they don't pan out.  We don't remove
-     *  them from allFiles to support resumes.)
-     */
-    private RemoteFileDescGrouper buckets;
-    
     /**
      * The current RFDs that this ManagedDownloader is connecting to.
      * This is necessary to store so that when an RFD is removed from files,
@@ -305,14 +288,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private List currentRFDs;
     
-    /**
-     * The index of the bucket we are trying to download from. We use it
-     * to find the hash of the bucket we are downloading from - so that 
-     * we can verify that we downloaded the correct file, once the download is
-     * complete
-     */
-    private int bucketNumber;
-
     /** If started, the thread trying to coordinate all downloads.  
      *  Otherwise null. */
     private Thread dloaderManagerThread;
@@ -343,6 +318,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
+	
+    /**
+     * The SHA1 hash of the file that this ManagedDownloader is controlling.
+     */
+    private URN sha1;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -509,6 +489,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.allFiles = files;
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
+        for(int i = 0; i < allFiles.length && sha1 == null; i++)
+            sha1 = allFiles[i].getSHA1Urn();
     }
 
     /** 
@@ -549,6 +531,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //initializer statements, as they're not executed.  Nor should it be
         //done in initialize, as that could cause problems in resume().
         reqLock=new RequeryLock();
+        
+        if(allFiles != null) {
+            for(int i = 0; i < allFiles.length && sha1 == null; i++)
+                sha1 = allFiles[i].getSHA1Urn();
+        }
     }
 
     /** 
@@ -568,6 +555,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
+        files = new LinkedList();
         dloaders=new LinkedList();
         threads=new ArrayList();
         queuedThreads = new HashMap();
@@ -588,7 +576,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // stores up to 10 locations for up to 10 minutes
         recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
         synchronized (this) {
-            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
             if(shouldInitAltLocs(deserialized)) {
                 initializeAlternateLocations();
             }
@@ -608,6 +595,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         };
         dloaderManagerThread.setDaemon(true);
         dloaderManagerThread.start();       
+    }
+
+    /**
+     * Initialize files wrt allFiles.
+     */
+    protected void initializeFiles() {
+        for(int i = 0; i < allFiles.length; i++)
+            if(shouldAllowRFD(allFiles[i]))
+                files.add(allFiles[i]);
     }
 
     /**
@@ -894,7 +890,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    private boolean initDone = false; // used to init
+    private static boolean initDone = false; // used to init
 
     /**
      * Returns true if 'other' should be accepted as a new download location.
@@ -933,42 +929,24 @@ public class ManagedDownloader implements Downloader, Serializable {
         final long otherLength = other.getSize();
 
         synchronized (this) {
+            if(otherUrn != null && sha1 != null)
+                return otherUrn.equals(sha1);
+            
             // compare to allFiles....
             for (int i=0; i<allFiles.length; i++) {
                 // get current info....
                 RemoteFileDesc rfd = (RemoteFileDesc) allFiles[i];
-				final URN urn = rfd.getSHA1Urn();
-				if(otherUrn != null && urn != null) {
-					return otherUrn.equals(urn);
-				}
                 final String thisName = rfd.getFileName();
                 final long thisLength = rfd.getSize();
 				
-                // if they are similarly named and are close in length....
-                // do sizeClose() first, much less expensive.....
-                if (sizeClose(otherLength, thisLength))
+                // if they are similarly named and same length
+                // do length check first, much less expensive.....
+                if (otherLength == thisLength) 
                     if (namesClose(otherName, thisName)) 
                         return true;                
             }
         }
         return false;
-    }
-
-    private final long SIXTY_KB = 60000;
-    private final boolean sizeClose(long one, long two) {
-        boolean retVal = false;
-		// if the sizes match exactly, we are good to go....
-		if (one == two)
-            retVal = true;
-        else {
-            //Similar file size (within 60k)?  This value was determined 
-            //empirically to optimize grouping aggressiveness with minimal 
-            //performance cost.
-            long sizeDiff = Math.abs(one - two);
-            if (sizeDiff <= SIXTY_KB) 
-                retVal = true;
-        }
-        return retVal;
     }
 
     private final boolean namesClose(final String one, 
@@ -1024,13 +1002,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Like addDownload, but doesn't call allowAddition(..).
      *
      * If cache is false, the RFD is not added to allFiles, but is
-     * added to the appropriate bucket.
+     * added to 'files', the list of RFDs we will connect to.
      *
      * If the RFD matches one already in allFiles, the new one is
-     * NOT added to allFiles, but IS added the appropriate bucket
-     * if and only if a matching RFD is not currently in the bucket.
+     * NOT added to allFiles, but IS added the list of RFDs to connect to
+     * if and only if a matching RFD is not currently in that list.
      *
-     * If the file is ultimately added to buckets, either reqLock is released
+     * If the file is ultimately added to the list, either reqLock is released
      * or this is notified.
      *
      * This ALWAYS returns true, because the download is either allowed
@@ -1040,15 +1018,18 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
         rfd.setDownloading(true);
+        if(sha1 == null)
+            sha1 = rfd.getSHA1Urn();
                                                             
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
             return true;
         
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
-        // However, when we add it to buckets, we have to make sure
-        // it didn't already exist in the specified bucket.
-        // If cache is already false, there is no need to look.
+        // However, we must still add it to files if it didn't already exist
+        // there.
+
+        // If cache is already false, there is no need to look in allFiles.
         if (cache) {
             for (int i=0; i<allFiles.length; i++) {
                 if (rfd.equals(allFiles[i])) {
@@ -1059,14 +1040,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         boolean added = false;
-        //Add to buckets (will be seen because buckets exposes representation)
-        //if we don't already contain this RFD.
-        if (shouldAllowRFD(rfd)) {
-            // We must always check to see if this RFD was already added to
-            // the buckets now that we add downloads before adding to alt locs.
-            // (Previously altloccollection filtered out already-seen ones)
-            added = (buckets.add(rfd, true) != -1);
-        }
+        // Add to the list of RFDs to connect to.
+        if (shouldAllowRFD(rfd))
+            added = files.add(rfd);
         
         //Append to allFiles for resume purposes if caching...
         if(cache) {
@@ -1099,9 +1075,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     private synchronized boolean shouldAllowRFD(RemoteFileDesc rfd) {
-        if( buckets == null)
-            return false;
         if( currentRFDs != null && currentRFDs.contains(rfd))
+            return false;
+        if( files != null && files.contains(rfd))
             return false;
         return true;
     }
@@ -1177,7 +1153,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      */
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
-        URN bucketHash = null;
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -1188,21 +1163,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(!rfd.isAltLocCapable())
             return;
             
-        // Verify that the bucket itself has a hash.  If it does not,
+        // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        bucketHash = buckets.getURNForBucket(bucketNumber);
-        Assert.that(bucketHash != null, "null bucketHash.");
+        Assert.that(sha1 != null, "null hash.");
         
-        // Now verify that the SHA1 of the RFD matches the SHA1 of the
-        // bucket hash.
-        Assert.that(bucketHash.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        // Now verify that the SHA1 of the RFD matches.
+        Assert.that(sha1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
         
         // If a validAlts collection wasn't created already
         // (which would only be possible if the initial set of
         // RFDs did not have a hash, but subsequent searches
         // produced RFDs with hashes), create the collection.
         if( validAlts == null )
-            validAlts = AlternateLocationCollection.create(bucketHash);
+            validAlts = AlternateLocationCollection.create(sha1);
         
         try {
             loc = AlternateLocation.create(rfd);
@@ -1224,12 +1197,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
-            if(!bucketHash.equals(ifd.getSHA1Urn())) {
-                // Assert that the SHA1 of the IFD and the bucketHash match.
+            if(!sha1.equals(ifd.getSHA1Urn())) {
+                // Assert that the SHA1 of the IFD and our sha1 match.
                 Assert.silent(false, "wrong IFD.\n" +
                            "ours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
-                           "\nour hash    : " + bucketHash +
+                           "\nour hash    : " + sha1 +
                            "\ntheir hashes: " +
                            DataUtils.listSet(ifd.getUrns())+
                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
@@ -1284,16 +1257,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ((state==GAVE_UP) &&
                     (dloaderManagerThread!=null) && 
                     (dloaderManagerThread.isAlive())) {
-                    // We can be sure all available RFDs have been tried, so
-                    // buckets is empty. We should allow the user to retry
-                    // the original RFDs he tried to download by pushing
-                    // the resume button, so we create a new 'buckets'
-                    // This is a quick and easy way of possibly restarting
-                    // the download that uses zero network resources.
-                    synchronized (this) {
-                        buckets=new RemoteFileDescGrouper(
-                            allFiles, incompleteFileManager);
-                    }
                     // if the dloaderManagerThread is simply waiting on reqLock,
                     // then just release him.  calling initialize will 'do the 
                     // right thing' but will cause a memory leak due to threads
@@ -1428,35 +1391,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }       
     }
 
-    /** @return either the URN of the file that was downloaded the most so far
-     *  or the URN of the bucket with the most sources.
-     */
-    private URN getBestURN() {
-        URN retURN = null;
-
-        // Iterate through all available URNs and attempt to get one with the
-        // biggest size
-        List urns = buckets.getURNs();
-        int currBigSize = 0;
-        Iterator iter = urns.iterator();
-        while (iter.hasNext()) {
-            URN currURN = (URN) iter.next();
-            if(currURN == null) continue;
-            File incomplete = incompleteFileManager.getFileForUrn(currURN);
-            if (incomplete == null) continue;
-            VerifyingFile vF =incompleteFileManager.getEntry(incomplete);
-            if (vF == null) continue;
-            if ((retURN == null) || (vF.getBlockSize() > currBigSize)) {
-                currBigSize = vF.getBlockSize();
-                retURN = currURN;
-            }
-        }
-
-        // if we haven't downloaded anything, just get the most redundant URN
-        if (retURN == null) retURN = buckets.getBestURN();
-        return retURN;
-    }
-
     /** 
      * Actually does the download, finding duplicate files, trying all
      * locations, resuming, waiting, and retrying as necessary. Also takes care
@@ -1482,30 +1416,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         //While not success and still busy...
         while (true) {
             try {
-                //Try each b, bucket returning on success.  Note that buckets
-                //may be added while the iterator is in use; these changes will
-                //be reflected in the iteration.  The children of
-                //tryAllDownloads call setState(CONNECTING) and
-                //setState(DOWNLOADING) as appropriate.
                 setState(QUEUED);  
                 queuePosition="";//initialize
                 queuedVendor="";//initialize
+                LOG.trace("Waiting for slot");
                 manager.waitForSlot(this);
+                LOG.trace("Got slot");
                 boolean waitForRetry=false;
-                int currentBucket = 0;
+                initializeFiles();
+                if(files.size() > 0) {
                 try {
-                    for (Iterator iter=buckets.buckets(); iter.hasNext(); 
-                                                              currentBucket++) {
-                        bucketNumber = currentBucket;
-                        //when are are done tyring with a bucket cleanup
                         cleanup();
-                        files =(List)iter.next();
                         if(checkHosts()) {//files is global
                             setState(GAVE_UP);
                             return;
                         }
-                        if (files.size() <= 0)
-                            continue;
                         int status=tryAllDownloads2();
                         if (status==COMPLETE) {
                             //Success!
@@ -1526,12 +1451,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                             Assert.that(status==GAVE_UP,
                                         "Bad status from tad2: "+status);
                         }                    
-                    }
                 } catch (InterruptedException e) {
                     //check that each waitForSlot is paired with yieldSlot,
                     //unless we're aborting
                     if (!stopped)
                         ErrorService.error(e);
+                }
                 }
                 manager.yieldSlot(this);
                 if (stopped) {
@@ -1555,14 +1480,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(ITERATIVE_GUESSING);
                         triedLocatingSources = true;
                         boolean areThereNewResults = false;
-                        final URN bestURN = getBestURN();
                         //TODO: should we increment a stat to get a sense of
                         //how much this is happening?
                         for (Iterator i = guessLocs.iterator(); 
-                             (bestURN != null) && i.hasNext() ; ) {
+                             (sha1 != null) && i.hasNext() ; ) {
                             // send a guess query
                             GUESSEndpoint ep = (GUESSEndpoint) i.next();
-                            OnDemandUnicaster.query(ep, bestURN);
+                            OnDemandUnicaster.query(ep, sha1);
                             // wait a while for a result
                             if (!areThereNewResults)
                                 areThereNewResults = reqLock.lock(750);
@@ -1603,12 +1527,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // 1.
                 if (waitForRetry) {
                     synchronized (this) {
-                        retriesWaiting=0;
-                        for (Iterator iter=buckets.buckets();iter.hasNext();) {
-                            List /* of RemoteFileDesc */ bucket=
-                                                            (List)iter.next();
-                            retriesWaiting+=bucket.size();
-                        }
+                        retriesWaiting = files.size();
                     }
                     long time=calculateWaitTime();
                     setState(WAITING_FOR_RETRY, time);
@@ -1768,9 +1687,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //1. Verify it's safe to download.  Filename must not have "..", "/",
         //etc.  We check this by looking where the downloaded file will end up.
         //The completed filename is chosen somewhat arbitrarily from the first
-        //file of the bucket; see case (b) of getFileName() and
+        //file; see case (b) of getFileName() and
         //MagnetDownloader.getFileName().
-        //    incompleteFile is picked using an arbitrary RFD from the bucket, since
+        //    incompleteFile is picked using an arbitrary RFD, since
         //IncompleteFileManager guarantees that any "same" files will get the
         //same temporary file.
 
@@ -1793,7 +1712,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Create a new validAlts for this sha1.
         // initialize the HashTree
-		URN sha1 = buckets.getURNForBucket(bucketNumber);
 		if( sha1 != null ) {
 		    validAlts = AlternateLocationCollection.create(sha1);
             hashTree = TigerTreeCache.instance().getHashTree(sha1);  
@@ -1831,7 +1749,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
 
             //3. Find out the hash of the file and verify that its the same
-            // as the hash of the bucket it was downloaded from.
+            // as our hash.
             //If the hash is different, we try to automatically recover if
             //we have a HashTree.
             fileHash = scanForCorruption(i);
@@ -1872,8 +1790,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null;
         
         //if the user has not been asked before.               
-        URN bucketHash = buckets.getURNForBucket(bucketNumber);
-
         URN fileHash=null;
         try {
             // let the user know we're hashing the file
@@ -1883,18 +1799,18 @@ public class ManagedDownloader implements Downloader, Serializable {
         catch(IOException ignored) {}
         catch(InterruptedException ignored) {}
         
-        // If bucketHash is null, we can't check at all.
-        if(bucketHash == null)
+        // If we have no hash, we can't check at all.
+        if(sha1 == null)
             return fileHash;
 
         // If they're equal, everything's fine.
         //if fileHash == null, it will be a mismatch
-        if(bucketHash.equals(fileHash))
+        if(sha1.equals(fileHash))
             return fileHash;
         
         if(LOG.isWarnEnabled())
             LOG.warn("hash verification problem, fileHash="+
-                           fileHash+", bucketHash="+bucketHash);
+                           fileHash+", ourHash="+sha1);
 
         synchronized(corruptStateLock) {
             // immediately set as corrupt,
@@ -1913,7 +1829,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
         if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
-            treeRecoveryFailed(bucketHash);
+            treeRecoveryFailed(sha1);
         } else if (hashTree != null) {
             // we can try to use the hashtree to identify corrupt ranges!
             try {
@@ -1926,10 +1842,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
                 corruptState = NOT_CORRUPT_STATE;
                 if(deleted == 0)
-                    treeRecoveryFailed(bucketHash);
+                    treeRecoveryFailed(sha1);
             } catch (IOException ioe) {
                 LOG.debug(ioe);
-                treeRecoveryFailed(bucketHash);
+                treeRecoveryFailed(sha1);
             }
         }
         
@@ -2198,11 +2114,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // else (files.size() > 0 && calculateWaitTime() == 0)
                     // fallthrough ...
                 }
-            }
             
             size = files.size();
             connectTo = getNumAllowedDownloads();
             dloadsCount = dloaders.size();
+            }
 
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
@@ -2213,7 +2129,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                               dloadsCount < getSwarmCapacity(); i++) {
                 final RemoteFileDesc rfd;
                 synchronized(this) {
-                    rfd = removeBest(files);
+                    rfd = removeBest();
                     // If the rfd was busy, that means all possible RFDs
                     // are busy, so just put it back in files and exit.
                     if( rfd.isBusy() ) {
@@ -3349,10 +3265,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-    private synchronized RemoteFileDesc removeBest(List filesLeft) {
-        //Lock is needed here because filesLeft can be modified by
-        //tryOneDownload in worker thread.
-        Iterator iter=filesLeft.iterator();
+    private synchronized RemoteFileDesc removeBest() {
+        //Lock is needed here because file can be modified by
+        //worker thread.
+        Iterator iter=files.iterator();
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
         
@@ -3386,7 +3302,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
             
-        filesLeft.remove(ret);
+        files.remove(ret);
         return ret;
     }
 
@@ -3464,8 +3380,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private synchronized List getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
-        //those locations that we download from?  How about only those in this
-        //bucket?
+        //those locations that we download from?
         List allDocs = new ArrayList();
 
         // get all docs possible
@@ -3484,8 +3399,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void cleanup() {
         miniRFDToLock.clear();
         threadLockToSocket.clear();
-        files = null;
-        validAlts = null;
     }    
 
     /////////////////////////////Display Variables////////////////////////////
