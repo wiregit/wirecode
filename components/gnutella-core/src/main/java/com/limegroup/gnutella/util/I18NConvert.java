@@ -11,19 +11,21 @@ public class I18NConvert {
     private final static I18NConvert _instance = new I18NConvert();
     
     /** the class that handles the conversion */
-    private final AbstractI18NConverter _convertDelegator;
-
-    /**
-     * constructor : 
-     * instantiates a implementation of abstract class AbstractI18NConverter
-     * depeneding on JVM (118 or not)
-     */
-    private I18NConvert() {
-        if(CommonUtils.isJava118()) 
+    private static final AbstractI18NConverter _convertDelegator;
+    static {
+        //instantiates a implementation of abstract class AbstractI18NConverter
+        //depeneding on JVM (118 or not)
+        if(CommonUtils.isJava118()) {
             _convertDelegator = new I18NConvert118();
-        else
+        } else {
             _convertDelegator = new I18NConvertICU();
+        }
     }
+    
+    /**
+     * Empty constructor so nothing else can instantiate it.
+     */
+    private I18NConvert() {}
 
     /** accessor */
     public static I18NConvert instance() {

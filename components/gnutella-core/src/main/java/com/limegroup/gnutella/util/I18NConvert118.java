@@ -18,8 +18,7 @@ final class I18NConvert118 extends AbstractI18NConverter {
         _convert = new Trie(false);
         _kc = new Trie(false);
         try {
-            InputStream fi = 
-                getClass().getClassLoader().getResource("nudata.txt").openStream();
+            InputStream fi = CommonUtils.getResourceStream("nudata.txt");
             BufferedReader buf = 
                 new BufferedReader(new InputStreamReader(fi));
             
@@ -33,8 +32,8 @@ final class I18NConvert118 extends AbstractI18NConverter {
                     _kc.add(code2char(splitUp[1]), code2char(splitUp[2]));
             }
 
-            ObjectInputStream ois = 
-                new ObjectInputStream(getClass().getClassLoader().getResource("excluded.dat").openStream());
+            fi = CommonUtils.getResourceStream("excluded.dat");            
+            ObjectInputStream ois = new ObjectInputStream(fi);
             _ex = (java.util.BitSet)ois.readObject();
             
         }
