@@ -25,10 +25,13 @@ public class QueryUnicaster {
     // should the _querier be running?
     private boolean _shouldRun = true;
 
-    /** The list of Queries I need to send every iteration.
-     *  Not a List because I want to enforce synchronization.
+    /** The map of Queries I need to send every iteration.
+     *  The map is from GUID to QueryBundle.  The following invariant is
+     *  maintained:
+     *  GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
+     *  Not a Map because I want to enforce synchronization.
      */
-    private Vector _queries;
+    private Hashtable _queries;
 
     /** The unicast enabled hosts I should contact for queries.
      */
@@ -42,7 +45,7 @@ public class QueryUnicaster {
 
     protected QueryUnicaster() {
         // construct DSes...
-        _queries = new Vector();
+        _queries = new Hashtable();
         _queryHosts = new Stack();
 
         // start service...
@@ -67,9 +70,10 @@ public class QueryUnicaster {
                 UDPAcceptor udpService = UDPAcceptor.instance();
 
                 synchronized (_queries) {
-                    Iterator iter = _queries.iterator();
+                    Iterator iter = _queries.entrySet().iterator();
                     while (iter.hasNext()) {
-                        QueryBundle currQB = (QueryBundle) iter.next();
+                        QueryBundle currQB = 
+                        (QueryBundle) ((Map.Entry)iter.next()).getValue();
                         if ((currQB._numResults > QueryBundle.MAX_RESULTS) ||
                             (currQB._hostsQueried.size() > 
                              QueryBundle.MAX_QUERIES)
@@ -97,7 +101,7 @@ public class QueryUnicaster {
                 Iterator removee = toRemove.iterator();
                 while (removee.hasNext()) {
                     QueryBundle currQB = (QueryBundle) removee.next();
-                    _queries.remove(currQB);
+                    _queries.remove(new GUID(currQB._qr.getGUID()));
                 }
 
                 Thread.sleep(ITERATION_TIME);
@@ -124,10 +128,13 @@ public class QueryUnicaster {
     public boolean addQuery(QueryRequest query) {
         debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
+        GUID guid = new GUID(query.getGUID());
         QueryBundle qb = new QueryBundle(query);
         synchronized (_queries) {
-            if (!_queries.contains(qb)) 
-                retBool = _queries.add(qb);
+            if (!_queries.containsKey(guid)) {
+                _queries.put(guid, qb);
+                retBool = true;
+            }
             if (retBool)
                 _queries.notify();
         }
