@@ -29,6 +29,7 @@ public class DuplicateFilter extends SpamFilter {
      *
      * INVARIANT: BUF_SIZE>1 
      */
+
     private static final int BUF_SIZE=20;
     /** a list of the GUIDs of the last pings we saw and
      * their timestamps. 
@@ -38,9 +39,13 @@ public class DuplicateFilter extends SpamFilter {
     private Buffer /* of GUIDPair */ guids=new Buffer(BUF_SIZE);
     /** The time, in milliseconds, allowed between similar messages. */
     private static final int GUID_LAG=500;
-    /** The number of bytes in two GUIDs that must be the same to 
-     * assume they came from the same host. */
-    private static final int GUID_SIMILAR=10;
+    /** 
+     * When comparing two messages, if the GUIDs of the two messages differ
+     * in more than TOLERANCE bytes, the second message will be allowed.
+     * if they differ in less than or equal to TOLERANCE bytes the second
+     * message will not be allowed thro'
+     */
+    private static final int TOLERANCE=2;
 
 
 
@@ -96,9 +101,9 @@ public class DuplicateFilter extends SpamFilter {
         else if (m instanceof QueryRequest)
             return allowQuery((QueryRequest)m);
         else
-            return true;        
+            return true;
     }
-
+    
     public boolean allowGUID(Message m) {
         //Do NOT apply this filter to pongs, query replies, or pushes,
         //since many of those will (legally) have the same GUID.       
@@ -109,8 +114,9 @@ public class DuplicateFilter extends SpamFilter {
 
         //Consider all messages that came in within GUID_LAG milliseconds 
         //of this...
-        for (Iterator iter=guids.iterator(); iter.hasNext(); ) {
-            GUIDPair other=(GUIDPair)iter.next();
+        int z = guids.getSize();
+        for(int j=0; j<z ; j++){             
+            GUIDPair other=(GUIDPair)guids.get(j);
             //The following assertion fails for mysterious reasons on the
             //Macintosh.  Also, it can fail if the user adjusts the clock, e.g.,
             //for daylight savings time.  Luckily it need not hold for the code
@@ -123,12 +129,12 @@ public class DuplicateFilter extends SpamFilter {
             if (other.hops != me.hops)
                 continue;
             //Are the GUIDs similar?.  TODO3: can optimize
-            int matches=0;
-            for (int i=0; i<me.guid.length; i++) {
-                if (me.guid[i]==other.guid[i])
-                    matches++;
+            int misses=0;
+            for (int i=0; i<me.guid.length&&misses<=TOLERANCE; i++) {
+                if (me.guid[i]!=other.guid[i])
+                    misses++;
             }
-            if (matches>=GUID_SIMILAR) {
+            if (misses<=TOLERANCE) {//really close GUIDS
                 guids.add(me);
                 return false;
             }
@@ -137,7 +143,6 @@ public class DuplicateFilter extends SpamFilter {
         return true;        
     }
        
-
     public boolean allowQuery(QueryRequest qr) {
         //Update sets as needed.
         long time=getTime();
@@ -170,11 +175,11 @@ public class DuplicateFilter extends SpamFilter {
 
     ///** Unit test */
     /*
-    public static void main(String args[]) {
+    public static void main(String args[]) {        
         SpamFilter filter=new DuplicateFilter();
         PingRequest pr=null;
         QueryRequest qr=null;
-
+        
         pr=new PingRequest((byte)2);
         byte[] guid=pr.getGUID();
         guid[9]++;
@@ -184,22 +189,22 @@ public class DuplicateFilter extends SpamFilter {
         pr=new PingRequest((byte)2);
         Assert.that(filter.allow(pr)); //since GUIDs are currently random
         Assert.that(!filter.allow(pr));
-    
+        
         //Now, if I wait a few seconds, it should be allowed.
         synchronized (filter) {
             try {
                 filter.wait(GUID_LAG*2);
             } catch (InterruptedException e) { }
         }
-
+        
         Assert.that(filter.allow(pr));  
         Assert.that(!filter.allow(pr));
         pr=new PingRequest((byte)2);
         Assert.that(filter.allow(pr));
         pr.hop(); //hack to get different hops count
         Assert.that(filter.allow(pr));
-
-
+        
+        
         qr=new QueryRequest((byte)2, 0, "search1");
         Assert.that(filter.allow(qr));
         Assert.that(!filter.allow(qr));
