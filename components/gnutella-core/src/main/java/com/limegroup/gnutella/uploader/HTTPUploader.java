@@ -233,19 +233,10 @@ public final class HTTPUploader implements Uploader {
             return _socket;
 		} catch (SecurityException e) {
 			this.setState(Uploader.PUSH_FAILED);
-			throw new IOException();
-		} catch (IndexOutOfBoundsException e) {
-			this.setState(Uploader.PUSH_FAILED);   //TODO: I don't think these 
-            throw new IOException();               //can be thrown!  Eliminate.
-        } catch (NumberFormatException e) {
-			this.setState(Uploader.PUSH_FAILED);
-            throw new IOException();
-        } catch (IllegalArgumentException e) {
-			this.setState(Uploader.PUSH_FAILED);
-            throw new IOException();
+			throw new IOException("security exception");
         } catch (IOException e) {
 			this.setState(Uploader.PUSH_FAILED);
-			throw new IOException();
+			throw e;
 		}
 	}
 
