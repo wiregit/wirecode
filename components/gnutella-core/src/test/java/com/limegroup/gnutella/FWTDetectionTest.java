@@ -49,8 +49,7 @@ public class FWTDetectionTest extends BaseTestCase {
     static UDPPonger ponger1 = new UDPPonger(REMOTE_PORT1);
     static UDPPonger ponger2 = new UDPPonger(REMOTE_PORT2);
     
-    static File originalNet, tempNet;
-    
+    static File gnet;
 
     
     
@@ -64,10 +63,14 @@ public class FWTDetectionTest extends BaseTestCase {
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
+        // the catcher in RouterService points elsewhere 
+        HostCatcher catcher = new HostCatcher(); 
+        
         cmStub = new CMStub();
         
         try{
             PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+            PrivilegedAccessor.setValue(RouterService.class,"catcher",catcher);
         }catch(Exception bad) {
             ErrorService.error(bad);
         }
@@ -78,28 +81,8 @@ public class FWTDetectionTest extends BaseTestCase {
         cmStub.setConnected(false);
         assertFalse(RouterService.isConnected());
         
-        
-        // move our existing gnutella.net out of the way
-        originalNet = new File(CommonUtils.getUserSettingsDir(), 
-        	"gnutella.net");
-        
-        if ( originalNet.exists() ) {
-            tempNet = new File("gdotnet.tmp");
-            tempNet.delete();
-            originalNet.renameTo( tempNet );
-        }
-        
-    }
-    
-    public static void globalTearDown() {
-        // restore our original gnutella.net
-        tempNet = new File("gdotnet.tmp");
-        if (tempNet.exists()) {
-            originalNet = new File(CommonUtils.getUserSettingsDir(), 
-        		"gnutella.net");
-            originalNet.delete();
-            tempNet.renameTo(originalNet);
-        }
+        gnet = new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
+                
     }
     
     public void setUp() {
@@ -154,14 +137,14 @@ public class FWTDetectionTest extends BaseTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
         
         //reply with a pong that does not carry info
         ponger1.reply(null);
-        
+        cmStub.setConnected(true);
         ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
         assertTrue(UDPService.instance().canDoFWT());
         ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
@@ -232,14 +215,14 @@ public class FWTDetectionTest extends BaseTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
         
         // if we have received incoming, pings should not be requesting
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         assertFalse(ponger1.listen().requestsIP());
         
@@ -254,7 +237,7 @@ public class FWTDetectionTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -279,7 +262,7 @@ public class FWTDetectionTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -305,7 +288,7 @@ public class FWTDetectionTest extends BaseTestCase {
     public void testPongCarriesBadPort() throws Exception{
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -354,7 +337,7 @@ public class FWTDetectionTest extends BaseTestCase {
         RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -389,7 +372,7 @@ public class FWTDetectionTest extends BaseTestCase {
         assertTrue(UDPService.instance().canDoFWT());
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         cmStub.setConnected(false);
-        connectAsync();
+        RouterService.getHostCatcher().recoverHosts();
         ponger1.listen();
         Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
         PingReply badGuid = PingReply.create(GUID.makeGuid(),(byte)1,badAddress);
@@ -453,22 +436,8 @@ public class FWTDetectionTest extends BaseTestCase {
     }
     
     private static void writeToGnet(String hosts) throws Exception {
-        File gnet = new File(CommonUtils.getUserSettingsDir(), 
-    		"gnutella.net");
         FileOutputStream fos = new FileOutputStream(gnet);
-        
         fos.write(hosts.getBytes());fos.flush();fos.close();
-    }
-    
-    private static void connectAsync() {
-        Thread t = new Thread() {
-            public void run() {
-                HostCatcher catcher = new HostCatcher();
-                catcher.initialize();
-            }
-        };
-        t.setDaemon(true);
-        t.start();
     }
     
     private static class UDPPonger {
