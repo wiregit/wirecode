@@ -597,12 +597,13 @@ public class HostCatcher implements HostListener {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        addToLocaleMap(e); //add e to locale mapping 
         if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
             return false;
+
+        addToLocaleMap(e); //add e to locale mapping 
         
         Object removed=permanentHosts.insert(e);
         if (removed!=e) {

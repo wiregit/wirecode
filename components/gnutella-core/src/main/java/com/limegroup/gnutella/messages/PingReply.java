@@ -109,6 +109,10 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Constant for the locale
      */
     private String CLIENT_LOCALE;
+    
+    /**
+     * the number of free preferenced slots 
+     */
     private int FREE_LOCALE_SLOTS;
 
     /**
@@ -628,7 +632,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                     locale = new String(bytes, 0, 2);
-                    slots = bytes[2];
+                    slots = ByteOrder.ubyte2int(bytes[2]);
                 }
                 catch(BadGGEPPropertyException e) {
                     //ignore. we won't assign it.
