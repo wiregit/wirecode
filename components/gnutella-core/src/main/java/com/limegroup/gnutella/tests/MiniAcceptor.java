@@ -26,6 +26,7 @@ public class MiniAcceptor implements Runnable {
     Connection c=null;
     boolean done=false;
     int port;
+    IOException error=null;
 
     HandshakeResponder properties;
         
@@ -44,7 +45,9 @@ public class MiniAcceptor implements Runnable {
     }
 
     /** Blocks until a connection is available, and returns it. 
-     *  Returns null if something went awry. */
+     *  Returns null if something went awry.  In this case, you 
+     *  can get the exception via getError.  Bad design, but 
+     *  exists for backwards compatibility. */
     public Connection accept() {
         synchronized (lock) {
             while (! done) {
@@ -58,10 +61,15 @@ public class MiniAcceptor implements Runnable {
         }
     }
         
+    public IOException getError() {
+        return error;
+    }
+
     /** Don't call.  For internal use only. */
     public void run() {
+        ServerSocket ss=null;
         try {
-            ServerSocket ss=new ServerSocket(port);
+            ss=new ServerSocket(port);
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
@@ -74,7 +82,9 @@ public class MiniAcceptor implements Runnable {
                 lock.notify();
             } 
         } catch (IOException e) {
-            e.printStackTrace();
+            if (ss==null)
+                e.printStackTrace();  //Couldn't listen?  Serious.
+            error=e;                  //Record for later.
             synchronized (lock) {
                 done=true;
                 lock.notify();
