@@ -910,7 +910,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _badLocs = null;
         _writtenGoodLocs = null;
         _writtenBadLocs = null;
-		_rfd =  new RemoteFileDesc("127.0.0.1", 0,
+		_rfd =  new RemoteFileDesc("127.0.0.1", 1,
                                   0, "a", 0, new byte[16],
                                   0, false, 0, false, null, null,
                                   false, false, "", 0, null);
