@@ -186,10 +186,8 @@ public class HTTPClientMgr implements Runnable {
 	try {
 	    /* is this the right format? */ 
 	    _out.write("HTTP 404 Not Found \r\n");   
-	    
 	    _out.write("\r\n");     /* Even if it is, can Gnutella */ 
-   	                          /* clients handle it? */          
-	    _out.flush();
+	    _out.flush();    /* clients handle it? */          
 	}
 
 	catch (Exception e) {
