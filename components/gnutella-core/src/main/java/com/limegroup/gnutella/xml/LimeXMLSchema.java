@@ -306,39 +306,6 @@ public class LimeXMLSchema
         return fieldNames;
     }
     
-    
-    
-    public static void Test()
-    {
-        try
-        {
-            LimeXMLSchema schema = new LimeXMLSchema(new File(
-                LimeXMLProperties.instance().getXMLSchemaDir() 
-                + File.separator
-                + "audio.xsd"));
-            
-            System.out.println("Printing fields:");
-            
-            //get the fields and print those
-            Iterator iterator = schema.getCanonicalizedFields().iterator();
-            while(iterator.hasNext())
-            {
-                SchemaFieldInfo fieldInfo = (SchemaFieldInfo)iterator.next();
-                System.out.println(fieldInfo.getCanonicalizedFieldName());
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    public static void main(String[] args)
-    {
-        Test();
-    }
-    
-    
     private static final class Resolver implements EntityResolver
     {
         private InputSource schema;
