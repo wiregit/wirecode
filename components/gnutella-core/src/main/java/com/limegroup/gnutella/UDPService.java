@@ -666,6 +666,8 @@ public final class UDPService implements Runnable {
             // potential firewall to UDP traffic
             GUESSEndpoint ep = QueryUnicaster.instance().getUnicastEndpoint();
             if (ep == null) return;
+            // only do this if you can receive some form of UDP traffic.
+            if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;
 
             // good to use the solicited guid
             PingRequest pr = new PingRequest(getSolicitedGUID().bytes(),

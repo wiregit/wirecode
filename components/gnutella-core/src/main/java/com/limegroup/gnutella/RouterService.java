@@ -1287,7 +1287,7 @@ public class RouterService {
      */
     public static boolean isOOBCapable() {
         return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
-               acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
+               !NetworkUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&
                acceptor.isAddressExternal();
     }
