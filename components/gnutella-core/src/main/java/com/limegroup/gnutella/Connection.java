@@ -98,9 +98,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     private final String _host;
     private int _port;
     private Socket _socket;
+    private final boolean OUTGOING;
+    
     private InputStream _in;
     private OutputStream _out;
-    private final boolean OUTGOING;
     
     /**
      * The Inflater to use for inflating read streams, initialized
@@ -257,7 +258,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Use this if a PushProxyAck is received for this MC meaning the remote
      * Ultrapeer can serve as a PushProxy.
      */
-    private InetAddress _pushProxyAddr = null;
+    private InetAddress _pushProxyAddr;
 
     /** 
      * Use this if a PushProxyAck is received for this MC meaning the remote
@@ -509,6 +510,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
         // Set the Acceptors IP address
         RouterService.getAcceptor().setAddress( localAddress );
+
         try {
             
             _in = new BufferedInputStream(_socket.getInputStream());
@@ -526,7 +528,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             close();
             throw new IOException("could not establish connection");
         }
-
+        
         try {
             //In all the line reading code below, we are somewhat lax in
             //distinguishing between '\r' and '\n'.  Who cares?
@@ -568,7 +570,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                 _inflater = new Inflater();
                 _in = new UncompressingInputStream(_in, _inflater);
             }
-            
+                       
             // remove the reference to the RESPONSE_HEADERS, since we'll no
             // longer be responding.
             // This does not need to be in a finally clause, because if an
@@ -912,6 +914,25 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         }
     }
     
+    /**
+     * Accessor for the <tt>OutputStream</tt> for this connection.  The output
+     * stream returned may or may not use compression.
+     * 
+     * @return the <tt>OutputStream</tt> for this connection
+     */
+    public OutputStream getOutputStream() {
+        return _out;
+    }
+    
+    /**
+     * Accessor for the <tt>Deflater</tt> instance for this connection.
+     * 
+     * @return this connection's deflater
+     */
+    public Deflater getDeflater() {
+        return _deflater;
+    }
+    
     /** Returns true iff line ends with "CONNECT/N", where N
      *  is a number greater than or equal "0.6". */
     private static boolean notLessThan06(String line) {
@@ -1242,98 +1263,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
 
     /**
-     * Sends a message.  The message may be buffered, so call flush() to
-     * guarantee that the message is sent synchronously.  This method is NOT
-     * thread-safe. Behavior is undefined if two threads are in a send call
-     * at the same time for a given connection.
-     *
-     * @requires this is fully initialized
-     * @modifies the network underlying this
-     * @effects send m on the network.  Throws IOException if problems
-     *   arise.
-     */
-    public void sendMessage(Message m) throws IOException {
-        // in order to analyze the savings of compression,
-        // we must add the 'new' data to a stat.
-        long priorCompressed = 0, priorUncompressed = 0;
-        
-        // The try/catch block is necessary for two reasons...
-        // See the notes in Connection.close above the calls
-        // to end() on the Inflater/Deflater and close()
-        // on the Input/OutputStreams for the details.        
-        try {
-            if ( isWriteDeflated() ) {
-                priorUncompressed = _deflater.getTotalIn();
-                priorCompressed = _deflater.getTotalOut();
-            }
-            
-            try {
-                m.write(_out);
-            } catch(IOException ioe) {
-                close(); // make sure we close.
-                throw ioe;
-            }
-
-            updateWriteStatistics(m, priorUncompressed, priorCompressed);
-        } catch(NullPointerException e) {
-            throw CONNECTION_CLOSED;
-        }
-    }
-    
-    /**
-     * Updates the write statistics.
-     * @param m the possibly null message to add to the bytes sent
-     * @param pUn the prior uncompressed traffic, used for adding to stats
-     * @param pComp the prior compressed traffic, used for adding to stats
-     */
-    private void updateWriteStatistics(Message m, long pUn, long pComp) {
-        if( m != null )
-            stats().addBytesSent(m.getTotalLength());
-        if(isWriteDeflated()) {
-            stats().addCompressedBytesSent(_deflater.getTotalOut());
-            if(!CommonUtils.isJava118()) {
-                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalIn() - pUn));
-                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalOut() - pComp));
-            }
-        }
-    }         
-
-    /**
-     * Flushes any buffered messages sent through the send method.
-     */
-    public void flushMessage() throws IOException {
-        // in order to analyze the savings of compression,
-        // we must add the 'new' data to a stat.
-        long priorCompressed = 0, priorUncompressed = 0;
-        
-        // The try/catch block is necessary for two reasons...
-        // See the notes in Connection.close above the calls
-        // to end() on the Inflater/Deflater and close()
-        // on the Input/OutputStreams for the details.
-        try {            
-            if ( isWriteDeflated() ) {
-                priorUncompressed = _deflater.getTotalIn();
-                priorCompressed = _deflater.getTotalOut();
-            }
-
-            try {
-                _out.flush();
-            } catch(IOException ioe) {
-                close();
-                throw ioe;
-            }
-
-            // we must update the write statistics again,
-            // because flushing forces the deflater to deflate.
-            updateWriteStatistics(null, priorUncompressed, priorCompressed);
-        } catch(NullPointerException npe) {
-            throw CONNECTION_CLOSED;
-        }
-    }
-    
-    /**
      * This method is called when a reply is received for a PingRequest
      * originating on this Connection.  So, just send it back.
      * If modifying this method, note that receivingConnection may
@@ -1372,7 +1301,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * 
      * @return the <tt>MessageReader</tt> for this connection
      */
-    public MessageReader getReader() {
+    public MessageReader reader() {
         return _messageReader;    
     }
     
@@ -1382,7 +1311,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * 
      * @return the <tt>MessageWriter</tt> for this connection
      */
-    public MessageWriter getWriter() {
+    public MessageWriter writer() {
         return _messageWriter;    
     }
     
