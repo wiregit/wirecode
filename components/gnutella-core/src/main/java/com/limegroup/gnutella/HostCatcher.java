@@ -31,11 +31,11 @@ import java.util.Date;
  */
 public class HostCatcher {    
     /** The number of supernode pongs to store. */
-    private static final int GOOD_SIZE=50;
+    private static final int GOOD_SIZE=400;
     /** The number of normal pongs to store. */
-    private static final int NORMAL_SIZE=50;
+    private static final int NORMAL_SIZE=100;
     /** The number of private IP pongs to store. */
-    private static final int BAD_SIZE=10;
+    private static final int BAD_SIZE=15;
     private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
     public static final int GOOD_PRIORITY=2;

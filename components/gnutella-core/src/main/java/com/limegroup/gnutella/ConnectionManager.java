@@ -765,6 +765,26 @@ public class ConnectionManager {
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             remove(c);
+            //add the endpoint to hostcatcher
+            if (c.isSupernodeConnection()) {
+                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
+                    c.getPort()), true);
+            }
+        }
+    }
+    
+    /**
+     * Adds connected supernode endpoints to host catcher
+     */
+    public void cacheConnectedSupernodeEndpoints() {
+        for (Iterator iter=getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            //add the endpoint to hostcatcher
+            if (c.isSupernodeConnection()) {
+                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
+                    c.getPort()), true);
+            }
         }
     }
     

@@ -376,6 +376,9 @@ public class RouterService
     public void shutdown() {
         //Write gnutella.net
         try {
+            //ask the manager to add connected supernode endpoints to
+            //host catcher
+            manager.cacheConnectedSupernodeEndpoints();
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
 		finally {
