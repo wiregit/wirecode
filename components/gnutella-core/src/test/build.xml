@@ -6,7 +6,7 @@
   <property name="collections" value="${lib}collections.jar"/>
   <property name="xerces"      value="lib/xerces.jar"/>
   <property name="junit"       value="${lib}junit.jar"/>
-  <property name="jl011"       value="${lib}jl011.jar"/>
+  <property name="jl020"       value="${lib}jl020.jar"/>
   <property name="ui"          value="${lib}ui.jar"/>
   <property name="mrj"         value="${lib}MRJToolkitStubs.jar"/>
   <property name="mac"         value="${lib}MacStubs.jar"/>
@@ -30,7 +30,7 @@
     <pathelement location="${coredir}" />
     <pathelement location="${collections}" />
     <pathelement location="${xerces}" />
-    <pathelement location="${jl011}" />
+    <pathelement location="${jl020}" />
 	<pathelement location="${ui}" />
     <pathelement location="${mrj}" />
 	<pathelement location="${mac}" />
