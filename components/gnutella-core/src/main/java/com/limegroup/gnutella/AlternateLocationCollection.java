@@ -74,7 +74,8 @@ public final class AlternateLocationCollection
 	// implements the AlternateLocationCollector interface
 	public synchronized void 
 		addAlternateLocationCollection(AlternateLocationCollection alc) {
-		Map map = alc.getMap();
+		Map map = alc._alternateLocations;
+		if(map == null) return;
 		Collection values = map.values();
 		Iterator iter = values.iterator();
 		while(iter.hasNext()) {
@@ -87,17 +88,6 @@ public final class AlternateLocationCollection
 	public boolean hasAlternateLocations() {
 		if(_alternateLocations == null) return false;
 		return !_alternateLocations.isEmpty();
-	}
-
-	/**
-	 * Accessor for the internal <tt>Map</tt> of alternate locations,
-	 * accessible only from this class.
-	 *
-	 * @return the <tt>Map</tt> of <tt>AlternateLocation</tt> instances,
-	 *  which may be <tt>null</tt>
-	 */
-	private Map getMap() {
-		return _alternateLocations;
 	}
 
 	/**
@@ -136,33 +126,10 @@ public final class AlternateLocationCollection
 	 * @return the number of alternate locations stored
 	 */
 	public int size() {
+		if(_alternateLocations == null) {
+			return 0;
+		}
 		return _alternateLocations.size();
-	}
-
-	/**
-	 * Overrides Object.equals to more accurately compare 
-	 * <tt>AlternateLocationCollection</tt> instances based on the data.
-	 *
-	 * @return <tt>true</tt> if the specified <tt>Object</tt> is an alternate
-	 *  location collection that has stored exactly the same alterate 
-	 *  locations as this collection
-	 */
-	public boolean equals(Object o) {
-		if(o == this) return true;
-		if(!(o instanceof AlternateLocationCollection)) return false;
-		AlternateLocationCollection alc = (AlternateLocationCollection)o;
-		return _alternateLocations.equals(alc.getMap());
-	}
-
-	/**
-	 * Overrides Object.hashCode to meet the hashCode specification that
-	 * demands that objects that are "equal" according to the equals method
-	 * also have the same hash code.
-	 *
-	 * @return the hash code for this instance
-	 */
-	public int hashCode() {
-		return 37*_alternateLocations.hashCode();
 	}
 
 	/**
