@@ -174,10 +174,11 @@ public class FileManager{
             _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
             
-            //TODO: save space by not adding path components to Trie, or using
+            //TODO2: save space by not adding path components to Trie, or using
             //a special value for the value.  Likewise for common extensions
-            //like "mp3".  Perhaps this logic could go into Trie, e.g., a 
-            //"shareValue" method.
+            //like "mp3".  Perhaps this logic could go into Trie, e.g., a
+            //compress(..) method.  But then the Trie has to be careful remove
+            //values.
 
             //Update index...
             String[] keywords=StringUtils.split(path, DELIMETERS);

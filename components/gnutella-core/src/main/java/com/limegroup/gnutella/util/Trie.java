@@ -553,10 +553,10 @@ class TrieNode {
      *  This is much slower than get(char).
      *  @requires c not already mapped to a node. */
     void put(char c, TrieNode node) {
-        //It's possible to simply insert the node into children instead of
-        //sorting.  That reduces the time from O(n log n) to O(n), where 
-        //n==children.size().  But that requires a more flexible data
-        //structure to store the children. 
+        //TODO2: It's possible to simply insert the node into children instead
+        //of sorting.  That reduces the time from O(n log n) to O(n), where
+        //n==children.size().  But that requires a more flexible data structure
+        //to store the children.
         TrieNodePair[] children2=new TrieNodePair[children.length+1];
         System.arraycopy(children, 0, children2, 0, children.length);
         children2[children2.length-1]=new TrieNodePair(c, node);
