@@ -28,6 +28,9 @@ import java.util.StringTokenizer;
  * </pre>
  */
 public class HTTPDownloader {
+    /** The length of the buffer used in downloading. */
+    public static final int BUF_LENGTH=1024;
+
     private RemoteFileDesc _rfd;
     private boolean _isPush;
 	private long _index;
@@ -368,7 +371,7 @@ public class HTTPDownloader {
 
 		int c = -1;
 		
-		byte[] buf = new byte[1024];
+		byte[] buf = new byte[BUF_LENGTH];
 
 		while (true) {
 			//It's possible that we've read more than requested because of a
@@ -378,7 +381,8 @@ public class HTTPDownloader {
   			if (_amountRead >= _amountToRead) 
 				break;
 			
-			c = _byteReader.read(buf);
+            int left=_amountToRead - _amountRead;
+			c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
 
 			if (c == -1) 
 				break;
