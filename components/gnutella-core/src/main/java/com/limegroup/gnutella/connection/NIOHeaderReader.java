@@ -12,8 +12,10 @@ import com.limegroup.gnutella.http.HTTPHeader;
 public final class NIOHeaderReader implements HeaderReader {
 
 
-    //private HttpHeader _header;
-
+    /**
+     * Flag for whether or not we've read a complete set of headers.  A 
+     * complete set of headers is terminated by \r\n.
+     */
     private boolean _headersComplete;
 
     /**
@@ -62,6 +64,47 @@ public final class NIOHeaderReader implements HeaderReader {
      *  network, including a syntax error
      */    
     public HTTPHeader readHeader() throws IOException  {
+        String line = readLine();
+        if(line == null) {
+            return null;
+        }
+        if(line.length() == 0) {
+            _headersComplete = true;
+            return null;
+        }
+        return HTTPHeader.createHeader(line);     
+    }
+    
+    // inherit doc comment
+    public HTTPHeader readHeader(int timeout) throws IOException {
+        // TODO re-enable timeouts
+        return readHeader();
+    }
+
+    // inherit doc comment
+    public String readConnect() throws IOException {
+        return readLine();
+    }
+
+    // inherit doc comment
+    public String readConnect(int timeout) throws IOException {
+        return readConnect();
+        // TODO enable timeouts
+    }
+    
+    /**
+     * Helper method for reading a line of handshaking -- a line terminated
+     * by \r\n.  This line can either be a request line, a response status 
+     * line, or a HTTP-style Gnutella connection header.  In particular, this
+     * method takes care of the various header reading states for non-blocking
+     * reads, such as the case where a partial line was read on the previous 
+     * call.
+     * 
+     * @return the line read from the remote host, or <tt>null</tt> if we 
+     *  could only read a partial header
+     * @throws IOException if there's an IO error reading the header
+     */    
+    private String readLine() throws IOException {
         _headersComplete = false;
         // if there are more headers to read in the buffer, keep reading
         if(_headerByteBuffer.position() != 0 && 
@@ -75,7 +118,7 @@ public final class NIOHeaderReader implements HeaderReader {
                 if(header.length() == 0) {
                     return null;
                 }
-                return HTTPHeader.createHeader(header);
+                return header;
             }
         } 
 
@@ -105,7 +148,7 @@ public final class NIOHeaderReader implements HeaderReader {
         }
     
         //_header = new HttpHeader();
-        return HTTPHeader.createHeader(header);        
+        return header;         
     }
     
     
@@ -116,10 +159,8 @@ public final class NIOHeaderReader implements HeaderReader {
      */
     private String read(ByteBuffer buf) throws IOException   {
         while(buf.hasRemaining() && _buffer.length() < 1024)  {
-            //System.out.println("NIOHeaderReader::read::in loop");
             char curChar = (char)buf.get();
-            //System.out.print(curChar);
-            if(curChar == '\r' || curChar == '\n') {
+            if(curChar == '\r') {
                 char nextChar = (char)buf.get();
                 if(nextChar == '\n') {
                     // we've reached the end of a header
@@ -130,7 +171,6 @@ public final class NIOHeaderReader implements HeaderReader {
                         _headersComplete = false;
                     }
                     _buffer = new StringBuffer();
-                    
                     return header;
                 } else {
                     // we encountered only a '\r' or a '\n' but no final 
@@ -154,40 +194,8 @@ public final class NIOHeaderReader implements HeaderReader {
     }
 
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readHeader(int)
-     */
-    public HTTPHeader readHeader(int timeout) throws IOException {
-        // TODO re-enable timeouts
-        return readHeader();
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#headersComplete()
-     */
+    // inherit doc comment
     public boolean headersComplete() {
         return _headersComplete;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readConnect()
-     */
-    public String readConnect() throws IOException {
-        // TODO: what happens when these reads fail -- need to handle that
-        _headerByteBuffer.clear();
-        int bytesRead = CHANNEL.read(_headerByteBuffer);
-        if(bytesRead == -1) {
-            throw new IOException("reached end of stream");
-        }
-        _headerByteBuffer.flip();
-        return read(_headerByteBuffer);
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readConnect(int)
-     */
-    public String readConnect(int timeout) throws IOException {
-        return null;
-        // TODO enable timeouts
     }
 }
