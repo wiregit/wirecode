@@ -424,7 +424,7 @@ public class HostCatcher {
             while (! gotGoodPong) {
                 //1) Try each quick-connect host until we connect
                 String[] hosts=settings.getQuickConnectHosts();
-                for (int i=0; i<hosts.length; i++) {
+                for (int i=0; i<hosts.length && !gotGoodPong; i++) {
                     //a) Extract hostname+port and try to connect synchronously.
                     Endpoint e;
                     try {
