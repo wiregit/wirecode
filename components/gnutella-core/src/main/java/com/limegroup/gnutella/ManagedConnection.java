@@ -277,6 +277,11 @@ public class ManagedConnection extends Connection
     private QueryRouteTable _lastQRPTableSent;
     
     /**
+     * Holds the mappings of GUIDs that are being proxied.
+     */
+    private List _guidPairs = Collections.synchronizedList(new LinkedList());
+
+    /**
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
@@ -1012,6 +1017,9 @@ public class ManagedConnection extends Connection
         query = QueryRequest.createProxyQuery(query, oobGUID);
 
         // 2) set up mappings between the guids
+        // put the original guid as the first, the oob guid as the second
+        GUIDPair pair = new GUIDPair(new GUID(origGUID), new GUID(oobGUID));
+        _guidPairs.add(pair);
 
         return query;
     }
@@ -1514,4 +1522,16 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
+
+    
+    /** A simple container that associates two guids. */
+    public class GUIDPair {
+        public final GUID _one;
+        public final GUID _two;
+        public GUIDPair(GUID one, GUID two) {
+            _one = one;
+            _two = two;
+        }
+    }
+
 }
