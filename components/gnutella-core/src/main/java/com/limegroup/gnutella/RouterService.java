@@ -211,16 +211,22 @@ System.out.println("RouterService init");
     }
 
     /**
-     * Searches Gnutellanet with given query string and expected 
-     * minimum speed.  Results are shown asynchronously 
-     * via ActivityCallback.
+     * Searches Gnutellanet with the given query string and minimum
+     * speed.  Returns the GUID of the query request sent as a 16 byte
+     * array, or null if there was a network error.  ActivityCallback
+     * is notified asynchronously of responses.  These responses can
+     * be matched with requests by looking at their GUIDs.  (You may
+     * want to wrap the bytes with a GUID object for simplicity.)
      */
-    public void query(String query, int minSpeed) {
+    public byte[] query(String query, int minSpeed) {
 	QueryRequest qr=new QueryRequest(Const.TTL, minSpeed, query);
 	manager.fromMe(qr);
 	try {
 	    manager.sendToAll(qr);
-	} catch (IOException e) { }
+	    return qr.getGUID();
+	} catch (IOException e) { 
+	    return null;
+	}
     }
 
     /**
