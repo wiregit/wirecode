@@ -34,4 +34,9 @@ public class NameValue
         return _value;
     }
     
+    public void setValue(Object value)
+    {
+        this._value = value;
+    }
+    
 }
