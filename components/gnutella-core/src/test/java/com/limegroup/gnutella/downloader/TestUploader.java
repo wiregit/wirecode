@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -552,7 +553,7 @@ public class TestUploader extends AssertComparisons {
         BufferedReader input = 
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        OutputStream output = socket.getOutputStream();
+        OutputStream output = new BufferedOutputStream(socket.getOutputStream());
         if(rate > 0)
             throttle = new BandwidthThrottle(rate*1024);
         else
