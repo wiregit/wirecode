@@ -54,6 +54,8 @@ public interface SettingsInterface
     public boolean    getClearCompletedDownload();
     public int        getSearchAnimationTime();
 
+	public int        getUploadsPerPerson();
+
     public String     getConnectString();
     public String     getConnectOkString();
 
@@ -188,6 +190,8 @@ public interface SettingsInterface
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
 
+    public void setUploadsPerPerson(int uploads);
+
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
     public void setConnectString(String connect);
@@ -244,6 +248,9 @@ public interface SettingsInterface
     "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
     "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt";
 
+
+	/* the number of uplads allowed per person at a given time */
+    public static final int     DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
@@ -333,5 +340,7 @@ public interface SettingsInterface
     public static final String FORCED_PORT = "FORCED_PORT";
     public static final String FREELOADER_FILES = "FREELOADER_FILES";
     public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
+
+    public static final String UPLOADS_PER_PERSON = "UPLOADS_PER_PERSON";
 
 }

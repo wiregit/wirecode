@@ -72,6 +72,8 @@ public class SettingsManager implements SettingsInterface
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
 
+    private static int      uploadsPerPerson_;
+
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
      *  INVARIANT: connectString_=connectStringFirstWord_+" "+connectStringRemainder_
@@ -229,6 +231,9 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(TIMEOUT)) {
                     setTimeout(Integer.parseInt(p));
                 }
+				else if(key.equals(UPLOADS_PER_PERSON)){
+					setUploadsPerPerson(Integer.parseInt(p));
+				}
                 else if(key.equals(KEEP_ALIVE)) {
                     //Verified for real later.  See note below.
                     setKeepAlive(Integer.parseInt(p));
@@ -492,6 +497,8 @@ public class SettingsManager implements SettingsInterface
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
 
+		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
+
         write_ = true;
         writeProperties();
     }
@@ -542,6 +549,9 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the maximum number of connections to hold */
     public int getMaxIncomingConnections(){return maxIncomingConn_;}
+
+	/** returns the maximum number of uploads per person */
+    public int getUploadsPerPerson(){return uploadsPerPerson_;}
 
     /** returns the directory to save to */
     public String getSaveDirectory() {
@@ -886,6 +896,13 @@ public class SettingsManager implements SettingsInterface
         String s = Integer.toString(basicInfo);
         props_.put(BASIC_QUERY_INFO, s);
     }
+
+	public void setUploadsPerPerson(int uploads) {
+		uploadsPerPerson_ = uploads;
+		String s = Integer.toString(uploads);
+        props_.put(UPLOADS_PER_PERSON , s);
+	}
+
 
     public void setAdvancedInfoForQuery(int advancedInfo) {
         advancedQueryInfo_ = advancedInfo;
