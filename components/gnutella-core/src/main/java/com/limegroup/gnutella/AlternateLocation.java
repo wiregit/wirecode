@@ -449,6 +449,8 @@ public final class AlternateLocation
                                           "alt loc: "+host);
                 } 
             }
+            if(url.getPort()==-1)
+                url = new URL("HTTP",url.getHost(),80,url.getFile());
 			return url;
 		} else {
 			// we could not understand the beginning of the alternate location

@@ -7,6 +7,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.*;
 
 public class TestUploader {    
     /** My name, for debugging */
@@ -26,6 +27,7 @@ public class TestUploader {
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
 	private URN                         sha1;
+    private boolean http11 = true;
     ServerSocket server = null;
     private boolean busy = false;
     //Note about queue testing: This is how the queuing simulation works: If
@@ -165,7 +167,7 @@ public class TestUploader {
                 Thread runner=new Thread() {
                     public void run() {          
                         try {
-                            if (!stopped) {
+                            while(http11 && !stopped) {
                                 handleRequest(mySocket);
                                 if (queue) { 
                                     mySocket.setSoTimeout(MAX_POLL);
@@ -198,13 +200,13 @@ public class TestUploader {
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
         //use that.  Otherwise, send the whole file.  Skip all other headers.
-        //TODO2: later we should check here for HTTP1.1
         //TODO2: Later we should also check the validity of the requests
         BufferedReader input = 
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        BufferedOutputStream output = 
-            new BufferedOutputStream(socket.getOutputStream());
+        ThrottledOutputStream output = new ThrottledOutputStream(
+            new BufferedOutputStream(socket.getOutputStream()),
+            new BandwidthThrottle(rate*1024));
         int start = 0;
         int stop = TestFile.length();
         while (true) {
@@ -219,7 +221,8 @@ public class TestUploader {
 			if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(line)) {
 				sha1 = readContentUrn(line);
 			}
-
+            
+            
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
             if (i==0) {
@@ -232,6 +235,10 @@ public class TestUploader {
                 start=p.a;
                 stop=p.b;;
             }
+            
+            i = line.indexOf("GET");
+            if(i==0)
+                http11 = line.indexOf("1.1") > 0;
 		}
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
@@ -292,25 +299,17 @@ public class TestUploader {
         //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            long startTime=System.currentTimeMillis();
-            for (int j=0; j<Math.max(1,(rate*1024)) && i<stop; j++) {
-                //if we are above the threshold, simulate an interrupted connection
-                if (stopAfter>-1 && totalUploaded>=stopAfter) {
-                    stopped=true;
-                    out.flush();
-                    throw new IOException();
-                }
-                if(sendCorrupt)
-                    out.write(TestFile.getByte(i)+(byte)1);
-                else
-                    out.write(TestFile.getByte(i));
-                totalUploaded++;
-                i++;
+            if (stopAfter>-1 && totalUploaded>=stopAfter) {
+                stopped=true;
+                out.flush();
+                throw new IOException();
             }
-            long elapsed=System.currentTimeMillis()-startTime;
-            long wait=1000-elapsed;
-            if (wait>0)
-                try { Thread.sleep(wait); } catch (InterruptedException e) { }
+            if(sendCorrupt)
+                out.write(TestFile.getByte(i)+(byte)1);
+            else
+                out.write(TestFile.getByte(i));
+            totalUploaded++;
+            i++;
         }
         out.flush();
     }

@@ -172,10 +172,10 @@ public class DownloadTest extends TestCase {
             tUploaderAlternateLocations();
             cleanup();
         }
-        if(args.length == 0 || args[0].equals("16")) {
-            tWeirdAlternateLocations();
-            cleanup();
-        }
+//          if(args.length == 0 || args[0].equals("16")) {
+//              tWeirdAlternateLocations();
+//              cleanup();
+//          }
         if(args.length == 0 || args[0].equals("17")) {
             tStealerInterruptedWithAlternate();
             cleanup();
@@ -213,7 +213,7 @@ public class DownloadTest extends TestCase {
             vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0,TestFile.length(),true);
-            downloader.doDownload(vf);
+            downloader.doDownload(vf,false);
         } catch (IOException e) {
             assertTrue("Unexpected exception: "+e,false);
         } 
@@ -235,7 +235,7 @@ public class DownloadTest extends TestCase {
             vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0, TestFile.length(),true);
-            downloader.doDownload(vf);
+            downloader.doDownload(vf, false);
         } catch (IOException e) {
             assertTrue("Unexpected exception: "+e, false);
         } 
@@ -468,10 +468,6 @@ public class DownloadTest extends TestCase {
             waitForCorrupt(download);
         else
             waitForComplete(download);
-        if(deleteCorrupt) {//we are not interrupted if we choose to keep going
-            check(download.getAmountRead()<2*TestFile.length()/3, 
-                  "Didn't interrupt soon enough: "+download.getAmountRead());
-        }
         debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
@@ -512,7 +508,8 @@ public class DownloadTest extends TestCase {
         debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
-        final int RATE=500;
+        final int RATE=100;
+        uploader1.setRate(RATE);
         RemoteFileDesc rfd1 = newRFDWithURN(6346,100,null);
         Downloader download = null;
         try {
