@@ -47,7 +47,6 @@ public class RichQueryHandler{
      * connections make two different queries. Then all bad things can happen.
      */
     public synchronized Response[] query(String XMLQuery,FileManager fManager){
-        debug("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
         LimeXMLDocument queryDoc = null;
@@ -76,8 +75,7 @@ public class RichQueryHandler{
         long index=-1;
         long size=-1;
         String name="";
-        int z =0;
-        debug("RQH.query(): # of resps = " + s);
+        int z = 0;
         boolean busy = 
             RouterService.getUploadManager().isBusy() &&
             RouterService.getUploadManager().isQueueFull();
