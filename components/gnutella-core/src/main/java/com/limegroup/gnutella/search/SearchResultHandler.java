@@ -7,10 +7,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 
-import org.xml.sax.SAXException;
 import java.io.IOException;
-import java.net.*;
-
 import com.sun.java.util.collections.*;
 
 /**
@@ -192,7 +189,7 @@ public final class SearchResultHandler {
 						try {
 							Thread.sleep(sleepTime);
 						} catch (InterruptedException e) { }
-					};
+					}
 					
 					//3. Actually handle this.
 					boolean displayed = handleReply(qr);
