@@ -329,18 +329,24 @@ public class QueryRouteTable {
         // we must construct a new QRT of this size.            
         resizedQRT = new QueryRouteTable(newSize);
         
-        //This algorithm scales between tables of 2different lengths and TTLs.
+        //This algorithm scales between tables of different lengths.
         //Refer to the query routing paper for a full explanation.
-        int m = this.bitTableLength;
-        int m2 = resizedQRT.bitTableLength;
-        double scale=((double)m2)/((double)m);   //using float can cause round-off!
-    
+        //(The below algorithm, contributed by Philippe Verdy,
+        // uses integer values instead of decimal values
+        // as both double & float can cause precision problems on machines
+        // with odd setups, causing the wrong values to be set in tables)
+        final int m = this.bitTableLength;
+        final int m2 = resizedQRT.bitTableLength;
         for (int i = this.bitTable.nextSetBit(0); i >= 0;
-          i = this.bitTable.nextSetBit(i+1)) {
-            int low=(int)Math.floor(i*scale);
-            int high=(int)Math.ceil((i+1)*scale);
-            resizedQRT.bitTable.set(low, high);
+          i = this.bitTable.nextSetBit(i + 1)) {
+             // floor(i*m2/m)
+             final int firstSet = (int)(((long)i * m2) / m);
+             i = this.bitTable.nextClearBit(i + 1);
+             // ceil(i*m2/m)
+             final int lastNotSet = (int)(((long)i * m2 - 1) / m + 1);
+             resizedQRT.bitTable.set(firstSet, lastNotSet);
         }
+        
         return resizedQRT.bitTable;
     }
 
