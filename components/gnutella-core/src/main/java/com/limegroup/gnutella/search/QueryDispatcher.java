@@ -9,11 +9,17 @@ import com.limegroup.gnutella.*;
 public final class QueryDispatcher implements Runnable {
 
 	/**
-	 * List of outstanding queries.
+	 * <tt>List</tt> of outstanding queries.  
 	 */
 	private List _queries = new LinkedList();
 
-	private final Object QUERY_LOCK = new Object();
+	/**
+	 * <tt>List</tt> of new queries to add.
+	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
+	 * it's ever iterated over.  
+	 */
+	private final List NEW_QUERIES = 
+		Collections.synchronizedList(new LinkedList());
 
 	/**
 	 * List of unexpired queries -- continually swapped with <tt>_queries</tt>.
@@ -56,11 +62,7 @@ public final class QueryDispatcher implements Runnable {
 	 * @param handler the <tt>QueryHandler</tt> instance to add
 	 */
 	public void addQuery(QueryHandler handler) {
-		synchronized(QUERY_LOCK) {
-			// this adds the query to the end of the list
-			_queries.add(handler);		   
-			System.out.println("QueryDispatcher::addQuery::size: "+_queries.size()); 
-		}
+		NEW_QUERIES.add(handler);		   
 	}
 
 	/**
@@ -74,21 +76,24 @@ public final class QueryDispatcher implements Runnable {
 	 * Processes current queries.
 	 */
 	private void processQueries() {
-		//System.out.println("QueryDispatcher::processQueries"); 
-		synchronized(QUERY_LOCK) {
-			//System.out.println("QueryDispatcher::processQueries::got lock"); 
-			Iterator iter = _queries.iterator();
-			while(iter.hasNext()) {
-				QueryHandler handler = (QueryHandler)iter.next();
-				handler.sendQuery();
-				if(handler.hasEnoughResults()) {
-					EXPIRED_QUERIES.add(handler);
-				}
-			}
-
-			// remove any expired queries
-			_queries.removeAll(EXPIRED_QUERIES);
-			EXPIRED_QUERIES.clear();
+		// necessary to obtain the lock because addAll iterates over
+		// NEW_QUERIES
+		synchronized(NEW_QUERIES) {
+			_queries.addAll(NEW_QUERIES);
 		}
+
+		//System.out.println("QueryDispatcher::processQueries::got lock"); 
+		Iterator iter = _queries.iterator();
+		while(iter.hasNext()) {
+			QueryHandler handler = (QueryHandler)iter.next();
+			handler.sendQuery();
+			if(handler.hasEnoughResults()) {
+				EXPIRED_QUERIES.add(handler);
+			}
+		}
+
+		// remove any expired queries
+		_queries.removeAll(EXPIRED_QUERIES);
+		EXPIRED_QUERIES.clear();
 	}
 }
