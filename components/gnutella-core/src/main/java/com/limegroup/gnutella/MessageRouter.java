@@ -869,13 +869,21 @@ public abstract class MessageRouter {
         //Broadcast the ping to other connected nodes (supernodes or older
         //nodes), but DON'T forward any ping not originating from me 
         //along leaf to ultrapeer connections.
-        List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++) {
+        List list = manager.getInitializedConnections2();
+        int size = list.size();
+        boolean randomlyForward = false;
+        if(size > 3) randomlyForward = true;
+        for(int i=0; i<size; i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==FOR_ME_REPLY_HANDLER
 				   || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-                c.send(request);
+
+                if(randomlyForward && (Math.random() < 0.95)) {
+                    continue;
+                } else {
+                    c.send(request);
+                }
             }
         }
     }
