@@ -46,7 +46,11 @@ public class MediaType {
      * Type for 'any file'
      */
     private static final MediaType TYPE_ANY = 
-        new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, EXT_ANY_TYPE, null);
+        new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, EXT_ANY_TYPE, null) {
+            public boolean matches(String ext) {
+                return true;
+            }
+        };
                                        
     /**
      * Type for 'text'
