@@ -9,6 +9,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
 
 
@@ -18,7 +19,7 @@ import com.limegroup.gnutella.browser.ExternalControl;
  * chat connections over TCP; more may be supported in the future.<p> 
  * This class has a special relationship with UDPService and should really be
  * the only class that intializes it.  See setListeningPort() for more
- * info.<p>
+ * info.
  */
 public class Acceptor extends Thread {
     /**
@@ -207,7 +208,6 @@ public class Acceptor extends Thread {
 	 * The boolean variable _acceptedIncoming is set to false
 	 * by default, and true as soon as a connection is established.
 	 */
-
 	public boolean acceptedIncoming() {
 		return _acceptedIncoming;
 	}
@@ -301,7 +301,7 @@ public class Acceptor extends Thread {
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
-				settings.setAcceptedIncoming(_acceptedIncoming);
+				ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
 
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
