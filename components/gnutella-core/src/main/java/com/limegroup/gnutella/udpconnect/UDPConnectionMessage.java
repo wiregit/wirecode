@@ -65,7 +65,8 @@ public abstract class UDPConnectionMessage extends Message {
 	 * settings and data.
      */
     protected UDPConnectionMessage(
-      byte connectionID, byte opcode, int sequenceNumber, byte[] data ) 
+      byte connectionID, byte opcode, int sequenceNumber, byte[] data,
+	  int  datalength ) 
       throws BadPacketException {
 
         super(
@@ -73,15 +74,15 @@ public abstract class UDPConnectionMessage extends Message {
           /*func*/   F_UDP_CONNECTION, 
           /*ttl*/    (byte)1, 
           /*hops*/   (byte)0, 
-          /*length*/ calcPayloadLength(data));
+          /*length*/ calcPayloadLength(datalength));
 
         _connectionID   = connectionID;
         _opcode         = opcode;
         _sequenceNumber = sequenceNumber;
         _data1          = data;
         _data1Offset    = 0;
-        _data1Length    = (data.length >= MAX_GUID_DATA ? MAX_GUID_DATA : 
-                           data.length);
+        _data1Length    = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
+                           datalength);
         _data2          = data;
         _data2Offset    = MAX_GUID_DATA;
         _data2Length    = getLength();
@@ -143,8 +144,8 @@ public abstract class UDPConnectionMessage extends Message {
     /**
      * Calculate the payload length when the data is available in one array.
      */
-    private static int calcPayloadLength(byte[] data) {
-        return(data.length <= MAX_GUID_DATA ? 0 : data.length - MAX_GUID_DATA);
+    private static int calcPayloadLength(int datalength) {
+        return(datalength <= MAX_GUID_DATA ? 0 : datalength - MAX_GUID_DATA);
     }
 
     /**

@@ -11,14 +11,16 @@ public class DataMessage extends UDPConnectionMessage {
     /**
      * Construct a new DataMessage with the specified data.
      */
-    public DataMessage(byte connectionID, int sequenceNumber, byte[] data) 
+    public DataMessage(byte connectionID, int sequenceNumber, 
+	  byte[] data, int datalength) 
       throws BadPacketException {
 
         super(
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_DATA, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* data                       */ data
+          /* data                       */ data,
+          /* data length                */ datalength
           );
     }
 

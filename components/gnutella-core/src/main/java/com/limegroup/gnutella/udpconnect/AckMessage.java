@@ -16,7 +16,8 @@ public class AckMessage extends UDPConnectionMessage {
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_ACK, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* no data in an ack          */ emptyByteArray
+          /* no data in an ack          */ emptyByteArray,
+          /* data length of zero        */ 0
           );
     }
 

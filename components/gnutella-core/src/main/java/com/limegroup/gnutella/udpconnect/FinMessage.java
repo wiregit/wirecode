@@ -16,7 +16,8 @@ public class FinMessage extends UDPConnectionMessage {
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_FIN, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* no data in a fin packet    */ emptyByteArray
+          /* no data in a fin packet    */ emptyByteArray,
+          /* data length of zero        */ 0
           );
     }
 

@@ -18,7 +18,8 @@ public class KeepAliveMessage extends UDPConnectionMessage {
           /* his connectionID                 */ connectionID, 
           /* opcode                           */ OP_KEEPALIVE, 
           /* Keepalive have no sequenceNumber */ (byte)0, 
-          /* no data in a keepalive packet    */ emptyByteArray
+          /* no data in a keepalive packet    */ emptyByteArray,
+          /* data length of zero              */ 0
           );
     }
 

@@ -133,14 +133,14 @@ public class UDPBufferedOutputStream extends OutputStream {
 		Chunk rChunk;
 		if ( chunks.size() > 0 ) {
 			// Return the oldest chunk 
-			rChunk       = new Chunk();
-			rChunk.chunk = (byte[]) chunks.remove(0);
-			rChunk.count = rChunk.chunk.length;
+			rChunk        = new Chunk();
+			rChunk.data   = (byte[]) chunks.remove(0);
+			rChunk.length = rChunk.data.length;
 		} else if (activeCount > 0) {
 			// Return a partial chunk and allocate a fresh one
-			rChunk       = new Chunk();
-			rChunk.chunk = activeChunk;
-			rChunk.count = activeCount;
+			rChunk        = new Chunk();
+			rChunk.data   = activeChunk;
+			rChunk.length = activeCount;
     		allocateNewChunk();
 		} else {
 			// If no data currently, return null

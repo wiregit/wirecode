@@ -57,6 +57,10 @@ public class UDPConnectionProcessor {
         keep the connection alive (and firewalls open) */
 	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
+	/** Define the startup time before starting to send data.  Note that
+        on the receivers end, they may not be setup initially.  */
+	private static final long WRITE_STARTUP_WAIT_TIME = 400;
+
 
     /** Keep one KeepaliveMessage around for handy use - lazy instanciation */
     private KeepAliveMessage  KEEPALIVE_MSG;
@@ -177,6 +181,8 @@ public class UDPConnectionProcessor {
 
         // Create the delayed connection components
         _senderWindow    = new DataWindow(DATA_WINDOW_SIZE, 1);
+		// TODO: keep up to date
+        _chunkLimit      = _senderWindow.getWindowSpace();  
         _receiverWindow  = new DataWindow(DATA_WINDOW_SIZE, 1);
         try {
             KEEPALIVE_MSG    = new KeepAliveMessage(_theirConnectionID);
@@ -263,7 +269,8 @@ public class UDPConnectionProcessor {
 	}
 
     /**
-     *  Return the room for new local incoming data in chunks
+     *  Return the room for new local incoming data in chunks. This should 
+	 *  remain equal to the space available in the sender data window.
      */
 	public int getChunkLimit() {
 		return _chunkLimit;
@@ -273,7 +280,7 @@ public class UDPConnectionProcessor {
      *  Convenience method for sending keepalive message since we might fire 
      *  these off before waiting
      */
-    private void sendKeepAlive() throws IllegalArgumentException {
+    private void sendKeepAlive() {
         try {  
             send(KEEPALIVE_MSG);
         } catch(IllegalArgumentException iae) {
@@ -283,6 +290,27 @@ public class UDPConnectionProcessor {
     }
 
     /**
+     *  Convenience method for sending data.  TODO: graceful shutdown on error
+	 */
+    private synchronized void sendData(Chunk chunk) {
+        try {  
+            DataMessage dm = new DataMessage(_theirConnectionID, 
+			  _sequenceNumber, chunk.data, chunk.length);
+            send(dm);
+			//_senderWindow.addData(_sequenceNumber, dm);  /TODO: do
+
+			_sequenceNumber++;
+        } catch (BadPacketException bpe) {
+            // This would not be good.  
+            ErrorService.error(bpe);
+        } catch(IllegalArgumentException iae) {
+            // Report an error since this shouldn't ever happen
+            ErrorService.error(iae);
+        }
+    }
+
+
+    /**
      *  Send a message on to the UDPService
      */
 	private synchronized void send(UDPConnectionMessage msg) 
@@ -290,6 +318,7 @@ public class UDPConnectionProcessor {
 		_lastSendTime = System.currentTimeMillis();
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
+
 
     // ------------------  Connection Handling Logic -------------------
     //
@@ -328,6 +357,12 @@ public class UDPConnectionProcessor {
                 catch(InterruptedException e) {}
                 waitTime += SYN_WAIT_TIME;
 			}
+
+			// Start looking for data to write after an initial startup time
+			// Note: the caller needs to open the output connection and write
+			// some data before we can do anything.
+	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+
 		} catch (IllegalArgumentException iae) {
 			throw new IOException(iae.getMessage());
 		}
@@ -389,6 +424,16 @@ public class UDPConnectionProcessor {
      */
     public synchronized void writeData() {
         long time = 0l;
+
+		// If the input has not been started then wait again
+		if ( _input == null ) {
+	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+			return;
+		}
+
+		Chunk chunk = _input.getChunk();
+		sendData(chunk);
+		//time = _senderWindow.getWaitTime();
 
         // TODO: fill in
 
