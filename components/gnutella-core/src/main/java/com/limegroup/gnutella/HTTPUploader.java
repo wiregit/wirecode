@@ -252,50 +252,38 @@ public class HTTPUploader implements Runnable {
 	System.out.println("In the upload run");
 	
 	_callback.addUpload(this);
-	doUpload();
+	doUploadTwo();
 	_callback.removeUpload(this);
     }
 
     public void doUpload() {
 
         writeHeader();
-	
 	int c = -1;
-	
 	int available = 0;
 
 	// _bis = new BufferedInputStream(_fis);
-//  	_bos = new BufferedOutputStream(_ostream);
-
+	// _bos = new BufferedOutputStream(_ostream);
 	// byte[] buf = new byte[1024]; 
-
-  	//  try {
-//  	OutputStream _ostream = _socket.getOutputStream();
-//  	}
-//  	catch (IOException e) {
-
-//  	}
+  	// try {
+	//   OutputStream _ostream = _socket.getOutputStream();
+	// }
+	// catch (IOException e) {
+	// }
 	
 	while (true){
-	    // System.out.println("amount just read "  + c);
 	    try {
-		// c = _fis.read(buf);
 		c = _fis.read();
 	    }
 	    catch (IOException e) {
 		uploadError("Unable to read from the file");		
 		e.printStackTrace();
 	    }
-
-	    // System.out.println("after first try/catch");
-
 	    if (c == -1)
 		break;
-	    // System.out.println("after first try/catch");
 	    try {
 		if (_ostream == null)
   		    System.out.println("ostream is null");
-		// _ostream.write(buf, 0, c);
 		_ostream.write(c);
 
 	    }		
@@ -303,26 +291,56 @@ public class HTTPUploader implements Runnable {
 		uploadError("Unable to write to the socket");		
 		e.printStackTrace();
 	    }
+
+	    // _amountRead += c;
+
 	    // System.out.println("after second try/catch");
 
 	    //_amountRead += c;
 	    _amountRead++;
+
 	}
 
 	try {
-	    // _ostream.close();
 	    _out.close();
 	}
 	catch (IOException e) {
 	    uploadError("Unable to close the socket");		
 	} 
 	
-	//}
-	
-  	//  catch (Exception e) {
-//    	    uploadError("Unable to read from the file");
-//    	    return;
-//    	}
+    }
+
+    public void doUploadTwo() {
+	writeHeader();
+	int c = -1;
+	int available = 0;
+
+	byte[] buf = new byte[1024];
+	while (true) {
+	    try {
+		c = _fis.read(buf);
+	    }
+	    catch (IOException e) {
+
+	    }
+	    if (c == -1) 
+		break;
+	    try {
+		_ostream.write(buf, 0, c);
+	    }
+	    catch (IOException e) {
+		uploadError("Unable to write to the socket");		
+	    }
+	    _amountRead += c;
+
+	}
+	try {
+	    _out.close();
+	}
+	catch (IOException e) {
+	    uploadError("Unable to close the socket");		
+	}
+
 
     }
     
