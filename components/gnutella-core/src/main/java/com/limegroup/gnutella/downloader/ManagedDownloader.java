@@ -164,7 +164,9 @@ public class ManagedDownloader implements Downloader {
                     }
                     
                     //2. Send pushes for those hosts that we couldn't connect to.
-                    sendPushes();
+                    //   But only try this twice.
+                    if (i<2)
+                        sendPushes();
 
                     //3. Wait a while before retrying.  Accept any pushes.
                     success=waitForPushDownloads();
