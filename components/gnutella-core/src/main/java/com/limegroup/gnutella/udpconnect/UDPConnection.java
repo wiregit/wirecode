@@ -9,6 +9,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
  */
 public class UDPConnection extends Socket {
 
+    public static final byte VERSION = (byte) 1;
+
 	private UDPConnectionProcessor _processor;
 
     /**

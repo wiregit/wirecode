@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -70,7 +71,9 @@ public class QueryReply extends Message implements Serializable{
      *  FALSE, or UNDEFINED.  Assume it is false and set it to true if otherwise.
      */
     private volatile boolean _supportsFWTransfer = false;
-    
+    /** Version number of FW Transfer the host supports. */
+    private volatile byte _fwTransferVersion = (byte)0;
+
     private static final int TRUE=1;
     private static final int FALSE=0;
     private static final int UNDEFINED=-1;
@@ -693,6 +696,13 @@ public class QueryReply extends Message implements Serializable{
         return _supportsFWTransfer;
     }
 
+    /** @return 1 or greater if FW Transfer is supported, else 0.
+     */
+    public byte getFWTransferVersion() {
+        parseResults();
+        return _fwTransferVersion;
+    }
+
     /** 
      * Returns true iff the client supports browse host feature.
      * @return true, if the client supports browse host feature,
@@ -931,8 +941,9 @@ public class QueryReply extends Message implements Serializable{
                         ggepBlocks = GGEP.read(_payload, magicIndex);
                         if (_ggepUtil.allowsBrowseHost(ggepBlocks))
                             supportsBrowseHostT = TRUE;
-                        if (_ggepUtil.allowsFWTransfer(ggepBlocks))
-                            _supportsFWTransfer = true;
+                        _fwTransferVersion = 
+                            _ggepUtil.getFWTransferVersion(ggepBlocks);
+                        if (_fwTransferVersion > 0) _supportsFWTransfer = true;
                         if (_ggepUtil.replyToMulticastQuery(ggepBlocks))
                             replyToMulticastT = TRUE;
                         else
@@ -1244,7 +1255,8 @@ public class QueryReply extends Message implements Serializable{
                 if (isMulticastResponse)
                     retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
                 if (supportsFWTransfer)
-                    retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS);
+                    retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
+                                new byte[] {UDPConnection.VERSION});
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1321,6 +1333,29 @@ public class QueryReply extends Message implements Serializable{
                 retBool = headers.contains(GGEP.GGEP_HEADER_FW_TRANS);
             }
             return retBool;
+        }
+
+        /** @return the version of FW Transfer supported by the host.  0
+         *  if no support, else 1 or greater.
+         */
+        public byte getFWTransferVersion(GGEP[] ggeps) {
+            byte retVersion = 0;
+            for (int i = 0; 
+                 (ggeps != null) && (i < ggeps.length); 
+                 i++) {
+                Set headers = ggeps[i].getHeaders();
+                if (headers.contains(GGEP.GGEP_HEADER_FW_TRANS)) {
+                    try {
+                    byte[] bytes = ggeps[i].getBytes(GGEP.GGEP_HEADER_FW_TRANS);
+                    if (bytes != null) {
+                        retVersion = bytes[0];
+                        break;
+                    }
+                    }
+                    catch (BadGGEPPropertyException ignored) {}
+                }
+            }
+            return retVersion;
         }
 
         /** @return whether or not it can be inferred that this reply is in
