@@ -1,23 +1,9 @@
 <project name="Gnutella" default="core" basedir=".">
 
 <!-- set global properties for this basedir -->
-<property name="basedir" value="."/>
-<property name="releasedir" value="../release"/>
-<property name="downloader" value="com/limegroup/gnutella/downloader"/>
-<property name="filters" value="com/limegroup/gnutella/filters"/>
-<property name="tests" value="com/limegroup/gnutella/tests"/>
-<property name="uploader" value="com/limegroup/gnutella/uploader"/>
-<property name="util" value="com/limegroup/gnutella/util"/>
-<property name="xml" value="com/limegroup/gnutella/xml"/>
-<property name="routing" value="com/limegroup/gnutella/routing"/>
-<property name="chat" value="com/limegroup/gnutella/chat"/>
-<property name="gnutella" value="com/limegroup/gnutella"/>
-<property name="handshaking" value="com/limegroup/gnutella/handshaking"/>
-<property name="connection" value="com/limegroup/gnutella/connection"/>
-<property name="mp3" value="com/limegroup/gnutella/mp3"/>
-<property name="security" value="com/limegroup/gnutella/security"/>
-<property name="messages" value="com/limegroup/gnutella/messages"/>
-<property name="bzutil" value="com/bitzi/util"/>
+<property name="basedir"     value="."/>
+
+<property name="tests" value="com/limegroup/gnutella/tests/"/>
 
 <!-- constants -->
 <property name="DEBUG" value="yes"/>  
@@ -31,6 +17,7 @@
   <pathelement location="lib/collections.jar" />
   <pathelement location="lib/xerces.jar" />
   <pathelement location="lib/ui.jar" />
+  <pathelement location="../chord" />
 </path>
 
 
@@ -55,9 +42,8 @@
 <target name="core" depends="init">
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}" deprecation="${DEPRECATION}"
 		srcdir="${basedir}" destdir="${basedir}"
-		
-includes="${downloader}/**,${messages}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${routing}/**,${chat}/**,${mp3}/**,${security}/**,${handshaking}/**,${connection}/**, ${bzutil}/**">
-    <classpath refid="default.classpath" />
+		excludes="${tests}**">
+      <classpath refid="default.classpath" />
     </javac>
 </target>
 
