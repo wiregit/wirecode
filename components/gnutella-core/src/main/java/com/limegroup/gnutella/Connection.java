@@ -100,13 +100,7 @@ public class Connection {
      * The number of times we will respond to a given challenge 
      * from the other side, or otherwise, during connection handshaking
      */
-    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;
-    
-    /**
-	 * Constant handle to the <tt>SettingsManager</tt> for accessing
-	 * various properties.
-	 */
-	private final SettingsManager SETTINGS = SettingsManager.instance();
+    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;    
 
 
     /**
@@ -256,7 +250,7 @@ public class Connection {
 		InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
             _socket.getInetAddress().equals(localAddress) &&
-            _port == SETTINGS.getPort()) {
+            _port == SettingsManager.instance().getPort()) {
             throw new IOException("Connection to self");
         }
 
@@ -385,7 +379,8 @@ public class Connection {
                 //c) Terminate abnormally if we wrote anything else.               
                 throw new NoGnutellaOkException(true,
                                                 ourResponse.getStatusCode(),
-                                                "We sent fatal response");
+                                                "We sent fatal response: "+
+												ourResponse);
             }
         }
             
