@@ -210,7 +210,7 @@ public class QueryRequest extends Message implements Serializable{
                 // write out GGEP
                 addDelimiterBefore =
                     writeGemExtension(baos, addDelimiterBefore,
-                                      new String(ggepBytes.toByteArray()));
+                                      ggepBytes.toByteArray());
             }
 
             baos.write(0);                             // final null
@@ -249,40 +249,69 @@ public class QueryRequest extends Message implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(this.payload);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ubytes2int(sp);
-            tempQuery = super.readNullTerminatedString(bais);
+            tempQuery = new String(super.readNullTerminatedBytes(bais));
             // handle extensions, which include rich query and URN stuff
-            String exts = super.readNullTerminatedString(bais);
-            StringTokenizer stok = new StringTokenizer(exts,"\u001c");
-            while (stok.hasMoreElements()) {
-				String curExtStr = stok.nextToken();
-				if(URN.isUrn(curExtStr)) {
-					// it's an URN to match, of form "urn:namespace:etc"
-					URN urn = null;
-					try {
-						urn = URN.createSHA1Urn(curExtStr);
-					} catch(IOException e) {
-						// the urn string is invalid -- so continue
-						continue;
-					}
-					if(tempQueryUrns == null) {
-						tempQueryUrns = new HashSet();
-					}
-					tempQueryUrns.add(urn);
-				} else if(UrnType.isSupportedUrnType(curExtStr)) {
-					// it's an URN type to return, of form "urn" or 
-					// "urn:namespace"
-					if(tempRequestedUrnTypes == null) {
-						tempRequestedUrnTypes = new HashSet();
-					}
-					if(UrnType.isSupportedUrnType(curExtStr)) {
-						tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
-					}
-				} else if (curExtStr.startsWith("<?xml")) {
-					// rich query
-					tempRichQuery = curExtStr;
-				} else if ((curExtStr.getBytes())[0] == 
-                           GGEP.GGEP_PREFIX_MAGIC_NUMBER)
-                    tempQueryKey = parseGGEP(curExtStr);
+            byte[] extsBytes = super.readNullTerminatedBytes(bais);
+            int currIndex = 0;
+            // while we don't encounter a null....
+            while ((currIndex < extsBytes.length) && 
+                   (extsBytes[currIndex] != (byte)0x00)) {
+
+                // HANDLE GGEP STUFF
+                if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
+                    int[] endIndex = new int[1];
+                    endIndex[0] = currIndex+1;
+                    final String QK_SUPP = GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT;
+                    try {
+                        GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
+                        if (ggep.hasKey(QK_SUPP)) {
+                            byte[] qkBytes = ggep.getBytes(QK_SUPP);
+                            tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
+                        }
+                    }
+                    catch (BadGGEPBlockException ignored) {}
+                    catch (BadGGEPPropertyException ignored) {}
+                    
+                    currIndex = endIndex[0];
+                }
+                else { // HANDLE HUGE STUFF
+                    int delimIndex = currIndex;
+                    while ((delimIndex < extsBytes.length) 
+                           && (extsBytes[delimIndex] != (byte)0x1c))
+                        delimIndex++;
+                    if (delimIndex > extsBytes.length) 
+                        ; // we've overflown and not encounted a 0x1c - discard
+                    else {
+                        String curExtStr = new String(extsBytes, currIndex,
+                                                      delimIndex - currIndex);
+                        if (URN.isUrn(curExtStr)) {
+                            // it's an URN to match, of form "urn:namespace:etc"
+                            URN urn = null;
+                            try {
+                                urn = URN.createSHA1Urn(curExtStr);
+                            } 
+                            catch(IOException e) {
+                                // the urn string is invalid -- so continue
+                                continue;
+                            }
+                            if(tempQueryUrns == null) 
+                                tempQueryUrns = new HashSet();
+                            tempQueryUrns.add(urn);
+                        } 
+                        else if (UrnType.isSupportedUrnType(curExtStr)) {
+                            // it's an URN type to return, of form "urn" or 
+                            // "urn:namespace"
+                            if(tempRequestedUrnTypes == null) 
+                                tempRequestedUrnTypes = new HashSet();
+                            if(UrnType.isSupportedUrnType(curExtStr)) 
+                                tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
+                        } 
+                        else if (curExtStr.startsWith("<?xml"))
+                            // rich query
+                            tempRichQuery = curExtStr;
+                    }
+                    currIndex = delimIndex+1;
+                }
             }
         } catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -315,7 +344,7 @@ public class QueryRequest extends Message implements Serializable{
         byte[] ggepBytes = ggepString.getBytes();
         try {
             GGEP ggepBlock = new GGEP(ggepBytes, 0, null);
-            if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+             if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 byte[] qkBytes = 
                 ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
                 retQK = QueryKey.getQueryKey(qkBytes, false);
