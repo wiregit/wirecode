@@ -15,4 +15,6 @@ public class ConnectionHandshakeHeaders
     public static final String MY_ADDRESS       = "My-Address";
     public static final String SUPERNODE        = "Supernode";
     public static final String X_TRY            = "X-Try";
+    public static final String QUERY_ROUTING    = "Query-Routing";
+    public static final String PONG_CACHING     = "Pong-Caching";
 }
