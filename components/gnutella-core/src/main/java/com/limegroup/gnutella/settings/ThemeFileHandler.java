@@ -382,6 +382,13 @@ public final class ThemeFileHandler {
     public static final ColorSetting FILTER_TITLE_COLOR =
         FACTORY.createColorSetting("SEARCH_FILTER_TITLE_COLOR",
                                    new Color(0xFF, 0xCC, 0));
+                                   
+    /**
+     * Setting for the background grid color.
+     */
+    public static final ColorSetting SEARCH_GRID_COLOR = 
+        FACTORY.createColorSetting("SEARCH_GRID_COLOR",
+                            new Color(0, 0, 0));
 
 	/*
 	public static void main(String[] args) {
