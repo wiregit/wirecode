@@ -749,7 +749,7 @@ public class RouterService {
         if (isGUESSCapable() && !uploadManager.isBusy())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
-            return QueryRequest.newQueryGUID(false);
+            return GUID.makeGuid();
     }
 
     /**

@@ -1015,9 +1015,11 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Returns a new GUID appropriate for query requests.  If isRequery,
      * the GUID query is marked.
+     * When creating normal queries, use the RouterService method to incorporate
+     * OOB capability.
      */
     public static byte[] newQueryGUID(boolean isRequery) {
-        return isRequery ? GUID.makeGuidRequery() : GUID.makeGuid();
+        return isRequery ? GUID.makeGuidRequery() : RouterService.newQueryGUID();
 	}
 
     protected void writePayload(OutputStream out) throws IOException {
