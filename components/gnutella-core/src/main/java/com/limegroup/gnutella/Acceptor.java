@@ -2,8 +2,6 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
-
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
