@@ -132,6 +132,16 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private Set _goodLocs;
     
+    /**
+     * The firewalled locations to send to uploaders that are interested
+     */
+    private Set _pushLocs;
+    
+    /**
+     * The bad firewalled locations to send to uploaders that are interested
+     */
+    private Set _badPushLocs;
+    
     /** 
      * The list to send in the n-alts list
      */
@@ -146,6 +156,16 @@ public class HTTPDownloader implements BandwidthTracker {
      * The list of already written n-alts, used to stop duplicates
      */ 
     private Set _writtenBadLocs;
+    
+    /**
+     * The list of already written push alts, used to stop duplicates
+     */
+    private Set _writtenPushLocs;
+    
+    /**
+     * The list of already written bad push alts, used to stop duplicates
+     */
+    private Set _writtenBadPushLocs;
 
     
 	private int _port;
@@ -183,6 +203,11 @@ public class HTTPDownloader implements BandwidthTracker {
 
 
     private Interval _requestedInterval = null;
+    
+    /**
+     * whether the other side wants to receive firewalled altlocs
+     */
+    private boolean _wantsFalts = false;
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -237,8 +262,11 @@ public class HTTPDownloader implements BandwidthTracker {
             AlternateLocationCollection.create(urn);
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
+        _pushLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
         _writtenBadLocs = new HashSet();
+        _writtenPushLocs = new HashSet();
+        _writtenBadPushLocs = new HashSet();
 		_amountRead = 0;
 		_totalAmountRead = 0;
 		applyRate();
@@ -442,7 +470,60 @@ public class HTTPDownloader implements BandwidthTracker {
         if(writeClone != null) //have something to write?
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
-
+        
+        //write f-alts.  However, first send a header the value "true"
+        writeClone = null;
+        synchronized(_pushLocs) {
+            if(_pushLocs.size() > 0) {
+                writeClone = new HashSet();
+                Iterator iter = _pushLocs.iterator();
+                while(iter.hasNext()) {
+                    Object next = iter.next();
+                    writeClone.add(next);
+                    _writtenPushLocs.add(next);
+                }
+                _pushLocs.clear();
+            }
+        }
+        
+        //if we are not firewalled, we are interested in exchanging firewalled locations.
+        if (RouterService.acceptedIncomingConnection()) {
+        	
+        	//however, if the other side has not yet indicated that they are interested
+        	//themselves, we only send a header indicating interest.
+        	if (!_wantsFalts) 
+        		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,"",out);
+        	
+        	// if they have indicated interest and we have some locations, send them out
+        	else if (writeClone!=null) 
+        		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+        				new HTTPHeaderValueCollection(writeClone),out);
+        }
+        
+        
+        //only write bad firewalled locations if the other side has already
+        //indicated interest in firewalled locations at all.
+        if (_wantsFalts) {
+        	writeClone = null;
+        	synchronized(_badPushLocs) {
+                if(_badPushLocs.size() > 0) {
+                    writeClone = new HashSet();
+                    Iterator iter = _badPushLocs.iterator();
+                    while(iter.hasNext()) {
+                        Object next = iter.next();
+                        writeClone.add(next);
+                        _writtenBadPushLocs.add(next);
+                    }
+                    _badPushLocs.clear();
+                }
+            }
+        	
+        	if (writeClone!=null) 
+        		HTTPUtils.writeHeader(HTTPHeaderName.BFALT_LOCATION,
+        				new HTTPHeaderValueCollection(writeClone),out);
+        	
+        }
+        
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         _requestedInterval = new Interval(_initialReadingPoint, stop-1);
 		if (ChatSettings.CHAT_ENABLED.getValue() &&
@@ -706,6 +787,9 @@ public class HTTPDownloader implements BandwidthTracker {
             	parseFeatureHeader(str);
             else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
                 parseTHEXHeader(str);
+            else if (HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str)){
+            	parseFALTHeader(str);
+            }
         }
 
 
@@ -1252,6 +1336,22 @@ public class HTTPDownloader implements BandwidthTracker {
         } else
             _thexUri = str;
     }    
+    
+    /**
+     * 
+     * Method for parsing the header containing firewalled alternate
+     * locations.  The format is described at the Push Proxy spec at the_gdf,
+     * except that an empty header just indicates the other side is interested
+     * in receiving them.
+     * 
+     */
+    private void parseFALTHeader(String str) {
+    	//if we entered this method means the other side is interested
+    	//in receiving firewalled locations.
+    	_wantsFalts=true;
+    	
+    	//TODO:parse stuff here
+    }
       
     /////////////////////////////// Download ////////////////////////////////
 
