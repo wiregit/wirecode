@@ -349,19 +349,9 @@ public class IncompleteFileManager implements Serializable {
             Object o = map.get(incompleteFile);
             if(o==null) //no entry??!
                 continue;
-            else if( incompleteFile instanceof File ) {
-                // (o instanceof List) ie. old downloads.dat            
-                //Canonicalize the file to fix older LimeWires that allowed
-                //non-canonicalized files to be inserted into the table.
-                File f = (File)incompleteFile;
-                try {
-                    f = FileUtils.getCanonicalFile(f);
-                }  catch(IOException ioe) {
-                    // ignore entry
-                    continue;
-                }
+            else {// (o instanceof List) ie. old downloads.dat
                 Iterator iter = ((List)o).iterator();
-                VerifyingFile vf = new VerifyingFile(true, (int)getCompletedSize(f));
+                VerifyingFile vf = new VerifyingFile(true);
                 while(iter.hasNext()) {
                     Interval interval = (Interval)iter.next();
                     //older intervals excuded the high'th byte, so we decrease
@@ -372,7 +362,15 @@ public class IncompleteFileManager implements Serializable {
                     if(interval.high >= interval.low)
                         vf.addInterval(interval);
                 }
+                //Canonicalize the file to fix older LimeWires that allowed
+                //non-canonicalized files to be inserted into the table.
+                if( incompleteFile instanceof File ) {
+                    File f = (File)incompleteFile;
+                    try {
+                        f = FileUtils.getCanonicalFile(f);
                         retMap.put(f, vf);
+                    } catch(IOException ignored) {}
+                }
             }
         }//end of for
         return retMap;

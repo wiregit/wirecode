@@ -305,7 +305,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         Set urns = new HashSet();
         urns.add( HugeTestUtils.URNS[0] );
         fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(false, 0));
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete",
@@ -316,7 +316,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
         fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(false, 0));
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete",
@@ -328,7 +328,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         urns = new HashSet();
         urns.add( HugeTestUtils.URNS[1] );
         fman.addIncompleteFile(
-            new File("c"), urns, "c", 0, new VerifyingFile(false, 0));
+            new File("c"), urns, "c", 0, new VerifyingFile(false));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete",
@@ -350,11 +350,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         Set urns = new HashSet();
         urns.add( HugeTestUtils.URNS[0] );
         fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(false, 0));
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
         urns = new HashSet();
         urns.add( HugeTestUtils.URNS[1] );
         fman.addIncompleteFile(
-            new File("b"), urns, "b", 0, new VerifyingFile(false, 0));
+            new File("b"), urns, "b", 0, new VerifyingFile(false));
         assertEquals("unexpected shared incomplete",
             2, fman.getNumIncompleteFiles());
             
@@ -385,7 +385,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(
-            new File("sambe"), urns, "a", 0, new VerifyingFile(false, 0));
+            new File("sambe"), urns, "a", 0, new VerifyingFile(false));
         assertEquals("unexpected shared incomplete",
             1, fman.getNumIncompleteFiles());            
             
@@ -410,7 +410,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(
-            new File("sambe"), urns, "a", 0, new VerifyingFile(false, 0));
+            new File("sambe"), urns, "a", 0, new VerifyingFile(false));
         assertEquals("unexpected shared incomplete",
             1, fman.getNumIncompleteFiles());
             
@@ -436,7 +436,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // now add an ifd with those urns.
         fman.addIncompleteFile(
-            new File("sam"), urns, "b", 0, new VerifyingFile(false, 0));
+            new File("sam"), urns, "b", 0, new VerifyingFile(false));
         
         FileDesc retFD = fman.getFileDescForUrn(urn);    
         assertNotNull(retFD);

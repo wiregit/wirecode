@@ -2138,9 +2138,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             if(commonOutFile==null) {//no entry in incompleteFM
                 LOG.trace("creating a verifying file");
-                commonOutFile = new VerifyingFile(true, 
-                    (int)IncompleteFileManager.getCompletedSize(
-                        incompleteFile));
+                commonOutFile = new VerifyingFile(true);
                 try {
                     //we must add an entry in IncompleteFileManager
                     incompleteFileManager.

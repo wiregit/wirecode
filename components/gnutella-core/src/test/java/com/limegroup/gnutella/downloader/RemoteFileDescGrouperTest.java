@@ -120,7 +120,7 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         assertTrue(list.contains(rf1));
 
         //Large part written on disk
-        VerifyingFile vf=new VerifyingFile(false, 1010);
+        VerifyingFile vf=new VerifyingFile(false);
         vf.addInterval(new Interval(0, 1008));
         ifm.addEntry(ifm.getFile(rf3), vf);
         allFiles=new RemoteFileDesc[] {rf3, rf2, rf1, rf4};
