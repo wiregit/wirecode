@@ -2,7 +2,11 @@ package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.gui.*;
+
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -27,19 +31,27 @@ public class AcceptLimitTest {
     private static List /* of Connection */ buffer=new LinkedList();
 
     public static void main(String args[]) {
-        String host=null;
-        int port=0;
+        String host="localhost";
+        int port=6346;
+
+        //Bring up application.
+        SettingsManager settings=SettingsManager.instance();
+        settings.setPort(6346);
+        settings.setQuickConnectHosts(new String[0]);
+        settings.setConnectOnStartup(true);
+        settings.setConnectOnStartup(false);
+        settings.setEverSupernodeCapable(true);
+        settings.setDisableSupernodeMode(true);
+        settings.setMaxShieldedClientConnections(25);
+        RouterService rs=new RouterService(new DebugActivityCallback(),
+                                           new MessageRouterStub(),
+                                           new FileManagerStub(),
+                                           new DummyAuthenticator());
+        rs.initialize();
+        rs.clearHostCatcher();
         try {
-            host=args[0];
-            port=Integer.parseInt(args[1]);
-        } catch (Exception e) {
-            System.out.println("Syntax: AcceptLimitTest <address> <port>");
-        }
-        
-        System.out.println(
-            "Please make sure you have an ultrapeer with incoming slots, \n"
-           +"running on port "+port+" of localhost, with no connections,\n"
-           +"and watchdogs turned off.\n");
+            rs.setKeepAlive(6);
+        } catch (BadConnectionSettingException e) { Assert.that(false); }
 
         //You can reorder these statements (with small changes) in creative ways.
         Connection c=testLimit(host, port, LEAF);        
@@ -190,5 +202,28 @@ class EmptyResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException {
         return new HandshakeResponse(new Properties());
+    }
+}
+
+class DebugActivityCallback extends ActivityCallbackStub {
+    public void connectionInitializing(Connection c) { 
+        //System.out.println("Initializing "+str(c));
+    }
+    public void connectionInitialized(Connection c) { 
+        System.out.println("Initialized "+str(c));
+    }
+    public void connectionClosed(Connection c) { 
+        System.out.println("CLOSED "+str(c));
+    }
+    private static String str(Connection c) {
+        String ultrapeer="old";
+        String ultrapeerProp=c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (ultrapeerProp!=null) {
+            if (ultrapeerProp.toLowerCase().equals("true")) 
+                ultrapeer="ultrapeer";
+            else if (ultrapeerProp.toLowerCase().equals("false")) 
+                ultrapeer="leaf";
+        }
+        return "["+c.getInetAddress()+", "+ultrapeer+"]";
     }
 }
