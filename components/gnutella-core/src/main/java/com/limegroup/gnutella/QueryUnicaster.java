@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.guess.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Stack;
@@ -55,6 +56,12 @@ public final class QueryUnicaster {
      */
     private long _lastPingTime = 0;
 
+	/**
+	 * Variable for how many test pings have been sent out to determine 
+	 * whether or not we can accept incoming connections.
+	 */
+	private int _testUDPPingsSent = 0;
+
     public static QueryUnicaster instance() {
         if (_instance == null)
             _instance = new QueryUnicaster();
@@ -105,10 +112,10 @@ public final class QueryUnicaster {
 
         // start service...
         _querier = new Thread() {
-                public void run() {
-                    queryLoop();
-                }
-            };
+			public void run() {
+				queryLoop();
+			}
+		};
         _querier.start();
     }
 
@@ -120,7 +127,7 @@ public final class QueryUnicaster {
         while (_shouldRun) {
             try {
                 waitForQueries();
-                Endpoint toQuery = getUnicastHost();
+                GUESSEndpoint toQuery = getUnicastHost();
                 List toRemove = new ArrayList();
                 UDPService udpService = UDPService.instance();
 
@@ -137,17 +144,12 @@ public final class QueryUnicaster {
                         else if (currQB._hostsQueried.contains(toQuery))
                             ; // don't send another....
                         else {
-                            try {
-                                InetAddress ip = 
-                                InetAddress.getByName(toQuery.getHostname());
-                                // send the query
-                                debug("QueryUnicaster.queryLoop(): sending" +
-                                      " query " + currQB._qr.getQuery());
-                                udpService.send(currQB._qr, ip, 
-                                                toQuery.getPort());
-                                currQB._hostsQueried.add(toQuery);
-                            }
-                            catch (UnknownHostException ignored) {}
+							InetAddress ip = toQuery.getAddress();
+							debug("QueryUnicaster.queryLoop(): sending" +
+								  " query " + currQB._qr.getQuery());
+							udpService.send(currQB._qr, ip, 
+											toQuery.getPort());
+							currQB._hostsQueried.add(toQuery);
                         }
                     }
                 }
@@ -199,14 +201,19 @@ public final class QueryUnicaster {
 
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
-    public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
-        if (endpoint.getUnicastSupport() && notMe(endpoint)) {
+    public void addUnicastEndpoint(InetAddress address, int port) {//ExtendedEndpoint endpoint) {
+        if (notMe(address, port)) {
             synchronized (_queryHosts) {
                 debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
                 if (_queryHosts.size() == MAX_ENDPOINTS)
                     _queryHosts.removeLast(); // evict a old guy...
-                _queryHosts.addFirst(endpoint);
+                _queryHosts.addFirst(new GUESSEndpoint(address, port));
                 _queryHosts.notify();
+				if(_testUDPPingsSent < 20) {
+					UDPService.instance().send(new PingRequest((byte)1), 
+											   address, port);
+					_testUDPPingsSent++;
+				}
                 debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
             }
         }
@@ -215,25 +222,20 @@ public final class QueryUnicaster {
     /** Returns whether or not the Endpoint refers to me!  True if it doesn't,
         false if it does (NOT not me == me).
      */
-    private boolean notMe(Endpoint e) {
+    private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
 
         SettingsManager sm = SettingsManager.instance();
         if (sm.getForceIPAddress()) {
-            if ((e.getPort() == sm.getForcedPort()) &&
-                e.getHostname().equals(sm.getForcedIPAddressString())
-                )
-                retVal = false;
+            if (port == sm.getForcedPort() &&
+				address.getHostAddress().equals(sm.getForcedIPAddressString()))
+				retVal = false;
         }
-        else {
-            try {
-                if ((e.getPort() == RouterService.getPort()) &&
-                    Arrays.equals(e.getHostBytes(), RouterService.getAddress())
-                    )
-                    retVal = false;
-            }
-            catch (UnknownHostException whatever) {}
-        }
+        else if ((port == RouterService.getPort()) &&
+				 Arrays.equals(address.getAddress(), 
+							   RouterService.getAddress())) {
+			retVal = false;
+		}
 
         return retVal;
     }
@@ -258,7 +260,7 @@ public final class QueryUnicaster {
 
     /** May block if no hosts exist.
      */
-    private Endpoint getUnicastHost() throws InterruptedException {
+    private GUESSEndpoint getUnicastHost() throws InterruptedException {
         debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
             debug("QueryUnicaster.getUnicastHost(): obtained lock.");
@@ -279,23 +281,18 @@ public final class QueryUnicaster {
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
             // send a ping to the guy you are popping if cache too small
-            ExtendedEndpoint toReturn = 
-            (ExtendedEndpoint) _queryHosts.removeLast();
+            GUESSEndpoint toReturn = 
+                (GUESSEndpoint) _queryHosts.removeLast();
             // if i haven't pinged him 'recently', then ping him...
             if (_pingList.add(toReturn)) {  
                 PingRequest pr = new PingRequest((byte)1);
                 UDPService udpService = UDPService.instance();
-                try {
-                    InetAddress ip = 
-                    InetAddress.getByName(toReturn.getHostname());
-                    // send the query
-                    udpService.send(pr, ip, toReturn.getPort());
-                }
-                catch (UnknownHostException ignored) {}
+				InetAddress ip = toReturn.getAddress();
+				UDPService.instance().send(pr, ip, toReturn.getPort());
             }
             return toReturn;
         }
-        return (ExtendedEndpoint) _queryHosts.removeLast();
+        return (GUESSEndpoint) _queryHosts.removeLast();
     }
 
 
@@ -340,7 +337,7 @@ public final class QueryUnicaster {
 
         /* @return if the badboy o was added.
          */
-        public synchronized boolean add(Object o) {
+        public synchronized boolean add(GUESSEndpoint o) {
             boolean hasObject = _objects.contains(o);
             if (!hasObject) {
                 if (_objects.size() >= _threshold)
