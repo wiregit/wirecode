@@ -6,7 +6,7 @@ import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 
 /** 
@@ -41,8 +41,6 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
 
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */
     private static ResumeDownloader newResumeDownloader() {
-        // this ResumeDownloader is started from the library, not from restart,
-        // that is why the last param to init is false
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
         ret.initialize(new DownloadManagerStub(), 
                        new FileManagerStub(), 
@@ -66,13 +64,13 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader=newResumeDownloader();
-        while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
+        while (downloader.getState()!=Downloader.GAVE_UP) {         
 			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.WAITING_FOR_RESULTS, 
+                assertEquals(Downloader.GAVE_UP, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(Downloader.GAVE_UP, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
         //Serialize it!
@@ -93,7 +91,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_USER, downloader.getState());
+        assertEquals(Downloader.GAVE_UP, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }
@@ -102,14 +100,14 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  (LimeWire 2.7.0/2.7.1 beta.)
      */
     public void testSerialization12()
-            throws Exception {
+            throws IOException, ClassNotFoundException {
         tSerialization("ResumeDownloader.1_2.dat", false);
     }
 
     /** Tests serialization of version 1.3 of ResumeDownloader.
      *  (LimeWire 2.7.3) */
     public void testSerialization13()
-            throws Exception {
+            throws IOException, ClassNotFoundException {
         tSerialization("ResumeDownloader.1_3.dat", true);
     }
     
@@ -117,25 +115,25 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  @param file the serialized ResumeDownloader to read
      *  @param expectHash true iff there should be a hash in the downloader */
     private void tSerialization(String file, boolean expectHash) 
-            throws Exception {
+            throws IOException, ClassNotFoundException {
         ObjectInputStream in=new ObjectInputStream(
             new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
         );
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
-        QueryRequest qr = rd.newRequery(0);
-        URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");
+        QueryRequest qr=rd.newRequery(0);
         if (expectHash) {
-            assertEquals("unexpected hash", hash, _hash);
-            // filenames were put in hash queries since everyone drops //
-            assertEquals("hash query should have filename",
-                name, qr.getQuery());
+            assertEquals("unexpected amount of urns",
+                1, qr.getQueryUrns().size());
+            assertEquals("unexpected hash",
+                hash, qr.getQueryUrns().iterator().next());
+            assertEquals("hash query shouldn't have filename",
+                "\\", qr.getQuery());
+        } else {
+            assertEquals("unexpected amount of urns",
+                0, qr.getQueryUrns().size());
+            assertEquals("unexpected filename",
+                "filename.txt", qr.getQuery());            
         }
-
-        // we never send URNs
-        assertEquals("unexpected amount of urns",
-                     0, qr.getQueryUrns().size());
-        assertEquals("unexpected filename",
-                     "filename.txt", qr.getQuery());            
     }
 
 

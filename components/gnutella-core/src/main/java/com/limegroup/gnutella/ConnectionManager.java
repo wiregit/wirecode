@@ -1390,7 +1390,7 @@ public class ConnectionManager {
         //iterate over the tokens
         while(st.hasMoreTokens()){
             //get an address
-            String address = ((String)st.nextToken()).trim();
+            String address = st.nextToken().trim();
             Endpoint e;
             try{
                 e = new Endpoint(address);
