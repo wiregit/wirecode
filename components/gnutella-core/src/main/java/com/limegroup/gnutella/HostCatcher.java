@@ -74,13 +74,9 @@ public class HostCatcher {
      * during the next session, though not necessarily likely to have slots
      * available now.  In this way, they act more like bootstrap hosts than
      * normal pongs.  This list is written to gnutella.net and used to
-     * initialize queue on startup.
-     *
-     * TODO: BinaryHeap is not the right data structure to use.  When full
-     * it does not necessarily remove the smallest element.  Better to
-     * use a tree with fixed size.  */
-    private BinaryHeap /* of Endpoint */ permanentHosts=
-        new BinaryHeap(PERMANENT_SIZE);
+     * initialize queue on startup. */
+    private FixedsizePriorityQueue /* of Endpoint */ permanentHosts=
+        new FixedsizePriorityQueue(PERMANENT_SIZE);
     
 
     /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
@@ -198,18 +194,11 @@ public class HostCatcher {
      */
     synchronized void write(String filename) throws IOException {
         FileWriter out=new FileWriter(filename);       
-        //Write elements of permanent from best to worst.  Order matters, as it
+        //Write elements of permanent from worst to best.  Order matters, as it
         //allows read() to put them into queue in the right order without any
-        //difficulty.  So first we copy into an external list...
-        Endpoint[] permanentHostsCopy=new Endpoint[permanentHosts.size()];  
-        Iterator iter=permanentHosts.iterator();
-        for (int i=0; i<permanentHostsCopy.length; i++) 
-            permanentHostsCopy[i]=(Endpoint)iter.next();
-        //...sort by uptime (weight)
-        Arrays.sort(permanentHostsCopy);                        
-        //...and write from head (worst) to tail (best).
-        for (int i=0; i<permanentHostsCopy.length; i++) {
-            Endpoint e=(Endpoint)permanentHostsCopy[i];
+        //difficulty.
+        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+            Endpoint e=(Endpoint)iter.next();
             writeInternal(out, e, e.getWeight());
         }
 
