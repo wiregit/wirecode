@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.messages.*;
 
 import java.net.*;
 
@@ -12,7 +13,8 @@ import java.net.*;
  * is in this package instead of com.limegroup.gnutella.stubs because it
  * requires package-access to ManagedConnection.
  * 
- * Added ability to report fake remote ip:port.
+ * Added ability to report fake remote ip:port and to wait for specific types of
+ * messages to be sent.
  */
 public class ManagedConnectionStub extends ManagedConnection {
 	
@@ -20,6 +22,24 @@ public class ManagedConnectionStub extends ManagedConnection {
 	int _port;
 	InetAddress _addr;
 	boolean _inited;
+	
+	/**
+	 * monitor to lock when waiting for messages.  
+	 * Protects _expectedMessage and _lastSent fields.
+	 */
+	Object _waitLock;
+	
+	/**
+	 * the type of the message we are expecting to receive
+	 * LOCKING: _waitLock
+	 */
+	String _expectedMessage;
+	
+	/**
+	 * the last message we have received.
+	 * LOCKING: _waitLock
+	 */
+	private Message _lastSent;
 	
     public ManagedConnectionStub() {
         super("1.2.3.4", 6346);
@@ -31,6 +51,7 @@ public class ManagedConnectionStub extends ManagedConnection {
         }		
 		//_router = new MessageRouterStub(); 
         //_manager = new ConnectionManagerStub();
+        _waitLock = new Object();
     }
     
     /**
@@ -57,4 +78,49 @@ public class ManagedConnectionStub extends ManagedConnection {
     }
     
     public boolean isInitialized() {return _inited;}
+    
+    /**
+     * waits for another thread to call send() on this object.
+     */
+    public void waitForSend(int timeout) {
+    	 waitForSend("Message",timeout);
+    }
+    
+    /**
+     * waits for another method to call send() with a specified message type
+     * @param messageType name of the class of the message we're waiting to receive.
+     */
+    public void waitForSend(String messageType, int timeout) {
+    	synchronized(_waitLock) {
+    		_expectedMessage=messageType;
+    		try{
+    			_waitLock.wait(timeout);
+    		}catch(InterruptedException iex) {}
+    	}
+    }
+    
+    /**
+     * overriden to notify the listener.
+     */
+    public void send(Message m) {
+    	synchronized(_waitLock) {
+    		if (_expectedMessage ==null)
+    			_expectedMessage = "Message";
+    		if (_expectedMessage.equals("Message"))
+    			_waitLock.notifyAll();
+    		else if (m.getClass().equals(_expectedMessage))
+    			_waitLock.notifyAll();
+    		_lastSent=m;
+    	}
+    }
+    
+    public Message getLastSent() {
+    	return _lastSent;
+    }
+    
+    public void setLastSent(Message m) {
+    	synchronized(_waitLock) {
+    		_lastSent =m;
+    	}
+    }
 }
