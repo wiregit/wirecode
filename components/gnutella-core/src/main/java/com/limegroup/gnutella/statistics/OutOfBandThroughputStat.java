@@ -12,14 +12,23 @@ import com.limegroup.gnutella.*;
  */
 public class OutOfBandThroughputStat extends BasicStatistic {
 
-    public static final int MIN_SAMPLE_SIZE = 500;
+    public static int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
-	private OutOfBandThroughputStat() {}
+	private OutOfBandThroughputStat() {
+        final int thirtyMins = 30 * 60 * 1000;
+        Runnable adjuster = new Thread() {
+                public void run() {
+                    if (!isSuccessRateGreat())
+                        MIN_SAMPLE_SIZE += 500;
+                }
+            };
+        RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+    }
 
 
 	/**
