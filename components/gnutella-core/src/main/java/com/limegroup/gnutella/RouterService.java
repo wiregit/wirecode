@@ -133,8 +133,7 @@ public class RouterService
         //HostCatcher.expire() would instead call Thread.interrupt, causing
         //HostCatcher.connectUntilPong to be restarted.       
 
-		this.downloader.initialize(callback, router, acceptor,
-                                   fileManager, this);
+		this.downloader.initialize(callback, router, acceptor, fileManager);
 		
 		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
                                                    downloader, 
@@ -211,7 +210,7 @@ public class RouterService
         // callback.
         fileManager.initialize(callback);
         // Restore any downloads in progress.
-        downloader.readSnapshot();
+        downloader.postGuiInit(this);
     }
 
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,

@@ -77,26 +77,34 @@ public class DownloadManager implements BandwidthTracker {
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
      *     @param fileManager used to check if files exist
-     *     @param backend provides the schedule(..) method for checkpointing 
-     *      downloads.dat
      */
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor,
-                           FileManager fileManager,
-                           RouterService backend) {
+                           FileManager fileManager) {
         this.callback=callback;
         this.router=router;
         this.acceptor=acceptor;
         this.fileManager=fileManager;
+    }
 
+    /**
+     * Performs the slow, low-priority initialization tasks: reading in
+     * snapshots and scheduling snapshot checkpointing.
+     *     @param backend provides the schedule(..) method for checkpointing 
+     *      downloads.dat
+     */
+    public void postGuiInit(RouterService backend) {
+        readSnapshot();
         Runnable checkpointer=new Runnable() {
             public void run() {
                 if (downloadsInProgress()>0) //optimization
                     writeSnapshot();
             }
         };
-        backend.schedule(checkpointer, 0, SNAPSHOT_CHECKPOINT_TIME);
+        backend.schedule(checkpointer, 
+                         SNAPSHOT_CHECKPOINT_TIME, 
+                         SNAPSHOT_CHECKPOINT_TIME);
     }
 
     public synchronized int downloadsInProgress() {
@@ -107,7 +115,7 @@ public class DownloadManager implements BandwidthTracker {
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
-    public synchronized boolean writeSnapshot() {
+    synchronized boolean writeSnapshot() {
         List buf=new ArrayList();
         buf.addAll(active);
         buf.addAll(waiting);
@@ -142,7 +150,7 @@ public class DownloadManager implements BandwidthTracker {
      *  to this, queued.  The queued downloads will restart immediately if slots
      *  are available.  Returns false iff the file could not be read for any
      *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. */
-    public synchronized boolean readSnapshot() {
+    synchronized boolean readSnapshot() {
         //Read downloaders from disk.
         List buf=null;
         try {
