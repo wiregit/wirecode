@@ -2274,6 +2274,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+	/**
+     *  Certain subclasses would like to know whether we have at least one good
+	 *  RFD.
+     */
+	protected synchronized boolean hasRFD() {
+        return ( allFiles != null && allFiles.length > 0);
+	}
 	
 
     public synchronized int getContentLength() {

@@ -280,7 +280,12 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         if (_filename!=null)
             return _filename;
         else {
-            String fname = super.getFileName();
+            String fname = null;
+			// Check the super name if I have an RFD
+			if ( hasRFD() )   
+                fname = super.getFileName();
+
+			// If I still don't have a good name, resort to whatever I have.
             if ( fname == null || fname.equals(UNKNOWN_FILENAME) )
 			    fname = getFileNameHint();
 			return fname;
