@@ -145,11 +145,16 @@ public class Main implements ActivityCallback {
 
 
     public void error(int message) {
-    error(message, null);
+		error(message, null);
     }
 
+	/**
+	 * Implements ActivityCallback.
+	 */
+    public void error(Throwable problem) {}
+
     public void error(int message, Throwable t) {
-    System.out.println("Error: "+message);
+		System.out.println("Error: "+message);
     }
 
     ///////////////////////////////////////////////////////////////////////////
