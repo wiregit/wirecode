@@ -135,7 +135,7 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * The firewalled locations to send to uploaders that are interested
      */
-    private Set _pushLocs;
+    private Set _goodPushLocs;
     
     /**
      * The bad firewalled locations to send to uploaders that are interested
@@ -258,11 +258,16 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
         URN urn = rfd.getSHA1Urn();
-        _altLocsReceived = urn==null ? null:
-            AlternateLocationCollection.create(urn);
+        if (urn!=null) {
+        	_altLocsReceived = AlternateLocationCollection.create(urn);
+        	_pushAltLocsReceived = AlternateLocationCollection.create(urn);
+        } else  {
+        	_altLocsReceived=null;
+        	_pushAltLocsReceived=null;
+        }
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
-        _pushLocs = new HashSet();
+        _goodPushLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
         _writtenBadLocs = new HashSet();
         _writtenPushLocs = new HashSet();
@@ -284,6 +289,10 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     AlternateLocationCollection getAltLocsReceived() { 
 	    return _altLocsReceived;
+    }
+    
+    AlternateLocationCollection getPushLocsReceived() {
+    	return _pushAltLocsReceived;
     }
         
     void addSuccessfulAltLoc(AlternateLocation loc) {
@@ -308,9 +317,9 @@ public class HTTPDownloader implements BandwidthTracker {
     			_writtenBadPushLocs.remove(loc);           
     			_badPushLocs.remove(loc);
     		}
-    		synchronized(_pushLocs) {
+    		synchronized(_goodPushLocs) {
     			if(!_writtenPushLocs.contains(loc)) //not written earlier
-    				_pushLocs.add(loc); //duplicates make no difference
+    				_goodPushLocs.add(loc); //duplicates make no difference
     		}
     	}
     }
@@ -331,9 +340,9 @@ public class HTTPDownloader implements BandwidthTracker {
     		}
     	}
     	else {
-    		synchronized(_pushLocs) {
+    		synchronized(_goodPushLocs) {
     			_writtenPushLocs.remove(loc);
-    			_pushLocs.remove(loc);
+    			_goodPushLocs.remove(loc);
     		}
         
     		synchronized(_badLocs) {
@@ -500,39 +509,31 @@ public class HTTPDownloader implements BandwidthTracker {
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
         
-        //write push alts.  However, first send a header indicating we are intersted.
-        writeClone = null;
-        synchronized(_pushLocs) {
-            if(_pushLocs.size() > 0) {
-                writeClone = new HashSet();
-                Iterator iter = _pushLocs.iterator();
-                while(iter.hasNext()) {
-                    Object next = iter.next();
-                    writeClone.add(next);
-                    _writtenPushLocs.add(next);
-                }
-                _pushLocs.clear();
-            }
-        }
+        //write push alts.  However, if the other side has
+        // not indicated whether they want Push Locs, only 
+        //send a header indicating we are intersted.
         
-        //if we are not firewalled, we are interested in exchanging firewalled locations.
-        if (RouterService.acceptedIncomingConnection()) {
-        	
-        	//however, if the other side has not yet indicated that they are interested
-        	//themselves, we only send an empty header indicating our interest.
-        	if (!_wantsFalts) 
-        		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,"",out);
-        	
-        	// if they have indicated interest and we have some locations, send them out
-        	else if (writeClone!=null) 
+        if (!_wantsFalts) 
+        	HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,"",out);
+        else {
+        	writeClone = null;
+        	synchronized(_goodPushLocs) {
+        		if(_goodPushLocs.size() > 0) {
+        			writeClone = new HashSet();
+        			Iterator iter = _goodPushLocs.iterator();
+        			while(iter.hasNext()) {
+        				Object next = iter.next();
+        				writeClone.add(next);
+        				_writtenPushLocs.add(next);
+        			}
+        			_goodPushLocs.clear();
+        		}
+        	}
+        	if (writeClone!=null) 
         		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-        				new HTTPHeaderValueCollection(writeClone),out);
-        }
-        
-        
-        //only write bad firewalled locations if the other side has already
-        //indicated interest in firewalled locations at all.
-        if (_wantsFalts) {
+        			new HTTPHeaderValueCollection(writeClone),out);
+        	
+        	//do the same with bad push locs
         	writeClone = null;
         	synchronized(_badPushLocs) {
                 if(_badPushLocs.size() > 0) {
@@ -550,8 +551,11 @@ public class HTTPDownloader implements BandwidthTracker {
         	if (writeClone!=null) 
         		HTTPUtils.writeHeader(HTTPHeaderName.BFALT_LOCATION,
         				new HTTPHeaderValueCollection(writeClone),out);
-        	
         }
+        
+        
+        
+
         
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         _requestedInterval = new Interval(_initialReadingPoint, stop-1);

@@ -2879,6 +2879,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 }
             }
+            
+            //if we are not firewalled, we also want to try the firewalled push locs
+            c = dloader.getPushLocsReceived();
+            if(c!=null && RouterService.acceptedIncomingConnection()) {
+                synchronized(c) { 
+                    Iterator iter = c.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation al=(AlternateLocation)iter.next();
+                        RemoteFileDesc rfd1 =
+                            al.createRemoteFileDesc(rfd.getSize());
+                        addDownload(rfd1, false);//don't cache
+                    }
+                }
+            }
         }
         
         //did not throw exception? OK. we are downloading
