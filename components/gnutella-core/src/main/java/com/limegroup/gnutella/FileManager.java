@@ -106,6 +106,14 @@ public class FileManager {
      * canonicalized files, sorted by a FileComparator.
      */
     private Map /* of File -> IntSet */ _sharedDirectories;
+    
+    /**
+     * The IntSet for incomplete shared files.
+     * This is not strictly needed for correctness, but it allows
+     * others to retrieve all the incomplete-shared files, which is
+     * a relatively useful feature.
+     */
+    private IntSet _incompletesShared;
 
     /**
      *  The thread responsisble for adding contents of _sharedDirectories to
@@ -186,6 +194,7 @@ public class FileManager {
         _urnIndex = new HashMap();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
+        _incompletesShared = new IntSet();
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -304,7 +313,24 @@ public class FileManager {
         return null;
 	}
 	
-
+	/**
+	 * Returns a list of all shared incomplete file descriptors.
+	 */
+	public FileDesc[] getIncompleteFileDescriptors() {
+        if (_incompletesShared == null) {
+            return null;
+        }
+        
+        FileDesc[] ret = new FileDesc[_incompletesShared.size()];
+        IntSet.IntSetIterator iter = _incompletesShared.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
+            FileDesc fd = (FileDesc)_files.get(iter.next());
+            Assert.that(fd != null, "Directory has null entry");
+            ret[i]=fd;
+        }
+        
+        return ret;
+    }
 
     /**
      * Returns a list of all shared files in the given directory, in any order.
@@ -567,6 +593,7 @@ public class FileManager {
             _urnIndex=new HashMap(); //maintain invariant
             _extensions = new TreeSet(new StringComparator());
             _sharedDirectories = new TreeMap(new FileComparator());
+            _incompletesShared = new IntSet();
 
             // Load the extensions.
             String[] extensions = 
@@ -875,11 +902,16 @@ public class FileManager {
             // no indices were found for any URN associated with this
             // IncompleteFileDesc... add it.
             int fileIndex = _files.size();
+            _incompletesShared.add(fileIndex);
             IncompleteFileDesc ifd = new IncompleteFileDesc(
                 incompleteFile, urns, fileIndex, name, size, vf);            
             _files.add(ifd);
             this.updateUrnIndex(ifd);
             _numIncompleteFiles++;
+            if (_callback != null) {
+                File parent = getParentFile(incompleteFile);
+                _callback.addSharedFile(ifd, parent);
+            }
         }
     }
 
@@ -938,6 +970,9 @@ public class FileManager {
                 if (fd instanceof IncompleteFileDesc) {
                     this.removeUrnIndex(fd);
                     _numIncompleteFiles--;
+                    boolean removed = _incompletesShared.remove(i);
+                    Assert.that(removed,
+                        "File "+i+" not found in " + _incompletesShared);
                     repOk();
                     return false;
                 }
