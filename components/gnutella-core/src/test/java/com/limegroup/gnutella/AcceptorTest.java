@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.stubs.*;
 import junit.framework.*;
 import java.io.IOException;
 import java.net.*;
@@ -18,12 +19,18 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public void testPortsOccupied() {
+    public static void globalSetUp() throws Exception {
+        new RouterService(new ActivityCallbackStub());
+        RouterService.getConnectionManager().initialize();
+    }
+
+    public void testPortsOccupied() {        
         // strategy: open sockets on various ports and try to set the listening
         // port via Acceptor.
 
         // start it up!
-        Acceptor acceptThread = new Acceptor();
+        //Acceptor acceptThread = new Acceptor();
+        Acceptor acceptThread = RouterService.getAcceptor();
         acceptThread.start();
         
         // Give thread time to find and open it's sockets.   This race condition
