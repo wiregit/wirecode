@@ -652,12 +652,11 @@ public class HostCatcherTest extends BaseTestCase {
         assertEquals(0, uhc.getSize());
         
         GGEP ggep = new GGEP(true);
-        List addrs = new LinkedList();
-        addrs.add("1.2.3.4:81");
-        addrs.add("www.limewire.com:6379");
-        addrs.add("www.eff.org");
-        addrs.add("www.test.org:1");
-        ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, zip(addrs));
+        String addrs ="1.2.3.4:81\n" +
+        	"www.limewire.com:6379\n"+
+        	"www.eff.org\n"+
+            "www.test.org:1";
+        ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
         PingReply pr = PingReply.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
