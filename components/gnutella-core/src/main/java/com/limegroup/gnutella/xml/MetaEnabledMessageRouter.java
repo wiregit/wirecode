@@ -34,7 +34,8 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                                     byte[] clientGUID, boolean notIncoming,
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
-                                    boolean supportsChat) {
+                                    boolean supportsChat,
+                                    boolean isFromMcast) {
         
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
@@ -88,7 +89,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                                                     xmlCompressed, notIncoming, 
                                                     busy, uploaded, 
                                                     measuredSpeed, supportsChat,
-                                                    false);
+                                                    isFromMcast);
                         queryReplies.add(queryReply);
                     }
                     catch (IllegalArgumentException ignored) {
