@@ -1102,16 +1102,6 @@ public class Connection {
 		return _socket.getPort();
     }
 
-    /**
-     * Returns the port this is connected to locally.
-     * @exception IllegalStateException this is not initialized
-     */
-    public int getLocalPort() throws IllegalStateException {
-		if(_socket == null) {
-			throw new IllegalStateException("Not initialized");
-		}
-		return _socket.getLocalPort();
-    }
 
     /**
      * Returns the address of the foreign host this is connected to.
@@ -1125,22 +1115,11 @@ public class Connection {
     }
 
     /**
-     * Returns the local address of this.
-     * @exception IllegalStateException this is not initialized
-     */
-    public InetAddress getLocalAddress() throws IllegalStateException {
-		if(_socket == null) {
-			throw new IllegalStateException("Not initialized");
-		}
-		return _socket.getLocalAddress();
-    }
-
-    /**
      * Returns true if the this connection is potentially on the 'same' network.
      */
     public boolean isConnectBackCapable() throws IllegalStateException {
-        byte[] local = getLocalAddress().getAddress();
         byte[] remote = getInetAddress().getAddress();
+        byte[] local = _socket.getLocalAddress().getAddress();
         return NetworkUtils.isCloseIP(local, remote);
     }
 
