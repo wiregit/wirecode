@@ -90,12 +90,6 @@ public class ManagedConnection extends Connection
 	 */
     private ConnectionManager _manager;
 
-	/** Filter for filtering out messages that are considered spam.
-	 */
-    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
-    private volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
-
     /*
      * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
      * http://www.limewire.com/developer/sachrifc.txt.  The basic idea is to use
@@ -222,17 +216,6 @@ public class ManagedConnection extends Connection
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
-    
-	/** 
-	 * Priority queue of messages to send. 
-	 */
-	private final CompositeQueue QUEUE = CompositeQueue.createQueue();
-	
-	/** 
-	 * Locking to ensure that messages are not dropped if write() is called
-	 *  from multiple threads. 
-	 */
-	private final Object WRITE_LOCK = new Object();
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -300,103 +283,7 @@ public class ManagedConnection extends Connection
         updater.checkAndUpdate(this);
     }
     
-	/** 
-	 * Like Connection.write(m), but may queue and write more than one message. 
-	 * Never blocks, even if this is a blocking connection.
-	 */
-	public boolean write(Message m) {
-		if (! supportsGGEP())
-			m = m.stripExtendedPayload();
-
-		synchronized (this) {
-			_numMessagesSent++;
-			QUEUE.add(m);
-			_numSentMessagesDropped+=QUEUE.resetDropped();    
-		}        
-		if (! isBlocking()) {
-			//NON-BLOCKING IO: attempt to write queued data, not necessarily
-			//m.  This calls super.write(m'), which may call
-			//listener.needsWrite().
-			return this.write();
-		} else {
-			//BLOCKING IO: writing data could stall another reader thread.
-			//So queue it and notify write thread.
-            // TODO:: we need to implement this!!!
-			return true;
-		}
-	}
-
-	private final boolean isBlocking() {
-		return getChannel().isBlocking();
-	}
-
-	/**
-	 * Like Connection.write(), but may write more than one message.  May also
-	 * call listener.needsWrite.  If this is a blocking connection, blocks until
-	 * data is sent.
-	 */
-	public boolean write() {
-        System.out.println("ManagedConnection::write");
-		synchronized (WRITE_LOCK) {
-			//Terminate when either
-			//a) super cannot send any more data because its send
-			//   buffer is full OR
-			//b) neither super nor this have any queued data
-			//c) the socket is closed
-			while (isOpen()) {
-                System.out.println("ManagedConnection::write::open");
-				// Add more queued data to super if possible.
-				if (! super.hasQueued()) {
-					Message m = null;
-                    System.out.println("ManagedConnection::write::open::about to get lock");
-					synchronized (this) {
-                        System.out.println("ManagedConnection::write::open::got LOCK!!");
-						m = QUEUE.removeNext();
-						if (m == null)
-							return false;    //Nothing left to send (a)
-						_numSentMessagesDropped += QUEUE.resetDropped();
-					}
-					boolean hasUnsentData = super.write(m);
-					if (hasUnsentData)
-						return true;         //needs another write (b)
-				}     
-				//Otherwise write data from super.  Abort if this didn't
-				//complete.
-				else {
-                    return super.write();
-					//boolean hasUnsentData = super.write();
-					//if (hasUnsentData)
-					//	return true;         //needs another write (b)
-				}
-			}
-			return false;                    //socket closed (c)
-		}
-	}
-
-	public boolean hasQueued() {
-		return QUEUE.size()>0;
-	}
     
-	/**
-	 * Handles a read of message <tt>m</tt> from <tt>this</tt>.
-	 */
-	public void handleRead(Message m) {
-		// Run through the route spam filter and drop accordingly.
-		if (!_routeFilter.allow(m)) {
-			if(!CommonUtils.isJava118()) {
-				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
-			}
-			_numReceivedMessagesDropped++;
-			return;
-		}
-
-		//Call MessageRouter to handle and process the message
-		//TODO: reject connection handles differently
-		// TODO: make direct call -- don't use RouterService
-		RouterService.getMessageRouter().handleMessage(m, this);         
-	}
-
-
     /**
      * Resets the query route table for this connection.  The new table
      * will be of the size specified in <tt>rtm</tt> and will contain
@@ -911,7 +798,7 @@ public class ManagedConnection extends Connection
             }
 
             // Run through the route spam filter and drop accordingly.
-            if (!_routeFilter.allow(m)) {
+            if (isSpam(m)) {
 				if(!CommonUtils.isJava118()) {
 					ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
 				}
@@ -937,38 +824,6 @@ public class ManagedConnection extends Connection
 		_numReceivedMessagesDropped++;
     }
 
-    /**
-     * A callback for Message Handler implementations to check to see if a
-     * message is considered to be undesirable by the message's receiving
-     * connection.
-     * Messages ignored for this reason are not considered to be dropped, so
-     * no statistics are incremented here.
-     *
-     * @return true if the message is spam, false if it's okay
-     */
-    public boolean isPersonalSpam(Message m) {
-        return !_personalFilter.allow(m);
-    }
-
-    /**
-     * @modifies this
-     * @effects sets the underlying routing filter.   Note that
-     *  most filters are not thread-safe, so they should not be shared
-     *  among multiple connections.
-     */
-    public void setRouteFilter(SpamFilter filter) {
-        _routeFilter = filter;
-    }
-
-    /**
-     * @modifies this
-     * @effects sets the underlying personal filter.   Note that
-     *  most filters are not thread-safe, so they should not be shared
-     *  among multiple connections.
-     */
-    public void setPersonalFilter(SpamFilter filter) {
-        _personalFilter = filter;
-    }
     
     /**
      * Returns the domain to which this connection is authenticated
