@@ -614,7 +614,7 @@ public class HTTPUploader implements Uploader {
 		
 		String urnStr = contentUrnStr.substring(offset);
 		try {
-			return URNFactory.createUrn(urnStr);
+			return URNFactory.createSHA1Urn(urnStr);
 		} catch(IOException e) {
 			// this will be thrown if the URN string was invalid for any
 			// reason -- just return null

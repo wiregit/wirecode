@@ -72,7 +72,7 @@ public final class UrnTest extends TestCase {
 		urns = new URN[VALID_URNS.length];
 		for(int i=0; i<urns.length; i++) {
 			try {
-				urns[i] = URNFactory.createUrn(VALID_URNS[i]);
+				urns[i] = URNFactory.createSHA1Urn(VALID_URNS[i]);
 				assertNotNull("urn should not be null",urns[i]);
 				assertTrue("should be SHA1", urns[i].isSHA1());
 				assertTrue("urn should not have the empty string", 
@@ -84,7 +84,7 @@ public final class UrnTest extends TestCase {
 		sha1Urns = new URN[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
 			try {
-				sha1Urns[i] = URNFactory.createUrn(VALID_SHA1_URNS[i]);
+				sha1Urns[i] = URNFactory.createSHA1Urn(VALID_SHA1_URNS[i]);
 				assertNotNull("urn should not be null",sha1Urns[i]);
 				assertTrue("urn should not have the empty string", 
 						   !sha1Urns[i].toString().equals(""));
@@ -100,7 +100,7 @@ public final class UrnTest extends TestCase {
 	public void testValidUrns() {
 		for(int i=0; i<VALID_URNS.length; i++) {
 			try {
-				URN urn = URNFactory.createUrn(VALID_URNS[i]);
+				URN urn = URNFactory.createSHA1Urn(VALID_URNS[i]);
 			} catch(IOException e) {
 				assertTrue(false);				
 			}
@@ -116,7 +116,7 @@ public final class UrnTest extends TestCase {
 		boolean encounteredFailure = false;
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
-				URN urn = URNFactory.createUrn(INVALID_URNS[i]);
+				URN urn = URNFactory.createSHA1Urn(INVALID_URNS[i]);
 				assertTrue(false);
 			} catch(IOException e) {
 			}
@@ -141,7 +141,7 @@ public final class UrnTest extends TestCase {
 				assertTrue(urn.isUrn(urn.toString()));
 				assertTrue(urn.getUrnType() == UrnType.SHA1);
 				try {
-					URN newURN = URNFactory.createUrn(urn.toString());
+					URN newURN = URNFactory.createSHA1Urn(urn.toString());
 					assertTrue(newURN.equals(urn));
 				} catch(IOException e) {
 					assertTrue(false);
@@ -191,7 +191,7 @@ public final class UrnTest extends TestCase {
 		int[] hashCodes = new int[VALID_URNS.length];
 		for(int i=0; i<VALID_URNS.length; i++) {
 			try {
-				hashCodes[i] = URNFactory.createUrn(VALID_URNS[i]).hashCode();
+				hashCodes[i] = URNFactory.createSHA1Urn(VALID_URNS[i]).hashCode();
 			} catch(IOException e) {
 				assertTrue(false);
 			}
@@ -217,7 +217,7 @@ public final class UrnTest extends TestCase {
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
 					try {
-						URN tempUrn = URNFactory.createUrn(urns[j].toString());
+						URN tempUrn = URNFactory.createSHA1Urn(urns[j].toString());
 						assertEquals("urns should be equal", curUrn, tempUrn);
 					} catch(IOException e) {
 						assertTrue("unexpected exception: "+e, false);

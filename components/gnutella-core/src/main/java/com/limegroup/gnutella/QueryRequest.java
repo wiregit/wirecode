@@ -205,7 +205,7 @@ public class QueryRequest extends Message implements Serializable{
 					// it's an URN to match, of form "urn:namespace:etc"
 					URN urn = null;
 					try {
-						urn = URNFactory.createUrn(curExtStr);
+						urn = URNFactory.createSHA1Urn(curExtStr);
 					} catch(IOException e) {
 						// the urn string is invalid -- so continue
 						continue;

@@ -42,7 +42,7 @@ public final class AlternateLocationTest extends TestCase {
 	public void testUrlUrnConstructor() {
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-				URN urn = URNFactory.createUrn(HugeTestUtils.VALID_URN_STRINGS[i]);
+				URN urn = URNFactory.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
 				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
 								   URNFactory.createHttpUrnServiceRequest(HugeTestUtils.URNS[i]));
 				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], "/test.htm");

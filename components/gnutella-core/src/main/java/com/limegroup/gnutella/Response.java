@@ -288,7 +288,7 @@ public class Response {
 				if(URN.isUrn(ext)) {
 					// it's a HUGE v0.93 URN name for the same files
 					try {
-						URN urn = URNFactory.createUrn(ext);
+						URN urn = URNFactory.createSHA1Urn(ext);
 						if (urns == null) urns = new HashSet();
 						urns.add(urn);
 					} catch(IOException e) {

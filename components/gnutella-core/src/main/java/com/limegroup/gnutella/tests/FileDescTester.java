@@ -60,7 +60,7 @@ public final class FileDescTester extends TestCase {
 //  		_containedUrnSet = new HashSet();
 //  		for(int i=0; i<10; i++) {
 //  			try {
-//  				_containedUrnSet.add(URNFactory.createUrn(containedURNStrings[i]));
+//  				_containedUrnSet.add(URNFactory.createSHA1Urn(containedURNStrings[i]));
 //  			} catch(IOException e) {
 //  				assertTrue("unexpected exception "+e+"\r\n"+
 //  						   containedURNStrings[i], false);
@@ -70,7 +70,7 @@ public final class FileDescTester extends TestCase {
 		_uncontainedUrnSet = new HashSet();
 		for(int i=0; i<10; i++) {
 			try {
-				_uncontainedUrnSet.add(URNFactory.createUrn(uncontainedURNStrings[i]));
+				_uncontainedUrnSet.add(URNFactory.createSHA1Urn(uncontainedURNStrings[i]));
 			} catch(IOException e) {
 				assertTrue("unexpected exception "+e+"\r\n"+
 						   uncontainedURNStrings[i], false);
