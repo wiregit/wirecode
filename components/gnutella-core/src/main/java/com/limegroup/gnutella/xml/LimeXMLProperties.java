@@ -34,7 +34,7 @@ public class LimeXMLProperties
      * as the users
      * will be invoking all the methods on this instance only.
      */
-    private static LimeXMLProperties _instance = null;
+    private static LimeXMLProperties _instance = new LimeXMLProperties();
 
     private static final String XML_PROPS_FILENAME = "xml.props";
     
@@ -153,10 +153,6 @@ public class LimeXMLProperties
      */
     public static LimeXMLProperties instance()
     {
-        if(_instance == null)
-        {
-            _instance = new LimeXMLProperties();
-        }
         return _instance;
     }
 

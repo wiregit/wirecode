@@ -26,7 +26,8 @@ public class LimeXMLSchemaRepository
     /**
      * An instance of this class
      */
-    private static LimeXMLSchemaRepository _instance = null;
+    private static LimeXMLSchemaRepository _instance = 
+        new LimeXMLSchemaRepository();
     
     /** Creates new LimeXMLSchemaRepository */
     private LimeXMLSchemaRepository()
@@ -69,11 +70,8 @@ public class LimeXMLSchemaRepository
      * Returns an instance of this class. Adheres to Singleton design pattern.
      * So, only one instance of the class is created.
      */
-    public static synchronized LimeXMLSchemaRepository instance()
+    public static LimeXMLSchemaRepository instance()
     {
-        if(_instance == null)
-            _instance = new LimeXMLSchemaRepository();
-        
         return _instance;
     }
     
