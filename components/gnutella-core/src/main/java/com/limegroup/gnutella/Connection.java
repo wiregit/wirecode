@@ -338,14 +338,27 @@ public class Connection {
             _propertiesRead=new Properties();
             //1. Read GNUTELLA CONNECT
             readHeaders();
-            //2. Send GNUTELLA/200 OK
-            sendString(GNUTELLA_OK_06+CRLF);
-            if (_propertiesWrittenR==null)
+            //2. Send our response and headers
+            if (_propertiesWrittenR==null){
+                sendString(GNUTELLA_OK_06+CRLF);
                 sendString(CRLF);  //no headers specified ==> blank line
-            else
-                sendHeaders(_propertiesWrittenR.respond(
-                    new HandshakeResponse(
-                    _propertiesRead), false).getHeaders());
+            }
+            else{
+                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                    new HandshakeResponse(_propertiesRead), false);
+                sendString(GNUTELLA_06 + " " 
+                    + ourResponse.getStatusLine() + CRLF);
+                sendHeaders(ourResponse.getHeaders());   
+                
+                //if our response was not OK, throw an exception so as to
+                //signal the caller to close the connection.
+                //(Needed to accomodate bad clients, who may not close the
+                //connection, even if they dont receive 200 OK
+                if(ourResponse.notOKStatusCode()){
+                    throw new IOException(
+                        "We didnt return OK code during Connection Handshake");
+                }
+            }
             //3. Read GNUTELLA/200 OK, and any private vendor headers.
             if (! readLine().equals(GNUTELLA_OK_06))
                 throw new IOException("Bad connect string");
