@@ -62,7 +62,7 @@ public class MessagesSupportedVMPTest extends TestCase {
             baos.write(smp2.encode());
             baos.write(smp3.encode());
             baos.write(smp3.encode());
-            VendorMessage vm = new VendorMessage("null".getBytes(), 0, 0,
+            VendorMessage vm = new VendorMessage(new byte[4], 0, 0,
                                                  baos.toByteArray());
             baos = new ByteArrayOutputStream();
             vm.write(baos);

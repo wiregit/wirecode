@@ -21,8 +21,8 @@ public abstract class VendorMessagePayload {
                                                    (byte) 65, (byte) 82};
     public static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
                                                    (byte) 75, (byte) 72};
-    public static final byte[] F_NULL_VENDOR_ID = {(byte) 110, (byte) 117,
-                                                   (byte) 108, (byte) 108};
+    public static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
+                                                   (byte) 0, (byte) 0};
 
     //----------------------
     // INSTANCE DATA
