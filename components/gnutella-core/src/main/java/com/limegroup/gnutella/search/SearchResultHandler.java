@@ -279,7 +279,7 @@ public final class SearchResultHandler {
             } catch(IllegalArgumentException e) {
                 continue; //discard this response.
             }
-			RouterService.getCallback().handleQueryResult(rfd,replyGUID,data);
+			RouterService.getCallback().handleQueryResult(rfd,data);
 
         } //end of response loop
         return true;
