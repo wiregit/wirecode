@@ -240,8 +240,9 @@ public abstract class MessageRouter
         // Increment hops and decrement TTL.
         msg.hop();
 
-		UDPReplyHandler handler = 
-		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
+		InetAddress address = datagram.getAddress();
+		int port = datagram.getPort();
+		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
 			MessageStatistics.addUDPQueryRequest();
@@ -258,8 +259,12 @@ public abstract class MessageRouter
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
 			MessageStatistics.addUDPPingReply();
-			UNICASTER.addUnicastEndpoint(datagram.getAddress(),
-										 datagram.getPort());		
+			PingReply reply = (PingReply)msg;
+			if((reply.getPort() != port) || 
+			   (!reply.getIP().equals(address.getHostAddress()))) {
+				UNICASTER.addUnicastEndpoint(datagram.getAddress(),
+											 datagram.getPort());		
+			}
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
 			MessageStatistics.addUDPPushRequest();
