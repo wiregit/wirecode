@@ -4,7 +4,6 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.MetaFileManager;
-import com.limegroup.gnutella.server.ServerFileManager;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -79,8 +78,6 @@ public class FileManager {
         String servantType = SettingsManager.instance().getServantType();
         if(servantType.equals(Constants.XML_CLIENT))
             _instance = new MetaFileManager();
-        else if(servantType.equals(Constants.SERVER))
-            _instance = new ServerFileManager();
         else
             _instance = new FileManager();
     }
