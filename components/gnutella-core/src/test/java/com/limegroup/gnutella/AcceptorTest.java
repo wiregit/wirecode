@@ -14,13 +14,23 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(AcceptorTest.class);
     }
 
-    public void testPortsOccupied() {        
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}
+
+    public void testPortsOccupied() {
         // strategy: open sockets on various ports and try to set the listening
         // port via Acceptor.
 
         // start it up!
         Acceptor acceptThread = new Acceptor();
         acceptThread.start();
+        
+        // Give thread time to find and open it's sockets.   This race condition
+        // is tolerated in order to speed up LimeWire startup
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {}
 
         int portToTry = 2000;
         DatagramSocket udp = null;
@@ -83,6 +93,12 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
         // start it up!
         Acceptor acceptThread = new Acceptor();
         acceptThread.start();
+        
+        // Give thread time to find and open it's sockets.   This race condition
+        // is tolerated in order to speed up LimeWire startup
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {}
 
         int portToTry = 2000;
         while (true) {
