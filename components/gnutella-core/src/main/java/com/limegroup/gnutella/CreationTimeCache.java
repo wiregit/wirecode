@@ -15,6 +15,14 @@ import com.limegroup.gnutella.ErrorService;
  *
  * In order to be speedy, this class maintains two data structures - one for
  * fast URN to creation time lookup, another for fast 'youngest' file lookup.
+ * <br>
+ * IMPLEMENTATION NOTES:
+ * The two data structures do not reflect each other's internal representation
+ * - specifically, the URN->Time lookup may have more URNs than the
+ * Time->URNSet lookup.  This is a consequence of partial file sharing.  It is
+ * the case that the URNs in the sets of the Time->URNSet lookup are a subset
+ * of the URNs in the URN->Time lookup.  For more details, see addTime and
+ * commitTime.
  */
 public final class CreationTimeCache {
     
@@ -226,10 +234,8 @@ public final class CreationTimeCache {
     private synchronized void removeURNFromURNSet(URN urn, Long refTime) {
         if (refTime != null) {
             Set urnSet = (Set) TIME_TO_URNSET_MAP.get(refTime);
-            if ((urnSet != null) && (urnSet.contains(urn))) {
-                urnSet.remove(urn);
+            if ((urnSet != null) && (urnSet.remove(urn)))
                 if (urnSet.size() < 1) TIME_TO_URNSET_MAP.remove(refTime);
-            }
         }
         else { // search everything
             Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
@@ -252,6 +258,11 @@ public final class CreationTimeCache {
     /**
      * Constructs the TIME_TO_URNSET_MAP, which is based off the entries in the
      * URN_TO_TIME_MAP.
+     * IMPORTANT NOTE: currently this method is not synchronized, and does not
+     * need to be since it is only called from the constructor (which auto-
+     * magically disallows concurrent acess to the instance.  If this method
+     * is ever made public, called from multiple entrypoints, etc.,
+     * synchronization may be needed.
      */
     private void constructURNMap() {
         Set entries = URN_TO_TIME_MAP.entrySet();
