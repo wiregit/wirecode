@@ -111,6 +111,9 @@ public class UDPConnectionProcessor {
         firing - This should achieve part of nagles algorithm.  */
     private static final long WRITE_WAKEUP_DELAY_TIME = 10;
 
+    /** Delay the write events by one second if there is nothing to do */
+    private static final long NOTHING_TO_DO_DELAY     = 1000;
+
     /** Time to wait after a close before everything is totally shutdown. */
     private static final long SHUTDOWN_DELAY_TIME     = 400;
 
@@ -1147,7 +1150,9 @@ public class UDPConnectionProcessor {
                         sendData(chunk);
                 } else {
                     // if no room to send data then wait for the window to Open
-                    scheduleWriteDataEvent(Long.MAX_VALUE);
+                    // Don't wait more than 1 second for sanity checking 
+                    scheduleWriteDataEvent(
+                      System.currentTimeMillis() + NOTHING_TO_DO_DELAY);
                     _waitingForDataSpace = true;
 
             		if(LOG.isDebugEnabled())  
@@ -1160,7 +1165,9 @@ public class UDPConnectionProcessor {
             // Writes will get rescheduled if a chunk becomes available.
             synchronized(_inputFromOutputStream) {
                 if ( _inputFromOutputStream.getPendingChunks() == 0 ) {
-                    scheduleWriteDataEvent(Long.MAX_VALUE);
+                    // Don't wait more than 1 second for sanity checking 
+                    scheduleWriteDataEvent(
+                      System.currentTimeMillis() + NOTHING_TO_DO_DELAY);
                     _waitingForDataAvailable = true;
             		if(LOG.isDebugEnabled())  
                 		LOG.debug("Shutdown SendData no pending");
