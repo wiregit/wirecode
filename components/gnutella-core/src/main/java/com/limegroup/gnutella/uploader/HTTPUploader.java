@@ -481,6 +481,7 @@ public class HTTPUploader implements Runnable {
                 _state = COMPLETE;
             }
         } catch (IOException e) {
+			decrementNumUploads();
             _state = ERROR;
         } finally {
             if ( uploadCountIncremented )
@@ -607,7 +608,7 @@ public class HTTPUploader implements Runnable {
         }
 
         _state = COMPLETE;
-		decrementNumUploads();
+
     }
 
     /**
