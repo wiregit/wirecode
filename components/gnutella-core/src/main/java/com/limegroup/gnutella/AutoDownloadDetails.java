@@ -30,6 +30,15 @@ class AutoDownloadDetails {
      */
     private float MATCH_PRECISION_DL = .30f;
 
+    /**
+     */
+    private float WORD_INCIDENCE_RATE = .509999f;
+
+    /** the set of words that are already being downloaded.  this can be used
+     *  as a heuristic when determining what to download.....
+     */
+    private Set wordSet = null;
+
     static {
         matcher.setIgnoreCase(true);
         matcher.setIgnoreWhitespace(true);
@@ -54,6 +63,7 @@ class AutoDownloadDetails {
         richQuery = inRichQuery;
         type = inType;
         dlList = new Vector();
+        wordSet = new HashSet();
     }
     
     public String getQuery() {
@@ -73,6 +83,8 @@ class AutoDownloadDetails {
      * @return Whether or not the add was successful. 
      */
     public synchronized boolean addDownload(RemoteFileDesc toAdd) {
+        debug("ADD.addDownload(): *-----------");
+        debug("ADD.addDownload(): entered.");
         // this is used not only as a return value but to control processing.
         // if it every turns false we just stop processing....
         boolean retVal = true;
@@ -88,6 +100,33 @@ class AutoDownloadDetails {
                       inputFileName + " isn't the right type.");
             }
 
+            // check to see there is a high incidence of words here in stuff we
+            // are already downloading....
+            if (retVal && (wordSet.size() > 0)) {
+                StringTokenizer st = 
+                new StringTokenizer(ripExtension(inputFileName),
+                                    FileManager.DELIMETERS);
+                int additions = 0;
+                final int numTokens = st.countTokens();
+                while (st.hasMoreTokens()) {
+                    String currToken = st.nextToken().toLowerCase();
+                    debug("ADD.addDownload(): currToken = " +
+                          currToken);
+                    if (!wordSet.contains(currToken)) 
+                        additions++;
+                }
+                float matchRate = 
+                ((float)(numTokens - additions)/
+                 (float)wordSet.size());
+                if ((additions == 0) || 
+                    (matchRate > WORD_INCIDENCE_RATE)) {
+                    retVal = false;
+                    debug("ADD.addDownload(): file " +
+                          inputFileName + " has many elements similar to" +
+                          " other files. matchRate = " + matchRate + 
+                          ", additions = " + additions);
+                }
+            }
 
             // see if it compares to any other file already being DLed....
             if (retVal && (dlList.size() > 0)) {
@@ -112,6 +151,7 @@ class AutoDownloadDetails {
                         debug("ADD.addDownload(): conflict for file " +
                               inputFileName + " and " + currFileName);
                     }
+
                     // oops, we have already accepted that file for DL, don't
                     // add it and break out of this costly loop....
                     if (!retVal)
@@ -119,12 +159,24 @@ class AutoDownloadDetails {
                 }
             }
 
-            if (retVal)
+            // ok, all processing passed, add this...
+            if (retVal) {
+                // used by the approx. matcher...
                 dlList.add(toAdd);
+                // used by my hashset comparator....
+                StringTokenizer st = 
+                new StringTokenizer(ripExtension(inputFileName),
+                                    FileManager.DELIMETERS);
+                while (st.hasMoreTokens())
+                    wordSet.add(st.nextToken().toLowerCase());
+                debug("ADD.addDownload(): wordSet = " + wordSet);
+            }
         }
         else 
             retVal = false;
-        
+
+        debug("ADD.addDownload(): returning " + retVal);        
+        debug("ADD.addDownload(): -----------*");
         return retVal;
     }
 
@@ -132,7 +184,15 @@ class AutoDownloadDetails {
      *  you want to back it out....
      */
     public synchronized void removeDownload(RemoteFileDesc toRemove) {
+        // used by the approx. matcher...
         dlList.remove(toRemove);
+        // used by the hashset comparator....
+        StringTokenizer st = 
+        new StringTokenizer(ripExtension(toRemove.getFileName()),
+                            FileManager.DELIMETERS);
+        while (st.hasMoreTokens())
+            wordSet.remove(st.nextToken().toLowerCase());
+        
     }
 
     /** Call this when the DL was 'successful'.
@@ -144,13 +204,24 @@ class AutoDownloadDetails {
 
     /** @return true when the AutoDownload process is complete.
      */
-    public boolean expired() {
+    public synchronized boolean expired() {
         boolean retVal = false;
         if (committedDLs >= MAX_DOWNLOADS)
             retVal = true;
         return retVal;
     }
 
+
+    // take the extension off the filename...
+    private String ripExtension(String fileName) {
+        String retString = null;
+        int extStart = fileName.lastIndexOf('.');
+        if (extStart == -1)
+            retString = fileName;
+        else
+            retString = fileName.substring(0, extStart);
+        return retString;
+    }
 
     private static final boolean debugOn = false;
     private static void debug(String out) {
@@ -169,11 +240,11 @@ class AutoDownloadDetails {
                                 MediaType.getAudioMediaType());
         String[] files = {"morrissey - suedehead.mp3",
                           "morriseey - sueadhea d.mp3",
-                          "morrissey - billy budd.mp3",
-                          "morrissey - tomorrow.asf",
-                          "morrissey - boxers.mp3",
-                          "morrissey - tomorrow.mp3",
-                          "morrissey - hold on to your friends.mp3",
+                          "Morrissey - billy budd.mp3",
+                          "moRrissey - tomorrow.asf",
+                          "morRissey - boxers.mp3",
+                          "morriSSey - tomorrow.mp3",
+                          "Morrissey - hold on to your friends.mp3",
                           "morrissey - budd billy.mp3"};
 
         RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
@@ -201,7 +272,7 @@ class AutoDownloadDetails {
         // seems like we've committed MAX_DOWNLOADS, should be expired...
         Assert.that(add.expired());
     }
-    */    
+    */
     
 }
 
