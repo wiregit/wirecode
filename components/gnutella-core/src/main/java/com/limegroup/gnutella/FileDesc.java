@@ -271,7 +271,8 @@ public final class FileDesc implements AlternateLocationCollector {
 	
 	// implements AlternateLocationCollector interface
 	public int numberOfAlternateLocations() {
-	    createAlternateLocations();
+	    // save memory by not creating the object if it isn't storing anything
+	    if(_altLocs == null) return 0;
 	    return _altLocs.numberOfAlternateLocations();
 	}
 
