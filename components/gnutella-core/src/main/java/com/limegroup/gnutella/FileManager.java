@@ -24,8 +24,6 @@ public class FileManager {
 
     private static FileManager _myFileManager;
 
-
-
     public FileManager() {               /* the constructor initializes */ 
 	_size = 0;                       /* all the provate variables */
 	_numFiles = 0;
@@ -57,7 +55,7 @@ public class FileManager {
 	return response;
     }
 
-    public void addFile(String path) { /* the addFile method adds */ 
+    public synchronized void addFile(String path) { /* the addFile method adds */ 
 	File myFile = new File(path);  /* just one single file to */
 	String name = myFile.getName();     /* the name of the file */
 	int n = (int)myFile.length();       /* the list, and increments */
@@ -66,7 +64,7 @@ public class FileManager {
 	_numFiles++;
     }
 
-    public void addDirectory(String dir_name) { /* the addDirectory method */
+    public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
 	File myFile = new File(dir_name);       /* recursively adds all of */
 	File[] file_list = myFile.listFiles();  /* the files in a specified */
 	int n = file_list.length;               /* directory */
@@ -96,3 +94,8 @@ public class FileManager {
     }
     
 }
+
+
+
+
+
