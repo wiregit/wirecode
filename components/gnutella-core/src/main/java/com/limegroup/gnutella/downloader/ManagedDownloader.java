@@ -130,6 +130,54 @@ public class ManagedDownloader implements Downloader, Serializable {
       The core downloading loop is done by tryAllDownloads3.
       connectAndDownload (which is started asynchronously in tryAllDownloads3),
       does the three step ennumerated above.
+            
+      All downloads start QUEUED.
+      From there, it will stay queued until a slot is available.
+      
+      If atleast one host is available to download from, then the
+      first state is always CONNECTING.
+          After connecting, a downloader can become:
+          a) DOWNLOADING (actively downloading)
+          b) WAITING_FOR_RETRY (busy hosts)
+          c) ABORTED (user manually stopped the download)
+          d) REMOTE_QUEUED (the remote host queued us)
+      
+      If no hosts existed for connecting, or we exhausted our attempts
+      at connecting to all possible hosts, the state will become one of:
+          e) GAVE_UP (maxxed out on requeries)
+          f) WAITING_FOR_USER (waiting for the user to initiate a requery)
+          g) ITERATIVE_GUESSING (targetted location of more sources)
+      If the user resumes the download and we were WAITING_FOR_USER, a requery
+      is sent out and we go into WAITING_FOR_RESULTS stage.  After we have
+      finished waiting for results (if none arrived), we will either go back to
+      WAITING_FOR_USER (if we are allowed more requeries), or GAVE_UP (if we 
+      maxxed out the requeries).
+      After ITERATIVE_GUESSING completes, if no results arrived then we go to 
+      WAITING_FOR_USER.  Prior to WAITING_FOR_RESULTS, if no connections are
+      active then we wait at WAITING_FOR_CONNECTIONS until connections exist.
+      
+      If more results come in while waiting in these states, the download will
+      either immediately become active (CONNECTING ...) again, or change its
+      state to QUEUED and wait for DownloadManager to activate it.
+      
+      The download can finish in one of the following states:
+          h) COMPLETE (download completed just fine)
+          i) ABORTED  (user pressed stopped at some point)
+          j) COULDNT_MOVE_TO_LIBRARY (limewire couldn't the file)
+          k) CORRUPT_FILE (the file was corrupt)
+
+     There are a few intermediary states:
+          l) HASHING
+          m) SAVING
+          n) IDENTIFY_CORRUPTION
+          o) RECOVERY_FAILED
+     HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
+     to let the user know what is currently happening in the closing states of
+     the download.  IDENTIFY_CORRUPTION is used if SHA1 hash checks failed
+     and a TigerTree exists, to identify precisely which parts of the file are
+     corrupt.  RECOVERY_FAILED is used as an indicator that we no longer want
+     to retry the download, because we've tried and recovered from corruption
+     too many times.
 
       Currently the desired parallelism is fixed at 2 for modem users, 6
       for cable/T1/DSL, and 8 for T3 and above.
@@ -227,6 +275,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      * DownloadManager.  Package-access and non-final for testing.
      * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
     static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
+    
+    /**
+     * How long we'll wait after sending a GUESS query before we try something
+     * else.
+     */
+    private static final int GUESS_WAIT_TIME = 5000;
+    
+    /**
+     * How long we'll wait before attempting to download again after checking
+     * for stable connections (and not seeing any)
+     */
+    private static final int CONNECTING_WAIT_TIME = 750;
     
     /**
      * The number of times to requery the network. All requeries are
@@ -698,7 +758,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If we don't have stable connections, wait until we do.
         if(!hasStableConnections()) {
             lastQuerySent = -1; // mark as wanting to requery.
-            setState(WAITING_FOR_CONNECTIONS, 750);
+            setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
         } else {
             try {
                 if(manager.sendQuery(this, newRequery(numQueries))) {
@@ -767,7 +827,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(guessLocs == null || guessLocs.isEmpty())
             return false;
 
-        setState(ITERATIVE_GUESSING, 5000);
+        setState(ITERATIVE_GUESSING, GUESS_WAIT_TIME);
         triedLocatingSources = true;
 
         //TODO: should we increment a stat to get a sense of
@@ -961,7 +1021,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    
 		if(allFiles[0].getSHA1Urn() == null)
 			return QueryRequest.createQuery(extractQueryString());
-        else
+        else // this is where a SHA1 query would be sent, if desired
             return QueryRequest.createQuery(extractQueryString());
     }
 
@@ -1348,6 +1408,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //interrupt the thread
             for(Iterator iter=threads.iterator(); iter.hasNext(); )
                 ((Thread)iter.next()).interrupt();
+
+            if(dloaderManagerThread != null)
+                dloaderManagerThread.interrupt();
         }
     }
 
