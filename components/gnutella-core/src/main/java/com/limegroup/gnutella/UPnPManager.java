@@ -382,7 +382,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			udp = _udp;
 		}
 		
-		Runnable cleaner = new Runnable() {
+		final Thread cleaner = new Thread() {
 			public void run() {
 				LOG.debug("start cleaning");
 				removeMapping(tcp);
@@ -391,12 +391,22 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			}
 		};
 		
-		Thread remover = new ManagedThread(cleaner);
-		remover.setDaemon(false);
-		remover.setName("shutdown mapping cleaner");
+		Thread waiter = new Thread() {
+		    public void run() {
+		        try{
+		            LOG.debug("waiting for UPnP cleaners to finish");
+		            cleaner.join();
+		        }catch(InterruptedException ignored){}
+		        LOG.debug("UPnP cleaners done");
+		    }
+		};
+		
 		try {
-		    Runtime.getRuntime().addShutdownHook(remover);
+		    Runtime.getRuntime().addShutdownHook(waiter);
 		} catch (IllegalStateException ignored){}
+		
+		cleaner.setName("shutdown mapping cleaner");
+		cleaner.start();
 	}
 	
 	public void finalize() {
