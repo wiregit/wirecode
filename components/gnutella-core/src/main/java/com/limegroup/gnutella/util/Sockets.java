@@ -135,6 +135,10 @@ public class Sockets {
                     new Object[] { addr, new Integer(timeout) });
                 return ret;
             } catch (InvocationTargetException e) {
+                // keep this here -- we want to know if we're not connecting
+                // for unexpected reasons, but we don't want to notify the
+                // user
+                e.printStackTrace();
                 //ioException.getTargetException() should be an instance of
                 //IOexception, but this is safer.
                 throw new IOException(e.getMessage()); 
@@ -142,7 +146,9 @@ public class Sockets {
                 // this should never happen -- display the error
                 ErrorService.error(e);
             } catch(IllegalAccessException e) {
-                // should almost never happen
+                // should almost never happen -- we want to know if it 
+                // does
+                ErrorService.error(e);
             }
         }
      
