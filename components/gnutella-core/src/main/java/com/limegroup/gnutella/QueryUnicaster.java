@@ -56,9 +56,8 @@ public final class QueryUnicaster {
      */
     private long _lastPingTime = 0;
 
-	/**
-	 * Variable for how many test pings have been sent out to determine 
-	 * whether or not we can accept incoming connections.
+	/** Variable for how many test pings have been sent out to determine 
+	 *  whether or not we can accept incoming connections.
 	 */
 	private int _testUDPPingsSent = 0;
 
@@ -103,13 +102,12 @@ public final class QueryUnicaster {
         return retList;
     }
 
-	/**
-	 * Returns a <tt>GUESSEndpoint</tt> from the current cache of 
-	 * GUESS endpoints.
+	/** Returns a <tt>GUESSEndpoint</tt> from the current cache of 
+	 *  GUESS endpoints.
 	 *
-	 * @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
-	 *  to query, or <tt>null</tt> if there are no available hosts
-	 *  to return
+	 *  @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
+	 *   to query, or <tt>null</tt> if there are no available hosts
+	 *   to return
 	 */
 	public GUESSEndpoint getUnicastEndpoint() {
 		synchronized(_queryHosts) {
@@ -223,7 +221,9 @@ public final class QueryUnicaster {
                     _queryHosts.removeLast(); // evict a old guy...
                 _queryHosts.addFirst(new GUESSEndpoint(address, port));
                 _queryHosts.notify();
-				if(_testUDPPingsSent < 30 && !RouterService.isGUESSCapable()) {
+				if(UDPService.instance().isListening() &&
+				   !RouterService.isGUESSCapable() &&
+				   _testUDPPingsSent < 5) {
 					UDPService.instance().send(new PingRequest((byte)1), 
 											   address, port);
 					_testUDPPingsSent++;
