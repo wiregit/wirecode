@@ -755,10 +755,8 @@ public class DownloadManager implements BandwidthTracker {
             	// the failover push.
             	Set files = (Set)_udpFailover.get(socket.getInetAddress());
             
-            	if (files!=null) {
+            	if (files!=null) 
             		files.remove(file);
-            		_udpFailover.put(socket.getInetAddress(),files);
-            	}
             }
 
             //2. Attempt to give to an existing downloader.
@@ -1034,10 +1032,6 @@ public class DownloadManager implements BandwidthTracker {
         	return true;
         }
         
-        // in case this is a failover push, remove the host from the set
-        if (file.getOOBAddress()!=null)
-        	_udpFailover.remove(file.getOOBAddress().getInetAddress());
-        
         //send the push through tcp.
         pr = 
         	new PushRequest(GUID.makeGuid(),
@@ -1117,7 +1111,7 @@ public class DownloadManager implements BandwidthTracker {
             if (next==null || (! next.equals(""))) {
                 throw new IOException();
             }
-        } catch (IOException e) {        
+        } catch (IOException e) {      
             throw e;                   
         }   
 
@@ -1207,7 +1201,7 @@ public class DownloadManager implements BandwidthTracker {
 			boolean proceed = false;
 			
 			InetAddress key = _file.getOOBAddress().getInetAddress();
-			
+
 			synchronized(_failoverLock) {
 				Set files = (Set) _udpFailover.get(key);
 			
