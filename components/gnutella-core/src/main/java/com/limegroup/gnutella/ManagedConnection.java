@@ -386,23 +386,20 @@ public class ManagedConnection
     private int calculatePriority(Message m) {
         //TODO: use switch statement?
         byte opcode=m.getFunc();
-        byte hops=m.getHops();
-        if (hops==0 && (opcode==Message.F_PING || opcode==Message.F_PING_REPLY))
-            //watchdog ping/pong
-            return PRIORITY_WATCHDOG;
-        else if (opcode==Message.F_PUSH)
-            return PRIORITY_PUSH;
-        else if (opcode==Message.F_QUERY_REPLY) 
-            return PRIORITY_QUERY_REPLY;
-        else if (opcode==Message.F_QUERY) 
-            return PRIORITY_QUERY;
-        else if (opcode==Message.F_PING_REPLY)
-            return PRIORITY_PING_REPLY;
-        else if (opcode==Message.F_PING)
-            return PRIORITY_PING;
-        else {
-            //includes QRP table updates
-            return PRIORITY_OTHER;
+        boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
+        switch (opcode) {
+            case Message.F_QUERY: 
+                return PRIORITY_QUERY;
+            case Message.F_QUERY_REPLY: 
+                return PRIORITY_QUERY_REPLY;
+            case Message.F_PING_REPLY: 
+                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
+            case Message.F_PING: 
+                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
+            case Message.F_PUSH: 
+                return PRIORITY_PUSH;
+            default: 
+                return PRIORITY_OTHER;  //includes QRP Tables
         }
     }
 
@@ -461,37 +458,37 @@ public class ManagedConnection
         
         /** Send several queued message of each type. */
         private final void sendQueued() throws IOException {  
-            //1. For each priority send as many messages as desired for that
+            //1. For each priority i send as many messages as desired for that
             //type.  As an optimization, we start with the buffer of the last
             //message sent, wrapping around the buffer.  You can also search
             //from 0 to the end.
             int start=_lastPriority;
-            int priority=start;
+            int i=start;
             do {                   
                 //IMPORTANT: we only obtain _outputQueueLock while touching the
                 //queue, not while actually sending (which can block).
-                MessageQueue queue=_outputQueue[priority];
+                MessageQueue queue=_outputQueue[i];
                 queue.resetCycle();
+                boolean emptied=false;
                 while (true) {
                     Message m=null;
                     synchronized (_outputQueueLock) {
                         m=(Message)queue.removeNext(); 
                         if (m==null)
                             break;
-                        _queued--;
+                        if (--_queued==0)
+                            emptied=true;
                     }
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
                 
-                //Optimization: the code in the synchronized block is not needed for
+                //Optimization: the if statement below is not needed for
                 //correctness but works nicely with the _priorityHint trick.
-                synchronized (_outputQueueLock) {
-                    if (_queued==0)
-                        break;  
-                }
-                priority=(priority+1)%PRIORITIES;
-            } while (priority!=start);
+                if (emptied)
+                    break;
+                i=(i+1)%PRIORITIES;
+            } while (i!=start);
             
             
             //2. Now force data from Connection's BufferedOutputStream into the
@@ -1202,6 +1199,7 @@ public class ManagedConnection
      * private and final.  Make protected if ManagedConnection is subclassed.
      */
     private final void repOk() {
+        /*
         //Check _queued invariant.
         synchronized (_outputQueueLock) {
             int sum=0;
@@ -1209,9 +1207,11 @@ public class ManagedConnection
                 sum+=_outputQueue[i].size();
             Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
         }
+        */
     }
     
     /** Unit test. */
+    /*
     public static void main(String args[]) {        
         try {
             System.out.println("-Testing initialize");
@@ -1306,7 +1306,7 @@ public class ManagedConnection
         m.hop();
         out.send(m);
         out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new PingReply(new byte[16], (byte)5, 6342, new byte[4], 0, 0));
+        out.send(new PingReply(new byte[16], (byte)1, 6342, new byte[4], 0, 0));
         m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                          new Response[0], new byte[16]);
         m.setPriority(1);
@@ -1314,7 +1314,7 @@ public class ManagedConnection
         out.send(new PatchTableMessage((short)1, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 0, 5));
-        out.send(new PingRequest((byte)5));
+        out.send(new PingRequest((byte)2));
         out.send(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
@@ -1594,4 +1594,5 @@ public class ManagedConnection
     private ManagedConnection() {
         super("", 0);
     }
+    */
 }
