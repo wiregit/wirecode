@@ -131,34 +131,60 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
-    public void testExpire() {
+    public void testExpireBig() {
         try {
-            //System.out.println("-Testing expire");
+            HostCatcher.DEBUG=false;
+            final int SIZE=100;
+            assertTrue(SIZE>HostCatcher.HOSTS_BEFORE_BOOTSTRAP);
+            //Tests that some messages are copied from GOOD priority to NORMAL,
+            //but some aren't.
             SettingsManager.instance().setQuickConnectHosts(
                  new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
+            for (int i=SIZE; i>=1; i--) 
+                hc.add(new Endpoint("18.239.0.144", i), true);
+            assertEquals(SIZE, 
+                         hc.getNumUltrapeerHosts());
+
             hc.expire();
 
+            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP, 
+                         hc.getNumUltrapeerHosts());
+            int i=1;
+            for (; i<=HostCatcher.HOSTS_BEFORE_BOOTSTRAP; i++)
+                assertEquals(new Endpoint("18.239.0.144", i),
+                             hc.getAnEndpoint());
             assertTrue(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
+            for (; i<=SIZE; i++)
+                assertEquals(new Endpoint("18.239.0.144", i),
+                             hc.getAnEndpoint());
+            assertEquals(0, hc.getNumHosts());
+        } catch (InterruptedException e) { 
+            assertTrue("Mysterious InterruptedException", false);
+        }
+    }
 
-            hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.add(new Endpoint("128.103.60.3", 6346), false);
-            hc.add(new Endpoint("192.168.0.1", 6346), false);
-            assertTrue(hc.getNumUltrapeerHosts()==1);
+    public void testExpireSmall() {
+        try {
+            HostCatcher.DEBUG=false;
+            final int SIZE=5;
+            assertTrue(SIZE<HostCatcher.HOSTS_BEFORE_BOOTSTRAP);
+            //Tests that some messages are copied from GOOD priority to NORMAL,
+            //but some aren't.
+            SettingsManager.instance().setQuickConnectHosts(
+                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
+            for (int i=SIZE; i>=1; i--) 
+                hc.add(new Endpoint("18.239.0.144", i), true);
+            assertEquals(SIZE, 
+                         hc.getNumUltrapeerHosts());
 
             hc.expire();
-            assertTrue(hc.getNumUltrapeerHosts()==0);
-            Endpoint e=hc.getAnEndpoint();
-            assertTrue(e.equals(new Endpoint("r1.b.c.d", 6346)));
-            hc.doneWithConnect(e, false);
-            hc.doneWithMessageLoop(e);
-            e=hc.getAnEndpoint();
-            assertTrue(e.equals(new Endpoint("r2.b.c.d", 6347)));
-            hc.doneWithConnect(e, true);
-            hc.doneWithMessageLoop(e);
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.144", 6346)));
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.3", 6346)));
+
+            assertEquals(SIZE, hc.getNumUltrapeerHosts());            
+            for (int i=1; i<=SIZE; i++)
+                assertEquals(new Endpoint("18.239.0.144", i),
+                             hc.getAnEndpoint());
+            assertTrue(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
+            assertEquals(0, hc.getNumHosts());
         } catch (InterruptedException e) { 
             assertTrue("Mysterious InterruptedException", false);
         }
@@ -271,7 +297,6 @@ public class HostCatcherTest extends TestCase {
             SettingsManager.instance().setQuickConnectHosts(new String[0]);
             setUp();
             hc.read(tmp.getAbsolutePath());
-            assertTrue(hc.getNumUltrapeerHosts()==0);
             assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
             assertEquals(new Endpoint("18.239.0.142", 6342),
                          hc.getAnEndpoint());
@@ -323,7 +348,8 @@ public class HostCatcherTest extends TestCase {
             setUp();
             HostCatcher.DEBUG=false;  //Too darn slow
             hc.read(tmp.getAbsolutePath());
-            assertTrue(hc.getNumUltrapeerHosts()==0);
+            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP,
+                         hc.getNumUltrapeerHosts());
             assertEquals(new Endpoint("18.239.0.142", 0),
                          hc.getAnEndpoint());
             for (int i=N; i>1; i--) {
@@ -437,7 +463,8 @@ public class HostCatcherTest extends TestCase {
             hc.read(tmp.getAbsolutePath());
 
             assertEquals(HostCatcher.NORMAL_SIZE, hc.getNumHosts());
-            assertTrue(hc.getNumUltrapeerHosts()==0);
+            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP, 
+                         hc.getNumUltrapeerHosts());
 
             //3. Verify it's random.  This is hard to check.  We just verify
             //that that the first three entries aren't the last three entries

@@ -50,6 +50,10 @@ public class HostCatcher {
     /** The number of private IP pongs to store. */
     static final int BAD_SIZE=15;
     static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+    /** The number of hosts to try before relying on router.limewire.com.  This
+     *  is used when loading the gnutella.net file and when expiring the
+     *  cache. */
+    static final int HOSTS_BEFORE_BOOTSTRAP=20;
 
     /** The number of permanent locations to store in gnutella.net */
     static final int PERMANENT_SIZE=NORMAL_SIZE;
@@ -163,7 +167,7 @@ public class HostCatcher {
     synchronized void read(String filename)
             throws FileNotFoundException, IOException {
         //Read gnutella.net file into temporary buffer.
-        ArrayList /* of ExtendedEndpoint */ buffer=new ArrayList(NORMAL_SIZE);
+        List /* of ExtendedEndpoint */ buffer=new ArrayList(NORMAL_SIZE);
         BufferedReader in=new BufferedReader(new FileReader(filename));
         while (true) {
             try {
@@ -176,30 +180,32 @@ public class HostCatcher {
             }
         }
 
-        //Add entries to buffer.
+        //If the gnutella.net file is very large, we can assume we're
+        //running LimeWire for the first time.  In this case, we want to
+        //pick a random subset of the gnutella.net file to add.  You might
+        //also want to check that LimeWire is running for the first time--
+        //but I worry that we might be using an old limewire.props with a
+        //new gnutella.net.
+        //
+        //It's possible to specialize the shuffling algorithm to run in
+        //O(PERMANENT_SIZE) time instead of O(buffer.size()) time, while still
+        //preventing duplicates.
         if (buffer.size()>PERMANENT_SIZE) {
-            //a) If the gnutella.net file is very large, we can assume we're
-            //running LimeWire for the first time.  In this case, we want to
-            //pick a random subset of the gnutella.net file to add.  You might
-            //also want to check that LimeWire is running for the first time--
-            //but I worry that we might be using an old limewire.props with a
-            //new gnutella.net.
-            //
-            //It's possible to optimize this algorithm to run in
-            //O(PERMANENT_SIZE) time instead of O(buffer.size()) time, while
-            //still preventing duplicates.
             Collections.shuffle(buffer);
-            for (int i=0; i<PERMANENT_SIZE; i++) {
-                ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
-                add(e, priority(e));
-            }
-        } else {
-            //b) Normal case.  Note that first elements read are the worst
-            //elements, so end up at the tail of the queue.
-            for (int i=0; i<buffer.size(); i++) {
-                ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
-                add(e, priority(e));
-            }
+            buffer=buffer.subList(0, PERMANENT_SIZE); //efficient
+        }
+
+        //Add entries to the buffer.  Note that first elements end up at the
+        //lowest priority, assuming they're otherwise equal.
+        for (int i=0; i<buffer.size(); i++) {
+            ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
+            //First pongs are normal priority.  Last HOSTS_BEFORE_BOOTSTRAP are
+            //given ultrapeer priority.  This delays the use of
+            //router.limewire.com until connection attempts fail.
+            int priority=i>=(buffer.size()-HOSTS_BEFORE_BOOTSTRAP) 
+                         ? GOOD_PRIORITY
+                         : priority(e);
+            add(e, priority);
         }
     }
 
@@ -598,21 +604,31 @@ public class HostCatcher {
             }
         }
         
-        //Move the N ultrapeer hosts from GOOD to NORMAL.  This forces
-        //getAnEndpointInternal() to return a bootstrap pong next.  This is a
-        //little weird, because these hosts really still are ultrapeer
-        //pongs--just lesser priority.
+        //Move the worst N-HOSTS_BEFORE_BOOTSTRAP ultrapeer hosts from GOOD to
+        //NORMAL.  This is a little weird because these hosts really still are
+        //ultrapeer pongs--just lesser priority.  Leave the best
+        //HOSTS_BEFORE_BOOTSTRAP pongs in the same priority level.  Our
+        //implementation uses a temporary buffer to avoid needing knowledge of
+        //queue structure.
         int n=getNumUltrapeerHosts();
+        ExtendedEndpoint[] buffer=new ExtendedEndpoint[n];
         for (int i=0; i<n; i++) {
+            //1. Remove pongs from queue, adding to buffer.
             try {
-                ExtendedEndpoint e=getAnEndpointInternal();
-                //Uptime doesn't matter, since e already in permanent.
-                add(e, NORMAL_PRIORITY);
+                buffer[i]=getAnEndpointInternal();
             } catch (NoSuchElementException e) {
                 Assert.that(false, 
                     i+"'th getAnEndpointInternal not consistent with "+n);
             }
         }
+        Assert.that(getNumUltrapeerHosts()==0, "Ultrapeers not emptied");
+        int i=n-1;
+        for (; i>=HOSTS_BEFORE_BOOTSTRAP; i--)
+            //2. Copy worst pongs to normal priority
+            add(buffer[i], NORMAL_PRIORITY);
+        for (; i>=0; i--)
+            //3. Put best pongs back into good priority
+            add(buffer[i], GOOD_PRIORITY);        
     }
 
     /**
