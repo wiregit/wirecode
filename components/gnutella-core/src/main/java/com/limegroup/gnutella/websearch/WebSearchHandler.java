@@ -80,8 +80,6 @@ public class WebSearchHandler {
         int numReplies = Integer.parseInt(v);
         
         NodeList results = resultElement.getChildNodes();
-        Assert.that(results.getLength() == numReplies, "server inconsistent");
-
         for(int i=0; i<numReplies; i++) {
             //Note: these nodes have the following fields:
             //title, url, desc, bidprice, clickurl
