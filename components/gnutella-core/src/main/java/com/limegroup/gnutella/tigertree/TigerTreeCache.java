@@ -37,7 +37,7 @@ public final class TigerTreeCache {
     /**
      * TigerTreeCache instance variable.
      */
-    private static TigerTreeCache instance = null;
+    private static TigerTreeCache instance = new TigerTreeCache();
     
     /**
      * The ProcessingQueue to do the hashing.
@@ -64,10 +64,7 @@ public final class TigerTreeCache {
      * 
      * @return the <tt>TigerTreeCache</tt> instance
      */
-    public static synchronized TigerTreeCache instance() {
-        if (instance == null) {
-            instance = new TigerTreeCache();
-        }
+    public static TigerTreeCache instance() {
         return instance;
     }
 
@@ -141,7 +138,16 @@ public final class TigerTreeCache {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
-            return (Map) ois.readObject();
+            Map map = (Map)ois.readObject();
+            for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
+                // Remove values that aren't correct.
+                Map.Entry next = (Map.Entry)i.next();
+                Object key = next.getKey();
+                Object value = next.getValue();
+                if( !(key instanceof URN) || !(value instanceof HashTree) )
+                    i.remove();
+            }
+            return map;
         } catch(Throwable t) {
             LOG.error("Can't read tiger trees", t);
             return new HashMap();
