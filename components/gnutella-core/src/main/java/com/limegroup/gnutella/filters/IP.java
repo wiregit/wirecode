@@ -98,21 +98,36 @@ class IP {
         for(int i = 0; i < length; i++, numOctets++) {
             short octet = 0;
             // loop over each character in the octet
-            for(; i < length; i++) {
+            for(int j = 0; i < length; i++, j++) {
                 char c = ip_str.charAt(i);
-
+                
                 // finished octet?
-                if ( c == '.' )
-                    break;
+                if ( c == '.' ) {
+                    if( j == 0 ) // cannot have 0..1.1
+                        throw new IllegalArgumentException(MSG + ip_str);
+                    else
+                        break;
+                }
+                    
+                // have we read more than 3 numeric characters?
+                if ( j > 2 )
+                    throw new IllegalArgumentException(MSG + ip_str);
 
                 // convert wildcard.
                 if( c == '*' ) {
-                    c = '0';
+                    // wildcard be the only entry in an octet
+                    if( j != 0 )
+                        throw new IllegalArgumentException(MSG + ip_str);
+                    else // functionality equivilant to setting c to be '0' 
+                        continue;
                 } else if( c < '0' || c > '9' ) {
                     throw new IllegalArgumentException(MSG + ip_str);
                 }
 
                 octet = (short)(octet * 10 + c - '0');
+                // faulty addr.
+                if( octet > 255 || octet < 0 )
+                    throw new IllegalArgumentException(MSG + ip_str);
             }
             ip = (ip << 8) + octet;
         }
@@ -145,10 +160,23 @@ class IP {
             short submask = 0;
             // loop over each character in the octet
             // if we encounter a single non '*', mask it off.
-            for(; i < length; i++) {
+            for(int j = 0; i < length; i++, j++) {
                 char c = s.charAt(i);
-                if( c == '.' ) break;
-                if( c != '*' ) submask = 0xff;
+                if( c == '.' ) {
+                    if( j == 0 )
+                        throw new IllegalArgumentException(MSG + s);
+                    else
+                        break;
+                }
+                    
+                // can't accept more than three characters.
+                if( j > 2 )
+                    throw new IllegalArgumentException(MSG + s);
+
+                if( c != '*' )
+                    submask = 0xff;
+                else if ( j != 0 ) // canot accept wildcard past first char.
+                    throw new IllegalArgumentException(MSG + s);
             }
             mask = (mask << 8) + submask;
         }

@@ -85,6 +85,51 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
             new IP("this should fail.");
             fail("illegal argument expected.");
         } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("821.1.1.0");
+            fail("illegal argument excepted.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1*.1.0");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.256.0.0");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1.1.1/33");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1.1.1/-1");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}    
+        
+        try {
+            new IP("1.1..1");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1.1.1/255.255.256.255");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1234.1.1");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP("1.1.1.1/255.1234.255.255");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
     }
 
 

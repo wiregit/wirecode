@@ -21,7 +21,7 @@ class IPList {
      * @param ip_str a String containing the IP, see IP.java for formatting
      */
     public void add(String ip_str) {
-	IP ip;
+	    IP ip;
         try {
             ip = new IP(ip_str);
         } catch (IllegalArgumentException e) {
