@@ -31,6 +31,9 @@
   <property name="jaxen"       value="lib/jaxen-core-1.0-fcs.jar"/>
   <property name="saxpath"     value="lib/saxpath-1.0-fcs.jar"/>
   <property name="cloverjar"   value="lib/clover.jar"/>
+  <property name="i18njar"   value="lib/i18n.jar"/>
+  <property name="xmljar"   value="lib/xml.jar"/>
+
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -41,6 +44,7 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
+    <pathelement path="lib" />
     <pathelement location="${builddir}" />
     <pathelement location="${coredir}" />
     <pathelement location="${collections}" />
@@ -59,6 +63,8 @@
 	<pathelement location="${jaxen}"/>
 	<pathelement location="${saxpath}"/>
 	<pathelement location="${cloverjar}"/>
+	<pathelement location="${i18njar}"/>
+	<pathelement location="${xmljar}"/>
   </path>
   
   <!-- CLOVER SETUP TASKS -->
@@ -260,3 +266,4 @@
 </project>
 
 
+           
