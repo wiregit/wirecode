@@ -25,6 +25,8 @@ public class HTTPAcceptor implements Runnable {
     private static final String MAGNET_DEFAULT = "magnet10/default.js?";
 	/** Magnet request for a paused response */
     private static final String MAGNET_PAUSE   = "magnet10/pause";
+	/** Local machine ip */
+    private static final String LOCALHOST      = "127.0.0.1";
 	/** Start of Magnet URI */
     private static final String MAGNET         = "magnet:?";
 	/** HTTP no content return */
@@ -254,8 +256,10 @@ public class HTTPAcceptor implements Runnable {
 	private void handleHTTPRequest(Socket socket) throws IOException {
 
 		// Only respond to localhost
-        byte[] addressBytes = _socket.getInetAddress().getAddress();
-		if (addressBytes[0] != 127)
+		String hostAddress =
+		    socket.getInetAddress().getHostAddress().toLowerCase();
+		if ( !LOCALHOST.equals(hostAddress) &&
+			 "localhost".equals(hostAddress) )
 			return;
 
 		// Set the timeout so that we don't do block reading.
