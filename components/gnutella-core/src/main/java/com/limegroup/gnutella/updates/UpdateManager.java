@@ -62,7 +62,8 @@ public class UpdateManager {
             byte[] content = new byte[(int)raf.length()];
             raf.readFully(content);
             //we dont really need to verify, but we may as well...so here goes.
-            UpdateMessageVerifier verifier = new UpdateMessageVerifier(content);
+            UpdateMessageVerifier verifier = 
+                          new UpdateMessageVerifier(content, true);//from disk
             boolean verified = verifier.verifySource();
             if(!verified) {
                 latestVersion = CommonUtils.getLimeWireVersion();
@@ -172,7 +173,7 @@ public class UpdateManager {
                     if( data == null )
                         return;
                     UpdateMessageVerifier verifier =
-                        new UpdateMessageVerifier(data);
+                         new UpdateMessageVerifier(data, false);// from network
                     if(!verifier.verifySource())
                         return;
                     LOG.trace("Verified file contents");

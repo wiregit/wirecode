@@ -34,7 +34,7 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
         byte[] content = new byte[(int)f.length()];
         f.readFully(content);
         f.close();
-        UpdateMessageVerifier tester = new UpdateMessageVerifier(content);
+        UpdateMessageVerifier tester = new UpdateMessageVerifier(content,true);
         assertTrue(tester.verifySource());
     }
     

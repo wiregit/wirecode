@@ -17,11 +17,17 @@ public class UpdateMessageVerifier {
     private byte[] data;
     private byte[] signature;
     private byte[] xmlMessage;
+    private boolean fromDisk;
     
-    public UpdateMessageVerifier(byte[] fromStream) {
+    /**
+     * @param fromDisk true if the byte are being read from disk, false is the
+     * bytes are being read from the network
+     */
+    public UpdateMessageVerifier(byte[] fromStream, boolean fromDisk) {
         if(fromStream == null)
             throw new IllegalArgumentException();
         this.data = fromStream;
+        this.fromDisk = fromDisk;
     }
     
     
@@ -30,8 +36,12 @@ public class UpdateMessageVerifier {
         boolean parsed = parse(); 
         if(!parsed)
             return false;
-        if(CommonUtils.isJava118()) //Java118 installs have trouble w/ publickey
+        if(CommonUtils.isJava118()) {
+            //Java118 installs have trouble w/ publickey
+            if(fromDisk)
+                return true;
             return checkVersionForJava118();
+        }
         //get the public key
         PublicKey pubKey = null;
         FileInputStream fis = null;
@@ -151,7 +161,8 @@ public class UpdateMessageVerifier {
         String version = parser.getVersion();
         if(version==null || version.equals(""))
             return false;
-
+        
+        
         //Now iterate over all UP connections and see how many agree
         Iterator iter = connManager.getConnections().iterator();
         int count = 0;
