@@ -468,7 +468,7 @@ public class HTTPUploader implements Runnable, Comparable {
         try {
 			_cleanupDone = false;
 			_fullUploads.add(this);  // Add to the User-Agent priority queue
-            testAndIncrementNumUploads();
+            boolean uplimit = testAndIncrementNumUploads();
             _callback.addUpload(this);
             //1. For push requests only, establish the connection.
             if (! _isServer) {
@@ -492,8 +492,28 @@ public class HTTPUploader implements Runnable, Comparable {
                 _state = CONNECTED;
             }
 
+
+			// TODO: This code should be combined with the other 
+			// limit exceeded code.  Unfortunately, I'm not really
+			// understanding what is going on with it right now,
+			// and I guess speed is critical here.  Basically, 
+			// the block of code above with the if (! _isServer) 
+			// should establish a connection for pushes.  After
+			// that, if the upload limit per person has been reached
+			// then we want to send a 503 error. I'm also not sure
+			// if I should be calling doLimitReachedAfterConnect
+			// or doLimitReached, since that latter seems to be called
+			// after connect has been called also.  
+			if (!uplimit) {
+				//send 503 Limit Exceeded Headers
+				doLimitReached(_socket);
+				throw new IOException();
+			} 
+
+
             //2. Check for upload room for non-pushes
-            if ( ! uploadCountIncremented ) // Pushes have already been handled
+			// Pushes have already been handled
+            if ( ! uploadCountIncremented ) 
             {
                 while ( testAndIncrementUploadCount() )
                 {
@@ -705,8 +725,8 @@ public class HTTPUploader implements Runnable, Comparable {
 	 * throw an IOException.
 	 * 
 	 */
-	private void testAndIncrementNumUploads() 
-		throws IOException {
+	private boolean testAndIncrementNumUploads() {
+		// throws IOException {
 		/* the ip address will be the key for the map */
 		String ip = getInetAddress().getHostAddress();
 		
@@ -733,9 +753,12 @@ public class HTTPUploader implements Runnable, Comparable {
             /* if there are more uploads than allowed */
             /* then throw an exception */		
             if (numAllowed < numUploads) {
-                doLimitReachedAfterConnect();
-                throw new IOException("Too Many Uploads in Progress");
+                // doLimitReachedAfterConnect();
+				return false;
+                // throw new IOException("Too Many Uploads in Progress");
             }
+			
+			return true;
         }
 	}
 
