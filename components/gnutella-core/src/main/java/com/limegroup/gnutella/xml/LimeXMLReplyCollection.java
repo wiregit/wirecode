@@ -413,7 +413,7 @@ public class LimeXMLReplyCollection{
      */
     private Object[] ripMP3XML(String modifiedFile) {
         Object[] retObjs = new Object[3];
-        retObjs[0] = new Boolean(false);
+        retObjs[0] = Boolean.FALSE;
         if (!LimeXMLUtils.isMP3File(modifiedFile))
             return retObjs;
         try {
@@ -428,7 +428,7 @@ public class LimeXMLReplyCollection{
                 ID3Editor e = new ID3Editor();
                 String xml = doc.getXMLStringWithIdentifier();
                 e.removeID3Tags(xml);
-                retObjs[0] = new Boolean(true);
+                retObjs[0] = Boolean.TRUE;
                 retObjs[1] = hash;
                 retObjs[2] = e;
             }

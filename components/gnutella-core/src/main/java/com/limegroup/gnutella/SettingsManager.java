@@ -901,7 +901,7 @@ public final class SettingsManager {
                     setFractionalUptime(Float.valueOf(p).floatValue());
                 }
 				else if(key.equals(INSTALLED)) {
-					Boolean installed = new Boolean(p);
+					Boolean installed = Boolean.valueOf(p);
 					setInstalled(installed.booleanValue());
 				}
 				else if(key.equals(APP_WIDTH)) {
@@ -911,7 +911,7 @@ public final class SettingsManager {
 					setAppHeight(Integer.parseInt(p));
 				}
 				else if(key.equals(RUN_ONCE)) {
-					Boolean runOnce = new Boolean(p);
+					Boolean runOnce = Boolean.valueOf(p);
 					setRunOnce(runOnce.booleanValue());
 				}
 
@@ -923,12 +923,12 @@ public final class SettingsManager {
 				}
 
 				else if(key.equals(MINIMIZE_TO_TRAY)) {
-					Boolean minimize = new Boolean(p);
+					Boolean minimize = Boolean.valueOf(p);
 					setMinimizeToTray(minimize.booleanValue());
 				}
 
 				else if(key.equals(SHUTDOWN_AFTER_TRANSFERS)) {
-					Boolean afterTransfers = new Boolean(p);
+					Boolean afterTransfers = Boolean.valueOf(p);
 					setShutdownAfterTransfers(afterTransfers.booleanValue());
 				}
 				else if(key.equals(LANGUAGE)) {
@@ -957,13 +957,13 @@ public final class SettingsManager {
                 }
                 else if(key.equals(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)){
                     setAcceptAuthenticatedConnectionsOnly(
-                        (new Boolean(p)).booleanValue());
+                        (Boolean.valueOf(p)).booleanValue());
                 }
                 else if(key.equals(COOKIES_FILE)){
                    setCookiesFile(p);
                 }
                 else if(key.equals(SERVER)){
-                    setServer((new Boolean(p)).booleanValue());
+                    setServer((Boolean.valueOf(p)).booleanValue());
                 }
 				else if(key.equals(JAR_NAME)) {
 					setJarName(p);
@@ -1109,7 +1109,7 @@ public final class SettingsManager {
                         theValue = (String)fields[i].get(this);
                     else if (theClass == Boolean.TYPE )
                         theValue = 
-                            new Boolean(fields[i].getBoolean(this)).toString();
+                            Boolean.valueOf(fields[i].getBoolean(this)).toString();
                     else if (theClass == Byte.TYPE )
                         theValue = Byte.toString(fields[i].getByte(this));
                     else if (theClass == Character.TYPE )
@@ -1555,7 +1555,7 @@ public final class SettingsManager {
 	 *         <tt>false</tt> otherwise
 	 */
     public boolean getCheckAgain() {
-		Boolean b = new Boolean(PROPS.getProperty(CHECK_AGAIN));
+		Boolean b = Boolean.valueOf(PROPS.getProperty(CHECK_AGAIN));
         return b.booleanValue();
     }
 
@@ -1710,7 +1710,7 @@ public final class SettingsManager {
 	 *          only after file transfers are complete, false otherwise
 	 */
 	public boolean getShutdownAfterTransfers() {
-		Boolean b = new Boolean(PROPS.getProperty(SHUTDOWN_AFTER_TRANSFERS));
+		Boolean b = Boolean.valueOf(PROPS.getProperty(SHUTDOWN_AFTER_TRANSFERS));
 		return b.booleanValue();
 	}
 
@@ -2543,35 +2543,35 @@ public final class SettingsManager {
 	 */
     public void setFilterAdult(boolean filterAdult) {
 		_filterAdult = filterAdult;
-		Boolean b = new Boolean(filterAdult);
+		Boolean b = filterAdult ? Boolean.TRUE : Boolean.FALSE;
 		String s = b.toString();
 		PROPS.put(FILTER_ADULT, s);
     }
 
     public void setFilterDuplicates(boolean filterDuplicates) {
 		_filterDuplicates = filterDuplicates;
-		Boolean b = new Boolean(filterDuplicates);
+		Boolean b = filterDuplicates ? Boolean.TRUE : Boolean.FALSE;
 		String s = b.toString();
 		PROPS.put(FILTER_DUPLICATES, s);
     }
 
     public void setFilterHtml(boolean filterHtml) {
 		_filterHtml = filterHtml;
-		Boolean b = new Boolean(filterHtml);
+		Boolean b = filterHtml ? Boolean.TRUE : Boolean.FALSE;
 		String s = b.toString();
 		PROPS.put(FILTER_HTML, s);
     }
 
     public void setFilterVbs(boolean filterVbs) {
 		_filterVbs = filterVbs;
-		Boolean b = new Boolean(filterVbs);
+		Boolean b = filterVbs ? Boolean.TRUE : Boolean.FALSE;
 		String s = b.toString();
 		PROPS.put(FILTER_VBS, s);
     }
 
     public void setFilterGreedyQueries(boolean yes) {
         _filterGreedyQueries = yes;
-        Boolean b = new Boolean(yes);
+        Boolean b = yes ? Boolean.TRUE : Boolean.FALSE;
         String s = b.toString();
         PROPS.put(FILTER_GREEDY_QUERIES, s);
     }
@@ -2579,7 +2579,7 @@ public final class SettingsManager {
 
     public void setFilterBearShareQueries(boolean yes) {
         _filterBearShare = yes;
-        Boolean b = new Boolean(yes);
+        Boolean b = yes ? Boolean.TRUE : Boolean.FALSE;
         String s = b.toString();
         PROPS.put(FILTER_HIGHBIT_QUERIES, s);
     }
@@ -2622,7 +2622,7 @@ public final class SettingsManager {
 	 *              again for updates
 	 */
     public void setCheckAgain(final boolean check) {
-		Boolean b = new Boolean(check);
+		Boolean b = check ? Boolean.TRUE : Boolean.FALSE;
         PROPS.put(CHECK_AGAIN, b.toString());
     }
 
@@ -2653,7 +2653,7 @@ public final class SettingsManager {
 	 *                been run once
 	 */
 	public void setRunOnce(final boolean runOnce) {
-		Boolean b = new Boolean(runOnce);
+		Boolean b = runOnce ? Boolean.TRUE : Boolean.FALSE;
 		PROPS.put(RUN_ONCE, b.toString());
 	}
 
