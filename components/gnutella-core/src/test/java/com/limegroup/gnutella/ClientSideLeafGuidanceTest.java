@@ -27,7 +27,7 @@ import java.net.*;
 public class ClientSideLeafGuidanceTest 
     extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6669;
-    private static final int TIMEOUT=3000;
+    private static final int TIMEOUT=2000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
