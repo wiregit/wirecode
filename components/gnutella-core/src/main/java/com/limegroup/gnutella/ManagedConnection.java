@@ -1622,12 +1622,6 @@ public class ManagedConnection extends Connection
         }
     }
     
-    /** 
-	 * this should not arrive through TCP.
-	 * Although if we get it, we might as well send it
-	 */
-	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
-		send(m);
-	}
+	
 
 }

@@ -79,6 +79,13 @@ public abstract class MessageRouter {
      */
     private RouteTable _pushRouteTable = 
         new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
+    
+    /**
+     * maps HeadPong clientGUIDs to UDPReplyHandlers. 2 seconds
+     * is plenty of time since HeadPings get answered immediately.
+     */
+    private RouteTable _headPongRouteTable =
+    	new RouteTable(2,MAX_ROUTE_TABLE_SIZE);
 
     /** How long to buffer up out-of-band replies.
      */
@@ -421,6 +428,11 @@ public abstract class MessageRouter {
         	if(RECORD_STATS)
         		;//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
+        }
+        else if (msg instanceof HeadPong) {
+        	if(RECORD_STATS)
+        		;//TODO: add the statistics recording code
+        	handleHeadPongTCP((HeadPong)msg);
         }
         
         //This may trigger propogation of query route tables.  We do this AFTER
@@ -2566,15 +2578,15 @@ public abstract class MessageRouter {
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.handleUDPCrawlerPong(newMsg);
+    	handler.send(newMsg);
     }
     
     /**
      * replies to a head ping that came through udp, 
      * unless the same person has pinged us too recently.
      * 
-     * TODO: if the ping requests to be pushed, forward it as appropriately
-     *  keeps a state where to send it back to.
+     *  if the ping requests to be pushed, forward it as appropriately
+     *  and record where to send the pong. 
      */
     private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
     	
@@ -2584,19 +2596,55 @@ public abstract class MessageRouter {
     	FileManager fmanager = RouterService.getFileManager();
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
+    	
     	if (_udpHeadRequests.add(host)) {
-    		HeadPong pong = new HeadPong(ping);
     		
-    		uservice.send(pong, host, port);
+    		//this ping needs to be routed.
+    		if (ping.getClientGuid()!=null) 
+    			routeHeadPing(ping,datagram);
+    		else {
+    		
+    			HeadPong pong = new HeadPong(ping);
+    		
+    			uservice.send(pong, host, port);
+    		}
     	}
+    }
+    
+    private void routeHeadPing(HeadPing ping, DatagramPacket datagram) {
+    	
+    	InetAddress host = datagram.getAddress();
+    	int port = datagram.getPort();
+    	
+    	ReplyHandler handler = 
+			_pushRouteTable.getReplyHandler(ping.getClientGuid().bytes());
+		
+		//drop the ping if no entry
+		if (handler == null)
+			return;
+		
+		//don't bother routing if this is intended for me.
+		if (handler instanceof ForMeReplyHandler) 
+			handleHeadPing(HeadPing.createForwardPing(ping),datagram);
+		
+		//remember where to send the pong to.
+		//the pong will have the same GUID as the ping.
+		UDPReplyHandler pinger = new UDPReplyHandler(host,port);
+		_headPongRouteTable.routeReply(ping.getGUID(),pinger);
+		
+		//and send off the routed ping
+		handler.send(ping);
+
     }
     
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
      * 
-     * if the ping requests to be forwarded, do so only if we 
-     * have the file and are not busy.
+     * Note: if I'm a leaf, I can only receive these pings
+     * from my Ultrapeer which is proxying them for
+     * someone else.  In this case, the time limit is ignored.
+     * 
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
     	
@@ -2604,13 +2652,32 @@ public abstract class MessageRouter {
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
     	
-    	if (_udpHeadRequests.add(conn.getInetAddress())) {
-    		HeadPong pong = new HeadPong(ping);
-    		
-    		conn.send(pong);
-    		
-    	}
+    	boolean send=false;
     	
+    	if (RouterService.isSupernode())
+    		send = _udpHeadRequests.add(conn.getInetAddress()); 
+    	else
+    		send = true;
+    	
+    	if (send){
+    		HeadPong pong = new HeadPong(ping);
+    		conn.send(pong);
+    	}
+    		
+    }
+    
+    /**
+     * for now just sends the pong back to the pinger.
+     * @param pong
+     */
+    private void handleHeadPongTCP(HeadPong pong) {
+    	ReplyHandler handler = 
+    		_headPongRouteTable.getReplyHandler(pong.getGUID());
+    	
+    	if (handler!=null) {
+    		handler.send(pong);
+    		_headPongRouteTable.removeReplyHandler(handler);
+    	}
     }
     
     private static class QueryResponseBundle {

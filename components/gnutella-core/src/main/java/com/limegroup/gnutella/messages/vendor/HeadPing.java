@@ -146,7 +146,7 @@ public class HeadPing extends VendorMessage {
 	 * @param original the original ping received from the pinger
 	 * @return the new ping, with stripped clientGuid and updated features.
 	 */
-	public HeadPing createForwardPing(HeadPing original) {
+	public static HeadPing createForwardPing(HeadPing original) {
 		
 		HeadPing ret = 
 			new HeadPing(original.getUrn(),

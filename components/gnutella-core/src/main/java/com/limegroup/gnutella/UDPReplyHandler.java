@@ -289,6 +289,10 @@ public final class UDPReplyHandler implements ReplyHandler {
 		UDPService.instance().send(m, IP, PORT);
 	}
 	
+	public void send(Message m) {
+		UDPService.instance().send(m, IP,PORT);
+	}
+	
 	public int getPort() {
 		return PORT;
 	}
