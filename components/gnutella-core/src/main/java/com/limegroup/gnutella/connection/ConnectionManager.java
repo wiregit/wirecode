@@ -244,36 +244,17 @@ public class ConnectionManager {
      *
      * @param mc the <tt>Connection</tt> instance to remove
      */
-    private void remove(Connection conn) {
+    public void remove(Connection conn) {
 		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
+		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;    
+        if(conn.isOutgoing() && !conn.isInitialized())   {
+            _initializingFetchedConnections.remove(conn);
+        }  
         removeInternal(conn);
 
         adjustConnectionFetchers();
     }
     
-    /**
-     * Removes the specified connection from currently active connections, also
-     * removing this connection from routing tables and modifying active 
-     * connection fetchers accordingly.
-     *
-     * @param mc the <tt>Connection</tt> instance to remove
-     */
-    public synchronized void removeIncoming(Connection conn) {
-        remove(conn);
-    }
-    
-    /**
-     * Removes the specified connection from currently active connections, also
-     * removing this connection from routing tables and modifying active 
-     * connection fetchers accordingly.
-     *
-     * @param mc the <tt>Connection</tt> instance to remove
-     */
-    public synchronized void removeOutgoing(Connection conn) {
-        _initializingFetchedConnections.remove(conn);
-        remove(conn);
-    }
 
     /**
      * Get the number of connections we are attempting to maintain.
@@ -1247,7 +1228,7 @@ public class ConnectionManager {
         try {
             mc.initialize();
         } catch(IOException e) {
-            removeOutgoing(mc);
+            remove(mc);
             throw e;
         }
         finally {
@@ -1446,7 +1427,7 @@ public class ConnectionManager {
             c.initialize();
 
         } catch(IOException e) {
-            removeIncoming(c);
+            remove(c);
             throw e;
         }
         finally {
