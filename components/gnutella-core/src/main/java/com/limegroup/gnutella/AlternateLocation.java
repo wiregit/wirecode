@@ -214,22 +214,11 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * Returns whether or not this <tt>AlternateLocation</tt> has a SHA1 urn.
-	 *
-	 * @return <tt>true</tt> if there is a SHA1 urn, otherwise <tt>false</tt>
-	 */
-	public boolean hasSHA1Urn() {
-		return SHA1_URN != null;
-	}
-
-	/**
 	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
 	 * 
-	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>, or 
-	 *  <tt>null</tt> if there is none
+	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>
 	 */
 	public URN getSHA1Urn() {
-		// can be null
 		return SHA1_URN;
 	}
 
