@@ -6,7 +6,7 @@ package com.limegroup.gnutella.xml;
  */
 public class MFMStub extends MetaFileManager {
 
-    public String readFromMap(Object file, boolean audio) {
+    public String readFromMap(Object file) {
         String hash = null;
         try {
             hash = new String(LimeXMLUtils.hashFile((java.io.File)file));

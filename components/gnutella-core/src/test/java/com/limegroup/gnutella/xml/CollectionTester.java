@@ -52,18 +52,19 @@ public class CollectionTester extends TestCase {
         // test construction
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
-        Assert.assertTrue("LimeXMLCollection count wrong!",
+        Assert.assertTrue("LimeXMLCollection count wrong!  Count is " + 
+                          collection.getCount(),
                           (collection.getCount() == 2));
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = collection.getDocForHash(mfm.readFromMap(mason, true));
+        doc = collection.getDocForHash(mfm.readFromMap(mason));
         Assert.assertTrue("Mason should not have a doc!",
                           doc == null);
-        doc = collection.getDocForHash(mfm.readFromMap(vader, true));
+        doc = collection.getDocForHash(mfm.readFromMap(vader));
         Assert.assertTrue("Vader should have a doc!",
                           doc != null);
-        doc = collection.getDocForHash(mfm.readFromMap(swing, true));
+        doc = collection.getDocForHash(mfm.readFromMap(swing));
         Assert.assertTrue("Swing should have a doc!",
                           doc != null);
 
