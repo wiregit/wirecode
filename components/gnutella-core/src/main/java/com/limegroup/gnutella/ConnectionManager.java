@@ -772,7 +772,8 @@ public class ConnectionManager {
      * @return <tt>true</tt> if the connection should be allowed, otherwise
      *  <tt>false</tt>
      */
-    private boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+    private static boolean 
+        allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
         if(userAgent == null) return false;
         if(userAgent.startsWith("Morpheus")) return false;
@@ -788,7 +789,7 @@ public class ConnectionManager {
      * @return <tt>true</tt> if the connection should be allowed, otherwise
      *  <tt>false</tt>
      */
-    private boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
+    private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
         if(userAgent == null) return false;
         if(userAgent.startsWith("Morpheus")) return false;
