@@ -720,9 +720,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 try {
                     dailyUptime = 
                         ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
-                } catch(BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
+                } catch(BadGGEPPropertyException e) {}
             }
 
             supportsUnicast = 
@@ -730,42 +728,23 @@ public class PingReply extends Message implements Serializable, IpPort {
 
             if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
                 try {
-                    vendor = 
-                        new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
-                                   0, 4);   
-                } catch(BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-
-                try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    if(bytes.length > 4)
-                        vendorMajor = (bytes[4] >> 4);
-                } catch (BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-                try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    if(bytes.length > 4)
-                        vendorMinor = (bytes[4] & 15);
-                }
-                catch (BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
+                    if(bytes.length >= 4)
+                        vendor = new String(bytes, 0, 4);   
+                    if(bytes.length > 4) {
+                        vendorMajor = bytes[4] >> 4;
+                        vendorMinor = bytes[4] & 0xF;
+                    }
+                } catch (BadGGEPPropertyException e) {}
              }
 
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
                     byte[] bytes = 
                         ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    key = QueryKey.getQueryKey(bytes, false);
-                }
-                catch (IllegalArgumentException malformedQueryKey) { 
-                    // simply don't assign it
-                }
-                catch (BadGGEPPropertyException corrupt) { 
-                    // simply don't assign it
-                }
+                    if(QueryKey.isValidQueryKeyBytes(bytes))
+                        key = QueryKey.getQueryKey(bytes, false);
+                } catch (BadGGEPPropertyException corrupt) {}
             }
             
             if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
@@ -775,29 +754,23 @@ public class PingReply extends Message implements Serializable, IpPort {
                         freeLeafSlots = bytes[1];
                         freeUltrapeerSlots = bytes[2];
                     }
-                } catch(IllegalArgumentException e) {
-                    // simply don't assign it
-                } catch (BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
+                } catch (BadGGEPPropertyException e) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                    locale = new String(bytes, 0, 2);
-                    slots = ByteOrder.ubyte2int(bytes[2]);
-                }
-                catch(BadGGEPPropertyException e) {
-                    //ignore. we won't assign it.
-                }
+                    if(bytes.length >= 2)
+                        locale = new String(bytes, 0, 2);
+                    if(bytes.length >= 3)
+                        slots = ByteOrder.ubyte2int(bytes[2]);
+                } catch(BadGGEPPropertyException e) {}
             }
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
-                byte []data=null;
+                byte[] data=null;
                 try{
-                    data = 
-                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
                 }catch(BadGGEPPropertyException bad) {
                     Assert.that(false,"creating a PingReply with invalid GGEP field");
                     //this should have been checked earlier
@@ -805,13 +778,17 @@ public class PingReply extends Message implements Serializable, IpPort {
                 
                 
                 byte [] myip = new byte[4];
-                System.arraycopy(data,0,myip,0,4);
+                // only copy the addr if the data is atleast 6
+                // bytes (ip + port).  that way isValidAddress
+                // will fail & we don't need to recheck the length
+                // when getting the port.
+                if(data.length >= 6)
+                    System.arraycopy(data,0,myip,0,4);
                 
                 if (NetworkUtils.isValidAddress(myip)) {
                     try{
                         myIP = NetworkUtils.getByAddress(myip);
                         myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
-
 
                         if (NetworkUtils.isPrivateAddress(myIP) ||
                             !NetworkUtils.isValidPort(myPort) ) {
@@ -835,24 +812,18 @@ public class PingReply extends Message implements Serializable, IpPort {
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
-                byte[] data = null;
                 try {
-                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
-                } catch(BadGGEPPropertyException bad) {}
-                if(data != null) {
-                    try {
-                        packedIPs = NetworkUtils.unpackIps(data);
-                    } catch(BadPacketException bpe) {}
-                }
+                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                    packedIPs = NetworkUtils.unpackIps(data);
+                } catch(BadGGEPPropertyException bad) {
+                } catch(BadPacketException bpe) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
-                String data = null;
                 try {
-                    data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
-                } catch(BadGGEPPropertyException bad) {}
-                if(data != null)
+                    String data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
                     packedCaches = listCaches(data);
+                } catch(BadGGEPPropertyException bad) {}
             }
         }
         
