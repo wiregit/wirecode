@@ -77,7 +77,8 @@
 
   <!-- tests individual class -->
   <target name="test class" if="class" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes">
+    <junit printsummary="withOutAndErr" haltonfailure="yes"
+	       showoutput="true">
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.${class}" />
 	  <classpath>
@@ -88,6 +89,43 @@
 	    <pathelement location="${lib}"/>
 	  </classpath>
 	</junit>
+  </target>
+
+  <!-- tests GUESS code -->
+  <target name="test guess" depends="build tests">
+    <parallel>
+	  <java classname="com.limegroup.gnutella.Backend"
+			failonerror="true"
+	        fork="true"
+	  >
+	        <classpath>
+	          <pathelement location="${builddir}"/>
+	          <pathelement location="${collections}"/>
+		      <pathelement location="${xerces}"/>
+	          <pathelement location="${skins}"/>
+	          <pathelement location="${lib}"/>
+	        </classpath>	  
+	  </java>  
+      <sequential>
+        <sleep seconds="5"/>
+		<junit printsummary="withOutAndErr" 
+		       haltonfailure="on"
+		       showoutput="true"
+			   fork="true"
+        >
+		<formatter type="plain" useFile="false"/>
+	    <test name="com.limegroup.gnutella.UDPServiceTest" />
+	      <classpath>
+	        <pathelement location="${builddir}"/>
+	        <pathelement location="${collections}"/>
+		    <pathelement location="${xerces}"/>
+	        <pathelement location="${skins}"/>
+	        <pathelement location="${lib}"/>
+	      </classpath>	  
+	    </junit>
+      </sequential>
+
+    </parallel>
   </target>
 
 </project>

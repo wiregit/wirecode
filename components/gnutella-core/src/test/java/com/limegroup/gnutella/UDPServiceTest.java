@@ -12,8 +12,11 @@ public class UDPServiceTest extends TestCase {
 
 	//private static final Backend BACKEND_0 = Backend.instance();
 
+	private final ActivityCallback CALLBACK = new ActivityCallbackTest();
 	private final Backend BACKEND_0 = 
-		Backend.createBackend(new ActivityCallbackTest());
+		Backend.createBackend(CALLBACK);
+
+	private final RouterService ROUTER_SERVICE = BACKEND_0.getRouterService();
 	
 	private final int BUFFER_SIZE = 1024;
 	
@@ -45,24 +48,42 @@ public class UDPServiceTest extends TestCase {
 	 */
 	public void testQueryRequests() {
 		System.out.println("TESTING UDP QUERY REQUESTS"); 
-		FileManager fm = BACKEND_0.getRouterService().getFileManager();
+		System.out.println("CALLBACK: "+CALLBACK); 
+		FileManager fm = ROUTER_SERVICE.getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 		System.out.println("NUM FILE DESCS: "+fds.length); 
+
+		byte[] ipBytes = ROUTER_SERVICE.getAddress();
+		String address = Message.ip2string(ipBytes);
+		ROUTER_SERVICE.connectToHostAsynchronously(address, 6346);
+		
+		try {
+			Thread.sleep(1000);
+		} catch(InterruptedException e) {
+		}
+		System.out.println("GUESS ENABLED: "+
+						   SettingsManager.instance().getGuessEnabled()); 
 		for(int i=0; i<fds.length; i++) {
 			String curName = fds[i].getName(); 
 			System.out.println("TESTING FILE: "+curName); 
-			QueryRequest qr = new QueryRequest(GUID.makeGuid(),
-											   (byte)6, (byte)4, 
+			QueryRequest qr = new QueryRequest((byte)1, (byte)0, 
 											   curName); 
+			PingRequest ping = new PingRequest((byte)1);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				qr.write(baos);
+				ping.write(baos);
 				byte[] data = baos.toByteArray();
 				InetAddress ip = InetAddress.getLocalHost();
-				
-				UDPService udp = BACKEND_0.getRouterService().getUdpService();
-				udp.send(qr, ip, 6346);			
+			
+				UDPService service = ROUTER_SERVICE.getUdpService();
+				service.send(ping, ip, 6346);
+				MessageRouter router = ROUTER_SERVICE.getMessageRouter();
+				//router.broadcastPingRequest(new PingRequest((byte)1));
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {}
+				router.broadcastQueryRequest(qr);
 				try {
 					while(_reply == null) {
 						Thread.sleep(100);
@@ -70,12 +91,14 @@ public class UDPServiceTest extends TestCase {
 				} catch(InterruptedException e) {
 					e.printStackTrace();
 				}
+
 				
 				try {
 					RemoteFileDesc[] rfds = _reply.toRemoteFileDescArray();
 					assertEquals("should only be one response in reply", rfds.length, 1);								
 					assertEquals("reply name should equal query name", rfds[0].getFileName(),
 								 curName);
+					_reply = null;
 				} catch(BadPacketException e) {
 					fail("unexpected exception: "+e);
 				}
@@ -87,14 +110,17 @@ public class UDPServiceTest extends TestCase {
 				e.printStackTrace();
 			}		
 		}
+
+		System.out.println("ABOUT TO SHUTDOWN ROUTER SERVICE"); 
+		ROUTER_SERVICE.shutdown();
 	}
 
 
 	private class ActivityCallbackTest extends ActivityCallbackStub {
 		public void handleQueryReply(QueryReply reply) {
-			//System.out.println(""); 
-			//System.out.println(""); 
-			//System.out.println("RECEIVED REPLY: "+reply); 
+			System.out.println(""); 
+			System.out.println(""); 
+			System.out.println("RECEIVED REPLY: "+reply); 
 			_reply = reply;
 		}
 	}

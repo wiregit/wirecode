@@ -5,6 +5,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
 import java.io.*;
+import java.util.*;
 
 /**
  * Utility class that constructs a LimeWire backend for testing
@@ -21,6 +22,8 @@ public final class Backend {
 	private final RouterService ROUTER_SERVICE;
 
 	private final File TEMP_DIR = new File("temp");
+
+	private final Timer TIMER = new Timer();
 
 
 	public static Backend createBackend(ActivityCallback callback) {
@@ -56,6 +59,7 @@ public final class Backend {
 			copyResourceFile(files[i]);
 		}
 
+
 		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
 		SettingsManager.instance().setExtensions("java");
 
@@ -66,6 +70,11 @@ public final class Backend {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
 		}
+		TIMER.schedule(new TimerTask() {
+			public void run() {
+				shutdown();
+			}
+		}, 40*1000);
 	}
 
 	public RouterService getRouterService() {
@@ -76,9 +85,8 @@ public final class Backend {
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
 	public void shutdown() {
-		System.exit(0);
-		ROUTER_SERVICE.shutdown();
-		
+		System.out.println("BACKEND SHUTDOWN"); 
+		ROUTER_SERVICE.shutdown();		
 	}
 
 	/**
