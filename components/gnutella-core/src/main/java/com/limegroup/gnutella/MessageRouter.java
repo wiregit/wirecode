@@ -9,6 +9,7 @@ import com.limegroup.gnutella.messages.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.*;
 
 
@@ -201,10 +202,9 @@ public abstract class MessageRouter {
                 else if (vmp instanceof HopsFlowVMP)
                     receivingConnection.handleVendorMessagePayload(vmp);
                 else if (vmp instanceof TCPConnectBackVMP)
-                    // do some TCP ConnectBack mumbo jumbo....
-                    ;
+                    handleTCPConnectBackRequest((TCPConnectBackVMP)vmp,
+                                                receivingConnection);
                 else if (vmp instanceof UDPConnectBackVMP)
-                    // do some UDP ConnectBack mumbo jumbo....
                     handleUDPConnectBackRequest((UDPConnectBackVMP)vmp,
                                                 receivingConnection);
             }
@@ -553,7 +553,10 @@ public abstract class MessageRouter {
         respondToQueryRequest(request, _clientGUID);
     }
 
-
+    /**
+     * Basically, just get the correct parameters, create a temporary 
+     * DatagramSocket, and send a Ping.
+     */
     protected void handleUDPConnectBackRequest(UDPConnectBackVMP udp,
                                                Connection source) {
         GUID guidToUse = udp.getConnectBackGUID();
@@ -576,6 +579,36 @@ public abstract class MessageRouter {
             // whatever....            
         }
     }
+
+
+    /**
+     * Basically, just get the correct parameters, create a Socket, and
+     * send a "/n/n".
+     */
+    protected void handleTCPConnectBackRequest(TCPConnectBackVMP tcp,
+                                               Connection source) {
+        int portToContact = tcp.getConnectBackPort();
+        InetAddress addrToContact = null;
+        try {
+            addrToContact = source.getInetAddress();
+        }
+        catch (IllegalStateException ise) {
+            return;
+        }
+        try {
+            Socket sock = new Socket(addrToContact, portToContact);
+            OutputStream os = sock.getOutputStream();
+            os.write("\n\n".getBytes());
+            sock.close();
+        }
+        catch (IOException ioe) {
+            // whatever
+        }
+        catch (SecurityException se) {
+            // whatever
+        }
+    }
+
 
     /**
      * Sends the ping request to the designated connection,

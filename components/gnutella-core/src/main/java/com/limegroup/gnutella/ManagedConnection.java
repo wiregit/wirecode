@@ -44,6 +44,10 @@ import com.limegroup.gnutella.updates.*;
  * this change into ManagedConnection in the future, so please bear with this
  * for now.<p>
  * 
+ * ManagedConnection also takes care of various VendorMessage handling, in
+ * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
+ * handleVendorMessagePayload().
+ *
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
  */
@@ -60,6 +64,11 @@ public class ManagedConnection
      *  ConnectBack requests.
      */
     private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+
+    /** The maximum number of times ManagedConnection instances should send TCP
+     *  ConnectBack requests.
+     */
+    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
     private final MessageRouter _router;
     private final ConnectionManager _manager;
@@ -269,6 +278,11 @@ public class ManagedConnection
      *  request sent.
      */
     private static int _numUDPConnectBackRequests = 0;
+
+    /** The class wide static counter for the number of tcp connect back 
+     *  request sent.
+     */
+    private static int _numTCPConnectBackRequests = 0;
 
     /** 
      * Creates an outgoing connection. 
@@ -968,6 +982,14 @@ public class ManagedConnection
                    new UDPConnectBackVMP(RouterService.getPort(),
                                          RouterService.getUDPConnectBackGUID());
                 send(udp.getVendorMessage());
+            }
+            if (!RouterService.acceptedIncomingConnection() &&
+                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsTCPConnectBack() > -1)) {
+                _numTCPConnectBackRequests++;
+                TCPConnectBackVMP tcp =
+                   new TCPConnectBackVMP(RouterService.getPort());
+                send(tcp.getVendorMessage());
             }
         }
     }
