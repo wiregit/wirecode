@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import org.xml.sax.*;
@@ -321,7 +322,7 @@ public class LimeXMLReplyCollection {
                 // if no list of docs for this value created, create & insert.
                 if( allDocs == null ) {
                     allDocs = new LinkedList();
-                    trie.add(value, allDocs);
+                    trie.add(I18NConvert.instance().getNorm(value), allDocs);
                 }
                 //Add the value to the list of docs
                 allDocs.add(doc);
