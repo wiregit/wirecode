@@ -21,7 +21,7 @@ import java.io.*;
  *   ConnectionManager cm=new ConnectionManager();
  *   Connection c=new Connection(host, port);
  *   c.connect();                  //actually connect
- *   cm.addConnection(c);          //register for broadcasting purposes
+ *   cm.add(c);                    //register for broadcasting purposes
  *   c.setManager(cm);             //Must set before calling run.
  *   c.send(new PingRequest(Const.TTL); //initial ping
  *   Thread t=new Thread(c);       //create new handler thread
@@ -64,7 +64,7 @@ public class Connection implements Runnable {
     private int received=0;
 
     static final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
-    static final String CONNECT_WITHOUT_FIRST_WORD=" CONNECT/0.4\n\n";
+    static final String CONNECT_WITHOUT_FIRST_WORD="CONNECT/0.4\n\n";
     static final String OK="GNUTELLA OK\n\n";
 
     /** 
@@ -103,7 +103,7 @@ public class Connection implements Runnable {
     /** 
      * Creates an incoming, connected connection around an existing socket.
      *
-     * @requires the word "GNUTELLA" and nothing else has just been read from sock
+     * @requires the word "GNUTELLA " and nothing else has just been read from sock
      * @modifies network
      * @effects wraps a connection around sock and does the rest of the Gnutella
      *  handshake.  Throws IOException if the connection couldn't be established.
@@ -162,7 +162,7 @@ public class Connection implements Runnable {
 	    if (manager!=null)
 		manager.total++;
 	}
-	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -181,8 +181,8 @@ public class Connection implements Runnable {
 	    received++;  //keep statistics.
 	    if (manager!=null)
 		manager.total++;
-	    //if (m!=null)
-	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    if (m!=null)
+	    	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
