@@ -9,12 +9,15 @@ import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 
 /**
- * A Gnutella query request method.  In addition to a query string, queries can
- * include a minimum size string, metadata, URN info, and a QueryKey.  There are
- * seven constructors in this to make new outgoing messages from scratch.
- * Several take GUIDs as arguments; this allows the GUI to prepare a result
- * panel <i>before</i> sending the query to the network.  One takes a isRequery
- * argument; this is used for automatic re-query capabilities (DownloadManager).
+ * This class creates Gnutella query messages, either from scratch, or
+ * from data read from the network.  Queries can contain query strings, 
+ * XML query strings, URNs, etc.  The minimum speed field is now used
+ * for bit flags to indicate such things as the firewalled status of
+ * the querier.<p>
+ * 
+ * This class also has factory constructors for requeries originated
+ * from this LimeWire.  These requeries have specially marked GUIDs
+ * that allow us to identify them as requeries.
  */
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
@@ -45,19 +48,17 @@ public class QueryRequest extends Message implements Serializable{
     private final QueryKey QUERY_KEY;
 
 	/**
+	 * Cached hash code for this instance.
+	 */
+	private volatile int _hashCode = 0;
+
+	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
 	 * because Collections.EMPTY_SET is not serializable in the collections 
 	 * 1.1 implementation.
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
-
-
-	/**
-	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
-	 */
-	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
 
 	/**
 	 * Creates a new requery for the specified SHA1 value and the specified
@@ -159,7 +160,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  is <tt>null</tt> or if the <tt>xmlQuery</tt> argument is 
 	 *  <tt>null</tt>
 	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
+	 *  argument and the xml query are both zero-length (empty)
 	 */
 	public static QueryRequest createQuery(String query, String xmlQuery) {
         if(query == null) {
@@ -170,6 +171,9 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		if(query.length() == 0 && xmlQuery.length() == 0) {
 			throw new IllegalArgumentException("empty query");
+		}
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
 		return new QueryRequest(newQueryGUID(false), query, xmlQuery);
 	}
@@ -214,7 +218,8 @@ public class QueryRequest extends Message implements Serializable{
 	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
 	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
 	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
-	 *  not 16 or if both the query strings are empty
+	 *  not 16, if both the query strings are empty, or if the XML does
+	 *  not appear to be valid
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
@@ -232,6 +237,9 @@ public class QueryRequest extends Message implements Serializable{
         }
 		if(query.length() == 0 && xmlQuery.length() == 0) {
 			throw new IllegalArgumentException("empty query");
+		}
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
 		return new QueryRequest(guid, query, xmlQuery);
 	}
@@ -341,6 +349,24 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 	/**
+	 * Specialized constructor used to create a query without the firewalled
+	 * bit set.  This should primarily be used for testing.
+	 *
+	 * @param query the query string
+	 * @return a new <tt>QueryRequest</tt> with the specified query string
+	 *  and without the firewalled bit set
+	 */
+	public static QueryRequest 
+		createNonFirewalledQuery(String query, byte ttl) {
+		return new QueryRequest(newQueryGUID(false), ttl, 
+								query, "", 
+                                UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+                                false, false);
+	}
+
+
+
+	/**
 	 * Creates a new query from the network.
 	 *
 	 * @param guid the GUID of the query
@@ -430,14 +456,13 @@ public class QueryRequest extends Message implements Serializable{
 		if (isFirewalled && !isMulticast)
 			minSpeed |= 0x40;
 		// LimeWire's ALWAYS want rich results....
-		if (true)
-			minSpeed |= 0x20;
+		minSpeed |= 0x20;
 		
 		// set the multicast bit
 		if (isMulticast) 
 			minSpeed |= 0x10;
 
-        this.MIN_SPEED=minSpeed;
+        MIN_SPEED = minSpeed;
 		if(query == null) {
 			this.QUERY = "";
 		} else {
@@ -469,13 +494,20 @@ public class QueryRequest extends Message implements Serializable{
             ByteOrder.short2leb((short)MIN_SPEED,baos); // write minspeed
             baos.write(QUERY.getBytes());              // write query
             baos.write(0);                             // null
+
+			
             // now write any & all HUGE v0.93 General Extension Mechanism 
 			// extensions
+
+			// this specifies whether or not the extension was successfully
+			// written, meaning that the HUGE GEM delimiter should be
+			// written before the next extension
             boolean addDelimiterBefore = false;
 			
             byte[] richQueryBytes = null;
-            if(XML_QUERY!=null)
+            if(XML_QUERY != null) {
                 richQueryBytes = XML_QUERY.getBytes("UTF-8");
+			}
             
 			// add the rich query
             addDelimiterBefore = 
@@ -514,7 +546,8 @@ public class QueryRequest extends Message implements Serializable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		PAYLOAD=baos.toByteArray();
+
+		PAYLOAD = baos.toByteArray();
 		updateLength(PAYLOAD.length); 
 
 		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
@@ -608,9 +641,10 @@ public class QueryRequest extends Message implements Serializable{
                             if(UrnType.isSupportedUrnType(curExtStr)) 
                                 tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
                         } 
-                        else if (curExtStr.startsWith("<?xml"))
+                        else if (curExtStr.startsWith("<?xml")) {
                             // rich query
                             tempRichQuery = curExtStr;
+						}
                     }
                     currIndex = delimIndex+1;
                 }
@@ -720,9 +754,9 @@ public class QueryRequest extends Message implements Serializable{
 	 * number, but Java shorts are signed.  Hence we must use an int.  The
 	 * value returned is always smaller than 2^16.
 	 */
-    public int getMinSpeed() {
-        return MIN_SPEED;
-    }
+	public int getMinSpeed() {
+		return MIN_SPEED;
+	}
 
 
     /*    
@@ -793,6 +827,36 @@ public class QueryRequest extends Message implements Serializable{
     public Message stripExtendedPayload() {
         return this;
     }
+
+	public int hashCode() {
+		if(_hashCode == 0) {
+			int result = 17;
+			result = (37*result) + QUERY.hashCode();
+			result = (37*result) + XML_QUERY.hashCode();
+			result = (37*result) + REQUESTED_URN_TYPES.hashCode();
+			result = (37*result) + QUERY_URNS.hashCode();
+			if(QUERY_KEY != null) {
+				result = (37*result) + QUERY_KEY.hashCode();
+			}
+			// TODO:: ADD GUID!!
+			_hashCode = result;
+		}
+		return _hashCode;
+	}
+
+	// overrides Object.toString
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof QueryRequest)) return false;
+		QueryRequest qr = (QueryRequest)o;
+		return (MIN_SPEED == qr.MIN_SPEED &&
+				QUERY.equals(qr.QUERY) &&
+				XML_QUERY.equals(qr.XML_QUERY) &&
+				REQUESTED_URN_TYPES.equals(qr.REQUESTED_URN_TYPES) &&
+				QUERY_URNS.equals(qr.QUERY_URNS) &&
+				Arrays.equals(getGUID(), qr.getGUID()) &&
+				Arrays.equals(PAYLOAD, qr.PAYLOAD));
+	}
 
 
     public String toString() {
