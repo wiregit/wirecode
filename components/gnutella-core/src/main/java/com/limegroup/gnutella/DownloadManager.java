@@ -929,7 +929,7 @@ public class DownloadManager implements BandwidthTracker {
                 Base32.encode(file.getClientGUID()) +
                 // if this will result in a firewalled transfer, send the
                 // appropriate control index
-                (shouldDoFWTransfer ? ("?index=" + PushRequest.FW_TRANS_INDEX) :
+                (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) :
                  "");
             final String nodeString = "X-Node:";
             final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;

@@ -235,7 +235,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(guidFromNetwork, guidFromBackend);
 
         // make sure it sends back the correct index
-        beginIndex = currLine.indexOf("index=") + 6;
+        beginIndex = currLine.indexOf("&file=") + 6;
         String longString = currLine.substring(beginIndex, beginIndex+10);
         long index = Long.parseLong(longString);
         assertEquals(index, Integer.MAX_VALUE);
