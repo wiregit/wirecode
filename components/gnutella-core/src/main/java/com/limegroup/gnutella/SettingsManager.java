@@ -428,7 +428,14 @@ public class SettingsManager implements SettingsInterface
 					setOldJARName(p);
 				}
 				else if(key.equals(DELETE_OLD_JAR)) {
-					setDeleteOldJAR(Boolean.getBoolean(p));
+					boolean b;
+					if(p.equals("true"))
+						b = true;
+					else if(p.equals("false"))
+						b = false;
+					else
+						b = false;
+					setDeleteOldJAR(b);
 				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
