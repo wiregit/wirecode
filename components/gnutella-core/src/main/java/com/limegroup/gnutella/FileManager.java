@@ -17,6 +17,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -40,6 +43,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public abstract class FileManager {
 	
+    private static final Log LOG = LogFactory.getLog(FileManager.class);
+
     /** The string used by Clip2 reflectors to index hosts. */
     public static final String INDEXING_QUERY = "    ";
     
@@ -828,13 +833,12 @@ public abstract class FileManager {
     
      /**
       * @modifies this
-      * @effects adds the given file to this, if it exists in a shared 
-      *  directory and has a shared extension.  Returns true iff the file
-      *  was actually added.  <b>WARNING: this is a potential security 
-      *  hazard.</b> 
-      *
-      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
-      *  added, otherwise <tt>null</tt>
+      * @effects adds the given file to this, if it exists in a shared directory
+      *          and has a shared extension. <b>WARNING: this is a potential
+      *          security hazard. </b>
+      * 
+      * @return the <tt>FileDesc</tt> for the new file if it was successfully
+      *         added, otherwise <tt>null</tt>
       */
     public FileDesc addFileIfShared(File file) {
         return addFileIfShared(file, true);
@@ -1352,7 +1356,7 @@ public abstract class FileManager {
     }
 
 
-    /** Ensures that this' index takes the minimum amount of space.  Only
+    /** Ensures that this's index takes the minimum amount of space.  Only
      *  affects performance, not correctness; hence no modifies clause. */
     private synchronized void trim() {
         _KeywordTrie.trim(new Function() {
@@ -1386,7 +1390,7 @@ public abstract class FileManager {
 	}    
     
     /**
-     * Returns true if this file is sharable.
+     * Returns true if this file is shareable.
      */
     public static boolean isFileShareable(File file, long fileLength) {
         if (fileLength>Integer.MAX_VALUE || fileLength<=0) 

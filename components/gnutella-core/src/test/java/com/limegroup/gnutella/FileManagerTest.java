@@ -38,7 +38,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private File f5 = null;
     private File f6 = null;
     //changed to protected so that MetaFileManagerTest can
-    //use these varaiables as well.
+    //use these variables as well.
     protected FileManager fman = null;
     protected Object loaded = new Object();
     private Response[] responses;
@@ -79,8 +79,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         if (f5!=null) f5.delete();
         if (f6!=null) f6.delete();	    
     }
-    
-    
     
     public void testGetParentFile() throws Exception {
         f1 = createNewTestFile(1);
@@ -610,6 +608,53 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //check old name
         qr = get_qr(f2);
         assertFalse("query should not be in qrt", qrt.contains(qr));
+    }
+    
+    /**
+     * Tests whether specially shared files are indeed shared.  Also
+     * tests that another file in the same directory as a specially
+     * shared file is not shared.   
+     */
+    public void testSpecialSharing() throws Exception {
+        //  create "shared" and "notShared" out of shared directory
+        File shared    = createNewNamedTestFile(10, "../shared");
+        File notShared = createNewNamedTestFile(10, "../notShared");
+
+        //  Add "shared" to special shared files
+        File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
+        File[] newSpecialFiles = new File[specialFiles.length + 1];
+        System.arraycopy(specialFiles, 0, newSpecialFiles, 0, specialFiles.length);
+        newSpecialFiles[specialFiles.length] = shared;
+        SharingSettings.SPECIAL_FILES_TO_SHARE.setValue(newSpecialFiles);
+        waitForLoad();
+
+        //  assert that "shared" and "notShared" are not in shared directories
+        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
+        assertFalse("notShared should not be shared in a shared directory", fman.isFileInSharedDirectories(notShared));
+        
+        //  assert that "shared" is shared
+        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
+        assertNotNull("no shared files, even though just added a specially shared file", sharedFiles);
+        boolean found = false;
+        for(int i = 0; i < sharedFiles.length; i++) {
+            FileDesc fd = sharedFiles[i];
+            if(fd == null) continue;
+            if(fd.getFile().equals(shared)) {
+                found = true;
+            }
+        }
+        assertTrue("specially shared file not found in list of shared files", found);
+        
+        //  assert that "notShared" is not shared
+        found = false;
+        for(int i = 0; i < sharedFiles.length; i++) {
+            FileDesc fd = sharedFiles[i];
+            if(fd == null) continue;
+            if(fd.getFile().equals(notShared)) {
+                found = true;
+            }
+        }
+        assertFalse("non-shared file found in list of shared files", found);
     }
 
     //helper function to create queryrequest with I18N
