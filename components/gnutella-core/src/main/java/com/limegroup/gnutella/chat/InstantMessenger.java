@@ -55,15 +55,37 @@ public class InstantMessenger implements Chatter {
 		creation of the socket will be in the thread */
 	private void OutgoingInitializer() throws IOException  {
 		_socket =  new Socket(_host, _port);
+		_socket.setSoTimeout(SettingsManager.instance().getTimeout());
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
-        _out.write("CHAT lscp 0.1 \n\n");
-        _out.write("User-Agent: "+CommonUtils.getVendor()+"\n\n");
-        _out.write("\n\n");
+		// CHAT protocal :
+		// First we send the Chat connect string, followed by 
+		// any number of '\r\n' terminated header strings, 
+		// followed by a singe '\r\n'
+        _out.write("CHAT CONNECT/0.1\r\n");
+        _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
+        _out.write("\r\n");
 		_out.flush();
+		// next we expect to read 'CHAT/0.1 200 OK' followed 
+		// by headers, and then a blank line.
+		// TODO: Add socket timeouts.
 		InputStream istream = _socket.getInputStream();
 		_reader = new ByteReader(istream);
+		// we are being lazy here: not actually checking for the 
+		// header, and reading until a blank line
+		while (true) {
+			String str = _reader.readLine();
+			if  (str.equals("")) 
+				break;
+			if (str == null) 
+				return;
+		}
+		// finally, we send 
+        _out.write("CHAT/0.1 200 OK\r\n");
+        _out.write("\r\n");
+		_out.flush();
+		_socket.setSoTimeout(0);
 		_activityCallback.acceptChat(this);
 	}
 
@@ -135,16 +157,40 @@ public class InstantMessenger implements Chatter {
 	/** Reads the header information from the chat
 		request.  At the moment, the header information
 		is pretty useless */
-	public void readHeader() {
-		try {
-			for (int i =0; i < 6; i++) { 
-				String str = _reader.readLine();
-				if ((str == null) || (str == ""))
-					return;
-			}
-		} catch (IOException e) {
-			return;
+	public void readHeader() throws IOException {
+		_socket.setSoTimeout(SettingsManager.instance().getTimeout());
+		// For the Server side of the chat protocal:
+		// We expect to be recieving 'CHAT CONNECT/0.1'
+		// but 'CHAT' has been consumed by acceptor.
+		// then, headers, followed by a blank line.
+		// we are going to be lazy, and just read until
+		// the blank line.
+		while (true) {
+			String str = _reader.readLine();
+			if  (str.equals("")) 
+				break;
+			if (str == null) 
+				return;
 		}
+		// then we want to send 'CHAT/0.1 200 OK'
+		_out.write("CHAT/0.1 200 OK\r\n");
+		_out.write("\r\n");
+		_out.flush();
+
+		// Now we expect to read 'CHAT/0.1 200 OK'
+		// followed by headers, followed by a blank line.
+		// once again we will be lazy, and just read until
+		// a blank line. 
+		// TODO: add socket timeouts.
+		while (true) {
+			String str = _reader.readLine();
+			if  (str.equals("")) 
+				break;
+			if (str == null) 
+				return;
+		}
+
+		_socket.setSoTimeout(0);
 	}
 
 
