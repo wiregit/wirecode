@@ -125,7 +125,8 @@ public class Acceptor implements Runnable {
      */
     public byte[] getAddress(boolean checkForce) {        
 		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-            String address = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
+            String address = 
+                ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
             try {
                 InetAddress ia = InetAddress.getByName(address);
                 return ia.getAddress();
