@@ -71,7 +71,7 @@ public class WMAMetaData extends AudioMetaData {
     private static final String WM_LYRICS = "WM/Lyrics";
     
     /** whether or not this is encoded in VBR */
-    private static final String VBR = "isVBR";
+    private static final String VBR = "IsVBR";
     
     /** the unique file identifier of this song */
     private static final String WM_UNIQUE_FILE_IDENTIFIER = "WM/UniqueFileIdentifier";
@@ -190,7 +190,11 @@ public class WMAMetaData extends AudioMetaData {
         if(Arrays.equals(id, WMA_FILE_PROPERTIES_ID)) {
             LOG.debug("Parsing file properties");
             
-            IOUtils.ensureSkip(ds, 80); // ???
+            IOUtils.ensureSkip(ds, 52);
+            int duration = (int)(ByteOrder.leb2long(ds) / 10000000);
+            setLength(duration);
+            
+            IOUtils.ensureSkip(ds, 20);
             int maxBR = ByteOrder.leb2int(ds);
             // TODO: assign duration based off this??
             if(LOG.isDebugEnabled())
@@ -277,7 +281,7 @@ public class WMAMetaData extends AudioMetaData {
         } catch(NumberFormatException ignored) {}
             
         if(LOG.isDebugEnabled())
-            LOG.debug("Standard Tag Values.  Title[" + getTitle() + ", Author: " + getArtist() + ", Track: " + getTrack()
+            LOG.debug("Standard Tag Values.  Title: " + getTitle() + ", Author: " + getArtist() + ", Track: " + getTrack()
                          + ", Unknown[2]: " + wmaString(unknown1) + ", Unknown[4]: " + wmaString(unknown2));
     }
     

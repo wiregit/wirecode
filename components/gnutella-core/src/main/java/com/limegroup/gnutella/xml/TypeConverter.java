@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.HashMap;
+import java.util.Date;
 
 /**
  * Converts XML Schema types of Java types. Contains a hashMap of
@@ -29,6 +30,7 @@ public class TypeConverter{
         map.put("uriReference",String.class);
         map.put("decimal",Double.class);
         map.put("double",Double.class);
+        map.put("duration", Date.class);
     }
     
     /**
