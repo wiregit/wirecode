@@ -566,7 +566,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     throw new BadPacketException("Pong had IPPORT header but bad data");
                 
                 byte [] myip = new byte[4];
-                System.arraycopy(data,0,ip,0,4);
+                System.arraycopy(data,0,myip,0,4);
                 
                 try{
                     myIp = InetAddress.getByAddress(myip);
@@ -709,7 +709,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 
                 
                 byte [] myip = new byte[4];
-                System.arraycopy(data,0,ip,0,4);
+                System.arraycopy(data,0,myip,0,4);
                 
                 
                 try{
