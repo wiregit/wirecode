@@ -83,7 +83,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * The last state of commonOutFile.isCorrupted.
      * Used to know whether or not to add ourselves to the mesh.
      */
-    private boolean outIsCorrupted;
+    private boolean _outIsCorrupted;
 
 	/**
 	 * The new alternate locations we've received for this file.
@@ -273,7 +273,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //  We have downloaded a large enough portion of the file,
         //  and We have accepted incoming during this session.
         if (_rfd.getSHA1Urn() != null && 
-          !outIsCorrupted &&
+          !_outIsCorrupted &&
           RouterService.acceptedIncomingConnection() &&
           _incompleteFile.length() > _minPartialFileSize) {
             if( alts == null ) // will be null if altsToSend is null.
@@ -737,7 +737,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
                 commonOutFile.writeBlock(currPos,c, buf);
-                outIsCorrupted = commonOutFile.isCorrupted();
+                _outIsCorrupted = commonOutFile.isCorrupted();
 
                 currPos += c;//update the currPos for next iteration
                 _amountRead += c;
