@@ -75,9 +75,13 @@ public class ExtendedEndpoint extends Endpoint {
     /** Same as connectSuccesses, but for failed connections. */
     private Buffer /* of Long */ connectFailures=new Buffer(HISTORY_SIZE);
 
+    /** the locale of the client that this endpoint represents */
     private String client_locale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
-    
+
+    /** locale of this client */
+    private final static String ownLocale =
+        ApplicationSettings.LANGUAGE.getValue();
     
     /**
      * Creates a new ExtendedEndpoint with uptime data read from a ping reply.
@@ -346,16 +350,13 @@ public class ExtendedEndpoint extends Endpoint {
         return new PriorityComparator();
     }
 
-    private final static String ownLocale =
-        ApplicationSettings.LANGUAGE.getValue();
-
     static class PriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {
             ExtendedEndpoint a=(ExtendedEndpoint)extEndpoint1;
             ExtendedEndpoint b=(ExtendedEndpoint)extEndpoint2;
 
             boolean bLoc = ownLocale.equals(b.getClientLocale());
-            //preference locale first or after connectScore?
+            //TODO: preference locale first or after connectScore?
             if(ownLocale.equals(a.getClientLocale())) {
                 if(!bLoc) 
                     return 1;

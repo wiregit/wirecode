@@ -50,7 +50,7 @@ public class PingRequest extends Message {
         super((byte)0x0, ttl, (byte)0);
         addLocale();
     }
-
+    
     /**
      * Creates an outgoing group ping. Used only by boot-strap server
      *
@@ -154,6 +154,7 @@ public class PingRequest extends Message {
     }
 
     /**
+     * add locale information to the GGEP.
      */
     private void addLocale() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -173,6 +174,7 @@ public class PingRequest extends Message {
     }
 
     /**
+     * get locale of this PingRequest 
      */
     public String getLocale() {
         if(payload != null) { //payload can be null

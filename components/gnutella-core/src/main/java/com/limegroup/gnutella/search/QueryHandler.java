@@ -419,9 +419,9 @@ public final class QueryHandler {
         List ultrapeers = /** method returns a copy */
             _connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
-
-        //System.out.println("QueryHandler : sendQuery : "
-        //                   + _prefLocale);
+        
+        //if we did get a list of connections that matches the locale
+        //of the query
         if(!ultrapeers.isEmpty()) {
             QUERIED_CONNECTIONS.retainAll(ultrapeers);
             QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
@@ -430,9 +430,8 @@ public final class QueryHandler {
             ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
             //at this point ultrapeers could become empty
         }
-        
+                
         if(ultrapeers.isEmpty()) { 
-            //System.out.println("no locale matching connection found");
             //either we used up all the returned ultrapeers or
             //there were no locale matching ultrapeers connections to begin with
             //so now use any ultrapeer connection

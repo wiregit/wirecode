@@ -286,7 +286,7 @@ public final class PongCachingTest extends BaseTestCase {
 
     /**
      * Tests to make sure that pongs are received properly via
-     * pong caching.
+     * pong caching when the locale is specified in the ping
      */
     public void testPongsReceivedFromPingWithLocale() throws Exception {
         PingPongSettings.PINGS_ACTIVE.setValue(false);

@@ -206,6 +206,7 @@ public final class HandshakeResponse {
 
     
     /**
+     * Locale 
      */
     private final String LOCALE_PREF;
 

@@ -266,6 +266,7 @@ public final class UDPReplyHandler implements ReplyHandler {
     }
 
     /**
+     * implementation of interface. this is not used.
      */
     public String getLocalePref() {
         return ApplicationSettings.DEFAULT_LOCALE.getValue();

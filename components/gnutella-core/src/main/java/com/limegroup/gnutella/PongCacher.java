@@ -90,10 +90,16 @@ public final class PongCacher {
         }
     }
     
-    /** .return to remove list
+    /** 
+     * adds good pongs to the passed in list "pongs" and
+     * return a list of pongs that should be removed.
      */
     private List addBestPongs(String loc, List pongs, 
                               long curTime, int i) {
+        //set the expire time to be used.
+        //if the locale that is passed in is "en" then just use the
+        //normal expire time otherwise use the longer expire time
+        //so we can have some memory of non english locales
         int exp_time = 
             (ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc))?
             EXPIRE_TIME :
@@ -121,6 +127,10 @@ public final class PongCacher {
     }
 
     
+    /**
+     * removes the pongs with the specified locale and those
+     * that are in the passed in list l
+     */
     private void removePongs(String loc, List l) {
         if(l != null) {
             BucketQueue bq = (BucketQueue)PONGS.get(loc);
@@ -148,7 +158,7 @@ public final class PongCacher {
         // if the hops are too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
-            //PONGS.insert(pr, pr.getHops());
+            //check the map for the locale and create or retrieve the set
             if(PONGS.containsKey(pr.getClientLocale())) {
                 BucketQueue bq = (BucketQueue)PONGS.get(pr.getClientLocale());
                 bq.insert(pr, pr.getHops());

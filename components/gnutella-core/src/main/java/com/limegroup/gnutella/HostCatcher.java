@@ -439,7 +439,10 @@ public class HostCatcher implements HostListener {
             
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
-            if(pr.hasFreeUltrapeerSlots()) {
+            if(pr.hasFreeUltrapeerSlots() 
+               ||
+               (ApplicationSettings.LANGUAGE.getValue()
+                .equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
                 addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
                 return true;
             } 
@@ -476,12 +479,12 @@ public class HostCatcher implements HostListener {
      */
     private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
         String loc = endpoint.getClientLocale();
-        if(LOCALE_2_SET.containsKey(loc)) {
+        if(LOCALE_2_SET.containsKey(loc)) { //if set exists for ths locale
             Set s = (Set)LOCALE_2_SET.get(loc);
             if(s.add(endpoint) && s.size() > NUM_2_KEEP_LOCALE_SET)
                 s.remove(s.iterator().next());
         }
-        else {
+        else { //otherwise create new set and add it to the map
             Set s = new HashSet();
             s.add(endpoint);
             LOCALE_2_SET.put(loc, s);
@@ -508,7 +511,10 @@ public class HostCatcher implements HostListener {
 
     
 
-    //use this if locale is known
+    /**
+     * Adds an endpoint.  Use this method if the locale of endpoint is known
+     * (used by ConnectionManager.disconnect())
+     */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
         //need ExtendedEndpoint for the locale
         if (forceHighPriority)
@@ -766,12 +772,6 @@ public class HostCatcher implements HostListener {
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
         if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            /*
-            Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
-            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-            iter.remove();
-            return ee;
-            */
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
                                     
         } 
@@ -779,24 +779,12 @@ public class HostCatcher implements HostListener {
         // free leaf slots, try those.
         else if(RouterService.isShieldedLeaf() && 
                 !FREE_LEAF_SLOTS_SET.isEmpty()) {
-            /*
-            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
-            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-            iter.remove();
-            return ee;
-            */
             return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
         } 
         // Otherwise, assume we'll be a leaf and we're trying to connect, since
         // this is more common than wanting to become an ultrapeer and because
         // we want to fill any remaining leaf slots if we can.
         else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            /*
-            Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
-            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-            iter.remove();
-            return ee;
-            */
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
         } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
@@ -813,6 +801,8 @@ public class HostCatcher implements HostListener {
 
     
     /**
+     * tries to return an endpoint that matches the locale of this client
+     * from the passed in set.
      */
     private ExtendedEndpoint preferenceWithLocale(Set s) {
 
@@ -876,16 +866,6 @@ public class HostCatcher implements HostListener {
      *  have advertised they have free ultrapeer slots
      */
     public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
-        
-        /*
-        Set copy = new HashSet();
-        Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
-        for(int i=0; iter.hasNext() && i<10; i++) {
-            copy.add(iter.next());
-        }
-        return copy;
-        */
-
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
                                         ApplicationSettings.LANGUAGE.getValue());
     }
@@ -906,15 +886,6 @@ public class HostCatcher implements HostListener {
      *  have advertised they have free leaf slots
      */
     public synchronized Collection getUltrapeersWithFreeLeafSlots() {
-        /*
-        Set copy = new HashSet();
-        Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
-        for(int i=0; iter.hasNext() && i<10; i++) {
-            copy.add(iter.next());
-        }
-        return copy;
-        */
-        
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
                                         ApplicationSettings.LANGUAGE.getValue());
     }
@@ -926,6 +897,8 @@ public class HostCatcher implements HostListener {
     }
 
     /**
+     * preference the set so we try to return those endpoints that match
+     * passed in locale "loc"
      */
     private Collection getPreferencedCollection(Set s, String loc) {
         if(loc == null || loc.equals(""))

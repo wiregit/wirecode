@@ -1573,6 +1573,8 @@ public class ManagedConnection extends Connection
 
     /**
      * set preferencing for the responder
+     * (The preference of the Responder is used when creating the response 
+     * (in Connection.java: conclude..))
      */
     public void setLocalePreferencing(boolean b) {
         RESPONSE_HEADERS.setLocalePreferencing(b);

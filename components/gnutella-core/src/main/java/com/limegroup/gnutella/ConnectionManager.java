@@ -144,8 +144,20 @@ public class ConnectionManager {
     private final List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
+    /**
+     * dedicated ConnectionFetcher used by leafs to fetch a 
+     * locale matching connection
+     * NOTE: currently this is only used by leafs which will try
+     * to connect to one connection which matches the locale of the 
+     * client.
+     */
     private ConnectionFetcher _dedicatedPrefFetcher;
+    
+    /**
+     * boolean to check if a locale matching connection is needed.
+     */
     private volatile boolean _needPref = true;
+
     /**
      * List of all connections.  The core data structures are lists, which allow
      * fast iteration for message broadcast purposes.  Actually we keep a couple
@@ -419,7 +431,7 @@ public class ConnectionManager {
     private boolean hasFreeLeafSlots() {
         return getNumFreeLeafSlots() > 0;
     }
-    
+
     /**
      * Returns whether this (probably) has a connection to the given host.  This
      * method is currently implemented by iterating through all connections and
@@ -527,11 +539,24 @@ public class ConnectionManager {
      */
     public int getNumFreeLimeWireNonLeafSlots() {
         return Math.max(0, 
-                 getNumFreeNonLeafSlots() - 
-                 Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
-               );
+                        getNumFreeNonLeafSlots() 
+                        - Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
+                        - Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                                   - _localeMatchingPeers)
+                        );
     }
 
+    /**
+     * @return true if there are locale reserved slots false otherwise
+     *
+     * An ultrapeer may not have Free LimeWire Non Leaf Slots but may still
+     * have free slots that are reserved for locales
+     */
+    public int getNumLimeWireLocalePrefSlots() {
+        return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                        - _localeMatchingPeers);
+    }
+    
 	/**
 	 * Returns whether or not the client has an established connection with
 	 * another Gnutella client.
@@ -915,6 +940,9 @@ public class ConnectionManager {
     }
 
     /**
+     * return a list of initialized connection that matches the parameter
+     * String loc.
+     * create a new linkedlist to return.
      */
     public List getInitializedConnectionsMatchLocale(String loc) {
         List matches = new LinkedList();
@@ -1355,7 +1383,7 @@ public class ConnectionManager {
      */
     private void adjustConnectionFetchers() {
         if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
-            //if it's a leaf and locale preferencing is true
+            //if it's a leaf and locale preferencing is on
             //we will create a dedicated preference fetcher
             //that tries to fetch a connection that matches the
             //clients locale
@@ -1414,7 +1442,6 @@ public class ConnectionManager {
         else {
             multiple = 2;
             neededConnections -= 5 + RESERVED_NON_LIMEWIRE_PEERS;
-            
         }
             
         int need = Math.min(20, multiple*neededConnections) 
@@ -1846,6 +1873,7 @@ public class ConnectionManager {
      * responsible for recording the death.
      */
     private class ConnectionFetcher extends ManagedThread {
+        //set if this connectionfetcher is a preferencing fetcher
         private boolean _pref = false;
         /**
          * Tries to add a connection.  Should only be called from a thread

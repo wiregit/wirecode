@@ -36,7 +36,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	private ForMeReplyHandler() {}
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
-        
         //Kill incoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
         //share!)  Note that we only consider killing them on the first ping.
@@ -280,8 +279,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
         return true;
     }
 
-    /**
-     */
     public String getLocalePref() {
         return ApplicationSettings.LANGUAGE.getValue();
     }

@@ -264,6 +264,8 @@ public class Connection implements IpPort {
         new IOException("connection closed");
 
     /**
+     * boolean to tell if this connection should preference during the
+     * connection attempt
      */
     private boolean _isPreference = false;
 
@@ -634,6 +636,9 @@ public class Connection implements IpPort {
                     throw NoGnutellaOkException.CLIENT_REJECT;
                 } 
                 else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
+                    //if reponder's locale preferencing was set 
+                    //and didn't match the locale this code is set.
+                    //(currently in use by the dedicated connectionfetcher)
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
                 }
                 else {

@@ -154,6 +154,7 @@ public interface ReplyHandler {
     boolean isStable();
 
     /**
+     * access the locale thats associated with this replyhandler
      */
     public String getLocalePref();
 
