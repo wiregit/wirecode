@@ -9,6 +9,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * There are two constructors that are necessary.  The 
@@ -217,6 +218,8 @@ public class HTTPUploader implements Uploader {
 			_ostream.flush();
 
             InputStream in = _socket.getInputStream(); 
+			
+			// TODO: we should read head requests here too...
             //dont read a word of size more than 3
             String word = IOUtils.readWord(in, 3);
             if (!word.equalsIgnoreCase("get"))
