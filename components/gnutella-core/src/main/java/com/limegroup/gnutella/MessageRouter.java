@@ -1494,7 +1494,8 @@ public abstract class MessageRouter {
             boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
-			boolean incoming = RouterService.acceptedIncomingConnection();
+			boolean incoming = RouterService.acceptedIncomingConnection()
+			                || queryRequest.isMulticast();
 
 			boolean chat = SettingsManager.instance().getChatEnabled();
 
