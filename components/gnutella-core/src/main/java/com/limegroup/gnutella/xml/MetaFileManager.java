@@ -99,15 +99,6 @@ public class MetaFileManager extends FileManager {
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
         // ----*
         List xmlDocs = new LinkedList();
-        if( LimeXMLUtils.isMP3File(f) ) {
-            try {
-                xmlDocs.add(ID3Reader.readDocument(f));
-            } catch(IOException e) {
-                // if we were unable to read this document,
-                // then simply add the file without metadata.
-                return super.fileChanged(f);
-            }
-        }
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
