@@ -8,7 +8,6 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
-import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
 /**
@@ -105,23 +104,7 @@ public class StandardMessageRouter extends MessageRouter {
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   DatagramPacket datagram,
                                            ReplyHandler handler) {
-		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
-		Iterator iter = unicastEndpoints.iterator();
-		if(iter.hasNext()) {
-			while(iter.hasNext()) {
-				GUESSEndpoint host = (GUESSEndpoint)iter.next();				
-                PingReply pr = 
-                    PingReply.createExternal(request.getGUID(), (byte)1,
-                                             host.getPort(),
-                                             host.getAddress().getAddress(),
-                                             true);
-
-                sendPingReply(pr, handler);
-			}
-		} else {
-			// always respond with something
-			sendAcknowledgement(datagram, request.getGUID());
-		}
+        sendPingReply(PingReply.create(request.getGUID(), (byte)1), handler);
 	}
 
     /**
