@@ -61,6 +61,13 @@ public class LimeXMLProperties
      */
     private static final String XML_DOCS_DIR = "XML_DOCS_DIR";
 
+    /**
+     * The propertiy that denotes the directoru in which the mappings
+     * of canonicalized field names to display string will be stores
+     * per schema
+     */
+    private static final String XML_DISPLAY_PROPS_DIR="XML_DISPLAY+PROPS_DIR";
+
 
     /**
      * The name of the directory in which XML Schemas will be 
@@ -75,6 +82,14 @@ public class LimeXMLProperties
      */
     private static final String XML_DOCS_DIR_DEF = "etc" + File.separator + 
                                                 "xml" + File.separator;
+
+    /**
+     * The name of the directory in which the field names for various 
+     * schemas will have their display strings.
+     */
+    private static final String XML_DISPLAY_PROPS_DIR_DEF = "etc"+
+        File.separator + "xml"+File.separator+"display"+File.separator;
+
     
     /**
      * Name of the property that denotes the max number of xml results
@@ -254,6 +269,13 @@ public class LimeXMLProperties
         return getPath() + xmlDocsDirRel;
     }
     
+    public String getXMLDisplayPropsDir()
+    {
+        String xmlDisplayPropsDirRel = _properties.getProperty
+                           (XML_DISPLAY_PROPS_DIR,XML_DISPLAY_PROPS_DIR_DEF);
+        return getPath() + xmlDisplayPropsDirRel;
+    }
+
 
     /**
      * Returns the name of the file that stores the SchemaTransformationDataMap

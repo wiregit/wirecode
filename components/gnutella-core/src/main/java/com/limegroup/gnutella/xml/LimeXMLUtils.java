@@ -408,8 +408,36 @@ public class LimeXMLUtils
         
     //return the encoded string
     return buffer.toString();
-}
-
+    }
     
+    /**
+     * takes a string and returns the same string with the first letter 
+     * capitalized
+     */
+    public static String capitalizeFirst(String str)
+    {
+        String first = str.substring(0,1);
+        String newFirst = first.toUpperCase();
+        String last = str.substring(1); 
+        return  newFirst+last;
+    }
+
+    /**
+     * picks up the last strng in the colName and return it.
+     */
+    public static String processColName(String colName)
+    {
+        int count=1;//not attribute - default case
+        if (colName.endsWith(XMLStringUtils.DELIMITER)){//remove the last delim
+            colName=
+            colName.substring(0,colName.lastIndexOf(XMLStringUtils.DELIMITER));
+        }        
+        int index = colName.lastIndexOf(XMLStringUtils.DELIMITER);
+
+        if(index==-1)//we could not find a DELIMITER
+            return colName;
+        index += XMLStringUtils.DELIMITER.length();
+        return capitalizeFirst(colName.substring(index));
+    }
     
 }
