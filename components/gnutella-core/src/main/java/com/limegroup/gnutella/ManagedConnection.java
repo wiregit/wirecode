@@ -1615,11 +1615,11 @@ public class ManagedConnection extends Connection
                 while (iter.hasNext()) {
                     Map currMap = (Map) iter.next();
                     synchronized (currMap) {
-                        Iterator keySetIter = currMap.keySet().iterator();
+                        Iterator keyIter = currMap.keySet().iterator();
                         // and expire as many entries as possible....
-                        while (keySetIter.hasNext()) 
-                            if (((GUID.TimedGUID) iter.next()).shouldExpire()) 
-                                iter.remove();
+                        while (keyIter.hasNext()) 
+                            if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
+                                keyIter.remove();
                     }
                     // now that you've expired hosts, remove the reference
                     // so as to free the memory (the connection will re-add
