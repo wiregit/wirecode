@@ -43,6 +43,8 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 			bestCandidates[0].write(wr); //my best leaf
 			if (bestCandidates[1]!=null)
 				bestCandidates[1].write(wr); //best leaf at ttl 1
+			wr.flush();
+			bos.flush();
 		}catch(IOException iox) {
 			//weird.  can't really do much except report it.
 			ErrorService.getErrorCallback().error(iox);
@@ -56,9 +58,9 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 * see superclass
 	 */
 	protected BestCandidatesVendorMessage(byte[] guid, byte ttl, byte hops,
-			byte[] vendorID, int selector, int version, byte[] payload)
+			 int version, byte[] payload)
 			throws BadPacketException {
-		super(guid, ttl, hops, vendorID, selector, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_BEST_CANDIDATE, version, payload);
 		parseCandidates(payload);
 	}
 	
@@ -69,9 +71,9 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 */
 	private void parseCandidates(byte [] payload) throws BadPacketException {
 		
-		//get the Ultrapeer that advertised us
+
 		if (payload==null || payload.length==0)
-			throw new BadPacketException();
+			throw new BadPacketException("empty payload for message with GUID "+new String(getGUID()));
 		
 		_bestCandidates = new Candidate[2];
 		

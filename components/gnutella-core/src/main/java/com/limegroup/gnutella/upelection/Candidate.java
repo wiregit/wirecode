@@ -28,9 +28,25 @@ public class Candidate implements Comparable{
 	
 	private ExtendedEndpoint _endpoint;
 	
-	
+	/**
+	 * deserializes a Candidate.  It delegates the parsing to the
+	 * ExtendedEndpoint.read method.
+	 * @param line  the line representing the endpoint
+	 * @throws ParseException parsing failed
+	 */
 	public Candidate(String line) throws ParseException {
 		_endpoint = ExtendedEndpoint.read(line);
+	}
+	
+	/**
+	 * creates a new Candidate from a Connection object. 
+	 * Note: this casts the uptime of the connection to int.
+	 * @param con the connection to consider a candidate
+	 */
+	public Candidate(Connection con) {
+		_endpoint = new ExtendedEndpoint(con.getInetAddress().getHostAddress(),
+					con.getPort(),
+					(int)(System.currentTimeMillis() - con.getConnectionTime()));
 	}
 	
 	/**

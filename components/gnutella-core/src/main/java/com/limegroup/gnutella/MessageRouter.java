@@ -193,6 +193,14 @@ public abstract class MessageRouter {
      */
     private FixedSizeExpiringSet _candidateAdvertisers = new FixedSizeExpiringSet(
     		ConnectionManager.ULTRAPEER_CONNECTIONS, 14*60*1000);
+    
+    /**
+     * some constants related to the propagation of the best candidates.
+     * not final so that PrivilegedAccessor can change them.
+     */
+    private Integer CANDIDATE_PROPAGATION_DELAY= new Integer(2*60*60*1000); //2 hours
+    private Integer CANDIDATE_PROPAGATION_INTERVAL=new Integer(15*60*1000); // 15 minutes
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -225,6 +233,11 @@ public abstract class MessageRouter {
         // schedule a runner to clear guys we've connected back to
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
+        
+        //TODO: find the proper values experimentally
+        RouterService.schedule(new CandidateAdvertiser(), 
+        			CANDIDATE_PROPAGATION_DELAY.intValue(),	
+					CANDIDATE_PROPAGATION_INTERVAL.intValue());
     }
 
     /** Call this to inform us that a query has been killed by a user or
@@ -2578,8 +2591,11 @@ public abstract class MessageRouter {
      * ExtendedEndpoints are created from open ManagedConnection objects; the field dailyUptime in this 
      * case means the lifetime of the connection.
      */
-    private class CandidateAdvertiser implements Runnable {
+    private static class CandidateAdvertiser implements Runnable {
+    	
+    	
     	public void run() {
+    		
     		//first update our best leaf, i.e. find the one with the longest uptime
     		//that is also not firewalled, isGoodLeaf, etc.
     		Candidate best = electBest();
@@ -2588,7 +2604,8 @@ public abstract class MessageRouter {
     		if (best==null)
     			return;
     		
-    		BestCandidates.update(electBest());
+    		
+    		BestCandidates.update(best);
     		
     		//create a vendor message with the new info
     		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(
@@ -2602,9 +2619,11 @@ public abstract class MessageRouter {
     		for (Iterator iter = _manager.getInitializedConnections().iterator();iter.hasNext();) {
     			ManagedConnection current = (ManagedConnection)iter.next();
     			if (current.isGoodUltrapeer() &&
-    					current.isLimeWire())
+    					current.isLimeWire()) 
 						//add more criteria if necessary
-    				current.send(bcvm); 
+    				current.send(bcvm);
+    		
+    		
     		}
     	}
     	
@@ -2618,7 +2637,7 @@ public abstract class MessageRouter {
     			iter.hasNext();){
     			ManagedConnection current = (ManagedConnection)iter.next();
     			if (current.isGoodLeaf() &&
-    					current.isStable() &&
+    					current.isStable() && 
 						current.isLimeWire() &&
 						current.isGUESSCapable()) //unsolicited udp
     				//add more criteria here

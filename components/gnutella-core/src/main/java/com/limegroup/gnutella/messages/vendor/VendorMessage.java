@@ -335,6 +335,13 @@ public abstract class VendorMessage extends Message {
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new UPListVendorMessage(guid,ttl,hops,version,restOf);
         
+        if ((selector == F_BEST_CANDIDATE) &&
+        		(Arrays.equals(vendorID,F_LIME_VENDOR_ID)) && restOf.length!=0)
+        	return new BestCandidatesVendorMessage(guid,ttl,hops,version,restOf);
+        
+        if (selector == F_BEST_CANDIDATE && restOf.length==0)
+        	throw new BadPacketException("something ate my payload!");
+        
         
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
