@@ -23,8 +23,6 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
     /** The extension header (key) for average daily uptime. */
     public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
-    /** The extension header (key) for out of band replies. */
-    public static final String GGEP_HEADER_OUT_OF_BAND_REPLIES = "OBR";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;

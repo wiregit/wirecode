@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
-import com.limegroup.gnutella.messages.*;
 
 /**
  * A Gnutella query request method.  In addition to a query string, queries can
@@ -22,11 +21,6 @@ public class QueryRequest extends Message implements Serializable{
      *  LOCKING: obtain this' lock. */
     private final String query;
     private final String richQuery;
-
-    /** The GGEP block before GEM blocks.  Cached to avoid allocations.  Null
-     *  if the GGEP data has not been parsed, this has no GGEP data, or the GGEP
-     *  data is corrupt.  LOCKING: obtain this' monitor. */
-    private volatile GGEP ggep;
 
     // HUGE v0.93 fields
     /** 
@@ -100,8 +94,8 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, String richQuery,
                         boolean isRequery) {
-        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, 
-             isRequery, null, null);
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, isRequery, 
+			 null, null);
     }
 
     /**
@@ -113,23 +107,6 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns) {
-        this(guid, ttl, minSpeed, query, richQuery, isRequery,
-             requestedUrnTypes, queryUrns, false);
-    }
-
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
-     *
-     * @param acceptOutOfBandReplies If you want to allow the request to be
-     * fulfilled via direct connect reply streaming.
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-                        String query, String richQuery, boolean isRequery,
-                        Set requestedUrnTypes, Set queryUrns,
-                        boolean acceptOutOfBandReplies) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
         this.minSpeed=minSpeed;
@@ -156,26 +133,16 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			tempQueryUrns = new HashSet();
 		}
-
-        if (acceptOutOfBandReplies) {
-            // get the GGEP ready....
-            ggep = new GGEP(true);
-            ggep.put(GGEP.GGEP_HEADER_OUT_OF_BAND_REPLIES);
-        }
-
+			
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
             baos.write(query.getBytes());              // write query
             baos.write(0);                             // null
-            // write any GGEP extension(s) necessary....
-            if (ggep != null)
-                ggep.write(baos);
-
             // now write any & all HUGE v0.93 General Extension Mechanism 
 			// extensions
-            boolean addDelimiterBefore = (ggep != null);
+            boolean addDelimiterBefore = false;
 			
 			// add the rich query
             addDelimiterBefore = 
@@ -232,24 +199,8 @@ public class QueryRequest extends Message implements Serializable{
             // handle extensions, which include rich query and URN stuff
             String exts = super.readNullTerminatedString(bais);
             StringTokenizer stok = new StringTokenizer(exts,"\u001c");
-            boolean firstIter = true;
             while (stok.hasMoreElements()) {
 				String curExtStr = stok.nextToken();
-
-                // ggep stuff is before the urn stuff, so check for it....
-                // it will only be in the first string since we only put it in
-                // beginning....
-                if (firstIter) {
-                    try {
-                        int[] endOffset = new int[1];
-                        ggep = new GGEP(curExtStr.getBytes(),
-                                        0, endOffset);
-                        curExtStr = curExtStr.substring(endOffset[0]);
-                    }
-                    catch (BadGGEPBlockException ignored) {}
-                    firstIter = false;
-                }
-
 				if(URN.isUrn(curExtStr)) {
 					// it's an URN to match, of form "urn:namespace:etc"
 					URN urn = null;
@@ -360,17 +311,6 @@ public class QueryRequest extends Message implements Serializable{
     public int getMinSpeed() {
         return minSpeed;
     }
-
-
-    /** @return Whether or not the sender of this Query accepts out of band
-     *  QueryReplies.
-     */
-    public boolean acceptsOutOfBandReplies() {
-        return ((ggep != null) && 
-                (ggep.hasKey(GGEP.GGEP_HEADER_OUT_OF_BAND_REPLIES))
-                );
-    }
-
 
     /** Returns this, because it's always safe to send big queries. */
     public Message stripExtendedPayload() {
