@@ -24,8 +24,8 @@ class HTMLOutput {
 
     /** minimum completion levels for the status HTML page */
     private static final double MIN_PERCENTAGE_COMPLETED     = 0.75;
-    private static final double MIN_PERCENTAGE_NEED_REVISION = 0.66;
-    private static final double MIN_PERCENTAGE_MIDWAY        = 0.50;
+    private static final double MIN_PERCENTAGE_NEED_REVISION = 0.65;
+    private static final double MIN_PERCENTAGE_MIDWAY        = 0.45;
     private static final int    MIN_COUNT_STARTED            = 20;
     
     private final StringBuffer page;
