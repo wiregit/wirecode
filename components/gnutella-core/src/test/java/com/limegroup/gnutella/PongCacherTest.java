@@ -29,7 +29,7 @@ public final class PongCacherTest extends BaseTestCase {
 
     public void setUp() throws Exception {
         BucketQueue bq = 
-            (BucketQueue)PrivilegedAccessor.getValue(PC, "_pongs");
+            (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
         if(bq != null) {
             bq.clear();
         }
@@ -48,7 +48,7 @@ public final class PongCacherTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
         //Thread.sleep(2000);
         
-        Set pongs = PC.getBestPongs();
+        List pongs = PC.getBestPongs();
         //int startSize = pongs.size();
 
         PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
@@ -95,10 +95,8 @@ public final class PongCacherTest extends BaseTestCase {
                      PongCacher.NUM_CACHED_PONGS, pongs.size());
 
         BucketQueue queue = 
-            (BucketQueue)PrivilegedAccessor.getValue(PC, "_pongs");
+            (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
 
-        //assertEquals("first pong should be high hops", highHopPong, 
-        //           queue.extractMax());        
 
         Iterator iter = pongs.iterator();
         PingReply pr = (PingReply)iter.next();
@@ -112,7 +110,7 @@ public final class PongCacherTest extends BaseTestCase {
         highHopPong2.hop();
         PC.addPong(highHopPong2);
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+2000);
+        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_CACHED_PONGS, pongs.size());   
@@ -136,7 +134,7 @@ public final class PongCacherTest extends BaseTestCase {
 
         BucketQueue bq = 
             (BucketQueue)PrivilegedAccessor.getValue(PongCacher.class, 
-                                                     "_pongs");
+                                                     "PONGS");
         assertEquals("unexpected bucket queue size", 1, bq.size());
 
         pong = PingReply.create(new GUID().bytes(), (byte)5);
