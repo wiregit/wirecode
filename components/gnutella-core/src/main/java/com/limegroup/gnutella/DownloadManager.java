@@ -553,7 +553,8 @@ public class DownloadManager implements BandwidthTracker {
      * 
      * @param query the requery to send, which should have a marked GUID
      * @param requerier the downloader requesting more sources.  Needed to 
-     *  ensure fair requery scheduling.
+     *  ensure fair requery scheduling.  This MUST be in the waiting list,
+     *  i.e., it MUST NOT have a download slot.
      * @return true iff the query was actually sent.  If false is returned,
      *  the downloader should attempt to send the query later.
      */
@@ -562,42 +563,29 @@ public class DownloadManager implements BandwidthTracker {
         debug("DM.sendQuery(): entered.");
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
-        boolean allowed = true;
-        //Check limits
-        if ((System.currentTimeMillis() - lastRequeryTime) > 
-            TIME_BETWEEN_REQUERIES) {
-            debug("DM.sendQuery(): requery allowed!!");            
-            // ok, i can do a requery, but is it allowed for this MD?           
-            if (querySentMDs.size() < waiting.size()) {
-                // not all MDs have had a turn, see if this guy can go...
-                if (querySentMDs.contains(requerier)) {
-                    debug("DM.sendQuery(): sorry, wait your turn...");
-                    // nope, sorry, must lets others go first...
-                    allowed = false;
-                }
-                else {
-                    querySentMDs.add(requerier);
-                    debug("DM.sendQuery(): ok, you can go...");
-                }
-            }
-            else {
-                debug("DM.sendQuery(): no contention, just go....");
-                querySentMDs.clear();
-                querySentMDs.add(requerier);
-            }
-                
-            // note last requery time...
-            if (allowed)
-                lastRequeryTime = System.currentTimeMillis();
-        }
-        else 
-            allowed = false;
 
-        if (allowed) {
-            router.broadcastQueryRequest(query);
+        //Disallow if global time limits exceeded.
+        if (System.currentTimeMillis()-lastRequeryTime
+                <= TIME_BETWEEN_REQUERIES) {
+            return false;
         }
-        debug("DM.sendQuery(): returning " + allowed);
-        return allowed;
+
+        //Has everyone had a chance to send a query?  If so, clear the slate.
+        if (querySentMDs.size() >= waiting.size())
+            querySentMDs.clear();
+
+        //If downloader has already sent a query, give someone else a turn.
+        if (querySentMDs.contains(requerier)) {
+            // nope, sorry, must lets others go first...
+            debug("DM.sendQuery(): sorry, wait your turn...");
+            return false;
+        }
+        
+        debug("DM.sendQuery(): requery allowed!!");  
+        querySentMDs.add(requerier);                  
+        lastRequeryTime = System.currentTimeMillis();
+        router.broadcastQueryRequest(query);
+        return true;
     }
 
 
