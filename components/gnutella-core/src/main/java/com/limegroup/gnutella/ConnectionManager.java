@@ -88,10 +88,6 @@ public class ConnectionManager {
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_ULTRAPEER headers. */
     private static final int MAX_ULTRAPEER_ENDPOINTS=10;
-	
-	/** The maximum number of leaves to allow -- also the preferred number.*/		
-	private static final int MAX_LEAVES = 
-		UltrapeerSettings.MAX_LEAVES.getValue();
 
     /**
      * Reference to the <tt>HostCatcher</tt> for retrieving host data as well 
@@ -453,7 +449,7 @@ public class ConnectionManager {
      */
     int getNumFreeLeafSlots() {
         if (isSupernode())
-			return MAX_LEAVES - 
+			return UltrapeerSettings.MAX_LEAVES.getValue() - 
 				getNumInitializedClientConnections();
         else
             return 0;
@@ -573,7 +569,8 @@ public class ConnectionManager {
         //Do we have normal or leaf slots?
         return getNumInitializedConnections() < _keepAlive
             || (isSupernode() 
-				&& getNumInitializedClientConnections() < MAX_LEAVES);
+				&& getNumInitializedClientConnections() < 
+				   UltrapeerSettings.MAX_LEAVES.getValue());
     }
     
     /**
@@ -649,7 +646,7 @@ public class ConnectionManager {
             // for non-limewire leaves to ensure that the network
             // is well connected.
             if(!hr.isLimeWire()) {
-                if( leaves < MAX_LEAVES &&
+                if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
                     nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
                     return true;
                 }
@@ -661,7 +658,8 @@ public class ConnectionManager {
             // non-limewire leaves to ensure we reserve the correct amount.
             if(hr.isGoodLeaf()) {
                 return (leaves + RESERVED_NON_LIMEWIRE_LEAVES - 
-                        nonLimeWireLeaves) < MAX_LEAVES;
+                        nonLimeWireLeaves) < 
+                          UltrapeerSettings.MAX_LEAVES.getValue();
             }            
             
             // Otherwise, if:
@@ -672,7 +670,9 @@ public class ConnectionManager {
             // leaves.  (This implicitly will reserve space, if needed,
             // for non-limewire leaves because the GOOD number is always
             // larger).
-            return leaves < (MAX_LEAVES - RESERVED_GOOD_LEAF_CONNECTIONS);
+            return leaves <
+                 (UltrapeerSettings.MAX_LEAVES.getValue() - 
+                  RESERVED_GOOD_LEAF_CONNECTIONS);
                             
         } else if (hr.isUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
@@ -772,7 +772,7 @@ public class ConnectionManager {
     public boolean supernodeNeeded() {
         //if more than 90% slots are full, return true         
 		if(getNumInitializedClientConnections() >= 
-           (MAX_LEAVES * 0.9)){
+           (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
             return true;
         } else {
             //else return false
