@@ -132,6 +132,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static URN createSHA1UrnFromString(final String urnString) 
 		throws IOException {
+		if(urnString == null) {
+			throw new IOException("cannot accept null URN string");
+		}
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("invalid urn string: "+urnString);
 		}
