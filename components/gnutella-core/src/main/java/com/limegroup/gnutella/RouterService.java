@@ -170,10 +170,7 @@ public final class RouterService {
 		catcher.initialize();
 		acceptor.initialize();
 		
-		if(SETTINGS.getForceSupernodeMode()) {
-			// could this be exploited??  probably...
-			udpAcceptor.ultraPeerConnectionEstablished();
-		}
+		udpAcceptor.start();
 
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
@@ -1012,15 +1009,5 @@ public final class RouterService {
 	 */
 	public static void error(int errorCode, Throwable trace) {
 		callback.error(errorCode, trace);
-	}
-
-	/**
-	 * Adds the specified <tt>UltraPeerListener</tt> to the <tt>List</tt>
-	 * of listeners.
-	 *
-	 * @param listener the <tt>UltraPeerListener</tt> to add
-	 */
-	public static void addUltraPeerListener(UltraPeerListener listener) {
-		manager.addUltraPeerListener(listener);
 	}
 }

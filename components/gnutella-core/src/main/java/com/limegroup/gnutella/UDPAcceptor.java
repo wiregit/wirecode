@@ -3,8 +3,6 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 
-import com.limegroup.gnutella.connection.UltraPeerListener;
-
 /**
  * This class listens for incoming messages on the open UDP port,
  * dispatching those message the appropriate message routers and 
@@ -13,7 +11,7 @@ import com.limegroup.gnutella.connection.UltraPeerListener;
  * @see UDPReplyHandler
  * @see MessageRouter
  */
-public final class UDPAcceptor implements Runnable, UltraPeerListener {
+public final class UDPAcceptor implements Runnable {
 
 	/**
 	 * Constant for the single <tt>UDPAcceptor</tt> instance.
@@ -52,13 +50,11 @@ public final class UDPAcceptor implements Runnable, UltraPeerListener {
 
 
 	/**
-	 * Implements <tt>UltraPeerListener</tt>.<p>
-	 *
 	 * If the UDP listening socket thread is not already running, this
 	 * starts the thread, listening for incoming Gnutella messages
 	 * over UDP.
 	 */
-	public void ultraPeerConnectionEstablished() {
+	public void start() {
 
 		// if we're already listening, return
 		if(_udpThread.isAlive()) return;

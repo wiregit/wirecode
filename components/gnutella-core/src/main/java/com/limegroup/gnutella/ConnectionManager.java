@@ -10,7 +10,6 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.connection.UltraPeerListener;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -128,14 +127,6 @@ public class ConnectionManager {
      * For authenticating users
      */
     private Authenticator _authenticator;
-
-	/**
-	 * A list of listeners that listen for this node becoming an UltraPeer.
-	 * LOCKING: synchronize on ULTRAPEER_LISTENERS before modifying in
-	 * or iterating
-	 */
-	private final List ULTRAPEER_LISTENERS = new ArrayList();
-
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -795,37 +786,9 @@ public class ConnectionManager {
                     =new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
-				fireUltraPeerConnectionEstablished();
             }
         }
     }
-
-	/**
-	 * Called when this node establishes a leaf connection, indicating
-	 * that it is now an UltraPeer.  This method notifies all registered
-	 * listeners of the change.
-	 */
-	private void fireUltraPeerConnectionEstablished() {
-		synchronized(ULTRAPEER_LISTENERS) {
-			Iterator iter = ULTRAPEER_LISTENERS.iterator();
-			while(iter.hasNext()) {
-				UltraPeerListener listener = (UltraPeerListener)iter.next();
-				listener.ultraPeerConnectionEstablished();
-			}
-		}
-	}
-
-	/**
-	 * Adds the specified <tt>UltraPeerListener</tt> to the <tt>List</tt>
-	 * of listeners.
-	 *
-	 * @param listener the <tt>UltraPeerListener</tt> to add
-	 */
-	public void addUltraPeerListener(UltraPeerListener listener) {
-		synchronized(ULTRAPEER_LISTENERS) {
-			ULTRAPEER_LISTENERS.add(listener);
-		}
-	}
 
     /**
      * Disconnects from the network.  Closes all connections and sets
