@@ -646,9 +646,18 @@ public class ManagedDownloader implements Downloader, Serializable {
         //eventually.
         stopped=true;
         //This guarantees any downloads in progress will be killed.  New
-        //downloads will not start because of the flag above.
+        //downloads will not start because of the flag above. Note that this
+        //does not kill downloaders that are queued...
         for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
             ((HTTPDownloader)iter.next()).stop();			
+
+        //...so we interrupt all threads - see connectAndDownload.
+        //This is safe because worker threads can be waiting for a push 
+        //or to requeury, or sleeping while queued. In every case its OK to 
+        //interrupt the thread
+        for(Iterator iter=threads.iterator(); iter.hasNext(); )
+            ((Thread)iter.next()).interrupt();
+            
 
         //Interrupt thread if waiting to retry.  This is actually just an
         //optimization since the thread will terminate upon exiting wait.  In
@@ -1305,6 +1314,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     queuedCount--;
                 }
+                dloader.stop();
                 return;//close connection
             }
         }
@@ -1462,7 +1472,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;
             } catch(TryAgainLaterException talx) {
                 debug("talx thrown in assignAndRequest"+dloader);
-                debug(talx);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later
                 }
@@ -1488,7 +1497,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 return 1;
             } catch (IOException iox) {
-                debug(iox);
                 debug("iox thrown in assignAndReplace "+dloader);
                 return 0; //discard the rfd of dloader
             } finally {
