@@ -360,11 +360,30 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             "/uri-res/N2R?" + incompleteHash, null, true,
                 "X-Available-Ranges: bytes 50-102499");
                 
+        // add another range and make sure we display it.
         iv = new Interval(150050, 252450);
         vf.addInterval(iv);
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true,
-                "X-Available-Ranges: bytes 59-102499, 150050-252449");
+                "X-Available-Ranges: bytes 50-102499, 150050-252449");
+        
+        // add an interval too small to report and make sure we don't report        
+        iv = new Interval(102505, 150000);
+        vf.addInterval(iv);
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + incompleteHash, null, true,
+                "X-Available-Ranges: bytes 50-102499, 150050-252449");
+                
+        // add the glue between the other intervals and make sure we condense
+        // the ranges into a single larger range.
+        iv = new Interval(102500, 102505);
+        vf.addInterval(iv);
+        iv = new Interval(150000, 150050);
+        vf.addInterval(iv);
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + incompleteHash, null, true,
+                "X-Available-Ranges: bytes 50-252449");
+        
     }
     
     public void testIncompleteFileWithRangeRequest() throws Exception {
@@ -660,7 +679,6 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         while (true) { 
             String line = in.readLine();
-            System.out.println(line);
             if (line == null || line.equals(""))
                 break;
             if (requiredHeader != null) {
