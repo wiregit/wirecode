@@ -201,7 +201,9 @@ public final class MP3Info {
 			fis = new FileInputStream(_file);
 			
 			//initially check the first few bytes
-			c = fis.read(buf, 0, buf.length); 
+			c = fis.read(buf, 0, buf.length);
+			if( c < -1 )
+			    throw new IOException("early EOF, empty file?");
 
 			//check for ID3 tag
 			//officially ID3, some tags incorrectly contain lowercase
