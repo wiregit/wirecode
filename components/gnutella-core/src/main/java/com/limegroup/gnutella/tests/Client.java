@@ -148,6 +148,13 @@ public void doTest()
   
 }
 
+/**
+* Reports the time taken to receive NUM_MESSAGES (a predefined number of 
+* messages
+* NOTE: AT THIS POINT, THE CALCULATIONS HAVE BEEN MODIFIED TO  BE GOOD FOR
+* SINGLE THREAD ONLY
+* @param time The time taken
+*/
 private synchronized void reportTime(long time)
 {
     timeTaken += time;
@@ -157,7 +164,8 @@ private synchronized void reportTime(long time)
                 numClientsFinished : numThreads);
     
     float bandwidth = (float)NUM_MESSAGES * numClientsFinished / (avgTime/1000.f);
-    System.out.println("Reply bandwidth: " + bandwidth +" replies/sec");
+    System.out.println("Reply bandwidth: Tis Time:" + NUM_MESSAGES/time 
+            + " Avg. bandwidth" +" replies/sec");
 }
 
 
