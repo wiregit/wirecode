@@ -27,27 +27,34 @@ public final class QueryHandler {
 	 * The number of results to try to get if we're an Ultrapeer originating
 	 * the query.
 	 */
-	private static final int ULTRAPEER_RESULTS = 160;
+	private static final int ULTRAPEER_RESULTS = 100;
 
 	/**
 	 * The number of results to try to get if the query came from an old
 	 * leaf -- they are connected to 2 other Ultrapeers that may or may
 	 * not use this algorithm.
 	 */
-	private static final int OLD_LEAF_RESULTS = 50;
+	private static final int OLD_LEAF_RESULTS = 30;
 
 	/**
 	 * The number of results to try to get for new leaves -- they only 
 	 * maintain 2 connections and don't generate as much overall traffic,
 	 * so give them a little more.
 	 */
-	private static final int NEW_LEAF_RESULTS = 80;
+	private static final int NEW_LEAF_RESULTS = 50;
 
 	/**
 	 * The number of results to try to get for queries by hash -- really
 	 * small since you need relatively few exact matches.
 	 */
 	private static final int HASH_QUERY_RESULTS = 10;
+
+    /**
+     * The number of milliseconds to wait per query hop.  So, if we send
+     * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
+     * milliseconds.
+     */
+    static final long TIME_TO_WAIT_PER_HOP = 2500;
 
 
 	/**
@@ -67,22 +74,22 @@ public final class QueryHandler {
     /**
      * TTL of the probe query.
      */
-    private static byte PROBE_TTL = (byte)2;
+    //private static final byte PROBE_TTL = (byte)2;
 
 	/**
 	 * Variable for the number of hosts that have been queried.
 	 */
-	private int _hostsQueried = 0;
+	private volatile int _hostsQueried = 0;
 
 	/**
 	 * Variable for the next time after which a query should be sent.
 	 */
-	private long _nextQueryTime = 0;
+	private volatile long _nextQueryTime = 0;
 
 	/**
 	 * The theoretical number of hosts that have been reached by this query.
 	 */
-	private int _theoreticalHostsQueried = 1;
+	private volatile int _theoreticalHostsQueried = 1;
 
 	/**
 	 * Constant for the <tt>ResultCounter</tt> for this query -- used
@@ -98,12 +105,12 @@ public final class QueryHandler {
 	/**
 	 * The time the query started.
 	 */
-	private long _queryStartTime = 0;
+	private volatile long _queryStartTime = 0;
 
     /**
      * The current time, taken each time the query is initiated again.
      */
-    private long _curTime = 0;
+    private volatile long _curTime = 0;
 
 	/**
 	 * <tt>ReplyHandler</tt> for replies received for this query.
@@ -119,27 +126,7 @@ public final class QueryHandler {
      * Boolean for whether or not the query has been forwarded to leaves of 
      * this ultrapeer.
      */
-    private boolean _forwardedToLeaves = false;
-
-    /**
-     * Constant TTL 1 query for this dynamic query;
-     */
-    final QueryRequest TTL_1_QUERY;
-
-    /**
-     * Constant TTL 2 query for this dynamic query;
-     */
-    final QueryRequest TTL_2_QUERY;
-
-    /**
-     * Constant TTL 3 query for this dynamic query;
-     */
-    final QueryRequest TTL_3_QUERY;
-
-    /**
-     * Constant TTL 4 query for this dynamic query;
-     */
-    final QueryRequest TTL_4_QUERY;
+    private volatile boolean _forwardedToLeaves = false;
 
     /**
      * Constant <tt>ProbeQuery</tt> instance for managing the probe.
@@ -171,10 +158,6 @@ public final class QueryHandler {
 
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
-        TTL_1_QUERY = createQuery(QUERY, (byte)1);
-        TTL_2_QUERY = createQuery(QUERY, (byte)2);
-        TTL_3_QUERY = createQuery(QUERY, (byte)3);
-        TTL_4_QUERY = createQuery(QUERY, (byte)4);
         PROBE_QUERY = 
             new ProbeQuery(_connectionManager.getInitializedConnections2(),
                            this);
@@ -264,6 +247,16 @@ public final class QueryHandler {
 		}
 	}
 
+    /**
+     * Convenience method for creating a new query with the given TTL
+     * with this <tt>QueryHandler</tt>.
+     *
+     * @param ttl the time to live for the new query
+     */
+    QueryRequest createQuery(byte ttl) {
+        return createQuery(QUERY, ttl);
+    }
+
 
 	
 	/**
@@ -280,19 +273,27 @@ public final class QueryHandler {
 			_queryStartTime = _curTime;
         }
             
+        // handle 3 query cases
+
+        // 1) We haven't sent the query to our leaves -- send it
         if(!_forwardedToLeaves) {
-            System.out.println("forwarding to leaves: "+QUERY.getQuery()); 
-            RouterService.getMessageRouter().forwardQueryRequestToLeaves(TTL_1_QUERY, 
-                                                                         REPLY_HANDLER); 
+            RouterService.getMessageRouter().
+                forwardQueryRequestToLeaves(createQuery(QUERY, (byte)1), 
+                                            REPLY_HANDLER); 
             _theoreticalHostsQueried += 25;
             _forwardedToLeaves = true;
-            _nextQueryTime = System.currentTimeMillis() + 600;
-            return;
+            _nextQueryTime = System.currentTimeMillis() + 1000;
+        }
+        
+        // 2) We haven't completed the probe query -- complete it
+        else if(!PROBE_QUERY.finishedProbe()) {
+            long timeToWait = PROBE_QUERY.getTimeToWait();
+            _theoreticalHostsQueried += PROBE_QUERY.sendProbe();
+            _nextQueryTime = System.currentTimeMillis() + timeToWait;
         }
 
-        if(!PROBE_QUERY.finishedProbe()) {
-            _theoreticalHostsQueried += PROBE_QUERY.sendProbe();
-        } else {
+        // 3) We haven't yet satisfied the query -- keep trying
+        else {
             // otherwise, just send a normal query
             _theoreticalHostsQueried += 
                 sendQuery(this, _connectionManager.getInitializedConnections2());             
@@ -312,7 +313,6 @@ public final class QueryHandler {
      *  query iteration
      */
     private static int sendQuery(QueryHandler handler, List list) {
-        System.out.println("QueryHandler::sendQuery"); 
 		int length = list.size();
         int newHosts = 0;
         for(int i=0; i<length; i++) {
@@ -356,11 +356,13 @@ public final class QueryHandler {
                                 mc.getNumIntraUltrapeerConnections(),
                                 mc.headers().getMaxTTL());
 
-			QueryRequest query = null;
-            if(ttl == 1) query = handler.TTL_1_QUERY;
-            if(ttl == 2) query = handler.TTL_2_QUERY;
-            if(ttl == 3) query = handler.TTL_3_QUERY;
-            else query = handler.TTL_4_QUERY;            
+            // we know we're not going to get anything at TTL=1 if
+            // it's not the connections route table, so go to TTL=2
+            if(ttl == 1 && !mc.hitsQueryRouteTable(handler.QUERY)) {
+                ttl = 2;
+            }
+
+			QueryRequest query = createQuery(handler.QUERY, ttl);
  
 			// send out the query on the network, returning the number of new
             // hosts theoretically reached
@@ -384,8 +386,6 @@ public final class QueryHandler {
     static int sendQueryToHost(QueryRequest query, 
                                ManagedConnection mc, 
                                QueryHandler handler) {
-        System.out.println("QueryHandler::sendQueryToHost:: "+
-                           query.getQuery()+" TTL="+query.getTTL()); 
         
         // send the query directly along the connection
         mc.originateQuery(query);
@@ -398,7 +398,8 @@ public final class QueryHandler {
             handler.QUERIED_HANDLERS.add(mc);
         }
         
-        handler._nextQueryTime = System.currentTimeMillis() + (ttl * 1000);
+        handler._nextQueryTime = System.currentTimeMillis() + 
+            (ttl * TIME_TO_WAIT_PER_HOP);
 
         return calculateNewHosts(mc, ttl);
     }
@@ -421,7 +422,7 @@ public final class QueryHandler {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(1.5*calculateNewHosts(degree, i));
+            int hosts = (int)(7.5*calculateNewHosts(degree, i));
             if(hosts >= hostsToQueryPerConnection) {
                 return i;
             }
@@ -476,12 +477,12 @@ public final class QueryHandler {
         // precisely what this number should be is somewhat hard to determine
         // because, while connection have a specfic degree, the degree of 
         // the connections on subsequent hops cannot be determined
-		if(_theoreticalHostsQueried > 80000) return true;
+		if(_theoreticalHostsQueried > 110000) return true;
 
 		// return true if we've been querying for longer than the specified 
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
-		if(queryLength > 60*1000) return true;
+		if(queryLength > 100*1000) return true;
 
 		return false;
 	}

@@ -41,9 +41,12 @@ final class ProbeQuery {
             createProbeLists(connections, qh.QUERY);
         TTL_1_PROBES = lists[0];
         TTL_2_PROBES = lists[1];
-        System.out.println("ProbeQuery::ProbeQuery::"+
-                           " ttl1: "+TTL_1_PROBES.size()+
-                           " ttl2: "+TTL_2_PROBES.size()); 
+        
+        if(QUERY_HANDLER.QUERY.getHops() == 0) {
+            System.out.println("ProbeQuery::ProbeQuery::"+
+                               " ttl1: "+TTL_1_PROBES.size()+
+                               " ttl2: "+TTL_2_PROBES.size()); 
+        }
     }
     
     /**
@@ -55,6 +58,16 @@ final class ProbeQuery {
     boolean finishedProbe() {
         return (TTL_1_PROBES.isEmpty() &&  TTL_2_PROBES.isEmpty());
     }
+
+    /**
+     * Obtains the time to wait for probe results to return.
+     */
+    long getTimeToWait() {
+        return (TTL_1_PROBES.size() * 
+                QueryHandler.TIME_TO_WAIT_PER_HOP) +
+            (TTL_2_PROBES.size() * 2 * 
+             QueryHandler.TIME_TO_WAIT_PER_HOP);
+    }
     
     /**
      * Sends the next probe query out on the network if there 
@@ -64,23 +77,31 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
-        System.out.println("ProbeQuery::sendProbe"); 
+        if(QUERY_HANDLER.QUERY.getHops() == 0) {
+            System.out.println("ProbeQuery::sendProbe"); 
+        }
         Iterator iter = TTL_1_PROBES.iterator();
         int hosts = 0;
+        QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
         while(iter.hasNext()) {
-            System.out.println("ProbeQuery::sendProbe::TTL=1"); 
+            if(QUERY_HANDLER.QUERY.getHops() == 0) {
+                System.out.println("ProbeQuery::sendProbe::TTL=1"); 
+            }
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
-                QUERY_HANDLER.sendQueryToHost(QUERY_HANDLER.TTL_1_QUERY, 
+                QUERY_HANDLER.sendQueryToHost(query, 
                                               mc, QUERY_HANDLER);
         }
         
+        query = QUERY_HANDLER.createQuery((byte)2);
         iter = TTL_2_PROBES.iterator();
         while(iter.hasNext()) {
-            System.out.println("ProbeQuery::sendProbe::TTL=2"); 
+            if(QUERY_HANDLER.QUERY.getHops() == 0) {
+                System.out.println("ProbeQuery::sendProbe::TTL=2"); 
+            }
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
-                QUERY_HANDLER.sendQueryToHost(QUERY_HANDLER.TTL_2_QUERY, 
+                QUERY_HANDLER.sendQueryToHost(query, 
                                               mc, QUERY_HANDLER);
         }
         
@@ -117,11 +138,12 @@ final class ProbeQuery {
                 oldConnections.add(mc);
             }
         }
-
-        System.out.println(query.getQuery()+
-                           " hitConnections:  "+hitConnections.size()+
-                           " missConnections: "+missConnections.size()+
-                           " oldConnections:  "+oldConnections.size()); 
+        if(query.getHops() == 0) {
+            System.out.println(query.getQuery()+
+                               " hitConnections:  "+hitConnections.size()+
+                               " missConnections: "+missConnections.size()+
+                               " oldConnections:  "+oldConnections.size()); 
+        }
         // final list of connections to query
         LinkedList[] returnLists = new LinkedList[2];
         LinkedList ttl1List = new LinkedList();
@@ -150,8 +172,7 @@ final class ProbeQuery {
         // rare file, so send out a more aggressive probe
         if(popularity == 0.0) {
             return createAggressiveProbe(oldConnections, missConnections, 
-                                         hitConnections, returnLists);
-            
+                                         hitConnections, returnLists);      
         }
         
         // if the file appears to be very popular, send it to only one host
@@ -180,7 +201,7 @@ final class ProbeQuery {
         
         // add more TTL=2 nodes to the probe if we need them
         if(extraNodesNeeded > 0) {
-            if(extraNodesNeeded < 10) {
+            if(extraNodesNeeded < 25) {
                 addToList(ttl2List, oldConnections, missConnections, 1);
             } else {
                 addToList(ttl2List, oldConnections, missConnections, 2);
