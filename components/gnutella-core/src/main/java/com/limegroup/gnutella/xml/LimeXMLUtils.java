@@ -36,17 +36,18 @@ public class LimeXMLUtils
 
     private static final double MATCHING_RATE = .9;
 
-    private static final String C_HEADER_NAME = "Content-Type";
-    private static final String C_HEADER_NONE_VAL = "xml/plaintext";
-    private static final String C_HEADER_ZLIB_VAL = "xml/deflate";
-    private static final String C_HEADER_GZIP_VAL = "xml/gzip";
+    private static final String C_HEADER_BEGIN = "{";
+    private static final String C_HEADER_END   = "}";
+    private static final String C_HEADER_NONE_VAL = "plaintext";
+    private static final String C_HEADER_ZLIB_VAL = "deflate";
+    private static final String C_HEADER_GZIP_VAL = "gzip";
     
     private static final String COMPRESS_HEADER_ZLIB = 
-        "{"+ C_HEADER_NAME + ":" + C_HEADER_ZLIB_VAL + "}";
+        C_HEADER_BEGIN + C_HEADER_ZLIB_VAL + C_HEADER_END;
     private static final String COMPRESS_HEADER_GZIP = 
-        "{"+ C_HEADER_NAME + ":" + C_HEADER_GZIP_VAL + "}";
+        C_HEADER_BEGIN + C_HEADER_GZIP_VAL + C_HEADER_END;
     private static final String COMPRESS_HEADER_NONE = 
-        "{"+ C_HEADER_NAME + ":" + C_HEADER_NONE_VAL + "}";
+        C_HEADER_BEGIN + C_HEADER_NONE_VAL + C_HEADER_END;
 
 
     /**
@@ -566,13 +567,13 @@ public class LimeXMLUtils
     public static byte[] uncompress(byte[] data) throws Exception {
         byte[] retBytes = new byte[0];
 
-        String headerFragment = new String(data, 1, 
-                                           C_HEADER_NAME.length());
+        String headerFragment = new String(data, 0, 
+                                           C_HEADER_BEGIN.length());
         
-        if (headerFragment.equals(C_HEADER_NAME)) {
+        if (headerFragment.equals(C_HEADER_BEGIN)) {
             // we have well formed input (so far)
             headerFragment = new String(data,
-                                        (1+C_HEADER_NAME.length()+1),
+                                        (C_HEADER_BEGIN.length()),
                                         max3(C_HEADER_NONE_VAL.length(),
                                              C_HEADER_ZLIB_VAL.length(),
                                              C_HEADER_GZIP_VAL.length())
