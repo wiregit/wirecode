@@ -72,11 +72,6 @@ public class HostCatcher {
      * Size of the queue for hosts returned from the GWebCaches.
      */
     static final int CACHE_SIZE = 20;
-    
-    /**
-     * Size of the queue for hosts returned from pongs listing free slots.
-     */
-    static final int FREE_SLOTS_SIZE = 200;
 
     /**
      * The number of permanent locations to store in gnutella.net 
@@ -90,12 +85,6 @@ public class HostCatcher {
      * 
      */
     static final int PERMANENT_SIZE = NORMAL_SIZE;
-
-    /**
-     * Constant for the priority of hosts retrieved from pongs that have free
-     * connection slots.
-     */
-    public static final int FREE_SLOTS_PRIORITY = 3;
     
     /**
      * Constant for the priority of hosts retrieved from GWebCaches.
@@ -124,8 +113,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
-        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, 
-            CACHE_SIZE, FREE_SLOTS_SIZE});
+        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
     private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
 
 
@@ -169,13 +157,39 @@ public class HostCatcher {
 	 */
 	private final File HOST_FILE;
 
+    /**
+     * Count for the number of hosts that we have not been able to connect to.
+     * This is used for degenerate cases where we ultimately have to hit the 
+     * GWebCaches.
+     */
     private int _failures;
     
+    /**
+     * <tt>Set</tt> of hosts we were unable to create TCP connections with
+     * and should therefore not be tried again.  Fixed size.
+     * 
+     * LOCKING: obtain this' monitor before modifying/iterating
+     */
     private final Set EXPIRED_HOSTS = new HashSet();
     
+    /**
+     * <tt>Set</tt> of hosts we were able to create TCP connections with but 
+     * did not accept our Gnutella connection, and are therefore put on 
+     * "probation".  Fixed size.
+     * 
+     * LOCKING: obtain this' monitor before modifying/iterating
+     */    
     private final Set PROBATION_HOSTS = new HashSet();
 
+    /**
+     * Flag for whether or not we've already hit the GWebCaches.
+     */
     private boolean _hitCaches;
+    
+    /**
+     * Constant for the <tt>Set</tt> of ultrapeers with free leaf slots.
+     */
+    private final Set FREE_LEAF_SLOTS = new HashSet();
     
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
@@ -369,11 +383,21 @@ public class HostCatcher {
         //an ultrapeer.
             
         if (pr.isUltrapeer()) {
-            if(pr.hasFreeSlots()) {
-                return add(endpoint, FREE_SLOTS_PRIORITY);
-            } else {
-            return add(endpoint, GOOD_PRIORITY);
-            }
+            // Add it to our free leaf slots list if it has free leaf slots and
+            // is an Ultrapeer.
+            if(pr.hasFreeLeafSlots() && pr.isUltrapeer()) {
+                synchronized(FREE_LEAF_SLOTS) {
+                    FREE_LEAF_SLOTS.add(endpoint);
+                    
+                    // Don't allow the free slots host to expand infinitely.
+                    if(FREE_LEAF_SLOTS.size() > 30) {
+                        FREE_LEAF_SLOTS.remove(
+                            FREE_LEAF_SLOTS.iterator().next());
+                    }
+                }
+            } 
+            
+            return add(endpoint, GOOD_PRIORITY); 
         } else
             return add(endpoint, NORMAL_PRIORITY);
     }
@@ -550,10 +574,13 @@ public class HostCatcher {
             //GWebCache server to get more addresses.  Note, however, that this
             //will not do anything if we're currently connecting to a GWebCache.
             //TODO: do we need rate-limiting code?
-            if (getNumHosts()==0 || 
-                (!RouterService.isConnected()&&_failures > 200&&!_hitCaches)) {
+            if(getNumHosts()==0 || 
+               (!RouterService.isConnected() && _failures>200 && !_hitCaches)) {
                 LOG.debug("getNumHosts() == 0, fetching endpoints");
                 _hitCaches = true;
+                
+                // Reset the failures to zero to start counting again.
+                _failures = 0;
                 gWebCache.fetchEndpointsAsync();
             }
             //If there are no good, fresh ultrapeer pongs--these exclude
@@ -696,6 +723,18 @@ public class HostCatcher {
             buf.add(iter.next());
         //And return iterator of contents.
         return buf.iterator();
+    }
+    
+    /**
+     * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
+     * free leaf slots.  The returned <tt>Collection</tt> will throw an
+     * exception if it is modified in any way.
+     * 
+     * @return a <tt>Collection</tt> of hosts that have advertised that they
+     *  have free leaf slots
+     */
+    public synchronized Collection getUltrapeersWithFreeLeafSlots() {
+        return Collections.unmodifiableCollection(FREE_LEAF_SLOTS);
     }
 
     /**
