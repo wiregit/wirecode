@@ -153,10 +153,10 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         
         List l=new ArrayList(); l.add(i13); l.add(o13); l.add(i10); l.add(o10);
         Collections.sort(l, newManagedConnectionComparator());
-        Assert.that(l.get(0)==o10);
-        Assert.that(l.get(1)==o13);
-        Assert.that(l.get(2)==i10);
-        Assert.that(l.get(3)==i13);
+        assertSame(o10, l.get(0));
+        assertSame(o13, l.get(1));
+        assertSame(i10, l.get(2));
+        assertSame(i13, l.get(3));
     }
     
     private static Comparator newManagedConnectionComparator() throws Exception {
