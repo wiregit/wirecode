@@ -245,6 +245,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       a limited amount of time (about 9 seconds) and then checks the map for the
       socket anyway, if there is no entry, it assumes the push failed and 
       terminates.
+      
     */
     
     private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
@@ -270,8 +271,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * This additional lock will prevent GUI freezes, since we hold this'
      * monitor for a very short time while we are updating the shared
      * datastructures, also atomicity is guaranteed since we are still
-     * synchronized.
-     *
+     * synchronized.  StealLock is also held for manipulations to the verifying file,
+     * and for all removal operations from the dloaders list.
+     * 
+     * stealLock->this is ok
+     * stealLock->verifyingFile is ok
+     * 
      * Never acquire stealLock's monitor if you have this' monitor.
      *
      * Never acquire incompleteFileManager's monitor if you have commonOutFile's
