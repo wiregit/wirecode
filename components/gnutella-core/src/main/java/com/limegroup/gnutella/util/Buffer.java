@@ -325,6 +325,22 @@ public class Buffer implements Cloneable {
         return new Buffer(this);        
     }
 
+    public String toString() {
+        StringBuffer buf=new StringBuffer();
+        buf.append("[");
+        boolean isFirst=true;
+        for (Iterator iter=iterator(); iter.hasNext(); ) {
+            if (! isFirst) 
+                buf.append(", ");
+            else
+                isFirst=false;
+            buf.append(iter.next().toString());            
+        }
+        buf.append("]");
+        return buf.toString();
+    }
+
+
     /*
     public static void main(String args[]) {
         //1. Tests of old methods.
