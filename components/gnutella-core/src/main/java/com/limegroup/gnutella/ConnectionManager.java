@@ -720,10 +720,11 @@ public class ConnectionManager {
 	 * @return the <tt>Endpoint</tt> for an Ultrapeer connected via TCP if
 	 *  there is one, otherwise returns <tt>null</tt>
 	 */
-	public Endpoint getConnectedUltrapeer() {
+	public Endpoint getConnectedGUESSUltrapeer() {
 		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
 			ManagedConnection connection = (ManagedConnection)iter.next();
-			if(connection.isSupernodeConnection()) {
+			if(connection.isSupernodeConnection() && 
+			   connection.isGUESSUltrapeer()) {				
 				return new Endpoint(connection.getInetAddress().getAddress(),
 									connection.getOrigPort());
 			}
