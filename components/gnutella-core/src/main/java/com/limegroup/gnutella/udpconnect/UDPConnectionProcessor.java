@@ -419,7 +419,7 @@ public class UDPConnectionProcessor {
      */
     private void prepareOpenConnection() {
         _connectionState = CONNECT_STATE;
-        _sequenceNumber++;
+        _sequenceNumber=1;
         scheduleKeepAlive();
 
         // Create the delayed connection components
@@ -1048,7 +1048,7 @@ public class UDPConnectionProcessor {
 
 
                 // If they are Acking our SYN message, advance the state
-                if ( seqNo == 0 && isConnecting() ) { 
+                if ( seqNo == 0 && isConnecting() && _connectionState == PRECONNECT_STATE ) { 
                     // The connection should be successful assuming that I
                     // receive their SYN so move state to CONNECT_STATE
                     // and get ready for activity
