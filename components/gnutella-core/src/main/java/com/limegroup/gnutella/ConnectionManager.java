@@ -985,8 +985,10 @@ public class ConnectionManager {
      * stricter.  
      */
     public boolean allowClientMode() {
-        //if is a supernode, and have client connections, dont change mode
-        if (isSupernode() && _incomingClientConnections > 0)
+        //if is a supernode, and have client connections, 
+        //or the supernode status is forced, dont change mode
+        if (_settings.getForceSupernodeMode() 
+            || (isSupernode() && _incomingClientConnections > 0))
             return false;
         else
             return true;

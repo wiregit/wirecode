@@ -319,6 +319,9 @@ public final class SettingsManager {
     /** By default we don't disable supernodes. */
     private final boolean DEFAULT_DISABLE_SUPERNODE_MODE = false;
 
+	/** By default we don't force supernode mode. */
+    private final boolean DEFAULT_FORCE_SUPERNODE_MODE = false;
+
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
 	 * per second downstream.
@@ -485,6 +488,9 @@ public final class SettingsManager {
 
     /** Key to disable supernode capability. */
     private final String DISABLE_SUPERNODE_MODE = "DISABLE_SUPERNODE_MODE";
+
+	 /** Key to force supernode capability. */
+    private final String FORCE_SUPERNODE_MODE = "FORCE_SUPERNODE_MODE";
 
 	/**
 	 * Constant key for whether or not to connect on startup.
@@ -1028,6 +1034,10 @@ public final class SettingsManager {
                     Boolean b = new Boolean(p);
                     setDisableSupernodeMode(b.booleanValue());
                 }
+				else if(key.equals(FORCE_SUPERNODE_MODE)) {
+                    Boolean b = new Boolean(p);
+                    setForceSupernodeMode(b.booleanValue());
+                }
                 else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMaxShieldedClientConnections((new Integer(p)).intValue());
                 }
@@ -1141,6 +1151,7 @@ public final class SettingsManager {
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
         setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
         setDisableSupernodeMode(DEFAULT_DISABLE_SUPERNODE_MODE);
+		setForceSupernodeMode(DEFAULT_FORCE_SUPERNODE_MODE);
         
         //settings for Supernode implementation
         setMaxShieldedClientConnections(
@@ -1858,6 +1869,11 @@ public final class SettingsManager {
     /** Returns true iff the user has disabled supernode mode. */
     public boolean getDisableSupernodeMode() {
         return getBooleanValue(DISABLE_SUPERNODE_MODE);
+    }
+
+	/** Returns true iff the user has forced supernode mode. */
+    public boolean getForceSupernodeMode() {
+        return getBooleanValue(FORCE_SUPERNODE_MODE);
     }
 
 	/**
@@ -2950,6 +2966,14 @@ public final class SettingsManager {
      */
     public void setDisableSupernodeMode(boolean disable) {
         setBooleanValue(DISABLE_SUPERNODE_MODE, disable);
+    }
+
+	/** 
+     * Sets whether supernode mode is forced. 
+     * @param force true iff supernode mode should be forced
+     */
+    public void setForceSupernodeMode(boolean force) {
+        setBooleanValue(FORCE_SUPERNODE_MODE, force);
     }
     
     /**
