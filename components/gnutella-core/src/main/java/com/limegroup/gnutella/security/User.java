@@ -38,10 +38,23 @@ public class User implements Serializable
      */
     public User(String username, String password)
     {
+        //delegate to the other constructor, and pass default domain set
+        //as an additional parameter
+        this(username, password, createDefaultDomainSet());
+    }
+    
+    /**
+     * creates a new user
+     * @param username Unique name for the user
+     * @param password User's password to be used for authentication
+     * @param domains The set of domains to which the user belongs
+     */
+    public User(String username, String password, Set domains)
+    {
+        //initialize with parameters
         this._username = username;
         this._password = password;
-        //create default domain set
-        _domains = createDefaultDomainSet();
+        this._domains = domains;
     }
     
     /**
@@ -54,7 +67,6 @@ public class User implements Serializable
         domainSet.add(DEFAULT_DOMAIN);
         return domainSet;
     }
-    
     
     /**
      * Returns the username for the user
