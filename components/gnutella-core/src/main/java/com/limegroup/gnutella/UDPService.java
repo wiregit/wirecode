@@ -293,6 +293,7 @@ public final class UDPService implements Runnable {
 	 *  UDP messages, <tt>false</tt> otherwise
 	 */
 	public boolean isListening() {
+		if(_socket == null) return false;
 		return (_socket.getLocalPort() != -1);
 	}
 
