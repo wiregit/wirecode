@@ -232,7 +232,7 @@ public final class NIODispatcher implements Runnable {
                         // continue if the connection is no longer open
                         continue;
                     }
-					Message msg = conn.getReader().createMessageFromTCP(key);
+					Message msg = conn.reader().createMessageFromTCP(key);
 					
 					if(msg == null) {
                         // the message was not read completely -- we'll get
@@ -280,7 +280,7 @@ public final class NIODispatcher implements Runnable {
 				Connection conn = 
                     (Connection)key.attachment();
 				try {
-                    if(conn.getWriter().write()) {
+                    if(conn.writer().write()) {
                         // if the message was successfully written, switch it 
                         // back to only being registered for read events
                         register(conn, SelectionKey.OP_READ);
