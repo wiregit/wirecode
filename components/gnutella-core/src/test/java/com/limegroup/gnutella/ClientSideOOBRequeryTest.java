@@ -986,8 +986,7 @@ public class ClientSideOOBRequeryTest
         final int UPLOADER_PORT = 10000;
         TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
         uploader.setBusy(true);
-        URN urn =
-        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        URN urn = TestFile.hash();
         Set urns = new HashSet();
         urns.add(urn);
         RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
@@ -1094,9 +1093,10 @@ public class ClientSideOOBRequeryTest
                     UDP_ACCESS[0].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
                     m = Message.read(in);
-                    m.hop();
-                    if (m instanceof QueryRequest) 
-                        gotQuery = ((QueryRequest) m).hasQueryUrns();
+                    if (m instanceof QueryRequest) {
+                        Set queryURNs = ((QueryRequest) m).getQueryUrns();
+                        gotQuery = queryURNs.contains(urn);
+                    }
                 }
                 catch (InterruptedIOException iioe) {
                     assertTrue(false);
@@ -1105,13 +1105,37 @@ public class ClientSideOOBRequeryTest
         }
 
         Thread.sleep(1000 - (System.currentTimeMillis() - currTime));
-
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
-
+        // purge front end of query
         callback.clearGUID();
-        downloader.stop();
 
-        Thread.sleep(1000);
+        // create a new Uploader to service the download
+        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT+1);
+        uploader2.setRate(100);
+
+        { // send back a query request, the TestUploader should service upload
+            rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT+1, 1, 
+                                     "whatever", 10, GUID.makeGuid(),
+                                     1, false, 3, false, null, 
+                                     urns, false, false, 
+                                     "LIME", 0, new HashSet());
+            Response[] res = new Response[] { new Response(10, 10, "whatever") };
+            m = new QueryReply(qr.getGUID(), (byte) 1, UPLOADER_PORT+1, myIP(), 
+                               0, res, GUID.makeGuid(), new byte[0], false, 
+                               false, true, true, false, false, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            m.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(),
+                                      PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        // after a while, the download should finish, the bypassed results
+        // should be discarded
+        Thread.sleep(3000);
+        assertEquals(Downloader.COMPLETE, downloader.getState());
 
         {
             // now we should make sure MessageRouter clears the map
