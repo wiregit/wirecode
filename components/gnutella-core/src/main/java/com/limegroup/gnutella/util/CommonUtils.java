@@ -175,7 +175,7 @@ public final class CommonUtils {
 		new File(PROPS.getProperty("user.dir"));
 
     /**
-     * Variable for whether or this this is a PRO version of LimeWire. 
+     * Variable for whether or not this is a PRO version of LimeWire. 
      */
     private static boolean _isPro = false;
     
