@@ -114,18 +114,23 @@ public final class FileDesc {
     public void calculateUrns() {
 		// update modTime
 		_modTime = _file.lastModified();
-		URN urn = new URN(_file);
+		URN urn =  null;
+		try {
+			urn = URNFactory.createSHA1URN(_file);
+		} catch(IOException e) {
+			return;
+		}
 		String urnStr = urn.getURNString();
 		if(urnStr == null) return;
-
+		
 		if(_urns==null) _urns = new HashSet();		
 		_urns.add(urnStr);
-    }
+	}
     
     /**
      * Verify that given URN applies to file
      */
-    public boolean satisfiesUrn(String urn) {
+    public boolean satisfiesUrn(URN urn) {
         // first check if modified since last hashing
         if (_file.lastModified()!=_modTime) {
             // recently modified; throw out SHA1 values
