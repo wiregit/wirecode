@@ -67,10 +67,21 @@ public abstract class UDPTimerEvent implements Comparable {
         return _eventTime;
     }
 
-   /**
-    *  Implementors should take their event actions here.
-    */
-    public abstract void handleEvent();
+  
+    public final void handleEvent(){
+    	UDPConnectionProcessor udpCon = 
+    		(UDPConnectionProcessor) _udpCon.get();
+    	
+    	if (udpCon==null)
+    		return;
+    	
+    	doActualEvent(udpCon);
+    }
+    
+    /**
+     *  Implementors should take their event actions here.
+     */
+    protected abstract void doActualEvent(UDPConnectionProcessor proc);
 
     /** 
      * Compares event times

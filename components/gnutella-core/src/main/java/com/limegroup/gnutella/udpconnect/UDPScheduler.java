@@ -283,12 +283,12 @@ public class UDPScheduler extends ManagedThread {
 		}
 	}
 
-	static class NoEvent extends UDPTimerEvent {
+	private static final class NoEvent extends UDPTimerEvent {
 		public NoEvent(long time) {
 			super(time,null);
 		}
 
-		public void handleEvent() {
+		protected void doActualEvent(UDPConnectionProcessor udpCon) {
 		}
 	} 
 

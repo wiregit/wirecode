@@ -1277,14 +1277,8 @@ public class UDPConnectionProcessor {
     		super(time,proc);
     	}
 
-        public void handleEvent() {
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
 
-            
-            UDPConnectionProcessor udpCon = 
-            	(UDPConnectionProcessor)_udpCon.get();
-            
-        	if (udpCon==null)
-        		return;
 
             long time = System.currentTimeMillis();
             
@@ -1333,13 +1327,7 @@ public class UDPConnectionProcessor {
             super(time,proc);
         }
 
-        public void handleEvent() {
-        	
-        	UDPConnectionProcessor udpCon = 
-        		(UDPConnectionProcessor) _udpCon.get();
-        	
-        	if (udpCon==null)
-        		return;
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {        	
         	
             if(LOG.isDebugEnabled())  
                 LOG.debug("data timeout :"+ System.currentTimeMillis());
@@ -1372,13 +1360,8 @@ public class UDPConnectionProcessor {
             super(time,proc);
         }
 
-        public void handleEvent() {
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
         	
-        	UDPConnectionProcessor udpCon = 
-        		(UDPConnectionProcessor) _udpCon.get();
-        	
-        	if (udpCon == null)
-        		return;
         	
             if(LOG.isDebugEnabled())  
                 LOG.debug("ack timeout: "+ System.currentTimeMillis());
@@ -1399,13 +1382,7 @@ public class UDPConnectionProcessor {
             super(time,proc);
         }
 
-        public void handleEvent() {
-        	
-        	UDPConnectionProcessor udpCon = 
-        		(UDPConnectionProcessor) _udpCon.get();
-        	
-        	if (udpCon==null)
-        		return;
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
         	
             if(LOG.isDebugEnabled())  
                 LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
@@ -1428,12 +1405,7 @@ public class UDPConnectionProcessor {
             super(time,proc );
         }
 
-        public void handleEvent() {
-        	UDPConnectionProcessor udpCon = 
-        		(UDPConnectionProcessor) _udpCon.get();
-        	
-        	if (udpCon==null)
-        		return;
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
         	
             if(LOG.isDebugEnabled())  
                 LOG.debug("Closed connection timeout: "+ 
