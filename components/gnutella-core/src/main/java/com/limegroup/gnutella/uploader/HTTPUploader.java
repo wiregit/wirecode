@@ -994,8 +994,10 @@ public final class HTTPUploader implements Uploader {
 	}
 
 	public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(
-             _totalAmountRead + _amountRead + _ostream.getAmountWritten());
+	    int written = _totalAmountRead + _amountRead;
+	    if(_ostream != null)
+	        written += _ostream.getAmountWritten();
+        bandwidthTracker.measureBandwidth(written);
     }
 
     public float getMeasuredBandwidth() {
