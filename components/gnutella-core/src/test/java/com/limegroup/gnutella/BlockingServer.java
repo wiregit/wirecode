@@ -91,7 +91,6 @@ public class BlockingServer {
             InputStream is = CLIENT.getInputStream();
             while(true) {
                 is.read(READ_BYTES);
-                System.out.println(new String(READ_BYTES));
                 WRITER.addWriter();
             }
         }
