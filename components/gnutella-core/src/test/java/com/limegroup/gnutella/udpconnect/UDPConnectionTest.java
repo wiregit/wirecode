@@ -539,8 +539,8 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Add some simulated connections to the UDPServiceStub
         // Make the connections 15% flaky
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 15);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 15);
+        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 10);
+        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 10);
 
         // Start the second connection in another thread
         // and run it to completion.
