@@ -5,8 +5,8 @@ implementation to be functional and ready for release:
 Date Posted: 9/27/02
 Date Resolved: 
 
-1) Decide on a rate of querying for the QueryUnicaster.  This may change
-   the implementation drastically.
+Decide on a rate of querying for the QueryUnicaster.  This may change the 
+implementation drastically.
 
 Current Status: The QueryUnicaster sleeps for 1/10th a second before
 sending out queries.
@@ -15,8 +15,22 @@ sending out queries.
 
 
 --------------------------------------------------------------------------------
-Date Posted: 
+Date Posted: 9/30/02
 Date Resolved: 
+
+Confirm that the GUESS setting in limewire.props controls all handling of
+UDP traffic appropriately, i.e. if it is false no UDP traffic should be
+accepted.
+
+********************************************************************************
+
+
+--------------------------------------------------------------------------------
+Date Posted: 9/30/02
+Date Resolved: 
+
+Does PingReply have a accurate GGEP extension for GUESS?  Does it conform
+to the latest version of the GUESS spec?
 
 ********************************************************************************
 
