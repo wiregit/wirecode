@@ -109,11 +109,17 @@ public final class UrnCache {
     private static Map createMap() {
 		try {
             ObjectInputStream ois = 
-			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
+			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));            
 			return (Map)ois.readObject();
 		} catch(Exception e) {
 			return new HashMap();
-		}
+		} finally {
+            try {
+                ois.close();
+            } catch(IOException e) {
+                // all we can do is try to close it
+            }
+        }
 	}
 
 	/**
