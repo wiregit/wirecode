@@ -36,7 +36,6 @@ public class PerPacketMetaInfo {
 	}
 
 	public void print() {
-		System.out.println("The Meta info is: " + _meta);
 	}
 
 }

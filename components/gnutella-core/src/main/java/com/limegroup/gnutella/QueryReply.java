@@ -180,7 +180,6 @@ public class QueryReply extends Message implements Serializable{
 		byte[] metaAsBytes = ppmi.getMetaInfoAsBytes();
 		// write the meta data at the footer of payload
 		for (int k=0; k<metaSize; k++) {
-			System.out.println("k: " + k);
 			payload[i+k] = metaAsBytes[k];
 		}
 
@@ -214,7 +213,6 @@ public class QueryReply extends Message implements Serializable{
             //8 bytes for index and size, plus name and two null terminators
             ret += (8+responses[i].getName().length()+2+
 					responses[i].getMeta().getBytes().length);
-		System.out.println("ret: " + ret);
         return ret;
     }
 
@@ -314,7 +312,6 @@ public class QueryReply extends Message implements Serializable{
 					String myMeta = new String(payload, l, blen);
 					// add the meta information to the response[]
 					myResponse.setMeta(myMeta);
-					System.out.println("myMeta: " + myMeta);
 					// i=j+1;
 					// j+= blen;
 				}
@@ -328,15 +325,12 @@ public class QueryReply extends Message implements Serializable{
 			if (i < payload.length-16) {
 				i+=16;  // two nulls + 16 bit guid
 				// there is extra data!
-				System.out.println("There was extra info");
 				int metaLength = payload.length - i;
 				byte[] metaData = new byte[metaLength];
 				for (int k = 0; k < metaLength; k++) {
-					System.out.println("Parsing k: " + k);
 					metaData[k] = payload[i+k];
 				}
 				PerPacketMetaInfo ppmi = new PerPacketMetaInfo(metaData);
-				System.out.println("About to print");
 				ppmi.print();
 			}
 			
