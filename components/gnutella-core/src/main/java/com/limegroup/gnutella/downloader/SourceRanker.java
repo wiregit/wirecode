@@ -43,6 +43,11 @@ public abstract class SourceRanker {
     protected abstract Collection getShareableHosts();
     
     /**
+     * stops the ranker.
+     */
+    public abstract void stop();
+    
+    /**
      * @return a ranker appropriate for our system's capabilities.
      */
     public static SourceRanker getAppropriateRanker() {

@@ -440,6 +440,17 @@ public class HeadPong extends VendorMessage {
 	public boolean isDownloading() {
 		return _isDownloading;
 	}
+    
+    public String toString() {
+        return "HeadPong: hasFile"+hasFile()+
+            " hasCompleteFile "+hasCompleteFile()+
+            " isDownloading "+isDownloading()+
+            " isFirewalled "+isFirewalled()+
+            " queue rank "+getQueueStatus()+
+            " ranges "+getRanges()+
+            " alts "+getAltLocs()+
+            " pushalts "+getPushLocs();
+    }
 	
 	//*************************************
 	//utility methods

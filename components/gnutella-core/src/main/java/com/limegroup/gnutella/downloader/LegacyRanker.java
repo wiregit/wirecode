@@ -88,4 +88,6 @@ public class LegacyRanker extends SourceRanker {
     protected Collection getShareableHosts() {
         return rfds;
     }
+    
+    public void stop(){}
 }

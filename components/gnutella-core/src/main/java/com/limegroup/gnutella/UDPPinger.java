@@ -44,12 +44,12 @@ public class UDPPinger {
     /**
      * The current number of datagrams we've sent in the past 500 milliseconds.
      */
-    private int _sentAmount;
+    private static int _sentAmount;
     
     /**
      * The last time we sent a datagram.
      */
-    private long _lastSentTime;
+    private static long _lastSentTime;
     
     /**
      * Ranks the specified Collection of hosts.

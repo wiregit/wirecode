@@ -629,9 +629,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 		// make sure all rfds have the same sha1
         verifyAllFiles();
 		
-		// load up the ranker with the hosts we know about
-		ranker.addToPool(allFiles);
-		
         // stores up to 1000 locations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
@@ -1425,6 +1422,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {
             killAllWorkers();
             
+            ranker.stop();
             // must capture in local variable so the value doesn't become null
             // between if & contents of if.
             Thread dlMan = dloaderManagerThread;
@@ -1859,6 +1857,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             validAlts = AlternateLocationCollection.create(downloadSHA1);
             initializeHashTree();
         }
+        
+        // load up the ranker with the hosts we know about
+        ranker.addToPool(allFiles);
         
         return CONNECTING;
     }

@@ -2,16 +2,18 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
@@ -25,13 +27,12 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.ForgetfulHashMap;
-import com.limegroup.gnutella.util.HasherSet;
 import com.limegroup.gnutella.util.IpPort;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
+    private static final Log LOG = LogFactory.getLog(PingRanker.class);
+    
     /**
      * a cached instance of the ping to send to non-firewalled hosts
      */
@@ -70,7 +71,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private URN sha1;
     
+    /**
+     * whether the ranker has been stopped.
+     */
+    private volatile boolean stopped;
+    
     private static final Comparator RFD_COMPARATOR = new RFDComparator();
+    
+    private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
     public PingRanker() {
         pinger = new UDPPinger();
@@ -79,6 +87,17 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
         everybody = new TreeSet(IpPort.COMPARATOR);
         everybodyPush = new HashSet();
+    }
+    
+    public synchronized void addToPool(Collection c)  {
+        List l;
+        if (c instanceof List)
+            l = (List)c;
+        else
+            l = new ArrayList(c);
+        
+        Collections.sort(l,ALT_DEPRIORITIZER);
+        super.addToPool(l);
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
@@ -90,11 +109,17 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         else
             everybody.add(host);
         
+        if(LOG.isDebugEnabled())
+            LOG.debug("adding new host "+host);
+        
         newHosts.add(host);
         pingIfNeeded();
     }
     
     private void addIfNew(RemoteFileDesc host) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("potentially adding new host "+host);
+        
         if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
                 return;
         else if (everybody.contains(host))
@@ -104,6 +129,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException{
+        LOG.debug("trying to get best host...");
         RemoteFileDesc ret;
         
         // try a verified host
@@ -122,6 +148,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         }
         
         pingIfNeeded();
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("the best host we came up with is "+ret+" "+ret.getPushAddr());
         return ret;
     }
     
@@ -140,6 +169,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // if we haven't found a single RFD with URN, don't ping anybody
         if (sha1 == null)
             return;
+        
+        LOG.debug("will ping some hosts");
         
         // create a ping for the non-firewalled hosts
         HeadPing ping = new HeadPing(sha1,getPingFlags());
@@ -162,6 +193,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             Object o = iter.next();
             pingedHosts.put(o,o);
         }
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("pinging hosts: "+toSend);
         
         pinger.rank(toSend,this,this,ping);
     }
@@ -190,14 +224,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
                 pingedHosts.put(iter.next(),rfd);
             
+            if (LOG.isDebugEnabled())
+                LOG.debug("pinging push locatioin "+rfd.getPushAddr());
+            
             pinger.rank(rfd.getPushProxies(),this,this,pushPing);
         }
         
-    }
-    
-    private RemoteFileDesc getNewRFD() {
-        Iterator iter = newHosts.iterator();
-        return (RemoteFileDesc) iter.next();
     }
     
     public synchronized boolean hasMore() {
@@ -205,6 +237,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized void processMessage(Message m, ReplyHandler handler) {
+        if (stopped)
+            return;
+        
         if (! (m instanceof HeadPong))
             return;
         
@@ -214,6 +249,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             return;
         
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("received a pong "+ pong+ " from "+handler +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
         
         // if the pong is firewalled, remove the other proxies from the 
         // pinged set
@@ -246,7 +284,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public void unregistered(byte[] guid) {}
     
     public synchronized boolean isCancelled(){
-        return verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
+        return stopped || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
+    }
+    
+    public void stop() {
+        stopped = true;
     }
     
     protected synchronized Collection getShareableHosts(){
@@ -292,5 +334,22 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             return pongA.hashCode() - pongB.hashCode();
         }
     }
-
+    
+    /**
+     * a quick-and-dirty ranker that deprioritizes RFDs from altlocs.
+     */
+    private static final class RFDAltDeprioritizer implements Comparator {
+        public int compare(Object a, Object b) {
+            RemoteFileDesc rfd1 = (RemoteFileDesc)a;
+            RemoteFileDesc rfd2 = (RemoteFileDesc)b;
+            
+            if (rfd1.isFromAlternateLocation() != rfd2.isFromAlternateLocation()) {
+                if (rfd1.isFromAlternateLocation())
+                    return 1;
+                else
+                    return -1;
+            }
+            return 0;
+        }
+    }
 }
