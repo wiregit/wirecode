@@ -1,18 +1,20 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.guess.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 
 /**
  * A Gnutella query request method.  In addition to a query string, queries can
- * include a minimum size string and metadata.  There are four constructors in
- * this to make new outgoing messages from scratch.  Two of them take GUIDs as
- * arguments; this allows the GUI to prepare a result panel <i>before</i>
- * sending the query to the network.  One takes a isRequery argument; this is
- * used for automatic re-query capabilities (DownloadManager).
+ * include a minimum size string, metadata, URN info, and a QueryKey.  There are
+ * seven constructors in this to make new outgoing messages from scratch.
+ * Several take GUIDs as arguments; this allows the GUI to prepare a result
+ * panel <i>before</i> sending the query to the network.  One takes a isRequery
+ * argument; this is used for automatic re-query capabilities (DownloadManager).
  */
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
@@ -35,6 +37,11 @@ public class QueryRequest extends Message implements Serializable{
 	 */
     private final Set /* of URN */ queryUrns;
 
+    /**
+     * The Query Key associated with this Query.
+     */
+    private QueryKey queryKey = null;
+
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
 	 * because Collections.EMPTY_SET is not serializable in the collections 
@@ -56,9 +63,9 @@ public class QueryRequest extends Message implements Serializable{
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSp, String query, 
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
 						String richQuery, boolean isFirewalled) {
-        this(guid, ttl, minSp, query, richQuery, false, null, null, 
+        this(guid, ttl, minSpeed, query, richQuery, false, null, null, null,
              isFirewalled);
     }
 
@@ -67,18 +74,18 @@ public class QueryRequest extends Message implements Serializable{
      * Whether or not this is a repeat query is encoded in guid.  GUID must have
      * been created via newQueryGUID; this allows the caller to match up results
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSp, String query,
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query,
                         boolean isFirewalled) {
-        this(guid, ttl, minSp, query, "", isFirewalled);
+        this(guid, ttl, minSpeed, query, "", isFirewalled);
     }
 
     /**
      * Builds a new query from scratch, with no metadata, with a default GUID.
      */
-    public QueryRequest(byte ttl, int minSp, String query, 
+    public QueryRequest(byte ttl, int minSpeed, String query, 
                         boolean isFirewalled) {
-        this(newQueryGUID(false), ttl, minSp, query, "", false, null, null,
-             isFirewalled);
+        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null,
+             null, isFirewalled);
     }
 
 
@@ -86,10 +93,10 @@ public class QueryRequest extends Message implements Serializable{
      * Builds a new query from scratch, with no metadata, marking the GUID
      * as a requery iff isRequery.
      */
-    public QueryRequest(byte ttl, int minSp, 
+    public QueryRequest(byte ttl, int minSpeed, 
                         String query, boolean isRequery, boolean isFirewalled) {
-        this(newQueryGUID(isRequery), ttl, minSp, query, "", isRequery, 
-			 null, null, isFirewalled);
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, "", isRequery, 
+			 null, null, null, isFirewalled);
     }
 
 
@@ -97,11 +104,11 @@ public class QueryRequest extends Message implements Serializable{
      * Builds a new query from scratch, with metadata, marking the GUID
      * as a requery iff isRequery.
      */
-    public QueryRequest(byte ttl, int minSp, 
+    public QueryRequest(byte ttl, int minSpeed, 
                         String query, String richQuery,
                         boolean isRequery, boolean isFirewalled) {
-        this(newQueryGUID(isRequery), ttl, minSp, query, richQuery, 
-             isRequery, null, null, isFirewalled);
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, 
+             isRequery, null, null, null, isFirewalled);
     }
 
     /**
@@ -115,27 +122,47 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSp,
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
-                        Set requestedUrnTypes, Set queryUrns, 
+                        Set requestedUrnTypes, Set queryUrns,
                         boolean isFirewalled) {
+        this(guid, ttl, minSpeed, query, richQuery, isRequery,
+             requestedUrnTypes, queryUrns, null, isFirewalled);
+    }
+
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery,
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
-        if (minSp == 0) {
+        if (minSpeed == 0) {
             // user has not specified a Min Speed - go ahead and set it for
             // them, as appropriate
-
+            
             // the new Min Speed format - looks reversed but
             // it isn't because of ByteOrder.short2leb
-            minSp = 0x00000080; 
+            minSpeed = 0x00000080; 
             // set the firewall bit if i'm firewalled
             if (isFirewalled)
-                minSp |= 0x01;
+                minSpeed |= 0x01;
             // LimeWire's ALWAYS want rich results....
             if (true)
-                minSp |= 0x02;
+                minSpeed |= 0x02;
         }
-        this.minSpeed=minSp;
+        this.minSpeed=minSpeed;
 		if(query == null) {
 			this.query = "";
 		} else {
@@ -159,7 +186,8 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			tempQueryUrns = new HashSet();
 		}
-			
+        if (queryKey != null)
+            this.queryKey = queryKey;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -185,6 +213,23 @@ public class QueryRequest extends Message implements Serializable{
 			    writeGemExtensions(baos, addDelimiterBefore, 
 								   tempRequestedUrnTypes == null ? null : 
 								   tempRequestedUrnTypes.iterator());
+
+            // add the GGEP Extension
+            if (this.queryKey != null) {
+                // get query key in byte form....
+                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
+                this.queryKey.write(qkBytes);
+                // construct the GGEP block
+                GGEP ggepBlock = new GGEP(false); // do COBS
+                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                              qkBytes.toByteArray());
+                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
+                ggepBlock.write(ggepBytes);
+                // write out GGEP
+                addDelimiterBefore =
+                    writeGemExtension(baos, addDelimiterBefore,
+                                      ggepBytes.toByteArray());
+            }
 
             baos.write(0);                             // final null
 		} catch (IOException e) {
@@ -217,42 +262,74 @@ public class QueryRequest extends Message implements Serializable{
 		int tempMinSpeed = 0;
 		Set tempQueryUrns = null;
 		Set tempRequestedUrnTypes = null;
+        QueryKey tempQueryKey = null;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(this.payload);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ubytes2int(sp);
-            tempQuery = super.readNullTerminatedString(bais);
+            tempQuery = new String(super.readNullTerminatedBytes(bais));
             // handle extensions, which include rich query and URN stuff
-            String exts = super.readNullTerminatedString(bais);
-            StringTokenizer stok = new StringTokenizer(exts,"\u001c");
-            while (stok.hasMoreElements()) {
-				String curExtStr = stok.nextToken();
-				if(URN.isUrn(curExtStr)) {
-					// it's an URN to match, of form "urn:namespace:etc"
-					URN urn = null;
-					try {
-						urn = URN.createSHA1Urn(curExtStr);
-					} catch(IOException e) {
-						// the urn string is invalid -- so continue
-						continue;
-					}
-					if(tempQueryUrns == null) {
-						tempQueryUrns = new HashSet();
-					}
-					tempQueryUrns.add(urn);
-				} else if(UrnType.isSupportedUrnType(curExtStr)) {
-					// it's an URN type to return, of form "urn" or 
-					// "urn:namespace"
-					if(tempRequestedUrnTypes == null) {
-						tempRequestedUrnTypes = new HashSet();
-					}
-					if(UrnType.isSupportedUrnType(curExtStr)) {
-						tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
-					}
-				} else if (curExtStr.startsWith("<?xml")) {
-					// rich query
-					tempRichQuery = curExtStr;
-				}
+            byte[] extsBytes = super.readNullTerminatedBytes(bais);
+            int currIndex = 0;
+            // while we don't encounter a null....
+            while ((currIndex < extsBytes.length) && 
+                   (extsBytes[currIndex] != (byte)0x00)) {
+
+                // HANDLE GGEP STUFF
+                if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
+                    int[] endIndex = new int[1];
+                    endIndex[0] = currIndex+1;
+                    final String QK_SUPP = GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT;
+                    try {
+                        GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
+                        if (ggep.hasKey(QK_SUPP)) {
+                            byte[] qkBytes = ggep.getBytes(QK_SUPP);
+                            tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
+                        }
+                    }
+                    catch (BadGGEPBlockException ignored) {}
+                    catch (BadGGEPPropertyException ignored) {}
+                    
+                    currIndex = endIndex[0];
+                }
+                else { // HANDLE HUGE STUFF
+                    int delimIndex = currIndex;
+                    while ((delimIndex < extsBytes.length) 
+                           && (extsBytes[delimIndex] != (byte)0x1c))
+                        delimIndex++;
+                    if (delimIndex > extsBytes.length) 
+                        ; // we've overflown and not encounted a 0x1c - discard
+                    else {
+                        String curExtStr = new String(extsBytes, currIndex,
+                                                      delimIndex - currIndex);
+                        if (URN.isUrn(curExtStr)) {
+                            // it's an URN to match, of form "urn:namespace:etc"
+                            URN urn = null;
+                            try {
+                                urn = URN.createSHA1Urn(curExtStr);
+                            } 
+                            catch(IOException e) {
+                                // the urn string is invalid -- so continue
+                                continue;
+                            }
+                            if(tempQueryUrns == null) 
+                                tempQueryUrns = new HashSet();
+                            tempQueryUrns.add(urn);
+                        } 
+                        else if (UrnType.isSupportedUrnType(curExtStr)) {
+                            // it's an URN type to return, of form "urn" or 
+                            // "urn:namespace"
+                            if(tempRequestedUrnTypes == null) 
+                                tempRequestedUrnTypes = new HashSet();
+                            if(UrnType.isSupportedUrnType(curExtStr)) 
+                                tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
+                        } 
+                        else if (curExtStr.startsWith("<?xml"))
+                            // rich query
+                            tempRichQuery = curExtStr;
+                    }
+                    currIndex = delimIndex+1;
+                }
             }
         } catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -273,6 +350,7 @@ public class QueryRequest extends Message implements Serializable{
 			this.requestedUrnTypes =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
+        queryKey = tempQueryKey;
     }
 
     /**
@@ -339,7 +417,8 @@ public class QueryRequest extends Message implements Serializable{
         return minSpeed;
     }
 
-    /**
+
+    /*    
      * Returns true if the query source is a firewalled servent.
      */
     public boolean isFirewalledSource() {
@@ -349,8 +428,8 @@ public class QueryRequest extends Message implements Serializable{
         }
         return false;
     }
-
-
+ 
+ 
     /**
      * Returns true if the query source desires Lime meta-data in responses.
      */
@@ -361,7 +440,15 @@ public class QueryRequest extends Message implements Serializable{
         }
         return false;        
     }
-
+    
+        
+    /**
+     * Returns the QueryKey associated with this Request.  May very well be
+     * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
+     */
+    public QueryKey getQueryKey() {
+        return queryKey;
+    }
 
 	// inherit doc comment
 	public void recordDrop() {
@@ -376,20 +463,11 @@ public class QueryRequest extends Message implements Serializable{
     }
 
     public String toString() {
-		return "<query: \""+getQuery()+"\", "+
-		       "meta: \""+getRichQuery()+"\", "+
-		       "types: "+getRequestedUrnTypes().size()+","+
-		       "urns: "+getQueryUrns().size()+">";
+ 		return "<query: \""+getQuery()+"\", "+
+        "meta: \""+getRichQuery()+"\", "+
+        "types: "+getRequestedUrnTypes().size()+","+
+        "urns: "+getQueryUrns().size()+">";
     }
-
-//      public String toString() {
-//  		return "QueryRequest:\r\n"+ 
-//  		       "query:             "+getQuery()+"\r\n"+
-//  		       "rich query:        "+getRichQuery()+"\r\n"+
-//  		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
-//  		       "query urns:        "+getQueryUrns()+"\r\n"+
-//  		       "min speed:         "+getMinSpeed();
-//      }
 }
 
 

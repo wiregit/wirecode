@@ -4,6 +4,7 @@ import junit.framework.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
@@ -57,7 +58,6 @@ public class GUESSServerSideTest extends TestCase {
             assertTrue("Couldn't get the local address!!!!", false);
         }            
         int port = rs.getPort();
-        System.out.println("Contacting host on " + address + ":" + port);
 
 		try {
 			_socket = new DatagramSocket();
@@ -72,11 +72,27 @@ public class GUESSServerSideTest extends TestCase {
 			return;
 		}
 
-        // send a normal ping, should get a pong....
-        PingRequest pr = new PingRequest((byte)1);
+        // first try to get a QueryKey....
+        PingRequest pr = new PingRequest();
+        QueryKey qkToUse = null;
         send(pr, address, port);
         try {
             PingReply pRep = (PingReply) receive();
+            assertTrue(pRep.getQueryKey() != null);
+            qkToUse = pRep.getQueryKey();
+        }
+        catch (Exception damn) {
+            damn.printStackTrace();
+            cleanUp();
+            assertTrue("Couldn't get a QueryKey!!", false);
+        }
+
+        // send a normal ping, should get a pong....
+        pr = new PingRequest((byte)1);
+        send(pr, address, port);
+        try {
+            PingReply pRep = (PingReply) receive();
+            assertTrue(pRep.getQueryKey() == null);
         }
         catch (Exception damn) {
             damn.printStackTrace();
@@ -84,13 +100,29 @@ public class GUESSServerSideTest extends TestCase {
             assertTrue("Didn't get a Pong!!", false);
         }
 
-        // try to send a query
+        // first try a bad QueryKey....
+        byte[] fakeQueryKey = new byte[8];
+        (new Random()).nextBytes(fakeQueryKey);
+        QueryRequest crapQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
+                             false, null, null, 
+                             QueryKey.getQueryKey(fakeQueryKey, true), false);
+        send(crapQuery, address, port);
+        try {
+            receive();
+            cleanUp();
+            assertTrue("Fake Query Key worked!!", false);
+        }
+        catch (Exception shouldHappen) {
+        }
+
+        // now try a legit one....
         byte[] guid = GUID.makeGuid();
-        QueryRequest goodQuery = new QueryRequest(guid, (byte) 1, 0, "susheel",
-                                                  false);
+        QueryRequest goodQuery = 
+            new QueryRequest(guid, (byte) 1, 0, "susheel", null, 
+                             false, null, null, qkToUse, false);
         send(goodQuery, address, port);
         try {
-            // should get an ack....
             PingReply pRep = (PingReply) receive();
             assertTrue(Arrays.equals(pRep.getGUID(), guid));
         }

@@ -259,15 +259,29 @@ public abstract class Message
      */
     protected boolean writeGemExtension(OutputStream os, 
 										boolean addPrefixDelimiter, 
-										String ext) throws IOException {
-        if (ext == null || (ext.length()==0)) {
+										byte[] extBytes) throws IOException {
+        if (extBytes == null || (extBytes.length == 0)) {
             return addPrefixDelimiter;
         }
         if(addPrefixDelimiter) {
             os.write(0x1c);
         }
-        os.write(ext.getBytes());
+        os.write(extBytes);
         return true; // any subsequent extensions should have delimiter 
+    }
+    
+     /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+										boolean addPrefixDelimiter, 
+										String ext) throws IOException {
+        if (ext != null)
+            return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
+        else
+            return writeGemExtension(os, addPrefixDelimiter, new byte[0]);
     }
     
     /**
@@ -289,15 +303,16 @@ public abstract class Message
     }
     
     /**
-     * @effects utility function to read null-terminated string from stream
+     * @effects utility function to read null-terminated byte[] from stream
      */
-    protected String readNullTerminatedString(InputStream is) throws IOException {
+    protected byte[] readNullTerminatedBytes(InputStream is) 
+        throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i;
         while ((is.available()>0)&&(i=is.read())!=0) {
             baos.write(i);
         }
-        return new String(baos.toByteArray());
+        return baos.toByteArray();
     }
 
     ////////////////////////////////////////////////////////////////////

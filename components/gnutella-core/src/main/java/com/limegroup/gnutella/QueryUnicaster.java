@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
@@ -27,6 +28,10 @@ public final class QueryUnicaster {
     /** The max number of unicast pongs to store.
      */
     public static final int MAX_ENDPOINTS = 2000;
+
+    /** One hour in milliseconds.
+     */
+    public static final long ONE_HOUR = 1000 * 60 * 60; // 60 minutes
 
     // the instance of me....
     private static QueryUnicaster _instance = null;
@@ -58,6 +63,12 @@ public final class QueryUnicaster {
      * end.
      */
     private LinkedList _queryHosts;
+
+    /**
+     * The Set of QueryKeys to be used for Queries.
+     * GUESSEndpoint -> QueryKey
+     */
+    private Map _queryKeys;
 
     /** The fixed size list of endpoints i've pinged.
      */
@@ -142,13 +153,14 @@ public final class QueryUnicaster {
 	}
 
 
-	/**
-	 * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
-	 */
+ 	/**
+ 	 * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
+ 	 */
     private QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable();
         _queryHosts = new LinkedList();
+        _queryKeys = new Hashtable();
         _pingList = new Buffer(25);
         _querySets = new Hashtable();
         _qGuidsToRemove = new Vector();
@@ -163,11 +175,13 @@ public final class QueryUnicaster {
                 }
 			}
 		};
-
         // only if settings says i can....
-        if (SearchSettings.GUESS_ENABLED.getValue()) { 
+        if (SearchSettings.GUESS_ENABLED.getValue())
             _querier.start();
-		}
+
+        QueryKeyExpirer expirer = new QueryKeyExpirer();
+        RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+
     }
 
     /** 
@@ -182,6 +196,21 @@ public final class QueryUnicaster {
             try {
                 waitForQueries();
                 GUESSEndpoint toQuery = getUnicastHost();
+
+                // no query key to use in my query!
+                if (!_queryKeys.containsKey(toQuery)) { 
+                    // send a QueryKey Request
+                    PingRequest pr = new PingRequest();
+                    udpService.send(pr,toQuery.getAddress(),toQuery.getPort());
+                    if(RECORD_STATS)
+                        SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+                    // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
+                    // QueryKey Reply!!
+                    continue; // try another up above....
+                }
+                QueryKey queryKey = 
+                    ((QueryKeyBundle) _queryKeys.get(toQuery))._queryKey;
+
                 purgeGuidsInternal(); // in case any were added while asleep
 				boolean currentHostUsed = false;
                 synchronized (_queries) {
@@ -198,14 +227,13 @@ public final class QueryUnicaster {
                             ; // don't send another....
                         else {
 							InetAddress ip = toQuery.getAddress();
-							debug("QueryUnicaster.queryLoop(): sending" +
-								  " query " + currQB._qr.getQuery());
-							udpService.send(currQB._qr, ip, 
-											toQuery.getPort());
+                            QueryRequest qrToSend = getQueryRequest(currQB._qr,
+                                                                    queryKey);
+							udpService.send(qrToSend, ip, toQuery.getPort());
 							currentHostUsed = true;
 							if(RECORD_STATS)
 								SentMessageStatHandler.UDP_QUERY_REQUESTS.
-									addMessage(currQB._qr);
+									addMessage(qrToSend);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
@@ -386,6 +414,29 @@ public final class QueryUnicaster {
     }
 
 
+    /** Feed me QueryKey pongs so I can query people....
+     *  pre: pr.getQueryKey() != null
+     */
+    public void handleQueryKeyPong(PingReply pr) {
+        QueryKey qk = null;
+        InetAddress address = null;
+        try {
+            qk = pr.getQueryKey();
+            address = InetAddress.getByName(pr.getIP());
+        }
+        catch (BadPacketException ignored) {}
+        catch (UnknownHostException damn) {
+            // unknown host exception??  weird - well, don't continue....
+            return;
+        }
+        Assert.that(qk != null);
+        int port = pr.getPort();
+        GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
+        _queryKeys.put(endpoint, new QueryKeyBundle(qk));
+        addUnicastEndpoint(endpoint);
+    }
+
+
     /** 
      * Add results to a query so we can invalidate it when enough results are
      * received.
@@ -459,6 +510,63 @@ public final class QueryUnicaster {
 		public String toString() {
 			return "QueryBundle: "+_qr;
 		}
+    }
+
+    
+    private static class QueryKeyBundle {
+        public static final long QUERY_KEY_LIFETIME = 2 * ONE_HOUR; // 2 hours
+        
+        final long _birthTime;
+        final QueryKey _queryKey;
+        
+        public QueryKeyBundle(QueryKey qk) {
+            _queryKey = qk;
+            _birthTime = System.currentTimeMillis();
+        }
+
+        /** Returns true if this QueryKey hasn't been updated in a while and
+         *  should be expired.
+         */
+        public boolean shouldExpire() {
+            if ((System.currentTimeMillis() - _birthTime) >= 
+                QUERY_KEY_LIFETIME)
+                return true;
+            return false;
+        }
+
+        public String toString() {
+            return "{QueryKeyBundle: " + _queryKey + " BirthTime = " +
+            _birthTime;
+        }
+    }
+
+    /** Returns a QueryRequest that is a copy of the input QR associated with
+     *  the input QueryKey.
+     */
+    private static QueryRequest getQueryRequest(QueryRequest qr, QueryKey qk) {
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
+                                qr.getQuery(), qr.getRichQuery(), false,
+                                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                                qk, qr.isFirewalledSource());
+    }
+
+
+    /**
+     * Schedule this class to run every so often and rid the Map of Bundles that
+     * are stale.
+     */ 
+    private class QueryKeyExpirer implements Runnable {
+        public void run() {
+            synchronized (_queryKeys) {
+                Set entries = _queryKeys.entrySet();
+                Iterator iter = entries.iterator();
+                while (iter.hasNext()) {
+                    QueryKeyBundle currQKB = (QueryKeyBundle) iter.next();
+                    if (currQKB.shouldExpire())
+                        entries.remove(currQKB);
+                }
+            }
+        }
     }
 
 

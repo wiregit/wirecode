@@ -1,7 +1,8 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*; 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.guess.*; 
+import com.limegroup.gnutella.messages.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.StringTokenizer;
@@ -71,7 +72,7 @@ public final class QueryRequestTest extends TestCase {
 	 * Tests the constructor that most of the other constructors are built
 	 * off of.
 	 */
-	public void testQueryRequestConstructorWithGUID() {
+	public void testQueryRequestConstructorWithGUID1() {
 		try {
 			ByteArrayOutputStream[] baos = 
 			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
@@ -100,16 +101,86 @@ public final class QueryRequestTest extends TestCase {
 				assertEquals("queries should be equal", 
 							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
 				Set queryUrns = qr.getQueryUrns();
-				assertEquals("query urn sets should be equal", curUrnSet, queryUrns);
+				assertEquals("query urn sets should be equal", curUrnSet, 
+                             queryUrns);
 				Set queryUrnTypes = qr.getRequestedUrnTypes();
 
-				assertEquals("urn type set sizes should be equal", curUrnTypeSet.size(),
+				assertEquals("urn type set sizes should be equal", 
+                             curUrnTypeSet.size(),
 							 queryUrnTypes.size());
 				assertEquals("urn types should be equal\r\n"+
 							 "set 1: "+print(curUrnTypeSet)+"r\n"+
 							 "set 2: "+print(queryUrnTypes), 
 							 curUrnTypeSet,
 							 queryUrnTypes);
+			}		   
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
+		}
+	}	
+
+
+	/**
+	 * Tests the constructor that most of the other constructors are built
+	 * off of.
+	 */
+	public void testQueryRequestConstructorWithGUID2() {
+		try {
+			ByteArrayOutputStream[] baos = 
+			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				baos[i] = new ByteArrayOutputStream();
+				baos[i].write(0);
+				baos[i].write(0);
+				baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+				baos[i].write(0);
+				Set curUrnSet = new HashSet();
+				Set curUrnTypeSet = new HashSet();
+				//curUrnTypeSet.add(UrnType.SHA1);
+				curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
+                // write the GGEP stuff
+                byte[] bytes = new byte[4];
+                (new Random()).nextBytes(bytes);
+                QueryKey qk = QueryKey.getQueryKey(bytes, true);
+                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
+                qk.write(qkBytes);
+                GGEP ggepBlock = new GGEP(false); // do COBS
+                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                              qkBytes.toByteArray());
+                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
+                ggepBlock.write(baos[i]);
+                baos[i].write(0x1c);
+                // write the URN stuff
+				for(int j=i; j<HugeTestUtils.URNS.length; j++) {
+					baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
+					curUrnSet.add(HugeTestUtils.URNS[j]);
+					if((j+1) != HugeTestUtils.URNS.length) {
+						baos[i].write(0x1c);
+					}
+				}
+				baos[i].write(0);
+				QueryRequest qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
+												   (byte)4, 
+												   baos[i].toByteArray());
+				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
+				assertEquals("queries should be equal", 
+							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
+				Set queryUrns = qr.getQueryUrns();
+				assertEquals("query urn sets should be equal", curUrnSet, 
+                             queryUrns);
+				Set queryUrnTypes = qr.getRequestedUrnTypes();
+
+				assertEquals("urn type set sizes should be equal", 
+                             curUrnTypeSet.size(),
+							 queryUrnTypes.size());
+				assertEquals("urn types should be equal\r\n"+
+							 "set 1: "+print(curUrnTypeSet)+"r\n"+
+							 "set 2: "+print(queryUrnTypes), 
+							 curUrnTypeSet,
+							 queryUrnTypes);
+                assertTrue("query keys should be equal\nqk = " + qk + 
+                           "\nqr = " + qr.getQueryKey(),
+                           qk.equals(qr.getQueryKey()));
 			}		   
 		} catch(IOException e) {
 			fail("unexpected exception: "+e);
@@ -125,12 +196,12 @@ public final class QueryRequestTest extends TestCase {
 		QueryRequest qr = new QueryRequest((byte)7, 0, query, false);
 		String storedQuery = qr.getQuery();
 		assertEquals("query strings should be equal", query, storedQuery);
-		assertEquals("rich query should be the empty string", "", qr.getRichQuery());
+		assertEquals("rich query should be the empty string", "", 
+                     qr.getRichQuery());
 		assertEquals("requested URN types should be the empty set", 
 					 qr.getRequestedUrnTypes(), Collections.EMPTY_SET);
 		assertEquals("URN Set should be the empty set", 
 					 qr.getQueryUrns(), Collections.EMPTY_SET);
-        // the min speed should be 130 cuz we convert 0s to such....
 		assertEquals("min speeds don't match", 130, qr.getMinSpeed());
 
 		try {
@@ -152,7 +223,7 @@ public final class QueryRequestTest extends TestCase {
 	 * Tests the primary constructor that most of the other constructors
 	 * delegate to.
 	 */
-	public void testQueryRequestPrimaryConstructor() {
+	public void testQueryRequestSecondaryConstructor() {
 		byte ttl = 5;
 		int minSpeed = 30;
 		String query = "file i really want";
@@ -168,16 +239,17 @@ public final class QueryRequestTest extends TestCase {
 		byte[] guid = QueryRequest.newQueryGUID(isRequery);
 		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
                                            richQuery, isRequery, 
-                                           requestedUrnTypes, queryUrns,
-                                           false);
+                                           requestedUrnTypes, queryUrns, false);
 		
 		assertEquals("ttls should be equal", ttl, qr.getTTL());
 		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
 		assertEquals("queries should be equal", query, qr.getQuery());
-		assertEquals("rich queries should be equal", richQuery, qr.getRichQuery());
+		assertEquals("rich queries should be equal", richQuery, 
+                     qr.getRichQuery());
 		assertEquals("query urn types should be equal", requestedUrnTypes, 
 					 qr.getRequestedUrnTypes());
-		assertEquals("query urns should be equal", queryUrns, qr.getQueryUrns());
+		assertEquals("query urns should be equal", queryUrns, 
+                     qr.getQueryUrns());
 				
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
@@ -187,7 +259,8 @@ public final class QueryRequestTest extends TestCase {
 			fail("unexpected exception: "+e);
 		}
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
 
 		QueryRequest qrTest = null;
 		try {
@@ -195,7 +268,8 @@ public final class QueryRequestTest extends TestCase {
 		} catch(Exception e) {
 			fail("unexpected exception: "+e);
 		}
-		assertEquals("queries should be equal", qr.getQuery(), qrTest.getQuery());
+		assertEquals("queries should be equal", qr.getQuery(), 
+                     qrTest.getQuery());
 		assertEquals("rich queries should be equals", qr.getRichQuery(), 
 					 qrTest.getRichQuery());
 
@@ -213,24 +287,99 @@ public final class QueryRequestTest extends TestCase {
 					 "set1: "+ print(urnTypes1), 
 					 urnTypes0,
 					 urnTypes1);
-		assertEquals("query urns should be equal", qr.getQueryUrns(), qrTest.getQueryUrns());
-		assertEquals("min speeds should be equal", qr.getMinSpeed(), qrTest.getMinSpeed());
+		assertEquals("query urns should be equal", qr.getQueryUrns(), 
+                     qrTest.getQueryUrns());
+		assertEquals("min speeds should be equal", qr.getMinSpeed(), 
+                     qrTest.getMinSpeed());
 		
 	}
 
-	private static String print(Collection col) {
-		Iterator iter = col.iterator();
-		StringBuffer sb = new StringBuffer();
-		while(iter.hasNext()) {
-			sb.append(iter.next()); 
-			sb.append("\r\n");
+
+	/**
+	 * Tests the primary constructor that most of the other constructors
+	 * delegate to.
+	 */
+	public void testQueryRequestPrimaryConstructor() {
+		byte ttl = 5;
+		int minSpeed = 30;
+		String query = "file i really want";
+		
+		// ideally this would be a real rich query
+		String richQuery = "";
+		boolean isRequery = false;
+		Set requestedUrnTypes = new HashSet();
+		requestedUrnTypes.add(UrnType.SHA1);
+		Set queryUrns = new HashSet();
+		queryUrns.add(HugeTestUtils.URNS[4]);
+
+		byte[] guid = QueryRequest.newQueryGUID(isRequery);
+        QueryKey qk = QueryKey.getQueryKey(guid, true);
+		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
+                                           richQuery, isRequery, 
+                                           requestedUrnTypes, queryUrns, qk,
+                                           false);
+		
+		assertEquals("ttls should be equal", ttl, qr.getTTL());
+		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
+		assertEquals("queries should be equal", query, qr.getQuery());
+		assertEquals("rich queries should be equal", richQuery, 
+                     qr.getRichQuery());
+		assertEquals("query urn types should be equal", requestedUrnTypes, 
+					 qr.getRequestedUrnTypes());
+		assertEquals("query urns should be equal", queryUrns, 
+                     qr.getQueryUrns());
+		assertEquals("query keys should be equal", qk, qr.getQueryKey());
+				
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			qr.write(baos);
+			baos.flush();
+		} catch (IOException e) {
+			fail("unexpected exception: "+e);
 		}
-		return sb.toString();
+
+		ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+
+		QueryRequest qrTest = null;
+		try {
+			qrTest = (QueryRequest)qr.read(bais);
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}
+		assertEquals("queries should be equal", qr.getQuery(), 
+                     qrTest.getQuery());
+		assertEquals("rich queries should be equals", qr.getRichQuery(), 
+					 qrTest.getRichQuery());
+
+		Set urnTypes0 = qr.getRequestedUrnTypes();
+		Set urnTypes1 = qrTest.getRequestedUrnTypes();
+		Iterator iter0 = urnTypes0.iterator();
+		Iterator iter1 = urnTypes1.iterator();
+		UrnType urnType0 = (UrnType)iter0.next();
+		UrnType urnType1 = (UrnType)iter1.next();
+		assertEquals("urn types should both be sha1", urnType0, urnType1);
+		assertEquals("urn type set sizes should be equal", urnTypes0.size(), 
+					 urnTypes1.size());
+		assertEquals("urn types should be equal\r\n"+
+					 "set0: "+print(urnTypes0)+"\r\n"+
+					 "set1: "+ print(urnTypes1), 
+					 urnTypes0,
+					 urnTypes1);
+		assertEquals("query urns should be equal", qr.getQueryUrns(), 
+                     qrTest.getQueryUrns());
+		assertEquals("min speeds should be equal", qr.getMinSpeed(), 
+                     qrTest.getMinSpeed());
+        assertTrue("qk = " + qk + " , read = " + qrTest.getQueryKey(), 
+                   qk.equals(qrTest.getQueryKey()));
+		
 	}
 
 
-    public void testNewMinSpeedUse() {
 
+
+    public void testNewMinSpeedUse() {
+        
         QueryRequest qr = null;
 
         // BASIC FROM THE NETWORK TESTS
@@ -356,4 +505,15 @@ public final class QueryRequestTest extends TestCase {
         // --------------------------------------
     }
 
+
+
+	private static String print(Collection col) {
+		Iterator iter = col.iterator();
+		StringBuffer sb = new StringBuffer();
+		while(iter.hasNext()) {
+			sb.append(iter.next()); 
+			sb.append("\r\n");
+		}
+		return sb.toString();
+	}
 }

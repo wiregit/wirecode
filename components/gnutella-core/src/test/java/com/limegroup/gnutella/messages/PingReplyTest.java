@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.guess.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -313,4 +314,44 @@ public class PingReplyTest extends TestCase {
             //Pass!
         }
     }
+
+
+    public void testQueryKeyPong() {
+        byte[] randBytes = new byte[8];
+        (new Random()).nextBytes(randBytes);
+        QueryKey qk = null;
+        GUID guid = new GUID(GUID.makeGuid());
+        byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
+        try {
+            qk = QueryKey.getQueryKey(randBytes, true);
+        }
+        catch (Exception crap) {
+            assertTrue(false);
+        }
+        PingReply pr = new PingReply(guid.bytes(), (byte) 1, 6346, ip,
+                                     2, 2, true, qk);
+        try {
+            assertTrue(pr.getQueryKey().equals(qk));
+        }
+        catch (Exception crap) {
+            assertTrue(false);
+        }
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pr.write(baos);
+            ByteArrayInputStream bais = 
+                 new ByteArrayInputStream(baos.toByteArray());
+            PingReply prStreamed = (PingReply) Message.read(bais);
+            assertTrue(prStreamed.getQueryKey().equals(qk));
+        }
+        catch (Exception damn) {
+            assertTrue(false);
+        }
+    
+    }
+
+    // TODO: build a test to test multiple GGEP blocks in the payload!!  the
+    // implementation does not cover this it seems, so it should fail ;)
+
 }

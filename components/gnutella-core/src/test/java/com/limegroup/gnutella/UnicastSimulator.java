@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*; 
+import com.limegroup.gnutella.guess.*; 
 import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.io.*;
@@ -163,6 +165,8 @@ public class UnicastSimulator {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
+        QueryKey.SecretKey key = QueryKey.generateSecretKey();
+        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -175,6 +179,14 @@ public class UnicastSimulator {
                     if (message == null) continue;
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();
+                        QueryKey queryKey = 
+                            ((QueryRequest)message).getQueryKey();
+                        QueryKey computed = 
+                            QueryKey.getQueryKey(datagram.getAddress(),
+                                                 datagram.getPort(),
+                                                 key, pad);
+                        if (!computed.equals(queryKey))
+                            continue; // querykey is invalid!!
                         byte[] inGUID = ((QueryRequest)message).getGUID();
                         Response[] resps = new Response[rand.nextInt(15)];
                         for (int i = 0; i < resps.length; i++) {
@@ -195,9 +207,27 @@ public class UnicastSimulator {
                              datagram.getPort());
                     }
                     else if (message instanceof PingRequest) {
-                        PingReply toSend = _pongs[port - PORT_RANGE_BEGIN];
-                        send(socket, toSend, datagram.getAddress(),
-                             datagram.getPort());
+                        PingRequest pr = (PingRequest)message;
+                        pr.hop();  // need to hop it!!
+                        if (pr.isQueryKeyRequest()) {
+                            // send a QueryKey back!!!
+                            QueryKey qk = 
+                                QueryKey.getQueryKey(datagram.getAddress(),
+                                                     datagram.getPort(),
+                                                     key, pad);
+                            PingReply pRep = new PingReply(pr.getGUID(),
+                                                           (byte)1,
+                                                           port,
+                                                           _localAddress,
+                                                           2, 2, true, qk);
+                            send(socket, pRep, datagram.getAddress(),
+                                 datagram.getPort());
+                        }
+                        else {
+                            PingReply toSend = _pongs[port - PORT_RANGE_BEGIN];
+                            send(socket, toSend, datagram.getAddress(),
+                                 datagram.getPort());
+                        }
                     }
                 } 
                 catch(BadPacketException e) {
