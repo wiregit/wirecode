@@ -558,7 +558,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
             }
         } finally {		
             progressMap.remove(file);
-            fis.close();
+            if(fis != null) {
+                try {
+                    fis.close();
+                } catch(IOException ignored) {}
+            }
         }
 
 		byte[] sha1 = md.digest();
