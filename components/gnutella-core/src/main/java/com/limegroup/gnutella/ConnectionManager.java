@@ -363,15 +363,15 @@ public class ConnectionManager implements Runnable {
 	}
 
 	//3. Start the statistics thread
-	try{
-	    Stat s = new Stat(this);
-	    Thread stat = new Thread(s);
-	    if (stats==true)
-		stat.start();
-	}
-	catch (Exception e){
-	    error(ActivityCallback.ERROR_1);
-	}
+//  	try{
+//  	    Stat s = new Stat(this);
+//  	    Thread stat = new Thread(s);
+//  	    if (stats==true)
+//  		stat.start();
+//  	}
+//  	catch (Exception e){
+//  	    error(ActivityCallback.ERROR_1);
+//  	}
 	while (true) {
 	    Connection c = null;
 	    try {
