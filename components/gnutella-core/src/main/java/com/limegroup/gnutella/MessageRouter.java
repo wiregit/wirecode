@@ -38,11 +38,15 @@ public abstract class MessageRouter
         _pingInformationTable = new HashMap();
 
     /**
-     * Keeps track of query route table state for each connection 
+     * Keeps track of query route table state for each "new client" connection
      * This helps you decide where to send queries.  (Compare with
-     * _queryRouteTable, which helps you decide where to send responses,
-     * and helps filter duplicate queries.)  
-     * LOCKING: obtain _queryInfoTable's monitor.
+     * _querySourceTable, which helps filter duplicate queries and decide where
+     * to send responses.)  Connections are added to this in two places: when
+     * propogating tables or receiving updates.
+     *
+     * INVARIANT: for all keys c, !c.isOldClient.  (Note that there
+     *  may be new connections not yet added to the domain of the map.)
+     * LOCKING: obtain _queryInfoTable's monitor.  
      */
     private HashMap /* ManagedConnection -> ManagedConnectionQueryInfo */ 
         _queryInfoTable = new HashMap();
@@ -586,6 +590,8 @@ public abstract class MessageRouter
                     ManagedConnectionQueryInfo qi=
                         (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
                     if (qi==null) 
+                        //Either a new client, or an old client that's not yet
+                        //sent us a table message.
                         c.send(queryRequest);
                     else if (qi.lastReceived.contains(queryRequest))
                         //TODO: what if table is not fully patched?
@@ -837,6 +843,7 @@ public abstract class MessageRouter
                 (ManagedConnectionQueryInfo)
                     _queryInfoTable.get(receivingConnection);
             if (qi==null) {
+                //There's really no need to check if c is an old client here.
                 qi=new ManagedConnectionQueryInfo();
                 _queryInfoTable.put(receivingConnection, qi);            
             }
@@ -862,8 +869,6 @@ public abstract class MessageRouter
                 return;
             nextQueryUpdateTime=time+QUERY_ROUTE_UPDATE_TIME;
 
-            System.out.println("Propogating route tables");
-
             //For all connections to new hosts c needing an update...
             //TODO3: use getInitializedConnections2?
             List list=_manager.getInitializedConnections();
@@ -871,9 +876,9 @@ public abstract class MessageRouter
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 ManagedConnectionQueryInfo qi=
                     (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
-                //TODO: we should distinguish between older clients and clients
-                //that just haven't sent us tables yet.
                 if (qi==null) {
+                    if (c.isOldClient())
+                        continue;
                     qi=new ManagedConnectionQueryInfo();
                     _queryInfoTable.put(c, qi);            
                 }
