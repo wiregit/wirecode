@@ -148,8 +148,7 @@ public final class UrnCache {
             oos.writeObject(URN_MAP);
             oos.close();
         } catch (Exception e) {
-            ErrorService.error(
-											  e);
+            ErrorService.error(e);
         }
     }
 
