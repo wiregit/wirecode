@@ -16,6 +16,6 @@ jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\xml\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\util\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\*.class
 REM Goto the GUI project to compile it with the new core
-cd ..\gui
+cd ..\gui\lib
 jar -i core.jar
 cd ..
