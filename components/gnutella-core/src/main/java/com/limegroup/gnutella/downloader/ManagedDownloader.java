@@ -2939,7 +2939,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the number of invalid alternate locations that this download is
      * using.
      */
-    public int getNumberOfInvalidAlternateLocations() {
+    public synchronized int getNumberOfInvalidAlternateLocations() {
         if ( invalidAlts == null ) return 0;
         return invalidAlts.size();
     }

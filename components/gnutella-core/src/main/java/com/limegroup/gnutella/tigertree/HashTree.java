@@ -453,7 +453,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
                 nodeOffset += read;
                 offset += read;
                 try {
-                    Thread.sleep((System.currentTimeMillis() - time) * 2);
+                    long sleep = (System.currentTimeMillis() - time) * 2;
+                    if(sleep > 0)
+                        Thread.sleep(sleep);
                 } catch (InterruptedException ie) {
                     throw new IOException("interrupted during hashing operation");
                 }
