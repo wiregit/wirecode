@@ -342,14 +342,14 @@ public final class Launcher {
 				System.out.print(" "+strs[i]);
 			}
 			try {
-				Process process = Runtime.getRuntime().exec(strs);
+				Runtime.getRuntime().exec(strs);
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		} else {
 			System.out.println("starting " + handler);
             String[] strs = {handler, path};
-            Process process = Runtime.getRuntime().exec(strs);
+            Runtime.getRuntime().exec(strs);
         }
     }
 }
