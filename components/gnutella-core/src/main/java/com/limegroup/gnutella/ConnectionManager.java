@@ -166,9 +166,11 @@ public class ConnectionManager implements Runnable {
 	// start the statistics thread
 	try{
 	    Stat s = new Stat(this);
+	    Thread stat = new Thread(s);
+	    stat.start();
 	}
-	catch(IOException e){
-	    ConnectionManager.error("I/O error in Statistics thread!");
+	catch(Exception e){
+	    ConnectionManager.error("Error in Statistics thread!");
 	}
 	while (true) {
 	    try {

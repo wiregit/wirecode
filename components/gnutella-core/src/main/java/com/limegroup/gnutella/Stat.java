@@ -18,23 +18,31 @@ public class Stat implements Runnable{
     Date d;
     ConnectionManager man;
     
-    public Stat(ConnectionManager cm)throws IOException{
+    public Stat(ConnectionManager cm){
 	cal = new GregorianCalendar();	    
 	man = cm;
-	pr = new PrintWriter(new FileOutputStream("stats.txt",true));
+	try{
+	    pr = new PrintWriter(new BufferedWriter(new FileWriter("stats.log",true)));
+	}
+	catch(Exception e){
+	    System.out.println("Failed to open file in stat thread");
+	}
     }
    
     public void run(){
 	while(true){
 	    try{
 		Thread.sleep(108000000); //sleep for 30 minutes
+		System.out.println("Sumeet: thread waking up");
 	    }
-	    catch(InterruptedException e){
-		continue;
+	    catch (Exception e){
+		System.out.println("Error in statistical thread");
 	    }
+
 	    Date d = cal.getTime();
 	    
 	    try{
+		System.out.println("Writing to file");
 		pr.println(d);//write the time
 		pr.println("Total messages seen : " + man.total);
 		pr.println("Ping requests : " + man.PReqCount + " (" + ((man.PReqCount*100)/man.total) +"%)" );
@@ -45,6 +53,7 @@ public class Stat implements Runnable{
 		pr.println("Total files : " + man.totalFiles );
 		pr.println("Total size : " + man.totalSize );
 		pr.println("-------------------------------------------------" );
+		pr.flush();
 	    }
 	    catch (Exception e){
 		System.out.println("Error in writing file");
