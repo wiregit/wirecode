@@ -239,10 +239,12 @@ public class Acceptor extends Thread {
         // onward.
         //1. Try suggested port.
 		int oldPort = tempPort;
+        Exception socketError = null;
         try {
 			setListeningPort(tempPort);
 			_port = tempPort;
         } catch (IOException e) {
+            socketError = e;
             //2. Try 10 different ports
             for (int i=0; i<10; i++) {
 				tempPort = i+6346;
@@ -250,13 +252,17 @@ public class Acceptor extends Thread {
                     setListeningPort(tempPort);
 					_port = tempPort;
                     break;
-                } catch (IOException e2) { }
+                } catch (IOException e2) { 
+                    socketError = e2;
+                }
             }
 
             // If we still don't have a socket, there's an error
-            if(_socket == null)
-                callback.error(ActivityCallback.PORT_ERROR);
+            if(_socket == null) {
+                callback.error(socketError);
+            }
         }
+        socketError = null;
 
         if (_port!=oldPort) {
             settings.setPort(_port);
