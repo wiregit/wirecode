@@ -323,6 +323,7 @@ public class Acceptor implements Runnable {
 
         if (_port!=oldPort) {
             settings.setPort(_port);
+            settings.writeProperties();
         }
 
         while (true) {
