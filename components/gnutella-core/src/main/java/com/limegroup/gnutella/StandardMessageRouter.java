@@ -303,9 +303,11 @@ public class StandardMessageRouter extends MessageRouter {
         int port = isFromMcast ?
             RouterService.getNonForcedPort() :
             RouterService.getPort();
-        byte[] ip = isFromMcast ? 
-            RouterService.getNonForcedAddress() :
-            RouterService.getAddress();
+        byte[] ip = isFromMcast ? RouterService.getNonForcedAddress() :
+                    (canFWTransfer ? RouterService.getExternalAddress() : 
+                     RouterService.getAddress());
+
+
         
         // get the xml collection string...
         String xmlCollectionString = 

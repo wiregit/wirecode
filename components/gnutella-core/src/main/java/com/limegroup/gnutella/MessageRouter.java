@@ -2246,11 +2246,13 @@ public abstract class MessageRouter {
                 (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
             // We should mark our hits if the remote end can do a firewalled
-            // transfer AND so can we AND we don't accept tcp incoming
+            // transfer AND so can we AND we don't accept tcp incoming AND our
+            // external address is valid (needed for input into the reply)
             final boolean fwTransfer = 
                 queryRequest.canDoFirewalledTransfer() && 
                 UDPService.instance().canReceiveSolicited() &&
-                !RouterService.acceptedIncomingConnection();
+                !RouterService.acceptedIncomingConnection() &&
+                NetworkUtils.isValidAddress(RouterService.getExternalAddress());
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.

@@ -930,10 +930,19 @@ public class DownloadManager implements BandwidthTracker {
             boolean requestSuccessful = false;
 
             // set up request
+
+            // if this is a FW to FW transfer, we must consider special stuff
             final boolean shouldDoFWTransfer = 
                 file.supportsFWTransfer() &&
                 UDPService.instance().canReceiveSolicited() &&
                 !RouterService.acceptedIncomingConnection();
+            if (shouldDoFWTransfer &&
+                !NetworkUtils.isValidAddress(RouterService.getExternalAddress())
+                )
+                // i can't do crap - i need a valid external address for this
+                // guy to talk to - no need to send a push cuz it won't work
+                return false;
+
             final String requestString = "/gnutella/push-proxy?ServerID=" + 
                 Base32.encode(file.getClientGUID()) +
                 // if this will result in a firewalled transfer, send the
@@ -941,7 +950,10 @@ public class DownloadManager implements BandwidthTracker {
                 (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) :
                  "");
             final String nodeString = "X-Node:";
-            final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;
+            byte[] nodeAddrToSend = shouldDoFWTransfer ?
+                                    RouterService.getExternalAddress() : addr;
+            final String nodeValue = NetworkUtils.ip2string(nodeAddrToSend) + 
+                                     ":" + port;
 
             // try to contact each proxy
             Iterator iter = proxies.iterator();
