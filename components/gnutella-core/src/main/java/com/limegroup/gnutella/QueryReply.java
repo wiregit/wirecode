@@ -742,14 +742,171 @@ public class QueryReply extends Message implements Serializable{
     }
 
 
-    public static boolean debugOn = false;
+	/**
+	 * This method calculates the quality of service for
+	 * a given host.  The calculation should be some function
+	 * of whether or not the host is busy, whether or not
+	 * the host has ever recieved an incoming connection,
+	 * and... what else?
+	 *   hops value
+	 *   speed?
+	 *   firewall? <- not as usefull as incoming/not incoming ?
+	 *
+	 * NOTE:
+	 * I dont really think this is the right place for this,
+	 * but for now I'll put it here.  I don't think it should
+	 * be in the QueryReply, but if not there, then I'm really
+	 * not sure where to put it.  Some other data structure?
+	 *
+     * NOTE2:
+     * QueryReply has need of this method now.  It is in TWO places,
+     * and i can't easily give access to it in StandardSearchView
+     * cuz that would be a gui dependency in core.
+	 */
+	private int calculateQualityOfService(QueryReply qr) {
+
+		int quality;
+		int busy;
+		int push;
+
+		Endpoint ep = new Endpoint(qr.getIP(), qr.getPort());
+
+		// check isPrivate
+
+		try {
+			if (qr.getIsBusy())
+				busy = 1;
+			else busy = -1;// 1 == TRUE, -1 == FALSE
+		} catch (BadPacketException e) {
+			busy = 0; // UNDECIDED
+		}
+
+		if ( ep.isPrivateAddress() )
+			push = 1;
+		else {
+			try {
+				if (qr.getNeedsPush()) // 1 == TRUE, -1 == FALSE
+					push = 1;
+				else push = -1;
+			} catch (BadPacketException e) {
+				push = 0; // UNDECIDED
+			}
+		}
+
+        
+        boolean iFirewalled = false;
+        if (RouterService.instance() != null)
+            iFirewalled = RouterService.instance().acceptedIncomingConnection();
+
+		/*********************************************************************
+         *  There are 9 possible QHD states, though only 7 can appear in the
+         *  wild.  Each state is shown below as (needsPush, isBusy), where -1
+         *  means FALSE, 0 means MAYBE, and 1 means TRUE.  A state (p1, b1) is
+         *  considered better than or equal to a state (p2, b2) if p1<=p2 and
+         *  b1<=b2.  This results in the partial order drawn below.
+         *
+		 *  The ranking function is a total order that rates a downloads
+         *  probability of success RIGHT NOW.  It does not account for speed.
+         *  This total order must be consistent with the partial order.  That
+         *  is, if a state s1 is less than s2 in the partial order, the
+         *  ranking for s1 must not be more than s2.
+         *
+         *          (push, busy)
+         *             -1,-1               4 stars (yes, it will work)
+         *               /\
+         *              /  \
+         *             /    \
+         *            /      \
+         *         -1,0       0,-1      
+         *   (early Bear)  (impossible)  
+         *           |  \    / |         
+         *           |   \  /  |         
+         *         -1,1  0,0  1,-1     
+         *           |   /  \  |         
+         *           |  /    \ |         
+         *          0,1       1,0      
+         *    (impossible)   /
+         *             \    /
+         *              \  /
+         *               \/
+         *              1,1               1 star  (no, it won't work)                    
+		 *
+         * The top and bottom points are easy.  What about the middle?  We use 
+         * the following rules:
+         *   a) anything busy is 1 star
+         *   c) a firewalled host is 1 star if I'm firewalled (push can't work)
+         *   b) a non-busy host is 3 stars if I'm not firewalled (push may work)
+         *   d) anything else is two stars
+         * 
+		 *  Note, however, that the returned value is 0-3, not 1-4.
+		 ********************************************************************/
+
+        if (push==-1 && busy==-1)
+            return 3;
+        else if (busy==1)                   //Rule a
+            return 0;
+        else if (iFirewalled && push==1)    //Rule b
+            return 0;
+        else if (!iFirewalled && busy==-1)  //Rule c
+            return 2;
+        else
+            return 1;                       //Rule d
+	}
+
+
+
+    /** Return all the responses in this QR as an array of
+     *    RemoteFileDescriptors.
+     *   @exception java.lang.Exception Thrown if attempt fails.
+     */
+    public RemoteFileDesc[] toRemoteFileDescArray() throws Exception {
+        List responses = null;
+        try { // get the responses, some data from them is needed...
+            responses = getResultsAsList();
+        }
+        catch (BadPacketException bpe) {
+            debug(bpe);
+            throw new Exception();
+        }
+    
+        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
+        
+        Iterator respIter = responses.iterator();
+        int index = 0;
+        // these will be used over and over....
+        final String ip = getIP();
+        final int port = getPort(), qual = calculateQualityOfService(this);
+        final long speed = getSpeed();
+        final byte[] clientGUID = getClientGUID();
+        final boolean supportsChat = getSupportsChat();
+        
+        // construct RFDs....
+        while (respIter.hasNext()) {
+            Response currResp = (Response) respIter.next();
+            retArray[index++] = new RemoteFileDesc(ip, port, 
+                                                   currResp.getIndex(),
+                                                   currResp.getName(),
+                                                   (int) currResp.getSize(),
+                                                   clientGUID, (int) speed,
+                                                   supportsChat, qual);
+        }
+        
+        return retArray;
+    }
+
+
+    public final static boolean debugOn = false;
     public static void debug(String out) {
         if (debugOn) 
             System.out.println(out);
     }
+    public static void debug(Exception e) {
+        if (debugOn) 
+            e.printStackTrace();
+    }
 
     /** Unit test.  TODO: these badly need to be factored. */
-    
+    /*    
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
         long u4=0x00000000FFFFFFFFl;
@@ -1164,6 +1321,6 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
         } catch (BadPacketException e) { }
     } //end unit test
-
+    */
 } //end QueryReply
     

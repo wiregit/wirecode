@@ -300,7 +300,8 @@ public class StandardMessageRouter
     {
         if (!receivingConnection.isPersonalSpam(queryReply)) {
             _callback.handleQueryReply(queryReply);
-            RouterService.sendQRToDownloadManager(queryReply);
+            if (RouterService.instance() != null) 
+                RouterService.instance().sendQRToDownloadManager(queryReply);
         }
     }
 

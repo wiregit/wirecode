@@ -54,7 +54,7 @@ public class RouterService
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
-    private static DownloadManager downloader;
+    private DownloadManager downloader;
     private UploadManager uploadManager;
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
@@ -63,6 +63,13 @@ public class RouterService
      * For authenticating users
      */
     private Authenticator authenticator;
+
+    private static RouterService me = null;
+    /* @return May return null, be careful....
+     */
+    public static RouterService instance() {
+        return me;
+    }
 
 	/**
 	 * Creates a unitialized RouterService.  No work is done until
@@ -81,6 +88,8 @@ public class RouterService
         this.fileManager = fManager;
         this.authenticator = authenticator;
 		Assert.setCallback(this.callback);
+        
+        me = this;
   	}
 
 	/**
@@ -464,7 +473,7 @@ public class RouterService
      * results in the GUI.)
      */
     public boolean acceptedIncomingConnection() {
-        return acceptor.acceptedIncoming();
+            return acceptor.acceptedIncoming();
     }
 
 
@@ -876,11 +885,7 @@ public class RouterService
         return manager.hasClientSupernodeConnection();
     }
 
-    /** NOTE: This is a HACK - a temporary one - There might be a better
-     *    way for StandardMessageRouter to talk to DownloadManager.
-     *    For the present, this suffices.....
-     */
-    static void sendQRToDownloadManager(QueryReply qr) {
+    public void sendQRToDownloadManager(QueryReply qr) {
         if (downloader != null)
             downloader.handleQueryReply(qr);
     }
