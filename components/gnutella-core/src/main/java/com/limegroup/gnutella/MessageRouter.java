@@ -1349,9 +1349,13 @@ public abstract class MessageRouter {
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions
         int limit = Math.min(4, list.size());
+        final boolean wantsOOB = qr.desiresOutOfBandReplies();
         for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);       
-            sendQueryRequest(qr, mc, FOR_ME_REPLY_HANDLER);
+			ManagedConnection mc = (ManagedConnection)list.get(i);
+            QueryRequest qrToSend = qr;
+            if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
+                qrToSend = QueryRequest.unmarkOOBQuery(qr);
+            sendQueryRequest(qrToSend, mc, FOR_ME_REPLY_HANDLER);
         }
     }
     

@@ -502,6 +502,21 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getNetwork(), qr.desiresOutOfBandReplies());
 	}
 
+	/**
+	 * Creates a new query from the existing query and loses the OOB marking.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @return a new <tt>QueryRequest</tt> with no OOB marking
+	 */
+	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
+		return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getQuery(),
+								qr.getRichQueryString(), 
+								qr.getRequestedUrnTypes(),
+								qr.getQueryUrns(), qr.getQueryKey(),
+								qr.isFirewalledSource(),
+								qr.getNetwork(), false);
+	}
+
     /**
      * Creates a new query with the specified query key for use in 
      * GUESS-style UDP queries.
