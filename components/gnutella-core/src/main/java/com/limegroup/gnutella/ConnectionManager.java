@@ -40,12 +40,15 @@ public class ConnectionManager implements Runnable {
     /* List of all connections.  This is implemented with two data structures: a list
      * for fast iteration, and a set for quickly telling what we're connected to.
      *
-     * LOCKING: obtain this' monitor before modifying connections or endpoints.
+     * LOCKING: connections and endpoints must NOT BE MUTATED.  Instead they should be
+     *          replaced as necessary with new copies.  Before replacing the structures,
+     *          obtain this' monitor.
+     *         
      * INVARIANT: "connections" contains no duplicates, and "endpoints" contains exactly
      * those endpoints that could be made from the elements of "connections".
      */
-    private List /* of Connection */ connections=new ArrayList();
-    private Set /* of Endpoint */ endpoints=new HashSet();
+    private volatile List /* of Connection */ connections=new ArrayList();
+    private volatile Set /* of Endpoint */ endpoints=new HashSet();
     /** List of all connection fetchers.  This is synchronized. */
     List /* of ConnectionFetcher */ fetchers=
 	Collections.synchronizedList(new ArrayList());
@@ -167,25 +170,27 @@ public class ConnectionManager implements Runnable {
 	routeTable.put(m.getGUID(), ME_CONNECTION);
     }
 
-    /** @modifies network
-     *
+    /**
+     *  @modifies network
      *  @effects sends the message m to all connections except c.  This is useful
      *   for forwarding a packet.  (You don't want to forward it to the originator!)
+     *   Underlying IO errors (e.g., because a connection has closed) are caught
+     *   and silently ignored.
      */
-    public synchronized void sendToAllExcept(Message m, Connection c) 
-	throws IOException {
-	//TODO2: use reader/writer lock to allow parallelism.  Avoid iterator.
+    public void sendToAllExcept(Message m, Connection c) {
 	Assert.that(m!=null);
-	Assert.that(c!=null);
 
 	//Eventually this code will be specialized a choose a "good" subset
 	//to forward to, especially on searches.
-	Iterator iter=connections.iterator();
-	while (iter.hasNext()) {
-	    Connection c2=(Connection)iter.next();
+	List connectionsSnapshot=connections;
+	int n=connectionsSnapshot.size();
+	for (int i=0; i<n; i++) {
+	    Connection c2=(Connection)connectionsSnapshot.get(i);
 	    Assert.that(c2!=null);
-	    if (! c2.equals(c)) {
-		c2.send(m);
+	    if (c2!=c) {
+		try {
+		    c2.send(m);
+		} catch (IOException e) { /* ignore */ }
 	    }
 	}
     }
@@ -193,19 +198,10 @@ public class ConnectionManager implements Runnable {
     /** 
      *  @modifies network
      *  @effects sends the message m to all connections.  This
-     *   is useful for intiating a ping or query.
+     *   is useful for intiating a ping or query. 
      */
-    public synchronized void sendToAll(Message m) 
-	throws IOException {
-	//TODO2: use reader/writer lock to allow parallelism.  Avoid iterator.
-	Assert.that(m!=null);
-
-	Iterator iter=connections.iterator();
-	while (iter.hasNext()) {
-	    Connection c2=(Connection)iter.next();
-	    Assert.that(c2!=null);
-	    c2.send(m);
-	}
+    public void sendToAll(Message m) {
+	sendToAllExcept(m, null);
     }
     
     /**
@@ -361,14 +357,28 @@ public class ConnectionManager implements Runnable {
         callback = connection;
     }
 
-    /** @requires c not in this
-     *  @effects adds c to this
+    /** 
+     *  Adds a connection.
+     * 
+     *  @requires c in the connected state
+     *  @modifies this
+     *  @effects if c already in this, does nothing; otherwise, adds c to this.
      */
     public synchronized void add(Connection c) {
-	Assert.that(!connections.contains(c));
-	
-	connections.add(c);
-	endpoints.add(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
+	if (connections.contains(c))
+	    return;
+
+	//REPLACE connections with the list connections+[c]
+	List newConnections=new ArrayList();
+	newConnections.addAll(connections);
+	newConnections.add(c);
+	connections=newConnections;
+
+	//REPLACE endpoints with the set endpoints+{c}
+	Set newEndpoints=new HashSet();
+	newEndpoints.addAll(endpoints);
+	newEndpoints.add(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
+	endpoints=newEndpoints;
 
 	// Tell the listener that this connection is okay.
 	if ( callback != null )
@@ -419,10 +429,21 @@ public class ConnectionManager implements Runnable {
     public synchronized void remove(Connection c) {
 	int i=connections.indexOf(c);
 	if (i != -1) {
+	    //REPLACE connections with the list connections-[c]
+	    List newConnections=new ArrayList();
+	    newConnections.addAll(connections);
+	    newConnections.remove(c);
+	    connections=newConnections;
+	    
+	    //REPLACE endpoints with the set endpoints+{c}
+	    Set newEndpoints=new HashSet();
+	    newEndpoints.addAll(endpoints);
+	    newEndpoints.remove(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
+	    endpoints=newEndpoints;
+
+	    //Clean up route tables.
 	    routeTable.remove(c);
 	    pushRouteTable.remove(c);
-	    connections.remove(i);
-	    endpoints.remove(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
 	    c.shutdown();//ensure that the connection is closed
 	    int need = keepAlive - getNumConnections() - fetchers.size();
 	    for (int j=0; j<need; j++) {
@@ -458,8 +479,9 @@ public class ConnectionManager implements Runnable {
     /**
      *  Returns the number of connections 
      */
-    public synchronized int getNumConnections() {
-	return connections.size();
+    public int getNumConnections() {
+	List connectionsSnapshot=connections;
+	return connectionsSnapshot.size();
     }
 
     /**Returns true if the given ClientID matches the ClientID of this host
@@ -480,8 +502,9 @@ public class ConnectionManager implements Runnable {
     /**
      * returns true if there is a connection to the given host. 
      */
-    public synchronized boolean isConnected(Endpoint host) {
-	return endpoints.contains(host);
+    public boolean isConnected(Endpoint host) {
+	Set endpointsSnapshot=endpoints;
+	return endpointsSnapshot.contains(host);
     }	
     
     /** Returns an iterator of a clone of this' connections.
@@ -489,9 +512,10 @@ public class ConnectionManager implements Runnable {
      *  to modify this while iterating through the elements of this, but
      *  the modifications will not be visible during the iteration.
      */
-    public synchronized Iterator connections() {
+    public Iterator connections() {
+	List connectionsSnapshot=connections;
 	List clone=new ArrayList();	
-	clone.addAll(connections);
+	clone.addAll(connectionsSnapshot);
 	return clone.iterator();
     }
 
@@ -515,7 +539,9 @@ public class ConnectionManager implements Runnable {
 
     /**
      *  Reset how many connections you want and start kicking more off
-     *  if required
+     *  if required.  This IS synchronized because we don't want threads
+     *  adding or removing connections while this is deciding whether
+     *  to add more threads.
      */
     public synchronized void adjustKeepAlive(int newKeep)
     {
@@ -553,25 +579,29 @@ public class ConnectionManager implements Runnable {
 
 //      public static void main(String args[]) {
 //  	try {
-//  	    //Tests ConnectionManager.connections()
-//  	    Const.KEEP_ALIVE=0;
 //  	    ConnectionManager cm=new ConnectionManager();
-//  	    Thread t=new Thread(cm);
-//  	    t.setDaemon(true);
-//  	    t.start();
-//  	    ConnectionManager cm2=new ConnectionManager(6349);
-//  	    Thread t2=new Thread(cm);
-//  	    t2.setDaemon(true);
-//  	    t2.start();
+//  	    Connection c1=new Connection("localhost", 3333);
+//  	    c1.connect();
+//  	    Connection c2=new Connection("localhost", 3333);
+//  	    c2.connect();
 
-//  	    Connection c1=new Connection(cm2, "localhost", 6346);
-//  	    Iterator iter=cm2.connections();	    
-//  	    Connection c2=new Connection(cm2, "localhost", 6346);
+//  	    //Note that modifications are not reflected in the iterator.
+//  	    cm.add(c1);
+//  	    Iterator iter=cm.connections();	    
+//  	    cm.remove(c1);
+//  	    cm.add(c2);
 //  	    Assert.that(iter.next()==c1);
 //  	    Assert.that(! iter.hasNext());
+
+//  	    //You should be able to remove elements not in there, and add
+//  	    //elements already in there (without duplicates)
+//  	    cm.remove(c1);
+//  	    cm.add(c2);
+//  	    iter=cm.connections();
+//  	    Assert.that(iter.next()==c2);
+//  	    Assert.that(! iter.hasNext());
 //  	} catch (IOException e) {
-//  	    e.printStackTrace();
-//  	    Assert.that(false);
+//  	    System.out.println("Couldn't connect to host.  Try again.");
 //  	}
 //      }
 }
