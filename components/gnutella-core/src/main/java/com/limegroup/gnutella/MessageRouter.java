@@ -1967,26 +1967,29 @@ public abstract class MessageRouter {
 
     private void handleStatisticsMessage(final StatisticVendorMessage svm, 
                                          final ReplyHandler handler) {
-        Thread statHandler = new Thread("Stat writer ") {
-            public void run() {
-                RandomAccessFile file = null;
-                try {
-                    file = new RandomAccessFile("stats_log.log", "rw");
-                    file.seek(file.length());//go to the end.
-                    file.writeBytes(svm.getReportedStats()+"\n");
-                } catch (IOException iox) {
-                    ErrorService.error(iox);
-                } finally {
+        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
+            Thread statHandler = new Thread("Stat writer ") {
+                public void run() {
+                    RandomAccessFile file = null;
                     try {
-                        file.close();
+                        file = new RandomAccessFile("stats_log.log", "rw");
+                        file.seek(file.length());//go to the end.
+                        file.writeBytes(svm.getReportedStats()+"\n");
                     } catch (IOException iox) {
                         ErrorService.error(iox);
+                    } finally {
+                        if(file != null) {
+                            try {
+                                file.close();
+                            } catch (IOException iox) {
+                                ErrorService.error(iox);
+                            }
+                        }
                     }
                 }
-            }
-        };
-        if(StatisticsSettings.RECORD_VM_STATS.getValue())
+            };
             statHandler.start();
+        }
     }
 
     /**
