@@ -22,7 +22,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     public static Test suite() {
-        return buildTestSuite(ManagedDownloaderTest.class);
+        return buildTestSuite(ManagedDownloaderTest.class,"testLegacy");
     }
     
     public void setUp() {
@@ -31,8 +31,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
     public void testLegacy() throws Exception {
         //Test removeBest
-        Set urns1 = new TreeSet();
-        Set urns2 = new TreeSet();
+        Set urns1 = new HashSet();
+        Set urns2 = new HashSet();
         try {
             urns1.add(URN.createSHA1Urn(
                          "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
