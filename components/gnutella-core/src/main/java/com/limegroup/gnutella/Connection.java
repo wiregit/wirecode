@@ -227,6 +227,12 @@ public class Connection {
      * multiple threads caching old data for the ping time.
      */
     private volatile long _nextPingTime = Long.MIN_VALUE;
+
+    /**
+     * Variable for the next time to allow a pong.  Volatile to avoid
+     * multiple threads caching old data for the pong time.
+     */
+    private volatile long _nextPongTime = Long.MIN_VALUE;
     
     /**
      * Cache the 'connection closed' exception, so we have to allocate
@@ -1309,6 +1315,11 @@ public class Connection {
         return _headers.isGoodLeaf();
     }
 
+    // inherit doc comment
+    public boolean supportsPongCaching() {
+        return _headers.supportsPongCaching();
+    }
+
     /**
      * Returns whether or not we should allow new pings on this connection.  If
      * we have recently received a ping, we will likely not allow the second
@@ -1328,6 +1339,28 @@ public class Connection {
     // inherit doc comment
     public void updatePingTime() {
         _nextPingTime = System.currentTimeMillis() + 800;
+    }
+
+    /**
+     * Returns whether or not we should allow new pongs on this connection.  If
+     * we have recently received a pong, we will likely not allow the second
+     * pong to go through to avoid flooding the network with pong traffic.
+     * In practice, this is only used to limit pongs sent to leaves.
+     *
+     * @return <tt>true</tt> if new pongs are allowed along this connection,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean allowNewPongs() {
+        long curTime = System.currentTimeMillis();
+        if(curTime < _nextPongTime) {
+            return false;
+        } 
+        return true;
+    }
+
+    // inherit doc comment
+    public void updatePongTime() {
+        _nextPongTime = System.currentTimeMillis() + 2000;
     }
 
 	/**
