@@ -35,6 +35,8 @@ public class UpdateManager {
      * true if message is as per the user's language  preferences.
      */
     private boolean usesLocale;
+
+    private static final long SEVEN_HOURS = 7*60*60*1000;//7 hours
     
     private static UpdateManager INSTANCE=null;
 
@@ -222,14 +224,25 @@ public class UpdateManager {
                         String runningVersion=CommonUtils.getLimeWireVersion();
                         if(!isGreaterVersion(newVersion, runningVersion))
                             return; //runningVersion <= newVersion -- no message
+                        
                         //OK. We don't want to DDOS ourselves so lets sleep 
                         //for a random amount of time.
-                        Random rand = new Random();
-                        long max = 7*60*60*1000;//7 hours
-                        long sleep = rand.nextLong() % max;
-                        try {
-                            Thread.sleep(sleep);
-                        } catch(InterruptedException ignored) {}
+                        //Find the publish time of the update.xml file
+                        long makeTime = parser.getTimestamp();
+                        if(makeTime == -1)//timestammp not in file?? huh??
+                            makeTime = System.currentTimeMillis();
+                        
+                        //if the file has just been released, sleep randomly up
+                        //to seven hours, otherwise if it's been seven hours
+                        //since the file was published, we can show the user and
+                        //update right now.
+                        if(System.currentTimeMillis() < makeTime+SEVEN_HOURS) {
+                            Random rand = new Random();
+                            long sleep = rand.nextLong() % SEVEN_HOURS;
+                            try {
+                                Thread.sleep(sleep);
+                            } catch(InterruptedException ignored) {}
+                        }
                         RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(IOException iox) {

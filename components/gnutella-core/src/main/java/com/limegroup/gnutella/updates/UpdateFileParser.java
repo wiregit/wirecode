@@ -24,9 +24,12 @@ public class UpdateFileParser {
 
     private boolean usingLocale = true;
 
+    private long timestamp;
+
     public UpdateFileParser(String xml) throws SAXException, IOException {
         if(xml==null || xml.equals(""))
             throw new SAXException("xml is null or empty string");
+        timestamp = -1l;
         InputSource inputSource = new InputSource(new StringReader(xml));
         Document d = null;
         synchronized(this.parser) {
@@ -38,20 +41,28 @@ public class UpdateFileParser {
         populateValues(d);
     }
     
-    private void populateValues(Document doc) {
+    private void populateValues(Document doc) throws IOException {
         Element docElement = doc.getDocumentElement();
         //Note: We are assuming that the XML structure will have no attributes.
         //only child elements. We can make this assumption because we are the
         //XML is generated right here in house at LimeWire.
         NodeList children = docElement.getChildNodes();
         int len = children.getLength();
-        for(int i=0; i<len; i++) { //this versions only looks for version
+        for(int i=0; i<len; i++) { //parse the nodes.
             Node node = children.item(i);
             String name = node.getNodeName().toLowerCase().trim();
             if(name.equals("version")) 
                 newVersion = LimeXMLUtils.getText(node.getChildNodes());
             else if(name.equals("message"))
                 updateMessage = getLocaleSpecificMessage(node);
+            else if(name.equals("timestamp")) {
+                try {
+                    timestamp = 
+                    Long.parseLong(LimeXMLUtils.getText(node.getChildNodes()));
+                } catch (NumberFormatException nfx) {
+                    throw new IOException();
+                }
+            }
         }
     }
     
@@ -95,6 +106,10 @@ public class UpdateFileParser {
         return newVersion;
     }
     
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     /**
      * @return true if the message was picked up as per the locale, else false
      */
