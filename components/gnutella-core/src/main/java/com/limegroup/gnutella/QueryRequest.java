@@ -2,17 +2,18 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.guess.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 
 /**
  * A Gnutella query request method.  In addition to a query string, queries can
- * include a minimum size string and metadata.  There are four constructors in
- * this to make new outgoing messages from scratch.  Two of them take GUIDs as
- * arguments; this allows the GUI to prepare a result panel <i>before</i>
- * sending the query to the network.  One takes a isRequery argument; this is
- * used for automatic re-query capabilities (DownloadManager).
+ * include a minimum size string, metadata, URN info, and a QueryKey.  There are
+ * seven constructors in this to make new outgoing messages from scratch.
+ * Several take GUIDs as arguments; this allows the GUI to prepare a result
+ * panel <i>before</i> sending the query to the network.  One takes a isRequery
+ * argument; this is used for automatic re-query capabilities (DownloadManager).
  */
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
@@ -34,6 +35,11 @@ public class QueryRequest extends Message implements Serializable{
 	 * Specific URNs requested.
 	 */
     private final Set /* of URN */ queryUrns;
+
+    /**
+     * The Query Key associated with this Query.
+     */
+    private QueryKey queryKey = null;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -58,7 +64,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
 						String richQuery) {
-        this(guid, ttl, minSpeed, query, richQuery, false, null, null);
+        this(guid, ttl, minSpeed, query, richQuery, false, null, null, null);
     }
 
     /**
@@ -74,7 +80,8 @@ public class QueryRequest extends Message implements Serializable{
      * Builds a new query from scratch, with no metadata, with a default GUID.
      */
     public QueryRequest(byte ttl, int minSpeed, String query) {
-        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null);
+        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null,
+             null);
     }
 
 
@@ -85,7 +92,7 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, boolean isRequery) {
         this(newQueryGUID(isRequery), ttl, minSpeed, query, "", isRequery, 
-			 null, null);
+			 null, null, null);
     }
 
 
@@ -97,7 +104,7 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery,
                         boolean isRequery) {
         this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, isRequery, 
-			 null, null);
+			 null, null, null);
     }
 
     /**
@@ -114,6 +121,26 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns) {
+        this(guid, ttl, minSpeed, query, richQuery, isRequery,
+             requestedUrnTypes, queryUrns, null);
+    }
+
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery,
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
         this.minSpeed=minSpeed;
@@ -140,7 +167,8 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			tempQueryUrns = new HashSet();
 		}
-			
+        if (queryKey != null)
+            this.queryKey = queryKey;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -198,6 +226,7 @@ public class QueryRequest extends Message implements Serializable{
 		int tempMinSpeed = 0;
 		Set tempQueryUrns = null;
 		Set tempRequestedUrnTypes = null;
+        QueryKey tempQueryKey = null;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(this.payload);
 			short sp = ByteOrder.leb2short(bais);
@@ -254,6 +283,7 @@ public class QueryRequest extends Message implements Serializable{
 			this.requestedUrnTypes =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
+        queryKey = tempQueryKey;
     }
 
     /**
@@ -318,6 +348,15 @@ public class QueryRequest extends Message implements Serializable{
 	 */
     public int getMinSpeed() {
         return minSpeed;
+    }
+
+    
+    /**
+     * Returns the QueryKey associated with this Request.  May very well be
+     * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
+     */
+    public QueryKey getQueryKey() {
+        return queryKey;
     }
 
 	// inherit doc comment
