@@ -277,11 +277,7 @@ public final class SettingsManager {
 	/**
 	 * The default classpath.
 	 */
-	public static final String DEFAULT_CLASSPATH = 
-		DEFAULT_JAR_NAME+File.pathSeparator+
-		"collections.jar"+File.pathSeparator+
-		"xerces.jar"+File.pathSeparator+
-		"jl011.jar";
+	public static final String DEFAULT_CLASSPATH = DEFAULT_JAR_NAME;
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
