@@ -312,7 +312,7 @@ public class LimeXMLReplyCollection{
         return schemaURI;
     }
 
-    public void addReply(URN hash,LimeXMLDocument replyDoc){
+    public void addReply(URN hash,LimeXMLDocument replyDoc) {
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
@@ -638,10 +638,10 @@ public class LimeXMLReplyCollection{
 
     }
 
-    private final static boolean debugOn = false;
+    private final static boolean debugOn = true;
     private final static void debug(String out) {
         if (debugOn)
-            debug(out);
+            System.out.println(out);
     }
     private final static void debug(Exception out) {
         if (debugOn)
