@@ -9,30 +9,59 @@ import java.net.*;
 /** 
  * A smart download.  Tries to get a group of similar files by delegating
  * to HTTPDownloader objects.  Does retries and resumes automatically.
- * Reports all changes to a DownloadManager.  This class is thread safe.
+ * Reports all changes to a DownloadManager.  This class is thread safe.<p>
+ *
+ * Smart downloads can use many policies, and these policies are free to
+ * change as allowed by the Downloader specification.  This implementation
+ * uses the following policy:
+ *
+ * <ol>
+ *   <li>Try normal downloads from all locations that are not private and
+ *       do not have the push flag set.  Try these one at a time, from
+ *       fastest to slowest.
+ *   <li>Send push requests to any N hosts that we weren't reached above,
+ *       in parallel.  N is currently 6, but typically fewer pushes are 
+ *       typically sent.  If N is small, this could be prioritized too.
+ *   <li>Wait a fixed amount of time for pushes to come in.   The first
+ *       push to come in (if any!) is handled.  This wait time is fairly
+ *       large, as it behaves as the retry window.
+ *   <li>If all of the above fails, repeat the whole process.  However
+ *       after two failed push attempts, never try a host again.
+ * </ol>
+ *
+ * Note that the whole process will be repeated as long as we get the busy
+ * signal from a host.
  */
 public class ManagedDownloader implements Downloader {
     /* LOCKING: obtain this's monitor before modifying any of these. */
 
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
-    /** The files to get. */
-    private RemoteFileDesc[] files;
+    /** The files to get, each represented by a RemoteFileDesc. 
+     *  INVARIANT: files is sorted by priority. */
+    private List /* RemoteFileDesc */ files;
+    /** The files to get by pushes, each represented by a RFDPushPair.
+     *  These are not sorted.  They contain former members of files. */
+    private List /* of RFDPushPair */ pushFiles=new LinkedList();
     
     ///////////////////////// Policy Controls ///////////////////////////
     /** The number of tries to make */
-    private static final int TRIES=5;
+    private static final int TRIES=100;
+    /** The max number of push tries to make, per host. */
+    private static final int PUSH_TRIES=2;
+    /** The max number of pushes to send in parallel. */
+    private static final int PARALLEL_PUSH=6;
     /** The amount of time to wait before retrying in milliseconds, This is also
      *  the time to wait for incoming pushes to arrive.  TODO: increase 
      *  exponentially with number of tries.   WARNING: if WAIT_TIME and
      *  CONNECT_TIME are much smaller than the socket's natural timeout,
      *  memory will be consumed since threads don't die! */
-    private static final int WAIT_TIME=30000;     //30 seconds
+    private static final int WAIT_TIME=30000;    //30 seconds
     /** The time to wait trying to establish each connection, in milliseconds.*/
-    private static final int CONNECT_TIME=10000;  //8 seconds
+    private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
      *  incoming push connection. */
-    private final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
+    private final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
 
 
     ////////////////////////// Core Variables ////////////////////////////
@@ -74,9 +103,15 @@ public class ManagedDownloader implements Downloader {
      */
     public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
         this.manager=manager;
-        this.files=files;
-        setState(QUEUED);
 
+        //Sort files by size and store in this.files.  Note that Arrays.sort(..)
+        //sorts in ASCENDING order, so we iterate through the array backwards.
+        Arrays.sort(files, new RemoteFileDesc.RemoteFileDescComparator());        
+        this.files=new LinkedList();
+        for (int i=files.length-1; i>=0; i--)
+            this.files.add(files[i]);       
+
+        setState(QUEUED);
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
         dloaderThread.setDaemon(true);
         dloaderThread.start();
@@ -144,10 +179,6 @@ public class ManagedDownloader implements Downloader {
         manager.remove(this, false);
     }
 
-//      public synchronized void resume() {
-//          Assert.that(false, "TODO1: not implemented");
-//      }
-
     /** Actually does the download. */
     private class ManagedDownloadRunner implements Runnable {
         public void run() {
@@ -158,6 +189,10 @@ public class ManagedDownloader implements Downloader {
             try {
                 boolean success;
                 for (int i=0; i<TRIES && !stopped; i++) {
+                    //Nothing left to do?
+                    if (files.size()==0 && pushFiles.size()==0)
+                        break;
+                    
                     //1. Try all normal downloads first.  Exit if success.
                     success=tryNormalDownloads();
                     if (success) {
@@ -166,9 +201,7 @@ public class ManagedDownloader implements Downloader {
                     }
                     
                     //2. Send pushes for those hosts that we couldn't connect to.
-                    //   But only try this twice.
-                    if (i<2)
-                        sendPushes();
+                    sendPushes();
 
                     //3. Wait a while before retrying.  Accept any pushes.
                     success=waitForPushDownloads();
@@ -201,26 +234,32 @@ public class ManagedDownloader implements Downloader {
 
         /** Tries download from all locations.  Blocks waiting for a download
          *  slot first.  Returns true iff a location succeeded.  Throws
-         *  InterruptedException if a call to stop() is detected.  */
-        private boolean tryNormalDownloads() throws InterruptedException {            
+         *  InterruptedException if a call to stop() is detected.  
+         *      @modifies this.files, this.pushFiles, network  */
+        private boolean tryNormalDownloads() throws InterruptedException {   
             try {
                 setState(QUEUED);
                 manager.waitForSlot(ManagedDownloader.this);
-                for (int j=0; j<files.length; j++) {                
-                    RemoteFileDesc rfd=files[j];                
+                for (Iterator iter=files.iterator(); iter.hasNext(); ) {
+                    RemoteFileDesc rfd=(RemoteFileDesc)iter.next();                
                     //As an optimization, we can skip normal download attempts
                     //from private IP addresses.  If the host is on the same
                     //private network as us, a push download should work anyway.
                     //If the host is on a different network, this wouldn't
                     //possibly work.  TODO2: look at push flag here as well.
-                    if (isPrivate(rfd))
+                    if (isPrivate(rfd)) {
+                        iter.remove();
+                        pushFiles.add(new RFDPushPair(rfd));
                         continue;
+                    }
                     try {
                         //Make a new downloader.  Only actually start it if this
                         //is still wanted.  The construction of the downloader
                         //cannot go in the synchronized statement since it may
                         //be blocking.
                         setState(CONNECTING, rfd.getHost());
+//                          System.out.println("Trying normal download from "
+//                                             +rfd.getHost());
                         HTTPDownloader dloader2=new HTTPDownloader(
                             rfd.getFileName(), rfd.getHost(), rfd.getPort(),
                             rfd.getIndex(), rfd.getClientGUID(),
@@ -236,14 +275,20 @@ public class ManagedDownloader implements Downloader {
                         dloader.start();
                         setState(COMPLETE);
                         return true;
+                    } catch (TryAgainLaterException e) {
+                        //Go on to next one.  We will try normal attempt later.
+//                          System.out.println("    Got busy signal.");
+                        continue;
                     } catch (IOException e) {
-                        //Was this forcibly closed?  Or was it a normal IO
-                        //problem?  TODO2: if this is interrupted, retry same
-                        //file.
+                        //Was this forcibly closed? 
                         synchronized (ManagedDownloader.this) {
                             if (stopped)
                                 throw new InterruptedException();
                         }
+                        //Nope, it was a normal IO problem.  Try push later.
+                        //TODO2: if this is interrupted, retry same file.
+                        iter.remove();  //Don't call files.remove(..)!
+                        pushFiles.add(new RFDPushPair(rfd));
                     }
                 }
                 return false;
@@ -252,26 +297,38 @@ public class ManagedDownloader implements Downloader {
             }
         }
 
-        /** Sends pushes to all private locations. */
+        /** Sends pushes to those locations we couldn't connect to above. 
+         *      @modifies this.pushFiles, network */
         private void sendPushes() {
             //Just to ensure memory is bounded, remove old push request from
             //list.  This is different than requested.clear()!
             synchronized (ManagedDownloader.this) {
                 purgeOldPushRequests();
             }
-            //TODO2: don't send pushes to hosts that we connected to above
-            //but couldn't download from.
-            for (int j=0; j<files.length; j++) {
-                RemoteFileDesc rfd=files[j];                
+            //For each file that needs a push.  Just to be safe we limit
+            //the number of pushes sent at any time.
+            Iterator iter=pushFiles.iterator();
+            for (int i=0; i<PARALLEL_PUSH && iter.hasNext(); i++) {
+                //Send the push. Mark that we requested the file, for
+                //authentication purposes.
+                RFDPushPair pair=(RFDPushPair)iter.next();
+                RemoteFileDesc rfd=pair.rfd;
                 PushRequestedFile prf=new PushRequestedFile(rfd.getClientGUID(),
                                                             rfd.getFileName(),
                                                             rfd.getIndex());
                 synchronized (ManagedDownloader.this) {
-                    //Mark that we requested the file, for authentication
-                    //purposes.
                     requested.add(prf);
                 }
                 manager.sendPush(rfd);
+//                  System.out.println("Sending push to "+rfd.getHost());
+
+                //Increment and check attempts variable.
+                pair.pushAttempts++;
+                if (pair.pushAttempts>=PUSH_TRIES) {
+                    iter.remove();   //can't call pushFiles.remove(..)
+                    continue;
+                }          
+                
             }
         }
 
@@ -395,15 +452,19 @@ public class ManagedDownloader implements Downloader {
     public synchronized String getFileName() {
         if (dloader!=null)
             return dloader.getFileName();
+        else if (! files.isEmpty())
+            return ((RemoteFileDesc)files.get(0)).getFileName();
         else
-            return files[0].getFileName();  //better than nothing
+            return null;
     }
 
     public synchronized int getContentLength() {
         if (dloader!=null)
             return dloader.getFileSize();
+        else if (! files.isEmpty())
+            return ((RemoteFileDesc)files.get(0)).getSize();
         else
-            return files[0].getSize();     //better than nothing
+            return 0;
     }
 
     public synchronized int getAmountRead() {
@@ -418,3 +479,20 @@ public class ManagedDownloader implements Downloader {
     }
 }
 
+/** A RemoteFileDesc and the number of times we've tries to push it. */
+class RFDPushPair {
+    /** The file to get and its location. */
+    final RemoteFileDesc rfd;
+    /** The number of times we've already attempted a push. */
+    int pushAttempts;
+    
+    /** Creates a new RFDPushPair with zero push attempts. */
+    public RFDPushPair(RemoteFileDesc rfd) {
+        this.rfd=rfd;
+        this.pushAttempts=0;
+    }
+
+    public String toString() {
+        return "<"+rfd.getHost()+", "+rfd.getSpeed()+", "+pushAttempts+">";
+    }
+}
