@@ -336,7 +336,7 @@ public class SettingsManager implements SettingsInterface
 			try {setQuickConnectHosts(decode(p));}
 			catch (IllegalArgumentException ie){}
 		    }
-		else if(key.equals(SettingsManager.SEARCH_ANIMATION_TIME))
+		else if(key.equals(SettingsInterface.SEARCH_ANIMATION_TIME))
 		    {			
 			try {
 			    i = Integer.parseInt(p);
@@ -345,20 +345,20 @@ public class SettingsManager implements SettingsInterface
 			} catch(NumberFormatException nfe){}   	
 		    }
 
-		else if(key.equals(SettingsManager.SAVE_DEFAULT)){
+		else if(key.equals(SettingsInterface.SAVE_DEFAULT)){
 		    try{setSaveDefault(p);}
 		    catch(IllegalArgumentException e){}
 		}
 
-		else if(key.equals(SettingsManager.INSTALL_DIR)) {
+		else if(key.equals(SettingsInterface.INSTALL_DIR)) {
 		    try{setInstallDir(p);}
 		    catch(IllegalArgumentException e){}
 		}
-		else if(key.equals(SettingsManager.CONNECT_STRING)) {
+		else if(key.equals(SettingsInterface.CONNECT_STRING)) {
 		    try{setConnectString(p);}
 		    catch(IllegalArgumentException e){}
 		}
-		else if(key.equals(SettingsManager.CONNECT_OK_STRING)){
+		else if(key.equals(SettingsInterface.CONNECT_OK_STRING)){
 		    try{setConnectOkString(p);}
 		    catch(IllegalArgumentException e){}
 		}

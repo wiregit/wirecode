@@ -67,7 +67,7 @@ public interface SettingsInterface
 
     /** set the user time to live */
     public void setTTL(byte ttl) 
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the soft maximum time to live (TTLs above this are readjusted) */
     public void setSoftMaxTTL(byte smaxttl)
@@ -75,23 +75,23 @@ public interface SettingsInterface
 
     /** set the hard maximum time to live (TTLs above this are dropped) */
     public void setMaxTTL(byte maxttl) 
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
    
     /** set the maximum length of packets */
     public void setMaxLength(int maxLength)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the timeout */
     public void setTimeout(int timeout)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
     
     /** set the keep alive */
     public void setKeepAlive(int keepAlive)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the port */
     public void setPort(int port)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
     
     /** set the network connection speed */
     public void setConnectionSpeed(int speed)
@@ -99,39 +99,39 @@ public interface SettingsInterface
 
     /** set the maximum number of searches */
     public void setSearchLimit(byte limit)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the boolean specifying whether 
      *  the stats file exists 
      */
     public void setStats(boolean stats)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the client (gu) id */
     public void setClientID(String clientID)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** set the maximum number of connections */
     public void setMaxConn(int maxConn)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** sets the directory for saving files*/
     public void setSaveDirectory(String dir)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
     /** sets the default directory for saving files*/
     public void setSaveDefault(String dir)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** sets the string list of directories*/
     public void setDirectories(String directories)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
     
     /** sets the string of extensions*/
     public void setExtensions(String extensions)
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
    
     public void setBannedIps(String[] ips) 
-	throws IllegalArgumentException;
+		throws IllegalArgumentException;
 
     /** Set the list of words to ban in queries. 
      *  If words is not a semicolon-separated list of white-space
