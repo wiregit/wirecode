@@ -273,7 +273,7 @@ public class ID3Editor{
                 file.write(0);//separator b/w comment and track(track is optional)
                 file.write(trackByte);
             } catch(IOException e){
-                return LimeXMLReplyCollection.RW_ERROR;
+                return LimeXMLReplyCollection.FAILED_TRACK;
             }
             
             //genre
@@ -285,12 +285,6 @@ public class ID3Editor{
                 file.write(genreByte);
             } catch(IOException e) {
                 return LimeXMLReplyCollection.FAILED_GENRE;
-            }
-    
-            try{
-                file.close();
-            }catch(IOException ioe){
-                return LimeXMLReplyCollection.RW_ERROR;
             }
             //come this far means we are OK.
             return LimeXMLReplyCollection.NORMAL;

@@ -415,17 +415,17 @@ public class LimeXMLReplyCollection{
     whether you should commit this ID3 to disk, second is the new hash (String)
     of the file, and third is the ID3Editor to use....
      */
-    private Object[] ripMP3XML(String modifiedFile) {
+    private Object[] ripMP3XML(String mp3File) {
         Object[] retObjs = new Object[3];
         retObjs[0] = Boolean.FALSE;
 
-        if (!LimeXMLUtils.isMP3File(modifiedFile))
+        if (!LimeXMLUtils.isMP3File(mp3File))
             return retObjs;
 
         String hash = null;
         
         try {
-            hash = new String(LimeXMLUtils.hashFile(new File(modifiedFile)));
+            hash = new String(LimeXMLUtils.hashFile(new File(mp3File)));
         } catch(IOException ioe) {
             return retObjs;
         }
@@ -454,11 +454,14 @@ public class LimeXMLReplyCollection{
 
 
     private int commitID3Data(String mp3FileName,
-                              String changedHash,
+                              String oldHash,
                               ID3Editor editor) {
         //write to mp3 file...
         int retVal = editor.writeID3DataToDisk(mp3FileName);
-        if (retVal != NORMAL)
+        // any error where the file wasn't changed ... 
+        if( retVal == FILE_DEFECTIVE ||
+            retVal == RW_ERROR ||
+            retVal == BAD_ID3 )
             return retVal;
         
         //Note: above operation has changed the hash of the file.
@@ -471,18 +474,26 @@ public class LimeXMLReplyCollection{
             retVal = HASH_FAILED;
             return retVal;
         }
+
+        // nothing changed, no need to notify anyone, just
+        // make sure we persist the current map.        
+        if( newHash.equals(oldHash) ) {
+            write();
+            return retVal;
+        }
         
         synchronized (mainMap) {
-            Object mainValue = mainMap.remove(changedHash);
+            Object mainValue = mainMap.remove(oldHash);
             mainMap.put(newHash, mainValue);
         }
+
         //replace the old hashValue
         metaFileManager.writeToMap(file, newHash);
         //Since the hash of the file has changed, the metadata pertaiing 
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        metaFileManager.handleChangedHash(changedHash, newHash, this);
+        metaFileManager.handleChangedHash(oldHash, newHash, this);
         return retVal;
     }
 
