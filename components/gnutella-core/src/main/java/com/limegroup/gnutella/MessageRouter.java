@@ -674,46 +674,34 @@ public abstract class MessageRouter {
         broadcastPingRequest(ping, null, _manager);
     }
 
-    /**
-     * Broadcasts the query request to all initialized connections,
-     * setting up the proper reply routing.
-     */
-    public void broadcastQueryRequest(QueryRequest request) {
-		if(request == null) {
-			throw new NullPointerException("null query request");
-		}		
-        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
-        //if (RouterService.isGUESSCapable()) {
-		//unicastQueryRequest(request, null);
-		//} else {
-		broadcastQueryRequest(request, FOR_ME_REPLY_HANDLER);
-		//}
-    }
-
 	/**
 	 * Generates a new dynamic query.  This method is used to send a new 
 	 * dynamic query from this host (the user initiated this query directly,
 	 * so it's replies are intended for this node.
 	 *
-	 * @param qh the <tt>QueryHandler</tt> instance that generates
+	 * @param query the <tt>QueryRequest</tt> instance that generates
 	 *  queries for this dynamic query
 	 * @throws <tt>NullPointerException</tt> if the <tt>QueryHandler</tt> 
 	 *  argument is <tt>null</tt>
 	 */
-	public void sendDynamicQuery(QueryHandler qh) {
-		if(qh == null) {
+	public void sendDynamicQuery(QueryRequest query) {
+		if(query == null) {
 			throw new NullPointerException("null QueryHandler");
 		}
 		// get the result counter so we can track the number of results
 		ResultCounter counter = 
-			_queryRouteTable.routeReply(qh.getGUID(), 
+			_queryRouteTable.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
 			// create a query to send to leaves
-			forwardQueryRequestToLeaves(qh.createQuery((byte)1), 
+			forwardQueryRequestToLeaves(query, 
 										FOR_ME_REPLY_HANDLER);
-		}
-		sendDynamicQuery(qh, FOR_ME_REPLY_HANDLER, counter);
+			sendDynamicQuery(QueryHandler.createHandler(query), 
+							 FOR_ME_REPLY_HANDLER, counter);
+		} else {
+			broadcastQueryRequest(query, FOR_ME_REPLY_HANDLER);
+		} 
+		
 	}
 
 	/**
