@@ -529,9 +529,6 @@ public class NIOHandshaker extends AbstractHandshaker {
                 write();
             }
     
-            if(_headerReader.hasRemainingData()) {
-                System.out.println("extra data after outgoing handshake!!!");
-            }
             // we're all done with reading
             return null;
         }
