@@ -147,7 +147,7 @@ public class LimeXMLReplyCollection{
             // if i've gotten this far, the doc is non-null and should be added.
             addReply(hash, doc);
         }
-        checkDocuments(fileToHash, false);
+        checkDocuments(fileToHash);
         }
     
         debug("LimeXMLReplyCollection(): returning.");
@@ -177,7 +177,7 @@ public class LimeXMLReplyCollection{
      *  LimeXMLDocument with the actual file name of the file the
      *  LimeXMLDocument refers to.
      */
-    private void checkDocuments(Map fileToHash, boolean mp3){
+    private void checkDocuments(Map fileToHash){
         synchronized (fileToHash) {
         // FLOW:
         // 1. get the set of files
@@ -423,7 +423,6 @@ public class LimeXMLReplyCollection{
             synchronized (mainMap) {
                 doc = (LimeXMLDocument) mainMap.get(hash);
             }
-            String fName = doc.getIdentifier();
             if (LimeXMLUtils.isMP3File(modifiedFile)) {
                 ID3Editor e = new ID3Editor();
                 String xml = doc.getXMLStringWithIdentifier();
