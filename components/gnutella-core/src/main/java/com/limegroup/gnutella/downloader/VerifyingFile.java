@@ -19,17 +19,24 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 
 
 /**
- * All the HTTPDownloaders associated with a ManagedDownloader will commit
- * the parts of the file they are downloading through a single object of this 
- * class. 
- * <p> 
- * Keeps track of which bytes have already been written to disk,
- * and based on this information makes a decision about whether or not to do
- * checking. 
- * <p>
- * Users of this class must call open(...) before calling writeBlock.
- * <p>
- * @author Sumeet Thadani, Chris Rohrs
+ * A control point for all access to the file being downloaded to, also does 
+ * on-the-fly verification.
+ * 
+ * Every region of the file can be in one of five states, and can move from one
+ * state to another only in the following order:
+ * 
+ *   1. available for download 
+ *   2. currently being downloaded 
+ *   3. written on disk, but impossible to verify yet
+ *   4. waiting to be verified
+ *   5. verified 
+ *         or if it doesn't verify back to
+ *   1. available for download   
+ *   
+ * In order to maintain these constraints, the only possible operations are:
+ *   Lease a block - find an area which is available for download and claim it
+ *   Write a block - report that the specified block has been received from the network.
+ *   Release a block - report that the specified block will not be downloaded.
  */
 public class VerifyingFile {
     

@@ -103,6 +103,12 @@ public class HTTPDownloader implements BandwidthTracker {
     private static final int MAX_RETRY_AFTER = 60 * 60; // 1 hour
     
     /**
+     * The smallest possible file to be shared with partial file sharing.
+     * Non final for testing purposes.
+     */
+    static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
+    
+    /**
      * The throttle to use for all TCP downloads.
      */
     private static final BandwidthThrottle THROTTLE =
@@ -114,12 +120,6 @@ public class HTTPDownloader implements BandwidthTracker {
     private static final BandwidthThrottle UDP_THROTTLE =
         new BandwidthThrottle(Float.MAX_VALUE, false);
 
-    /**
-     * The smallest possible file to be shared with partial file sharing.
-     * Non final for testing purposes.
-     */
-    static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
-    
     private RemoteFileDesc _rfd;
     private boolean _isPush;
 	private long _index;
@@ -1086,13 +1086,15 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * Checks the following:
 	 *  - RFD has a SHA1.
 	 *  - We are allowing partial sharing
-	 *  - The VerifyingFile is not corrupted
+	 *  - We have successfully verified at least certain size of the file
 	 *  - Our port and IP address are valid 
 	 */
 	private boolean isPartialFileValid() {
+        VerifyingFile vf = RouterService.getDownloadManager().
+            getIncompleteFileManager().getEntry(_incompleteFile);
 	    return _rfd.getSHA1Urn() != null && 
+               vf.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-               _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES &&
                NetworkUtils.isValidPort(RouterService.getPort()) &&
                NetworkUtils.isValidAddress(RouterService.getAddress()); 
     }

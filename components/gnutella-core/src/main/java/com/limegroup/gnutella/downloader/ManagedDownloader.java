@@ -68,6 +68,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -1816,7 +1817,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 	private static final int MIN_NUM_CONNECTIONS      = 2;
 	private static final int MIN_CONNECTION_MESSAGES  = 6;
 	private static final int MIN_TOTAL_MESSAGES       = 45;
-	        static boolean   NO_DELAY				  = false; // For testing
+    static boolean   NO_DELAY				  = false; // For testing
+
     /**
      *  Determines if we have any stable connections to send a requery down.
      */

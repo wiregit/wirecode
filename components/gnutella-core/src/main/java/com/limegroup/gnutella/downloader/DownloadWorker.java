@@ -167,7 +167,7 @@ public class DownloadWorker implements Runnable {
     /**
      * Socket to use when doing a push download.
      */
-    private WeakReference _pushSocketRef;
+    private Socket _pushSocket;
     
     /**
      * The downloader that will do the actual downloading
@@ -470,19 +470,15 @@ public class DownloadWorker implements Runnable {
         DownloadWorker doomed = null;
         int queuePos = status.isQueued() ? status.getQueuePosition() : -1;
         
-        // get the lock once rather than 3 times
-        Set queuedWorkers;
-        synchronized(_manager) {
-            queuedWorkers = _manager.getQueuedWorkers().keySet();
-            
-            // No replacement required?...
-            if(_manager.getNumDownloaders() <= _manager.getSwarmCapacity()) {
-                if(status.isQueued())
-                    _manager.addQueuedWorker(this, queuePos);
-                return true;
-            }
+        // No replacement required?...
+        if(_manager.getNumDownloaders() <= _manager.getSwarmCapacity()) {
+            if(status.isQueued())
+                _manager.addQueuedWorker(this, queuePos);
+            return true;
         }
-            
+
+        Set queuedWorkers = _manager.getQueuedWorkers().keySet();
+        
         // Already Queued?...
         if(queuedWorkers.contains(this)) {
             // update position
@@ -658,6 +654,7 @@ public class DownloadWorker implements Runnable {
         _manager.registerPushWaiter(this,mrfd);
 
         boolean pushSent;
+        Socket pushSocket = null;
         synchronized(this) {
             // only wait if we actually were able to send the push
             RouterService.getDownloadManager().sendPush(_rfd, this);
@@ -669,7 +666,9 @@ public class DownloadWorker implements Runnable {
             try {
                 wait(_rfd.isFromAlternateLocation()? 
                         UDP_PUSH_CONNECT_TIME: 
-                            PUSH_CONNECT_TIME);  
+                            PUSH_CONNECT_TIME);
+                pushSocket = _pushSocket;
+                _pushSocket = null;
             } catch(InterruptedException e) {
                 DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                 throw new IOException("push interupted.");
@@ -678,7 +677,6 @@ public class DownloadWorker implements Runnable {
         }
         
         //Done waiting or were notified.
-        Socket pushSocket = _pushSocketRef == null ? null : (Socket) _pushSocketRef.get();
         if (pushSocket==null) {
             DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
             
@@ -704,7 +702,7 @@ public class DownloadWorker implements Runnable {
      * callback to notify that a push request was received
      */
     synchronized void setPushSocket(Socket s) {
-        _pushSocketRef = new WeakReference(s);
+        _pushSocket = s;
         notify();
     }
 
@@ -974,7 +972,7 @@ public class DownloadWorker implements Runnable {
         // If it is a partial source, extract the first needed/available range
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
-            try {
+            try { 
                 IntervalSet availableRanges =
                     _downloader.getRemoteFileDesc().getAvailableRanges();
                 
