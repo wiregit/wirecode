@@ -33,6 +33,11 @@ abstract class Setting {
 	 * Constant for the default value for this <tt>Setting</tt>.
 	 */
 	protected final String DEFAULT_VALUE;
+	
+	/**
+	 * Value for whether or not this setting should always save.
+	 */
+	private boolean _alwaysSave = false;
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -71,6 +76,23 @@ abstract class Setting {
 	public void revertToDefault() {
         setValue(DEFAULT_VALUE);
 	}
+	
+	/**
+	 * Determines whether or not this value should always be saved to disk.
+	 */
+    public boolean shouldAlwaysSave() {
+        return _alwaysSave;
+    }
+    
+    /**
+     * Sets whether or not this setting should always save, even if
+     * it is default.
+     * Returns this so it can be used during assignment.
+     */
+    public Setting setAlwaysSave(boolean save) {
+        _alwaysSave = save;
+        return this;
+    }
 	
     /**
      * Determines whether or not the current value is the default value.

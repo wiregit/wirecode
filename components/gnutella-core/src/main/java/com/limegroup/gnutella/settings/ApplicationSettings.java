@@ -81,14 +81,14 @@ public class ApplicationSettings extends LimeProps {
 	 * is started.
 	 */
     public static final IntSetting WINDOW_X =
-        FACTORY.createIntSetting("WINDOW_X", 0);
+        (IntSetting)FACTORY.createIntSetting("WINDOW_X", 0).setAlwaysSave(true);
     
     /**
 	 * The y position of the window for the next time the application
 	 * is started.
 	 */
     public static final IntSetting WINDOW_Y =
-        FACTORY.createIntSetting("WINDOW_Y", 0);
+        (IntSetting)FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
     
     /**
 	 * A flag for whether or not the application should be minimized

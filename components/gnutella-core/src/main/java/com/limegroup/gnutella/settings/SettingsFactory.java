@@ -167,11 +167,12 @@ public final class SettingsFactory {
     public synchronized void save() {
         Properties tempProps = (Properties)PROPS.clone();
 
-        // First scan over it for any settings that are in this factory
+        // If any settings are default and don't want to always save,
+        // remove them from the properties that'll be written out.
         Iterator ii = settings.iterator();
         while( ii.hasNext() ) {
             Setting set = (Setting)ii.next();
-            if ( set.isDefault() ) {
+            if ( !set.shouldAlwaysSave() && set.isDefault() ) {
                 tempProps.remove( set.getKey() );
             }
         }
