@@ -122,6 +122,10 @@ public class UploadTest extends TestCase {
             passed=downloadPush1(file, "Range: bytes=2-5","cdef");
             assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
             
+            assertTrue("Persistent push HEAD requests", 
+                       downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
+                                     
+                       
 
             //////////////normal downloads with HTTP 1.0//////////////
             passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
@@ -287,7 +291,21 @@ public class UploadTest extends TestCase {
         return ret.equals(expResp);
     }
 
-    private static boolean downloadPush1(String file, String header, 
+
+    /** Does a simple push GET download. */
+    private static boolean downloadPush1(String indexedFile, String header, 
+										 String expResp)
+           		                         throws IOException, BadPacketException{
+        return downloadPush1("GET", "/get/"+index+"/"+indexedFile, header, expResp);        
+    }
+
+    /** 
+     * Does an arbitrary push download. 
+     * @param request an HTTP request such as "GET" or "HEAD"
+     * @param file the full filename, e.g., "/get/0/file.txt"    
+     */
+    private static boolean downloadPush1(String request,
+                                         String file, String header, 
 										 String expResp) 
 		throws IOException, BadPacketException {
         //Establish push route
@@ -325,12 +343,12 @@ public class UploadTest extends TestCase {
 		in.readLine(); //skip blank line
 
         //Download from the (incoming) TCP connection.
-        String retStr=downloadInternal1(file, header, out, in,expResp.length());
+        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
 		assertEquals("unexpected HTTP response message body", expResp, retStr);
         boolean ret = retStr.equals(expResp);
 
         // reset string variable
-        retStr = downloadInternal1(file, header, out, in,expResp.length());
+        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
 		assertEquals("unexpected HTTP response message body in second request", 
 					 expResp, retStr);
         
@@ -470,16 +488,16 @@ public class UploadTest extends TestCase {
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
-     * @param file a partially qualified name, e.g. "file.txt".  The 
+     * @param indexedFile a partially qualified name, e.g. "file.txt".  The 
      * "/get/<index>" is automatically appended
      */
-    private static String downloadInternal1(String file,
+    private static String downloadInternal1(String indexedFile,
 											String header,
 											BufferedWriter out,
 											BufferedReader in,
 											int expectedSize) 
                                             throws IOException {
-        return downloadInternal1("GET", "/get/"+index+"/"+file, header, 
+        return downloadInternal1("GET", "/get/"+index+"/"+indexedFile, header, 
                                  out, in, expectedSize);
     }
 

@@ -187,14 +187,16 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 
-	/**
-     * This method is called in the case of a push only.
-     * <p>
-     * The method creates the socket, and send the GIV message.
-     * When this method returns the socket, is in the same state as a 
-     * socket created as a result of a normal upload - ready to receive GET
-     * <p>
-     * @return The returned socket is used for a normal upload.
+    /**
+     * Establishes a push upload.  If this is already connected, returns
+     * immediately.  Otherwise attempts to establish a TCP connection to the
+     * remote host and send a GIV request.
+     *
+     * @return this' underlying socket, for which a GIV has been sent but
+     *  nothing has been read.  Typically the caller will read the GET or HEAD
+     *  request from this socket.  The socket is needed for persistence and
+     *  queueing purposes; caller must be careful when modifying it.
+     * @throws IOException couldn't establish the connection
      */
 	public Socket connect() throws IOException {
         // This method is only called from acceptPushUpload() now. 
@@ -218,23 +220,14 @@ public class HTTPUploader implements Uploader {
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 
-            InputStream in = _socket.getInputStream(); 
-			
-			// TODO: we should read head requests here too...
-            //dont read a word of size more than 3
-            String word = IOUtils.readWord(in, 3);
-            if (!word.equalsIgnoreCase("get"))
-                throw new IOException();
-
-            //OK. We connected, sent the GIV, and confirmed the get, 
-            //now just return the socket
+            //OK. We connected, sent the GIV.  Now just return the socket.
             return _socket;
 		} catch (SecurityException e) {
 			this.setState(Uploader.PUSH_FAILED);
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
-			this.setState(Uploader.PUSH_FAILED);
-            throw new IOException();
+			this.setState(Uploader.PUSH_FAILED);   //TODO: I don't think these 
+            throw new IOException();               //can be thrown!  Eliminate.
         } catch (NumberFormatException e) {
 			this.setState(Uploader.PUSH_FAILED);
             throw new IOException();

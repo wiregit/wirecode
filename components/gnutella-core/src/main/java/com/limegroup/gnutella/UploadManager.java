@@ -380,8 +380,15 @@ public final class UploadManager implements BandwidthTracker {
                 try {
                     //create the socket and send the GIV message
                     Socket s = GIVuploader.connect();
-                    //delegate to the normal upload
-                    acceptUpload(HTTPRequestMethod.GET, s);
+
+                    //read GET or HEAD and delegate appropriately.
+                    String word = IOUtils.readWord(s.getInputStream(), 4);
+                    if (word.equals("GET"))
+                        acceptUpload(HTTPRequestMethod.GET, s);
+                    else if (word.equals("HEAD"))
+                        acceptUpload(HTTPRequestMethod.HEAD, s);
+                    else
+                        throw new IOException();
                 } catch(IOException ioe){//connection failed? do book-keeping
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
