@@ -523,9 +523,12 @@ public class HTTPDownloader implements Runnable {
             return;
         }
 
+        //Move from temporary directory to final directory.
         if ( _amountRead == _sizeOfFile ) {
             String pname = _downloadDir + _filename;
             File target=new File(pname);
+            //If target doesn't exist, this will fail silently.  Otherwise,
+            //it's always safe to do this since we prompted the user above.
             target.delete();
             boolean ok=myFile.renameTo(target);
             if (! ok) {
