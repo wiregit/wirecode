@@ -341,6 +341,7 @@ public class CreationTimeCacheTest
         assertEquals(0, TIME_MAP.size());
 
         ctCache.addTime(hash1, middle.longValue());
+        ctCache.commitTime(hash1);
         ctCache.persistCache();
         iter = ctCache.getFiles();
         assertEquals(hash1, iter.next());
@@ -359,8 +360,11 @@ public class CreationTimeCacheTest
         assertEquals(1, TIME_MAP.size());
 
         ctCache.addTime(hash2, old.longValue());
+        ctCache.commitTime(hash2);
         ctCache.addTime(hash3, young.longValue());
+        ctCache.commitTime(hash3);
         ctCache.addTime(hash4, middle.longValue());
+        ctCache.commitTime(hash4);
         ctCache.removeTime(hash1);
         ctCache.persistCache();
         iter = ctCache.getFiles();

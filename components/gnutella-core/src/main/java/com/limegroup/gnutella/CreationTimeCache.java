@@ -89,8 +89,7 @@ public final class CreationTimeCache {
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {
-        URN_TO_TIME_MAP.remove(urn);
-        removeURNFromURNSet(urn);
+        removeURNFromURNSet(urn, (Long) URN_TO_TIME_MAP.remove(urn));
     }
 
 
@@ -104,13 +103,14 @@ public final class CreationTimeCache {
         while (iter.hasNext()) {
             Map.Entry currEntry = (Map.Entry) iter.next();
             URN currURN = (URN) currEntry.getKey();
+            Long cTime = (Long) currEntry.getValue();
             
             // check to see if file still exists
             FileDesc fd = fileManager.getFileDescForUrn(currURN);
             if ((fd == null) || (fd.getFile() == null) || 
                 !fd.getFile().exists()) {
                 iter.remove();
-                if (shouldClearURNSetMap) removeURNFromURNSet(currURN);
+                if (shouldClearURNSetMap) removeURNFromURNSet(currURN, cTime);
             }
         }
     }
@@ -125,7 +125,9 @@ public final class CreationTimeCache {
 
 
     /**
-     * Add a CreationTime for the specified <tt>URN</tt> instance.
+     * Add a CreationTime for the specified <tt>URN</tt> instance.  Can be 
+     * called for any type of file (complete or partial).  Partial files
+     * should be committed upon completion via commitTime.
 	 *
 	 * @param urn the <tt>URN</tt> instance containing Time to store
      * @param time The creation time of the urn.
@@ -139,6 +141,21 @@ public final class CreationTimeCache {
 
         // populate urn to time
         URN_TO_TIME_MAP.put(urn, cTime);
+    }
+
+    /**
+     * Commits the CreationTime for the specified <tt>URN</tt> instance.  Should
+     * be called for complete files that are shared.
+	 *
+	 * @param urn the <tt>URN</tt> instance containing Time to store
+     * @throws IllegalArgumentException If urn is null or associated time is
+     * invalid.
+     */
+    public synchronized void commitTime(URN urn) 
+        throws IllegalArgumentException {
+        if (urn == null) throw new IllegalArgumentException("Null URN.");
+        Long cTime = (Long) URN_TO_TIME_MAP.get(urn);
+        if  (cTime == null) throw new IllegalArgumentException("Bad Time.");
 
         // populate time to set of urns
         Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
@@ -149,6 +166,7 @@ public final class CreationTimeCache {
         urnSet.add(urn);
     }
 
+    
 
     /**
      * Returns an iterator of URNs, from 'youngest' to 'oldest'.
@@ -201,19 +219,31 @@ public final class CreationTimeCache {
         }
     }
 
-
-    private synchronized void removeURNFromURNSet(URN urn) {
-        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
-        // find the urn in the map:
-        // 1) get rid of it
-        // 2) get rid of the empty set if it exists
-        while (iter.hasNext()) {
-            Map.Entry currEntry = (Map.Entry) iter.next();
-            Set urnSet = (Set) currEntry.getValue();
-            if (urnSet.contains(urn)) {
-                urnSet.remove(urn); // 1)
-                if (urnSet.size() < 1) iter.remove(); // 2)
-                break;
+    /** Evicts the urn from the TIME_TO_URNSET_MAP.
+     *  @param if refTime is non-null, will try to eject from set referred to
+     *  by refTime.  otherwise will do an iterative search.
+     */
+    private synchronized void removeURNFromURNSet(URN urn, Long refTime) {
+        if (refTime != null) {
+            Set urnSet = (Set) TIME_TO_URNSET_MAP.get(refTime);
+            if ((urnSet != null) && (urnSet.contains(urn))) {
+                urnSet.remove(urn);
+                if (urnSet.size() < 1) TIME_TO_URNSET_MAP.remove(refTime);
+            }
+        }
+        else { // search everything
+            Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
+            // find the urn in the map:
+            // 1) get rid of it
+            // 2) get rid of the empty set if it exists
+            while (iter.hasNext()) {
+                Map.Entry currEntry = (Map.Entry) iter.next();
+                Set urnSet = (Set) currEntry.getValue();
+                if (urnSet.contains(urn)) {
+                    urnSet.remove(urn); // 1)
+                    if (urnSet.size() < 1) iter.remove(); // 2)
+                    break;
+                }
             }
         }
     }
@@ -231,6 +261,10 @@ public final class CreationTimeCache {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Long cTime = (Long) currEntry.getValue();
             URN urn = (URN) currEntry.getKey();
+
+            // don't ever add IFDs
+            if (fileManager.getFileDescForUrn(urn) instanceof 
+                IncompleteFileDesc) continue;
 
             // put the urn in a set of urns that have that creation time....
             Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);

@@ -91,10 +91,14 @@ public class MetaFileManager extends FileManager {
      */
     public FileDesc fileChanged(File f) {
         FileDesc fd = getFileDescForFile(f);
-        Long cTime = 
-            CreationTimeCache.instance().getCreationTime(fd.getSHA1Urn());
         if( fd == null )
             return null;
+        // store the creation time for later re-input
+        // *----
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
+        Assert.that(cTime != null);
+        // ----*
         List xmlDocs = new LinkedList();
         if( LimeXMLUtils.isMP3File(f) ) {
             try {
@@ -109,7 +113,16 @@ public class MetaFileManager extends FileManager {
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
         _needRebuild = true;
-        return addFileIfShared(f, xmlDocs, cTime.longValue());
+        fd = addFileIfShared(f, xmlDocs);
+        //re-populate the ctCache
+        // *----
+        synchronized (ctCache) {
+            ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+            ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+            ctCache.commitTime(fd.getSHA1Urn());
+        }
+        // ----*
+        return fd;
     }        
     
     /**
@@ -152,9 +165,8 @@ public class MetaFileManager extends FileManager {
      *
      * @return The FileDesc that was added, or null if nothing added.
      */
-	public FileDesc addFileIfShared(File file, List metadata, 
-                                    long creationTime) {
-        FileDesc fd = super.addFileIfShared(file, creationTime);
+	public FileDesc addFileIfShared(File file, List metadata) {
+        FileDesc fd = super.addFileIfShared(file);
         
         // if not added, exit.
         if( fd == null )

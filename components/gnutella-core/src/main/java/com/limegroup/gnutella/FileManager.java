@@ -758,7 +758,7 @@ public abstract class FileManager {
             KeyValue info = (KeyValue)i.next();
             File[] shareables = (File[])info.getValue();
             for(int j=0; j<shareables.length && !loadThreadInterrupted();j++) {
-                addFile(shareables[j], -1);
+                addFile(shareables[j]);
                 synchronized(this) { _numPendingFiles--; }
             }
             // let the gc clean up the array of shareables.
@@ -767,6 +767,7 @@ public abstract class FileManager {
         }
     }
     
+
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
@@ -778,21 +779,6 @@ public abstract class FileManager {
      *  added, otherwise <tt>null</tt>
      */
 	public FileDesc addFileIfShared(File file) {
-        return addFileIfShared(file, -1);
-    }
-
-    /**
-     * @modifies this
-     * @effects adds the given file to this, if it exists in a shared 
-     *  directory and has a shared extension.  Returns true iff the file
-     *  was actually added.  <b>WARNING: this is a potential security 
-     *  hazard.</b> 
-     *
-     * @param creationTime -1 if not known, will use file.lastModified.
-     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
-     *  added, otherwise <tt>null</tt>
-     */
-	public FileDesc addFileIfShared(File file, long creationTime) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
@@ -815,7 +801,7 @@ public abstract class FileManager {
         }
         FileDesc fd;
         if (directoryShared) {
-            fd = addFile(f, creationTime);
+            fd = addFile(f);
             synchronized(this) { _numPendingFiles--; }
             _needRebuild = true;
         } else {
@@ -825,19 +811,6 @@ public abstract class FileManager {
         return fd;
 	}
 
-    /**
-     * @modifies this
-     * @effects calls addFileIfShared(file), then optionally stores any metadata
-     *  in the given XML documents.  metadata may be null if there is no data.
-     *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
-     *  security hazard.</b> 
-     *
-     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
-     *  added, otherwise <tt>null</tt>
-     */
-	public FileDesc addFileIfShared(File file, List metadata) {
-        return addFileIfShared(file, metadata, -1);
-    }
 
     /**
      * @modifies this
@@ -846,12 +819,10 @@ public abstract class FileManager {
      *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
      *  security hazard.</b> 
      *
-     * @param creationTime -1 if not known, will use file.lastModified.
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-	public abstract FileDesc addFileIfShared(File file, List metadata,
-                                             long creationTime);
+	public abstract FileDesc addFileIfShared(File file, List metadata);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -861,11 +832,10 @@ public abstract class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b>
      *
-     * @param creationTime -1 if not known, will use file.lastModified.
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-    private FileDesc addFile(File file, long creationTime) {
+    private FileDesc addFile(File file) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
@@ -928,14 +898,16 @@ public abstract class FileManager {
                 indices.add(fileIndex);
             }
 		
-            // Populate the creation time cache if necessary
+            // Commit the time in the CreactionTimeCache
             URN mainURN = fileDesc.getSHA1Urn();
-            Long cTime = CreationTimeCache.instance().getCreationTime(mainURN);
-            if (cTime == null)
-                CreationTimeCache.instance().addTime(mainURN, 
-                                                     (creationTime > 0 ?
-                                                      creationTime :
-                                                      file.lastModified()));
+            CreationTimeCache ctCache = CreationTimeCache.instance();
+            synchronized (ctCache) {
+                Long cTime = ctCache.getCreationTime(mainURN);
+                if (cTime == null)
+                    ctCache.addTime(mainURN, file.lastModified());
+                // this call may be superfluous but it is quite fast....
+                ctCache.commitTime(mainURN);
+            }
 
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
@@ -1038,12 +1010,19 @@ public abstract class FileManager {
      */
     public FileDesc fileChanged(File f) {
         URN oldURN = getURNForFile(f);
-        Long cTime = CreationTimeCache.instance().getCreationTime(oldURN);
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        Long cTime = ctCache.getCreationTime(oldURN);
         Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        FileDesc fd = addFileIfShared(f, cTime.longValue());
+        FileDesc fd = addFileIfShared(f);
+        //re-populate the ctCache
+        synchronized (ctCache) {
+            ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+            ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+            ctCache.commitTime(fd.getSHA1Urn());
+        }
         return fd;
     }
 
@@ -1174,7 +1153,7 @@ public abstract class FileManager {
         fd = removeFileIfShared(oldName);
         Assert.that( fd != null, "invariant broken.");
         // hash didn't change so no need to re-input creation time
-        fd = addFileIfShared(newName, xmlDocs, -1);
+        fd = addFileIfShared(newName, xmlDocs);
         return (fd != null);
     }
 

@@ -28,7 +28,7 @@ public class FileManagerStub extends FileManager {
         ;
     }
     
-    public FileDesc addFileIfShared(File f, List docs, long creationTime) {
+    public FileDesc addFileIfShared(File f, List docs) {
         return addFileIfShared(f);
     }
 }

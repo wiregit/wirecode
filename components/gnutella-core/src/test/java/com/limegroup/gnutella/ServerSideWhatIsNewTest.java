@@ -610,20 +610,29 @@ public class ServerSideWhatIsNewTest
         TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
+        Set urns = new HashSet();
+        urns.add(TestFile.hash());
         RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever.txt", 10, 
+                                                "whatever.txt", 
+                                                TestFile.length(), 
                                                 guid, 1, false, 3,
-                                                false, null, null, false,
+                                                false, null, urns, false,
                                                 false, "LIME", 0, new HashSet());
         Downloader downloader = 
             rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
-        Thread.sleep(3000);
+        Thread.sleep(5000);
         assertEquals("State = " + downloader.getState(),
                      Downloader.COMPLETE, downloader.getState());
         
         assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
                      rs.getNumSharedFiles());
+
+        File newFile = new File(_savedDir, "whatever.txt");
+        assertTrue(newFile.exists());
+        URN newFileURN = fm.getURNForFile(newFile);
+        assertEquals(TestFile.hash(), newFileURN);
+        assertEquals(cTime, ctCache.getCreationTime(newFileURN));
 
         {
             Map urnToLong = 
@@ -636,10 +645,6 @@ public class ServerSideWhatIsNewTest
             assertEquals(""+longToUrns, 2, longToUrns.size());
         }
 
-        File newFile = new File(_savedDir, "whatever.txt");
-        assertTrue(newFile.exists());
-        URN newFileURN = fm.getURNForFile(newFile);
-        assertEquals(cTime, ctCache.getCreationTime(newFileURN));
     }
 
 
@@ -662,24 +667,26 @@ public class ServerSideWhatIsNewTest
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
             uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
-            uploader[i].setRate(1);
+            uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
+            Set urns = new HashSet();
+            urns.add(TestFile.hash());
             rfds[i] = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, 
-                                         "anita.txt", 10, 
+                                         "anita.txt", TestFile.length(), 
                                          guid, 1, false, 3,
-                                         false, null, null, false,
+                                         false, null, urns, false,
                                          false, "LIME", 0, new HashSet());
         }
 
         Downloader downloader = rs.download(rfds, false, new GUID(guid));
         
-        Thread.sleep(2000);
-        if (downloader.getState() != Downloader.COMPLETE) 
-            uploader[0].setRate(10000);
-        Thread.sleep(2000);
-        assertEquals("State = " + downloader.getState(),
-                     Downloader.COMPLETE, downloader.getState());
+        int sleeps = 0;
+        while (downloader.getState() != Downloader.COMPLETE) {
+            Thread.sleep(1000);
+            sleeps++;
+            if (sleeps > 120) assertTrue("download never completed", false);
+        }
         
         assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
                      rs.getNumSharedFiles());

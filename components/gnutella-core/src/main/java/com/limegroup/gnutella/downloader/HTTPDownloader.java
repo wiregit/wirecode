@@ -838,6 +838,15 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException();
         }
+        if (rfd.getSHA1Urn() != null) {
+            CreationTimeCache ctCache = CreationTimeCache.instance();
+            synchronized (ctCache) {
+                Long cTime = ctCache.getCreationTime(rfd.getSHA1Urn());
+                // prefer older times....
+                if ((cTime == null) || (cTime.longValue() > milliSeconds))
+                    ctCache.addTime(rfd.getSHA1Urn(), milliSeconds);
+            }
+        }
     }
     
     /////////////////////////////// Download ////////////////////////////////
