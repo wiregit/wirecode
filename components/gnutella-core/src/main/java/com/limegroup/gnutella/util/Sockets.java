@@ -1,12 +1,17 @@
 package com.limegroup.gnutella.util;
 
-import java.net.*;
-import java.nio.channels.*;
-import java.nio.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-import com.limegroup.gnutella.*;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
@@ -67,16 +72,66 @@ public class Sockets {
      * @return the connected Socket
      * @throws IOException the connections couldn't be made in the 
      *  requested time
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public static Socket connect(String host, int port, int timeout) 
-		throws IOException {
+        throws IOException {
         if(!NetworkUtils.isValidPort(port)) {
             throw new IllegalArgumentException("port out of range: "+port);
         }
-        if (CommonUtils.isJava14OrLater() &&
-            ConnectionSettings.USE_NIO.getValue()) {
-            //a) Non-blocking IO using Java 1.4. 
+        if (ConnectionSettings.USE_NIO.getValue()) {
+            //a) Non-blocking IO using Java 1.4. Conceptually, this code
+            //   does the following:
+            //      SocketAddress addr=new InetSocketAddress(host, port);
+            //      Socket ret=new Socket();
+            //      ret.connect(addr, timeout);
+            //      return ret;
+            //   Unfortunately that causes compile errors on older versions
+            //   of Java.  Worse, it may cause runtime errors if class loading
+            //   is not done lazily.  (See chapter 12.3.4 of the Java Language
+            //   Specification.)  So we use reflection.
+            InetSocketAddress addr = new InetSocketAddress(host, port);
+
+            // make sure the address was resolved to an InetAddress
+            if (addr.isUnresolved())
+                throw new IOException("Couldn't resolve address");
+            Socket sock = SocketChannel.open().socket();
+
+            // use the blocking connect in this case
+            sock.connect(addr, timeout);
+            return sock;
+        }
+     
+        if (timeout!=0) {
+            //b) Emulation using threads
+            return (new SocketOpener(host, port)).connect(timeout);
+        } else {
+            //c) No timeouts
+            return new Socket(host, port);
+        }
+    }
+
+
+    /**
+     * Connects and returns a socket to the given host without blocking.
+     *
+     * @param host the address of the host to connect to
+     * @param port the port to connect to
+     * @param timeout the desired timeout for connecting, in milliseconds,
+     *  or 0 for no timeout.
+     * @return the connected Socket
+     * @throws IOException the connections couldn't be made in the 
+     *  requested time
+	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     */
+    public static Socket connectNIO(String host, int port, int timeout) 
+		throws IOException {
+
+        // TODO::implement the timeout in this case??
+        if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("port out of range: "+port);
+        }
+        if (ConnectionSettings.USE_NIO.getValue()) {
             InetSocketAddress addr = new InetSocketAddress(host, port);
 
             // make sure the address was resolved to an InetAddress
@@ -85,6 +140,9 @@ public class Sockets {
             SocketChannel sc = SocketChannel.open();
             sc.configureBlocking(false);
             sc.connect(addr);
+
+            return sc.socket();
+            /*
             SocketData data = new SocketData(sc);
             synchronized(PENDING_SOCKETS) {
                 PENDING_SOCKETS.add(data);
@@ -127,6 +185,7 @@ public class Sockets {
             }
             System.out.println("Sockets::RETURNING SOCKET"); 
             return sc.socket();
+            */
         }
      
         if (timeout!=0) {
@@ -234,7 +293,6 @@ public class Sockets {
                 // Attempt to complete the connection sequence
                 try {
                     if (sc.finishConnect()) {
-                        System.out.println("Sockets::processSelectedKeys::finished connecting"); 
                         key.cancel();
                         synchronized(CONNECT_LOCK) {
                             CONNECT_LOCK.notify();
@@ -397,4 +455,5 @@ public class Sockets {
 			}
 		}
 	}
+
 }
