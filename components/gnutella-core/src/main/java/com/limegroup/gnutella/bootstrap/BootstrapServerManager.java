@@ -6,6 +6,7 @@ import java.text.ParseException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
@@ -89,6 +90,7 @@ public class BootstrapServerManager {
      * the "urlfile=1" message.
      */
     public synchronized void fetchBootstrapServersAsync() {
+		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
         addDefaultsIfNeeded();
         requestAsync(new UrlfileRequest(), "GWebCache urlfile");
     }
@@ -100,6 +102,7 @@ public class BootstrapServerManager {
      * progress.  Uses the "hostfile=1" message.
      */
     public synchronized void fetchEndpointsAsync() {
+		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
         addDefaultsIfNeeded();
         if (! _hostFetchInProgress) {
             _hostFetchInProgress=true;  //unset in HostfileRequest.done()
