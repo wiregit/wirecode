@@ -6,6 +6,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 
+import junit.framework.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
@@ -16,7 +17,7 @@ import java.net.*;
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.
  */
-public class LeafTester {
+public class LeafTester extends TestCase {
     static final int PORT=6669;
     static final int TIMEOUT=500;
     static final byte[] ultrapeerIP=
@@ -29,7 +30,15 @@ public class LeafTester {
     static Connection old1;
     static Connection old2;
 
-    public static void main(String args[]) {
+    public LeafTester(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return new TestSuite(LeafTester.class);
+    }    
+
+    public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -51,18 +60,18 @@ public class LeafTester {
                                            router,
                                            files,
                                            new DummyAuthenticator());
-        Assert.that(settings.getPort()==PORT, "Bad port: "+settings.getPort());
+        assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
         rs.initialize();
         rs.clearHostCatcher();
-        Assert.that(PORT==settings.getPort());
+        assertTrue(PORT==settings.getPort());
 
         //Run tests
         try {
             connect(rs);
-            testRedirect();
-            testLeafBroadcast(rs);
-            testBroadcastFromUltrapeer();
-            testNoBroadcastFromOld();
+            doRedirect();
+            doLeafBroadcast(rs);
+            doBroadcastFromUltrapeer();
+            doNoBroadcastFromOld();
             shutdown();
         } catch (IOException e) { 
             System.err.println("Mysterious IOException:");
@@ -74,7 +83,7 @@ public class LeafTester {
             e.printStackTrace();
         }
         
-        System.out.println("Done");
+        //System.out.println("Done");
      }
 
      ////////////////////////// Initialization ////////////////////////
@@ -146,7 +155,7 @@ public class LeafTester {
      private static void replyToPing(Connection c, boolean ultrapeer) 
              throws IOException, BadPacketException {
          Message m=c.receive(500);
-         Assert.that(m instanceof PingRequest);
+         assertTrue(m instanceof PingRequest);
          PingRequest pr=(PingRequest)m;
          byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
          PingReply reply=new PingReply(pr.getGUID(), (byte)7,
@@ -160,7 +169,7 @@ public class LeafTester {
 
      ///////////////////////// Actual Tests ////////////////////////////
 
-    private static void testLeafBroadcast(RouterService rs) 
+    private static void doLeafBroadcast(RouterService rs) 
             throws IOException, BadPacketException {
         //System.out.println("Please send a query for \"crap\" from your leaf\n");
         //try {
@@ -168,72 +177,72 @@ public class LeafTester {
         //} catch (InterruptedException e) { }
         byte[] guid=rs.newQueryGUID();
         rs.query(guid, "crap", 0);
-        System.out.println("-Testing broadcast from leaf");
+        //System.out.println("-Testing broadcast from leaf");
 
         while (true) {
             Message m=ultrapeer1.receive(2000);
             if (m instanceof QueryRequest) {
-                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }       
         while (true) {
             Message m=ultrapeer2.receive(2000);
             if (m instanceof QueryRequest) {
-                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }
         while (true) {
             Message m=old1.receive(2000);
             if (m instanceof QueryRequest) {
-                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }
         while (true) {
             Message m=old2.receive(2000);
             if (m instanceof QueryRequest) {
-                Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }
     }
 
-    private static void testRedirect() {
-        System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
+    private static void doRedirect() {
+        //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder(),
                                     false);
         try {
             c.initialize();
-            Assert.that(false, "Handshake succeeded!");
+            assertTrue("Handshake succeeded!", false);
         } catch (IOException e) {
             String hosts=c.getProperty(ConnectionHandshakeHeaders.X_TRY);
             //System.out.println("X-Try: "+hosts);
-            Assert.that(hosts!=null, "No hosts");
+            assertTrue("No hosts", hosts!=null);
             Set s=list2set(hosts);
-            Assert.that(s.size()==2);
-            Assert.that(s.contains(new Endpoint(oldIP, 6352)));
-            Assert.that(s.contains(new Endpoint(oldIP, 6353)));
+            assertTrue(s.size()==2);
+            assertTrue(s.contains(new Endpoint(oldIP, 6352)));
+            assertTrue(s.contains(new Endpoint(oldIP, 6353)));
 
             hosts=c.getProperty(
                                 ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
-            Assert.that(hosts!=null);
+            assertTrue(hosts!=null);
             s=list2set(hosts);
-            Assert.that(s.size()==4);
+            assertTrue(s.size()==4);
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-            Assert.that(s.contains(new Endpoint(ultrapeerIP, 6350)));
-            Assert.that(s.contains(new Endpoint(ultrapeerIP, 6351)));
-            Assert.that(s.contains(new Endpoint(localhost, 6350))); 
-            Assert.that(s.contains(new Endpoint(localhost, 6351)));
+            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6350)));
+            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6351)));
+            assertTrue(s.contains(new Endpoint(localhost, 6350))); 
+            assertTrue(s.contains(new Endpoint(localhost, 6351)));
         }
     }
 
-    private static void testBroadcastFromUltrapeer() throws IOException {
-        System.out.println("-Test query from ultrapeer not broadcasted");
+    private static void doBroadcastFromUltrapeer() throws IOException {
+        //System.out.println("-Test query from ultrapeer not broadcasted");
         drain(ultrapeer2);
         drain(old1);
         drain(old2);
@@ -242,14 +251,14 @@ public class LeafTester {
         ultrapeer1.send(qr);
         ultrapeer1.flush();
 
-        Assert.that(! drain(ultrapeer2));
+        assertTrue(! drain(ultrapeer2));
         //We don't care whether this is forwarded to the old connections
     }
 
 
-    private static void testNoBroadcastFromOld() 
+    private static void doNoBroadcastFromOld() 
         throws IOException, BadPacketException {
-        System.out.println("-Test query from old not broadcasted");
+        //System.out.println("-Test query from old not broadcasted");
         drain(ultrapeer1);
         drain(ultrapeer2);
         drain(old2);
@@ -258,12 +267,12 @@ public class LeafTester {
         old1.send(qr);
         old1.flush();
 
-        Assert.that(! drain(ultrapeer1));
-        Assert.that(! drain(ultrapeer2));
+        assertTrue(! drain(ultrapeer1));
+        assertTrue(! drain(ultrapeer2));
         Message m=old2.receive(500);
-        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)1);
-        Assert.that(m.getTTL()==(byte)6);         
+        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue(m.getHops()==(byte)1);
+        assertTrue(m.getTTL()==(byte)6);         
     }
 
     /** Converts the given X-Try[-Ultrapeer] header value to
@@ -280,7 +289,7 @@ public class LeafTester {
                 e = new Endpoint(address);
                 ret.add(e);
             } catch(IllegalArgumentException iae) {
-                Assert.that(false, "Bad endpoint");
+                assertTrue("Bad endpoint", false);
             }
         }
         return ret;
@@ -305,7 +314,7 @@ public class LeafTester {
     }
 
     private static void shutdown() throws IOException {
-        System.out.println("\nShutting down.");
+        //System.out.println("\nShutting down.");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
