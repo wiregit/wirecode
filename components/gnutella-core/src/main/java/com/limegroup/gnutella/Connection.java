@@ -7,9 +7,6 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.connection.BIOMessageWriter;
-import com.limegroup.gnutella.connection.MessageWriter;
-import com.limegroup.gnutella.connection.NIOMessageWriter;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
@@ -333,24 +330,6 @@ public class Connection {
 		if(!CommonUtils.isJava118()) {
 			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
 		}
-    }
-
-
-    /** Call this method when the Connection has been initialized and accepted
-     *  as 'long-lived'.
-     */
-    protected void postInit() {
-        try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
-			if(_headers.supportsVendorMessages()) {
-                send(MessagesSupportedVendorMessage.instance());
-			}
-        }
-        catch (IOException ioe) {
-        }
-        catch (BadPacketException bpe) {
-            // should never happen.
-            ErrorService.error(bpe);
-        }
     }
 
     /**
@@ -993,9 +972,9 @@ public class Connection {
                 _bytesReceived = _inflater.getTotalOut();
                 if(!CommonUtils.isJava118()) {
                     CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                        (int)(_inflater.getTotalOut() - pUncompressed));
+                        (_inflater.getTotalOut() - pUncompressed));
                     CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                        (int)(_inflater.getTotalIn() - pCompressed));
+                        (_inflater.getTotalIn() - pCompressed));
                 }            
             } else if(msg != null) {
                 _bytesReceived += msg.getTotalLength();
@@ -1017,7 +996,8 @@ public class Connection {
      * @effects send m on the network.  Throws IOException if problems
      *   arise.
      */
-    public void send(Message m) throws IOException {
+    public void sendMessage(Message m) throws IOException {
+        //System.out.println("Connection::sendMessage");
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
@@ -1042,7 +1022,7 @@ public class Connection {
     /**
      * Flushes any buffered messages sent through the send method.
      */
-    public void flush() throws IOException {
+    public void flushMessage() throws IOException {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
