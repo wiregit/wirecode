@@ -322,12 +322,16 @@ public class QueryRouteTable {
     //allocations here if memory is at a premium.
 
     private void handlePatch(PatchTableMessage m) throws BadPacketException {
-        //0. Verify that m belongs in this sequence.
+        //0. Verify that m belongs in this sequence.  If we haven't just been
+        //RESET, ensure that m's sequence size matches last message
         if (sequenceSize!=-1 && sequenceSize!=m.getSequenceSize())
             throw new BadPacketException("Inconsistent seq size: "
                                          +m.getSequenceSize()
                                          +" vs. "+sequenceSize);
-        if (sequenceNumber!=-1 && sequenceNumber+1!=m.getSequenceNumber())
+        //If we were just reset, ensure that m's sequence number is one.
+        //Otherwise it should be one greater than the last message received.
+        if (sequenceNumber==-1 ? m.getSequenceNumber()!=1 //reset
+                               : sequenceNumber+1!=m.getSequenceNumber())
             throw new BadPacketException("Inconsistent seq number: "
                                          +m.getSequenceNumber()
                                          +" vs. "+sequenceNumber);
@@ -341,7 +345,8 @@ public class QueryRouteTable {
                 //a) If first message, create uncompressor (if needed).
                 if (m.getSequenceNumber()==1)
                     uncompressor=new Inflater();
-                Assert.that(uncompressor!=null, "Null uncompressor");
+                Assert.that(uncompressor!=null, 
+                    "Null uncompressor.  Sequence: "+m.getSequenceNumber());
                 data=uncompress(data);            
             } catch (IOException e) {
                 throw new BadPacketException("Couldn't uncompress data: "+e);
@@ -375,6 +380,7 @@ public class QueryRouteTable {
         }
 
         //4. Update sequence numbers.
+        this.sequenceSize=m.getSequenceSize();
         if (m.getSequenceNumber()!=m.getSequenceSize()) {            
             this.sequenceNumber=m.getSequenceNumber();
         } else {
@@ -775,14 +781,86 @@ public class QueryRouteTable {
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
 
         //6. Test sequence numbers.
-//          qrt=new QueryRouteTable();
-//          PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
-//              PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-//          try {
-//              qrt.update(patch);
-//              Assert.that(false);
-//          } catch (BadPacketException e) { }
-        
+        qrt=new QueryRouteTable();   //a. wrong sequence after reset
+        ResetTableMessage reset=null;
+        PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
+            PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
+        try {
+            qrt.update(patch);
+            Assert.that(false);
+        } catch (BadPacketException e) { 
+        }
+
+        qrt=new QueryRouteTable();  //b. message sizes don't match
+        try {
+            reset=new ResetTableMessage(1024, (byte)2);
+            qrt.update(reset);
+            patch=new PatchTableMessage((short)1, (short)3,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        try {
+            patch=new PatchTableMessage((short)2, (short)4,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+            Assert.that(false);
+        } catch (BadPacketException e) { 
+        }
+
+        qrt=new QueryRouteTable();  //c. message sequences don't match
+        try {
+            patch=new PatchTableMessage((short)1, (short)3,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        try {
+            patch=new PatchTableMessage((short)3, (short)3,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+            Assert.that(false);
+        } catch (BadPacketException e) {
+        }        
+
+        qrt=new QueryRouteTable();  //d. sequence interrupted by reset
+        try {
+            patch=new PatchTableMessage((short)1, (short)3,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+            reset=new ResetTableMessage(1024, (byte)2);
+            qrt.update(reset);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        try {
+            patch=new PatchTableMessage((short)1, (short)6,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+
+        qrt=new QueryRouteTable();  //e. Sequence too big
+        try {
+            patch=new PatchTableMessage((short)1, (short)2,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+            patch=new PatchTableMessage((short)2, (short)2,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        try {
+            patch=new PatchTableMessage((short)3, (short)2,
+                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+            qrt.update(patch);
+            Assert.that(false);
+        } catch (BadPacketException e) {
+        }
     }
     */
 }
