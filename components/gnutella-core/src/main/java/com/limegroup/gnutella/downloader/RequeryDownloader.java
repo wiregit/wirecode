@@ -87,7 +87,7 @@ public class RequeryDownloader extends ManagedDownloader
         if (_hasFile)
             return super.newRequery(numRequeries);
         //Otherwise just spit out the original search keywords.
-		return QueryRequest.createRequery(getQuery());
+		return QueryRequest.createQuery(getQuery());
     }
 
     /**
