@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -40,17 +44,31 @@ public class UDPHostCache {
      * INVARIANT: udpHosts contains no duplicates and contains exactly
      *  the same elements and udpHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue /* of ExtendedEndpoint */ udpHosts =
+    private final FixedsizePriorityQueue /* of ExtendedEndpoint */ udpHosts =
         new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private Set /* of ExtendedEndpoint */ udpHostsSet =new HashSet();
+    private final Set /* of ExtendedEndpoint */ udpHostsSet =new HashSet();
     
     /**
      * A set of hosts who we've recently contacted, so we don't contact them
      * again.
      */
-    private Set /* of ExtendedEndpoint */ attemptedHosts =
-        new FixedSizeExpiringSet(PERMANENT_SIZE, 10 * 60 * 1000);
+    private final Set /* of ExtendedEndpoint */ attemptedHosts;
+    
+    /**
+     * Constructs a new UDPHostCache that remembers attempting hosts for 10 minutes.
+     */
+    public UDPHostCache() {
+        this(10 * 60 * 1000);
+    }
+    
+    /**
+     * Constructs a new UDPHostCache that remembers attempting hosts for
+     * the given amount of time, in msecs.
+     */
+    public UDPHostCache(long expiryTime) {
+        attemptedHosts = new FixedSizeExpiringSet(PERMANENT_SIZE, expiryTime);
+    }
     
     /**
      * Writes this' info out to the stream.
@@ -79,19 +97,47 @@ public class UDPHostCache {
     
     /**
      * Attempts to contact a host cache to retrieve endpoints.
+     *
+     * Contacts 10 UDP hosts at a time.
      */
     public synchronized boolean fetchHosts() {
-        Set validHosts = new HashSet(udpHostsSet);
-        validHosts.removeAll(attemptedHosts);
-        if(validHosts.isEmpty()) {
-            LOG.warn("No UDP Host Caches to fetch.");
+        LinkedList temp = new LinkedList();
+        // add caches so they're ordered best -> worst
+        for(Iterator i = udpHosts.iterator(); i.hasNext(); ) {
+            Object next = i.next();
+            if(!attemptedHosts.contains(next))
+                temp.addFirst(next);
+        }
+        
+        // Keep only the first 10 of the valid hosts.
+        // Note that we had to add all possible ones first, 
+        // 'cause udpHosts.iterator() returns from worst -> best
+        List validHosts = new ArrayList(Math.min(10, temp.size()));
+        for(Iterator i = temp.iterator(); i.hasNext(); ){
+            validHosts.add(i.next());
+            if(validHosts.size() == 10)
+                break;
+        }
+
+        attemptedHosts.addAll(validHosts);
+        
+        return fetch(validHosts);
+     }
+     
+     /**
+      * Fetches endpoints from the given collection of hosts.
+      */
+     protected synchronized boolean fetch(Collection hosts) {
+        if(hosts.isEmpty()) {
+            LOG.debug("No hosts to fetch");
             return false;
         }
 
-        LOG.debug("Fetching hosts via UDP Host Cache");
-        attemptedHosts.addAll(validHosts);        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Fetching endpoints from " + hosts + " host caches");
+
         UDPHostRanker.rank(
-            validHosts,
+            hosts,
             null,
             // cancel when connected -- don't send out any more pings
             new Cancellable() {
@@ -106,7 +152,7 @@ public class UDPHostCache {
     /**
      * Adds a new udp hostcache to this.
      */
-    public boolean add(ExtendedEndpoint e) {
+    public synchronized boolean add(ExtendedEndpoint e) {
         Assert.that(e.isUDPHostCache());
         
         if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
@@ -138,6 +184,8 @@ public class UDPHostCache {
             loadDefaults();
     }
     
-    private void loadDefaults() {}
+    protected void loadDefaults() {
+      // ADD DEFAULT UDP HOST CACHES HERE.
+    }
     
 }
