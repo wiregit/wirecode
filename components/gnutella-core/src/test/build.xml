@@ -22,6 +22,7 @@
   <property name="settings"    value="${coredir}com/limegroup/gnutella/settings/"/>
   <property name="tests"       value="com/limegroup/gnutella/tests/"/>
   <property name="reports"     value="reports"/>
+  <property name="datadir"     value="${basedir}"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -58,6 +59,7 @@
 	<pathelement location="${quicktime}"/>
 	<pathelement location="lib/junit.jar"/>
 	<pathelement location="lib/logicrypto.jar"/>
+	<pathelement location="${datadir}"/>
   </path>
 
   <!-- Initialization stuff -->
@@ -204,6 +206,8 @@
       <test name="${DOWNLOADER}.RequeryDownloaderTest"
 	        todir="${reports}" />
       <test name="${DOWNLOADER}.RequeryDownloadTest"
+	        todir="${reports}" />
+	  <test name="${DOWNLOADER}.ResumeDownloaderTest"
 	        todir="${reports}" />
     
     </junit>
