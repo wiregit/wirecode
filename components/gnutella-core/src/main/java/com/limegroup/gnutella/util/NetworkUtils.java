@@ -61,10 +61,17 @@ public final class NetworkUtils {
      * @param addr1 the second address to compare
      */
     public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
-        return 
-            addr0[0] == addr1[0] &&
-            addr0[1] == addr1[1] &&
-            addr0[2] == addr1[2];
+        // if one is a private address, check three bytes for closeness
+        if( isPrivateAddress(addr0) )
+            return 
+                addr0[0] == addr1[0] &&
+                addr0[1] == addr1[1] &&
+                addr0[2] == addr1[2];
+        // otherwise, check only two bytes.
+        else
+            return
+                addr0[0] == addr1[0] &&
+                addr0[1] == addr1[1];
     }
 
     /**
