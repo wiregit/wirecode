@@ -14,8 +14,8 @@ public class CollectionTester extends TestCase {
     final Map files = new HashMap();
     final String fileLocation = "com/limegroup/gnutella/xml/";
     final File mason = new File(fileLocation + "nullfile.null");
-    final File vader = new File(fileLocation + "vader.mp3");
-    final File swing = new File(fileLocation + "swing.mp3");
+    final File test1 = new File(fileLocation + "test1.mp3");
+    final File test2 = new File(fileLocation + "test2.mp3");
     final String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
     final String schemaURIVideo = "http://www.limewire.com/schemas/video.xsd";
     final MetaFileManager mfm = new MFMStub();
@@ -41,20 +41,20 @@ public class CollectionTester extends TestCase {
     protected void setUp() {
         if (!mason.exists())
             Assert.assertTrue("Could not find necessary file!", false);
-        if (!vader.exists())
+        if (!test1.exists())
             Assert.assertTrue("Could not find necessary file!", false);
-        if (!swing.exists())
+        if (!test2.exists())
             Assert.assertTrue("Could not find necessary file!", false);
         files.clear();
         Assert.assertTrue("Necessary file nullfile.null cannot be found!",
                           mason.exists());
-        Assert.assertTrue("Necessary file vader.mp3 cannot be found!",
-                          vader.exists());
-        Assert.assertTrue("Necessary file swing.mp3 cannot be found!",
-                          swing.exists());
+        Assert.assertTrue("Necessary file test1.mp3 cannot be found!",
+                          test1.exists());
+        Assert.assertTrue("Necessary file test2.mp3 cannot be found!",
+                          test2.exists());
         files.put(mason, mfm.readFromMap(mason));
-        files.put(vader, mfm.readFromMap(vader));
-        files.put(swing, mfm.readFromMap(swing));
+        files.put(test1, mfm.readFromMap(test1));
+        files.put(test2, mfm.readFromMap(test2));
     }
 
     public void testAudio() {
@@ -71,11 +71,11 @@ public class CollectionTester extends TestCase {
         doc = collection.getDocForHash(mfm.readFromMap(mason));
         Assert.assertTrue("Mason should not have a doc!",
                           doc == null);
-        doc = collection.getDocForHash(mfm.readFromMap(vader));
-        Assert.assertTrue("Vader should have a doc!",
+        doc = collection.getDocForHash(mfm.readFromMap(test1));
+        Assert.assertTrue("Test1 should have a doc!",
                           doc != null);
-        doc = collection.getDocForHash(mfm.readFromMap(swing));
-        Assert.assertTrue("Swing should have a doc!",
+        doc = collection.getDocForHash(mfm.readFromMap(test2));
+        Assert.assertTrue("Test2 should have a doc!",
                           doc != null);
 
         // test keyword generation
@@ -83,11 +83,11 @@ public class CollectionTester extends TestCase {
         Assert.assertTrue("Keywords should have 6, instead " + keywords.size(),
                           (keywords.size() == 6));
         Assert.assertTrue("Correct keywords not in map!", 
-                          (keywords.contains("ferris") && 
-                           keywords.contains("swing")  &&
+                          (keywords.contains("othertfield") && 
+                           keywords.contains("otherafield")  &&
                            keywords.contains("Other")  &&
-                           keywords.contains("darth")  &&
-                           keywords.contains("darth")  &&
+                           keywords.contains("tfield")  &&
+                           keywords.contains("afield")  &&
                            keywords.contains("Vocal") )
                           );
         
@@ -108,11 +108,11 @@ public class CollectionTester extends TestCase {
         doc = collection.getDocForHash(mfm.readFromMap(mason));
         Assert.assertTrue("Mason should not have a doc!",
                           doc == null);
-        doc = collection.getDocForHash(mfm.readFromMap(vader));
-        Assert.assertTrue("Vader should not have a doc!",
+        doc = collection.getDocForHash(mfm.readFromMap(test1));
+        Assert.assertTrue("Test1 should not have a doc!",
                           doc == null);
-        doc = collection.getDocForHash(mfm.readFromMap(swing));
-        Assert.assertTrue("Swing should not have a doc!",
+        doc = collection.getDocForHash(mfm.readFromMap(test2));
+        Assert.assertTrue("Test2 should not have a doc!",
                           doc == null);
 
         // test keyword generation
@@ -130,27 +130,18 @@ public class CollectionTester extends TestCase {
 
         // make sure that a simple match works....
         List nameVals = new ArrayList();
-        nameVals.add(new NameValue(TITLE_KEY, "vade"));
+        nameVals.add(new NameValue(TITLE_KEY, "tfie"));
         LimeXMLDocument searchDoc = new LimeXMLDocument(nameVals, 
                                                         schemaURI);
         List results = collection.getMatchingReplies(searchDoc);
-        Assert.assertTrue("Not the correct amount of results, # = " +
-                          results.size(), (results.size() == 1));
+        assertEquals("Not the correct amount of results",
+                     1, results.size());
 
         // make sure a little more complex match works, no mp3 has album but one
         // has a title beginning with s
         nameVals.clear();
         nameVals.add(new NameValue(ALBUM_KEY, "susheel"));
-        nameVals.add(new NameValue(TITLE_KEY, "s"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
-        results = collection.getMatchingReplies(searchDoc);
-        Assert.assertTrue("Not the correct amount of results, # = " +
-                          results.size(), (results.size() == 1));        
-
-        // has a title beginning with s
-        nameVals.clear();
-        nameVals.add(new NameValue(ALBUM_KEY, "susheel"));
-        nameVals.add(new NameValue(TITLE_KEY, "s"));
+        nameVals.add(new NameValue(TITLE_KEY, "o"));
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         Assert.assertTrue("Not the correct amount of results, # = " +
@@ -158,18 +149,18 @@ public class CollectionTester extends TestCase {
 
         // has two matching, one null
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "vader"));
-        nameVals.add(new NameValue(ALBUM_KEY, "darth"));
-        nameVals.add(new NameValue(ARTIST_KEY, "darth"));
+        nameVals.add(new NameValue(TITLE_KEY, "tfield"));
+        nameVals.add(new NameValue(ALBUM_KEY, "ignored"));
+        nameVals.add(new NameValue(ARTIST_KEY, "afield"));
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
-        Assert.assertTrue("Not the correct amount of results, # = " +
-                          results.size(), (results.size() == 1));        
+        assertEquals("Not the correct amount of results",
+                     1, results.size());
 
         // has two matching
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "swi"));
-        nameVals.add(new NameValue(ARTIST_KEY, "ferr"));
+        nameVals.add(new NameValue(TITLE_KEY, "othertf"));
+        nameVals.add(new NameValue(ARTIST_KEY, "otherafi"));
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         Assert.assertTrue("Not the correct amount of results, # = " +
@@ -177,8 +168,8 @@ public class CollectionTester extends TestCase {
 
         // has one off by one....
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "swi"));
-        nameVals.add(new NameValue(ARTIST_KEY, "ferb"));
+        nameVals.add(new NameValue(TITLE_KEY, "othert"));
+        nameVals.add(new NameValue(ARTIST_KEY, "othra"));
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         Assert.assertTrue("Not the correct amount of results, # = " +
@@ -226,20 +217,20 @@ public class CollectionTester extends TestCase {
         doc = audioCollection.getDocForHash(mfm.readFromMap(mason));
         Assert.assertTrue("Mason should not have a doc!",
                           doc == null);
-        doc = audioCollection.getDocForHash(mfm.readFromMap(vader));
-        Assert.assertTrue("Vader should have a doc!",
+        doc = audioCollection.getDocForHash(mfm.readFromMap(test1));
+        Assert.assertTrue("Test1 should have a doc!",
                           doc != null);
-        doc = audioCollection.getDocForHash(mfm.readFromMap(swing));
-        Assert.assertTrue("Swing should have a doc!",
+        doc = audioCollection.getDocForHash(mfm.readFromMap(test2));
+        Assert.assertTrue("Test2 should have a doc!",
                           doc != null);
         doc = videoCollection.getDocForHash(mfm.readFromMap(mason));
         Assert.assertTrue("Mason should have a doc!",
                           doc != null);
-        doc = videoCollection.getDocForHash(mfm.readFromMap(vader));
-        Assert.assertTrue("Vader should not have a doc!",
+        doc = videoCollection.getDocForHash(mfm.readFromMap(test1));
+        Assert.assertTrue("Test1 should not have a doc!",
                           doc == null);
-        doc = videoCollection.getDocForHash(mfm.readFromMap(swing));
-        Assert.assertTrue("Swing should have a doc!",
+        doc = videoCollection.getDocForHash(mfm.readFromMap(test2));
+        Assert.assertTrue("Test2 should have a doc!",
                           doc != null);
 
 
@@ -248,11 +239,11 @@ public class CollectionTester extends TestCase {
         Assert.assertTrue("Keywords should have 6, instead " + keywords.size(),
                           (keywords.size() == 6));
         Assert.assertTrue("Correct keywords not in map!", 
-                          (keywords.contains("ferris") && 
-                           keywords.contains("swing")  &&
+                          (keywords.contains("othertfield") && 
+                           keywords.contains("otherafield")  &&
                            keywords.contains("Other")  &&
-                           keywords.contains("darth")  &&
-                           keywords.contains("vader")  &&
+                           keywords.contains("tfield")  &&
+                           keywords.contains("afield")  &&
                            keywords.contains("Vocal") )
                           );
         keywords = videoCollection.getKeyWords();
@@ -286,10 +277,10 @@ public class CollectionTester extends TestCase {
         LimeXMLDocument doc = null;
         LimeXMLReplyCollection.MapSerializer ms = null;
         // make audio.collection
-        doc = (new ID3Reader()).readDocument(vader);
-        map.put(mfm.readFromMap(vader), doc);
-        doc = (new ID3Reader()).readDocument(swing);
-        map.put(mfm.readFromMap(swing), doc);
+        doc = (new ID3Reader()).readDocument(test1);
+        map.put(mfm.readFromMap(test1), doc);
+        doc = (new ID3Reader()).readDocument(test2);
+        map.put(mfm.readFromMap(test2), doc);
         ms = new LimeXMLReplyCollection.MapSerializer(new File(fileLocation+"audio.collection"), map);
         ms.commit();
         // made video.collection
@@ -298,9 +289,9 @@ public class CollectionTester extends TestCase {
         nameVals.add(new NameValue("videos__video__director__","daswani"));
         nameVals.add(new NameValue("videos__video__title__","susheel"));
         doc = new LimeXMLDocument(nameVals, schemaURIVideo);
-        doc.setIdentifier(swing.getCanonicalPath());
+        doc.setIdentifier(test2.getCanonicalPath());
         doc.getXMLString();
-        map.put(mfm.readFromMap(swing), doc);
+        map.put(mfm.readFromMap(test2), doc);
         nameVals = new ArrayList();
         nameVals.add(new NameValue("videos__video__director__","file"));
         nameVals.add(new NameValue("videos__video__title__","null"));
