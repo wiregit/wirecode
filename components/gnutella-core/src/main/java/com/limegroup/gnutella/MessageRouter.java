@@ -1945,11 +1945,11 @@ public abstract class MessageRouter {
 			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime())
+			if (time < c.qrp().getNextQRPForwardTime())
 				continue;
 
 
-			c.incrementNextQRPForwardTime(time);
+			c.qrp().incrementNextQRPForwardTime(time);
 				
 			// Create a new query route table if we need to
 			if (table == null) {
