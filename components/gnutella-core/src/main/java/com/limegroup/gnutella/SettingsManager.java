@@ -629,6 +629,11 @@ public class SettingsManager implements SettingsInterface {
     /** returns the incomplete directory */
     public String getIncompleteDirectory() {
         File incFile = new File(incompleteDirectory_);
+
+		if (incFile == null) {
+			System.out.println("The Incomplete Directory is null");
+		}
+
         if(!incFile.isDirectory()) {			
 			setSaveDirectory(saveDirectory_);
         }
