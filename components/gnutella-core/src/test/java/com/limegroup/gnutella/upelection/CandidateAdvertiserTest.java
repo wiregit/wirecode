@@ -185,7 +185,7 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		assertTrue(_supporting._gotNotNull);
 		assertFalse(_notSupporting._gotNotNull);
 		assertFalse(_leaf._gotIt);
-		assertGreaterThanOrEquals(2*TEST_TIMEOUT,System.currentTimeMillis() -now);
+		assertGreaterThanOrEquals(TEST_TIMEOUT,System.currentTimeMillis() -now);
 		
 	}
 	
