@@ -59,6 +59,12 @@ public final class QueryUnicaster {
      */
     private LinkedList _queryHosts;
 
+    /**
+     * The Set of QueryKeys to be used for Queries.
+     * GUESSEndpoint -> QueryKey
+     */
+    private Map _queryKeys;
+
     /** The fixed size list of endpoints i've pinged.
      */
     private Buffer _pingList;
@@ -146,6 +152,7 @@ public final class QueryUnicaster {
         // construct DSes...
         _queries = new Hashtable();
         _queryHosts = new LinkedList();
+        _queryKeys = new Hashtable();
         _pingList = new Buffer(25);
         _querySets = new Hashtable();
         _qGuidsToRemove = new Vector();
@@ -378,6 +385,28 @@ public final class QueryUnicaster {
      */
     public void handleQueryReply(QueryReply qr) {
         addResults(new GUID(qr.getGUID()), qr.getResultCount());
+    }
+
+
+    /** Feed me QueryKey pongs so I can query people....
+     *  pre: pr.getQueryKey() != null
+     */
+    public void handleQueryKeyPong(PingReply pr) {
+        QueryKey qk = null;
+        InetAddress address = null;
+        try {
+            qk = pr.getQueryKey();
+            address = InetAddress.getByName(pr.getIP());
+        }
+        catch (BadPacketException ignored) {}
+        catch (UnknownHostException damn) {
+            // unknown host exception??  weird - well, don't continue....
+            return;
+        }
+        Assert.that(qk != null);
+        int port = pr.getPort();
+        GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
+        _queryKeys.put(endpoint, qk);
     }
 
 
