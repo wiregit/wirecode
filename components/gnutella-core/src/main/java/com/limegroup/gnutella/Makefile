@@ -7,7 +7,6 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	QueryRequest.class QueryReply.class Response.class \
 	PushRequest.class ByteOrder.class HostCatcher.class \
 	ForgetfulHashMap.class Endpoint.class \
-	NetworkDiscoverer.class NDThread.class GraphInOut.class
 
 
 all : $(classes)
