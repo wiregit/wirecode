@@ -297,13 +297,15 @@ public class HTTPUploader implements Runnable {
 	    str = "Content-length:"+ _sizeOfFile + "\r\n";
 	    _ostream.write(str.getBytes());
 	    
-	    int end;
-	    if (_uploadEnd != 0)
-		end = _uploadEnd;
-	    else 
-		end = _sizeOfFile;
+	  //    int end;
+//  	    if (_uploadEnd != 0)
+//  		end = _uploadEnd;
+//  	    else 
+//  		end = _sizeOfFile;
 
-	    str = "Content-range:" + _uploadBegin + "-" + end + "\r\n";
+	    str = "Content-range: bytes=" + (_uploadBegin + 1) + 
+		"-" + _sizeOfFile + "/" + _sizeOfFile + "\r\n";
+		
 		
 	    _ostream.write(str.getBytes());
 		
@@ -359,14 +361,20 @@ public class HTTPUploader implements Runnable {
 //  	if (_uploadBegin != 0)
 //  	    skip = _uploadBegin -1;
 
-	_fis.skip(_uploadBegin);
+	//	System.out.println("skipping: " + _uploadBegin);
+
+	long a = _fis.skip(_uploadBegin);
+
+	//	System.out.println("skipped: " + a);
+
+	_amountRead+=a;
 
 	while (true) {
 	    try {
 
-		if ((_uploadEnd != 0) && 
-		    (_uploadEnd == _amountRead ))
-		    break;
+		//  if ((_uploadEnd != 0) && 
+//  		    (_uploadEnd == _amountRead ))
+//  		    break;
 		     
 		c = _fis.read(buf);
 	    }

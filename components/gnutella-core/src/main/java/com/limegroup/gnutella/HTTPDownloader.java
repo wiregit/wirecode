@@ -529,6 +529,8 @@ public class HTTPDownloader implements Runnable {
 	    }
 	    
 	    if (str.indexOf("Content-range:") != -1) {
+		System.out.println("Content-range line:");
+		System.out.println(str);
 		_resume = true;
 	    }
 	    
