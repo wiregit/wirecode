@@ -202,6 +202,32 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean isGoodLeaf() {
         return false;
     }
+
+    /**
+     * Returns <tt>true</tt>, since we always support pong caching.
+     *
+     * @return <tt>true</tt> since this node always supports pong 
+     *  caching (since it's us)
+     */
+    public boolean supportsPongCaching() {
+        return true;
+    }
+
+    /**
+     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
+     * Since this ping is from us, we'll always allow it.
+     *
+     * @return <tt>true</tt> since this ping is from us
+     */
+    public boolean allowNewPings() {
+        return true;
+    }
+
+    /**
+     * Does nothing for traffic to this host, since we'll always allow new pings
+     * from ourselves.
+     */
+    public void updatePingTime() {}
 }
 
 

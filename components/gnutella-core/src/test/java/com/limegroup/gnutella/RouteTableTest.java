@@ -300,6 +300,16 @@ public final class RouteTableTest extends BaseTestCase {
         public boolean isGoodLeaf() {
             return true;
         }
+
+        public boolean supportsPongCaching() {
+            return true;
+        }
+
+        public boolean allowNewPings() {
+            return true;
+        }
+
+        public void updatePingTime() {}
     }
 
 }

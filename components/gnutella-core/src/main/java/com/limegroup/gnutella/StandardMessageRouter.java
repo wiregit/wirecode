@@ -63,13 +63,33 @@ public class StandardMessageRouter extends MessageRouter {
         if ( (hops+ttl) <=2)
             newTTL = 1;        
 
-        PingReply pr = 
-            PingReply.create(pingRequest.getGUID(), (byte)newTTL);
+        // send our own pong if we have free slots or if our average
+        // daily uptime is more than 1/2 hour
+        if(RouterService.getConnectionManager().hasFreeSlots() ||
+           Statistics.instance().calculateDailyUptime() > 60*30) {
 
-        try {
-            sendPingReply(pr);
+            PingReply pr = 
+                PingReply.create(pingRequest.getGUID(), (byte)newTTL);
+            
+            try {
+                sendPingReply(pr);
+            }
+            catch(IOException e) {
+                // broken reply route, can't send
+            }
         }
-        catch(IOException e) {}
+
+        List pongs = PongCacher.instance().getBestPongs();
+        Iterator iter = pongs.iterator();
+        byte[] guid = pingRequest.getGUID();
+        try {
+            while(iter.hasNext()) {
+                sendPingReply(((PingReply)iter.next()).mutateGUID(guid));
+            }
+        } catch(IOException e) {  
+            // this indicates that the reply route has been broken,
+            // so we stop trying to send more pongs
+        }
     }
 
 	/**

@@ -221,6 +221,18 @@ public class Connection {
      * The "soft max" ttl to use for this connection.
      */
     private byte _softMax;
+
+    /**
+     * Variable for the next time to allow a ping.  Volatile to avoid
+     * multiple threads caching old data for the ping time.
+     */
+    private volatile long _nextPingTime = Long.MIN_VALUE;
+
+    /**
+     * Variable for the next time to allow a pong.  Volatile to avoid
+     * multiple threads caching old data for the pong time.
+     */
+    private volatile long _nextPongTime = Long.MIN_VALUE;
     
     /**
      * Cache the 'connection closed' exception, so we have to allocate
@@ -1307,6 +1319,64 @@ public class Connection {
     // inherit doc comment
     public boolean isGoodLeaf() {
         return _headers.isGoodLeaf();
+    }
+
+    // inherit doc comment
+    public boolean supportsPongCaching() {
+        return _headers.supportsPongCaching();
+    }
+
+    /**
+     * Returns whether or not we should allow new pings on this connection.  If
+     * we have recently received a ping, we will likely not allow the second
+     * ping to go through to avoid flooding the network with ping traffic.
+     *
+     * @return <tt>true</tt> if new pings are allowed along this connection,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean allowNewPings() {
+        long curTime = System.currentTimeMillis();
+        if(curTime < _nextPingTime) {
+            return false;
+        } 
+        return true;
+    }
+
+    // inherit doc comment
+    public void updatePingTime() {
+        _nextPingTime = System.currentTimeMillis() + 800;
+    }
+
+    /**
+     * Returns whether or not we should allow new pongs on this connection.  If
+     * we have recently received a pong, we will likely not allow the second
+     * pong to go through to avoid flooding the network with pong traffic.
+     * In practice, this is only used to limit pongs sent to leaves.
+     *
+     * @return <tt>true</tt> if new pongs are allowed along this connection,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean allowNewPongs() {
+        long curTime = System.currentTimeMillis();
+        if(curTime < _nextPongTime) {
+            return false;
+        } 
+        return true;
+    }
+
+    // inherit doc comment
+    public void updatePongTime() {
+        long curTime = System.currentTimeMillis();
+        int interval;
+
+        // if the connection is young, give it a lot of pongs, otherwise
+        // be more conservative
+        if(curTime - getConnectionTime() < 10000) {
+            interval = 200;
+        } else {
+            interval = 6000;
+        }
+        _nextPongTime = curTime + interval;
     }
 
 	/**

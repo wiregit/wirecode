@@ -59,4 +59,23 @@ public class ReplyHandlerStub implements ReplyHandler {
     public boolean isGoodLeaf() {
         return false;
     }
+
+    public boolean supportsPongCaching() {
+        return true;
+    }
+
+    public boolean allowNewPings() {
+        return true;
+    }
+
+    public void updatePingTime() {
+    }
 }
+
+
+
+
+
+
+
+

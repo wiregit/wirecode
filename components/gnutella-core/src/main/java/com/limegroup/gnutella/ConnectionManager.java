@@ -85,20 +85,6 @@ public class ConnectionManager {
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
-    /** 
-	 * The desired number of slots to reserve for "good" connections.  
-	 * Search architecture design is an ongoing area of research both in the
-	 * Gnutella world and in the academic world.  As a result, the meaning 
-	 * of "good" connection will vary over time with development in open
-	 * search architectures.  As of LimeWire 2.9, "good" connections
-	 * meant connections that used querty routing tables between Ultrapeers
-	 * and that used high numbers of intra-Ultrapeer connections.  At 
-	 * release time, that was only LimeWire, but it will likely soon include
-	 * BearShare.
-	 */
-    public static final int RESERVED_GOOD_CONNECTIONS = 0;  
-
-
 	/**
 	 * The number of leaf connections reserved for "good" clients.  As
 	 * described above, the definition of good constantly changes with 
@@ -396,6 +382,44 @@ public class ConnectionManager {
     public boolean hasSupernodeClientConnection() {
         return getNumInitializedClientConnections() > 0;
     }
+
+    /**
+     * Returns whether or not this node has any available connection
+     * slots.  This is only relevant for Ultrapeers -- leaves will 
+     * always return <tt>false</tt> to this call since they do not 
+     * accept any incoming connections, at least for now.
+     *
+     * @return <tt>true</tt> if this node is an Ultrapeer with free
+     *  leaf or Ultrapeer connections slots, otherwise <tt>false</tt>
+     */
+    public boolean hasFreeSlots() {
+        return isSupernode() && 
+            (hasFreeUltrapeerSlots() || hasFreeLeafSlots());
+    }
+
+    /**
+     * Utility method for determing whether or not we have any available
+     * Ultrapeer connection slots.  If this node is a leaf, it will
+     * always return <tt>false</tt>.
+     *
+     * @return <tt>true</tt> if there are available Ultrapeer connection
+     *  slots, otherwise <tt>false</tt>
+     */
+    private boolean hasFreeUltrapeerSlots() {
+        return getNumFreeNonLeafSlots() > 0;
+    }
+
+    /**
+     * Utility method for determing whether or not we have any available
+     * leaf connection slots.  If this node is a leaf, it will
+     * always return <tt>false</tt>.
+     *
+     * @return <tt>true</tt> if there are available leaf connection
+     *  slots, otherwise <tt>false</tt>
+     */
+    private boolean hasFreeLeafSlots() {
+        return getNumFreeLeafSlots() > 0;
+    }
     
     /**
      * Returns whether this (probably) has a connection to the given host.  This
@@ -646,12 +670,12 @@ public class ConnectionManager {
 			// we're a leaf -- don't allow any incoming connections
             return false;  
 		} else if (hr.isLeaf() || leaf) {
-            //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
-            //Preference trusted vendors using BearShare's clumping algorithm
-            //(see above).
+            // Leaf. As the spec. says, this assumes we are an ultrapeer.
+            // If the leaf supports features we're looking for, accept it
+            // if we have slots.  Otherwise, only accept it if it's a 
+            // trusted vendor and we have slots available for older clients
 			if(hr.isGoodLeaf()) {
-				return getNumInitializedClientConnections() < 
-                    UltrapeerSettings.MAX_LEAVES.getValue();
+				return hasFreeLeafSlots(); 
 			} else {
 				return getNumInitializedClientConnections() <
 					(trustedVendor(hr.getUserAgent()) ?
@@ -666,8 +690,6 @@ public class ConnectionManager {
         } else if (hr.isUltrapeer()) {
             //2. Ultrapeer.  Preference trusted vendors using BearShare's
             //clumping algorithm (see above).		   
-
-			int connections = getNumInitializedConnections();
 
 			//if(goodConnection(hr)) {
 				// otherwise, it is a high degree connection, so allow it if we 
@@ -686,9 +708,7 @@ public class ConnectionManager {
 			// if it's not a new high-density connection, only allow it if
 			// our number of connections is below the maximum number of old
 			// connections to allow
-			return connections < 
-				//(trustedVendor(hr.getUserAgent()) ? 
-				ULTRAPEER_CONNECTIONS - RESERVED_GOOD_CONNECTIONS;
+			return hasFreeUltrapeerSlots(); 
         }
 		return false;
     }
@@ -988,6 +1008,8 @@ public class ConnectionManager {
      * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
+        if(connection.supportsPongCaching()) return;
+
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -1000,7 +1022,7 @@ public class ConnectionManager {
             pr = new PingRequest((byte)1);   
         else
             pr = new PingRequest((byte)4);   
-
+        
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
@@ -1494,7 +1516,7 @@ public class ConnectionManager {
     }
 
 	/**
-	 * Runs standard calls that should be made whenever a connection if fully
+	 * Runs standard calls that should be made whenever a connection is fully
 	 * established and should wait for messages.
 	 *
 	 * @param conn the <tt>ManagedConnection</tt> instance to start

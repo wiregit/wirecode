@@ -168,6 +168,11 @@ public final class HandshakeResponse {
     private final boolean PROBE_QUERIES;
 
     /**
+     * Constant for whether or not this node supports pong caching.
+     */
+    private final boolean PONG_CACHING;
+
+    /**
      * Creates a HandshakeResponse which defaults the status code and status
      * message to be "200 Ok" and uses the desired headers in the response. 
      * @param headers the headers to use in the response. 
@@ -212,6 +217,8 @@ public final class HandshakeResponse {
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
         DEFLATE_ENCODED = isStringValue(HEADERS,
             HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+        PONG_CACHING = 
+            isVersionOrHigher(headers, HeaderNames.X_PONG_CACHING, 0.1F);
     }
     
     /**
@@ -295,6 +302,22 @@ public final class HandshakeResponse {
      */
     static HandshakeResponse createRejectIncomingResponse(Properties headers) {
         addConnectedUltrapeers(RouterService.getConnectionManager(), headers);
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection to a leaf.  In this case, we send high hops
+     * Ultrapeers in the X-Try-Ultrapeer headers to avoid clustering as
+     * much as possible.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createLeafRejectIncomingResponse(Properties headers) {
+        addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
                                      headers);        
@@ -702,6 +725,16 @@ public final class HandshakeResponse {
 		}
 		return false;
 	}
+
+    /**
+     * Returns whether or not this node supports pong caching.  
+     *
+     * @return <tt>true</tt> if this node supports pong caching, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean supportsPongCaching() {
+        return PONG_CACHING;
+    }
 
 	/**
 	 * Returns the authenticated domains listed in the connection headers

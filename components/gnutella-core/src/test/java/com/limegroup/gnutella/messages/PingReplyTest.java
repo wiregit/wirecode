@@ -20,6 +20,39 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     /**
+     * Tests the method for creating a new pong with a changed GUID out
+     * of an existing pong
+     */
+    public void testMutateGUID() throws Exception {
+        byte[] guid = new GUID().bytes();
+        byte ttl = 4;
+        int port = 6444;
+        byte[] ip = new byte[6];
+        long files = 500L;
+        long kbytes = 75580L;
+        boolean isUltrapeer = false;
+        int dailyUptime = 10;
+        boolean isGUESSCapable = false;
+        
+        PingReply pr = 
+            PingReply.create(guid, ttl, port, ip, files, kbytes, 
+                             isUltrapeer, dailyUptime, isGUESSCapable);
+        
+        PingReply testPR = pr.mutateGUID(new GUID().bytes());
+        
+        assertNotEquals(pr.getGUID(), testPR.getGUID());
+        assertEquals(pr.getTTL(), testPR.getTTL());
+        assertEquals(pr.getPort(), testPR.getPort());
+        assertEquals(pr.getIP(), testPR.getIP());
+        assertEquals(pr.getFiles(), testPR.getFiles());
+        assertEquals(pr.getKbytes(), testPR.getKbytes());
+        assertEquals(pr.isUltrapeer(), testPR.isUltrapeer());
+        assertEquals(pr.getDailyUptime(), testPR.getDailyUptime());
+        assertEquals(pr.supportsUnicast(), testPR.supportsUnicast());
+    }
+
+
+    /**
      * Tests the method for creating a pong from the network.
      */
     public void testCreatePongFromNetwork() throws Exception {
@@ -94,6 +127,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                                         payload);
     }
 
+
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
@@ -110,7 +144,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         //assertTrue(pr.ip!=null);  //Looking at private data
         ip2=pr.getIP();
         assertEquals("255.0.0.1", ip2);
-        assertTrue(! pr.isMarked());
+        assertTrue(! pr.isUltrapeer());
     }      
       
     //TODO: check construction from raw bytes
@@ -121,38 +155,38 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                                      false);
 
         
-        assertTrue(! pr.isMarked());        
+        assertTrue(! pr.isUltrapeer());        
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
         pr = PingReply.createExternal(new byte[16], (byte)2, 6346, new byte[4],
                                       true);
-        assertTrue(pr.isMarked());
+        assertTrue(pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
         pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
                               5, 2348, false, 0, false);        
-        assertTrue(! pr.isMarked());
+        assertTrue(! pr.isUltrapeer());
         assertEquals(2348, pr.getKbytes());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
         pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
                               5, 2348, true, 0, true);
-        assertTrue(pr.isMarked());
+        assertTrue(pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
         pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
                               5, 345882, false, 0, false);
-        assertTrue(! pr.isMarked());
+        assertTrue(! pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
         pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
                               5, 345882, true, -1, true);
-        assertTrue(pr.isMarked());
+        assertTrue(pr.isUltrapeer());
         // after added unicast support, all Ultrapeer Pongs have GGEP extension
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 

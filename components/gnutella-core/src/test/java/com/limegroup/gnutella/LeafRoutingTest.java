@@ -221,15 +221,8 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
             c.initialize();
             fail("handshake should not have succeeded");
         } catch (IOException e) {
-			String hosts=c.headers().getProperty(HeaderNames.X_TRY);
-            //System.out.println("X-Try: "+hosts);
-            assertNull("hosts should be null", hosts);
-            //Set s=list2set(hosts);
 
-            // size should be 0 since the test contains no non-Ultrapeer nodes
-            //assertEquals("unexpected size of X-Try hosts list", 0, s.size());
-
-            hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
+            String hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
             Set s=list2set(hosts);

@@ -113,4 +113,29 @@ public interface ReplyHandler {
      *  otherwise <tt>false</tt>
      */
     public boolean isGoodLeaf();
+
+    /**
+     * Returns whether or not this node supports pong caching.  
+     *
+     * @return <tt>true</tt> if this node supports pong caching, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean supportsPongCaching();
+
+    /**
+     * Determines whether new pings should be allowed from this reply handler.
+     * Pings should only be accepted if we have not seen another ping from
+     * this handler in a given number of milliseconds, avoiding messages
+     * bursts.
+     *
+     * @return <tt>true</tt> if new pings are allowed, otherwise 
+     *  <tt>false</tt>
+     */
+    public boolean allowNewPings();
+
+    /**
+     * Updates the time after which we will allow new pings from this handler
+     * Before this time is reached, new pings will be ignored.
+     */
+    public void updatePingTime();
 }

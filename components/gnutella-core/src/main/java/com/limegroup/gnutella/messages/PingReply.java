@@ -314,6 +314,21 @@ public class PingReply extends Message implements Serializable {
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
 
+    /**
+     * Returns a new <tt>PingReply</tt> instance with all the same data
+     * as <tt>this</tt>, but with the specified GUID.
+     *
+     * @param guid the guid to use for the new <tt>PingReply</tt>
+     * @return a new <tt>PingReply</tt> instance with the specified GUID
+     *  and all of the data from this <tt>PingReply</tt>
+     */
+    public PingReply mutateGUID(byte[] guid) {
+        return PingReply.create(guid, 
+                                getTTL(), getPort(),
+                                getIPBytes(), getFiles(), getKbytes(),
+                                isUltrapeer(), getDailyUptime(),
+                                supportsUnicast());        
+    }
 
     /**
      * Creates a new <tt>PingReply</tt> instance with the specified
@@ -741,9 +756,14 @@ public class PingReply extends Message implements Serializable {
 
     ////////////////////////// Pong Marking //////////////////////////
 
-    /** Returns true if this message is "marked", i.e., likely from a
-     *  supernode. */
-    public boolean isMarked() {
+    /** 
+     * Returns true if this message is "marked", i.e., likely from an
+     * Ultrapeer. 
+     *
+     * @return <tt>true</tt> if this pong is marked as an Ultrapeer pong,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isUltrapeer() {
         //Returns true if kb is a power of two greater than or equal to eight.
         long kb = getKbytes();
         if (kb < 8)

@@ -20,10 +20,14 @@ public final class HeaderNames {
     /** The replacement for X_MY_ADDRESS */
     public static final String LISTEN_IP            = "Listen-IP";
     public static final String X_ULTRAPEER          = "X-Ultrapeer";
-    public static final String X_TRY                = "X-Try";
     public static final String X_TRY_ULTRAPEERS     = "X-Try-Ultrapeers";
     public static final String X_QUERY_ROUTING      = "X-Query-Routing";
-    public static final String X_PONG_CACHING       = "X-Pong-Caching";
+
+    /**
+     * Constant string for the header indicating support for pong
+     * caching.
+     */
+    public static final String X_PONG_CACHING       = "Pong-Caching";
     public static final String X_ULTRAPEER_NEEDED   = "X-Ultrapeer-Needed";
     public static final String USER_AGENT           = "User-Agent";
     public static final String X_USERNAME         = "X-Username";

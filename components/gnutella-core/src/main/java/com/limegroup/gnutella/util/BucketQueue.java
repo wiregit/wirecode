@@ -79,6 +79,9 @@ public class BucketQueue implements Cloneable {
         this.size=other.size;
     }
 
+    /**
+     * Removes all elements from the queue.
+     */
     public void clear() {
         repOk();
         for (int i=0; i<buckets.length; i++) 

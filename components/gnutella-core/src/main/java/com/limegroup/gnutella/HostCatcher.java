@@ -280,7 +280,7 @@ public class HostCatcher {
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
-        if (pr.isMarked())
+        if (pr.isUltrapeer())
             return add(endpoint, GOOD_PRIORITY);
         else
             return add(endpoint, priority(endpoint));

@@ -194,6 +194,33 @@ public final class UDPReplyHandler implements ReplyHandler {
         return false;
     }
 
+    /**
+     * Returns <tt>false</tt>, since we don't know whether a host 
+     * communicating via UDP supports pong caching or not.
+     *
+     * @return <tt>false</tt> since we don't know if this node supports
+     *  pong caching or not
+     */
+    public boolean supportsPongCaching() {
+        return false;
+    }
+
+    /**
+     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
+     * Since this ping is over UDP, we'll always allow it.
+     *
+     * @return <tt>true</tt> since this ping is received over UDP
+     */
+    public boolean allowNewPings() {
+        return true;
+    }
+
+    /**
+     * Does nothing for UDP traffic, since we'll always accept new pings over
+     * UDP.
+     */
+    public void updatePingTime() {}
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
