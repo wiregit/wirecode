@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -73,4 +74,9 @@ public interface Handshaker {
      * 
      */
     public void read() throws IOException;
+
+    /**
+     * @return
+     */
+    public ByteBuffer getRemainingData();
 }
