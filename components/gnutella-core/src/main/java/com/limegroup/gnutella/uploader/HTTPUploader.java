@@ -194,7 +194,12 @@ public final class HTTPUploader implements Uploader {
         }
         else {
             try {
-                // get the fileInputStream
+                // if there already was an input stream, close it.
+                if( _fis != null ) {
+                    try {
+                        _fis.close();
+                    } catch(IOException ignored) {}
+                }
                 _fis = _fileDesc.createInputStream();
                 setState(CONNECTING);
 			} catch(FileNotFoundException e) {
