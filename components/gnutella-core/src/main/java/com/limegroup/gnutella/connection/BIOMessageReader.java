@@ -369,7 +369,7 @@ public class BIOMessageReader extends AbstractMessageReader {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
         }
 
-        checkFields(ttl, hops, softMax, func);
+        ttl = checkFields(ttl, hops, softMax, func);
         
         // Delayed GUID allocation
         byte[] guid = new byte[16];

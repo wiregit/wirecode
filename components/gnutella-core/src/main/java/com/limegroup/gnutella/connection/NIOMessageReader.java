@@ -224,7 +224,7 @@ public class NIOMessageReader extends AbstractMessageReader {
 		//  Check values. 
 		byte softMax = conn.getSoftMax();
         
-        checkFields(ttl, hops, softMax, func);
+        ttl = checkFields(ttl, hops, softMax, func);
 
 		// dispatch based on opcode.
 		payloadBuffer.flip();     
