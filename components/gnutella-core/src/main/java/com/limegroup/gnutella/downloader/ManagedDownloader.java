@@ -138,22 +138,21 @@ public class ManagedDownloader implements Downloader, Serializable {
      * atomicity and thread safety for step 2 of the algorithm above. For 
      * this reason we needed to add another lock - stealLock.
      *
-     * We don't  want to synchronize assignAndRequest on this
-     * since that freezes the GUI as it calls getAmountRead() frequently 
-     * (which also hold this' monitor
-     *
-     * Now assignAndRequest is synchronized on stealLock, and within it we
-     * acquire this' monitor when we are modifying shared datastructures.
-     * 
-     * This additional lock will prevent GUI freezes, since we hold this' 
-     * monitor for a very short time while we are updating the shared 
-     * datastructures, also atomicity is guaranteed since we are still 
-     * synchronized. 
+     * We don't want to synchronize assignAndRequest on this since that freezes
+     * the GUI as it calls getAmountRead() frequently (which also hold this'
+     * monitor).  Now assignAndRequest is synchronized on stealLock, and within
+     * it we acquire this' monitor when we are modifying shared datastructures.
+     * This additional lock will prevent GUI freezes, since we hold this'
+     * monitor for a very short time while we are updating the shared
+     * datastructures, also atomicity is guaranteed since we are still
+     * synchronized.
      *
      * Never acquire stealLock's monitor if you have this' monitor.
      *
      * Never acquire incompleteFileManager's monitor if you have commonOutFile's
      * monitor.
+     *
+     * Never obtain manager's lock if you hold this.
      *
      * Also, always hold stealLock's monitor before REMOVING elements from 
      * needed. As always, we must obtain this' monitor before modifying needed.
@@ -790,30 +789,39 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloaderManagerThread.interrupt();
     }
 
-    public synchronized boolean resume() throws AlreadyDownloadingException {
+    public boolean resume() throws AlreadyDownloadingException {
         //Ignore request if already in the download cycle.
-        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-               state==ABORTED || state==WAITING_FOR_RESULTS))
-            return false;
-        //Sometimes a resume can cause a conflict.  So we check.
+        synchronized (this) {
+            if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
+                   state==ABORTED || state==WAITING_FOR_RESULTS))
+                return false;
+        }
+
+        //Sometimes a resume can cause a conflict.  So we check.  Do not hold
+        //this' lock during this step, as that can cause deadlock.  There is a
+        //small chance that a conflicting file could be added to this after the
+        //check.
         String conflict=this.manager.conflicts(allFiles, this);
         if (conflict!=null)
-            throw new AlreadyDownloadingException(conflict);
+            throw new AlreadyDownloadingException(conflict);        
 
-        if (state==GAVE_UP || state==ABORTED) {
-            //This stopped because all hosts were tried.  (Note that this
-            //couldn't have been user aborted.)  Therefore no threads are
-            //running in this and it may be safely resumed.
-            initialize(this.manager, this.fileManager, this.callback);
-        } else if (state==WAITING_FOR_RETRY) {
-            //Interrupt any waits.
-            if (dloaderManagerThread!=null)
-                dloaderManagerThread.interrupt();
-        } else if (state==WAITING_FOR_RESULTS) {
-            // wake up the requerier...
-            reqLock.release();
+        //Do actual download.
+        synchronized (this) {
+            if (state==GAVE_UP || state==ABORTED) {
+                //This stopped because all hosts were tried.  (Note that this
+                //couldn't have been user aborted.)  Therefore no threads are
+                //running in this and it may be safely resumed.
+                initialize(this.manager, this.fileManager, this.callback);
+            } else if (state==WAITING_FOR_RETRY) {
+                //Interrupt any waits.
+                if (dloaderManagerThread!=null)
+                    dloaderManagerThread.interrupt();
+            } else if (state==WAITING_FOR_RESULTS) {
+                // wake up the requerier...
+                reqLock.release();
+            }
+            return true;
         }
-        return true;
     }
 
     public File getDownloadFragment() {
