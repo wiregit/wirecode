@@ -365,7 +365,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testIterators() {
         //System.out.println("-Testing iterators");
 
-        Iterator iter=hc.getUltrapeerHosts(10);
+        Iterator iter = hc.getUltrapeerHosts(10).iterator();
         assertTrue("should not have Ultrapeer hosts", ! iter.hasNext());
 
         assertEquals("unexpected number of ultrapeer hosts", 
@@ -379,7 +379,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected number of ultrapeer hosts",
             2, hc.getNumUltrapeerHosts());
 
-        iter=hc.getUltrapeerHosts(100);
+        iter = hc.getUltrapeerHosts(100).iterator();
         assertTrue(iter.hasNext());
         assertEquals("unexpected host",
             new Endpoint("18.239.0.2", 6346), iter.next());
@@ -388,7 +388,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
             new Endpoint("18.239.0.1", 6346), iter.next());
         assertTrue(! iter.hasNext());
 
-        iter=hc.getUltrapeerHosts(1);
+        iter = hc.getUltrapeerHosts(1).iterator();
         assertTrue(iter.hasNext());
         assertEquals("unexpected host",
             new Endpoint("18.239.0.2", 6346), iter.next());
