@@ -12,7 +12,6 @@ import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
@@ -178,7 +177,7 @@ public class RouterService {
 
     public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm) {
         this(ac,mr);
-        this.fileManager = fm;
+        RouterService.fileManager = fm;
     }
 
 	/**
@@ -595,16 +594,16 @@ public class RouterService {
         if (manager.hasSupernodeClientConnection()) {
             //Also the request to decrease the keep alive below a minimum
             //level is invalid, if we are an Ultrapeer with leaves
-            if (newKeep < manager.ULTRAPEER_CONNECTIONS)
+            if (newKeep < ConnectionManager.ULTRAPEER_CONNECTIONS)
                 throw new BadConnectionSettingException(
                 BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
-                manager.ULTRAPEER_CONNECTIONS);
-            else if (newKeep > manager.ULTRAPEER_CONNECTIONS 
+                ConnectionManager.ULTRAPEER_CONNECTIONS);
+            else if (newKeep > ConnectionManager.ULTRAPEER_CONNECTIONS 
                 && newKeep > max)
                 throw new BadConnectionSettingException(
                 BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                manager.ULTRAPEER_CONNECTIONS > max ?
-                    manager.ULTRAPEER_CONNECTIONS : max);
+                ConnectionManager.ULTRAPEER_CONNECTIONS > max ?
+                    ConnectionManager.ULTRAPEER_CONNECTIONS : max);
         } else if (newKeep > max)
             //cant have too many connections based upon node's speed
             throw new BadConnectionSettingException(
