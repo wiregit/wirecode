@@ -260,17 +260,20 @@ public class LeafRoutingTest extends BaseTestCase {
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
             Set s=list2set(hosts);
-            assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+hosts, 
-                         4, s.size());
-            //byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+            assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+
+                         hosts, 4, s.size());
+            byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+            // because we used 'createExternal' to create the external pongs we
+            // did not mark them with slot info.  we shoud do that at some point
+            // to test this.
             assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6350));
+                       s, new Endpoint(localhost, 6350));
             assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6351));
+                       s, new Endpoint(localhost, 6351));
             assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6352));
+                       s, new Endpoint(localhost, 6352));
             assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6353));
+                       s, new Endpoint(localhost, 6353));
 
             //assertTrue("expected Ultrapeer not present in list",
             //           s.contains(new Endpoint(localhost, 6350))); 
