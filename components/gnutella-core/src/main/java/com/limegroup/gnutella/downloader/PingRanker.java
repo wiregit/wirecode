@@ -143,18 +143,20 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         RemoteFileDesc ret;
         
         // try a verified host
-        if (!verifiedHosts.isEmpty()){ 
+        if (!verifiedHosts.isEmpty()){
+            LOG.debug("getting a verified host");
             ret =(RemoteFileDesc) verifiedHosts.first();
             verifiedHosts.remove(ret);
         }
         else {
+            LOG.debug("getting a non-verified host");
             // use the legacy ranking logic to select a non-verified host
             LegacyRanker r = new LegacyRanker();
             r.addToPool(pingedHosts.values());
             r.addToPool(newHosts);
             ret = r.getBest();
             newHosts.remove(ret);
-            pingedHosts.values().remove(ret);
+            while(pingedHosts.values().remove(ret));
         }
         
         pingIfNeeded();
