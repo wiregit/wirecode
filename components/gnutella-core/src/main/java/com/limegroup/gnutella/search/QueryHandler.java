@@ -239,8 +239,6 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
-			System.out.println("QueryHandler::sendQuery::ttl: "+ttl+" "+this+
-							   " hostToQuery: "+hostsToQueryPerConnection); 
 			QueryRequest query = createQuery(ttl);
 
 
@@ -264,7 +262,6 @@ public final class QueryHandler {
 	 * Send the initial "probe" query to get an idea of how widely di
 	 */
 	private void sendProbeQuery() {
-		System.out.println("QueryHandler::sendProbeQuery"); 
 		List connections = CONNECTION_MANAGER.getInitializedConnections2();
 
 		byte ttl = 2;
@@ -273,7 +270,6 @@ public final class QueryHandler {
 		for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)connections.get(i);
 
-			System.out.println("QueryHandler::sendProbeQuery::to: "+mc+" "+query); 
 			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
 
 			// add the reply handler to the list of queried hosts
