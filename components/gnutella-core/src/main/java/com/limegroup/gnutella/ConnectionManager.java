@@ -1483,7 +1483,7 @@ public class ConnectionManager {
      * @return whether we became an UP successfully.
      */
     public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
-    	
+    	System.out.println("trying to become an UP");
     	//first, lose one of our current UPs in order to free a slot.
     	ManagedConnection sacrificed = (ManagedConnection)_initializedConnections.get(0);
     	remove(sacrificed);

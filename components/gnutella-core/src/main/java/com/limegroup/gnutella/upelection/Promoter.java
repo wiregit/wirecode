@@ -34,12 +34,11 @@ public class Promoter implements Runnable {
 	/**
 	 * Thread that performs the promotion process, including crawling, etc.
 	 * 
-	 * @param host the host that requested our promotion.  We will connect to that host first
-	 * @param port the port of the host that requested the promotion.
+	 * @param target the UP that asked us to promote ourselves.
 	 */
-	public Promoter(String host, int port) {
-		_host = host;
-		_port = port;
+	public Promoter(Endpoint target) {
+		_host = target.getAddress();
+		_port = target.getPort();
 	}
 	
 	//override for test purposes

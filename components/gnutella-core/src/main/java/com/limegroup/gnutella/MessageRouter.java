@@ -179,34 +179,9 @@ public abstract class MessageRouter {
     private final Map _messageListeners = new Hashtable();
     
     /**
-     * keeps a list of the people who have requested our connection lists.
-     * used to make sure we don't get ping-flooded.
-     * not final so that tests won't take forever.
+     * ref to the promotion manager.
      */
-    private FixedSizeExpiringSet _UDPListRequestors = new FixedSizeExpiringSet(200, 5*1000);
-    
-    /**
-     * keeps a list of the peopel who advertised their best candidate.  These should be only
-     * neighboring ultrapeers.  Furthermore they shouldn't do it too often.
-     * TODO: export the values to the proper constants.
-     * Note: the alss is not final so that the tests won't take forever.
-     */
-    private FixedSizeExpiringSet _candidateAdvertisers = new FixedSizeExpiringSet(
-    		ConnectionManager.ULTRAPEER_CONNECTIONS, 14*60*1000);
-    
-    /**
-     * some constants related to the propagation of the best candidates.  
-     * should eventually be determined by experiments.
-     */
-    private final int CANDIDATE_PROPAGATION_DELAY= 2*60*60*1000; //2 hours
-    private final int CANDIDATE_PROPAGATION_INTERVAL=15*60*1000; // 15 minutes
-    
-    /**
-     * the endpoint of either the requestor or the candidate for promotion
-     * LOCKING: obtain _promotionLock
-     */
-    private Endpoint _promotionPartner;
-    private Object _promotionLock = new Object();
+    private PromotionManager _promotionManager;
     
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -232,6 +207,7 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
+		_promotionManager = RouterService.getPromotionManager();
 		DYNAMIC_QUERIER.start();
 	    QRP_PROPAGATOR.start();
 
@@ -242,8 +218,8 @@ public abstract class MessageRouter {
                                10 * CLEAR_TIME);
         
         RouterService.schedule(new CandidateAdvertiser(), 
-        			CANDIDATE_PROPAGATION_DELAY,	
-					CANDIDATE_PROPAGATION_INTERVAL);
+        			PromotionManager.CANDIDATE_PROPAGATION_DELAY,	
+					PromotionManager.CANDIDATE_PROPAGATION_INTERVAL);
     }
 
     /** Call this to inform us that a query has been killed by a user or
@@ -2604,68 +2580,6 @@ public abstract class MessageRouter {
         }
     }
     
-    /**
-     * sends out a vendor message to all UP connections containing our best candidates.
-     * ExtendedEndpoints are created from open ManagedConnection objects; the field dailyUptime in this 
-     * case means the lifetime of the connection.
-     */
-    private static class CandidateAdvertiser implements Runnable {
-    	
-    	
-    	public void run() {
-    		
-    		//first update our best leaf, i.e. find the one with the longest uptime
-    		//that is also not firewalled, isGoodLeaf, etc.
-    		Candidate best = electBest();
-    		
-    		//if we don't have a candidate, do not advertise.
-    		if (best==null)
-    			return;
-    		
-    		
-    		BestCandidates.update(best);
-    		
-    		//create a vendor message with the new info
-    		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(
-    				BestCandidates.getCandidates());
-    		
-    		//broadcast!
-    		for (Iterator iter = _manager.getInitializedConnections().iterator();iter.hasNext();) {
-    			ManagedConnection current = (ManagedConnection)iter.next();
-    			if (current.isGoodUltrapeer() &&
-    					current.remoteHostSupportsBestCandidates() >= 1);
-    				current.send(bcvm);
-    		}
-    	}
-    	
-    	/**
-    	 * elects the best ultrapeer candidate amongst our leaf connections
-    	 */
-    	private Candidate electBest() {
-    		Candidate best = null;
-    		
-    		for (Iterator iter = _manager.getInitializedClientConnections().iterator();
-    			iter.hasNext();){
-    			ManagedConnection current = (ManagedConnection)iter.next();
-    			if (current.isGoodLeaf() &&
-    					current.isStable() && 
-						current.isLimeWire() &&
-						current.isGUESSCapable()) //unsolicited udp
-    				//add more criteria here
-    				try {
-    					Candidate currentCandidate = new Candidate(current);
-    					if (currentCandidate.compareTo(best) > 0)
-    						best = currentCandidate;
-    				}catch (UnknownHostException ignored) {
-    					//if the leaf doesn't have valid address it should be rightfully ignored.
-    				}
-    		}
-    		
-    		return best;
-    	}
-    }
-
-
     /** This is run to clear out the registry of connect back attempts...
      *  Made package access for easy test access.
      */
@@ -2694,7 +2608,7 @@ public abstract class MessageRouter {
     		return;
     	
     	//make sure they aren't advertising too soon.
-    	if (!_candidateAdvertisers.add(advertiser.getInetAddress()))
+    	if (!_promotionManager.getCandidateAdvertisers().add(advertiser.getInetAddress()))
     		return;
     	
     	//then add a ref of the advertiser to each candidate he sent
@@ -2719,7 +2633,7 @@ public abstract class MessageRouter {
     	//make sure the same person doesn't request too often
     	//note: this should only happen on the UDP receiver thread, that's why
     	//I'm not locking it.
-    	if (!_UDPListRequestors.add(handler.getInetAddress()))
+    	if (!_promotionManager.getUDPListRequestors().add(handler.getInetAddress()))
     		return; //this also takes care of multiple instances running on the same ip address.
     	
     	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
@@ -2754,7 +2668,7 @@ public abstract class MessageRouter {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
     				RouterService.getExternalAddress()))
-    			initiatePromotion(msg);
+    			_promotionManager.initiatePromotion(msg);
     		return; 
     	}
     	
@@ -2780,26 +2694,7 @@ public abstract class MessageRouter {
     	
     }
     
-    /**
-	 * initiates the promotion process.  It sends out an udp ping to the
-     * original requestor and when the ack comes back it the listener will 
-     * start the crawl in a separate thread.
-     */
-    private void initiatePromotion(PromotionRequestVendorMessage msg) {
-    	
-    	//set the promotion partner
-    	synchronized(_promotionLock) {
-    		_promotionPartner = new Endpoint (
-    				msg.getRequestor().getAddress(),
-					msg.getRequestor().getPort());
-    	}
-    	
-    	//ping the original requestor
-    	System.out.println("pinging the original requestor");
-    	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
-    	UDPService.instance().send( ping,
-    		msg.getRequestor().getInetAddress(),msg.getRequestor().getPort());
-    }
+    
     
     /**
      * forwards a promotion request to a candidate.  This method will create a new
