@@ -245,7 +245,7 @@ public class Response {
 		else
 			this.name = name;
 
-        byte[] temp;
+        byte[] temp = null;
         
         try {
             temp = this.name.getBytes("UTF-8");
@@ -665,7 +665,7 @@ public class Response {
         catch(UnsupportedEncodingException uee) {
             //b/c this should never happen, we will show and error
             //if it ever does for some reason.
-            ErrorService.error(use);
+            ErrorService.error(uee);
         }
 	}
 	

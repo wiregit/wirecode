@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import com.sun.java.util.collections.*;
 
 /**
