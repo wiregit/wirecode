@@ -106,7 +106,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test keyword generation
         List keywords = collection.getKeyWords();
 
-        assertEquals("Wrong keyword count!",8, keywords.size());
+        assertEquals("Wrong keywords: " + keywords.toString(), 8, keywords.size());
 
         //Note: the Test1 and Test2 both contain the keyword "Movie", so we
         //check only 7 keywords while there are 8 entries

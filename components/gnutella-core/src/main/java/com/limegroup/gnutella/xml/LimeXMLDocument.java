@@ -245,8 +245,9 @@ public class LimeXMLDocument implements Serializable {
             if(val != null && !val.equals("") && !isIndivisible(currKey, val)) {
                 try {
                     Double.parseDouble(val); // will trigger NFE.
+                } catch(NumberFormatException ignored) {
                     retList.add(val);
-                } catch(NumberFormatException ignored) {}
+                }
             }
         }
         CACHED_KEYWORDS = retList;
