@@ -87,13 +87,13 @@ public class Library {
     private static String checkChars(String str) {
 	
 	String escapeChars = "&";
-
-	char[] new_chars = new char[256];
 	
 	char[] chars = str.toCharArray();
 	int length = chars.length;
+
+	char[] new_chars = new char[length*2];
 	
-	int index = 0;;
+	int index = 0;
 	
 	for (int i=0; i < length; i++) {
 	    
