@@ -10,6 +10,7 @@ import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Set;
 
+
 /**
  * This class contains data for an individual shared file.  It also provides
  * various utility methods for checking against the encapsulated data.<p>
@@ -61,9 +62,10 @@ public class FileDesc implements AlternateLocationCollector {
 	private final File FILE;
 
 	/**
-	 * Constant for the SHA1 <tt>URN</tt> instance.
+	 * The SHA1 <tt>URN</tt> instance.
+	 * Set by constructor and recalculateAndCacheURN method.
 	 */
-	private final URN SHA1_URN;
+	private URN SHA1_URN;
 
 	/**
 	 * The collection of alternate locations for the file.
@@ -158,6 +160,28 @@ public class FileDesc implements AlternateLocationCollector {
 		}
         return urns;
     }
+    
+    /**
+     * Recalculates and caches the URNs for this file.
+     * All previous information is lost.
+     *
+     * @return an unmodifiable <tt>Set</tt> of <tt>URN</tt>.  If the calling
+     * thread is interrupted while executing this, returns an empty set.  
+	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument is
+	 *  <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>file</tt> argument
+	 *  denotes a file that is not a file on disk
+     * @throws <tt>IOException</tt> if there is an IO error calculating the 
+     *  URN
+     * @throws <tt>InterruptedException</tt> if the thread that calculates
+     *  the URN is interrupted
+     */
+    public void /* of URN */ recalculateAndCacheURN() 
+      throws IOException, InterruptedException {
+        UrnCache.instance().removeUrns(FILE);
+        FileDesc.calculateAndCacheURN(FILE);
+        SHA1_URN = extractSHA1();
+    }
 
 	/**
 	 * Returns whether or not this <tt>FileDesc</tt> has any urns.
@@ -211,7 +235,6 @@ public class FileDesc implements AlternateLocationCollector {
 		return SHA1_URN;
 	}
 
-
 	/**
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
@@ -247,7 +270,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 */
 	public Set getUrns() {
 		return URNS;
-	}
+	}   
 
 	/**
 	 * Returns the absolute path of the file represented wrapped by this
@@ -359,7 +382,7 @@ public class FileDesc implements AlternateLocationCollector {
      */
     private static Set calculateUrns(File file) 
         throws IOException, InterruptedException {
-        Set set = new HashSet();
+        Set set = new HashSet(1);
         set.add(URN.createSHA1Urn(file));
         return set;
 	}
@@ -443,6 +466,16 @@ public class FileDesc implements AlternateLocationCollector {
     public InputStream createInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
     }
+    
+    private String listSet(Set info) {
+        StringBuffer stuff = new StringBuffer();
+        for(Iterator i = info.iterator(); i.hasNext(); ) {
+            stuff.append(i.next().toString());
+            if( i.hasNext() )
+                stuff.append(", ");
+        }
+        return stuff.toString();
+    }
 
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
@@ -453,7 +486,7 @@ public class FileDesc implements AlternateLocationCollector {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+URNS+"\r\n"+
+				"urns:     "+listSet(URNS)+"\r\n"+
 				"alt locs: "+ALT_LOCS+"\r\n");
 	}
 }
