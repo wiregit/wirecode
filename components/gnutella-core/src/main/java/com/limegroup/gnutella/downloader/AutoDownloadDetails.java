@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.StringTokenizer;
 import java.io.*;
 import org.xml.sax.SAXException;

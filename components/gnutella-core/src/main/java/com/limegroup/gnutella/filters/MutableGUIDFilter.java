@@ -5,8 +5,8 @@ import com.limegroup.gnutella.messages.QueryReply;
 
 import com.limegroup.gnutella.GUID;
 
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.TreeSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Filter for query replies based on the GUID

@@ -1,9 +1,15 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 public class UpdateFileState extends UploadState {
     

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.altlocs;
 
 import com.limegroup.gnutella.http.*; 
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;

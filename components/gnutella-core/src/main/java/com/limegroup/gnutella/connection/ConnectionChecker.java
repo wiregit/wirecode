@@ -14,10 +14,10 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known

@@ -19,7 +19,7 @@ import java.io.*;
  * slightly different.
  */
 public abstract class AlternateLocation implements HTTPHeaderValue, 
-	com.sun.java.util.collections.Comparable {
+	Comparable {
     
     /**
      * The vendor to use.

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**

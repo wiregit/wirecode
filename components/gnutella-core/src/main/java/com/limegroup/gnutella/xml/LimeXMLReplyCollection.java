@@ -5,7 +5,7 @@ import com.limegroup.gnutella.metadata.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.I18NConvert;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import org.xml.sax.*;
 

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.*;

@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.limegroup.gnutella.altlocs.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -72,7 +72,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * much much easier.
 	 */
 	private volatile List /* of LimeXMLDocument */ _limeXMLDocs = 
-	    DataUtils.EMPTY_LIST;
+	    Collections.EMPTY_LIST;
 
 	/**
 	 * The collection of alternate locations for the file.

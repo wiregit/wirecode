@@ -18,7 +18,7 @@ import java.net.*;
 
 import java.util.StringTokenizer;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

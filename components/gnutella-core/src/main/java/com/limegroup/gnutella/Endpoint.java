@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.*;
  * of files, mainly for legacy reasons.
  */
 public class Endpoint implements Cloneable, Serializable, IpPort,
-com.sun.java.util.collections.Comparable
+Comparable
 {
     /**
     * serial version (needed for serialization/deserialization)

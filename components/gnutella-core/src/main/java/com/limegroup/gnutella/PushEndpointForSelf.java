@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 /**
  * A push endpoint for myself.  This differs from the standard
@@ -38,17 +37,4 @@ public class PushEndpointForSelf extends PushEndpoint {
         return RouterService.getConnectionManager().getPushProxies();
     }
     
-    /**
-     * override to not cache the hashcode
-     */
-    public int hashCode() {
-        return getHashcode();
-    }
-    
-    /**
-     * override to not cache the http representation
-     */
-    public String httpStringValue() {
-        return generateHTTPString();
-    }
 }

@@ -5,7 +5,8 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+
+import java.util.*;
 import de.vdheide.mp3.*;
 
 /**
@@ -140,8 +141,12 @@ public class MP3MetaData extends AudioMetaData {
         
 
         Vector frames = null;
-        try {
-            frames = id3v2Parser.getFrames();
+        try {//quick hack to avoid recompiling id3v2.  Not meant to be merged --zab
+            frames = new Vector();
+            com.sun.java.util.collections.Vector v = id3v2Parser.getFrames();
+            for (int i =0;i<v.size();i++)
+                frames.add(v.get(i));
+            //frames = id3v2Parser.getFrames();
         } catch (NoID3v2TagException ntx) {
             return ;
         }

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.ManagedThread;
 

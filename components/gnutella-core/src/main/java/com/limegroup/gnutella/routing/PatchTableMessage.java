@@ -3,7 +3,7 @@ package com.limegroup.gnutella.routing;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.statistics.*;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 import java.io.*;
 
 

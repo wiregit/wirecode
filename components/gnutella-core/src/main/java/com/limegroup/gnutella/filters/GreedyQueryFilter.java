@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /** 
  * Stops queries that are bound to match too many files.  

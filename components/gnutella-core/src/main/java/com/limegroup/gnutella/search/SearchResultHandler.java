@@ -9,7 +9,7 @@ import com.limegroup.gnutella.xml.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -118,7 +118,7 @@ public final class SearchResultHandler {
             }
         }
         if( reSend == null )
-            return DataUtils.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         else
             return reSend;
     }        

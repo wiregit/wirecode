@@ -1,11 +1,19 @@
 package com.limegroup.gnutella.simpp;
 
-import org.apache.xerces.parsers.*;
-import org.xml.sax.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.*;
-import org.w3c.dom.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class SimppParser {
 

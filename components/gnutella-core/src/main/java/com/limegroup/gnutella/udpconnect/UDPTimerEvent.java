@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.udpconnect;
 
-import com.sun.java.util.collections.Comparable;
 
 /**
  * A timed task to be repeated and rescheduled as needed.

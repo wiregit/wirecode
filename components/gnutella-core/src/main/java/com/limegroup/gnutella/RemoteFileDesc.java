@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.xml.*;
@@ -158,7 +158,7 @@ public class RemoteFileDesc implements Serializable {
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
               System.currentTimeMillis(),   // timestamp
-              DataUtils.EMPTY_SET,          // push proxies
+              Collections.EMPTY_SET,          // push proxies
               rfd.getCreationTime(),       // creation time
               0);                       // firewalled transfer
     }
@@ -324,7 +324,7 @@ public class RemoteFileDesc implements Serializable {
         else
             _xmlDocs = null;
 		if(urns == null) {
-			_urns = DataUtils.EMPTY_SET;
+			_urns = Collections.EMPTY_SET;
 		}
 		else {
 			_urns = Collections.unmodifiableSet(urns);
@@ -339,7 +339,7 @@ public class RemoteFileDesc implements Serializable {
         //(the default Java value).  Hence we also initialize
         //_browseHostEnabled.  See class overview for more details.
         if(_urns == null) {
-            _urns = DataUtils.EMPTY_SET;
+            _urns = Collections.EMPTY_SET;
             _browseHostEnabled= false;
         } else {
             // It seems that the Urn Set has some java.io.Files
@@ -678,7 +678,7 @@ public class RemoteFileDesc implements Serializable {
     	if (_pushAddr!=null)
     		return _pushAddr.getProxies();
     	else
-    		return DataUtils.EMPTY_SET;
+    		return Collections.EMPTY_SET;
     }
 
     public final boolean supportsFWTransfer() {

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.text.ParseException;
@@ -30,7 +30,7 @@ import java.text.ParseException;
  * ExtendedEndpoint does not override the compareTo method for two reasons:
  * <ul>
  * <li>It creates confusion between java.lang.Comparable and
- *     com.sun.java.util.collections.Comparable 
+ *     Comparable 
  * <li>It creates confusion between compareTo and equals.
  * </ul> 
  * For comparing by priority, users should use the return value of 

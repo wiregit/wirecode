@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.Assert;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.Locale;
 
 /**

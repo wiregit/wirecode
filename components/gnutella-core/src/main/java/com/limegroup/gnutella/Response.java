@@ -24,7 +24,7 @@ import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
 import org.xml.sax.SAXException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 
 /**
@@ -268,7 +268,7 @@ public class Response {
         this.nameBytes = temp;
 
 		if (urns == null)
-			this.urns = DataUtils.EMPTY_SET;
+			this.urns = Collections.EMPTY_SET;
 		else
 			this.urns = Collections.unmodifiableSet(urns);
 		
@@ -514,7 +514,7 @@ public class Response {
      */
     private static Set getAsEndpoints(AlternateLocationCollection col) {
         if( col == null || col.getAltLocsSize() == 0)
-            return DataUtils.EMPTY_SET;
+            return Collections.EMPTY_SET;
         
         synchronized(col) {
             Set endpoints = null;
@@ -533,7 +533,7 @@ public class Response {
                     i++;
                 }
             }
-            return endpoints == null ? DataUtils.EMPTY_SET : endpoints;
+            return endpoints == null ? Collections.EMPTY_SET : endpoints;
         }
         
     }           
@@ -977,7 +977,7 @@ public class Response {
         }
         
         GGEPContainer(Set locs, long create) {
-            locations = locs == null ? DataUtils.EMPTY_SET : locs;
+            locations = locs == null ? Collections.EMPTY_SET : locs;
             createTime = create;
         }
         

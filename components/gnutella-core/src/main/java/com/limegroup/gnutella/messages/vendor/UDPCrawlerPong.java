@@ -11,7 +11,7 @@ import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.net.*;
 

@@ -1,5 +1,5 @@
 package com.limegroup.gnutella.security;
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 /**
  * An interface for authentication purposes.
  * @author Anurag Singla

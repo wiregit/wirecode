@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -1037,7 +1037,7 @@ public class ConnectionManager {
             return proxies;
         }
 
-        return DataUtils.EMPTY_SET;
+        return Collections.EMPTY_SET;
     }
 
     /**

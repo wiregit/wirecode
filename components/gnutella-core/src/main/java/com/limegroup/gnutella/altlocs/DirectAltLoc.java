@@ -16,8 +16,8 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An alternate location that is directly reachable, i.e. not firewalled.

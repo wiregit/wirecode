@@ -10,8 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * This class supplies general facilities for handling HTTP, such as

@@ -6,8 +6,8 @@ import java.io.InputStream;
 import com.limegroup.gnutella.ErrorService;
 import com.ibm.icu.text.Normalizer;
 
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.HashMap;
+import java.util.Map;
+import java.util.HashMap;
 
 final class I18NConvertICU extends AbstractI18NConverter {
 

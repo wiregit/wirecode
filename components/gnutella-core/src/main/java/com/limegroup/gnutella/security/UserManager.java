@@ -5,7 +5,7 @@
  */
 
 package com.limegroup.gnutella.security;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 
 import com.limegroup.gnutella.util.FileUtils;

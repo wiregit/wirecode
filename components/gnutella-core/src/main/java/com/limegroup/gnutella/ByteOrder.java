@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Various static routines for solving endian problems.

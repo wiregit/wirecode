@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class defines the types of URNs supported in the application and 

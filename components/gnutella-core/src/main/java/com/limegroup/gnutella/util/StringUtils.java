@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.Constants;
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.util.Locale;
 import java.text.Collator;

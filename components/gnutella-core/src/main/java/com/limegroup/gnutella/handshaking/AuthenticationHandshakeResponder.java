@@ -7,7 +7,7 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.util.Properties;
 import java.io.IOException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * An authentication-capable responder to be used during handshake.

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import java.io.*;
 import java.net.*;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;

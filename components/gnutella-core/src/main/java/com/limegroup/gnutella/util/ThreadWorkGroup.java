@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A reuseable class that allows for a WorkGroup of WorkerInterface threads to

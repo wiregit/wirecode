@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.StringTokenizer;

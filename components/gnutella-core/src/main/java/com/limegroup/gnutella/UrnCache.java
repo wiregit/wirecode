@@ -11,11 +11,11 @@ import java.io.Serializable;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -86,14 +86,14 @@ public final class UrnCache {
     public synchronized Set getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L) {
-			return DataUtils.EMPTY_SET;
+			return Collections.EMPTY_SET;
 		} 
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
 		if(cachedUrns == null) {
-			return DataUtils.EMPTY_SET;
+			return Collections.EMPTY_SET;
 		}
 
 		return Collections.unmodifiableSet(cachedUrns);

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.*;
 
 /**

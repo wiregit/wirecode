@@ -8,7 +8,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * an Upload State.  has some utility methods all upload states can use.

@@ -8,7 +8,7 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import com.bitzi.util.Base32;
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
@@ -240,7 +240,7 @@ public class UploadManager implements BandwidthTracker {
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
                 if (LOG.isTraceEnabled())
                     LOG.trace("line = " + line);
-
+                
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
                 

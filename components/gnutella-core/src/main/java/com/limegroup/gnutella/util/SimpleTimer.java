@@ -4,8 +4,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ErrorService;
-import com.sun.java.util.collections.Comparable;
-import com.sun.java.util.collections.ArrayList;
+import java.util.ArrayList;
 
 
 /**

@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import java.util.zip.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 /**
  * Simulates zlib's Z_PARTIAL_FLUSH and Z_SYNC_FLUSH behaviour.

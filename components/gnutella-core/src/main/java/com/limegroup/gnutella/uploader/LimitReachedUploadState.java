@@ -9,7 +9,7 @@ import java.io.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 
 /**

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;

@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.1 2004-06-10 16:18:49 sberlin Exp $
+ * $Id: TigerTree.java,v 1.1.28.1 2004-09-30 16:59:24 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -17,9 +17,9 @@ import java.security.Security;
 import java.security.Provider;
 
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.ErrorService;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.COBSUtil;

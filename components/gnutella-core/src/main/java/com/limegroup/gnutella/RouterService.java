@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.filters.*;
@@ -1143,7 +1143,7 @@ public class RouterService {
                                       boolean overwrite, GUID queryGUID)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return download(files, DataUtils.EMPTY_LIST, overwrite, queryGUID);
+		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID);
 	}
         
 

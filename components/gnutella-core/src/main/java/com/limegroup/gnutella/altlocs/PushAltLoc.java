@@ -14,8 +14,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A firewalled altloc.

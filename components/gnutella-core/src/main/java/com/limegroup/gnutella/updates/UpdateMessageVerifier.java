@@ -7,7 +7,7 @@ import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
 import org.xml.sax.*;
 import com.limegroup.gnutella.security.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Provides static methods, which accept an InputStream and use the 

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.Serializable;
 
-import com.sun.java.util.collections.Comparator;
+import java.util.Comparator;
 
 /**
  * Utility class that uses the strategy pattern for <tt>Comparator</tt> 

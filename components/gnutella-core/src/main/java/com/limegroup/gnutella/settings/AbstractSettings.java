@@ -2,7 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.util.*;
 import java.util.Properties;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 
 

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
@@ -20,7 +20,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
  * only the TTL, hops, and priority field can be changed.
  */
 public abstract class Message 
-    implements Serializable, com.sun.java.util.collections.Comparable {
+    implements Serializable, Comparable {
     //Functional IDs defined by Gnutella protocol.
     public static final byte F_PING                  = (byte)0x0;
     public static final byte F_PING_REPLY            = (byte)0x1;

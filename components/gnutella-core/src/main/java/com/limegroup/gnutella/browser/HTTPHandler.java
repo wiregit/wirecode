@@ -2,7 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.Date;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.CommonUtils;

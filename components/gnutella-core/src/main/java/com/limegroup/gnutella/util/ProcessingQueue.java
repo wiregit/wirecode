@@ -2,8 +2,8 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.util.ManagedThread;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Vector;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A queue of items to be processed.

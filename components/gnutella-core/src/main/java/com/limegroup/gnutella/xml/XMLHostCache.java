@@ -68,8 +68,8 @@ public class XMLHostCache {
                                                      HOSTS_DELIM);
 
             // use an arraylist cuz a nslookup may fail....
-            com.sun.java.util.collections.ArrayList ipAddresses = 
-            new com.sun.java.util.collections.ArrayList();
+            java.util.ArrayList ipAddresses = 
+            new java.util.ArrayList();
             while (st.hasMoreTokens()) {
                 String currHost = st.nextToken();
                 try {

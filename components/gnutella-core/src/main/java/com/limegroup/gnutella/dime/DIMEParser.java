@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.dime;
 
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.NoSuchElementException;
-import com.sun.java.util.collections.UnsupportedOperationException;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.lang.UnsupportedOperationException;
+import java.util.Iterator;
 import java.io.InputStream;
 import java.io.IOException;
 

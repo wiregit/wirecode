@@ -66,7 +66,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 	private static final int FEATURES_MASK=0xE0;   //1110 0000
 	
 	
-	private static final Map GUID_PROXY_MAP = new WeakHashMap();
+	private static final Map GUID_PROXY_MAP = 
+	    Collections.synchronizedMap(new WeakHashMap());
 	
 	/**
 	 * the client guid of the endpoint
@@ -140,7 +141,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * creates a PushEndpoint from a String passed in http header exchange.
 	 * 
 	 */
-	private PushEndpoint(String httpString) throws IOException{
+	public PushEndpoint(String httpString) throws IOException{
 		
 
 	    if (httpString.length() < 32 ||
@@ -292,7 +293,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		/** this adds the read set to the existing proxies */
 		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version);
-		updateProxies(pe);
+		updateProxies(pe,true);
 		return pe;
 	}
 	
@@ -300,10 +301,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 		return _clientGUID;
 	}
 	
+	/**
+	 * 
+	 * @return a view of the current set of proxies.
+	 */
 	public Set getProxies() {
-		synchronized(PushEndpoint.class) {
-		    return (Set) GUID_PROXY_MAP.get(_clientGUID);
-		}
+	    Set current = (Set)GUID_PROXY_MAP.get(_clientGUID);
+		return current==null ? null : Collections.unmodifiableSet(current);
 	}
 	
 	/**
@@ -354,14 +358,6 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public String httpStringValue() {
-		
-		if (_httpString ==null) 	
-			_httpString=generateHTTPString();
-		
-		return _httpString;
-	}
-	
-	protected final String generateHTTPString() {
 	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
@@ -383,30 +379,60 @@ public class PushEndpoint implements HTTPHeaderValue{
 		httpString.deleteCharAt(httpString.length()-1);
 		
 		return httpString.toString();
+		
 	}
 	
 	public int getFeatures() {
 		return _features & FEATURES_MASK;
 	}
 	
-	public static synchronized PushEndpoint updateProxies(String httpString) 
+	/**
+	 * Merges the known push proxies for the host specified in the http string  
+	 * with the set contained in the http string.
+	 * @param good whether these proxies were successfull or not (X-FAlt vs X-NFAlt)
+	 * @return a PushEndpoint object with updated proxies
+	 */
+	public static PushEndpoint updateProxies(String httpString,boolean good) 
 		throws IOException{
 	    PushEndpoint pe = new PushEndpoint(httpString);
-	    updateProxies(pe);
+	    updateProxies(pe,good);
 	    return pe;
 	}
 	
-	private static synchronized void updateProxies(PushEndpoint pe){
+	private static void updateProxies(PushEndpoint pe,boolean good){
 	    
-	    Set existing = (Set)GUID_PROXY_MAP.get(pe._guid);
-	    if (existing!=null)
-	        existing.add(pe._proxies);
+	    Set existing;
+	    	    
+	    synchronized(GUID_PROXY_MAP) {
+	        existing = (Set)GUID_PROXY_MAP.get(pe._guid);
+	        
+	        // if we do not have a mapping for this guid, add a
+	        // new one atomically
+	        if (existing == null && good) {
+	            existing = Collections.synchronizedSet(pe._proxies);
+	            GUID_PROXY_MAP.put(pe._guid,existing);
+	            pe._proxies=null;
+	            return;
+	        }
+	    }
+	    
+	    // if we got here, means we did have a mapping.  no need to
+	    // hold the map mutex when updating just the set
+	    if (good)
+	        existing.addAll(pe._proxies);
 	    else
-	        GUID_PROXY_MAP.put(pe._guid,pe._proxies);
+	        existing.removeAll(pe._proxies);
+	        
 	    pe._proxies=null;
 	}
 	
-	public static synchronized PushEndpoint overwriteProxies(String httpString) 
+	/**
+	 * Overwrites the current known push proxies for the host specified
+	 * in the httpString with the set contained in the httpString
+	 * @param httpString
+	 * @throws IOException
+	 */
+	public static PushEndpoint overwriteProxies(String httpString) 
 		throws IOException{
 	    PushEndpoint pe = new PushEndpoint(httpString);
 	    GUID_PROXY_MAP.put(pe._guid,pe._proxies);

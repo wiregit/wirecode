@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -57,7 +57,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * comboes are themselves unique.
  *  
  */
-public class GUID implements  com.sun.java.util.collections.Comparable {
+public class GUID implements  Comparable {
     /** The size of a GUID. */
     private static final int SZ=16;
     /** Used to generated new GUID's. */
@@ -352,14 +352,14 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     }
 
     /** Compares GUID's lexically. */
-    public static class GUIDComparator implements com.sun.java.util.collections.Comparator {
+    public static class GUIDComparator implements java.util.Comparator {
         public int compare(Object a, Object b) {
             return GUID.compare(((GUID)a).bytes, ((GUID)b).bytes);
         }
     }
 
     /** Compares 16-byte arrays (raw GUIDs) lexically. */
-    public static class GUIDByteComparator implements com.sun.java.util.collections.Comparator {
+    public static class GUIDByteComparator implements java.util.Comparator {
         public int compare(Object a, Object b) {
             return GUID.compare((byte[])a, (byte[])b);
         }

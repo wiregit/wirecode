@@ -19,17 +19,17 @@ import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Comparator;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.TreeMap;
-import com.sun.java.util.collections.TreeSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * The list of all shared files.  Provides operations to add and remove

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.tigertree;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 

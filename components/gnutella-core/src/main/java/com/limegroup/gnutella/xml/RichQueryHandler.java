@@ -5,8 +5,8 @@ import java.io.File;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.Iterator;
 
 
 /**

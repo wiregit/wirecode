@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.browser;
 
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.List;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains information fields extracted from a magnet link.

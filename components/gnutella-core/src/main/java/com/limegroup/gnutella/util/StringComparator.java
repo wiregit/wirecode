@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.Comparator;
+import java.util.Comparator;
 import java.io.Serializable;
 
 /**

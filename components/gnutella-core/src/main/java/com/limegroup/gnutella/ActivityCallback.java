@@ -6,7 +6,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
 
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 /**
  *  Callback to notify the GUI of asynchronous backend events.

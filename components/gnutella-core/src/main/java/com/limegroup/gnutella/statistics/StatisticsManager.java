@@ -2,7 +2,7 @@ package com.limegroup.gnutella.statistics;
 
 import com.limegroup.gnutella.*;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Class for managing statistics recording.

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

@@ -11,7 +11,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class handles UDP messaging services.  It both sends and
