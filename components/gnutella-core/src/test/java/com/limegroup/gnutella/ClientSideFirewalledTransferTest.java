@@ -210,7 +210,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
-        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
+        m = new QueryReply(m.getGUID(), (byte) 1, 9000, myIP(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, true, proxies);
         testUP[0].send(m);
@@ -280,6 +280,18 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             } while (true) ;
         }
         catch (InterruptedIOException expected) {}
+
+        // we should get some incoming UDP
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            UDP_ACCESS.receive(pack);
+        }
+        catch (IOException bad) {
+            fail("Did not get SYN", bad);
+        }
+        InputStream in = new ByteArrayInputStream(pack.getData());
+        // as long as we don't get a ClassCastException we are good to go
+        SynMessage syn = (SynMessage) Message.read(in);
 
         // awesome - everything checks out!
         ss.close();

@@ -887,7 +887,7 @@ public class DownloadManager implements BandwidthTracker {
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public boolean sendPush(RemoteFileDesc file) {
+    public boolean sendPush(final RemoteFileDesc file) {
         LOG.trace("DM.sendPush(): entered.");
         
         // Send as multicast if it's multicast.
@@ -971,14 +971,14 @@ public class DownloadManager implements BandwidthTracker {
                                     public void managedRun() {
                                         try {
                                             Socket fwTrans = 
-                                                new UDPConnection(ppIp, ppPort);
+                                            new UDPConnection(file.getHost(),
+                                                              file.getPort());
                                             acceptDownload(fwTrans);
                                         }
                                         catch (IOException crap) {}
                                     }
                                 };
-                            // client side is not enabled, but we should start
-                            // startPushThread here.
+                            startPushThread.start();
                         }
                     } else {
                         if(LOG.isWarnEnabled())
