@@ -176,6 +176,11 @@ public final class HandshakeResponse {
      * Constant for whether or not this node supports GUESS.
      */
     private final boolean GUESS_CAPABLE;
+    
+	/**
+	 * Constant for whether or not this node supports GUESS.
+	 */
+	private final boolean IS_CRAWLER;
 
     /**
      * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
@@ -236,6 +241,8 @@ public final class HandshakeResponse {
             isVersionOrHigher(headers, HeaderNames.X_PONG_CACHING, 0.1F);
         GUESS_CAPABLE = 
             isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
+        IS_CRAWLER = 
+        	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
     }
     
     /**
@@ -313,6 +320,29 @@ public final class HandshakeResponse {
         return new HandshakeResponse(headers);
     }
 
+	/**
+	 * Creates a new <tt>HandshakeResponse</tt> instance that responds to a
+	 * special crawler connection with connected leaves and Ultrapeers.  See the 
+	 * Files>>Development section on the GDF.
+	 *
+	 * @param headers the <tt>Properties</tt> instance containing the headers
+	 *  to send to the node we're rejecting
+	 */
+	static HandshakeResponse createCrawlerResponse() {
+		Properties headers = new Properties();
+		
+		// add any leaves
+		headers.put(HeaderNames.LEAVES, 
+			createEndpointString(RouterService.getConnectionManager().getInitializedClientConnections2()));
+
+		// add any Ultrapeers
+		headers.put(HeaderNames.PEERS,
+			createEndpointString(RouterService.getConnectionManager().getInitializedConnections2()));
+			
+		return new HandshakeResponse(HandshakeResponse.OK,
+			HandshakeResponse.OK_MESSAGE, headers);        
+	}
+	
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
      * potential connection.
@@ -373,7 +403,30 @@ public final class HandshakeResponse {
                                      HandshakeResponse.SHIELDED_MESSAGE);        
     }
 
-
+	/**
+	 * Utility method that takes the specified list of <tt>Connection</tt> instances
+	 * and returns a string of the form:<p>
+	 *
+	 * IP:port,IP:port,IP:port
+	 *
+	 * @return a string of the form IP:port,IP:port,... from the given list of connections
+	 */
+	private static String createEndpointString(List connections) {
+		Iterator iter = connections.iterator();
+		StringBuffer sb = new StringBuffer();
+		while(iter.hasNext()) {
+			Connection conn = (Connection)iter.next();
+			sb.append(conn.getIPString());
+			sb.append(":");
+			sb.append(conn.getListeningPort());
+			if(iter.hasNext()) {
+				sb.append(",");
+			}
+		}
+		return sb.toString();
+	}
+	
+	
     /**
      * Utility method to extract the connection code from the connect string,
      * such as "200" in a "200 OK" message.
@@ -802,6 +855,16 @@ public final class HandshakeResponse {
     public boolean supportsProbeQueries() {
         return PROBE_QUERIES;
     }
+    
+	/**
+	 * Determines whether or not this handshake is from the crawler.
+	 * 
+	 * @return <tt>true</tt> if this handshake is from the crawler, otherwise 
+	 * <tt>false</tt>
+	 */
+	public boolean isCrawler() {
+		return IS_CRAWLER;
+	}
 
     /**
      * Convenience method that returns whether or not the given header 
