@@ -9,7 +9,7 @@ import com.limegroup.gnutella.*;
  * to add data for received Gnutella message statistics should go through 
  * this class to avoid losing any data.
  */
-public final class ReceivedMessageStatHandler extends AbstractStatHandler {
+public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler {
 
 	/**
 	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
