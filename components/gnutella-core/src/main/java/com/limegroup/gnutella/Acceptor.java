@@ -5,12 +5,13 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.filters.IPFilter;
 
 /**
- * Listens on ports, accepts incoming connections, and dispatches
- * threads to handle those connections.  Currently HTTP and
- * limited HTTP connections over TCP are supported; more may
- * be supported in the future.<p>
+ * Listens on ports, accepts incoming connections, and dispatches threads to
+ * handle those connections.  Currently supports Gnutella messaging, HTTP, and
+ * chat connections over TCP; more may be supported in the
+ * future.<p> 
  */
 public class Acceptor extends Thread {
     /**
@@ -45,8 +46,8 @@ public class Acceptor extends Thread {
      */
     private static byte[] _address=new byte[4];
 
-    private Vector /* of String */ _badHosts = new Vector();
-
+    private IPFilter _filter=new IPFilter();;
+    
     private ConnectionManager _connectionManager;
     private DownloadManager _downloadManager;
     private UploadManager _uploadManager;
@@ -86,11 +87,6 @@ public class Acceptor extends Thread {
     public Acceptor(int port, ActivityCallback callback) {
         _port = port;
         _callback = callback;
-
-
-        String[] allHosts = SettingsManager.instance().getBannedIps();
-        for (int i=0; i<allHosts.length; i++)
-            _badHosts.add(allHosts[i]);
     }
 
     /**
@@ -374,41 +370,22 @@ public class Acceptor extends Thread {
         }
     }
 
-    /** Added to fix bug where banned IP added is not effective until restart
-     *  (Bug 62001).
-     *  Allows a new host to be dynamically added to the Banned IPs list (via a
-     *  reload from SettingsManager).
+    /** 
+     * Updates this IP filter.  Added to fix bug where banned IP added is not
+     * effective until restart (Bug 62001).  Allows a new host to be dynamically
+     * added to the Banned IPs list (via a reload from SettingsManager).  
      */
     public void refreshBannedIPs() {
-
-        // synch to ensure no concurrent access by Acceptor thread, as this will
-        // always be called by the gui thread.....
-        synchronized (_badHosts) {
-            // reset list
-            _badHosts.removeAllElements();
-            
-            // reload list
-            String[] allHosts = SettingsManager.instance().getBannedIps();
-            for (int i=0; i<allHosts.length; i++)
-                _badHosts.add(allHosts[i]);
-        }
-
-        // kill any connections that may now be banned.....
-        // this method isn't too inefficient, as the normal connections per
-        // client is about 4.
-        final List connections = _connectionManager.getConnections();
-        for (int i = 0; i < connections.size(); i++) {
-            ManagedConnection curr = (ManagedConnection) connections.get(i);
-            if (isBannedIP(curr.getOrigHost()))
-                _connectionManager.remove(curr);                
-        }
+        _filter=new IPFilter();
     }
 
-    /** @return true if the input dotted address (i.e. 'W.X.Y.Z') is banned,
-     *  else false.
+    /**
+     * Returns whether <tt>ip</tt> is a banned address.
+     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
+     * @return true iff ip is a banned address.
      */
-    public boolean isBannedIP(String ip) {
-        return _badHosts.contains(ip);
+    public boolean isBannedIP(String ip) {        
+        return !_filter.allow(ip);
     }
 
 

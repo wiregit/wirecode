@@ -294,6 +294,10 @@ public class HostCatcher {
         if (isMe(e.getHostname(), e.getPort()))
             return false;
 
+        //Skip if this host is banned.
+        if (acceptor.isBannedIP(e.getHostname()))
+            return false;
+
         //Skip if this is the router.
         try {
             if (isRouter(e.getHostBytes())) 

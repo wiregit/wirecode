@@ -528,6 +528,8 @@ public class RouterService
      * extra work must be done.
      */
     public void adjustSpamFilters() {
+        acceptor.refreshBannedIPs();
+
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
         for (Iterator iter=manager.getConnections().iterator();
@@ -975,17 +977,6 @@ public class RouterService
         return downloader.startRequeryDownload(query, richQuery,
                                                guid, type);
     }
-
-
-    /** 
-      * Notifies the backend that the BLACKLISTED_IP property has changed,
-      * forcing the acceptor to reload the property. This method was added
-      * to solve bug 62001.  
-      */
-    public void refreshBannedIPs() {
-        acceptor.refreshBannedIPs();
-    }
-
 
 	/**
 	 * Creates and returns a new chat to the given host and port.

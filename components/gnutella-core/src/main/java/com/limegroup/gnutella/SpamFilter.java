@@ -25,7 +25,16 @@ public abstract class SpamFilter {
      */
     public static SpamFilter newPersonalFilter() {
         SettingsManager settings=SettingsManager.instance();
-        //Keyword-based techniques.
+        Vector /* of SpamFilter */ buf=new Vector();
+
+        //1. IP-based techniques.
+        String[] badIPs=settings.getBannedIps();
+        if (badIPs.length!=0) {   //no need to check getAllowIPs
+            IPFilter bf=new IPFilter();
+            buf.add(bf);
+        }
+
+        //2. Keyword-based techniques.
         String[] badWords=settings.getBannedWords();
         boolean filterAdult=settings.getFilterAdult();
         boolean filterVbs=settings.getFilterVbs();
@@ -33,19 +42,17 @@ public abstract class SpamFilter {
         if (badWords.length!=0 || filterAdult || filterVbs || filterHtml) {
             KeywordFilter kf=new KeywordFilter();
             for (int i=0; i<badWords.length; i++)
-            kf.disallow(badWords[i]);
+                kf.disallow(badWords[i]);
             if (filterAdult)
-            kf.disallowAdult();
+                kf.disallowAdult();
             if (filterVbs)
-            kf.disallowVbs();
+                kf.disallowVbs();
             if (filterHtml)
-            kf.disallowHtml();
-            return kf;
-        } else {
-            //This is really just a minor optimization; you could also
-            //just use an empty KeywordFilter.
-            return new AllowFilter();
+                kf.disallowHtml();
+            buf.add(kf);
         }
+
+        return compose(buf);
     }
 
     /**
@@ -58,24 +65,8 @@ public abstract class SpamFilter {
         SettingsManager settings=SettingsManager.instance();
         Vector /* of SpamFilter */ buf=new Vector();
 
-        //0. Eliminate old LimeWire requeries.
+        //1. Eliminate old LimeWire requeries.
         buf.add(new RequeryFilter());
-
-        //1. IP-based techniques.
-        String[] badIPs=settings.getBannedIps();
-        if (badIPs.length!=0) {
-            //BlackListFilter uses the singleton pattern, so it is really
-            //not necessary to call this on every connection.  But we are
-            //not at all concerned with efficiency here, and it actually
-            //works.
-            BlackListFilter bf=BlackListFilter.instance();
-            synchronized (bf) { //just to be safe
-            bf.clear();
-            for (int i=0; i<badIPs.length; i++)
-                bf.add(badIPs[i]);
-            }
-            buf.add(bf);
-        }
 
         //2. Duplicate-based techniques.
         if (settings.getFilterDuplicates())
@@ -89,15 +80,23 @@ public abstract class SpamFilter {
         if (settings.getFilterBearShareQueries())
             buf.add(new BearShareFilter());
 
+        return compose(buf);
+    }
+
+    /**
+     * Returns a composite filter of the given filters.
+     * @param filters a Vector of SpamFilter.
+     */
+    private static SpamFilter compose(Vector /* of SpamFilter */ filters) {
         //As a minor optimization, we avoid a few method calls in
         //special cases.
-        if (buf.size()==0)
+        if (filters.size()==0)
             return new AllowFilter();
-        else if (buf.size()==1)
-            return (SpamFilter)buf.get(0);
+        else if (filters.size()==1)
+            return (SpamFilter)filters.get(0);
         else {
-            SpamFilter[] delegates=new SpamFilter[buf.size()];
-            buf.copyInto(delegates);
+            SpamFilter[] delegates=new SpamFilter[filters.size()];
+            filters.copyInto(delegates);
             return new CompositeFilter(delegates);
         }
     }

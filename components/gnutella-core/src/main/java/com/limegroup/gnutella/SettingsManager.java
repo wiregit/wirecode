@@ -167,6 +167,7 @@ public final class SettingsManager {
 
     /** default banned ip addresses */
     private final String[] DEFAULT_BANNED_IPS     = {};
+    private final String[] DEFAULT_ALLOWED_IPS     = {};
     private final String[] DEFAULT_BANNED_WORDS   = {};
     private final boolean DEFAULT_FILTER_ADULT   = false;
     private final boolean DEFAULT_FILTER_DUPLICATES = true;
@@ -401,6 +402,8 @@ public final class SettingsManager {
 		= "EXTENSIONS_TO_SEARCH_FOR";
     private final String BANNED_IPS            
 		= "BLACK_LISTED_IP_ADDRESSES";
+    private final String ALLOWED_IPS            
+		= "WHITE_LISTED_IP_ADDRESSES";
     private final String BANNED_WORDS          = "BANNED_WORDS";
     private final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
     private final String FILTER_ADULT          = "FILTER_ADULT";
@@ -598,6 +601,7 @@ public final class SettingsManager {
     private volatile int      _incompletePurgeTime;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
+    private volatile String[] _allowedIps;
     private volatile String[] _bannedWords;
     private volatile boolean  _filterDuplicates;
     private volatile boolean  _filterAdult;
@@ -947,6 +951,9 @@ public final class SettingsManager {
                 else if(key.equals(BANNED_IPS)) {
                     setBannedIps(decode(p));
                 }
+                else if(key.equals(ALLOWED_IPS)) {
+                    setAllowedIps(decode(p));
+                }
                 else if(key.equals(BANNED_WORDS)) {
                     setBannedWords(decode(p));
                 }
@@ -1203,6 +1210,7 @@ public final class SettingsManager {
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
         setBannedIps(DEFAULT_BANNED_IPS);
+        setAllowedIps(DEFAULT_ALLOWED_IPS);
         setBannedWords(DEFAULT_BANNED_WORDS);
         setFilterAdult(DEFAULT_FILTER_ADULT);
         setFilterDuplicates(DEFAULT_FILTER_DUPLICATES);
@@ -1528,6 +1536,14 @@ public final class SettingsManager {
      * @return an array of strings denoting banned ip addresses
      */
     public String[] getBannedIps(){return _bannedIps;}
+    
+    /**
+     * Returns an array of strings denoting the ip addresses that the
+     * user has allowed.
+     *  
+     * @return an array of strings denoting allowed ip addresses
+     */
+    public String[] getAllowedIps(){return _allowedIps;}
     
     /**
      * Returns an array of strings denoting words that the user has banned.
@@ -2786,6 +2802,21 @@ public final class SettingsManager {
         else {
             _bannedIps = bannedIps;
             PROPS.put(BANNED_IPS,encode(bannedIps));
+        }
+    }
+
+	/**
+	 * Sets the array of ip addresses that the user has allowed.
+	 *
+	 * @param bannedIps the array of ip addresses that the user has allowed
+	 *                  from their machine
+	 */
+    public void setAllowedIps(String[] allowedIps) {
+        if(allowedIps == null)
+            throw new IllegalArgumentException();
+        else {
+            _allowedIps = allowedIps;
+            PROPS.put(ALLOWED_IPS,encode(allowedIps));
         }
     }
 

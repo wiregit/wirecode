@@ -361,6 +361,10 @@ public class StandardMessageRouter
         PushRequest pushRequest,
         ManagedConnection receivingConnection)
     {
+        //Ignore push request from banned hosts.
+        if (receivingConnection.isPersonalSpam(pushRequest))
+            return;
+
         // Ignore excess upload requests
         //if (_callback.getNumUploads() >=
 /*
