@@ -1,20 +1,23 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.sun.java.util.collections.*;
-import java.net.URL;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
 import com.limegroup.gnutella.settings.*;
-//import com.limegroup.gnutella.gui.search.*;
-import javax.swing.JOptionPane;
-import junit.framework.*;
 
+import javax.swing.JOptionPane;
+
+import java.io.*;
+import java.net.URL;
+import java.net.InetAddress;
+
+import com.sun.java.util.collections.*;
+
+import junit.framework.*;
 /**
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
@@ -71,10 +74,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static final long TWO_MINUTES = 1000 * 60 * 2;
 	
     
-    public static void globalSetUp() {
+    public static void globalSetUp() throws Exception {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
