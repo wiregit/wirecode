@@ -1515,20 +1515,6 @@ public class Connection {
 	}
 
 
-	/**
-	 * Returns the version of the GUESS search scheme supported by the node
-	 * at the other end of the connection.  This returns the version in
-	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
-	 * will return 1.  If the other client has not sent an X-Guess header
-	 * this returns -1.
-	 *
-	 * @return the version of GUESS supported, reported as a whole number,
-	 *  or -1 if GUESS is not supported
-	 */
-	public int getGUESSVersion() {
-		return _headers.getGUESSVersion();
-	}
-
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
