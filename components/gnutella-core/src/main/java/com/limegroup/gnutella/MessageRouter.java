@@ -66,7 +66,7 @@ public abstract class MessageRouter {
      * (Route tables are stored per connection in ManagedConnectionQueryInfo.)
      * LOCKING: obtain queryUpdateLock
      */
-    private long nextQueryUpdateTime=0l;
+    private long _nextQueryUpdateTime = 0L;
     /** 
      * The time to wait between route table updates, in milliseconds. 
      */
@@ -213,7 +213,7 @@ public abstract class MessageRouter {
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
-        forwardQueryRouteTables();      
+		forwardQueryRouteTables();      
     }
 
 	/**
@@ -1117,26 +1117,36 @@ public abstract class MessageRouter {
      * it takes care of throttling.
      *     @modifies connections
      */    
-    public void forwardQueryRouteTables() {
-        //As a tiny optimization, we skip the propogate if we have not in
-        //shielded mode.
-        if (! _manager.hasClientSupernodeConnection())
-            return;
-
+    private void forwardQueryRouteTables() {		
         synchronized (queryUpdateLock) {
+			//Check the time to decide if it needs an update.
+			long time = System.currentTimeMillis();
+			if(_nextQueryUpdateTime < time) return;
+
+			_nextQueryUpdateTime = time + 1000;
+
             //For all connections to new hosts c needing an update...
             //TODO3: use getInitializedConnections2?
             List list=_manager.getInitializedConnections();
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 
-                //Not every connection need be a leaf/supernode connection.
-                if (! (c.isClientSupernodeConnection() 
-					   && c.isQueryRoutingEnabled())) 
-                    continue;
+
+				// continue if I'm an Ultrapeer and the node on the
+				// other end doesn't support Ultrapeer-level query
+				// routing
+				if(RouterService.isSupernode()) {
+					if(!c.isUltrapeerQueryRoutingConnection()) continue;
+				} else {
+					
+					// otherwise, I'm a leaf, and don't send routing
+					// tables is it's not a connection to an Ultrapeer
+					// or if query routing is not enabled
+					if (!(c.isClientSupernodeConnection() && 
+						  c.isQueryRoutingEnabled()))
+						continue;
+				}
                 
-                //Check the time to decide if it needs an update.
-                long time=System.currentTimeMillis();
                 if (time<c.getNextQRPForwardTime())
                     continue;
                 c.setNextQRPForwardTime(time+QUERY_ROUTE_UPDATE_TIME);
