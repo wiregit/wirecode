@@ -381,7 +381,13 @@ public class HTTPDownloader implements Runnable {
             Assert.that(false, "Illegal state for download connection.");
 
         if (_state == CONNECTED) {
-            doDownload();
+			try {
+				doDownload();
+			}
+			catch(IOException e) {
+				_state = ERROR;
+				_stateString = e.getMessage();
+			}
 			// check to see if there is an error condition 
 			// after attempting the download
 			if (_state == ERROR) {
@@ -462,154 +468,91 @@ public class HTTPDownloader implements Runnable {
             return;
         }
     }
+	
+	public void doDownload() throws IOException {
 
-    public void doDownload() {
-
-        if ( _wasShutdown )
-            return;
-
-        readHeader();
-        if ( _state == ERROR ) {
-            return;
+		SettingsManager settings = SettingsManager.instance();
+		
+		String download_dir = settings.getSaveDirectory();
+		String incomplete_dir = settings.getIncompleteDirectory();
+		
+		// a reference file that will be stored, until the download
+		// is complete.
+		File incomplete_file = new File(incomplete_dir, _filename);
+		String path_to_incomplete = incomplete_file.getAbsolutePath();
+		
+		// the eventual fully downloaded file, and the path to it.
+		File complete_file = new File(download_dir, _filename);
+		String path_to_complete = complete_file.getAbsolutePath();
+		
+		File shared = new File(download_dir);
+		String shared_path = shared.getCanonicalPath();
+		
+		File parent_of_shared = new File(incomplete_file.getParent());
+		String path_to_parent = parent_of_shared.getCanonicalPath();
+		
+		if (!path_to_parent.equals(shared_path)) {
+			// need to add an error message here
+			throw new IOException("Invalid path");  
 		}
 
-        SettingsManager set = SettingsManager.instance();
-
-        _downloadDir = set.getSaveDirectory();
-
-        String incompleteDir = set.getIncompleteDirectory();
-
-        File myFile = new File(incompleteDir, _filename);
-        String pathname = myFile.getAbsolutePath();
-
-        File myTest = new File(_downloadDir, _filename);
-        String path = myTest.getAbsolutePath();
-
-        // This is necessary, and a little tricky. I
-		//  check to see if the canonical path of the
-		//  parent of the requested file is equivalent
-		//  to the canonical path of the shared directory. */
-
-        File f;
-        String p;
-        try {
-            File shared = new File(_downloadDir);
-            String shared_path = shared.getCanonicalPath();
-
-            f = new File(myTest.getParent());
-            p = f.getCanonicalPath();
-
-            if (!p.equals(shared_path)) {
-                _state = ERROR;
-                return;
-            }
-        } catch (Exception e) {
-            _state = ERROR;
-            return;
-        }
-
-
+		if ( complete_file.exists() ) {
+			// ask the user if the file should be overwritten
+			if ( ! _callback.overwriteFile(_filename) ) 
+				throw new IOException("File Already Exists");
+		}
 		
-		if ( ( myFile.exists() && !_resume  ) 
-			|| (myTest.exists()) ) {
-            // ask the user if the file should be overwritten
-            if ( ! _callback.overwriteFile(_filename) ) {
-                _stateString = "File Already Exists";
-                _state = ERROR;
-                return;
-            }
-        }
+		_fos = new FileOutputStream(path_to_incomplete, _resume);
 
-        try {
-            _fos = new FileOutputStream(pathname, _resume);
-        }
-        catch (FileNotFoundException e) {
-            _state = ERROR;
-            return;
-        }
-        catch (Exception e) {
-            _state = ERROR;
-            return;
-        }
+		int c = -1;
+		
+		byte[] buf = new byte[1024];
 
-        int c = -1;
 
-        byte[] buf = new byte[1024];
+		while (true) {
+			
+  			if (_amountRead == _sizeOfFile) {
+				_state = COMPLETE;
+				break;
+			}
+			
+  			// just a safety check.  hopefully this wouldn't
+  			// happen, but if it does, need a way to exit 
+  			// gracefully...
+  			if (_amountRead > _sizeOfFile) 
+				throw new IOException("File Size To Large");
+			
+			c = _br.read(buf);
 
-        while (true) {
+			if (c == -1) 
+				break;
+			
+			_fos.write(buf, 0, c);
+			
+			_amountRead+=c;
 
-			if (_amountRead == _sizeOfFile) {
-                _state = COMPLETE;
-                break;
-            }
+		}  // end of while loop
 
-			// just a safety check.  hopefully this wouldn't
-			// happen, but if it does, need a way to exit 
-			// gracefully...
-			if (_amountRead > _sizeOfFile) {
-                _state = ERROR;
-                break;
-            }
+		_br.close();
+		_fos.close();
 
-            try {
-                c = _br.read(buf);
-            }
-            catch (Exception e) {
-                _state = ERROR;
-                return;
-            }
+		//Move from temporary directory to final directory.
+		if ( _amountRead == _sizeOfFile ) {
+			//If target doesn't exist, this will fail silently.  Otherwise,
+			//it's always safe to do this since we prompted the user above.
+			complete_file.delete();
+			boolean ok = incomplete_file.renameTo(complete_file);
+			if (! ok) 
+				throw new IOException("Couldn't Move to Library");
+			//renameTo is not guaranteed to work, esp. when the
+			//file is being moved across file systems.  
 
-            if (c == -1) {
-                break;
-            }
+			_state = COMPLETE;
+			FileManager.getFileManager().addFileIfShared(path_to_complete);
 
-            try {
-                _fos.write(buf, 0, c);
-            }
-            catch (Exception e) {
-                _state = ERROR;
-                break;
-            }
+		}			
 
-            _amountRead+=c;
-
-        }
-
-        try {
-            _br.close();
-            _fos.close();
-        }
-        catch (IOException e) {
-            _state = ERROR;
-            return;
-        }
-
-        //Move from temporary directory to final directory.
-        if ( _amountRead == _sizeOfFile ) {
-            String pname = _downloadDir + _filename;
-            File target=new File(pname);
-            //If target doesn't exist, this will fail silently.  Otherwise,
-            //it's always safe to do this since we prompted the user above.
-            target.delete();
-            boolean ok=myFile.renameTo(target);
-            if (! ok) {
-                //renameTo is not guaranteed to work, esp. when the
-                //file is being moved across file systems.  
-                _state = ERROR;
-                _stateString = "Couldn't Move to Library";
-                return;
-            }
-            _state = COMPLETE;
-            FileManager.getFileManager().addFileIfShared(pname);
-        }
-
-        else
-        {
-            _state = ERROR;
-            _stateString = "Interrupted";
-        }
-    }
-
+	}
 
 	// this method handles cexpplicitly closing the streams 
 	// if an error condition was somehow reached.
