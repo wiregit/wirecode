@@ -44,12 +44,15 @@ public class UDPBufferedOutputStream extends OutputStream {
      */
     private UDPConnectionProcessor _processor;
 
+    private boolean                _connectionActive;
+
     /**
      *  Creates an output stream front end to a UDP Connection.
      */
     public UDPBufferedOutputStream(UDPConnectionProcessor p) {
-		_processor    = p;
-        chunks        = new ArrayList(5);
+		_processor        = p;
+        _connectionActive = true;
+        chunks            = new ArrayList(5);
         allocateNewChunk();
     }
 
@@ -57,14 +60,17 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Writes the specified byte to the activeChunk if room.
      *  Block if necessary.
      */
-    public synchronized void write(int b) {
+    public synchronized void write(int b) throws IOException {
 		// If there was no data before this, then ensure a writer is awake
-    	if ( getPendingChunks() == 0 )
+    	if ( _connectionActive && getPendingChunks() == 0 )
             _processor.wakeupWriteEvent();
 
         while (true) {
+            if ( !_connectionActive ) 
+                throw new IOException("Connection Closed");
+            
 			// If there is room within current chunk
-            if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
+            else if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
 				// Add to the current chunk
                 activeChunk[activeCount] = (byte) b;
                 activeCount++;
@@ -77,7 +83,7 @@ public class UDPBufferedOutputStream extends OutputStream {
                     allocateNewChunk();
                 } else {
 					// Wait for room for a new chunk
-                    try { wait(FOREVER); } catch(InterruptedException e) {}
+                    waitOnReader();
 
                     // Again, If there was no data before this, 
                     // then ensure a writer is awake
@@ -91,7 +97,8 @@ public class UDPBufferedOutputStream extends OutputStream {
     /**
      * Do a partial write from the byte array. Block if necessary.
      */
-    public synchronized void write(byte b[], int off, int len) {
+    public synchronized void write(byte b[], int off, int len) 
+      throws IOException {
 
         if(LOG.isDebugEnabled())  {
             LOG.debug("writing len: "+len+" bytes");
@@ -101,12 +108,15 @@ public class UDPBufferedOutputStream extends OutputStream {
 		int wlength; // The length of data to be written to the active chunk
 
 		// If there was no data before this, then ensure a writer is awake
-    	if ( getPendingChunks() == 0 )
+        if ( _connectionActive && getPendingChunks() == 0 )
 			_processor.wakeupWriteEvent();
 
         while (true) {
+            if ( !_connectionActive ) 
+                throw new IOException("Connection Closed");
+
 			// If there is room within current chunk
-			if ( activeCount < activeChunk.length ) {
+			else if ( activeCount < activeChunk.length ) {
 				// Fill up the current chunk
 				space   = activeChunk.length - activeCount;
 				wlength = Math.min(space, len);
@@ -130,7 +140,7 @@ public class UDPBufferedOutputStream extends OutputStream {
                     allocateNewChunk();
                 } else {
 					// Wait for room for a new chunk
-                    try { wait(FOREVER); } catch(InterruptedException e) {}
+                    waitOnReader();
 
                     // Again, If there was no data before this, 
                     // then ensure a writer is awake
@@ -145,6 +155,7 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Closing output stream has no effect. 
      */
     public void close() throws IOException {
+        _connectionActive = false;
     }
 
     /**
@@ -164,31 +175,49 @@ public class UDPBufferedOutputStream extends OutputStream {
 
     /**
      *  Package accessor for retrieving and freeing up chunks of data.
-	 *  Returns null if no data.
+     *  Returns null if no data.
      */
     synchronized Chunk getChunk() {
-		Chunk rChunk;
-		if ( chunks.size() > 0 ) {
-			// Return the oldest chunk 
-			rChunk        = new Chunk();
-			rChunk.data   = (byte[]) chunks.remove(0);
+        Chunk rChunk;
+        if ( chunks.size() > 0 ) {
+            // Return the oldest chunk 
+            rChunk        = new Chunk();
+            rChunk.data   = (byte[]) chunks.remove(0);
             rChunk.start  = 0; // Keep this to zero here
-			rChunk.length = rChunk.data.length;
-		} else if (activeCount > 0) {
-			// Return a partial chunk and allocate a fresh one
-			rChunk        = new Chunk();
-			rChunk.data   = activeChunk;
+            rChunk.length = rChunk.data.length;
+        } else if (activeCount > 0) {
+            // Return a partial chunk and allocate a fresh one
+            rChunk        = new Chunk();
+            rChunk.data   = activeChunk;
             rChunk.start  = 0; // Keep this to zero here
-			rChunk.length = activeCount;
-    		allocateNewChunk();
-		} else {
-			// If no data currently, return null
-			return null;
-		}
-		// Wakeup any write operation waiting for space
-		notify();
+            rChunk.length = activeCount;
+            allocateNewChunk();
+        } else {
+            // If no data currently, return null
+            return null;
+        }
+        // Wakeup any write operation waiting for space
+        notify();
 
-		return rChunk;
+        return rChunk;
+    }
+
+    /**
+     *  Wait for some chunks to be read
+     */
+    private void waitOnReader() throws IOException {
+        try { wait(FOREVER); } catch(InterruptedException e) {}
+
+        if ( !_connectionActive )
+            throw new IOException("Connection Closed");
+    }
+
+    /**
+     *  Package accessor for erroring out and waking up any further activity.
+     */
+    synchronized void connectionClosed() {
+        _connectionActive = false;
+		notify();
     }
 
     /**

@@ -343,6 +343,10 @@ public class UDPConnectionProcessor {
         if ( _outputToInputStream != null )
             _outputToInputStream.wakeup();
 
+        // Wakeup any sleeping writers
+        if ( _inputFromOutputStream != null )
+            _inputFromOutputStream.connectionClosed();
+
         // Register for a full cleanup after a slight delay
         _closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
            System.currentTimeMillis() + SHUTDOWN_DELAY_TIME);
