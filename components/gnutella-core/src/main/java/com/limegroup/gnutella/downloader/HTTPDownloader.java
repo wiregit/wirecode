@@ -171,8 +171,9 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception NotSharingException the host isn't sharing files (BearShare)
      * @exception IOException miscellaneous  error 
      */
-    public void connectHTTP (int start, int stop) throws IOException,
-    TryAgainLaterException, FileNotFoundException, NotSharingException {
+    public void connectHTTP(int start, int stop ,boolean supportQueueing) 
+        throws IOException, TryAgainLaterException, FileNotFoundException, 
+               NotSharingException, QueuedException {
         _amountToRead = stop-start;
 		_initialReadingPoint = start;
         //Write GET request and headers.  TODO: we COULD specify the end of the
@@ -183,6 +184,9 @@ public class HTTPDownloader implements BandwidthTracker {
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+
+        if(supportQueueing)
+            out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking
 		// while holding the lock
@@ -235,7 +239,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
-        int code=parseHTTPCode(str);		
+        int code=parseHTTPCode(str);	
 
 		//Accept any 2xx's, but reject other codes.
 		if ( (code < 200) || (code >= 300) ) {
@@ -245,11 +249,20 @@ public class HTTPDownloader implements BandwidthTracker {
 			else if (code == 410)
 				throw new 
                     com.limegroup.gnutella.downloader.NotSharingException();
-			else if (code == 503)
+			else if (code == 503) {
+                try {
+                    supportsQueueing();
+                } catch(QueuedException qx) {
+                    throw qx;
+                } catch(IOException ignored) {
+                    //socket closed, no tokens or not queued.
+                }
+                //no exception or IOException? not queued.
 				throw new TryAgainLaterException();
-			// a general catch for 4xx and 5xx's
-			// should maybe be a different exception?
-			// else if ( (code >= 400) && (code < 600) ) 
+                // a general catch for 4xx and 5xx's
+                // should maybe be a different exception?
+                // else if ( (code >= 400) && (code < 600) ) 
+            }
 			else 
 				throw new IOException();			
 		}
@@ -349,7 +362,57 @@ public class HTTPDownloader implements BandwidthTracker {
 		} catch (NumberFormatException e) {
 			throw new ProblemReadingHeaderException();
 		}
+    }
+    
+    /**
+     * Note: Called when we encounter a 503, and need to check if the uploader
+     * has queued us or not. Consuming all the headers is required, because
+     * if queued, we intend to use the same stream again, and residual headers
+     * will cause problems. Further, these headers are of no use to anyone else.
+     */
+    private void supportsQueueing() throws IOException, QueuedException {
+        //Note: According to the specification there are 5 headers, LimeWire
+        //ignores 2 of them - queue length, and maxUploadSlots.
+        int position = -1;
+        int minPollTime = -1;
+        int maxPollTime = -1;
+        //        boolean done = false;
+        String str = _byteReader.readLine();
+        while(!str.equals("")) {//still need info & headers exist
+            StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
+            if(!tokenizer.hasMoreTokens()) { //no tokens on new line??
+                str = _byteReader.readLine();//could throw exception
+                continue; //TODO: Is this correct or should we throw IOX here??
+            }
+            
+            String token = tokenizer.nextToken();
+            if(!token.equals("X-Queue")) {
+                str = _byteReader.readLine();//could throw exception
+                continue;
+            }
 
+            while(tokenizer.hasMoreTokens()) {
+                token = tokenizer.nextToken();
+                String value;
+                if(token.equals("pollMin")) {
+                    value = tokenizer.nextToken();
+                    minPollTime = Integer.parseInt(value);
+                }
+                else if(token.equals("pollMax")) {
+                    value = tokenizer.nextToken();
+                    maxPollTime = Integer.parseInt(value);
+                }
+                else if(token.equals("position")) {
+                    value = tokenizer.nextToken();
+                    position = Integer.parseInt(value);
+                }
+            } //end of inner while - done parsing this line.
+            str = _byteReader.readLine();//could throw exception
+        }//end of outer while - we have all the info we need.
+        //OK. now we have all the info we need.
+        if(minPollTime==-1 && maxPollTime==-1 && position==-1)
+            throw new IOException();
+        throw new QueuedException(minPollTime, maxPollTime, position);
     }
 
     /** 

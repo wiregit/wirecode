@@ -20,7 +20,7 @@ import java.util.Enumeration;
  *    FileDesc fd=new FileDesc(file, urns, index);
  * </pre>
  */
-public final class FileDesc implements AlternateLocationCollector {
+public class FileDesc implements AlternateLocationCollector {
     
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 

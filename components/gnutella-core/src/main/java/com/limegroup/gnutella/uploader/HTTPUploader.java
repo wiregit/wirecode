@@ -54,6 +54,7 @@ public class HTTPUploader implements Uploader {
 	private String _chatHost;
 	private int _chatPort;
     private final FileManager _fileManager;
+    private boolean _supportsQueueing = false;
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
@@ -262,7 +263,6 @@ public class HTTPUploader implements Uploader {
 	 */
 	public void writeResponse() {
 		try {
-		    readHeader();   
 			if(_ostream != null) {
 				_method.writeHttpResponse(_state, _ostream);
 			}
@@ -331,6 +331,10 @@ public class HTTPUploader implements Uploader {
 		case CONNECTING:
 			_state = new NormalUploadState(this);
 			break;
+        case QUEUED:
+            int pos = _manager.positionInQueue(_socket);
+            _state = new QueuedUploadState(pos,_fileDesc);
+            break;
 		case LIMIT_REACHED:
 			_state = new LimitReachedUploadState(_fileDesc);
 			break;
@@ -400,8 +404,18 @@ public class HTTPUploader implements Uploader {
 	//implements the Uploader interface
 	public boolean isHeaderParsed() { return _headersParsed; }
 
-    /**
-     * The number of bytes read. 
+    public boolean supportsQueueing() {return _supportsQueueing; }
+    
+    /**The number of bytes read. The way we calculate the number of bytes 
+     * read is a little wierd if the range header begins from the middle of 
+     * the file (say from byte x). Then we consider that bytes 0-x have 
+     * already been read. 
+     * <p>
+     * This may lead to some wierd behaviour with chunking. For example if 
+     * a host requests the last 10% of a file, the GUI will display 90%
+     * downloaded. Later if the same host requests from 20% to 30% the 
+     * progress will reduce to 20% onwards. 
+	 * 
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {return _amountRead;}
@@ -419,14 +433,14 @@ public class HTTPUploader implements Uploader {
         return _clientAcceptsXGnutellaQueryreplies;
     }
 
-    /**
-	 * Reads the HTTP header sent by the requesting client -- note that the
+	/**
+     * Reads the HTTP header sent by the requesting client -- note that the
 	 * 'GET' portion of the request header has already been read.
 	 *
 	 * @throws <tt>IOException</tt> if there are any io issues while reading
 	 *  the header
 	 */
-	private void readHeader() throws IOException {
+	public void readHeader() throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
 		_clientAcceptsXGnutellaQueryreplies = false;
@@ -448,6 +462,7 @@ public class HTTPUploader implements Uploader {
                 else if ( readContentURNHeader(str)  ) ;
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readAcceptHeader(str)      ) ;
+                else if ( readQueueVersion(str)      ) ;
         	}
         } finally {
             // we want to ensure these are always set, regardless
@@ -690,6 +705,18 @@ public class HTTPUploader implements Uploader {
         return true;
     }	
 
+    private boolean readQueueVersion(String str) {
+        if (indexOfIgnoreCase(str,"x-queue")==-1)
+            return false;
+        
+        String s = HTTPUtils.extractHeaderValue(str);
+        float version = Float.parseFloat(s);
+        if (version > 0) 
+            _supportsQueueing = true;
+
+        return true;
+    }
+
 	/**
 	 * This method parses the "X-Gnutella-Content-URN" header, as specified
 	 * in HUGE v0.93.  This assigns the requested urn value for this 
@@ -785,12 +812,13 @@ public class HTTPUploader implements Uploader {
 
 	// overrides Object.toString
 	public String toString() {
-		return "HTTPUploader:\r\n"+
-		       "File Name: "+_fileName+"\r\n"+
-		       "Host Name: "+_hostName+"\r\n"+
-		       "Port:      "+_port+"\r\n"+
-		       "File Size: "+_fileSize+"\r\n"+
-		       "State:     "+_state;
+        return "<"+_hostName+":"+_port+", "+_fileName+">";
+//  		return "HTTPUploader:\r\n"+
+//  		       "File Name: "+_fileName+"\r\n"+
+//  		       "Host Name: "+_hostName+"\r\n"+
+//  		       "Port:      "+_port+"\r\n"+
+//  		       "File Size: "+_fileSize+"\r\n"+
+//  		       "State:     "+_state;
 		
 	}
 }

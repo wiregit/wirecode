@@ -28,6 +28,21 @@ public class TestUploader {
 	private URN                         sha1;
     ServerSocket server = null;
     private boolean busy = false;
+    //Note about queue testing: This is how the queuing simulation works: If
+    //queue is set, the uploader sends the X-Queue header etc in handleRequest
+    //method, and sets values for minPollTime and maxPollTime. In the loop
+    //method, if queue was set, when handleRequest returns, queue is set to
+    //false and handleRequest is called one more time. This time handleRequest
+    //will upload the file normally, but it will also check that the downloader
+    //1. Kept the socket open 2. Responsed within the given time range.
+    //3. completed the download after coming out of the queue.
+    private boolean queue = false;
+    private long minPollTime = -1;
+    private long maxPollTime = -1;
+    //Note if either of these is changed we must change the X-Queue header in
+    //this test
+    private final int MIN_POLL = 45000;
+    private final int MAX_POLL = 120000;
 
 
     /** 
@@ -65,6 +80,10 @@ public class TestUploader {
         rate = 10000;
         stopped = false;
         sendCorrupt = false;
+        busy = false;
+        queue = false;
+        minPollTime = -1;
+        maxPollTime = -1;
     }
 
     public int amountUploaded() {
@@ -84,6 +103,9 @@ public class TestUploader {
         this.busy = busy;
     }
 
+    public void setQueue(boolean q) { 
+        this.queue = q;
+    }
 
     /** Sets whether this should send bad data. */
     public void setCorruption(boolean corrupt) {
@@ -144,6 +166,12 @@ public class TestUploader {
                         try {
                             if (!stopped) {
                                 handleRequest(mySocket);
+                                if (queue) { 
+                                    mySocket.setSoTimeout(MAX_POLL);
+                                    queue = false;//second time give slot
+                                    handleRequest(mySocket);
+                                }
+                                mySocket.setSoTimeout(8000);
                             }
                         } catch (IOException e) {
                             //e.printStackTrace();
@@ -161,6 +189,7 @@ public class TestUploader {
                 //e.printStackTrace();
                 return;  //server socket closed.
             }
+            //handling next request
         }
     }
 
@@ -212,8 +241,18 @@ public class TestUploader {
     private void send(OutputStream out, int start, int stop) 
             throws IOException {
         //Write header, stolen from NormalUploadState.writeHeader()
+        long t0 = System.currentTimeMillis();
+        if(minPollTime > 0) 
+            Assert.that(t0 > minPollTime,
+                        "queued downloader responded too quick by "+
+                        (minPollTime-t0)+" mS");
+        if(maxPollTime > 0) 
+            Assert.that(t0 < maxPollTime,
+                        "queued downloader responded too late, by "+
+                        (t0-maxPollTime) +" mS");        
         
-		String str = busy?"HTTP 503 Service Unavailable":"HTTP 200 OK \r\n";
+		String str=
+        busy|queue?"HTTP 503 Service Unavailable\r\n":"HTTP 200 OK \r\n";
 		out.write(str.getBytes());
         if (busy) {
             String s = "\r\n"; 
@@ -222,6 +261,19 @@ public class TestUploader {
             out.close();
             return;
         }
+
+        if(queue) {
+            String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
+            out.write(s.getBytes());
+            s = "\r\n";
+            out.write(s.getBytes());
+            out.flush();//don't close socket
+            long t = System.currentTimeMillis();
+            minPollTime = t+MIN_POLL;
+            maxPollTime = t+MAX_POLL;
+            return;
+        }
+
 		str = "Content-length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
 		if (start != 0) {
