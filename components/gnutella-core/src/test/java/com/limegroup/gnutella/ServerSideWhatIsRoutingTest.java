@@ -294,6 +294,26 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
                      new GUID(whatIsNewQuery.getGUID()));
+
+        // send the LAST HOP query
+        whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)1, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        ULTRAPEER_2.send(whatIsNewQuery);
+        ULTRAPEER_2.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        // the Leaf should get this query
+        rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+                                                            QueryRequest.class);
+        assertNotNull(rQuery);
+        assertEquals(new GUID(rQuery.getGUID()), 
+                     new GUID(whatIsNewQuery.getGUID()));
+
+
     }
 
 
