@@ -509,7 +509,9 @@ public final class UDPService implements Runnable {
             if(scan(msg, -1, "descriptor not a socket"))
                 return true;
             if(scan(msg, -1, "icmp port unreachable"))
-                return true;                
+                return true;
+            if(scan(msg, -1, "network subsystem has failed"))
+                return true;
                 
             // General invalid error on Linux
             if(msg.indexOf("operation not permitted") > -1)

@@ -22,6 +22,11 @@ public final class UncompressingInputStream extends InflaterInputStream {
             //This will happen if 'end' was called on the inflate
             //while we were inflating.
             throw new IOException("inflater was ended");
+        } catch(ArrayIndexOutOfBoundsException aioobe) {
+            //This will happen occasionally on Windows machines
+            //when the underlying socket was closed/disconnected
+            //while the read reached the native socketRead0
+            throw new IOException(aioobe.getMessage());
         }
     }
 } // class
