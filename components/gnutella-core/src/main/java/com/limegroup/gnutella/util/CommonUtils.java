@@ -68,6 +68,12 @@ public final class CommonUtils {
 	 */
 	private static boolean _isSolaris = false;
 
+
+	/**
+	 * Variable for whether or not the JVM is 1.1,8.
+	 */
+	private static boolean _isJava118 = false;
+
 	/**
 	 * Make sure the constructor can never be called.
 	 */
@@ -97,6 +103,10 @@ public final class CommonUtils {
 			} else {
 				_isMacClassic = true;
 			}			
+		}
+		
+		if(getJavaVersion().startsWith("1.1.8")) {
+			_isJava118 = true;
 		}
 	}
 
@@ -236,6 +246,16 @@ public final class CommonUtils {
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
 	}   
+
+	/**
+	 * Returns whether or not the current JVM is 1.1.8 implementation.
+	 *
+	 * @return <tt>true</tt> if we are running on 1.1.8, <tt>false</tt>
+	 *  otherwise
+	 */
+	public static boolean isJava118() {
+		return _isJava118;
+	}
 
     /** 
 	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
