@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * updates those settings based on user input, checking for errors 
  * where appropriate.  It also saves the settings file to disk when 
  * the session terminates.
+ *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public class SettingsManager {
@@ -23,12 +24,17 @@ public class SettingsManager {
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
 
 	/**
-	 * the default name of the shared directory.
+	 * Constant string for the name of the windows library to load.
+	 */
+	public final String WINDOWS_LIBRARY_NAME = "LimeWire18.dll";
+
+	/**
+	 * Default name of the shared directory.
 	 */
 	private final String  SAVE_DIRECTORY_NAME = "Shared";
 
 	/**
-	 * the name of the host list file.
+	 * Name of the host list file.
 	 */
 	private final String HOST_LIST_NAME = "gnutella.net";	
 
@@ -378,7 +384,7 @@ public class SettingsManager {
     private volatile int      _maxIncomingConn;
     private volatile File     _saveDirectory;
     private volatile File     _incompleteDirectory;
-    private volatile String   _directories;
+    private volatile File[]   _directories;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
     private volatile String[] _bannedWords;
@@ -1098,23 +1104,32 @@ public class SettingsManager {
 		return new File(SAVE_DIRECTORY_NAME);
     }
 
-    /** Returns the directories to search */
-    public String getDirectories(){return _directories;}
+    /** 
+	 * Returns the directories to search as an array of <tt>File</tt>
+	 * instances.
+	 *
+	 * @return the directories to search as an array of <tt>File</tt>
+	 *  instances
+	 */
+    public File[] getDirectories() {
+		return _directories;
+	}
 
 	/** Returns the shared directories as an array of pathname strings. */
-    public String[] getDirectoriesAsArray() {
-		if(_directories == null) return new String[0];		
-        _directories.trim();
-        return StringUtils.split(_directories, ';');
-    }
+    //public String[] getDirectoriesAsArray() {
+		//if(_directories == null) return new String[0];		
+        //_directories.trim();
+        //return StringUtils.split(_directories, ';');
+	//return new String[1];
+    //}
 
 	/**
 	 * Returns an array of Strings of directory path names.  these are the
 	 * pathnames of the shared directories as well as the pathname of 
 	 * the Incomplete directory.
 	 */
-	public String[] getDirectoriesWithIncompleteAsArray() {
-		String temp = _directories;
+	public File[] getDirectoriesWithIncompleteAsArray() {
+		/**String temp = _directories;
         temp.trim();
 		if(!temp.endsWith(";")) 
 			temp += ";";
@@ -1124,7 +1139,23 @@ public class SettingsManager {
 		} catch(FileNotFoundException fnfe) {			
 		}
 		temp += incompleteDir;
-        return StringUtils.split(temp, ';');		
+        return StringUtils.split(temp, ';');	
+		*/
+
+		int newLength = _directories.length + 1;
+		File[] newFiles = new File[newLength];
+		
+		for(int i=0; i<_directories.length; i++) {
+			newFiles[i] = _directories[i];
+		}
+		
+		File incompleteDir = null;
+		try {
+			incompleteDir = getIncompleteDirectory();
+		} catch(FileNotFoundException fnfe) {			
+		}
+		newFiles[_directories.length] = incompleteDir;
+		return newFiles;
 	}
     
     /** 
@@ -1979,6 +2010,24 @@ public class SettingsManager {
 		PROPS.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
+
+	/**
+	 * This method sets the shared directories based on the
+	 * string of semi-colon delimited directories stored in 
+	 * the props file.
+	 *
+	 * @param dirs the string of directories
+	 */
+	private void setDirectories(final String dirs) {
+		StringTokenizer st = new StringTokenizer(dirs, ";");
+		int length = st.countTokens();
+		File[] files = new File[length];
+		for(int i=0; i<length; i++) {
+			files[i] = new File(st.nextToken());
+		}
+		setDirectories(files);
+	}
+
     /** 
 	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
@@ -1986,64 +2035,34 @@ public class SettingsManager {
      * listing subdirectories that have parent directories
      * also in the string. 
 	 *
-	 * @param dirs A semicolon delimited <tt>String</tt> instance 
-	 *             containing the paths of shared directories.
+	 * @param dirs an array of <tt>File</tt> instances denoting
+	 *  the abstract pathnames of the shared directories
 	 */
-    public void setDirectories(final String dirs) {
+	public void setDirectories(final File[] dirArray) {
         boolean dirsModified = false;
 		
-		// this is necessary because the getDirectoriesAsArray
-		// method creates its array from the _directories variable.
-		_directories = dirs;
-        String[] dirArray = getDirectoriesAsArray();
-        int i = 0;
-        while(i < dirArray.length) {
-            if(dirArray[i] != null) {
-                File f = new File(dirArray[i]);
-                if(f.isDirectory()) {
-                    int count = 0;
-                    int z = 0;
-                    String str = "";
-                    try {str = f.getCanonicalPath();}
-                    catch(IOException ioe) {break;}
-                    while(z < dirArray.length) {
-                        if(dirArray[z] != null) {
-                            File file = new File(dirArray[z]);
-                            String name = "";
-                            try {name = file.getCanonicalPath();}
-                            catch(IOException ioe) {break;}
-                            if(str.equals(name)) {
-                                count++;
-                                if(count > 1) {
-                                    dirArray[z] = null;
-                                    dirsModified = true;
-                                }
-                            }
-                        }
-                        z++;
-                    }
-                }
-                else {
-                    dirArray[i] = null;
-                    dirsModified = true;
-                }
-            }
-            i++;
-        }
-        if(dirsModified) {
-            i = 0;
-            StringBuffer sb = new StringBuffer();
-            while(i < dirArray.length) {
-                if(dirArray[i] != null) {
-                    sb.append(dirArray[i]);
-                    sb.append(';');
-                }
-                i++;
-            }
-            _directories = sb.toString();
-        }
-        PROPS.put(DIRECTORIES, _directories);
-    }
+		// ok, let's prune out any duplicates if they're there
+		HashMap directories = new HashMap();
+		for(int i=0; i<dirArray.length; i++) {
+			directories.put(dirArray[i], "");
+		}
+		
+		Set fileSet = directories.keySet();
+
+		Object[] prunedFiles = fileSet.toArray();
+		StringBuffer sb = new StringBuffer();
+		for(int z=0; z<prunedFiles.length; z++) {
+			if(prunedFiles[z] != null) {
+				sb.append(prunedFiles[z]);
+				sb.append(';');
+			}
+		}
+		_directories = new File[prunedFiles.length];
+		for(int r=0; r<prunedFiles.length; r++) {
+			_directories[r] = (File)prunedFiles[r];
+		}
+        PROPS.put(DIRECTORIES, sb.toString());
+	}
 
     /** 
 	 * Adds one directory to the directory string only if
@@ -2061,27 +2080,18 @@ public class SettingsManager {
 	 */
     public void addDirectory(File dir) throws IOException {
 		if(!dir.isDirectory()) throw new IOException();
-		String[] dirs = getDirectoriesAsArray();
-		String newPath = "";
-		newPath = dir.getCanonicalPath();
-		int i = 0;
-		while(i < dirs.length) {
-			File file = new File(dirs[i]);
-			String name = "";
-			name = file.getCanonicalPath();
-			if(name.equals(newPath)) {
-				// throw the exception because the shared 
-				// directory already exists
-				throw new IOException();
-			}
-			i++;
+		
+		int newLength = _directories.length + 1;
+		File[] newFiles = new File[newLength];
+		
+		for(int i=0; i<_directories.length; i++) {
+			newFiles[i] = _directories[i];
 		}
-		if(!_directories.endsWith(";"))
-			_directories += ";";
-		_directories += newPath;
-		_directories += ";";
-		PROPS.put(DIRECTORIES, _directories);
-    }
+		newFiles[_directories.length] = dir;
+
+		// this will prune it out if it's a duplicate and add it too
+		setDirectories(newFiles);
+	}
 
     /** 
 	 * Sets the file extensions that are shared.
@@ -2260,13 +2270,22 @@ public class SettingsManager {
 		PROPS.put(PLAYER_ENABLED, s);
 	}
 
-
+	/**
+	 * Sets the maximum number of simultaneous downloads to allow.
+	 *
+	 * @param max the maximum number of simultaneous downloads to allow
+	 */
     public void setMaxSimDownload(int max) {
 		_maxSimDownload = max;
 		String s = String.valueOf(max);
 		PROPS.put(MAX_SIM_DOWNLOAD, s);        
     }
 
+	/**
+	 * Sets the maximum number of simultaneous uploads to allow.
+	 *
+	 * @param max the maximum number of simultaneous uploads to allow
+	 */
     public void setMaxUploads(int max) {
 		_maxUploads = max;
 		String s = String.valueOf(max);
@@ -2279,12 +2298,25 @@ public class SettingsManager {
 		PROPS.put(CLEAR_UPLOAD, s);
     }
 
-    public void setClearCompletedDownload(boolean b) {
-		_clearCompletedDownload = b;
-		String s = String.valueOf(b);
-		PROPS.put(CLEAR_DOWNLOAD, s);
+	/**
+	 * Sets whether or not completed downloads should be automatically
+	 * cleared or not.
+	 *
+	 * @param clear specifies whether or not they should be 
+	 * automatically cleared
+	 */
+	public void setClearCompletedDownload(boolean clear) {
+		_clearCompletedDownload = clear;
+		PROPS.put(CLEAR_DOWNLOAD, String.valueOf(clear));
     }
 
+	/**
+	 * Sets whether or not the users ip address should be forced to
+	 * the value they have entered.
+	 *
+	 * @param clear specifies whether or not the ip address should
+	 * be forced
+	 */
     public void setForceIPAddress(boolean force) {
         String c;
         if (force == true)
