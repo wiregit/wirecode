@@ -8,7 +8,7 @@ Here are the details about the proposed standard:
 1) Advertising Browse Host through GGEP
 
 'Browse Host' capable clients notify others of this feature via
-GGEP. THe new extension ID for Browse Host is 'BHOST' (subject to
+GGEP. THe new extension ID for Browse Host is 'BH' (subject to
 approval) and 'Browse Host' capable clients should add a
 corresponding extension header to all Query Replies. There is no
 need for any extension data.
