@@ -343,50 +343,28 @@ public class ManagedConnection
     public void initialize(ConnectionListener listener)
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
+        StatisticsConnectionListener listener2=
+            new StatisticsConnectionListener(listener);
         if (_isRouter)
-            super.initialize(listener);   //no timeout for bootstrap server
+            super.initialize(listener2);   //no timeout for bootstrap server
         else
-            super.initialize(listener, CONNECT_TIMEOUT);
+            super.initialize(listener2, CONNECT_TIMEOUT);
     }
 
-//      /**
-//       * Override of receive to do ConnectionManager stats and to properly shut
-//       * down the connection on IOException
-//       */
-//      public Message receive() throws IOException, BadPacketException {
-//          Message m = null;
-//          try {
-//              m = super.receive();
-//              _bytesReceived+=m.getTotalLength();
-//          } catch(IOException e) {
-//              if (_manager!=null) //may be null for testing
-//                  _manager.remove(this);
-//              throw e;
-//          }
-//          _numMessagesReceived++;
-//          _router.countMessage();
-//          return m;
-//      }
-
-//      /**
-//       * Override of receive to do MessageRouter stats and to properly shut
-//       * down the connection on IOException
-//       */
-//      public Message receive(int timeout)
-//              throws IOException, BadPacketException, InterruptedIOException {
-//          Message m = null;
-//          try {
-//              m = super.receive(timeout);
-//              _bytesReceived+=m.getTotalLength();
-//          } catch(IOException e) {
-//              if (_manager!=null) //may be null for testing
-//                  _manager.remove(this);
-//              throw e;
-//          }
-//          _numMessagesReceived++;
-//          _router.countMessage();
-//          return m;
-//      }
+    /** 
+     * Adds hooks to maintain read statistics.
+     */
+    class StatisticsConnectionListener extends DelegateConnectionListener {
+        StatisticsConnectionListener(ConnectionListener delegate) {
+            super(delegate);
+        }
+        public void read(Connection c, Message m) { 
+            _bytesReceived+=m.getTotalLength();
+            _numMessagesReceived++;
+            _router.countMessage();  //TODO: shouldn't this go in handleMessage?
+            delegate.read(c, m);
+        }
+    }
 
 
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
