@@ -563,10 +563,14 @@ public class HostCatcher {
         bootstrapHosts.clear();
         String[] hosts=settings.getQuickConnectHosts();
         for (int i=0; i<hosts.length; i++) {
-            Endpoint e=new Endpoint(hosts[i]);
-            bootstrapHosts.addLast(e);
-            //This may allow some fetchers to progress.
-            notify();
+            try {
+                Endpoint e=new Endpoint(hosts[i]);
+                bootstrapHosts.addLast(e);
+                //This may allow some fetchers to progress.
+                notify();
+            } catch (IllegalArgumentException ignore) {
+                //poorly formatted quick-connect host
+            }
         }
         
         //Move the N ultrapeer hosts from GOOD to NORMAL.  This forces

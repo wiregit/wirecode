@@ -100,7 +100,7 @@ public class HostCatcherTest extends TestCase {
     public void testBootstraps() {
         try {
             SettingsManager.instance().setQuickConnectHosts(
-                new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
+                new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347", "crap:crap"});
             hc.expire();
 
             hc.add(new Endpoint("128.103.60.3", 6346), false);
