@@ -732,76 +732,6 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
 
-    /** This test makes sure that querys with no query string but with
-     *  specified urn get through to leaves, etc.
-     */ 
-	/*
-    public void testNullQueryURNRequest() 
-        throws Exception {
-
-        // make sure it gets through with all combinations of one sender and two
-        // receivers.
-        urnTest(ULTRAPEER_1, ULTRAPEER_2, LEAF);
-        urnTest(ULTRAPEER_2, LEAF, ULTRAPEER_1);
-        urnTest(LEAF, ULTRAPEER_1, ULTRAPEER_2);        
-    }
-	*/
-
-
-	/**
-	 * Tests a URN query send from the first <tt>Connnection</tt> to the other
-	 * two <tt>Connnection</tt>s.
-	 *
-	 * @param sndr the <tt>Connnection</tt> sending the query
-	 * @param rcv1 the first <tt>Connnection</tt> receiving the query
-	 * @param rcv2 the second <tt>Connnection</tt> receiving the query
-	 */
-    private void urnTest(Connection sndr, Connection rcv1,
-						 Connection rcv2) 
-        throws Exception {
-        // make urns...
-        Set currUrnSet = new HashSet();
-        Set currUrnTypeSet = new HashSet();
-        for(int j = 0; j < HugeTestUtils.URNS.length; j++) {
-			currUrnSet.add(HugeTestUtils.URNS[j]);
-			currUrnTypeSet.add(HugeTestUtils.URNS[j].getUrnType());
-        }
-
-        // build the null QR
-        GUID guid = new GUID(GUID.makeGuid());
-        QueryRequest qr = 
-			new QueryRequest(guid.bytes(), TTL, 0, "", "", false,
-							 currUrnTypeSet, currUrnSet, false);
-        
-		//QueryRequest qr = QueryRequest.createRequery(HugeTestUtils.URNS[0]);
-        //GUID guid = new GUID(qr.getGUID());
-
-		//Set currUrnSet = qr.getQueryUrns();
-
-        // send the QR - FROM sndr
-        sndr.send(qr);
-        sndr.flush();
-
-		Message m = rcv1.receive(TIMEOUT);
-		assertQuery(m);
-
-        // did recv1 get everything a-ok?
-        QueryRequest reqRead=(QueryRequest)m;
-        assertTrue("guids should be equal",
-				   Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        assertNotNull("query urns should not be null", reqRead.getQueryUrns());
-        assertEquals("urn sets should be equal",currUrnSet, reqRead.getQueryUrns());
-
-        // did recv2 get everything a-ok?
-        m = rcv2.receive(TIMEOUT);
-		assertQuery(m);
-		reqRead = (QueryRequest)m;
-        assertTrue("guids should be equal", Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        assertNotNull("query urns should not be null",reqRead.getQueryUrns());
-        assertEquals("urn sets should be equal", currUrnSet, reqRead.getQueryUrns());
-    }
-
-
 	/**
 	 * Tests that duplicate queries are not forwarded if the connection that
 	 * originated the connection is dropped.
@@ -873,9 +803,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
                 Message m = c.receive(TIMEOUT);
 				if(m instanceof QueryRequest) {
 					ret = true;
-				} else {
-					System.out.println(m); 
-				}
+				} 
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
 				// we read a null message or received another 
