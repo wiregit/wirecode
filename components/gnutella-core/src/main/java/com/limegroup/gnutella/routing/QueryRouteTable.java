@@ -206,14 +206,20 @@ public class QueryRouteTable {
     
     private final boolean contains(int hash, int ttl) {
         return table[hash]<infinity;
-        // return bitTable.get(hash);
     }
     
+    // In the new version, we will not accept TTLs for methods.  Tables are only
+    // 1 hop deep....
+    private final boolean contains(int hash) {
+        return bitTable.get(hash);
+    }
+
     /**
      * For all keywords k in filename, adds <k, 1> to this.
      */
     public void add(String filename) {
         add(filename, 1);
+        addBTInternal(filename);
     }
 
     /**
@@ -226,14 +232,23 @@ public class QueryRouteTable {
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], 
                                        Utilities.log2(table.length));
-            //int hash=HashFunction.hash(keywords[i], 
-            //                         Utilities.log2(bitTableLength));
             if (ttl<table[hash]) {
                 if (table[hash]>=infinity)
                     entries++;  //added new entry
                 table[hash]=(byte)ttl;
-                if (!bitTable.get(hash))
-                    bitEntries++; //added new entry
+            }
+        }
+    }
+
+
+    private void addBTInternal(String filename) {
+        String[] words=HashFunction.keywords(filename);
+        String[] keywords=HashFunction.getPrefixes(words);
+        for (int i=0; i<keywords.length; i++) {
+            int hash=HashFunction.hash(keywords[i], 
+                                       Utilities.log2(bitTableLength));
+            if (!bitTable.get(hash)) {
+                bitEntries++; //added new entry
                 bitTable.set(hash);
             }
         }
@@ -244,17 +259,23 @@ public class QueryRouteTable {
         final int ttl = 1;
         final int hash = HashFunction.hash(iString, 
                                            Utilities.log2(table.length));
-        //        final int hash = HashFunction.hash(iString, 
-        //                                   Utilities.log2(bitTableLength));
         if (ttl < table[hash]) {
             if (table[hash] >= infinity)
                 entries++;  //added new entry
             table[hash] = (byte)ttl;
-            if (!bitTable.get(hash))
-                bitEntries++; //added new entry
+        }
+    }
+
+
+    public void addBTIndivisible(String iString) {
+        final int hash = HashFunction.hash(iString, 
+                                           Utilities.log2(bitTableLength));
+        if (!bitTable.get(hash)) {
+            bitEntries++; //added new entry
             bitTable.set(hash);
         }
     }
+
 
     /**
      * For all <keyword_i, ttl_i> in m, adds <keyword_i, (ttl_i)+1> to this.
@@ -274,8 +295,6 @@ public class QueryRouteTable {
 
         int m=qrt.table.length;
         int m2=this.table.length;
-        //        int m=qrt.bitTableLength;
-        //        int m2=this.bitTableLength;
         double scale=((double)m2)/((double)m);   //using float can cause round-off!
         for (int i=0; i<m; i++) {
             int low=(int)Math.floor(i*scale);
@@ -295,9 +314,41 @@ public class QueryRouteTable {
                         entries++; //added new entry
                     table[i2]=other;
                 }
-                if (qrt.bitTable.get(i)!=bitTable.get(i)) {
+            }
+        }
+    }
+
+
+    /**
+     * For all <keyword_i> in qrt, adds <keyword_i> to this.
+     * (This is useful for unioning lots of route tables for propoagation.)
+     *
+     *    @modifies this
+     */
+    public void addBTAll(QueryRouteTable qrt) {
+        //This algorithm scales between tables of 2different lengths and TTLs.
+        //Refer to the query routing paper for a full explanation.  If
+        //performance is a problem, it's possible to special-case the algorithm
+        //for when both tables have the same length and infinity:
+        //
+        //          for (int i=0; i<table.length; i++)
+        //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
+        //              //update entries accordingly
+
+        int m=qrt.bitTableLength;
+        int m2=this.bitTableLength;
+        double scale=((double)m2)/((double)m);   //using float can cause round-off!
+        for (int i=0; i<m; i++) {
+            int low=(int)Math.floor(i*scale);
+            int high=(int)Math.ceil((i+1)*scale);
+            Assert.that(low>=0 && low<m2,
+                        "Low value "+low+" for "+i+" incompatible with "+m2);
+            Assert.that(high>=0 && high<=m2,
+                        "High value "+high+" for "+i+" incompatible with "+m2);
+            for (int i2=low; i2<high; i2++) {
+                if (qrt.bitTable.get(i)!=bitTable.get(i2)) {
                     if (qrt.bitTable.get(i)) {
-                        bitTable.set(i);
+                        bitTable.set(i2);
                         bitEntries++;
                     }
                     // else bitTable[i] is already set..
@@ -321,15 +372,27 @@ public class QueryRouteTable {
         QueryRouteTable other=(QueryRouteTable)o;
         if (this.table.length!=other.table.length)
             return false;
-        //        if (this.bitTableLength!=other.bitTableLength)
-        //            return false;
 
         for (int i=0; i<this.table.length; i++) {
             if (this.table[i]!=other.table[i])
                 return false;
         }
-        //        if (!this.bitTable.equals(other.bitTable))
-        //            return false;
+
+        return true;
+    }
+
+    /** True if o is a QueryRouteTable with the same entries of this. */
+    public boolean btEquals(Object o) {
+        if (! (o instanceof QueryRouteTable))
+            return false;
+
+        //TODO: two qrt's can be equal even if they have different TTL ranges.
+        QueryRouteTable other=(QueryRouteTable)o;
+        if (this.bitTableLength!=other.bitTableLength)
+            return false;
+
+        if (!this.bitTable.equals(other.bitTable))
+            return false;
 
         return true;
     }
@@ -599,7 +662,7 @@ public class QueryRouteTable {
     ////////////////////////////// Unit Tests ////////////////////////////////
     
     /** Unit test */
-    /*
+
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
 
@@ -901,5 +964,5 @@ public class QueryRouteTable {
         } catch (BadPacketException e) {
         }
     }
-    */
+
 }
