@@ -86,7 +86,7 @@ public class Library {
     
     private static String checkChars(String str) {
 	
-	String escapeChars = "&()";
+	String escapeChars = "&()|";
 	
 	char[] chars = str.toCharArray();
 	int length = chars.length;
