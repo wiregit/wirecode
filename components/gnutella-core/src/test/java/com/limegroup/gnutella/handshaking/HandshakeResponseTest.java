@@ -27,6 +27,46 @@ public final class HandshakeResponseTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    
+    /**
+     * Tests the method for extracting the status message from a connection
+     * handshake status line.
+     */
+    public void testExtractMessage() throws Exception {
+		Method codeMethod = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractCode",
+                                         new Class[]{String.class});
+
+		Method messageMethod = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractMessage",
+                                         new Class[]{String.class});
+        String line = "200 OK";
+        int code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        String message = (String)messageMethod.invoke(null, new Object[]{line});
+        assertEquals("unexpected code", 200, code);
+        assertEquals("unexpected message", "OK", message);
+
+        line = "503 Service Unavailable";
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        assertEquals("unexpected code", 503, code);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
+        assertEquals("unexpected message", "Service Unavailable", message);
+
+        line = "503 Something Totally Different";
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        assertEquals("unexpected code", 503, code);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
+        assertEquals("unexpected message", "Something Totally Different", message);
+
+        line = "200 Something Totally Different";
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        assertEquals("unexpected code", 200, code);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
+        assertEquals("unexpected message", "Something Totally Different", message);
+    }
+
     /**
      * Tests the method that add Ultrapeer hosts to the X-Try-Ultrapeer
      * header.
