@@ -9,6 +9,10 @@ import java.io.*;
  * huge test classes.
  */
 final class HugeTestUtils {
+
+	/**
+	 * Strings representing invalid URNs.
+	 */
 	static final String[] INVALID_URN_STRINGS = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC",
 		"urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
@@ -26,6 +30,9 @@ final class HugeTestUtils {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB ",
 	};
 
+	/**
+	 * String representing valid URNs.
+	 */
 	static final String[] VALID_URN_STRINGS = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
@@ -39,6 +46,9 @@ final class HugeTestUtils {
 		"urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	};
 
+	/**
+	 * Array of query strings.
+	 */
 	static final String[] QUERY_STRINGS = {
 		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"file",
@@ -61,6 +71,92 @@ final class HugeTestUtils {
 		"new file"
 	};
 
+	/**
+	 * URLs for general use.
+	 */
+	static final String [] URL_STRINGS = {
+		"www.limewire.com",
+		"www.cnn.com",
+		"www.test.org",
+		"www.limewire.org",
+		"www.eff.org",
+		"www.guerrillanews.com",
+		"www.natprior.org",
+		"www.census.gov",
+		"www.cmpbs.org",
+		"www.lc.gov",
+		"www.news.com",
+		"www.oreilly.com",
+		"www.apple.com",
+		"www.gnutella.com",
+		"www.gnutellanews.com",
+		"java.sun.com"
+	};
+
+	/**
+	 * Alternate locations with timestamps.
+	 */
+	static final String[] VALID_TIMESTAMPED_LOCS = {
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		                     "lime%20capital%20management%2001.mpg "+
+		                     "2002-04-09T20:32:33Z",
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2002.mpg "+
+		               "2002-04-09T20:32:33Z",
+		"http://Y.Z.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "2002-04-09T20:32:33Z",
+		"http://Y.W.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "2002-04-09T20:32:33Z",
+		"http://Y.T.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "2002-04-09T20:32:33Z",
+		"http: //Y.R.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "2002-04-09T20:32:33Z"
+	};
+
+	/**
+	 * Alternate locations without timestamps.
+	 */
+	static final String[] VALID_NONTIMESTAMPED_LOCS = {
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.X.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.R.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http: //Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.S.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.Z.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg"
+	};
+
+	/**
+	 * Invalid alternate locations.
+	 */
+	static final String[] INVALID_LOCS = {
+		"",
+		null,
+		"http",
+		"http://",
+		"www",
+		"test",
+		"http://www",
+	};
+	
+
+	/**
+	 * Array of GUIDs for use by tests.
+	 */
 	static final GUID[] GUIDS = {
 		new GUID(GUID.makeGuid()),
 		new GUID(GUID.makeGuid()),
@@ -73,7 +169,14 @@ final class HugeTestUtils {
 		new GUID(GUID.makeGuid())
 	};
 
+	/**
+	 * Array of URNs for use by tests.
+	 */
 	static final URN[] URNS = new URN[VALID_URN_STRINGS.length];
+
+	/**
+	 * Array of URNType instances for use by tests.
+	 */
 	static final UrnType[] URN_TYPES = new UrnType[VALID_URN_STRINGS.length];
 	private static final ArrayList URN_SETS = new ArrayList();
 	private static final HugeTestUtils INSTANCE = new HugeTestUtils();
