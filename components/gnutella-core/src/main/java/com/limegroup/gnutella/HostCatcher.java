@@ -278,24 +278,31 @@ public class HostCatcher {
 
         //Is e private?  
         if (e.isPrivateAddress()) {
-            //Yes, add to expired portion.  It might make sense to discard such
-            //addresses altogether.  But putting these in the expired "new"
-            //category allows testing on private networks.
+            //Yes, add to expired portion if not already there.  It might make
+            //sense to discard such addresses altogether.  But putting these in
+            //the expired "new" category allows testing on private networks.
+            //TODO: is the call to contains(..) too expensive?
             synchronized (cacheLock) {
-                mainCacheExpired.add(e);
-                cacheLock.notify();
+                if (! mainCacheExpired.contains(e)) {
+                    mainCacheExpired.add(e);
+                    cacheLock.notify();
+                    return true;
+                }
             }
         } else {
-            //No, add to main cache--if not already there.
+            //No, add to main cache--if not already there.  TODO: is the call to
+            //contains(..) too expensive?
             synchronized(cacheLock) {
                 MainCacheEntry newEntry = 
                     new MainCacheEntry(pr, connection);
-                if (!(mainCache[hops-1].contains(newEntry)))
+                if (!(mainCache[hops-1].contains(newEntry))) {
                     mainCache[hops-1].add(newEntry);
-                cacheLock.notify();
+                    cacheLock.notify();
+                    return true;
+                }
             }
         }
-        return true;
+        return false;
     }
 
     /**
