@@ -107,7 +107,7 @@ public class PushAltLoc extends AlternateLocation {
      * take them out of the collection.  This does not affect ordering
      * since they are always compared to other demoted PushLocs.
      */
-    public boolean getDemoted() {
+    public boolean isDemoted() {
         return true;
     }
 

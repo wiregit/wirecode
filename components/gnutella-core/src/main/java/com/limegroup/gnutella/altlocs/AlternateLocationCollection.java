@@ -170,7 +170,7 @@ public final class AlternateLocationCollection
             AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
                 return false;
-            if(loc.getDemoted()) {//if its demoted remove it
+            if(loc.isDemoted()) {//if its demoted remove it
                 LOCATIONS.remove(loc);
                 return true;         
             }   

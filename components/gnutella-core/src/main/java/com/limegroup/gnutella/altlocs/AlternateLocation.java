@@ -246,7 +246,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     /**
      * package access, accessor to the value of _demoted
      */ 
-    public synchronized boolean getDemoted() { return _demoted; }
+    public synchronized boolean isDemoted() { return _demoted; }
     
     ////////////////////////////Mesh utility methods////////////////////////////
 
