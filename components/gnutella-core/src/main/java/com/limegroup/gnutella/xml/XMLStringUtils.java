@@ -98,4 +98,53 @@ public class XMLStringUtils
         return returnList;
     }//end of fn split
     
+    /**
+     * Tokenizes the given string based upon the delimiter passed.
+     * No characters are lost from the string (delimiter becomes the 
+     * start of the tokenized string)
+     * @param content The string to be tokenized
+     * @param delimiter delimits/identifies the various parts of the content
+     * @return List (of String) of strings formed by chopping the original
+     * content
+     */
+    public static List tokenize(String content, String delimiter)
+    {
+        //list to contain chooped strings
+        List /* of String */ choppedElements = new LinkedList();
+        
+        //indexes in the content to identify start & end of the part to be
+        //chopped
+        int startIndex = content.indexOf(delimiter); 
+        int endIndex;
+        //go thru the content
+        while(startIndex != -1)
+        {
+            //get the end index for the current token
+            //(leave the current delimiter by starting from 1 instead of 0)
+            endIndex = content.indexOf(delimiter, startIndex + 1);  
+            //add the current element to the list
+            if(endIndex != -1)
+            {
+                //add the part from startIndex to endIndex
+                choppedElements.add(
+                    content.substring(startIndex,endIndex).trim());
+            }
+            else
+            {
+                //add the part from startIndex to the end of the string
+                //as this is the last part
+                choppedElements.add(content.substring(startIndex).trim());
+                //break out of the loop
+                break;
+            }
+            //move the startindex to the end of this token (or the start of 
+            //next)
+            startIndex = endIndex;
+        }
+        
+        System.out.println("finished tokenizing");
+        //return the list of chopped/tokenized elements    
+        return choppedElements;
+    }
+    
 }
