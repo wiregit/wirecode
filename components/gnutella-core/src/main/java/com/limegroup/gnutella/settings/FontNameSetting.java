@@ -16,8 +16,8 @@ public final class FontNameSetting extends Setting {
     String _fontName;
 
     FontNameSetting(Properties defaultProps, Properties props, String key,
-                                          String defaultStr, boolean useSimpp) {
-        super(defaultProps, props, key, defaultStr, useSimpp);
+                                          String defaultStr, String simppKey) {
+        super(defaultProps, props, key, defaultStr, simppKey);
         _fontName = defaultStr;
     }
 

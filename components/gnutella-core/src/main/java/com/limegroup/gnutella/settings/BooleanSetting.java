@@ -18,8 +18,8 @@ public final class BooleanSetting extends Setting {
 	 * @param defaultBool the default value to use for the setting
 	 */
 	BooleanSetting(Properties defaultProps, Properties props, String key, 
-				                      boolean defaultBool, boolean useSimpp) {
-		super(defaultProps, props, key, String.valueOf(defaultBool), useSimpp);
+				                      boolean defaultBool, String simppKey) {
+		super(defaultProps, props, key, String.valueOf(defaultBool), simppKey);
 	}
         
 	/**

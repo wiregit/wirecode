@@ -20,8 +20,8 @@ public class StringArraySetting extends Setting {
 	 * @param defaultInt the default value to use for the setting
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
-                                      String[] defaultValue, boolean useSimpp) {
-		super(defaultProps, props, key, decode(defaultValue), useSimpp);
+                                      String[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
 	}
         
 	/**

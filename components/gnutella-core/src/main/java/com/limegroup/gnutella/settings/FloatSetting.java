@@ -17,8 +17,8 @@ public final class FloatSetting extends Setting {
 	 * @param defaultFloat the default value to use for the setting
 	 */
 	FloatSetting(Properties defaultProps, Properties props, String key, 
-                                        float defaultFloat, boolean useSimpp) {
-		super(defaultProps, props, key, String.valueOf(defaultFloat), useSimpp);
+                                        float defaultFloat, String simppKey) {
+		super(defaultProps, props, key, String.valueOf(defaultFloat), simppKey);
 	}
         
 	/**

@@ -21,8 +21,8 @@ public class FileArraySetting extends Setting {
 	 * @param defaultInt the default value to use for the setting
 	 */
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
-                                       File[] defaultValue, boolean useSimpp) {
-		super(defaultProps, props, key, decode(defaultValue), useSimpp);
+                                       File[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
 	}
         
 	/**

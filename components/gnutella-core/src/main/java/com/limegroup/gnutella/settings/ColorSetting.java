@@ -20,9 +20,9 @@ public final class ColorSetting extends Setting {
 	 */
 	static ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, String key, 
-                                       Color defaultColor, boolean useSimpp ) { 
+                                       Color defaultColor, String simppKey ) { 
 		return new ColorSetting(defaultProps, props, key, 
-                                formatColor(defaultColor), useSimpp);
+                                formatColor(defaultColor), simppKey);
 	}
 
 	/**
@@ -36,8 +36,8 @@ public final class ColorSetting extends Setting {
 	 * @param value the default value to use for the setting
 	 */
 	private ColorSetting(Properties defaultProps, Properties props, String key, 
-						                       String value, boolean useSimpp) {
-		super(defaultProps, props, key, value, useSimpp);
+						                       String value, String simppKey) {
+		super(defaultProps, props, key, value, simppKey);
 	}
 
         

@@ -17,8 +17,8 @@ public final class StringSetting extends Setting {
 	 * @param defaultStr the default value to use for the setting
 	 */
 	StringSetting(Properties defaultProps, Properties props, String key, 
-                                       String defaultStr, boolean useSimpp) {
-		super(defaultProps, props, key, defaultStr, useSimpp);
+                                       String defaultStr, String simppKey) {
+		super(defaultProps, props, key, defaultStr, simppKey);
 	}
         
 	/**

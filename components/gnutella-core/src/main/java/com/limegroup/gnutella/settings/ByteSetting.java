@@ -17,8 +17,8 @@ public final class ByteSetting extends Setting {
 	 * @param defaultByte the default value to use for the setting
 	 */
 	ByteSetting(Properties defaultProps, Properties props, String key, 
-                byte defaultByte, boolean useSimpp) {
-		super(defaultProps, props, key, String.valueOf(defaultByte), useSimpp);
+                byte defaultByte, String simppKey) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), simppKey);
 	}
         
 	/**

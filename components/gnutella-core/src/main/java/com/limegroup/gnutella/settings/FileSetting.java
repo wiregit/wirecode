@@ -19,8 +19,8 @@ public final class FileSetting extends Setting {
 	 * @param defaultFile the default value to use for the setting
 	 */
 	FileSetting(Properties defaultProps, Properties props, String key, 
-                                         File defaultFile, boolean simppEn) {
-		super(defaultProps, props, key, defaultFile.getAbsolutePath(), simppEn);
+                                         File defaultFile, String simppKey) {
+		super(defaultProps, props, key, defaultFile.getAbsolutePath(), simppKey);
 	}
         
 	/**
