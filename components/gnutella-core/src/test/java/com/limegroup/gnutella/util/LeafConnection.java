@@ -1,5 +1,12 @@
 package com.limegroup.gnutella.util;
 
+import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
+
 /**
  * Specialized class that uses special keywords for leaf routing
  * tables.
@@ -39,12 +46,26 @@ public final class LeafConnection extends NewConnection {
     private LeafConnection(String[] keywords, int connections, 
         String descriptor, boolean addStandardKeyword, boolean requireMatches) {
         super(connections, requireMatches);
-
+        
+        QueryRouteTable qrt = new QueryRouteTable();
+        
         for(int i=0; i<keywords.length; i++) {
-            QRT.add(keywords[i]);
+            qrt.add(keywords[i]);
         }
         if(addStandardKeyword) {
-            QRT.add(LEAF_KEYWORD);
+            qrt.add(LEAF_KEYWORD);
+        }
+        
+        List qrts = qrt.encode(null);
+        
+        Iterator iter = qrts.iterator();
+        while(iter.hasNext()) {
+            RouteTableMessage rtm = (RouteTableMessage)iter.next();
+            if(rtm instanceof ResetTableMessage) {
+                qrp().resetQueryRouteTable((ResetTableMessage)rtm);
+            } else {
+                qrp().patchQueryRouteTable((PatchTableMessage)rtm);
+            }
         }
         DESCRIPTOR = descriptor;
     }
