@@ -26,6 +26,7 @@ public final class NetworkUtils {
 	 */
 	public static boolean isValidPort(int port) {
 		if((port & 0xFFFF0000) != 0) return false;
+        if(port == 0) return false;
 		return true;
 	}
 	
