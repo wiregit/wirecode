@@ -19,12 +19,15 @@ import com.limegroup.gnutella.downloader.*; //for testing
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
-    
-    private final int REJECTED = 0;
-    
+    /** An enumeration of return values for queue checking. */
+    private final int REJECTED = 0;    
     private final int QUEUED = 1;
-
     private final int ACCEPTED = 2;
+    /** The min and max allowed times (in milliseconds) between requests by
+     *  queued hosts. */
+    public static final int MIN_POLL_TIME = 45000; //45 sec, same as Shareaza
+    public static final int MAX_POLL_TIME = 120000; //120 sec, same as Shareaza
+    
 
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
@@ -61,13 +64,12 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private List /* of Uploaders */ _activeUploadList = new LinkedList();
 
+    /** The list of queued uploads.  Most recent uploads are added to the tail.
+     *  Each pair contains the underlying socket and the time of the last
+     *  request. */
     private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
         new LinkedList();
 
-    public static final int MIN_POLL_TIME = 45000; //same as Shareaza
-
-    public static final int MAX_POLL_TIME = 120000; //same as Shareaza
-    
 
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
@@ -231,11 +233,15 @@ public final class UploadManager implements BandwidthTracker {
 	}
     
     /**
-     * Does some book-keeping and makes the downloader, start the download
-     * @param uploader This method assumes that uploader is connected.
-     * @exception IOException thrown if insertAndTest throws an IOException
+     * Attempts to upload the given file for the given uploader.  May instead 
+     * reject or queue the upload.
+     *
+     * @param uploader the uploader for this file, which MUST be connected
+     * @param giveSlot whether the upload already has the slot for this file
+     *  If false, the usual queueing rules apply.
+     * @exception IOException if checkAndQueue throws an IOException, which
+     *  means that the GET request came too early for the queued uploader
      */
-
     private int doSingleUpload(Uploader uploader, Socket socket, String host, 
                                int index, boolean giveSlot) throws IOException {
         long startTime=-1;
@@ -250,7 +256,7 @@ public final class UploadManager implements BandwidthTracker {
             //BROWSE_HOST, PUSH_FAILED or CONNECTING
             if(uploader.getState()==Uploader.CONNECTING) {
                 //can throw IOEx
-                queued = insertAndTest(uploader, host, socket,giveSlot);
+                queued = checkAndQueue(uploader, host, socket,giveSlot);
                 debug(uploader+ " insert and test returned "+queued);
                 Assert.that(queued!=-1);
             }
@@ -451,19 +457,18 @@ public final class UploadManager implements BandwidthTracker {
 
 	/////////////////// Private Interface for Testing Limits /////////////////
 
-    /** Increments the count of uploads in progress for host.
-     *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
-     *  Always accept Browse Host requests, though....
-     *  Notifies callback of this.
-     *  Corollary: wontAccept is true iff hasQueue is true
-     *  Corollary: (hasQueue==false) => (wontaccept==false)
-     *  Corollary: (hasQueue==false) => posInQueue == -1
-     *      @modifies uploader, _callback 
-     * @exception if an uploader gets a request too soon, we are going to throw
-     * an IOException, which will cause the socket to be closed. 
-     * @return 0 if rejected, 1 if queued, 2 if given a slot
-     */
-	private synchronized int insertAndTest(Uploader uploader, String host,
+    /** Checks whether the given upload may proceed based on number of slots,
+     *  position in upload queue, etc.  Updates the upload queue as necessary.
+     *  Always accepts Browse Host requests, though.  Notifies callback of this.
+     *  
+     * @return ACCEPTED if the download may proceed, QUEUED if this is in the
+     *  upload queue, or REJECTED if this is flat-out disallowed (and hence not
+     *  queued).  If REJECTED, <tt>uploader</tt>'s state will be set to
+     *  LIMIT_REACHED.  
+     * @exception IOException the request came sooner than allowed by upload
+     *  queueing rules.  (Throwing IOException forces the connection to be
+     *  closed by the calling code.)  */
+	private synchronized int checkAndQueue(Uploader uploader, String host,
                           Socket socket, boolean giveSlot) throws IOException {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
