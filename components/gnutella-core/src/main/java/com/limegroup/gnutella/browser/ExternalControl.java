@@ -94,6 +94,7 @@ public class ExternalControl {
 	 *  and return true as a sign that LimeWire is running.
 	 */
 	public static void fireMagnet(Socket socket) {
+        Thread.currentThread().setName("IncomingMagnetThread");
 		try {
 			// Only allow control from localhost
 			if ( !LOCALHOST.equals(
