@@ -21,6 +21,7 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -42,6 +43,8 @@ public class Acceptor implements Runnable {
     static long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
     static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
+    
+    private UPnPManager _upnpManager;
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -160,6 +163,13 @@ public class Acceptor implements Runnable {
 	public void start() {
 	    MulticastService.instance().start();
 	    UDPService.instance().start();
+	    
+	    // UPNP requires 1.4+
+	    if (CommonUtils.isJava14OrLater())
+	    	_upnpManager = UPnPManager.instance();
+	    else
+	    	_upnpManager = null;
+	    
 		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();
@@ -403,17 +413,24 @@ public class Acceptor implements Runnable {
 		int oldPort = tempPort;
         Exception socketError = null;
         try {
+        	// if we have a NAT and the default port is not available, lets try
+        	// another one
+        	if (_upnpManager != null && !_upnpManager.portAvailable(tempPort))
+        		throw new IOException();
+        	
 			setListeningPort(tempPort);
 			_port = tempPort;
         } catch (IOException e) {
             socketError = e;
-            //2. Try 20 different ports. The first 10 tries increment
-            //sequentially from 6346. The next 10 tries are random ports between
-            //2000 and 52000
-            int numToTry = 20;
+            // 2. Try 40 different ports. The first 10 tries increment
+            // sequentially from 6346. The next 10 tries are random ports between
+            // 2000 and 52000
+            // for each port first check if its available on the NAT (if a NAT exists)
+            // and then check if its available locally.
+            int numToTry = 40;
             Random gen = null;
             for (int i=0; i<numToTry; i++) {
-                if(i < 10)
+                if(i < 20)
                     tempPort = i+6346;
                 else {
                     if(gen==null)
@@ -427,6 +444,9 @@ public class Acceptor implements Runnable {
 				    continue;
 				}
                 try {
+                	if (_upnpManager != null && 
+                			!_upnpManager.portAvailable(tempPort))
+                		continue;
                     setListeningPort(tempPort);
 					_port = tempPort;
                     break;
@@ -439,7 +459,15 @@ public class Acceptor implements Runnable {
             if(_socket == null) {
                 MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
             }
+        } finally {
+        	// if we created a socket and have a NAT, open the ports
+        	if (_socket != null && 
+        			_upnpManager != null && 
+					_upnpManager.NATPresent() &&
+					NetworkUtils.isValidPort(_port))
+        		_upnpManager.mapPort(_port);
         }
+        
         socketError = null;
 
         if (_port!=oldPort) {

@@ -1,11 +1,16 @@
 package com.limegroup.gnutella;
 
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +22,11 @@ import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
+
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 
 /**
@@ -43,8 +53,11 @@ import org.cybergarage.upnp.device.DeviceChangeListener;
  * between limewire sessions. In the meantime however, the NAT may assign a different 
  * ip address to the local node.  That's why we need to find any previous mappings 
  * the node has created and update them with our new address. In order to uniquely 
- * distinguish which mappings were made by us, we put our client GUID in the description 
- * field.
+ * distinguish which mappings were made by us, we put part of our client GUID in the 
+ * description field.  
+ * 
+ * For the TCP mapping, we use the following description: "Lime/TCP:<cliengGUID>"
+ * For the UDP mapping, we use "Lime/UDP:<clientGUID>"
  * 
  * NOTES:
  * 
@@ -68,9 +81,19 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	private static final String SERVICE_TYPE = 
 		"urn:schemas-upnp-org:service:WANIPConnection:1";
 	
+	/** prefixes and a suffix for the descriptions of our TCP and UDP mappings */
+	private static final String TCP_PREFIX = "Lime/TCP:";
+	private static final String UDP_PREFIX = "Lime/UDP:";
+	private static final String GUID_SUFFIX = 
+		ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+	
 	private static final UPnPManager INSTANCE = new UPnPManager();
 	
 	private static final Log LOG = LogFactory.getLog(UPnPManager.class);
+	static {
+		if (!CommonUtils.isJava14OrLater())
+			LOG.warn("loading UPnPManager on jvm that doesn't support it!");
+	}
 	
 	public static UPnPManager instance() {
 		return INSTANCE;
@@ -86,6 +109,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * The port-mapping service we'll use.  LOCKING: this
 	 */
 	private Service _service;
+	
+	/**
+	 * existing port mappings. LOCKING: this
+	 */
+	private Map _mappings;
 	
 	/** whether we are currently performing any UPnP operations */
 	private volatile boolean _running;
@@ -155,6 +183,30 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			_router=null;
 		} else
 			LOG.debug("found service");
+		
+		// get the existing mappings
+		try {
+			Map m = getExistingMappings();
+			synchronized(this) {
+				_mappings = m;
+			}
+			if (LOG.isDebugEnabled())
+				LOG.debug("mappings on startup: "+_mappings);
+		}catch(NumberFormatException bad) {
+			//the router returned invalid port values, it must be malfunctioning.
+			LOG.debug("removing broken router",bad);
+			_router = null;
+			_service = null;
+			return;
+		}
+		
+		// delete any previous mappings for this client if they exist
+		Mapping tcp = (Mapping)_mappings.remove(TCP_PREFIX + GUID_SUFFIX);
+		Mapping udp = (Mapping)_mappings.remove(UDP_PREFIX + GUID_SUFFIX);
+		if (tcp != null)
+			removeMapping(tcp);
+		if (udp != null)
+			removeMapping(udp);
 	}
 	
 	/**
@@ -187,7 +239,70 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		}
 	}
 	
-	private Map /*String description->Mapping */ getExistingMappings() {
+	/**
+	 * @param port the port that we wish to forward
+	 * @return whether the port is available or not
+	 */
+	public synchronized boolean portAvailable(int port) {
+		// if no nat, its always available
+		if (!NATPresent())
+			return true;
+		
+		for (Iterator iter = _mappings.values().iterator();iter.hasNext();) {
+			Mapping m = (Mapping)iter.next();
+			if (m._externalPort == port)
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * adds a mapping on the router to the specified port
+	 * @param port
+	 */
+	public void mapPort(int port) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("existing mappings: "+_mappings);
+		
+		String localAddress = NetworkUtils.ip2string(
+				RouterService.getAcceptor().getAddress(false));
+		
+		Mapping tcp = new Mapping("",
+				""+port,
+				localAddress,
+				""+port,
+				"TCP",
+				TCP_PREFIX + GUID_SUFFIX);
+		Mapping udp = new Mapping("",
+				""+port,
+				localAddress,
+				""+port,
+				"UDP",
+				UDP_PREFIX + GUID_SUFFIX);
+		
+		// add udp first in case it gets overwritten.
+		addMapping(udp);
+		addMapping(tcp);
+		
+		// check if all went well
+		Map m =getExistingMappings();
+		synchronized(this) {
+			_mappings = m;
+		}
+		
+		if (LOG.isDebugEnabled()) {
+			if (_mappings.containsKey(tcp._description))
+				LOG.debug("tcp mapping successful");
+			if (_mappings.containsKey(udp._description)) 
+				LOG.debug("udp mapping successful");
+			
+			LOG.debug("current mappings: "+_mappings);
+		}
+				
+	}
+	
+	private Map /*String description->Mapping */ getExistingMappings() 
+		throws NumberFormatException {
 		Map ret = new HashMap();
 		Action check;
 		synchronized(this){
@@ -209,9 +324,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 					l.getArgument("NewPortMappingDescription").getValue());
 			
 			ret.put(m._description,m);
-
+			
 		}
-		
 		return ret;
 	}
 	
@@ -220,6 +334,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * @return whether it worked or not
 	 */
 	private boolean addMapping(Mapping m) {
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("adding "+m);
+		
 		Action add;
 		synchronized(this) {
 			add = _service.getAction("AddPortMapping");
@@ -242,6 +360,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * @return whether it worked or not
 	 */
 	private boolean removeMapping(Mapping m) {
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("removing "+m);
+		
 		Action remove;
 		synchronized(this) {
 			remove = _service.getAction("DeletePortMapping");
@@ -277,29 +399,38 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	public void deviceRemoved(Device dev) {}
 	
 	private final class Mapping {
-		public final String _externalAddress, _externalPort;
-		public final String _internalAddress, _internalPort;
+		public final String _externalAddress;
+		public final int _externalPort;
+		public final String _internalAddress;
+		public final int _internalPort;
 		public final String _protocol,_description;
 		
 		public Mapping(String externalAddress,String externalPort,
 				String internalAddress, String internalPort,
-				String protocol, String description) {
+				String protocol, String description) throws NumberFormatException{
 			_externalAddress=externalAddress;
-			_externalPort=externalPort;
+			_externalPort=Integer.parseInt(externalPort);
 			_internalAddress=internalAddress;
-			_internalPort=internalPort;
+			_internalPort=Integer.parseInt(internalPort);
 			_protocol=protocol;
 			_description=description;
 		}
 		
+		public String toString() {
+			return _externalAddress+":"+_externalPort+"->"+_internalAddress+":"+_internalPort+
+				"@"+_protocol+" desc: "+_description;
+		}
+		
 	}
+	
 	public static void main(String[] args) throws Exception {
 		final UPnPManager cp = new UPnPManager();
 		Thread.sleep(4000);
 		LOG.debug("start");
 		LOG.debug("found "+cp.getNATAddress());
 		Map m = cp.getExistingMappings();
-		System.out.println(m);
+		for (Iterator iter = m.values().iterator();iter.hasNext();) 
+			cp.removeMapping((Mapping)iter.next());
 		synchronized(cp)  {
 			cp.wait();
 		}
