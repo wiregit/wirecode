@@ -698,7 +698,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If we don't have stable connections, wait until we do.
         if(!hasStableConnections()) {
             lastQuerySent = -1; // mark as wanting to requery.
-            setState(WAITING_FOR_CONNECTIONS);
+            setState(WAITING_FOR_CONNECTIONS, 750);
         } else {
             try {
                 if(manager.sendQuery(this, newRequery(numQueries))) {
@@ -940,12 +940,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * override this to be more or less specific.  Note that the requery will
      * not be sent if global limits are exceeded.<p>
      *
-     * The default implementation includes all non-trivial keywords found in all
-     * RemoteFileDesc's in this, i.e., the INTERSECTION of all file names.  A
-     * keyword is "non-trivial" if it is not a number of a common English
-     * article (e.g., "the"), a number (e.g., "2"), or the file extension.  The
-     * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
-     * of all hashes.
+     * The default implementation uses extractQueryString, which
+     * includes all non-trivial keywords found in the first RFD in allFiles.
+     * A keyword is "non-trivial" if it is not a number of a common English
+     * article (e.g., "the"), a number (e.g., "2"), or the file extension.
      *
      * Since there are no more AUTOMATIC requeries, subclasses are advised to
      * stop using createRequery(...).  All attempts to 'requery' the network is

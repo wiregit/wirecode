@@ -170,7 +170,7 @@ public class DownloadManager implements BandwidthTracker {
             
         _waitingPump = new Runnable() {
             public void run() {
-                synchronized(this) {
+                synchronized(DownloadManager.this) {
                     for(Iterator i = waiting.iterator(); i.hasNext(); ) {
                         ManagedDownloader md = (ManagedDownloader)i.next();
                         if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
