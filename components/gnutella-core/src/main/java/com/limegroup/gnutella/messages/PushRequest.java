@@ -78,7 +78,7 @@ public class PushRequest extends Message implements Serializable {
 			throw new IllegalArgumentException("invalid ip length: "+
 											   ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
-            throw new IllegalArgumentException("invalid ip");
+            throw new IllegalArgumentException("invalid ip "+NetworkUtils.ip2string(ip));
 		} else if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		}
