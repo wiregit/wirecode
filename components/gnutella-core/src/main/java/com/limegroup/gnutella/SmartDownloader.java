@@ -125,8 +125,8 @@ public class SmartDownloader extends HTTPDownloader {
 	 * in the tryHost method
 	 */
 	public void shutdown() {
-		super.shutdown();
 		_keepTrying = false;
+		super.shutdown();
 	}
 
 }
