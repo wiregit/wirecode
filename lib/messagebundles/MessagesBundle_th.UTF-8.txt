@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=ประเทศไทย
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Thai
+LOCALE_SCRIPT_NAME=ภาษาไทย
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

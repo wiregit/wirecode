@@ -1,6 +1,6 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 2.8.5
-# Specialization for: Serbian - Yugoslavia, Bosnia Herzegovina (Cyrillic)
+# Specialization for: Serbian - Serbia-Montenegro, Bosnia Herzegovina (Cyrillic)
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=sr
@@ -8,7 +8,9 @@ LOCALE_LANGUAGE_NAME=Српски
 LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=Југославија
 LOCALE_VARIANT_CODE=
-LOCALE_VARIANT_NAME=Cyrillic
+LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Cyrl
+LOCALE_SCRIPT_NAME=Cyrillic
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

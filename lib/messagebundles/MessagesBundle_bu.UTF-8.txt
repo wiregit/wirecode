@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=Myanmar
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Mymr
+LOCALE_SCRIPT_NAME=Myanmar
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

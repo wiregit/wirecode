@@ -9,7 +9,9 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=Türkiye, Kıbrıs
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
-#Edited with an editor environment supporting ISO-8859-9 or windows-1254 fonts.
+LOCALE_SCRIPT_CODE=Latn
+LOCALE_SCRIPT_NAME=Latin
+#Edited with an editor environment supporting ISO-8859-9 or windows-1254 fonts.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).

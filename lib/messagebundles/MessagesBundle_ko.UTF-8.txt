@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=대한민국
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=국제
+LOCALE_SCRIPT_CODE=Hang
+LOCALE_SCRIPT_NAME=Hangul
 #UTF-8 file edited with Notepad/Windows 2000, and a "Gulim" or "GulimChe" font.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

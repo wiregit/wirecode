@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=Ελλάδα, Κύπρος
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=Modern standard
+LOCALE_SCRIPT_CODE=Grek
+LOCALE_SCRIPT_NAME=Greek
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

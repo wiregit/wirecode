@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=中国
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=国际
+LOCALE_SCRIPT_CODE=Hani
+LOCALE_SCRIPT_NAME=Han
 # UTF-8 file created with Windows 2000/XP NotePad with the "SimSun" font.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

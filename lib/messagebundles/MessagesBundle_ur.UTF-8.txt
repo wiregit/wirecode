@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=پاکستان
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Arab
+LOCALE_SCRIPT_NAME=Arabic
 # File edited with Notepad on Windows XP/2000, "Microsoft Sans Serif" font
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

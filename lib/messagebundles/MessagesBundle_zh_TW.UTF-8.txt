@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=TW
 LOCALE_COUNTRY_NAME=中國台灣, 香港, 澳門
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=國際
+LOCALE_SCRIPT_CODE=Hani
+LOCALE_SCRIPT_NAME=Han
 # UTF-8 file created on Windows 2000/XP NotePad with Big5 "細明體" MingLiU font.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

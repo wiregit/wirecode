@@ -9,6 +9,8 @@ LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=مِصْر
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=دُوَلِيّ
+LOCALE_SCRIPT_CODE=Arab
+LOCALE_SCRIPT_NAME=Arabic
 # UTF-8 file edited with Notepad on Windows NT/2000/XP with "Courier New" font
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
