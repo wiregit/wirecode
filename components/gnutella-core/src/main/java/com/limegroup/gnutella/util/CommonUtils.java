@@ -75,6 +75,13 @@ public class CommonUtils {
 	}
 
 	/**
+	 * returns the user's current working directory.
+	 */
+	public static String getCurrentDirectory() {
+		return _props.getProperty("user.dir");
+	}
+
+	/**
 	 * returns whether or not the os is some version of Windows
 	 */
 	public static boolean isWindows() {
