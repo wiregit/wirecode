@@ -169,7 +169,7 @@ public class M4AMetaData extends AudioMetaData {
 		if (current==null)
 			setYear("");
 		else {
-			String year = new String(current);
+			String year = new String(current,8,current.length-8);
 			if (year.length()>4)
 				year = year.substring(0,4);
 			setYear(year);
