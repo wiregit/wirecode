@@ -47,7 +47,7 @@ public final class HTTPHeader {
         }            
         int i = header.indexOf(':');
         if (i<0)  {
-            throw new IOException("could not find colon");
+            throw new IOException("could not find colon in header: "+header);
         }
         
         NAME = header.substring(0, i);
