@@ -60,11 +60,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
 
+    /** The number of seconds to wait for results.  
+     */
+    private static final int REQUERY_WAIT_SECONDS = 90; 
     /** The amount of time to wait before requerying the network.  Should not be
      *  too small such that it hurts Gnutella.  Also the time to wait for
      *  replies from a query to return.
      */
-    private static final int REQUERY_TIMEOUT = 1 * 60 * 1000 ; // 1 minute
+    private static final int REQUERY_TIMEOUT = REQUERY_WAIT_SECONDS * 1000 ;
     /** The number of times to requery the network.
      */
     private static final int REQUERY_ATTEMPTS = 5;
@@ -183,7 +186,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //serialized object from disk.  This can't be done in the constructor or
         //initializer statements, as they're not executed.  Nor should it be
         //done in initialize, as that could cause problems in resume().
-        pushLock=new Object(); 
+        pushLock=new Object();
+        reqLock=new RequeryLock();
     }
 
     /** 
@@ -507,7 +511,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(REQUERYING_NETWORK);
                         manager.sendQuery(allFiles);
 
-                        setState(WAITING_FOR_RESULTS);
+                        setState(WAITING_FOR_RESULTS, REQUERY_TIMEOUT);
                         reqLock.lock();
                     }
                     else {
@@ -1067,10 +1071,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getRemainingStateTime() {
+        long remaining;
         switch (state) {
         case CONNECTING:
         case WAITING_FOR_RETRY:
-            long remaining=stateTime-System.currentTimeMillis();
+            remaining=stateTime-System.currentTimeMillis();
+            return (int)Math.max(remaining, 0)/1000;
+        case WAITING_FOR_RESULTS:
+            remaining=stateTime-System.currentTimeMillis();
             return (int)Math.max(remaining, 0)/1000;
         default:
             return Integer.MAX_VALUE;
