@@ -202,9 +202,13 @@ public class ConnectionManager {
          }
          
          //2. Check if it is a client connection, and decide whether to keep.
-         boolean isClientConnection = Boolean.getBoolean(
+         Properties headers = connection.getHeaders();
+         boolean isClientConnection = false;
+         if(headers != null){
+            isClientConnection = Boolean.getBoolean(
             connection.getHeaders().getProperty(
             ConnectionHandshakeHeaders.SUPERNODE, "False"));
+         }
             
          //set the flag in the connection, so that we can know from the 
          //connection itself whether the connection is to a shielded client
@@ -670,6 +674,8 @@ public class ConnectionManager {
     private void processConnectionHeaders(ManagedConnection connection){
         //get the connection headers
         Properties headers = connection.getHeaders();
+        //return if no headers to process
+        if(headers == null) return;
         
         //check for the addresses of other hosts
         String hostAddresses = 
