@@ -49,6 +49,7 @@ public class FileManager{
 
     }
 
+    /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
     public int getNumFiles() {return _numFiles;}
 
