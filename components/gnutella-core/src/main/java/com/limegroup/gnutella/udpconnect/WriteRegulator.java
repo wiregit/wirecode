@@ -1,9 +1,15 @@
 package com.limegroup.gnutella.udpconnect;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /** 
  *  Calculate and control the timing of data writing.
  */
 public class WriteRegulator {
+
+    private static final Log LOG =
+      LogFactory.getLog(WriteRegulator.class);
 
     private DataWindow _sendWindow;
     private int        _skipCount  = 0;
@@ -78,16 +84,18 @@ public class WriteRegulator {
         int   rto        = _sendWindow.getRTO();
         float rttvar     = _sendWindow.getRTTVar();
         float srtt       = _sendWindow.getSRTT();
-log(
-"sleepTime:"+sleepTime+
-" uS:"+usedSpots+
-" smoothRTT:"+smoothRTT+
-" realRTT:"+realRTT+
-" rtt:"+rtt+
-" RTO:"+rto+
-" RTTVar:"+rttvar+
-" srtt:"+srtt+
-" sL:"+_skipLimit);
+
+        if(LOG.isDebugEnabled())  
+            LOG.debug(
+              "sleepTime:"+sleepTime+
+              " uS:"+usedSpots+
+              " smoothRTT:"+smoothRTT+
+              " realRTT:"+realRTT+
+              " rtt:"+rtt+
+              " RTO:"+rto+
+              " RTTVar:"+rttvar+
+              " srtt:"+srtt+
+              " sL:"+_skipLimit);
 
         if ( _skipLimit < 1 )
             _skipLimit = 1;
@@ -127,12 +135,14 @@ log(
         if ( !_limitHit ) {
             if (_sendWindow.getWindowStart()%_sendWindow.getWindowSize() == 0) {
                 _skipLimit++;
-log("UPP sL:"+_skipLimit);
+            if(LOG.isDebugEnabled())  
+                LOG.debug("UPP sL:"+_skipLimit);
             }
         } else {
             _limitCount++;
             if (_limitCount >= _limitReset) {
-log("UPP reset:"+_skipLimit);
+                if(LOG.isDebugEnabled())  
+                    LOG.debug("UPP reset:"+_skipLimit);
                 _limitCount = 0;
                 _limitHit = false;
             }

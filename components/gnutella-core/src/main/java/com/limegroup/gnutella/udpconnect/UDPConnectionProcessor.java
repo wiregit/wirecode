@@ -6,10 +6,16 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.ErrorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /** 
  *  Manage a reliable udp connection for the transfer of data.
  */
 public class UDPConnectionProcessor {
+
+    private static final Log LOG =
+      LogFactory.getLog(UDPConnectionProcessor.class);
 
     /** Define the chunk size used for data bytes */
     public static final int   DATA_CHUNK_SIZE         = 512;
@@ -341,7 +347,7 @@ public class UDPConnectionProcessor {
 
             // Notify the scheduler that there is a new write event/time
             _scheduler.scheduleEvent(_writeDataEvent);
-log2("scheduleWriteDataEvent");
+            LOG.debug("scheduleWriteDataEvent");
         }
     }
 
@@ -371,7 +377,7 @@ log2("scheduleWriteDataEvent");
      */
     public void wakeupWriteEvent() {
         if ( _waitingForDataAvailable ) {
-log2("wakupWriteEvent");
+            LOG.debug("wakupWriteEvent");
             _waitingForDataAvailable = false;
             _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
             _scheduler.scheduleEvent(_safeWriteWakeup);
@@ -628,7 +634,9 @@ log2("wakupWriteEvent");
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
+        if(LOG.isDebugEnabled())  
+            LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
+              _lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  
 	}
 
@@ -681,8 +689,9 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 
             long start   = _sendWindow.getWindowStart();
 
-//log2("Soft resend data:"+ start+ " rto:"+rto+
-//" uS:"+_sendWindow.getUsedSpots());
+            if(LOG.isDebugEnabled())  
+              LOG.debug("Soft resend data:"+ start+ " rto:"+rto+
+                " uS:"+_sendWindow.getUsedSpots());
 
             // Scale back on the writing speed if you are hitting limits
             _writeRegulator.hitResendTimeout();
@@ -702,7 +711,9 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 
 				// If too many sends then abort connection
 				if ( drec.sends > MAX_SEND_TRIES+1 ) {
-log2("Tried too many send on:"+drec.msg.getSequenceNumber());
+                    if(LOG.isDebugEnabled())  
+                        LOG.debug("Tried too many send on:"+
+                          drec.msg.getSequenceNumber());
 					closeAndCleanup();
 					return;
 				}
@@ -711,7 +722,9 @@ log2("Tried too many send on:"+drec.msg.getSequenceNumber());
 
                 // If it looks like we waited too long then speculatively resend
                 if ( currentWait > adjRTO ) {
-log2("Soft resending message:"+drec.msg.getSequenceNumber());
+                    if(LOG.isDebugEnabled())  
+                        LOG.debug("Soft resending message:"+
+                          drec.msg.getSequenceNumber());
                     safeSend(drec.msg);
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
@@ -795,7 +808,8 @@ log2("Soft resending message:"+drec.msg.getSequenceNumber());
 
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
-log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
+        if(LOG.isDebugEnabled())  
+            LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.
@@ -856,7 +870,8 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
             long seqNo     = dmsg.getSequenceNumber();
             long baseSeqNo = _receiveWindow.getWindowStart();
             if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
-log2("Received block num too far ahead: "+ seqNo);
+                if(LOG.isDebugEnabled())  
+                    LOG.debug("Received block num too far ahead: "+ seqNo);
                return;
             }
 
@@ -871,7 +886,9 @@ log2("Received block num too far ahead: "+ seqNo);
 				if ( _outputToInputStream != null )
 					_outputToInputStream.wakeup();
             } else {
-log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
+                if(LOG.isDebugEnabled())  
+                    LOG.debug("Received duplicate block num: "+ 
+                      dmsg.getSequenceNumber());
             }
 
             // Ack the Data message
@@ -994,12 +1011,13 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
-log2("keepalive: "+ time);
+            if(LOG.isDebugEnabled())  
+                LOG.debug("keepalive: "+ time);
 
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-//log2("shutdown");
+//          LOG.debug("shutdown");
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
@@ -1009,7 +1027,6 @@ log2("keepalive: "+ time);
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
-log("sendKeepAlive");
                     sendKeepAlive();
                 } else {
                     return;
@@ -1019,7 +1036,8 @@ log("sendKeepAlive");
             // Reschedule keepalive timer
             _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
             _scheduler.scheduleEvent(this);
-log2("end keepalive: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("end keepalive: "+ System.currentTimeMillis());
         }
     }
     /** 
@@ -1031,7 +1049,8 @@ log2("end keepalive: "+ System.currentTimeMillis());
         }
 
         public void handleEvent() {
-log2("data timeout :"+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("data timeout :"+ System.currentTimeMillis());
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -1047,7 +1066,8 @@ log2("data timeout :"+ System.currentTimeMillis());
             if ( isConnected() ) {
                 writeData();
             }
-log2("end data timeout: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("end data timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1061,11 +1081,13 @@ log2("end data timeout: "+ System.currentTimeMillis());
         }
 
         public void handleEvent() {
-log2("ack timeout: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("ack timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 validateAckedData();
             }
-log2("end ack timeout: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("end ack timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1079,13 +1101,15 @@ log2("end ack timeout: "+ System.currentTimeMillis());
         }
 
         public void handleEvent() {
-log2("write wakeup timeout: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 writeDataActivation();
             }
             _eventTime = Long.MAX_VALUE;
             _scheduler.scheduleEvent(this);
-log2("write wakeup timeout: "+ System.currentTimeMillis());
+            if(LOG.isDebugEnabled())  
+                LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
         }
     }
     //
