@@ -1409,7 +1409,7 @@ public abstract class MessageRouter {
                                    ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = 
-		    RouterService.getHostCatcher().add(reply, handler);
+		    RouterService.getHostCatcher().add(reply);
 
         if(newAddress && 
            (handler.supportsPongCaching() || 
