@@ -189,9 +189,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  the Acceptor thread and the manager thread. */
     private Socket pushSocket;
 
-    /** For implementing the BandwidthTracker interface. */
-    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
-
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
       *  etc.   Should be modified only through setState. */
@@ -247,7 +244,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         initialize(manager, fileManager);
     }
 
-    /** See note on serialization at top of file */
+    /** 
+     * See note on serialization at top of file 
+     * <p>
+     * Note that we are serializing a new BandwidthImpl to the stream. 
+     * This is for compatibility reasons, so the new version of the code 
+     * will run with an older download.dat file.     
+     */
     private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
         stream.writeObject(allFiles);
@@ -256,16 +259,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-		stream.writeObject(bandwidthTracker);
+		stream.writeObject(new BandwidthTrackerImpl());
     }
 
     /** See note on serialization at top of file.  You must call initialize on
-     *  this!  */
+     *  this!  
+     * Also see note in writeObjects about why we are not using 
+     * BandwidthTrackerImpl after reading from the stream
+     */
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
-		bandwidthTracker=(BandwidthTrackerImpl)stream.readObject();
+		//BandwidthTrackerImpl which we are going to throw away
+        stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
         //serialized object from disk.  This can't be done in the constructor or
@@ -1096,11 +1103,23 @@ public class ManagedDownloader implements Downloader, Serializable {
             //constant.  getAmountRead() is not, so we "capture" it into a
             //variable.
             int amountRead=biggest.getAmountRead();
-            int left=biggest.getAmountToRead()-amountRead;;
+            int left=biggest.getAmountToRead()-amountRead;
             if (left < MIN_SPLIT_SIZE) { 
                 //If the overbandwidth is less than acceptable, then the last
                 //downloader is going too slow
-                if(getMeasuredBandwidth() < MIN_ACCEPTABLE_SPEED) {
+                float bandwidth = biggest.getMeasuredBandwidth();
+                while(bandwidth < 0) {
+                    //Note while we are waiting the downloader may have
+                    //finished and been removed from dloaders. Then it
+                    //will not be clicked and so its b/w will never increase
+                    if(!dloaders.contains(biggest))
+                       return;
+                    try{
+                        Thread.sleep(2000);
+                    }catch(InterruptedException ie) {}
+                    bandwidth = biggest.getMeasuredBandwidth();
+                }       
+                if(bandwidth < MIN_ACCEPTABLE_SPEED) {
                     //replace (bad boy) biggest if possible
                     int start=
                     biggest.getInitialReadingPoint()+amountRead;
@@ -1513,12 +1532,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retriesWaiting;
     }
 
-    public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getAmountRead());
+    public synchronized void measureBandwidth() {
+        Iterator iter = dloaders.iterator();
+        while(iter.hasNext()) {
+            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            dloader.measureBandwidth();
+        }
     }
     
-    public float getMeasuredBandwidth() {
-        return bandwidthTracker.getMeasuredBandwidth();
+    public synchronized float getMeasuredBandwidth() {
+        float retVal = 0f;
+        Iterator iter = dloaders.iterator();
+        while(iter.hasNext()) {
+            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            retVal += dloader.getMeasuredBandwidth();
+        }
+        return retVal;
     }
 
     /**

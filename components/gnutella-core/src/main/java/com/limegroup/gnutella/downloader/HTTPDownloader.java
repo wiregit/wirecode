@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * dl.doDownload();
  * </pre>
  */
-public class HTTPDownloader {
+public class HTTPDownloader implements BandwidthTracker {
     /** The length of the buffer used in downloading. */
     public static final int BUF_LENGTH=1024;
 
@@ -55,6 +55,9 @@ public class HTTPDownloader {
 	private String _host;
 	
 	private boolean _chatEnabled = false; // for now
+
+    /** For implementing the BandwidthTracker interface. */
+    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
     /**
      * Creates an uninitialized client-side normal download.  Call connect() on
@@ -474,9 +477,18 @@ public class HTTPDownloader {
     public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
     /** Returns true iff this is a push download. */
     public boolean isPush() {return _isPush;}
-	
 
-	////////////////////////////// Unit Test ////////////////////////////////////
+
+    /////////////////////Bandwidth tracker interface methods//////////////
+    public void measureBandwidth() {
+        bandwidthTracker.measureBandwidth(getAmountRead());
+    }
+
+    public float getMeasuredBandwidth() {
+        return bandwidthTracker.getMeasuredBandwidth();
+    }
+	
+	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {
         return "<"+_host+":"+_port+", "+getFileName()+">";
