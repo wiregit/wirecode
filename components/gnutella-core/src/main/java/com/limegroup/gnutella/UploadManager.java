@@ -7,6 +7,9 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.downloader.*; //for testing
+import com.limegroup.gnutella.tests.util.*; //for testing
+import com.limegroup.gnutella.tests.stubs.*; //for testing
 
 /**
  * The list of all the uploads in progress.
@@ -60,7 +63,7 @@ public class UploadManager implements BandwidthTracker {
 	 * uploadsPerPerson_ variable, then the upload is denied, 
 	 * and the used gets a Try Again Later message.
 	 */
-	private static Map /* String -> Integer */ _uploadsInProgress =
+	private Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
     /**
      * The number of uploads that are actually transferring data.
@@ -188,7 +191,7 @@ public class UploadManager implements BandwidthTracker {
         //try {
         // check if it complies with the restrictions.
         //and set the uploader state accordingly
-        insertAndTest(uploader, host);
+        boolean accepted=insertAndTest(uploader, host);
         
         //Note: We do not call connect() anymore. That's because connect would
         //never do anything in the case of a normal upload  - becasue the
@@ -196,7 +199,10 @@ public class UploadManager implements BandwidthTracker {
         // if a push was calling this method. 
         //Now the acceptPushDownload method connects directly.
         
-        synchronized(this) { _activeUploads++; }
+        synchronized(this) { 
+            if (accepted) 
+                _activeUploads++; 
+        }
 
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
@@ -220,7 +226,8 @@ public class UploadManager implements BandwidthTracker {
                                   uploader.amountUploaded());
             removeFromMapAndList(uploader, host);
             removeAttemptingPush(host, index);
-            _activeUploads--;
+            if (accepted)
+                _activeUploads--;
             _callback.removeUpload(uploader);		
         }
     }
@@ -335,19 +342,22 @@ public class UploadManager implements BandwidthTracker {
 	/////////////////// Private Interface for Testing Limits /////////////////
 
     /** Increments the count of uploads in progress for host.
-     *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
+     *  If uploader has exceeded its limits, places it in LIMIT_REACHED state
+     *  and returns false.  Otherwise returns true.
      *  Notifies callback of this.
      *      @modifies _uploadsInProgress, uploader, _callback */
-	private synchronized void insertAndTest(HTTPUploader uploader, 
-                                                                String host) {
+	private synchronized boolean insertAndTest(HTTPUploader uploader, 
+                                               String host) {
 		// add to the Map
 		insertIntoMapAndList(uploader, host);
 
 		if ( (! testPerHostLimit(host) ) ||
-			 ( ! testTotalUploadLimit() ) )
+			 ( ! testTotalUploadLimit() ) ) {
 			 uploader.setState(Uploader.LIMIT_REACHED);
-		
+             return false;
+		}
 		_callback.addUpload(uploader);		
+        return true;
 
 	}
 
@@ -699,29 +709,214 @@ public class UploadManager implements BandwidthTracker {
 	}
 
     /** Partial unit test. */
-    /*
-    public static void main(String args[]) {
-        UploadManager upman=new UploadManager();
-        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 2000000);  //20 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 3000000);  //30 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 4000000);  //40 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 5000000);  //50 kB/s == 400 kb/sec
-        Assert.that(upman.measuredUploadSpeed()==400);
-        upman.reportUploadSpeed(100000, 6000000);  //60 kB/s == 480 kb/sec
-        Assert.that(upman.measuredUploadSpeed()==480);
-        upman.reportUploadSpeed(1, 1000);          //too little data to count
-        Assert.that(upman.measuredUploadSpeed()==480);
-        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s = 80 kb/s
-        upman.reportUploadSpeed(100000, 1000000);  
-        upman.reportUploadSpeed(100000, 1000000);  
-        upman.reportUploadSpeed(100000, 1000000);  
-        upman.reportUploadSpeed(100000, 1000000);  
-        Assert.that(upman.measuredUploadSpeed()==80);
-    }
-    */
+//      public static void main(String args[]) {
+//          //Test measured upload speed code
+//          UploadManager upman=new UploadManager();
+//          testBandwidthTracker(upman);
+
+//          //Test limits
+//          FileManager fileMan=new FileManagerStub();
+//          FileDesc fd=fileMan.get(0);
+//          RemoteFileDesc rfd=new RemoteFileDesc(
+//              "x.x.x.x", 0, fd._index, fd._name, fd._size,
+//              new byte[16], 56, false, 3);
+
+//          upman=new UploadManager();
+//          upman.initialize(new com.limegroup.gnutella.Main(),
+//                           null,
+//                           null,
+//                           fileMan);
+//          testTotalUploadLimit(upman, rfd);
+
+//          upman=new UploadManager();
+//          upman.initialize(new com.limegroup.gnutella.Main(),
+//                           null,
+//                           null,
+//                           fileMan);
+//          testPerPersonUploadLimit(upman, rfd);
+
+//          upman=new UploadManager();
+//          upman.initialize(new com.limegroup.gnutella.Main(),
+//                           null,
+//                           null,
+//                           fileMan);
+//          testSoftUploadLimit(upman, rfd);
+//      }
+
+//      private static void testBandwidthTracker(UploadManager upman) {
+//          System.out.print("-Testing bandwidth tracker...");
+//          upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
+//          Assert.that(upman.measuredUploadSpeed()==-1);
+//          upman.reportUploadSpeed(100000, 2000000);  //20 kB/s
+//          Assert.that(upman.measuredUploadSpeed()==-1);
+//          upman.reportUploadSpeed(100000, 3000000);  //30 kB/s
+//          Assert.that(upman.measuredUploadSpeed()==-1);
+//          upman.reportUploadSpeed(100000, 4000000);  //40 kB/s
+//          Assert.that(upman.measuredUploadSpeed()==-1);
+//          upman.reportUploadSpeed(100000, 5000000);  //50 kB/s == 400 kb/sec
+//          Assert.that(upman.measuredUploadSpeed()==400);
+//          upman.reportUploadSpeed(100000, 6000000);  //60 kB/s == 480 kb/sec
+//          Assert.that(upman.measuredUploadSpeed()==480);
+//          upman.reportUploadSpeed(1, 1000);          //too little data to count
+//          Assert.that(upman.measuredUploadSpeed()==480);
+//          upman.reportUploadSpeed(100000, 1000000);  //10 kB/s = 80 kb/s
+//          upman.reportUploadSpeed(100000, 1000000);  
+//          upman.reportUploadSpeed(100000, 1000000);  
+//          upman.reportUploadSpeed(100000, 1000000);  
+//          upman.reportUploadSpeed(100000, 1000000);  
+//          Assert.that(upman.measuredUploadSpeed()==80);
+//          System.out.println("passed");
+//      }
+    
+//      private static void testTotalUploadLimit(UploadManager upman, 
+//                                               RemoteFileDesc rfd) {
+//          SettingsManager.instance().setMaxUploads(2);
+//          SettingsManager.instance().setSoftMaxUploads(99999);
+//          SettingsManager.instance().setUploadsPerPerson(99999);               
+        
+//          System.out.print("-Testing total upload limit...");
+//          try {
+//              //Add two downloaders
+//              HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.1", true);
+//              HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.2", true);
+//              //Third is denied
+//              try {
+//                  HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+//                  Assert.that(false, "Downloader denied");
+//              } catch (TryAgainLaterException e) {            
+//              }
+//              //But killing 1st allows third
+//              kill(d1);
+//              HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+//              //But not a fourth
+//              try {
+//                  HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.3", true);
+//                  Assert.that(false, "Downloader denied");
+//              } catch (TryAgainLaterException e) {            
+//              }
+//              System.out.println("passed");
+//          } catch (Throwable e) {
+//              System.out.println("FAILED!");
+//              e.printStackTrace();
+//          }
+//      }
+
+    
+//      private static void testPerPersonUploadLimit(UploadManager upman, 
+//                                                   RemoteFileDesc rfd) {
+//          SettingsManager.instance().setMaxUploads(99999);
+//          SettingsManager.instance().setSoftMaxUploads(99999);
+//          SettingsManager.instance().setUploadsPerPerson(2);               
+
+//          System.out.print("-Testing per person upload limit...");    
+//          try {
+//              //Add two downloaders
+//              HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.1", true);
+//              HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.1", true);
+//              //Third from same address is denied
+//              try {
+//                  //TODO: we have to disable blocking behavior below since
+//                  //TryAgainLater uploads ARE included in _uploadsInProgress.
+//                  //That's really a bug, but we can live with it.
+//                  HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.1", false);
+//                  Assert.that(false, "Downloader denied");
+//              } catch (TryAgainLaterException e) {            
+//              }
+//              //But allow another with different address in
+//              HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.2", true);
+//              //And killing d1 allows another from the first address
+//              kill(d1);
+//              HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.1", true);
+//              System.out.println("passed");
+//          } catch (Throwable e) {
+//              System.out.println("FAILED");
+//              e.printStackTrace();
+//          }
+//      }
+    
+//      private static void testSoftUploadLimit(UploadManager upman, 
+//                                                   RemoteFileDesc rfd) {
+//          SettingsManager.instance().setMaxUploads(99999);
+//          SettingsManager.instance().setSoftMaxUploads(2);
+//          SettingsManager.instance().setUploadsPerPerson(99999);               
+
+//          System.out.print("-Testing soft upload limit (incomplete)...");    
+//          //TODO: this doesn't test that the number of slots is increased
+//          //if all uploaders are fast.
+//          try {
+//              //Add two downloaders
+//              HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.1", true);
+//              HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.2", true);
+//              //Third is denied
+//              try {
+//                  HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+//                  Assert.that(false, "Downloader denied");
+//              } catch (TryAgainLaterException e) {            
+//              }
+//              //But killing 1st allows third
+//              kill(d1);
+//              HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+//              //But not a fourth
+//              try {
+//                  HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.3", true);
+//                  Assert.that(false, "Downloader denied");
+//              } catch (TryAgainLaterException e) {            
+//              }
+//              System.out.println("passed");
+//          } catch (Throwable e) {
+//              System.out.println("FAILED!");
+//              e.printStackTrace();
+//          }
+//      }
+
+    
+//      /** 
+//       * Adds a downloader to upman, returning the downloader.  The downloader
+//       * is connected but doesn't actually read the contents.
+//       *
+//       * @param upman the UploadManager responsible for accepting or denying
+//       *  the upload
+//       * @param rfd the file requested by the downloader
+//       * @param ip the address reported by the downloader.  This need
+//       *  not be a connectable address, though it must be resolvable
+//       * @param block if true, force the uploader to block after writing
+//       *  hundredth byte
+//       * @exception TryAgainLaterException the downloader was denied 
+//       *  because upman was busy
+//       * @exception IOException some other exception
+//       */     
+//      private static HTTPDownloader addUploader(final UploadManager upman, 
+//                                                RemoteFileDesc rfd,
+//                                                String ip,
+//                                                boolean block) 
+//              throws TryAgainLaterException, IOException {        
+//          //Allow some fudging to prevent race conditons.
+//          try { Thread.sleep(200); } catch (InterruptedException e) { }
+
+//          PipedSocketFactory psf=new PipedSocketFactory(
+//                  "127.0.0.1", ip, block ? 100 : -1, -1);
+//          final Socket sa=psf.getSocketA();
+//          Thread runner=new Thread() {
+//              public void run() {
+//                  upman.acceptUpload(sa);
+//              }
+//          };
+//          runner.setDaemon(true);
+//          runner.start();       
+
+//          Socket sb=psf.getSocketB();
+//          File tmp=File.createTempFile("UploadManager_Test", "dat");
+//          HTTPDownloader downloader=new HTTPDownloader(                                           sb, rfd, tmp, 0, rfd.getSize());
+//          try {
+//              downloader.connect(); //may throw TryAgainLater, etc.
+//              return downloader;
+//          } finally {
+//              tmp.delete();
+//          }
+//      }
+
+//      private static void kill(HTTPDownloader downloader) {
+//          downloader.stop();
+//          try { Thread.sleep(400); } catch (InterruptedException ignored) { }
+//      }
 }
