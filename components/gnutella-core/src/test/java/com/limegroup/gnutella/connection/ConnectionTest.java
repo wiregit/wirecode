@@ -8,6 +8,11 @@ import java.io.*;
 import java.util.Properties;
 import com.sun.java.util.collections.Arrays;
 
+/**
+ * Tests connection readng and writing.
+ * @see Connection
+ * @see ConnectionHandshakeTest
+ */
 public class ConnectionTest extends TestCase {
     public ConnectionTest(String name) {
         super(name);
@@ -15,208 +20,214 @@ public class ConnectionTest extends TestCase {
 
     public static Test suite() {
         return new TestSuite(ConnectionTest.class);
-        //TestSuite ret=new TestSuite();
-        //ret.addTest(new ConnectionTest("test0406"));
-        //return ret;                
     }
 
-    /////////////// Setup Code: non-standard for legacy reasons ///////////////
-  
-    private static class ConnectionPair {
-        Connection in;
-        Connection out;
-    }
+    final int PORT=6666;
+    Connection out;
+    Connection in;
+    TestConnectionListener inListener;
+    TestConnectionListener outListener;
 
-    private static ConnectionPair connect(HandshakeResponder inProperties,
-                                          Properties outProperties1,
-                                          HandshakeResponder outProperties2) {
-        ConnectionPair ret=new ConnectionPair();
-        MiniAcceptor acceptor=new MiniAcceptor(inProperties, 6666);
-        Thread.yield();
+    public void setUp() {
+        SettingsManager.instance().loadDefaults();
         try {
-            ret.out=new Connection("localhost", 6666,
-                                   outProperties1, outProperties2,
-                                   true);
-            ret.out.initialize(new ConnectionListenerStub());
-        } catch (IOException e) { }
-        ret.in=acceptor.accept();
-        if (ret.in==null || ret.out==null)
-            return null;
-        else
-            return ret;
-    }
+            inListener=new TestConnectionListener();
+            outListener=new TestConnectionListener();
 
-    private static void disconnect(ConnectionPair cp) {
-        if (cp.in!=null)
-            cp.in.close();
-        if (cp.out!=null)
-            cp.out.close();
-    } 
-
-    ///////////////////////////// Data for Tests ////////////////////////////
-
-    private final Properties props=new Properties(); {
-        props.setProperty("Query-Routing", "0.3");        
-    }
-    HandshakeResponder standardResponder=new HandshakeResponder() {
-        public HandshakeResponse respond(HandshakeResponse response,
-                                         boolean outgoing) {
-            return new HandshakeResponse(props);
-        }
-    };        
-
-    private final HandshakeResponder secretResponder=new HandshakeResponder() {
-        public HandshakeResponse respond(HandshakeResponse response,
-                                         boolean outgoing) {
-            Properties props2=new Properties();
-            props2.setProperty("Secret", "abcdefg");
-            return new HandshakeResponse(props2);
-        }
-    };
-    
-    private ConnectionPair p=null;
-
-    /////////////////////////// Actual Tests ///////////////////////////
-
-    public void testLessThan() {
-        assertTrue(! Connection.notLessThan06("CONNECT"));
-        assertTrue(! Connection.notLessThan06("CONNECT/0.4"));
-        assertTrue(! Connection.notLessThan06("CONNECT/0.599"));
-        assertTrue(! Connection.notLessThan06("CONNECT/XP"));
-        assertTrue(Connection.notLessThan06("CONNECT/0.6"));
-        assertTrue(Connection.notLessThan06("CONNECT/0.7"));
-        assertTrue(Connection.notLessThan06("GNUTELLA CONNECT/1.0"));
-    }
-
-    public void test0404() {
-        //1. 0.4 => 0.4
-        p=connect(null, null, null);
-        assertTrue(p!=null);
-        assertTrue(p.in.getProperty("Query-Routing")==null);
-        assertTrue(p.out.getProperty("Query-Routing")==null);
-        disconnect(p);
-    }
-
-    public void test0606() {
-        //2. 0.6 => 0.6
-        p=connect(standardResponder, props, secretResponder);
-        assertTrue(p!=null);
-        assertTrue(p.in.getProperty("Query-Routing").equals("0.3"));
-        assertTrue(p.out.getProperty("Query-Routing").equals("0.3"));
-        assertTrue(p.out.getProperty("Secret")==null);
-        assertTrue(p.in.getProperty("Secret").equals("abcdefg"));
-        disconnect(p);
-    }
-
-    public void test0406() {
-        //3. 0.4 => 0.6 (Incoming doesn't send properties)
-        p=connect(standardResponder, null, null);
-        assertTrue(p!=null);
-        assertTrue(p.in.getProperty("Query-Routing")==null);
-        assertTrue(p.out.getProperty("Query-Routing")==null);
-        disconnect(p);
-    }
-
-    public void test0604() {
-        //4. 0.6 => 0.4 (If the receiving connection were Gnutella 0.4, this
-        //wouldn't work.  But the new guy will automatically upgrade to 0.6.)
-        p=connect(null, props, standardResponder);
-        assertTrue(p!=null);
-        //assertTrue(p.in.getProperty("Query-Routing")==null);
-        assertTrue(p.out.getProperty("Query-Routing")==null);
-        disconnect(p);
-    }
-
-//      public void testReadFromClosed() {
-//          //TODO: get to work
-//          p=connect(null, null, null);
-//          assertTrue(p!=null);
-//          p.in.close();
-//          try {
-//              p.out.read();
-//              fail("No IOException; connection not closed?");
-//          } catch (BadPacketException failed) {
-//              fail("No IOException; connection not closed?");
-//          } catch (IOException pass) {
-//          }
-//      }
-
-//      public void testWriteToClosed() {
-//          //TODO: get to work
-//          p=connect(null, null, null);
-//          assertTrue(p!=null);
-//          p.in.close();
-//          try { Thread.sleep(2000); } catch (InterruptedException e) { }
-//          try {
-//              //You'd think that only one write is needed to get IOException.
-//              //That doesn't seem to be the case, and I'm not 100% sure why.  It
-//              //has something to do with TCP half-close state.  Anyway, this
-//              //slightly weaker test is good enough.
-//              p.out.write(new QueryRequest((byte)3, 0, "las"));
-//              p.out.write(new QueryRequest((byte)3, 0, "asdf"));
-//              fail("No IOException; connection not closed?");
-//          } catch (IOException pass) {
-//          }
-//      } 
-
-    public void testConnectWithNameTimeout() {
-        //TODO: can we get timeout in TCP phase too?
-        Connection c=new Connection("this-host-does-not-exist.limewire.com", 6346);
-        int TIMEOUT=1000;
-        long start=System.currentTimeMillis();
-        try {
-            c.initialize(new ConnectionListenerStub(), TIMEOUT);
-            assertTrue(false);
+            MiniAcceptor acceptor=new MiniAcceptor(inListener, null, PORT);
+            out=new Connection("127.0.0.1", PORT);
+            out.initialize(outListener);
+            in=acceptor.accept();
+            assertTrue("Couldn't accept connection", in!=null);
+            assertTrue(inListener.normal());
+            assertTrue(outListener.normal());
         } catch (IOException e) {
-            //Check that exception happened quickly.  Note fudge factor below.
-            long elapsed=System.currentTimeMillis()-start;  
-            assertTrue("Took too long to connect: "+elapsed, elapsed<(3*TIMEOUT)/2);
+            fail("Couldn't establish connection");
         }
-    }   
+    }
 
-//      /** Checks that we can send and receive messages along the connections. */
-//      private void checkSendReceive(ConnectionPair p) {
-//          //Send ping from OUT to IN.
-//          try {
-//              PingRequest ping=new PingRequest((byte)3);
-//              assertTrue("Couldn't queue", p.out.write(ping));
-//              assertTrue("Couldn't write in one try", p.write());
-//              sleep(100);           //wait in case of buffering
+    public void tearDown() {
+        out.close();
+        in.close();
+    }
 
-//              Message m=p.in.read();
-//              assertTrue("No message read", m!=null);
-//              assertTrue("Read wrong kind of message", m instanceof PingRequest);        
-//              assertTrue("Differing GUIDs", 
-//                         Arrays.equals(m.getGUID(), ping.getGUID()));
-//          } catch (BadPacketException e) {
-//              fail("Bad packet");
-//          } catch (IOException e) {
-//              fail("Connection closed");
-//          }
+    //////////////////////////////////////////////////////////////////////////
 
-//          //Send ping from IN to OUT.
-//          //wait in case of buffering
-//          try {
-//              QueryRequest query=new QueryRequest((byte)3, 0, "query");
-//              assertTrue("Couldn't queue", p.in.queue(query));
-//              assertTrue("Couldn't write in one try", p.in.write());
-//              sleep(100);
+    public void testWriteRead() {
+        //1. Write a ping, wait for it to be sent...
+        PingRequest ping=new PingRequest((byte)3);
+        out.write(ping);
+        assertTrue(outListener.normal());
+        sleep(200);
+        //   ...and read it.
+        assertTrue(inListener.message==null);
+        in.read();
+        assertTrue(inListener.normal());
+        assertTrue(inListener.message!=null);
+        assertTrue(inListener.message instanceof PingRequest);
+        assertTrue(Arrays.equals(inListener.message.getGUID(), ping.getGUID()));
+        inListener.message=null;
 
-//              Message m=p.out.read();
-//              assertTrue("No message read", m!=null);
-//              assertTrue("Read wrong kind of message", m instanceof QueryRequest);
-//              assertTrue("Differing GUIDs", 
-//                         Arrays.equals(m.getGUID(),query.getGUID()));
-//          } catch (BadPacketException e) {
-//              fail("Bad packet");
-//          } catch (IOException e) {
-//              fail("Connection closed");
-//          }
-//      }
+        //2. Write a query, wait for it to be sent...
+        QueryRequest query=new QueryRequest((byte)3, 0, "hello");
+        out.write(query);
+        sleep(200);
+        assertTrue(outListener.normal());
+        //   ...and read it.
+        assertTrue(inListener.message==null);
+        in.read();
+        assertTrue(inListener.normal());
+        assertTrue(inListener.message!=null);
+        assertTrue(inListener.message instanceof QueryRequest);
+        assertTrue(Arrays.equals(inListener.message.getGUID(), query.getGUID()));
+        assertEquals(query.getQuery(),
+                     (((QueryRequest)inListener.message).getQuery()));                
+    }
+    
+    public void testEmptyWrite() {
+        out.write();
+        in.read();
+        assertTrue(inListener.normal());
+        assertTrue(outListener.normal());
+    }
+
+    public void testLargeWrite() {
+        //Unfortunately this is OS-specific...
+        final int SIZE=100000;
+        SettingsManager.instance().setMaxLength(SIZE+1);
+
+        //Try to write huge message.  Nothing should go through initially.
+        PingRequest big=new PingRequest(GUID.makeGuid(), 
+                                        (byte)3, (byte)0,
+                                        new byte[SIZE]);
+        out.write(big);
+        assertTrue(outListener.needsWrite);
+        assertTrue(!outListener.closed);
+        assertTrue(outListener.error==null);        
+        out.write(new QueryRequest((byte)3, 0, "drop me"));//will NOT be written
+        in.read();
+        assertTrue(inListener.message==null);
+        assertTrue(inListener.normal());
+        outListener.needsWrite=false;
+
+        //Keep writing until message is sent or we timeout.
+        final int TIMEOUT=2000;    //2 secs
+        long start=System.currentTimeMillis();
+        while (true) {
+            long elapsed=System.currentTimeMillis()-start;
+            if (elapsed > TIMEOUT) {
+                fail("Couldn't send message in reasonable time");
+            }
+            if (! out.write())
+                break;
+        }
+        assertTrue(outListener.normal());
+        assertTrue("Still has queued data", !out.write());
+
+        //Read until message is done
+        start=System.currentTimeMillis();
+        while (true) {
+            long elapsed=System.currentTimeMillis()-start;
+            if (elapsed > TIMEOUT) {
+                fail("Couldn't read message in reasonable time");
+            }
+            in.read();
+            if (inListener.message!=null)
+                break;
+        }
+        assertTrue(outListener.normal());
+        assertTrue(inListener.normal());
+        assertTrue(inListener.message instanceof PingRequest);
+        assertTrue(inListener.message.getLength()==SIZE); 
+
+        //Make sure second message wasn't sent
+        inListener.message=null;
+        sleep(200);
+        in.read();
+        assertTrue(inListener.message==null);
+        assertTrue(inListener.normal());
+    }
+
+    public void testUnrecoverablyLargeMessage() {    
+        final int SIZE=100000;
+        //Write a huge message
+        PingRequest big=new PingRequest(GUID.makeGuid(), 
+                                        (byte)3, (byte)0,
+                                        new byte[SIZE]);
+        out.write(big);
+        while (out.write()) { }
+        
+        //Try to read it.   Get error
+        final int TIMEOUT=2000;
+        long start=System.currentTimeMillis();
+        while (true) {
+            long elapsed=System.currentTimeMillis()-start;
+            if (elapsed > TIMEOUT) {
+                fail("Couldn't read message in reasonable time");
+            }
+            in.read();
+            if (inListener.closed==true)
+                break;
+        }
+        assertTrue(inListener.closed);
+        assertTrue(inListener.message==null);        
+    }
+
+    public void testReadFromClosed() {
+        out.close();
+        sleep(200);                        //give time for FIN to be propogated
+        in.read();
+        assertTrue(inListener.closed);     //TODO: occasionally fails
+        assertTrue(! outListener.closed);  //should not generate ERROR event
+    }
+
+
+    public void testWriteToClosed() {
+        out.close();
+        in.write(new PingRequest((byte)3));//it takes TWO writes to get FIN
+        in.write(new PingRequest((byte)4));
+        in.write(new PingRequest((byte)5));
+        sleep(200);
+        assertTrue(inListener.closed);     //TODO: occasionally fails
+        assertTrue(! outListener.closed);  //should not generate ERROR event
+    }
 
     private void sleep(long msecs) {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException e) { }
+    }
+}
+
+
+class TestConnectionListener implements ConnectionListener {
+    boolean initialized=false;        
+    Message message;
+    BadPacketException error;
+    boolean needsWrite=false;
+    boolean closed=false;
+
+    public void initialized(Connection c) { 
+        initialized=true;
+    }
+
+    public void read(Connection c, Message m) { 
+        message=m;
+    }
+
+    public void read(Connection c, BadPacketException error) { 
+        this.error=error;
+    }
+
+    public void needsWrite(Connection c) { 
+        needsWrite=true;
+    }
+
+    public void error(Connection c) { 
+        this.closed=true;
+    }
+    
+    public boolean normal() {
+        return initialized && closed==false && needsWrite==false && error==null;
     }
 }
