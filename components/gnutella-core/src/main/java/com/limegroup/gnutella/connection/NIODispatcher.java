@@ -12,6 +12,7 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
@@ -76,6 +77,7 @@ public final class NIODispatcher implements Runnable {
 	 *    the network
 	 */
     public void addReader(Connection conn) {
+        System.out.println("NIODispatcher::addReader");
 		READERS.add(conn);
 		_selector.wakeup();
 	}
@@ -198,15 +200,17 @@ public final class NIODispatcher implements Runnable {
 						Message msg = MessageReader.createMessageFromTCP(key);
 						
 						if(msg == null) {
+                            System.out.println("NIODispatcher::read NULL message");
 							continue;
 						}
+                        System.out.println("NIODispatcher::read message: "+msg);
 						// TODO:: don't use RouterService
 						RouterService.getMessageRouter().handleMessage(msg, 
 							(ManagedConnection)key.attachment());
-					} catch (IOException e) {
-						// TODO record stats for this
 					} catch (BadPacketException e) {
-						// TODO record stats for this
+                        MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+					} catch (IOException e) {
+                        MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 					}
 				}
 			}
