@@ -799,8 +799,52 @@ public final class CommonUtils {
             return new File(location);
         }
         
-        return new File(resource.getFile());
+        //NOTE: The resource URL will contain %20 instead of spaces.
+        // This is by design, but will not work when trying to make a file.
+        // See BugParadeID: 4466485
+        //(http://developer.java.sun.com/developer/bugParade/bugs/4466485.html)
+        // The recommended workaround is to use the URI class, but that doesn't
+        // exist until Java 1.4.  So, we can't use it here.
+        // Thus, we manually have to parse out the %20s from the URL
+        return new File( decode(resource.getFile()) );
     }
+    
+    /**
+     * Copied from URLDecoder.java
+     */
+    public static String decode(String s) {
+        StringBuffer sb = new StringBuffer();
+        for(int i=0; i<s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '+':
+                    sb.append(' ');
+                    break;
+                case '%':
+                    try {
+                        sb.append((char)Integer.parseInt(
+                                        s.substring(i+1,i+3),16));
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException(s);
+                    }
+                    i += 2;
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+        // Undo conversion to external encoding
+        String result = sb.toString();
+        try {
+            byte[] inputBytes = result.getBytes("8859_1");
+            result = new String(inputBytes);
+        } catch (UnsupportedEncodingException e) {
+            // The system should always have 8859_1
+        }
+        return result;
+    }
+        
 
 	/**
 	 * Copies the specified resource file into the current directory from
