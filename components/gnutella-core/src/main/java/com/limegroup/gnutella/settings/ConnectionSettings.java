@@ -81,5 +81,10 @@ public final class ConnectionSettings extends AbstractSettings {
 	public static final BooleanSetting IGNORE_KEEP_ALIVE =
 		CFG_FACTORY.createBooleanSetting("IGNORE_KEEP_ALIVE", false);
 
+	/**
+	 * Setting for whether or not to show the keep alive in the UI.
+	 */
+	public static final BooleanSetting SHOW_KEEP_ALIVE =
+		CFG_FACTORY.createBooleanSetting("SHOW_KEEP_ALIVE", false);
 }
 
