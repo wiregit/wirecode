@@ -4,7 +4,8 @@ classes = Client.class Server.class \
     BadClient.class BadServer.class \
 	RoutingTester.class \
     AddressTest.class \
-    RecorderMessageRouter.class MessageSimulator.class TimeAndMessage.class
+    RecorderMessageRouter.class MessageSimulator.class TimeAndMessage.class \
+	ReceivesOnly.class SendsOnly.class
 
 all : $(classes)
 
