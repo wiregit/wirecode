@@ -32,6 +32,7 @@ public class ConnectionManager implements Runnable {
     private int port=0;
     private volatile ServerSocket socket=null;
     private Object socketLock=new Object();
+    private byte[] ip;
 
     /** Routing information.  ME_CONNECTION is a hack described in Connection. */
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
@@ -96,6 +97,15 @@ public class ConnectionManager implements Runnable {
 	else
 	    catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
 
+	try {
+	    ip=InetAddress.getLocalHost().getAddress();
+	} catch (Exception e) {
+	    //In case of UnknownHostException or SecurityException, we have
+	    //no choice but to use a fake address: all zeroes.
+	    ip=new byte[4];
+	}
+	    
+
 	this.port=port;
 	Thread t=new Thread(new MessageBroadcaster());
 	t.setDaemon(true);
@@ -114,6 +124,14 @@ public class ConnectionManager implements Runnable {
      */
     public int getListeningPort() {
 	return port;
+    }
+
+    /** Returns this' address to use for ping replies, query replies, and pushes. */
+    public byte[] getAddress() {
+	//TODO3: if FORCE_LOCAL_IP is true, then use that value instead.
+	//       (Alternative implementation: just set this.ip accordingly during
+	//        initialization.)
+	return ip;
     }
 
     /**
@@ -399,12 +417,12 @@ public class ConnectionManager implements Runnable {
 			}
 
 		    } 
-		    else if( word.equals("GET") || word.equals("PUT") ){
-			
-			System.out.println("handling an http...");
-
-			HTTPManager mgr = new HTTPManager(client, this);
-			
+		    //Incoming file transfer connection: normal HTTP and push.
+		    else if (word.equals("GET")) {
+			HTTPManager mgr = new HTTPManager(client, this, false);
+		    } 
+		    else if (word.equals("GIV")) {
+			HTTPManager mgr = new HTTPManager(client, this, true);
 		    }
 		    else {
 			throw new IOException();
@@ -413,7 +431,7 @@ public class ConnectionManager implements Runnable {
 		    //handshake failed: try to close connection.
 		    if ( c != null )
 		        failedToConnect(c);
-		    try { client.close(); } catch (IOException e2) { }
+		    try { client.close(); } catch (IOException e2) { }		    
 		    continue;
 		}
 	    } catch (IOException e) {

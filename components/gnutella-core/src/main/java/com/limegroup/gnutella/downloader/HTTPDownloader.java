@@ -50,10 +50,53 @@ public class HTTPDownloader implements Runnable {
     private int _finalAmount;
     private int _initialAmount;
 
+    /** 
+     * The list of all files we've requested via push messages.  Only
+     * files matching this description may be accepted from incoming
+     * connections.  Duplicates ARE allowed in the (rare) case that
+     * the user wants to download the same file multiple times.  This
+     * list is static because it must be shared by all
+     * HTTPDownloader's.  Note that it is synchronized.  
+     */
+    private static List /* of PushRequestedFile */ requested=
+	Collections.synchronizedList(new LinkedList());
+    /** The maximum time, in SECONDS, allowed between a push request and an
+     *  incoming push connection. */
+    private static final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
+    
 
-    /* The server side put */
-    public HTTPDownloader(Socket s, String file, ConnectionManager m) {
+    /* 
+     * Server side download in response to incoming PUT request.
+     * 
+     * @requires a GIV command was just read from s, e.g., 
+     *     "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt"
+     * @effects Creates a downloader that will download the specified file
+     *  in the background when the run method is called.   Throws
+     *  IllegalAccessException if we never requested the file.
+     */
+    public HTTPDownloader(Socket s, String file, int index, byte[] clientGUID,
+			  ConnectionManager m) throws IllegalAccessException {
+	//Authentication: check if we are requested via push.  First we clear
+	//out very old entries in requested.
+	Date time=new Date();
+	time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000)); 
+	synchronized (requested) {
+	    Iterator iter=requested.iterator();
+	    while (iter.hasNext()) {
+		PushRequestedFile prf=(PushRequestedFile)iter.next();
+		if (prf.before(time))
+		    iter.remove();
+	    }
+	}
 	
+	byte[] ip=s.getInetAddress().getAddress();
+	PushRequestedFile prf=new PushRequestedFile(clientGUID, file,
+						    ip, index);
+	boolean found=requested.remove(prf);
+	if (! found)
+	    throw new IllegalAccessException();
+
+	_guid=clientGUID;
 	_state = NOT_CONNECTED;
 	_okay = false;
 	_mode = 1;
@@ -64,8 +107,11 @@ public class HTTPDownloader implements Runnable {
 	_manager = m;
 	_callback = _manager.getCallback();
 	_downloadDir = "";
+	_index=index;
     }
 
+    /** Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"  
+     *  (Response will be read later in readHeader()). */
     public void initOne() {
 
 	try {
@@ -78,9 +124,24 @@ public class HTTPDownloader implements Runnable {
 	}
 
 	_state = CONNECTED;
-
-	_okay = true;
 	
+	//Note that the following code is similar to initTwo except that it does
+	//not use the built in Java URL/URLConnection classes (since we've already
+	//established the connection).  Ideally we should have special methods
+	//to handle the HTTP formatting, but this is kind of a hack.
+	try {
+	    BufferedWriter out=new BufferedWriter(
+				 new OutputStreamWriter(_socket.getOutputStream()));
+	    out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+	    out.write("User-Agent: Gnutella\r\n");
+	    out.write("\r\n");
+	    out.flush();
+	} catch (IOException e) {
+	    _state = ERROR;
+	    _okay = false;
+	    return;
+	}
+	_okay = true;
     }
       
 
@@ -121,32 +182,18 @@ public class HTTPDownloader implements Runnable {
 
 	    URL url = new URL(_protocol, _host, _port, furl);
 	    conn = url.openConnection();
+	    conn.connect();
+	    _istream = conn.getInputStream();
+	    _br = new ByteReader(_istream);
 	}
 	catch (java.net.MalformedURLException e) {
-	    sendPushRequest(_host, _index, _port, _guid);
+	    sendPushRequest();
 	    return;
 	}
 	catch (IOException e) {
-	    sendPushRequest(_host, _index, _port, _guid);
+	    sendPushRequest();
 	    return;
 	}
-	catch (Exception e) {
-	    _state = ERROR;
-	    return;
-	}
-  	try {
-	    _istream = conn.getInputStream();
-	    _br = new ByteReader(_istream);
-  	}
-	catch (NoRouteToHostException e) {
-	    _state = ERROR;
-	    return;
-	}
-  	catch (IOException e) {
-  	    sendPushRequest(_host, _index, _port, _guid);
-  	    return;
-
-  	}
 	catch (Exception e) {
 	    _state = ERROR;
 	    return;
@@ -161,35 +208,56 @@ public class HTTPDownloader implements Runnable {
 	return _state;
     }
 
-    public void sendPushRequest(String hostname, int index, 
-				int port, byte[] cguid) {
+    /** 
+     * @requires this is an outgoing (normal) HTTPDownloader
+     * @effects sends a push request for the file specified at
+     *  at construction time from host specified in the constructor.
+     */
+    public void sendPushRequest() {
+	final byte[] clientGUID=_guid;
 
-	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
-	String a = tokenizer.nextToken();
-	String b = tokenizer.nextToken();
-	String c = tokenizer.nextToken();
-	String d = tokenizer.nextToken();
+	//Record this push so incoming push connections can be verified.
+	Assert.that(clientGUID!=null);
+	Assert.that(_filename!=null);
+	byte[] remoteIP=null;
+	try {
+	    remoteIP=InetAddress.getByName(_host).getAddress();
+	} catch (UnknownHostException e) {
+	    //This shouldn't ever fail because _host should be
+	    //in dotted decimal fashion.  If it were to someone be
+	    //thrown legitimately, there would be no point in continuing
+	    //since we would never accept the corresponding incoming
+	    //push connection.
+	    _state = ERROR;
+	    return;
+	}
+	PushRequestedFile prf=new PushRequestedFile(clientGUID, _filename,
+						    remoteIP, _index);
+	requested.add(prf);
 	
-	int a1 = Integer.parseInt(a);
-	int b1 = Integer.parseInt(b);
-	int c1 = Integer.parseInt(c);
-	int d1 = Integer.parseInt(d);
-	byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
-
-	byte[] guid = GUID.fromHexString(_manager.ClientId);
-
-	// last 16 bytes of the query reply message...
-	byte[] clientGUID = cguid;
-
+	//TODO1: Should this be a new mGUID or the mGUID of the corresponding
+	//query and reply?  I claim it should be a totally new mGUID, since
+	//push requests are ONLY routed based on their cGUID.  This way, clients
+	//could record mGUID's of push requests to avoid routing duplicate
+	//push requests.  While there should never be duplicate pushes if people
+	//route push request, this is unfortunately NOT the case.
+	byte[] messageGUID = Message.makeGuid();
 	byte ttl = SettingsManager.instance().getTTL();
-
-	// am i passing the right guid's? 
-
-	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
-  					   index, ip, port);
+	byte[] myIP = _manager.getAddress();
+	int myPort=_manager.getListeningPort();
+	    
+	PushRequest push = new PushRequest(messageGUID, ttl, clientGUID, 
+  					   _index, myIP, myPort);
 	
 	try {
-	    _manager.sendToAll(push);
+	    //ROUTE the push to the appropriate connection, if possible.
+	    Connection c=_manager.pushRouteTable.get(clientGUID);
+	    if (c!=null)
+		c.send(push);
+	    else {
+		_state = ERROR;
+		return;
+	    }
 	}
 	catch (Exception e) {
 	    _state = ERROR;
@@ -363,16 +431,15 @@ public class HTTPDownloader implements Runnable {
 	while (!str.equals("")) {
 	    
 	    str = _br.readLine();
-	    //System.out.println(str);
 	    
 	    if (str.indexOf("Content-length:") != -1) {
-		    String sub;
-		    try {
-			sub=str.substring(15);
-		    } catch (ArrayIndexOutOfBoundsException e) {
+		String sub;
+		try {
+		    sub=str.substring(15);
+		} catch (IndexOutOfBoundsException e) {
 		    _state = ERROR;
 		    return;
-		    }
+		}
 		    
 		sub = sub.trim();
 		
@@ -453,4 +520,55 @@ public class HTTPDownloader implements Runnable {
 
 
 
+}
+
+/** A file that we requested via a push message. */
+class PushRequestedFile {
+    byte[] clientGUID;
+    String filename;
+    byte[] ip;
+    int index;
+    Date time;
+
+    public PushRequestedFile(byte[] clientGUID, String filename, 
+			     byte[] ip, int index) {
+	this.clientGUID=clientGUID;
+	this.filename=filename;
+	this.ip=ip;
+	this.index=index;
+	this.time=new Date();
+    }
+
+    /** Returns true if this request was made before the given time. */
+    public boolean before(Date time) {
+	return this.time.before(time);
+    }
+
+    public boolean equals(Object o) {
+	if (! (o instanceof PushRequestedFile))
+	    return false;
+
+	PushRequestedFile prf=(PushRequestedFile)o;
+	return Arrays.equals(clientGUID, prf.clientGUID)	    
+	    && filename.equals(prf.filename)
+	    //Because of the following line, hosts that used faked IP addresses
+	    //will not be able to connect to you.
+  	    && Arrays.equals(ip, prf.ip)
+	    && index==prf.index;
+    }
+    
+    public int hashCode() {
+	//This is good enough since we'll rarely request the 
+	//same file over and over.
+	return filename.hashCode();
+    }
+
+    public String toString() {
+	String ips=ByteOrder.ubyte2int(ip[0])+"."
+	         + ByteOrder.ubyte2int(ip[1])+"."
+	         + ByteOrder.ubyte2int(ip[2])+"."
+	         + ByteOrder.ubyte2int(ip[3]);
+	return "<"+filename+", "+index+", "
+	    +(new GUID(clientGUID).toString())+", "+ips+">";
+    }
 }
