@@ -8,10 +8,8 @@ import java.io.IOException;
  * A very simple responder to be used by client-nodes during the
  * connection handshake while accepting incoming connections
  */
-public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
-{
-    
-    private final ConnectionManager _manager;   
+public final class ClientHandshakeResponder 
+    extends AuthenticationHandshakeResponder {    
     
     /**
      * Creates a new instance of ClientHandshakeResponder
@@ -21,39 +19,49 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public ClientHandshakeResponder(String host)
-    {
+    public ClientHandshakeResponder(String host) {
         super(RouterService.getConnectionManager(), host);
-        this._manager = RouterService.getConnectionManager();
     }
     
     //inherit doc comment
     protected HandshakeResponse respondUnauthenticated(
-        HandshakeResponse response, boolean outgoing) throws IOException
-    {
-        if (outgoing)
-        {
-            //a) Outgoing: nothing more to say
-            return new HandshakeResponse(new Properties());
-        } else
-        {
-            Properties props=new ClientProperties(getRemoteIP());
-            addHostAddresses(props, _manager);
-            
-            if (_manager.isLeaf())
-            {
-                //b) Incoming, with supernode connection: reject (redirect)
-                return new HandshakeResponse(
-                HandshakeResponse.SHIELDED,
-                HandshakeResponse.SHIELDED_MESSAGE,
-                props);
-            } else
-            {
-                //c) Incoming, no supernode: accept...until I find one
-                return new HandshakeResponse(props);
-            }
+        HandshakeResponse response, boolean outgoing) throws IOException {
+        if (outgoing) return respondToOutgoing(response);
+        return respondToIncoming(response);
+    }
+
+
+    /**
+     * Responds to an outgoing connection handshake.
+     *
+     * @return the <tt>HandshakeResponse</tt> with the handshake 
+     *  headers to send in response to the connection attempt
+     */
+    private HandshakeResponse 
+        respondToOutgoing(HandshakeResponse response) {
+        // let the Ultrapeer know of any high-hops Ultrapeers
+        // we're aware of
+        return HandshakeResponse.createAcceptResponse(new Properties());
+    }
+
+    
+    /**
+     * Responds to an incoming connection handshake.
+     *
+     * @return the <tt>HandshakeResponse</tt> with the handshake 
+     *  headers to send in response to the connection attempt
+     */
+    private HandshakeResponse 
+        respondToIncoming(HandshakeResponse response) {
+        Properties props = new ClientProperties(getRemoteIP());
+        
+        if (RouterService.isLeaf()) {
+            //b) Incoming, with ultrapeer connection: reject (redirect)
+            return HandshakeResponse.createRejectResponse(props);
+        } else {
+            //c) Incoming, no ultrapeer: accept...until I find one
+            return HandshakeResponse.createAcceptResponse(props);
         }
     }
-    
 }
 
