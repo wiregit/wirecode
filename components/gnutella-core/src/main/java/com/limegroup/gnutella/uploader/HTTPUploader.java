@@ -740,7 +740,7 @@ public final class HTTPUploader implements Uploader {
 				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
         if(_alternateLocationCollection != null)
             HTTPUploader.parseAlternateLocations(
-                str, _alternateLocationCollection, _fileDesc);
+                str, _alternateLocationCollection);
 
         return true;
     }
@@ -835,8 +835,7 @@ public final class HTTPUploader implements Uploader {
 	 *  locations should be added to
 	 */
 	private static void parseAlternateLocations(final String altHeader,
-												final AlternateLocationCollector alc,
-												final FileDesc fd) {
+      final AlternateLocationCollector alc) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
