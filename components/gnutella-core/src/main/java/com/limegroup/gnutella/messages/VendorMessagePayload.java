@@ -91,7 +91,8 @@ public abstract class VendorMessagePayload {
     /**
      * Use this to get a NEW Gnutella-able VendorMessage from the class.
      */
-    public VendorMessage getVendorMessage() throws IllegalArgumentException {
+    public final VendorMessage getVendorMessage() 
+        throws IllegalArgumentException {
         return new VendorMessage(_vendorID, _selector, _version, 
                                  getPayload());
     }
