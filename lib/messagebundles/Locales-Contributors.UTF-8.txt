@@ -108,7 +108,7 @@ nl_BE   /België                               "Reinier Bergwerf"
 nl_NA   /Nederlands Antillas                  mail: tool AT lycos DOT nl
 nl_AW   /Aruba                                "Edwin van Ouwerkerk Moria"
                                               mail: edwin AT cadwal DOT org
-                                              "Jan Lageman"
+                                              "Jan Willem Lageman"
                                               mail: janlageman AT hotmail DOT com
 ------- ----------------------- ------------- -------------------------------
 nn      Norwegian (New)/Norway  Messages      New translator needed ?
