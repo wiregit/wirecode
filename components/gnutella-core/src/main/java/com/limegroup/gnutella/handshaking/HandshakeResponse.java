@@ -381,15 +381,17 @@ public final class HandshakeResponse {
         headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
         
 		// add any leaves
+        List leaves = 
+            RouterService.getConnectionManager().
+                getInitializedClientConnections();
 		headers.put(HeaderNames.LEAVES, 
-			createEndpointString(RouterService.
-                getConnectionManager().getInitializedClientConnections().
-                    iterator()));
+            createEndpointString(leaves.iterator(), leaves.size()));
 
 		// add any Ultrapeers
+        List ultrapeers = 
+            RouterService.getConnectionManager().getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
-			createEndpointString(RouterService.
-                getConnectionManager().getInitializedConnections().iterator()));
+			createEndpointString(ultrapeers.iterator(), ultrapeers.size()));
 			
 		return new HandshakeResponse(HandshakeResponse.OK,
 			HandshakeResponse.OK_MESSAGE, headers);        
@@ -455,18 +457,33 @@ public final class HandshakeResponse {
                                      HandshakeResponse.SHIELDED_MESSAGE);        
     }
 
+    /**
+     * Creates a new String of hosts, limiting the number of hosts to add to
+     * the default value of 10.  This is particularly used for the 
+     * X-Try-Ultrapeers header.
+     * 
+     * @param iter an <tt>Iterator</tt> of <tt>IpPort</tt> instances
+     * @return a string of the form IP:port,IP:port,... from the given list of 
+     *  hosts
+     */
+    private static String createEndpointString(Iterator iter) {
+        return createEndpointString(iter, 10);
+    }
+    
 	/**
-	 * Utility method that takes the specified list of <tt>Connection</tt>s 
-	 * and returns a string of the form:<p>
+	 * Utility method that takes the specified list of hosts and returns a
+	 * string of the form:<p>
 	 *
 	 * IP:port,IP:port,IP:port
 	 *
+     * @param iter an <tt>Iterator</tt> of <tt>IpPort</tt> instances
 	 * @return a string of the form IP:port,IP:port,... from the given list of 
-     *  connections
+     *  hosts
 	 */
-	private static String createEndpointString(Iterator iter) {
+	private static String createEndpointString(Iterator iter, int limit) {
 		StringBuffer sb = new StringBuffer();
-		while(iter.hasNext()) {
+        int i = 0;
+		while(iter.hasNext() && i<limit) {
             IpPort host = (IpPort)iter.next();
 			sb.append(host.getAddress());
 			sb.append(":");
@@ -474,6 +491,7 @@ public final class HandshakeResponse {
 			if(iter.hasNext()) {
 				sb.append(",");
 			}
+            i++;
 		}
 		return sb.toString();
 	}
