@@ -347,6 +347,38 @@ public final class CCLicenseTest extends BaseTestCase {
         assertFalse(l.isValid(null));
     }
     
+
+    
+    public void testMultipleLicenseElementsInWork() throws Exception {
+        URN goodUrn = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
+        
+	    License l = new StubLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
+	    "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    "<Work rdf:about=\"" + goodUrn + "\">" +
+	    "<license rdf:resource=\"http://deed1.com\" />" +
+	    "<license rdf:resource=\"http://creativecommons.org/licenses/mylicense\" />" +
+	    "<license rdf:resource=\"http://deed2.com\" />" +
+	    "</Work>" +
+        "<License rdf:about=\"http://deed1.com\">" +
+        "     <requires rdf:resource=\"http://web.resource.org/cc/Attribution\" />" +
+        "     <permits rdf:resource=\"http://web.resource.org/cc/Distribution\" />" +
+        "     <prohibits rdf:resource=\"http://web.resource.org/cc/Evil\" />" +
+        "  </License>" +
+        "<License rdf:about=\"http://creativecommons.org/licenses/mylicense\">" +
+        "     <requires rdf:resource=\"http://web.resource.org/cc/Peace\" />" +
+        "     <permits rdf:resource=\"http://web.resource.org/cc/Love\" />" +
+        "     <permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
+        "  </License>" +     
+	    "</rdf:RDF>");
+	    l.verify(null);
+	    assertTrue(l.isVerified());
+	    assertTrue(l.isValid(null));
+	    assertTrue(l.isValid(goodUrn));
+	    assertEquals("http://creativecommons.org/licenses/mylicense", l.getLicenseDeed(goodUrn).toExternalForm());
+        assertEquals("Permitted: Love, Happiness\n" +
+                     "Required: Peace", l.getLicenseDescription(goodUrn));
+    }        
+    
     public void testHTTPRetrieval() throws Exception {
         TestBootstrapServer server = new TestBootstrapServer(20181);
         URN good = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
