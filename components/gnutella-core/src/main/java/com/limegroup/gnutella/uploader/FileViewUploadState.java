@@ -13,6 +13,8 @@ import com.limegroup.gnutella.util.CommonUtils;
  * when the request is to get a file view.
  */
 public final class FileViewUploadState implements HTTPMessage {
+
+    public final static String BAD_PASS_REPLY = "Wrong Password!";
     
     private final HTTPUploader _uploader;
 
@@ -29,9 +31,8 @@ public final class FileViewUploadState implements HTTPMessage {
             FileListHTMLPage htmlGen = FileListHTMLPage.instance();
             BAOS.write(htmlGen.getSharedFilePage().getBytes());
         }
-        else {
-            BAOS.write("Wrong Password!".getBytes());
-        }
+        else
+            BAOS.write(BAD_PASS_REPLY.getBytes());
      
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
