@@ -323,4 +323,12 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
     public void resetPriority() {
         QUEUE.resetPriority();
     }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#setRegistered(boolean)
+     */
+    public void setRegistered(boolean b) {
+        // TODO Auto-generated method stub
+        
+    }
 }
