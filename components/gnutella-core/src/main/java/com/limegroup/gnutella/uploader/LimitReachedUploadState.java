@@ -61,7 +61,6 @@ public class LimitReachedUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
-		ostream.flush();
 	}
     
     /**

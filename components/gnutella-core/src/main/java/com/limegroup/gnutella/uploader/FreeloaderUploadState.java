@@ -43,7 +43,6 @@ public class FreeloaderUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream os) throws IOException {
 		os.write(RESPONSE_PAGE.getBytes());
-		os.flush();
 	}
 
     /**
