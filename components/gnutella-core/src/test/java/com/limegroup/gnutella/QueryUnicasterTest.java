@@ -89,7 +89,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // wait some seconds for thread to do work.  this is not scientific 
         // but should do the job...
         try {
-            Thread.sleep(5 * 1000);
+            Thread.sleep(10 * 1000);
         }
         catch (InterruptedException ignored) {}
         int numMessages = 0, numQRs = 0, numPings = 0, numQKReqs = 0;
@@ -188,7 +188,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // wait some seconds for thread to do work.  this is not scientific 
         // but should do the job...
         try {
-            Thread.sleep(3 * 1000);
+            Thread.sleep(10 * 1000);
             assertEquals("unexpected number of queries",
                 0, QueryUnicaster.instance().getQueryNumber() );
         }
