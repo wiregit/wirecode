@@ -104,7 +104,7 @@ public class UDPConnectionProcessor {
     private static final long SMALL_SEND_WINDOW       = 4;
 
     /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_WINDOW_MULTIPLE   = 3;
+    private static final long SMALL_WINDOW_MULTIPLE   = 6;
 
     /** Ensure that writing takes a break every 4 writes so other 
         synchronized activity can take place */
