@@ -27,7 +27,8 @@ public class RemoteFileDesc2 extends RemoteFileDesc {
               rfd.getQuality(),
               rfd.browseHostEnabled(),
 			  rfd.getXMLDoc(),
-			  rfd.getUrns());
+			  rfd.getUrns(),
+			  rfd.getUrl());
         this._isUnreachable=isUnreachable;
         this._timeStamp=System.currentTimeMillis();
     }
