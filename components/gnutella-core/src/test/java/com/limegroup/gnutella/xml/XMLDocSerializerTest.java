@@ -19,7 +19,12 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
         super(name);
     }
 
-    protected void setUp() {
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(XMLDocSerializerTest.class);
     }
 
     private void basicTest(File file) throws Exception  {
@@ -53,17 +58,6 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
      */
     public void testCurrent() throws Exception {
         basicTest(CommonUtils.getResourceFile(fileLocation + "audio.sxml"));
-    }
-
-
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
-    }
-
-    public static Test suite() {
-        TestSuite suite =  new TestSuite("XML Serialization Unit Test");
-        suite.addTest(new TestSuite(XMLDocSerializerTest.class));
-        return suite;
     }
 
 }
