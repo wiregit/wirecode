@@ -709,6 +709,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Starts the download.
      */
     public void startDownload() {
+        Assert.that(dloaderManagerThread == null, "already started" );
+        
         dloaderManagerThread = new ManagedThread(new Runnable() {
             public void run() {
                 try {
