@@ -636,12 +636,9 @@ public class HTTPUploader implements Uploader {
 	 */
 	private static void readAlternateLocations(final String altHeader,
 											   final AlternateLocationCollector alc) {
-		int colonIndex = altHeader.indexOf(":");
-		if(colonIndex == -1) {
-			return;
-		}
-		final String alternateLocations = 
-		    altHeader.substring(colonIndex+1).trim();
+		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+		// return if the alternate locations could not be properly extracted
+		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
 
 		while(st.hasMoreTokens()) {
@@ -649,7 +646,6 @@ public class HTTPUploader implements Uploader {
 				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
 				alc.addAlternateLocation(al);
 			} catch(IOException e) {
-				e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
