@@ -2363,6 +2363,9 @@ public abstract class MessageRouter {
 		        c.send((RouteTableMessage)iter.next());
     	    }
     	    
+            if(c.isBearShare())
+                System.out.println("Sent QRP with % full: " + table.getPercentFull());
+            
             c.setQueryRouteTableSent(table);
 		}
     }

@@ -11,6 +11,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.routing.RouteTableMessage;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -1009,7 +1010,7 @@ public class Connection {
             
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            if(isBearShare() && LOG.isTraceEnabled() && msg instanceof PingReply)
+            if(isBearShare() && LOG.isTraceEnabled() && msg instanceof RouteTableMessage)
                 System.out.println("Read: " + msg);
             
             // _bytesReceived must be set differently
@@ -1048,7 +1049,7 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
-        if(isBearShare() && LOG.isTraceEnabled() && m instanceof PingRequest)
+        if(isBearShare() && LOG.isTraceEnabled() && m instanceof RouteTableMessage)
             System.out.println("Sending: " + m);
         
         // in order to analyze the savings of compression,
