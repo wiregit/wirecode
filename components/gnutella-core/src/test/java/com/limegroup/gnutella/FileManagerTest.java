@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 
 import com.limegroup.gnutella.settings.*;
@@ -26,7 +26,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private FileManager fman = null;
     private Object loaded = new Object();
     private Response[] responses;
-    private File[] files;
+    private FileDesc[] files;
 
     public FileManagerTest(String name) {
         super(name);
@@ -59,13 +59,13 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testGetParentFile() throws Exception {
         f1 = createNewTestFile(1);
         assertEquals("getParentFile doesn't work",
-            new File(fman.getParentFile(f1).getCanonicalPath()),
+            new File(FileUtils.getParentFile(f1).getCanonicalPath()),
             new File(_sharedDir.getCanonicalPath()));
     }
     
     public void testGetSharedFilesWithNoShared() throws Exception {
-        File[] files=fman.getSharedFiles(_sharedDir);
-        assertNull("should not be sharing any files", files);
+        FileDesc[] sharedFiles =  fman.getSharedFileDescriptors(_sharedDir);
+        assertNull("should not be sharing any files", sharedFiles);
     }
     
     public void testOneSharedFile() throws Exception {
@@ -101,10 +101,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 				   
         assertEquals("first file should be f1", f1, fman.get(0).getFile());
         
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected length of shared files", 1, files.length);
-        assertEquals("files should be the same", files[0], f1);
-        files=fman.getSharedFiles(FileManager.getParentFile(_sharedDir));
+        assertEquals("files should be the same", files[0].getFile(), f1);
+        files=fman.getSharedFileDescriptors(FileUtils.getParentFile(_sharedDir));
         assertNull("file manager listed shared files in file's parent dir",
             files);
     }
@@ -128,10 +128,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("responses should be expected indexes", 
                 responses[i].getIndex()==0 || responses[i].getIndex()==1);
         }
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 2, files.length);
-        assertEquals("first shared file is not f1", files[0], f1);
-        assertEquals("second shared file is not f2", files[1], f2);
+        assertEquals("first shared file is not f1", files[0].getFile(), f1);
+        assertEquals("second shared file is not f2", files[1].getFile(), f2);
     }
     
     public void testRemovingOneSharedFile() throws Exception {
@@ -149,9 +149,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
-        assertEquals("files differ", files[0], f1);
+        assertEquals("files differ", files[0].getFile(), f1);
     }
     
     public void testAddAnotherSharedFileDifferentIndex() throws Exception {
@@ -187,14 +187,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         responses=fman.query(QueryRequest.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 2, files.length);
-        assertEquals("files differ", files[0], f1);
-        assertEquals("files differ", files[1], f3);
-        files=fman.getAllSharedFiles();
+        assertEquals("files differ", files[0].getFile(), f1);
+        assertEquals("files differ", files[1].getFile(), f3);
+        files=fman.getAllSharedFileDescriptors();
         assertEquals("unexpected files length", 2, files.length);
-        assertEquals("files differ", files[1], f1);
-        assertEquals("files differ", files[0], f3);
+        assertEquals("files differ", files[1].getFile(), f1);
+        assertEquals("files differ", files[0].getFile(), f3);
     }
     
     public void testRenameSharedFiles() throws Exception {
@@ -210,15 +210,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             !fman.renameFileIfShared(f2, f2));
         assertTrue("should have been able to rename shared file",
              fman.renameFileIfShared(f1, f2));
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 2, files.length);
-        assertEquals("files differ", files[0], f3);
-        assertEquals("files differ", files[1], f2);
+        assertEquals("files differ", files[0].getFile(), f3);
+        assertEquals("files differ", files[1].getFile(), f2);
         assertTrue("shouldn't have been able to rename shared file", 
             !fman.renameFileIfShared(f2, new File("C\\garbage.XSADF")));
-        files=fman.getSharedFiles(_sharedDir);
+        files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
-        assertEquals("files differ", files[0], f3);
+        assertEquals("files differ", files[0].getFile(), f3);
     }
     
     public void testIgnoreHugeFiles() throws Exception {
@@ -349,9 +349,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, fman.getNumIncompleteFiles());            
             
         QueryRequest qr = QueryRequest.createQuery(urn, "sambe");
-        Response[] responses = fman.query(qr);
-        assertNotNull(responses);
-        assertEquals("unexpected number of resp.", 0, responses.length);
+        Response[] hits = fman.query(qr);
+        assertNotNull(hits);
+        assertEquals("unexpected number of resp.", 0, hits.length);
     }
     
     /**
@@ -387,8 +387,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             0, fman.getNumPendingFiles());        
         
         // ensure it got shared.
-        files=fman.getSharedFiles(_sharedDir);
-        assertEquals( f3, files[0] );
+        files=fman.getSharedFileDescriptors(_sharedDir);
+        assertEquals( f3, files[0].getFile() );
         fd = fman.get(0);
         urn = fd.getSHA1Urn();
         urns = fd.getUrns();
@@ -434,9 +434,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			for(int j = 0; j < requestedUrnSets.length; j++) {
 				QueryRequest qr = QueryRequest.createQuery(
                                 requestedUrnSets[j], queryUrnSet);
-				Response[] responses = fman.query(qr);
-				assertEquals("there should only be one response", 1, responses.length);
-				assertEquals("responses should be equal", testResponse, responses[0]);		
+				Response[] hits = fman.query(qr);
+				assertEquals("there should only be one response", 1, hits.length);
+				assertEquals("responses should be equal", testResponse, hits[0]);		
 			}
 		}
 	}
@@ -454,14 +454,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
 			QueryRequest qr = QueryRequest.createQuery(fd.getName());
-			Response[] responses = fman.query(qr);
-			assertNotNull("didn't get a response for query " + qr, responses);
+			Response[] hits = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
-			if ( responses.length != 1 ) continue;
+			if ( hits.length != 1 ) continue;
 			checked = true;
-			assertEquals("responses should be equal", testResponse, responses[0]);
-			Set urnSet = responses[0].getUrns();
+			assertEquals("responses should be equal", testResponse, hits[0]);
+			Set urnSet = hits[0].getUrns();
 			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
 			// this is just a sanity check
 			assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);		
@@ -476,7 +476,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		assertTrue("could not find the gnutella directory",
 		    testDir.isDirectory());
 		
-        File[] files = testDir.listFiles(new FileFilter() { 
+        File[] testFiles = testDir.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 // use files with a $ because they'll generally
                 // trigger a single-response return, which is
@@ -484,17 +484,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
                 return !file.isDirectory() && file.getName().indexOf("$")!=-1;
             }
         });
-		assertNotNull("no files to test against", files);
-		assertNotEquals("no files to test against", 0, files.length);
+		assertNotNull("no files to test against", testFiles);
+		assertNotEquals("no files to test against", 0, testFiles.length);
 
         waitForLoad();
 
-   		for(int i=0; i<files.length; i++) {
-			if(!files[i].isFile()) continue;
+   		for(int i=0; i<testFiles.length; i++) {
+			if(!testFiles[i].isFile()) continue;
 			File shared = new File(
-			    _sharedDir, files[i].getName() + "." + EXTENSION);
+			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
 			assertTrue("unable to get file",
-			    CommonUtils.copy( files[i], shared));
+			    CommonUtils.copy( testFiles[i], shared));
             assertNotEquals(-1, fman.addFileIfShared(shared));
 		}
         
@@ -508,7 +508,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //                 fman.get(i).getFile().getName());
             
         assertEquals("unexpected number of shared files",
-            files.length, fman.getNumFiles() );
+            testFiles.length, fman.getNumFiles() );
     }	    
 
 
