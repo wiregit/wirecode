@@ -377,7 +377,7 @@ public class Response {
             while (iter.hasNext() && metaString.equals(""))
                 metaString = createXmlString(name, (String)iter.next());
 
-			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEPBlocks());
+			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
 
 			return new Response(index, size, name, metaString, 
 			                    urns, null, ggep, rawMeta);
@@ -904,63 +904,56 @@ public class Response {
          * Returns a <tt>Set</tt> of other endpoints described
          * in one of the GGEP arrays.
          */
-        static GGEPContainer getGGEP(Set ggeps) {
-            if (ggeps == null)
+        static GGEPContainer getGGEP(GGEP ggep) {
+            if (ggep == null)
                 return GGEPContainer.EMPTY;
+
             Set locations = null;
             long createTime = -1;
             final byte[] ip = new byte[4];
-            IPFilter ipFilter = IPFilter.instance();
-            Iterator iter = ggeps.iterator();
-            while (iter.hasNext()) {
-                GGEP currGGEP = (GGEP) iter.next();
-                // if the block has a ALTS value, get it, parse it,
-                // and move to the next.
-                if (currGGEP.hasKey(GGEP.GGEP_HEADER_ALTS)) {
-                    byte[] locBytes;
-                    try {
-                        locBytes = currGGEP.getBytes(GGEP.GGEP_HEADER_ALTS);
-                        // must be a multiple of 6
-                        if (locBytes.length % 6 != 0)
-                            continue;
-                    } catch (BadGGEPPropertyException bad) {
-                        //locBytes not set, key was added without value
-                        continue;
-                    }
-
-                    for (int j = 0; j < locBytes.length; j += 6) {
-                        int port = ByteOrder.ubytes2int(
-                                    ByteOrder.leb2short(locBytes, j+4)
-                                   );                                
-                        if (!NetworkUtils.isValidPort(port))
-                            continue;
-                        ip[0] = locBytes[j];
-                        ip[1] = locBytes[j + 1];
-                        ip[2] = locBytes[j + 2];
-                        ip[3] = locBytes[j + 3];
-                        if (!NetworkUtils.isValidAddress(ip) ||
-                            !ipFilter.allow(ip) ||
-                            NetworkUtils.isMe(ip, port))
-                            continue;
-                        if (locations == null)
-                            locations = new HashSet();
-                        locations.add(new Endpoint(ip, port));
-                    }
-                }
-                
-                if(currGGEP.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
-                    try {
-                        createTime =
-                            currGGEP.getLong(GGEP.GGEP_HEADER_CREATE_TIME) *
-                            1000;
-                    } catch(BadGGEPPropertyException bad) {
-                        continue;
-                    }
-                }
+            
+            // if the block has a ALTS value, get it, parse it,
+            // and move to the next.
+            if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
+                try {
+                    locations = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
+                } catch (BadGGEPPropertyException bad) {}
+            }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+                try {
+                    createTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
+                } catch(BadGGEPPropertyException bad) {}
             }
             
             return (locations == null && createTime == -1) ?
                 GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
+        }
+        
+        private static Set parseLocations(byte[] locBytes) {
+            Set locations = null;
+            IPFilter ipFilter = IPFilter.instance();
+ 
+            if (locBytes.length % 6 == 0) {
+                for (int j = 0; j < locBytes.length; j += 6) {
+                    int port = ByteOrder.ubytes2int(ByteOrder.leb2short(locBytes, j+4));
+                    if (!NetworkUtils.isValidPort(port))
+                        continue;
+                    byte[] ip = new byte[4];
+                    ip[0] = locBytes[j];
+                    ip[1] = locBytes[j + 1];
+                    ip[2] = locBytes[j + 2];
+                    ip[3] = locBytes[j + 3];
+                    if (!NetworkUtils.isValidAddress(ip) ||
+                        !ipFilter.allow(ip) ||
+                        NetworkUtils.isMe(ip, port))
+                        continue;
+                    if (locations == null)
+                        locations = new HashSet();
+                    locations.add(new Endpoint(ip, port));
+                }
+            }
+            return locations;
         }
     }
     

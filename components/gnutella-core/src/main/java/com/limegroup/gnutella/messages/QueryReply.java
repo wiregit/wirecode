@@ -83,19 +83,16 @@ public class QueryReply extends Message implements Serializable{
     private volatile int _uploadedFlag = UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
     private volatile int _measuredSpeedFlag = UNDEFINED;
-    /** If parsed, one of TRUE (client supports chat), FALSE, or UNDEFINED. */
-    private volatile int _supportsChat = UNDEFINED;
-     /** If parsed, one of TRUE (client supports browse host), 
-      * FALSE, or UNDEFINED. */
-    private volatile int _supportsBrowseHost = FALSE;
-     /** If parsed, one of TRUE (reply sent in response to a multicast query), 
-      * FALSE, or UNDEFINED. */
-    private volatile int _replyToMulticast = FALSE;
-    /** Boolean for whether or not the remote host supports Firewalled Transfer.
-     *  This does not follow the usual example where an int takes on TRUE,
-     *  FALSE, or UNDEFINED.  Assume it is false and set it to true if otherwise.
-     */
+
+    /** Determines if the remote host supports chat */
+    private volatile boolean _supportsChat = false;
+    /** Determines if the remote host supports browse host */
+    private volatile boolean _supportsBrowseHost = false;
+    /** Determines if this is a reply to a multicast query */
+    private volatile boolean _replyToMulticast = false;
+    /** Determines if the remote host supports FW transfers */
     private volatile boolean _supportsFWTransfer = false;
+    
     /** Version number of FW Transfer the host supports. */
     private volatile byte _fwTransferVersion = (byte)0;
 
@@ -377,10 +374,9 @@ public class QueryReply extends Message implements Serializable{
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
-        // you aren't going to send this.  it will throw an exception above in
-        // the appropriate constructor....
+
         if (xmlBytes.length > XML_MAX_SIZE)
-            return;  
+            throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
 
         final int n = responses.length;
 		if(!NetworkUtils.isValidPort(port)) {
@@ -713,25 +709,11 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** 
-     * Returns true iff the client supports chat.  Throws BadPacketException if
-     * the flag couldn't be extracted, either because it is missing or
-     * corrupted.  Typically this exception is treated the same way as returning
-     * false.  
+     * Returns true iff the client supports chat.
      */
-    public boolean getSupportsChat() throws BadPacketException {
+    public boolean getSupportsChat() {
         parseResults();
-
-        switch (_supportsChat) {
-        case UNDEFINED:
-            throw new BadPacketException();
-        case TRUE:
-            return true;
-        case FALSE:
-            return false;
-        default:
-            Assert.that(false, "Bad value for supportsChat: "+_supportsChat);
-            return false;
-        }
+        return _supportsChat;
     }
 
     /** @return true if the remote host can firewalled transfers.
@@ -750,28 +732,10 @@ public class QueryReply extends Message implements Serializable{
 
     /** 
      * Returns true iff the client supports browse host feature.
-     * @return true, if the client supports browse host feature,
-     * false otherwise
-     * @exception Throws BadPacketException if
-     * the flag couldn't be extracted, either because it is missing or
-     * corrupted.  Typically this exception is treated the same way as returning
-     * false. 
      */
-    public boolean getSupportsBrowseHost() throws BadPacketException {
+    public boolean getSupportsBrowseHost() {
         parseResults();
-
-        switch (_supportsBrowseHost) {
-        case UNDEFINED:
-            throw new BadPacketException();
-        case TRUE:
-            return true;
-        case FALSE:
-            return false;
-        default:
-            Assert.that(false, "Bad value for supportsBrowseHost: "
-                + _supportsBrowseHost);
-            return false;
-        }
+        return _supportsBrowseHost;
     }
     
     /** 
@@ -783,21 +747,9 @@ public class QueryReply extends Message implements Serializable{
      * corrupted.  Typically this exception is treated the same way as returning
      * false. 
      */
-    public boolean isReplyToMulticastQuery() throws BadPacketException {
+    public boolean isReplyToMulticastQuery() {
         parseResults();
-
-        switch (_replyToMulticast) {
-        case UNDEFINED:
-            throw new BadPacketException();
-        case TRUE:
-            return true;
-        case FALSE:
-            return false;
-        default:
-            Assert.that(false, "Bad value for replyToMulticast: "
-                + _replyToMulticast);
-            return false;
-        }
+        return _replyToMulticast;
     }
 
     /**
@@ -930,9 +882,9 @@ public class QueryReply extends Message implements Serializable{
             int busyFlagT=UNDEFINED;
             int uploadedFlagT=UNDEFINED;
             int measuredSpeedFlagT=UNDEFINED;
-            int supportsChatT=UNDEFINED;
-            int supportsBrowseHostT=UNDEFINED;
-            int replyToMulticastT=FALSE;
+            boolean supportsChatT=false;
+            boolean supportsBrowseHostT=false;
+            boolean replyToMulticastT=false;
             Set proxies=null;
             
             //a) extract vendor code
@@ -978,24 +930,18 @@ public class QueryReply extends Message implements Serializable{
                          (magicIndex < _payload.length);
                          magicIndex++)
                         ; // get the beginning of the GGEP stuff...
-                    GGEP[] ggepBlocks = null;
                     try {
                         // if there are GGEPs, see if Browse Host supported...
-                        // TODO: stop using GGEP.read(2) - move to GGEP.read(3)
-                        // or fix up GGEP.read(2)
-                        ggepBlocks = GGEP.read(_payload, magicIndex);
-                        if (_ggepUtil.allowsBrowseHost(ggepBlocks))
-                            supportsBrowseHostT = TRUE;
-                        _fwTransferVersion = 
-                            _ggepUtil.getFWTransferVersion(ggepBlocks);
-                        if (_fwTransferVersion > 0) _supportsFWTransfer = true;
-                        if (_ggepUtil.replyToMulticastQuery(ggepBlocks))
-                            replyToMulticastT = TRUE;
-                        else
-                            replyToMulticastT = FALSE;
-                        proxies = _ggepUtil.getPushProxies(ggepBlocks);
-                    }
-                    catch (BadGGEPBlockException ignored) {
+                        GGEP ggep = new GGEP(_payload, magicIndex, null);
+                        supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
+                        if(ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
+                            _fwTransferVersion = ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0];
+                            _supportsFWTransfer = _fwTransferVersion > 0;
+                        }
+                        replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                        proxies = _ggepUtil.getPushProxies(ggep);
+                    } catch (BadGGEPBlockException ignored) {
+                    } catch (BadGGEPPropertyException bgpe) {
                     }
                 }
                 i+=2; // increment used bytes appropriately...
@@ -1029,7 +975,7 @@ public class QueryReply extends Message implements Serializable{
             if (privateLength>0 && (vendorT.equals("LIME") ||
                                     vendorT.equals("RAZA"))) {
                 byte privateFlags = _payload[i];
-                supportsChatT = (privateFlags&CHAT_MASK)!=0 ? TRUE : FALSE;
+                supportsChatT = (privateFlags & CHAT_MASK) != 0;
             }
 
             if (i>_payload.length-16)
@@ -1116,12 +1062,7 @@ public class QueryReply extends Message implements Serializable{
 			busy = MAYBE;
 		}
 		
-		boolean isMCastReply;
-		try {
-		    isMCastReply = this.isReplyToMulticastQuery();
-		} catch(BadPacketException e) {
-		    isMCastReply = false;
-		}		       
+		boolean isMCastReply = this.isReplyToMulticastQuery();
 
         /* Is the remote host firewalled? */
 		int heFirewalled;
@@ -1141,21 +1082,13 @@ public class QueryReply extends Message implements Serializable{
 
         /* Push Proxy availability? */
         boolean hasPushProxies = false;
-        if ((this.getPushProxies() != null) && 
-            (this.getPushProxies().size() > 1))
+        if ((this.getPushProxies() != null) && (this.getPushProxies().size() > 1))
             hasPushProxies = true;
-        
-	boolean testingFwt = SearchSettings.FWT_ONLY.getValue();    
 
-        if (getSupportsFWTransfer() && 
-            UDPService.instance().canDoFWT()) {
+        if (getSupportsFWTransfer() && UDPService.instance().canDoFWT()) {
             iFirewalled = false;
             heFirewalled = NO;
-	    if (testingFwt)
-		return 3;
-        } 
-	else if (testingFwt)
-		return -1; 
+        }
 
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
@@ -1243,9 +1176,7 @@ public class QueryReply extends Message implements Serializable{
             try {
                 GGEP standard = new GGEP(false);
                 standard.write(oStream);
-            }
-            catch (IOException writeError) {
-            }
+            } catch (IOException writeError) {}
             _standardGGEP = oStream.toByteArray();
             
             // a GGEP block with JUST BHOST
@@ -1254,9 +1185,7 @@ public class QueryReply extends Message implements Serializable{
                 GGEP bhost = new GGEP(false);
                 bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
                 bhost.write(oStream);
-            }
-            catch (IOException writeError) {
-            }
+            } catch (IOException writeError) {}
             _bhGGEP = oStream.toByteArray();
             Assert.that(_bhGGEP != null);
 
@@ -1266,9 +1195,7 @@ public class QueryReply extends Message implements Serializable{
                 GGEP mcast = new GGEP(false);
                 mcast.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
                 mcast.write(oStream);
-            }
-            catch (IOException writeError) {
-            }
+            } catch (IOException writeError) {}
             _mcGGEP = oStream.toByteArray();
             Assert.that(_mcGGEP != null);
 
@@ -1279,9 +1206,7 @@ public class QueryReply extends Message implements Serializable{
                 combo.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
                 combo.put(GGEP.GGEP_HEADER_BROWSE_HOST);
                 combo.write(oStream);
-            }
-            catch (IOException writeError) {
-            }
+            } catch (IOException writeError) {}
             _comboGGEP = oStream.toByteArray();
             Assert.that(_comboGGEP != null);
         }
@@ -1354,73 +1279,6 @@ public class QueryReply extends Message implements Serializable{
                 retGGEPBlock = _mcGGEP;
             return retGGEPBlock;
         }
-
-
-        /** @return whether or not browse host support can be inferred from this
-         * block of GGEPs.
-         */
-        public boolean allowsBrowseHost(GGEP[] ggeps) {
-            boolean retBool = false;
-            for (int i = 0; 
-                 (ggeps != null) && (i < ggeps.length) && !retBool; 
-                 i++) {
-                Set headers = ggeps[i].getHeaders();
-                retBool = headers.contains(GGEP.GGEP_HEADER_BROWSE_HOST);
-            }
-            return retBool;
-        }
-
-        /** @return whether or not FW Transfer support can be inferred from this
-         *  block of GGEPs.
-         */
-        public boolean allowsFWTransfer(GGEP[] ggeps) {
-            boolean retBool = false;
-            for (int i = 0; 
-                 (ggeps != null) && (i < ggeps.length) && !retBool; 
-                 i++) {
-                Set headers = ggeps[i].getHeaders();
-                retBool = headers.contains(GGEP.GGEP_HEADER_FW_TRANS);
-            }
-            return retBool;
-        }
-
-        /** @return the version of FW Transfer supported by the host.  0
-         *  if no support, else 1 or greater.
-         */
-        public byte getFWTransferVersion(GGEP[] ggeps) {
-            byte retVersion = 0;
-            for (int i = 0; 
-                 (ggeps != null) && (i < ggeps.length); 
-                 i++) {
-                Set headers = ggeps[i].getHeaders();
-                if (headers.contains(GGEP.GGEP_HEADER_FW_TRANS)) {
-                    try {
-                    byte[] bytes = ggeps[i].getBytes(GGEP.GGEP_HEADER_FW_TRANS);
-                    if (bytes != null) {
-                        retVersion = bytes[0];
-                        break;
-                    }
-                    }
-                    catch (BadGGEPPropertyException ignored) {}
-                }
-            }
-            return retVersion;
-        }
-
-        /** @return whether or not it can be inferred that this reply is in
-            response to a multicast query.
-         */
-        public boolean replyToMulticastQuery(GGEP[] ggeps) {
-            boolean retBool = false;
-            for (int i = 0; 
-                 (ggeps != null) && (i < ggeps.length) && !retBool; 
-                 i++) {
-                Set headers = ggeps[i].getHeaders();
-                retBool = headers.contains(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-            }
-            return retBool;
-        }
-
         
         /** @return a <tt>Set</tt> of <tt>PushProxyContainer</tt> instances,
          *  which can be empty but is guaranteed not to be <tt>null</tt>, as 
@@ -1429,40 +1287,26 @@ public class QueryReply extends Message implements Serializable{
          * @param ggeps the array of GGEP extensions that may or may not
          *  contain push proxy data
          */
-        public Set getPushProxies(GGEP[] ggeps) {
-            Set proxies = new HashSet();
+        public Set getPushProxies(GGEP ggep) {
+            Set proxies = null;
             
-            for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
-                Set headers = ggeps[i].getHeaders();
-                // if the block has a PUSH_PROXY value, get it, parse it,
-                // and move to the next
-                if (headers.contains(GGEP.GGEP_HEADER_PUSH_PROXY)) {
-                    byte[] proxyBytes = null;
-                    try {
-                        proxyBytes = 
-                            ggeps[i].getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
-                    }
-                    catch (BadGGEPPropertyException bad) {
-                        // just ignore for now - we can't even get the vendor
-                        // since this is a static method, will figure out
-                        // something later
-                        // TODO: add meaningful logging
-                        continue;
-                    }
-
-                    ByteArrayInputStream bais = 
-                        new ByteArrayInputStream(proxyBytes);
+            if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
+                try {
+                    byte[] proxyBytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+                    ByteArrayInputStream bais = new ByteArrayInputStream(proxyBytes);
                     while (bais.available() > 0) {
                         byte[] combo = new byte[6];
-                        if (bais.read(combo, 0, combo.length) == 
-                            combo.length) {
+                        if (bais.read(combo, 0, combo.length) == combo.length) {
                             try {
+                                if(proxies == null)
+                                    proxies = new HashSet(3);
                                 proxies.add(new PushProxyContainer(combo));
                             } catch (BadPacketException malformedPair) {}
                         }                        
                     }
-                }
+                 } catch (BadGGEPPropertyException bad) {}
             }
+            
             return proxies;
         }
     }

@@ -222,6 +222,13 @@ public class GGEP {
         if ((endOffset != null) && (endOffset.length > 0))
             endOffset[0] = currIndex;
     }
+    
+    /**
+     * Merges the other's GGEP with this' GGEP.
+     */
+    public void merge(GGEP other) {
+        _props.putAll(other._props);
+    }   
 
     private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
         // the 4th bit in the header's first byte must be 0.
@@ -382,61 +389,6 @@ public class GGEP {
         int end = dataLen & 0x3F; // shut off everything except last 6 bits...
         toWrite = 0x40 | end;
         out.write(toWrite);
-    }
-
-    /**
-     * Constructs an array of all GGEP blocks starting at
-     *  messageBytes[beginOffset].
-     *  @param messageBytes The input bytes to attempt to read one or more GGEP
-     *  blocks from.
-     *  @param beginOffset The begin index of the (first) GGEP prefix.
-     *  @param endOffset If the reader wants to know where the last GGEP block
-     *     was read, fill this with a blank int[1] and the endOffset will
-     *     be placed here.  Otherwise, null is allowed.
-     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
-     *  correctly.
-     */
-    public static GGEP[] read(byte[] messageBytes,
-                              final int beginOffset,
-                              int[] endOffset) 
-        throws BadGGEPBlockException {
-
-        GGEP[] retGGEPs = null;
-        List ggeps = new ArrayList();
-        int currIndex[] = {beginOffset};
-
-        while ((messageBytes.length > currIndex[0]) && 
-               (messageBytes[currIndex[0]] == GGEP_PREFIX_MAGIC_NUMBER))
-            ggeps.add(new GGEP(messageBytes, currIndex[0], currIndex));
-        
-        if (ggeps.size() == 0)
-            throw new BadGGEPBlockException();
-        
-        Object[] array = ggeps.toArray();
-        retGGEPs = new GGEP[array.length];
-        for (int i = 0; i < array.length; i++)
-            retGGEPs[i] = (GGEP)array[i];
-
-        if( endOffset != null && endOffset.length > 0 )
-            endOffset[0] = currIndex[0];
-
-        return retGGEPs;
-    }
-    
-    /**
-     * Utility method for calling read(messageBytes, beginOffset, null).
-     * Constructs an array of all GGEP blocks starting at
-     *  messageBytes[beginOffset]. 
-     *  @param messageBytes The input bytes to attempt to read one or more GGEP
-     *  blocks from.
-     *  @param beginOffset The begin index of the (first) GGEP prefix.
-     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
-     *  correctly.
-     */
-    public static GGEP[] read(byte[] messageBytes,
-                              final int beginOffset)
-        throws BadGGEPBlockException {
-            return read(messageBytes, beginOffset, null);
     }
 
     ////////////////////////// Key/Value Mutators and Accessors ////////////////

@@ -124,16 +124,7 @@ public final class HostData {
 		} catch(BadPacketException e) {
 			firewalled = true;
 		}
-		try {
-			browseHostEnabled = reply.getSupportsBrowseHost();
-		} catch (BadPacketException e){ 
-			browseHostEnabled = false;
-		}                
-		try {
-			chatEnabled = reply.getSupportsChat() && !firewalled;			
-		} catch (BadPacketException e){ 
-			chatEnabled = false;
-		}                
+		
 		try { 
 			measuredSpeed = reply.getIsMeasuredSpeed();
 		} catch (BadPacketException e) { 
@@ -144,16 +135,16 @@ public final class HostData {
 		} catch (BadPacketException bad) {
 			busy = true;
 		}
-		try {
-		    multicast = reply.isReplyToMulticastQuery();
-		} catch(BadPacketException bad) {
-		    multicast = false;
-		}
+		
         
 		try {
             vendor = reply.getVendor();
 		} catch(BadPacketException bad) {
 		}
+
+    	browseHostEnabled = reply.getSupportsBrowseHost();
+		chatEnabled = reply.getSupportsChat() && !firewalled;
+		multicast = reply.isReplyToMulticastQuery();
 
 		FIREWALLED = firewalled && !multicast;
 		BUSY = busy;
