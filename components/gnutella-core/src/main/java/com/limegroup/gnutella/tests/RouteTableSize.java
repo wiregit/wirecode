@@ -17,7 +17,7 @@ public class RouteTableSize {
         //Make route table, fill with entries.
         int size=50000;
         ReplyHandler handler=new StubReplyHandler();
-        RouteTable rt=new RouteTable(size, false);
+        RouteTable rt=new RouteTable(60);
         for (int i=0; i<2*size; i++) {
             byte[] guid=GUID.makeGuid();
             rt.tryToRouteReply(guid, handler);

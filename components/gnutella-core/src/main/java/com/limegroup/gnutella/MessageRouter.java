@@ -47,21 +47,20 @@ public abstract class MessageRouter
     private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
     
     /**
-     * Maps PingRequest GUIDs to PingReplyHandlers
+     * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
+     * typically around 2500 entries.
      */
-    private RouteTable _pingRouteTable = new RouteTable(2048);
+    private RouteTable _pingRouteTable = new RouteTable(2*60);
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Allows for 4 minutes
-     * of query traffic at 100 queries/sec.
+     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
+     * typically around 13000 entries.
      */
-    private RouteTable _queryRouteTable = new RouteTable(24000);
+    private RouteTable _queryRouteTable = new RouteTable(5*60);
     /**
-     * Maps QueryReply client GUIDs to PushRequestHandlers
-     * Because client GUID's can be re-mapped to different connections, we
-     * must force RouteTable to used FixedsizeForgetfulHashMap instead of
-     * the lighter ForgetfulHashMap.
+     * Maps QueryReply client GUIDs to PushRequestHandlers.  
+     * Stores 7-14 minutes, typically around 3500 entries.
      */
-    private RouteTable _pushRouteTable = new RouteTable(2048, true);
+    private RouteTable _pushRouteTable = new RouteTable(7*60);
 
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.

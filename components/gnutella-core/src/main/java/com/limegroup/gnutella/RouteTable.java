@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.ForgetfulHashMap;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.sun.java.util.collections.*;
 
 /**
@@ -22,12 +20,12 @@ class RouteTable {
      * the entire table to clean all references (which wastes time AND removes
      * valuable information for preventing duplicate queries).
      *
-     * Instead we use a layer of indirection.  _map maps GUIDs to Integers,
-     * which act as IDs for each connection.  _idMap maps IDs to ReplyHandlers.
-     * _handlerMap maps ReplyHandler to IDs.  So to clean up a connection, we
-     * just purge the entries from _handlerMap and _idMap; there is no need to
-     * iterate through the entire GUID mapping.  Adding GUIDs and routing
-     * replies are still constant-time operations.
+     * Instead we use a layer of indirection.  _newMap/_oldMap maps GUIDs to
+     * Integers, which act as IDs for each connection.  _idMap maps IDs to
+     * ReplyHandlers.  _handlerMap maps ReplyHandler to IDs.  So to clean up a
+     * connection, we just purge the entries from _handlerMap and _idMap; there
+     * is no need to iterate through the entire GUID mapping.  Adding GUIDs and
+     * routing replies are still constant-time operations.
      *
      * IDs are allocated sequentially according with the nextID variable.  The
      * field does "wrap around" after reaching the maximum integer value.
@@ -35,46 +33,39 @@ class RouteTable {
      * _idMap--there is a very low probability that an ID in _map could be
      * prematurely reused.
      *
-     * To take care of FIFO replacement, _map is either a ForgetfulHashMap (pings
-     * and queries) or a FixedsizeForgetfulHashMap (pushes).  Note however these
-     * classes may not be fully implemented, so only some operations in _map can
-     * be used.
+     * To approximate FIFO behavior, we keep two sets around, _newMap and
+     * _oldMap.  Every few seconds, when the system time is greater than
+     * nextSwitch, we clear _oldMap and replace it with _newMap.
+     * (DuplicateFilter uses the same trick.)  In this way, we remember the last
+     * N to 2N minutes worth of GUIDs.  This is superior to a fixed size route
+     * table.
      *
+     * INVARIANT: keys of _newMap and _oldMap are disjoint
      * INVARIANT: _idMap and _replyMap are inverses
      *
-     * TODO3: I wish we could avoid creating new GUIDs everytime
-     * TODO3: I wish ForgetfulHashMap and FixedsizeForgetfulHashMap
-     *  implemented some common interface.  
      * TODO3: if IDs were stored in each ReplyHandler, we would not need
      *  _replyMap.  Better yet, if the values of _map were indices (with tags)
      *  into ConnectionManager._initialized[Client]Connections, we would not
      *  need _idMap either.  However, this increases dependenceies.  
      */
-    private Map /* GUID -> Integer */ _map;
+    private Map /* byte[] -> Integer */ _newMap=
+        new TreeMap(new GUID.GUIDByteComparator());
+    private Map /* byte[] -> Integer */ _oldMap=
+        new TreeMap(new GUID.GUIDByteComparator());
+    private int _mseconds;
+    private long _nextSwitchTime;
+
     private Map /* Integer -> ReplyHandler */ _idMap=new HashMap();
     private Map /* ReplyHandler -> Integer */ _handlerMap=new HashMap();
     private int _nextID;
 
     /**
-     * @requires size>0
-     * @effects same as RouteTable(size, false)
+     * Creates a new route table with enough space to hold the last 
+     * seconds to 2*seconds worth of data.
      */
-    public RouteTable(int size) {
-        this(size, false);
-    }
-
-    /**
-     * @requires size>0
-     * @effects Create a new RouteTable holds only the last "size" routing
-     *  entries.  If allowRemap==false, it is assumed that guid's will never
-     *  be remapped to different ReplyHandlers.
-     */
-    public RouteTable(int size, boolean allowRemap) {
-        if (allowRemap)
-            //More expensive, but has stronger ordering properties.
-            _map=new FixedsizeForgetfulHashMap(size);
-        else
-            _map=new ForgetfulHashMap(size);
+    public RouteTable(int seconds) {
+        this._mseconds=seconds*1000;
+        this._nextSwitchTime=System.currentTimeMillis()+_mseconds;
     }
 
     /**
@@ -83,19 +74,20 @@ class RouteTable {
      * @requires guid and c are non-null, guid.length==16
      * @modifies this
      * @effects if replyHandler is open, adds the routing entry to this,
-     *  replacing any routing entries for guid.  Otherwise returns
-     *  without modifying this.
+     *  replacing any routing entries for guid.  This has effect of 
+     *  "renewing" guid.  Otherwise returns without modifying this.
      */
     public synchronized void routeReply(byte[] guid,
                                         ReplyHandler replyHandler) {
-        //repOk();
+        repOk();
+        purge();
         Assert.that(replyHandler != null);
         if (! replyHandler.isOpen())
             return;
 
-        GUID g=new GUID(guid);
         Integer id=handler2id(replyHandler);
-        _map.put(g, id);
+        _oldMap.remove(guid);   //renews keys
+        _newMap.put(guid, id);
     }
 
     /**
@@ -110,17 +102,17 @@ class RouteTable {
      */
     public synchronized boolean tryToRouteReply(byte[] guid,
                                                 ReplyHandler replyHandler) {
-        //repOk();
+        repOk();
+        purge();
         Assert.that(replyHandler != null);
         Assert.that(guid!=null, "Null GUID in tryToRouteReply");
 
         if (! replyHandler.isOpen())
             return false;
 
-        GUID g=new GUID(guid);
-        if(!_map.containsKey(g)) {
+        if(!_newMap.containsKey(guid) && !_oldMap.containsKey(guid)) {
             Integer id=handler2id(replyHandler);
-            _map.put(g, id);
+            _newMap.put(guid, id);
             return true;
         } else {
             return false;
@@ -135,13 +127,16 @@ class RouteTable {
      *  Returns null if no mapping for guid, or guid maps to null (i.e., 
      *  to a removed ReplyHandler.
      */
-    public synchronized ReplyHandler getReplyHandler(byte[] guid) {
-        //repOk();
-        Integer id=(Integer)_map.get(new GUID(guid));
+    public synchronized ReplyHandler getReplyHandler(byte[] guid) {        
+        //no purge
+        repOk();
+
+        //Look up guid in _newMap. If not there, check _oldMap. 
+        Integer id=(Integer)_newMap.get(guid);
         if (id==null)
-            return null;
-        else
-            return id2handler(id);  //may be null
+            id=(Integer)_oldMap.get(guid);
+
+        return (id==null) ? null : id2handler(id);  //may be null
     }
 
     /**
@@ -153,10 +148,12 @@ class RouteTable {
      *  runs in constant time. [sic]
      */
     public synchronized void removeReplyHandler(ReplyHandler replyHandler) {        
-        //repOk();
+        //no purge
+        repOk();
         //The aggressive asserts below are to make sure bug X75 has been fixed.
         Assert.that(replyHandler!=null,
                     "Null replyHandler in removeReplyHandler");
+
         //Note that _map is not modified.  See overview of class for rationale.
         Integer id=handler2id(replyHandler);
         if (id!=null) {
@@ -200,16 +197,44 @@ class RouteTable {
         return (ReplyHandler)_idMap.get(id);
     }
 
+    /**
+     * Purges old entries.
+     *
+     * @modifies _nextSwitchTime, _newMap, _oldMap
+     * @effects if the system time is less than _nextSwitchTime, returns
+     *  false.  Otherwise, clears _oldMap and swaps _oldMap and _newMap,
+     *  updates _nextSwitchTime, and returns true.
+     */
+    private final boolean purge() {
+        long now=System.currentTimeMillis();
+        if (now<_nextSwitchTime) 
+            //not enough time has elapsed
+            return false;
+
+        //System.out.println(now+" "+this.hashCode()+" purging "
+        //                   +_oldMap.size()+" old, "
+        //                   +_newMap.size()+" new");
+        _oldMap.clear();
+        Map tmp=_oldMap;
+        _oldMap=_newMap;
+        _newMap=tmp;
+        _nextSwitchTime=now+_mseconds;
+        return true;
+    }
+
     public synchronized String toString() {
-        //IMPORTANT: because_map.values() may not be defined (see note above),
-        //we can only use _map.keySet().iterator()
+        //Inefficient, but this is only for debugging anyway.
         StringBuffer buf=new StringBuffer("{");
-        Iterator iter=_map.keySet().iterator();
+        Map bothMaps=new TreeMap(new GUID.GUIDByteComparator());
+        bothMaps.putAll(_oldMap);
+        bothMaps.putAll(_newMap);
+
+        Iterator iter=bothMaps.keySet().iterator();
         while (iter.hasNext()) {
-            Object key=iter.next();
-            buf.append(key); // GUID
+            byte[] key=(byte[])iter.next();
+            buf.append(new GUID(key)); // GUID
             buf.append("->");
-            Integer id=(Integer)_map.get(key);
+            Integer id=(Integer)bothMaps.get(key);
             ReplyHandler handler=id2handler(id);
             buf.append(handler==null ? "null" : handler.toString());//connection
             if (iter.hasNext())
@@ -219,8 +244,8 @@ class RouteTable {
         return buf.toString();
     }
 
-//      /** Tests internal consistency.  VERY slow. */
-//      private void repOk() {
+    /** Tests internal consistency.  VERY slow. */
+    private final void repOk() {
 //          //Check that _idMap is inverse of _handlerMap...
 //          for (Iterator iter=_idMap.keySet().iterator(); iter.hasNext(); ) {
 //              Integer key=(Integer)iter.next();
@@ -233,7 +258,19 @@ class RouteTable {
 //              Integer value=(Integer)_handlerMap.get(key);
 //              Assert.that(_idMap.get(value)==key);
 //          }
-//      }
+
+//          //Check that keys of _newMap aren't in _oldMap
+//          for (Iterator iter=_newMap.keySet().iterator(); iter.hasNext(); ) {
+//              byte[] guid=(byte[])iter.next();
+//              Assert.that(! _oldMap.containsKey(guid));
+//          }
+
+//          //Check that keys of _oldMap aren't in _newMap
+//          for (Iterator iter=_oldMap.keySet().iterator(); iter.hasNext(); ) {
+//              byte[] guid=(byte[])iter.next();
+//              Assert.that(! _newMap.containsKey(guid));
+//          }
+    }
 
     /** Unit test */
     /*
@@ -248,40 +285,42 @@ class RouteTable {
         ReplyHandler c3=new StubReplyHandler();
         ReplyHandler c4=new StubReplyHandler();
 
-        //1. Test FIFO ability
-        rt=new RouteTable(3);
+        //1. Test replacement policy (glass box).
+        int MSECS=1000;
+        rt=new RouteTable(MSECS/1000);
         rt.routeReply(g1, c1);
-        rt.routeReply(g2, c2);
-        rt.routeReply(g3, c3);
+        rt.routeReply(g2, c2);                    //old, new:
+        rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
         Assert.that(rt.getReplyHandler(g1)==c1);
         Assert.that(rt.getReplyHandler(g2)==c2);
         Assert.that(rt.getReplyHandler(g3)==c3);
-        rt.routeReply(g4, c4);
-        Assert.that(rt.getReplyHandler(g1)==null);
+        Assert.that(rt.getReplyHandler(g4)==null);
+        try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
+        Assert.that(rt.tryToRouteReply(g4, c4));  //{g1, g2, g3}, {g4}
+        Assert.that(rt.getReplyHandler(g1)==c1);
+        rt.routeReply(g1, c1);                    //{g2, g3}, {g1, g4}
+        Assert.that(rt.getReplyHandler(g1)==c1);
         Assert.that(rt.getReplyHandler(g2)==c2);
         Assert.that(rt.getReplyHandler(g3)==c3);
         Assert.that(rt.getReplyHandler(g4)==c4);
-        rt.routeReply(g1, c1);
+        try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
+        rt.routeReply(g2, c3);                     //{g1, g4}, {g2}
+        System.out.println(rt.toString());
         Assert.that(rt.getReplyHandler(g1)==c1);
-        Assert.that(rt.getReplyHandler(g2)==null);
-        Assert.that(rt.getReplyHandler(g3)==c3);
+        Assert.that(rt.getReplyHandler(g2)==c3);
+        Assert.that(rt.getReplyHandler(g3)==null);
         Assert.that(rt.getReplyHandler(g4)==c4);
-
-        rt=new RouteTable(1);
-        rt.routeReply(g1, c1);
-        Assert.that(rt.getReplyHandler(g1)==c1);
-        rt.routeReply(g2, c2);
+        try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
+        Assert.that(! rt.tryToRouteReply(g2, c2));  //{g2}, {}}
+        Assert.that(rt.getReplyHandler(g1)==null);
+        Assert.that(rt.getReplyHandler(g2)==c3);
+        Assert.that(rt.getReplyHandler(g3)==null);
+        Assert.that(rt.getReplyHandler(g4)==null);
+        rt.routeReply(g2, c2);                      //{}, {g2}
         Assert.that(rt.getReplyHandler(g1)==null);
         Assert.that(rt.getReplyHandler(g2)==c2);
-        rt.routeReply(g3, c3);
-        Assert.that(rt.getReplyHandler(g1)==null);
-        Assert.that(rt.getReplyHandler(g2)==null);
-        Assert.that(rt.getReplyHandler(g3)==c3);
-
-        rt=new RouteTable(2);
-        rt.routeReply(g1,c1);
-        rt.removeReplyHandler(c1);
-        Assert.that(rt.getReplyHandler(g1)==null);
+        Assert.that(rt.getReplyHandler(g3)==null);
+        Assert.that(rt.getReplyHandler(g4)==null);
 
         //2. Test routing/re-routing abilities...with glass box tests.
         rt=new RouteTable(1000);
