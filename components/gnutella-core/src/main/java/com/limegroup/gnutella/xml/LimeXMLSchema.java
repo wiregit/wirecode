@@ -31,7 +31,8 @@ public class LimeXMLSchema
      * List<String> of fields (in canonicalized form to preserve the structural
      * information)
      */
-    private List /* of String */ _canonicalizedFields = new LinkedList();
+    private List /* of SchemaFieldInfo */ _canonicalizedFields 
+        = new LinkedList();
     
     /**
      * The URI for this schema
@@ -184,7 +185,7 @@ public class LimeXMLSchema
     }
     
     /**
-     * Returns all the field names (placeholders) in this schema.
+     * Returns all the fields(placeholders) in this schema.
      * The field names are canonicalized as mentioned below:
      * <p>
      * So as to preserve the structure, Structure.Field will be represented as
@@ -201,11 +202,11 @@ public class LimeXMLSchema
      * with __ (double underscore).
      * So element.attribute ==> element__attribute__
      *
-     * @return all the field names (placeholders) in this schema.
+     * @return list (of SchemaFieldInfo) of all the fields in this schema.
      */
-    public String[] getCanonicalizedFieldNames()
+    public List getCanonicalizedFieldNames()
     {
-        return (String[])_canonicalizedFields.toArray(new String[0]);
+        return _canonicalizedFields;
     }
     
     public static void Test()
@@ -217,11 +218,14 @@ public class LimeXMLSchema
                 + File.separator
                 + "personal.xsd"));
             
+            System.out.println("Printing fields:");
+            
             //get the fields and print those
-            String[] fields = schema.getCanonicalizedFieldNames();
-            for(int i=0; i < fields.length; i++)
+            Iterator iterator = schema.getCanonicalizedFieldNames().iterator();
+            while(iterator.hasNext())
             {
-                System.out.println(fields[i]);
+                SchemaFieldInfo fieldInfo = (SchemaFieldInfo)iterator.next();
+                System.out.println(fieldInfo.getCanonicalizedFieldName());
             }
         }
         catch(Exception e)
