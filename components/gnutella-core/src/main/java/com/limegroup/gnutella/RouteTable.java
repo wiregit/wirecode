@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.search.ResultCounter;
 
 /**
  * The reply routing table.  Given a GUID from a reply message header,
@@ -68,7 +69,7 @@ public final class RouteTable {
     private int _nextID;
 
     /** Values stored in _newMap/_oldMap. */
-    public static class RouteTableEntry {
+    static final class RouteTableEntry implements ResultCounter {
         /** The numericID of the reply connection. */
         private int handlerID;
         /** The bytes already routed for this GUID. */
@@ -82,8 +83,8 @@ public final class RouteTable {
 			this.repliesRouted = 0;
         }
 		
-		/** Accessor for the number of query replies routed for this entry. */
-		public int getRepliesRouted() { return repliesRouted; }
+		/** Accessor for the number of results for this entry. */
+		public int getNumResults() { return repliesRouted; }
     }
 
     /**
@@ -152,22 +153,24 @@ public final class RouteTable {
      *  replyHandler is still open, adds the routing entry to this
      *  and returns true.  Otherwise returns false, without modifying this.
      */
-    public synchronized boolean tryToRouteReply(byte[] guid,
-                                                ReplyHandler replyHandler) {
+    public synchronized RouteTableEntry tryToRouteReply(byte[] guid,
+														ReplyHandler replyHandler) {
         repOk();
         purge();
         Assert.that(replyHandler != null);
         Assert.that(guid!=null, "Null GUID in tryToRouteReply");
 
         if (! replyHandler.isOpen())
-            return false;
+            return null;
 
         if(!_newMap.containsKey(guid) && !_oldMap.containsKey(guid)) {
             int id=handler2id(replyHandler).intValue();
-            _newMap.put(guid, new RouteTableEntry(id));
-            return true;
+			RouteTableEntry entry = new RouteTableEntry(id);
+			_newMap.put(guid, entry);
+            //_newMap.put(guid, new RouteTableEntry(id));
+            return entry;
         } else {
-            return false;
+            return null;
         }
     }
 
