@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.guess.GUESSEndpoint;
+
 import java.net.*;
 import java.io.*;
 
@@ -12,6 +14,7 @@ import java.io.*;
  *
  * @see UDPReplyHandler
  * @see MessageRouter
+ * @see QueryUnicaster
  */
 public final class UDPService implements Runnable {
 
@@ -46,6 +49,11 @@ public final class UDPService implements Runnable {
 	 * The thread for listening of incoming messages.
 	 */
 	private Thread _udpThread = new Thread(this);
+
+	/**
+	 * Cached <tt>QueryUnicaster</tt> instnace.
+	 */
+	private QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
 	/**
 	 * Instance accessor.
@@ -154,13 +162,21 @@ public final class UDPService implements Runnable {
 	 * Returns a <tt>PingReply</tt> for localhost.
 	 */
 	private PingReply getPingReply(byte[] guid) {
-		return new PingReply(guid, (byte)1,
-							 RouterService.getPort(),
-							 RouterService.getAddress(),
-							 RouterService.getNumSharedFiles(),
-							 RouterService.getSharedFileSize()/1024,
-							 RouterService.isSupernode(),
-							 Statistics.instance().calculateDailyUptime());		
+		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
+		if(endpoint == null) {
+			return new PingReply(guid, (byte)1,
+								 RouterService.getPort(),
+								 RouterService.getAddress(),
+								 RouterService.getNumSharedFiles(),
+								 RouterService.getSharedFileSize()/1024,
+								 RouterService.isSupernode(),
+								 Statistics.instance().calculateDailyUptime());		
+		} else {
+			return new PingReply(guid, (byte)1,
+								 endpoint.getPort(),
+								 endpoint.getAddress().getAddress(),
+								 0, 0, true, 0);
+		}
 	}
 
 	/**
