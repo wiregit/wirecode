@@ -3386,10 +3386,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
  
     public synchronized String toString() {
-        return "MD.NumBuckets: "+buckets.numBuckets()+
-        "MD.currentBucketNo.: "+bucketNumber+
-        "MD.currentHash: "+buckets.getURNForBucket(bucketNumber)+
-        "MD.incompleteFile: "+incompleteFile;
+        return "numBuckets: "+buckets.numBuckets()+
+        ", currentBucket: "+bucketNumber+
+        ", currentHash: "+buckets.getURNForBucket(bucketNumber)+
+        ", incompleteFile: "+incompleteFile;
     }
    
     private final boolean debugOn = false;
