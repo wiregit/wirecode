@@ -233,7 +233,7 @@ public class QueryRouteTable {
 
     private void addBTInternal(String filename) {
         String[] words= 
-            HashFunction.keywords(I18NConvert.instance().getNorm(filename));
+            HashFunction.keywords(filename);
         String[] keywords=HashFunction.getPrefixes(words);
 		byte log2 = Utilities.log2(bitTableLength);
         for (int i=0; i<keywords.length; i++) {
