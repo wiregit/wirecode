@@ -236,16 +236,16 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Try to add a huge file.  (It will be ignored.)
         f4=createFakeTestFile(Integer.MAX_VALUE+1l);
         assertEquals("shouldn't have been able to add shared file", 
-            null, fman.addFileIfShared(f4));
+            null, addFile(f4));
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
         f5=createFakeTestFile(Integer.MAX_VALUE-1);
         f6=createFakeTestFile(Integer.MAX_VALUE);
         assertNotEquals("should have been able to add shared file",
-            null, fman.addFileIfShared(f5));
+            null, addFile(f5));
         assertNotEquals("should have been able to add shared file",
-            null, fman.addFileIfShared(f6));
+            null, addFile(f6));
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size",
             Integer.MAX_VALUE, fman.getSize());
@@ -254,6 +254,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", responses[0].getName(), f3.getName());
         assertEquals("files differ", responses[1].getName(), f5.getName());
         assertEquals("files differ", responses[2].getName(), f6.getName());
+    }
+    
+    /**
+     * Calls FileManager.addFile directly.  This is necessary so we keep the
+     * file object.  Otherwise addFileIfShared will actually call addFile
+     * with the canonical file, which is a different object.
+     */
+    private FileDesc addFile(File f) throws Exception {
+        FileDesc fd = (FileDesc)PrivilegedAccessor.invokeMethod(
+            fman, "addFile", new Object[] {f}, new Class[] {File.class} );
+        return fd;
     }
     
     /**
