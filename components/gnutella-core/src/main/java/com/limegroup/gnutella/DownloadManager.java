@@ -374,6 +374,11 @@ public class DownloadManager implements BandwidthTracker {
         if (incompleteFileManager.purge(true))
             writeSnapshot();
 
+        // Pump the downloaders through a set, to remove duplicate values.
+        // This is necessary in case LimeWire got into a state where a
+        // downloader was written to disk twice.
+        buf = new LinkedList(new HashSet(buf));
+
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
         //important that instruction (3) follow (1) and (2), because we must not
@@ -384,6 +389,7 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)
                     continue;
@@ -606,7 +612,7 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void startDownload(ManagedDownloader md) {
+    private synchronized void startDownload(ManagedDownloader md) {
         md.initialize(this, fileManager, callback);
         waiting.add(md);
         callback.addDownload(md);
@@ -800,7 +806,7 @@ public class DownloadManager implements BandwidthTracker {
      * Requests a download to start.
      */
     public synchronized void requestStart(ManagedDownloader md) {
-        if(hasFreeSlot()) {
+        if(hasFreeSlot() && !active.contains(md)) {
             waiting.remove(md);
             active.add(md);
             md.startDownload();
@@ -992,7 +998,7 @@ public class DownloadManager implements BandwidthTracker {
     	    return true;
     	    
         // if push proxies failed, but we need a fw-fw transfer, give up.
-        if(shouldDoFWTransfer)
+        if(shouldDoFWTransfer || !RouterService.acceptedIncomingConnection())
             return false;
 
         PushRequest pr = 

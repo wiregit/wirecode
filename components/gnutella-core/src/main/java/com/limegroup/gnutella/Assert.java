@@ -12,8 +12,8 @@ public class Assert {
      */
     public static void silent(boolean ok, String msg) {
         if (!ok) {
-            System.err.println("Assertion failed: "+msg);
-            Thread.dumpStack();
+          //  System.err.println("Assertion failed: "+msg);
+          //  Thread.dumpStack();
 			RuntimeException re = new AssertFailure(msg);
 			ErrorService.error(re);
         }
@@ -25,8 +25,8 @@ public class Assert {
 
     public static void that(boolean ok, String msg) {
         if (!ok) {
-            System.err.println("Assertion failed: "+msg);
-            Thread.dumpStack();
+            //System.err.println("Assertion failed: "+msg);
+            //Thread.dumpStack();
 			RuntimeException re = new AssertFailure(msg);
 			throw re;
         }

@@ -708,7 +708,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Starts the download.
      */
-    public void startDownload() {
+    public synchronized void startDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
         
         dloaderManagerThread = new ManagedThread(new Runnable() {
@@ -820,7 +820,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Handles state changes when inactive.
      */
-    public void handleInactivity() {
+    public synchronized void handleInactivity() {
         if(LOG.isTraceEnabled())
             LOG.trace("handling inactivity. state: " + 
                       getState() + ", hasnew: " + hasNewSources() + 
@@ -854,7 +854,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             // have given up, or are queued, there's nothing to do.
             break;
         default:
-            Assert.that(false, "invalid state: " + getState());
+            Assert.that(false, "invalid state: " + getState() +
+                             ", threads: " + threads.size() + 
+                             ", dloaders: " + dloaders.size());
         }
     }   
     
@@ -939,7 +941,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initialize files wrt allFiles.
      */
-    protected void initializeFiles() {
+    protected synchronized void initializeFiles() {
         for(int i = 0; i < allFiles.length; i++)
             if(!isRFDAlreadyStored(allFiles[i]))
                 files.add(allFiles[i]);
