@@ -210,11 +210,11 @@ public final class NIODispatcher implements Runnable {
                     handleReader(key);
                 }
                 
-                if(key.isWritable())  {
+                else if(key.isWritable())  {
                     handleWriter(key);
                 }
                 
-                if(key.isConnectable())  {
+                else if(key.isConnectable())  {
                     handleConnector(key);
                 }
             }
@@ -259,8 +259,7 @@ public final class NIODispatcher implements Runnable {
         Connection conn = (Connection)key.attachment();      
         // Attempt to complete the connection sequence
         try {
-            System.out.println("NIODispatcher::about to finish connect");
-            if(sc.finishConnect()) {
+            if(sc.isConnectionPending() && sc.finishConnect()) {
                 key.cancel();
                 
                 //TODO: shouldn't we deregister for connect events?
@@ -302,7 +301,7 @@ public final class NIODispatcher implements Runnable {
 				// hammering our way into ClosedChannelExceptions -- 
 				// more efficient and cleaner
 				if(channel.isOpen()) {
-					try {
+					try {                        
                         channel.register(SELECTOR, SelectionKey.OP_READ, conn);
                     } catch (ClosedChannelException e) {
                     	// keep registering the other connections
