@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.http.*; 
 import com.bitzi.util.*;
 import java.io.*;
 import java.security.*;
