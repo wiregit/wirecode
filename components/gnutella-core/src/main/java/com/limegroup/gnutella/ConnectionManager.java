@@ -11,6 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -165,11 +166,10 @@ public class ConnectionManager {
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(
-            String hostname, int portnum) throws IOException {
-
-        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this);
+    public ManagedConnection createConnectionBlocking(String hostname, int portnum) 
+		throws IOException {
+        ManagedConnection c = 
+			new ManagedConnection(hostname, portnum, _router, this);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -188,7 +188,7 @@ public class ConnectionManager {
 
         // Initialize and loop for messages on another thread.
         new OutgoingConnectionThread(
-                new ManagedConnection(hostname, portnum, _router, this),
+		    new ManagedConnection(hostname, portnum, _router, this),
                 true);
     }
 
@@ -207,6 +207,7 @@ public class ConnectionManager {
              connection = new ManagedConnection(socket, _router, this);
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
+			 e.printStackTrace();
              if(connection != null){
 				 connection.close();
              }
@@ -309,11 +310,12 @@ public class ConnectionManager {
     }
     
     /**
-     * Tells whether the node is gonna be a supernode or not
-     * @return true, if supernode, false otherwise
+     * Tells whether the node is gonna be an Ultrapeer or not
+     * @return true, if Ultrapeer, false otherwise
      */
     public boolean isSupernode() {
-        boolean isCapable=SettingsManager.instance().getEverSupernodeCapable();
+        boolean isCapable =
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue();
         return isCapable && !hasClientSupernodeConnection();
     }
     
@@ -401,8 +403,8 @@ public class ConnectionManager {
      */
     int getNumFreeLeafSlots() {
         if (isSupernode())
-            return SettingsManager.instance().getMaxShieldedClientConnections()-
-            getNumInitializedClientConnections();
+			return UltrapeerSettings.MAX_LEAVES.getValue() - 
+				getNumInitializedClientConnections();
         else
             return 0;
     }
@@ -494,8 +496,8 @@ public class ConnectionManager {
      * false otherwise
      */
     public boolean allowAnyConnection() {
-        int shieldedMax=
-            SettingsManager.instance().getMaxShieldedClientConnections();
+        int shieldedMax =
+			UltrapeerSettings.MAX_LEAVES.getValue();
 
         //Stricter than necessary.  
         //See allowAnyConnection(boolean,String,String).
@@ -563,8 +565,9 @@ public class ConnectionManager {
 
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
-        if (_keepAlive<=0)
+        if (_keepAlive<=0) {
             return false;
+		}
         else if (hasClientSupernodeConnection())
             //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
             return false;  
@@ -573,8 +576,8 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-            int shieldedMax=
-                SettingsManager.instance().getMaxShieldedClientConnections();
+            int shieldedMax =
+				UltrapeerSettings.MAX_LEAVES.getValue();
             return getNumInitializedClientConnections() 
                 < (trustedVendor(useragentHeader)
                       ? shieldedMax : ALLOWED_BAD_LEAF_CONNECTIONS);
@@ -632,8 +635,7 @@ public class ConnectionManager {
         //if more than 70% slots are full, return true 
         if(isSupernode() &&
             getNumInitializedClientConnections() > 
-            (SettingsManager.instance()
-            .getMaxShieldedClientConnections() * 0.7)){
+            (UltrapeerSettings.MAX_LEAVES.getValue() * 0.7)){
             return true;
         }else{
             //else return false
@@ -828,7 +830,7 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=settings.getKeepAlive();
+        int oldKeepAlive=ConnectionSettings.KEEP_ALIVE.getValue();//settings.getKeepAlive();
 
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
@@ -874,12 +876,13 @@ public class ConnectionManager {
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
-        int outgoing=settings.getKeepAlive();
-        if (outgoing<1) {
-            outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);
+        //int outgoing=settings.getKeepAlive();
+		int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+        if (outgoing < 1) {
+			ConnectionSettings.KEEP_ALIVE.revertToDefault();
+			outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
         }
-        //Actually notify the backend.
+        //Actually notify the backend.		
         setKeepAlive(outgoing);
 
         //int incoming=settings.getKeepAlive();
@@ -903,10 +906,10 @@ public class ConnectionManager {
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
         //Bootstrap server: send group ping.
-        if (connection.isRouterConnection()) {
-            String group = "none:"+_settings.getConnectionSpeed();
-            pr = _router.createGroupPingRequest(group);                 //a
-        }
+        //if (connection.isRouterConnection()) {
+		//  String group = "none:"+_settings.getConnectionSpeed();
+		//  pr = _router.createGroupPingRequest(group);                 //a
+        //}
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -914,7 +917,7 @@ public class ConnectionManager {
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
-        else if (getNumInitializedConnections() >= _keepAlive)
+        if (getNumInitializedConnections() >= _keepAlive)
             pr = new PingRequest((byte)1);                              //b
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());  //c
@@ -1218,7 +1221,7 @@ public class ConnectionManager {
         //or the supernode status is forced, dont change mode
         int connections=getNumInitializedConnections()
                        +getNumInitializedClientConnections();
-        if (_settings.getForceSupernodeMode() 
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue()//_settings.getForceSupernodeMode() 
             || (isSupernode() && connections > 0))
             return false;
         else
@@ -1289,6 +1292,7 @@ public class ConnectionManager {
      */
     private void initializeExternallyGeneratedConnection(ManagedConnection c)
             throws IOException {
+
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
         //slots.  This keeps reject connections from appearing in the GUI, as
@@ -1323,7 +1327,7 @@ public class ConnectionManager {
         //directly.
         if (!c.isOutgoing() && 
                 !allowConnection(c)) {
-            c.loopToReject(_catcher);     
+            c.loopToReject(_catcher);   
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
