@@ -150,8 +150,10 @@ public class HostCatcher {
                         RouterService.isSupernode()) {
                             Endpoint e=new Endpoint(RouterService.getAddress(),
                                                     RouterService.getPort());
-                            //This spawn another thread, so blocking is not an issue.
-                            gWebCache.sendUpdatesAsync(e);
+							if(!e.isPrivateAddress()) {
+								//This spawn another thread, so blocking is not an issue.
+								gWebCache.sendUpdatesAsync(e);
+							}
                         }
                 } catch(Throwable t) {
                     RouterService.error(t);
