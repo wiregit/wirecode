@@ -121,9 +121,8 @@ public class SettingsManager implements SettingsInterface
     private SettingsManager() {
         props_      = new Properties();
         ndProps_    = new Properties();
-        fileSep_    = System.getProperty("file.separator");
         home_       = System.getProperty("user.dir");
-        home_       += fileSep_;
+        home_       += File.separator;
         fileName_   = home_;
         ndFileName_ = home_;
         fileName_   += SettingsInterface.DEFAULT_FILE_NAME;
@@ -138,29 +137,6 @@ public class SettingsManager implements SettingsInterface
         catch(SecurityException se) {}
         initSettings();
     }
-
-
-	/**
-	 * private methods to handle versioning 
-	 * control information
-	 */
-	public void setLastVersionChecked(String last) {
-		lastVersionChecked_ = last;
-		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
-		writeProperties();
-	}
-	
-	public void setCheckAgain(boolean check) {
-		checkAgain_ = check;
-		String c;
-		if (check == true)
-			c = "true";
-		else 
-			c = "false";
-		props_.put(SettingsInterface.CHECK_AGAIN, c);
-        writeProperties();
-
-	}
 
 
     /** Check the properties file and set the props */
@@ -192,8 +168,6 @@ public class SettingsManager implements SettingsInterface
         throws IOException {
         write_ = false;
         String p;
-        //byte b;
-        //int i;
         Enumeration enum = tempProps.propertyNames();
         while(enum.hasMoreElements()){
             String key;
@@ -845,8 +819,8 @@ public class SettingsManager implements SettingsInterface
     }
 
     public synchronized void setIncompleteDirectory(String dir) {
-        if(!dir.endsWith(fileSep_))
-            dir += fileSep_;
+        if(!dir.endsWith(File.separator))
+            dir += File.separator;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(b == false)
@@ -874,8 +848,8 @@ public class SettingsManager implements SettingsInterface
 	 *  window.  this method should only get called at
 	 *  install time, and is therefore not synchronized */
     public void setSaveDefault(String dir) {
-        if(!dir.endsWith(fileSep_))
-            dir += fileSep_;
+        if(!dir.endsWith(File.separator))
+            dir += File.separator;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(!b)
@@ -905,8 +879,8 @@ public class SettingsManager implements SettingsInterface
 
     /** set the directory for saving files */
     public void setSaveDirectory(String dir) {
-        if(!dir.endsWith(fileSep_))
-            dir += fileSep_;
+        if(!dir.endsWith(File.separator))
+            dir += File.separator;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(b == false)
@@ -1307,6 +1281,27 @@ public class SettingsManager implements SettingsInterface
             writeProperties();
         }
     }
+
+	/**
+	 * private methods to handle versioning 
+	 * control information
+	 */
+	public void setLastVersionChecked(String last) {
+		lastVersionChecked_ = last;
+		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
+		writeProperties();
+	}
+	
+	public void setCheckAgain(boolean check) {
+		checkAgain_ = check;
+		String c;
+		if (check == true)
+			c = "true";
+		else 
+			c = "false";
+		props_.put(SettingsInterface.CHECK_AGAIN, c);
+        writeProperties();
+	}
 
 
     /**
