@@ -60,7 +60,7 @@ public class PingReply extends Message implements Serializable {
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes, 
              boolean isUltrapeer) { 
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, 0);
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1);
     }
 
     /**
@@ -87,7 +87,7 @@ public class PingReply extends Message implements Serializable {
              int port, byte[] ip, long files, long kbytes,
              boolean isUltrapeer, int dailyUptime) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             dailyUptime>=0 ? newGGEP(dailyUptime, isUltrapeer) : null);
+             ((dailyUptime>=0) || isUltrapeer)? newGGEP(dailyUptime, isUltrapeer) : null);
     }
 
     /**
@@ -139,7 +139,10 @@ public class PingReply extends Message implements Serializable {
     private static byte[] newGGEP(int dailyUptime, boolean udpSupported) {
         try {
             GGEP ggep=new GGEP(true);
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            // one of the following, if not both, if statements will evaluate
+            // to true.
+            if (dailyUptime >= 0)
+                ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
             if (udpSupported) {
                 // the version number is 0.1
                 byte[] vNum = {(byte) 1}; // high nibble is 0, low nibble is 1
