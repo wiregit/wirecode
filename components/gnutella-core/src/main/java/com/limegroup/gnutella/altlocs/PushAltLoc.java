@@ -7,6 +7,7 @@ import java.net.URL;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -56,12 +57,8 @@ public class PushAltLoc extends AlternateLocation {
 	protected PushAltLoc(URN sha1) throws IOException{
 		
 		super(sha1);
-		Set proxies = RouterService.getConnectionManager().getPushProxies();
-		
-		byte [] guid = RouterService.getMessageRouter().getOurGUID();
-		
-		_fileName="";
-		_pushAddress = new PushEndpoint(guid,proxies,0,UDPConnection.VERSION);
+		_fileName="ALT";
+		_pushAddress = new PushEndpointForSelf();
 	}
 	
 	protected String generateHTTPString() {

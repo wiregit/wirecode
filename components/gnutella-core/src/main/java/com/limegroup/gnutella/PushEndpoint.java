@@ -16,7 +16,7 @@ import java.net.UnknownHostException;
 ;
 
 /**
- * a class that represents an endpoint behind one or more PushProxies
+ * a class that represents an endpoint behind one or more PushProxies.
  * almost everything is immutable including the contents of the set.
  * 
  * the network format this is serialized to is:
@@ -86,12 +86,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	/**
 	 * how big this PE is/will be in bytes.
 	 */
-	private final int _size;
+	private int _size=-1;
 	
 	/**
 	 * the hashcode of this object
 	 */
-	private final int _hashcode;
+	private int _hashcode=-1;
 	
 	/**
 	 * the string representation as sent in headers.
@@ -125,26 +125,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 		if (proxies!=null)
 			_proxies = Collections.unmodifiableSet(proxies);
 		else 
-			_proxies = DataUtils.EMPTY_SET;
-		
-		_size = HEADER_SIZE+
-			Math.min(_proxies.size(),4) * PROXY_SIZE;
-		
-		//also calculate the hashcode in the constructor
-		
-		int hashcode = _guid.hashCode();
-		
-		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
-			PushProxyInterface cur = (PushProxyInterface)iter.next();
-			hashcode = 37 *hashcode+cur.hashCode();	
-		}
-		
-
-		
-		_hashcode = hashcode;
+			_proxies = Collections.EMPTY_SET;
 		
 		
 	}
+	
+	
 	
 	public PushEndpoint(byte [] guid, Set proxies) {
 		this(guid,proxies,PLAIN,0);
@@ -242,11 +228,22 @@ public class PushEndpoint implements HTTPHeaderValue{
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 	}
 	
+	protected final int getHashcode() {
+	    int hashcode = _guid.hashCode();
+		
+		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+			PushProxyInterface cur = (PushProxyInterface)iter.next();
+			hashcode = 37 *hashcode+cur.hashCode();	
+		}
+		
+		return hashcode;
+	}
+	
 	/**
 	 * @return a byte-packed representation of this
 	 */
 	public byte [] toBytes() {
-		byte [] ret = new byte[_size];
+		byte [] ret = new byte[getSizeBytes()];
 		toBytes(ret,0);
 		return ret;
 	}
@@ -258,18 +255,18 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public void toBytes(byte [] where, int offset) {
 		
-		if (where.length-offset < _size)
+		if (where.length-offset < getSizeBytes())
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
-		where[offset] = (byte)(Math.min(4,_proxies.size()) | _features);
+		where[offset] = (byte)(Math.min(4,getProxies().size()) | _features);
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,offset+1,16);
 		
 		//store the push proxies
 		int i=0;
-		for (Iterator iter = _proxies.iterator();iter.hasNext() && i < 4;) {
+		for (Iterator iter = getProxies().iterator();iter.hasNext() && i < 4;) {
 			PushProxyInterface ppi = (PushProxyInterface) iter.next();
 			
 			byte [] addr = ppi.getPushProxyAddress().getAddress();
@@ -333,6 +330,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return how many bytes this PE will use when serialized.
 	 */
 	public int getSizeBytes() {
+	    if (_size==-1) {
+			_size = HEADER_SIZE+
+			Math.min(getProxies().size(),4) * PROXY_SIZE;
+	    }
 		return _size;
 	}
 	
@@ -344,6 +345,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public int hashCode() {
+	    if (_hashcode==-1) {
+	        _hashcode = getHashcode();
+	    }
+	        
 		return _hashcode;
 	}
 	
@@ -363,13 +368,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 		boolean ret = Arrays.equals(_clientGUID,o.getClientGUID());
 		
 		//same # of push proxies
-		ret = ret & _proxies.size() == o.getProxies().size();
+		ret = ret & getProxies().size() == o.getProxies().size();
 		
 		//and the same proxies
 		HashSet temp = new HashSet(_proxies);
 		temp.retainAll(o.getProxies());
 		
-		ret = ret & temp.size() ==_proxies.size();
+		ret = ret & temp.size() ==getProxies().size();
 		
 		return ret;
 	}
@@ -377,7 +382,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public String toString() {
 		String ret = "PE [FEATURES:"+_features+", FWT Version:"+_fwtVersion+
 			", GUID:"+_guid+", proxies:{ "; 
-		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 			PushProxyInterface ppi = (PushProxyInterface)iter.next();
 			ret = ret+ppi.getPushProxyAddress()+":"+ppi.getPushProxyPort()+" ";
 		}
@@ -394,7 +399,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			if (_fwtVersion!=0)
 				httpString+=HTTPConstants.FW_TRANSFER+"/"+_fwtVersion+";";
 			
-			for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+			for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 				PushProxyInterface cur = (PushProxyInterface)iter.next();
 				
 				httpString = httpString + 
