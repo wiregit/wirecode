@@ -47,6 +47,11 @@ public abstract class MessageRouter
     private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
     private int MAX_ROUTE_TABLE_SIZE=50000;        //actually 100,000 entries
 
+    /** The maximum number of QueryReply bytes to route for any given query GUID. 
+     *  Provides a primitive form of flow control by cutting off run-away replies. 
+     *  Assuming 100 bytes per result, this allows 500 results.  */
+    public static final int MAX_REPLY_ROUTE_BYTES=50000; //50k
+
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
@@ -572,8 +577,15 @@ public abstract class MessageRouter
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        receivingConnection);
-            rrp.getReplyHandler().handleQueryReply(queryReply,
-                                                   receivingConnection);
+            //Simple flow control: don't route this message along other
+            //connections if we've already routed too many replies for this
+            //GUID.  Note that replies destined for me all always delivered to
+            //the GUI.
+            if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
+                    rrp.getReplyHandler()==_forMeReplyHandler) {
+                rrp.getReplyHandler().handleQueryReply(queryReply,
+                                                       receivingConnection);
+            }
         }
         else
         {
