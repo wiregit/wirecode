@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.search.*;
+import com.sun.java.util.collections.*;
 import java.net.*;
 
 /**
@@ -233,7 +234,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
     // inherit doc comment
     public InetAddress getInetAddress() {
         try {
-            return InetAddress.getByAddress(RouterService.getAddress());
+            return InetAddress.
+                getByName(NetworkUtils.ip2string(RouterService.getAddress()));
         } catch(UnknownHostException e) {
             // may want to do something else here if we ever use this!
             return null;
