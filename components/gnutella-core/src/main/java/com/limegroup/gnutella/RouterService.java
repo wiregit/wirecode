@@ -17,8 +17,8 @@ import com.limegroup.gnutella.util.*;
  * constructing the backend components.  Typical use is as follows:
  *
  * <pre>
- * RouterService rs = new RouterService(callback);
- * rs.postGuiInit();
+ * RouterService rs = new RouterService();
+ * rs.start();
  * rs.query(...);
  * rs.download(...);
  * rs.shutdown();
@@ -47,35 +47,39 @@ import com.limegroup.gnutella.util.*;
 public final class RouterService {
     private static ActivityCallback callback;
 
-    private final HostCatcher catcher = new HostCatcher();
+    private final HostCatcher catcher;
     private final MessageRouter router;
-    private final Acceptor acceptor = 
-		new Acceptor(SettingsManager.instance().getPort());
+    private final Acceptor acceptor;
     private final ConnectionManager manager;
     private final ResponseVerifier verifier = new ResponseVerifier();
-    private final DownloadManager downloader = new DownloadManager();
+    private final DownloadManager downloader;
     private final UploadManager uploadManager;
-    private final FileManager fileManager = new MetaFileManager();
+    private final FileManager fileManager;
 	//keep the reference around...prevent class GC
-    private final ChatManager chatManager = ChatManager.instance();
-	private final Statistics statistics = Statistics.instance();
+    private final ChatManager chatManager;
+	private final Statistics statistics;
     private final SimpleTimer timer;
 
 	/**
 	 * Constant for the <tt>UDPAcceptor</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private final UDPAcceptor udpAcceptor = UDPAcceptor.instance();
+	private final UDPAcceptor udpAcceptor;
     
     /**
      * For authenticating users
      */
-    private Authenticator authenticator = new ServerAuthenticator();
+    private Authenticator authenticator;
 
     /**
      * isShuttingDown flag
      */
     private boolean isShuttingDown;
+
+	/**
+	 * Boolean for whether or not the backend threads have started.
+	 */
+	private boolean started;
 
 	/**
 	 * <tt>RouterService</tt> instance, following singleton.
@@ -104,13 +108,21 @@ public final class RouterService {
   	private RouterService() {
 		SettingsManager settings = SettingsManager.instance();
 
+		this.fileManager = new MetaFileManager();
 		// this used to be given as a parameter, allowing other components,
 		// like the server, to use their own MessageRouter.
   		this.router = new MetaEnabledMessageRouter(callback, fileManager);
+		this.authenticator = new ServerAuthenticator();
         this.timer = new SimpleTimer(true, callback);
+		this.acceptor = new Acceptor(settings.getPort());
   		this.manager = new ConnectionManager(callback, authenticator);
-  		this.uploadManager = new UploadManager(this.callback, this.router, 
-											   this.fileManager);
+		this.catcher = new HostCatcher();
+		this.downloader = new DownloadManager();
+  		this.uploadManager = new UploadManager(callback, router, 
+											   fileManager);
+		this.chatManager = ChatManager.instance();
+		this.statistics = Statistics.instance();
+		this.udpAcceptor = UDPAcceptor.instance();
 
 		// Now, link all the pieces together, starting the various threads.
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
@@ -140,7 +152,7 @@ public final class RouterService {
 	 *  visual display
 	 */
 	public static void setCallback(ActivityCallback callback) {
-		callback = callback;
+		RouterService.callback = callback;
 	}
 
 	/**
@@ -148,14 +160,13 @@ public final class RouterService {
 	 * been constructed.
 	 */
 	public void start() {
-		fileManager.initialize();
-		acceptor.initialize();
-
 		// start up the UDP server thread
 		Thread udpThread = new Thread(udpAcceptor);
 		udpThread.start();
 		
-		catcher.start();
+		catcher.initialize();
+
+		acceptor.initialize();
 
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
@@ -163,13 +174,23 @@ public final class RouterService {
 
         // Restore any downloads in progress.
         downloader.postGuiInit();
+		started = true;
+	}
+
+	/**
+	 * Returns whether or not the backend threads have started running.
+	 * 
+	 * @return <tt>true</tt> if the threads have started, <tt>false</tt> otherwise
+	 */
+	public boolean isStarted() {
+		return started;
 	}
 
     /**
      * Returns the ActivityCallback passed to this' constructor.
      */ 
     public ActivityCallback getCallback() {
-        return callback;
+        return RouterService.callback;
     }
     
 	/**
@@ -233,6 +254,15 @@ public final class RouterService {
      */
 	public Acceptor getAcceptor() {
 		return acceptor;
+	}
+
+    /** 
+     * Accessor for the <tt>HostCatcher</tt> instance.
+     *
+     * @return the <tt>HostCatcher</tt> in use
+     */
+	public HostCatcher getHostCatcher() {
+		return catcher;
 	}
 
     /**
