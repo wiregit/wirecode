@@ -32,6 +32,7 @@ public class AllTests {
 		suite.addTest(AlternateLocationTest.suite());
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(ResponseTest.suite());
+		suite.addTest(UrnCacheTest.suite());
 
         //End-to-end integration tests (includes some unit tests too)
         suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
