@@ -308,23 +308,21 @@ public class QueryRequest extends Message implements Serializable{
 
     // handles parsing of all GGEP blocks.  may need to change return sig
     // if new things are needed....
+    // TODO: technically there may be multiple GGEP blocks here - we tried to
+    // get all but encountered a infinite loop so just try to get one for now.
     private final QueryKey parseGGEP(String ggepString) {
         QueryKey retQK = null;
         byte[] ggepBytes = ggepString.getBytes();
-        int[] offsetIndex = new int[1];
-        offsetIndex[0] = 0;
-        while (offsetIndex[0] < ggepBytes.length) {
-            try {
-                GGEP ggepBlock = new GGEP(ggepBytes, 0, offsetIndex);
-                if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                    byte[] qkBytes = 
-                        ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    retQK = QueryKey.getQueryKey(qkBytes);
-                }
+        try {
+            GGEP ggepBlock = new GGEP(ggepBytes, 0, null);
+            if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                byte[] qkBytes = 
+                ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                retQK = QueryKey.getQueryKey(qkBytes);
             }
-            catch (BadGGEPBlockException ignored) {}
-            catch (BadGGEPPropertyException ignored) {}
-        }
+        }        
+        catch (BadGGEPBlockException ignored) {}
+        catch (BadGGEPPropertyException ignored) {}
         return retQK;
     }
 
