@@ -87,7 +87,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
-    protected void tryAllDownloads() {     
+    protected void tryAllDownloads(boolean deserializedFromDisk) {     
 
 		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
 			//Send HEAD request to default location (if present)to get its size.
@@ -107,7 +107,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 
         //Start the downloads for real.
-        super.tryAllDownloads();
+        super.tryAllDownloads(deserializedFromDisk);
     }
 
 
@@ -213,12 +213,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /**
      * @param numRequeries The number of requeries sent so far.
      */
-    protected void pauseForRequery(int numRequeries) {
+    protected boolean pauseForRequery(int numRequeries) {
         if (numRequeries > 0) {
-            super.pauseForRequery(numRequeries);
+            return super.pauseForRequery(numRequeries);
         }
         else
-            ; // don't wait the first time!!
+            // don't wait the first time!!  we want to immediately start a new
+            // query
+            return false; 
     }
 
     /** 

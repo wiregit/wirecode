@@ -70,6 +70,15 @@ public class RequeryDownloader extends ManagedDownloader
                getMediaType().toString().equals(add.getMediaType().toString()));
     }
 
+    protected int getQueryCount(boolean deserializedFromDisk) {
+        // RequeryDownloaders started from scratch have already had a search
+        // done for them.
+        if (deserializedFromDisk)
+            return 0;
+        else
+            return 1;
+    }
+
     /** Overrides ManagedDownloader to use the original search keywords. */
     protected QueryRequest newRequery(int numRequeries) 
 		throws CantResumeException {
