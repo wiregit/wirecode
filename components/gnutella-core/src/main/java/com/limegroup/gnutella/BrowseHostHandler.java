@@ -140,7 +140,11 @@ public class BrowseHostHandler {
         while (readingHTTP) {
             currLine = br.readLine();
             debug("BHH.browseExchange(): currLine = " + currLine);
-            if (indexOfIgnoreCase(currLine, "User-Agent") > -1)
+            if ((currLine == null) || currLine.equals("")) {
+                // start processing queries...
+                readingHTTP = false;
+            }
+            else if (indexOfIgnoreCase(currLine, "User-Agent") > -1)
                 ; // just skip, who cares?
             else if (indexOfIgnoreCase(currLine, "Content-Type") > -1) {
                 // make sure it is QRs....
@@ -149,12 +153,7 @@ public class BrowseHostHandler {
                     throw new IOException();
             }
             else if (indexOfIgnoreCase(currLine, "Content-Encoding") > -1) {
-                // make sure it is QRs....
                 throw new IOException();  //  decompress currently not supported
-            }
-            else if ((currLine == null) || currLine.equals("")) {
-                // start processing queries...
-                readingHTTP = false;
             }
         }
         debug("BHH.browseExchange(): read HTTP seemingly OK.");
