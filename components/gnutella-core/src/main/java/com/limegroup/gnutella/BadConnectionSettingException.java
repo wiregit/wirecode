@@ -8,7 +8,7 @@ package com.limegroup.gnutella;
  * Design note: some may argue that this should be multiple classes or an enum.
  * But there could be multiple reasons for an exception, so we may use masks.
  */
-public class BadConnectionSettingException extends RuntimeException {
+public class BadConnectionSettingException extends Exception {
     public final static int NEGATIVE_VALUE=0x1;
     public final static int TOO_HIGH_FOR_SPEED=0x2;
     public final static int TOO_HIGH_FOR_LEAF=0x3;
@@ -18,8 +18,6 @@ public class BadConnectionSettingException extends RuntimeException {
     private int reason;
     /** The suggested KEEP_ALIVE. */
     private int suggestedOutgoing;
-    /** The suggested MAX_INCOMING_CONNECTIONS */
-    private int suggestedIncoming;
 
     /**
      * @param reason why the settings were rejected.  This value
@@ -28,14 +26,11 @@ public class BadConnectionSettingException extends RuntimeException {
      * @param suggestedIncoming the suggested MAX_INCOMING_CONNECTIONS
      */
     public BadConnectionSettingException(int reason,
-                                         int suggestedOutgoing,
-                                         int suggestedIncoming) {
+                                         int suggestedOutgoing) {
         this.reason=reason;
-        this.suggestedIncoming=suggestedIncoming;
         this.suggestedOutgoing=suggestedOutgoing;
     }
 
     public int getReason() { return reason; }
     public int getSuggestedOutgoing() { return suggestedOutgoing; }
-    public int getSuggestedIncoming() { return suggestedIncoming; }
 }
