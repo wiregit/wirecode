@@ -603,7 +603,7 @@ public abstract class MessageRouter {
         // if it's a TTL=1 ping, such as a heartbeat ping, or if we should
         // allow new pings on this connection, allow it.
         if((ping.getHops() == 1) || handler.allowNewPings()) {
-            respondToPingRequest(ping);
+            respondToPingRequest(ping, handler);
             handler.updatePingTime();
         } 
     }
@@ -630,7 +630,7 @@ public abstract class MessageRouter {
         if (pingRequest.isQueryKeyRequest())
             sendQueryKeyPong(pingRequest, datagram);
         else
-            respondToUDPPingRequest(pingRequest, datagram);
+            respondToUDPPingRequest(pingRequest, datagram, handler);
     }
     
 
@@ -1311,7 +1311,8 @@ public abstract class MessageRouter {
      * sendPingReply(PingReply).
      * This method is called from the default handlePingRequest.
      */
-    protected abstract void respondToPingRequest(PingRequest request);
+    protected abstract void respondToPingRequest(PingRequest request,
+                                                 ReplyHandler handler);
 
 	/**
 	 * Responds to a ping received over UDP -- implementations
@@ -1320,9 +1321,13 @@ public abstract class MessageRouter {
 	 * that also support UDP messaging.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
+     * @param datagram the <tt>DatagramPacket</tt> containing the ping
+     * @param handler the <tt>ReplyHandler</tt> instance from which the
+     *  ping was received and to which pongs should be sent
 	 */
     protected abstract void respondToUDPPingRequest(PingRequest request, 
-													DatagramPacket datagram);
+													DatagramPacket datagram,
+                                                    ReplyHandler handler);
 
 
     /**
@@ -1531,18 +1536,16 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    protected void sendPingReply(PingReply pong)
-        throws IOException {
+    protected void sendPingReply(PingReply pong, ReplyHandler handler) {
         if(pong == null) {
             throw new NullPointerException("null pong");
         }
-        ReplyHandler replyHandler =
-            _pingRouteTable.getReplyHandler(pong.getGUID());
 
-        if(replyHandler != null)
-            replyHandler.handlePingReply(pong, null);
-        else
-            throw new IOException("could not find reply handler");
+        if(handler == null) {
+            throw new NullPointerException("null reply handler");
+        }
+
+        handler.handlePingReply(pong, null);
     }
 
     /**
