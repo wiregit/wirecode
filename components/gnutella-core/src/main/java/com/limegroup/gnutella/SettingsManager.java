@@ -576,7 +576,7 @@ public class SettingsManager implements SettingsInterface
     /** returns the incomplete directory */
     public String getIncompleteDirectory() {
         File incFile = new File(incompleteDirectory_);
-        if(!incFile.isDirectory()) {
+        if(!incFile.isDirectory()) {			
 			setSaveDirectory(saveDirectory_);
         }
         return incompleteDirectory_;
@@ -994,17 +994,26 @@ public class SettingsManager implements SettingsInterface
     /** set the directory for saving files */
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
-		String parent = saveFile.getParent();
-		File incFile  = new File(parent, "Incomplete");
-		saveFile.mkdirs();
-		incFile.mkdirs();
-		String saveDir = dir;
-		String incDir = parent;
-		try {
-			saveDir = saveFile.getCanonicalPath();
-			incDir = incFile.getCanonicalPath();
+		String tempPath = saveFile.getAbsolutePath();
+		if(tempPath.endsWith(File.separator)) {
+			tempPath = tempPath.substring(0, tempPath.length() -1);
 		}
-		catch(IOException ioe) {}
+		tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
+		File incFile  = new File(tempPath, "Incomplete");
+		if(!saveFile.isDirectory()) {
+			saveFile.mkdirs();
+		}
+		if(!incFile.isDirectory()) {
+			incFile.mkdirs();
+		}
+		String saveDir = saveFile.getAbsolutePath();
+		String incDir  = incFile.getAbsolutePath();
+		if(!saveDir.endsWith(File.separator)) {
+			saveDir += File.separator;
+		}
+		if(!incDir.endsWith(File.separator)) {
+			incDir += File.separator;
+		}
 		saveDirectory_ = saveDir;
 		incompleteDirectory_ = incDir;
 		props_.put(SAVE_DIRECTORY, saveDirectory_);
@@ -1553,12 +1562,12 @@ public class SettingsManager implements SettingsInterface
         return ret;
     }
 
-//  	public static void main(String args[]) {
-//  		SettingsManager settings = SettingsManager.instance();
-//  		String incDir = settings.getIncompleteDirectory();
-//  		String saveDir = settings.getSaveDirectory();
-//  		System.out.println("incDir: "+incDir+"  saveDir: "+saveDir);
-//  	}
+//    	public static void main(String args[]) {
+//    		SettingsManager settings = SettingsManager.instance();
+//    		String incDir  = settings.getIncompleteDirectory();
+//    		String saveDir = settings.getSaveDirectory();
+//    		System.out.println("incDir: "+incDir+"  saveDir: "+saveDir);
+//    	}
 
     //      /** Unit test */
     //      public static void main(String args[]) {
