@@ -61,70 +61,9 @@ public class ManagedConnection
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
 
-    /*
-     * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
-     * http://www.limewire.com/developer/sachrifc.txt.  The basic idea is to use
-     * one queue for each message type.  Messages are removed from the queue in
-     * a biased round-robin fashion.  This prioritizes some messages types while
-     * preventing any one message type from dominating traffic.  Query replies
-     * are further prioritized by "GUID volume", i.e., the number of bytes
-     * already routed for that GUID.  Other messages are sorted by time and
-     * removed in a LIFO [sic] policy.  This, coupled with timeouts, reduces
-     * latency.  
-     */
+    /** Priority queue of messages to send. */
+    CompositeQueue _queue=new CompositeQueue();
 
-    /** A lock to protect _outputQueue. */
-    private Object _outputQueueLock=new Object();
-    /** The producer's queues, one priority per mesage type. 
-     *  INVARIANT: _outputQueue.length==PRIORITIES
-     *  LOCKING: obtain _outputQueueLock. */
-    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];
-    /** The number of queued messages.  Maintained for performance.
-     *  INVARIANT: _queued==sum of _outputQueue[i].size() 
-     *  LOCKING: obtain _outputQueueLock */
-    private int _queued=0;
-    /** The priority of the last message added to _outputQueue. This is an
-     *  optimization to keep write() from iterating through all priorities.
-     *  This value is only a hint and can be legally set to any priority.  Hence
-     *  no locking is necessary.  Package-access for testing purposes only. */
-    int _lastPriority=0;
-    /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. */
-    private static final int QUEUE_SIZE=100;
-    /** The max time to keep reply messages and pushes in the queues, in
-     *  milliseconds. */
-    private static int BIG_QUEUE_TIME=10*1000;
-    /** The max time to keep queries, pings, and pongs in the queues, in
-     *  milliseconds.  Package-access for testing purposes only! */
-    static int QUEUE_TIME=5*1000;
-    /** The number of different priority levels. */
-    private static final int PRIORITIES=7;
-    /** Names for each priority. "Other" includes QRP messages and is NOT
-     * reordered.  These numbers do NOT translate directly to priorities;
-     * that's determined by the cycle fields passed to MessageQueue. */
-    private static final int PRIORITY_WATCHDOG=0;
-    private static final int PRIORITY_PUSH=1;
-    private static final int PRIORITY_QUERY_REPLY=2;
-    private static final int PRIORITY_QUERY=3; //TODO: add requeries
-    private static final int PRIORITY_PING_REPLY=4;
-    private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;       
-    {
-        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, true);
-        _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING_REPLY] 
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING]       
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
-    }                                                             
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
@@ -138,7 +77,7 @@ public class ManagedConnection
 
 
     /**
-     * The number of messages received.  This messages that are eventually
+     * The number of messages sent.  This includes messages that are eventually
      * dropped.  This stat is synchronized by _outputQueueLock;
      */
     private int _numMessagesSent;
@@ -343,8 +282,8 @@ public class ManagedConnection
     public void initialize(ConnectionListener listener)
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        StatisticsConnectionListener listener2=
-            new StatisticsConnectionListener(listener);
+        StatsConnectionListener listener2=
+            new StatsConnectionListener(listener);
         if (_isRouter)
             super.initialize(listener2);   //no timeout for bootstrap server
         else
@@ -354,8 +293,8 @@ public class ManagedConnection
     /** 
      * Adds hooks to maintain read statistics.
      */
-    class StatisticsConnectionListener extends DelegateConnectionListener {
-        StatisticsConnectionListener(ConnectionListener delegate) {
+    private class StatsConnectionListener extends DelegateConnectionListener {
+        StatsConnectionListener(ConnectionListener delegate) {
             super(delegate);
         }
         public void read(Connection c, Message m) { 
@@ -369,210 +308,57 @@ public class ManagedConnection
 
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
 
-//      /**
-//       * Queue a message.  This does extra buffering so that Messages
-//       * are dropped if the socket gets backed up.  Will remove any extended
-//       * payloads if the receiving connection does not support GGGEP.   Also
-//       * updates MessageRouter stats.<p>
-//       *
-//       * This methodIS thread safe.  Multiple threads can be in a send call
-//       * at the same time for a given connection.
-//       *
-//       * @requires this is fully constructed
-//       * @modifies the network underlying this
-//       * @effects send m on the network.  Throws IOException if the connection
-//       *  is already closed.  This is thread-safe and guaranteed not to block.
-//       */
-//      public boolean queue(Message m) {
-//          if (! supportsGGEP())
-//              m=m.stripExtendedPayload();
 
-//          repOk();
-//          _router.countMessage();
-//          int priority=calculatePriority(m);
-//          synchronized (_outputQueueLock) {
-//              _numMessagesSent++;
-//              _outputQueue[priority].add(m);
-//              int dropped=_outputQueue[priority].resetDropped();
-//              _numSentMessagesDropped+=dropped;
-//              _queued+=1-dropped;
-//              _lastPriority=priority;
-//              _outputQueueLock.notify();
-//          }
-//          repOk();
-//          return true;   //not strictly appropriate
-//      }
+    /** 
+     * Like Connection.write(m), but may queue and write more than one message. 
+     */
+    public boolean write(Message m) {
+        if (! supportsGGEP())
+            m=m.stripExtendedPayload();
 
-//      /** 
-//       * Returns the send priority for the given message, with higher number for
-//       * higher priorities.  TODO: this method will eventually be moved to
-//       * MessageRouter and account for number of reply bytes.
-//       */
-//      private int calculatePriority(Message m) {
-//          //TODO: use switch statement?
-//          byte opcode=m.getFunc();
-//          boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
-//          switch (opcode) {
-//              case Message.F_QUERY: 
-//                  return PRIORITY_QUERY;
-//              case Message.F_QUERY_REPLY: 
-//                  return PRIORITY_QUERY_REPLY;
-//              case Message.F_PING_REPLY: 
-//                  return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
-//              case Message.F_PING: 
-//                  return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
-//              case Message.F_PUSH: 
-//                  return PRIORITY_PUSH;
-//              default: 
-//                  return PRIORITY_OTHER;  //includes QRP Tables
-//          }
-//      }
+        _router.countMessage();   //why count messages snet?
+        _numMessagesSent++;
+        _queue.add(m);
+        _numSentMessagesDropped+=_queue.resetDropped();
+        //Attempt to write queued data, not necessarily m.  This calls
+        //super.write(m'), which may call listener.needsWrite().
+        return this.write();   
+    }
 
-//      public boolean hasQueued() {
-//          synchronized (_outputQueueLock) {
-//              return _queued==0;
-//          }
-//      }
+    /**
+     * Like Connection.write(), but may write more than one message.
+     * May also call listener.needsWrite.
+     */
+    public boolean write() {
+        //Terminate when either
+        //a) super cannot send any more data because its send
+        //   buffer is full OR
+        //b) neither super nor this have any queued data
+        while (true) {
+            //Add more queued data to super if possible.
+            if (! super.hasQueued()) {
+                Message m=_queue.removeNext();
+                if (m==null)
+                    return false;    //Nothing left to send (a)
+                _numSentMessagesDropped+=_queue.resetDropped();
+                _bytesSent+=m.getTotalLength();
+                boolean hasUnsentData=super.write(m);
+                if (hasUnsentData)
+                    return true;     //needs another write (b)
+            }     
+            //Otherwise write data from super.  Abort if this didn't complete.
+            else {
+                boolean hasUnsentData=super.write();
+                if (hasUnsentData)
+                    return true;     //needs another write (b)
+            }
+        }
+    }
 
-//      public boolean write() throws IOException {  //overrides Connection.write
-//          boolean ret=false;
-//          //Terminate when either
-//          //a) super cannot send any more data because its send
-//          //   buffer is full OR
-//          //b) neither super nor this have any queued data            
-//          while (true) {
-//              //Add more queued data to super if possible
-//              if (! super.hasQueued()) {
-//                  if (! this.hasQueued())
-//                      break;
-//                  Message m=queue.extractBest();
-//                  super.queue(m);
-//              }
-            
-//              //Write data from super.  (Returns false if nothing queued.)
-//              boolean wrote=super.write();   
-//              ret=ret|wrote;
-            
-//              //Terminate if write didn't make progress
-//              if (! wrote)   
-//                  break;
-//          }
-//          return ret;
-//      }
+    protected boolean hasQueued() {
+        return _queue.size()>0;
+    }
 
-//      /** Repeatedly sends all the queued data. */
-//      private class OutputRunner extends Thread {
-//          public OutputRunner() {
-//              setDaemon(true);
-//              start();
-//          }
-
-//          /** While the connection is not closed, sends all data delay. */
-//          public void run() {
-//              while (true) {
-//                  repOk();
-//                  try {
-//                      waitForQueued();
-//                      sendQueued();
-//                  } catch (IOException e) {
-//                      if (_manager!=null) //may be null for testing
-//                          _manager.remove(ManagedConnection.this);
-//                      _runnerDied=true;
-//                      return;
-//                  }
-//                  repOk();
-//              }
-//          }
-
-//          /** 
-//           * Wait until the queue is (probably) non-empty or closed. 
-//           * @exception IOException this was closed while waiting
-//           */
-//          private final void waitForQueued() throws IOException {
-//              //The synchronized statement is outside the while loop to
-//              //protect _queued.
-//              synchronized (_outputQueueLock) {
-//                  while (isOpen() && _queued==0) {           
-//                      try {
-//                          _outputQueueLock.wait();
-//                      } catch (InterruptedException e) {
-//                          Assert.that(false, "OutputRunner Interrupted");
-//                      }
-//                  }
-//              }
-            
-//              if (! isOpen())
-//                  throw new IOException();
-//          }
-        
-//          /** Send several queued message of each type. */
-//          private final void sendQueued() throws IOException {  
-//              //1. For each priority i send as many messages as desired for that
-//              //type.  As an optimization, we start with the buffer of the last
-//              //message sent, wrapping around the buffer.  You can also search
-//              //from 0 to the end.
-//              int start=_lastPriority;
-//              int i=start;
-//              do {                   
-//                  //IMPORTANT: we only obtain _outputQueueLock while touching the
-//                  //queue, not while actually sending (which can block).
-//                  MessageQueue queue=_outputQueue[i];
-//                  queue.resetCycle();
-//                  boolean emptied=false;
-//                  while (true) {
-//                      Message m=null;
-//                      synchronized (_outputQueueLock) {
-//                          m=(Message)queue.removeNext(); 
-//                          int dropped=queue.resetDropped();
-//                          _numSentMessagesDropped+=dropped;
-//                          _queued-=(m==null?0:1)+dropped;  //maintain invariant
-//                          if (_queued==0)
-//                              emptied=true;                        
-//                          if (m==null)
-//                              break;
-//                      }
-//                      ManagedConnection.super.send(m);
-//                      _bytesSent+=m.getTotalLength();
-//                  }
-                
-//                  //Optimization: the if statement below is not needed for
-//                  //correctness but works nicely with the _priorityHint trick.
-//                  if (emptied)
-//                      break;
-//                  i=(i+1)%PRIORITIES;
-//              } while (i!=start);
-            
-            
-//              //2. Now force data from Connection's BufferedOutputStream into the
-//              //kernel's TCP send buffer.  It doesn't force TCP to
-//              //actually send the data to the network.  That is determined
-//              //by the receiver's window size and Nagle's algorithm.
-//              ManagedConnection.super.flush();
-//          }
-//      } //end OutputRunner
-
-
-//      /** 
-//       * For debugging only: prints to stdout the number of queued messages in
-//       * this, by type.
-//       */
-//      private void dumpQueueStats() {
-//          synchronized (_outputQueueLock) {
-//              for (int i=0; i<PRIORITIES; i++) {
-//                  System.out.println(i+" "+_outputQueue[i].size());
-//              }
-//              System.out.println("* "+_queued+"\n");
-//          }
-//      }
-
-
-//      public void close() {
-//          //Ensure OutputRunner terminates.
-//          synchronized (_outputQueueLock) {
-//              super.close();
-//              _outputQueueLock.notify();
-//          }        
-//      }
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -1284,22 +1070,6 @@ public class ManagedConnection
                 || hostname.endsWith("143"))) 
             return true;
         return false;
-    }
-
-    /** 
-     * Tests representation invariants.  For performance reasons, this is
-     * private and final.  Make protected if ManagedConnection is subclassed.
-     */
-    private final void repOk() {
-        /*
-        //Check _queued invariant.
-        synchronized (_outputQueueLock) {
-            int sum=0;
-            for (int i=0; i<_outputQueue.length; i++) 
-                sum+=_outputQueue[i].size();
-            Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
-        }
-        */
     }
     
     /***************************************************************************

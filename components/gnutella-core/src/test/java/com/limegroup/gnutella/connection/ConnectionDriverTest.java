@@ -3,6 +3,8 @@ package com.limegroup.gnutella.connection;
 import java.io.*;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.handshaking.*;
+import java.util.Properties;
 import com.sun.java.util.collections.*;
 
 public class ConnectionDriverTest extends TestCase {
@@ -12,6 +14,9 @@ public class ConnectionDriverTest extends TestCase {
 
     public static Test suite() {
         return new TestSuite(ConnectionDriverTest.class);
+        //TestSuite ret=new TestSuite("Simple suite");
+        //ret.addTest(new ConnectionDriverTest("testHugeWrite"));
+        //return ret;
     }
 
     /*
@@ -38,8 +43,9 @@ public class ConnectionDriverTest extends TestCase {
             out2=new Connection("127.0.0.1", PORT);
             out2.initialize(driver);
             in2=acceptor.accept();
-            assertTrue(in1!=null);
+            assertTrue(in2!=null);
         } catch (IOException e) { 
+            e.printStackTrace();
             fail("Couldn't create connection");
         }
     }
@@ -55,6 +61,29 @@ public class ConnectionDriverTest extends TestCase {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException e) { }
+    }
+
+    class GGEPProperties extends Properties {
+        GGEPProperties() {
+            this.put("GGEP", "0.6");
+        }
+    }
+
+    class GGEPResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response,
+                                         boolean outgoing) throws IOException {
+            Properties props=new Properties();
+            props.put("GGEP", "0.6"); 
+            return new HandshakeResponse(props);
+        }
+    }
+
+    class EmptyResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response,
+                                         boolean outgoing) throws IOException {
+            Properties props=new Properties();
+            return new HandshakeResponse(props);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -81,7 +110,7 @@ public class ConnectionDriverTest extends TestCase {
                                         (byte)3, (byte)0,
                                         new byte[SIZE]);
         out1.write(big);     // out1 -> in1
-        sleep(1000);
+        sleep(200);
         assertEquals(1, driver.reads.size());
         assertTrue(driver.reads.contains(new ReadPair(in1, big)));
     }
@@ -101,20 +130,3 @@ class TestConnectionDriver extends ConnectionDriver {
     public void error(Connection c) { }
 }
 
-class ReadPair {
-    Connection connection;
-    Message message;
-
-    public ReadPair(Connection connection, Message message) {
-        this.connection=connection;
-        this.message=message;
-    }
-
-    public boolean equals(Object o) {
-        if (! (o instanceof ReadPair))
-            return false;
-        ReadPair other=(ReadPair)o;
-        return this.connection==other.connection 
-            && Arrays.equals(this.message.getGUID(), other.message.getGUID());            
-    }
-}

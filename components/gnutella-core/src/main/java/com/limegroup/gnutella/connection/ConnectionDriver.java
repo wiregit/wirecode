@@ -124,6 +124,7 @@ public class ConnectionDriver implements ConnectionListener {
             
             //Wait for something to be readable or writeable.
             try {
+                //System.out.println("<Select>");
                 _selector.select();
             } catch (IOException e) {
                 //It's really not clear why this can happen, but it does
@@ -137,14 +138,13 @@ public class ConnectionDriver implements ConnectionListener {
                 SelectionKey key=(SelectionKey)iter.next();
                 try {
                     if (key.isReadable()) {       
-                        //System.out.println("Read");
+                        iter.remove();          //remove from selected set
+                        //System.out.println("<Read>");
                         Connection connection=(Connection)key.attachment();
                         connection.read();  //typically calls MessageRouter.handle
                     }
                 } catch (CancelledKeyException e) {
                     //Channel was closed.  Nothing to do.
-                } finally {
-                    iter.remove();          //remove from selected set
                 }
             }
 
@@ -153,7 +153,7 @@ public class ConnectionDriver implements ConnectionListener {
             synchronized (_needWriteRegister) {
                 Iterator iter=_needWriteRegister.iterator(); 
                 while (iter.hasNext()) {
-                    //System.out.println("Write register");
+                    //System.out.println("<Write register>");
                     Connection connection=(Connection)iter.next();
                     register(connection, true);
                 }
@@ -168,7 +168,8 @@ public class ConnectionDriver implements ConnectionListener {
                 SelectionKey key=(SelectionKey)iter.next();
                 try {
                     if (key.isWritable()) {
-                        //System.out.println("Write");
+                        iter.remove();          //remove from selected set
+                        //System.out.println("<Write>");
                         Connection connection=(Connection)key.attachment();
                         boolean needsMoreWrite=connection.write();
                         //If all data sent, Change registration status to only read.
@@ -177,8 +178,6 @@ public class ConnectionDriver implements ConnectionListener {
                     }
                 } catch (CancelledKeyException e) {
                     //Channel was closed.  Nothing to do.
-                } finally {
-                    iter.remove();          //remove from selected set
                 }
             }
             } catch (Exception e) {

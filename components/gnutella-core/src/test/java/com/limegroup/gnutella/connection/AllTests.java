@@ -12,6 +12,7 @@ public class AllTests {
         suite.addTest(ConnectionHandshakeTest.suite());
         suite.addTest(ConnectionTest.suite());
         suite.addTest(ConnectionDriverTest.suite());
+        suite.addTest(CompositeQueueTest.suite());
         return suite;
     }
 

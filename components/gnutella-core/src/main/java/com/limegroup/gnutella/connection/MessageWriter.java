@@ -74,6 +74,7 @@ public class MessageWriter {
 
         //Try one send.  No looping; that's for higher levels.
         int n=channel.write(message);
+        //System.out.println("Wrote "+n+" bytes");
 
         if (! message.hasRemaining()) {
             message=null;

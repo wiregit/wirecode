@@ -723,6 +723,12 @@ public class Connection {
         }                   
     }
 
+    /** Returns true if this has queued data, and hence is unable to accept
+     *  more messages. */
+    protected boolean hasQueued() {
+        return _writer.hasQueued();
+    }
+
     /**
      * Attempts to send m, or as much as possible.  First attempts to add m to
      * this' send queue, possibly discarding other queued messages (or m) for
@@ -733,27 +739,32 @@ public class Connection {
      *
      * This method is called from deep within the bowels of the message handling
      * code.  That's why it doesn't block and generates needWrite events through
-     * a callback instead of a simple return value.  
+     * a callback in addition to a return value.  
+     *
+     * @return true iff this still has unsent queued data.  If true, the caller
+     *  must subsequently call write() again 
      */
-    public void write(Message m) {
+    public boolean write(Message m) {
         if (_closed) {
             _listener.error(this);
-            return;
+            return false;
         }                    
 
         try {            
             boolean needsWrite=_writer.write(m);
             if (needsWrite)
                 _listener.needsWrite(this); 
+            return needsWrite;
         } catch (IOException e) {
             _listener.error(this);
+            return false;
         }                 
     }
 
     /**
      * Sends as much queued data as possible, if any.  Calls
-     * listener.error(this) if connection closed.  Does NOT call
-     * listener.needsWrite(this).<p>
+     * listener.error(this) if connection closed.  Typically does NOT call
+     * listener.needsWrite(this), though subclasses may change this behavior.<p>
      *
      * This method is called within the Selector code, which typically
      * needs to know whether to register the write operation.  That's why this
