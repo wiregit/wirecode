@@ -38,7 +38,9 @@ public class HostCatcherTest extends TestCase {
         File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
                                 "gnutella.net");
         if ( gdotnet.exists() ) {
-            gdotnet.renameTo( new File("gdotnet.tmp") );
+            File tmpFile = new File("gdotnet.tmp");
+            tmpFile.delete();
+            gdotnet.renameTo( tmpFile );
         }
         
         
@@ -52,6 +54,8 @@ public class HostCatcherTest extends TestCase {
 	    if( gtmp.exists() ) {
             File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
                                     "gnutella.net");
+            gdotnet.delete();
+            gtmp.renameTo( gdotnet );
 	    }
 	    
 	}
