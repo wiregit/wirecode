@@ -80,7 +80,7 @@ public class RichQueryHandler{
         debug("RQH.query(): # of resps = " + s);
         boolean busy = 
             RouterService.getUploadManager().isBusy() &&
-            RouterService.getUploadManager().isQueueFull();        
+            RouterService.getUploadManager().isQueueFull();
         for(int i = 0; i < s; i++) {
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none

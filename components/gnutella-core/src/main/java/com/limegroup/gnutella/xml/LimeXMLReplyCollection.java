@@ -110,6 +110,7 @@ public class LimeXMLReplyCollection{
             Iterator iter = hashToXML.keySet().iterator();
             if( iter.hasNext() )
                 requiresConversion = ( iter.next() instanceof String );
+            debug("requiresConversion: " + requiresConversion);
         }
         
         synchronized(fileToHash) {
@@ -134,21 +135,27 @@ public class LimeXMLReplyCollection{
                     xml = hashToXML.get(miniHash);
                     // If this was between LimeWire 2.5 and LimeWire 3.3...
                     // and it had some XML..
-                    if( xml != null && xml instanceof LimeXMLDocument )
+                    if( xml != null && xml instanceof LimeXMLDocument ) {
+                        debug("sync: 1");
                         doc = (LimeXMLDocument)xml;
-                    else // Pre LimeWire 2.5 or no XML stored.
+                    } else { // Pre LimeWire 2.5 or no XML stored. {
+                        debug("sync: 2");
                         doc = constructDocument((String)xml, file);
+                    }
                 } else { // After LimeWire 3.3
                     xml = hashToXML.get(hash);
-                    if( xml == null ) // no XML might exist, try and make some
+                    if( xml == null ) { // no XML might exist, try and make some
+                        debug("sync: 3");
                         doc = constructDocument(null, file);
-                    else //it had a doc already.
+                    } else { //it had a doc already.
+                        debug("sync: 4");
                         doc = (LimeXMLDocument)xml;
+                    }
                 }
                 
                 if( doc == null ) // no document, ignore.
                     continue;
-                
+                                
                 // We have a document, add it.
                 addReply(hash, doc);
             }
@@ -387,7 +394,7 @@ public class LimeXMLReplyCollection{
         return oldDoc;
     }
 
-    public boolean removeDoc(URN hash){
+    public boolean removeDoc(URN hash) {
         boolean found;
         Object val;
         synchronized(mainMap){
@@ -403,6 +410,8 @@ public class LimeXMLReplyCollection{
                 mainMap.put(hash,val);
             }
         }
+        
+        debug("found: " + found + ", written: " + written);
         
         return (found && written);
     }
@@ -439,6 +448,8 @@ public class LimeXMLReplyCollection{
     public int mp3ToDisk(String mp3FileName, URN hash, LimeXMLDocument doc) {
         boolean wrote=false;
         int mp3WriteState = -1;
+        
+        debug("writing: " + mp3FileName + " to disk.");
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
@@ -497,8 +508,10 @@ public class LimeXMLReplyCollection{
         existing.removeID3Tags(existingXML);
         
         // The ID3 tag is the same as the document, don't do anything.
-        if( newValues.equals(existing) )
+        if( newValues.equals(existing) ) {
+            debug("tag read from disk is same as XML doc.");
             return retObjs;
+        }
         
         // Something will change ... let them know.
         retObjs[0] = Boolean.TRUE;
@@ -513,21 +526,21 @@ public class LimeXMLReplyCollection{
                               ID3Editor editor) {
         //write to mp3 file...
         int retVal = editor.writeID3DataToDisk(mp3FileName);
+        debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 
         if( retVal == FILE_DEFECTIVE ||
             retVal == RW_ERROR ||
             retVal == BAD_ID3 )
             return retVal;
+            
+        // We do not remove the hash from the hashMap because
+        // MetaFileManager needs to look it up to get the doc.
         
-        synchronized (mainMap) {
-            Object mainValue = mainMap.remove(oldHash);
-        }
-
         //Since the hash of the file has changed, the metadata pertaiing 
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        metaFileManager.fileChanged(new File(mp3FileName), oldHash, this);
+        metaFileManager.fileChanged(new File(mp3FileName), oldHash);
         return retVal;
     }
 
@@ -573,6 +586,10 @@ public class LimeXMLReplyCollection{
                 istream = new FileInputStream(_backingStoreFile);
                 objStream = new ObjectInputStream(istream);
                 _hashMap = (Map) objStream.readObject();
+                for(Iterator it = _hashMap.entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry ent = (Map.Entry)it.next();
+                    debug("read " + ent.getKey() + ", " + ent.getValue());
+                }
             } catch(ClassNotFoundException cnfe) {
                 throw new IOException("class not found");
             } catch(ClassCastException cce) {
@@ -624,7 +641,7 @@ public class LimeXMLReplyCollection{
     private final static boolean debugOn = false;
     private final static void debug(String out) {
         if (debugOn)
-            System.out.println(out);
+            debug(out);
     }
     private final static void debug(Exception out) {
         if (debugOn)

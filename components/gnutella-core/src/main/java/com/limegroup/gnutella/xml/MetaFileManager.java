@@ -164,11 +164,11 @@ public class MetaFileManager extends FileManager {
      * audio LimeXMLReplyCollectin and, even further, it is only called
      * when the file being edited is an mp3 file
      */
-    void fileChanged(File f, URN oldHash, LimeXMLReplyCollection collection) {
+    public int fileChanged(File f, URN oldHash) {
         // Let FileManager know and get the index of the changed file.
         int index = super.fileChanged(f, oldHash);
         if( index == -1 ) // not shared of hashing failed, oh well.
-            return;
+            return -1;
 
         FileDesc fd = super.get(index);
         URN newHash = fd.getSHA1Urn();
@@ -182,15 +182,15 @@ public class MetaFileManager extends FileManager {
         int l = schemas.length;
         for(int i=0;i<l;i++){
             LimeXMLReplyCollection coll = map.getReplyCollection(schemas[i]);
-            if(coll!=collection){//only look at other collections
-                LimeXMLDocument d=coll.getDocForHash(oldHash);
-                if(d!=null){//we have a value...must replace
-                    coll.removeDoc(oldHash);
-                    coll.addReply(newHash,d);
-                    coll.write();
-                }//affected collection done
-            }
+            LimeXMLDocument d=coll.getDocForHash(oldHash);
+            if(d!=null){//we have a value...must replace
+                coll.removeDoc(oldHash);
+                coll.addReply(newHash,d);
+                coll.write();
+            }//affected collection done
         }
+        
+        return index;
     }
 
 
@@ -290,7 +290,8 @@ public class MetaFileManager extends FileManager {
         
         for(int i = 0; i < fds.length; i++) {
             FileDesc fd = fds[i];
-            writeToMap(fd.getFile(), fd.getSHA1Urn());
+            if( !(fd instanceof IncompleteFileDesc) )
+                writeToMap(fd.getFile(), fd.getSHA1Urn());
         }
     }
 
