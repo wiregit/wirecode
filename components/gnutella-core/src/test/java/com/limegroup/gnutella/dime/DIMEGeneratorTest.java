@@ -35,18 +35,22 @@ public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.BaseTes
 	    DIMEGenerator gen = new DIMEGenerator();
 	    
 	    DIMERecord one =
-	        DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+	        new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                               null, null, null, "one".getBytes());
         DIMERecord two =
-            DIMERecord.create(DIMERecord.TYPE_MEDIA_TYPE,
+            new DIMERecord(DIMERecord.TYPE_MEDIA_TYPE,
                               null, null, null, "two".getBytes());
         DIMERecord three =
-            DIMERecord.create(DIMERecord.TYPE_ABSOLUTE_URI,
+            new DIMERecord(DIMERecord.TYPE_ABSOLUTE_URI,
                               null, null, null, "three".getBytes());
 
+        assertEquals(0, gen.getLength());
         gen.add(one);
+        assertEquals(12 + 4, gen.getLength());
         gen.add(two);
+        assertEquals(12 + 4 + 12 + 4, gen.getLength());
         gen.add(three);
+        assertEquals(12 + 4 + 12 + 4 + 12 + 8, gen.getLength());
         
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -77,7 +81,7 @@ public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.BaseTes
     
     public void testWriteWithOne() throws Exception {
         DIMEGenerator gen = new DIMEGenerator();
-        DIMERecord one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        DIMERecord one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                            null, null, null, null);
         gen.add(one);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

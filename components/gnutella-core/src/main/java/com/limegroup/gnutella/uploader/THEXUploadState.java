@@ -12,6 +12,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.sun.java.util.collections.HashSet;
@@ -28,6 +29,7 @@ import com.sun.java.util.collections.Set;
 public class THEXUploadState implements HTTPMessage {
     private final FileDesc FILE_DESC;
     private final HTTPUploader UPLOADER;
+    private final HashTree TREE;
 
     /**
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
@@ -44,6 +46,7 @@ public class THEXUploadState implements HTTPMessage {
     public THEXUploadState(HTTPUploader uploader) {
         UPLOADER = uploader;
         FILE_DESC = uploader.getFileDesc();
+        TREE = FILE_DESC.getHashTree();
     }
 
     /**
@@ -57,40 +60,23 @@ public class THEXUploadState implements HTTPMessage {
     public void writeMessageHeaders(OutputStream os) throws IOException {
         String str = "HTTP/1.1 200 OK\r\n";
         os.write(str.getBytes());
+
         HTTPUtils.writeHeader(
             HTTPHeaderName.SERVER,
             ConstantHTTPHeaderValue.SERVER_VALUE,
             os);
-        if (FILE_DESC != null) {
-            // write the URN in case the caller wants it
-            URN sha1 = FILE_DESC.getSHA1Urn();
-            if (sha1 != null) {
-                HTTPUtils.writeHeader(
-                    HTTPHeaderName.GNUTELLA_CONTENT_URN,
-                    FILE_DESC.getSHA1Urn(),
-                    os);
-            }
-        }
 
-        if (UPLOADER.isFirstReply()) {
-            // write x-features header once because the downloader is
-            // supposed to cache that information anyway
-            Set features = new HashSet();
-            features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
-            if (ChatSettings.CHAT_ENABLED.getValue())
-                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
-            // Write X-Features header.
-            if (features.size() > 0) {
-                HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
-                        new HTTPHeaderValueCollection(features),
-                                      os);
-            }
-            // write X-Thex-URI header
-            if (FILE_DESC.getHashTree() != null)
-                HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
-                                      FILE_DESC.getHashTree(),
-                                      os);
-        }
+        // write the URN in case the caller wants it
+        HTTPUtils.writeHeader(
+            HTTPHeaderName.GNUTELLA_CONTENT_URN,
+            FILE_DESC.getSHA1Urn(),
+            os);
+
+        HTTPUtils.writeHeader(
+            HTTPHeaderName.CONTENT_LENGTH,
+            TREE.getOutputLength(),
+            os);        
+        
         str = "\r\n";
         os.write(str.getBytes());
     }
@@ -105,7 +91,7 @@ public class THEXUploadState implements HTTPMessage {
      */
     public void writeMessageBody(OutputStream os) throws IOException {
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
-        FILE_DESC.getHashTree().write(slowStream);
+        TREE.write(slowStream);
     }
 
     /**

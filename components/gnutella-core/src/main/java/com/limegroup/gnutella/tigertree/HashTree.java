@@ -78,12 +78,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     private final String THEX_URI;
     
     /**
-     * All intermediary nodes.
-     *
-     * This is lazily allocated for deserialized HashTrees the first
-     * time that getAllNodes is called.
+     * The tree writer.
      */
-    private transient List /* of List of byte[] */ ALL_NODES;
+    private transient HashTreeHandler _treeWriter;
 
     /*
      * Constructs a new HashTree out of the given nodes, root, sha1
@@ -96,12 +93,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         ROOT_HASH = (byte[])((List)allNodes.get(0)).get(0);
         DEPTH = allNodes.size()-1;
         Assert.that(log2Ceil(NODES.size()) == DEPTH);
-        
-        // Only store smaller trees.
-        if(DEPTH <= MAX_DEPTH_TO_STORE)
-            ALL_NODES = Collections.unmodifiableList(allNodes);
-        else
-            ALL_NODES = null;
+        HashTreeNodeManager.instance().register(this, allNodes);
     }
 
     /**
@@ -305,23 +297,22 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @return all nodes.
      */
     public List getAllNodes() {
-        if(ALL_NODES == null) {
-            if(DEPTH <= MAX_DEPTH_TO_STORE)
-                ALL_NODES =
-                    Collections.unmodifiableList(createAllParentNodes(NODES));
-            else
-                return createAllParentNodes(NODES);
-        }
-        
-        return ALL_NODES;
+        return HashTreeNodeManager.instance().getAllNodes(this);
     }
 
     /**
      * Writes this HashTree to the specified OutputStream using DIME.
      */
     public void write(OutputStream out) throws IOException {
-        new HashTreeHandler(this).write(out);
+        getTreeWriter().write(out);
     }
+    
+    /**
+     * Determines the length of the tree's output.
+     */
+    public int getOutputLength() {
+        return getTreeWriter().getLength();
+    }        
 
     /**
      * Calculates which depth we want to use for the HashTree. For small files
@@ -353,10 +344,38 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         else
             return 9;
     }
+    
+    /**
+     * Returns the TreeWriter, initializing it if necessary.
+     * No volatile or locking is necessary, because it's not a huge
+     * deal if we create two of these.
+     */
+    private HashTreeHandler getTreeWriter() {
+        if(_treeWriter == null)
+            _treeWriter = new HashTreeHandler(this);
+        return _treeWriter;
+    }            
 
     /*
      * Static helper methods
      */
+
+    /*
+     * Iterative method to generate the parent nodes of an arbitrary
+     * depth.
+     *
+     * The 0th element of the returned List will always be a List of size
+     * 1, containing a byte[] of the root hash.
+     */
+    static List createAllParentNodes(List nodes) {
+        List allNodes = new ArrayList();
+        allNodes.add(Collections.unmodifiableList(nodes));
+        while (nodes.size() > 1) {
+            nodes = createParentGeneration(nodes);
+            allNodes.add(0, nodes);
+        }
+        return allNodes;
+    }
      
     /*
      * Create the parent generation of the Merkle HashTree for a given child
@@ -384,7 +403,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         }
         return ret;
     }     
-     
 
     /*
      * Create a generation of nodes. It is very important that nodeSize equals
@@ -430,23 +448,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             }
         }
         return ret;
-    }
-
-    /*
-     * Iterative method to generate the parent nodes of an arbitrary
-     * depth.
-     *
-     * The 0th element of the returned List will always be a List of size
-     * 1, containing a byte[] of the root hash.
-     */
-    private static List createAllParentNodes(List nodes) {
-        List allNodes = new ArrayList();
-        allNodes.add(Collections.unmodifiableList(nodes));
-        while (nodes.size() > 1) {
-            nodes = createParentGeneration(nodes);
-            allNodes.add(0, nodes);
-        }
-        return allNodes;
     }
 
     // calculates the next n with 2^n > number

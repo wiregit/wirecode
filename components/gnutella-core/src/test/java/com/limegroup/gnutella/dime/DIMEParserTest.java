@@ -55,7 +55,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test a stream that didn't have a 'first' message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, null);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -69,7 +69,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test we can read a single message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
         one.write(out);
@@ -88,11 +88,11 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test that once we get a message with ME we stop.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sam".getBytes());
         one.setFirstRecord(true);
         one.setLastRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bad".getBytes());
         one.write(out);
         two.write(out);
@@ -111,10 +111,10 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bas".getBytes());
         two.setFirstRecord(true);
         one.write(out);
@@ -152,7 +152,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test a stream that didn't have a 'first' message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, null);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -166,7 +166,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test we can read a single message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
         one.write(out);
@@ -183,11 +183,11 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test that once we get a message with ME we stop.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sam".getBytes());
         one.setFirstRecord(true);
         one.setLastRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bad".getBytes());
         one.write(out);
         two.write(out);
@@ -204,10 +204,10 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bas".getBytes());
         two.setFirstRecord(true);
         one.write(out);
@@ -244,7 +244,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test a stream that didn't have a 'first' message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, null);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -258,10 +258,10 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bas".getBytes());
         two.setFirstRecord(true);
         one.write(out);
@@ -278,7 +278,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         // test the simple correct case with one message (first & last)
         // test we can read a single message.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
         one.setLastRecord(true);
@@ -296,11 +296,11 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         // test that we ignore further messages after the last message
         // is read.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "bas".getBytes());
         one.setFirstRecord(true);
         one.setLastRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.write(out);
         two.write(out);
@@ -316,7 +316,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // test that a stream without an end fails.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "sab".getBytes());
         one.setFirstRecord(true);
         one.write(out);
@@ -339,12 +339,12 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
         // write out a few messages.
         out = new ByteArrayOutputStream();
-        one = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "one".getBytes());
         one.setFirstRecord(true);
-        two = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "two".getBytes());
-        three = DIMERecord.create(DIMERecord.TYPE_UNCHANGED,
+        three = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
                                 null, null, null, "three".getBytes());
         three.setLastRecord(true);
         one.write(out);

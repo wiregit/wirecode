@@ -95,7 +95,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	public void testCreate() throws Exception {
 	    // Basic DIMERecord, no data at all.
 	    // More complex creates are tested in other tests.
-	    DIMERecord record = DIMERecord.create((byte)0x00, null, 
+	    DIMERecord record = new DIMERecord((byte)0x00, null, 
 	                                          null, null, null);
 	    assertFalse(record.isFirstRecord());
 	    assertFalse(record.isLastRecord());
@@ -106,7 +106,8 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(0, record.getId().length);
 	    assertEquals(0, record.getOptions().length);
 	    assertEquals("", record.getIdentifier());
-	    assertEquals(new HashMap(), record.getOptionsMap());	    
+	    assertEquals(new HashMap(), record.getOptionsMap());
+	    assertEquals(12, record.getRecordLength());
 	    
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -121,7 +122,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    for(int i = 2; i < header.length; i++)
 	        assertEquals(0, header[i]);
         assertEquals(-1, in.read());
-    }
+    }   
     
     public void testMessageBeginAndMessageEnd() throws Exception {
         DIMERecord record;
@@ -129,7 +130,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
         ByteArrayInputStream in;
 	    byte[] header = new byte[12];        
         
-        record = DIMERecord.create((byte)0x00, null, null, null, null);
+        record = new DIMERecord((byte)0x00, null, null, null, null);
 	    assertFalse(record.isFirstRecord());
 	    assertFalse(record.isLastRecord());
 	    
@@ -204,7 +205,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    ByteArrayInputStream in;
 	    byte[] header = new byte[12];
 	    
-	    record = DIMERecord.create(DIMERecord.TYPE_MEDIA_TYPE,
+	    record = new DIMERecord(DIMERecord.TYPE_MEDIA_TYPE,
 	                               "4abc".getBytes(), "1".getBytes(),
 	                               "2x".getBytes(), "3yz".getBytes());
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, record.getTypeId());
@@ -213,6 +214,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals("2x", record.getTypeString());
         assertEquals("3yz".getBytes(), record.getData());
         assertEquals("4abc".getBytes(), record.getOptions());
+        assertEquals(28, record.getRecordLength());
         
         record.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -260,6 +262,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals("berlin".getBytes(), record.getId());
         assertEquals("hackers", record.getTypeString());
         assertEquals("limewire".getBytes(), record.getData());
+        assertEquals(44, record.getRecordLength());
         
         //Create a message with invalid padding and make sure we throw IOE.
         out = new ByteArrayOutputStream();
@@ -288,7 +291,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // A - TYPE_UNCHANGED.
 	    // Valid only if the 'type' data is 0 length.
-	    record = DIMERecord.create((byte)0x00,
+	    record = new DIMERecord((byte)0x00,
 	                               null, null, null, null);
         assertEquals(DIMERecord.TYPE_UNCHANGED, record.getTypeId());
 	    assertEquals(0, record.getType().length);
@@ -302,7 +305,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // Now try a bad case -- TYPE_UNCHANGED with a type passed to it.
 	    try {
-	        record = DIMERecord.create((byte)0x00,
+	        record = new DIMERecord((byte)0x00,
 	                                   null, null, "sam".getBytes(), null);
             fail("expected exception");
         } catch(IllegalArgumentException expected) {
@@ -330,7 +333,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // B - TYPE_MEDIA_TYPE
         // Valid always.
-        record = DIMERecord.create((byte)(0x01 << 4),
+        record = new DIMERecord((byte)(0x01 << 4),
                                    null, null, null, null);
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, record.getTypeId());
 	    assertEquals(0, record.getType().length);
@@ -360,7 +363,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(new HashMap(), record.getOptionsMap());
 	    
 	    // try with some type data too.
-        record = DIMERecord.create((byte)(0x01 << 4),
+        record = new DIMERecord((byte)(0x01 << 4),
                                    null, null, "sam".getBytes(), null);
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, record.getTypeId());
 	    assertEquals(3, record.getType().length);
@@ -391,7 +394,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(new HashMap(), record.getOptionsMap());
 	    
 	    // C - Absolute URI, valid always.
-        record = DIMERecord.create((byte)(0x02 << 4),
+        record = new DIMERecord((byte)(0x02 << 4),
                                    null, null, null, null);
         assertEquals(DIMERecord.TYPE_ABSOLUTE_URI, record.getTypeId());
 	    assertEquals(0, record.getType().length);
@@ -421,7 +424,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(new HashMap(), record.getOptionsMap());
 	    
 	    // try with some type data too.
-        record = DIMERecord.create((byte)(0x02 << 4),
+        record = new DIMERecord((byte)(0x02 << 4),
                                    null, null, "sam".getBytes(), null);
         assertEquals(DIMERecord.TYPE_ABSOLUTE_URI, record.getTypeId());
 	    assertEquals(3, record.getType().length);
@@ -453,7 +456,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // D - TYPE_UNKNOWN.
 	    // Valid only if the 'type' data is 0 length.
-	    record = DIMERecord.create((byte)(0x03 << 4),
+	    record = new DIMERecord((byte)(0x03 << 4),
 	                               null, null, null, null);
         assertEquals(DIMERecord.TYPE_UNKNOWN, record.getTypeId());
 	    assertEquals(0, record.getType().length);
@@ -485,7 +488,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // Now try a bad case -- TYPE_UNKNOWN with a type passed to it.
 	    try {
-	        record = DIMERecord.create((byte)(0x03 << 4),
+	        record = new DIMERecord((byte)(0x03 << 4),
 	                                   null, null, "sam".getBytes(), null);
             fail("expected exception");
         } catch(IllegalArgumentException expected) {
@@ -513,7 +516,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // E - TYPE_NONE
 	    // Requires no data & no type.
-	    record = DIMERecord.create((byte)(0x04 << 4),
+	    record = new DIMERecord((byte)(0x04 << 4),
 	                               null, null, null, null);
         assertEquals(DIMERecord.TYPE_NONE, record.getTypeId());
 	    assertEquals(0, record.getType().length);
@@ -545,7 +548,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    
 	    // Now try a bad case -- TYPE_NONE with a type passed to it.
 	    try {
-	        record = DIMERecord.create((byte)(0x04 << 4),
+	        record = new DIMERecord((byte)(0x04 << 4),
 	                                   null, null, "sam".getBytes(), null);
             fail("expected exception");
         } catch(IllegalArgumentException expected) {
@@ -572,7 +575,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
         
         // Try another bad case -- TYPE_NONE with data passed to it.
 	    try {
-	        record = DIMERecord.create((byte)(0x04 << 4),
+	        record = new DIMERecord((byte)(0x04 << 4),
 	                                   null, null, null, "samuel".getBytes());
             fail("expected exception");
         } catch(IllegalArgumentException expected) {
@@ -620,7 +623,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
             
             // try also creating not from network.
             try {
-                DIMERecord record = DIMERecord.create((byte)type, null,
+                DIMERecord record = new DIMERecord((byte)type, null,
                                                       null, null, null);
                 fail("expected exception");
             } catch(IllegalArgumentException expected) {

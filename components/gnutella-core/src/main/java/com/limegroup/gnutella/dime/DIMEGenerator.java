@@ -25,13 +25,29 @@ import java.io.IOException;
  */
 public class DIMEGenerator {
     
+    /**
+     * The list of records that will be written out.
+     */
     private final List RECORDS = new LinkedList();
+    
+    /**
+     * The amount of bytes that write(OutputStream) will write.
+     */
+    private int _length = 0;
     
     /**
      * Adds the given record to the internal list of records.
      */
     public void add(DIMERecord record) {
         RECORDS.add(record);
+        _length += record.getRecordLength();
+    }
+    
+    /**
+     * Returns the amount of bytes that write(OutputStream) will write.
+     */
+    public int getLength() {
+        return _length;
     }
     
     /**

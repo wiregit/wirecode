@@ -107,6 +107,7 @@ public class HashTreeTest extends BaseTestCase {
         hashTree.write(baos);
         
         written = baos.toByteArray();
+        assertEquals(written.length, hashTree.getOutputLength());
         
         // Should be two DIME Records.
         ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
@@ -129,6 +130,7 @@ public class HashTreeTest extends BaseTestCase {
         
         assertEquals(hashTree.getDepth(), treeFromNetwork.getDepth());
         assertEquals(hashTree.getRootHash(), treeFromNetwork.getRootHash());
+        assertEquals(written.length, hashTree.getOutputLength());
         
     }
 
@@ -316,7 +318,7 @@ public class HashTreeTest extends BaseTestCase {
     }
     
     private DIMERecord createCorruptRecord(DIMERecord base, byte[] data) {
-        return DIMERecord.create((byte)base.getTypeId(),
+        return new DIMERecord((byte)base.getTypeId(),
                                  base.getOptions(),
                                  base.getId(),
                                  base.getType(),
@@ -324,7 +326,7 @@ public class HashTreeTest extends BaseTestCase {
     }    
     
     private DIMERecord createCorruptRecord(DIMERecord base, String data) {
-        return DIMERecord.create((byte)base.getTypeId(),
+        return new DIMERecord((byte)base.getTypeId(),
                                  base.getOptions(),
                                  base.getId(),
                                  base.getType(),

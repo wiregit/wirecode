@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import com.limegroup.gnutella.Assert;
@@ -170,10 +171,18 @@ public class DIMERecord {
     /**
      * Constructs a new DIMERecord with the given data.
      */
-    private DIMERecord(byte byte1, byte byte2, byte[] options,
+    public DIMERecord(byte byte1, byte byte2, byte[] options,
                        byte[] id, byte[] type, byte[] data) {
         _byte1 = byte1;
         _byte2 = byte2;
+        if(options == null)
+            options = DataUtils.EMPTY_BYTE_ARRAY;
+        if(id == null)
+            id = DataUtils.EMPTY_BYTE_ARRAY;
+        if(type == null)
+            type = DataUtils.EMPTY_BYTE_ARRAY;
+        if(data == null)
+            data = DataUtils.EMPTY_BYTE_ARRAY;
         _options = options;
         _id = id;
         _type = type;
@@ -184,19 +193,10 @@ public class DIMERecord {
     /**
      * Constructs a new DIMERecord with the given information.
      */
-    public static DIMERecord create(byte typeId, byte[] options, byte[] id,
-                             byte[] type, byte[] data) {
-        byte byte1 = VERSION;
-        byte byte2 = (byte)(typeId | RESERVED);
-        if(options == null)
-            options = DataUtils.EMPTY_BYTE_ARRAY;
-        if(id == null)
-            id = DataUtils.EMPTY_BYTE_ARRAY;
-        if(type == null)
-            type = DataUtils.EMPTY_BYTE_ARRAY;
-        if(data == null)
-            data = DataUtils.EMPTY_BYTE_ARRAY;
-        return new DIMERecord(byte1, byte2, options, id, type, data);
+    public DIMERecord(byte typeId, byte[] options, byte[] id,
+                      byte[] type, byte[] data) {
+        this(VERSION, (byte)(typeId | RESERVED), 
+             options, id, type, data);
     }
     
     /**
@@ -246,23 +246,62 @@ public class DIMERecord {
     }
     
     /**
+     * Determines the length of the full record.
+     */
+    public int getRecordLength() {
+        return 12 // header
+             + getOptionsLength() + calculatePaddingLength(getOptionsLength())
+             + getIdLength() + calculatePaddingLength(getIdLength())
+             + getTypeLength() + calculatePaddingLength(getTypeLength())
+             + getDataLength() + calculatePaddingLength(getDataLength());
+    }        
+    
+    /**
      * Writes this record to the given OutputStream.
      */
     void write(OutputStream out) throws IOException {
         // Write the header.
         out.write(_byte1);
         out.write(_byte2);
-        ByteOrder.int2beb(_options.length, out, 2);
-        ByteOrder.int2beb(_id.length, out, 2);
-        ByteOrder.int2beb(_type.length, out, 2);
-        ByteOrder.int2beb(_data.length, out, 4);
+        ByteOrder.int2beb(getOptionsLength(), out, 2);
+        ByteOrder.int2beb(getIdLength(), out, 2);
+        ByteOrder.int2beb(getTypeLength(), out, 2);
+        ByteOrder.int2beb(getDataLength(), out, 4);
         
         // Write out the data.
+        writeOptions(out);
+        writeId(out);
+        writeType(out);
+        writeData(out);
+    }
+    
+    /**
+     * Writes the option out.
+     */
+    public void writeOptions(OutputStream out) throws IOException {
         writeDataWithPadding(_options, out);
+    }
+    
+    /**
+     * Writes the id out.
+     */
+    public void writeId(OutputStream out) throws IOException {
         writeDataWithPadding(_id, out);
+    }
+    
+    /**
+     * Writes the type out.
+     */
+    public void writeType(OutputStream out) throws IOException {    
         writeDataWithPadding(_type, out);
+    }
+
+    /**
+     * Writes the data out.
+     */
+    public void writeData(OutputStream out) throws IOException {    
         writeDataWithPadding(_data, out);
-    }        
+    }
     
     /**
      * Sets this to be the first record in a sequence of records.
@@ -309,6 +348,13 @@ public class DIMERecord {
     public int getTypeId() {
         return _byte2 & TYPE_MASK;
     }
+    
+    /**
+     * Returns the length of the type.
+     */
+    public int getTypeLength() {
+        return _type.length;
+    }    
 
     /**
      * @return typeField of <tt>DIMERecord</tt>
@@ -322,12 +368,20 @@ public class DIMERecord {
      */
     public String getTypeString() {
         try {
-            return new String(_type, "UTF-8");
+            return new String(getType(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             ErrorService.error(e);
             return null;
         }
     }
+    
+    /**
+     * Returns the length of the data.
+     */
+    public int getDataLength() {
+        return _data.length;
+    }
+        
 
     /**
      * @return dataField of <tt>DIMERecord</tt>
@@ -335,6 +389,13 @@ public class DIMERecord {
     public byte[] getData() {
         return _data;
     }
+    
+    /**
+     * Returns the length of the id.
+     */
+    public int getIdLength() {
+        return _id.length;
+    }    
 
     /**
      * @return idField of <tt>DIMERecord</tt>
@@ -342,6 +403,13 @@ public class DIMERecord {
     public byte[] getId() {
         return _id;
     }
+    
+    /**
+     * Returns the length of the options.
+     */
+    public int getOptionsLength() {
+        return _options.length;
+    }    
 
     /**
      * @return optionsField of <tt>DIMERecord</tt>
@@ -355,7 +423,7 @@ public class DIMERecord {
      */
     public String getIdentifier() {
         if (_idString == null)
-            _idString = new String(_id);
+            _idString = new String(getId());
         return _idString;
     }
 
@@ -367,9 +435,33 @@ public class DIMERecord {
      */
     public Map getOptionsMap() throws DIMEMessageException {
         if (_optionsMap == null)
-            _optionsMap = parseOptions(_options);
+            _optionsMap = parseOptions(getOptions());
         return _optionsMap;
     }
+    
+    /**
+     * Writes the padding necessary for the given length.
+     */
+    public static void writePadding(int length, OutputStream os)
+      throws IOException {
+        // write the padding.
+        int padding = calculatePaddingLength(length);
+        switch(padding) {
+        case 0:
+            return;
+        case 1:
+            os.write(DataUtils.BYTE_ARRAY_ONE);
+            return;
+        case 2:
+            os.write(DataUtils.BYTE_ARRAY_TWO);
+            return;
+        case 3:
+            os.write(DataUtils.BYTE_ARRAY_THREE);
+            return;
+        default:
+            throw new IllegalStateException("invalid padding.");
+        }
+    }    
     
     /**
      * Validates the first two bytes.
@@ -394,7 +486,7 @@ public class DIMERecord {
         byte maskedType = (byte)(_byte2 & TYPE_MASK);
         switch(maskedType) {
         case TYPE_UNCHANGED:
-            if(_type.length != 0)
+            if( getTypeLength() != 0)
                 throw new IllegalArgumentException(
                     "TYPE_UNCHANGED requires 0 type length");
             break;                    
@@ -403,12 +495,12 @@ public class DIMERecord {
         case TYPE_ABSOLUTE_URI:
             break;
         case TYPE_UNKNOWN:
-            if(_type.length != 0)
+            if( getTypeLength() != 0)
                 throw new IllegalArgumentException(
                     "TYPE_UNKNOWN requires 0 type length");
             break;
         case TYPE_NONE:
-            if(_type.length != 0 || _data.length != 0)
+            if( getTypeLength() != 0 || getDataLength() != 0)
                 throw new IllegalArgumentException(
                     "TYPE_NONE requires 0 type & data length");
             break;
@@ -433,7 +525,7 @@ public class DIMERecord {
     }
     
     /**
-     * Writes the given data an output stream, including padding.
+     * Writes the given data to an output stream, including padding.
      */
     private static void writeDataWithPadding(byte[] data, OutputStream os) 
       throws IOException {
@@ -441,25 +533,8 @@ public class DIMERecord {
             return;
             
         os.write(data);
-        
-        // write the padding.
-        int padding = calculatePaddingLength(data.length);
-        switch(padding) {
-        case 0:
-            return;
-        case 1:
-            os.write(DataUtils.BYTE_ARRAY_ONE);
-            return;
-        case 2:
-            os.write(DataUtils.BYTE_ARRAY_TWO);
-            return;
-        case 3:
-            os.write(DataUtils.BYTE_ARRAY_THREE);
-            return;
-        default:
-            throw new IllegalStateException("invalid padding.");
-        }
-    }   
+        writePadding(data.length, os);
+    }
         
     /**
      * Calculates how much data should be padded for the given length.
