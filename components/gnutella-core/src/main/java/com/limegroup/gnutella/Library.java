@@ -69,10 +69,20 @@ public class Library {
 	    return false;
 	Properties props = System.getProperties();
 	String os = props.getProperty("os.name");
-	if (os.indexOf("Windows") != -1) {
+	if (os.indexOf("NT") != -1) {
 	    try {
 		Runtime runtime = Runtime.getRuntime();
 		String str = "cmd /c "+"\""+ checkChars(path)+"\"";
+		Process p1 = runtime.exec(str);
+	    }catch (Exception e) {
+		return false;
+	    }
+	    return true;
+	}
+	else if (os.indexOf("Windows") != -1) {
+	    try {
+		Runtime runtime = Runtime.getRuntime();
+		String str = "start "+"\""+ path+"\"";
 		Process p1 = runtime.exec(str);
 	    }catch (Exception e) {
 		return false;
@@ -85,7 +95,7 @@ public class Library {
     
     private static String checkChars(String str) {
 	
-	String escapeChars = "&()| ";
+	String escapeChars = "&()|<>^ ";
 	
 	char[] chars = str.toCharArray();
 	int length = chars.length;
