@@ -53,6 +53,7 @@ public class RouterService
     private ResponseVerifier verifier = new ResponseVerifier();
     private DownloadManager downloader;
     private UploadManager uploadManager;
+    private ChatManager chatManager;//keep the reference around...prevent class GC
 
 	/**
 	 * Creates a unitialized RouterService.  No work is done until
@@ -79,6 +80,9 @@ public class RouterService
   		this.catcher = new HostCatcher(callback);
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager();
+
+        this.chatManager = ChatManager.instance();
+
 		// Now, link all the pieces together, starting the various threads.
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
@@ -86,7 +90,7 @@ public class RouterService
 		this.manager.initialize(router, catcher);		
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
-
+        this.chatManager.setActivityCallback(callback);
 		// Make the call to connect to the router after everything else has
 		// been initialized
 		this.catcher.connectToRouter();
