@@ -72,5 +72,20 @@ public class FileUtils
     
         return ret;
     }
+
+    /**
+     * Same as f.listFiles(FileNameFilter) in JDK1.2
+     */
+    public static File[] listFiles(File f, FilenameFilter filter) {
+        String[] children=f.list(filter);
+        if(children == null)
+            return null;
+        File[] ret = new File[children.length];
+        for (int i=0; i<children.length; i++) {
+            ret[i] = new File(f, children[i]);
+        }
+    
+        return ret;
+    }    
     
 }
