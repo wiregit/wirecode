@@ -419,6 +419,7 @@ public class UploadManager {
 				synchronized(UploadManager.this) {
 					removeFromMap(_host);
 					removeAttemptedPush(_host, _index);
+					_callback.removeUpload(_up);		
 				}
 			}
 			
