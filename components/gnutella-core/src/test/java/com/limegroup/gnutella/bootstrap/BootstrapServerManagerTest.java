@@ -354,13 +354,14 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     }
 
     public void testRedirect() {
+        // we should not follow redirects!!!
         s3.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url1);
         s3.setResponseData("You have been redirected.");
         bman.fetchEndpointsAsync();
         sleep();
         assertNotNull(s3.getRequest());  //original location
-        assertNotNull(s1.getRequest());  //was redirected here
-        assertNull(s2.getRequest());  //didn't go here
+        assertNull(s1.getRequest());  //was redirected here, but shouldn't go
+        assertNotNull(s2.getRequest());  //should go here since s3 was crap
         assertEquals("invalid responses, got: " + catcher.list,
                 RESPONSES_PER_SERVER, catcher.list.size());
     }

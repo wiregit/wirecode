@@ -510,7 +510,7 @@ public class BootstrapServerManager {
         get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
-        get.setFollowRedirects(true);
+        get.setFollowRedirects(false);
         HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
