@@ -155,5 +155,9 @@ public class StatisticVendorMessage extends VendorMessage {
             throw new BadPacketException("unknown granularity requested");
         }
     }
-    
+ 
+    public String getReportedStats() {
+        return new String(getPayload());
+    }
+   
 }

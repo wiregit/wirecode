@@ -17,18 +17,15 @@ public class GiveStatsVendorMessage extends VendorMessage {
      * The opcode in this Vendor message to ask the other end to give us the
      * various statistics.
      */
-    public static final byte GNUTELLA_INCOMING_TRAFFIC = (byte)1;
-    
-    public static final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)2;
+    public static final byte GNUTELLA_INCOMING_TRAFFIC = (byte)0;
+    public static final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)1;
+    public static final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)2;
+    public static final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)3;   
 
-    public static final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)3;
-    
-    public static final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)4;   
-
-    public static final byte PER_CONNECTION_STATS = (byte)1;
-    public static final byte ALL_CONNECTIONS_STATS = (byte)2;
-    public static final byte LEAF_CONNECTIONS_STATS = (byte)1;
-    public static final byte UP_CONNECTIONS_STATS = (byte)2;
+    public static final byte PER_CONNECTION_STATS = (byte)0;
+    public static final byte ALL_CONNECTIONS_STATS = (byte)1;
+    public static final byte LEAF_CONNECTIONS_STATS = (byte)2;
+    public static final byte UP_CONNECTIONS_STATS = (byte)3;
 
 
     private int _network;
@@ -38,19 +35,11 @@ public class GiveStatsVendorMessage extends VendorMessage {
      */
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
                        byte[] payload, int network) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,
-              payload);
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload);
         if(version == 1 && getPayload().length != 2)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
                                          payload.length);
-
         _network = network;
-
-        //TODO1: OK. Find out what kind of stat is requested and return it
-        //with the StatisticVendorMessage.
-        //Note the response StatisticVendor message must go out in UDP, or
-        //TCP depending on whether this message was received via UDP or TCP
-        
     }
     
     /**

@@ -13,8 +13,7 @@ import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 
 
@@ -373,6 +372,12 @@ public abstract class MessageRouter {
                 ; //TODO: add the statistics recording code
             handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
         }
+        else if(msg instanceof StatisticVendorMessage) {
+            if(RECORD_STATS) 
+                ;//TODO: add the statistics recording code
+            handleStatisticsMessage(
+                            (StatisticVendorMessage)msg, receivingConnection);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -459,6 +464,11 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ;
             handleGiveStats((GiveStatsVendorMessage) msg, handler);
+        }
+        else if(msg instanceof StatisticVendorMessage) {
+            if(RECORD_STATS)
+                ;
+            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
     }
     
@@ -1947,6 +1957,28 @@ public abstract class MessageRouter {
         statHandler.start();
     }
 
+    private void handleStatisticsMessage(final StatisticVendorMessage svm, 
+                                         final ReplyHandler handler) {
+        Thread statHandler = new Thread("Stat writer ") {
+            public void run() {
+                RandomAccessFile file = null;
+                try {
+                    file = new RandomAccessFile("stats_log.log", "rw");
+                    file.seek(file.length());//go to the end.
+                    file.writeBytes(svm.getReportedStats()+"\n");
+                } catch (IOException iox) {
+                    ErrorService.error(iox);
+                } finally {
+                    try {
+                        file.close();
+                    } catch (IOException iox) {
+                        ErrorService.error(iox);
+                    }
+                }
+            }
+        };
+        statHandler.start();
+    }
 
     /**
      * The default handler for PushRequests received in
