@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import junit.framework.*;
-import junit.extensions.*;
 import java.io.*;
 import java.net.*;
 import java.util.Properties;
@@ -12,8 +11,6 @@ import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -24,7 +21,6 @@ import com.limegroup.gnutella.downloader.Interval;
  * containing the lowercase characters a-z.
  */
 public class UploadTest extends BaseTestCase {
-    private static String address;
     private static final int PORT = 6668;
     /** The file name, plain and encoded. */
     private static String testDirName = "com/limegroup/gnutella/uploader/data";
@@ -85,7 +81,6 @@ public class UploadTest extends BaseTestCase {
     }
 
 	protected void setUp() throws Exception {
-		address = InetAddress.getLocalHost().getHostAddress();
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
 		    new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -93,7 +88,7 @@ public class UploadTest extends BaseTestCase {
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
-        UploadSettings.MAX_UPLOADS.setValue(10);
+        UploadSettings.HARD_MAX_UPLOADS.setValue(10);
 		UploadSettings.UPLOADS_PER_PERSON.setValue(10);
 
         FilterSettings.FILTER_DUPLICATES.setValue(false);
@@ -115,7 +110,7 @@ public class UploadTest extends BaseTestCase {
 		copyFile(testFile, sharedFile);
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
 
-        if ( !ROUTER_SERVICE.isStarted() ) {
+        if ( !RouterService.isStarted() ) {
             startAndWaitForLoad();
             Thread.sleep(2000);
         }
@@ -1396,19 +1391,6 @@ public class UploadTest extends BaseTestCase {
         return downloadInternal("GET", "/get/" + index + "/" + file, header,
                                     out, in, requiredHeader, false);
 	}
-    
-    
-    /** Removes all spaces and lower cases all characters. */
-    private static String canonicalizeHeader(String line) {
-        //Although we really should not replace 'bytes 2' with 'bytes2'
-        //this method does...but who cares?
-        StringBuffer buf=new StringBuffer();
-        for (int i=0; i<line.length(); i++) {
-            if (line.charAt(i)!=' ')
-                buf.append(Character.toLowerCase(line.charAt(i)));
-        }
-        return buf.toString();
-    }
 
     /** 
      * Sends an arbitrary request, returning the result.
