@@ -4,9 +4,9 @@ import java.io.*;
 import java.util.*;
 
 /**
- * The command-line UI for the router
+ * The command-line UI for the Gnutella servent.
  */
-public class Main {	
+public class Main implements ActivityCallback {	
     public static void main(String args[]) {
 	//Start thread to accept connections.  Optional first arg is the 
 	//listening port number.
@@ -16,6 +16,7 @@ public class Main {
 	} else {
 	    service=new RouterService();
 	}
+	service.setActivityCallback(new Main());
 
 	BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 	for ( ; ;) {
@@ -65,6 +66,61 @@ public class Main {
 	System.out.println("Good bye.");
 	service.shutdown(); //write gnutella.net
     }
+
+    /////////////////////////// ActivityCallback methods //////////////////////
+
+    public void addConnection(String host, int port, int type, int status) {
+	String direction=null;
+	String direction2=null;
+	if (type==ActivityCallback.CONNECTION_OUTGOING) {
+	    direction="outgoing";
+	    direction2="to ";
+	} else if (type==ActivityCallback.CONNECTION_INCOMING) {
+	    direction="incoming";
+	    direction2="from ";
+	} else
+	    Assert.that(false,"Unknown connection type");
+
+	if (status==ActivityCallback.STATUS_CONNECTED)
+	    System.out.println("Created "+direction+" connection "+direction2+host+":"+port+".");
+	else if (status==ActivityCallback.STATUS_CONNECTING)
+	    System.out.println("Creating "+direction+" connection "+direction2+host+":"+port+"...");
+	else
+	    Assert.that(false,"Unknown connection status");
+    }
+
+    public void removeConnection(String host, int port) {
+	System.out.println("Connection to "+host+":"+port+" closed.");
+    }
+
+    public void updateConnection(String host, int port, int status) {
+	if (status==ActivityCallback.STATUS_CONNECTED)
+	    System.out.println("Connected to "+host+":"+port+".");
+	else {
+	    //Why would this be called?
+	}	    
+    }
+
+    public void knownHost(Endpoint e) {
+	//Do nothing.
+    }
+
+    public void handleQueryReply( QueryReply qr ) {
+	synchronized(System.out) {
+	    System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
+	    try {
+		for (Iterator iter=qr.getResults(); iter.hasNext(); ) 
+		    System.out.println("   "+((Response)iter.next()).getName());
+	    } catch (BadPacketException e) { }
+	}
+    }
+    
+    public void error(String message) {
+	System.out.println("Error: "+message);
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    
 
     /** Returns an array of strings containing the words of s, where
      *  a word is any sequence of characters not containing a space.
