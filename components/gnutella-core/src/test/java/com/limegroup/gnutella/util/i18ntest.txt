@@ -1,0 +1,34 @@
+# BEGIN CASE
+hello;HELLO
+hello;ＨＥＬＬＯ
+limewire;ＬＩＭＥＷＩＲＥ
+hello;ＨＥllo
+カ;ｶ
+アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンヲ;ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝｦ
+# END CASE
+# BEGIN ACCENTS
+ジャ;ｼﾞｬ
+ジャ;シﾞｬ
+s;š
+y;Ÿ
+aacute a;Aacute Á
+acircumflex a;Acircumflex Â
+a;Ã
+a;Ä
+a;Å
+c;Ç
+c;Ç
+e;É
+e;Ê
+e;Ë
+i;Ì
+o;Ö
+ecec;ÈÇÈÇ
+# END ŸACCENTS
+# BEGIN OTHER
+tm;™
+カ;㋕
+エスクード;㌇
+# END OTHER
+# BEGIN KEYWORD_SPLIT
+# END KEYWORD_SPLIT
