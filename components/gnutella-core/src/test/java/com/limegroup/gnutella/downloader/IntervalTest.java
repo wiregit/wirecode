@@ -12,32 +12,16 @@ public class IntervalTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(IntervalTest.class);
     }
 
-	public void testLegacy() {
+	public void testSubrange() {
         Interval a=new Interval(0,3);
         Interval b=new Interval(3,5);
-        Interval c=new Interval(1,4);
-        Interval d=new Interval(6,10);
-        Interval e=new Interval(0,10);
-
-        assertTrue(a.overlaps(a));
-        assertTrue(! a.adjacent(a));
-
-        assertTrue(! a.overlaps(b));
-        assertTrue(! b.overlaps(a));
-        assertTrue(a.adjacent(b));
-        assertTrue(b.adjacent(a));
-
-        assertTrue(a.overlaps(c));
-        assertTrue(c.overlaps(a));
-        assertTrue(! a.adjacent(c));
-        assertTrue(! c.adjacent(a));
+        Interval c=new Interval(1,6);
         
-        assertTrue(! a.overlaps(d));
-        assertTrue(! d.overlaps(a));
-        assertTrue(! a.adjacent(d));
-        assertTrue(! d.adjacent(a));
+        assertFalse(a.isSubrange(b));
+        assertTrue(b.isSubrange(c));
+        assertFalse(c.isSubrange(b));
+        assertTrue(b.isSubrange(b));
 
-        assertTrue(e.overlaps(c));
-        assertTrue(c.overlaps(a));
+        
     }
 }
