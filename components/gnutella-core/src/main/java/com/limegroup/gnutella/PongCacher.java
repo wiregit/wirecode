@@ -8,7 +8,8 @@ import com.sun.java.util.collections.*;
  * This class caches pongs from the network.  Caching pongs saves considerable
  * bandwidth because only a controlled number of pings are sent to maintain
  * adequate host data, with Ultrapeers caching and responding to pings with
- * the best pongs available.
+ * the best pongs available.  This class devotes a thread to pong caching to
+ * avoid pong caching holding up the processing of other messages.
  */
 public final class PongCacher implements Runnable {
 
@@ -18,16 +19,11 @@ public final class PongCacher implements Runnable {
     private static final PongCacher INSTANCE = new PongCacher();    
 
     /**
-     * <tt>BucketQueue</tt> holding pongs separated by hops.
-     */
-    private static volatile BucketQueue _pongs;
-
-    /**
-     * Variable for the <tt>Set</tt> of the best cached pongs currently 
+     * Variable for the <tt>List</tt> of the best cached pongs currently 
      * available.
      */
-    private static Set _cachedPongs = 
-        Collections.unmodifiableSet(new HashSet());
+    private static List _cachedPongs = 
+        Collections.unmodifiableList(new LinkedList());
 
     /**
      * Constant for the number of pongs to store at each hop. Public to 
@@ -46,6 +42,12 @@ public final class PongCacher implements Runnable {
      * the set of cached pongs.  Public for testing convenience.
      */
     public static final int REFRESH_INTERVAL = 600;
+
+    /**
+     * <tt>BucketQueue</tt> holding pongs separated by hops.
+     */
+    private static final BucketQueue PONGS =
+        new BucketQueue(8, PONGS_PER_HOP);
 
     /**
      * Flag for whether or not we've received a new pong -- allows slight
@@ -90,7 +92,7 @@ public final class PongCacher implements Runnable {
         try {
             while(true) {
                 if(RouterService.isSupernode() && _newPong) {
-                    _cachedPongs = Collections.unmodifiableSet(updatePongs());
+                    _cachedPongs = Collections.unmodifiableList(updatePongs());
                     _newPong = false;
                 }
                 Thread.sleep(REFRESH_INTERVAL);
@@ -101,13 +103,13 @@ public final class PongCacher implements Runnable {
     }
 
     /**
-     * Accessor for the <tt>Set</tt> of cached pongs.  This <tt>Set</tt>
+     * Accessor for the <tt>Set</tt> of cached pongs.  This <tt>List</tt>
      * is unmodifiable and will throw <tt>IllegalOperationException</tt> if
      * it is modified.
      *
-     * @return the <tt>Set</tt> of cached pongs -- continually updated
+     * @return the <tt>List</tt> of cached pongs -- continually updated
      */
-    public Set getBestPongs() {
+    public List getBestPongs() {
         return _cachedPongs;
     }
 
@@ -121,26 +123,22 @@ public final class PongCacher implements Runnable {
         // if we're not an Ultrapeer, we don't care about caching the pong
         if(!RouterService.isSupernode()) return;
 
-        // lazily construct the queue
-        if(_pongs == null) {
-            _pongs = new BucketQueue(8, PONGS_PER_HOP);
-        }
-        synchronized(_pongs) {
-            _pongs.insert(pr, pr.getHops());
+        synchronized(PONGS) {
+            PONGS.insert(pr, pr.getHops());
         }
         _newPong = true;
     }
 
     /**
-     * Updates the <tt>Set</tt> of cached pongs being sent in response to pings.
+     * Updates the <tt>List</tt> of cached pongs being sent in response to pings.
      *
-     * @return the <tt>Set</tt> of cached pongs 
+     * @return the <tt>List</tt> of cached pongs 
      */
-    private Set updatePongs() {
-        synchronized(_pongs) {
-            Iterator iter = _pongs.iterator();
+    private List updatePongs() {
+        synchronized(PONGS) {
+            Iterator iter = PONGS.iterator();
             int i = 0;
-            Set pongs = new HashSet();
+            List pongs = new LinkedList();
             while(iter.hasNext() && i<NUM_CACHED_PONGS) {
                 pongs.add((PingReply)iter.next());
                 i++;
@@ -149,3 +147,5 @@ public final class PongCacher implements Runnable {
         }
     }
 }
+
+
