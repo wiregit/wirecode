@@ -53,7 +53,7 @@ public abstract class MessageRouter {
     /** The maximum number of QueryReply bytes to route for any given query GUID. 
      *  Provides a primitive form of flow control by cutting off run-away replies. 
      *  Assuming 100 bytes per result, this allows 500 results.  */
-    public static final int MAX_REPLY_ROUTE_BYTES=50000; //50k
+    public static final int MAX_REPLY_ROUTE_BYTES = 50 * 1000; //50k
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -81,6 +81,7 @@ public abstract class MessageRouter {
 	 * upon very frequently.
 	 */
 	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
+
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -753,8 +754,7 @@ public abstract class MessageRouter {
      * if you do.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ReplyHandler handler)
-    {
+                                 ReplyHandler handler) {
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
@@ -762,8 +762,7 @@ public abstract class MessageRouter {
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength());
 
-        if(rrp != null)
-        {
+        if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
             //_numQueryReplies++;
             // Prepare a routing for a PushRequest, which works
@@ -775,8 +774,11 @@ public abstract class MessageRouter {
             //connections if we've already routed too many replies for this
             //GUID.  Note that replies destined for me all always delivered to
             //the GUI.
+            //if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
+            // rrp.getReplyHandler()==_forMeReplyHandler) {
+            
             if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
-				rrp.getReplyHandler()==_forMeReplyHandler) {
+                rrp.getReplyHandler()==_forMeReplyHandler) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
                                                        handler);
                 // also add to the QueryUnicaster for accounting - basically,
@@ -784,13 +786,46 @@ public abstract class MessageRouter {
                 // HashSet lookup, it isn't a prohibitive expense...
                 UNICASTER.handleQueryReply(queryReply);
 
+            } else {
+                //RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+                RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+                handler.countDroppedMessage();
             }
         }
-        else
-        {
-			RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+        else {
+			//RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+            RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
+    }
+
+    /**
+     * Checks if the <tt>QueryReply</tt> should be dropped based on per-TTL
+     * hard limits for the number of bytes routed for the given reply guid.
+     * This algorithm favors replies that don't have as far to go on the 
+     * network -- i.e., low TTL hits have more liberal limits that high TTL
+     * hits.  This ensures that hits that are closer to the query originator
+     * -- hits for which we've already done most of the work, are not 
+     * dropped unless we've routed a really large number of bytes for that
+     * guid.<p>
+     *
+     * Note that we increment the hops and decrement the TTL as soon as any
+     * message arrives, 
+     */
+    private static boolean shouldDropReply(int bytesRouted, int ttl) {
+        // send replies coming in with ttl above 4 if we've routed under 50K 
+        if(ttl > 3 && bytesRouted < 50   * 1024) return true;
+        // send replies coming in with ttl 1 if we've routed under 3000K 
+        if(ttl == 0 && bytesRouted < 3000 * 1024) return true;
+        // send replies coming in with ttl 2 if we've routed under 1000K 
+        if(ttl == 1 && bytesRouted < 1000 * 1024) return true;
+        // send replies coming in with ttl 3 if we've routed under 333K 
+        if(ttl == 2 && bytesRouted < 333  * 1024) return true;
+        // send replies coming in with ttl 4 if we've routed under 111K 
+        if(ttl == 3 && bytesRouted < 111  * 1024) return true;
+
+        // if none of the above conditions holds true, drop the reply
+        return false;
     }
 
     /**
