@@ -23,7 +23,7 @@ import java.util.Properties;
 		final short _uptime;
 		final int _filesShared;
 		
-		CandidateHandler _handler;
+		
 		
 		public GoodLeafCandidate(String host, int port, short uptime, int filesShared) {
 			super(host,port);
@@ -39,21 +39,18 @@ import java.util.Properties;
 			
 			_uptime = uptime;
 			_filesShared = filesShared;
-			_handler = new CandidateHandler(this);
+			_candidateHandler = new CandidateHandler(this);
+			
 			
 			try {
-				PrivilegedAccessor.setValue(_handler,"_features",_goodProperties);
+				PrivilegedAccessor.setValue(_candidateHandler,"_features",_goodProperties);
+				
 			}catch(Exception e) {e.printStackTrace();}
 			
 		}
 		
-		public CandidateHandler getCandidateHandler() {
-			return _handler;
-		}
 		
-		public boolean isGoodCandidate() {
-			return true;
-		}
+		
 		
 		/* (non-Javadoc)
 		 * @see com.limegroup.gnutella.Connection#isOpen()

@@ -196,6 +196,8 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * tests the simple getBest scenario
 	 */
 	public void testGetBest() throws Exception {
+		Comparator comparator = new CandidatePriorityComparator();
+		assertEquals(0,comparator.compare(null,null));
 		
 		
 		//put the worst guy at ttl 1 and the best guy at ttl 2

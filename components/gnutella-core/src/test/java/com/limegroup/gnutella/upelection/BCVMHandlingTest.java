@@ -8,9 +8,11 @@ import com.limegroup.gnutella.messages.vendor.*;
 
 import junit.framework.Test;
 
+import java.util.Properties;
+
 /**
  * This test tests the logic in the <tt>Connection</tt> class which
- * handles BestCandidatesMessages
+ * handles BestCandidatesMessages, and Features vendor messages.
  * 
  * There are several scenarios when sending updates:
  * 
@@ -32,6 +34,10 @@ import junit.framework.Test;
  * 1.  We receive an update from a leaf or we are a leaf
  * 2.  We receive an update too soon
  * 3.  We receive a proper update.
+ * 
+ * Features VM tests:
+ * 1.  Test features before any message has been received
+ * 2.  Test merging of features
  */
 public class BCVMHandlingTest extends BaseTestCase {
 	
@@ -349,6 +355,106 @@ public class BCVMHandlingTest extends BaseTestCase {
 		assertTrue(_bcvm2.isSame(_connection.getCandidatesReceived()));
 	}
 	
+	public void testFeaturesVM() throws Exception {
+		
+		_connection = new NonUPConnection();
+		
+		//test the case where we have not received a Features VM
+		CandidateHandler handler = _connection.getCandidateHandler();
+		
+		assertFalse(handler.isTCPCapable());
+		assertFalse(handler.isUDPCapable());
+		assertFalse(handler.isGoodCandidate());
+		assertNull(handler.getOS());
+		assertNull(handler.getJVM());
+		assertNull(handler.getCandidates());
+		assertEquals(-1,handler.getBandwidth());
+		assertEquals(-1,handler.getFileShared());
+		
+		
+		//create a partial Features VM
+		Properties partial = new Properties();
+		
+		partial.setProperty(FeaturesVendorMessage.OS,"nachos ;-)");
+		partial.setProperty(FeaturesVendorMessage.FILES_SHARED,"42");
+		
+		FeaturesVendorMessage fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+		
+		assertFalse(handler.isTCPCapable());
+		assertFalse(handler.isUDPCapable());
+		assertFalse(handler.isGoodCandidate());
+		assertNotNull(handler.getOS());
+		assertNull(handler.getJVM());
+		assertNull(handler.getCandidates());
+		assertEquals(-1,handler.getBandwidth());
+		assertEquals(42,handler.getFileShared());
+		
+		//add more partial features
+		partial = new Properties();
+		
+		partial.setProperty(FeaturesVendorMessage.INCOMING_TCP,"true");
+		partial.setProperty(FeaturesVendorMessage.INCOMING_UDP,"true");
+		partial.setProperty(FeaturesVendorMessage.BANDWIDTH,"30");
+		partial.setProperty(FeaturesVendorMessage.FILES_SHARED,"20");
+		
+		fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+		
+		assertTrue(handler.isTCPCapable());
+		assertTrue(handler.isUDPCapable());
+		assertTrue(handler.isGoodCandidate());
+		assertNotNull(handler.getOS());
+		assertNull(handler.getJVM());
+		assertNull(handler.getCandidates());
+		assertEquals(30,handler.getBandwidth());
+		assertEquals(20,handler.getFileShared());
+		
+		partial = new Properties();
+		partial.setProperty(FeaturesVendorMessage.OS,"windows la la la 98");
+		
+		fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+
+		assertTrue(handler.isTCPCapable());
+		assertTrue(handler.isUDPCapable());
+		assertFalse(handler.isGoodCandidate());
+		assertNotNull(handler.getOS());
+		assertNull(handler.getJVM());
+		assertNull(handler.getCandidates());
+		assertEquals(30,handler.getBandwidth());
+		assertEquals(20,handler.getFileShared());
+		
+		partial = new Properties();
+		partial.setProperty(FeaturesVendorMessage.OS,"mac os X but not quite");
+		
+		fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+		assertFalse(handler.isGoodCandidate());
+		
+		partial = new Properties();
+		partial.setProperty(FeaturesVendorMessage.JVM,"1.4.0");
+		
+		fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+		assertFalse(handler.isGoodCandidate());
+		
+		partial = new Properties();
+		partial.setProperty(FeaturesVendorMessage.JVM,"1.4.1");
+		partial.setProperty(FeaturesVendorMessage.OS,"windows xp");
+		
+		fvm = new FeaturesVendorMessage(partial);
+		
+		_connection.handleVendorMessage(fvm);
+		assertTrue(handler.isGoodCandidate());
+		
+	}
+	
 	/**
 	 * a utility class with various getters. 
 	 * it also exposes the handleVendorMessage method.
@@ -431,5 +537,6 @@ public class BCVMHandlingTest extends BaseTestCase {
 	 */
 	static class NonUPConnection extends TestConnection {
 		public boolean isGoodUltrapeer() {return false;}
+		public boolean isGoodLeaf() {return true;}
 	}
 }
