@@ -2,6 +2,7 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
 public class LazyProperties extends Properties
@@ -52,6 +53,8 @@ public class LazyProperties extends Properties
 				  CommonUtils.getHttpServer());       
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
 		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
+        UpdateManager u = UpdateManager.instance();
+        props.put(ConnectionHandshakeHeaders.X_VERSION, u.getVersion());
     }
     
 }

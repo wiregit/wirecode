@@ -131,11 +131,18 @@ public final class CommonUtils {
 	private static final File CURRENT_DIRECTORY =
 		new File(PROPS.getProperty("user.dir"));
 
+
+    /**
+     * Variable for whether or this this is a PRO version of LimeWire. 
+     */
+    private static boolean _isPro = false;
+
+
 	/**
 	 * Make sure the constructor can never be called.
 	 */
 	private CommonUtils() {}
-
+    
 	/**
 	 * Initialize the settings statically. 
 	 */
@@ -174,9 +181,9 @@ public final class CommonUtils {
 			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
 		}
 		else {
-			HTTP_SERVER = ("LimeWire/" + 
-                LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4)+
-				" (Pro)");
+			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
+                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
+            _isPro = true;
 		}
 	}
 
@@ -236,6 +243,10 @@ public final class CommonUtils {
         }
         // in case this is a mainline version or NFE was caught (strange)
         return 2;
+    }
+
+    public static boolean isPro() {
+        return _isPro;
     }
 
 

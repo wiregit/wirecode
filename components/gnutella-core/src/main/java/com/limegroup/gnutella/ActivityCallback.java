@@ -88,6 +88,12 @@ public interface ActivityCallback
     public void browseHostFailed(GUID guid);
 
     /**
+     * A new version of LimeWire is available, notify user.
+     */
+    public void notifyUserAboutUpdate(String message, boolean isPro, boolean l);
+
+
+    /**
      * Notifies the GUI that the given directory has been shared.  This method
      * is called exactly once per directory per change to the shared directory
      * and extension settings.  Note that the files in directory are not

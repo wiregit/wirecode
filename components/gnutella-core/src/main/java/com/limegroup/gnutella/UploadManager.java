@@ -107,6 +107,8 @@ public final class UploadManager implements BandwidthTracker {
      * request
      */
     public static final int BROWSE_HOST_FILE_INDEX = -1;
+    
+    public static final int UPDATE_FILE_INDEX = -2;
 
                 
 	/**
@@ -176,6 +178,7 @@ public final class UploadManager implements BandwidthTracker {
                     return;
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
+            ioe.printStackTrace();
             debug("IOE thrown, closing socket");
         } finally {
             synchronized(this) {
@@ -212,10 +215,13 @@ public final class UploadManager implements BandwidthTracker {
         debug(uploader+ " starting single upload");
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
+        
+        boolean updateCheck= (uploader.getState() == Uploader.UPDATE_FILE);
         // check if it complies with the restrictions.
         // and set the uploader state accordingly
         int queued = -1;
-        if(!isBHUploader) { //testing and book-keeping only if !browse host
+        if(!isBHUploader&&!updateCheck) { 
+            //testing and book-keeping only if !browse host and !updateCheck
             //Note the state at this point can be either FILE_NOT_FOUND, 
             //BROWSE_HOST, PUSH_FAILED or CONNECTING
             if(uploader.getState()==Uploader.CONNECTING) {
@@ -830,6 +836,10 @@ public final class UploadManager implements BandwidthTracker {
                 //special case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
                 fileName = "Browse-Host Request";
+            } else if (fileInfoPart.equals("/update.xml")) {
+                index = UPDATE_FILE_INDEX;
+                fileName = "Update-File Request";
+                System.out.println("Sumeet: Uploader got Upgrade request");
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
@@ -1012,8 +1022,8 @@ public final class UploadManager implements BandwidthTracker {
         return averageBandwidth;
 	}	
     
-    private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.updates.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -353,9 +354,12 @@ public class ManagedConnection
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
-
+        
         //Start the thread to empty the output queue
         new OutputRunner();
+
+        UpdateManager updater = UpdateManager.instance();
+        updater.checkAndUpdate(this);
     }
 
     /** Throttles the super's OutputStream. */

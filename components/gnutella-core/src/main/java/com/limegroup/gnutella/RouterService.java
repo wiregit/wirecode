@@ -11,6 +11,7 @@ import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.*;
+import com.limegroup.gnutella.updates.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -192,6 +193,9 @@ public final class RouterService {
 
         // Restore any downloads in progress.
         downloader.postGuiInit();
+        
+        UpdateManager updater = UpdateManager.instance();//initialize
+        updater.postGuiInit(callback);
 	}
 
     /**

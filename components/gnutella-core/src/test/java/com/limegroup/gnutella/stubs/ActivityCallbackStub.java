@@ -45,5 +45,6 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void setAnnotateEnabled(boolean enabled) {};
     public String getHostValue(String key) { return null;}
     public void handleSharedFileUpdate(File file) { }
-
+    public void notifyUserAboutUpdate(String version, boolean isPro, boolean l){
+    }
 }

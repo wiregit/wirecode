@@ -257,6 +257,8 @@ public class Main implements ActivityCallback {
     public void browseHostFailed(GUID guid) {};
 
 	public void setAnnotateEnabled(boolean enabled) {};
-        
+
+    public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
+    };
 }
 

@@ -116,7 +116,11 @@ public final class HTTPUploader implements Uploader {
                 setState(BROWSE_HOST);
                 return;
             } 
-
+            else if(index == UploadManager.UPDATE_FILE_INDEX) {
+                setState(UPDATE_FILE);
+                return;
+            }
+            
 			_fileDesc = RouterService.getFileManager().get(_index);
 			_fileSize = (int)_fileDesc.getSize();
 
@@ -319,7 +323,7 @@ public final class HTTPUploader implements Uploader {
 			_state = new NormalUploadState(this);
 			break;
         case QUEUED:
-            int pos = RouterService.getUploadManager().positionInQueue(_socket);
+            int pos=RouterService.getUploadManager().positionInQueue(_socket);
             _state = new QueuedUploadState(pos,_fileDesc);
             break;
 		case LIMIT_REACHED:
@@ -333,6 +337,9 @@ public final class HTTPUploader implements Uploader {
 			break;
         case BROWSE_HOST:
             _state = new BrowseHostUploadState(this);
+            break;
+        case UPDATE_FILE:
+            _state = new UpdateFileState(this);
             break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
@@ -445,8 +452,10 @@ public final class HTTPUploader implements Uploader {
         	while (true) {
         		// read the line in from the socket.
                 String str = br.readLine();
+
 				if(!CommonUtils.isJava118()) 
-					BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+					BandwidthStat.
+                        HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank
