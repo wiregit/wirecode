@@ -181,6 +181,13 @@ public final class CommonUtils {
 	public static String getOS() {
 		return PROPS.getProperty("os.name");
 	}
+	
+	/**
+	 * Returns the operating system version.
+	 */
+	public static String getOSVersion() {
+		return PROPS.getProperty("os.version");
+	}
 
 	/**
 	 * Returns the user's current working directory as a <tt>File</tt>
@@ -253,6 +260,17 @@ public final class CommonUtils {
 	 */
 	public static boolean isMacOSX() {
 		return _isMacOSX;
+	}
+	
+	/** 
+	 * Returns whether or not the os is Mac OSX 10.2 or above.
+	 *
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *  10.2 or above, <tt>false</tt> otherwise
+	 */
+	public static boolean isJaguarOrAbove() {
+		if(!isMacOSX()) return false;
+		return getOSVersion().startsWith("10.2");
 	}
 
 	/** 
