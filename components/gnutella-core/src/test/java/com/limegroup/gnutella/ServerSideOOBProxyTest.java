@@ -122,7 +122,34 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     // ------------------------------------------------------
 
     // PLEASE RUN THIS TEST FIRST!!!
-    public void testDoesNotProxy() throws Exception {
+    public void testProxiesOnlyWhenSupposedTo() throws Exception {
+
+        // before we set up GUESS we should see that the UP does not proxy
+        //------------------------------
+        {
+        drainAll();    
+        sendF(LEAF[1], MessagesSupportedVendorMessage.instance());
+        Thread.sleep(100); // wait for processing of msvm
+
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        sendF(LEAF[1], query);
+        
+        Thread.sleep(1000);
+
+        // the Ultrapeer should get it.
+        QueryRequest queryRec = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                                                         QueryRequest.class);
+        assertNotNull(queryRec);
+        assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
+
+        // shut off query
+        QueryStatusResponse resp = 
+            new QueryStatusResponse(new GUID(queryRec.getGUID()), MAX_RESULTS);
+        sendF(LEAF[1], resp);
+        }
+        //------------------------------
+
 
         // need to set up GUESS
         DatagramPacket pack = null;
@@ -285,6 +312,30 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         QueryStatusResponse resp = 
             new QueryStatusResponse(new GUID(queryRec.getGUID()), MAX_RESULTS);
         sendF(LEAF[0], resp);
+        }
+        //------------------------------
+
+        //we should never proxy for a Ultrapeer
+        //now send a MSM and make sure that the query is proxied
+        //------------------------------
+        {
+        drainAll();    
+        sendF(ULTRAPEER[0], MessagesSupportedVendorMessage.instance());
+        Thread.sleep(100); // wait for processing of msvm
+
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        sendF(ULTRAPEER[0], query);
+        
+        Thread.sleep(1000);
+
+        // the Leaf should get the non-OOB query
+        QueryRequest queryRec = 
+            (QueryRequest) getFirstInstanceOfMessageType(LEAF[0],
+                                                         QueryRequest.class);
+        assertNotNull(queryRec);
+        assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
+
+        // no need shut off query
         }
         //------------------------------
 
