@@ -62,7 +62,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
     
     public void tearDown() throws Exception {
-		in.close();
+        in.close();
         out.close();
     }
     
@@ -680,6 +680,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 			                       boolean outgoing) 
 			throws IOException {
 			    Properties props = new Properties();
+			    props.put("X-Ultrapeer", "True");
 			    if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
 			        props.put("Accept-Encoding", "deflate");
                 if(response.isDeflateAccepted())
