@@ -187,13 +187,6 @@ public final class SettingsManager {
     private final boolean DEFAULT_FILTER_HTML    = false;
     private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
     private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
-	/** This is limewire's public pong cache */
-    public static final String  DEFAULT_LIMEWIRE_ROUTER =
-	  "router.limewire.com";
-	/** This is limewire's dedicated pong cache */
-    public static final String DEDICATED_LIMEWIRE_ROUTER =
-	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
-    /** List of hosts to try on quick connect */
 
     private final int     DEFAULT_PARALLEL_SEARCH  = 5;
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
