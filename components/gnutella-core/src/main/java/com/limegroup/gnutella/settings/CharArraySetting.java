@@ -58,6 +58,6 @@ public final class CharArraySetting extends Setting {
      * @param sValue property string value
      */
     protected void loadValue(String sValue) {
-        value = sValue.toCharArray();
+        value = sValue.trim().toCharArray();
     }
 }

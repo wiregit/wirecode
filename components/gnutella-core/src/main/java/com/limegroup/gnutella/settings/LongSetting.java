@@ -43,6 +43,10 @@ public final class LongSetting extends Setting {
      *
      */
     protected void loadValue(String sValue) {
-		value = Long.parseLong(sValue);
+        try {
+            value = Long.parseLong(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
     }
 }

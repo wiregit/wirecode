@@ -43,6 +43,10 @@ public final class FloatSetting extends Setting {
      *
      */
     protected void loadValue(String sValue) {
-		value = Float.parseFloat(sValue);
+        try {
+            value = Float.parseFloat(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
     }
 }

@@ -43,7 +43,11 @@ public final class IntSetting extends Setting {
      *
      */
     protected void loadValue(String sValue) {
-		value = Integer.parseInt(sValue);
+        try {
+            value = Integer.parseInt(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
     }
     
 }

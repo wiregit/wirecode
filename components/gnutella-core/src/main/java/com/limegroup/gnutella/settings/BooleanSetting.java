@@ -45,6 +45,6 @@ public final class BooleanSetting extends Setting {
      * @param sValue property string value
      */
     protected void loadValue(String sValue) {
-        value = Boolean.valueOf(sValue).booleanValue();
+        value = Boolean.valueOf(sValue.trim()).booleanValue();
     }
 }

@@ -43,6 +43,10 @@ public final class ByteSetting extends Setting {
      * @param sValue property string value
      */
     protected void loadValue(String sValue) {
-        value = Byte.parseByte(sValue);
+        try {
+            value = Byte.parseByte(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
     }
 }

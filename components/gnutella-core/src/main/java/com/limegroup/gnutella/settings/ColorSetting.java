@@ -65,10 +65,15 @@ public final class ColorSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	protected void loadValue(String sValue) {
-		int r = Integer.parseInt(sValue.substring(1, 3), 16);
-		int g = Integer.parseInt(sValue.substring(3, 5), 16);
-		int b = Integer.parseInt(sValue.substring(5, 7), 16);
-		value = new Color(r,g,b);
+	    sValue = sValue.trim();
+	    try {
+            int r = Integer.parseInt(sValue.substring(1, 3), 16);
+            int g = Integer.parseInt(sValue.substring(3, 5), 16);
+            int b = Integer.parseInt(sValue.substring(5, 7), 16);
+            value = new Color(r,g,b);
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
 	}
     
     /**

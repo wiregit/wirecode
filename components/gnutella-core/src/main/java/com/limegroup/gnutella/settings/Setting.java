@@ -72,6 +72,10 @@ abstract class Setting {
 
 	/**
 	 * Revert to the default value.
+	 * It is critically important that the DEFAULT_VALUE is valid,
+	 * otherwise an infinite loop will be encountered when revertToDefault
+	 * is called, as invalid values call revertToDefault.
+	 * Because default values are hard-coded into the program, this is okay.
 	 */
 	public void revertToDefault() {
         setValue(DEFAULT_VALUE);
