@@ -688,7 +688,6 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
-
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
@@ -729,6 +728,7 @@ public class ConnectionManager {
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
+			
             if(!allowUltrapeer2LeafConnection(hr)) {
                 return false;
             }
@@ -770,13 +770,11 @@ public class ConnectionManager {
                   RESERVED_GOOD_LEAF_CONNECTIONS);
                             
         } else if (hr.isUltrapeer()) {
-        	
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
-
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
@@ -1599,9 +1597,6 @@ public class ConnectionManager {
     				remove(c);
     		}
     	
-    	//also close some connections until we have a free slot
-    	while (PREFERRED_CONNECTIONS_FOR_LEAF - getNumInitializedConnections() < 1)
-    		remove ((ManagedConnection) _initializedConnections.get(0));
     	
     	
     	//this connection must not fail.  If it does, the process will be aborted. 
@@ -1634,7 +1629,7 @@ public class ConnectionManager {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		isSupernode();
 		
-		//connect using the classic method.  This should be removed
+		//fetch UP connections using the classic method.  This should be removed
 		//when the crawler is implemented
 		recoverHosts();
 		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
