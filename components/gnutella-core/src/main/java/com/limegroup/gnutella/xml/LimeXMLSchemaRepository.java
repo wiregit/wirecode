@@ -14,7 +14,7 @@ import java.io.*;
  * @author  asingla
  * @version
  */
-public class LimeXMLSchemaRepository extends java.lang.Object
+public class LimeXMLSchemaRepository
 {
     
     /**
@@ -59,6 +59,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
                 catch(IOException ioe)
                 {
                     //no problem
+                    ioe.printStackTrace();
                 }//end of try
             }//end of for
         }//end of if
@@ -68,7 +69,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
      * Returns an instance of this class. Adheres to Singleton design pattern.
      * So, only one instance of the class is created.
      */
-    public static LimeXMLSchemaRepository instance()
+    public static synchronized LimeXMLSchemaRepository instance()
     {
         if(_instance == null)
             _instance = new LimeXMLSchemaRepository();
