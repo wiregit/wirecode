@@ -40,8 +40,10 @@ public class NormalUploadState implements UploadState {
 	 */
 	private FileDesc _fileDesc;
 
-    /** Flag indicating whether we should close the connection after serving
-     * the request or not */
+    /** 
+	 * Flag indicating whether we should close the connection after serving
+     * the request or not.
+	 */
     private boolean _closeConnection = false;
     
 	/**
