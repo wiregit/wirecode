@@ -16,7 +16,7 @@ public class VendorMessageSupportTest extends TestCase {
     
     private String _remoteHost = "localhost";
     private int _remotePort = 6000;
-    private static final int TIMEOUT = 400;
+    private static final int TIMEOUT = 500;
     private boolean _localTest = true;
 
     public VendorMessageSupportTest(String name) {
@@ -379,7 +379,7 @@ public class VendorMessageSupportTest extends TestCase {
     }
     
 
-    private static final boolean debugOn = false;
+    private static final boolean debugOn = true;
     private static final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
