@@ -99,6 +99,7 @@ public class VendorMessagePayloadTest extends TestCase {
         }
         try {
             VendorMessage vm = (VendorMessage) Message.read(bais);
+            vm.hop();
             VendorMessagePayload vmp = vm.getVendorMessagePayload();
             assertTrue(vmp.equals(udp));
         }
@@ -107,6 +108,34 @@ public class VendorMessagePayloadTest extends TestCase {
             assertTrue(false);
         }
 
+    }
+
+
+    public void testBadVMP() {
+        TCPConnectBackVMP tcp = new TCPConnectBackVMP(6346);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            VendorMessage vm = tcp.getVendorMessage();
+            vm.hop();
+            vm.write(baos);
+        }
+        catch (IOException uhoh) {
+            assertTrue(false);
+        }
+        
+        ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+        
+        try {
+            VendorMessage vm = (VendorMessage) Message.read(bais);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {
+        }
+        catch (IOException nope) {
+            assertTrue(false);
+        }
     }
 
 
