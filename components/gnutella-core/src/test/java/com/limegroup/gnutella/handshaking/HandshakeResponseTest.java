@@ -468,6 +468,43 @@ public final class HandshakeResponseTest extends BaseTestCase {
     }
     
     /**
+     * Tests that the isOldLimeWire method works correctly
+     */
+    public void testIsOldLimeWire() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr;
+
+        props.put("User-Agent","bearshare/1.2.4");
+        hr = HandshakeResponse.createResponse(props);
+        assertFalse("user agent is not limewire ",hr.isOldLimeWire());
+        
+        props.put("User-Agent","limewire/@version@");
+        hr = HandshakeResponse.createResponse(props);
+        assertFalse("this version should not parse ",hr.isOldLimeWire());
+
+        props.put("User-Agent","limewire/2.5.4");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("major lower, minor higher, this is old",hr.isOldLimeWire());
+
+        props.put("User-Agent","limewire/2.3.4");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("major lower, minor lower, this is old",hr.isOldLimeWire());
+
+        props.put("User-Agent","limewire/3.3.3");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("major equal, minor lower, this is old",hr.isOldLimeWire());
+
+        props.put("User-Agent","limewire/3.4.4");
+        hr = HandshakeResponse.createResponse(props);
+        assertFalse("major equal, minor higher, is  new",hr.isOldLimeWire());
+
+        props.put("User-Agent","limewire/4.0.4");
+        hr = HandshakeResponse.createResponse(props);
+        assertFalse("major greater, minor lower, is  new",hr.isOldLimeWire());
+    }
+
+
+    /**
      * Tests the isDeflateAccepted method.  Note the wierd condition
      * with ConnectionSettings.ENCODE_DEFLATE
      */
