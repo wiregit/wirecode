@@ -327,6 +327,15 @@ public abstract class VendorMessage extends Message {
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
         
 
+        if ((selector == F_GIVE_ULTRAPEER) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new GiveUPVendorMessage(guid,ttl,hops,version,restOf);
+        
+        if ((selector == F_ULTRAPEER_LIST) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new UPListVendorMessage(guid,ttl,hops,version,restOf);
+        
+        
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;

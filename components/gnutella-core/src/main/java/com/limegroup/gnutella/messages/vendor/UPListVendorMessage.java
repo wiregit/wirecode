@@ -104,9 +104,9 @@ public class UPListVendorMessage extends VendorMessage {
 	 * see parent comment
 	 */
 	public UPListVendorMessage(byte[] guid, byte ttl, byte hops,
-			byte[] vendorID, int selector, int version, byte[] payload)
+			 int version, byte[] payload)
 			throws BadPacketException {
-		super(guid, ttl, hops, vendorID, selector, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, payload);
 		
 		// check if the payload is legal length
 		byte numberUP = payload[0];

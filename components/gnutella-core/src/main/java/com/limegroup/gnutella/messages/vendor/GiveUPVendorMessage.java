@@ -65,10 +65,10 @@ public class GiveUPVendorMessage extends VendorMessage {
 	 * note this does not have upper limit to the number of requested results 
 	 * (other than the 255 byte limit).  One day we may have many more connections..
 	 */
-	public GiveUPVendorMessage(byte[] guid, byte ttl, byte hops,
-			byte[] vendorID, int selector, int version, byte[] payload)
+	protected GiveUPVendorMessage(byte[] guid, byte ttl, byte hops,
+			 int version, byte[] payload)
 			throws BadPacketException {
-		super(guid, ttl, hops, vendorID, selector, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_ULTRAPEER, version, payload);
 		
 		//see if the payload is valid
 		if (payload == null || payload.length != 2)
