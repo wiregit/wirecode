@@ -14,8 +14,9 @@ import org.w3c.dom.*;
 
 public class WebSearchHandler {
     private static final String HOST = 
-        "http://us01.xmlsearch.findwhat.com/bin/findwhat.dll?getresults";
-    
+        "http://sales.limewire.com/cgi-bin/echoJunk.cgi?";
+        //"http://us01.xmlsearch.findwhat.com/bin/findwhat.dll?getresults";
+
     private static final String BASE = "&base=";
 
     private static final String SRCH = "&mt=";
@@ -69,14 +70,23 @@ public class WebSearchHandler {
         parser.parse(inputSource);
         Document document = parser.getDocument();
         Element resultElement = document.getDocumentElement();
-        //attributes of the result element.
+        //attributes of the result element.  
+
+        //Note: This tab has the following attributes status for if the result
+        //is valid, records for the total number of results, first for the index
+        //of the first result of the set of all results, last for the index of
+        //the last result and searchrequest for the query string.
+
+        //TODO1: All the above attributes have to be parsed correctly for the
+        //proper parsing and display of results
+
         String v;
         v = 
         LimeXMLUtils.getAttributeValue(resultElement.getAttributes(),"status");
         boolean valid = "OK".equalsIgnoreCase(v);
         Assert.that(valid,"server not responding correctly");//TODO:remove
         v = 
-        LimeXMLUtils.getAttributeValue(resultElement.getAttributes(),"records");
+        LimeXMLUtils.getAttributeValue(resultElement.getAttributes(),"last");
         int numReplies = Integer.parseInt(v);
         
         NodeList results = resultElement.getChildNodes();
