@@ -179,6 +179,23 @@ public abstract class UDPConnectionMessage extends Message {
         return darray;
     } 
 
+    /**
+     * Create a byte array for data sending purposes.
+     */
+    public static byte[] buildByteArray(int val1, int val2) {
+        byte[] darray = new byte[4];
+        darray[0] = (byte)((val1 & 0xff00) >> 8);
+        darray[1] = (byte)((val1 & 0x00ff));
+        darray[2] = (byte)((val2 & 0xff00) >> 8);
+        darray[3] = (byte)((val2 & 0x00ff));
+
+        return darray;
+    } 
+
+    public static int getShortInt(byte b1, byte b2) {
+          return (((int) b1 & 0xff) << 8) | ((int) b2 & 0xff);
+    }
+
 
     /** 
      *  Return the length of data stored in this message.

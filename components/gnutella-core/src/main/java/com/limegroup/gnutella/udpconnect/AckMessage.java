@@ -6,19 +6,25 @@ import com.limegroup.gnutella.messages.BadPacketException;
  */
 public class AckMessage extends UDPConnectionMessage {
 
+    int _windowStart;
+    int _windowSpace;
+
     /**
      * Construct a new AckMessage with the specified settings and data
      */
-    public AckMessage(byte connectionID, int sequenceNumber) 
+    public AckMessage(byte connectionID, int sequenceNumber, 
+      int windowStart, int windowSpace) 
       throws BadPacketException {
 
         super(
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_ACK, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* no data in an ack          */ emptyByteArray,
-          /* data length of zero        */ 0
+          /* window Start and Space     */ buildByteArray(windowStart,                                                       windowSpace),
+          /* 2 short ints => 4 bytes    */ 4
           );
+        _windowStart = windowStart;
+        _windowSpace = windowSpace;
     }
 
     /**
@@ -29,5 +35,30 @@ public class AckMessage extends UDPConnectionMessage {
       throws BadPacketException {
 
       	super(guid, ttl, hops, payload);
+
+        // Parse the added windowStart and windowSpace information
+        _windowStart = 
+          getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
+        _windowSpace = 
+          getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
+    }
+
+    /**
+     *  The windowStart is equivalent to the lowest unreceived sequenceNumber
+     *  coming from the receiving end of the connection.  It is saying, I have 
+     *  received everything up to one minus this. (Note: it rolls)
+     */
+    public int getWindowStart() {
+        return _windowStart;
+    }
+
+    /**
+     *  The windowSpace is a measure of how much more data the receiver can 
+     *  receive within its buffer.  This number will go to zero if the 
+     *  application on the receiving side is reading data slowly.  If it goes 
+     *  to zero then the sender should stop sending.
+     */
+    public int getWindowSpace() {
+        return _windowSpace;
     }
 }

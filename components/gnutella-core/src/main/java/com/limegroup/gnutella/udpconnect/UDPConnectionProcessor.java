@@ -61,10 +61,6 @@ public class UDPConnectionProcessor {
         on the receivers end, they may not be setup initially.  */
 	private static final long WRITE_STARTUP_WAIT_TIME = 400;
 
-
-    /** Keep one KeepaliveMessage around for handy use - lazy instanciation */
-    private KeepAliveMessage  KEEPALIVE_MSG;
-
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -85,10 +81,10 @@ public class UDPConnectionProcessor {
 
 
     /** The Window for sending and acking data */
-	private DataWindow        _senderWindow;
+	private DataWindow        _sendWindow;
 
     /** The Window for receiving data */
-    private DataWindow        _receiverWindow;
+    private DataWindow        _receiveWindow;
 
     /** The connectionID of this end of connection.  Used for routing */
 	private byte              _myConnectionID;
@@ -180,16 +176,10 @@ public class UDPConnectionProcessor {
         scheduleKeepAlive();
 
         // Create the delayed connection components
-        _senderWindow    = new DataWindow(DATA_WINDOW_SIZE, 1);
+        _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
 		// TODO: keep up to date
-        _chunkLimit      = _senderWindow.getWindowSpace();  
-        _receiverWindow  = new DataWindow(DATA_WINDOW_SIZE, 1);
-        try {
-            KEEPALIVE_MSG    = new KeepAliveMessage(_theirConnectionID);
-        } catch (BadPacketException bpe) {
-            // This would not be good.   TODO: ????
-            ErrorService.error(bpe);
-        }
+        _chunkLimit      = _sendWindow.getWindowSpace();  
+        _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
     }
 
     /**
@@ -281,8 +271,16 @@ public class UDPConnectionProcessor {
      *  these off before waiting
      */
     private void sendKeepAlive() {
+        KeepAliveMessage keepalive = null;
         try {  
-            send(KEEPALIVE_MSG);
+              keepalive = 
+                new KeepAliveMessage(_theirConnectionID, 
+                  _receiveWindow.getWindowStart(), 
+                  _receiveWindow.getWindowSpace());
+            send(keepalive);
+        } catch (BadPacketException bpe) {
+            // This would not be good.   TODO: ????
+            ErrorService.error(bpe);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
@@ -297,7 +295,7 @@ public class UDPConnectionProcessor {
             DataMessage dm = new DataMessage(_theirConnectionID, 
 			  _sequenceNumber, chunk.data, chunk.length);
             send(dm);
-			//_senderWindow.addData(_sequenceNumber, dm);  /TODO: do
+			//_sendWindow.addData(_sequenceNumber, dm);  /TODO: do
 
 			_sequenceNumber++;
         } catch (BadPacketException bpe) {
@@ -391,7 +389,9 @@ public class UDPConnectionProcessor {
             // Ack their SYN message
             AckMessage ack = null;
             try {
-              ack = new AckMessage(theirConnID, smsg.getSequenceNumber());
+              ack = new AckMessage(theirConnID, smsg.getSequenceNumber(),
+               _receiveWindow.getWindowStart(),   
+               _receiveWindow.getWindowSpace());
             } catch (BadPacketException bpe) {
                 // This would not be good.   TODO: ????
                 ErrorService.error(bpe);
@@ -433,7 +433,7 @@ public class UDPConnectionProcessor {
 
 		Chunk chunk = _input.getChunk();
 		sendData(chunk);
-		//time = _senderWindow.getWaitTime();
+		//time = _sendWindow.getWaitTime();
 
         // TODO: fill in
 
