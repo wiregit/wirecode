@@ -160,10 +160,13 @@ public class QueryKeyTest extends TestCase {
         Random rand = new Random();
         for (int i = 4; i < 17; i++) {
             byte[] qk = new byte[i];
+            Arrays.sort(qk);
             // make sure the bytes have offensive characters....
             while ((Arrays.binarySearch(qk, (byte) 0x1c) < 0) ||
-                   (Arrays.binarySearch(qk, (byte) 0x00) < 0))
+                   (Arrays.binarySearch(qk, (byte) 0x00) < 0)) {
                 rand.nextBytes(qk);
+                Arrays.sort(qk);
+            }
             try {
                 QueryKey queryKey = QueryKey.getQueryKey(qk, true);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
