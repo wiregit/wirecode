@@ -44,12 +44,16 @@ public class ConnectionManager {
     private MessageRouter _router;
     private HostCatcher _catcher;
     private ActivityCallback _callback;
+	private boolean _isWindows = false;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      */
     public ConnectionManager(ActivityCallback callback) {
         _callback = callback;
+		String os = System.getProperty("os.name");
+		if(os.startsWith("Windows"))
+			_isWindows = true;
     }
 
     /**
@@ -151,7 +155,15 @@ public class ConnectionManager {
             // looking for and responding to a PingRequest.  It's
             // all synchronous, because we have a dedicated thread
             // right here.
-            new RejectConnection(socket, _catcher);
+			if(_isWindows) {
+				new RejectConnection(socket, _catcher);
+			}
+			else {
+				try {
+					socket.close();
+				}
+				catch(IOException ioe) {}
+			}
         }
      }
 
