@@ -29,6 +29,76 @@ import java.net.*;
  * initialize(..) after reading a ManagedDownloader from disk.</b> 
  */
 public class ManagedDownloader implements Downloader, Serializable {
+    /*
+      IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
+      downloads is to download one file in parallel from multiple servers.  For
+      example, one might simultaneously download the first half of book from
+      server A and the second half from server B.  This increases throughput if
+      the downstream capacity of the downloader is greater than the upstream
+      capacity of the fastest uploader.
+
+      The ideal way of identifying duplicate copies of a file is to use hashes
+      via the HUGE proposal.  Until that is more widely adopted, LimeWire
+      considers two files with the same name and file size to be duplicates.
+
+      When discussing swarmed downloads, it's useful to divide parts of a file
+      into three categories: black, grey, and white.  Black regions have already
+      been downloaded to disk.  Grey regions have been assigned to a downloader
+      but not yet completed.  White regions have not been assigned to a
+      downloader.
+      
+      LimeWire uses the following algorithm for swarming.  First all download
+      locations are divided into buckets of "same" files.  Then the following is
+      done for each bucket:
+
+      while there are still more (grey or white) blocks to download,
+            while parallelism has not been exceeded,
+                  if there is a white region of the file,
+                       assign to a new downloader
+                  else
+                       let R be the largest grey region R of the file
+                       "steal" the top part of R from its current downloader
+                       assign this top part to a new downloader
+            wait for one downloader to terminate (normally or abnormally)
+
+     ManagedDownloader delegates to multiple HTTPDownloader instances, one for
+     each HTTP connection.  HTTPDownloader uses Java's RandomAccessFile class,
+     which allows multiple threads to write to different parts of a file at the
+     same time.  The IncompleteFileManager class maintains a list of which
+     blocks have been written to disk.  It is also indirectly responsible for
+     identifying duplicate files.
+
+     ManagedDownloader uses one thread to control the smart downloads plus one
+     thread per HTTPDownloader instance.  The call graph of ManagedDownloader's
+     "master" thread is as follows:
+
+                             tryAllDownloads
+                             /      |
+                         bucket   tryAllDownloads2
+                                    |
+                                  tryAllDownloads3
+                                  /      \
+                     startBestDownload    wait
+                     /               \
+                findConnectable      (asynchronously)
+               /    |                  \
+       removeBest   HTTPDownloader.    tryOneDownload
+                        connect              |
+                                       HTTPDownloader.doDownload
+
+      tryAllDownloads does the bucketing of files, as well as waiting for
+      retries.  The core downloading loop is done by tryAllDownloads3.
+      startBestDownload executes the IF-statement in the pseudocode above.
+
+      Currently the desired parallelism is fixed at 4, except for modem users.
+      Better to choose this according to the downloaders capacity and the number
+      and speed of uploaders.
+
+      For push downloads, the acceptDownload(Socket) method of ManagedDownloader
+      is called from the Acceptor instance.  This thread simply passes the
+      Socket to findConnectable, which waits appropriately with timeout.  */
+    
+
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
      * Finer-grained locking is probably possible but not necessary.  Do not
