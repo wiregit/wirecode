@@ -849,7 +849,7 @@ public abstract class MessageRouter
                     //recorder for monitoring purposes.
                     StatisticsRecorder.addToTotal("QRP Update Messages",
                         m.getTotalLength(), "bytes");
-                    System.out.println("    Sending "+m.toString()+" to "+c);
+                    //System.out.println("    Sending "+m.toString()+" to "+c);
                     c.send(m);
                 }
                 qi.lastSent=table;
