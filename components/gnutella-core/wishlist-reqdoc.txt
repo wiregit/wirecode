@@ -1,0 +1,23 @@
+This exposition details the requirements for the wishlist functionality.
+
+Goal: To provide the LimeWire user with a tool that allows for flexible
+downloading of a file.  If a search garners results, the user simply
+reverts back to the old style (manual selection of the needed file(s)).
+If a search does not yield any results, they will have a 'wishlist'
+option.  Selecting this option will spawn a download with no source file -
+the download will requery the network at regular intervals until a match
+is found, and then the match will be downloaded.
+
+GUI Layout: The 'Download Any' and 'Download All' button will be replaced
+by one button.  The button will alternately read 'Add To WishList' and
+'Download'.  If a search tab with no results is 'tabbed', the button will
+read the former.  As soon as one result for the search appears, the button
+will change its label to 'Download'.
+If the 'Add To WishList' button is pressed, a DownloadDataLine will appear
+with Filename equal to the search string (only non-xml) and a size unknown
+'?'.  Once a candidate is found, the DataLine will assume the role of the
+more traditional DataLine.
+
+Backend Behavior/Implementation Notes: Not definite yet, but will involve
+moving the use of an AutoDownloadDetail from DownloadManager to
+ManagedDownloader.
