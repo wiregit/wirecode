@@ -85,7 +85,7 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String WINDOWS_LIBRARY_NAME = "LimeWire16c.dll";
+	private static final String WINDOWS_LIBRARY_NAME = "LimeWire16d.dll";
 
 
 	/** 
