@@ -124,8 +124,7 @@ public class PingRankerTest extends BaseTestCase {
     }
     
     /**
-     * Tests that the ranker learns about new hosts from altlocs, and filters
-     * hosts it already knew about
+     * Tests that the ranker learns about new hosts from altlocs
      */
     public void testLearnsFromAltLocs() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
@@ -134,12 +133,11 @@ public class PingRankerTest extends BaseTestCase {
         assertEquals(1,pinger.hosts.size());
         pinger.hosts.clear();
         
-        // send two altlocs, one containing the node itself (spammer ;-) 
+        // send two altlocs, one containing the node itself 
         IpPort ip = new IpPortImpl("1.2.3.5",1);
-        IpPort ip2 = new IpPortImpl("1.2.3.4",1);
+        
         Set alts = new HashSet();
         alts.add(ip);
-        alts.add(ip2);
         
         //and one push loc
         PushEndpoint pe =new PushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
@@ -160,12 +158,34 @@ public class PingRankerTest extends BaseTestCase {
         
         // the ranker should have pinged the other two hosts.
         assertEquals(2,pinger.hosts.size());
+    }
+    
+    /**
+     * Tests that the ranker does not add altlocs it already knows about 
+     * either from other altlocs or from direct addition
+     */
+    public void testIgnoresDuplicateAlts() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        RemoteFileDesc original = newRFDWithURN("1.2.3.4",3);
+        GUID g = new GUID(GUID.makeGuid());
+        RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
+        ranker.addToPool(original);
+        ranker.addToPool(original2);
+        assertEquals(3,pinger.hosts.size());
         pinger.hosts.clear();
+
+        // make one of the hosts send an altloc of itself (spammer?) and the pushloc 
+        IpPort ip = new IpPortImpl("1.2.3.4",1);
+        PushEndpoint pe = new PushEndpoint(g.toHexString()+";7:1.2.3.6;4.4.4.4:4");
+        Set alts = new HashSet();
+        alts.add(ip);
+        Set push = new HashSet();
+        push.add(pe);
         
-        // receive a pong from one of the altlocs, that carries the same set of altlocs
-        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        MockPong pong = new MockPong(true,true,-1,false,false,false,null,alts,push);
+        ranker.processMessage(pong, new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
         
-        // the pinger should not have pinged anybody.
+        // both of the carried altlocs are dupes, so we should not have pinged anybody
         assertTrue(pinger.hosts.isEmpty());
     }
     
