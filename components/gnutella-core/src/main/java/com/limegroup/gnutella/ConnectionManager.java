@@ -734,12 +734,14 @@ public class ConnectionManager {
      * decision.
      * @return true, if more ultrapeers needed, false otherwise
      */
-    public boolean supernodeNeeded(){
-        //if more than 70% slots are full, return true 
-        if(isSupernode() &&
-		   getNumInitializedClientConnections() > (MAX_LEAVES * 0.7)){
+    public boolean supernodeNeeded() {
+        System.out.println("ConnectionManager::supernodeNeeded::ultrapeer: "+isSupernode()); 
+        //if more than 90% slots are full, return true 
+        
+		if(getNumInitializedClientConnections() >= 
+           (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
             return true;
-        }else{
+        } else {
             //else return false
             return false;
         }
@@ -1236,15 +1238,15 @@ public class ConnectionManager {
      * @param headers The headers to be processed
      * @param connection The connection on which we received the headers
      */
-    private void processConnectionHeaders(ManagedConnection connection){
+    private void processConnectionHeaders(Connection connection){
         //get the connection headers
-        Properties headers = connection.getHeaders().props();
+        Properties headers = connection.headers().props();
         //return if no headers to process
         if(headers == null) return;
         
         //update the addresses in the host cache (in case we received some
         //in the headers)
-        updateHostCache(headers, connection);
+        updateHostCache(connection.headers());
                 
         //get remote address.  If the more modern "Listen-IP" header is
         //not included, try the old-fashioned "X-My-Address".
@@ -1256,10 +1258,8 @@ public class ConnectionManager {
 
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
-        if((remoteAddress != null) && (!connection.isOutgoing()))
-        {
-            try
-            {
+        if((remoteAddress != null) && (!connection.isOutgoing())) {
+            try {
                 connection.setOrigPort(
                     Integer.parseInt(remoteAddress.substring(
                     remoteAddress.indexOf(':') + 1).trim()));
@@ -1318,38 +1318,18 @@ public class ConnectionManager {
 	}
     
     /**
-     * Updates the addresses in the hostCache by parsing the passed string
-     * @param headers The connection headers received
-     * @param connection The connection on which we received the headers
+     * Adds the X-Try-Ultrapeer hosts from the connection headers to the
+     * host cache.
+     *
+     * @param headers the connection headers received
      */
-    private void updateHostCache(Properties headers, 								 
-								 ManagedConnection connection) {
+    private void updateHostCache(HandshakeResponse headers) { 	
+
+        if(!headers.hasXTryUltrapeers()) return;
+
         //get the ultrapeers, and add those to the host cache
-        updateHostCache(headers.getProperty(
-                HeaderNames.X_TRY_ULTRAPEERS),
-                connection, true);
-        //add the addresses received
-        updateHostCache(headers.getProperty(
-                HeaderNames.X_TRY),
-                connection, false);        
-    }
+        String hostAddresses = headers.getXTryUltrapeers();
     
-    /**
-     * Updates the addresses in the hostCache by parsing the passed string
-     * @param hostAddresses The string representing the addressess to be 
-     * added. It should be in the form:
-     * <p> IP Address:Port [,IPAddress:Port]* 
-     * <p> e.g. 123.4.5.67:6346, 234.5.6.78:6347 
-     * @param connection The connection on which we received the addresses
-     * @param goodPriority Flag that specifies if the addresses have to be
-     * given high priority
-     */
-    private void updateHostCache(String hostAddresses, 
-                                 ManagedConnection connection, 
-                                 boolean goodPriority){
-        //check for null param
-        if(hostAddresses == null)
-            return;
          
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
@@ -1367,7 +1347,7 @@ public class ConnectionManager {
             }
             //set the good priority, if specified
             //add it to the catcher
-            _catcher.add(e, goodPriority);
+            _catcher.add(e, true);
         }
     }
 
