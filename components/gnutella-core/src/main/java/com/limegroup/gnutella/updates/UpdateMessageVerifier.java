@@ -64,6 +64,7 @@ public class UpdateMessageVerifier {
             //verify
             return verifier.verify(signature);
         } catch (NoSuchAlgorithmException nsax) {
+            ErrorService.error(nsax);
             return false;
         } catch (InvalidKeyException ikx) {
             return false;
