@@ -11,6 +11,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -157,6 +158,9 @@ public class Connection {
         OUTGOING = true;
         REQUEST_HEADERS = requestHeaders;
         RESPONSE_HEADERS = responseHeaders;            
+		if(!CommonUtils.isJava118()) {
+			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+		}
     }
 
     /**
@@ -187,6 +191,9 @@ public class Connection {
         OUTGOING = false;
         RESPONSE_HEADERS = responseHeaders;	
 		REQUEST_HEADERS = null;
+		if(!CommonUtils.isJava118()) {
+			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+		}
     }
 
 
