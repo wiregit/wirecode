@@ -938,22 +938,23 @@ public class Response {
                 throw new NullPointerException("null or empty locations");
             
             GGEP info = new GGEP();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
-                    try {
-                        Endpoint ep = (Endpoint)i.next();
-                        baos.write(ep.getHostBytes());
-                        ByteOrder.short2leb((short)ep.getPort(), baos);
-                    } catch(UnknownHostException uhe) {
-                        continue;
+            if(ggep.locations.size() > 0) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try {
+                    for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
+                        try {
+                            Endpoint ep = (Endpoint)i.next();
+                            baos.write(ep.getHostBytes());
+                            ByteOrder.short2leb((short)ep.getPort(), baos);
+                        } catch(UnknownHostException uhe) {
+                            continue;
+                        }
                     }
-                }
-            } catch(IOException impossible) {
-                ErrorService.error(impossible);
+                } catch(IOException impossible) {
+                    ErrorService.error(impossible);
+                }   
+                info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
             }
-                
-            info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
             
             if(ggep.createTime > 0)
                 info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime);
@@ -1002,7 +1003,6 @@ public class Response {
                             continue;
                     } catch (BadGGEPPropertyException bad) {
                         //locBytes not set, key was added without value
-                        ErrorService.error(bad);
                         continue;
                     }
 
