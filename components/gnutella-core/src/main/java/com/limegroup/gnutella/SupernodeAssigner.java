@@ -51,12 +51,6 @@ public final class SupernodeAssigner {
 	private static final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hrs
 
 	/**
-	 * Constant for the minimum current uptime in seconds that a node must 
-	 * have for us to attempt to switch them from a leaf to an Ultrapeer
-	 */
-	private static final int MINIMUM_CURRENT_UPTIME_FORCE = 360 * 60; //6 hrs
-
-	/**
 	 * Constant value for whether or not the operating system qualifies
 	 * this node for Ultrapeer status.
 	 */
