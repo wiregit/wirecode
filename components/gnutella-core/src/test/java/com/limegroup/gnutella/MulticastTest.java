@@ -208,9 +208,10 @@ public class MulticastTest extends BaseTestCase {
         reroutePush(qr.getClientGUID());
                 
         // okay, now we have a QueryReply to convert to an RFD.
-        RemoteFileDesc[] rfdArray = qr.toRemoteFileDescArray();
-        assertEquals("should only be one rfd", 1, rfdArray.length);
-        RemoteFileDesc rfd = rfdArray[0];
+        List responses = qr.getResultsAsList();
+        assertEquals("should only have 1 response", 1, responses.size());
+        Response res = (Response)responses.get(0);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData());
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -270,7 +271,10 @@ public class MulticastTest extends BaseTestCase {
         reroutePush(qr.getClientGUID());
         
         // okay, now we have a QueryReply to convert to an RFD.
-        RemoteFileDesc rfds[] = qr.toRemoteFileDescArray();
+        List responses = qr.getResultsAsList();
+        assertEquals("should only have 1 response", 1, responses.size());
+        Response res = (Response)responses.get(0);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData());
         
         // clear the data to make it easier to look at again...
         MESSAGE_ROUTER.multicasted.clear();
@@ -281,7 +285,7 @@ public class MulticastTest extends BaseTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        RouterService.download(rfds, false);
+        RouterService.download(new RemoteFileDesc[] { rfd }, false);
         
         // sleep to make sure the download starts & push goes through.
         sleep(10000);
