@@ -36,6 +36,16 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
+        System.out.println("About to respond to ping request");
+        //only return our own address if we still have any available incoming
+        //slots or 
+        int hops = (int)pingRequest.getHops();
+        int ttl = (int)pingRequest.getTTL();
+        if ( (!_manager.hasAvailableIncoming()) && ((hops+ttl > 2)) )
+            return;
+
+        System.out.println("Responding with our own address");
+
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
 
@@ -61,7 +71,7 @@ public class StandardMessageRouter
         receivingConnection.updateHorizonStats(pingReply);
         super.handlePingReply(pingReply, receivingConnection);
     }
-    
+
     /**
      * Handles the PingReply by updating horizon stats.
      */
@@ -138,14 +148,7 @@ public class StandardMessageRouter
         byte ttl = (byte)(queryRequest.getHops() + 1);
         int port = acceptor.getPort();
         byte[] ip = acceptor.getAddress();
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = _uploadManager.measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
-            measuredSpeed=false;
-        }
+        long speed = SettingsManager.instance().getConnectionSpeed();
 
         int numResponses = responses.length;
         int index = 0;
@@ -200,7 +203,7 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										!incoming, busy, uploaded, measuredSpeed);
+										!incoming, busy, uploaded, false);
 
             // try to send the new queryReply
             try {

@@ -174,12 +174,7 @@ public class ConnectionManager {
                  socket, _router, this);
              try {                     
                  initializeExternallyGeneratedConnection(connection);
-                 //We DO send ping requests on incoming connections.  This may
-                 //double ping traffic, but if gives us more accurate horizon
-                 //stats.  And it won't really affect traffic if people implement
-                 //caching properly.
-                 _router.sendPingRequest(new PingRequest(_settings.getTTL()),
-                                         connection);
+                 sendInitialPingRequest(connection);
                  connection.loopForMessages();
              } catch(IOException e) {
              } catch(Exception e) {
@@ -272,6 +267,13 @@ public class ConnectionManager {
     }
 
     /**
+     * @return true if incoming connection slots are still available.
+     */
+    public boolean hasAvailableIncoming() {
+        return (_incomingConnections < _keepAlive);
+    }
+
+    /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
@@ -357,6 +359,28 @@ public class ConnectionManager {
 	public void deactivateUltraFastConnectShutdown() {
 		_ultraFastCheck = null;
 	}
+
+    /** 
+     * Sends the initial ping request to a newly initialized connection.  The ttl
+     * of the PingRequest will be 1 if we don't need any connections.  Otherwise,
+     * the ttl = max ttl.
+     */
+    private void sendInitialPingRequest(ManagedConnection connection) {
+        PingRequest pr;
+        //we need to compare how many connections we have to the keep alive to
+        //determine whether to send a broadcast ping or a handshake ping, 
+        //initially.  However, in this case, we can't check the number of 
+        //connection fetchers currently operating, as that would always then
+        //send a handshake ping, since we're always adjusting the connection 
+        //fetchers to have the difference between keep alive and num of
+        //connections.
+        if (getNumConnections() >= _keepAlive)
+            pr = new PingRequest((byte)1);
+        else
+            pr = new PingRequest(SettingsManager.instance().getTTL());
+        connection.send(pr);
+    }
+
 
     /**
      * This Runnable resets the KeepAlive to the appropriate value
@@ -616,10 +640,11 @@ public class ConnectionManager {
 				    pingRequest = _router.createGroupPingRequest(group);
 				}
 				else
-				    pingRequest = 
-				      new PingRequest(_settings.getTTL());
-
-                _router.sendPingRequest(pingRequest, _connection);
+                {
+                    //send normal ping request (handshake or broadcast depending
+                    //on num of current connections.
+                    sendInitialPingRequest(_connection);
+                }
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -726,7 +751,7 @@ public class ConnectionManager {
                     // The interrupting thread has recorded the
                     // death of the fetcher, so just return.
                     return;
-                }               
+                } 
             } while (isConnected(endpoint));
 
             Assert.that(endpoint != null);
@@ -737,9 +762,7 @@ public class ConnectionManager {
 
             try {
                 initializeFetchedConnection(connection, this);
-                _router.sendPingRequest(
-                    new PingRequest(_settings.getTTL()),
-                    connection);
+                sendInitialPingRequest(connection);
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
