@@ -146,7 +146,8 @@ public class RouterService
 	//fancy like incrementally updating them.
 	for (Iterator iter=manager.connections(); iter.hasNext(); ) {
 	    Connection c=(Connection)iter.next();
-	    c.setSpamFilter(SpamFilter.newInstance());
+	    c.setPersonalFilter(SpamFilter.newPersonalFilter());
+	    c.setRouteFilter(SpamFilter.newRouteFilter());
 	}
     }
 
