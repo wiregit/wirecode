@@ -3,7 +3,9 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.Buffer;
 import java.net.*;
 import java.io.*;
+import java.rmi.RemoteException;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.networkdiscoverer.NDAccess;
 
 /**
  * The list of all connections.  Accepts new connections and creates
@@ -79,6 +81,14 @@ public class ConnectionManager implements Runnable {
     public int QReqCount; //Query Request count
     public int QRepCount; //Query Reply count
     public int pushCount; //Push request count
+    public int totDropped; //Total dropped messages
+    public int totRouteError; //Total misrouted messages
+    
+    /**
+    * An instance of NDAccess for remote access to the network discovery engine 
+    * to retrieve good hosts
+    */
+    private NDAccess ndAccess = null;
     
     private Vector badHosts = new Vector();
 
@@ -89,6 +99,7 @@ public class ConnectionManager implements Runnable {
      * of 0 means do not accept incoming connections. 
      */
     public ConnectionManager(int port) {
+        
 	this.port=port;
 	try {
 	    ip=InetAddress.getLocalHost().getAddress();
@@ -133,6 +144,36 @@ public class ConnectionManager implements Runnable {
 	return ip;
     }
 
+    /**
+    * Accessor method to get an instance of NDAccess, which is used for 
+    * remote access to the network discovery engine 
+    * to retrieve good hosts
+    * @return An instance of NDAccess, or null if not able to initialize
+    * @see com.limegroup.gnutella.networkdiscoverer.NDAccess
+    */
+    public NDAccess getNDAccess()
+    {
+        
+        if(ndAccess == null)
+        {
+             //initialize NDAccess for remote access to Network Discovery Engine
+            try
+            {
+                ndAccess = new NDAccess();
+                return ndAccess;
+            }
+            catch(RemoteException re)
+            {
+                //e.printStackTrace();
+                return null;
+            }
+        }
+        else
+        {
+            return ndAccess;
+        }
+    }
+    
     /**
      * @modifies this
      * @effects sets the port on which the ConnectionManager is listening. 
@@ -340,11 +381,15 @@ public class ConnectionManager implements Runnable {
 	//1. Start background threads to fetch the desired number of
 	//   connections.  These run in parallel until each has launched
 	//   a connection--or there are no connections left to try.
+        
+        /** //anu //we dont really need to initiate the connections. Its a router 
+        //and is just gonna listen for connections
 	for (int i=0; i<keepAlive; i++) {	    
 	    ConnectionFetcher fetcher=new ConnectionFetcher(this,1);
 	    fetcher.start();
 	    fetchers.add(fetcher);
 	}
+        */
 	//2. Create the server socket, bind it to a port, and listen for
 	//   incoming connections.  If there are problems, we can continue
 	//   onward.
@@ -370,6 +415,8 @@ public class ConnectionManager implements Runnable {
 	catch (Exception e){
 	    error(ActivityCallback.ERROR_1);
 	}
+        
+        
 	while (true) {
 	    Connection c = null;
 	    try {
@@ -407,6 +454,9 @@ public class ConnectionManager implements Runnable {
 		    if (word.equals(SettingsManager.instance().getConnectStringFirstWord())) {
 			//a) Gnutella connection
 
+                        /** //anu //we just wanna return good hostnames and dont really
+                        //want to maintain connections.
+                        //So just open a Reject Connection instead
 			if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
 			    c = new Connection( getHostName(client.getInetAddress() ), 
 						client.getPort(), true);
@@ -418,22 +468,28 @@ public class ConnectionManager implements Runnable {
 			    t.setDaemon(true);
 			    t.start();
 			}
-			else{// we have more connections than we can handle
+                        */
+			//anu //else{// we have more connections than we can handle
 			    RejectConnection rc = new RejectConnection(client);
 			    rc.setManager(this);
 			    Thread t = new Thread(rc);
 			    t.setDaemon(true);
 			    t.start();
-			}
+			//}
 
 		    } 
+                    /* //anu //we dont wanna handle any other requests
 		    //Incoming file transfer connection: normal HTTP and push.
+                    //we 
 		    else if (word.equals("GET")) {
 			HTTPManager mgr = new HTTPManager(client, this, false);
 		    } 
 		    else if (word.equals("GIV")) {
 			HTTPManager mgr = new HTTPManager(client, this, true);
 		    }
+                    */
+                    
+                    //else just close the connection //anu
 		    else {
 			throw new IOException();
 		    }
