@@ -351,33 +351,28 @@ public class TestUploader {
             maxPollTime = t+MAX_POLL;
             return;
         }
-        if (partial==1) {
-            DownloadTest.debug("UPLOAD PARTIAL SHARING");
-            //try ranges with spaces between and no spaces between
-            String s = 
-            "X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
-            out.write(s.getBytes());
-            s="\r\n";
-            out.write(s.getBytes());
-            out.flush();
-            partial++; //partial is now 2   
-            return;
-        }
-        else if(partial==2) {
-            String s = 
-            "X-Available-Ranges: bytes 50000-900000\r\n";
+        
+        if(partial > 0) {
+            String s="";
+            switch(partial) {
+            case 1:
+                s="X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
+                break;
+            case 2:
+                s="X-Available-Ranges: bytes 50000-900000\r\n";
+                break;
+            default:
+                s="X-Available-Ranges: bytes 50000-150000\r\n";
+            }
             out.write(s.getBytes());
             out.flush();
             partial++;
-            //don't return..we want to upload a partial range
-        }
-        else if(partial>=3) {
-            String s = 
-            "X-Available-Ranges: bytes 50000-150000\r\n";
-            out.write(s.getBytes());
-            out.flush();
-            //don't return..we want to upload a partial range
-            partial++;
+            if(partial==2) {//was 1 until last statement
+                s="\r\n";
+                out.write(s.getBytes());
+                out.flush();
+                return;
+            }
         }
 		str = "Content-Length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
