@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 import junit.framework.Test;
 
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.*;
 
 /**
@@ -35,6 +37,9 @@ public class FWTDetectionTest extends BaseTestCase {
     public static Test suite() {
         return buildTestSuite(FWTDetectionTest.class);
     }
+
+    //make sure the RouterService class gets loaded before the UDPService class
+    static RouterService router = new RouterService(new ActivityCallbackStub());
     
     static int REMOTE_PORT1 = 10000;
     static int REMOTE_PORT2 = 10001;
@@ -44,16 +49,35 @@ public class FWTDetectionTest extends BaseTestCase {
     
     static File originalNet, tempNet;
     
-    static RouterService router;
+
+    
+    
+    static CMStub cmStub;
     /**
      * the basic testing routine is a node with a few hosts in its gnutella.net
      * the node sends an initial ping to them, and they return various
      * pongs.
      */
     public static void globalSetUp() {
+        
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        router = new RouterService(new ActivityCallbackStub());
+        cmStub = new CMStub();
+        
+        try{
+            PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        }catch(Exception bad) {
+            ErrorService.error(bad);
+        }
         router.start();
+        
+        cmStub.setConnected(true);
+        assertTrue(RouterService.isConnected());
+        cmStub.setConnected(false);
+        assertFalse(RouterService.isConnected());
+        
+        assertNotNull(UDPService.instance());
+        assertNotNull(RouterService.getUdpService());
+        
         // move our existing gnutella.net out of the way
         originalNet = new File(CommonUtils.getUserSettingsDir(), 
         	"gnutella.net");
@@ -76,6 +100,11 @@ public class FWTDetectionTest extends BaseTestCase {
         }
     }
     
+    public void tearDown() {
+        RouterService.disconnect();
+        ponger1.drain();
+        ponger2.drain();
+    }
     /**
      * tests if the pings are requesting ip:port check properly
      *
@@ -98,6 +127,51 @@ public class FWTDetectionTest extends BaseTestCase {
         
         assertFalse(ponger1.listen().requestsIP());
         
+    }
+    
+    
+    /**
+     * tests the case where both pinged hosts reply with the same
+     * ip:port.
+     */
+    public void testPongsCarryGoodInfo() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
+        connectAsync();
+        
+        assertTrue(ponger1.listen().requestsIP());
+        assertTrue(ponger2.listen().requestsIP());
+        
+        Endpoint myself = new Endpoint(RouterService.getExternalAddress(),
+                RouterService.getPort());
+        ponger1.reply(myself);
+        ponger2.reply(myself);
+        Thread.sleep(500);
+        cmStub.setConnected(true);
+        assertTrue(UDPService.instance().canDoFWT());
+        cmStub.setConnected(false);
+    }
+    
+    /**
+     * tests the case where a pong says we have a different port
+     */
+    public void testPongCarriesBadPort() throws Exception{
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
+        connectAsync();
+        
+        assertTrue(ponger1.listen().requestsIP());
+        assertTrue(ponger2.listen().requestsIP());
+        
+        Endpoint badPort = new Endpoint(RouterService.getExternalAddress(),12345);
+        ponger1.reply(badPort);
+        ponger2.reply(badPort);
+        Thread.sleep(500);
+        cmStub.setConnected(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        assertTrue(ConnectionSettings.EVER_DISABLED_FWT.getValue());
+        cmStub.setConnected(false);
     }
     
     private static void writeToGnet(String hosts) throws Exception {
@@ -126,11 +200,17 @@ public class FWTDetectionTest extends BaseTestCase {
         public PingReply reply;
         public boolean shouldAsk;
         
+        private GUID _solGUID;
+        
         public UDPPonger(int port) {
             try {
+                _solGUID=(GUID) PrivilegedAccessor.getValue(
+                    UDPService.instance(),"SOLICITED_PING_GUID");
+            
+            
                 _sock = new DatagramSocket(port);
                 _sock.setSoTimeout(5000);
-            }catch(IOException bad) {
+            }catch(Exception bad) {
                 ErrorService.error(bad);
             }
         }
@@ -141,7 +221,11 @@ public class FWTDetectionTest extends BaseTestCase {
                 DatagramPacket pack = new DatagramPacket(data,1024);
                 _sock.receive(pack);
                 _lastAddress = pack.getSocketAddress();
-                    
+                
+                //also set the external address based on that ping
+                ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+                RouterService.getAcceptor().setExternalAddress(pack.getAddress());
+                
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
                     
                 return (PingRequest) Message.read(bais); 
@@ -149,14 +233,14 @@ public class FWTDetectionTest extends BaseTestCase {
         
         /**
          * send a pong with the specified address back to the pinger.
-         * for the specific test we don't care about matching the guids 
+         * it uses the solicited ping
          */
         public void reply(IpPort reply) throws Exception{
             PingReply toSend;
             if (reply==null)
-                toSend = PingReply.create(GUID.makeGuid(),(byte)1);
+                toSend = PingReply.create(_solGUID.bytes(),(byte)1);
             else
-                toSend = PingReply.create(GUID.makeGuid(),(byte)1,reply);
+                toSend = PingReply.create(_solGUID.bytes(),(byte)1,reply);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             toSend.write(baos);
@@ -164,6 +248,29 @@ public class FWTDetectionTest extends BaseTestCase {
             DatagramPacket pack = new DatagramPacket(data,data.length,_lastAddress);
             _sock.send(pack);
             
+        }
+        
+        public void drain()  {
+            try{
+                _sock.setSoTimeout(100);
+                try{
+                    while(true)
+                        _sock.receive(new DatagramPacket(new byte[1000],1000));
+                }catch(IOException expected) {}
+                _sock.setSoTimeout(5000);
+            }catch(SocketException bad) {
+                ErrorService.error(bad);
+            }
+        }
+    }
+    
+    private static class CMStub extends ConnectionManagerStub {
+        private boolean connected;
+        public boolean isConnected() {
+            return connected;
+        }
+        public void setConnected(boolean yes) {
+            connected=yes;
         }
     }
 
