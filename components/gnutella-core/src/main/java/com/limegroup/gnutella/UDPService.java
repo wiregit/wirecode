@@ -26,7 +26,7 @@ public final class UDPService implements Runnable {
 	/**
 	 * The socket that handles sending and receiving messages over UDP.
 	 */
-	private DatagramSocket _socket;
+	private volatile DatagramSocket _socket;
 	
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -238,7 +238,7 @@ public final class UDPService implements Runnable {
 	 *  UDP messages, <tt>false</tt> otherwise
 	 */
 	public boolean isListening() {
-		return (_socket.getPort() != -1);
+		return (_socket.getLocalPort() != -1);
 	}
 
 	/** 
