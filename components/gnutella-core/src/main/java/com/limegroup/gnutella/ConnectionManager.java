@@ -691,7 +691,6 @@ public class ConnectionManager {
         }
     }
 
-    //anu TODO
     /** 
      * Indicates that we are a client node, and have received supernode
      * connection. Executing this method will lead to dropping all the 
@@ -734,6 +733,19 @@ public class ConnectionManager {
         
         //set the _hasShieldedClientSupernodeConnection flag to true
         _hasShieldedClientSupernodeConnection = true;
+    }
+    
+    /** 
+     * Indicates that the node is in the client node, and has now
+     * lost its only connection to the supernode
+     */
+    private synchronized void lostShieldedClientSupernodeConnection()
+    {
+        //set the _hasShieldedClientSupernodeConnection flag to false
+        _hasShieldedClientSupernodeConnection = false;
+        
+        //set keep alive to 1, so that we start fetching new connections
+        setKeepAlive(4);
     }
     
     /**
@@ -907,8 +919,10 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                //unset the _hasShieldedClientSupernodeConnection flag
-                _hasShieldedClientSupernodeConnection = false;
+                if(_hasShieldedClientSupernodeConnection)
+                {
+                    lostShieldedClientSupernodeConnection();
+                }
             }
         }
     }
@@ -975,8 +989,10 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                //unset the _hasShieldedClientSupernodeConnection flag
-                _hasShieldedClientSupernodeConnection = false;
+                if(_hasShieldedClientSupernodeConnection)
+                {
+                    lostShieldedClientSupernodeConnection();
+                }
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -1045,8 +1061,10 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                //unset the _hasShieldedClientSupernodeConnection flag
-                _hasShieldedClientSupernodeConnection = false;
+                if(_hasShieldedClientSupernodeConnection)
+                {
+                    lostShieldedClientSupernodeConnection();
+                }
             }
         }
     }
