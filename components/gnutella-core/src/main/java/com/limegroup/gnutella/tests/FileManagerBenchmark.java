@@ -2,38 +2,109 @@ package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
 import java.util.Random;
+import java.io.*;
 
 public class FileManagerBenchmark {
-    public static final String DIRECTORY="c:\\junk";
-    public static final int QUERIES=1000;
+    /** Location of files. */
+    public static final String DIRECTORY="c:\\Documents and Settings\\crohrs\\My Documents\\data\\filemanager\\simulated\\";
+    /** The queries to try, in increasing order of nastiness */
+    public static final String[] QUERIES={"beethoven",                   //no luck
+                                          "sinead", "mccartney paul",    //some luck
+                                          "and she", "mp3"};             //lots of luck
+    /** The sample to try per query. */
+    public static final int QUERY_TRIES=1000;
 
     public static void main(String args[]) {
+        //Set up FileManager with no files.
         SettingsManager settings=SettingsManager.instance();
-        settings.setExtensions("txt");
+        settings.setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
         settings.setDirectories("");
         FileManager fm=FileManager.instance();
+        if (! (new File(DIRECTORY).exists())) {
+            System.out.println("Directory doesn't exist");
+            return;
+        }
         
+        //Time directory scan.
         System.out.println("Adding files...");
         long startTime=System.currentTimeMillis();
         fm.addDirectory(DIRECTORY);
         long stopTime=System.currentTimeMillis();
-        long elapsed=(stopTime-startTime)/1000;
-        System.out.println("Added "+fm.getNumFiles()+" in "+elapsed+" seconds\n");
+        long elapsed=stopTime-startTime;
+        System.out.println("Added "+fm.getNumFiles()+" in "+elapsed+" msecs\n");
 
-        Random rand=new Random();
-        System.out.println("Querying files...");
-        startTime=System.currentTimeMillis();
-        long hits=0;
-        for (int i=0; i<QUERIES; i++) {
-            int n=rand.nextInt() % 1000;
-            String query="file"+String.valueOf(n);
+
+        //Time query.
+        for (int i=0; i<QUERIES.length; i++) {
+            String query=QUERIES[i];
             QueryRequest qr=new QueryRequest((byte)5, 0, query);
-            Response[] responses=fm.query(qr);
-            if (responses!=null)
-                hits+=responses.length;
+            System.out.println("Querying files for \""+query+"\"...");
+
+            startTime=System.currentTimeMillis();
+            long hits=0;
+            for (int tries=0; tries<QUERY_TRIES; tries++) {            
+                Response[] responses=fm.query(qr);
+                if (responses!=null)
+                    hits+=responses.length;
+            }
+            stopTime=System.currentTimeMillis();
+
+            elapsed=stopTime-startTime;
+            System.out.println("Delivered "+hits+" query results in "+elapsed+" msecs\n"); 
         }
-        stopTime=System.currentTimeMillis();
-        elapsed=(stopTime-startTime)/1000;
-        System.out.println("Delivered "+hits+" query results in "+elapsed+" seconds\n"); 
     }
+
+    /*
+
+This is the base line performance
+
+Adding files...
+Added 1190 in 4417 msecs
+
+Querying files for "beethoven"...
+Delivered 0 query results in 190 msecs
+
+Querying files for "sinead"...
+Delivered 4000 query results in 230 msecs
+
+Querying files for "mccartney paul"...
+Delivered 10000 query results in 501 msecs
+
+Querying files for "and she"...
+Delivered 16000 query results in 5318 msecs
+****This is somewhat slow because "and" matches the directory name!
+
+Querying files for "mp3"...
+Delivered 1185000 query results in 33197 msecs
+*****This is somwhat slow because 'mp3, '
+
+==>Adding the special case optimization to FileManager.search and adding "," to
+the delimeters doesn't really help.
+
+
+--------------------------------------------
+
+This is the old performance
+
+Adding files...
+Added 1190 in 3135 msecs
+
+Querying files for "beethoven"...
+Delivered 0 query results in 12999 msecs
+
+Querying files for "sinead"...
+Delivered 5000 query results in 14130 msecs
+
+Querying files for "mccartney paul"...
+Delivered 11000 query results in 13770 msecs
+
+Querying files for "and she"...
+Delivered 18000 query results in 16163 msecs
+
+Querying files for "mp3"...
+Delivered 1185000 query results in 32747 msecs
+
+~%
+
+     */
 }
