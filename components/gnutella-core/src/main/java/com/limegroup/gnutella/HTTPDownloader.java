@@ -34,10 +34,14 @@ public class HTTPDownloader implements Runnable {
 
     private ByteReader _br;
 
+    private boolean _okay;
+
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
-			
+	
+	_okay = false;
+
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;
@@ -57,8 +61,10 @@ public class HTTPDownloader implements Runnable {
 	}
 	catch (Exception e) {
 	    _callback.error(ActivityCallback.ERROR_4);
+	    return;
 	}
 
+	_okay = true;
 	
     }
       
@@ -67,6 +73,7 @@ public class HTTPDownloader implements Runnable {
 			  int port, int index, String file, 
 			  ConnectionManager m, byte[] guid ) {
 			
+	_okay = false;
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;
@@ -94,6 +101,11 @@ public class HTTPDownloader implements Runnable {
 
 	    return;
 	}
+	catch (Exception e) {
+	    System.out.println("There was an exception:");
+  	    e.printStackTrace();
+	    return;
+	}
   	try {
 	    _istream = conn.getInputStream();
 	    //  _bis = new BufferedInputStream(_istream);
@@ -112,6 +124,12 @@ public class HTTPDownloader implements Runnable {
   	    return;
 
   	}
+	catch (Exception e) {
+	    System.out.println("There was an exception:");
+  	    e.printStackTrace();
+	    return;
+	}
+	_okay = true;
 
     }
     
@@ -175,9 +193,12 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
-	_callback.addDownload(this);
-	doDownload();
-	_callback.removeDownload(this);
+	if (_okay) {
+	    _callback.addDownload(this);
+	    doDownload();
+	    // readHeader();
+	    _callback.removeDownload(this);
+	}
     }
 
     
@@ -217,10 +238,11 @@ public class HTTPDownloader implements Runnable {
 		// c = _in.read(buf);
 		c = _br.read(buf);
 		// c = _in.read();
-		// System.out.print(c);
+		// System.out.print(c); 
 	    }
 	    catch (Exception e) {
-		System.out.print("THere is a problem with read");
+		System.out.println("THere is a problem with read");
+		return;
 	    }
 
 	    if (c == -1)
@@ -231,11 +253,23 @@ public class HTTPDownloader implements Runnable {
 		// _fos.write(c);
 	    }
 	    catch (Exception e) {
-		System.out.print("THere is a problem with write");
+		System.out.println("***********************************");
+		System.out.println("* There is a problem with write");
+		System.out.println("***********************************");
+		e.printStackTrace();
+		return;
 	    }
 
 	    _amountRead+=c;
 	    // _amountRead++;
+	    
+	    System.out.println("The amount read: " + _amountRead);
+	    System.out.println("The size of the file: " + _sizeOfFile);	    
+	    double percent = _amountRead / _sizeOfFile;
+	    System.out.println("The percent read: " + percent);
+	    System.out.println("");
+	    
+
 	}
 
 	try {
@@ -251,6 +285,9 @@ public class HTTPDownloader implements Runnable {
 
      public void readHeader() {
 	String str = null;
+
+	int flag = 0;
+
 	while (true) {		
 	    // try {
 		// str = _in.readLine();
@@ -263,9 +300,23 @@ public class HTTPDownloader implements Runnable {
 		// }
 	    if (str.indexOf("Content-length:") != -1) {
 		String sub = str.substring(15);
+
 		sub.trim();
 		
-		_sizeOfFile = java.lang.Integer.parseInt(sub);
+		System.out.println(":" + str + ":");
+		System.out.println(":" + sub + ":");
+
+		
+		
+		try {
+		    _sizeOfFile = java.lang.Integer.parseInt(sub);
+		}
+		catch (NumberFormatException e) {
+		    System.out.println("Number Format Exception");
+		    return;
+		}
+		flag = 1;
+		
 		// try {
 		    // str = _in.readLine();
 		    str = _br.readLine();
@@ -278,6 +329,15 @@ public class HTTPDownloader implements Runnable {
 		break;
 	    }
 	}
+
+	if (flag == 0) {
+	    
+	    System.out.println("***********************************");
+	    System.out.println("DID NOT READ THE LENGTH");
+	    System.out.println("***********************************");
+
+	}
+
     }
 
     public void shutdown()

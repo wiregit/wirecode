@@ -54,7 +54,7 @@ public class ByteReader {
 
 	try {
 	    c = _istream.read(buf);
-	    System.out.print(c  + " ");
+	    // System.out.print(c  + " ");
 
 	}
 	catch(IOException e) {
@@ -115,9 +115,9 @@ public class ByteReader {
 		    break;
 		    // endOfLine = true;
 		else {
-		    buf[i++] = (byte)c;
-		    buf[i++] = (byte)b;
-		    numBytes+=2;
+		    // buf[i++] = (byte)c;
+		    // buf[i++] = (byte)b;
+		    // numBytes+=2;
 		}
 	    }
 	    else {
