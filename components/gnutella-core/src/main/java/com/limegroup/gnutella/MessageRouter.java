@@ -1598,6 +1598,10 @@ public abstract class MessageRouter {
         // by a leaf to other Ultrapeers
         if(ultrapeer.isClientSupernodeConnection()) return;
 
+        if (query.isWhatIsNewRequest() &&
+            !ultrapeer.remoteHostSupportsWhatIsNew())
+            return;
+
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
            
@@ -1686,14 +1690,18 @@ public abstract class MessageRouter {
      *
      * @param request The query to send.
      * @param mc The ManagedConnection to send the query along
+     * @return false if the query was not sent, true if so
      */
-    public void originateQuery(QueryRequest query, ManagedConnection mc) {
+    public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
         if( query == null )
             throw new NullPointerException("null query");
         if( mc == null )
             throw new NullPointerException("null connection");
         
+        if (query.isWhatIsNewRequest() && !mc.remoteHostSupportsWhatIsNew())
+            return false;
         mc.originateQuery(query);
+        return true;
     }
     
 

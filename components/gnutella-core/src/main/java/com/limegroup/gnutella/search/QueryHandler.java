@@ -515,8 +515,9 @@ public final class QueryHandler {
                                ManagedConnection mc, 
                                QueryHandler handler) {
         
-        // send the query directly along the connection
-        _messageRouter.originateQuery(query, mc);
+        // send the query directly along the connection, but if the query didn't
+        // go through send back 0....
+        if (!_messageRouter.originateQuery(query, mc)) return 0;
         
         byte ttl = query.getTTL();
 

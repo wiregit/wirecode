@@ -148,9 +148,10 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
             super();
         }
         
-        public void originateQuery(QueryRequest r, ManagedConnection c) {
+        public boolean originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);
             super.sendQueryRequest(r, c);
+            return true;
         }
 	}
 

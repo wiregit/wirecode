@@ -250,7 +250,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testDoesNotRouteWhatIsNewQuery() throws Exception {
+    public void testDoesNotRouteToLeafWhatIsNewQuery() throws Exception {
         drainAll();
 
         // send the query
@@ -270,7 +270,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         assertNull(rQuery);
     }
 
-    public void testDoesRouteWhatIsNewQuery() throws Exception {
+    public void testDoesRouteToLeafWhatIsNewQuery() throws Exception {
         drainAll();
 
         // send the CapabilitiesVM
@@ -294,6 +294,84 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
                      new GUID(whatIsNewQuery.getGUID()));
+    }
+
+
+    public void testDoesNotRouteToUltrapeerWhatIsNewQuery() throws Exception {
+        drainAll();
+
+        // send the query
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        ULTRAPEER_2.send(whatIsNewQuery);
+        ULTRAPEER_2.flush();
+
+        // give time to process
+        Thread.sleep(3000);
+
+        // the UP should NOT get this query
+        QueryRequest rQuery = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+                                                         QueryRequest.class);
+        assertNull(rQuery);
+    }
+
+    public void testDoesRouteToUltrapeerWhatIsNewQuery() throws Exception {
+        drainAll();
+
+        // send the CapabilitiesVM
+        ULTRAPEER_1.send(CapabilitiesVM.instance());
+        ULTRAPEER_1.flush();
+
+        // send the query
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        ULTRAPEER_2.send(whatIsNewQuery);
+        ULTRAPEER_2.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        // the UP should get this query
+        QueryRequest rQuery = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+                                                         QueryRequest.class);
+        assertNotNull(rQuery);
+        assertEquals(new GUID(rQuery.getGUID()), 
+                     new GUID(whatIsNewQuery.getGUID()));
+    }
+
+    // Ultrapeer 1 should get the query, Ultrapeer 2 should not (because UP 1
+    // sent the capabilites VM)
+    public void testLeafQueryRoutesCorrectly() throws Exception {
+        drainAll();
+
+        // send the query
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        LEAF.send(whatIsNewQuery);
+        LEAF.flush();
+
+        // give time to process
+        Thread.sleep(5000);
+
+        // UP 1 should get this query
+        QueryRequest rQuery = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+                                                         QueryRequest.class);
+        assertNotNull(rQuery);
+        assertEquals(new GUID(rQuery.getGUID()), 
+                     new GUID(whatIsNewQuery.getGUID()));
+        // UP 2 should NOT get this query
+        rQuery = (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_2,
+                                                              QueryRequest.class);
+        assertNull(rQuery);
     }
 
 
