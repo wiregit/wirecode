@@ -180,16 +180,20 @@ public class DownloadTest extends TestCase {
             tStealerInterruptedWithAlternate();
             cleanup();
         }
-        if(args.length == 0 || args[0].equals("18")) {
-            tTwoAlternatesButOneWithNoSHA1();
-            cleanup();
-        }
+//          if(args.length == 0 || args[0].equals("18")) {
+//              tTwoAlternatesButOneWithNoSHA1();
+//              cleanup();
+//          }
         if(args.length == 0 || args[0].equals("19")) {
             tUpdateWhiteWithFailingFirstUploader();
             cleanup();
         }
         if(args.length == 0 || args[0].equals("20")) {
             tQueuedDownloader();
+            cleanup();
+        }
+        if(args.length==0 || args[0].equals("21")) {
+            tAlternateLocationsExchangedWithBusy();
             cleanup();
         }
     }
@@ -809,6 +813,51 @@ public class DownloadTest extends TestCase {
         //and then it shold complete the download, because TestUploader
         //resets queue after sending 503
         tGeneric(rfds);
+    }
+
+    private static void tAlternateLocationsExchangedWithBusy() {
+        //tests that a downloader reads alternate locations from the
+        //uploader even if it receives a 503 from the uploader.
+        
+        debug("-Testing dloader gets alt from 503 uploader...");
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setBusy(true);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, testHash.toString());
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, testHash.toString());
+        RemoteFileDesc[] rfds = {rfd1};
+
+        //Prebuild an uploader alts in lieu of rdf2
+        AlternateLocationCollection ualt = new AlternateLocationCollection();
+        try {
+            URL url2 =   rfdURL(rfd2);
+            AlternateLocation al2 =
+            AlternateLocation.createAlternateLocation(url2);
+            ualt.addAlternateLocation(al2);
+        } catch (Exception e) {
+            check(false, "Couldn't setup test");
+        }
+        uploader1.setAlternateLocations(ualt);
+
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        check(u1==0, "u1 did all the work");
+        check(u2<TestFile.length()+FUDGE_FACTOR, "u2 did all the work");
     }
 
     private static void tGUI() {

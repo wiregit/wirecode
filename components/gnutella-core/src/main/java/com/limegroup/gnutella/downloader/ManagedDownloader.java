@@ -1613,6 +1613,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 debug("iox thrown in assignAndReplace "+dloader);
                 return 0; //discard the rfd of dloader
             } finally {
+                //add alternate locations, which we could have gotten from 
+                //the downloader
+                synchronized(this) {
+                    addAlternateLocations(dloader.getAlternateLocations(),
+                                          dloader.getRemoteFileDesc() );
+                }
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
                 //    was never modified since needed.size()==0
@@ -1640,8 +1646,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dloaders.add(dloader);
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
-				addAlternateLocations(dloader.getAlternateLocations(),
-                                      dloader.getRemoteFileDesc() );
             }
             return 2;
         }

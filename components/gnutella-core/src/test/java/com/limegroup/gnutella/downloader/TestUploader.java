@@ -255,13 +255,6 @@ public class TestUploader {
 		String str=
         busy|queue?"HTTP/1.1 503 Service Unavailable\r\n":"HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
-        if (busy) {
-            String s = "\r\n"; 
-            out.write(s.getBytes());
-            out.flush();
-            out.close();
-            return;
-        }
 
         if(queue) {
             String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
@@ -285,12 +278,16 @@ public class TestUploader {
 			out.write(str.getBytes());
 		}
 		if(storedAltLocs.hasAlternateLocations()) 
-		    HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
 		      storedAltLocs, out);
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
-
+        if (busy) {
+            out.close();
+            return;
+        }
+        
         //Write data at throttled rate.  See NormalUploadState.  TODO: use
         //ThrottledOutputStream
         for (int i=start; i<stop; ) {
