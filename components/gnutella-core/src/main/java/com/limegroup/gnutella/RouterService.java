@@ -282,6 +282,7 @@ public class RouterService
      * @effects removes all connections.
      */
     public void disconnect() {
+		manager.setTimeEvent(0, null); // Deactivate any timed keepAlive fiddle
         SettingsManager settings=SettingsManager.instance();
         int oldKeepAlive=settings.getKeepAlive();
 
