@@ -113,7 +113,7 @@ public class UDPBufferedInputStream extends InputStream {
                 } else {
 
                     // This connection is closed
-                    return 0;
+                    return -1;
                 }
 
             }
@@ -159,7 +159,7 @@ public class UDPBufferedInputStream extends InputStream {
                 } else {
 
                     // This connection is closed
-                    return 0;
+                    return -1;
                 }
             }
         }

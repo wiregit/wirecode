@@ -302,6 +302,10 @@ public class UDPConnectionProcessor {
 		// Tell the receiver that we are shutting down
     	safeSendFin();
 
+        // Wakeup any sleeping readers
+        if ( _outputToInputStream != null )
+            _outputToInputStream.wakeup();
+
 		// TODO: should I wait for ack. Communicate state to streams.
         // There should likely be a shutdown event that resends the FIN
         // a few times if the ack doesn't come back.  As it is, something
