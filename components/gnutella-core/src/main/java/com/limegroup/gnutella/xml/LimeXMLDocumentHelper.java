@@ -167,73 +167,6 @@ public final class LimeXMLDocumentHelper{
     }
 
 
-    private static void indexTree(String schemaURI, Element tree,
-                                  HashMap urisToLists) {
-        LinkedList trees = null;
-        if (urisToLists.containsKey(schemaURI)) 
-            trees = (LinkedList) urisToLists.remove(schemaURI);        
-        else 
-            trees = new LinkedList();
-        trees.add(tree);
-        urisToLists.put(schemaURI, trees);
-    }
-
-    private static String internalGetAggregateString(Response[] responses) { 
-        HashMap urisToLists = new HashMap();
-        DOMParser parser = new DOMParser();
-        
-        final int len = responses.length;
-        
-        // since responses may have disparate xml, i need to group them while
-        // remembering their index in the response array
-        for (int i = 0; i < len; i++) {
-            Response currResp = responses[i];
-            String currXML = currResp.getMetadata();
-            Element currTree = null;
-            if ((currXML != null) && !currXML.equals(""))
-                currTree = getDOMTree(parser, currXML);
-            if (currTree != null) {
-                addIndex(currTree, i);
-                String schemaURI = getSchemaURI(currXML);
-                indexTree(schemaURI, currTree, urisToLists);
-            }
-        }
-        
-        // now get all the disparate xml from the hashmap, and construct a xml
-        // string for each.
-        StringBuffer retStringBuffer = new StringBuffer();
-        Iterator keys = urisToLists.keySet().iterator();
-        while (keys.hasNext()) { // for each schema URI
-            String currKey = (String) keys.next();
-            List treeList = (List) urisToLists.get(currKey);
-            Iterator trees = treeList.iterator();
-            boolean firstIter = true;
-
-            while (trees.hasNext()) { // for each xml per schema URI
-                Element currTree = (Element) trees.next();
-
-                // open the outer on the first iteration...
-                if (firstIter) {
-                    retStringBuffer.append(XMLStringUtils.XML_VERSION_DELIM);
-                    retStringBuffer.append(getSchemaURIXML(currTree));
-                    firstIter = false;
-                }
-
-                // get current child info and append...
-                Node currChild = getFirstNonTextChild(currTree);
-                retStringBuffer.append(getNodeString(currChild));
-
-                // upon the last iteration, close outer....
-                if (!trees.hasNext()) 
-                    retStringBuffer.append("</"+
-                                           currTree.getNodeName()+
-                                           ">");
-            }
-        }
-        
-        return retStringBuffer.toString();
-    }
-    
     private static String internalGetAggregateString2 (Response[] responses) { 
         //this hashmap remembers the current state of the string for each uri
         HashMap uriToString /*LimeXMLSchemaURI -> String */ = new HashMap();
@@ -243,7 +176,7 @@ public final class LimeXMLDocumentHelper{
                 continue;
             aggregateResponse(uriToString, doc,i);
         }
-        String retString = "";
+        StringBuffer retStringB = new StringBuffer();
 
         //iterate over the map and close all the strings out.
         Iterator iter = uriToString.values().iterator();
@@ -252,9 +185,11 @@ public final class LimeXMLDocumentHelper{
             int begin = str.indexOf("<",2);//index of opening outer(plural)
             int end = str.indexOf(" ",begin);
             String tail  = "</"+str.substring(begin+1,end)+">";
-            retString = retString+str+tail;
+            //            retString = retString+str+tail;
+            retStringB.append(str);
+            retStringB.append(tail);
         }
-        return retString;
+        return retStringB.toString();
     }
     
     private static void aggregateResponse(HashMap uriToString, 
@@ -280,9 +215,16 @@ public final class LimeXMLDocumentHelper{
             p = str.indexOf(">",p+1);//index of first closing tag
             String first = str.substring(0,p);
             String last = str.substring(p);
-            str = first+" index=\""+index+"\" "+last;
+            StringBuffer strB = new StringBuffer(first.length()+
+                                                 15 + last.length());
+            // str = first+" index=\""+index+"\" "+last;
+            strB.append(first);
+            strB.append(" index=\"");
+            strB.append(""+index);
+            strB.append("\" ");
+            strB.append(last);
             //3. add the entry in the map
-            uriToString.put(uri,str);
+            uriToString.put(uri,strB.toString());
         }
         else {            
             //1.strip the plural form out of the xml string
@@ -301,11 +243,17 @@ public final class LimeXMLDocumentHelper{
             int p = str.indexOf(">");
             String first = str.substring(0,p);
             String last = str.substring(p);
-            str = first+" index=\""+index+"\" "+last;
+            StringBuffer strB = new StringBuffer(currString);
+            //  str = first+" index=\""+index+"\" "+last;
+            //  currString = currString+str;
+            strB.append(first);
+            strB.append(" index=\"");
+            strB.append(""+index);
+            strB.append("\" ");
+            strB.append(last);
             //3.concatinate the remaining xml to currString
-            currString = currString+str;
             //4.put it back into the map
-            uriToString.put(uri,currString);
+            uriToString.put(uri,strB.toString());
         }
     }
 
@@ -407,7 +355,7 @@ public final class LimeXMLDocumentHelper{
         return retString;
     }
 
-    private static final boolean debugOn = false;
+    private static boolean debugOn = false;
     public static void debug(String out) {
         if (debugOn) 
             System.out.println(out);
@@ -415,17 +363,18 @@ public final class LimeXMLDocumentHelper{
 
     /*
     public static void main(String argv[]) throws Exception {
+        debugOn = true;
         LimeXMLDocumentHelper help = new LimeXMLDocumentHelper();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         LimeXMLDocument doc = null;
         Response[] resps = new Response[5];
         
-        resps[0] = new MetaEnabledResponse(0, 100, "File 1", null);
+        resps[0] = new Response(0, 100, "File 1");
         doc = new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"192\" genre=\"Blues\"/></audios>");
-        resps[1] = new MetaEnabledResponse(1, 200, "File 2",doc);
-        resps[2] = new MetaEnabledResponse(0, 300, "File 3", null);
-        resps[3] = new MetaEnabledResponse(3, 400, "File 4", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"128\" genre=\"Country\"/></audios>"));
-        resps[4] = new MetaEnabledResponse(0, 500, "File 5", null);
+        resps[1] = new Response(1, 200, "File 2",doc);
+        resps[2] = new Response(0, 300, "File 3");
+        resps[3] = new Response(3, 400, "File 4", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"128\" genre=\"Country\"/></audios>"));
+        resps[4] = new Response(0, 500, "File 5");
         
         for (int i = 0; i < resps.length; i++)
             debug("resps["+i+"].metadata = " +
@@ -435,59 +384,57 @@ public final class LimeXMLDocumentHelper{
         debug("Aggregate String (no disparates) = " + xmlCollectionString); 
         
         resps = new Response[10];
-        resps[0] = new MetaEnabledResponse(0, 100, "File 1", null);
-        resps[1] = new MetaEnabledResponse(1, 200, "File 2", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"192\" genre=\"Blues\"/></audios>"));
-        resps[2] = new MetaEnabledResponse(0, 300, "File 3", null);
+        resps[0] = new Response(0, 100, "File 1");
+        resps[1] = new Response(1, 200, "File 2", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"192\" genre=\"Blues\"/></audios>"));
+        resps[2] = new Response(0, 300, "File 3");
         doc = new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><comments>Duh!</comments><author>Susheel</author></story></backslash>");
         
-        resps[3] = new MetaEnabledResponse(}
-
+        resps[3] = new Response(3, 400, "File 4", doc);
+        resps[4] = new Response(0, 500, "File 5");
+        resps[5] = new Response(1, 200, "File 6", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Blues\" city=\"New York\"/></radioStations>"));
+        resps[6] = new Response(1, 200, "File 7", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"160\" genre=\"Chamber Music\"/></audios>"));
+        resps[7] = new Response(1, 200, "File 8", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"170\" genre=\"Pop\"/></audios>"));
+        resps[8] = new Response(1, 200, "File 9", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Classic Rock=\"></radioStation></radioStations>"));
+        resps[9] = new Response(1, 200, "File 10", new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
         
-
-        3, 400, "File 4", doc);
-         resps[4] = new MetaEnabledResponse(0, 500, "File 5", null);
-         resps[5] = new MetaEnabledResponse(1, 200, "File 6", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Blues\" city=\"New York\"/></radioStations>"));
-         resps[6] = new MetaEnabledResponse(1, 200, "File 7", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"160\" genre=\"Chamber Music\"/></audios>"));
-         resps[7] = new MetaEnabledResponse(1, 200, "File 8", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"170\" genre=\"Pop\"/></audios>"));
-         resps[8] = new MetaEnabledResponse(1, 200, "File 9", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Classic Rock=\"></radioStation></radioStations>"));
-         resps[9] = new MetaEnabledResponse(1, 200, "File 10", new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
+        for (int i = 0; i < resps.length; i++)
+            debug("resps["+i+"].metadata = " +
+                  resps[i].getMetadata());
         
-         for (int i = 0; i < resps.length; i++)
-             debug("resps["+i+"].metadata = " +
-                   resps[i].getMetadata());
-
-         System.out.println("----->");
+        System.out.println("----->");
         
-         xmlCollectionString = help.getAggregateString(resps);
-         debug("Aggregate String (disparates) = " + xmlCollectionString); 
-
-
-
-         debug("--------------------------------");
+        xmlCollectionString = help.getAggregateString(resps);
+        debug("Aggregate String (disparates) = " + xmlCollectionString); 
         
-         List madeXMLList = 
-         help.getDocuments("<?xml version=\"1.0\"?><backlash><story index=\"0\"><title>Susheel</title></story><story index=\"4\"><author>Daswani</author><section>News</section></story></backlash>", 6);
-         LimeXMLDocument[] madeXML = (LimeXMLDocument[])madeXMLList.get(0);
-         for (int i = 0; (i < 6) && (madeXML != null); i++)
-             if (madeXML[i] != null) {
-                 madeXML[i].setSchemaURI("http://www.limewire.com/schemas/slashdotNews.xsd");
-                 debug("mock-xml["+i+"] = " + 
-                       madeXML[i].getXMLString());
-             }
         
-         debug("--------------------------------");
         
-         List retrievedXMLList = help.getDocuments(xmlCollectionString,
-                                                   resps.length);
-         Iterator arrays = retrievedXMLList.iterator();
-         while (arrays.hasNext()) {
-             LimeXMLDocument[] retrievedXML = (LimeXMLDocument[]) arrays.next();
-             if (retrievedXML == null)
-                 debug("unexpected!");
-             for (int i = 0; (i < resps.length) && (retrievedXML != null); i++)
-                 if (retrievedXML[i] != null) 
-                     debug("ret-xml["+i+"] = " + 
-                           retrievedXML[i].getXMLString());
-   }
+        debug("--------------------------------");
+        
+//         List madeXMLList = 
+//         help.getDocuments("<?xml version=\"1.0\"?><backlash><story index=\"0\"><title>Susheel</title></story><story index=\"4\"><author>Daswani</author><section>News</section></story></backlash>", 6);
+//         LimeXMLDocument[] madeXML = (LimeXMLDocument[])madeXMLList.get(0);
+//          for (int i = 0; (i < 6) && (madeXML != null); i++)
+//              if (madeXM<audiosL[i] != null) {
+//                  madeXML[i].setSchemaURI("http://www.limewire.com/schemas/slashdotNews.xsd");
+//                  debug("mock-xml["+i+"] = " + 
+//                        madeXML[i].getXMLString());
+//              }
+         
+//          debug("--------------------------------");
+         
+//          List retrievedXMLList = help.getDocuments(xmlCollectionString,
+//                                                    resps.length);
+//          Iterator arrays = retrievedXMLList.iterator();
+//          while (arrays.hasNext()) {
+//              LimeXMLDocument[] retrievedXML = (LimeXMLDocument[]) arrays.next();
+//              if (retrievedXML == null)
+//                  debug("unexpected!");
+//              for (int i = 0; (i < resps.length) && (retrievedXML != null); i++)
+//                  if (retrievedXML[i] != null) 
+//                      debug("ret-xml["+i+"] = " + 
+//                            retrievedXML[i].getXMLString());
+//          }
+         
+    }
     */
 }
