@@ -975,12 +975,9 @@ public class ManagedConnection extends Connection
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {
             // if we are ignoring local addresses and the connection is local
-            // then ignore
-            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && isLocal())
-                return;
-
-            // if the guy is potentially on the same network then ignore
-            if (!isConnectBackCapable())
+            // or the guy has a similar address then ignore
+            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+               (isLocal() || !isConnectBackCapable()))
                 return;
 
             // do i need to send any ConnectBack messages????
