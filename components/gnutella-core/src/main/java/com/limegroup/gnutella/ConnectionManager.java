@@ -953,6 +953,9 @@ public class ConnectionManager {
 
         // 4) Notify the listener
         RouterService.getCallback().connectionClosed(c); 
+
+        // 5) Clean up Unicaster
+        QueryUnicaster.instance().purgeQuery(c);
     }
 
     /**

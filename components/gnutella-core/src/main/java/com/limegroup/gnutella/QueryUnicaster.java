@@ -38,9 +38,13 @@ public final class QueryUnicaster {
      *  The map is from GUID to QueryBundle.  The following invariant is
      *  maintained:
      *  GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
-     *  Not a Map because I want to enforce synchronization.
      */
     private Map _queries;
+
+    /** Maps leaf connections to the queries they've spawned.
+     *  The map is from ReplyHandler to a Set (of GUIDs).
+     */
+    private Map _querySets;
 
     /** The unicast enabled hosts I should contact for queries.  Add to the
      *  front, remove from the end.  Therefore, the OLDEST entries are at the
@@ -122,6 +126,7 @@ public final class QueryUnicaster {
         _queries = new Hashtable();
         _queryHosts = new LinkedList();
         _pingList = new FixedSizeList(25);
+        _querySets = new Hashtable();
 
         // start service...
         _querier = new Thread() {
@@ -200,6 +205,7 @@ public final class QueryUnicaster {
         debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
         GUID guid = new GUID(query.getGUID());
+        // first map the QueryBundle using the guid....
         synchronized (_queries) {
             if (!_queries.containsKey(guid)) {
                 QueryBundle qb = new QueryBundle(query);
@@ -208,6 +214,18 @@ public final class QueryUnicaster {
             }
             if (retBool)
                 _queries.notify();
+        }
+        if (reference == null)
+            return retBool;
+
+        // then record the guid in the set of leaf's queries...
+        synchronized (_querySets) {
+            Set guids = (Set) _querySets.get(reference);
+            if (guids == null) {
+                guids = new HashSet();
+                _querySets.put(reference, guids);
+            }
+            guids.add(guid);
         }
         debug("QueryUnicaster.addQuery(): returning " + retBool);
         return retBool;
@@ -256,13 +274,33 @@ public final class QueryUnicaster {
         return retVal;
     }
 
+    /** Gets rid of a Query according to ReplyHandler.  
+     *  Use this if a leaf connection dies and you want to stop the query.
+     */
+    void purgeQuery(ReplyHandler reference) {
+        debug("QueryUnicaster.purgeQuery(RH): entered.");
+        if (reference == null)
+            return;
+        synchronized (_querySets) {
+            Set guids = (Set) _querySets.remove(reference);
+            if (guids == null)
+                return;
+            Iterator iter = guids.iterator();
+            while (iter.hasNext())
+                purgeQuery((GUID) iter.next());
+        }
+        debug("QueryUnicaster.purgeQuery(): returning.");
+    }
+
     /** Gets rid of a Query according to GUID.  Use this if a leaf connection
      *  dies and you want to stop the query.
      */
     void purgeQuery(GUID queryGUID) {
+        debug("QueryUnicaster.purgeQuery(GUID): entered.");
         synchronized (_queries) {
             _queries.remove(queryGUID);
         }
+        debug("QueryUnicaster.purgeQuery(GUID): returning.");
     }
 
 
