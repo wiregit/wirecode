@@ -66,7 +66,7 @@ public class SettingsManager implements SettingsInterface
      * to an instance of this class in 
      * accordance with the singleton pattern
      */
-    public static SettingsManager instance()
+    public static synchronized SettingsManager instance()
     {
 	if(instance_ == null)
 	    instance_ = new SettingsManager();
