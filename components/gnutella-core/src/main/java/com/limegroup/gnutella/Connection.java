@@ -404,6 +404,9 @@ public class Connection {
             _port == ConnectionSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }
+        
+        // Notify the acceptor of our address.
+        RouterService.getAcceptor().setAddress(localAddress);
 
         try {
             _in = getInputStream();
