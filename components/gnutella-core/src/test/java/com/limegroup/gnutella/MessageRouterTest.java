@@ -12,13 +12,19 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NewConnection;
@@ -632,6 +638,62 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(0, reply.getMyPort());        
     }
     
+    public void testHeadPingForwarding() throws Exception {
+    	HeadListener pingee = new HeadListener();
+    	
+    	GUID clientGUID = new GUID(GUID.makeGuid());
+    	
+    	//make sure our routing table contains an entry for the pingee
+    	RouteTable pushRt = (RouteTable) PrivilegedAccessor.getValue(ROUTER,"_pushRouteTable");
+    	
+    	pushRt.routeReply(clientGUID.bytes(),pingee);
+    	
+    	// try a HeadPing 
+    	URN urn = FileDescStub.DEFAULT_SHA1;
+    	HeadPing ping = new HeadPing(urn, clientGUID, 0xFF);
+    	
+    	DatagramPacket pack = new DatagramPacket(new byte[0],0, InetAddress.getLocalHost(),10);
+    	ROUTER.handleUDPMessage(ping,pack);
+    	
+    	// the pingee should have received it
+    	assertNotNull(pingee._lastSent);
+    	assertEquals(pingee._lastSent.getGUID(),ping.getGUID());
+    	assertTrue(pingee._lastSent instanceof HeadPing);
+    	HeadPing ping2 = (HeadPing) pingee._lastSent;
+    	assertNull(ping2.getClientGuid());
+    	
+    	// we should have an entry in the routing table
+    	RouteTable headRt =(RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");
+    	
+    	ReplyHandler r = headRt.getReplyHandler(ping.getGUID());
+    	assertEquals(InetAddress.getLocalHost(),InetAddress.getByName(r.getAddress()));
+    	assertEquals(10,r.getPort());
+    }
+    
+    public void testHeadPongForwarding() throws Exception {
+    	HeadListener pinger = new HeadListener();
+    	
+    	//make sure our routing table contains an entry for the pinger
+    	RouteTable headRt = (RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");
+    	
+    	
+    	//try a headpong
+    	URN urn = FileDescStub.DEFAULT_SHA1;
+    	HeadPing ping = new HeadPing(urn, 0xFF);
+    	headRt.routeReply(ping.getGUID(),pinger);
+    	HeadPong pong = new HeadPong(ping);
+    	
+    	ROUTER.handleMessage(pong, new ManagedConnectionStub());
+    	
+    	//the pinger should have gotten the identical object
+    	assertNotNull(pinger._lastSent);
+    	assertTrue(pinger._lastSent == pong);
+    	
+    	//the entry in the routing table should be gone
+    	ReplyHandler r = headRt.getReplyHandler(ping.getGUID());
+    	assertNull(r);
+    }
+    
     private void addFreeLeafSlotHosts(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
         Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
@@ -693,6 +755,13 @@ public final class MessageRouterTest extends BaseTestCase {
         protected void sendPingReply(PingReply pong, ReplyHandler handler) {
             sentPongs.add(pong);
         }
+    }
+    
+    private static class HeadListener extends ReplyHandlerStub {
+    	Message _lastSent;
+    	public void reply(Message m) {
+    		_lastSent = m;
+    	}
     }
                                             
 }

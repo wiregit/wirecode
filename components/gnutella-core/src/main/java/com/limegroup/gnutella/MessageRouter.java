@@ -2705,7 +2705,6 @@ public abstract class MessageRouter {
      * where the ping came from.
      */
     private void routeHeadPing(HeadPing ping, DatagramPacket datagram) { 
-        
        InetAddress host = datagram.getAddress(); 
        int port = datagram.getPort(); 
         
@@ -2729,7 +2728,7 @@ public abstract class MessageRouter {
        _headPongRouteTable.routeReply(ping.getGUID(),pinger); 
         
        //and send off the routed ping 
-       pinger.reply(ping); 
+       pingee.reply(ping); 
    } 
     
     
