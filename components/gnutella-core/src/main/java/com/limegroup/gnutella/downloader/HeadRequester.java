@@ -121,7 +121,9 @@ final class HeadRequester implements Runnable {
                         AlternateLocationCollection alc = 
                             AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
                         if (alc == null) continue;
-                        COLLECTOR.addAlternateLocationCollection(alc);
+                        if(alc.getSHA1Urn().equals(COLLECTOR.getSHA1Urn())) {
+                            COLLECTOR.addAlternateLocationCollection(alc);
+                        }
                     } catch(IOException e) {
                         continue;
                     } finally {
