@@ -15,6 +15,11 @@ public class PingRequest extends Message {
      */
     private byte[] payload = null;
     
+    /**
+     * The GGEP blocks carried in this ping - parsed when necessary
+     */
+    private GGEP [] _ggeps;
+    
     /////////////////Constructors for incoming messages/////////////////
     /**
      * Creates a normal ping from data read on the network
@@ -172,14 +177,19 @@ public class PingRequest extends Message {
     
     /**
      * marks this ping request as requesting a pong carrying ip:port
-     * info
+     * info.
+     * 
+     * 
      */
     public void addIPRequest() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            //first put in the exsisting payload, if any
-            if (payload!=null)
-                baos.write(payload);
+
+            // Since existing clients are hard-coded to expect the locale GGEP
+            // at offset 0, we sneak the ping request GGEP after it.
+            
+            if (payload!=null && payload[payload.length-1]==0)
+                baos.write(payload,0,payload.length-1);
             
             GGEP ggep = new GGEP(false);
             ggep.put(GGEP.GGEP_HEADER_IPPORT);
@@ -200,18 +210,23 @@ public class PingRequest extends Message {
     public String getLocale() {
         if(payload != null) { //payload can be null
             try {
-                GGEP ggepBlock = new GGEP(payload, 0, null);
-                if(ggepBlock.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
-                    return ggepBlock.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                else
-                    return ApplicationSettings.DEFAULT_LOCALE.getValue(); 
+                
+                if (_ggeps==null)
+                    _ggeps = GGEP.read(payload,0);
+                
+                for (int i = 0;i<_ggeps.length;i++) 
+                    if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
+                    	return _ggeps[i].getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    
+                System.out.println("not too good");
+                return ApplicationSettings.DEFAULT_LOCALE.getValue();
             }
             catch(BadGGEPBlockException ignored) {}
             catch(BadGGEPPropertyException ignoredToo) {}
             return ApplicationSettings.DEFAULT_LOCALE.getValue();
         }
-        else 
-            return ApplicationSettings.DEFAULT_LOCALE.getValue();
+        else {System.out.println("bad");
+            return ApplicationSettings.DEFAULT_LOCALE.getValue();}
     }
     
     /**
@@ -222,9 +237,10 @@ public class PingRequest extends Message {
            return false;
        
        try{
-           GGEP [] ggeps = GGEP.read(payload,0);
-           for (int i=0;i<ggeps.length;i++) 
-               if (ggeps[i].hasKey(GGEP.GGEP_HEADER_IPPORT))
+           if (_ggeps==null)
+               _ggeps = GGEP.read(payload,0);
+           for (int i=0;i<_ggeps.length;i++) 
+               if (_ggeps[i].hasKey(GGEP.GGEP_HEADER_IPPORT))
                    return true;
            
        }catch(BadGGEPBlockException ignored) {}
