@@ -65,7 +65,8 @@ public class ConnectionManager implements Runnable {
     public int QReqCount; //Query Request count
     public int QRepCount; //Query Reply count
     public int pushCount; //Push request count
-
+    
+    private Vector badHosts = new Vector();
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
      * call run. */
@@ -146,7 +147,10 @@ public class ConnectionManager implements Runnable {
 	if(statVal)
 	    stats = true;
 	else
-	    stats = false;	
+	    stats = false;
+	String[] allHosts = SettingsManager.instance().getBannedIps();
+	for (int i=0; i<allHosts.length; i++)
+	    badHosts.add(allHosts[i]);
     }	  
 
     /** 
@@ -267,6 +271,11 @@ public class ConnectionManager implements Runnable {
 			continue;
 		    }
 		}
+		//Check if IP address of the incoming socket is in badHosts (initialized in propertyManager()
+		if (badHosts.contains(client.getInetAddress().getHostAddress() ) ){
+		    client.close();
+		    continue;
+		}
 		try {
 		    InputStream in=client.getInputStream();
 		    String word=readWord(in);
@@ -277,16 +286,15 @@ public class ConnectionManager implements Runnable {
 			//a) Gnutella connection
 
 			if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
-
-			c = new Connection( getHostName(client.getInetAddress() ), 
-					    client.getPort(), true);
-			tryingToConnect(c, true);
-			c.initIncoming(client); 
-			c.setManager(this);
-			add(c);		 
-			Thread t=new Thread(c);
-			t.setDaemon(true);
-			t.start();
+			    c = new Connection( getHostName(client.getInetAddress() ), 
+						client.getPort(), true);
+			    tryingToConnect(c, true);
+			    c.initIncoming(client); 
+			    c.setManager(this);
+			    add(c);		 
+			    Thread t=new Thread(c);
+			    t.setDaemon(true);
+			    t.start();
 			}
 			else{// we have more connections than we can handle
 			    RejectConnection rc = new RejectConnection(client);
