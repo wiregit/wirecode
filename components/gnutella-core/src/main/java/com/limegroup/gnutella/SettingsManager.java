@@ -2151,7 +2151,8 @@ public final class SettingsManager {
 		// ok, let's prune out any duplicates if they're there
 		HashMap directories = new HashMap();
 		for(int i=0; i<dirArray.length; i++) {
-			directories.put(dirArray[i], "");
+			if(dirArray[i].isDirectory())
+				directories.put(dirArray[i], "");
 		}
 		
 		Set fileSet = directories.keySet();
