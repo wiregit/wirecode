@@ -54,7 +54,7 @@ public final class QueryHandler {
      * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
      * milliseconds.
      */
-    static final long TIME_TO_WAIT_PER_HOP = 2500;
+    static final long TIME_TO_WAIT_PER_HOP = 2000;
 
 
 	/**
@@ -70,11 +70,6 @@ public final class QueryHandler {
 	 */
 	private static ConnectionManager _connectionManager =
 		RouterService.getConnectionManager();
-
-    /**
-     * TTL of the probe query.
-     */
-    //private static final byte PROBE_TTL = (byte)2;
 
 	/**
 	 * Variable for the number of hosts that have been queried.
@@ -133,6 +128,11 @@ public final class QueryHandler {
      */
     private final ProbeQuery PROBE_QUERY;
 
+    /**
+     * <tt>List</tt> of TTL=1 probe connections that we've already used.
+     */
+    private final List TTL_1_PROBES_SENT = new LinkedList();
+
 	/**
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
@@ -159,7 +159,7 @@ public final class QueryHandler {
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
         PROBE_QUERY = 
-            new ProbeQuery(_connectionManager.getInitializedConnections2(),
+            new ProbeQuery(_connectionManager.getInitializedConnections(),
                            this);
 	}
 
@@ -275,24 +275,35 @@ public final class QueryHandler {
             
         // handle 3 query cases
 
-        // 1) We haven't sent the query to our leaves -- send it
+        // 1) If we haven't sent the query to our leaves, send it
         if(!_forwardedToLeaves) {
-            RouterService.getMessageRouter().
-                forwardQueryRequestToLeaves(createQuery(QUERY, (byte)1), 
-                                            REPLY_HANDLER); 
-            _theoreticalHostsQueried += 25;
             _forwardedToLeaves = true;
-            _nextQueryTime = System.currentTimeMillis() + 1000;
+            QueryRouteTable qrt = 
+                RouterService.getMessageRouter().getQueryRouteTable();
+            QueryRequest query = createQuery(QUERY, (byte)1);
+
+            // send the query to our leaves if there's a hit and wait,
+            // otherwise we'll move on to the probe
+            if(qrt.contains(query)) {
+                RouterService.getMessageRouter().
+                    forwardQueryRequestToLeaves(query, 
+                                                REPLY_HANDLER); 
+                _theoreticalHostsQueried += 25;
+                _forwardedToLeaves = true;
+                _nextQueryTime = 
+                    System.currentTimeMillis() + TIME_TO_WAIT_PER_HOP;
+                return;
+            }
         }
         
-        // 2) We haven't completed the probe query -- complete it
-        else if(!PROBE_QUERY.finishedProbe()) {
-            long timeToWait = PROBE_QUERY.getTimeToWait();
+        // 2) If we haven't sent the probe query, send it
+        if(!PROBE_QUERY.probeSent()) {
+            long timeToWait = PROBE_QUERY.getTimeToWait();            
             _theoreticalHostsQueried += PROBE_QUERY.sendProbe();
-            _nextQueryTime = System.currentTimeMillis() + timeToWait;
+            _nextQueryTime = _curTime + timeToWait;
         }
 
-        // 3) We haven't yet satisfied the query -- keep trying
+        // 3) If we haven't yet satisfied the query, keep trying
         else {
             // otherwise, just send a normal query
             _theoreticalHostsQueried += 
@@ -360,6 +371,14 @@ public final class QueryHandler {
             // it's not the connections route table, so go to TTL=2
             if(ttl == 1 && !mc.hitsQueryRouteTable(handler.QUERY)) {
                 ttl = 2;
+            } else if(ttl == 1 && 
+                      handler.TTL_1_PROBES_SENT.contains(mc)) {
+                // if we're trying to send a TTL=1 query down a
+                // connection that has already received a probe, move
+                // on to the next one, since it won't do anything,
+                // and we want to save that connection for future,
+                // higher TTL queries
+                continue;
             }
 
 			QueryRequest query = createQuery(handler.QUERY, ttl);
@@ -394,9 +413,17 @@ public final class QueryHandler {
 
         // add the reply handler to the list of queried hosts if it's not
         // a TTL=1 query or the connection does not support probe queries
-        if(ttl != 1 || !mc.supportsProbeQueries()) {
+
+        // adds the connection to the list of probe connections if it's
+        // a TTL=1 query to a connection that supports probe extensions,
+        // otherwise add it to the list of connections we've queried
+        if(ttl == 1 && mc.supportsProbeQueries()) {
+            handler.TTL_1_PROBES_SENT.add(mc);
+        } else {
             handler.QUERIED_HANDLERS.add(mc);
         }
+
+        
         
         handler._nextQueryTime = System.currentTimeMillis() + 
             (ttl * TIME_TO_WAIT_PER_HOP);
@@ -422,7 +449,7 @@ public final class QueryHandler {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(7.5*calculateNewHosts(degree, i));
+            int hosts = (int)(12.0*calculateNewHosts(degree, i));
             if(hosts >= hostsToQueryPerConnection) {
                 return i;
             }
@@ -477,7 +504,10 @@ public final class QueryHandler {
         // precisely what this number should be is somewhat hard to determine
         // because, while connection have a specfic degree, the degree of 
         // the connections on subsequent hops cannot be determined
-		if(_theoreticalHostsQueried > 110000) return true;
+		if(_theoreticalHostsQueried > 110000) {
+            System.out.println("QueryHandler::hasEnoughResults::max horizon reached"); 
+            return true;
+        }
 
 		// return true if we've been querying for longer than the specified 
 		// maximum
