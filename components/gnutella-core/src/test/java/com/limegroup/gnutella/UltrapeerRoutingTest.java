@@ -37,6 +37,12 @@ public class UltrapeerRoutingTest extends TestCase {
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
         SettingsManager settings=SettingsManager.instance();
+        //To keep LimeWire from connecting to the outside network, we filter out
+        //all addresses but localhost and 18.239.0.*.  The latter is used in
+        //pongs for testing.  TODO: it would be nice to have a way to prevent
+        //BootstrapServerManager from adding defaults and connecting.
+        settings.setBannedIps(new String[] {"*.*.*.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*"});
         settings.setPort(PORT);
         settings.setDirectories(new File[0]);
         settings.setConnectOnStartup(false);

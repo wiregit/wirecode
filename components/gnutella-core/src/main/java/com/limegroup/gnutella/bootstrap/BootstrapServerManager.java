@@ -2,7 +2,6 @@ package com.limegroup.gnutella.bootstrap;
 
 import java.io.*;
 import java.net.*;
-import java.util.Random;
 import java.text.ParseException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
@@ -46,7 +45,7 @@ public class BootstrapServerManager {
     private HostCatcher _catcher; 
     /** Source of randomness for picking servers. 
      *  TODO: this is thread-safe, right? */
-    private Random _rand=new Random();
+    private Random12 _rand=new Random12();
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
@@ -344,7 +343,7 @@ public class BootstrapServerManager {
     }
 
     /** Returns an random valid index of _servers.  Protected so we can override
-     *  in test cases.  */
+     *  in test cases.  PRECONDITION: _servers.size>0. */
     protected int randomServer() {
         return _rand.nextInt(_servers.size());
     }
