@@ -243,8 +243,8 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		UPListVendorMessage reply = tryMessage(msgAll);
  		//test whether we got proper # of results
- 		assertEquals(reply.getLeaves().size(), 3);
- 		assertEquals(reply.getUltrapeers().size(), 3);
+ 		assertEquals(3,reply.getLeaves().size());
+ 		assertEquals(3,reply.getUltrapeers().size());
  		
  	}
  	
@@ -254,8 +254,8 @@ public class ServerSideUPListTest extends BaseTestCase {
  	public void testMsgNone() throws Exception {
  		UPListVendorMessage reply = tryMessage(msgNone);
  		
- 		assertEquals(reply.getLeaves().size(),0);
- 		assertEquals(reply.getUltrapeers().size(),0);
+ 		assertEquals(0,reply.getLeaves().size());
+ 		assertEquals(0,reply.getUltrapeers().size());
  	}
  	
  	/**
@@ -277,8 +277,8 @@ public class ServerSideUPListTest extends BaseTestCase {
  	public void testMsgLeafs() throws Exception {
  		UPListVendorMessage reply = tryMessage(msgLeafsOnly);
  		
- 		assertEquals(reply.getLeaves().size(),2);
- 		assertEquals(reply.getUltrapeers().size(),0);
+ 		assertEquals(2,reply.getLeaves().size());
+ 		assertEquals(0,reply.getUltrapeers().size());
  	}
  	
  	/**
@@ -287,8 +287,8 @@ public class ServerSideUPListTest extends BaseTestCase {
  	public void testMsgSome() throws Exception {
  		UPListVendorMessage reply = tryMessage(msgSome);
  		
- 		assertEquals(reply.getLeaves().size(),1);
- 		assertEquals(reply.getUltrapeers().size(),2);
+ 		assertEquals(1,reply.getLeaves().size());
+ 		assertEquals(2,reply.getUltrapeers().size());
  	}
  	
  	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
