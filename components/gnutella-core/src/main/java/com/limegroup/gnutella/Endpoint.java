@@ -24,10 +24,10 @@ public String getHostname()
 	return hostname;
 }
 
-	public int getPort()
-	{
-		return port;
-	}
+public int getPort()
+{
+	return port;
+}
     
 public boolean equals(Object o) {
 	if (! (o instanceof Endpoint))
