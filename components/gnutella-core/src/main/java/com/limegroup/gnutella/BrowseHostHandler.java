@@ -296,6 +296,12 @@ public class BrowseHostHandler {
             if(m == null) {
                 //we are finished reading the stream
                 setState(FINISHED);
+                
+                //close the connection since we won't be re-using it (yet)
+                try {
+                	socket.close();
+                }catch(IOException ignored){}
+                
                 return;
             } else {
                 if(m instanceof QueryReply) {
