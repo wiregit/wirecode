@@ -327,7 +327,7 @@ public abstract class FileManager {
      */
     public synchronized FileDesc getFileDescForFile(File f) {
         try {
-            f = getCanonicalFile(f);
+            f = FileUtils.getCanonicalFile(f);
         } catch(IOException ioe) {
             return null;
         }
@@ -405,7 +405,7 @@ public abstract class FileManager {
         
         // a. Remove case, trailing separators, etc.
         try {
-            directory = getCanonicalFile(directory);
+            directory = FileUtils.getCanonicalFile(directory);
         } catch (IOException e) { // invalid directory ?
             return null;
         }
@@ -432,6 +432,8 @@ public abstract class FileManager {
      * extensions in the filter array.
      * @return A Array of Files recursively obtained from the directory,
      * according to the filter.
+     * 
+     * TODO:: add test!
      */
     public static File[] getFilesRecursive(File directory,
                                            String[] filter) {
@@ -463,7 +465,7 @@ public abstract class FileManager {
                     if (filter == null)
                         shouldAdd = true;
                     else {
-                        String ext = getFileExtension(currFile);
+                        String ext = FileUtils.getFileExtension(currFile);
                         for (int j = 0; 
                              (j < filter.length) && (ext != null); 
                              j++)
@@ -487,20 +489,6 @@ public abstract class FileManager {
         return retArray;
     }
 
-
-    // simply gets whatever is after the "." in a filename, or the first thing
-    // after the first "." in the filename
-    private static String getFileExtension(File f) {
-        String retString = null;
-
-        java.util.StringTokenizer st = 
-        new java.util.StringTokenizer(f.getName(), ".");
-        if (st.countTokens() > 1) {
-            st.nextToken();
-            retString = st.nextToken();
-        }
-        return retString;
-    }
 
     private static boolean debugOn = false;
     public static void debug(String out) {
@@ -675,7 +663,7 @@ public abstract class FileManager {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
-            directory=getCanonicalFile(directory);
+            directory=FileUtils.getCanonicalFile(directory);
         } catch (IOException e) {
             return new LinkedList();  //doesn't exist?
         }
@@ -759,7 +747,7 @@ public abstract class FileManager {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
-            f=getCanonicalFile(file);
+            f=FileUtils.getCanonicalFile(file);
             if (!f.exists()) 
                 return -1;
         } catch (IOException e) {
@@ -893,7 +881,7 @@ public abstract class FileManager {
                                                int size,
                                                VerifyingFile vf) {
         try {
-            incompleteFile = getCanonicalFile(incompleteFile);
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
         } catch(IOException ioe) {
             // file doesn't exist?
         }
@@ -969,7 +957,7 @@ public abstract class FileManager {
      */
     public int fileChanged(File f) {
         try {
-            f = getCanonicalFile(f);
+            f = FileUtils.getCanonicalFile(f);
         } catch(IOException ioe) {
             return -1;
         }
@@ -994,7 +982,7 @@ public abstract class FileManager {
         repOk();
         //Take care of case, etc.
         try {
-            f=getCanonicalFile(f);
+            f=FileUtils.getCanonicalFile(f);
         } catch (IOException e) {
             e.printStackTrace();
             repOk();
@@ -1172,12 +1160,6 @@ public abstract class FileManager {
         // Just return an empty list.
         return new ArrayList();
     }
-
-    /** Same as f.getCanonicalFile() in JDK1.3. */
-    public static File getCanonicalFile(File f) throws IOException {
-        return new File(f.getCanonicalPath());
-    }
-
 
     ////////////////////////////////// Queries ///////////////////////////////
 
@@ -1485,7 +1467,7 @@ public abstract class FileManager {
             //c) Ensure properly listed in directory
             try {
                 IntSet siblings=(IntSet)_sharedDirectories.get(
-                    getCanonicalFile(FileUtils.getParentFile(desc.getFile())));
+                    FileUtils.getCanonicalFile(FileUtils.getParentFile(desc.getFile())));
                 Assert.that(siblings!=null, 
                     "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),
