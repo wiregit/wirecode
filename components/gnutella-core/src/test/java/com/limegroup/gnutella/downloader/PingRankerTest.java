@@ -169,7 +169,7 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
         assertEquals(1,pinger.hosts.size());
-        assertEquals(new IpPortImpl("1.2.2.2",3),pinger.hosts.get(0));
+        assertIpPortEquals(new IpPortImpl("1.2.2.2",3),pinger.hosts.get(0));
         HeadPing ping = (HeadPing)pinger.messages.get(0);
         assertEquals(g,ping.getClientGuid());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
@@ -219,8 +219,10 @@ public class PingRankerTest extends BaseTestCase {
         
         // two pings should be sent out
         assertEquals(2,pinger.hosts.size());
-        assertTrue(pinger.hosts.contains(new IpPortImpl("1.2.2.2",3)));
-        assertTrue(pinger.hosts.contains(new IpPortImpl("1.3.3.3",4)));
+        Set s = new TreeSet(IpPort.COMPARATOR);
+        s.addAll(pinger.hosts);
+        assertTrue(s.contains(new IpPortImpl("1.2.2.2",3)));
+        assertTrue(s.contains(new IpPortImpl("1.3.3.3",4)));
         
         // receive one pong from each proxy
         MockPong pong = new MockPong(true,true,-1,true,false,true,null,null,null);
@@ -581,4 +583,7 @@ public class PingRankerTest extends BaseTestCase {
         
     }
 
+    private static void assertIpPortEquals(IpPort a, Object b) {
+        assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
+    }
 }
