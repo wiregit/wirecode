@@ -48,6 +48,22 @@ public final class QueryUnicaster {
     }
 
 
+    //----------------------------------------------------
+    // These methods are used by the QueryUnicasterTester.
+    // That is why they are package level.  In general
+    // they should not be used by others, though it is
+    // technically OK
+
+    /** Returns the number of Queries unicasted by this guy...
+     */
+    int getQueryNumber() {
+        return _queries.size();
+    }
+
+
+    //----------------------------------------------------
+
+
     /** Returns a List of unicast Endpoints.
      */
     public List getUnicastEndpoints() {
