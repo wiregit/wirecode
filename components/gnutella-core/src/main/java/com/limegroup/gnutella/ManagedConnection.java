@@ -434,13 +434,12 @@ public class ManagedConnection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-        int priority=calculatePriority(m);        
+        int priority = calculatePriority(m);        
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             _outputQueue[priority].add(m);
             int dropped=_outputQueue[priority].resetDropped();
             addDropped(dropped);
-            //_numSentMessagesDropped+=dropped;
             _queued+=1-dropped;
             _lastPriority=priority;
             _outputQueueLock.notify();
@@ -554,8 +553,6 @@ public class ManagedConnection
                         m=(Message)queue.removeNext(); 
                         int dropped=queue.resetDropped();
                         addDropped(dropped);
-                        //FlowControlStat.SENT_MESSAGES_DROPPED.addData(dropped);
-                        //_numSentMessagesDropped+=dropped;
                         _queued-=(m==null?0:1)+dropped;  //maintain invariant
                         if (_queued==0)
                             emptied=true;                        
