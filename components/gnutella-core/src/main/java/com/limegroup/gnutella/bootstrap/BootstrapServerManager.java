@@ -323,6 +323,7 @@ public class BootstrapServerManager {
 			throw new NullPointerException("null server in request to one host");
 		}
         BufferedReader in = null;
+        HttpURLConnection connection = null;
         try {
             //Prepare the request.  TODO: it would be great to add connection
             //timeouts, but URLConnection doesn't give us control over that.
@@ -333,8 +334,7 @@ public class BootstrapServerManager {
                 +"?client="+CommonUtils.QHD_VENDOR_NAME
                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                 +"&"+request.parameters());
-            HttpURLConnection connection =
-                (HttpURLConnection)url.openConnection();
+            connection = (HttpURLConnection)url.openConnection();
             connection.setUseCaches(false);
             connection.setRequestProperty(
                 "User-Agent",
@@ -387,6 +387,9 @@ public class BootstrapServerManager {
             //Close the connection.  TODO: is this really the preferred way?
             if (in!=null)
                 try { in.close(); } catch (IOException e) { }
+            if(connection != null) {
+                connection.disconnect(); 
+            }
         }
     }
 
