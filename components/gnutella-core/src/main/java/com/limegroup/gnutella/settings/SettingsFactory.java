@@ -28,7 +28,7 @@ public final class SettingsFactory {
     /** 
 	 * <tt>File</tt> object from which settings are loaded and saved 
 	 */    
-    private final File SETTINGS_FILE;
+    private File SETTINGS_FILE;
     
     private final String HEADING;
 
@@ -97,6 +97,15 @@ public final class SettingsFactory {
             set.reload();
         }
 	}
+	
+	/**
+	 * Changes the backing file to use for this factory.
+	 */
+    public synchronized void changeFile(File toUse) {
+        SETTINGS_FILE = toUse;
+        if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+        reload();
+    }
 	
 	/**
 	 * Reverts all settings to their factory defaults.
