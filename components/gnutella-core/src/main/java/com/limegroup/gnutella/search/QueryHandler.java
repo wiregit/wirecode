@@ -85,7 +85,9 @@ public final class QueryHandler {
 	 */
 	private final Set QUERIED_REPLY_HANDLERS = new HashSet();
 
-	
+	/**
+	 * The time the query started.
+	 */
 	private long _queryStartTime = 0;
 
 	/**
@@ -264,12 +266,12 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
-			if(ttl == 4 && remainingConnections > 4) {
-				ttl = 3;
-			}
+			//if(ttl == 4 && remainingConnections > 4) {
+			//ttl = 3;
+			//}
 			QueryRequest query = createQuery(ttl);
 
-
+ 
 			// send out the query on the network
 			MESSAGE_ROUTER.sendQueryRequest(query, mc, REPLY_HANDLER);
 
@@ -321,7 +323,8 @@ public final class QueryHandler {
 		if(hostsToQueryPerConnection < 30)    return 1;
 		if(hostsToQueryPerConnection < 100)   return 2;
 		if(hostsToQueryPerConnection < 1000)  return 3;
-		else return 4;
+		if(hostsToQueryPerConnection < 2000)  return 4;
+		else return 5;
 	}
 
 	/**
