@@ -305,6 +305,7 @@ public class UDPScheduler extends ManagedThread {
  	private synchronized void runEvent() {
 		if ( _scheduledEvent != NO_EVENT ) {
 			_scheduledEvent.handleEvent();
+			Thread.yield();
 		}
 	}
 
