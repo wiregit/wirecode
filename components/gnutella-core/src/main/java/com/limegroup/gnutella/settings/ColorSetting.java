@@ -2,7 +2,6 @@ package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 import java.awt.Color;
-import java.text.NumberFormat;
 
 
 /**
@@ -22,7 +21,8 @@ public final class ColorSetting extends Setting {
 	static ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, 
 										   String key, Color defaultColor) {	  
-		return new ColorSetting(defaultProps, props, key, formatColor(defaultColor));
+		return new ColorSetting(defaultProps, props, key, 
+            formatColor(defaultColor));
 	}
 
 	/**
