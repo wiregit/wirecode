@@ -50,8 +50,11 @@ public interface ActivityCallback
 
 	/** handle adding a chat, and messages to the chats */
 	public void acceptChat(Chatter ctr);
-	
-	public void recieveMessage(String str);
+
+	/** removes a chat from the gui */
+	public void removeChat(Chatter ctr);
+
+	public void recieveMessage(Chatter chr);
 
 
     /**

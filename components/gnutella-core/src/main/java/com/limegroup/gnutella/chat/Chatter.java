@@ -13,5 +13,5 @@ public interface Chatter {
 	public void send(String message);
 	public String getHost();
 	public int getPort();
-
+	public String getMessage();
 }

@@ -20,6 +20,7 @@ public class InstantMessenger extends Chat {
 	private BufferedWriter _out;
 	private String _host;
 	private int _port;
+	private String _message = "";
 
 	/** constructor for an incoming chat request */
 	public InstantMessenger(Socket socket, ChatManager manager, 
@@ -57,7 +58,7 @@ public class InstantMessenger extends Chat {
 
 	/** starts the chatting */
 	public void start() {
-		MessageReader messageReader = new MessageReader();
+		MessageReader messageReader = new MessageReader(this);
 		Thread upThread = new Thread(messageReader);
 		upThread.setDaemon(true);
 		upThread.start();
@@ -67,6 +68,7 @@ public class InstantMessenger extends Chat {
 	/** stop the chat, and close the connections */
 	public void stop() {
 		_manager.removeChat(this);
+		_activityCallback.removeChat(this);
 	}
 
 	/** send a message accross the socket to the other host */
@@ -91,6 +93,12 @@ public class InstantMessenger extends Chat {
 		return _port;
 	}
 
+	public String getMessage() {
+		String str = _message;
+		_message = "";
+		return str;
+	}
+
 
 	/**
 	 * a private class that handles the thread for reading
@@ -100,6 +108,11 @@ public class InstantMessenger extends Chat {
 	 */
 	
 	private class MessageReader implements Runnable {
+		Chatter _chatter;
+		
+		public MessageReader(Chatter chatter) {
+			_chatter = chatter;
+		}
 
 		public void run() {
 			while (true){
@@ -110,8 +123,10 @@ public class InstantMessenger extends Chat {
 					// reached. then alert the gui to 
 					// write to the screen.
 					str = _reader.readLine();
-					if ( str != null )
-						_activityCallback.recieveMessage(str);
+					if ( str != null ) {
+						_message += str;
+						_activityCallback.recieveMessage(_chatter);
+					}
 				} catch (IOException e) {
 					// if an exception was thrown, then 
 					// the socket was closed, and the chat
