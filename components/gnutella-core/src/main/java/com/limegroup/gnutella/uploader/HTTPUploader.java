@@ -571,6 +571,7 @@ public final class HTTPUploader implements Uploader {
                  break;
             }
             
+            // TODO: record stats for this
             throw prhe;
         } finally {
             // we want to ensure these are always set, regardless
