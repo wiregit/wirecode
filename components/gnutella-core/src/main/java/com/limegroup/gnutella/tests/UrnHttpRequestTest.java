@@ -34,6 +34,9 @@ public final class UrnHttpRequestTest extends TestCase {
 	 */
 	private UploadManager _uploadManager;
 
+	private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
+	private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
+
 	/**
 	 * Constructs a new test instance.
 	 */
@@ -140,7 +143,7 @@ public final class UrnHttpRequestTest extends TestCase {
 			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+
 			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"+"\r\n\r\n";
-			sendRequestThatShouldFail(request, fd);
+			sendRequestThatShouldFail(request, fd, STATUS_404);
 		}				
 	}
 
@@ -153,9 +156,26 @@ public final class UrnHttpRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn();
-			sendRequestThatShouldFail(request, fd);
+			sendRequestThatShouldFail(request, fd, STATUS_404);
 		}				
 	}
+
+	/**
+	 * Tests requests that follow the traditional "get" syntax to make sure that 
+	 * the X-Gnutella-Content-URN header is always returned.
+	 */
+	public void testLimitReachedRequests() {
+		int maxUploads = SettingsManager.instance().getMaxUploads();
+		SettingsManager.instance().setMaxUploads(0);
+		for(int i=0; i<_fileManager.getNumFiles(); i++) {
+			FileDesc fd = _fileManager.get(i);
+			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
+			sendRequestThatShouldFail(request, fd, STATUS_503);
+		}				
+		SettingsManager.instance().setMaxUploads(maxUploads);
+	}
+
 
 	/**
 	 * Sends an HTTP request that should succeed and send back all of the
@@ -209,7 +229,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	 * Sends an HTTP request that should fail if everything is working 
 	 * correctly.
 	 */
-	private void sendRequestThatShouldFail(String request, FileDesc fd) {
+	private void sendRequestThatShouldFail(String request, FileDesc fd, String error) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(request.getBytes());
@@ -217,14 +237,14 @@ public final class UrnHttpRequestTest extends TestCase {
 			_uploadManager.acceptUpload(sock);
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
-			boolean sent404 = false;
+			boolean sentExpectedError = false;
 			while(st.hasMoreTokens()) {
 				String curString = st.nextToken();
-				if(curString.equals("HTTP/1.1 404 Not Found")) {
-					sent404 = true;
+				if(curString.equals(error)) {
+					sentExpectedError = true;
 				}
 			}
-			assertTrue("404 status should have been sent", sent404);
+			assertTrue(error +" should have been sent", sentExpectedError);
 		} catch(IOException e) {
 			assertTrue("unexpected exception: "+e, false);
 		}
