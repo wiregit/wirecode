@@ -90,7 +90,7 @@ public final class FileDescTester extends TestCase {
 		_fileArray = parDir.listFiles();
 		_fileDescArray = new FileDesc[_containedUrnSet.size()];
 		for(int i=0; i<_containedUrnSet.size(); i++) {
-			_fileDescArray[i] = new FileDesc(_fileArray[i], i, _containedUrnSet);
+			_fileDescArray[i] = new FileDesc(_fileArray[i], i);
 		}
 	}
 
@@ -99,15 +99,9 @@ public final class FileDescTester extends TestCase {
 	 */
 	public void testConstructor() {
 		File file = new File("FileDescTester.java");
-		try {
-			FileDesc fd = new FileDesc(file, 0, null);
-			assertTrue("null values should not be permitted for FileDesc "+
-					   "constructor", false);
-		} catch(NullPointerException e) {
-		}
 
 		try {
-			FileDesc fd = new FileDesc(null, 0, new HashSet());
+			FileDesc fd = new FileDesc(null, 0);
 			assertTrue("null values should not be permitted for FileDesc "+
 					   "constructor", false);
 		} catch(NullPointerException e) {
@@ -137,15 +131,6 @@ public final class FileDescTester extends TestCase {
 		}
 	}
 
-	/**
-	 * Tests the method for checking whether or not the file desc has a 
-	 * SHA1 urn.
-	 */
-	public void testHasSHA1Urn() {
-		for(int i=0; i<_fileDescArray.length; i++) {
-			assertTrue("this should contain a URN", _fileDescArray[i].hasSHA1Urn());
-		}
-	}
 
 	/**
 	 * Tests the method for getting the SHA1 URN from the FileDesc.
