@@ -289,7 +289,7 @@ public class LimeXMLUtils
             Assert.that( queryValue != null, "null value");            
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
-            String replyDocValue = replyDoc.getValue(currFieldName);
+            String replyDocValue = replyDoc.getValueFast(currFieldName);
             if((replyDocValue == null) || replyDocValue.equals(""))
                 nullCount++;
             else {

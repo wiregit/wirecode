@@ -164,6 +164,17 @@ public class LimeXMLDocument implements Serializable {
         // make sure any spaces are removed.
         if(xmlString != null)
             xmlString = xmlString.trim();
+        if (LimeXMLUtils.isMP3File(identifier)) {
+        	String genre = (String) fieldToValue.get("audios__audio__genre__");
+        	try {
+        		short index = Short.parseShort(genre);
+        		genre = MP3MetaData.getGenreString(index);
+        		fieldToValue.put("audios__audio__genre__", genre);
+        	}
+        	catch (NumberFormatException ignored) {
+        		// the string is fine, it is a valid genre...
+        	}
+        }
     }
  
 
