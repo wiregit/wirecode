@@ -196,6 +196,9 @@ public class FileUtils
      * Touches a file, to ensure it exists.
      */
     public static void touch(File f) throws IOException {
+        File parent = f.getParentFile();
+        if(parent != null)
+            parent.mkdirs();
         f.createNewFile();
     }
     
