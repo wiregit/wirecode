@@ -11,5 +11,6 @@ $n = shift;
 $suffix = shift;
 
 for ($i = 1; $i <= $n; $i++) {
-    system('touch', "$prefix$i$suffix");
+    $r= int (rand 1000000);
+    system('touch', "$prefix$r.$suffix");
 }

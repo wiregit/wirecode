@@ -482,7 +482,7 @@ public class RouterService
         }
 
         //2. Send a query for "*.*" with a TTL of 1.
-        QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
+        QueryRequest qr=new QueryRequest((byte)1, 0, FileManager.BROWSE_QUERY);
         router.sendQueryRequest(qr, c);
         try {
             c.flush();

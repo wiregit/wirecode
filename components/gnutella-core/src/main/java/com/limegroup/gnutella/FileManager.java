@@ -5,18 +5,20 @@
  *       may be shared through the client.  It keeps them
  *       in the list _files.  There are methods for adding
  *       one file, or a whole directory.
- *
- * Updated by Sumeet Thadani 8/17/2000. Changed the search method so that
- * searches are possible with Regular Expressions. Imported necessary package
  */
 
 package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.*;
 
-public class FileManager{
+public class FileManager {
+    /** The string used by Clip2 reflectors to index hosts. */
+    public static final String INDEXING_QUERY="    ";
+    /** The string used by LimeWire to browse hosts. */
+    public static final String BROWSE_QUERY="*.*";
+
     /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
     private int _size;
@@ -25,14 +27,41 @@ public class FileManager{
     private int _numFiles;
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in the shared folder with the shareable extension.
+     *  f[i]._path is in the shared folder with a shareable extension.
      *  LOCKING: obtain this before modifying. */
     private ArrayList /* of FileDesc */ _files;
+    /** an index mapping keywords in file names to the indices in _files.  A
+     * keyword of a filename f is defined to be a maximal sequence of characters
+     * without a character from DELIMETERS.  INVARIANT: For all keys k in
+     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
+     * contains i. */
+    private Trie /* String -> IntSet  */ _index;
+
     private String[] _extensions;
+    private Set _sharedDirectories;
 
     private static FileManager _instance = new FileManager();
 
-    private Set _sharedDirectories;
+    /** Characters used to tokenize queries and file names. */
+    static final String DELIMETERS=" -._+/*()\\";
+    private static final boolean isDelimeter(char c) {
+        switch (c) {
+        case ' ':
+        case '-':
+        case '.':
+        case '_':
+        case '+':
+        case '/':
+        case '*':
+        case '(':
+        case ')':
+        case '\\':
+            return true;
+        default:
+            return false;
+        }
+    }
 
     private FileManager() {
         // We'll initialize all the instance variables so that the FileManager
@@ -42,6 +71,7 @@ public class FileManager{
         _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
+        _index = new Trie(true);  //ignore case
         _extensions = new String[0];
         _sharedDirectories = new HashSet();
 
@@ -93,17 +123,48 @@ public class FileManager{
      */
     public Response[] query(QueryRequest request) {
         String str = request.getQuery();
-        ArrayList list = search(str);
-        if (list==null)
+
+        //Special case: return everything for Clip2 indexing query (" ") and
+        //browse queries ("*.*").  If these messages had initial TTLs too high,
+        //StandardMessageRouter will clip the number of results sent on the
+        //network.  Note that some initial TTLs are filterd by GreedyQuery
+        //before they ever reach this point.
+        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
+            synchronized (this) {   
+                //Extract responses for all non-null (i.e., not deleted) files.
+                Response[] ret=new Response[_numFiles];
+                int j=0;
+                for (int i=0; i<_files.size(); i++) {
+                    FileDesc desc = (FileDesc)_files.get(i);
+                    if (desc==null) 
+                        continue;                    
+                    Assert.that(j<ret.length,
+                                "_numFiles is too small");
+                    Response r=new Response(desc._index, desc._size, desc._name);
+                    ret[j]=r;
+                    j++;
+                }
+                Assert.that(j==ret.length,
+                            "_numFiles is too large");
+                return ret;
+            }            
+        }
+
+        //Normal case: query the index to find all matches.  TODO: this
+        //sometimes returns more results (>255) than we actually send out.
+        //That's wasted work.
+        IntSet matches = search(str);
+        if (matches==null)
             return null;
 
-        int size = list.size();
-        Response[] response = new Response[size];
-        FileDesc desc;
-        for(int j=0; j < size; j++) {
-            desc = (FileDesc)list.get(j);
-            response[j] =
-            new Response(desc._index, desc._size, desc._name);
+        Response[] response = new Response[matches.size()];
+        int j=0;
+        for (IntSet.IntSetIterator iter=matches.iterator(); 
+                 iter.hasNext(); 
+                 j++) {            
+            int i=iter.next();
+            FileDesc desc = (FileDesc)_files.get(i);
+            response[j] = new Response(desc._index, desc._size, desc._name);
         }
         return response;
     }
@@ -146,6 +207,22 @@ public class FileManager{
             _size += n;                         /* the appropriate info */
             _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
+
+            //For each keyword...
+            int j=_files.size()-1;
+            String[] keywords=StringUtils.split(path, DELIMETERS);
+            for (int i=0; i<keywords.length; i++) {
+                String keyword=keywords[i];
+                //Ensure there _index has a set of indices associated with
+                //keyword.
+                IntSet indices=(IntSet)_index.get(keyword);
+                if (indices==null) {
+                    indices=new IntSet();
+                    _index.add(keyword, indices);
+                }
+                //Add j to the set.
+                indices.add(j);
+            }
         }
     }
 
@@ -203,6 +280,19 @@ public class FileManager{
                 _files.set(i,null);
                 _numFiles--;
                 _size-=fd._size;
+
+                //Remove references to this from index.
+                String[] keywords=StringUtils.split(fd._path,
+                                                    DELIMETERS);
+                for (int j=0; j<keywords.length; j++) {
+                    String keyword=keywords[j];
+                    IntSet indices=(IntSet)_index.get(keyword);
+                    if (indices!=null) {
+                        indices.remove(i);
+                        //TODO2: prune tree if possible.  call
+                        //_index.remove(keyword) if indices.size()==0.
+                    }
+                }
                 return true;  //No more files in list will match this.
             }
         }
@@ -276,8 +366,10 @@ public class FileManager{
 
         for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);
-        }
+        }        
 
+//          System.out.println("Index loaded.");
+//          System.out.println(_index.toString());   
     }
 
     /**
@@ -323,35 +415,87 @@ public class FileManager{
             else                                /* add the file with the */
                 addFile(file_list[i].getAbsolutePath());  /* addFile method */
         }
+
+        //Compact the index.  Ideally this should be called just once on startup, not
+        //once for each directory.
+        _index.trim(new Function() {
+            public Object apply(Object intSet) {
+                ((IntSet)intSet).trim();
+                return intSet;
+            }
+        });
     }
 
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Returns a list of FileDesc matching q, or null if there are no matches.
-     * Subclasses may override to provide different notions of matching.
+     * Returns a set of indices of files matching q, or null if there are no
+     * matches.  Subclasses may override to provide different notions of
+     * matching.  The caller of this method must not mutate the returned
+     * value.
      */
-    protected synchronized ArrayList search(String query) {
+    protected synchronized IntSet search(String query) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
         //Doing so would allow multiple queries to proceed in parallel.  But
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
-        // Don't allocate until needed
-        ArrayList response_list=null;
+        //As an optimization, we lazily allocate all sets in case there are no
+        //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
+        //returns an iterator of one element and there is only one keyword.
+        IntSet ret=null;
 
-        for(int i=0; i < _files.size(); i++) {
-            FileDesc desc = (FileDesc)_files.get(i);
-            if (desc==null)
+        //For each keyword in the query....  (Note that we avoid calling
+        //StringUtils.split and take advantage of Trie's offset/limit feature.)
+        for (int i=0; i<query.length(); ) {
+            if (isDelimeter(query.charAt(i))) {
+                i++;
                 continue;
-            String file_name = desc._path;  //checking the path too..
-            if (StringUtils.contains(file_name, query, true)) {
-                if (response_list==null)
-                    response_list=new ArrayList();
-                response_list.add(_files.get(i));
             }
+            int j;
+            for (j=i+1; j<query.length(); j++) {
+                if (isDelimeter(query.charAt(j)))
+                    break;
+            }
+
+            //Search for keyword, i.e., keywords[i...j-1].  
+            Iterator /* of IntSet */ iter=
+                _index.getPrefixedBy(query, i, j);
+            if (iter.hasNext()) {
+                //Got match.  Union contents of the iterator and store in
+                //matches.  As an optimization, if this is the only keyword and
+                //there is only one set returned, return that set without copying.
+                IntSet matches=null;
+                while (iter.hasNext()) {                
+                    IntSet s=(IntSet)iter.next();
+                    if (matches==null) {
+                        if (i==0 && j==query.length() && !(iter.hasNext()))
+                            return s;
+                        matches=new IntSet();
+                    }
+                    matches.addAll(s);
+                }
+
+                //Intersect matches with ret.  If ret isn't allocated,
+                //initialize to matches.
+                if (ret==null)   
+                    ret=matches;
+                else
+                    ret.retainAll(matches);
+            } else {
+                //No match.  Optimizaton: no matches for keyword => failure
+                return null;
+            }
+            
+            //Optimization: no matches after intersect => failure
+            if (ret.size()==0)
+                return null;        
+            i=j;
         }
-        return response_list;
+        if (ret==null || ret.size()==0)
+            return null;
+        else 
+            return ret;
     }
 
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
